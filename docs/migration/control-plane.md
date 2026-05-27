@@ -636,6 +636,26 @@ secret payloads, raw release evidence, live stream-relay evidence collection,
 ECR image push evidence, dashboards, or private deployment evidence. It also
 does not add the external Go AWS SDK.
 
+### RIID-4706 — AWS adapter public facade migration
+
+This slice adds a narrow public Go module facade for the RIID-4704
+DynamoDB/EventBridge adapters so private infra tooling can consume the adapter
+surface without importing `internal/riidoaiserver`.
+
+This slice does:
+
+- add the `awsadapters` package
+- re-export only adapter DTOs, ports, constructors, and functions from
+  `internal/riidoaiserver`
+- add facade compile/usage tests for static credentials and stream-relay event
+  types
+- document that the facade must not fork or redefine adapter behavior
+- add focused public CI for the facade package
+
+This slice does not move implementation out of `internal/riidoaiserver`, add
+the external Go AWS SDK, move live AWS evidence collection into public CI,
+move Terraform, or expose credentials/runtime secret values.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -647,6 +667,7 @@ go test ./internal/riidoaiserver -run 'ReviewAccount|HTTPReviewAccount|AgentCata
 go test ./cmd/riido_ai_server -run 'ReviewAccount|ConfigFromEnv|AuthorizerFromEnv' -count=1
 go test ./internal/riidoaiserver -run 'CloudWatch|Metrics|EventAppend' -count=1
 go test ./internal/riidoaiserver -run 'DynamoDB|EventBridge' -count=1
+go test ./awsadapters -count=1
 go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration' -count=1
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -

@@ -4,7 +4,8 @@
 > RIID-4688 `[Control Plane] riido-contracts v0.3.0 assignment import migration`,
 > RIID-4691 `[Control Plane] review account seed runtime wiring migration`,
 > RIID-4692 `[Control Plane] CloudWatch EMF metrics publisher migration`,
-> RIID-4704 `[Control Plane] DynamoDB/EventBridge adapter migration`
+> RIID-4704 `[Control Plane] DynamoDB/EventBridge adapter migration`,
+> RIID-4706 `[Control Plane] AWS adapter public facade migration`
 
 This document is the public SSOT for the SaaS control-plane assignment contract
 surface that can be verified without AWS credentials.
@@ -235,6 +236,29 @@ live DynamoDB/EventBridge smoke evidence, stream-relay evidence artifacts,
 runtime secret values, ECR image push evidence, dashboards, or private
 deployment evidence. It also does not add or require the external Go AWS SDK.
 
+## AWS Adapter Public Facade Boundary
+
+The `awsadapters` package is a narrow public Go module facade over the
+`internal/riidoaiserver` DynamoDB/EventBridge adapter implementation. It owns
+only type aliases and constructor/function re-exports needed by private
+operational tooling, such as `riido-infra` stream-relay evidence collection.
+
+The facade may expose:
+
+- AWS credential provider DTOs and constructors
+- DynamoDB outbox, snapshot, operation-store, table-stream, stream-relay, and
+  checkpoint adapter DTOs and constructors
+- EventBridge stream relay publisher DTOs and constructor
+- assignment/task-event DTO aliases needed to build smoke events
+
+The facade must not fork or redefine adapter behavior. Behavioral code stays in
+`internal/riidoaiserver`; the facade compiles against it so external repos can
+consume the same production adapter surface through the public module path.
+
+This boundary does not own live AWS evidence collection, Terraform, AWS
+credentials, release evidence artifacts, runtime secret values, or deployment
+automation. Those remain private infra responsibilities.
+
 ## Health/Ready And Runtime Command Boundary
 
 The public health/ready adapter exposes liveness and readiness responses that do
@@ -378,6 +402,10 @@ DynamoDB Streams relay/checkpoint handling, and EventBridge publisher request
 construction. Live AWS configuration, Terraform, stream-relay evidence
 collection, credentials, and deployment evidence remain private infra
 responsibilities.
+
+RIID-4706 adds the public `awsadapters` facade so private infra tooling can
+consume RIID-4704 adapter behavior through the `riido-control-plane` Go module
+without importing an `internal` package or duplicating adapter behavior.
 
 RIID-4669 moves the operation journal port and record surface into this public
 repository.
