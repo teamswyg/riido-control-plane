@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/teamswyg/riido-contracts/hostintegration"
 )
 
 func TestHTTPAgentCatalogRBACListShowsOwnAndOtherPublicAgents(t *testing.T) {
@@ -261,6 +263,72 @@ func TestHTTPAgentCatalogCreateStampsOwnerFromAuthorization(t *testing.T) {
 	server.ServeHTTP(badResp, badReq)
 	if badResp.Code != http.StatusBadRequest {
 		t.Fatalf("client owner create status=%d body=%s", badResp.Code, badResp.Body.String())
+	}
+}
+
+func TestHTTPReviewAccountProvisioningExposesSeededCatalogAndSyntheticProviderStatus(t *testing.T) {
+	seed, err := LoadReviewAccountSeed()
+	if err != nil {
+		t.Fatalf("LoadReviewAccountSeed: %v", err)
+	}
+	provisioning, err := ProvisionReviewAccount(seed, ReviewAccountProvisionInput{
+		TokenSHA256: reviewTokenSHA256("review-token"),
+	})
+	if err != nil {
+		t.Fatalf("ProvisionReviewAccount: %v", err)
+	}
+	store := NewStore()
+	defer store.Close()
+	if err := store.ApplyReviewAccountProvisioning(context.Background(), provisioning); err != nil {
+		t.Fatalf("ApplyReviewAccountProvisioning: %v", err)
+	}
+	authorizer, err := NewStaticTokenAuthorizer([]StaticTokenCredential{provisioning.Credential})
+	if err != nil {
+		t.Fatalf("NewStaticTokenAuthorizer: %v", err)
+	}
+	server := NewServer(ServerConfig{Assignment: store, Authorizer: authorizer}).Handler()
+
+	catalogReq := httptest.NewRequest(http.MethodGet, "/v1/agent-catalog", nil)
+	catalogReq.Header.Set("Authorization", "Bearer review-token")
+	catalogResp := httptest.NewRecorder()
+	server.ServeHTTP(catalogResp, catalogReq)
+	if catalogResp.Code != http.StatusOK {
+		t.Fatalf("review catalog status=%d body=%s", catalogResp.Code, catalogResp.Body.String())
+	}
+	var catalog AgentCatalogListResponse
+	if err := json.Unmarshal(catalogResp.Body.Bytes(), &catalog); err != nil {
+		t.Fatalf("review catalog json: %v", err)
+	}
+	if got, want := agentCatalogIDs(catalog.Agents), []string{"review-other-public", "review-owned-private", "review-owned-public"}; !sameStrings(got, want) {
+		t.Fatalf("review visible catalog = %v, want %v", got, want)
+	}
+
+	statusReq := httptest.NewRequest(http.MethodGet, "/v1/agents/store-review-agent/provider-status", nil)
+	statusReq.Header.Set("Authorization", "Bearer review-token")
+	statusResp := httptest.NewRecorder()
+	server.ServeHTTP(statusResp, statusReq)
+	if statusResp.Code != http.StatusOK {
+		t.Fatalf("review provider status=%d body=%s", statusResp.Code, statusResp.Body.String())
+	}
+	var status ProviderStatusSyncResponse
+	if err := json.Unmarshal(statusResp.Body.Bytes(), &status); err != nil {
+		t.Fatalf("review provider status json: %v", err)
+	}
+	if status.AgentID != "store-review-agent" || status.AppVersion != "review-demo" {
+		t.Fatalf("review provider status = %+v", status)
+	}
+	for _, provider := range status.Providers {
+		if provider.RoutingStatus == hostintegration.ProviderRoutingAvailable {
+			t.Fatalf("review provider status must stay non-routable: %+v", provider)
+		}
+	}
+
+	pollReq := httptest.NewRequest(http.MethodPost, "/v1/agents/store-review-agent/poll", strings.NewReader(`{"daemon_id":"review-demo-daemon","runtime_id":"review-demo-daemon:agent:store-review-agent:demo"}`))
+	pollReq.Header.Set("Authorization", "Bearer review-token")
+	pollResp := httptest.NewRecorder()
+	server.ServeHTTP(pollResp, pollReq)
+	if pollResp.Code != http.StatusForbidden {
+		t.Fatalf("review poll status=%d body=%s", pollResp.Code, pollResp.Body.String())
 	}
 }
 

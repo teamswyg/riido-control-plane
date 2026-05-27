@@ -1,0 +1,79 @@
+name: review-account-seed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/review-account-seed.yml"
+      - "README.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "cmd/riido_ai_server/main.go"
+      - "cmd/riido_ai_server/main_test.go"
+      - "internal/riidoaiserver/agent_catalog_store.go"
+      - "internal/riidoaiserver/agent_catalog_store_test.go"
+      - "internal/riidoaiserver/doc.go"
+      - "internal/riidoaiserver/review_account_seed.go"
+      - "internal/riidoaiserver/review_account_seed.riido.json"
+      - "internal/riidoaiserver/review_account_seed_test.go"
+      - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/server_test.go"
+      - "internal/riidoaiserver/store.go"
+  pull_request:
+    paths:
+      - ".github/workflows/review-account-seed.yml"
+      - "README.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "cmd/riido_ai_server/main.go"
+      - "cmd/riido_ai_server/main_test.go"
+      - "internal/riidoaiserver/agent_catalog_store.go"
+      - "internal/riidoaiserver/agent_catalog_store_test.go"
+      - "internal/riidoaiserver/doc.go"
+      - "internal/riidoaiserver/review_account_seed.go"
+      - "internal/riidoaiserver/review_account_seed.riido.json"
+      - "internal/riidoaiserver/review_account_seed_test.go"
+      - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/server_test.go"
+      - "internal/riidoaiserver/store.go"
+
+jobs:
+  review-account-seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify review seed import boundary
+        run: |
+          disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./cmd/riido_ai_server ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed review seed imports:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify review seed artifact has no raw secrets
+        run: |
+          if grep -R --line-number -E '"token"|"password"|provider_executable_path|workspace_root_path|api_key|AWS_ACCESS_KEY|AWS_SECRET' internal/riidoaiserver/review_account_seed.riido.json; then
+            echo "review seed artifact contains a forbidden raw secret field"
+            exit 1
+          fi
+      - name: Test review account seed domain and HTTP behavior
+        run: go test ./internal/riidoaiserver -run 'ReviewAccount|HTTPReviewAccount|AgentCatalogStore' -count=1
+      - name: Test command review account wiring
+        run: go test ./cmd/riido_ai_server -run 'ReviewAccount|ConfigFromEnv|AuthorizerFromEnv' -count=1
+      - name: Build command
+        run: go build -o /tmp/riido_ai_server ./cmd/riido_ai_server

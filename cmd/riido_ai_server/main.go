@@ -25,6 +25,7 @@ const (
 	envExternalAuthzURL       = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL"
 	envExternalAuthzAudience  = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE"
 	envExternalAuthzTimeout   = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS"
+	envReviewAccountTokenHash = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
 )
 
 type runtimeConfig struct {
@@ -32,6 +33,7 @@ type runtimeConfig struct {
 	ShutdownTimeout time.Duration
 	AgentRegistry   riidoaiserver.AgentRegistry
 	Authorizer      riidoaiserver.RequestAuthorizer
+	ReviewProvision *riidoaiserver.ReviewAccountProvisioning
 }
 
 func main() {
@@ -48,6 +50,11 @@ func run() error {
 	}
 	store := riidoaiserver.NewStoreWithConfig(riidoaiserver.StoreConfig{AgentRegistry: config.AgentRegistry})
 	defer store.Close()
+	if config.ReviewProvision != nil {
+		if err := store.ApplyReviewAccountProvisioning(context.Background(), *config.ReviewProvision); err != nil {
+			return fmt.Errorf("apply review account provisioning: %w", err)
+		}
+	}
 	server := &http.Server{
 		Addr:              config.Addr,
 		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, Authorizer: config.Authorizer}).Handler(),
@@ -65,7 +72,11 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	authorizer, err := authorizerFromEnv()
+	reviewProvision, err := reviewAccountProvisioningFromEnv()
+	if err != nil {
+		return runtimeConfig{}, err
+	}
+	authorizer, err := authorizerFromEnvWithReview(reviewProvision)
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -74,6 +85,7 @@ func configFromEnv() (runtimeConfig, error) {
 		ShutdownTimeout: shutdownTimeout,
 		AgentRegistry:   registry,
 		Authorizer:      authorizer,
+		ReviewProvision: reviewProvision,
 	}, nil
 }
 
@@ -142,11 +154,26 @@ func parseAgentRegistryJSON(raw string) (*riidoaiserver.StaticAgentRegistry, err
 }
 
 func authorizerFromEnv() (riidoaiserver.RequestAuthorizer, error) {
+	reviewProvision, err := reviewAccountProvisioningFromEnv()
+	if err != nil {
+		return nil, err
+	}
+	return authorizerFromEnvWithReview(reviewProvision)
+}
+
+func authorizerFromEnvWithReview(reviewProvision *riidoaiserver.ReviewAccountProvisioning) (riidoaiserver.RequestAuthorizer, error) {
 	var authorizers []riidoaiserver.RequestAuthorizer
-	if raw := strings.TrimSpace(os.Getenv(envAuthzTokensJSON)); raw != "" {
-		authorizer, err := parseAuthzTokensJSON(raw)
+	credentials, err := parseAuthzTokenCredentialsJSON(os.Getenv(envAuthzTokensJSON))
+	if err != nil {
+		return nil, err
+	}
+	if reviewProvision != nil {
+		credentials = append(credentials, reviewProvision.Credential)
+	}
+	if len(credentials) > 0 {
+		authorizer, err := riidoaiserver.NewStaticTokenAuthorizer(credentials)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s: %w", envAuthzTokensJSON, err)
 		}
 		authorizers = append(authorizers, authorizer)
 	}
@@ -176,11 +203,44 @@ func authorizerFromEnv() (riidoaiserver.RequestAuthorizer, error) {
 }
 
 func parseAuthzTokensJSON(raw string) (*riidoaiserver.StaticTokenAuthorizer, error) {
+	credentials, err := parseAuthzTokenCredentialsJSON(raw)
+	if err != nil {
+		return nil, err
+	}
+	if len(credentials) == 0 {
+		return nil, nil
+	}
+	return riidoaiserver.NewStaticTokenAuthorizer(credentials)
+}
+
+func parseAuthzTokenCredentialsJSON(raw string) ([]riidoaiserver.StaticTokenCredential, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, nil
+	}
 	var credentials []riidoaiserver.StaticTokenCredential
 	if err := strictDecodeJSON(raw, &credentials); err != nil {
 		return nil, fmt.Errorf("%s: %w", envAuthzTokensJSON, err)
 	}
-	return riidoaiserver.NewStaticTokenAuthorizer(credentials)
+	return credentials, nil
+}
+
+func reviewAccountProvisioningFromEnv() (*riidoaiserver.ReviewAccountProvisioning, error) {
+	tokenHash := strings.TrimSpace(os.Getenv(envReviewAccountTokenHash))
+	if tokenHash == "" {
+		return nil, nil
+	}
+	seed, err := riidoaiserver.LoadReviewAccountSeed()
+	if err != nil {
+		return nil, fmt.Errorf("%s load seed: %w", envReviewAccountTokenHash, err)
+	}
+	provisioning, err := riidoaiserver.ProvisionReviewAccount(seed, riidoaiserver.ReviewAccountProvisionInput{
+		TokenSHA256: tokenHash,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", envReviewAccountTokenHash, err)
+	}
+	return &provisioning, nil
 }
 
 func strictDecodeJSON(raw string, out any) error {

@@ -26,6 +26,12 @@ type Server struct {
 }
 
 func NewServer(config ServerConfig) Server {
+	agentCatalog := config.AgentCatalogStore
+	if agentCatalog == nil {
+		if store, ok := config.Assignment.(AgentCatalogStore); ok {
+			agentCatalog = store
+		}
+	}
 	provider := config.ProviderStatus
 	if provider == nil {
 		if store, ok := config.Assignment.(ProviderStatusStore); ok {
@@ -40,7 +46,7 @@ func NewServer(config ServerConfig) Server {
 	}
 	return Server{
 		assignment:   config.Assignment,
-		agentCatalog: config.AgentCatalogStore,
+		agentCatalog: agentCatalog,
 		provider:     provider,
 		providerRead: providerRead,
 		config:       config,

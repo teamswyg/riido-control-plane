@@ -1,0 +1,62 @@
+{
+  "schema_version": "riido-review-account-seed.v1",
+  "principal_id": "store-reviewer",
+  "display_name": "Store Review",
+  "scopes": [
+    "metrics:read",
+    "agent-catalog:read",
+    "agent:store-review-agent:provider-status:read",
+    "component-task:*:assign",
+    "component-task:*:events:read"
+  ],
+  "agent_catalog_records": [
+    {
+      "agent_id": "review-owned-private",
+      "owner_principal_id": "store-reviewer",
+      "visibility": "private"
+    },
+    {
+      "agent_id": "review-owned-public",
+      "owner_principal_id": "store-reviewer",
+      "visibility": "public"
+    },
+    {
+      "agent_id": "review-other-public",
+      "owner_principal_id": "riido-demo",
+      "visibility": "public"
+    },
+    {
+      "agent_id": "review-other-private",
+      "owner_principal_id": "riido-demo",
+      "visibility": "private"
+    }
+  ],
+  "synthetic_provider_status": {
+    "agent_id": "store-review-agent",
+    "request": {
+      "daemon_id": "review-demo-daemon",
+      "device_id": "store-review",
+      "runtime_id": "review-demo-daemon:agent:store-review-agent:demo",
+      "distribution_channel": "mac-app-store",
+      "app_version": "review-demo",
+      "providers": [
+        {
+          "provider_kind": "claude",
+          "routing_status": "login-required"
+        },
+        {
+          "provider_kind": "codex",
+          "routing_status": "login-required"
+        },
+        {
+          "provider_kind": "cursor",
+          "routing_status": "unsupported"
+        },
+        {
+          "provider_kind": "openclaw",
+          "routing_status": "unsupported"
+        }
+      ]
+    }
+  }
+}

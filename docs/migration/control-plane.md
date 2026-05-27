@@ -554,6 +554,37 @@ This slice does not connect the guard to assignment creation, daemon status
 sync, review/demo seed runtime wiring, durable store actor behavior, DynamoDB
 adapters, Terraform, secret values, AWS adapters, or deployment evidence.
 
+### RIID-4691 — review account seed runtime wiring migration
+
+This slice moves the public-safe store review/demo bootstrap path into the
+public control-plane repository.
+
+This slice does:
+
+- add the embedded `riido-review-account-seed.v1` artifact
+- add review seed loading, validation, and provisioning domain behavior
+- provision a static-token credential from
+  `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` only
+- keep the raw review token outside the repository and outside env parsing
+- add in-memory `Store` actor commands for the `AgentCatalogStore` port
+- let `NewServer` auto-use assignment stores that also implement the agent
+  catalog and provider status ports
+- seed owner/private, owner/public, other-user/public, and other-user/private
+  agent catalog records for RBAC review
+- seed a synthetic, non-routable provider-status snapshot for the
+  `store-review-agent`
+- wire `cmd/riido_ai_server` startup to apply review provisioning before
+  serving HTTP
+- add black-box HTTP tests proving the review token can read seeded catalog and
+  synthetic provider status but cannot poll as a daemon agent
+- add a focused public CI workflow for review seed domain, command wiring,
+  import boundary, and no-raw-secret artifact checks
+
+This slice does not move raw review token values, production IdP rollout, real
+provider execution, Claude/Codex/OpenClaw/Cursor bundling, DynamoDB/EventBridge
+adapters, Terraform, AWS credentials, production secrets, image digest
+evidence, or deployment evidence.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -561,6 +592,8 @@ Required before a control-plane migration PR is mergeable:
 ```bash
 go test ./...
 go list -m all
+go test ./internal/riidoaiserver -run 'ReviewAccount|HTTPReviewAccount|AgentCatalogStore' -count=1
+go test ./cmd/riido_ai_server -run 'ReviewAccount|ConfigFromEnv|AuthorizerFromEnv' -count=1
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .

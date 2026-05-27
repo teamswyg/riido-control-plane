@@ -104,8 +104,9 @@ derived from request authorization and RBAC evaluation.
 
 `AgentCatalogStore` is the persistence port for the HTTP adapter. It
 contains only list, get, save, and delete operations for `AgentCatalogRecord`.
-It does not own the store actor, snapshot replay, DynamoDB, EventBridge, or
-request authorization.
+The public `Store` actor now implements this port for stdlib-only in-memory
+runtime and review/demo seed scenarios. The port does not own snapshot replay,
+DynamoDB, EventBridge, or request authorization.
 
 ## HTTP Adapter Boundary
 
@@ -135,11 +136,15 @@ RIID-4663 moves the stdlib-only RBAC and static-token authorization code from
 the former private `riido_daemon/internal/riidoaiserver` package into this
 public repository.
 
-The durable store actor and AWS adapters remain separate migration units.
+The durable AWS-backed store actor and AWS adapters remain separate migration
+units.
 
 RIID-4666 moves the public API DTOs and `AgentCatalogStore` port into this
 repository.
 
 RIID-4667 moves the stdlib-only agent catalog HTTP adapter into this repository.
-The concrete store actor, snapshot/replay, DynamoDB/EventBridge adapters, and
+RIID-4691 connects the public in-memory `Store` actor to the `AgentCatalogStore`
+port for review account seed runtime wiring.
+
+Snapshot/replay persistence for catalog data, DynamoDB/EventBridge adapters, and
 deployment wiring remain separate migration units.
