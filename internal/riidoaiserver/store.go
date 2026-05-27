@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -11,19 +12,23 @@ import (
 )
 
 type Store struct {
-	commands      chan any
-	done          chan struct{}
-	now           func() time.Time
-	outbox        EventSink
-	snapshotStore SnapshotStore
-	agentRegistry AgentRegistry
+	commands            chan any
+	done                chan struct{}
+	now                 func() time.Time
+	activeLeaseDuration time.Duration
+	outbox              EventSink
+	snapshotStore       SnapshotStore
+	operationStore      AssignmentOperationStore
+	agentRegistry       AgentRegistry
 }
 
 type StoreConfig struct {
-	Now           func() time.Time
-	Outbox        EventSink
-	SnapshotStore SnapshotStore
-	AgentRegistry AgentRegistry
+	Now                 func() time.Time
+	ActiveLeaseDuration time.Duration
+	Outbox              EventSink
+	SnapshotStore       SnapshotStore
+	OperationStore      AssignmentOperationStore
+	AgentRegistry       AgentRegistry
 }
 
 func NewStore() *Store {
@@ -43,6 +48,7 @@ func OpenStoreWithConfig(ctx context.Context, config StoreConfig) (*Store, error
 		ctx = context.Background()
 	}
 	state := newStoreState()
+	loadedSnapshot := false
 	if config.SnapshotStore != nil {
 		snapshot, ok, err := config.SnapshotStore.LoadStoreSnapshot(ctx)
 		if err != nil {
@@ -54,6 +60,22 @@ func OpenStoreWithConfig(ctx context.Context, config StoreConfig) (*Store, error
 				return nil, err
 			}
 			state = loaded
+			loadedSnapshot = true
+		}
+	}
+	if !loadedSnapshot {
+		if loader, ok := config.OperationStore.(AssignmentOperationLoader); ok {
+			operations, err := loader.LoadAssignmentOperations(ctx)
+			if err != nil {
+				return nil, err
+			}
+			if len(operations) > 0 {
+				loaded, err := stateFromAssignmentOperations(operations)
+				if err != nil {
+					return nil, err
+				}
+				state = loaded
+			}
 		}
 	}
 	return newStoreWithConfig(config, state), nil
@@ -64,13 +86,19 @@ func newStoreWithConfig(config StoreConfig, initial storeState) *Store {
 	if now == nil {
 		now = func() time.Time { return time.Now().UTC() }
 	}
+	activeLeaseDuration := config.ActiveLeaseDuration
+	if activeLeaseDuration <= 0 {
+		activeLeaseDuration = time.Duration(DefaultAssignmentActiveLeaseSeconds) * time.Second
+	}
 	s := &Store{
-		commands:      make(chan any),
-		done:          make(chan struct{}),
-		now:           now,
-		outbox:        config.Outbox,
-		snapshotStore: config.SnapshotStore,
-		agentRegistry: config.AgentRegistry,
+		commands:            make(chan any, 64),
+		done:                make(chan struct{}),
+		now:                 now,
+		activeLeaseDuration: activeLeaseDuration,
+		outbox:              config.Outbox,
+		snapshotStore:       config.SnapshotStore,
+		operationStore:      config.OperationStore,
+		agentRegistry:       config.AgentRegistry,
 	}
 	go s.loop(initial)
 	return s
@@ -233,8 +261,11 @@ type pollCmd struct {
 }
 
 type pollResult struct {
-	response PollResponse
-	err      error
+	response              PollResponse
+	operationAlreadySaved bool
+	mutatedAssignment     *Assignment
+	mutationOperationType AssignmentOperationType
+	err                   error
 }
 
 type eventCmd struct {
@@ -317,21 +348,41 @@ func (s *Store) loop(state storeState) {
 	for cmd := range s.commands {
 		switch msg := cmd.(type) {
 		case assignCmd:
+			beforeEventSeq := state.nextEventSeq
 			assignment, err := s.handleAssign(&state, msg.taskID, msg.req)
+			if err == nil {
+				err = s.saveOperation(&state, AssignmentOperationAssignTask, assignment, eventsAfterSeq(&state, beforeEventSeq))
+			}
 			if err == nil {
 				err = s.saveSnapshot(&state)
 			}
 			msg.reply <- assignResult{assignment: assignment, err: err}
 		case pollCmd:
-			response, err := s.handlePoll(&state, msg.agentID, msg.req)
-			if err == nil && response.Action == PollStart {
-				err = s.saveSnapshot(&state)
+			beforeEventSeq := state.nextEventSeq
+			response, operationAlreadySaved, mutatedAssignment, mutationOperationType, err := s.handlePoll(&state, msg.agentID, msg.req)
+			if err == nil && mutatedAssignment != nil {
+				err = s.saveOperation(&state, mutationOperationType, *mutatedAssignment, eventsAfterSeq(&state, beforeEventSeq))
+				if err == nil {
+					err = s.saveSnapshot(&state)
+				}
 			}
-			msg.reply <- pollResult{response: response, err: err}
+			if err == nil && mutatedAssignment == nil && response.Action == PollStart {
+				if !operationAlreadySaved {
+					err = s.saveOperation(&state, AssignmentOperationPollStart, *response.Assignment, eventsAfterSeq(&state, beforeEventSeq))
+				}
+				if err == nil {
+					err = s.saveSnapshot(&state)
+				}
+			}
+			msg.reply <- pollResult{response: response, operationAlreadySaved: operationAlreadySaved, mutatedAssignment: mutatedAssignment, mutationOperationType: mutationOperationType, err: err}
 		case eventCmd:
+			beforeEventSeq := state.nextEventSeq
 			response, err := s.handleEvent(&state, msg.agentID, msg.req)
 			if err == nil {
-				err = s.saveSnapshot(&state)
+				err = s.saveOperation(&state, AssignmentOperationAgentEvent, *response.Assignment, eventsAfterSeq(&state, beforeEventSeq))
+				if err == nil {
+					err = s.saveSnapshot(&state)
+				}
 			}
 			msg.reply <- eventResult{response: response, err: err}
 		case heartbeatCmd:
@@ -359,6 +410,9 @@ func (s *Store) loop(state storeState) {
 			if s.snapshotStore != nil {
 				_ = s.snapshotStore.Close()
 			}
+			if s.operationStore != nil {
+				_ = s.operationStore.Close()
+			}
 			for _, subs := range state.subscribers {
 				for _, ch := range subs {
 					close(ch)
@@ -375,6 +429,24 @@ func (s *Store) saveSnapshot(state *storeState) error {
 		return nil
 	}
 	return s.snapshotStore.SaveStoreSnapshot(context.Background(), snapshotFromState(state, s.now()))
+}
+
+func (s *Store) saveOperation(state *storeState, operationType AssignmentOperationType, assignment Assignment, events []TaskEvent) error {
+	if s.operationStore == nil || len(events) == 0 {
+		return nil
+	}
+	recordedAt := s.now()
+	return s.operationStore.SaveAssignmentOperation(context.Background(), AssignmentOperationRecord{
+		SchemaVersion: AssignmentOperationSchemaVersion,
+		OperationID:   assignmentOperationID(operationType, assignment, events),
+		OperationType: operationType,
+		TaskID:        assignment.TaskID,
+		AssignmentID:  assignment.ID,
+		AgentID:       assignment.AgentID,
+		Assignment:    assignment,
+		Events:        append([]TaskEvent(nil), events...),
+		RecordedAt:    recordedAt,
+	})
 }
 
 func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest) (Assignment, error) {
@@ -456,13 +528,13 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	return assignment, nil
 }
 
-func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest) (PollResponse, error) {
+func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest) (PollResponse, bool, *Assignment, AssignmentOperationType, error) {
 	agentID = strings.TrimSpace(agentID)
 	if agentID == "" {
-		return PollResponse{}, errors.New("agent_id is required")
+		return PollResponse{}, false, nil, "", errors.New("agent_id is required")
 	}
 	if err := validateDaemonBinding(s.agentRegistry, agentID, req); err != nil {
-		return PollResponse{}, err
+		return PollResponse{}, false, nil, "", err
 	}
 	state.pollRequestsTotal++
 	response := PollResponse{SchemaVersion: SchemaVersion, Action: PollNone}
@@ -470,19 +542,74 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest) (
 	for _, id := range assignIDs {
 		assignment := state.assignments[id]
 		if assignment.State == AssignmentCancelling {
+			expired, err := s.assignmentActiveLeaseExpired(state, assignment, s.now())
+			if err != nil {
+				return PollResponse{}, false, nil, "", err
+			}
+			if expired {
+				stale := s.failStaleAssignment(state, assignment)
+				state.pollActionsTotal[response.Action]++
+				return response, false, &stale, AssignmentOperationAgentEvent, nil
+			}
 			response.Action = PollCancel
 			response.Assignment = copyAssignment(assignment)
 			state.pollActionsTotal[response.Action]++
-			return response, nil
+			return response, false, nil, "", nil
+		}
+	}
+	durableAssignment, staleAssignment, ok, err := s.loadDurableActiveAssignment(state, agentID, s.now())
+	if err != nil {
+		return PollResponse{}, false, nil, "", err
+	}
+	if staleAssignment != nil {
+		state.pollActionsTotal[response.Action]++
+		return response, false, staleAssignment, AssignmentOperationAgentEvent, nil
+	}
+	if ok {
+		switch {
+		case durableAssignment.State == AssignmentCancelling:
+			response.Action = PollCancel
+			response.Assignment = copyAssignment(durableAssignment)
+			state.pollActionsTotal[response.Action]++
+			return response, false, nil, "", nil
+		case isAgentActive(durableAssignment.State):
+			response.Action = PollActive
+			response.Assignment = copyAssignment(durableAssignment)
+			state.pollActionsTotal[response.Action]++
+			return response, false, nil, "", nil
 		}
 	}
 	for _, id := range assignIDs {
 		assignment := state.assignments[id]
 		if isAgentActive(assignment.State) {
+			expired, err := s.assignmentActiveLeaseExpired(state, assignment, s.now())
+			if err != nil {
+				return PollResponse{}, false, nil, "", err
+			}
+			if expired {
+				stale := s.failStaleAssignment(state, assignment)
+				state.pollActionsTotal[response.Action]++
+				return response, false, &stale, AssignmentOperationAgentEvent, nil
+			}
 			response.Action = PollActive
 			response.Assignment = copyAssignment(assignment)
 			state.pollActionsTotal[response.Action]++
-			return response, nil
+			return response, false, nil, "", nil
+		}
+	}
+	if claimer, ok := s.operationStore.(AssignmentClaimer); ok {
+		claim, err := claimer.ClaimNextAssignment(context.Background(), agentID, s.now())
+		if err != nil {
+			return PollResponse{}, false, nil, "", err
+		}
+		if claim.Claimed {
+			if err := s.applyClaimedAssignment(state, claim); err != nil {
+				return PollResponse{}, false, nil, "", err
+			}
+			response.Action = PollStart
+			response.Assignment = copyAssignment(claim.Assignment)
+			state.pollActionsTotal[response.Action]++
+			return response, true, nil, "", nil
 		}
 	}
 	for _, id := range assignIDs {
@@ -499,10 +626,89 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest) (
 		response.Action = PollStart
 		response.Assignment = copyAssignment(assignment)
 		state.pollActionsTotal[response.Action]++
-		return response, nil
+		return response, false, nil, "", nil
 	}
 	state.pollActionsTotal[response.Action]++
-	return response, nil
+	return response, false, nil, "", nil
+}
+
+func (s *Store) loadDurableActiveAssignment(state *storeState, agentID string, at time.Time) (Assignment, *Assignment, bool, error) {
+	leaseStore, hasLeaseStore := s.operationStore.(AssignmentActiveLeaseStore)
+	projectionReader, hasProjectionReader := s.operationStore.(AssignmentProjectionReader)
+	if !hasLeaseStore || !hasProjectionReader {
+		return Assignment{}, nil, false, nil
+	}
+	lease, exists, err := leaseStore.LoadAgentActiveAssignment(context.Background(), agentID)
+	if err != nil {
+		return Assignment{}, nil, false, err
+	}
+	if !exists || lease.ActiveAssignmentID == "" {
+		return Assignment{}, nil, false, nil
+	}
+	projection, exists, err := projectionReader.LoadAssignmentProjection(context.Background(), lease.ActiveAssignmentID)
+	if err != nil {
+		return Assignment{}, nil, false, err
+	}
+	if !exists {
+		return Assignment{}, nil, false, nil
+	}
+	assignment := projection.Assignment
+	if assignment.AgentID != agentID {
+		return Assignment{}, nil, false, nil
+	}
+	applyAssignmentProjectionToState(state, projection)
+	if !assignmentHoldsActiveLease(assignment.State) {
+		return assignment, nil, true, nil
+	}
+	if lease.Expired(at) {
+		stale := s.failStaleAssignment(state, assignment)
+		return Assignment{}, &stale, false, nil
+	}
+	if !lease.HeartbeatAt.IsZero() && lease.HeartbeatAt.After(assignment.UpdatedAt) {
+		assignment.UpdatedAt = lease.HeartbeatAt
+		state.assignments[assignment.ID] = assignment
+	}
+	return assignment, nil, true, nil
+}
+
+func (s *Store) assignmentActiveLeaseExpired(state *storeState, assignment Assignment, at time.Time) (bool, error) {
+	if !assignmentHoldsActiveLease(assignment.State) {
+		return false, nil
+	}
+	if !assignment.UpdatedAt.IsZero() && assignment.UpdatedAt.Add(s.activeLeaseDuration).After(at) {
+		return false, nil
+	}
+	leaseStore, ok := s.operationStore.(AssignmentActiveLeaseStore)
+	if !ok {
+		return false, nil
+	}
+	lease, exists, err := leaseStore.LoadAgentActiveAssignment(context.Background(), assignment.AgentID)
+	if err != nil {
+		return false, err
+	}
+	if !exists {
+		return true, nil
+	}
+	if lease.ActiveAssignmentID != assignment.ID {
+		return true, nil
+	}
+	if lease.Expired(at) {
+		return true, nil
+	}
+	if !lease.HeartbeatAt.IsZero() {
+		assignment.UpdatedAt = lease.HeartbeatAt
+		state.assignments[assignment.ID] = assignment
+	}
+	return false, nil
+}
+
+func (s *Store) failStaleAssignment(state *storeState, assignment Assignment) Assignment {
+	now := s.now()
+	assignment.State = AssignmentFailed
+	assignment.UpdatedAt = now
+	state.assignments[assignment.ID] = assignment
+	s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentFailed, assignment.State, "active assignment lease expired", map[string]string{"lease_token": assignment.LeaseToken}, now)
+	return assignment
 }
 
 func (s *Store) handleHeartbeat(state *storeState, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, error) {
@@ -519,6 +725,7 @@ func (s *Store) handleHeartbeat(state *storeState, agentID string, req AgentHear
 		return response, nil
 	}
 	now := s.now()
+	leaseStore, _ := s.operationStore.(AssignmentActiveLeaseStore)
 	for _, assignmentID := range assignmentIDs {
 		assignment, ok := state.assignments[assignmentID]
 		if !ok {
@@ -529,6 +736,11 @@ func (s *Store) handleHeartbeat(state *storeState, agentID string, req AgentHear
 		}
 		if !assignmentHoldsActiveLease(assignment.State) {
 			continue
+		}
+		if leaseStore != nil {
+			if err := leaseStore.RefreshAgentActiveAssignment(context.Background(), assignment, now); err != nil {
+				return AgentHeartbeatResponse{}, err
+			}
 		}
 		assignment.UpdatedAt = now
 		state.assignments[assignment.ID] = assignment
@@ -737,6 +949,109 @@ func (s *Store) appendEvent(state *storeState, taskID, assignmentID, agentID, ev
 	return event
 }
 
+func (s *Store) applyClaimedAssignment(state *storeState, claim AssignmentClaimResult) error {
+	if !claim.Claimed {
+		return nil
+	}
+	if claim.Assignment.ID == "" {
+		return errors.New("claimed assignment_id is required")
+	}
+	if claim.Operation.OperationID == "" {
+		return errors.New("claimed assignment operation_id is required")
+	}
+	if err := validateAssignmentOperationRecord(claim.Operation); err != nil {
+		return err
+	}
+	if claim.Operation.OperationType != AssignmentOperationPollStart {
+		return fmt.Errorf("claimed assignment operation_type = %q", claim.Operation.OperationType)
+	}
+	if claim.Operation.AssignmentID != claim.Assignment.ID {
+		return fmt.Errorf("claimed assignment operation assignment_id mismatch %q", claim.Operation.AssignmentID)
+	}
+	if claim.Operation.Assignment != claim.Assignment {
+		return errors.New("claimed assignment operation assignment mismatch")
+	}
+	applyAssignmentToState(state, claim.Assignment)
+	for _, event := range claim.Operation.Events {
+		s.appendRecordedEvent(state, event)
+	}
+	return nil
+}
+
+func applyAssignmentToState(state *storeState, assignment Assignment) {
+	state.assignments[assignment.ID] = assignment
+	if seq := assignmentSequence(assignment.ID); seq > state.nextAssignmentSeq {
+		state.nextAssignmentSeq = seq
+	}
+	if !assignmentIDInAgentQueue(state.agentAssignments[assignment.AgentID], assignment.ID) {
+		state.agentAssignments[assignment.AgentID] = append(state.agentAssignments[assignment.AgentID], assignment.ID)
+	}
+	task := state.tasks[assignment.TaskID]
+	current := state.assignments[task.currentAssignmentID]
+	if task.id == "" || assignmentIsNewer(assignment, current) || task.currentAssignmentID == assignment.ID {
+		state.tasks[assignment.TaskID] = taskRecord{
+			id:                  assignment.TaskID,
+			componentID:         assignment.ComponentID,
+			currentAssignmentID: assignment.ID,
+		}
+	}
+}
+
+func applyAssignmentProjectionToState(state *storeState, projection AssignmentProjection) {
+	applyAssignmentToState(state, projection.Assignment)
+	if projection.LastEventSeq > state.nextEventSeq {
+		state.nextEventSeq = projection.LastEventSeq
+	}
+}
+
+func assignmentIDInAgentQueue(ids []string, id string) bool {
+	for _, current := range ids {
+		if current == id {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Store) appendRecordedEvent(state *storeState, event TaskEvent) {
+	if event.Seq <= 0 || event.TaskID == "" {
+		return
+	}
+	for _, existing := range state.events[event.TaskID] {
+		if existing.Seq == event.Seq {
+			return
+		}
+	}
+	recorded := event
+	recorded.Metadata = cloneMetadata(event.Metadata)
+	state.events[recorded.TaskID] = append(state.events[recorded.TaskID], recorded)
+	sort.Slice(state.events[recorded.TaskID], func(i, j int) bool {
+		return state.events[recorded.TaskID][i].Seq < state.events[recorded.TaskID][j].Seq
+	})
+	if recorded.Seq > state.nextEventSeq {
+		state.nextEventSeq = recorded.Seq
+	}
+	if recorded.AssignmentID != "" && recorded.State != "" {
+		assignment := state.assignments[recorded.AssignmentID]
+		if assignment.ID != "" {
+			assignment.State = recorded.State
+			if !recorded.At.IsZero() {
+				assignment.UpdatedAt = recorded.At
+			}
+			state.assignments[assignment.ID] = assignment
+		}
+	}
+	if s.outbox != nil {
+		s.appendTaskEventToOutbox(state, recorded)
+	}
+	for _, ch := range state.subscribers[recorded.TaskID] {
+		select {
+		case ch <- recorded:
+		default:
+		}
+	}
+}
+
 func (s *Store) appendTaskEventToOutbox(state *storeState, event TaskEvent) {
 	startedAt := s.now()
 	err := s.outbox.AppendTaskEvent(context.Background(), event)
@@ -797,6 +1112,19 @@ func cloneProviderStatusRecords(in []ProviderStatusRecord) []ProviderStatusRecor
 func cloneProviderStatusResponse(in ProviderStatusSyncResponse) ProviderStatusSyncResponse {
 	in.Providers = cloneProviderStatusRecords(in.Providers)
 	return in
+}
+
+func eventsAfterSeq(state *storeState, seq int64) []TaskEvent {
+	var events []TaskEvent
+	for _, taskEvents := range state.events {
+		for _, event := range taskEvents {
+			if event.Seq > seq {
+				events = append(events, event)
+			}
+		}
+	}
+	sort.Slice(events, func(i, j int) bool { return events[i].Seq < events[j].Seq })
+	return events
 }
 
 func countTaskEvents(state *storeState) int64 {

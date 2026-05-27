@@ -17,6 +17,11 @@ This document does not own the in-memory store actor, snapshot replay, HTTP
 routes, SSE fan-out, DynamoDB request payloads, Terraform, AWS credentials,
 secret values, or production deployment evidence.
 
+RIID-4681 wires these ports into the public store actor runtime. That runtime
+consumption does not move adapter ownership into this document: this document
+continues to own the journal/claim/lease contract, while
+[`saas-control-plane.md`](saas-control-plane.md) owns the store actor behavior.
+
 ## Port Surface
 
 The public operation journal and claim ports are:
@@ -92,6 +97,10 @@ repository.
 RIID-4673 moves the `stateFromAssignmentOperations` replay reducer and internal
 projection rebuild helpers into this public repository.
 
-The store actor runtime, assignment HTTP/SSE routes, DynamoDB assignment
-operation adapter, snapshot store, outbox, stream relay, EventBridge publisher,
-Terraform, and production evidence remain separate migration units.
+RIID-4681 wires the operation journal save/replay/claim ports and
+active-assignment lease/projection ports into the public store actor runtime
+without adding AWS or other external dependencies.
+
+Assignment HTTP/SSE routes, DynamoDB assignment operation adapter, stream relay,
+EventBridge publisher, Terraform, and production evidence remain separate
+migration units.

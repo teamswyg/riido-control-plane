@@ -432,6 +432,34 @@ save/claim runtime wiring, active lease recovery, Terraform, AWS credentials,
 Docker image contracts, review account seed data, dashboards, daemon consumers,
 or deployment evidence.
 
+### RIID-4681 — durable operation runtime wiring migration
+
+This slice wires the public assignment operation journal ports into the
+stdlib-only store actor runtime.
+
+This slice does:
+
+- add `OperationStore` and `ActiveLeaseDuration` to `StoreConfig`
+- save assignment operation records after assign, poll-start, and agent-event
+  mutations
+- replay assignment operation records from `AssignmentOperationLoader` when no
+  snapshot is available
+- claim the next assignment through `AssignmentClaimer` without duplicating an
+  already-recorded poll-start operation
+- load durable active-assignment leases and projections before returning
+  `active` or `cancel` poll responses
+- refresh durable active-assignment leases during heartbeat
+- fail stale active assignments before leasing the next queued assignment
+- close the configured operation store when the actor closes
+- add BDD-style domain tests for save, replay, claim, active lease refresh,
+  stale lease failure, and durable cancellation projection scenarios
+- add focused public CI for the operation runtime wiring slice
+
+This slice does not move DynamoDB assignment operation adapters, DynamoDB
+Streams relay code, EventBridge publishers, Terraform, AWS credentials, Docker
+image contracts, review account seed data, dashboards, daemon consumers, or
+deployment evidence.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

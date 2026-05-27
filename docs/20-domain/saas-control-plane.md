@@ -69,10 +69,14 @@ the stdlib-only runtime behavior that can be verified without AWS credentials:
 - in-memory provider status sync/read state used by store-safe routing
 - configurable snapshot and task-event outbox port calls after assignment
   mutations
+- configurable assignment operation journal save/replay/claim calls after
+  assignment mutations
+- durable active-assignment lease reads and heartbeat refreshes when the
+  configured operation store implements the lease/projection ports
 
-This actor does not own HTTP assignment routes, SSE fan-out, assignment
-operation durable save wiring, DynamoDB, EventBridge, Terraform, AWS
-credentials, or deployment evidence.
+This actor does not own HTTP assignment routes, SSE fan-out,
+DynamoDB/EventBridge adapter payload construction, Terraform, AWS credentials,
+or deployment evidence.
 
 ## Store Snapshot And File Outbox Boundary
 
@@ -103,8 +107,8 @@ counter and still record event-append latency counters.
 
 This boundary does not own `DynamoDBStoreSnapshot`, `DynamoDBOutbox`, DynamoDB
 Streams relays, EventBridge publishers, assignment operation durable save/claim
-runtime wiring, active lease recovery, Terraform, AWS credentials, Docker image
-contracts, review account seed data, or deployment evidence.
+adapter implementation, Terraform, AWS credentials, Docker image contracts,
+review account seed data, or deployment evidence.
 
 ## Assignment HTTP Adapter Boundary
 
@@ -207,7 +211,10 @@ deployment evidence.
 
 It also owns the pure operation replay reducer that reconstructs internal
 assignment projection state from operation records before a later store actor
-slice consumes it.
+slice consumes it. RIID-4681 is that store actor runtime-consumption slice:
+the store actor can now save operation records, replay them when no snapshot is
+available, claim the next assignment through an `AssignmentClaimer`, and consult
+durable active-assignment lease/projection ports during poll and heartbeat.
 
 ## Provider Status Boundary
 
@@ -254,5 +261,8 @@ environment/runtime entrypoint into this public repository.
 RIID-4680 moves the stdlib-only store snapshot and file outbox adapters into
 this public repository.
 
-Durable operation save/claim wiring, review account seed, Docker, Terraform,
-AWS adapters, and deployment evidence remain separate migration units.
+RIID-4681 wires the assignment operation journal ports into the store actor
+runtime without adding any AWS or external dependencies.
+
+Review account seed, Docker, Terraform, AWS adapters, and deployment evidence
+remain separate migration units.
