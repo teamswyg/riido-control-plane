@@ -108,6 +108,26 @@ The next control-plane migration unit can build on this by moving the HTTP
 agent catalog handler or by introducing store ports, but those units must keep
 AWS adapters out of public pull-request verification.
 
+### RIID-4664 — external HTTP authorizer migration
+
+This slice moves the stdlib-only external request authorizer adapter behind the
+public `RequestAuthorizer` port.
+
+This slice does:
+
+- add `ExternalHTTPAuthorizer` and its request/response schema version
+  constants
+- add fail-closed tests for 401, 403, `allowed:false`, malformed JSON,
+  unsupported schema, invalid role, unsafe endpoints, and provider errors
+- cover `FallbackAuthorizer` behavior where only unauthenticated results fall
+  through to the next authorizer
+- add `docs/20-domain/request-authorization.md` as the request authZ SSOT
+- add a focused public CI workflow for the external authorizer adapter
+
+This slice does not move production IdP rollout, tenant claim mapping,
+JWKS/OIDC validation, environment parsing in `cmd/riido_ai_server`, HTTP route
+wiring, Terraform, secret values, or deployment evidence.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
