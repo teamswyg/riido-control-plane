@@ -237,6 +237,8 @@ func (s Server) handleComponentTasks(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case suffix == "assignment" && r.Method == http.MethodPost:
 		s.handleComponentTaskAssign(w, r, taskID)
+	case suffix == "events" && r.Method == http.MethodGet:
+		s.handleComponentTaskEvents(w, r, taskID)
 	default:
 		writeError(w, http.StatusNotFound, "not found")
 	}
@@ -264,6 +266,17 @@ func (s Server) handleComponentTaskAssign(w http.ResponseWriter, r *http.Request
 		SchemaVersion string     `json:"schema_version"`
 		Assignment    Assignment `json:"assignment"`
 	}{SchemaVersion: SchemaVersion, Assignment: assignment})
+}
+
+func (s Server) handleComponentTaskEvents(w http.ResponseWriter, r *http.Request, taskID string) {
+	if s.assignment == nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
+		return
+	}
+	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceComponentTaskEvents, Action: AuthorizationActionEventsRead, TaskID: taskID}); !ok {
+		return
+	}
+	s.streamTaskEvents(w, r, taskID)
 }
 
 func (s Server) handleAgentPoll(w http.ResponseWriter, r *http.Request, agentID string) {
@@ -481,4 +494,54 @@ func writeMethodNotAllowed(w http.ResponseWriter) {
 func writeUnauthorized(w http.ResponseWriter) {
 	w.Header().Set("WWW-Authenticate", `Bearer realm="riido_ai_server"`)
 	writeError(w, http.StatusUnauthorized, "unauthorized")
+}
+
+func (s Server) streamTaskEvents(w http.ResponseWriter, r *http.Request, taskID string) {
+	history, events, cancel, err := s.assignment.SubscribeTask(r.Context(), taskID)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	defer cancel()
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	flusher, _ := w.(http.Flusher)
+	for _, event := range history {
+		if err := writeSSE(w, event); err != nil {
+			return
+		}
+	}
+	if flusher != nil {
+		flusher.Flush()
+	}
+	if r.URL.Query().Get("replay") == "1" {
+		return
+	}
+	for {
+		select {
+		case event, ok := <-events:
+			if !ok {
+				return
+			}
+			if err := writeSSE(w, event); err != nil {
+				return
+			}
+			if flusher != nil {
+				flusher.Flush()
+			}
+		case <-r.Context().Done():
+			return
+		}
+	}
+}
+
+func writeSSE(w http.ResponseWriter, event TaskEvent) error {
+	data, err := json.Marshal(event)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(w, "id: %d\nevent: %s\ndata: %s\n\n", event.Seq, event.Type, data)
+	return err
 }
