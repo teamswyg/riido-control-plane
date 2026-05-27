@@ -100,3 +100,6 @@ account provisioning without storing raw token values.
 
 Production IdP rollout, tenant claim mapping, JWKS/OIDC validation, and
 production bearer token values remain separate migration units.
+
+Unresolved production identity mapping questions are tracked in
+[`../50-roadmap/open-questions.md`](../50-roadmap/open-questions.md).

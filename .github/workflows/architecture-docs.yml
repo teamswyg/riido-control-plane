@@ -1,0 +1,72 @@
+name: architecture-docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/architecture-docs.yml"
+      - "docs/20-domain/context-map.md"
+      - "docs/30-architecture/**"
+      - "docs/50-roadmap/open-questions.md"
+      - "docs/migration/control-plane.md"
+      - "cmd/riido_ai_server/main.go"
+      - "internal/riidoaiserver/doc.go"
+  pull_request:
+    paths:
+      - ".github/workflows/architecture-docs.yml"
+      - "docs/20-domain/context-map.md"
+      - "docs/30-architecture/**"
+      - "docs/50-roadmap/open-questions.md"
+      - "docs/migration/control-plane.md"
+      - "cmd/riido_ai_server/main.go"
+      - "internal/riidoaiserver/doc.go"
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify required architecture docs
+        run: |
+          test -f docs/20-domain/context-map.md
+          test -f docs/30-architecture/module-decomposition.md
+          test -f docs/30-architecture/config-reference.md
+          test -f docs/30-architecture/integration-matrix.md
+          test -f docs/30-architecture/runtime-deployment-boundary.md
+          test -f docs/50-roadmap/open-questions.md
+      - name: Verify architecture docs avoid stale ownership paths
+        run: |
+          stale="$(grep -R --line-number -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon/internal|packaging/terraform|terraform\\.tfstate|terraform\\.tfvars|AWS_ACCESS_KEY|AWS_SECRET' docs/20-domain/context-map.md docs/30-architecture docs/50-roadmap || true)"
+          if [ -n "$stale" ]; then
+            printf 'Stale/private ownership wording found:\n%s\n' "$stale"
+            exit 1
+          fi
+      - name: Verify documented env coverage
+        run: |
+          for env in \
+            RIIDO_AI_SERVER_ADDR \
+            RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS \
+            RIIDO_AI_SERVER_AGENT_BINDINGS_JSON \
+            RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON \
+            RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL \
+            RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE \
+            RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS \
+            RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256 \
+            RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS
+          do
+            grep -R "$env" docs/30-architecture/config-reference.md >/dev/null
+          done
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Test
+        run: go test ./...

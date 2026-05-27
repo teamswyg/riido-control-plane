@@ -656,6 +656,31 @@ This slice does not move implementation out of `internal/riidoaiserver`, add
 the external Go AWS SDK, move live AWS evidence collection into public CI,
 move Terraform, or expose credentials/runtime secret values.
 
+### RIID-4712 — architecture SSOT docs migration
+
+This slice restores the public architecture SSOT set for the split-repo
+control-plane boundary.
+
+This slice does:
+
+- add `docs/20-domain/context-map.md` for public context ownership
+- add `docs/30-architecture/module-decomposition.md` for package/import rules
+- add `docs/30-architecture/config-reference.md` for `cmd/riido_ai_server`
+  Factor 12 env ownership
+- add `docs/30-architecture/integration-matrix.md` for public CI vs private
+  infra/operator gates
+- add `docs/30-architecture/runtime-deployment-boundary.md` for container,
+  AWS adapter, and deployment hand-off facts
+- add `docs/50-roadmap/open-questions.md` for unresolved public
+  control-plane decisions
+- add a focused public architecture-docs GitHub Actions workflow
+- update domain docs and package comments to align with the RIID-4704/RIID-4706
+  AWS adapter facade ownership
+
+This slice does not move Terraform, AWS account wiring, live plan/apply
+evidence, production secrets, daemon runtime code, or external AWS SDK
+dependencies.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -672,6 +697,18 @@ go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
+```
+
+Architecture-doc migration PRs must also pass:
+
+```bash
+test -f docs/20-domain/context-map.md
+test -f docs/30-architecture/module-decomposition.md
+test -f docs/30-architecture/config-reference.md
+test -f docs/30-architecture/integration-matrix.md
+test -f docs/30-architecture/runtime-deployment-boundary.md
+test -f docs/50-roadmap/open-questions.md
+go test ./...
 ```
 
 Server black-box tests should cover:

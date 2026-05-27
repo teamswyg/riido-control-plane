@@ -28,6 +28,15 @@ This document does not own customer-PC provider process execution, local daemon
 configuration, Terraform, AWS account/resource configuration, private
 deployment evidence, live AWS evidence collection, or production secret values.
 
+The split-repo context map is
+[`context-map.md`](context-map.md). Package decomposition, runtime config,
+integration gates, and release hand-off are owned by
+[`../30-architecture/module-decomposition.md`](../30-architecture/module-decomposition.md),
+[`../30-architecture/config-reference.md`](../30-architecture/config-reference.md),
+[`../30-architecture/integration-matrix.md`](../30-architecture/integration-matrix.md),
+and
+[`../30-architecture/runtime-deployment-boundary.md`](../30-architecture/runtime-deployment-boundary.md).
+
 ## Executable Contract
 
 The executable assignment polling contract is owned by
@@ -407,6 +416,11 @@ RIID-4706 adds the public `awsadapters` facade so private infra tooling can
 consume RIID-4704 adapter behavior through the `riido-control-plane` Go module
 without importing an `internal` package or duplicating adapter behavior.
 
+RIID-4712 adds the public architecture SSOT set for the split-repo control-plane
+boundary: context map, module decomposition, config reference, integration
+matrix, runtime/deployment hand-off, open questions, and a focused public docs
+workflow.
+
 RIID-4669 moves the operation journal port and record surface into this public
 repository.
 
@@ -447,3 +461,8 @@ domain, in-memory agent catalog store actor commands, command env wiring, and
 black-box review account HTTP scenarios into this repository. Raw review token
 values, production IdP rollout, AWS adapters, Terraform, image digest evidence,
 and production deployment evidence remain separate migration units.
+
+## Open Questions
+
+Unresolved control-plane decisions are owned by
+[`../50-roadmap/open-questions.md`](../50-roadmap/open-questions.md).

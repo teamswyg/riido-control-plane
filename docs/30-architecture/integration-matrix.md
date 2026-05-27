@@ -1,0 +1,53 @@
+# Control Plane Integration Matrix
+
+> Riido task: RIID-4712 `[Control Plane] Architecture SSOT docs migration`
+
+Control-plane verification is split into deterministic public CI and
+operator/private infra validation.
+
+## Public Deterministic Gates
+
+| Surface | Verification | External dependency |
+| --- | --- | --- |
+| module dependency boundary | `go list -m all` allowlist | none |
+| full backend behavior | `go test ./...` | none |
+| agent catalog RBAC and HTTP | focused `internal/riidoaiserver` black-box tests | none |
+| request authorization | static tokens and `httptest` external authorizer tests | none |
+| assignment polling/heartbeat/events | in-memory store and HTTP tests | none |
+| SSE | `httptest` streaming tests | none |
+| metrics HTTP and stdout EMF | metrics read-model and writer tests | none |
+| DynamoDB/EventBridge adapters | fake endpoint HTTP tests with fake credentials | no live AWS |
+| `awsadapters` facade | compile and usage tests | none |
+| container image contract | `tools/containercontract` and optional local Docker build | Docker only for image build check |
+
+Public PR checks must not require AWS credentials, Terraform state, ECR access,
+or production secret material.
+
+## Private / Operator Gates
+
+| Surface | Owner | Evidence |
+| --- | --- | --- |
+| Terraform plan/apply | `riido-infra` | typed plan/apply evidence and Terraform work-unit records |
+| ECR image push | `riido-infra` | image digest and push evidence |
+| ECS/Fargate deployment | `riido-infra` | task-definition and service rollout evidence |
+| DNS/ACM/WAF/public ingress | `riido-infra` | traffic, certificate, and ingress evidence |
+| production secret wiring | `riido-infra` plus secret manager | redacted runtime secret evidence |
+| live DynamoDB/EventBridge behavior | `riido-infra` | backend bootstrap and traffic/evidence tools |
+
+Private gates may consume public module tags, container image digests, and the
+`awsadapters` facade. They must not push account-specific evidence back into
+this public repository.
+
+## Optional Local Commands
+
+```bash
+go test ./...
+go list -m all
+go test ./awsadapters -count=1
+go test ./tools/containercontract -count=1
+go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
+docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
+```
+
+The Docker build is useful before release but may be skipped where Docker is not
+available. The Go tests and contract verifier are the minimum public gate.
