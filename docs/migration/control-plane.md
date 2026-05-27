@@ -57,8 +57,10 @@ Do not move into `riido-control-plane`:
    Keep the server black-box testable with `net/http/httptest`.
 
 4. Move durable store ports and stdlib-only adapters.
-   AWS SDK integration remains outside the initial public migration unless a
-   new ADR accepts that dependency.
+   External AWS SDK integration remains outside the public migration unless a
+   new ADR accepts that dependency. Stdlib-only AWS JSON/SigV4 adapters may
+   move when they are verified with local black-box HTTP tests and no live AWS
+   credentials.
 
 5. Move generated assignment contract fixtures.
    Shared request/response fixtures should move to `riido-contracts` when both
@@ -607,6 +609,33 @@ credentials, log group/dashboard creation, production tuning samples,
 Prometheus conversion, DynamoDB/EventBridge adapters, Terraform, AWS
 credentials, private deployment evidence, or deployment evidence.
 
+### RIID-4704 — DynamoDB/EventBridge adapter migration
+
+This slice moves the stdlib-only DynamoDB/EventBridge production adapter
+behavior into the public control-plane repository while keeping live AWS
+configuration and evidence private.
+
+This slice does:
+
+- add the DynamoDB request/signing helper and static/ECS credential provider
+  boundary
+- add `DynamoDBOutbox` for task-event outbox writes
+- add `DynamoDBStoreSnapshot` for store snapshot load/save
+- add the DynamoDB assignment operation durable store, queue claim,
+  projection, and active-lease adapter
+- add DynamoDB table stream discovery and DynamoDB Streams relay/checkpoint
+  behavior
+- add the EventBridge stream relay publisher adapter
+- verify every AWS adapter through `httptest`/local black-box tests with fake
+  endpoints and fake credentials only
+- add focused public CI for the DynamoDB/EventBridge adapter test slice
+
+This slice does not move AWS account ids, Terraform state/backend config,
+tfvars, IAM/VPC/ECS/EventBridge rule resources, live AWS credentials, runtime
+secret payloads, raw release evidence, live stream-relay evidence collection,
+ECR image push evidence, dashboards, or private deployment evidence. It also
+does not add the external Go AWS SDK.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -617,6 +646,7 @@ go list -m all
 go test ./internal/riidoaiserver -run 'ReviewAccount|HTTPReviewAccount|AgentCatalogStore' -count=1
 go test ./cmd/riido_ai_server -run 'ReviewAccount|ConfigFromEnv|AuthorizerFromEnv' -count=1
 go test ./internal/riidoaiserver -run 'CloudWatch|Metrics|EventAppend' -count=1
+go test ./internal/riidoaiserver -run 'DynamoDB|EventBridge' -count=1
 go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration' -count=1
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
