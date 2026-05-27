@@ -1,0 +1,70 @@
+{
+  "schema_version": "riido-ai-server-contract.v1",
+  "service_schema_version": "riido-ai-server.v1",
+  "assignment_states": [
+    {
+      "name": "Queued",
+      "value": "queued",
+      "transitions": ["leased", "cancelling", "cancelled", "failed"]
+    },
+    {
+      "name": "Leased",
+      "value": "leased",
+      "agent_active": true,
+      "transitions": ["ready", "running", "cancelling", "cancelled", "failed"]
+    },
+    {
+      "name": "Ready",
+      "value": "ready",
+      "agent_active": true,
+      "transitions": ["running", "cancelling", "cancelled", "failed"]
+    },
+    {
+      "name": "Running",
+      "value": "running",
+      "agent_active": true,
+      "transitions": ["completed", "failed", "cancelling", "cancelled"]
+    },
+    {
+      "name": "Cancelling",
+      "value": "cancelling",
+      "transitions": ["cancelled", "failed"]
+    },
+    {
+      "name": "Cancelled",
+      "value": "cancelled",
+      "terminal": true
+    },
+    {
+      "name": "Completed",
+      "value": "completed",
+      "terminal": true
+    },
+    {
+      "name": "Failed",
+      "value": "failed",
+      "terminal": true
+    }
+  ],
+  "poll_actions": [
+    {"name": "None", "value": "none"},
+    {"name": "Start", "value": "start"},
+    {"name": "Cancel", "value": "cancel"},
+    {"name": "Active", "value": "active"}
+  ],
+  "task_events": [
+    {"name": "AssignmentQueued", "value": "assignment_queued"},
+    {"name": "AssignmentLeased", "value": "assignment_leased"},
+    {"name": "AssignmentReady", "value": "assignment_ready"},
+    {"name": "AssignmentRunning", "value": "assignment_running"},
+    {"name": "AssignmentCancelling", "value": "assignment_cancelling"},
+    {"name": "AssignmentCancelled", "value": "assignment_cancelled"},
+    {"name": "AssignmentCompleted", "value": "assignment_completed"},
+    {"name": "AssignmentFailed", "value": "assignment_failed"},
+    {"name": "AssignmentStateUpdated", "value": "assignment_state_updated"},
+    {"name": "RiidoLog", "value": "riido_log"},
+    {"name": "ProviderLog", "value": "provider_log"},
+    {"name": "ProviderWarning", "value": "provider_warning"},
+    {"name": "ProviderError", "value": "provider_error"}
+  ]
+}
