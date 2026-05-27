@@ -89,6 +89,24 @@ The public CI gate must cover these behavior scenarios:
 - Given a static token with an agent catalog or broader Riido scope, when the
   request action matches the scope candidates, then authorization succeeds.
 
+## API And Port Boundary
+
+The public agent catalog API DTOs are:
+
+- `CreateAgentCatalogRequest`
+- `UpdateAgentCatalogRequest`
+- `AgentCatalogListResponse`
+- `AgentCatalogRecordResponse`
+
+Create requests carry `agent_id` and `visibility`. Update requests carry only
+`visibility`. Request DTOs do not carry `owner_principal_id` or roles; those are
+derived from request authorization and RBAC evaluation.
+
+`AgentCatalogStore` is the persistence port for the future HTTP adapter. It
+contains only list, get, save, and delete operations for `AgentCatalogRecord`.
+It does not own the store actor, snapshot replay, DynamoDB, EventBridge, or
+request authorization.
+
 ## Migration State
 
 RIID-4663 moves the stdlib-only RBAC and static-token authorization code from
@@ -97,3 +115,7 @@ public repository.
 
 The HTTP handler, durable store, external authorizer, and AWS adapters remain
 separate migration units.
+
+RIID-4666 moves the public API DTOs and `AgentCatalogStore` port into this
+repository. The HTTP handler and concrete store adapters remain separate
+migration units.

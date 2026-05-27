@@ -147,6 +147,25 @@ This slice does not move the store actor, assignment queue, active lease
 recovery, provider status store, HTTP handler, environment parsing, AWS
 adapters, Terraform, or deployment evidence.
 
+### RIID-4666 — agent catalog API port migration
+
+This slice moves the public agent catalog DTOs and persistence port into the
+public control-plane repository.
+
+This slice does:
+
+- add `CreateAgentCatalogRequest` and `UpdateAgentCatalogRequest`
+- add `AgentCatalogListResponse` and `AgentCatalogRecordResponse`
+- add `AgentCatalogStore` as a narrow list/get/save/delete port
+- add tests that request DTOs do not accept owner or role input
+- add tests that response DTOs include `schema_version` and catalog records
+- extend `docs/20-domain/agent-catalog-rbac.md` with the API/port boundary
+- add a focused public CI workflow for the agent catalog API/port slice
+
+This slice does not move HTTP routing, authZ middleware, SSE, metrics, store
+actor implementation, snapshot/operation replay, DynamoDB/EventBridge adapters,
+environment parsing, Terraform, secret values, or deployment evidence.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
