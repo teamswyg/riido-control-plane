@@ -1,0 +1,61 @@
+name: container-image-contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/container-image-contract.yml"
+      - ".dockerignore"
+      - "README.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "cmd/riido_ai_server/**"
+      - "internal/**"
+      - "packaging/containers/**"
+      - "tools/containercontract/**"
+  pull_request:
+    paths:
+      - ".github/workflows/container-image-contract.yml"
+      - ".dockerignore"
+      - "README.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "cmd/riido_ai_server/**"
+      - "internal/**"
+      - "packaging/containers/**"
+      - "tools/containercontract/**"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify container import boundary
+        run: |
+          disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./cmd/riido_ai_server ./tools/containercontract | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed container contract imports:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Test container contract verifier
+        run: go test ./tools/containercontract -count=1
+      - name: Verify container image contract
+        run: go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
+      - name: Build container image
+        run: docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:ci .

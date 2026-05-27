@@ -196,8 +196,33 @@ authorizer, while forbidden results stop evaluation.
 
 This boundary does not own legacy broad bearer-token compatibility,
 snapshot/outbox stores, durable operation save/claim wiring, DynamoDB,
-EventBridge, Terraform, AWS credentials, CloudWatch/Prometheus adapters, Docker,
-review account seed data, production secrets, or deployment evidence.
+EventBridge, Terraform, AWS credentials, CloudWatch/Prometheus adapters, Docker
+image contracts, review account seed data, production secrets, or deployment
+evidence.
+
+## Container Image Contract Boundary
+
+The public container image contract owns the buildable `riido_ai_server`
+artifact shape that can be verified without AWS credentials:
+
+- `packaging/containers/riido_ai_server.Dockerfile`
+- `packaging/containers/riido_ai_server_container.riido.json`
+- `tools/containercontract`
+
+The executable contract requires a two-stage Go build, `CGO_ENABLED=0`, the
+`./cmd/riido_ai_server` package, a `scratch` final image, copied CA
+certificates, `EXPOSE 8080`, `RIIDO_AI_SERVER_ADDR=:8080`, non-root
+`65532:65532`, and `ENTRYPOINT ["/riido_ai_server"]`.
+
+`tools/containercontract` is the stdlib-only verifier for
+`riido-container-image-contract.v1`. It emits
+`riido-container-image-contract-check.v1` evidence and may optionally validate a
+private Fargate task-definition IR when another repository supplies that path.
+
+This boundary does not own ECR repositories, image push permissions, immutable
+image digest evidence, Terraform/Fargate task definitions, AWS credentials,
+runtime secret values, production environment variables, or deployment
+evidence. Those remain `riido-infra` responsibilities.
 
 ## Durable Operation Boundary
 
@@ -258,11 +283,16 @@ RIID-4678 moves the metrics HTTP adapter into this public repository.
 RIID-4679 moves health/ready routes and the minimal `cmd/riido_ai_server`
 environment/runtime entrypoint into this public repository.
 
-RIID-4680 moves the stdlib-only store snapshot and file outbox adapters into
-this public repository.
+RIID-4680 moves stdlib-only store snapshot and file outbox adapters into this
+public repository.
 
-RIID-4681 wires the assignment operation journal ports into the store actor
-runtime without adding any AWS or external dependencies.
+RIID-4681 wires durable assignment operation journal ports into the public
+store actor runtime without moving DynamoDB adapters or Terraform.
 
-Review account seed, Docker, Terraform, AWS adapters, and deployment evidence
-remain separate migration units.
+RIID-4682 moves the public Docker image contract, Dockerfile, container contract
+verifier, and focused CI into this repository. ECR push, Terraform/Fargate task
+definition IR, image digest deployment evidence, AWS credentials, and runtime
+secret values remain private infra responsibilities.
+
+Review account seed, ECR push, Terraform, AWS adapters, image digest evidence,
+and production deployment evidence remain separate migration units.

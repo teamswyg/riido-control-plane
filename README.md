@@ -23,6 +23,7 @@ This repository may contain:
 - HTTP/SSE control-plane server code
 - assignment, event, RBAC, provider status, and read-model domain logic
 - public API contracts implemented by the control plane
+- public Docker image contracts that do not publish or deploy artifacts
 - black-box and domain scenario tests
 
 This repository must not contain:
@@ -31,12 +32,17 @@ This repository must not contain:
 - environment-specific production values
 - customer data exports
 - private release artifacts
+- ECR push configuration, image digest deployment evidence, or private
+  Fargate task-definition wiring
 
 ## Verification
 
 ```bash
 go test ./...
 go list -m all
+go test ./tools/containercontract -count=1
+go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
+docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
 ```
 
 The public GitHub Actions workflow runs the lightweight verification suite

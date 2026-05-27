@@ -1,0 +1,39 @@
+{
+  "schema_version": "riido-container-image-contract.v1",
+  "service": "riido_ai_server",
+  "dockerfile": "packaging/containers/riido_ai_server.Dockerfile",
+  "build": {
+    "build_arg": {
+      "name": "GO_IMAGE",
+      "default": "golang:1.26"
+    },
+    "stage_name": "build",
+    "workdir": "/src",
+    "cgo_enabled": "0",
+    "go_build": {
+      "package": "./cmd/riido_ai_server",
+      "output": "/out/riido_ai_server",
+      "trimpath": true,
+      "ldflags": ["-s", "-w"]
+    }
+  },
+  "final": {
+    "base_image": "scratch",
+    "copy_from": "build",
+    "copy_source": "/out/riido_ai_server",
+    "binary": "/riido_ai_server",
+    "required_copies": [
+      {
+        "from": "build",
+        "source": "/etc/ssl/certs/ca-certificates.crt",
+        "destination": "/etc/ssl/certs/ca-certificates.crt"
+      }
+    ],
+    "exposed_ports": [8080],
+    "env": {
+      "RIIDO_AI_SERVER_ADDR": ":8080"
+    },
+    "user": "65532:65532",
+    "entrypoint": ["/riido_ai_server"]
+  }
+}
