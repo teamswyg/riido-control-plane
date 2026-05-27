@@ -7,7 +7,7 @@ event ingest, SSE/read-model APIs, authorization ports, RBAC behavior, and
 control-plane black-box/domain tests.
 
 It consumes shared public contracts from
-`github.com/teamswyg/riido-contracts` at `v0.1.0`. Runtime provider execution,
+`github.com/teamswyg/riido-contracts` at `v0.2.0`. Runtime provider execution,
 Terraform deployment wiring, and secret material stay outside this repository.
 
 ## Module
@@ -21,7 +21,7 @@ github.com/teamswyg/riido-control-plane
 This repository may contain:
 
 - HTTP/SSE control-plane server code
-- assignment, event, RBAC, and read-model domain logic
+- assignment, event, RBAC, provider status, and read-model domain logic
 - public API contracts implemented by the control plane
 - black-box and domain scenario tests
 
