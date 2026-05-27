@@ -1,0 +1,57 @@
+name: assignment-operation-journal
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/assignment-operation-journal.yml"
+      - "docs/20-domain/assignment-operation-journal.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "internal/riidoaiserver/doc.go"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/assignment_contract_gen.go"
+      - "internal/riidoaiserver/assignment_operation_port.go"
+      - "internal/riidoaiserver/assignment_operation_port_test.go"
+  pull_request:
+    paths:
+      - ".github/workflows/assignment-operation-journal.yml"
+      - "docs/20-domain/assignment-operation-journal.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "internal/riidoaiserver/doc.go"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/assignment_contract_gen.go"
+      - "internal/riidoaiserver/assignment_operation_port.go"
+      - "internal/riidoaiserver/assignment_operation_port_test.go"
+
+jobs:
+  journal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify assignment journal import boundary
+        run: |
+          disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed assignment journal imports:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Test assignment operation journal
+        run: go test ./internal/riidoaiserver -run 'AssignmentOperation|AssignmentActiveLease' -count=1

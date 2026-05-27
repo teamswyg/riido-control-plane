@@ -217,6 +217,34 @@ route wiring, provider status store/API, review account seed, environment
 parsing, Docker, Terraform, secret values, AWS adapters, or deployment
 evidence.
 
+### RIID-4669 — assignment operation journal port migration
+
+This slice moves the durable assignment operation journal and claim-port
+contract into the public control-plane repository.
+
+This slice does:
+
+- add assignment operation, projection, and active-assignment schema constants
+- add assignment operation type constants
+- add `AssignmentOperationStore`, `AssignmentOperationLoader`,
+  `AssignmentQueueReader`, `AssignmentClaimer`, `AssignmentActiveLeaseStore`,
+  and `AssignmentProjectionReader`
+- add `AssignmentProjection`, `AssignmentActiveLease`,
+  `AssignmentClaimResult`, and `AssignmentOperationRecord`
+- add executable validation for operation records
+- add deterministic helpers for operation IDs, event sequence extraction,
+  assignment sequence parsing, queue sort keys, and active lease expiry
+- add `docs/20-domain/assignment-operation-journal.md` as the public SSOT for
+  this slice
+- add a focused public CI workflow for the assignment operation journal slice
+
+This slice does not move `stateFromAssignmentOperations`, store actor replay,
+assignment queue/claim runtime behavior, active lease recovery runtime behavior,
+assignment HTTP routes, daemon poll/heartbeat/event handlers, SSE, metrics
+route wiring, provider status store/API, review account seed, environment
+parsing, Docker, Terraform, secret values, AWS adapters, or deployment
+evidence.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
