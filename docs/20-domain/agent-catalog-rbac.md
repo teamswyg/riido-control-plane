@@ -57,6 +57,11 @@ Static token authorization is a public-testable adapter for request-scope
 checks. Token credentials are compiled from either a plaintext token or a
 SHA-256 token hash. Production token values are not part of this repository.
 
+The broader request authorization port and external-authorizer adapter are
+owned by [`request-authorization.md`](request-authorization.md). Request scopes
+gate endpoint access; this RBAC policy still re-evaluates owner, visibility,
+and admin role before exposing or mutating an agent catalog record.
+
 Agent catalog scope candidates are:
 
 - `riido:*`

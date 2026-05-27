@@ -1,8 +1,8 @@
 // Package riidoaiserver owns the public Riido SaaS control-plane domain and
 // adapter boundary.
 //
-// The RIID-4663 migration slice contains only stdlib-only agent catalog RBAC
-// and request authorization behavior. It does not own daemon provider process
-// execution, AWS deployment wiring, durable store adapters, or production
-// secret values.
+// The current migration slices contain stdlib-only agent catalog RBAC, static
+// token request authorization, and the external HTTP request authorizer
+// adapter. This package does not own daemon provider process execution, AWS
+// deployment wiring, durable store adapters, or production secret values.
 package riidoaiserver
