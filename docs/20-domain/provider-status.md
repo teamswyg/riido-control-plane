@@ -114,6 +114,9 @@ and HTTP provider-status route from the former private
 
 RIID-4672 moves the store-safe routing guard into this public repository.
 
-Runtime detector implementation, assignment integration, review account seed
-runtime wiring, durable store actors, DynamoDB adapters, Terraform, AWS
-configuration, and deployment evidence remain separate migration units.
+RIID-4691 moves the public-safe review account seed runtime wiring into this
+repository and uses only a synthetic non-routable provider-status snapshot.
+
+Runtime detector implementation, assignment integration beyond the current
+store-safe guard, durable AWS-backed store actors, DynamoDB adapters, Terraform,
+AWS configuration, and deployment evidence remain separate migration units.

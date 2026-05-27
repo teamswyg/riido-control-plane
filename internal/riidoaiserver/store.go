@@ -394,6 +394,20 @@ func (s *Store) loop(state storeState) {
 		case getProviderStatusCmd:
 			response, ok, err := handleGetProviderStatus(&state, msg.agentID)
 			msg.reply <- getProviderStatusResult{response: response, ok: ok, err: err}
+		case listAgentCatalogCmd:
+			msg.reply <- listAgentCatalogResult{records: handleListAgentCatalog(&state)}
+		case getAgentCatalogCmd:
+			record, ok, err := handleGetAgentCatalog(&state, msg.agentID)
+			msg.reply <- getAgentCatalogResult{record: record, ok: ok, err: err}
+		case saveAgentCatalogCmd:
+			record, err := handleSaveAgentCatalog(&state, msg.record)
+			msg.reply <- saveAgentCatalogResult{record: record, err: err}
+		case deleteAgentCatalogCmd:
+			deleted, err := handleDeleteAgentCatalog(&state, msg.agentID)
+			msg.reply <- deleteAgentCatalogResult{deleted: deleted, err: err}
+		case applyReviewAccountProvisioningCmd:
+			err := s.handleApplyReviewAccountProvisioning(&state, msg.provisioning)
+			msg.reply <- applyReviewAccountProvisioningResult{err: err}
 		case subscribeCmd:
 			history, events, subID, err := s.handleSubscribe(&state, msg.taskID)
 			msg.reply <- subscribeResult{history: history, events: events, subID: subID, err: err}

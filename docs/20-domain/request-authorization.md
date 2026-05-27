@@ -15,6 +15,7 @@ payloads cannot directly submit an owner or role.
 This slice owns:
 
 - static token request-scope authorization
+- SHA-256 token hash credentials for public-safe runtime configuration
 - external HTTP request authorization behind the same port
 - unauthenticated-only fallback chaining
 - external authorizer JSON contract versions
@@ -93,5 +94,9 @@ RIID-4664 moves the stdlib-only external HTTP authorizer adapter and
 fail-closed tests from the former private `riido_daemon/internal/riidoaiserver`
 package into this public repository.
 
-Runtime environment parsing, production IdP rollout, and HTTP server route
-wiring remain separate migration units.
+RIID-4679 moves runtime environment parsing and HTTP route wiring into this
+public repository. RIID-4691 reuses the static token hash path for review
+account provisioning without storing raw token values.
+
+Production IdP rollout, tenant claim mapping, JWKS/OIDC validation, and
+production bearer token values remain separate migration units.

@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -62,6 +64,28 @@ func TestConfigFromEnvDefaultsToPublicHealthOnlyRuntime(t *testing.T) {
 	}
 	if config.AgentRegistry != nil || config.Authorizer != nil {
 		t.Fatalf("optional config should be nil: %+v", config)
+	}
+}
+
+func TestConfigFromEnvIncludesReviewAccountProvisioning(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envReviewAccountTokenHash, testTokenSHA256("review-token"))
+
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	if config.ReviewProvision == nil {
+		t.Fatal("review provisioning missing")
+	}
+	if config.ReviewProvision.Credential.Token != "" || config.ReviewProvision.Credential.TokenSHA256 == "" {
+		t.Fatalf("review credential should use token hash only: %+v", config.ReviewProvision.Credential)
+	}
+	if _, err := config.Authorizer.Authorize(context.Background(), "review-token", riidoaiserver.AuthorizationRequest{
+		Resource: riidoaiserver.AuthorizationResourceAgentCatalog,
+		Action:   riidoaiserver.AuthorizationActionRead,
+	}); err != nil {
+		t.Fatalf("review token should read catalog: %v", err)
 	}
 }
 
@@ -148,6 +172,39 @@ func TestAuthorizerFromEnvFallsBackFromStaticToExternalOnlyWhenUnauthenticated(t
 	}
 }
 
+func TestAuthorizerFromEnvIncludesReviewAccountCredential(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envReviewAccountTokenHash, testTokenSHA256("review-token"))
+
+	authorizer, err := authorizerFromEnv()
+	if err != nil {
+		t.Fatalf("authorizerFromEnv: %v", err)
+	}
+	if authorizer == nil {
+		t.Fatal("authorizer missing")
+	}
+	if _, err := authorizer.Authorize(context.Background(), "review-token", riidoaiserver.AuthorizationRequest{
+		Resource: riidoaiserver.AuthorizationResourceAgentCatalog,
+		Action:   riidoaiserver.AuthorizationActionRead,
+	}); err != nil {
+		t.Fatalf("review token should read catalog: %v", err)
+	}
+	if _, err := authorizer.Authorize(context.Background(), "review-token", riidoaiserver.AuthorizationRequest{
+		Resource: riidoaiserver.AuthorizationResourceAgent,
+		Action:   riidoaiserver.AuthorizationActionProviderStatusRead,
+		AgentID:  "store-review-agent",
+	}); err != nil {
+		t.Fatalf("review token should read synthetic provider status: %v", err)
+	}
+	if _, err := authorizer.Authorize(context.Background(), "review-token", riidoaiserver.AuthorizationRequest{
+		Resource: riidoaiserver.AuthorizationResourceAgent,
+		Action:   riidoaiserver.AuthorizationActionPoll,
+		AgentID:  "store-review-agent",
+	}); err == nil {
+		t.Fatal("review token must not poll as daemon agent")
+	}
+}
+
 func TestEnvDurationSecondsRejectsNonPositiveValues(t *testing.T) {
 	for _, value := range []string{"0", "-1", "nope"} {
 		t.Run(value, func(t *testing.T) {
@@ -169,7 +226,13 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envExternalAuthzURL,
 		envExternalAuthzAudience,
 		envExternalAuthzTimeout,
+		envReviewAccountTokenHash,
 	} {
 		t.Setenv(key, "")
 	}
+}
+
+func testTokenSHA256(value string) string {
+	sum := sha256.Sum256([]byte(value))
+	return hex.EncodeToString(sum[:])
 }

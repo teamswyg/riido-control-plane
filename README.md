@@ -22,6 +22,8 @@ This repository may contain:
 
 - HTTP/SSE control-plane server code
 - assignment, event, RBAC, provider status, and read-model domain logic
+- store-review/demo seed artifacts that contain no raw tokens or provider
+  execution grants
 - public API contracts implemented by the control plane
 - public Docker image contracts that do not publish or deploy artifacts
 - black-box and domain scenario tests
@@ -36,6 +38,10 @@ This repository must not contain:
   Fargate task-definition wiring
 
 ## Verification
+
+Optional store-review/demo access is enabled by setting only
+`RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`. The raw review token is never
+committed or read from this repository.
 
 ```bash
 go test ./...

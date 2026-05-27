@@ -1,7 +1,8 @@
 # SaaS Control Plane SSOT
 
 > Riido tasks: RIID-4668 `[Control Plane] assignment contract/type migration`,
-> RIID-4688 `[Control Plane] riido-contracts v0.3.0 assignment import migration`
+> RIID-4688 `[Control Plane] riido-contracts v0.3.0 assignment import migration`,
+> RIID-4691 `[Control Plane] review account seed runtime wiring migration`
 
 This document is the public SSOT for the SaaS control-plane assignment contract
 surface that can be verified without AWS credentials.
@@ -13,6 +14,9 @@ tasks to SaaS agent identities, daemon polling, daemon heartbeat handling,
 agent event sync, task event storage/streaming, health responses, and metrics
 snapshots. Shared assignment polling DTOs and state vocabulary are imported
 from `github.com/teamswyg/riido-contracts/assignment`.
+It also owns the public-safe store review seed artifact and runtime
+provisioning path that can be verified without raw review tokens, provider
+execution grants, AWS credentials, or Terraform state.
 
 This document does not own customer-PC provider process execution, local daemon
 configuration, Terraform, AWS, EventBridge, DynamoDB, private deployment
@@ -199,6 +203,7 @@ public repository. It owns only these environment variables:
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
+- `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`
 
 The agent binding and static-token JSON values use strict decoding, so unknown
 fields and trailing JSON are rejected. Static-token authorization may be
@@ -206,10 +211,42 @@ combined with the external HTTP authorizer through the existing fallback
 authorizer rule: only unauthenticated results fall through to the next
 authorizer, while forbidden results stop evaluation.
 
+`RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` enables only the public-safe
+review account provisioning path. The environment value is a SHA-256 hash of an
+externally supplied review token; the raw token remains outside this
+repository.
+
 This boundary does not own legacy broad bearer-token compatibility,
 snapshot/outbox stores, durable operation save/claim wiring, DynamoDB,
 EventBridge, Terraform, AWS credentials, CloudWatch/Prometheus adapters, Docker
-image contracts, review account seed data, production secrets, or deployment
+image contracts, raw review token values, production secrets, or deployment
+evidence.
+
+## Review Account Seed Boundary
+
+The review account seed boundary owns the public-safe App Store/MS Store review
+and demo control-plane bootstrap data:
+
+- `riido-review-account-seed.v1`
+- a non-admin `store-reviewer` principal
+- static-token credential provisioning from
+  `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`
+- seeded agent catalog records that demonstrate owner/private, owner/public,
+  other-user/public, and other-user/private RBAC visibility
+- a synthetic `store-review-agent` provider-status snapshot for the
+  `mac-app-store` distribution channel
+- non-routable provider statuses only: `login-required` or `unsupported`
+
+The seed artifact must not contain raw tokens, passwords, provider executable
+paths, workspace root paths, API keys, AWS credentials, or provider execution
+grants. The review principal may read metrics, read the agent catalog, read the
+synthetic provider status, assign component tasks, and read component-task
+events. It must not poll, heartbeat, write agent events, or write provider
+status as a daemon.
+
+This boundary does not own production IdP rollout, raw review token issuance,
+real provider execution, daemon/provider bundling, DynamoDB/EventBridge
+adapters, Terraform, AWS credentials, production secrets, or deployment
 evidence.
 
 ## Container Image Contract Boundary
@@ -311,5 +348,8 @@ verifier, and focused CI into this repository. ECR push, Terraform/Fargate task
 definition IR, image digest deployment evidence, AWS credentials, and runtime
 secret values remain private infra responsibilities.
 
-Review account seed, ECR push, Terraform, AWS adapters, image digest evidence,
+RIID-4691 moves the public-safe review account seed artifact, provisioning
+domain, in-memory agent catalog store actor commands, command env wiring, and
+black-box review account HTTP scenarios into this repository. Raw review token
+values, production IdP rollout, AWS adapters, Terraform, image digest evidence,
 and production deployment evidence remain separate migration units.
