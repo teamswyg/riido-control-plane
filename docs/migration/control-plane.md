@@ -270,6 +270,27 @@ collection, store-safe routing decisions, assignment routing integration,
 durable store actor behavior, review account seed runtime wiring, DynamoDB
 adapters, Terraform, secret values, AWS adapters, or deployment evidence.
 
+### RIID-4672 — store-safe routing guard migration
+
+This slice moves the pure provider-status routing guard into the public
+control-plane repository.
+
+This slice does:
+
+- add `StoreSafeRoutingInput` and `StoreSafeRoutingDecision`
+- add `EvaluateStoreSafeRouting`
+- allow `available`
+- block `login-required`, `unsupported`, and `store-blocked`
+- block a requested provider missing from an already-synced snapshot
+- preserve legacy assignment behavior when no provider status snapshot exists
+- reject blank runtime providers and unknown routing statuses
+- extend `docs/20-domain/provider-status.md` with the routing guard boundary
+- add focused store-safe routing domain tests and public CI
+
+This slice does not connect the guard to assignment creation, daemon status
+sync, review/demo seed runtime wiring, durable store actor behavior, DynamoDB
+adapters, Terraform, secret values, AWS adapters, or deployment evidence.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
