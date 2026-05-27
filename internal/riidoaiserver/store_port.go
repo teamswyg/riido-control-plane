@@ -8,8 +8,12 @@ type AssignmentStore interface {
 	HeartbeatAgent(ctx context.Context, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, error)
 	RecordAgentEvent(ctx context.Context, agentID string, req AgentEventRequest) (AgentEventResponse, error)
 	SubscribeTask(ctx context.Context, taskID string) ([]TaskEvent, <-chan TaskEvent, func(), error)
-	Metrics(ctx context.Context) (MetricsSnapshot, error)
+	MetricsReader
 	Close()
+}
+
+type MetricsReader interface {
+	Metrics(ctx context.Context) (MetricsSnapshot, error)
 }
 
 type EventSink interface {

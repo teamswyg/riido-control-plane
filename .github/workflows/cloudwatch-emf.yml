@@ -1,0 +1,67 @@
+name: cloudwatch-emf
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/cloudwatch-emf.yml"
+      - "README.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "cmd/riido_ai_server/main.go"
+      - "cmd/riido_ai_server/main_test.go"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/cloudwatch_emf.go"
+      - "internal/riidoaiserver/cloudwatch_emf_test.go"
+      - "internal/riidoaiserver/doc.go"
+      - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_port.go"
+  pull_request:
+    paths:
+      - ".github/workflows/cloudwatch-emf.yml"
+      - "README.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "cmd/riido_ai_server/main.go"
+      - "cmd/riido_ai_server/main_test.go"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/cloudwatch_emf.go"
+      - "internal/riidoaiserver/cloudwatch_emf_test.go"
+      - "internal/riidoaiserver/doc.go"
+      - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_port.go"
+
+jobs:
+  cloudwatch-emf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify CloudWatch EMF import boundary
+        run: |
+          disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./cmd/riido_ai_server ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed CloudWatch EMF imports:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Test CloudWatch EMF metrics
+        run: go test ./internal/riidoaiserver -run 'CloudWatch|Metrics|EventAppend' -count=1
+      - name: Test command metrics log wiring
+        run: go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration' -count=1
+      - name: Build command
+        run: go build -o /tmp/riido_ai_server ./cmd/riido_ai_server

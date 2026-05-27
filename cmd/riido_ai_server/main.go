@@ -26,14 +26,16 @@ const (
 	envExternalAuthzAudience  = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE"
 	envExternalAuthzTimeout   = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS"
 	envReviewAccountTokenHash = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
+	envMetricsLogInterval     = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
 )
 
 type runtimeConfig struct {
-	Addr            string
-	ShutdownTimeout time.Duration
-	AgentRegistry   riidoaiserver.AgentRegistry
-	Authorizer      riidoaiserver.RequestAuthorizer
-	ReviewProvision *riidoaiserver.ReviewAccountProvisioning
+	Addr               string
+	ShutdownTimeout    time.Duration
+	AgentRegistry      riidoaiserver.AgentRegistry
+	Authorizer         riidoaiserver.RequestAuthorizer
+	ReviewProvision    *riidoaiserver.ReviewAccountProvisioning
+	MetricsLogInterval time.Duration
 }
 
 func main() {
@@ -60,11 +62,17 @@ func run() error {
 		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, Authorizer: config.Authorizer}).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
-	return serveUntilSignal(server, config.ShutdownTimeout)
+	metricsCancel, metricsErrCh := startMetricsPublisher(store, config.MetricsLogInterval, os.Stdout)
+	defer stopMetricsPublisher(metricsCancel, metricsErrCh)
+	return serveUntilSignal(server, config.ShutdownTimeout, metricsErrCh)
 }
 
 func configFromEnv() (runtimeConfig, error) {
 	shutdownTimeout, err := envDurationSeconds(envShutdownTimeoutSeconds, 10*time.Second)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
+	metricsLogInterval, err := envOptionalDurationSeconds(envMetricsLogInterval)
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -81,15 +89,20 @@ func configFromEnv() (runtimeConfig, error) {
 		return runtimeConfig{}, err
 	}
 	return runtimeConfig{
-		Addr:            getenvDefault(envAddr, ":8080"),
-		ShutdownTimeout: shutdownTimeout,
-		AgentRegistry:   registry,
-		Authorizer:      authorizer,
-		ReviewProvision: reviewProvision,
+		Addr:               getenvDefault(envAddr, ":8080"),
+		ShutdownTimeout:    shutdownTimeout,
+		AgentRegistry:      registry,
+		Authorizer:         authorizer,
+		ReviewProvision:    reviewProvision,
+		MetricsLogInterval: metricsLogInterval,
 	}, nil
 }
 
-func serveUntilSignal(server *http.Server, shutdownTimeout time.Duration) error {
+func serveUntilSignal(server *http.Server, shutdownTimeout time.Duration, backgroundErrCh ...<-chan error) error {
+	var bgErrCh <-chan error
+	if len(backgroundErrCh) > 0 {
+		bgErrCh = backgroundErrCh[0]
+	}
 	errCh := make(chan error, 1)
 	go func() {
 		err := server.ListenAndServe()
@@ -112,6 +125,16 @@ func serveUntilSignal(server *http.Server, shutdownTimeout time.Duration) error 
 			return fmt.Errorf("shutdown after %s: %w", sig, err)
 		}
 		return <-errCh
+	case err := <-bgErrCh:
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		if shutdownErr := server.Shutdown(ctx); shutdownErr != nil {
+			return fmt.Errorf("shutdown after metrics publisher error: %w", shutdownErr)
+		}
+		if serverErr := <-errCh; serverErr != nil {
+			return serverErr
+		}
+		return err
 	case err := <-errCh:
 		return err
 	}
@@ -135,6 +158,42 @@ func envDurationSeconds(key string, fallback time.Duration) (time.Duration, erro
 		return 0, fmt.Errorf("%s must be a positive integer", key)
 	}
 	return time.Duration(seconds) * time.Second, nil
+}
+
+func envOptionalDurationSeconds(key string) (time.Duration, error) {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return 0, nil
+	}
+	seconds, err := strconv.Atoi(raw)
+	if err != nil || seconds <= 0 {
+		return 0, fmt.Errorf("%s must be a positive integer", key)
+	}
+	return time.Duration(seconds) * time.Second, nil
+}
+
+func startMetricsPublisher(metrics riidoaiserver.MetricsReader, interval time.Duration, writer io.Writer) (context.CancelFunc, <-chan error) {
+	if interval <= 0 {
+		return func() {}, nil
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	errCh := make(chan error, 1)
+	go func() {
+		err := riidoaiserver.RunCloudWatchEMFPublisher(ctx, metrics, interval, riidoaiserver.CloudWatchEMFConfig{Writer: writer})
+		if errors.Is(err, context.Canceled) {
+			err = nil
+		}
+		errCh <- err
+		close(errCh)
+	}()
+	return cancel, errCh
+}
+
+func stopMetricsPublisher(cancel context.CancelFunc, errCh <-chan error) {
+	cancel()
+	if errCh != nil {
+		<-errCh
+	}
 }
 
 func agentRegistryFromEnv() (riidoaiserver.AgentRegistry, error) {

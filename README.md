@@ -41,7 +41,10 @@ This repository must not contain:
 
 Optional store-review/demo access is enabled by setting only
 `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`. The raw review token is never
-committed or read from this repository.
+committed or read from this repository. Optional CloudWatch Embedded Metric
+Format JSONL logs can be enabled with
+`RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`; the writer uses stdout only and
+does not require AWS SDKs, credentials, log groups, or Terraform state.
 
 ```bash
 go test ./...

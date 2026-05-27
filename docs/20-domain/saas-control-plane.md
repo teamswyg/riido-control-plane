@@ -2,7 +2,8 @@
 
 > Riido tasks: RIID-4668 `[Control Plane] assignment contract/type migration`,
 > RIID-4688 `[Control Plane] riido-contracts v0.3.0 assignment import migration`,
-> RIID-4691 `[Control Plane] review account seed runtime wiring migration`
+> RIID-4691 `[Control Plane] review account seed runtime wiring migration`,
+> RIID-4692 `[Control Plane] CloudWatch EMF metrics publisher migration`
 
 This document is the public SSOT for the SaaS control-plane assignment contract
 surface that can be verified without AWS credentials.
@@ -12,8 +13,9 @@ surface that can be verified without AWS credentials.
 `riido-control-plane` owns the server-side behavior for assigning component
 tasks to SaaS agent identities, daemon polling, daemon heartbeat handling,
 agent event sync, task event storage/streaming, health responses, and metrics
-snapshots. Shared assignment polling DTOs and state vocabulary are imported
-from `github.com/teamswyg/riido-contracts/assignment`.
+snapshots. It also owns stdout CloudWatch Embedded Metric Format publication
+from those metrics snapshots. Shared assignment polling DTOs and state
+vocabulary are imported from `github.com/teamswyg/riido-contracts/assignment`.
 It also owns the public-safe store review seed artifact and runtime
 provisioning path that can be verified without raw review tokens, provider
 execution grants, AWS credentials, or Terraform state.
@@ -176,11 +178,33 @@ reading the store. The response is the `MetricsSnapshot` DTO, including
 poll, event, subscriber, outbox-error, and event-latency counters that are
 available without AWS credentials.
 
-The metrics adapter does not own health/ready routes, CloudWatch EMF,
-Prometheus conversion, production tuning calibration, `cmd/riido_ai_server`
-environment parsing, snapshot stores, file outbox adapters, durable operation
-save/claim wiring, DynamoDB, EventBridge, Terraform, AWS credentials,
-dashboards, daemon consumers, or deployment evidence.
+The metrics adapter does not own health/ready routes, Prometheus conversion,
+production tuning calibration, `cmd/riido_ai_server` environment parsing,
+snapshot stores, file outbox adapters, durable operation save/claim wiring,
+DynamoDB, EventBridge, Terraform, AWS credentials, dashboards, daemon
+consumers, or deployment evidence.
+
+## CloudWatch EMF Metrics Boundary
+
+The public CloudWatch EMF metrics boundary emits the same `MetricsSnapshot`
+read model as stdout JSON Lines in CloudWatch Embedded Metric Format. It owns:
+
+- `CloudWatchEMFConfig`
+- `PublishCloudWatchEMF`
+- `RunCloudWatchEMFPublisher`
+- `WriteCloudWatchEMF`
+- `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`
+
+When `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` is a positive integer,
+`cmd/riido_ai_server` starts the publisher, writes one metrics record
+immediately, and then writes at the configured interval until shutdown. The EMF
+record includes assignment, poll, agent event, task event, SSE subscriber,
+outbox error, and event-append-latency counters.
+
+This boundary owns only stdout EMF serialization and runtime scheduling. It
+does not own AWS SDK calls, CloudWatch PutMetricData, credentials, log group or
+dashboard creation, production tuning samples, Prometheus conversion,
+DynamoDB, EventBridge, Terraform, or deployment evidence.
 
 ## Health/Ready And Runtime Command Boundary
 
@@ -204,6 +228,7 @@ public repository. It owns only these environment variables:
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
 - `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`
+- `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`
 
 The agent binding and static-token JSON values use strict decoding, so unknown
 fields and trailing JSON are rejected. Static-token authorization may be
@@ -218,9 +243,9 @@ repository.
 
 This boundary does not own legacy broad bearer-token compatibility,
 snapshot/outbox stores, durable operation save/claim wiring, DynamoDB,
-EventBridge, Terraform, AWS credentials, CloudWatch/Prometheus adapters, Docker
-image contracts, raw review token values, production secrets, or deployment
-evidence.
+EventBridge, Terraform, AWS credentials, CloudWatch API wiring, Prometheus
+adapters, Docker image contracts, raw review token values, production secrets,
+or deployment evidence.
 
 ## Review Account Seed Boundary
 
@@ -312,6 +337,11 @@ RIID-4688 moves the shared assignment polling contract SSOT into
 `riido-contracts v0.3.0` and changes this repository to consume that tagged
 contract through aliases/imports. Control-plane health/metrics DTOs and all
 store/HTTP/SSE behavior remain local.
+
+RIID-4692 moves the stdout CloudWatch EMF metrics publisher into this public
+repository and wires optional command startup through
+`RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`, while leaving AWS resources,
+dashboards, Terraform, and deployment evidence in private infra.
 
 RIID-4669 moves the operation journal port and record surface into this public
 repository.
