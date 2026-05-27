@@ -270,6 +270,34 @@ poll/heartbeat/event handlers, SSE, metrics route wiring, snapshot store, file
 outbox, DynamoDB/EventBridge adapters, Terraform, secret values, AWS adapters,
 or deployment evidence.
 
+### RIID-4674 — in-memory assignment store actor migration
+
+This slice moves the stdlib-only in-memory assignment store actor into the
+public control-plane repository.
+
+This slice does:
+
+- add the `AssignmentStore` port
+- add `Store`, `StoreConfig`, `NewStore`, and `NewStoreWithClock`
+- serialize assignment mutations through one goroutine-backed command channel
+- preserve assign-task validation and agent runtime binding checks
+- connect store-safe routing to synced in-memory provider status before
+  assignment creation
+- preserve reassignment cancellation handoff and blocker behavior
+- preserve daemon poll actions for queued, active, and cancelling assignments
+- refresh active assignment timestamps on daemon heartbeat
+- validate agent event assignment FSM transitions and append task events
+- expose metrics read-model counters for tasks, assignments, poll actions, and
+  task events
+- expose in-memory provider status sync/read through the existing ports
+- add focused BDD/domain tests and public CI
+
+This slice does not move HTTP assignment routes, SSE stream routes, snapshot
+stores, file outbox adapters, assignment operation durable save/claim wiring,
+stale durable active lease recovery, DynamoDB/EventBridge adapters, Terraform,
+secret values, AWS adapters, `cmd/riido_ai_server`, Docker, or deployment
+evidence.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

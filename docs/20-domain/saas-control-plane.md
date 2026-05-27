@@ -52,9 +52,25 @@ The public assignment DTO surface is:
 - `Health`
 - `MetricsSnapshot`
 
-These types are API/adapter contracts only. They do not own the store actor,
-assignment queue, active lease, HTTP routing, SSE fan-out, outbox, snapshots, or
-AWS adapters.
+These types are API/adapter contracts only. They do not own HTTP routing, SSE
+fan-out, outbox, snapshots, or AWS adapters.
+
+## Store Actor Boundary
+
+`internal/riidoaiserver.Store` is the public in-memory assignment actor. It owns
+the stdlib-only runtime behavior that can be verified without AWS credentials:
+
+- `AssignmentStore` command serialization through one actor goroutine
+- assignment creation and reassignment cancellation handoff
+- daemon poll actions (`none`, `start`, `active`, `cancel`)
+- heartbeat-based active assignment timestamp refresh
+- agent event transition validation and task event append
+- metrics read-model counters for tasks, assignments, poll actions, and events
+- in-memory provider status sync/read state used by store-safe routing
+
+This actor does not own HTTP assignment routes, SSE fan-out, snapshot stores,
+file outbox adapters, assignment operation durable save wiring, DynamoDB,
+EventBridge, Terraform, AWS credentials, or deployment evidence.
 
 ## Durable Operation Boundary
 
@@ -100,7 +116,10 @@ vocabulary.
 
 RIID-4672 moves the pure store-safe routing guard into this public repository.
 
-The store actor runtime, assignment claim logic, active lease refresh, HTTP
-assignment/poll/heartbeat/event routes, SSE, metrics route wiring, review
-account seed, `cmd/riido_ai_server`, Docker, Terraform, AWS adapters, and
-deployment evidence remain separate migration units.
+RIID-4674 moves the stdlib-only in-memory assignment store actor into this
+public repository.
+
+HTTP assignment/poll/heartbeat/event routes, SSE, snapshot stores, file outbox
+adapters, durable operation save/claim wiring, review account seed,
+`cmd/riido_ai_server`, Docker, Terraform, AWS adapters, and deployment evidence
+remain separate migration units.
