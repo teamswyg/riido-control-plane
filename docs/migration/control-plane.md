@@ -585,6 +585,28 @@ provider execution, Claude/Codex/OpenClaw/Cursor bundling, DynamoDB/EventBridge
 adapters, Terraform, AWS credentials, production secrets, image digest
 evidence, or deployment evidence.
 
+### RIID-4692 — CloudWatch EMF metrics publisher migration
+
+This slice moves the stdout CloudWatch Embedded Metric Format publisher into
+the public control-plane repository.
+
+This slice does:
+
+- add a stdlib-only CloudWatch EMF metrics writer over `MetricsSnapshot`
+- publish one EMF JSON Lines record immediately and then on a configured
+  interval
+- include assignment, poll, agent event, task event, SSE subscriber, outbox
+  error, and event-append-latency counters
+- parse `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` in `cmd/riido_ai_server`
+- wire the optional metrics publisher to stdout during server startup
+- keep the server shutdown path responsible for stopping the publisher
+- add focused domain/command tests and public CI for the EMF slice
+
+This slice does not move AWS SDK integration, CloudWatch PutMetricData,
+credentials, log group/dashboard creation, production tuning samples,
+Prometheus conversion, DynamoDB/EventBridge adapters, Terraform, AWS
+credentials, private deployment evidence, or deployment evidence.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -594,6 +616,8 @@ go test ./...
 go list -m all
 go test ./internal/riidoaiserver -run 'ReviewAccount|HTTPReviewAccount|AgentCatalogStore' -count=1
 go test ./cmd/riido_ai_server -run 'ReviewAccount|ConfigFromEnv|AuthorizerFromEnv' -count=1
+go test ./internal/riidoaiserver -run 'CloudWatch|Metrics|EventAppend' -count=1
+go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration' -count=1
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .

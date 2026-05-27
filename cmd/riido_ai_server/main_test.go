@@ -62,8 +62,24 @@ func TestConfigFromEnvDefaultsToPublicHealthOnlyRuntime(t *testing.T) {
 	if config.Addr != ":8080" || config.ShutdownTimeout != 10*time.Second {
 		t.Fatalf("defaults = %+v", config)
 	}
+	if config.MetricsLogInterval != 0 {
+		t.Fatalf("metrics interval should default disabled: %s", config.MetricsLogInterval)
+	}
 	if config.AgentRegistry != nil || config.Authorizer != nil {
 		t.Fatalf("optional config should be nil: %+v", config)
+	}
+}
+
+func TestConfigFromEnvParsesMetricsLogInterval(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envMetricsLogInterval, "15")
+
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	if config.MetricsLogInterval != 15*time.Second {
+		t.Fatalf("metrics interval = %s", config.MetricsLogInterval)
 	}
 }
 
@@ -216,6 +232,51 @@ func TestEnvDurationSecondsRejectsNonPositiveValues(t *testing.T) {
 	}
 }
 
+func TestEnvOptionalDurationSecondsRejectsNonPositiveValues(t *testing.T) {
+	for _, value := range []string{"0", "-1", "nope"} {
+		t.Run(value, func(t *testing.T) {
+			t.Setenv(envMetricsLogInterval, value)
+			if _, err := envOptionalDurationSeconds(envMetricsLogInterval); err == nil || !strings.Contains(err.Error(), envMetricsLogInterval) {
+				t.Fatalf("envOptionalDurationSeconds err=%v", err)
+			}
+		})
+	}
+}
+
+func TestStartMetricsPublisherWritesCloudWatchEMF(t *testing.T) {
+	store := riidoaiserver.NewStoreWithClock(func() time.Time { return time.Unix(2000, 0).UTC() })
+	defer store.Close()
+	if _, err := store.AssignTask(context.Background(), "task-a", riidoaiserver.AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-a",
+		RuntimeProvider: "codex",
+		Prompt:          "hello",
+	}); err != nil {
+		t.Fatalf("AssignTask: %v", err)
+	}
+	writer := metricsCaptureWriter{ch: make(chan string, 1)}
+	cancel, errCh := startMetricsPublisher(store, time.Hour, writer)
+	defer stopMetricsPublisher(cancel, errCh)
+
+	select {
+	case body := <-writer.ch:
+		if !strings.Contains(body, "\"_aws\"") || !strings.Contains(body, "\"assignments_total\":1") {
+			t.Fatalf("metrics body = %s", body)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for metrics output")
+	}
+}
+
+type metricsCaptureWriter struct {
+	ch chan string
+}
+
+func (w metricsCaptureWriter) Write(p []byte) (int, error) {
+	w.ch <- string(p)
+	return len(p), nil
+}
+
 func clearRiidoAIServerEnv(t *testing.T) {
 	t.Helper()
 	for _, key := range []string{
@@ -227,6 +288,7 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envExternalAuthzAudience,
 		envExternalAuthzTimeout,
 		envReviewAccountTokenHash,
+		envMetricsLogInterval,
 	} {
 		t.Setenv(key, "")
 	}
