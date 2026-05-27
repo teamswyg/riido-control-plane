@@ -66,6 +66,17 @@ active-assignment lease records, and durable claim/read ports. It does not own
 the store actor, HTTP routes, SSE, DynamoDB payload construction, Terraform, or
 deployment evidence.
 
+## Provider Status Boundary
+
+The provider status sync/read contract is owned by
+[`provider-status.md`](provider-status.md).
+
+That boundary owns provider status DTOs, normalization, read/write ports, and
+the `GET`/`POST /v1/agents/{agent_id}/provider-status` HTTP adapter. It does
+not own provider executable detection, customer-PC provider process execution,
+store-safe routing decisions, durable store actors, DynamoDB payloads,
+Terraform, or deployment evidence.
+
 ## Migration State
 
 RIID-4668 moves the executable assignment contract and DTO surface from the
@@ -75,7 +86,11 @@ repository.
 RIID-4669 moves the operation journal port and record surface into this public
 repository.
 
+RIID-4671 moves the provider status DTO/port/HTTP contract into this public
+repository, using `riido-contracts v0.2.0` for shared provider/distribution
+vocabulary.
+
 The store actor, assignment claim logic, active lease refresh, HTTP
-assignment/poll/heartbeat/event routes, SSE, metrics route wiring, provider
-status routes, review account seed, `cmd/riido_ai_server`, Docker, Terraform,
-AWS adapters, and deployment evidence remain separate migration units.
+assignment/poll/heartbeat/event routes, SSE, metrics route wiring, review
+account seed, `cmd/riido_ai_server`, Docker, Terraform, AWS adapters, and
+deployment evidence remain separate migration units.

@@ -245,6 +245,31 @@ route wiring, provider status store/API, review account seed, environment
 parsing, Docker, Terraform, secret values, AWS adapters, or deployment
 evidence.
 
+### RIID-4671 — provider status contract migration
+
+This slice moves the provider status sync/read contract into the public
+control-plane repository after `riido-contracts v0.2.0` exposed the shared
+distribution/provider routing vocabulary.
+
+This slice does:
+
+- update the public contracts module to `v0.2.0`
+- add `ProviderStatusRecord`, `ProviderStatusSyncRequest`, and
+  `ProviderStatusSyncResponse`
+- add the executable provider status normalization gate
+- add `ProviderStatusStore` and `ProviderStatusReader`
+- add `POST /v1/agents/{agent_id}/provider-status`
+- add `GET /v1/agents/{agent_id}/provider-status`
+- route write/read authorization through scoped agent provider-status actions
+- reject unknown/private JSON fields with the existing strict decoder
+- add `docs/20-domain/provider-status.md` as the public SSOT
+- add focused provider status black-box/domain tests and public CI
+
+This slice does not move daemon provider detectors, executable path/provenance
+collection, store-safe routing decisions, assignment routing integration,
+durable store actor behavior, review account seed runtime wiring, DynamoDB
+adapters, Terraform, secret values, AWS adapters, or deployment evidence.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

@@ -12,21 +12,37 @@ import (
 type ServerConfig struct {
 	Authorizer        RequestAuthorizer
 	AgentCatalogStore AgentCatalogStore
+	ProviderStatus    ProviderStatusStore
+	ProviderRead      ProviderStatusReader
 }
 
 type Server struct {
 	agentCatalog AgentCatalogStore
+	provider     ProviderStatusStore
+	providerRead ProviderStatusReader
 	config       ServerConfig
 }
 
 func NewServer(config ServerConfig) Server {
-	return Server{agentCatalog: config.AgentCatalogStore, config: config}
+	providerRead := config.ProviderRead
+	if providerRead == nil {
+		if reader, ok := config.ProviderStatus.(ProviderStatusReader); ok {
+			providerRead = reader
+		}
+	}
+	return Server{
+		agentCatalog: config.AgentCatalogStore,
+		provider:     config.ProviderStatus,
+		providerRead: providerRead,
+		config:       config,
+	}
 }
 
 func (s Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/agent-catalog", s.handleAgentCatalog)
 	mux.HandleFunc("/v1/agent-catalog/", s.handleAgentCatalog)
+	mux.HandleFunc("/v1/agents/", s.handleAgents)
 	return mux
 }
 
@@ -180,15 +196,85 @@ func (s Server) handleAgentCatalogDelete(w http.ResponseWriter, r *http.Request,
 	}{SchemaVersion: SchemaVersion, Deleted: deleted})
 }
 
+func (s Server) handleAgents(w http.ResponseWriter, r *http.Request) {
+	agentID, suffix, ok := splitResourcePath(r.URL.Path, "/v1/agents/")
+	if !ok {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	switch {
+	case suffix == "provider-status" && r.Method == http.MethodPost:
+		s.handleProviderStatusSync(w, r, agentID)
+	case suffix == "provider-status" && r.Method == http.MethodGet:
+		s.handleProviderStatusRead(w, r, agentID)
+	default:
+		writeError(w, http.StatusNotFound, "not found")
+	}
+}
+
+func (s Server) handleProviderStatusSync(w http.ResponseWriter, r *http.Request, agentID string) {
+	if s.provider == nil {
+		writeError(w, http.StatusServiceUnavailable, "provider status store is not configured")
+		return
+	}
+	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionProviderStatusWrite, AgentID: agentID}); !ok {
+		return
+	}
+	var req ProviderStatusSyncRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.provider.SyncProviderStatus(r.Context(), agentID, req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleProviderStatusRead(w http.ResponseWriter, r *http.Request, agentID string) {
+	if s.providerRead == nil {
+		writeError(w, http.StatusServiceUnavailable, "provider status reader is not configured")
+		return
+	}
+	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionProviderStatusRead, AgentID: agentID}); !ok {
+		return
+	}
+	response, found, err := s.providerRead.GetProviderStatus(r.Context(), agentID)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if !found {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
 func (s Server) authorizeAgentCatalog(w http.ResponseWriter, r *http.Request, req AuthorizationRequest) (AgentCatalogPrincipal, bool) {
-	if s.config.Authorizer == nil {
-		writeError(w, http.StatusServiceUnavailable, "agent catalog requires scoped request authorizer")
+	result, ok := s.authorizeRequest(w, r, req)
+	if !ok {
 		return AgentCatalogPrincipal{}, false
+	}
+	principal := AgentCatalogPrincipalFromAuthorization(result)
+	if err := principal.Validate(); err != nil {
+		writeError(w, http.StatusForbidden, "forbidden")
+		return AgentCatalogPrincipal{}, false
+	}
+	return principal, true
+}
+
+func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req AuthorizationRequest) (AuthorizationResult, bool) {
+	if s.config.Authorizer == nil {
+		writeError(w, http.StatusServiceUnavailable, "scoped request authorizer is not configured")
+		return AuthorizationResult{}, false
 	}
 	token, ok := bearerToken(r)
 	if !ok {
 		writeUnauthorized(w)
-		return AgentCatalogPrincipal{}, false
+		return AuthorizationResult{}, false
 	}
 	result, err := s.config.Authorizer.Authorize(r.Context(), token, req)
 	if err != nil {
@@ -200,14 +286,9 @@ func (s Server) authorizeAgentCatalog(w http.ResponseWriter, r *http.Request, re
 		default:
 			writeError(w, http.StatusServiceUnavailable, err.Error())
 		}
-		return AgentCatalogPrincipal{}, false
+		return AuthorizationResult{}, false
 	}
-	principal := AgentCatalogPrincipalFromAuthorization(result)
-	if err := principal.Validate(); err != nil {
-		writeError(w, http.StatusForbidden, "forbidden")
-		return AgentCatalogPrincipal{}, false
-	}
-	return principal, true
+	return result, true
 }
 
 func bearerToken(r *http.Request) (string, bool) {
@@ -235,6 +316,18 @@ func splitOptionalResourcePath(path, prefix string) (string, bool, bool) {
 		return "", false, false
 	}
 	return rest, true, true
+}
+
+func splitResourcePath(path, prefix string) (string, string, bool) {
+	if !strings.HasPrefix(path, prefix) {
+		return "", "", false
+	}
+	rest := strings.Trim(strings.TrimPrefix(path, prefix), "/")
+	parts := strings.Split(rest, "/")
+	if len(parts) != 2 || strings.TrimSpace(parts[0]) == "" || strings.TrimSpace(parts[1]) == "" {
+		return "", "", false
+	}
+	return parts[0], parts[1], true
 }
 
 func decodeJSON(r *http.Request, out any) error {
