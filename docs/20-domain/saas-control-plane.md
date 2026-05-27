@@ -128,6 +128,39 @@ environment parsing, snapshot stores, file outbox adapters, durable operation
 save/claim wiring, DynamoDB, EventBridge, Terraform, AWS credentials,
 dashboards, daemon consumers, or deployment evidence.
 
+## Health/Ready And Runtime Command Boundary
+
+The public health/ready adapter exposes liveness and readiness responses that do
+not require request authorization:
+
+- `GET /healthz`
+- `GET /readyz`
+
+Both routes return the `Health` DTO with the current control-plane schema
+version. Non-`GET` methods must fail with `405`.
+
+`cmd/riido_ai_server` is the minimal stdlib-only runtime entrypoint for this
+public repository. It owns only these environment variables:
+
+- `RIIDO_AI_SERVER_ADDR`
+- `RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS`
+- `RIIDO_AI_SERVER_AGENT_BINDINGS_JSON`
+- `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON`
+- `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL`
+- `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
+- `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
+
+The agent binding and static-token JSON values use strict decoding, so unknown
+fields and trailing JSON are rejected. Static-token authorization may be
+combined with the external HTTP authorizer through the existing fallback
+authorizer rule: only unauthenticated results fall through to the next
+authorizer, while forbidden results stop evaluation.
+
+This boundary does not own legacy broad bearer-token compatibility,
+snapshot/outbox stores, durable operation save/claim wiring, DynamoDB,
+EventBridge, Terraform, AWS credentials, CloudWatch/Prometheus adapters, Docker,
+review account seed data, production secrets, or deployment evidence.
+
 ## Durable Operation Boundary
 
 The assignment operation journal and claim-port contract is owned by
@@ -181,7 +214,9 @@ RIID-4677 moves the task event SSE adapter into this public repository.
 
 RIID-4678 moves the metrics HTTP adapter into this public repository.
 
-Health/ready routes, snapshot stores, file outbox adapters, durable operation
-save/claim wiring, review account seed, `cmd/riido_ai_server`, Docker,
-Terraform, AWS adapters, and deployment evidence remain separate migration
-units.
+RIID-4679 moves health/ready routes and the minimal `cmd/riido_ai_server`
+environment/runtime entrypoint into this public repository.
+
+Snapshot stores, file outbox adapters, durable operation save/claim wiring,
+review account seed, Docker, Terraform, AWS adapters, and deployment evidence
+remain separate migration units.
