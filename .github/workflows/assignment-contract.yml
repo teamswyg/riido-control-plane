@@ -12,7 +12,6 @@ on:
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
-      - "internal/riidoaiserver/assignment_contract.riido.json"
       - "internal/riidoaiserver/assignment_contract_gen.go"
       - "internal/riidoaiserver/assignment_contract_test.go"
       - "internal/riidoaiserver/assignment_api.go"
@@ -29,7 +28,6 @@ on:
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
-      - "internal/riidoaiserver/assignment_contract.riido.json"
       - "internal/riidoaiserver/assignment_contract_gen.go"
       - "internal/riidoaiserver/assignment_contract_test.go"
       - "internal/riidoaiserver/assignment_api.go"
@@ -62,4 +60,4 @@ jobs:
             exit 1
           fi
       - name: Test assignment contract
-        run: go test ./internal/riidoaiserver -run 'AssignmentContract|AssignmentAPI' -count=1
+        run: go test ./internal/riidoaiserver -run 'AssignmentContract|AssignmentAPI|StaticAgentRegistry|ValidateAssignmentBinding|ValidateDaemonBinding' -count=1

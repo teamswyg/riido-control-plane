@@ -38,6 +38,10 @@ This slice does not own:
 - `runtime_id`
 - `runtime_provider`
 
+The DTO shape is imported from `github.com/teamswyg/riido-contracts/assignment`
+as of RIID-4688. Registry storage, normalization, duplicate rejection, and
+binding validation remain owned by this control-plane package.
+
 `agent_id`, `daemon_id`, `runtime_id`, and `runtime_provider` are required.
 Duplicate `agent_id` values are invalid after normalization.
 
@@ -79,3 +83,7 @@ RIID-4668 moves the broader assignment API DTO surface, including
 `PollRequest`, into this repository. The full store actor, poll response
 behavior, heartbeat behavior, event sync behavior, metrics route wiring, and
 HTTP server API migrations remain separate units.
+
+RIID-4688 changes `AgentRuntimeBinding` and assignment polling DTOs to consume
+the tagged `riido-contracts v0.3.0` shared assignment contract while keeping
+all binding validation behavior local to `riido-control-plane`.

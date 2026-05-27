@@ -3,6 +3,7 @@ package contractscompat
 import (
 	"testing"
 
+	"github.com/teamswyg/riido-contracts/assignment"
 	"github.com/teamswyg/riido-contracts/ir"
 	"github.com/teamswyg/riido-contracts/provider/capability"
 	"github.com/teamswyg/riido-contracts/task"
@@ -17,6 +18,12 @@ func TestContractsBaseline(t *testing.T) {
 	}
 	if !task.ValidateTransition(task.StateCreated, task.StateQueued, ir.EventTaskQueued) {
 		t.Fatal("Created -> Queued must remain legal")
+	}
+	if assignment.SchemaVersion != "riido-ai-server.v1" {
+		t.Fatalf("assignment SchemaVersion = %q", assignment.SchemaVersion)
+	}
+	if !assignment.CanTransition(assignment.AssignmentQueued, assignment.AssignmentLeased) {
+		t.Fatal("Queued -> Leased assignment transition must remain legal")
 	}
 
 	fingerprint, err := capability.ComputeCapabilityFingerprint(capability.CapabilityFingerprintInput{

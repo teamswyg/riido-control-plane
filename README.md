@@ -7,7 +7,7 @@ event ingest, SSE/read-model APIs, authorization ports, RBAC behavior, and
 control-plane black-box/domain tests.
 
 It consumes shared public contracts from
-`github.com/teamswyg/riido-contracts` at `v0.2.0`. Runtime provider execution,
+`github.com/teamswyg/riido-contracts` at `v0.3.0`. Runtime provider execution,
 Terraform deployment wiring, and secret material stay outside this repository.
 
 ## Module

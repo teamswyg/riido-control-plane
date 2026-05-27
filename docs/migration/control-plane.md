@@ -62,7 +62,8 @@ Do not move into `riido-control-plane`:
 
 5. Move generated assignment contract fixtures.
    Shared request/response fixtures should move to `riido-contracts` when both
-   daemon and control-plane need them.
+   daemon and control-plane need them. RIID-4688 completes this handoff for
+   assignment polling DTOs by consuming `riido-contracts v0.3.0`.
 
 6. Add public CI.
    Public CI should run `go test ./...`, contract checks, RBAC black-box tests,
@@ -216,6 +217,30 @@ assignment HTTP routes, daemon poll/heartbeat/event handlers, SSE, metrics
 route wiring, provider status store/API, review account seed, environment
 parsing, Docker, Terraform, secret values, AWS adapters, or deployment
 evidence.
+
+### RIID-4688 — riido-contracts v0.3.0 assignment import migration
+
+This slice replaces the local assignment contract SSOT with the tagged shared
+contract from `riido-contracts`.
+
+This slice does:
+
+- update `github.com/teamswyg/riido-contracts` to `v0.3.0`
+- import `github.com/teamswyg/riido-contracts/assignment`
+- replace local assignment state, poll action, task event, and polling DTO
+  declarations with aliases/imports
+- replace `AgentRuntimeBinding` DTO declaration with the shared assignment
+  contract type
+- keep local wrapper predicates for existing store code while delegating to the
+  shared contract predicates
+- remove the local `assignment_contract.riido.json` fixture so the executable
+  contract has one SSOT
+- update public docs and the focused assignment contract workflow
+
+This slice does not move store actor behavior, assignment HTTP routes, SSE,
+metrics route wiring, health routes, authorization, provider status store/API,
+daemon control-plane adapters, environment parsing, Docker, Terraform, secret
+values, AWS adapters, or deployment evidence.
 
 ### RIID-4669 — assignment operation journal port migration
 
