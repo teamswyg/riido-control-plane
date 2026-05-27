@@ -3,7 +3,8 @@
 > Riido tasks: RIID-4668 `[Control Plane] assignment contract/type migration`,
 > RIID-4688 `[Control Plane] riido-contracts v0.3.0 assignment import migration`,
 > RIID-4691 `[Control Plane] review account seed runtime wiring migration`,
-> RIID-4692 `[Control Plane] CloudWatch EMF metrics publisher migration`
+> RIID-4692 `[Control Plane] CloudWatch EMF metrics publisher migration`,
+> RIID-4704 `[Control Plane] DynamoDB/EventBridge adapter migration`
 
 This document is the public SSOT for the SaaS control-plane assignment contract
 surface that can be verified without AWS credentials.
@@ -14,15 +15,17 @@ surface that can be verified without AWS credentials.
 tasks to SaaS agent identities, daemon polling, daemon heartbeat handling,
 agent event sync, task event storage/streaming, health responses, and metrics
 snapshots. It also owns stdout CloudWatch Embedded Metric Format publication
-from those metrics snapshots. Shared assignment polling DTOs and state
-vocabulary are imported from `github.com/teamswyg/riido-contracts/assignment`.
+from those metrics snapshots and stdlib-only DynamoDB/EventBridge adapter
+behavior that can be verified with local black-box HTTP tests. Shared
+assignment polling DTOs and state vocabulary are imported from
+`github.com/teamswyg/riido-contracts/assignment`.
 It also owns the public-safe store review seed artifact and runtime
 provisioning path that can be verified without raw review tokens, provider
 execution grants, AWS credentials, or Terraform state.
 
 This document does not own customer-PC provider process execution, local daemon
-configuration, Terraform, AWS, EventBridge, DynamoDB, private deployment
-evidence, or production secret values.
+configuration, Terraform, AWS account/resource configuration, private
+deployment evidence, live AWS evidence collection, or production secret values.
 
 ## Executable Contract
 
@@ -206,6 +209,32 @@ does not own AWS SDK calls, CloudWatch PutMetricData, credentials, log group or
 dashboard creation, production tuning samples, Prometheus conversion,
 DynamoDB, EventBridge, Terraform, or deployment evidence.
 
+## DynamoDB/EventBridge Adapter Boundary
+
+The public DynamoDB/EventBridge adapter boundary owns stdlib-only AWS request
+construction, SigV4 signing, serialization, and local fake-endpoint behavior
+for the control-plane durable adapters:
+
+- `AWSCredentials`, `AWSCredentialsProvider`, `StaticAWSCredentialsProvider`,
+  and `ECSContainerCredentialsProvider`
+- `DynamoDBOutbox`
+- `DynamoDBStoreSnapshot`
+- `DynamoDBAssignmentOperationStore`
+- DynamoDB table stream discovery
+- DynamoDB Streams relay and checkpoint handling
+- EventBridge stream relay publishing
+
+These adapters are production adapter code, but their public verification must
+use only fake endpoints, fake credentials, `httptest`, and deterministic local
+black-box scenarios. They may construct AWS JSON payloads and sign HTTP
+requests; they must not require live AWS credentials in pull-request CI.
+
+This boundary does not own AWS account ids, Terraform, IAM/VPC/ECS/EventBridge
+rule resources, Route53/ACM/WAF resources, tfvars, Terraform backend/state,
+live DynamoDB/EventBridge smoke evidence, stream-relay evidence artifacts,
+runtime secret values, ECR image push evidence, dashboards, or private
+deployment evidence. It also does not add or require the external Go AWS SDK.
+
 ## Health/Ready And Runtime Command Boundary
 
 The public health/ready adapter exposes liveness and readiness responses that do
@@ -342,6 +371,13 @@ RIID-4692 moves the stdout CloudWatch EMF metrics publisher into this public
 repository and wires optional command startup through
 `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`, while leaving AWS resources,
 dashboards, Terraform, and deployment evidence in private infra.
+
+RIID-4704 moves stdlib-only DynamoDB/EventBridge adapter behavior into this
+public repository, including DynamoDB outbox/snapshot/operation stores,
+DynamoDB Streams relay/checkpoint handling, and EventBridge publisher request
+construction. Live AWS configuration, Terraform, stream-relay evidence
+collection, credentials, and deployment evidence remain private infra
+responsibilities.
 
 RIID-4669 moves the operation journal port and record surface into this public
 repository.
