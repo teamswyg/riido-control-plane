@@ -1,0 +1,51 @@
+name: aws-adapters-facade
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/aws-adapters-facade.yml"
+      - "awsadapters/**"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "internal/riidoaiserver/dynamodb_*.go"
+      - "internal/riidoaiserver/eventbridge_*.go"
+  pull_request:
+    paths:
+      - ".github/workflows/aws-adapters-facade.yml"
+      - "awsadapters/**"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "internal/riidoaiserver/dynamodb_*.go"
+      - "internal/riidoaiserver/eventbridge_*.go"
+
+jobs:
+  facade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify facade import boundary
+        run: |
+          disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./awsadapters | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(terraform|infra)' || true)"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed AWS facade imports:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Test AWS adapter facade
+        run: go test ./awsadapters -count=1
