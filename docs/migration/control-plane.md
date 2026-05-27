@@ -349,6 +349,30 @@ adapters, assignment operation durable save/claim wiring, DynamoDB/EventBridge
 adapters, Terraform, secret values, AWS adapters, Docker, daemon SSE clients,
 GUI SSE consumers, or deployment evidence.
 
+### RIID-4678 — metrics HTTP adapter migration
+
+This slice moves the `/metrics` HTTP adapter into the public control-plane
+repository.
+
+This slice does:
+
+- add `GET /metrics`
+- read `MetricsSnapshot` from `AssignmentStore.Metrics`
+- gate the route with `RequestAuthorizer` using `metrics` / `read` scope
+- return the `riido-ai-server-metrics.v1` JSON DTO
+- verify assignment, poll, event, task-event, and state counters through a
+  black-box HTTP test
+- verify missing metrics scope is forbidden
+- verify an unconfigured assignment store fails closed with 503
+- add focused public CI for metrics HTTP adapter behavior
+
+This slice does not move health/ready routes, `cmd/riido_ai_server`
+environment parsing, CloudWatch EMF, Prometheus conversion, production tuning
+metrics calibration, snapshot stores, file outbox adapters, assignment
+operation durable save/claim wiring, DynamoDB/EventBridge adapters, Terraform,
+secret values, AWS adapters, Docker, dashboards, daemon consumers, or
+deployment evidence.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

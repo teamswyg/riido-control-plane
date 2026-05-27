@@ -109,6 +109,25 @@ The SSE adapter does not own `/metrics`, health/ready routes,
 adapters, durable operation save/claim wiring, DynamoDB, EventBridge,
 Terraform, AWS credentials, daemon/GUI SSE consumers, or deployment evidence.
 
+## Metrics HTTP Adapter Boundary
+
+The public metrics HTTP adapter exposes the `MetricsSnapshot` read model from
+the `AssignmentStore` port. It owns this stdlib-only route:
+
+- `GET /metrics`
+
+The route must use `RequestAuthorizer` with `metrics` / `read` scope before
+reading the store. The response is the `MetricsSnapshot` DTO, including
+`riido-ai-server-metrics.v1` schema version and the in-memory assignment,
+poll, event, subscriber, outbox-error, and event-latency counters that are
+available without AWS credentials.
+
+The metrics adapter does not own health/ready routes, CloudWatch EMF,
+Prometheus conversion, production tuning calibration, `cmd/riido_ai_server`
+environment parsing, snapshot stores, file outbox adapters, durable operation
+save/claim wiring, DynamoDB, EventBridge, Terraform, AWS credentials,
+dashboards, daemon consumers, or deployment evidence.
+
 ## Durable Operation Boundary
 
 The assignment operation journal and claim-port contract is owned by
@@ -160,7 +179,9 @@ RIID-4675 moves the assignment HTTP adapter into this public repository.
 
 RIID-4677 moves the task event SSE adapter into this public repository.
 
-`/metrics`, health/ready routes, snapshot stores, file outbox adapters, durable
-operation save/claim wiring, review account seed, `cmd/riido_ai_server`,
-Docker, Terraform, AWS adapters, and deployment evidence remain separate
-migration units.
+RIID-4678 moves the metrics HTTP adapter into this public repository.
+
+Health/ready routes, snapshot stores, file outbox adapters, durable operation
+save/claim wiring, review account seed, `cmd/riido_ai_server`, Docker,
+Terraform, AWS adapters, and deployment evidence remain separate migration
+units.
