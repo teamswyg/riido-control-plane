@@ -1,0 +1,59 @@
+name: assignment-operation-replay
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/assignment-operation-replay.yml"
+      - "docs/20-domain/assignment-operation-journal.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/assignment_contract_gen.go"
+      - "internal/riidoaiserver/assignment_operation_port.go"
+      - "internal/riidoaiserver/assignment_operation_replay.go"
+      - "internal/riidoaiserver/assignment_operation_replay_test.go"
+      - "internal/riidoaiserver/store_state.go"
+  pull_request:
+    paths:
+      - ".github/workflows/assignment-operation-replay.yml"
+      - "docs/20-domain/assignment-operation-journal.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/assignment_contract_gen.go"
+      - "internal/riidoaiserver/assignment_operation_port.go"
+      - "internal/riidoaiserver/assignment_operation_replay.go"
+      - "internal/riidoaiserver/assignment_operation_replay_test.go"
+      - "internal/riidoaiserver/store_state.go"
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify replay import boundary
+        run: |
+          disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed replay imports:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Test assignment operation replay
+        run: go test ./internal/riidoaiserver -run 'AssignmentOperationReplay|AssignmentOperationRecord|AssignmentOperationHelpers' -count=1

@@ -48,6 +48,28 @@ gate for required fields and assignment/event consistency.
 expiry source when it is present, falls back to `lease_expires_at`, and treats an
 empty lease as expired.
 
+## Replay Reducer Boundary
+
+`stateFromAssignmentOperations` is the executable reducer for rebuilding the
+in-memory assignment projection from durable operation records. It is public
+repository code because the replay behavior must be testable without AWS.
+
+The reducer must:
+
+- validate each `AssignmentOperationRecord` before applying it
+- replay records ordered by last event sequence, then `recorded_at`, then
+  `operation_id`
+- de-duplicate events by `(task_id, seq)` so repeated operation reads do not
+  duplicate a task event
+- keep events with the same sequence when they belong to different tasks
+- track `next_event_seq` and `next_assignment_seq`
+- sort replayed task events by sequence
+- rebuild `task_id -> current_assignment_id` using newest assignment ordering
+- rebuild `agent_id -> assignment_id[]` in assignment creation order
+
+The reducer returns `storeState`, which is still an internal projection shape.
+It is not an adapter, database schema, HTTP DTO, or AWS persistence contract.
+
 ## Version Strings
 
 The public schema constants are:
@@ -67,7 +89,9 @@ RIID-4669 moves the operation journal port and record surface from the former
 private `riido_daemon/internal/riidoaiserver` package into this public
 repository.
 
-The `stateFromAssignmentOperations` replay reducer, store actor state rebuild,
-assignment HTTP/SSE routes, DynamoDB assignment operation adapter, snapshot
-store, outbox, stream relay, EventBridge publisher, Terraform, and production
-evidence remain separate migration units.
+RIID-4673 moves the `stateFromAssignmentOperations` replay reducer and internal
+projection rebuild helpers into this public repository.
+
+The store actor runtime, assignment HTTP/SSE routes, DynamoDB assignment
+operation adapter, snapshot store, outbox, stream relay, EventBridge publisher,
+Terraform, and production evidence remain separate migration units.

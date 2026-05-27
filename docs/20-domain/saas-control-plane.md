@@ -66,6 +66,10 @@ active-assignment lease records, and durable claim/read ports. It does not own
 the store actor, HTTP routes, SSE, DynamoDB payload construction, Terraform, or
 deployment evidence.
 
+It also owns the pure operation replay reducer that reconstructs internal
+assignment projection state from operation records before a later store actor
+slice consumes it.
+
 ## Provider Status Boundary
 
 The provider status sync/read contract is owned by
@@ -87,13 +91,16 @@ repository.
 RIID-4669 moves the operation journal port and record surface into this public
 repository.
 
+RIID-4673 moves the assignment operation replay reducer into this public
+repository.
+
 RIID-4671 moves the provider status DTO/port/HTTP contract into this public
 repository, using `riido-contracts v0.2.0` for shared provider/distribution
 vocabulary.
 
 RIID-4672 moves the pure store-safe routing guard into this public repository.
 
-The store actor, assignment claim logic, active lease refresh, HTTP
+The store actor runtime, assignment claim logic, active lease refresh, HTTP
 assignment/poll/heartbeat/event routes, SSE, metrics route wiring, review
 account seed, `cmd/riido_ai_server`, Docker, Terraform, AWS adapters, and
 deployment evidence remain separate migration units.

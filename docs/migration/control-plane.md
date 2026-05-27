@@ -245,6 +245,31 @@ route wiring, provider status store/API, review account seed, environment
 parsing, Docker, Terraform, secret values, AWS adapters, or deployment
 evidence.
 
+### RIID-4673 — assignment operation replay reducer migration
+
+This slice moves the pure operation replay reducer into the public control-plane
+repository.
+
+This slice does:
+
+- add the replay-relevant internal `storeState` projection shape
+- add `stateFromAssignmentOperations`
+- add operation replay ordering by last event sequence, recorded time, and
+  operation id
+- add duplicate event suppression by `(task_id, seq)`
+- preserve same-sequence events across different tasks
+- rebuild task current-assignment indexes
+- rebuild agent assignment indexes
+- update `next_event_seq` and `next_assignment_seq`
+- extend `docs/20-domain/assignment-operation-journal.md`
+- add focused assignment operation replay tests and public CI
+
+This slice does not move the store actor loop, assignment queue/claim runtime,
+active lease recovery runtime, assignment HTTP routes, daemon
+poll/heartbeat/event handlers, SSE, metrics route wiring, snapshot store, file
+outbox, DynamoDB/EventBridge adapters, Terraform, secret values, AWS adapters,
+or deployment evidence.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public
