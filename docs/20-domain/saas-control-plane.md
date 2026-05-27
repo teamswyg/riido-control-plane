@@ -56,10 +56,23 @@ These types are API/adapter contracts only. They do not own the store actor,
 assignment queue, active lease, HTTP routing, SSE fan-out, outbox, snapshots, or
 AWS adapters.
 
+## Durable Operation Boundary
+
+The assignment operation journal and claim-port contract is owned by
+[`assignment-operation-journal.md`](assignment-operation-journal.md).
+
+That boundary owns operation records, assignment projection records,
+active-assignment lease records, and durable claim/read ports. It does not own
+the store actor, HTTP routes, SSE, DynamoDB payload construction, Terraform, or
+deployment evidence.
+
 ## Migration State
 
 RIID-4668 moves the executable assignment contract and DTO surface from the
 former private `riido_daemon/internal/riidoaiserver` package into this public
+repository.
+
+RIID-4669 moves the operation journal port and record surface into this public
 repository.
 
 The store actor, assignment claim logic, active lease refresh, HTTP
