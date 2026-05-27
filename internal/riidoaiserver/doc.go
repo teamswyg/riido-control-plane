@@ -7,7 +7,8 @@
 // binding guards, provider status contracts, the in-memory assignment store
 // actor, review account seed provisioning, store snapshot/file outbox adapters,
 // HTTP/SSE/metrics/health adapters, and the stdout CloudWatch EMF metrics
-// publisher. This package does not own daemon provider process execution, cloud
-// deployment wiring, cloud database/event adapters, CloudWatch API calls,
-// dashboards, or production secret values.
+// publisher, and stdlib-only DynamoDB/EventBridge adapter request construction
+// that can be verified with fake endpoints. This package does not own daemon
+// provider process execution, cloud deployment wiring, CloudWatch API calls,
+// dashboards, live AWS evidence, Terraform, or production secret values.
 package riidoaiserver

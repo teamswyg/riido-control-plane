@@ -148,3 +148,6 @@ port for review account seed runtime wiring.
 
 Snapshot/replay persistence for catalog data, DynamoDB/EventBridge adapters, and
 deployment wiring remain separate migration units.
+
+Unresolved catalog durability and production identity questions are tracked in
+[`../50-roadmap/open-questions.md`](../50-roadmap/open-questions.md).
