@@ -49,12 +49,30 @@ func NewServer(config ServerConfig) Server {
 
 func (s Server) Handler() http.Handler {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", s.handleHealth)
+	mux.HandleFunc("/readyz", s.handleReady)
 	mux.HandleFunc("/metrics", s.handleMetrics)
 	mux.HandleFunc("/v1/agent-catalog", s.handleAgentCatalog)
 	mux.HandleFunc("/v1/agent-catalog/", s.handleAgentCatalog)
 	mux.HandleFunc("/v1/component-tasks/", s.handleComponentTasks)
 	mux.HandleFunc("/v1/agents/", s.handleAgents)
 	return mux
+}
+
+func (s Server) handleHealth(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeMethodNotAllowed(w)
+		return
+	}
+	writeJSON(w, http.StatusOK, Health{SchemaVersion: SchemaVersion, Status: "ok"})
+}
+
+func (s Server) handleReady(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeMethodNotAllowed(w)
+		return
+	}
+	writeJSON(w, http.StatusOK, Health{SchemaVersion: SchemaVersion, Status: "ready"})
 }
 
 func (s Server) handleMetrics(w http.ResponseWriter, r *http.Request) {

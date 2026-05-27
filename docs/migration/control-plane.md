@@ -373,6 +373,36 @@ operation durable save/claim wiring, DynamoDB/EventBridge adapters, Terraform,
 secret values, AWS adapters, Docker, dashboards, daemon consumers, or
 deployment evidence.
 
+### RIID-4679 — health/ready and cmd env migration
+
+This slice moves the public liveness/readiness HTTP routes and the minimal
+runtime entrypoint into the public control-plane repository.
+
+This slice does:
+
+- add unauthenticated `GET /healthz`
+- add unauthenticated `GET /readyz`
+- return the `Health` DTO with the current control-plane schema version
+- reject non-`GET` health/ready requests with `405`
+- add `cmd/riido_ai_server`
+- parse `RIIDO_AI_SERVER_ADDR` with default `:8080`
+- parse `RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS`
+- parse strict `RIIDO_AI_SERVER_AGENT_BINDINGS_JSON`
+- connect agent bindings to `StoreConfig.AgentRegistry`
+- parse strict `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON`
+- parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL`
+- parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
+- parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
+- compose static-token and external HTTP authorizers through fallback authZ
+- add black-box health/cmd parser tests
+- add focused public CI for health/ready and command environment behavior
+
+This slice does not move legacy `RIIDO_AI_SERVER_BEARER_TOKEN` compatibility,
+snapshot stores, file outbox adapters, assignment operation durable save/claim
+wiring, DynamoDB/EventBridge adapters, Terraform, secret values, AWS adapters,
+CloudWatch/Prometheus adapters, Docker, review account seed data, dashboards,
+daemon consumers, or deployment evidence.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public
