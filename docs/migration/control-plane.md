@@ -86,6 +86,28 @@ This slice does not move `cmd/riido_ai_server`, `internal/riidoaiserver`,
 AWS SDK integration, Terraform, production secret wiring, or deployment
 evidence. Those remain separate migration units.
 
+### RIID-4663 — agent catalog RBAC domain migration
+
+This slice moves the first pure `internal/riidoaiserver` domain behavior into
+the public control-plane repository.
+
+This slice does:
+
+- add `internal/riidoaiserver` agent catalog RBAC decisions
+- add a package boundary comment for the first public `riidoaiserver` slice
+- add static token request authorization and scope checks
+- add BDD-style tests for admin, owner, public visibility, and mutation denial
+- add `docs/20-domain/agent-catalog-rbac.md` as the SSOT for this domain slice
+- add a focused public CI workflow for the migrated RBAC package
+
+This slice does not move the HTTP server, SSE adapter, persistent store,
+DynamoDB/EventBridge adapters, external identity authorizer HTTP adapter,
+review account seed, Terraform, production credentials, or deployment evidence.
+
+The next control-plane migration unit can build on this by moving the HTTP
+agent catalog handler or by introducing store ports, but those units must keep
+AWS adapters out of public pull-request verification.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
