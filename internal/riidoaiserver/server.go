@@ -12,11 +12,13 @@ import (
 type ServerConfig struct {
 	Authorizer        RequestAuthorizer
 	AgentCatalogStore AgentCatalogStore
+	Assignment        AssignmentStore
 	ProviderStatus    ProviderStatusStore
 	ProviderRead      ProviderStatusReader
 }
 
 type Server struct {
+	assignment   AssignmentStore
 	agentCatalog AgentCatalogStore
 	provider     ProviderStatusStore
 	providerRead ProviderStatusReader
@@ -24,15 +26,22 @@ type Server struct {
 }
 
 func NewServer(config ServerConfig) Server {
+	provider := config.ProviderStatus
+	if provider == nil {
+		if store, ok := config.Assignment.(ProviderStatusStore); ok {
+			provider = store
+		}
+	}
 	providerRead := config.ProviderRead
 	if providerRead == nil {
-		if reader, ok := config.ProviderStatus.(ProviderStatusReader); ok {
+		if reader, ok := provider.(ProviderStatusReader); ok {
 			providerRead = reader
 		}
 	}
 	return Server{
+		assignment:   config.Assignment,
 		agentCatalog: config.AgentCatalogStore,
-		provider:     config.ProviderStatus,
+		provider:     provider,
 		providerRead: providerRead,
 		config:       config,
 	}
@@ -42,6 +51,7 @@ func (s Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/agent-catalog", s.handleAgentCatalog)
 	mux.HandleFunc("/v1/agent-catalog/", s.handleAgentCatalog)
+	mux.HandleFunc("/v1/component-tasks/", s.handleComponentTasks)
 	mux.HandleFunc("/v1/agents/", s.handleAgents)
 	return mux
 }
@@ -203,6 +213,12 @@ func (s Server) handleAgents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	switch {
+	case suffix == "poll" && r.Method == http.MethodPost:
+		s.handleAgentPoll(w, r, agentID)
+	case suffix == "heartbeat" && r.Method == http.MethodPost:
+		s.handleAgentHeartbeat(w, r, agentID)
+	case suffix == "events" && r.Method == http.MethodPost:
+		s.handleAgentEvent(w, r, agentID)
 	case suffix == "provider-status" && r.Method == http.MethodPost:
 		s.handleProviderStatusSync(w, r, agentID)
 	case suffix == "provider-status" && r.Method == http.MethodGet:
@@ -210,6 +226,107 @@ func (s Server) handleAgents(w http.ResponseWriter, r *http.Request) {
 	default:
 		writeError(w, http.StatusNotFound, "not found")
 	}
+}
+
+func (s Server) handleComponentTasks(w http.ResponseWriter, r *http.Request) {
+	taskID, suffix, ok := splitResourcePath(r.URL.Path, "/v1/component-tasks/")
+	if !ok {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	switch {
+	case suffix == "assignment" && r.Method == http.MethodPost:
+		s.handleComponentTaskAssign(w, r, taskID)
+	default:
+		writeError(w, http.StatusNotFound, "not found")
+	}
+}
+
+func (s Server) handleComponentTaskAssign(w http.ResponseWriter, r *http.Request, taskID string) {
+	if s.assignment == nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
+		return
+	}
+	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceComponentTask, Action: AuthorizationActionAssign, TaskID: taskID}); !ok {
+		return
+	}
+	var req AssignRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	assignment, err := s.assignment.AssignTask(r.Context(), taskID, req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, struct {
+		SchemaVersion string     `json:"schema_version"`
+		Assignment    Assignment `json:"assignment"`
+	}{SchemaVersion: SchemaVersion, Assignment: assignment})
+}
+
+func (s Server) handleAgentPoll(w http.ResponseWriter, r *http.Request, agentID string) {
+	if s.assignment == nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
+		return
+	}
+	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionPoll, AgentID: agentID}); !ok {
+		return
+	}
+	var req PollRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.assignment.PollAgent(r.Context(), agentID, req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAgentHeartbeat(w http.ResponseWriter, r *http.Request, agentID string) {
+	if s.assignment == nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
+		return
+	}
+	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionHeartbeat, AgentID: agentID}); !ok {
+		return
+	}
+	var req AgentHeartbeatRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.assignment.HeartbeatAgent(r.Context(), agentID, req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID string) {
+	if s.assignment == nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
+		return
+	}
+	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionEventsWrite, AgentID: agentID}); !ok {
+		return
+	}
+	var req AgentEventRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.assignment.RecordAgentEvent(r.Context(), agentID, req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (s Server) handleProviderStatusSync(w http.ResponseWriter, r *http.Request, agentID string) {
