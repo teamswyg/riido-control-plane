@@ -68,6 +68,24 @@ Do not move into `riido-control-plane`:
    Public CI should run `go test ./...`, contract checks, RBAC black-box tests,
    and generated drift checks.
 
+## Current Migration Slices
+
+### RIID-4644 — contracts import gate
+
+The first executable slice after the planning document is a compatibility gate
+against `github.com/teamswyg/riido-contracts v0.1.0`.
+
+This slice does:
+
+- add the public contracts module to `go.mod`
+- add a control-plane compatibility test that imports the IR, task lifecycle,
+  and provider capability contracts
+- replace the stdlib-only CI assertion with a "no non-Riido dependency" gate
+
+This slice does not move `cmd/riido_ai_server`, `internal/riidoaiserver`,
+AWS SDK integration, Terraform, production secret wiring, or deployment
+evidence. Those remain separate migration units.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

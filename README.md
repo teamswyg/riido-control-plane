@@ -6,6 +6,10 @@ This repository is the public backend boundary. It will own assignment polling,
 event ingest, SSE/read-model APIs, authorization ports, RBAC behavior, and
 control-plane black-box/domain tests.
 
+It consumes shared public contracts from
+`github.com/teamswyg/riido-contracts` at `v0.1.0`. Runtime provider execution,
+Terraform deployment wiring, and secret material stay outside this repository.
+
 ## Module
 
 ```text
@@ -36,7 +40,9 @@ go list -m all
 ```
 
 The public GitHub Actions workflow runs the lightweight verification suite
-outside the private infrastructure repository billing pool.
+outside the private infrastructure repository billing pool. CI allows only
+Riido-owned Go module dependencies; any third-party dependency requires a new
+documented decision before it is introduced.
 
 ## License
 
