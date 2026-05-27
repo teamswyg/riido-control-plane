@@ -72,10 +72,11 @@ The provider status sync/read contract is owned by
 [`provider-status.md`](provider-status.md).
 
 That boundary owns provider status DTOs, normalization, read/write ports, and
-the `GET`/`POST /v1/agents/{agent_id}/provider-status` HTTP adapter. It does
-not own provider executable detection, customer-PC provider process execution,
-store-safe routing decisions, durable store actors, DynamoDB payloads,
-Terraform, or deployment evidence.
+the `GET`/`POST /v1/agents/{agent_id}/provider-status` HTTP adapter. It also
+owns the pure store-safe routing guard that evaluates synced provider routing
+status before a later assignment integration calls it. It does not own provider
+executable detection, customer-PC provider process execution, durable store
+actors, DynamoDB payloads, Terraform, or deployment evidence.
 
 ## Migration State
 
@@ -89,6 +90,8 @@ repository.
 RIID-4671 moves the provider status DTO/port/HTTP contract into this public
 repository, using `riido-contracts v0.2.0` for shared provider/distribution
 vocabulary.
+
+RIID-4672 moves the pure store-safe routing guard into this public repository.
 
 The store actor, assignment claim logic, active lease refresh, HTTP
 assignment/poll/heartbeat/event routes, SSE, metrics route wiring, review

@@ -19,6 +19,8 @@ This boundary owns:
 - `ProviderStatusSyncResponse`
 - `ProviderStatusStore`
 - `ProviderStatusReader`
+- `StoreSafeRoutingInput`
+- `StoreSafeRoutingDecision`
 - `POST /v1/agents/{agent_id}/provider-status`
 - `GET /v1/agents/{agent_id}/provider-status`
 
@@ -69,6 +71,29 @@ gate for this contract. It must:
 The request/response intentionally exclude executable paths, workspace absolute
 paths, provider tokens, API keys, raw environment, and private host evidence.
 
+## Store-Safe Routing Guard
+
+`EvaluateStoreSafeRouting(input)` is the executable pure-domain guard that maps
+a runtime provider plus the latest provider status snapshot to an assignment
+routing decision.
+
+The guard must:
+
+- reject blank `runtime_provider`
+- allow `available` with reason `provider available`
+- block `login-required` with reason `provider login required`
+- block `unsupported` with reason `provider unsupported`
+- block `store-blocked` with reason `provider blocked by store policy`
+- block when a synced snapshot exists but the requested provider is missing,
+  with reason `provider status missing`
+- allow when no provider status snapshot has ever synced, with reason
+  `provider status not synced`
+- reject unknown routing status values
+
+The "not synced" allow case intentionally preserves legacy assignment behavior
+until the daemon starts syncing provider status for that agent. Once a snapshot
+exists, missing or non-routable provider rows fail closed.
+
 ## Authorization
 
 Provider status sync and read use the generic agent authorization resource:
@@ -87,7 +112,8 @@ RIID-4671 moves the provider status DTO, normalization gate, read/write port,
 and HTTP provider-status route from the former private
 `riido_daemon/internal/riidoaiserver` package into this public repository.
 
-Runtime detector implementation, store-safe routing, assignment integration,
-review account seed runtime wiring, durable store actors, DynamoDB adapters,
-Terraform, AWS configuration, and deployment evidence remain separate migration
-units.
+RIID-4672 moves the store-safe routing guard into this public repository.
+
+Runtime detector implementation, assignment integration, review account seed
+runtime wiring, durable store actors, DynamoDB adapters, Terraform, AWS
+configuration, and deployment evidence remain separate migration units.
