@@ -128,6 +128,25 @@ This slice does not move production IdP rollout, tenant claim mapping,
 JWKS/OIDC validation, environment parsing in `cmd/riido_ai_server`, HTTP route
 wiring, Terraform, secret values, or deployment evidence.
 
+### RIID-4665 — agent runtime binding migration
+
+This slice moves the stdlib-only agent/runtime binding guard into the public
+control-plane repository.
+
+This slice does:
+
+- add `AgentRuntimeBinding`, `AgentRegistry`, and `StaticAgentRegistry`
+- add the minimal `PollRequest` fields required by daemon binding validation
+- add focused tests for binding normalization, duplicate rejection, assignment
+  provider mismatch, daemon ID mismatch, optional device ID behavior, and
+  runtime ID mismatch
+- add `docs/20-domain/agent-runtime-binding.md` as the binding SSOT
+- add a focused public CI workflow for the agent runtime binding guard
+
+This slice does not move the store actor, assignment queue, active lease
+recovery, provider status store, HTTP handler, environment parsing, AWS
+adapters, Terraform, or deployment evidence.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
