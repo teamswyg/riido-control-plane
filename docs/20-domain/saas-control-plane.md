@@ -72,6 +72,25 @@ This actor does not own HTTP assignment routes, SSE fan-out, snapshot stores,
 file outbox adapters, assignment operation durable save wiring, DynamoDB,
 EventBridge, Terraform, AWS credentials, or deployment evidence.
 
+## Assignment HTTP Adapter Boundary
+
+The public HTTP assignment adapter routes request/response JSON into the
+`AssignmentStore` port. It owns these stdlib-only routes:
+
+- `POST /v1/component-tasks/{task_id}/assignment`
+- `POST /v1/agents/{agent_id}/poll`
+- `POST /v1/agents/{agent_id}/heartbeat`
+- `POST /v1/agents/{agent_id}/events`
+
+Every route must use `RequestAuthorizer` before it reaches the store. Request
+bodies use the strict JSON decoder, so unknown fields are rejected and private
+provider-path/token material cannot be accepted by accident.
+
+This adapter does not own the task event SSE route, `/metrics`, health/ready
+routes, `cmd/riido_ai_server` environment parsing, snapshot stores, file outbox
+adapters, durable operation save/claim wiring, DynamoDB, EventBridge,
+Terraform, AWS credentials, or deployment evidence.
+
 ## Durable Operation Boundary
 
 The assignment operation journal and claim-port contract is owned by
@@ -119,7 +138,9 @@ RIID-4672 moves the pure store-safe routing guard into this public repository.
 RIID-4674 moves the stdlib-only in-memory assignment store actor into this
 public repository.
 
-HTTP assignment/poll/heartbeat/event routes, SSE, snapshot stores, file outbox
-adapters, durable operation save/claim wiring, review account seed,
+RIID-4675 moves the assignment HTTP adapter into this public repository.
+
+Task event SSE routes, `/metrics`, health/ready routes, snapshot stores, file
+outbox adapters, durable operation save/claim wiring, review account seed,
 `cmd/riido_ai_server`, Docker, Terraform, AWS adapters, and deployment evidence
 remain separate migration units.

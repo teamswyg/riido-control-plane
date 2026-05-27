@@ -298,6 +298,31 @@ stale durable active lease recovery, DynamoDB/EventBridge adapters, Terraform,
 secret values, AWS adapters, `cmd/riido_ai_server`, Docker, or deployment
 evidence.
 
+### RIID-4675 — assignment HTTP adapter migration
+
+This slice moves the assignment HTTP adapter into the public control-plane
+repository.
+
+This slice does:
+
+- add `AssignmentStore` to `ServerConfig`
+- auto-use assignment stores that also implement provider status ports for the
+  existing provider status routes
+- add `POST /v1/component-tasks/{task_id}/assignment`
+- add `POST /v1/agents/{agent_id}/poll`
+- add `POST /v1/agents/{agent_id}/heartbeat`
+- add `POST /v1/agents/{agent_id}/events`
+- gate each route with `RequestAuthorizer` resource/action scopes
+- keep strict JSON decoding for assignment, poll, heartbeat, and event payloads
+- add black-box HTTP BDD tests against the public in-memory store actor
+- add a focused public CI workflow for assignment HTTP adapter behavior
+
+This slice does not move `GET /v1/component-tasks/{task_id}/events` SSE,
+`/metrics`, health/ready routes, `cmd/riido_ai_server` environment parsing,
+snapshot stores, file outbox adapters, assignment operation durable save/claim
+wiring, DynamoDB/EventBridge adapters, Terraform, secret values, AWS adapters,
+Docker, or deployment evidence.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public
