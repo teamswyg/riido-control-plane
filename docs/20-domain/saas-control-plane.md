@@ -67,10 +67,44 @@ the stdlib-only runtime behavior that can be verified without AWS credentials:
 - agent event transition validation and task event append
 - metrics read-model counters for tasks, assignments, poll actions, and events
 - in-memory provider status sync/read state used by store-safe routing
+- configurable snapshot and task-event outbox port calls after assignment
+  mutations
 
-This actor does not own HTTP assignment routes, SSE fan-out, snapshot stores,
-file outbox adapters, assignment operation durable save wiring, DynamoDB,
-EventBridge, Terraform, AWS credentials, or deployment evidence.
+This actor does not own HTTP assignment routes, SSE fan-out, assignment
+operation durable save wiring, DynamoDB, EventBridge, Terraform, AWS
+credentials, or deployment evidence.
+
+## Store Snapshot And File Outbox Boundary
+
+The public store snapshot and file outbox boundary owns the stdlib-only
+persistence adapters that can be verified without AWS credentials:
+
+- `SnapshotStore`
+- `StoreSnapshot`
+- `StoreSnapshotTask`
+- `FileStoreSnapshot`
+- `OpenStoreWithConfig`
+- `EventSink`
+- `OutboxRecord`
+- `FileOutbox`
+
+`StoreSnapshot` is a point-in-time assignment store snapshot. It preserves
+tasks, assignments, agent-assignment indexes, task event history, and the next
+assignment/event sequence counters. `FileStoreSnapshot` writes that snapshot as
+strict JSON using atomic replace. Loading rejects unknown fields, unsupported
+schema versions, trailing JSON, blank task ids, blank assignment ids, and agent
+assignment references that do not exist in the snapshot assignment set.
+
+`FileOutbox` appends task events as JSON Lines `OutboxRecord` values. The store
+actor calls the outbox after task events are appended for assignment queue,
+lease, and agent-event mutations. Outbox append errors do not fail the
+assignment mutation; they increment the public `outbox_errors_total` metrics
+counter and still record event-append latency counters.
+
+This boundary does not own `DynamoDBStoreSnapshot`, `DynamoDBOutbox`, DynamoDB
+Streams relays, EventBridge publishers, assignment operation durable save/claim
+runtime wiring, active lease recovery, Terraform, AWS credentials, Docker image
+contracts, review account seed data, or deployment evidence.
 
 ## Assignment HTTP Adapter Boundary
 
@@ -217,6 +251,8 @@ RIID-4678 moves the metrics HTTP adapter into this public repository.
 RIID-4679 moves health/ready routes and the minimal `cmd/riido_ai_server`
 environment/runtime entrypoint into this public repository.
 
-Snapshot stores, file outbox adapters, durable operation save/claim wiring,
-review account seed, Docker, Terraform, AWS adapters, and deployment evidence
-remain separate migration units.
+RIID-4680 moves the stdlib-only store snapshot and file outbox adapters into
+this public repository.
+
+Durable operation save/claim wiring, review account seed, Docker, Terraform,
+AWS adapters, and deployment evidence remain separate migration units.

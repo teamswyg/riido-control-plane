@@ -14,11 +14,15 @@ type Store struct {
 	commands      chan any
 	done          chan struct{}
 	now           func() time.Time
+	outbox        EventSink
+	snapshotStore SnapshotStore
 	agentRegistry AgentRegistry
 }
 
 type StoreConfig struct {
 	Now           func() time.Time
+	Outbox        EventSink
+	SnapshotStore SnapshotStore
 	AgentRegistry AgentRegistry
 }
 
@@ -31,6 +35,31 @@ func NewStoreWithClock(now func() time.Time) *Store {
 }
 
 func NewStoreWithConfig(config StoreConfig) *Store {
+	return newStoreWithConfig(config, newStoreState())
+}
+
+func OpenStoreWithConfig(ctx context.Context, config StoreConfig) (*Store, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	state := newStoreState()
+	if config.SnapshotStore != nil {
+		snapshot, ok, err := config.SnapshotStore.LoadStoreSnapshot(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if ok {
+			loaded, err := stateFromSnapshot(snapshot)
+			if err != nil {
+				return nil, err
+			}
+			state = loaded
+		}
+	}
+	return newStoreWithConfig(config, state), nil
+}
+
+func newStoreWithConfig(config StoreConfig, initial storeState) *Store {
 	now := config.Now
 	if now == nil {
 		now = func() time.Time { return time.Now().UTC() }
@@ -39,9 +68,11 @@ func NewStoreWithConfig(config StoreConfig) *Store {
 		commands:      make(chan any),
 		done:          make(chan struct{}),
 		now:           now,
+		outbox:        config.Outbox,
+		snapshotStore: config.SnapshotStore,
 		agentRegistry: config.AgentRegistry,
 	}
-	go s.loop(newStoreState())
+	go s.loop(initial)
 	return s
 }
 
@@ -287,12 +318,21 @@ func (s *Store) loop(state storeState) {
 		switch msg := cmd.(type) {
 		case assignCmd:
 			assignment, err := s.handleAssign(&state, msg.taskID, msg.req)
+			if err == nil {
+				err = s.saveSnapshot(&state)
+			}
 			msg.reply <- assignResult{assignment: assignment, err: err}
 		case pollCmd:
 			response, err := s.handlePoll(&state, msg.agentID, msg.req)
+			if err == nil && response.Action == PollStart {
+				err = s.saveSnapshot(&state)
+			}
 			msg.reply <- pollResult{response: response, err: err}
 		case eventCmd:
 			response, err := s.handleEvent(&state, msg.agentID, msg.req)
+			if err == nil {
+				err = s.saveSnapshot(&state)
+			}
 			msg.reply <- eventResult{response: response, err: err}
 		case heartbeatCmd:
 			response, err := s.handleHeartbeat(&state, msg.agentID, msg.req)
@@ -312,6 +352,13 @@ func (s *Store) loop(state storeState) {
 		case metricsCmd:
 			msg.reply <- metricsResult{snapshot: s.handleMetrics(&state)}
 		case closeCmd:
+			_ = s.saveSnapshot(&state)
+			if s.outbox != nil {
+				_ = s.outbox.Close()
+			}
+			if s.snapshotStore != nil {
+				_ = s.snapshotStore.Close()
+			}
 			for _, subs := range state.subscribers {
 				for _, ch := range subs {
 					close(ch)
@@ -321,6 +368,13 @@ func (s *Store) loop(state storeState) {
 			return
 		}
 	}
+}
+
+func (s *Store) saveSnapshot(state *storeState) error {
+	if s.snapshotStore == nil {
+		return nil
+	}
+	return s.snapshotStore.SaveStoreSnapshot(context.Background(), snapshotFromState(state, s.now()))
 }
 
 func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest) (Assignment, error) {
@@ -671,6 +725,9 @@ func (s *Store) appendEvent(state *storeState, taskID, assignmentID, agentID, ev
 		At:           at,
 	}
 	state.events[taskID] = append(state.events[taskID], event)
+	if s.outbox != nil {
+		s.appendTaskEventToOutbox(state, event)
+	}
 	for _, ch := range state.subscribers[taskID] {
 		select {
 		case ch <- event:
@@ -678,6 +735,28 @@ func (s *Store) appendEvent(state *storeState, taskID, assignmentID, agentID, ev
 		}
 	}
 	return event
+}
+
+func (s *Store) appendTaskEventToOutbox(state *storeState, event TaskEvent) {
+	startedAt := s.now()
+	err := s.outbox.AppendTaskEvent(context.Background(), event)
+	recordEventAppendLatency(state, s.now().Sub(startedAt))
+	if err != nil {
+		state.outboxErrorsTotal++
+	}
+}
+
+func recordEventAppendLatency(state *storeState, duration time.Duration) {
+	if duration < 0 {
+		duration = 0
+	}
+	milliseconds := duration.Milliseconds()
+	state.eventAppendLatency.samplesTotal++
+	state.eventAppendLatency.totalMilliseconds += milliseconds
+	state.eventAppendLatency.lastMilliseconds = milliseconds
+	if milliseconds > state.eventAppendLatency.maxMilliseconds {
+		state.eventAppendLatency.maxMilliseconds = milliseconds
+	}
 }
 
 func assignmentHoldsActiveLease(state AssignmentState) bool {

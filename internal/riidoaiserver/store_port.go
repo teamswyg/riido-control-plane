@@ -11,3 +11,14 @@ type AssignmentStore interface {
 	Metrics(ctx context.Context) (MetricsSnapshot, error)
 	Close()
 }
+
+type EventSink interface {
+	AppendTaskEvent(ctx context.Context, event TaskEvent) error
+	Close() error
+}
+
+type SnapshotStore interface {
+	LoadStoreSnapshot(ctx context.Context) (StoreSnapshot, bool, error)
+	SaveStoreSnapshot(ctx context.Context, snapshot StoreSnapshot) error
+	Close() error
+}
