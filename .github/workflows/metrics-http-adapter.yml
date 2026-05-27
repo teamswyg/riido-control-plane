@@ -1,0 +1,61 @@
+name: metrics-http-adapter
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/metrics-http-adapter.yml"
+      - "docs/20-domain/request-authorization.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/assignment_metrics_test.go"
+      - "internal/riidoaiserver/authorization.go"
+      - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_port.go"
+      - "internal/riidoaiserver/store_state.go"
+  pull_request:
+    paths:
+      - ".github/workflows/metrics-http-adapter.yml"
+      - "docs/20-domain/request-authorization.md"
+      - "docs/20-domain/saas-control-plane.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/assignment_metrics_test.go"
+      - "internal/riidoaiserver/authorization.go"
+      - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_port.go"
+      - "internal/riidoaiserver/store_state.go"
+
+jobs:
+  metrics-http:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify metrics HTTP boundary
+        run: |
+          disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed metrics HTTP imports:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Test metrics HTTP adapter
+        run: go test ./internal/riidoaiserver -run 'HTTPMetrics|MetricsHTTP' -count=1
