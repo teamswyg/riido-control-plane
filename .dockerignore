@@ -1,0 +1,6 @@
+.git
+.github
+.riido-local
+docs
+tmp
+*.log

@@ -460,6 +460,29 @@ Streams relay code, EventBridge publishers, Terraform, AWS credentials, Docker
 image contracts, review account seed data, dashboards, daemon consumers, or
 deployment evidence.
 
+### RIID-4682 — Docker image contract migration
+
+This slice moves the public, buildable control-plane container image contract
+into the public control-plane repository.
+
+This slice does:
+
+- add `packaging/containers/riido_ai_server.Dockerfile`
+- add `packaging/containers/riido_ai_server_container.riido.json`
+- add `tools/containercontract` as a stdlib-only executable verifier for
+  `riido-container-image-contract.v1`
+- require a static `CGO_ENABLED=0` Go build of `./cmd/riido_ai_server`
+- require a `scratch` final image with copied CA certificates
+- require `EXPOSE 8080`, `RIIDO_AI_SERVER_ADDR=:8080`, non-root
+  `65532:65532`, and `ENTRYPOINT ["/riido_ai_server"]`
+- emit `riido-container-image-contract-check.v1` verification evidence
+- add focused public CI for the contract verifier and Docker build
+
+This slice does not move ECR repository creation, image push permissions,
+immutable image digest evidence, Terraform/Fargate task definitions, AWS
+credentials, runtime secret values, production environment values, private
+deployment evidence, review account seed data, dashboards, or daemon consumers.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public
@@ -513,6 +536,9 @@ Required before a control-plane migration PR is mergeable:
 ```bash
 go test ./...
 go list -m all
+go test ./tools/containercontract -count=1
+go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
+docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
 ```
 
 Server black-box tests should cover:
@@ -526,8 +552,8 @@ Server black-box tests should cover:
 
 ## Infra Boundary
 
-`riido-control-plane` may build an image and publish a release artifact.
-Deployment is not owned here.
+`riido-control-plane` may build an image and verify the executable image
+contract. Deployment is not owned here.
 
 `riido-infra` consumes immutable artifacts by:
 
