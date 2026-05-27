@@ -4,15 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 )
 
-type AgentRuntimeBinding struct {
-	AgentID         string `json:"agent_id"`
-	DaemonID        string `json:"daemon_id"`
-	DeviceID        string `json:"device_id,omitempty"`
-	RuntimeID       string `json:"runtime_id"`
-	RuntimeProvider string `json:"runtime_provider"`
-}
+type AgentRuntimeBinding = assignmentcontract.AgentRuntimeBinding
 
 type AgentRegistry interface {
 	LookupAgent(agentID string) (AgentRuntimeBinding, bool)

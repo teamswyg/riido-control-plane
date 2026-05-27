@@ -1,16 +1,18 @@
 # SaaS Control Plane SSOT
 
-> Riido task: RIID-4668 `[Control Plane] assignment contract/type migration`
+> Riido tasks: RIID-4668 `[Control Plane] assignment contract/type migration`,
+> RIID-4688 `[Control Plane] riido-contracts v0.3.0 assignment import migration`
 
 This document is the public SSOT for the SaaS control-plane assignment contract
 surface that can be verified without AWS credentials.
 
 ## Responsibility
 
-`riido-control-plane` owns the server-side contract for assigning component
-tasks to SaaS agent identities, daemon polling actions, daemon heartbeat
-payloads, agent event sync payloads, task events, health responses, and metrics
-snapshots.
+`riido-control-plane` owns the server-side behavior for assigning component
+tasks to SaaS agent identities, daemon polling, daemon heartbeat handling,
+agent event sync, task event storage/streaming, health responses, and metrics
+snapshots. Shared assignment polling DTOs and state vocabulary are imported
+from `github.com/teamswyg/riido-contracts/assignment`.
 
 This document does not own customer-PC provider process execution, local daemon
 configuration, Terraform, AWS, EventBridge, DynamoDB, private deployment
@@ -18,8 +20,9 @@ evidence, or production secret values.
 
 ## Executable Contract
 
-The executable assignment contract is
-`internal/riidoaiserver/assignment_contract.riido.json`.
+The executable assignment polling contract is owned by
+`github.com/teamswyg/riido-contracts/assignment` and documented in
+`riido-contracts/docs/20-domain/assignment-polling.md`.
 
 That contract owns:
 
@@ -30,15 +33,19 @@ That contract owns:
 - legal assignment transitions
 - daemon poll action values
 - task event type values
+- assignment/poll/heartbeat/event/task-event DTO JSON field names
+- agent runtime binding DTO JSON field names
 
-The generated Go surface in
-`internal/riidoaiserver/assignment_contract_gen.go` must match the JSON
-contract. Markdown must link to the executable contract instead of redefining
-the transition matrix.
+The local Go surface in `internal/riidoaiserver/assignment_contract_gen.go` and
+`assignment_api.go` is an alias/import layer over that shared package so that
+existing control-plane store, HTTP, SSE, and metrics code can preserve its
+internal API while the cross-repository contract lives in `riido-contracts`.
+Markdown must link to the shared executable contract instead of redefining the
+transition matrix.
 
 ## Public DTO Surface
 
-The public assignment DTO surface is:
+The shared assignment DTO surface imported from `riido-contracts/assignment` is:
 
 - `AssignRequest`
 - `Assignment`
@@ -49,11 +56,16 @@ The public assignment DTO surface is:
 - `AgentEventRequest`
 - `AgentEventResponse`
 - `TaskEvent`
+
+The control-plane-local DTO surface is:
+
 - `Health`
 - `MetricsSnapshot`
 
 These types are API/adapter contracts only. They do not own HTTP routing, SSE
-fan-out, outbox, snapshots, or AWS adapters.
+fan-out, outbox, snapshots, or AWS adapters. `Health` and `MetricsSnapshot`
+remain local because they are control-plane adapter/read-model contracts rather
+than daemon polling contracts.
 
 ## Store Actor Boundary
 
@@ -255,9 +267,14 @@ actors, DynamoDB payloads, Terraform, or deployment evidence.
 
 ## Migration State
 
-RIID-4668 moves the executable assignment contract and DTO surface from the
+RIID-4668 moved the executable assignment contract and DTO surface from the
 former private `riido_daemon/internal/riidoaiserver` package into this public
 repository.
+
+RIID-4688 moves the shared assignment polling contract SSOT into
+`riido-contracts v0.3.0` and changes this repository to consume that tagged
+contract through aliases/imports. Control-plane health/metrics DTOs and all
+store/HTTP/SSE behavior remain local.
 
 RIID-4669 moves the operation journal port and record surface into this public
 repository.
@@ -266,7 +283,7 @@ RIID-4673 moves the assignment operation replay reducer into this public
 repository.
 
 RIID-4671 moves the provider status DTO/port/HTTP contract into this public
-repository, using `riido-contracts v0.2.0` for shared provider/distribution
+repository, using `riido-contracts v0.2.0+` for shared provider/distribution
 vocabulary.
 
 RIID-4672 moves the pure store-safe routing guard into this public repository.

@@ -1,146 +1,78 @@
 package riidoaiserver
 
 import (
-	"encoding/json"
-	"os"
-	"sort"
 	"testing"
+
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 )
 
-func TestAssignmentContractMatchesGeneratedSurface(t *testing.T) {
-	contract := loadAssignmentContract(t)
-	if contract.SchemaVersion != "riido-ai-server-contract.v1" {
-		t.Fatalf("contract schema_version = %q", contract.SchemaVersion)
-	}
-	if contract.ServiceSchemaVersion != SchemaVersion {
-		t.Fatalf("service schema_version = %q, want %q", contract.ServiceSchemaVersion, SchemaVersion)
+func TestAssignmentContractImportsSharedSurface(t *testing.T) {
+	if SchemaVersion != assignmentcontract.SchemaVersion {
+		t.Fatalf("SchemaVersion = %q, want %q", SchemaVersion, assignmentcontract.SchemaVersion)
 	}
 
-	generatedStates := map[AssignmentState]struct{}{
-		AssignmentQueued: {}, AssignmentLeased: {}, AssignmentReady: {}, AssignmentRunning: {},
-		AssignmentCancelling: {}, AssignmentCancelled: {}, AssignmentCompleted: {}, AssignmentFailed: {},
+	statePairs := map[AssignmentState]assignmentcontract.AssignmentState{
+		AssignmentQueued:     assignmentcontract.AssignmentQueued,
+		AssignmentLeased:     assignmentcontract.AssignmentLeased,
+		AssignmentReady:      assignmentcontract.AssignmentReady,
+		AssignmentRunning:    assignmentcontract.AssignmentRunning,
+		AssignmentCancelling: assignmentcontract.AssignmentCancelling,
+		AssignmentCancelled:  assignmentcontract.AssignmentCancelled,
+		AssignmentCompleted:  assignmentcontract.AssignmentCompleted,
+		AssignmentFailed:     assignmentcontract.AssignmentFailed,
 	}
-	contractStates := map[AssignmentState]assignmentContractState{}
-	for _, state := range contract.AssignmentStates {
-		value := AssignmentState(state.Value)
-		if _, ok := generatedStates[value]; !ok {
-			t.Fatalf("contract state %q is missing a generated constant", state.Value)
+	for local, shared := range statePairs {
+		if local != shared {
+			t.Fatalf("assignment state alias drift: local %q shared %q", local, shared)
 		}
-		if _, exists := contractStates[value]; exists {
-			t.Fatalf("duplicate contract state %q", state.Value)
+		if isTerminal(local) != assignmentcontract.IsTerminal(shared) {
+			t.Fatalf("terminal classification drift for %q", local)
 		}
-		contractStates[value] = state
-		if got := isTerminal(value); got != state.Terminal {
-			t.Fatalf("isTerminal(%q) = %v, want %v", value, got, state.Terminal)
-		}
-		if got := isAgentActive(value); got != state.AgentActive {
-			t.Fatalf("isAgentActive(%q) = %v, want %v", value, got, state.AgentActive)
+		if isAgentActive(local) != assignmentcontract.IsAgentActive(shared) {
+			t.Fatalf("agent-active classification drift for %q", local)
 		}
 	}
-	if len(contractStates) != len(generatedStates) {
-		t.Fatalf("contract states = %v, want %d states", sortedAssignmentStateKeys(contractStates), len(generatedStates))
+
+	actionPairs := map[PollAction]assignmentcontract.PollAction{
+		PollNone:   assignmentcontract.PollNone,
+		PollStart:  assignmentcontract.PollStart,
+		PollCancel: assignmentcontract.PollCancel,
+		PollActive: assignmentcontract.PollActive,
 	}
-	for from := range generatedStates {
-		allowed := map[AssignmentState]struct{}{}
-		for _, transition := range contractStates[from].Transitions {
-			allowed[AssignmentState(transition)] = struct{}{}
+	for local, shared := range actionPairs {
+		if local != shared {
+			t.Fatalf("poll action alias drift: local %q shared %q", local, shared)
 		}
-		for to := range generatedStates {
-			_, inContract := allowed[to]
-			want := from == to || inContract
-			if got := canTransitionAssignment(from, to); got != want {
+	}
+
+	eventPairs := map[string]string{
+		EventAssignmentQueued:       assignmentcontract.EventAssignmentQueued,
+		EventAssignmentLeased:       assignmentcontract.EventAssignmentLeased,
+		EventAssignmentReady:        assignmentcontract.EventAssignmentReady,
+		EventAssignmentRunning:      assignmentcontract.EventAssignmentRunning,
+		EventAssignmentCancelling:   assignmentcontract.EventAssignmentCancelling,
+		EventAssignmentCancelled:    assignmentcontract.EventAssignmentCancelled,
+		EventAssignmentCompleted:    assignmentcontract.EventAssignmentCompleted,
+		EventAssignmentFailed:       assignmentcontract.EventAssignmentFailed,
+		EventAssignmentStateUpdated: assignmentcontract.EventAssignmentStateUpdated,
+		EventRiidoLog:               assignmentcontract.EventRiidoLog,
+		EventProviderLog:            assignmentcontract.EventProviderLog,
+		EventProviderWarning:        assignmentcontract.EventProviderWarning,
+		EventProviderError:          assignmentcontract.EventProviderError,
+	}
+	for local, shared := range eventPairs {
+		if local != shared {
+			t.Fatalf("task event alias drift: local %q shared %q", local, shared)
+		}
+	}
+}
+
+func TestAssignmentTransitionDelegatesToSharedContract(t *testing.T) {
+	for _, from := range assignmentcontract.AllAssignmentStates() {
+		for _, to := range assignmentcontract.AllAssignmentStates() {
+			if got, want := canTransitionAssignment(from, to), assignmentcontract.CanTransition(from, to); got != want {
 				t.Fatalf("canTransitionAssignment(%q,%q) = %v, want %v", from, to, got, want)
 			}
 		}
 	}
-
-	generatedPollActions := map[PollAction]struct{}{
-		PollNone: {}, PollStart: {}, PollCancel: {}, PollActive: {},
-	}
-	for _, action := range contract.PollActions {
-		value := PollAction(action.Value)
-		if _, ok := generatedPollActions[value]; !ok {
-			t.Fatalf("contract poll action %q is missing a generated constant", action.Value)
-		}
-		delete(generatedPollActions, value)
-	}
-	if len(generatedPollActions) != 0 {
-		t.Fatalf("generated poll actions missing from contract: %v", sortedPollActionKeys(generatedPollActions))
-	}
-
-	generatedTaskEvents := map[string]struct{}{
-		EventAssignmentQueued: {}, EventAssignmentLeased: {}, EventAssignmentReady: {}, EventAssignmentRunning: {},
-		EventAssignmentCancelling: {}, EventAssignmentCancelled: {}, EventAssignmentCompleted: {}, EventAssignmentFailed: {},
-		EventAssignmentStateUpdated: {}, EventRiidoLog: {}, EventProviderLog: {}, EventProviderWarning: {}, EventProviderError: {},
-	}
-	for _, event := range contract.TaskEvents {
-		if _, ok := generatedTaskEvents[event.Value]; !ok {
-			t.Fatalf("contract task event %q is missing a generated constant", event.Value)
-		}
-		delete(generatedTaskEvents, event.Value)
-	}
-	if len(generatedTaskEvents) != 0 {
-		t.Fatalf("generated task events missing from contract: %v", sortedStringKeys(generatedTaskEvents))
-	}
-}
-
-func loadAssignmentContract(t *testing.T) assignmentContract {
-	t.Helper()
-	data, err := os.ReadFile("assignment_contract.riido.json")
-	if err != nil {
-		t.Fatalf("read assignment contract: %v", err)
-	}
-	var contract assignmentContract
-	if err := json.Unmarshal(data, &contract); err != nil {
-		t.Fatalf("unmarshal assignment contract: %v", err)
-	}
-	return contract
-}
-
-type assignmentContract struct {
-	SchemaVersion        string                    `json:"schema_version"`
-	ServiceSchemaVersion string                    `json:"service_schema_version"`
-	AssignmentStates     []assignmentContractState `json:"assignment_states"`
-	PollActions          []assignmentContractValue `json:"poll_actions"`
-	TaskEvents           []assignmentContractValue `json:"task_events"`
-}
-
-type assignmentContractState struct {
-	Name        string   `json:"name"`
-	Value       string   `json:"value"`
-	AgentActive bool     `json:"agent_active"`
-	Terminal    bool     `json:"terminal"`
-	Transitions []string `json:"transitions"`
-}
-
-type assignmentContractValue struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
-func sortedAssignmentStateKeys(values map[AssignmentState]assignmentContractState) []AssignmentState {
-	keys := make([]AssignmentState, 0, len(values))
-	for key := range values {
-		keys = append(keys, key)
-	}
-	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
-	return keys
-}
-
-func sortedPollActionKeys(values map[PollAction]struct{}) []PollAction {
-	keys := make([]PollAction, 0, len(values))
-	for key := range values {
-		keys = append(keys, key)
-	}
-	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
-	return keys
-}
-
-func sortedStringKeys(values map[string]struct{}) []string {
-	keys := make([]string, 0, len(values))
-	for key := range values {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	return keys
 }
