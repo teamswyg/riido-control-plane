@@ -403,6 +403,35 @@ wiring, DynamoDB/EventBridge adapters, Terraform, secret values, AWS adapters,
 CloudWatch/Prometheus adapters, Docker, review account seed data, dashboards,
 daemon consumers, or deployment evidence.
 
+### RIID-4680 — store snapshot/file outbox migration
+
+This slice moves the stdlib-only store snapshot and file outbox adapters into
+the public control-plane repository.
+
+This slice does:
+
+- add `SnapshotStore` and `EventSink` ports to the store configuration
+- add `OpenStoreWithConfig` to restore an in-memory store from a snapshot
+- add `StoreSnapshot`, `StoreSnapshotTask`, and
+  `StoreSnapshotSchemaVersion`
+- add `FileStoreSnapshot` with strict JSON decode, trailing-data rejection, and
+  atomic replace writes
+- preserve tasks, assignments, agent-assignment indexes, task event history,
+  and next sequence counters in the snapshot
+- save snapshots after assign, poll-start, and agent-event mutations
+- close configured snapshot and outbox adapters when the store closes
+- add `OutboxRecord`, `OutboxRecordSchemaVersion`, and `FileOutbox`
+- append queued and leased task events as JSON Lines outbox records
+- keep assignment mutations successful when outbox append fails
+- expose outbox error and event-append latency counters through metrics
+- add focused persistence tests and public CI
+
+This slice does not move `DynamoDBStoreSnapshot`, `DynamoDBOutbox`, DynamoDB
+Streams relay code, EventBridge publishers, assignment operation durable
+save/claim runtime wiring, active lease recovery, Terraform, AWS credentials,
+Docker image contracts, review account seed data, dashboards, daemon consumers,
+or deployment evidence.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public
