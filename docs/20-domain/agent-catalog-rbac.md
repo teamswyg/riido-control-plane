@@ -102,10 +102,32 @@ Create requests carry `agent_id` and `visibility`. Update requests carry only
 `visibility`. Request DTOs do not carry `owner_principal_id` or roles; those are
 derived from request authorization and RBAC evaluation.
 
-`AgentCatalogStore` is the persistence port for the future HTTP adapter. It
+`AgentCatalogStore` is the persistence port for the HTTP adapter. It
 contains only list, get, save, and delete operations for `AgentCatalogRecord`.
 It does not own the store actor, snapshot replay, DynamoDB, EventBridge, or
 request authorization.
+
+## HTTP Adapter Boundary
+
+The public agent catalog HTTP adapter owns only these routes:
+
+- `GET /v1/agent-catalog`
+- `POST /v1/agent-catalog`
+- `GET /v1/agent-catalog/{agent_id}`
+- `PATCH /v1/agent-catalog/{agent_id}`
+- `DELETE /v1/agent-catalog/{agent_id}`
+
+The adapter must call `RequestAuthorizer` before it reads or mutates catalog
+records. Authorization scope gates endpoint access; RBAC then re-evaluates the
+authorized principal against the catalog record owner, visibility, and roles.
+
+Create requests stamp `owner_principal_id` from the authorization result. Client
+JSON must not be able to set `owner_principal_id` or roles. Update requests may
+change only `visibility`.
+
+This adapter does not own assignment polling, heartbeat, event append, SSE,
+metrics, provider status routes, durable store actors, snapshot replay,
+DynamoDB, EventBridge, Terraform, or production secret values.
 
 ## Migration State
 
@@ -113,9 +135,11 @@ RIID-4663 moves the stdlib-only RBAC and static-token authorization code from
 the former private `riido_daemon/internal/riidoaiserver` package into this
 public repository.
 
-The HTTP handler, durable store, external authorizer, and AWS adapters remain
-separate migration units.
+The durable store actor and AWS adapters remain separate migration units.
 
 RIID-4666 moves the public API DTOs and `AgentCatalogStore` port into this
-repository. The HTTP handler and concrete store adapters remain separate
-migration units.
+repository.
+
+RIID-4667 moves the stdlib-only agent catalog HTTP adapter into this repository.
+The concrete store actor, snapshot/replay, DynamoDB/EventBridge adapters, and
+deployment wiring remain separate migration units.

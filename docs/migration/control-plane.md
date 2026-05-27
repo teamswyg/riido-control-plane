@@ -104,9 +104,9 @@ This slice does not move the HTTP server, SSE adapter, persistent store,
 DynamoDB/EventBridge adapters, external identity authorizer HTTP adapter,
 review account seed, Terraform, production credentials, or deployment evidence.
 
-The next control-plane migration unit can build on this by moving the HTTP
-agent catalog handler or by introducing store ports, but those units must keep
-AWS adapters out of public pull-request verification.
+Later control-plane migration units build on this by moving store ports and the
+HTTP agent catalog adapter while keeping AWS adapters out of public pull-request
+verification.
 
 ### RIID-4664 — external HTTP authorizer migration
 
@@ -165,6 +165,32 @@ This slice does:
 This slice does not move HTTP routing, authZ middleware, SSE, metrics, store
 actor implementation, snapshot/operation replay, DynamoDB/EventBridge adapters,
 environment parsing, Terraform, secret values, or deployment evidence.
+
+### RIID-4667 — agent catalog HTTP adapter migration
+
+This slice moves the stdlib-only agent catalog HTTP adapter into the public
+control-plane repository.
+
+This slice does:
+
+- add the minimal `ServerConfig`, `Server`, and `Handler` boundary for agent
+  catalog routes
+- add `GET /v1/agent-catalog` and `POST /v1/agent-catalog`
+- add `GET`, `PATCH`, and `DELETE /v1/agent-catalog/{agent_id}`
+- call `RequestAuthorizer` before every catalog read or mutation
+- stamp create owners from the authorization principal instead of request JSON
+- reuse owner/public/private/admin RBAC decisions on read/update/delete
+- reject unknown JSON fields and trailing request data
+- add black-box HTTP tests for user, owner, admin, public-read, external
+  authorizer, and create-owner stamping scenarios
+- extend `docs/20-domain/agent-catalog-rbac.md` with the HTTP adapter boundary
+- add a focused public CI workflow for the agent catalog HTTP slice
+
+This slice does not move assignment polling, heartbeat, event append, SSE,
+metrics, provider status HTTP routes, store actor implementation,
+snapshot/operation replay, outbox, DynamoDB/EventBridge adapters,
+environment parsing, review account seed, Terraform, secret values, or
+deployment evidence.
 
 ## Validation Gates
 
