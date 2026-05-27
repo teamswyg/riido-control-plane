@@ -75,7 +75,7 @@ RIID-4665 moves `StaticAgentRegistry` and the binding validation helpers from
 the former private `riido_daemon/internal/riidoaiserver` package into this
 public repository.
 
-This migration intentionally introduces only the minimal `PollRequest` shape
-required by the binding helpers. The full assignment, poll response, heartbeat,
-event, metrics, store actor, and HTTP server API migrations remain separate
-units.
+RIID-4668 moves the broader assignment API DTO surface, including
+`PollRequest`, into this repository. The full store actor, poll response
+behavior, heartbeat behavior, event sync behavior, metrics route wiring, and
+HTTP server API migrations remain separate units.

@@ -192,6 +192,31 @@ snapshot/operation replay, outbox, DynamoDB/EventBridge adapters,
 environment parsing, review account seed, Terraform, secret values, or
 deployment evidence.
 
+### RIID-4668 — assignment contract/type migration
+
+This slice moves the executable assignment contract and public assignment DTO
+surface into the public control-plane repository.
+
+This slice does:
+
+- add `assignment_contract.riido.json`
+- add generated assignment schema version, state, poll action, task event, and
+  transition helpers
+- move `PollRequest` into the broader assignment API DTO surface
+- add `AssignRequest`, `Assignment`, heartbeat, poll response, agent event,
+  task event, health, and metrics DTOs
+- add tests that the JSON contract matches generated constants, terminal
+  classification, active classification, and legal transitions
+- add tests that assignment DTO JSON shapes match the former private contract
+- add `docs/20-domain/saas-control-plane.md` as the public SSOT for this slice
+- add a focused public CI workflow for the assignment contract/type slice
+
+This slice does not move the store actor, assignment queue/claim/lease logic,
+assignment HTTP routes, daemon poll/heartbeat/event handlers, SSE, metrics
+route wiring, provider status store/API, review account seed, environment
+parsing, Docker, Terraform, secret values, AWS adapters, or deployment
+evidence.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

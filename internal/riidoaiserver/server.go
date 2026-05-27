@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-const SchemaVersion = "riido-ai-server.v1"
-
 type ServerConfig struct {
 	Authorizer        RequestAuthorizer
 	AgentCatalogStore AgentCatalogStore
