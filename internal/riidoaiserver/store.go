@@ -137,6 +137,29 @@ func (s *Store) RecordAgentEvent(ctx context.Context, agentID string, req AgentE
 	}
 }
 
+func (s *Store) SubscribeTask(ctx context.Context, taskID string) ([]TaskEvent, <-chan TaskEvent, func(), error) {
+	reply := make(chan subscribeResult, 1)
+	if err := s.send(ctx, subscribeCmd{taskID: taskID, reply: reply}); err != nil {
+		return nil, nil, nil, err
+	}
+	select {
+	case res := <-reply:
+		if res.err != nil {
+			return nil, nil, nil, res.err
+		}
+		cancel := func() {
+			unsub := make(chan struct{}, 1)
+			if err := s.send(context.Background(), unsubscribeCmd{taskID: taskID, subID: res.subID, reply: unsub}); err != nil {
+				return
+			}
+			<-unsub
+		}
+		return res.history, res.events, cancel, nil
+	case <-ctx.Done():
+		return nil, nil, nil, ctx.Err()
+	}
+}
+
 func (s *Store) Metrics(ctx context.Context) (MetricsSnapshot, error) {
 	reply := make(chan metricsResult, 1)
 	if err := s.send(ctx, metricsCmd{reply: reply}); err != nil {
@@ -227,6 +250,24 @@ type getProviderStatusResult struct {
 	err      error
 }
 
+type subscribeCmd struct {
+	taskID string
+	reply  chan subscribeResult
+}
+
+type subscribeResult struct {
+	history []TaskEvent
+	events  <-chan TaskEvent
+	subID   int64
+	err     error
+}
+
+type unsubscribeCmd struct {
+	taskID string
+	subID  int64
+	reply  chan struct{}
+}
+
 type metricsCmd struct {
 	reply chan metricsResult
 }
@@ -262,6 +303,12 @@ func (s *Store) loop(state storeState) {
 		case getProviderStatusCmd:
 			response, ok, err := handleGetProviderStatus(&state, msg.agentID)
 			msg.reply <- getProviderStatusResult{response: response, ok: ok, err: err}
+		case subscribeCmd:
+			history, events, subID, err := s.handleSubscribe(&state, msg.taskID)
+			msg.reply <- subscribeResult{history: history, events: events, subID: subID, err: err}
+		case unsubscribeCmd:
+			s.handleUnsubscribe(&state, msg.taskID, msg.subID)
+			msg.reply <- struct{}{}
 		case metricsCmd:
 			msg.reply <- metricsResult{snapshot: s.handleMetrics(&state)}
 		case closeCmd:
@@ -550,6 +597,36 @@ func handleGetProviderStatus(state *storeState, agentID string) (ProviderStatusS
 		return ProviderStatusSyncResponse{}, false, nil
 	}
 	return cloneProviderStatusResponse(response), true, nil
+}
+
+func (s *Store) handleSubscribe(state *storeState, taskID string) ([]TaskEvent, <-chan TaskEvent, int64, error) {
+	taskID = strings.TrimSpace(taskID)
+	if taskID == "" {
+		return nil, nil, 0, errors.New("task_id is required")
+	}
+	state.nextSubscriberSeq++
+	subID := state.nextSubscriberSeq
+	ch := make(chan TaskEvent, 32)
+	if state.subscribers[taskID] == nil {
+		state.subscribers[taskID] = map[int64]chan TaskEvent{}
+	}
+	state.subscribers[taskID][subID] = ch
+	history := append([]TaskEvent(nil), state.events[taskID]...)
+	return history, ch, subID, nil
+}
+
+func (s *Store) handleUnsubscribe(state *storeState, taskID string, subID int64) {
+	subs := state.subscribers[taskID]
+	if subs == nil {
+		return
+	}
+	if ch, ok := subs[subID]; ok {
+		close(ch)
+		delete(subs, subID)
+	}
+	if len(subs) == 0 {
+		delete(state.subscribers, taskID)
+	}
 }
 
 func (s *Store) handleMetrics(state *storeState) MetricsSnapshot {

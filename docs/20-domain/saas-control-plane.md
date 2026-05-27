@@ -91,6 +91,24 @@ routes, `cmd/riido_ai_server` environment parsing, snapshot stores, file outbox
 adapters, durable operation save/claim wiring, DynamoDB, EventBridge,
 Terraform, AWS credentials, or deployment evidence.
 
+## Task Event SSE Adapter Boundary
+
+The public task event SSE adapter streams `TaskEvent` records from the
+`AssignmentStore` subscription port. It owns this stdlib-only route:
+
+- `GET /v1/component-tasks/{task_id}/events`
+
+The route must use `RequestAuthorizer` with `component_task_events` /
+`events:read` scope before subscribing. On connection it replays existing task
+event history as SSE messages. With `replay=1`, the adapter flushes history and
+returns without holding the stream open. Without `replay=1`, it keeps the stream
+open and forwards later task events until the request context is cancelled.
+
+The SSE adapter does not own `/metrics`, health/ready routes,
+`cmd/riido_ai_server` environment parsing, snapshot stores, file outbox
+adapters, durable operation save/claim wiring, DynamoDB, EventBridge,
+Terraform, AWS credentials, daemon/GUI SSE consumers, or deployment evidence.
+
 ## Durable Operation Boundary
 
 The assignment operation journal and claim-port contract is owned by
@@ -140,7 +158,9 @@ public repository.
 
 RIID-4675 moves the assignment HTTP adapter into this public repository.
 
-Task event SSE routes, `/metrics`, health/ready routes, snapshot stores, file
-outbox adapters, durable operation save/claim wiring, review account seed,
-`cmd/riido_ai_server`, Docker, Terraform, AWS adapters, and deployment evidence
-remain separate migration units.
+RIID-4677 moves the task event SSE adapter into this public repository.
+
+`/metrics`, health/ready routes, snapshot stores, file outbox adapters, durable
+operation save/claim wiring, review account seed, `cmd/riido_ai_server`,
+Docker, Terraform, AWS adapters, and deployment evidence remain separate
+migration units.

@@ -323,6 +323,32 @@ snapshot stores, file outbox adapters, assignment operation durable save/claim
 wiring, DynamoDB/EventBridge adapters, Terraform, secret values, AWS adapters,
 Docker, or deployment evidence.
 
+### RIID-4677 — task SSE stream adapter migration
+
+This slice moves the component-task event SSE adapter into the public
+control-plane repository.
+
+This slice does:
+
+- add `SubscribeTask(ctx, taskID)` to the `AssignmentStore` port
+- add subscribe/unsubscribe commands to the in-memory store actor
+- replay existing task event history on SSE connection
+- support `replay=1` as a history-only response that does not hold the stream
+  open
+- stream new task events to active subscribers after agent event append
+- add `GET /v1/component-tasks/{task_id}/events`
+- gate the route with `RequestAuthorizer` using `component_task_events` /
+  `events:read` scopes
+- preserve SSE framing as `id`, `event`, and JSON `data`
+- verify subscriber count metrics decrease after cancellation
+- add black-box HTTP/domain tests and focused public CI
+
+This slice does not move `/metrics`, health/ready routes,
+`cmd/riido_ai_server` environment parsing, snapshot stores, file outbox
+adapters, assignment operation durable save/claim wiring, DynamoDB/EventBridge
+adapters, Terraform, secret values, AWS adapters, Docker, daemon SSE clients,
+GUI SSE consumers, or deployment evidence.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public
