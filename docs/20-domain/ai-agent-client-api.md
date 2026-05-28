@@ -15,9 +15,18 @@ The contract projection is checked in under
 - OpenAPI: `control-plane-ai-agent-client.openapi.json`
 - generated React Query: `web/generated/aiAgentClient.ts`
 
-The canonical DSL/IR/OpenAPI flow is owned by `riido-contracts`; this
-repository consumes the projection so the running mock API, smoke tests, and
-generated frontend client stay aligned.
+Canonical vocabulary, shared enum semantics, and lifecycle/deprecation grammar
+are owned by `riido-contracts`. This repository owns the AI Agent client API
+sub-DSL that imports those canonical terms and projects them to OpenAPI for the
+running mock API, smoke tests, and generated frontend client.
+
+Client-usability API changes enter through `riido-control-plane`. If a change
+modifies business meaning, policy scope, or canonical vocabulary, the decision
+must be escalated to `riido-contracts` before this repository updates the
+sub-DSL.
+
+Cross-repository React Query delivery to `riido-client` is owned by
+[`api-client-delivery.md`](../30-architecture/api-client-delivery.md).
 
 ## Mock Runtime
 
@@ -62,9 +71,10 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
 
 ## Boundary
 
-This repository owns the mock HTTP behavior and generated client drift gate. It
-does not own production persistence, daemon runtime probing, Terraform state,
-live AWS evidence, or final DNS naming.
+This repository owns the mock HTTP behavior, API sub-DSL projection, generated
+client drift gate, and future generated-client delivery workflow. It does not
+own production persistence, daemon runtime probing, Terraform state, live AWS
+evidence, final DNS naming, or direct edits to the target frontend repository.
 
 ## Testnet Smoke
 

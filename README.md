@@ -17,8 +17,9 @@ provider status, authorization port, RBAC read model, mock/testnet API를
   제공합니다.
 - agent catalog, AI Agent client API, provider status, assignment polling
   같은 control-plane domain slice를 검증합니다.
-- `riido-contracts`의 DSL -> IR -> OpenAPI projection을 소비해 mock API와
-  generated React Query client가 drift 나지 않도록 합니다.
+- `riido-contracts`의 canonical DSL/IR을 기준으로 AI Agent client API
+  sub-DSL -> OpenAPI projection -> generated React Query client가 drift 나지
+  않도록 합니다.
 - 공개 GitHub Actions에서 black-box/domain/generator 검증을 실행합니다.
 
 ## 이 레포가 하지 않는 일
@@ -35,9 +36,11 @@ AI Agent client-facing endpoint는 Riido web과 desktop webview가 직접 호출
 SaaS API입니다. 따라서 handler, auth scope gate, mock store, SSE replay,
 React Query generated client는 `riido-control-plane`에서 함께 검증해야 합니다.
 
-다만 API shape 자체는 이 레포가 새로 정의하지 않습니다. 계약 원본은
-`riido-contracts`의 Domain DSL/API IR이고, 이 레포는 projection을 복사해
-실제 서버 동작과 generated client가 같은 계약을 따르는지 검증합니다.
+다만 canonical business vocabulary와 lifecycle/deprecation grammar의 최종
+권한은 `riido-contracts`에 있습니다. 이 레포는 그 언어를 import해 AI Agent
+client API sub-DSL과 handler/generator delivery boundary를 소유합니다.
+client 사용성 때문에 API surface 변경이 필요하면 `riido-control-plane`에서
+시작하고, 비즈니스 의미가 바뀌는 순간 `riido-contracts`로 escalation합니다.
 
 ## 어떤 문서를 보면 되나
 
@@ -48,6 +51,7 @@ React Query generated client는 `riido-control-plane`에서 함께 검증해야 
 | agent catalog RBAC 규칙 | [`docs/20-domain/agent-catalog-rbac.md`](docs/20-domain/agent-catalog-rbac.md) |
 | runtime/agent binding domain | [`docs/20-domain/agent-runtime-binding.md`](docs/20-domain/agent-runtime-binding.md) |
 | control-plane bounded context | [`docs/20-domain/context-map.md`](docs/20-domain/context-map.md) |
+| riido-client generated React Query 전달 정책 | [`docs/30-architecture/api-client-delivery.md`](docs/30-architecture/api-client-delivery.md) |
 | module/package 책임 분해 | [`docs/30-architecture/module-decomposition.md`](docs/30-architecture/module-decomposition.md) |
 | runtime env 변수와 설정 책임 | [`docs/30-architecture/config-reference.md`](docs/30-architecture/config-reference.md) |
 | daemon/contracts/infra/client와의 연결 | [`docs/30-architecture/integration-matrix.md`](docs/30-architecture/integration-matrix.md) |
@@ -86,17 +90,24 @@ visibility policy를 통과해야 합니다.
 ## Contract / generated client 흐름
 
 ```text
-riido-contracts DSL
-  -> riido-contracts API IR
+riido-contracts canonical DSL/IR
+  -> control-plane AI Agent client API sub-DSL
+  -> control-plane API IR
   -> OpenAPI projection
   -> contracts/ai-agent-client/*.json
   -> tools/reactquerygen
   -> web/generated/aiAgentClient.ts
 ```
 
-OpenAPI와 generated client는 사람이 임의로 고치는 SSOT가 아닙니다. 계약이
-바뀌면 `riido-contracts`의 DSL을 먼저 바꾸고, projection과 generated client를
-다시 생성해야 합니다.
+OpenAPI와 generated client는 사람이 임의로 고치는 SSOT가 아닙니다. API surface
+계약이 바뀌면 control-plane API sub-DSL을 먼저 바꾸고 projection과 generated
+client를 다시 생성해야 합니다. canonical vocabulary나 비즈니스 정책이 바뀌는
+경우에는 `riido-contracts` 변경이 선행되어야 합니다.
+
+`riido-client`로 React Query 코드를 전달하는 cross-repo workflow는
+[`docs/30-architecture/api-client-delivery.md`](docs/30-architecture/api-client-delivery.md)의
+tag-triggered delivery 정책을 따라야 합니다. 이 레포의 workflow 산출물만 신뢰하고
+client repo에서 Orval을 직접 실행하지 않는 것이 원칙입니다.
 
 ## 검증
 

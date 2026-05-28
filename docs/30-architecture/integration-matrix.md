@@ -14,6 +14,7 @@ operator/private infra validation.
 | agent catalog RBAC and HTTP | focused `internal/riidoaiserver` black-box tests | none |
 | AI Agent client mock API | focused `internal/riidoaiserver` black-box tests over generated contract paths | none |
 | generated React Query client | `tools/reactquerygen` drift test from checked-in OpenAPI | none |
+| future `riido-client` generated delivery | tag-triggered control-plane workflow, target-path allowlist, generated manifest/history diff | GitHub API only after delivery secrets are configured |
 | request authorization | static tokens and `httptest` external authorizer tests | none |
 | assignment polling/heartbeat/events | in-memory store and HTTP tests | none |
 | SSE | `httptest` streaming tests | none |
@@ -24,7 +25,7 @@ operator/private infra validation.
 | container image contract | `tools/containercontract` and optional local Docker build | Docker only for image build check |
 
 Public PR checks must not require AWS credentials, Terraform state, ECR access,
-or production secret material.
+production secret material, or write access to `riido-client`.
 
 ## Private / Operator Gates
 
@@ -51,6 +52,7 @@ go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
 go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
 go test ./tools/reactquerygen -count=1
+git diff --check
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
