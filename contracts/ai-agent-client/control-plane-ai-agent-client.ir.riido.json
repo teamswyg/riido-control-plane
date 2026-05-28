@@ -91,6 +91,18 @@
         "openapi: generated projection only",
         "client: consumes OpenAPI projection with Orval or a compatible generator"
       ]
+    },
+    {
+      "policy_id": "task_thread_progress_batching.v1",
+      "kind": "telemetry",
+      "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
+      "rules": [
+        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
+        "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
+        "daemon: flush pending progress before terminal assignment events",
+        "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
+        "client: render task-thread progress from typed event payloads and never parse provider raw output"
+      ]
     }
   ],
   "enums": [
@@ -229,7 +241,7 @@
     {
       "name": "AgentTaskCommentKind",
       "type": "string",
-      "description": "Typed task-thread status update emitted for Figma comment communication flows.",
+      "description": "Typed task-thread status update emitted for Figma task thread flows.",
       "values": [
         {
           "value": "queued_by_busy_agent",
@@ -288,6 +300,10 @@
         {
           "kind": "agent_work_status_changed",
           "schema": "AgentWorkStatusChangedEvent"
+        },
+        {
+          "kind": "agent_thread_progress",
+          "schema": "AgentThreadProgressEvent"
         }
       ]
     }
@@ -849,6 +865,104 @@
       }
     },
     {
+      "name": "AgentThreadProgressLine",
+      "schema": {
+        "name": "AgentThreadProgressLine",
+        "type": "object",
+        "required": [
+          "seq",
+          "message"
+        ],
+        "properties": [
+          {
+            "name": "seq",
+            "type": "integer"
+          },
+          {
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "name": "observed_at",
+            "type": "string",
+            "format": "date-time"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentThreadProgressEvent",
+      "schema": {
+        "name": "AgentThreadProgressEvent",
+        "type": "object",
+        "required": [
+          "event_type",
+          "schema_version",
+          "agent_id",
+          "task_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "comment_kind",
+          "lines"
+        ],
+        "properties": [
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "agent_thread_progress"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
+          },
+          {
+            "name": "comment_kind",
+            "ref": "AgentTaskCommentKind"
+          },
+          {
+            "name": "batch_started_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "batch_ended_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "lines",
+            "type": "array",
+            "items": {
+              "ref": "AgentThreadProgressLine"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "ErrorEnvelope",
       "schema": {
         "name": "ErrorEnvelope",
@@ -1084,7 +1198,7 @@
       "path": "/v1/client/ai-agent/events",
       "resource": "agent",
       "action": "stream",
-      "summary": "Stream AI Agent client updates for editability, work status, and runtime snapshots",
+      "summary": "Stream AI Agent client updates for editability, work status, runtime snapshots, and task-thread progress",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -1100,6 +1214,7 @@
       "scenario_ids": [
         "streamAIAgentClientEvents.editability-updates-before-mutation",
         "streamAIAgentClientEvents.runtime-parse-status",
+        "streamAIAgentClientEvents.runtime-progress-batch",
         "streamAIAgentClientEvents.task-comment-status-update"
       ]
     }
@@ -1151,7 +1266,7 @@
       "name": "comment routes to running agent",
       "given": "the Figma task comment box submits a user message to a selected AI agent",
       "when": "the selected agent is idle and has an online runtime",
-      "then": "the response reports running work and the event stream emits runtime_progress for the task thread"
+      "then": "the response reports running work and the event stream emits agent_thread_progress batches for the task thread"
     },
     {
       "scenario_id": "submitAIAgentTaskComment.comment-queues-behind-busy-agent",
@@ -1218,10 +1333,18 @@
       "then": "the event stream emits agent_work_status_changed with a typed AgentWorkStatus value"
     },
     {
+      "scenario_id": "streamAIAgentClientEvents.runtime-progress-batch",
+      "operation_id": "streamAIAgentClientEvents",
+      "name": "runtime progress batch",
+      "given": "the daemon parses multiple runtime progress markers such as thinking, collection, and web-search updates",
+      "when": "the daemon submits a bounded progress batch to the control plane",
+      "then": "the event stream emits agent_thread_progress with ordered progress lines for the task thread"
+    },
+    {
       "scenario_id": "streamAIAgentClientEvents.task-comment-status-update",
       "operation_id": "streamAIAgentClientEvents",
       "name": "task comment status update",
-      "given": "the Figma comment communication flow shows a queued or stopped agent update in a task thread",
+      "given": "the Figma task thread flow shows a queued or stopped agent update",
       "when": "the assignment state changes",
       "then": "the event stream includes task_id, assignment_state, and a typed comment_kind for the client thread"
     }

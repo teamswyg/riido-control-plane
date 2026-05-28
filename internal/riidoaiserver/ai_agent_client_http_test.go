@@ -1,11 +1,13 @@
 package riidoaiserver
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
@@ -208,6 +210,98 @@ func TestHTTPAIAgentClientMockSSEReplaysTypedCommentStatus(t *testing.T) {
 	message := resp.Body.String()
 	if !strings.Contains(message, "event: agent_work_status_changed\n") || !strings.Contains(message, string(AgentTaskCommentQueuedByBusyAgent)) {
 		t.Fatalf("sse message = %q", message)
+	}
+}
+
+func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testing.T) {
+	ctx := context.Background()
+	assignmentStore := NewStore()
+	defer assignmentStore.Close()
+	assignment, err := assignmentStore.AssignTask(ctx, "task-1", AssignRequest{
+		ComponentID:     "component-1",
+		AgentID:         "agent-owned-codex",
+		RuntimeProvider: "codex",
+		Prompt:          "summarize team projects",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask: %v", err)
+	}
+	if _, err := assignmentStore.PollAgent(ctx, "agent-owned-codex", PollRequest{DaemonID: "daemon-1", RuntimeID: "runtime-1"}); err != nil {
+		t.Fatalf("PollAgent: %v", err)
+	}
+	authorizer, err := NewStaticTokenAuthorizer([]StaticTokenCredential{{
+		PrincipalID: "daemon-1",
+		Token:       "daemon-token",
+		Scopes:      []string{"agent:*:events:write"},
+	}, {
+		PrincipalID: "user-1",
+		Token:       "user-token",
+		Scopes:      []string{"ai-agent:stream"},
+	}})
+	if err != nil {
+		t.Fatalf("NewStaticTokenAuthorizer: %v", err)
+	}
+	handler := NewServer(ServerConfig{
+		Assignment:    assignmentStore,
+		AIAgentClient: NewMockAIAgentClientStore(),
+		Authorizer:    authorizer,
+	}).Handler()
+
+	body := `{"assignment_id":"` + assignment.ID + `","task_id":"task-1","daemon_id":"daemon-1","runtime_id":"runtime-1","run_id":"run-1","lines":[{"seq":1,"message":"생각 중..."},{"seq":2,"message":"팀 프로젝트 수집 중 - 팀의 프로젝트 목록을 조회 중."}]}`
+	ingestReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-owned-codex/thread-progress", strings.NewReader(body))
+	ingestReq.Header.Set("Authorization", "Bearer daemon-token")
+	ingestResp := httptest.NewRecorder()
+	handler.ServeHTTP(ingestResp, ingestReq)
+	if ingestResp.Code != http.StatusAccepted {
+		t.Fatalf("ingest status=%d body=%s", ingestResp.Code, ingestResp.Body.String())
+	}
+	var response AgentThreadProgressBatchResponse
+	if err := json.Unmarshal(ingestResp.Body.Bytes(), &response); err != nil {
+		t.Fatalf("ingest json: %v", err)
+	}
+	if response.AcceptedLines != 2 || response.Event.EventType != "agent_thread_progress" || len(response.Event.Lines) != 2 {
+		t.Fatalf("ingest response = %+v", response)
+	}
+
+	eventsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/events?replay=1", nil)
+	eventsReq.Header.Set("Authorization", "Bearer user-token")
+	eventsResp := httptest.NewRecorder()
+	handler.ServeHTTP(eventsResp, eventsReq)
+	if eventsResp.Code != http.StatusOK {
+		t.Fatalf("events status=%d body=%s", eventsResp.Code, eventsResp.Body.String())
+	}
+	message := eventsResp.Body.String()
+	if !strings.Contains(message, "event: agent_thread_progress\n") || !strings.Contains(message, "팀 프로젝트 수집 중") {
+		t.Fatalf("events body = %q", message)
+	}
+}
+
+func TestMockAIAgentClientStoreThreadProgressFanout(t *testing.T) {
+	store := NewMockAIAgentClientStore()
+	history, events, cancel, err := store.SubscribeAIAgentClientEvents(context.Background(), AuthorizationResult{PrincipalID: "user-1"})
+	if err != nil {
+		t.Fatalf("SubscribeAIAgentClientEvents: %v", err)
+	}
+	defer cancel()
+	if len(history) == 0 {
+		t.Fatal("expected replay history")
+	}
+	if _, err := store.RecordAIAgentThreadProgress(context.Background(), "agent-owned-codex", AgentThreadProgressBatchRequest{
+		AssignmentID: "asn-1",
+		TaskID:       "task-1",
+		RunID:        "run-1",
+		Lines:        []AgentThreadProgressLine{{Seq: 1, Message: "웹 검색 실행 중"}},
+	}); err != nil {
+		t.Fatalf("RecordAIAgentThreadProgress: %v", err)
+	}
+	select {
+	case event := <-events:
+		progress, ok := event.Payload.(AgentThreadProgressEvent)
+		if !ok || progress.EventType != "agent_thread_progress" || progress.Lines[0].Message != "웹 검색 실행 중" {
+			t.Fatalf("fanout event = %+v", event)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timeout waiting for progress fanout")
 	}
 }
 

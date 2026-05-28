@@ -276,7 +276,7 @@
     "/v1/client/ai-agent/events": {
       "get": {
         "operationId": "streamAIAgentClientEvents",
-        "summary": "Stream AI Agent client updates for editability, work status, and runtime snapshots",
+        "summary": "Stream AI Agent client updates for editability, work status, runtime snapshots, and task-thread progress",
         "tags": [
           "ai_agent_client"
         ],
@@ -315,6 +315,7 @@
         "x-riido-scenarios": [
           "streamAIAgentClientEvents.editability-updates-before-mutation",
           "streamAIAgentClientEvents.runtime-parse-status",
+          "streamAIAgentClientEvents.runtime-progress-batch",
           "streamAIAgentClientEvents.task-comment-status-update"
         ]
       }
@@ -703,7 +704,7 @@
         "type": "object"
       },
       "AgentTaskCommentKind": {
-        "description": "Typed task-thread status update emitted for Figma comment communication flows.",
+        "description": "Typed task-thread status update emitted for Figma task thread flows.",
         "enum": [
           "queued_by_busy_agent",
           "stopped_by_agent_deleted",
@@ -713,6 +714,82 @@
           "task_failed"
         ],
         "type": "string"
+      },
+      "AgentThreadProgressEvent": {
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "batch_ended_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "batch_started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "comment_kind": {
+            "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "event_type": {
+            "enum": [
+              "agent_thread_progress"
+            ],
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AgentThreadProgressLine"
+            },
+            "type": "array"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          }
+        },
+        "required": [
+          "event_type",
+          "schema_version",
+          "agent_id",
+          "task_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "comment_kind",
+          "lines"
+        ],
+        "type": "object"
+      },
+      "AgentThreadProgressLine": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seq",
+          "message"
+        ],
+        "type": "object"
       },
       "AgentVisibility": {
         "description": "Workspace visibility for an agent.",
@@ -819,6 +896,7 @@
         "discriminator": {
           "mapping": {
             "agent_editability_changed": "#/components/schemas/AgentEditabilityChangedEvent",
+            "agent_thread_progress": "#/components/schemas/AgentThreadProgressEvent",
             "agent_work_status_changed": "#/components/schemas/AgentWorkStatusChangedEvent",
             "device_runtime_snapshot": "#/components/schemas/DeviceRuntimeSnapshotEvent"
           },
@@ -833,6 +911,9 @@
           },
           {
             "$ref": "#/components/schemas/AgentWorkStatusChangedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AgentThreadProgressEvent"
           }
         ]
       },
