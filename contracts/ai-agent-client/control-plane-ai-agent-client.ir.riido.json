@@ -50,7 +50,7 @@
     {
       "policy_id": "ai_agent_rbac.v1",
       "kind": "rbac",
-      "description": "Admin can read and mutate all workspace agents; agent owner is admin-equivalent only for owned agents; non-admin users read owned agents plus other users' public agents.",
+      "description": "Admin은 workspace의 모든 agent를 조회/수정/삭제할 수 있습니다. agent owner는 자신이 소유한 agent에 한해 admin과 동일하게 취급됩니다. non-admin은 자신이 소유한 agent와 다른 사용자의 public agent만 조회합니다.",
       "rules": [
         "admin: read public and private agents, update all, delete all",
         "owner: read owned agents, update owned agents, delete owned agents",
@@ -60,17 +60,17 @@
     {
       "policy_id": "agent_mutation_safety.v1",
       "kind": "lifecycle",
-      "description": "Deleting an agent force-unassigns queued tasks and force-stops running tasks; editing is allowed only when the agent has no assigned tasks, and editability must be visible to clients before mutation.",
+      "description": "agent 삭제 시 예약된 작업은 강제 큐 해제되고 실행 중 작업은 강제 중단됩니다. agent 수정은 할당된 작업이 없을 때만 허용되며, client는 수정 가능 여부를 mutation 전에 조회하거나 SSE로 받아야 합니다.",
       "rules": [
         "delete: unassign queued tasks and force-stop running tasks before confirming deletion",
         "edit: allowed only when assigned_task_count is zero",
-        "editability: emitted through query and SSE before a client enables editing"
+        "editability: client가 수정 UI를 활성화하기 전에 query와 SSE로 전달됩니다"
       ]
     },
     {
       "policy_id": "runtime_liveness.v1",
       "kind": "liveness",
-      "description": "Daemon-owned runtime detection controls online/offline policy for agent assignments.",
+      "description": "데몬이 소유한 runtime 감지 결과가 agent assignment의 online/offline 정책을 결정합니다.",
       "rules": [
         "daemon: scan runtimes immediately after start",
         "daemon: scan runtimes every 30 seconds after start",
@@ -78,18 +78,18 @@
         "runtime_deleted_with_assigned_agent: mark runtime offline",
         "runtime_deleted_without_assigned_agent: treat runtime as absent",
         "runtime_reinstalled_same_device: mark runtime online according to online/offline policy only",
-        "runtime_detection_error: expose offline to clients"
+        "runtime_detection_error: client에는 offline으로 노출합니다"
       ]
     },
     {
       "policy_id": "api_codegen_safety.v1",
       "kind": "projection",
-      "description": "Control-plane API enums and union values are owned in DSL and preserved in IR before OpenAPI generation so Orval/client codegen gets safe discriminated shapes.",
+      "description": "control-plane API enum과 union 값은 DSL에서 소유하고 IR에서 보존한 뒤 OpenAPI로 투영되어 Orval/client codegen이 안전한 구분 union을 생성할 수 있어야 합니다.",
       "rules": [
         "enum: define as top-level DSL enum, not ad hoc string documentation",
         "sum_type: define discriminator and variants in DSL and IR",
         "openapi: generated projection only",
-        "client: consumes OpenAPI projection with Orval or a compatible generator"
+        "client: OpenAPI projection을 Orval 또는 호환 generator로 소비합니다"
       ]
     }
   ],
@@ -97,22 +97,22 @@
     {
       "name": "AgentVisibility",
       "type": "string",
-      "description": "Workspace visibility for an agent.",
+      "description": "agent의 workspace 공개 범위입니다.",
       "values": [
         {
           "value": "public",
-          "description": "Visible to non-admin workspace users."
+          "description": "non-admin workspace 사용자에게도 보입니다."
         },
         {
           "value": "private",
-          "description": "Visible only to admin and owner."
+          "description": "admin과 owner에게만 보입니다."
         }
       ]
     },
     {
       "name": "RuntimeKind",
       "type": "string",
-      "description": "Runtime installed on a device and controlled by the device owner.",
+      "description": "device에 설치되어 device owner가 제어하는 runtime입니다.",
       "values": [
         {
           "value": "codex"
@@ -131,7 +131,7 @@
     {
       "name": "RuntimeAvailability",
       "type": "string",
-      "description": "Client-visible runtime availability.",
+      "description": "client에 노출되는 runtime online/offline 상태입니다.",
       "values": [
         {
           "value": "online"
@@ -144,7 +144,7 @@
     {
       "name": "RuntimeDetectionState",
       "type": "string",
-      "description": "Daemon detection result before actor-state reduction.",
+      "description": "actor state reduction 전에 데몬이 감지한 runtime 상태입니다.",
       "values": [
         {
           "value": "detected"
@@ -160,7 +160,7 @@
     {
       "name": "AgentEditability",
       "type": "string",
-      "description": "Whether an agent can currently be edited.",
+      "description": "agent를 현재 수정할 수 있는지 나타냅니다.",
       "values": [
         {
           "value": "editable"
@@ -173,7 +173,7 @@
     {
       "name": "AgentWorkStatus",
       "type": "string",
-      "description": "Client-visible status derived from runtime output and task assignment state.",
+      "description": "runtime output과 task assignment state에서 파생된 client 표시용 agent 작업 상태입니다.",
       "values": [
         {
           "value": "idle"
@@ -201,7 +201,7 @@
     {
       "name": "AgentAssignmentState",
       "type": "string",
-      "description": "Assignment state affected by agent deletion and runtime lifecycle.",
+      "description": "agent 삭제와 runtime lifecycle에 의해 변경되는 task assignment 상태입니다.",
       "values": [
         {
           "value": "queued"
@@ -229,38 +229,38 @@
     {
       "name": "AgentTaskCommentKind",
       "type": "string",
-      "description": "Typed task-thread status update emitted for Figma comment communication flows.",
+      "description": "Figma comment 소통 흐름에서 task thread에 기록되는 상태 update 종류입니다.",
       "values": [
         {
           "value": "queued_by_busy_agent",
-          "description": "Assignment is queued because the selected agent is already working."
+          "description": "선택된 agent가 이미 작업 중이어서 assignment가 queue에 대기합니다."
         },
         {
           "value": "stopped_by_agent_deleted",
-          "description": "Assigned work was stopped because the agent was deleted."
+          "description": "agent 삭제로 인해 할당된 작업이 중단되었습니다."
         },
         {
           "value": "stopped_by_user_request",
-          "description": "Assigned work was stopped by an explicit user action."
+          "description": "명시적인 사용자 요청으로 할당된 작업이 중단되었습니다."
         },
         {
           "value": "runtime_progress",
-          "description": "Runtime output produced a progress update."
+          "description": "runtime output에서 진행 상태 update가 생성되었습니다."
         },
         {
           "value": "task_completed",
-          "description": "Runtime output produced a terminal completion update."
+          "description": "runtime output에서 작업 완료 update가 생성되었습니다."
         },
         {
           "value": "task_failed",
-          "description": "Runtime or validation produced a failure update."
+          "description": "runtime 또는 validation에서 실패 update가 생성되었습니다."
         }
       ]
     },
     {
       "name": "ClientKind",
       "type": "string",
-      "description": "Client consuming the AI Agent control-plane surface.",
+      "description": "AI Agent control-plane surface를 소비하는 client 종류입니다.",
       "values": [
         {
           "value": "web"
@@ -275,7 +275,7 @@
     {
       "name": "ClientStreamEvent",
       "discriminator": "event_type",
-      "description": "SSE event union consumed by web and desktop webview clients.",
+      "description": "web과 desktop webview client가 소비하는 SSE event union입니다.",
       "variants": [
         {
           "kind": "device_runtime_snapshot",
@@ -878,7 +878,7 @@
       "path": "/v1/client/ai-agent/bootstrap",
       "resource": "agent",
       "action": "read",
-      "summary": "Read AI Agent screen bootstrap data for web or desktop webview clients",
+      "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -901,7 +901,7 @@
       "path": "/v1/client/ai-agent/devices",
       "resource": "device",
       "action": "read",
-      "summary": "List device runtime availability for the authorized principal",
+      "summary": "권한이 확인된 principal의 device runtime 상태를 조회합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -925,7 +925,7 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignable-agents",
       "resource": "agent",
       "action": "read",
-      "summary": "List agents assignable from a task participant dropdown",
+      "summary": "task participant dropdown에서 할당 가능한 agent 목록을 조회합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -950,7 +950,7 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/comments",
       "resource": "agent",
       "action": "create",
-      "summary": "Submit a task-thread comment that should be routed to an assigned AI agent",
+      "summary": "task thread comment를 할당된 AI agent에게 전달합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -979,7 +979,7 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/stop",
       "resource": "agent",
       "action": "stop",
-      "summary": "Stop AI agent work from a task-thread stop action",
+      "summary": "task thread의 stop action으로 AI agent 작업을 중단합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -1007,7 +1007,7 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}/editability",
       "resource": "agent",
       "action": "read",
-      "summary": "Read whether an agent can be edited before enabling client controls",
+      "summary": "client control 활성화 전에 agent 수정 가능 여부를 조회합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -1031,7 +1031,7 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}",
       "resource": "agent",
       "action": "update",
-      "summary": "Update agent display/configuration fields when no task is assigned",
+      "summary": "할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -1060,7 +1060,7 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}",
       "resource": "agent",
       "action": "delete",
-      "summary": "Delete an agent and force-clear its queued/running assignments",
+      "summary": "agent를 삭제하고 queued/running assignment를 강제로 정리합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -1084,7 +1084,7 @@
       "path": "/v1/client/ai-agent/events",
       "resource": "agent",
       "action": "stream",
-      "summary": "Stream AI Agent client updates for editability, work status, and runtime snapshots",
+      "summary": "editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [

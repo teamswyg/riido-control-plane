@@ -100,6 +100,11 @@ Generator requirements:
 - avoid `npx` or floating package installs
 - disable or audit install scripts where the package manager supports it
 - keep the generated output deterministic enough for reviewable diffs
+- emit client-facing comments and notes in Korean, except for stable code
+  identifiers, endpoint paths, enum literal values, package names, and repository
+  names
+- carry OpenAPI schema descriptions and operation summaries into generated
+  JSDoc so frontend developers do not have to infer API behavior from type names
 
 `tools/reactquerygen` remains a small deterministic public fixture generator for
 the checked-in mock surface. It is useful for drift tests, but it is not the
@@ -122,6 +127,11 @@ OpenAPI diff.
 The release manifest is the authoritative machine-readable summary for a
 control-plane API release. It links the control-plane tag, source DSL/IR digest,
 OpenAPI digest, generator version, generated output path, and lifecycle summary.
+
+Client-facing README, history notes, manifest notes, and generated JSDoc are part
+of the delivered developer experience. They must be written in Korean because
+`riido-client` UI and team-facing development notes are Korean-first. English is
+kept only where changing it would change code identity or wire contract shape.
 
 ## Secret And Permission Boundary
 
@@ -147,4 +157,6 @@ state, customer data, or production bearer tokens.
   implemented.
 - Generated history and manifest artifacts carry lifecycle/deprecation
   information from DSL/IR through the client handoff.
+- Client-facing generated comments and notes are Korean-first and preserve
+  OpenAPI descriptions in JSDoc.
 - This slice does not edit `teamswyg/riido-client`.

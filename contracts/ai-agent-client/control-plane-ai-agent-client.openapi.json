@@ -13,7 +13,7 @@
     "/v1/client/ai-agent/agents/{agent_id}": {
       "delete": {
         "operationId": "deleteAIAgent",
-        "summary": "Delete an agent and force-clear its queued/running assignments",
+        "summary": "agent를 삭제하고 queued/running assignment를 강제로 정리합니다",
         "tags": [
           "ai_agent_client"
         ],
@@ -29,7 +29,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "성공",
             "content": {
               "application/json": {
                 "schema": {
@@ -39,7 +39,7 @@
             }
           },
           "default": {
-            "description": "error",
+            "description": "오류",
             "content": {
               "application/json": {
                 "schema": {
@@ -66,7 +66,7 @@
       },
       "patch": {
         "operationId": "updateAIAgentConfiguration",
-        "summary": "Update agent display/configuration fields when no task is assigned",
+        "summary": "할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다",
         "tags": [
           "ai_agent_client"
         ],
@@ -92,7 +92,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "성공",
             "content": {
               "application/json": {
                 "schema": {
@@ -102,7 +102,7 @@
             }
           },
           "default": {
-            "description": "error",
+            "description": "오류",
             "content": {
               "application/json": {
                 "schema": {
@@ -132,7 +132,7 @@
     "/v1/client/ai-agent/agents/{agent_id}/editability": {
       "get": {
         "operationId": "getAIAgentEditability",
-        "summary": "Read whether an agent can be edited before enabling client controls",
+        "summary": "client control 활성화 전에 agent 수정 가능 여부를 조회합니다",
         "tags": [
           "ai_agent_client"
         ],
@@ -148,7 +148,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "성공",
             "content": {
               "application/json": {
                 "schema": {
@@ -158,7 +158,7 @@
             }
           },
           "default": {
-            "description": "error",
+            "description": "오류",
             "content": {
               "application/json": {
                 "schema": {
@@ -187,13 +187,13 @@
     "/v1/client/ai-agent/bootstrap": {
       "get": {
         "operationId": "getAIAgentClientBootstrap",
-        "summary": "Read AI Agent screen bootstrap data for web or desktop webview clients",
+        "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
         "tags": [
           "ai_agent_client"
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "성공",
             "content": {
               "application/json": {
                 "schema": {
@@ -203,7 +203,7 @@
             }
           },
           "default": {
-            "description": "error",
+            "description": "오류",
             "content": {
               "application/json": {
                 "schema": {
@@ -231,13 +231,13 @@
     "/v1/client/ai-agent/devices": {
       "get": {
         "operationId": "listAIAgentDeviceRuntimes",
-        "summary": "List device runtime availability for the authorized principal",
+        "summary": "권한이 확인된 principal의 device runtime 상태를 조회합니다",
         "tags": [
           "ai_agent_client"
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "성공",
             "content": {
               "application/json": {
                 "schema": {
@@ -247,7 +247,7 @@
             }
           },
           "default": {
-            "description": "error",
+            "description": "오류",
             "content": {
               "application/json": {
                 "schema": {
@@ -276,13 +276,13 @@
     "/v1/client/ai-agent/events": {
       "get": {
         "operationId": "streamAIAgentClientEvents",
-        "summary": "Stream AI Agent client updates for editability, work status, and runtime snapshots",
+        "summary": "editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다",
         "tags": [
           "ai_agent_client"
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "성공",
             "content": {
               "text/event-stream": {
                 "schema": {
@@ -292,7 +292,7 @@
             }
           },
           "default": {
-            "description": "error",
+            "description": "오류",
             "content": {
               "application/json": {
                 "schema": {
@@ -322,7 +322,7 @@
     "/v1/client/ai-agent/tasks/{task_id}/assignable-agents": {
       "get": {
         "operationId": "listAIAgentTaskAssignableAgents",
-        "summary": "List agents assignable from a task participant dropdown",
+        "summary": "task participant dropdown에서 할당 가능한 agent 목록을 조회합니다",
         "tags": [
           "ai_agent_client"
         ],
@@ -338,7 +338,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "성공",
             "content": {
               "application/json": {
                 "schema": {
@@ -348,7 +348,7 @@
             }
           },
           "default": {
-            "description": "error",
+            "description": "오류",
             "content": {
               "application/json": {
                 "schema": {
@@ -378,7 +378,7 @@
     "/v1/client/ai-agent/tasks/{task_id}/comments": {
       "post": {
         "operationId": "submitAIAgentTaskComment",
-        "summary": "Submit a task-thread comment that should be routed to an assigned AI agent",
+        "summary": "task thread comment를 할당된 AI agent에게 전달합니다",
         "tags": [
           "ai_agent_client"
         ],
@@ -404,7 +404,7 @@
         },
         "responses": {
           "202": {
-            "description": "response",
+            "description": "응답",
             "content": {
               "application/json": {
                 "schema": {
@@ -414,7 +414,7 @@
             }
           },
           "default": {
-            "description": "error",
+            "description": "오류",
             "content": {
               "application/json": {
                 "schema": {
@@ -444,7 +444,7 @@
     "/v1/client/ai-agent/tasks/{task_id}/stop": {
       "post": {
         "operationId": "stopAIAgentTask",
-        "summary": "Stop AI agent work from a task-thread stop action",
+        "summary": "task thread의 stop action으로 AI agent 작업을 중단합니다",
         "tags": [
           "ai_agent_client"
         ],
@@ -469,7 +469,7 @@
         },
         "responses": {
           "202": {
-            "description": "response",
+            "description": "응답",
             "content": {
               "application/json": {
                 "schema": {
@@ -479,7 +479,7 @@
             }
           },
           "default": {
-            "description": "error",
+            "description": "오류",
             "content": {
               "application/json": {
                 "schema": {
@@ -510,6 +510,7 @@
   "components": {
     "schemas": {
       "AIAgentTaskActionResponse": {
+        "description": "task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.",
         "properties": {
           "agent_id": {
             "type": "string"
@@ -549,7 +550,7 @@
         "type": "object"
       },
       "AgentAssignmentState": {
-        "description": "Assignment state affected by agent deletion and runtime lifecycle.",
+        "description": "agent 삭제와 runtime lifecycle에 의해 변경되는 task assignment 상태입니다.",
         "enum": [
           "queued",
           "running",
@@ -562,6 +563,7 @@
         "type": "string"
       },
       "AgentClientListResponse": {
+        "description": "task 또는 화면에서 표시할 agent 목록 응답입니다.",
         "properties": {
           "agents": {
             "items": {
@@ -580,6 +582,7 @@
         "type": "object"
       },
       "AgentClientRecord": {
+        "description": "client 화면에 표시하는 agent 요약 record입니다.",
         "properties": {
           "agent_id": {
             "type": "string"
@@ -625,6 +628,7 @@
         "type": "object"
       },
       "AgentClientRecordResponse": {
+        "description": "단일 agent 변경 후 최신 agent record를 반환하는 응답입니다.",
         "properties": {
           "agent": {
             "$ref": "#/components/schemas/AgentClientRecord"
@@ -640,7 +644,7 @@
         "type": "object"
       },
       "AgentEditability": {
-        "description": "Whether an agent can currently be edited.",
+        "description": "agent를 현재 수정할 수 있는지 나타냅니다.",
         "enum": [
           "editable",
           "blocked_assigned_tasks"
@@ -648,6 +652,7 @@
         "type": "string"
       },
       "AgentEditabilityChangedEvent": {
+        "description": "agent 수정 가능 여부 변경을 전달하는 SSE event입니다.",
         "properties": {
           "agent_id": {
             "type": "string"
@@ -677,6 +682,7 @@
         "type": "object"
       },
       "AgentEditabilityResponse": {
+        "description": "agent 수정 가능 여부와 차단 사유를 알려주는 응답입니다.",
         "properties": {
           "agent_id": {
             "type": "string"
@@ -703,7 +709,7 @@
         "type": "object"
       },
       "AgentTaskCommentKind": {
-        "description": "Typed task-thread status update emitted for Figma comment communication flows.",
+        "description": "Figma comment 소통 흐름에서 task thread에 기록되는 상태 update 종류입니다.",
         "enum": [
           "queued_by_busy_agent",
           "stopped_by_agent_deleted",
@@ -715,7 +721,7 @@
         "type": "string"
       },
       "AgentVisibility": {
-        "description": "Workspace visibility for an agent.",
+        "description": "agent의 workspace 공개 범위입니다.",
         "enum": [
           "public",
           "private"
@@ -723,7 +729,7 @@
         "type": "string"
       },
       "AgentWorkStatus": {
-        "description": "Client-visible status derived from runtime output and task assignment state.",
+        "description": "runtime output과 task assignment state에서 파생된 client 표시용 agent 작업 상태입니다.",
         "enum": [
           "idle",
           "queued",
@@ -736,6 +742,7 @@
         "type": "string"
       },
       "AgentWorkStatusChangedEvent": {
+        "description": "agent 작업 상태와 task thread comment 상태 변경을 전달하는 SSE event입니다.",
         "properties": {
           "agent_id": {
             "type": "string"
@@ -774,6 +781,7 @@
         "type": "object"
       },
       "ClientBootstrapResponse": {
+        "description": "AI Agent 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다.",
         "properties": {
           "agents": {
             "items": {
@@ -807,7 +815,7 @@
         "type": "object"
       },
       "ClientKind": {
-        "description": "Client consuming the AI Agent control-plane surface.",
+        "description": "AI Agent control-plane surface를 소비하는 client 종류입니다.",
         "enum": [
           "web",
           "desktop_webview"
@@ -815,7 +823,7 @@
         "type": "string"
       },
       "ClientStreamEvent": {
-        "description": "SSE event union consumed by web and desktop webview clients.",
+        "description": "web과 desktop webview client가 소비하는 SSE event union입니다.",
         "discriminator": {
           "mapping": {
             "agent_editability_changed": "#/components/schemas/AgentEditabilityChangedEvent",
@@ -837,6 +845,7 @@
         ]
       },
       "DeleteAgentResponse": {
+        "description": "agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.",
         "properties": {
           "agent_id": {
             "type": "string"
@@ -860,6 +869,7 @@
         "type": "object"
       },
       "DeviceRecord": {
+        "description": "데몬이 연결된 device와 해당 device에서 감지된 runtime 목록입니다.",
         "properties": {
           "daemon_last_seen_at": {
             "format": "date-time",
@@ -889,6 +899,7 @@
         "type": "object"
       },
       "DeviceRuntimeListResponse": {
+        "description": "권한이 있는 principal이 볼 수 있는 device runtime 목록 응답입니다.",
         "properties": {
           "devices": {
             "items": {
@@ -907,6 +918,7 @@
         "type": "object"
       },
       "DeviceRuntimeSnapshotEvent": {
+        "description": "device runtime 감지 결과가 갱신되었음을 알리는 SSE event입니다.",
         "properties": {
           "device": {
             "$ref": "#/components/schemas/DeviceRecord"
@@ -929,6 +941,7 @@
         "type": "object"
       },
       "ErrorEnvelope": {
+        "description": "control-plane API 오류 응답 envelope입니다.",
         "properties": {
           "error": {
             "type": "string"
@@ -944,7 +957,7 @@
         "type": "object"
       },
       "RuntimeAvailability": {
-        "description": "Client-visible runtime availability.",
+        "description": "client에 노출되는 runtime online/offline 상태입니다.",
         "enum": [
           "online",
           "offline"
@@ -952,7 +965,7 @@
         "type": "string"
       },
       "RuntimeDetectionState": {
-        "description": "Daemon detection result before actor-state reduction.",
+        "description": "actor state reduction 전에 데몬이 감지한 runtime 상태입니다.",
         "enum": [
           "detected",
           "missing",
@@ -961,7 +974,7 @@
         "type": "string"
       },
       "RuntimeKind": {
-        "description": "Runtime installed on a device and controlled by the device owner.",
+        "description": "device에 설치되어 device owner가 제어하는 runtime입니다.",
         "enum": [
           "codex",
           "claude_code",
@@ -971,6 +984,7 @@
         "type": "string"
       },
       "RuntimeRecord": {
+        "description": "device에 설치되었거나 assignment 정책상 offline으로 유지되는 runtime record입니다.",
         "properties": {
           "availability": {
             "$ref": "#/components/schemas/RuntimeAvailability"
@@ -1009,6 +1023,7 @@
         "type": "object"
       },
       "StopAIAgentTaskRequest": {
+        "description": "task thread에서 agent 작업을 중단하기 위한 요청입니다.",
         "properties": {
           "agent_id": {
             "type": "string"
@@ -1020,6 +1035,7 @@
         "type": "object"
       },
       "SubmitAIAgentTaskCommentRequest": {
+        "description": "task thread comment를 agent에게 전달하기 위한 요청입니다.",
         "properties": {
           "agent_id": {
             "type": "string"
@@ -1038,6 +1054,7 @@
         "type": "object"
       },
       "UpdateAgentConfigurationRequest": {
+        "description": "agent 이름, 공개 범위, runtime 연결을 수정하기 위한 요청입니다.",
         "properties": {
           "name": {
             "type": "string"

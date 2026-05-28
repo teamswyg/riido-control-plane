@@ -48,6 +48,10 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"Promise<AIAgentTaskActionResponse>",
 		"export async function streamAIAgentClientEvents",
 		"Promise<Response>",
+		"이 파일은 tools/reactquerygen으로 생성됩니다. 직접 수정하지 마세요.",
+		"AI Agent 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다.",
+		"web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
+		"React Query query hook입니다.",
 	} {
 		if !strings.Contains(body, required) {
 			t.Fatalf("generated client missing %q", required)
