@@ -1,0 +1,86 @@
+# AI Agent Client API
+
+> Riido task: RIID-4721 `[Server] AI Agent client-facing endpoint handlers`
+
+This file is the control-plane SSOT for the mockable AI Agent client API
+implemented by `internal/riidoaiserver`.
+
+## Contract Source
+
+The contract projection is checked in under
+`contracts/ai-agent-client/`:
+
+- DSL: `control-plane-ai-agent-client.dsl.riido.json`
+- IR: `control-plane-ai-agent-client.ir.riido.json`
+- OpenAPI: `control-plane-ai-agent-client.openapi.json`
+- generated React Query: `web/generated/aiAgentClient.ts`
+
+The canonical DSL/IR/OpenAPI flow is owned by `riido-contracts`; this
+repository consumes the projection so the running mock API, smoke tests, and
+generated frontend client stay aligned.
+
+## Mock Runtime
+
+The mock surface is enabled by `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true`.
+When disabled, protected AI Agent client routes fail closed with `503` instead
+of returning synthetic data.
+
+The mock API implements:
+
+- `GET /v1/client/ai-agent/bootstrap`
+- `GET /v1/client/ai-agent/devices`
+- `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
+- `POST /v1/client/ai-agent/tasks/{task_id}/comments`
+- `POST /v1/client/ai-agent/tasks/{task_id}/stop`
+- `GET /v1/client/ai-agent/agents/{agent_id}/editability`
+- `PATCH /v1/client/ai-agent/agents/{agent_id}`
+- `DELETE /v1/client/ai-agent/agents/{agent_id}`
+- `GET /v1/client/ai-agent/events`
+
+The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
+`replay=1`, it keeps the connection open as a client event stream.
+
+## Policy
+
+- visible agents are the viewer's owned agents plus other users' public agents
+- task participant dropdown responses are ordered owned-first, then by name
+- non-owner, non-admin users cannot mutate other users' public agents
+- editing is blocked while `assigned_task_count` is greater than zero
+- delete returns forced assignment effects for queued/running mock tasks
+- task-thread comments can enqueue work when the selected agent is busy
+- task-thread stop actions return `stopped_by_user_request`
+- task-thread status updates use typed `AgentTaskCommentKind` values
+
+## Figma Handoff Evidence
+
+Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
+
+- `node-id=236-21379`: normal task thread with comment input and agent reply
+- `node-id=153-8761`: queued task comment when the agent is already busy
+- `node-id=227-19354`: task stop flow with stopped agent comment
+- `node-id=156-19307`: AI Agent menu placement in the workspace sidebar
+
+## Boundary
+
+This repository owns the mock HTTP behavior and generated client drift gate. It
+does not own production persistence, daemon runtime probing, Terraform state,
+live AWS evidence, or final DNS naming.
+
+## Testnet Smoke
+
+The `ai-agent-client-testnet-smoke` GitHub Actions workflow is intentionally
+separate from the local API/generator workflow. It calls the deployed testnet
+ALB for:
+
+- `GET /healthz`
+- `GET /readyz`
+- `GET /v1/client/ai-agent/bootstrap`
+- `GET /v1/client/ai-agent/devices`
+- `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
+- `POST /v1/client/ai-agent/tasks/{task_id}/comments`
+- `POST /v1/client/ai-agent/tasks/{task_id}/stop`
+- `GET /v1/client/ai-agent/events?replay=1`
+
+The workflow reads the ALB base URL from a manual workflow input or the
+`RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable, and the bearer token
+from the `RIIDO_AI_SERVER_TESTNET_TOKEN` repository secret.

@@ -19,6 +19,7 @@ This file is the public Factor 12 configuration catalog for
 | `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` | empty | `cmd/riido_ai_server` | enables public-safe review/demo seed provisioning using only a token hash |
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | disabled | `cmd/riido_ai_server` | positive integer interval for stdout CloudWatch EMF JSON Lines |
 | `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS` | empty | `cmd/riido_ai_server` | comma-separated exact `http://` or `https://` browser origins allowed to call the public HTTP API with CORS preflight support |
+| `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` | `false` | `cmd/riido_ai_server` | enables the mock AI Agent client API backed by synthetic in-memory data |
 
 All JSON env vars are decoded with unknown-field rejection and trailing-data
 rejection. Empty values disable the optional feature rather than selecting a
@@ -28,6 +29,10 @@ production default.
 enables browser transport from explicitly listed origins. Every protected API
 still requires the bearer-token authorization rules owned by
 [`../20-domain/request-authorization.md`](../20-domain/request-authorization.md).
+
+`RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` is a temporary testnet/review switch. It
+does not enable unauthenticated access; all AI Agent client endpoints still
+require bearer scopes.
 
 ## Non-Config Facts
 

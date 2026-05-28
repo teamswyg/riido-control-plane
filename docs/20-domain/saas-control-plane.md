@@ -291,6 +291,8 @@ public repository. It owns only these environment variables:
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
 - `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`
 - `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`
+- `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`
+- `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK`
 
 The agent binding and static-token JSON values use strict decoding, so unknown
 fields and trailing JSON are rejected. Static-token authorization may be
@@ -302,6 +304,9 @@ authorizer, while forbidden results stop evaluation.
 review account provisioning path. The environment value is a SHA-256 hash of an
 externally supplied review token; the raw token remains outside this
 repository.
+
+`RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` enables only the temporary AI Agent
+client mock API described in [`ai-agent-client-api.md`](ai-agent-client-api.md).
 
 This boundary does not own legacy broad bearer-token compatibility,
 snapshot/outbox stores, durable operation save/claim wiring, DynamoDB,

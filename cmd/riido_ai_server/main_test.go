@@ -98,6 +98,28 @@ func TestConfigFromEnvParsesWebAllowedOrigins(t *testing.T) {
 	}
 }
 
+func TestConfigFromEnvParsesAIAgentClientMockFlag(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envAIAgentClientMock, "true")
+
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	if !config.AIAgentClientMock {
+		t.Fatal("AI Agent client mock flag should be enabled")
+	}
+}
+
+func TestConfigFromEnvRejectsInvalidAIAgentClientMockFlag(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envAIAgentClientMock, "sometimes")
+
+	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envAIAgentClientMock) {
+		t.Fatalf("configFromEnv err=%v", err)
+	}
+}
+
 func TestParseWebAllowedOriginsRejectsInvalidOrigins(t *testing.T) {
 	for _, value := range []string{
 		"*",
@@ -321,6 +343,7 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envReviewAccountTokenHash,
 		envMetricsLogInterval,
 		envWebAllowedOrigins,
+		envAIAgentClientMock,
 	} {
 		t.Setenv(key, "")
 	}

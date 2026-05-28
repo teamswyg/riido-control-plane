@@ -12,6 +12,7 @@ import (
 type ServerConfig struct {
 	Authorizer        RequestAuthorizer
 	AgentCatalogStore AgentCatalogStore
+	AIAgentClient     AIAgentClientStore
 	Assignment        AssignmentStore
 	ProviderStatus    ProviderStatusStore
 	ProviderRead      ProviderStatusReader
@@ -21,6 +22,7 @@ type ServerConfig struct {
 type Server struct {
 	assignment   AssignmentStore
 	agentCatalog AgentCatalogStore
+	aiAgent      AIAgentClientStore
 	provider     ProviderStatusStore
 	providerRead ProviderStatusReader
 	config       ServerConfig
@@ -49,6 +51,7 @@ func NewServer(config ServerConfig) Server {
 	return Server{
 		assignment:   config.Assignment,
 		agentCatalog: agentCatalog,
+		aiAgent:      config.AIAgentClient,
 		provider:     provider,
 		providerRead: providerRead,
 		config:       config,
@@ -60,6 +63,11 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/healthz", s.handleHealth)
 	mux.HandleFunc("/readyz", s.handleReady)
 	mux.HandleFunc("/metrics", s.handleMetrics)
+	mux.HandleFunc("/v1/client/ai-agent/bootstrap", s.handleAIAgentClientBootstrap)
+	mux.HandleFunc("/v1/client/ai-agent/devices", s.handleAIAgentClientDevices)
+	mux.HandleFunc("/v1/client/ai-agent/tasks/", s.handleAIAgentClientTasks)
+	mux.HandleFunc("/v1/client/ai-agent/agents/", s.handleAIAgentClientAgents)
+	mux.HandleFunc("/v1/client/ai-agent/events", s.handleAIAgentClientEvents)
 	mux.HandleFunc("/v1/agent-catalog", s.handleAgentCatalog)
 	mux.HandleFunc("/v1/agent-catalog/", s.handleAgentCatalog)
 	mux.HandleFunc("/v1/component-tasks/", s.handleComponentTasks)
@@ -131,6 +139,222 @@ func (s Server) handleAgentCatalog(w http.ResponseWriter, r *http.Request) {
 	default:
 		writeMethodNotAllowed(w)
 	}
+}
+
+func (s Server) handleAIAgentClientBootstrap(w http.ResponseWriter, r *http.Request) {
+	if s.aiAgent == nil {
+		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		return
+	}
+	if r.Method != http.MethodGet {
+		writeMethodNotAllowed(w)
+		return
+	}
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead})
+	if !ok {
+		return
+	}
+	response, err := s.aiAgent.BootstrapAIAgentClient(r.Context(), principal, ClientKind(strings.TrimSpace(r.URL.Query().Get("client_kind"))))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientDevices(w http.ResponseWriter, r *http.Request) {
+	if s.aiAgent == nil {
+		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		return
+	}
+	if r.Method != http.MethodGet {
+		writeMethodNotAllowed(w)
+		return
+	}
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDeviceRead})
+	if !ok {
+		return
+	}
+	response, err := s.aiAgent.ListAIAgentDevices(r.Context(), principal)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request) {
+	if s.aiAgent == nil {
+		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		return
+	}
+	taskID, suffix, ok := splitResourcePath(r.URL.Path, "/v1/client/ai-agent/tasks/")
+	if !ok {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	switch {
+	case suffix == "assignable-agents" && r.Method == http.MethodGet:
+		s.handleAIAgentClientTaskAssignableAgents(w, r, taskID)
+	case suffix == "comments" && r.Method == http.MethodPost:
+		s.handleAIAgentClientSubmitTaskComment(w, r, taskID)
+	case suffix == "stop" && r.Method == http.MethodPost:
+		s.handleAIAgentClientStopTask(w, r, taskID)
+	default:
+		writeMethodNotAllowed(w)
+	}
+}
+
+func (s Server) handleAIAgentClientTaskAssignableAgents(w http.ResponseWriter, r *http.Request, taskID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead, TaskID: taskID})
+	if !ok {
+		return
+	}
+	response, err := s.aiAgent.ListAIAgentTaskAssignableAgents(r.Context(), principal, taskID)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientSubmitTaskComment(w http.ResponseWriter, r *http.Request, taskID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionCreate, TaskID: taskID})
+	if !ok {
+		return
+	}
+	var req SubmitAIAgentTaskCommentRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.aiAgent.SubmitAIAgentTaskComment(r.Context(), principal, taskID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
+}
+
+func (s Server) handleAIAgentClientStopTask(w http.ResponseWriter, r *http.Request, taskID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStop, TaskID: taskID})
+	if !ok {
+		return
+	}
+	var req StopAIAgentTaskRequest
+	if r.Body != nil && r.ContentLength != 0 {
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+	response, err := s.aiAgent.StopAIAgentTask(r.Context(), principal, taskID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
+}
+
+func (s Server) handleAIAgentClientAgents(w http.ResponseWriter, r *http.Request) {
+	if s.aiAgent == nil {
+		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		return
+	}
+	agentID, suffix, ok := splitAIAgentClientAgentPath(r.URL.Path)
+	if !ok {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	switch {
+	case suffix == "editability" && r.Method == http.MethodGet:
+		s.handleAIAgentClientEditability(w, r, agentID)
+	case suffix == "" && r.Method == http.MethodPatch:
+		s.handleAIAgentClientUpdate(w, r, agentID)
+	case suffix == "" && r.Method == http.MethodDelete:
+		s.handleAIAgentClientDelete(w, r, agentID)
+	default:
+		writeError(w, http.StatusNotFound, "not found")
+	}
+}
+
+func (s Server) handleAIAgentClientEditability(w http.ResponseWriter, r *http.Request, agentID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead, AgentID: agentID})
+	if !ok {
+		return
+	}
+	response, err := s.aiAgent.GetAIAgentEditability(r.Context(), principal, agentID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientUpdate(w http.ResponseWriter, r *http.Request, agentID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionUpdate, AgentID: agentID})
+	if !ok {
+		return
+	}
+	var req UpdateAgentConfigurationRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.aiAgent.UpdateAIAgentConfiguration(r.Context(), principal, agentID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientDelete(w http.ResponseWriter, r *http.Request, agentID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDelete, AgentID: agentID})
+	if !ok {
+		return
+	}
+	response, err := s.aiAgent.DeleteAIAgent(r.Context(), principal, agentID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request) {
+	if s.aiAgent == nil {
+		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		return
+	}
+	if r.Method != http.MethodGet {
+		writeMethodNotAllowed(w)
+		return
+	}
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStream})
+	if !ok {
+		return
+	}
+	events, err := s.aiAgent.AIAgentClientEvents(r.Context(), principal)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	for _, event := range events {
+		if err := writeAIAgentClientSSE(w, event); err != nil {
+			return
+		}
+	}
+	if flusher, ok := w.(http.Flusher); ok {
+		flusher.Flush()
+	}
+	if r.URL.Query().Get("replay") == "1" {
+		return
+	}
+	<-r.Context().Done()
 }
 
 func (s Server) handleAgentCatalogList(w http.ResponseWriter, r *http.Request) {
@@ -447,6 +671,18 @@ func (s Server) authorizeAgentCatalog(w http.ResponseWriter, r *http.Request, re
 	return principal, true
 }
 
+func (s Server) authorizeAIAgentClient(w http.ResponseWriter, r *http.Request, req AuthorizationRequest) (AuthorizationResult, bool) {
+	result, ok := s.authorizeRequest(w, r, req)
+	if !ok {
+		return AuthorizationResult{}, false
+	}
+	if strings.TrimSpace(result.PrincipalID) == "" {
+		writeError(w, http.StatusForbidden, "forbidden")
+		return AuthorizationResult{}, false
+	}
+	return result, true
+}
+
 func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req AuthorizationRequest) (AuthorizationResult, bool) {
 	if s.config.Authorizer == nil {
 		writeError(w, http.StatusServiceUnavailable, "scoped request authorizer is not configured")
@@ -511,6 +747,32 @@ func splitResourcePath(path, prefix string) (string, string, bool) {
 	return parts[0], parts[1], true
 }
 
+func splitAIAgentClientAgentPath(path string) (string, string, bool) {
+	const prefix = "/v1/client/ai-agent/agents/"
+	if !strings.HasPrefix(path, prefix) {
+		return "", "", false
+	}
+	rest := strings.Trim(strings.TrimPrefix(path, prefix), "/")
+	if rest == "" {
+		return "", "", false
+	}
+	parts := strings.Split(rest, "/")
+	switch len(parts) {
+	case 1:
+		if strings.TrimSpace(parts[0]) == "" {
+			return "", "", false
+		}
+		return parts[0], "", true
+	case 2:
+		if strings.TrimSpace(parts[0]) == "" || strings.TrimSpace(parts[1]) == "" {
+			return "", "", false
+		}
+		return parts[0], parts[1], true
+	default:
+		return "", "", false
+	}
+}
+
 func decodeJSON(r *http.Request, out any) error {
 	defer r.Body.Close()
 	dec := json.NewDecoder(r.Body)
@@ -545,6 +807,17 @@ func writeMethodNotAllowed(w http.ResponseWriter) {
 func writeUnauthorized(w http.ResponseWriter) {
 	w.Header().Set("WWW-Authenticate", `Bearer realm="riido_ai_server"`)
 	writeError(w, http.StatusUnauthorized, "unauthorized")
+}
+
+func writeAIAgentClientError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrAIAgentNotFound):
+		writeError(w, http.StatusNotFound, "not found")
+	case errors.Is(err, ErrAIAgentAssigned):
+		writeError(w, http.StatusConflict, err.Error())
+	default:
+		writeError(w, http.StatusBadRequest, err.Error())
+	}
 }
 
 func (s Server) streamTaskEvents(w http.ResponseWriter, r *http.Request, taskID string) {
@@ -594,5 +867,14 @@ func writeSSE(w http.ResponseWriter, event TaskEvent) error {
 		return err
 	}
 	_, err = fmt.Fprintf(w, "id: %d\nevent: %s\ndata: %s\n\n", event.Seq, event.Type, data)
+	return err
+}
+
+func writeAIAgentClientSSE(w http.ResponseWriter, event ClientStreamEvent) error {
+	data, err := json.Marshal(event.Payload)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(w, "id: %d\nevent: %s\ndata: %s\n\n", event.Seq, event.EventType, data)
 	return err
 }

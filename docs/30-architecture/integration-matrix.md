@@ -12,6 +12,8 @@ operator/private infra validation.
 | module dependency boundary | `go list -m all` allowlist | none |
 | full backend behavior | `go test ./...` | none |
 | agent catalog RBAC and HTTP | focused `internal/riidoaiserver` black-box tests | none |
+| AI Agent client mock API | focused `internal/riidoaiserver` black-box tests over generated contract paths | none |
+| generated React Query client | `tools/reactquerygen` drift test from checked-in OpenAPI | none |
 | request authorization | static tokens and `httptest` external authorizer tests | none |
 | assignment polling/heartbeat/events | in-memory store and HTTP tests | none |
 | SSE | `httptest` streaming tests | none |
@@ -46,7 +48,9 @@ go test ./...
 go list -m all
 go test ./awsadapters -count=1
 go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
+go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
 go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
+go test ./tools/reactquerygen -count=1
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .

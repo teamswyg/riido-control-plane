@@ -35,6 +35,7 @@ Authorization requests use a resource/action pair plus optional agent or task
 IDs. The current public domain slice supports these resource groups:
 
 - `agent`
+- `ai_agent_client`
 - `agent_catalog`
 - `component_task`
 - `component_task_events`
@@ -43,6 +44,23 @@ IDs. The current public domain slice supports these resource groups:
 Scopes are endpoint-call gates only. Agent catalog reads and writes must still
 re-run the RBAC decision described in
 [`agent-catalog-rbac.md`](agent-catalog-rbac.md).
+
+The `ai_agent_client` mock API accepts these static scope families:
+
+- `ai-agent:*`
+- `ai-agent:read`
+- `ai-agent:device:read`
+- `ai-agent:stream`
+- `ai-agent:write`
+- `ai-agent:{agent_id}:read`
+- `ai-agent:{agent_id}:update`
+- `ai-agent:{agent_id}:delete`
+- `task:{task_id}:read` for task participant dropdown reads
+- `task:{task_id}:comment` for task-thread AI Agent comment submit
+- `task:{task_id}:stop` or `task:{task_id}:write` for task-thread AI Agent stop
+
+Those scopes only gate HTTP access. The mock API still evaluates principal
+ownership/admin roles before returning private agents or accepting mutations.
 
 ## External Authorizer Contract
 
@@ -117,6 +135,10 @@ account provisioning without storing raw token values.
 RIID-4717 adds browser frontend CORS transport configuration over the existing
 public HTTP API without changing bearer-token authorization, RBAC, or endpoint
 payload contracts.
+
+RIID-4721 adds the bearer-protected AI Agent client mock API. It reuses the
+same static/external authorizer port and keeps owner/public/private visibility
+checks inside the route handler/store boundary.
 
 Production IdP rollout, tenant claim mapping, JWKS/OIDC validation, and
 production bearer token values remain separate migration units.

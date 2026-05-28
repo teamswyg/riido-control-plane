@@ -29,6 +29,7 @@ const (
 	envReviewAccountTokenHash = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
 	envMetricsLogInterval     = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
 	envWebAllowedOrigins      = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
+	envAIAgentClientMock      = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK"
 )
 
 type runtimeConfig struct {
@@ -39,6 +40,7 @@ type runtimeConfig struct {
 	ReviewProvision    *riidoaiserver.ReviewAccountProvisioning
 	MetricsLogInterval time.Duration
 	WebAllowedOrigins  []string
+	AIAgentClientMock  bool
 }
 
 func main() {
@@ -60,9 +62,13 @@ func run() error {
 			return fmt.Errorf("apply review account provisioning: %w", err)
 		}
 	}
+	var aiAgentClient riidoaiserver.AIAgentClientStore
+	if config.AIAgentClientMock {
+		aiAgentClient = riidoaiserver.NewMockAIAgentClientStore()
+	}
 	server := &http.Server{
 		Addr:              config.Addr,
-		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins}).Handler(),
+		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins}).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	metricsCancel, metricsErrCh := startMetricsPublisher(store, config.MetricsLogInterval, os.Stdout)
@@ -95,6 +101,10 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	aiAgentClientMock, err := envOptionalBool(envAIAgentClientMock)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	return runtimeConfig{
 		Addr:               getenvDefault(envAddr, ":8080"),
 		ShutdownTimeout:    shutdownTimeout,
@@ -103,6 +113,7 @@ func configFromEnv() (runtimeConfig, error) {
 		ReviewProvision:    reviewProvision,
 		MetricsLogInterval: metricsLogInterval,
 		WebAllowedOrigins:  webAllowedOrigins,
+		AIAgentClientMock:  aiAgentClientMock,
 	}, nil
 }
 
@@ -178,6 +189,21 @@ func envOptionalDurationSeconds(key string) (time.Duration, error) {
 		return 0, fmt.Errorf("%s must be a positive integer", key)
 	}
 	return time.Duration(seconds) * time.Second, nil
+}
+
+func envOptionalBool(key string) (bool, error) {
+	raw := strings.ToLower(strings.TrimSpace(os.Getenv(key)))
+	if raw == "" {
+		return false, nil
+	}
+	switch raw {
+	case "1", "true", "yes", "on":
+		return true, nil
+	case "0", "false", "no", "off":
+		return false, nil
+	default:
+		return false, fmt.Errorf("%s must be a boolean", key)
+	}
 }
 
 func webAllowedOriginsFromEnv() ([]string, error) {
