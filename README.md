@@ -45,10 +45,15 @@ committed or read from this repository. Optional CloudWatch Embedded Metric
 Format JSONL logs can be enabled with
 `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`; the writer uses stdout only and
 does not require AWS SDKs, credentials, log groups, or Terraform state.
+The temporary AI Agent client mock API is enabled with
+`RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true` and remains bearer-token protected.
 
 ```bash
 go test ./...
 go list -m all
+go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
+go test ./tools/reactquerygen -count=1
+go run ./tools/reactquerygen -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json -out web/generated/aiAgentClient.ts
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
@@ -58,6 +63,12 @@ The public GitHub Actions workflow runs the lightweight verification suite
 outside the private infrastructure repository billing pool. CI allows only
 Riido-owned Go module dependencies; any third-party dependency requires a new
 documented decision before it is introduced.
+
+The deployed AI Agent mock testnet is checked by the separate
+`ai-agent-client-testnet-smoke` workflow. It calls the ALB URL from the
+`RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable or a manual workflow
+input, and reads the bearer token from the `RIIDO_AI_SERVER_TESTNET_TOKEN`
+repository secret.
 
 ## License
 

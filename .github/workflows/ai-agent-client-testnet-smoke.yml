@@ -1,0 +1,82 @@
+name: ai-agent-client-testnet-smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Optional AI Agent testnet base URL. Falls back to RIIDO_AI_SERVER_TESTNET_BASE_URL repository variable."
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - "contracts/ai-agent-client/**"
+      - "internal/riidoaiserver/ai_agent_client_*.go"
+      - "internal/riidoaiserver/server.go"
+      - "cmd/riido_ai_server/main.go"
+      - "web/generated/aiAgentClient.ts"
+
+concurrency:
+  group: ai-agent-client-testnet-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TESTNET_BASE_URL: ${{ inputs.base_url || vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
+      TESTNET_TOKEN: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN }}
+    steps:
+      - name: Verify testnet configuration
+        run: |
+          test -n "$TESTNET_BASE_URL" || {
+            echo "RIIDO_AI_SERVER_TESTNET_BASE_URL repository variable or workflow input is required"
+            exit 1
+          }
+          test -n "$TESTNET_TOKEN" || {
+            echo "RIIDO_AI_SERVER_TESTNET_TOKEN repository secret is required"
+            exit 1
+          }
+      - name: Smoke AI Agent client API
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_url="${TESTNET_BASE_URL%/}"
+          auth_header="Authorization: Bearer ${TESTNET_TOKEN}"
+
+          curl_json() {
+            curl --fail --silent --show-error \
+              --connect-timeout 5 \
+              --max-time 15 \
+              "$@"
+          }
+
+          curl_json "$base_url/healthz" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ok"' >/dev/null
+          curl_json "$base_url/readyz" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ready"' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/bootstrap" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and (.agents | length) > 0 and (.devices | length) > 0' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/devices" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and (.devices | length) > 0' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/assignable-agents" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == "agent-owned-codex")' >/dev/null
+          curl_json \
+            -H "$auth_header" \
+            -H "Content-Type: application/json" \
+            -d '{"agent_id":"agent-owned-codex","body":"Please continue from the latest design"}' \
+            "$base_url/v1/client/ai-agent/tasks/task-1/comments" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .comment_kind == "queued_by_busy_agent" and .assignment_state == "queued"' >/dev/null
+          curl_json \
+            -H "$auth_header" \
+            -H "Content-Type: application/json" \
+            -d '{"agent_id":"agent-owned-codex","reason":"user requested stop"}' \
+            "$base_url/v1/client/ai-agent/tasks/task-1/stop" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .comment_kind == "stopped_by_user_request" and .assignment_state == "stopped"' >/dev/null
+
+          replay="$(mktemp)"
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/events?replay=1" > "$replay"
+          grep -q "queued_by_busy_agent" "$replay"
+          grep -q "stopped_by_user_request" "$replay"

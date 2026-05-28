@@ -1,0 +1,1229 @@
+{
+  "schema_version": "riido-api-ir.v1",
+  "contract_id": "control-plane-ai-agent-client-api.v1",
+  "source_schema_version": "riido-api-dsl.v1",
+  "context": "ai_agent_client",
+  "service": {
+    "name": "riido-control-plane",
+    "schema_version": "riido-ai-server.v1"
+  },
+  "resources": [
+    {
+      "name": "agent",
+      "owner_field": "owner_principal_id",
+      "visibility": [
+        {
+          "name": "public",
+          "read": [
+            "admin",
+            "owner",
+            "user"
+          ],
+          "write": [
+            "admin",
+            "owner"
+          ]
+        },
+        {
+          "name": "private",
+          "read": [
+            "admin",
+            "owner"
+          ],
+          "write": [
+            "admin",
+            "owner"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "device",
+      "owner_field": "owner_principal_id"
+    },
+    {
+      "name": "runtime",
+      "owner_field": "device.owner_principal_id"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "ai_agent_rbac.v1",
+      "kind": "rbac",
+      "description": "Admin can read and mutate all workspace agents; agent owner is admin-equivalent only for owned agents; non-admin users read owned agents plus other users' public agents.",
+      "rules": [
+        "admin: read public and private agents, update all, delete all",
+        "owner: read owned agents, update owned agents, delete owned agents",
+        "user: read owned agents and other users' public agents only"
+      ]
+    },
+    {
+      "policy_id": "agent_mutation_safety.v1",
+      "kind": "lifecycle",
+      "description": "Deleting an agent force-unassigns queued tasks and force-stops running tasks; editing is allowed only when the agent has no assigned tasks, and editability must be visible to clients before mutation.",
+      "rules": [
+        "delete: unassign queued tasks and force-stop running tasks before confirming deletion",
+        "edit: allowed only when assigned_task_count is zero",
+        "editability: emitted through query and SSE before a client enables editing"
+      ]
+    },
+    {
+      "policy_id": "runtime_liveness.v1",
+      "kind": "liveness",
+      "description": "Daemon-owned runtime detection controls online/offline policy for agent assignments.",
+      "rules": [
+        "daemon: scan runtimes immediately after start",
+        "daemon: scan runtimes every 30 seconds after start",
+        "daemon: queue detection results and let the actor model edit state",
+        "runtime_deleted_with_assigned_agent: mark runtime offline",
+        "runtime_deleted_without_assigned_agent: treat runtime as absent",
+        "runtime_reinstalled_same_device: mark runtime online according to online/offline policy only",
+        "runtime_detection_error: expose offline to clients"
+      ]
+    },
+    {
+      "policy_id": "api_codegen_safety.v1",
+      "kind": "projection",
+      "description": "Control-plane API enums and union values are owned in DSL and preserved in IR before OpenAPI generation so Orval/client codegen gets safe discriminated shapes.",
+      "rules": [
+        "enum: define as top-level DSL enum, not ad hoc string documentation",
+        "sum_type: define discriminator and variants in DSL and IR",
+        "openapi: generated projection only",
+        "client: consumes OpenAPI projection with Orval or a compatible generator"
+      ]
+    }
+  ],
+  "enums": [
+    {
+      "name": "AgentVisibility",
+      "type": "string",
+      "description": "Workspace visibility for an agent.",
+      "values": [
+        {
+          "value": "public",
+          "description": "Visible to non-admin workspace users."
+        },
+        {
+          "value": "private",
+          "description": "Visible only to admin and owner."
+        }
+      ]
+    },
+    {
+      "name": "RuntimeKind",
+      "type": "string",
+      "description": "Runtime installed on a device and controlled by the device owner.",
+      "values": [
+        {
+          "value": "codex"
+        },
+        {
+          "value": "claude_code"
+        },
+        {
+          "value": "cursor"
+        },
+        {
+          "value": "openclaw"
+        }
+      ]
+    },
+    {
+      "name": "RuntimeAvailability",
+      "type": "string",
+      "description": "Client-visible runtime availability.",
+      "values": [
+        {
+          "value": "online"
+        },
+        {
+          "value": "offline"
+        }
+      ]
+    },
+    {
+      "name": "RuntimeDetectionState",
+      "type": "string",
+      "description": "Daemon detection result before actor-state reduction.",
+      "values": [
+        {
+          "value": "detected"
+        },
+        {
+          "value": "missing"
+        },
+        {
+          "value": "error"
+        }
+      ]
+    },
+    {
+      "name": "AgentEditability",
+      "type": "string",
+      "description": "Whether an agent can currently be edited.",
+      "values": [
+        {
+          "value": "editable"
+        },
+        {
+          "value": "blocked_assigned_tasks"
+        }
+      ]
+    },
+    {
+      "name": "AgentWorkStatus",
+      "type": "string",
+      "description": "Client-visible status derived from runtime output and task assignment state.",
+      "values": [
+        {
+          "value": "idle"
+        },
+        {
+          "value": "queued"
+        },
+        {
+          "value": "running"
+        },
+        {
+          "value": "waiting_for_user"
+        },
+        {
+          "value": "completed"
+        },
+        {
+          "value": "failed"
+        },
+        {
+          "value": "offline"
+        }
+      ]
+    },
+    {
+      "name": "AgentAssignmentState",
+      "type": "string",
+      "description": "Assignment state affected by agent deletion and runtime lifecycle.",
+      "values": [
+        {
+          "value": "queued"
+        },
+        {
+          "value": "running"
+        },
+        {
+          "value": "stopping"
+        },
+        {
+          "value": "stopped"
+        },
+        {
+          "value": "completed"
+        },
+        {
+          "value": "failed"
+        },
+        {
+          "value": "unassigned"
+        }
+      ]
+    },
+    {
+      "name": "AgentTaskCommentKind",
+      "type": "string",
+      "description": "Typed task-thread status update emitted for Figma comment communication flows.",
+      "values": [
+        {
+          "value": "queued_by_busy_agent",
+          "description": "Assignment is queued because the selected agent is already working."
+        },
+        {
+          "value": "stopped_by_agent_deleted",
+          "description": "Assigned work was stopped because the agent was deleted."
+        },
+        {
+          "value": "stopped_by_user_request",
+          "description": "Assigned work was stopped by an explicit user action."
+        },
+        {
+          "value": "runtime_progress",
+          "description": "Runtime output produced a progress update."
+        },
+        {
+          "value": "task_completed",
+          "description": "Runtime output produced a terminal completion update."
+        },
+        {
+          "value": "task_failed",
+          "description": "Runtime or validation produced a failure update."
+        }
+      ]
+    },
+    {
+      "name": "ClientKind",
+      "type": "string",
+      "description": "Client consuming the AI Agent control-plane surface.",
+      "values": [
+        {
+          "value": "web"
+        },
+        {
+          "value": "desktop_webview"
+        }
+      ]
+    }
+  ],
+  "sum_types": [
+    {
+      "name": "ClientStreamEvent",
+      "discriminator": "event_type",
+      "description": "SSE event union consumed by web and desktop webview clients.",
+      "variants": [
+        {
+          "kind": "device_runtime_snapshot",
+          "schema": "DeviceRuntimeSnapshotEvent"
+        },
+        {
+          "kind": "agent_editability_changed",
+          "schema": "AgentEditabilityChangedEvent"
+        },
+        {
+          "kind": "agent_work_status_changed",
+          "schema": "AgentWorkStatusChangedEvent"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "name": "RuntimeRecord",
+      "schema": {
+        "name": "RuntimeRecord",
+        "type": "object",
+        "required": [
+          "runtime_id",
+          "device_id",
+          "kind",
+          "availability",
+          "detection_state",
+          "has_assigned_agent"
+        ],
+        "properties": [
+          {
+            "name": "runtime_id",
+            "type": "string"
+          },
+          {
+            "name": "device_id",
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "ref": "RuntimeKind"
+          },
+          {
+            "name": "availability",
+            "ref": "RuntimeAvailability"
+          },
+          {
+            "name": "detection_state",
+            "ref": "RuntimeDetectionState"
+          },
+          {
+            "name": "owner_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "last_detected_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "has_assigned_agent",
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeviceRecord",
+      "schema": {
+        "name": "DeviceRecord",
+        "type": "object",
+        "required": [
+          "device_id",
+          "owner_principal_id",
+          "runtimes"
+        ],
+        "properties": [
+          {
+            "name": "device_id",
+            "type": "string"
+          },
+          {
+            "name": "owner_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "display_name",
+            "type": "string"
+          },
+          {
+            "name": "daemon_last_seen_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "runtimes",
+            "type": "array",
+            "items": {
+              "ref": "RuntimeRecord"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentClientRecord",
+      "schema": {
+        "name": "AgentClientRecord",
+        "type": "object",
+        "required": [
+          "agent_id",
+          "owner_principal_id",
+          "is_owned_by_viewer",
+          "name",
+          "visibility",
+          "work_status",
+          "editability",
+          "assigned_task_count"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "owner_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "is_owned_by_viewer",
+            "type": "boolean"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "visibility",
+            "ref": "AgentVisibility"
+          },
+          {
+            "name": "runtime_id",
+            "type": "string"
+          },
+          {
+            "name": "runtime_kind",
+            "ref": "RuntimeKind"
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "editability",
+            "ref": "AgentEditability"
+          },
+          {
+            "name": "assigned_task_count",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentClientListResponse",
+      "schema": {
+        "name": "AgentClientListResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "agents"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "agents",
+            "type": "array",
+            "items": {
+              "ref": "AgentClientRecord"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentClientRecordResponse",
+      "schema": {
+        "name": "AgentClientRecordResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "agent"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "agent",
+            "ref": "AgentClientRecord"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClientBootstrapResponse",
+      "schema": {
+        "name": "ClientBootstrapResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "client_kind",
+          "workspace_id",
+          "agents",
+          "devices"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "client_kind",
+            "ref": "ClientKind"
+          },
+          {
+            "name": "workspace_id",
+            "type": "string"
+          },
+          {
+            "name": "agents",
+            "type": "array",
+            "items": {
+              "ref": "AgentClientRecord"
+            }
+          },
+          {
+            "name": "devices",
+            "type": "array",
+            "items": {
+              "ref": "DeviceRecord"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeviceRuntimeListResponse",
+      "schema": {
+        "name": "DeviceRuntimeListResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "devices"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "devices",
+            "type": "array",
+            "items": {
+              "ref": "DeviceRecord"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentEditabilityResponse",
+      "schema": {
+        "name": "AgentEditabilityResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "agent_id",
+          "editability",
+          "assigned_task_count"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "editability",
+            "ref": "AgentEditability"
+          },
+          {
+            "name": "assigned_task_count",
+            "type": "integer"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateAgentConfigurationRequest",
+      "schema": {
+        "name": "UpdateAgentConfigurationRequest",
+        "type": "object",
+        "properties": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "visibility",
+            "ref": "AgentVisibility"
+          },
+          {
+            "name": "runtime_id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeleteAgentResponse",
+      "schema": {
+        "name": "DeleteAgentResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "agent_id",
+          "queued_tasks_unassigned",
+          "running_tasks_force_stopped"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "queued_tasks_unassigned",
+            "type": "integer"
+          },
+          {
+            "name": "running_tasks_force_stopped",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SubmitAIAgentTaskCommentRequest",
+      "schema": {
+        "name": "SubmitAIAgentTaskCommentRequest",
+        "type": "object",
+        "required": [
+          "agent_id",
+          "body"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "source_comment_id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StopAIAgentTaskRequest",
+      "schema": {
+        "name": "StopAIAgentTaskRequest",
+        "type": "object",
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskActionResponse",
+      "schema": {
+        "name": "AIAgentTaskActionResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "task_id",
+          "agent_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "comment_kind",
+          "message"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
+          },
+          {
+            "name": "comment_kind",
+            "ref": "AgentTaskCommentKind"
+          },
+          {
+            "name": "message",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeviceRuntimeSnapshotEvent",
+      "schema": {
+        "name": "DeviceRuntimeSnapshotEvent",
+        "type": "object",
+        "required": [
+          "event_type",
+          "schema_version",
+          "device"
+        ],
+        "properties": [
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "device_runtime_snapshot"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "device",
+            "ref": "DeviceRecord"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentEditabilityChangedEvent",
+      "schema": {
+        "name": "AgentEditabilityChangedEvent",
+        "type": "object",
+        "required": [
+          "event_type",
+          "schema_version",
+          "agent_id",
+          "editability"
+        ],
+        "properties": [
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "agent_editability_changed"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "editability",
+            "ref": "AgentEditability"
+          },
+          {
+            "name": "assigned_task_count",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentWorkStatusChangedEvent",
+      "schema": {
+        "name": "AgentWorkStatusChangedEvent",
+        "type": "object",
+        "required": [
+          "event_type",
+          "schema_version",
+          "agent_id",
+          "work_status"
+        ],
+        "properties": [
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "agent_work_status_changed"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
+          },
+          {
+            "name": "comment_kind",
+            "ref": "AgentTaskCommentKind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ErrorEnvelope",
+      "schema": {
+        "name": "ErrorEnvelope",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "error"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "error",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ],
+  "operations": [
+    {
+      "operation_id": "getAIAgentClientBootstrap",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/bootstrap",
+      "resource": "agent",
+      "action": "read",
+      "summary": "Read AI Agent screen bootstrap data for web or desktop webview clients",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:read"
+        ]
+      },
+      "rbac_policy": "ai_agent_rbac.v1",
+      "response": {
+        "status": 200,
+        "ref": "ClientBootstrapResponse"
+      },
+      "scenario_ids": [
+        "getAIAgentClientBootstrap.figma-client-bootstrap"
+      ]
+    },
+    {
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/devices",
+      "resource": "device",
+      "action": "read",
+      "summary": "List device runtime availability for the authorized principal",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:device:read"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeviceRuntimeListResponse"
+      },
+      "scenario_ids": [
+        "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
+        "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent"
+      ]
+    },
+    {
+      "operation_id": "listAIAgentTaskAssignableAgents",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/assignable-agents",
+      "resource": "agent",
+      "action": "read",
+      "summary": "List agents assignable from a task participant dropdown",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ]
+      },
+      "rbac_policy": "ai_agent_rbac.v1",
+      "response": {
+        "status": 200,
+        "ref": "AgentClientListResponse"
+      },
+      "scenario_ids": [
+        "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
+        "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering"
+      ]
+    },
+    {
+      "operation_id": "submitAIAgentTaskComment",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/comments",
+      "resource": "agent",
+      "action": "create",
+      "summary": "Submit a task-thread comment that should be routed to an assigned AI agent",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:comment"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "request": {
+        "ref": "SubmitAIAgentTaskCommentRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenario_ids": [
+        "submitAIAgentTaskComment.comment-routes-to-running-agent",
+        "submitAIAgentTaskComment.comment-queues-behind-busy-agent"
+      ]
+    },
+    {
+      "operation_id": "stopAIAgentTask",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/stop",
+      "resource": "agent",
+      "action": "stop",
+      "summary": "Stop AI agent work from a task-thread stop action",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "request": {
+        "ref": "StopAIAgentTaskRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenario_ids": [
+        "stopAIAgentTask.task-stop-emits-comment-status"
+      ]
+    },
+    {
+      "operation_id": "getAIAgentEditability",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/agents/{agent_id}/editability",
+      "resource": "agent",
+      "action": "read",
+      "summary": "Read whether an agent can be edited before enabling client controls",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:read",
+          "ai-agent:{agent_id}:read"
+        ]
+      },
+      "rbac_policy": "agent_mutation_safety.v1",
+      "response": {
+        "status": 200,
+        "ref": "AgentEditabilityResponse"
+      },
+      "scenario_ids": [
+        "getAIAgentEditability.assigned-agent-blocks-editing"
+      ]
+    },
+    {
+      "operation_id": "updateAIAgentConfiguration",
+      "kind": "command",
+      "method": "PATCH",
+      "path": "/v1/client/ai-agent/agents/{agent_id}",
+      "resource": "agent",
+      "action": "update",
+      "summary": "Update agent display/configuration fields when no task is assigned",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:{agent_id}:update"
+        ]
+      },
+      "rbac_policy": "agent_mutation_safety.v1",
+      "request": {
+        "ref": "UpdateAgentConfigurationRequest",
+        "required": true
+      },
+      "response": {
+        "status": 200,
+        "ref": "AgentClientRecordResponse"
+      },
+      "scenario_ids": [
+        "updateAIAgentConfiguration.agent-name-is-not-unique",
+        "updateAIAgentConfiguration.edit-fails-while-assigned"
+      ]
+    },
+    {
+      "operation_id": "deleteAIAgent",
+      "kind": "command",
+      "method": "DELETE",
+      "path": "/v1/client/ai-agent/agents/{agent_id}",
+      "resource": "agent",
+      "action": "delete",
+      "summary": "Delete an agent and force-clear its queued/running assignments",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:{agent_id}:delete"
+        ]
+      },
+      "rbac_policy": "agent_mutation_safety.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeleteAgentResponse"
+      },
+      "scenario_ids": [
+        "deleteAIAgent.delete-unassigns-and-stops"
+      ]
+    },
+    {
+      "operation_id": "streamAIAgentClientEvents",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/events",
+      "resource": "agent",
+      "action": "stream",
+      "summary": "Stream AI Agent client updates for editability, work status, and runtime snapshots",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:stream"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "response": {
+        "status": 200,
+        "ref": "ClientStreamEvent",
+        "content_type": "text/event-stream"
+      },
+      "scenario_ids": [
+        "streamAIAgentClientEvents.editability-updates-before-mutation",
+        "streamAIAgentClientEvents.runtime-parse-status",
+        "streamAIAgentClientEvents.task-comment-status-update"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "getAIAgentClientBootstrap.figma-client-bootstrap",
+      "operation_id": "getAIAgentClientBootstrap",
+      "name": "figma client bootstrap",
+      "given": "a web or desktop webview client opens the v1.22 AI Agent surface",
+      "when": "the client requests bootstrap data",
+      "then": "the response contains visible agents and owned device runtimes required by the Figma onboarding and agent setting screens"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "name": "missing runtime with assigned agent is offline",
+      "given": "a runtime was deleted on a device and at least one assigned agent references it",
+      "when": "daemon scan reports the runtime missing",
+      "then": "the client sees that runtime as offline instead of absent"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent",
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "name": "missing runtime without assigned agent is absent",
+      "given": "a runtime was deleted on a device and no assigned agent references it",
+      "when": "daemon scan reports the runtime missing",
+      "then": "the client list omits the runtime as if it never existed"
+    },
+    {
+      "scenario_id": "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
+      "operation_id": "listAIAgentTaskAssignableAgents",
+      "name": "participant dropdown visible agents",
+      "given": "a web or desktop webview client opens the Figma task participant dropdown",
+      "when": "the client requests assignable AI agents for the task",
+      "then": "the response includes the viewer's owned agents and other users' public agents only"
+    },
+    {
+      "scenario_id": "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering",
+      "operation_id": "listAIAgentTaskAssignableAgents",
+      "name": "participant dropdown owned-first ordering",
+      "given": "visible agents include owned agents and other users' public agents",
+      "when": "the assignable-agent response is returned",
+      "then": "owned agents appear first and names are ordered inside each ownership group"
+    },
+    {
+      "scenario_id": "submitAIAgentTaskComment.comment-routes-to-running-agent",
+      "operation_id": "submitAIAgentTaskComment",
+      "name": "comment routes to running agent",
+      "given": "the Figma task comment box submits a user message to a selected AI agent",
+      "when": "the selected agent is idle and has an online runtime",
+      "then": "the response reports running work and the event stream emits runtime_progress for the task thread"
+    },
+    {
+      "scenario_id": "submitAIAgentTaskComment.comment-queues-behind-busy-agent",
+      "operation_id": "submitAIAgentTaskComment",
+      "name": "comment queues behind busy agent",
+      "given": "the selected AI agent is already running another task",
+      "when": "the Figma task comment box submits a new user message",
+      "then": "the response reports queued work and the event stream emits queued_by_busy_agent for the task thread"
+    },
+    {
+      "scenario_id": "stopAIAgentTask.task-stop-emits-comment-status",
+      "operation_id": "stopAIAgentTask",
+      "name": "task stop emits comment status",
+      "given": "the Figma task thread shows a running AI agent response",
+      "when": "the user presses the task stop action",
+      "then": "the response and event stream use stopped_by_user_request so the client can render the stopped agent comment"
+    },
+    {
+      "scenario_id": "getAIAgentEditability.assigned-agent-blocks-editing",
+      "operation_id": "getAIAgentEditability",
+      "name": "assigned agent blocks editing",
+      "given": "an agent has one or more assigned tasks",
+      "when": "the client asks whether the agent can be edited",
+      "then": "the response is blocked_assigned_tasks and includes the assigned task count"
+    },
+    {
+      "scenario_id": "updateAIAgentConfiguration.agent-name-is-not-unique",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "agent name is not unique",
+      "given": "two owned agents share the same display name",
+      "when": "the owner updates one agent name",
+      "then": "the request is accepted because agent names are mutable and non-unique"
+    },
+    {
+      "scenario_id": "updateAIAgentConfiguration.edit-fails-while-assigned",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "edit fails while assigned",
+      "given": "an agent has an assigned task",
+      "when": "the owner attempts to update the runtime binding",
+      "then": "the operation is rejected by mutation safety policy"
+    },
+    {
+      "scenario_id": "deleteAIAgent.delete-unassigns-and-stops",
+      "operation_id": "deleteAIAgent",
+      "name": "delete unassigns and stops",
+      "given": "an agent has queued tasks and one running task",
+      "when": "an admin or owner deletes the agent",
+      "then": "queued tasks are unassigned and the running task is force-stopped before deletion is confirmed"
+    },
+    {
+      "scenario_id": "streamAIAgentClientEvents.editability-updates-before-mutation",
+      "operation_id": "streamAIAgentClientEvents",
+      "name": "editability updates before mutation",
+      "given": "a client is viewing an agent setting screen",
+      "when": "the agent gains or loses assigned tasks",
+      "then": "the event stream emits agent_editability_changed before the client allows or blocks editing"
+    },
+    {
+      "scenario_id": "streamAIAgentClientEvents.runtime-parse-status",
+      "operation_id": "streamAIAgentClientEvents",
+      "name": "runtime parse status",
+      "given": "an assigned runtime output is parsed for task progress and may include a task-end marker",
+      "when": "the parsed status changes",
+      "then": "the event stream emits agent_work_status_changed with a typed AgentWorkStatus value"
+    },
+    {
+      "scenario_id": "streamAIAgentClientEvents.task-comment-status-update",
+      "operation_id": "streamAIAgentClientEvents",
+      "name": "task comment status update",
+      "given": "the Figma comment communication flow shows a queued or stopped agent update in a task thread",
+      "when": "the assignment state changes",
+      "then": "the event stream includes task_id, assignment_state, and a typed comment_kind for the client thread"
+    }
+  ]
+}

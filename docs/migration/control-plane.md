@@ -702,6 +702,28 @@ authorization, change agent-catalog RBAC, enable browser credentials, use
 wildcard origins, add raw tokens, move production IdP rollout, or add external
 dependencies.
 
+### RIID-4721 — AI Agent client mock API and React Query generation
+
+This slice wires the v1.22 AI Agent client contract into the public
+control-plane repository as a mockable HTTP surface.
+
+This slice does:
+
+- add the checked-in AI Agent client DSL/IR/OpenAPI projection from
+  `riido-contracts`
+- add stdlib-only mock handlers for the AI Agent web/desktop webview endpoints
+- enable the mock surface only when `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true`
+- add black-box tests for bootstrap, devices, assignable agents, editability,
+  task-thread comment submit, task-thread stop, mutation, deletion, and SSE
+  replay
+- add `tools/reactquerygen` to generate `web/generated/aiAgentClient.ts` from
+  the checked-in OpenAPI projection
+- add a focused CI workflow for mock API and generated-client drift
+
+This slice does not add production persistence, daemon runtime probing, final
+Route53 records, IdP rollout, Terraform state, AWS credentials, or frontend app
+implementation.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -717,7 +739,9 @@ go test ./awsadapters -count=1
 go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration' -count=1
 go test ./tools/containercontract -count=1
 go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
+go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
 go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
+go test ./tools/reactquerygen -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
 ```

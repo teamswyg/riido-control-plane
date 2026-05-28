@@ -13,6 +13,7 @@ import (
 type AuthorizationResource string
 
 const (
+	AuthorizationResourceAIAgentClient       AuthorizationResource = "ai_agent_client"
 	AuthorizationResourceAgent               AuthorizationResource = "agent"
 	AuthorizationResourceAgentCatalog        AuthorizationResource = "agent_catalog"
 	AuthorizationResourceComponentTask       AuthorizationResource = "component_task"
@@ -26,6 +27,7 @@ const (
 	AuthorizationActionAssign              AuthorizationAction = "assign"
 	AuthorizationActionCreate              AuthorizationAction = "create"
 	AuthorizationActionDelete              AuthorizationAction = "delete"
+	AuthorizationActionDeviceRead          AuthorizationAction = "device:read"
 	AuthorizationActionEventsRead          AuthorizationAction = "events:read"
 	AuthorizationActionEventsWrite         AuthorizationAction = "events:write"
 	AuthorizationActionHeartbeat           AuthorizationAction = "heartbeat"
@@ -33,6 +35,8 @@ const (
 	AuthorizationActionProviderStatusRead  AuthorizationAction = "provider-status:read"
 	AuthorizationActionProviderStatusWrite AuthorizationAction = "provider-status:write"
 	AuthorizationActionRead                AuthorizationAction = "read"
+	AuthorizationActionStream              AuthorizationAction = "stream"
+	AuthorizationActionStop                AuthorizationAction = "stop"
 	AuthorizationActionUpdate              AuthorizationAction = "update"
 )
 
@@ -230,6 +234,43 @@ func authorizationScopesPermit(scopes []string, req AuthorizationRequest) bool {
 
 func authorizationScopeCandidates(req AuthorizationRequest) []string {
 	switch req.Resource {
+	case AuthorizationResourceAIAgentClient:
+		candidates := []string{"riido:*", "ai-agent:*"}
+		switch req.Action {
+		case AuthorizationActionDeviceRead:
+			candidates = append(candidates, "ai-agent:device:read", "ai-agent:read")
+		case AuthorizationActionStream:
+			candidates = append(candidates, "ai-agent:stream")
+		case AuthorizationActionRead:
+			candidates = append(candidates, "ai-agent:read")
+			if req.AgentID != "" {
+				candidates = append(candidates, "ai-agent:"+req.AgentID+":read")
+			}
+			if req.TaskID != "" {
+				candidates = append(candidates, "task:"+req.TaskID+":read")
+			}
+		case AuthorizationActionCreate:
+			candidates = append(candidates, "ai-agent:write")
+			if req.TaskID != "" {
+				candidates = append(candidates, "task:"+req.TaskID+":comment")
+			}
+		case AuthorizationActionStop:
+			candidates = append(candidates, "ai-agent:write")
+			if req.TaskID != "" {
+				candidates = append(candidates, "task:"+req.TaskID+":stop", "task:"+req.TaskID+":write")
+			}
+		case AuthorizationActionUpdate:
+			candidates = append(candidates, "ai-agent:write")
+			if req.AgentID != "" {
+				candidates = append(candidates, "ai-agent:"+req.AgentID+":update")
+			}
+		case AuthorizationActionDelete:
+			candidates = append(candidates, "ai-agent:write")
+			if req.AgentID != "" {
+				candidates = append(candidates, "ai-agent:"+req.AgentID+":delete")
+			}
+		}
+		return candidates
 	case AuthorizationResourceMetrics:
 		return []string{"riido:*", "metrics:*", "metrics:read"}
 	case AuthorizationResourceComponentTask:

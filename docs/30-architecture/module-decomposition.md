@@ -11,9 +11,10 @@ public CI can verify the backend without AWS credentials.
 | Package/path | Role | Must not own |
 | --- | --- | --- |
 | `cmd/riido_ai_server` | binary entrypoint, Factor 12 env parsing, HTTP server lifecycle, optional stdout EMF publisher startup | domain decisions, Terraform, production secret values, provider process execution |
-| `internal/riidoaiserver` | C10 domain and adapter implementation: assignment store actor, HTTP/SSE/metrics/health routes, request authorization, RBAC, provider status, review seed provisioning, file snapshot/outbox, stdlib-only DynamoDB/EventBridge request adapters | daemon runtime, external AWS SDK, live deploy evidence, cloud resource topology |
+| `internal/riidoaiserver` | C10 domain and adapter implementation: assignment store actor, HTTP/SSE/metrics/health routes, AI Agent client mock routes, request authorization, RBAC, provider status, review seed provisioning, file snapshot/outbox, stdlib-only DynamoDB/EventBridge request adapters | daemon runtime, external AWS SDK, live deploy evidence, cloud resource topology |
 | `awsadapters` | public facade for private infra/evidence tools that need the public AWS adapter surface | new adapter behavior, duplicated DTOs, credential storage |
 | `tools/containercontract` | executable verifier for `riido-container-image-contract.v1` | image publishing, ECR credentials, ECS task definition deployment |
+| `tools/reactquerygen` | deterministic OpenAPI-to-React-Query fixture generator for the AI Agent client surface | frontend app implementation, package installation, npm lockfiles |
 | `internal/contractscompat` | dependency compatibility smoke tests for shared public contracts | domain redefinition |
 | `internal/repoidentity` | repository identity guard | runtime behavior |
 
