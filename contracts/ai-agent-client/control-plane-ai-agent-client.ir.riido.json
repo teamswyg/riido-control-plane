@@ -7,6 +7,51 @@
     "name": "riido-control-plane",
     "schema_version": "riido-ai-server.v1"
   },
+  "client_modules": [
+    {
+      "module": "aiAgent",
+      "description": "AI Agent client API module입니다. 화면 구성을 소유하지 않고, client가 화면을 구성할 때 필요한 API 의미, 정책, lifecycle, cache 관계를 제공합니다.",
+      "namespaces": [
+        {
+          "path": [
+            "agents"
+          ],
+          "description": "agent 설정과 mutation을 다루는 namespace입니다. agent 이름은 중복될 수 있고 assigned task가 있으면 수정할 수 없습니다."
+        },
+        {
+          "path": [
+            "bootstrap"
+          ],
+          "description": "AI Agent 화면 진입 시 필요한 초기 read model입니다. viewer가 볼 수 있는 agent와 device runtime snapshot을 제공합니다."
+        },
+        {
+          "path": [
+            "devices"
+          ],
+          "description": "device와 runtime 상태를 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "devices",
+            "runtimes"
+          ],
+          "description": "권한이 확인된 principal의 device runtime 목록입니다. assigned agent가 있는 runtime은 삭제되어도 offline 상태로 유지됩니다."
+        },
+        {
+          "path": [
+            "events"
+          ],
+          "description": "client가 SSE로 수신하는 상태 변경 stream namespace입니다."
+        },
+        {
+          "path": [
+            "tasks"
+          ],
+          "description": "task thread에서 AI Agent assignment와 comment action을 다루는 namespace입니다."
+        }
+      ]
+    }
+  ],
   "resources": [
     {
       "name": "agent",
@@ -882,7 +927,8 @@
         "module": "aiAgent",
         "facade_path": [
           "bootstrap"
-        ]
+        ],
+        "cache_tag": "aiAgent.bootstrap"
       },
       "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
       "auth": {
@@ -912,7 +958,8 @@
         "facade_path": [
           "devices",
           "runtimes"
-        ]
+        ],
+        "cache_tag": "aiAgent.devices.runtimes"
       },
       "summary": "권한이 확인된 principal의 device runtime 상태를 조회합니다",
       "auth": {
@@ -943,7 +990,8 @@
         "facade_path": [
           "tasks",
           "assignableAgents"
-        ]
+        ],
+        "cache_tag": "aiAgent.tasks.assignableAgents"
       },
       "summary": "task participant dropdown에서 할당 가능한 agent 목록을 조회합니다",
       "auth": {
@@ -975,6 +1023,10 @@
         "facade_path": [
           "tasks",
           "submitComment"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents"
         ]
       },
       "summary": "task thread comment를 할당된 AI agent에게 전달합니다",
@@ -1011,6 +1063,10 @@
         "facade_path": [
           "tasks",
           "stop"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents"
         ]
       },
       "summary": "task thread의 stop action으로 AI agent 작업을 중단합니다",
@@ -1046,7 +1102,8 @@
         "facade_path": [
           "agents",
           "editability"
-        ]
+        ],
+        "cache_tag": "aiAgent.agents.editability"
       },
       "summary": "client control 활성화 전에 agent 수정 가능 여부를 조회합니다",
       "auth": {
@@ -1077,6 +1134,11 @@
         "facade_path": [
           "agents",
           "updateConfiguration"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.agents.editability",
+          "aiAgent.tasks.assignableAgents"
         ]
       },
       "summary": "할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다",
@@ -1113,6 +1175,12 @@
         "facade_path": [
           "agents",
           "delete"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.devices.runtimes",
+          "aiAgent.agents.editability",
+          "aiAgent.tasks.assignableAgents"
         ]
       },
       "summary": "agent를 삭제하고 queued/running assignment를 강제로 정리합니다",
@@ -1144,7 +1212,8 @@
         "facade_path": [
           "events",
           "stream"
-        ]
+        ],
+        "cache_tag": "aiAgent.events.stream"
       },
       "summary": "editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다",
       "auth": {

@@ -9,6 +9,51 @@
       "name": "ai_agent_client"
     }
   ],
+  "x-riido-client-modules": [
+    {
+      "module": "aiAgent",
+      "description": "AI Agent client API module입니다. 화면 구성을 소유하지 않고, client가 화면을 구성할 때 필요한 API 의미, 정책, lifecycle, cache 관계를 제공합니다.",
+      "namespaces": [
+        {
+          "path": [
+            "agents"
+          ],
+          "description": "agent 설정과 mutation을 다루는 namespace입니다. agent 이름은 중복될 수 있고 assigned task가 있으면 수정할 수 없습니다."
+        },
+        {
+          "path": [
+            "bootstrap"
+          ],
+          "description": "AI Agent 화면 진입 시 필요한 초기 read model입니다. viewer가 볼 수 있는 agent와 device runtime snapshot을 제공합니다."
+        },
+        {
+          "path": [
+            "devices"
+          ],
+          "description": "device와 runtime 상태를 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "devices",
+            "runtimes"
+          ],
+          "description": "권한이 확인된 principal의 device runtime 목록입니다. assigned agent가 있는 runtime은 삭제되어도 offline 상태로 유지됩니다."
+        },
+        {
+          "path": [
+            "events"
+          ],
+          "description": "client가 SSE로 수신하는 상태 변경 stream namespace입니다."
+        },
+        {
+          "path": [
+            "tasks"
+          ],
+          "description": "task thread에서 AI Agent assignment와 comment action을 다루는 namespace입니다."
+        }
+      ]
+    }
+  ],
   "paths": {
     "/v1/client/ai-agent/agents/{agent_id}": {
       "delete": {
@@ -65,6 +110,12 @@
           "facade_path": [
             "agents",
             "delete"
+          ],
+          "invalidates": [
+            "aiAgent.bootstrap",
+            "aiAgent.devices.runtimes",
+            "aiAgent.agents.editability",
+            "aiAgent.tasks.assignableAgents"
           ]
         },
         "x-riido-scenarios": [
@@ -135,6 +186,11 @@
           "facade_path": [
             "agents",
             "updateConfiguration"
+          ],
+          "invalidates": [
+            "aiAgent.bootstrap",
+            "aiAgent.agents.editability",
+            "aiAgent.tasks.assignableAgents"
           ]
         },
         "x-riido-scenarios": [
@@ -198,7 +254,8 @@
           "facade_path": [
             "agents",
             "editability"
-          ]
+          ],
+          "cache_tag": "aiAgent.agents.editability"
         },
         "x-riido-scenarios": [
           "getAIAgentEditability.assigned-agent-blocks-editing"
@@ -248,7 +305,8 @@
           "module": "aiAgent",
           "facade_path": [
             "bootstrap"
-          ]
+          ],
+          "cache_tag": "aiAgent.bootstrap"
         },
         "x-riido-scenarios": [
           "getAIAgentClientBootstrap.figma-client-bootstrap"
@@ -299,7 +357,8 @@
           "facade_path": [
             "devices",
             "runtimes"
-          ]
+          ],
+          "cache_tag": "aiAgent.devices.runtimes"
         },
         "x-riido-scenarios": [
           "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
@@ -351,7 +410,8 @@
           "facade_path": [
             "events",
             "stream"
-          ]
+          ],
+          "cache_tag": "aiAgent.events.stream"
         },
         "x-riido-scenarios": [
           "streamAIAgentClientEvents.editability-updates-before-mutation",
@@ -415,7 +475,8 @@
           "facade_path": [
             "tasks",
             "assignableAgents"
-          ]
+          ],
+          "cache_tag": "aiAgent.tasks.assignableAgents"
         },
         "x-riido-scenarios": [
           "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
@@ -488,6 +549,10 @@
           "facade_path": [
             "tasks",
             "submitComment"
+          ],
+          "invalidates": [
+            "aiAgent.bootstrap",
+            "aiAgent.tasks.assignableAgents"
           ]
         },
         "x-riido-scenarios": [
@@ -561,6 +626,10 @@
           "facade_path": [
             "tasks",
             "stop"
+          ],
+          "invalidates": [
+            "aiAgent.bootstrap",
+            "aiAgent.tasks.assignableAgents"
           ]
         },
         "x-riido-scenarios": [

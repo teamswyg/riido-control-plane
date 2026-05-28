@@ -114,6 +114,49 @@ Generator requirements:
 the checked-in mock surface. It is useful for drift tests, but it is not the
 cross-repository Orval delivery mechanism.
 
+## Projection Placement
+
+The current projection chain is kept:
+
+```text
+contracts/ai-agent-client/*.dsl.riido.json
+  -> contracts/ai-agent-client/*.ir.riido.json
+  -> contracts/ai-agent-client/*.openapi.json
+  -> generated TypeScript client files
+```
+
+Do not introduce an independent `dsl2` or `ir2` as a second SSOT for frontend
+ergonomics. The client-facing library shape is a **client facet** inside the
+existing AI Agent API sub-DSL:
+
+- top-level `client_modules` describes generated module and namespace comments
+- operation-level `client.module` and `client.facade_path` describe the nested
+  library path
+- query operation `client.cache_tag` describes the cache root key
+- command operation `client.invalidates` describes deterministic cache roots
+  that a client may invalidate after a mutation
+
+The IR projection must preserve those fields without changing their meaning.
+OpenAPI exposes the same data as `x-riido-client-modules` and
+`x-riido-client`. TypeScript codegen consumes only those OpenAPI extension
+fields for facade structure, comments, root query keys, and invalidation
+helpers. If the metadata is missing or references an unknown cache tag,
+generation fails.
+
+This keeps SSOT ownership layered instead of duplicated:
+
+- `riido-contracts` owns canonical vocabulary, policy grammar, enum/sum-type
+  meaning, and lifecycle/deprecation grammar.
+- `riido-control-plane` owns the AI Agent client API sub-DSL and its deterministic
+  API/client projection.
+- `riido-client` owns screen composition, hook call timing, optimistic updates,
+  global error UX, invalidation timing, retry policy, and token refresh policy.
+
+Client usability feedback can enter through `riido-control-plane` when it is
+about endpoint shape, generated comments, cache relationship metadata, or
+library ergonomics. Feedback that changes business meaning or policy authority
+must still escalate to `riido-contracts`.
+
 ## Generated Artifacts
 
 The client branch should receive:
@@ -125,10 +168,12 @@ The client branch should receive:
 
 ## Generated Client Facade
 
-The generated client must keep primitive exports and a facade together:
+The generated client must keep primitive exports and a documented facade
+together:
 
 - primitive request functions, query keys, query options, mutation options, and
-  hooks remain individually exported for tests, tree-shaking, and direct use
+  generated types remain individually exported for tests, tree-shaking, and
+  direct use
 - `createRiidoControlPlaneClient(config)` groups the same primitives by DSL
   client metadata, for example `aiAgent.agents.editability`,
   `aiAgent.tasks.stop`, and `aiAgent.devices.runtimes`
@@ -136,9 +181,16 @@ The generated client must keep primitive exports and a facade together:
   `token`, and optional `fetcher`
 - each operation exposes concise library-style aliases: `query(...)` mirrors
   `queryOptions(...)`, and `mutation(...)` mirrors `mutationOptions(...)`
+- query endpoints expose `queryKeyRoot`, `queryKey`, `invalidate`,
+  `invalidateAll`, and `prefetch`
+- mutation endpoints expose deterministic `invalidates` helpers, but do not call
+  them automatically
+- the core facade does not import React hooks and remains server-safe
+- the React wrapper is generated separately and imports hooks from
+  `@/lib/react-query`, not directly from `@tanstack/react-query`
 - the facade does not create or replace TanStack `QueryClient`
-- the facade does not own token refresh, global error toasts, retry policy, cache
-  invalidation, or app-specific optimistic updates
+- the facade does not own token refresh, global error toasts, retry policy,
+  automatic cache invalidation, or app-specific optimistic updates
 
 The intended frontend usage is:
 
@@ -148,6 +200,21 @@ const riido = createRiidoControlPlaneClient(config);
 useQuery(riido.aiAgent.bootstrap.query());
 useMutation(riido.aiAgent.tasks.stop.mutation());
 queryClient.prefetchQuery(riido.aiAgent.devices.runtimes.query());
+await riido.aiAgent.tasks.stop.invalidates.bootstrap(queryClient);
+```
+
+For client components that prefer a hook-shaped library surface, the generated
+React wrapper is imported explicitly:
+
+```ts
+const riido = useRiidoControlPlaneClient(config);
+
+const bootstrap = riido.aiAgent.bootstrap.useQuery({ enabled: !!config.token });
+const stopTask = riido.aiAgent.tasks.stop.useMutation({
+  onSuccess: async () => {
+    await riido.aiAgent.tasks.stop.invalidates.all(queryClient);
+  },
+});
 ```
 
 This keeps the generated output feeling like a lightweight module while leaving
