@@ -149,6 +149,7 @@ func generate(spec openAPISpec) ([]byte, error) {
 			return nil, err
 		}
 	}
+	writeFacade(&b, ops)
 	out := bytes.TrimRight([]byte(b.String()), "\n")
 	return append(out, '\n'), nil
 }
@@ -247,6 +248,7 @@ func writeOperation(b *strings.Builder, op routeOperation) error {
 	fmt.Fprintf(b, "  return [%q%s] as const;\n", name, queryKeyTail(pathParams, requestType))
 	b.WriteString("}\n\n")
 	if strings.EqualFold(op.Method, "GET") {
+		queryOptionsName := name + "QueryOptions"
 		hookName := "use" + exportedName(name)
 		args := []string{"config: RiidoClientConfig"}
 		callArgs := []string{"config"}
@@ -258,20 +260,22 @@ func writeOperation(b *strings.Builder, op routeOperation) error {
 		}
 		callArgs = append(callArgs, "options")
 		args = append(args, fmt.Sprintf("options: Omit<UseQueryOptions<%s>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}", responseType))
+		writeJSDoc(b, operationSummary(op), "useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.")
+		fmt.Fprintf(b, "export function %s(%s) {\n", queryOptionsName, strings.Join(args, ", "))
+		fmt.Fprintf(b, "  return {\n    ...options,\n    queryKey: %s(%s),\n    queryFn: () => %s(%s),\n  };\n", queryKeyName, strings.Join(keyArgs, ", "), name, strings.Join(callArgs, ", "))
+		b.WriteString("}\n\n")
 		writeJSDoc(b, operationSummary(op), "React Query query hook입니다.")
 		fmt.Fprintf(b, "export function %s(%s) {\n", hookName, strings.Join(args, ", "))
-		fmt.Fprintf(b, "  return useQuery<%s>({\n", responseType)
-		fmt.Fprintf(b, "    ...options,\n    queryKey: %s(%s),\n    queryFn: () => %s(%s),\n  });\n", queryKeyName, strings.Join(keyArgs, ", "), name, strings.Join(callArgs, ", "))
+		fmt.Fprintf(b, "  return useQuery<%s>(%s(%s));\n", responseType, queryOptionsName, strings.Join(callArgs, ", "))
 		b.WriteString("}\n\n")
 		return nil
 	}
 	hookName := "use" + exportedName(name)
-	mutationVariable := mutationVariableType(pathParams, paramTypeName, requestType)
-	writeJSDoc(b, operationSummary(op), "React Query mutation hook입니다.")
-	fmt.Fprintf(b, "export function %s(config: RiidoClientConfig, options: UseMutationOptions<%s, Error, %s> = {}) {\n", hookName, responseType, mutationVariable)
-	fmt.Fprintf(b, "  return useMutation<%s, Error, %s>({\n", responseType, mutationVariable)
-	b.WriteString("    ...options,\n")
-	b.WriteString("    mutationFn: (variables) => ")
+	mutationVariable := writeMutationVariables(b, op, pathParams, paramTypeName, requestType)
+	mutationOptionsName := name + "MutationOptions"
+	writeJSDoc(b, operationSummary(op), "useMutation에 전달할 수 있는 옵션입니다.")
+	fmt.Fprintf(b, "export function %s(config: RiidoClientConfig, options: UseMutationOptions<%s, Error, %s> = {}) {\n", mutationOptionsName, responseType, mutationVariable)
+	fmt.Fprintf(b, "  return {\n    ...options,\n    mutationFn: (%s) => ", mutationFunctionVariable(mutationVariable))
 	callArgs := []string{"config"}
 	if len(pathParams) > 0 {
 		callArgs = append(callArgs, "variables.params")
@@ -281,9 +285,206 @@ func writeOperation(b *strings.Builder, op routeOperation) error {
 	}
 	callArgs = append(callArgs, "{}")
 	fmt.Fprintf(b, "%s(%s),\n", name, strings.Join(callArgs, ", "))
+	b.WriteString("  };\n")
+	b.WriteString("}\n\n")
+	writeJSDoc(b, operationSummary(op), "React Query mutation hook입니다.")
+	fmt.Fprintf(b, "export function %s(config: RiidoClientConfig, options: UseMutationOptions<%s, Error, %s> = {}) {\n", hookName, responseType, mutationVariable)
+	fmt.Fprintf(b, "  return useMutation<%s, Error, %s>({\n", responseType, mutationVariable)
+	fmt.Fprintf(b, "    ...%s(config, options),\n", mutationOptionsName)
 	b.WriteString("  });\n")
 	b.WriteString("}\n\n")
 	return nil
+}
+
+func writeMutationVariables(b *strings.Builder, op routeOperation, params []string, paramTypeName, requestType string) string {
+	if len(params) == 0 && requestType == "" {
+		return "void"
+	}
+	typeName := mutationVariableTypeName(op.Op.OperationID, params, requestType)
+	writeJSDoc(b, operationSummary(op), "mutation 함수에 전달하는 변수입니다.")
+	fmt.Fprintf(b, "export interface %s {\n", typeName)
+	if len(params) > 0 {
+		fmt.Fprintf(b, "  params: %s;\n", paramTypeName)
+	}
+	if requestType != "" {
+		fmt.Fprintf(b, "  body: %s;\n", requestType)
+	}
+	b.WriteString("}\n\n")
+	return typeName
+}
+
+func mutationFunctionVariable(mutationVariable string) string {
+	if mutationVariable == "void" {
+		return ""
+	}
+	return "variables: " + mutationVariable
+}
+
+type facadeNode struct {
+	Children map[string]*facadeNode
+	Op       *routeOperation
+}
+
+func writeFacade(b *strings.Builder, ops []routeOperation) {
+	root := &facadeNode{Children: map[string]*facadeNode{}}
+	for _, op := range ops {
+		insertFacadeOperation(root, facadePath(op), op)
+	}
+	writeJSDoc(b,
+		"control-plane AI Agent API를 namespace별로 묶은 config-bound facade입니다.",
+		"TanStack QueryClient를 대체하지 않고 request, queryKey, queryOptions, mutationOptions를 한곳에서 찾기 쉽게 제공합니다.",
+	)
+	b.WriteString("export function createRiidoControlPlaneClient(config: RiidoClientConfig) {\n")
+	b.WriteString("  return {\n")
+	writeFacadeChildren(b, root, "    ")
+	b.WriteString("  } as const;\n")
+	b.WriteString("}\n\n")
+}
+
+func insertFacadeOperation(root *facadeNode, path []string, op routeOperation) {
+	node := root
+	for _, part := range path {
+		if node.Children == nil {
+			node.Children = map[string]*facadeNode{}
+		}
+		child := node.Children[part]
+		if child == nil {
+			child = &facadeNode{Children: map[string]*facadeNode{}}
+			node.Children[part] = child
+		}
+		node = child
+	}
+	node.Op = &op
+}
+
+func writeFacadeChildren(b *strings.Builder, node *facadeNode, indent string) {
+	names := make([]string, 0, len(node.Children))
+	for name := range node.Children {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		child := node.Children[name]
+		fmt.Fprintf(b, "%s%s: {\n", indent, quoteFacadeProperty(name))
+		if child.Op != nil {
+			writeFacadeOperation(b, *child.Op, indent+"  ")
+		}
+		writeFacadeChildren(b, child, indent+"  ")
+		fmt.Fprintf(b, "%s},\n", indent)
+	}
+}
+
+func writeFacadeOperation(b *strings.Builder, op routeOperation, indent string) {
+	name := op.Op.OperationID
+	pathParams := pathParams(op.Path)
+	paramTypeName := exportedName(name) + "PathParams"
+	requestType := requestType(op.Op)
+	responseType := responseType(op.Op)
+	if isEventStream(op.Op) {
+		responseType = "Response"
+	}
+	if strings.EqualFold(op.Method, "GET") {
+		fmt.Fprintf(b, "%srequest: (%s) => %s(%s),\n", indent, facadeQueryRequestSignature(pathParams, paramTypeName), name, facadeQueryRequestCallArgs(pathParams))
+		fmt.Fprintf(b, "%squeryKey: %s,\n", indent, name+"QueryKey")
+		fmt.Fprintf(b, "%squeryOptions: (%s) => %s(%s),\n", indent, facadeQueryOptionsSignature(pathParams, paramTypeName, responseType), name+"QueryOptions", facadeQueryOptionsCallArgs(pathParams))
+		return
+	}
+	mutationVariable := mutationVariableTypeName(name, pathParams, requestType)
+	fmt.Fprintf(b, "%srequest: (%s) => %s(%s),\n", indent, facadeMutationRequestSignature(pathParams, paramTypeName, requestType), name, facadeMutationRequestCallArgs(pathParams, requestType))
+	fmt.Fprintf(b, "%smutationKey: %s,\n", indent, name+"QueryKey")
+	fmt.Fprintf(b, "%smutationOptions: (options: UseMutationOptions<%s, Error, %s> = {}) => %s(config, options),\n", indent, responseType, mutationVariable, name+"MutationOptions")
+}
+
+func facadePath(op routeOperation) []string {
+	switch op.Op.OperationID {
+	case "deleteAIAgent":
+		return []string{"agents", "delete"}
+	case "getAIAgentClientBootstrap":
+		return []string{"bootstrap"}
+	case "getAIAgentEditability":
+		return []string{"agents", "editability"}
+	case "listAIAgentDeviceRuntimes":
+		return []string{"devices", "runtimes"}
+	case "listAIAgentTaskAssignableAgents":
+		return []string{"tasks", "assignableAgents"}
+	case "stopAIAgentTask":
+		return []string{"tasks", "stop"}
+	case "streamAIAgentClientEvents":
+		return []string{"events", "stream"}
+	case "submitAIAgentTaskComment":
+		return []string{"tasks", "submitComment"}
+	case "updateAIAgentConfiguration":
+		return []string{"agents", "updateConfiguration"}
+	default:
+		return []string{"operations", op.Op.OperationID}
+	}
+}
+
+func quoteFacadeProperty(name string) string {
+	if safeIdentifier(name) == name {
+		return name
+	}
+	return fmt.Sprintf("%q", name)
+}
+
+func facadeQueryRequestSignature(params []string, paramTypeName string) string {
+	if len(params) > 0 {
+		return fmt.Sprintf("params: %s, options: RiidoRequestOptions = {}", paramTypeName)
+	}
+	return "options: RiidoRequestOptions = {}"
+}
+
+func facadeQueryRequestCallArgs(params []string) string {
+	if len(params) > 0 {
+		return "config, params, options"
+	}
+	return "config, options"
+}
+
+func facadeQueryOptionsSignature(params []string, paramTypeName, responseType string) string {
+	options := fmt.Sprintf("options: Omit<UseQueryOptions<%s>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}", responseType)
+	if len(params) > 0 {
+		return fmt.Sprintf("params: %s, %s", paramTypeName, options)
+	}
+	return options
+}
+
+func facadeQueryOptionsCallArgs(params []string) string {
+	if len(params) > 0 {
+		return "config, params, options"
+	}
+	return "config, options"
+}
+
+func facadeMutationRequestSignature(params []string, paramTypeName, requestType string) string {
+	var args []string
+	if len(params) > 0 {
+		args = append(args, "params: "+paramTypeName)
+	}
+	if requestType != "" {
+		args = append(args, "body: "+requestType)
+	}
+	args = append(args, "options: RiidoRequestOptions = {}")
+	return strings.Join(args, ", ")
+}
+
+func facadeMutationRequestCallArgs(params []string, requestType string) string {
+	args := []string{"config"}
+	if len(params) > 0 {
+		args = append(args, "params")
+	}
+	if requestType != "" {
+		args = append(args, "body")
+	}
+	args = append(args, "options")
+	return strings.Join(args, ", ")
+}
+
+func mutationVariableTypeName(operationID string, params []string, requestType string) string {
+	if len(params) == 0 && requestType == "" {
+		return "void"
+	}
+	return exportedName(operationID) + "MutationVariables"
 }
 
 func typeDescription(name string, s schema) string {

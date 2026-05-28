@@ -52,6 +52,12 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"AI Agent 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다.",
 		"web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
 		"React Query query hook입니다.",
+		"export function getAIAgentClientBootstrapQueryOptions",
+		"export interface StopAIAgentTaskMutationVariables",
+		"export function stopAIAgentTaskMutationOptions",
+		"export function createRiidoControlPlaneClient",
+		"tasks: {",
+		"assignableAgents: {",
 	} {
 		if !strings.Contains(body, required) {
 			t.Fatalf("generated client missing %q", required)

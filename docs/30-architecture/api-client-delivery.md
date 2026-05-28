@@ -105,6 +105,8 @@ Generator requirements:
   names
 - carry OpenAPI schema descriptions and operation summaries into generated
   JSDoc so frontend developers do not have to infer API behavior from type names
+- generate a config-bound API facade so frontend developers can consume the
+  surface as one module instead of stitching together isolated functions
 
 `tools/reactquerygen` remains a small deterministic public fixture generator for
 the checked-in mock surface. It is useful for drift tests, but it is not the
@@ -118,6 +120,34 @@ The client branch should receive:
 - `apiHistory.generated.ts`
 - `contractManifest.generated.ts`
 - `README.generated.md`
+
+## Generated Client Facade
+
+The generated client must keep primitive exports and a facade together:
+
+- primitive request functions, query keys, query options, mutation options, and
+  hooks remain individually exported for tests, tree-shaking, and direct use
+- `createRiidoControlPlaneClient(config)` groups the same primitives by API
+  namespace, for example `agents.editability`, `tasks.stop`, and
+  `devices.runtimes`
+- the facade is config-bound, so consumers do not repeatedly pass `baseUrl`,
+  `token`, and optional `fetcher`
+- the facade does not create or replace TanStack `QueryClient`
+- the facade does not own token refresh, global error toasts, retry policy, cache
+  invalidation, or app-specific optimistic updates
+
+The intended frontend usage is:
+
+```ts
+const aiAgent = createRiidoControlPlaneClient(config);
+
+useQuery(aiAgent.bootstrap.queryOptions());
+useMutation(aiAgent.tasks.stop.mutationOptions());
+queryClient.prefetchQuery(aiAgent.devices.runtimes.queryOptions());
+```
+
+This keeps the generated output feeling like a lightweight module while leaving
+application integration policy inside `riido-client`.
 
 The history artifact is intentionally lightweight. It should expose release
 entries, operation-level lifecycle changes, replacements, removals, and notable
@@ -159,4 +189,7 @@ state, customer data, or production bearer tokens.
   information from DSL/IR through the client handoff.
 - Client-facing generated comments and notes are Korean-first and preserve
   OpenAPI descriptions in JSDoc.
+- Generated clients include `queryOptions`, `mutationOptions`, and the
+  config-bound `createRiidoControlPlaneClient` facade without taking ownership of
+  app-level query policies.
 - This slice does not edit `teamswyg/riido-client`.
