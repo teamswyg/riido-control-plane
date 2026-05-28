@@ -1,57 +1,110 @@
 # riido-control-plane
 
-SaaS control-plane backend for Riido.
+`riido-control-plane`은 Riido SaaS control plane의 공개 backend boundary입니다.
+web client와 desktop app webview가 호출하는 HTTP/SSE API, assignment polling,
+provider status, authorization port, RBAC read model, mock/testnet API를
+소유합니다.
 
-This repository is the public backend boundary. It will own assignment polling,
-event ingest, SSE/read-model APIs, authorization ports, RBAC behavior, and
-control-plane black-box/domain tests.
+이 레포는 provider CLI를 실행하지 않습니다. 런타임 실행과 로컬 디바이스 제어는
+`riido-daemon`의 책임이고, Terraform과 AWS 배포 구성은 `riido-infra`의
+책임입니다. 이 레포는 공개 가능한 서버 코드와 검증 가능한 API surface만
+담습니다.
 
-It consumes shared public contracts from
-`github.com/teamswyg/riido-contracts` at `v0.3.0`. Runtime provider execution,
-Terraform deployment wiring, and secret material stay outside this repository.
+## 이 레포가 하는 일
 
-## Module
+- Riido SaaS HTTP/SSE endpoint를 구현합니다.
+- bearer token authorization port와 static/external authorizer adapter를
+  제공합니다.
+- agent catalog, AI Agent client API, provider status, assignment polling
+  같은 control-plane domain slice를 검증합니다.
+- `riido-contracts`의 DSL -> IR -> OpenAPI projection을 소비해 mock API와
+  generated React Query client가 drift 나지 않도록 합니다.
+- 공개 GitHub Actions에서 black-box/domain/generator 검증을 실행합니다.
 
-```text
-github.com/teamswyg/riido-control-plane
+## 이 레포가 하지 않는 일
+
+- Terraform state, AWS 계정 topology, ECR push 설정, Fargate task-definition
+  wiring을 커밋하지 않습니다.
+- raw bearer token, IdP secret, customer data export를 소유하지 않습니다.
+- provider runtime process를 실행하거나 provider CLI binary를 번들하지 않습니다.
+- production persistence와 DNS 운영 evidence를 SSOT로 삼지 않습니다.
+
+## 왜 이 작업을 여기서 했나
+
+AI Agent client-facing endpoint는 Riido web과 desktop webview가 직접 호출하는
+SaaS API입니다. 따라서 handler, auth scope gate, mock store, SSE replay,
+React Query generated client는 `riido-control-plane`에서 함께 검증해야 합니다.
+
+다만 API shape 자체는 이 레포가 새로 정의하지 않습니다. 계약 원본은
+`riido-contracts`의 Domain DSL/API IR이고, 이 레포는 projection을 복사해
+실제 서버 동작과 generated client가 같은 계약을 따르는지 검증합니다.
+
+## 어떤 문서를 보면 되나
+
+| 알고 싶은 것 | 문서 |
+| --- | --- |
+| AI Agent client API endpoint와 mock/testnet 정책 | [`docs/20-domain/ai-agent-client-api.md`](docs/20-domain/ai-agent-client-api.md) |
+| authorization resource/action/scope 규칙 | [`docs/20-domain/request-authorization.md`](docs/20-domain/request-authorization.md) |
+| agent catalog RBAC 규칙 | [`docs/20-domain/agent-catalog-rbac.md`](docs/20-domain/agent-catalog-rbac.md) |
+| runtime/agent binding domain | [`docs/20-domain/agent-runtime-binding.md`](docs/20-domain/agent-runtime-binding.md) |
+| control-plane bounded context | [`docs/20-domain/context-map.md`](docs/20-domain/context-map.md) |
+| module/package 책임 분해 | [`docs/30-architecture/module-decomposition.md`](docs/30-architecture/module-decomposition.md) |
+| runtime env 변수와 설정 책임 | [`docs/30-architecture/config-reference.md`](docs/30-architecture/config-reference.md) |
+| daemon/contracts/infra/client와의 연결 | [`docs/30-architecture/integration-matrix.md`](docs/30-architecture/integration-matrix.md) |
+| public runtime과 deploy boundary | [`docs/30-architecture/runtime-deployment-boundary.md`](docs/30-architecture/runtime-deployment-boundary.md) |
+| 마이그레이션 히스토리 | [`docs/migration/control-plane.md`](docs/migration/control-plane.md) |
+
+## AI Agent mock testnet
+
+AI Agent client mock API는 다음 env로 켭니다.
+
+```bash
+RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true
 ```
 
-## Repository Boundary
+mock API도 인증 없이 열리지 않습니다. bearer token scope와 owner/public/private
+visibility policy를 통과해야 합니다.
 
-This repository may contain:
+현재 testnet smoke는 별도 GitHub Actions workflow가 담당합니다.
 
-- HTTP/SSE control-plane server code
-- assignment, event, RBAC, provider status, and read-model domain logic
-- store-review/demo seed artifacts that contain no raw tokens or provider
-  execution grants
-- public API contracts implemented by the control plane
-- public Docker image contracts that do not publish or deploy artifacts
-- black-box and domain scenario tests
+- workflow: `ai-agent-client-testnet-smoke`
+- base URL: `RIIDO_AI_SERVER_TESTNET_BASE_URL`
+- token secret: `RIIDO_AI_SERVER_TESTNET_TOKEN`
+- 현재 testnet URL: `http://ai-api.riido.io`
 
-This repository must not contain:
+검증하는 endpoint:
 
-- Terraform state, AWS account details, or deployment secrets
-- environment-specific production values
-- customer data exports
-- private release artifacts
-- ECR push configuration, image digest deployment evidence, or private
-  Fargate task-definition wiring
+- `GET /healthz`
+- `GET /readyz`
+- `GET /v1/client/ai-agent/bootstrap`
+- `GET /v1/client/ai-agent/devices`
+- `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
+- `POST /v1/client/ai-agent/tasks/{task_id}/comments`
+- `POST /v1/client/ai-agent/tasks/{task_id}/stop`
+- `GET /v1/client/ai-agent/events?replay=1`
 
-## Verification
+## Contract / generated client 흐름
 
-Optional store-review/demo access is enabled by setting only
-`RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`. The raw review token is never
-committed or read from this repository. Optional CloudWatch Embedded Metric
-Format JSONL logs can be enabled with
-`RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`; the writer uses stdout only and
-does not require AWS SDKs, credentials, log groups, or Terraform state.
-The temporary AI Agent client mock API is enabled with
-`RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true` and remains bearer-token protected.
+```text
+riido-contracts DSL
+  -> riido-contracts API IR
+  -> OpenAPI projection
+  -> contracts/ai-agent-client/*.json
+  -> tools/reactquerygen
+  -> web/generated/aiAgentClient.ts
+```
+
+OpenAPI와 generated client는 사람이 임의로 고치는 SSOT가 아닙니다. 계약이
+바뀌면 `riido-contracts`의 DSL을 먼저 바꾸고, projection과 generated client를
+다시 생성해야 합니다.
+
+## 검증
 
 ```bash
 go test ./...
 go list -m all
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
+go test ./cmd/riido_ai_server -run 'AIAgentClientMock|ConfigFromEnv' -count=1
 go test ./tools/reactquerygen -count=1
 go run ./tools/reactquerygen -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json -out web/generated/aiAgentClient.ts
 go test ./tools/containercontract -count=1
@@ -59,16 +112,15 @@ go run ./tools/containercontract -contract packaging/containers/riido_ai_server_
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
 ```
 
-The public GitHub Actions workflow runs the lightweight verification suite
-outside the private infrastructure repository billing pool. CI allows only
-Riido-owned Go module dependencies; any third-party dependency requires a new
-documented decision before it is introduced.
+CI는 public repo에서 가벼운 검증을 돌리기 위한 경계입니다. private infra
+billing pool에서 테스트 비용이 커지지 않도록, 배포 wiring은 `riido-infra`에
+두고 API/generator/smoke 검증은 이 레포에서 수행합니다.
 
-The deployed AI Agent mock testnet is checked by the separate
-`ai-agent-client-testnet-smoke` workflow. It calls the ALB URL from the
-`RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable or a manual workflow
-input, and reads the bearer token from the `RIIDO_AI_SERVER_TESTNET_TOKEN`
-repository secret.
+## Module
+
+```text
+github.com/teamswyg/riido-control-plane
+```
 
 ## License
 
