@@ -28,6 +28,30 @@ sub-DSL.
 Cross-repository React Query delivery to `riido-client` is owned by
 [`api-client-delivery.md`](../30-architecture/api-client-delivery.md).
 
+## SSOT Dependency Direction
+
+This file is downstream of the canonical AI Agent policy in `riido-contracts`.
+It may repeat policy words only to explain local HTTP behavior, mock data,
+generator output, and black-box harness coverage.
+
+For agent settings:
+
+- `riido-contracts` owns the meaning of `profile_thumbnail_url` and
+  `instruction`, including URL-only thumbnail policy and the 1000 character
+  instruction limit.
+- This repository owns PATCH validation, save/update behavior, response
+  projection, generated TypeScript shape, and smoke-test coverage.
+- `riido-daemon` owns runtime consumption of an assigned instruction value after
+  the assignment contract carries it; this server doc does not define provider
+  prompt placement.
+- `riido-infra` owns deployment/storage changes only when the API requires new
+  media storage, secrets, persistence topology, or release evidence.
+
+Bottom-up findings from this repository, such as validation cost, generator
+shape, or frontend usability, can start here. If the finding changes domain
+meaning, the next PR must update `riido-contracts` first and then refresh this
+sub-DSL and generated output.
+
 ## Mock Runtime
 
 The mock surface is enabled by `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true`.

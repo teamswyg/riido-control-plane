@@ -35,6 +35,13 @@ cost, or operations findings may ask `riido-contracts` to change or remove a
 canonical concept. That does not immediately delete the lower API sub-DSL. The
 API surface moves through lifecycle states so existing clients can migrate.
 
+Agent setting fields follow that dependency direction. `profile_thumbnail_url`
+and `instruction` are canonical terms from `riido-contracts`; this repository
+delivers them as generated client API shape and history/manifest metadata. If
+client usage suggests a different thumbnail storage model or instruction
+semantics, the delivery workflow records the local finding but does not alter
+the canonical meaning without a contracts change.
+
 ## DSL Lifecycle
 
 The sub-DSL must preserve lifecycle metadata before OpenAPI generation:
