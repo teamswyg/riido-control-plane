@@ -4,6 +4,13 @@ import "time"
 
 const AIAgentClientContractID = "control-plane-ai-agent-client-api.v1"
 
+const (
+	AgentClientEventDeviceRuntimeSnapshot = "device_runtime_snapshot"
+	AgentClientEventEditabilityChanged    = "agent_editability_changed"
+	AgentClientEventWorkStatusChanged     = "agent_work_status_changed"
+	AgentClientEventThreadProgress        = "agent_thread_progress"
+)
+
 type AgentVisibility string
 
 const (
@@ -205,6 +212,45 @@ type AgentWorkStatusChangedEvent struct {
 	WorkStatus      AgentWorkStatus      `json:"work_status"`
 	AssignmentState AgentAssignmentState `json:"assignment_state,omitempty"`
 	CommentKind     AgentTaskCommentKind `json:"comment_kind,omitempty"`
+}
+
+type AgentThreadProgressLine struct {
+	Seq        int       `json:"seq"`
+	Message    string    `json:"message"`
+	ObservedAt time.Time `json:"observed_at,omitempty"`
+}
+
+type AgentThreadProgressEvent struct {
+	EventType       string                    `json:"event_type"`
+	SchemaVersion   string                    `json:"schema_version"`
+	AgentID         string                    `json:"agent_id"`
+	TaskID          string                    `json:"task_id"`
+	RunID           string                    `json:"run_id"`
+	WorkStatus      AgentWorkStatus           `json:"work_status"`
+	AssignmentState AgentAssignmentState      `json:"assignment_state"`
+	CommentKind     AgentTaskCommentKind      `json:"comment_kind"`
+	BatchStartedAt  time.Time                 `json:"batch_started_at,omitempty"`
+	BatchEndedAt    time.Time                 `json:"batch_ended_at,omitempty"`
+	Lines           []AgentThreadProgressLine `json:"lines"`
+}
+
+type AgentThreadProgressBatchRequest struct {
+	AssignmentID   string                    `json:"assignment_id"`
+	TaskID         string                    `json:"task_id"`
+	DaemonID       string                    `json:"daemon_id,omitempty"`
+	DeviceID       string                    `json:"device_id,omitempty"`
+	RuntimeID      string                    `json:"runtime_id,omitempty"`
+	RunID          string                    `json:"run_id,omitempty"`
+	BatchStartedAt time.Time                 `json:"batch_started_at,omitempty"`
+	BatchEndedAt   time.Time                 `json:"batch_ended_at,omitempty"`
+	Lines          []AgentThreadProgressLine `json:"lines"`
+	Metadata       map[string]string         `json:"metadata,omitempty"`
+}
+
+type AgentThreadProgressBatchResponse struct {
+	SchemaVersion string                   `json:"schema_version"`
+	AcceptedLines int                      `json:"accepted_lines"`
+	Event         AgentThreadProgressEvent `json:"event"`
 }
 
 type ClientStreamEvent struct {

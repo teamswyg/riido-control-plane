@@ -59,6 +59,26 @@ export interface AgentEditabilityResponse {
 
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
 
+export interface AgentThreadProgressEvent {
+  agent_id: string;
+  assignment_state: AgentAssignmentState;
+  batch_ended_at?: string;
+  batch_started_at?: string;
+  comment_kind: AgentTaskCommentKind;
+  event_type: "agent_thread_progress";
+  lines: AgentThreadProgressLine[];
+  run_id: string;
+  schema_version: string;
+  task_id: string;
+  work_status: AgentWorkStatus;
+}
+
+export interface AgentThreadProgressLine {
+  message: string;
+  observed_at?: string;
+  seq: number;
+}
+
 export type AgentVisibility = "public" | "private";
 
 export type AgentWorkStatus = "idle" | "queued" | "running" | "waiting_for_user" | "completed" | "failed" | "offline";
@@ -84,7 +104,7 @@ export interface ClientBootstrapResponse {
 
 export type ClientKind = "web" | "desktop_webview";
 
-export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent;
+export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent;
 
 export interface DeleteAgentResponse {
   agent_id: string;

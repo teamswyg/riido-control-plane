@@ -76,6 +76,12 @@ The shared assignment DTO surface imported from `riido-contracts/assignment` is:
 - `AgentEventResponse`
 - `TaskEvent`
 
+Runtime progress intended for the client task thread is ingested as bounded
+daemon batches on `POST /v1/agents/{agent_id}/thread-progress`. The endpoint
+stores each accepted line as an assignment `riido_log` task event and, when the
+AI Agent client event store is configured, fans out the same batch as
+`agent_thread_progress` on the client SSE surface.
+
 The control-plane-local DTO surface is:
 
 - `Health`

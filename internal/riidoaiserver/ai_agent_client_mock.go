@@ -21,12 +21,27 @@ type AIAgentClientStore interface {
 	AIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, error)
 }
 
+type AIAgentClientEventSubscriber interface {
+	SubscribeAIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, <-chan ClientStreamEvent, func(), error)
+}
+
+type AIAgentThreadProgressRecorder interface {
+	RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error)
+}
+
 type MockAIAgentClientStore struct {
-	mu          sync.Mutex
-	workspaceID string
-	devices     []DeviceRecord
-	agents      map[string]AgentClientRecord
-	events      []ClientStreamEvent
+	mu               sync.Mutex
+	workspaceID      string
+	devices          []DeviceRecord
+	agents           map[string]AgentClientRecord
+	events           []ClientStreamEvent
+	subscribers      map[int]aiAgentClientSubscriber
+	nextSubscriberID int
+}
+
+type aiAgentClientSubscriber struct {
+	principal AuthorizationResult
+	events    chan ClientStreamEvent
 }
 
 func NewMockAIAgentClientStore() *MockAIAgentClientStore {
@@ -119,21 +134,22 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		workspaceID: "workspace-mock-riid",
 		devices:     []DeviceRecord{device},
 		agents:      agents,
+		subscribers: map[int]aiAgentClientSubscriber{},
 		events: []ClientStreamEvent{
 			{
 				Seq:       1,
-				EventType: "device_runtime_snapshot",
+				EventType: AgentClientEventDeviceRuntimeSnapshot,
 				Payload: DeviceRuntimeSnapshotEvent{
-					EventType:     "device_runtime_snapshot",
+					EventType:     AgentClientEventDeviceRuntimeSnapshot,
 					SchemaVersion: SchemaVersion,
 					Device:        device,
 				},
 			},
 			{
 				Seq:       2,
-				EventType: "agent_work_status_changed",
+				EventType: AgentClientEventWorkStatusChanged,
 				Payload: AgentWorkStatusChangedEvent{
-					EventType:       "agent_work_status_changed",
+					EventType:       AgentClientEventWorkStatusChanged,
 					SchemaVersion:   SchemaVersion,
 					AgentID:         "agent-owned-codex",
 					TaskID:          "task-mock-1",
@@ -328,18 +344,14 @@ func (s *MockAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal Au
 		running = agent.AssignedTaskCount
 	}
 	delete(s.agents, agent.AgentID)
-	s.events = append(s.events, ClientStreamEvent{
-		Seq:       int64(len(s.events) + 1),
-		EventType: "agent_work_status_changed",
-		Payload: AgentWorkStatusChangedEvent{
-			EventType:       "agent_work_status_changed",
-			SchemaVersion:   SchemaVersion,
-			AgentID:         agent.AgentID,
-			TaskID:          "task-mock-1",
-			WorkStatus:      AgentWorkStatusOffline,
-			AssignmentState: AgentAssignmentStateStopped,
-			CommentKind:     AgentTaskCommentStoppedByAgentDeleted,
-		},
+	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
+		EventType:       AgentClientEventWorkStatusChanged,
+		SchemaVersion:   SchemaVersion,
+		AgentID:         agent.AgentID,
+		TaskID:          "task-mock-1",
+		WorkStatus:      AgentWorkStatusOffline,
+		AssignmentState: AgentAssignmentStateStopped,
+		CommentKind:     AgentTaskCommentStoppedByAgentDeleted,
 	})
 	return DeleteAgentResponse{
 		SchemaVersion:            SchemaVersion,
@@ -355,17 +367,86 @@ func (s *MockAIAgentClientStore) AIAgentClientEvents(ctx context.Context, princi
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	events := make([]ClientStreamEvent, 0, len(s.events))
-	visible := s.visibleAgentIDs(principal)
-	for _, event := range s.events {
-		if agentID, ok := eventAgentID(event.Payload); ok {
-			if _, isVisible := visible[agentID]; !isVisible {
-				continue
-			}
-		}
-		events = append(events, event)
+	return s.clientEventsForPrincipalLocked(principal), nil
+}
+
+func (s *MockAIAgentClientStore) SubscribeAIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, <-chan ClientStreamEvent, func(), error) {
+	if err := ctx.Err(); err != nil {
+		return nil, nil, nil, err
 	}
-	return events, nil
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	history := s.clientEventsForPrincipalLocked(principal)
+	s.nextSubscriberID++
+	id := s.nextSubscriberID
+	events := make(chan ClientStreamEvent, 32)
+	s.subscribers[id] = aiAgentClientSubscriber{principal: principal, events: events}
+	cancel := func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		if subscriber, ok := s.subscribers[id]; ok {
+			delete(s.subscribers, id)
+			close(subscriber.events)
+		}
+	}
+	return history, events, cancel, nil
+}
+
+func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return AgentThreadProgressBatchResponse{}, err
+	}
+	agentID = strings.TrimSpace(agentID)
+	req.TaskID = strings.TrimSpace(req.TaskID)
+	req.AssignmentID = strings.TrimSpace(req.AssignmentID)
+	req.RunID = strings.TrimSpace(req.RunID)
+	if agentID == "" {
+		return AgentThreadProgressBatchResponse{}, errors.New("agent_id is required")
+	}
+	if req.TaskID == "" {
+		return AgentThreadProgressBatchResponse{}, errors.New("task_id is required")
+	}
+	if req.AssignmentID == "" {
+		return AgentThreadProgressBatchResponse{}, errors.New("assignment_id is required")
+	}
+	lines := normalizeProgressLines(req.Lines)
+	if len(lines) == 0 {
+		return AgentThreadProgressBatchResponse{}, errors.New("lines are required")
+	}
+	if req.RunID == "" {
+		req.RunID = "run-" + req.AssignmentID
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	agent, ok := s.agents[agentID]
+	if !ok {
+		return AgentThreadProgressBatchResponse{}, ErrAIAgentNotFound
+	}
+	agent.WorkStatus = AgentWorkStatusRunning
+	agent.Editability = AgentEditabilityBlockedAssignedTasks
+	if agent.AssignedTaskCount == 0 {
+		agent.AssignedTaskCount = 1
+	}
+	s.agents[agentID] = agent
+	event := AgentThreadProgressEvent{
+		EventType:       AgentClientEventThreadProgress,
+		SchemaVersion:   SchemaVersion,
+		AgentID:         agentID,
+		TaskID:          req.TaskID,
+		RunID:           req.RunID,
+		WorkStatus:      AgentWorkStatusRunning,
+		AssignmentState: AgentAssignmentStateRunning,
+		CommentKind:     AgentTaskCommentRuntimeProgress,
+		BatchStartedAt:  req.BatchStartedAt,
+		BatchEndedAt:    req.BatchEndedAt,
+		Lines:           lines,
+	}
+	s.appendClientEventLocked(event.EventType, event)
+	return AgentThreadProgressBatchResponse{
+		SchemaVersion: SchemaVersion,
+		AcceptedLines: len(lines),
+		Event:         event,
+	}, nil
 }
 
 var (
@@ -441,20 +522,73 @@ func (s *MockAIAgentClientStore) agentForTaskStop(principal AuthorizationResult,
 }
 
 func (s *MockAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {
-	s.events = append(s.events, ClientStreamEvent{
-		Seq:       int64(len(s.events) + 1),
-		EventType: "agent_work_status_changed",
-		Payload: AgentWorkStatusChangedEvent{
-			EventType:       "agent_work_status_changed",
-			SchemaVersion:   SchemaVersion,
-			AgentID:         response.AgentID,
-			TaskID:          response.TaskID,
-			RunID:           response.RunID,
-			WorkStatus:      response.WorkStatus,
-			AssignmentState: response.AssignmentState,
-			CommentKind:     response.CommentKind,
-		},
+	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
+		EventType:       AgentClientEventWorkStatusChanged,
+		SchemaVersion:   SchemaVersion,
+		AgentID:         response.AgentID,
+		TaskID:          response.TaskID,
+		RunID:           response.RunID,
+		WorkStatus:      response.WorkStatus,
+		AssignmentState: response.AssignmentState,
+		CommentKind:     response.CommentKind,
 	})
+}
+
+func (s *MockAIAgentClientStore) clientEventsForPrincipalLocked(principal AuthorizationResult) []ClientStreamEvent {
+	events := make([]ClientStreamEvent, 0, len(s.events))
+	for _, event := range s.events {
+		if !clientEventVisibleToLocked(s, principal, event) {
+			continue
+		}
+		events = append(events, event)
+	}
+	return events
+}
+
+func (s *MockAIAgentClientStore) appendClientEventLocked(eventType string, payload any) ClientStreamEvent {
+	event := ClientStreamEvent{
+		Seq:       int64(len(s.events) + 1),
+		EventType: eventType,
+		Payload:   payload,
+	}
+	s.events = append(s.events, event)
+	for _, subscriber := range s.subscribers {
+		if !clientEventVisibleToLocked(s, subscriber.principal, event) {
+			continue
+		}
+		select {
+		case subscriber.events <- event:
+		default:
+		}
+	}
+	return event
+}
+
+func clientEventVisibleToLocked(s *MockAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) bool {
+	agentID, ok := eventAgentID(event.Payload)
+	if !ok {
+		return true
+	}
+	agent, exists := s.agents[agentID]
+	if !exists {
+		return aiAgentIsAdmin(principal)
+	}
+	return aiAgentVisibleTo(principal, agent)
+}
+
+func normalizeProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLine {
+	out := make([]AgentThreadProgressLine, 0, len(lines))
+	for _, line := range lines {
+		line.Message = strings.TrimSpace(line.Message)
+		if line.Message == "" {
+			continue
+		}
+		if line.Seq <= 0 {
+			line.Seq = len(out) + 1
+		}
+		out = append(out, line)
+	}
+	return out
 }
 
 func aiAgentVisibleTo(principal AuthorizationResult, agent AgentClientRecord) bool {
@@ -535,6 +669,8 @@ func eventAgentID(payload any) (string, bool) {
 	case AgentEditabilityChangedEvent:
 		return event.AgentID, true
 	case AgentWorkStatusChangedEvent:
+		return event.AgentID, true
+	case AgentThreadProgressEvent:
 		return event.AgentID, true
 	default:
 		return "", false

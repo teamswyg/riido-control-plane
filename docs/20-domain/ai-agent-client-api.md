@@ -59,6 +59,10 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task-thread comments can enqueue work when the selected agent is busy
 - task-thread stop actions return `stopped_by_user_request`
 - task-thread status updates use typed `AgentTaskCommentKind` values
+- daemon progress ingest accepts parsed `<riido_log>...<end>` batches through
+  `POST /v1/agents/{agent_id}/thread-progress`
+- client task-thread progress is streamed as the typed
+  `agent_thread_progress` event on `GET /v1/client/ai-agent/events`
 
 ## Figma Handoff Evidence
 
@@ -90,6 +94,7 @@ ALB for:
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 - `GET /v1/client/ai-agent/events?replay=1`
+- `POST /v1/agents/{agent_id}/thread-progress`
 
 The workflow reads the ALB base URL from a manual workflow input or the
 `RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable, and the bearer token
