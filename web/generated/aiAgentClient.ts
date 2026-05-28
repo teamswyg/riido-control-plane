@@ -14,6 +14,51 @@ export interface AIAgentTaskActionResponse {
   work_status: AgentWorkStatus;
 }
 
+export interface AIAgentTaskThreadCollectionResponse {
+  active_thread_id?: string;
+  links: AIAgentTaskThreadLinks;
+  schema_version: string;
+  task_id: string;
+  threads: AIAgentTaskThreadRecord[];
+}
+
+export interface AIAgentTaskThreadEntry {
+  comment_kind: AgentTaskCommentKind;
+  created_at: string;
+  entry_id: string;
+  lines?: AgentThreadProgressLine[];
+  message: string;
+}
+
+export interface AIAgentTaskThreadLinks {
+  active_stream?: AIAgentTaskThreadStreamLink;
+}
+
+export interface AIAgentTaskThreadRecord {
+  agent_id: string;
+  assignment_id: string;
+  assignment_state: AgentAssignmentState;
+  ended_at?: string;
+  entries: AIAgentTaskThreadEntry[];
+  run_id: string;
+  started_at?: string;
+  stream_state: AIAgentTaskThreadStreamState;
+  task_id: string;
+  thread_id: string;
+  work_status: AgentWorkStatus;
+}
+
+export interface AIAgentTaskThreadStreamLink {
+  content_type: "text/event-stream";
+  event_type: "agent_thread_progress";
+  href: string;
+  method: "GET";
+  rel: "active_stream";
+  thread_id: string;
+}
+
+export type AIAgentTaskThreadStreamState = "cold" | "active" | "terminal";
+
 export type AgentAssignmentState = "queued" | "running" | "stopping" | "stopped" | "completed" | "failed" | "unassigned";
 
 export interface AgentClientListResponse {
@@ -70,6 +115,7 @@ export interface AgentThreadProgressEvent {
   run_id: string;
   schema_version: string;
   task_id: string;
+  thread_id: string;
   work_status: AgentWorkStatus;
 }
 
@@ -386,4 +432,127 @@ export function useStopAIAgentTask(config: RiidoClientConfig, options: UseMutati
     ...options,
     mutationFn: (variables) => stopAIAgentTask(config, variables.params, variables.body, {}),
   });
+}
+
+export interface GetAIAgentTaskThreadsPathParams {
+  task_id: string;
+}
+
+export async function getAIAgentTaskThreads(config: RiidoClientConfig, params: GetAIAgentTaskThreadsPathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadCollectionResponse> {
+  const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads`;
+  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+export function getAIAgentTaskThreadsQueryKey(params: GetAIAgentTaskThreadsPathParams): readonly unknown[] {
+  return ["getAIAgentTaskThreads", params] as const;
+}
+
+export function useGetAIAgentTaskThreads(config: RiidoClientConfig, params: GetAIAgentTaskThreadsPathParams, options: Omit<UseQueryOptions<AIAgentTaskThreadCollectionResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) {
+  return useQuery<AIAgentTaskThreadCollectionResponse>({
+    ...options,
+    queryKey: getAIAgentTaskThreadsQueryKey(params),
+    queryFn: () => getAIAgentTaskThreads(config, params, options),
+  });
+}
+
+export interface StreamAIAgentTaskThreadEventsPathParams {
+  task_id: string;
+  thread_id: string;
+}
+
+export async function streamAIAgentTaskThreadEvents(config: RiidoClientConfig, params: StreamAIAgentTaskThreadEventsPathParams, options: RiidoRequestOptions = {}): Promise<Response> {
+  const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/events`;
+  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal });
+}
+
+export function streamAIAgentTaskThreadEventsQueryKey(params: StreamAIAgentTaskThreadEventsPathParams): readonly unknown[] {
+  return ["streamAIAgentTaskThreadEvents", params] as const;
+}
+
+export function useStreamAIAgentTaskThreadEvents(config: RiidoClientConfig, params: StreamAIAgentTaskThreadEventsPathParams, options: Omit<UseQueryOptions<Response>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) {
+  return useQuery<Response>({
+    ...options,
+    queryKey: streamAIAgentTaskThreadEventsQueryKey(params),
+    queryFn: () => streamAIAgentTaskThreadEvents(config, params, options),
+  });
+}
+
+export interface OpenAIAgentTaskThreadsOptions extends RiidoRequestOptions {
+  onEvent?: (event: AgentThreadProgressEvent) => void;
+}
+
+export interface OpenAIAgentTaskThreadsResult {
+  collection: AIAgentTaskThreadCollectionResponse;
+  active_thread_id?: string;
+  stream?: Response;
+  done?: Promise<void>;
+}
+
+/**
+ * task thread 화면은 과거 기록 조회만으로 끝날 수 있습니다.
+ * 이 helper는 HTTP cold collection을 먼저 읽고, 서버가 내려준 active_stream HATEOAS link가 있을 때만 SSE를 엽니다.
+ * onEvent를 넘기면 같은 thread_id의 agent_thread_progress 이벤트만 호출자에게 전달합니다.
+ */
+export async function openAIAgentTaskThreads(config: RiidoClientConfig, params: GetAIAgentTaskThreadsPathParams, options: OpenAIAgentTaskThreadsOptions = {}): Promise<OpenAIAgentTaskThreadsResult> {
+  const collection = await getAIAgentTaskThreads(config, params, options);
+  const link = collection.links.active_stream;
+  if (!link) {
+    return { collection };
+  }
+  if (collection.active_thread_id && link.thread_id !== collection.active_thread_id) {
+    throw new Error('Riido API active_stream thread_id mismatch');
+  }
+  if (link.method !== 'GET' || link.content_type !== 'text/event-stream' || link.event_type !== 'agent_thread_progress') {
+    throw new Error('Riido API active_stream link is not compatible');
+  }
+  const stream = await riidoRawRequest(config, riidoHateoasPath(config, link.href), { method: 'GET', signal: options.signal });
+  const done = options.onEvent ? readAIAgentTaskThreadStream(stream, link.thread_id, options.onEvent) : undefined;
+  return { collection, active_thread_id: link.thread_id, stream, done };
+}
+
+function riidoHateoasPath(config: RiidoClientConfig, href: string): string {
+  const base = new URL(config.baseUrl);
+  const url = new URL(href, base);
+  if (url.origin !== base.origin) {
+    throw new Error('Riido API active_stream link must stay on the configured baseUrl origin');
+  }
+  return `${url.pathname}${url.search}`;
+}
+
+async function readAIAgentTaskThreadStream(response: Response, expectedThreadID: string, onEvent: (event: AgentThreadProgressEvent) => void): Promise<void> {
+  if (!response.body) {
+    return;
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) {
+      break;
+    }
+    buffer += decoder.decode(value, { stream: true });
+    buffer = buffer.replace(/\r\n/g, '\n');
+    buffer = drainAIAgentTaskThreadSSE(buffer, expectedThreadID, onEvent);
+  }
+  buffer += decoder.decode();
+  buffer = buffer.replace(/\r\n/g, '\n');
+  drainAIAgentTaskThreadSSE(buffer, expectedThreadID, onEvent);
+}
+
+function drainAIAgentTaskThreadSSE(buffer: string, expectedThreadID: string, onEvent: (event: AgentThreadProgressEvent) => void): string {
+  let boundary = buffer.indexOf('\n\n');
+  while (boundary >= 0) {
+    const block = buffer.slice(0, boundary).replace(/\r/g, '');
+    buffer = buffer.slice(boundary + 2);
+    const data = block.split('\n').filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\n');
+    if (data) {
+      const event = JSON.parse(data) as AgentThreadProgressEvent;
+      if (event.event_type === 'agent_thread_progress' && event.thread_id === expectedThreadID) {
+        onEvent(event);
+      }
+    }
+    boundary = buffer.indexOf('\n\n');
+  }
+  return buffer;
 }

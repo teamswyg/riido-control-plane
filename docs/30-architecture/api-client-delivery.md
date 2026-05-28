@@ -105,6 +105,30 @@ Generator requirements:
 the checked-in mock surface. It is useful for drift tests, but it is not the
 cross-repository Orval delivery mechanism.
 
+### Task Thread Handoff Helper
+
+The generated client must not ask frontend screens to decide when SSE should be
+opened for task threads. The task-thread screen can show old completed AI Agent
+work, and opening a stream for those screens creates avoidable server cost.
+
+For the AI Agent task-thread surface, the generated output therefore provides a
+single handoff helper:
+
+```ts
+openAIAgentTaskThreads(config, { task_id }, { onEvent })
+```
+
+The helper performs:
+
+1. `GET /v1/client/ai-agent/tasks/{task_id}/threads`
+2. validates `links.active_stream` when present
+3. opens the HATEOAS-provided SSE URL only when the link exists
+4. forwards only `agent_thread_progress` events whose `thread_id` matches the
+   active link
+
+If the collection has no `active_stream`, the helper returns the cold
+collection and does not open a stream.
+
 ## Generated Artifacts
 
 The client branch should receive:

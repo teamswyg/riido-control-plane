@@ -142,6 +142,9 @@ func generate(spec openAPISpec) ([]byte, error) {
 			return nil, err
 		}
 	}
+	if hasOperation(ops, "getAIAgentTaskThreads") && hasOperation(ops, "streamAIAgentTaskThreadEvents") {
+		writeAIAgentTaskThreadHandoff(&b)
+	}
 	out := bytes.TrimRight([]byte(b.String()), "\n")
 	return append(out, '\n'), nil
 }
@@ -268,6 +271,83 @@ func writeOperation(b *strings.Builder, op routeOperation) error {
 	return nil
 }
 
+func writeAIAgentTaskThreadHandoff(b *strings.Builder) {
+	b.WriteString("export interface OpenAIAgentTaskThreadsOptions extends RiidoRequestOptions {\n")
+	b.WriteString("  onEvent?: (event: AgentThreadProgressEvent) => void;\n")
+	b.WriteString("}\n\n")
+	b.WriteString("export interface OpenAIAgentTaskThreadsResult {\n")
+	b.WriteString("  collection: AIAgentTaskThreadCollectionResponse;\n")
+	b.WriteString("  active_thread_id?: string;\n")
+	b.WriteString("  stream?: Response;\n")
+	b.WriteString("  done?: Promise<void>;\n")
+	b.WriteString("}\n\n")
+	b.WriteString("/**\n")
+	b.WriteString(" * task thread 화면은 과거 기록 조회만으로 끝날 수 있습니다.\n")
+	b.WriteString(" * 이 helper는 HTTP cold collection을 먼저 읽고, 서버가 내려준 active_stream HATEOAS link가 있을 때만 SSE를 엽니다.\n")
+	b.WriteString(" * onEvent를 넘기면 같은 thread_id의 agent_thread_progress 이벤트만 호출자에게 전달합니다.\n")
+	b.WriteString(" */\n")
+	b.WriteString("export async function openAIAgentTaskThreads(config: RiidoClientConfig, params: GetAIAgentTaskThreadsPathParams, options: OpenAIAgentTaskThreadsOptions = {}): Promise<OpenAIAgentTaskThreadsResult> {\n")
+	b.WriteString("  const collection = await getAIAgentTaskThreads(config, params, options);\n")
+	b.WriteString("  const link = collection.links.active_stream;\n")
+	b.WriteString("  if (!link) {\n")
+	b.WriteString("    return { collection };\n")
+	b.WriteString("  }\n")
+	b.WriteString("  if (collection.active_thread_id && link.thread_id !== collection.active_thread_id) {\n")
+	b.WriteString("    throw new Error('Riido API active_stream thread_id mismatch');\n")
+	b.WriteString("  }\n")
+	b.WriteString("  if (link.method !== 'GET' || link.content_type !== 'text/event-stream' || link.event_type !== 'agent_thread_progress') {\n")
+	b.WriteString("    throw new Error('Riido API active_stream link is not compatible');\n")
+	b.WriteString("  }\n")
+	b.WriteString("  const stream = await riidoRawRequest(config, riidoHateoasPath(config, link.href), { method: 'GET', signal: options.signal });\n")
+	b.WriteString("  const done = options.onEvent ? readAIAgentTaskThreadStream(stream, link.thread_id, options.onEvent) : undefined;\n")
+	b.WriteString("  return { collection, active_thread_id: link.thread_id, stream, done };\n")
+	b.WriteString("}\n\n")
+	b.WriteString("function riidoHateoasPath(config: RiidoClientConfig, href: string): string {\n")
+	b.WriteString("  const base = new URL(config.baseUrl);\n")
+	b.WriteString("  const url = new URL(href, base);\n")
+	b.WriteString("  if (url.origin !== base.origin) {\n")
+	b.WriteString("    throw new Error('Riido API active_stream link must stay on the configured baseUrl origin');\n")
+	b.WriteString("  }\n")
+	b.WriteString("  return `${url.pathname}${url.search}`;\n")
+	b.WriteString("}\n\n")
+	b.WriteString("async function readAIAgentTaskThreadStream(response: Response, expectedThreadID: string, onEvent: (event: AgentThreadProgressEvent) => void): Promise<void> {\n")
+	b.WriteString("  if (!response.body) {\n")
+	b.WriteString("    return;\n")
+	b.WriteString("  }\n")
+	b.WriteString("  const reader = response.body.getReader();\n")
+	b.WriteString("  const decoder = new TextDecoder();\n")
+	b.WriteString("  let buffer = '';\n")
+	b.WriteString("  for (;;) {\n")
+	b.WriteString("    const { value, done } = await reader.read();\n")
+	b.WriteString("    if (done) {\n")
+	b.WriteString("      break;\n")
+	b.WriteString("    }\n")
+	b.WriteString("    buffer += decoder.decode(value, { stream: true });\n")
+	b.WriteString("    buffer = buffer.replace(/\\r\\n/g, '\\n');\n")
+	b.WriteString("    buffer = drainAIAgentTaskThreadSSE(buffer, expectedThreadID, onEvent);\n")
+	b.WriteString("  }\n")
+	b.WriteString("  buffer += decoder.decode();\n")
+	b.WriteString("  buffer = buffer.replace(/\\r\\n/g, '\\n');\n")
+	b.WriteString("  drainAIAgentTaskThreadSSE(buffer, expectedThreadID, onEvent);\n")
+	b.WriteString("}\n\n")
+	b.WriteString("function drainAIAgentTaskThreadSSE(buffer: string, expectedThreadID: string, onEvent: (event: AgentThreadProgressEvent) => void): string {\n")
+	b.WriteString("  let boundary = buffer.indexOf('\\n\\n');\n")
+	b.WriteString("  while (boundary >= 0) {\n")
+	b.WriteString("    const block = buffer.slice(0, boundary).replace(/\\r/g, '');\n")
+	b.WriteString("    buffer = buffer.slice(boundary + 2);\n")
+	b.WriteString("    const data = block.split('\\n').filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\\n');\n")
+	b.WriteString("    if (data) {\n")
+	b.WriteString("      const event = JSON.parse(data) as AgentThreadProgressEvent;\n")
+	b.WriteString("      if (event.event_type === 'agent_thread_progress' && event.thread_id === expectedThreadID) {\n")
+	b.WriteString("        onEvent(event);\n")
+	b.WriteString("      }\n")
+	b.WriteString("    }\n")
+	b.WriteString("    boundary = buffer.indexOf('\\n\\n');\n")
+	b.WriteString("  }\n")
+	b.WriteString("  return buffer;\n")
+	b.WriteString("}\n\n")
+}
+
 func flattenOperations(paths map[string]map[string]operation) []routeOperation {
 	var ops []routeOperation
 	for path, byMethod := range paths {
@@ -282,6 +362,15 @@ func flattenOperations(paths map[string]map[string]operation) []routeOperation {
 		return ops[i].Method < ops[j].Method
 	})
 	return ops
+}
+
+func hasOperation(ops []routeOperation, operationID string) bool {
+	for _, op := range ops {
+		if op.Op.OperationID == operationID {
+			return true
+		}
+	}
+	return false
 }
 
 func requestType(op operation) string {

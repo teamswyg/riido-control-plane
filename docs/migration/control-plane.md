@@ -750,6 +750,28 @@ This slice does not edit `teamswyg/riido-client`, run Orval in the client
 repository, configure delivery secrets, publish npm packages, or implement the
 cross-repository delivery workflow.
 
+### RIID-4751 — task-thread cold collection and HATEOAS stream handoff
+
+This slice makes the task-thread screen load historical AI Agent thread records
+through HTTP before opening any live stream.
+
+This slice does:
+
+- add `GET /v1/client/ai-agent/tasks/{task_id}/threads`
+- add `GET /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/events`
+- model multiple historical task threads per task
+- enforce that the collection response exposes at most one `active_stream`
+  HATEOAS link because one task can have only one active agent assignment
+- include `thread_id` on task-thread progress events so clients update the
+  targeted thread
+- extend `tools/reactquerygen` with a generated helper that performs HTTP GET
+  -> HATEOAS link validation -> optional stream open for frontend usage
+- add black-box tests for active, completed-only, and daemon-ingested progress
+  thread collections
+
+This slice does not add production persistence, change the global client event
+stream, edit `teamswyg/riido-client`, or introduce frontend dependencies.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

@@ -188,14 +188,19 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
 		return
 	}
-	taskID, suffix, ok := splitResourcePath(r.URL.Path, "/v1/client/ai-agent/tasks/")
+	taskID, suffix, ok := splitAIAgentClientTaskPath(r.URL.Path)
 	if !ok {
 		writeError(w, http.StatusNotFound, "not found")
 		return
 	}
+	suffixParts := strings.Split(suffix, "/")
 	switch {
 	case suffix == "assignable-agents" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskAssignableAgents(w, r, taskID)
+	case suffix == "threads" && r.Method == http.MethodGet:
+		s.handleAIAgentClientTaskThreads(w, r, taskID)
+	case len(suffixParts) == 3 && suffixParts[0] == "threads" && suffixParts[2] == "events" && r.Method == http.MethodGet:
+		s.handleAIAgentClientTaskThreadEvents(w, r, taskID, suffixParts[1])
 	case suffix == "comments" && r.Method == http.MethodPost:
 		s.handleAIAgentClientSubmitTaskComment(w, r, taskID)
 	case suffix == "stop" && r.Method == http.MethodPost:
@@ -216,6 +221,69 @@ func (s Server) handleAIAgentClientTaskAssignableAgents(w http.ResponseWriter, r
 		return
 	}
 	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientTaskThreads(w http.ResponseWriter, r *http.Request, taskID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead, TaskID: taskID})
+	if !ok {
+		return
+	}
+	response, err := s.aiAgent.GetAIAgentTaskThreads(r.Context(), principal, taskID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientTaskThreadEvents(w http.ResponseWriter, r *http.Request, taskID, threadID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStream, TaskID: taskID})
+	if !ok {
+		return
+	}
+	subscriber, ok := s.aiAgent.(AIAgentTaskThreadEventSubscriber)
+	if !ok {
+		writeError(w, http.StatusServiceUnavailable, "ai agent task thread stream is not configured")
+		return
+	}
+	history, live, cancel, liveActive, err := subscriber.SubscribeAIAgentTaskThreadEvents(r.Context(), principal, taskID, threadID)
+	if cancel != nil {
+		defer cancel()
+	}
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	for index, event := range history {
+		if err := writeAIAgentTaskThreadSSE(w, int64(index+1), event); err != nil {
+			return
+		}
+	}
+	if flusher, ok := w.(http.Flusher); ok {
+		flusher.Flush()
+	}
+	if r.URL.Query().Get("replay") == "1" || !liveActive {
+		return
+	}
+	for {
+		select {
+		case event, ok := <-live:
+			if !ok {
+				return
+			}
+			if err := writeAIAgentTaskThreadSSE(w, aiAgentTaskThreadSSEID(event), event); err != nil {
+				return
+			}
+			if flusher, ok := w.(http.Flusher); ok {
+				flusher.Flush()
+			}
+		case <-r.Context().Done():
+			return
+		}
+	}
 }
 
 func (s Server) handleAIAgentClientSubmitTaskComment(w http.ResponseWriter, r *http.Request, taskID string) {
@@ -662,6 +730,7 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 	}
 	req.AssignmentID = strings.TrimSpace(req.AssignmentID)
 	req.TaskID = strings.TrimSpace(req.TaskID)
+	req.ThreadID = strings.TrimSpace(req.ThreadID)
 	req.RunID = strings.TrimSpace(req.RunID)
 	if req.AssignmentID == "" {
 		writeError(w, http.StatusBadRequest, "assignment_id is required")
@@ -674,6 +743,9 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 	if req.RunID == "" {
 		req.RunID = "run-" + req.AssignmentID
 	}
+	if req.ThreadID == "" {
+		req.ThreadID = req.AssignmentID
+	}
 	lines := normalizeProgressLines(req.Lines)
 	if len(lines) == 0 {
 		writeError(w, http.StatusBadRequest, "lines are required")
@@ -682,6 +754,7 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 	req.Lines = lines
 	for _, line := range lines {
 		metadata := copyStringMap(req.Metadata)
+		metadata["thread_id"] = req.ThreadID
 		metadata["thread_progress_seq"] = fmt.Sprint(line.Seq)
 		if _, err := s.assignment.RecordAgentEvent(r.Context(), agentID, AgentEventRequest{
 			AssignmentID: req.AssignmentID,
@@ -715,6 +788,7 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 			SchemaVersion:   SchemaVersion,
 			AgentID:         agentID,
 			TaskID:          req.TaskID,
+			ThreadID:        req.ThreadID,
 			RunID:           req.RunID,
 			WorkStatus:      AgentWorkStatusRunning,
 			AssignmentState: AgentAssignmentStateRunning,
@@ -856,6 +930,24 @@ func splitResourcePath(path, prefix string) (string, string, bool) {
 	return parts[0], parts[1], true
 }
 
+func splitAIAgentClientTaskPath(path string) (string, string, bool) {
+	const prefix = "/v1/client/ai-agent/tasks/"
+	if !strings.HasPrefix(path, prefix) {
+		return "", "", false
+	}
+	rest := strings.Trim(strings.TrimPrefix(path, prefix), "/")
+	parts := strings.Split(rest, "/")
+	if len(parts) < 2 || strings.TrimSpace(parts[0]) == "" {
+		return "", "", false
+	}
+	for _, part := range parts[1:] {
+		if strings.TrimSpace(part) == "" {
+			return "", "", false
+		}
+	}
+	return parts[0], strings.Join(parts[1:], "/"), true
+}
+
 func splitAIAgentClientAgentPath(path string) (string, string, bool) {
 	const prefix = "/v1/client/ai-agent/agents/"
 	if !strings.HasPrefix(path, prefix) {
@@ -930,6 +1022,8 @@ func writeAIAgentClientError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, ErrAIAgentNotFound):
 		writeError(w, http.StatusNotFound, "not found")
+	case errors.Is(err, ErrAIAgentThreadNotFound):
+		writeError(w, http.StatusNotFound, "not found")
 	case errors.Is(err, ErrAIAgentAssigned):
 		writeError(w, http.StatusConflict, err.Error())
 	default:
@@ -994,4 +1088,20 @@ func writeAIAgentClientSSE(w http.ResponseWriter, event ClientStreamEvent) error
 	}
 	_, err = fmt.Fprintf(w, "id: %d\nevent: %s\ndata: %s\n\n", event.Seq, event.EventType, data)
 	return err
+}
+
+func writeAIAgentTaskThreadSSE(w http.ResponseWriter, id int64, event AgentThreadProgressEvent) error {
+	data, err := json.Marshal(event)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(w, "id: %d\nevent: %s\ndata: %s\n\n", id, event.EventType, data)
+	return err
+}
+
+func aiAgentTaskThreadSSEID(event AgentThreadProgressEvent) int64 {
+	if len(event.Lines) == 0 {
+		return 0
+	}
+	return int64(event.Lines[len(event.Lines)-1].Seq)
 }

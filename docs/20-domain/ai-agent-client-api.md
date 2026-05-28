@@ -39,11 +39,13 @@ The mock API implements:
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
+- `GET /v1/client/ai-agent/tasks/{task_id}/threads`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 - `GET /v1/client/ai-agent/agents/{agent_id}/editability`
 - `PATCH /v1/client/ai-agent/agents/{agent_id}`
 - `DELETE /v1/client/ai-agent/agents/{agent_id}`
+- `GET /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/events`
 - `GET /v1/client/ai-agent/events`
 
 The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
@@ -59,6 +61,16 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task-thread comments can enqueue work when the selected agent is busy
 - task-thread stop actions return `stopped_by_user_request`
 - task-thread status updates use typed `AgentTaskCommentKind` values
+- task-thread screens load cold history through
+  `GET /v1/client/ai-agent/tasks/{task_id}/threads` before opening SSE
+- a task can have multiple historical AI Agent threads, but at most one
+  `links.active_stream` because a task can have only one active agent
+  assignment
+- completed or otherwise terminal task threads omit `links.active_stream`, so
+  generated clients must not open SSE for old screens
+- task-thread stream events include `thread_id` and are exposed through the
+  HATEOAS-selected route
+  `GET /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/events`
 - daemon progress ingest accepts parsed `<riido_log>...<end>` batches through
   `POST /v1/agents/{agent_id}/thread-progress`
 - client task-thread progress is streamed as the typed
@@ -91,8 +103,10 @@ ALB for:
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
+- `GET /v1/client/ai-agent/tasks/{task_id}/threads`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
+- `GET /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/events?replay=1`
 - `GET /v1/client/ai-agent/events?replay=1`
 - `POST /v1/agents/{agent_id}/thread-progress`
 

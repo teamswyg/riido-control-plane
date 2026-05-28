@@ -91,6 +91,14 @@ const (
 	ClientKindDesktopWebview ClientKind = "desktop_webview"
 )
 
+type AIAgentTaskThreadStreamState string
+
+const (
+	AIAgentTaskThreadStreamStateCold     AIAgentTaskThreadStreamState = "cold"
+	AIAgentTaskThreadStreamStateActive   AIAgentTaskThreadStreamState = "active"
+	AIAgentTaskThreadStreamStateTerminal AIAgentTaskThreadStreamState = "terminal"
+)
+
 type RuntimeRecord struct {
 	RuntimeID        string                `json:"runtime_id"`
 	DeviceID         string                `json:"device_id"`
@@ -189,6 +197,49 @@ type AIAgentTaskActionResponse struct {
 	Message         string               `json:"message"`
 }
 
+type AIAgentTaskThreadEntry struct {
+	EntryID     string                    `json:"entry_id"`
+	CommentKind AgentTaskCommentKind      `json:"comment_kind"`
+	Message     string                    `json:"message"`
+	CreatedAt   time.Time                 `json:"created_at"`
+	Lines       []AgentThreadProgressLine `json:"lines,omitempty"`
+}
+
+type AIAgentTaskThreadStreamLink struct {
+	Rel         string `json:"rel"`
+	Href        string `json:"href"`
+	Method      string `json:"method"`
+	ContentType string `json:"content_type"`
+	EventType   string `json:"event_type"`
+	ThreadID    string `json:"thread_id"`
+}
+
+type AIAgentTaskThreadRecord struct {
+	ThreadID        string                       `json:"thread_id"`
+	TaskID          string                       `json:"task_id"`
+	AgentID         string                       `json:"agent_id"`
+	AssignmentID    string                       `json:"assignment_id"`
+	RunID           string                       `json:"run_id"`
+	StreamState     AIAgentTaskThreadStreamState `json:"stream_state"`
+	WorkStatus      AgentWorkStatus              `json:"work_status"`
+	AssignmentState AgentAssignmentState         `json:"assignment_state"`
+	StartedAt       time.Time                    `json:"started_at,omitempty"`
+	EndedAt         time.Time                    `json:"ended_at,omitempty"`
+	Entries         []AIAgentTaskThreadEntry     `json:"entries"`
+}
+
+type AIAgentTaskThreadLinks struct {
+	ActiveStream *AIAgentTaskThreadStreamLink `json:"active_stream,omitempty"`
+}
+
+type AIAgentTaskThreadCollectionResponse struct {
+	SchemaVersion  string                    `json:"schema_version"`
+	TaskID         string                    `json:"task_id"`
+	ActiveThreadID string                    `json:"active_thread_id,omitempty"`
+	Threads        []AIAgentTaskThreadRecord `json:"threads"`
+	Links          AIAgentTaskThreadLinks    `json:"links"`
+}
+
 type DeviceRuntimeSnapshotEvent struct {
 	EventType     string       `json:"event_type"`
 	SchemaVersion string       `json:"schema_version"`
@@ -225,6 +276,7 @@ type AgentThreadProgressEvent struct {
 	SchemaVersion   string                    `json:"schema_version"`
 	AgentID         string                    `json:"agent_id"`
 	TaskID          string                    `json:"task_id"`
+	ThreadID        string                    `json:"thread_id"`
 	RunID           string                    `json:"run_id"`
 	WorkStatus      AgentWorkStatus           `json:"work_status"`
 	AssignmentState AgentAssignmentState      `json:"assignment_state"`
@@ -237,6 +289,7 @@ type AgentThreadProgressEvent struct {
 type AgentThreadProgressBatchRequest struct {
 	AssignmentID   string                    `json:"assignment_id"`
 	TaskID         string                    `json:"task_id"`
+	ThreadID       string                    `json:"thread_id,omitempty"`
 	DaemonID       string                    `json:"daemon_id,omitempty"`
 	DeviceID       string                    `json:"device_id,omitempty"`
 	RuntimeID      string                    `json:"runtime_id,omitempty"`

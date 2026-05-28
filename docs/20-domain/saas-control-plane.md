@@ -80,7 +80,10 @@ Runtime progress intended for the client task thread is ingested as bounded
 daemon batches on `POST /v1/agents/{agent_id}/thread-progress`. The endpoint
 stores each accepted line as an assignment `riido_log` task event and, when the
 AI Agent client event store is configured, fans out the same batch as
-`agent_thread_progress` on the client SSE surface.
+`agent_thread_progress` on the client SSE surface. The batch may carry
+`thread_id`; when omitted, the server derives `thread_id` from `assignment_id`
+so historical task-thread collections and live stream events target the same
+thread deterministically.
 
 The control-plane-local DTO surface is:
 

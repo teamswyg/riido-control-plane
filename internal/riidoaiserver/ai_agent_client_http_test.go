@@ -144,6 +144,59 @@ func TestHTTPAIAgentClientMockTaskCommentAndStop(t *testing.T) {
 	}
 }
 
+func TestHTTPAIAgentTaskThreadsHandoff(t *testing.T) {
+	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
+		PrincipalID: "user-1",
+		Token:       "user-token",
+		Scopes:      []string{"ai-agent:read", "ai-agent:stream", "task:task-mock-1:read", "task:task-mock-completed-only:read"},
+	}})
+
+	threadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-mock-1/threads", nil)
+	threadsReq.Header.Set("Authorization", "Bearer user-token")
+	threadsResp := httptest.NewRecorder()
+	server.ServeHTTP(threadsResp, threadsReq)
+	if threadsResp.Code != http.StatusOK {
+		t.Fatalf("threads status=%d body=%s", threadsResp.Code, threadsResp.Body.String())
+	}
+	var threads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
+		t.Fatalf("threads json: %v", err)
+	}
+	if len(threads.Threads) != 2 || threads.ActiveThreadID != "thread-mock-active" || threads.Links.ActiveStream == nil {
+		t.Fatalf("threads response = %+v", threads)
+	}
+	if threads.Links.ActiveStream.ThreadID != threads.ActiveThreadID || threads.Links.ActiveStream.Href == "" {
+		t.Fatalf("active stream link = %+v", threads.Links.ActiveStream)
+	}
+
+	streamReq := httptest.NewRequest(http.MethodGet, threads.Links.ActiveStream.Href+"?replay=1", nil)
+	streamReq.Header.Set("Authorization", "Bearer user-token")
+	streamResp := httptest.NewRecorder()
+	server.ServeHTTP(streamResp, streamReq)
+	if streamResp.Code != http.StatusOK {
+		t.Fatalf("stream status=%d body=%s", streamResp.Code, streamResp.Body.String())
+	}
+	streamBody := streamResp.Body.String()
+	if !strings.Contains(streamBody, "event: agent_thread_progress\n") || !strings.Contains(streamBody, `"thread_id":"thread-mock-active"`) {
+		t.Fatalf("stream body = %q", streamBody)
+	}
+
+	coldReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-mock-completed-only/threads", nil)
+	coldReq.Header.Set("Authorization", "Bearer user-token")
+	coldResp := httptest.NewRecorder()
+	server.ServeHTTP(coldResp, coldReq)
+	if coldResp.Code != http.StatusOK {
+		t.Fatalf("cold status=%d body=%s", coldResp.Code, coldResp.Body.String())
+	}
+	var cold AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(coldResp.Body.Bytes(), &cold); err != nil {
+		t.Fatalf("cold json: %v", err)
+	}
+	if len(cold.Threads) != 1 || cold.ActiveThreadID != "" || cold.Links.ActiveStream != nil {
+		t.Fatalf("cold response should not expose stream link: %+v", cold)
+	}
+}
+
 func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
@@ -236,7 +289,7 @@ func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testin
 	}, {
 		PrincipalID: "user-1",
 		Token:       "user-token",
-		Scopes:      []string{"ai-agent:stream"},
+		Scopes:      []string{"ai-agent:read", "ai-agent:stream", "task:task-1:read"},
 	}})
 	if err != nil {
 		t.Fatalf("NewStaticTokenAuthorizer: %v", err)
@@ -259,7 +312,7 @@ func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testin
 	if err := json.Unmarshal(ingestResp.Body.Bytes(), &response); err != nil {
 		t.Fatalf("ingest json: %v", err)
 	}
-	if response.AcceptedLines != 2 || response.Event.EventType != AgentClientEventThreadProgress || len(response.Event.Lines) != 2 {
+	if response.AcceptedLines != 2 || response.Event.EventType != AgentClientEventThreadProgress || response.Event.ThreadID != assignment.ID || len(response.Event.Lines) != 2 {
 		t.Fatalf("ingest response = %+v", response)
 	}
 
@@ -271,8 +324,23 @@ func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testin
 		t.Fatalf("events status=%d body=%s", eventsResp.Code, eventsResp.Body.String())
 	}
 	message := eventsResp.Body.String()
-	if !strings.Contains(message, "event: agent_thread_progress\n") || !strings.Contains(message, "팀 프로젝트 수집 중") {
+	if !strings.Contains(message, "event: agent_thread_progress\n") || !strings.Contains(message, "팀 프로젝트 수집 중") || !strings.Contains(message, `"thread_id":"`+assignment.ID+`"`) {
 		t.Fatalf("events body = %q", message)
+	}
+
+	threadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-1/threads", nil)
+	threadsReq.Header.Set("Authorization", "Bearer user-token")
+	threadsResp := httptest.NewRecorder()
+	handler.ServeHTTP(threadsResp, threadsReq)
+	if threadsResp.Code != http.StatusOK {
+		t.Fatalf("threads status=%d body=%s", threadsResp.Code, threadsResp.Body.String())
+	}
+	var threads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
+		t.Fatalf("threads json: %v", err)
+	}
+	if threads.ActiveThreadID != assignment.ID || threads.Links.ActiveStream == nil {
+		t.Fatalf("threads after ingest = %+v", threads)
 	}
 }
 
@@ -297,7 +365,7 @@ func TestMockAIAgentClientStoreThreadProgressFanout(t *testing.T) {
 	select {
 	case event := <-events:
 		progress, ok := event.Payload.(AgentThreadProgressEvent)
-		if !ok || progress.EventType != AgentClientEventThreadProgress || progress.Lines[0].Message != "웹 검색 실행 중" {
+		if !ok || progress.EventType != AgentClientEventThreadProgress || progress.ThreadID != "asn-1" || progress.Lines[0].Message != "웹 검색 실행 중" {
 			t.Fatalf("fanout event = %+v", event)
 		}
 	case <-time.After(time.Second):

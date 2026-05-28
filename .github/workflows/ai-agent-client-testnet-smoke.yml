@@ -63,6 +63,18 @@ jobs:
             | jq -e '.schema_version == "riido-ai-server.v1" and (.devices | length) > 0' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/assignable-agents" \
             | jq -e '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == "agent-owned-codex")' >/dev/null
+
+          threads_json="$(mktemp)"
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-mock-1/threads" > "$threads_json"
+          jq -e '.schema_version == "riido-ai-server.v1" and .active_thread_id == "thread-mock-active" and .links.active_stream.thread_id == "thread-mock-active" and (.threads | length) >= 2' "$threads_json" >/dev/null
+          active_stream_href="$(jq -r '.links.active_stream.href' "$threads_json")"
+          thread_stream="$(mktemp)"
+          curl_json -H "$auth_header" "$base_url${active_stream_href}?replay=1" > "$thread_stream"
+          grep -q '"thread_id":"thread-mock-active"' "$thread_stream"
+
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-mock-completed-only/threads" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and (.links.active_stream | not)' >/dev/null
+
           curl_json \
             -H "$auth_header" \
             -H "Content-Type: application/json" \

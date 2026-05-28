@@ -506,6 +506,127 @@
           "stopAIAgentTask.task-stop-emits-comment-status"
         ]
       }
+    },
+    "/v1/client/ai-agent/tasks/{task_id}/threads": {
+      "get": {
+        "operationId": "getAIAgentTaskThreads",
+        "summary": "Read task-thread history and the optional active stream handoff for an AI Agent task surface",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadCollectionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "task_thread_stream_handoff.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-scenarios": [
+          "getAIAgentTaskThreads.completed-task-does-not-open-stream",
+          "getAIAgentTaskThreads.active-task-exposes-one-stream-link",
+          "getAIAgentTaskThreads.reassigned-task-has-multiple-threads"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/events": {
+      "get": {
+        "operationId": "streamAIAgentTaskThreadEvents",
+        "summary": "Stream updates for a single active AI Agent task thread selected by a HATEOAS link",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "thread_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentThreadProgressEvent"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:stream",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "task_thread_stream_handoff.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-scenarios": [
+          "streamAIAgentTaskThreadEvents.stream-targets-one-thread",
+          "streamAIAgentTaskThreadEvents.stale-stream-link-ends-safely"
+        ]
+      }
     }
   },
   "components": {
@@ -548,6 +669,179 @@
           "message"
         ],
         "type": "object"
+      },
+      "AIAgentTaskThreadCollectionResponse": {
+        "properties": {
+          "active_thread_id": {
+            "type": "string"
+          },
+          "links": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadLinks"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "threads": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads",
+          "links"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadEntry": {
+        "properties": {
+          "comment_kind": {
+            "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entry_id": {
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AgentThreadProgressLine"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "entry_id",
+          "comment_kind",
+          "message",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadLinks": {
+        "properties": {
+          "active_stream": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
+          }
+        },
+        "type": "object"
+      },
+      "AIAgentTaskThreadRecord": {
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "ended_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadEntry"
+            },
+            "type": "array"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "stream_state": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamState"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          }
+        },
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "assignment_id",
+          "run_id",
+          "stream_state",
+          "work_status",
+          "assignment_state",
+          "entries"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadStreamLink": {
+        "properties": {
+          "content_type": {
+            "enum": [
+              "text/event-stream"
+            ],
+            "type": "string"
+          },
+          "event_type": {
+            "enum": [
+              "agent_thread_progress"
+            ],
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "method": {
+            "enum": [
+              "GET"
+            ],
+            "type": "string"
+          },
+          "rel": {
+            "enum": [
+              "active_stream"
+            ],
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rel",
+          "href",
+          "method",
+          "content_type",
+          "event_type",
+          "thread_id"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadStreamState": {
+        "description": "Whether a task thread is historical only or has an active stream handoff.",
+        "enum": [
+          "cold",
+          "active",
+          "terminal"
+        ],
+        "type": "string"
       },
       "AgentAssignmentState": {
         "description": "Assignment state affected by agent deletion and runtime lifecycle.",
@@ -755,6 +1049,9 @@
           "task_id": {
             "type": "string"
           },
+          "thread_id": {
+            "type": "string"
+          },
           "work_status": {
             "$ref": "#/components/schemas/AgentWorkStatus"
           }
@@ -764,6 +1061,7 @@
           "schema_version",
           "agent_id",
           "task_id",
+          "thread_id",
           "run_id",
           "work_status",
           "assignment_state",

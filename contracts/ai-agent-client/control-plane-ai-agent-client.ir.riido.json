@@ -103,6 +103,19 @@
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
         "client: render task-thread progress from typed event payloads and never parse provider raw output"
       ]
+    },
+    {
+      "policy_id": "task_thread_stream_handoff.v1",
+      "kind": "projection",
+      "description": "Clients must load task-thread history through HTTP first and open an SSE stream only when the response carries an active stream link.",
+      "rules": [
+        "client: request the task thread cold collection before opening any task-thread stream",
+        "server: return every historical task thread for the task as cold collection records",
+        "server: expose at most one active_stream HATEOAS link because one task can have only one active agent assignment",
+        "server: omit active_stream when all task threads are completed or otherwise terminal",
+        "stream: every task-thread stream event must carry thread_id so clients update the targeted thread only",
+        "codegen: generated clients should provide an HTTP GET -\u003e HATEOAS -\u003e stream helper so stream-cost policy is not reimplemented by UI code"
+      ]
     }
   ],
   "enums": [
@@ -279,6 +292,25 @@
         },
         {
           "value": "desktop_webview"
+        }
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadStreamState",
+      "type": "string",
+      "description": "Whether a task thread is historical only or has an active stream handoff.",
+      "values": [
+        {
+          "value": "cold",
+          "description": "Historical task thread with no live stream handoff."
+        },
+        {
+          "value": "active",
+          "description": "Current task thread that may expose a live stream handoff."
+        },
+        {
+          "value": "terminal",
+          "description": "Task thread whose agent work is completed, failed, or stopped."
         }
       ]
     }
@@ -748,6 +780,244 @@
       }
     },
     {
+      "name": "AgentThreadProgressLine",
+      "schema": {
+        "name": "AgentThreadProgressLine",
+        "type": "object",
+        "required": [
+          "seq",
+          "message"
+        ],
+        "properties": [
+          {
+            "name": "seq",
+            "type": "integer"
+          },
+          {
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "name": "observed_at",
+            "type": "string",
+            "format": "date-time"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadEntry",
+      "schema": {
+        "name": "AIAgentTaskThreadEntry",
+        "type": "object",
+        "required": [
+          "entry_id",
+          "comment_kind",
+          "message",
+          "created_at"
+        ],
+        "properties": [
+          {
+            "name": "entry_id",
+            "type": "string"
+          },
+          {
+            "name": "comment_kind",
+            "ref": "AgentTaskCommentKind"
+          },
+          {
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "lines",
+            "type": "array",
+            "items": {
+              "ref": "AgentThreadProgressLine"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadStreamLink",
+      "schema": {
+        "name": "AIAgentTaskThreadStreamLink",
+        "type": "object",
+        "required": [
+          "rel",
+          "href",
+          "method",
+          "content_type",
+          "event_type",
+          "thread_id"
+        ],
+        "properties": [
+          {
+            "name": "rel",
+            "type": "string",
+            "enum": [
+              "active_stream"
+            ]
+          },
+          {
+            "name": "href",
+            "type": "string"
+          },
+          {
+            "name": "method",
+            "type": "string",
+            "enum": [
+              "GET"
+            ]
+          },
+          {
+            "name": "content_type",
+            "type": "string",
+            "enum": [
+              "text/event-stream"
+            ]
+          },
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "agent_thread_progress"
+            ]
+          },
+          {
+            "name": "thread_id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadRecord",
+      "schema": {
+        "name": "AIAgentTaskThreadRecord",
+        "type": "object",
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "assignment_id",
+          "run_id",
+          "stream_state",
+          "work_status",
+          "assignment_state",
+          "entries"
+        ],
+        "properties": [
+          {
+            "name": "thread_id",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "stream_state",
+            "ref": "AIAgentTaskThreadStreamState"
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
+          },
+          {
+            "name": "started_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "ended_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "entries",
+            "type": "array",
+            "items": {
+              "ref": "AIAgentTaskThreadEntry"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadLinks",
+      "schema": {
+        "name": "AIAgentTaskThreadLinks",
+        "type": "object",
+        "properties": [
+          {
+            "name": "active_stream",
+            "ref": "AIAgentTaskThreadStreamLink"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadCollectionResponse",
+      "schema": {
+        "name": "AIAgentTaskThreadCollectionResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads",
+          "links"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "active_thread_id",
+            "type": "string"
+          },
+          {
+            "name": "threads",
+            "type": "array",
+            "items": {
+              "ref": "AIAgentTaskThreadRecord"
+            }
+          },
+          {
+            "name": "links",
+            "ref": "AIAgentTaskThreadLinks"
+          }
+        ]
+      }
+    },
+    {
       "name": "DeviceRuntimeSnapshotEvent",
       "schema": {
         "name": "DeviceRuntimeSnapshotEvent",
@@ -865,32 +1135,6 @@
       }
     },
     {
-      "name": "AgentThreadProgressLine",
-      "schema": {
-        "name": "AgentThreadProgressLine",
-        "type": "object",
-        "required": [
-          "seq",
-          "message"
-        ],
-        "properties": [
-          {
-            "name": "seq",
-            "type": "integer"
-          },
-          {
-            "name": "message",
-            "type": "string"
-          },
-          {
-            "name": "observed_at",
-            "type": "string",
-            "format": "date-time"
-          }
-        ]
-      }
-    },
-    {
       "name": "AgentThreadProgressEvent",
       "schema": {
         "name": "AgentThreadProgressEvent",
@@ -900,6 +1144,7 @@
           "schema_version",
           "agent_id",
           "task_id",
+          "thread_id",
           "run_id",
           "work_status",
           "assignment_state",
@@ -924,6 +1169,10 @@
           },
           {
             "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "thread_id",
             "type": "string"
           },
           {
@@ -1055,6 +1304,32 @@
       "scenario_ids": [
         "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
         "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering"
+      ]
+    },
+    {
+      "operation_id": "getAIAgentTaskThreads",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/threads",
+      "resource": "agent",
+      "action": "read",
+      "summary": "Read task-thread history and the optional active stream handoff for an AI Agent task surface",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ]
+      },
+      "rbac_policy": "task_thread_stream_handoff.v1",
+      "response": {
+        "status": 200,
+        "ref": "AIAgentTaskThreadCollectionResponse"
+      },
+      "scenario_ids": [
+        "getAIAgentTaskThreads.completed-task-does-not-open-stream",
+        "getAIAgentTaskThreads.active-task-exposes-one-stream-link",
+        "getAIAgentTaskThreads.reassigned-task-has-multiple-threads"
       ]
     },
     {
@@ -1192,6 +1467,32 @@
       ]
     },
     {
+      "operation_id": "streamAIAgentTaskThreadEvents",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/events",
+      "resource": "agent",
+      "action": "stream",
+      "summary": "Stream updates for a single active AI Agent task thread selected by a HATEOAS link",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:stream",
+          "task:{task_id}:read"
+        ]
+      },
+      "rbac_policy": "task_thread_stream_handoff.v1",
+      "response": {
+        "status": 200,
+        "ref": "AgentThreadProgressEvent",
+        "content_type": "text/event-stream"
+      },
+      "scenario_ids": [
+        "streamAIAgentTaskThreadEvents.stream-targets-one-thread",
+        "streamAIAgentTaskThreadEvents.stale-stream-link-ends-safely"
+      ]
+    },
+    {
       "operation_id": "streamAIAgentClientEvents",
       "kind": "query",
       "method": "GET",
@@ -1261,6 +1562,30 @@
       "then": "owned agents appear first and names are ordered inside each ownership group"
     },
     {
+      "scenario_id": "getAIAgentTaskThreads.completed-task-does-not-open-stream",
+      "operation_id": "getAIAgentTaskThreads",
+      "name": "completed task does not open stream",
+      "given": "a client opens a task that has only completed AI Agent threads",
+      "when": "the client reads the task-thread collection",
+      "then": "the response contains historical threads and omits links.active_stream"
+    },
+    {
+      "scenario_id": "getAIAgentTaskThreads.active-task-exposes-one-stream-link",
+      "operation_id": "getAIAgentTaskThreads",
+      "name": "active task exposes one stream link",
+      "given": "a task has one currently running AI Agent assignment",
+      "when": "the client reads the task-thread collection",
+      "then": "the response contains one active_thread_id and one links.active_stream for that thread"
+    },
+    {
+      "scenario_id": "getAIAgentTaskThreads.reassigned-task-has-multiple-threads",
+      "operation_id": "getAIAgentTaskThreads",
+      "name": "reassigned task has multiple threads",
+      "given": "an AI Agent completed work on a task and another agent assignment started later",
+      "when": "the client reads the task-thread collection",
+      "then": "the response contains multiple threads but at most one active stream link"
+    },
+    {
       "scenario_id": "submitAIAgentTaskComment.comment-routes-to-running-agent",
       "operation_id": "submitAIAgentTaskComment",
       "name": "comment routes to running agent",
@@ -1315,6 +1640,22 @@
       "given": "an agent has queued tasks and one running task",
       "when": "an admin or owner deletes the agent",
       "then": "queued tasks are unassigned and the running task is force-stopped before deletion is confirmed"
+    },
+    {
+      "scenario_id": "streamAIAgentTaskThreadEvents.stream-targets-one-thread",
+      "operation_id": "streamAIAgentTaskThreadEvents",
+      "name": "stream targets one thread",
+      "given": "the task-thread collection exposes an active_stream link for one thread",
+      "when": "the generated client follows that link",
+      "then": "every event contains the same task_id and thread_id as the stream path"
+    },
+    {
+      "scenario_id": "streamAIAgentTaskThreadEvents.stale-stream-link-ends-safely",
+      "operation_id": "streamAIAgentTaskThreadEvents",
+      "name": "stale stream link ends safely",
+      "given": "the active assignment completed after the collection response was read",
+      "when": "the client opens the stale stream link",
+      "then": "the stream returns no replay beyond the targeted thread and closes when no live handoff remains"
     },
     {
       "scenario_id": "streamAIAgentClientEvents.editability-updates-before-mutation",

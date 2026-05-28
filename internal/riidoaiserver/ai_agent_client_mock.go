@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -13,6 +14,7 @@ type AIAgentClientStore interface {
 	BootstrapAIAgentClient(ctx context.Context, principal AuthorizationResult, clientKind ClientKind) (ClientBootstrapResponse, error)
 	ListAIAgentDevices(ctx context.Context, principal AuthorizationResult) (DeviceRuntimeListResponse, error)
 	ListAIAgentTaskAssignableAgents(ctx context.Context, principal AuthorizationResult, taskID string) (AgentClientListResponse, error)
+	GetAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error)
 	SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error)
 	StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
 	GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error)
@@ -25,23 +27,38 @@ type AIAgentClientEventSubscriber interface {
 	SubscribeAIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, <-chan ClientStreamEvent, func(), error)
 }
 
+type AIAgentTaskThreadEventSubscriber interface {
+	SubscribeAIAgentTaskThreadEvents(ctx context.Context, principal AuthorizationResult, taskID, threadID string) ([]AgentThreadProgressEvent, <-chan AgentThreadProgressEvent, func(), bool, error)
+}
+
 type AIAgentThreadProgressRecorder interface {
 	RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error)
 }
 
 type MockAIAgentClientStore struct {
-	mu               sync.Mutex
-	workspaceID      string
-	devices          []DeviceRecord
-	agents           map[string]AgentClientRecord
-	events           []ClientStreamEvent
-	subscribers      map[int]aiAgentClientSubscriber
-	nextSubscriberID int
+	mu                     sync.Mutex
+	workspaceID            string
+	devices                []DeviceRecord
+	agents                 map[string]AgentClientRecord
+	taskThreads            map[string][]AIAgentTaskThreadRecord
+	threadEvents           map[string][]AgentThreadProgressEvent
+	events                 []ClientStreamEvent
+	subscribers            map[int]aiAgentClientSubscriber
+	threadSubscribers      map[int]aiAgentTaskThreadSubscriber
+	nextSubscriberID       int
+	nextThreadSubscriberID int
 }
 
 type aiAgentClientSubscriber struct {
 	principal AuthorizationResult
 	events    chan ClientStreamEvent
+}
+
+type aiAgentTaskThreadSubscriber struct {
+	principal AuthorizationResult
+	taskID    string
+	threadID  string
+	events    chan AgentThreadProgressEvent
 }
 
 func NewMockAIAgentClientStore() *MockAIAgentClientStore {
@@ -131,10 +148,13 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		},
 	}
 	return &MockAIAgentClientStore{
-		workspaceID: "workspace-mock-riid",
-		devices:     []DeviceRecord{device},
-		agents:      agents,
-		subscribers: map[int]aiAgentClientSubscriber{},
+		workspaceID:       "workspace-mock-riid",
+		devices:           []DeviceRecord{device},
+		agents:            agents,
+		taskThreads:       seedAIAgentTaskThreads(now),
+		threadEvents:      seedAIAgentTaskThreadEvents(now),
+		subscribers:       map[int]aiAgentClientSubscriber{},
+		threadSubscribers: map[int]aiAgentTaskThreadSubscriber{},
 		events: []ClientStreamEvent{
 			{
 				Seq:       1,
@@ -157,6 +177,100 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 					WorkStatus:      AgentWorkStatusQueued,
 					AssignmentState: AgentAssignmentStateQueued,
 					CommentKind:     AgentTaskCommentQueuedByBusyAgent,
+				},
+			},
+		},
+	}
+}
+
+func seedAIAgentTaskThreads(now time.Time) map[string][]AIAgentTaskThreadRecord {
+	return map[string][]AIAgentTaskThreadRecord{
+		"task-mock-1": {
+			{
+				ThreadID:        "thread-mock-completed",
+				TaskID:          "task-mock-1",
+				AgentID:         "agent-owned-codex",
+				AssignmentID:    "asn-mock-completed",
+				RunID:           "run-mock-completed",
+				StreamState:     AIAgentTaskThreadStreamStateTerminal,
+				WorkStatus:      AgentWorkStatusCompleted,
+				AssignmentState: AgentAssignmentStateCompleted,
+				StartedAt:       now.Add(-20 * time.Minute),
+				EndedAt:         now.Add(-15 * time.Minute),
+				Entries: []AIAgentTaskThreadEntry{
+					{
+						EntryID:     "entry-mock-completed-1",
+						CommentKind: AgentTaskCommentTaskCompleted,
+						Message:     "이전 AI Agent 작업이 완료되었습니다.",
+						CreatedAt:   now.Add(-15 * time.Minute),
+					},
+				},
+			},
+			{
+				ThreadID:        "thread-mock-active",
+				TaskID:          "task-mock-1",
+				AgentID:         "agent-owned-codex",
+				AssignmentID:    "asn-mock-active",
+				RunID:           "run-mock-active",
+				StreamState:     AIAgentTaskThreadStreamStateActive,
+				WorkStatus:      AgentWorkStatusRunning,
+				AssignmentState: AgentAssignmentStateRunning,
+				StartedAt:       now.Add(-2 * time.Minute),
+				Entries: []AIAgentTaskThreadEntry{
+					{
+						EntryID:     "entry-mock-active-1",
+						CommentKind: AgentTaskCommentRuntimeProgress,
+						Message:     "팀 프로젝트 수집 중",
+						CreatedAt:   now.Add(-90 * time.Second),
+						Lines: []AgentThreadProgressLine{
+							{Seq: 1, Message: "팀 프로젝트 수집 중", ObservedAt: now.Add(-90 * time.Second)},
+						},
+					},
+				},
+			},
+		},
+		"task-mock-completed-only": {
+			{
+				ThreadID:        "thread-mock-completed-only",
+				TaskID:          "task-mock-completed-only",
+				AgentID:         "agent-owned-codex",
+				AssignmentID:    "asn-mock-completed-only",
+				RunID:           "run-mock-completed-only",
+				StreamState:     AIAgentTaskThreadStreamStateTerminal,
+				WorkStatus:      AgentWorkStatusCompleted,
+				AssignmentState: AgentAssignmentStateCompleted,
+				StartedAt:       now.Add(-10 * time.Minute),
+				EndedAt:         now.Add(-5 * time.Minute),
+				Entries: []AIAgentTaskThreadEntry{
+					{
+						EntryID:     "entry-mock-completed-only-1",
+						CommentKind: AgentTaskCommentTaskCompleted,
+						Message:     "AI Agent 작업이 완료되었습니다.",
+						CreatedAt:   now.Add(-5 * time.Minute),
+					},
+				},
+			},
+		},
+	}
+}
+
+func seedAIAgentTaskThreadEvents(now time.Time) map[string][]AgentThreadProgressEvent {
+	return map[string][]AgentThreadProgressEvent{
+		"thread-mock-active": {
+			{
+				EventType:       AgentClientEventThreadProgress,
+				SchemaVersion:   SchemaVersion,
+				AgentID:         "agent-owned-codex",
+				TaskID:          "task-mock-1",
+				ThreadID:        "thread-mock-active",
+				RunID:           "run-mock-active",
+				WorkStatus:      AgentWorkStatusRunning,
+				AssignmentState: AgentAssignmentStateRunning,
+				CommentKind:     AgentTaskCommentRuntimeProgress,
+				BatchStartedAt:  now.Add(-90 * time.Second),
+				BatchEndedAt:    now.Add(-90 * time.Second),
+				Lines: []AgentThreadProgressLine{
+					{Seq: 1, Message: "팀 프로젝트 수집 중", ObservedAt: now.Add(-90 * time.Second)},
 				},
 			},
 		},
@@ -199,6 +313,40 @@ func (s *MockAIAgentClientStore) ListAIAgentTaskAssignableAgents(ctx context.Con
 	return AgentClientListResponse{SchemaVersion: SchemaVersion, Agents: s.visibleAgents(principal)}, nil
 }
 
+func (s *MockAIAgentClientStore) GetAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return AIAgentTaskThreadCollectionResponse{}, err
+	}
+	taskID = strings.TrimSpace(taskID)
+	if taskID == "" {
+		return AIAgentTaskThreadCollectionResponse{}, errors.New("task_id is required")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	threads, activeThreadID, err := s.visibleTaskThreadsLocked(principal, taskID)
+	if err != nil {
+		return AIAgentTaskThreadCollectionResponse{}, err
+	}
+	response := AIAgentTaskThreadCollectionResponse{
+		SchemaVersion: SchemaVersion,
+		TaskID:        taskID,
+		Threads:       threads,
+		Links:         AIAgentTaskThreadLinks{},
+	}
+	if activeThreadID != "" {
+		response.ActiveThreadID = activeThreadID
+		response.Links.ActiveStream = &AIAgentTaskThreadStreamLink{
+			Rel:         "active_stream",
+			Href:        "/v1/client/ai-agent/tasks/" + taskID + "/threads/" + activeThreadID + "/events",
+			Method:      "GET",
+			ContentType: "text/event-stream",
+			EventType:   AgentClientEventThreadProgress,
+			ThreadID:    activeThreadID,
+		}
+	}
+	return response, nil
+}
+
 func (s *MockAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
@@ -237,6 +385,7 @@ func (s *MockAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, p
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
 		response.Message = "agent is busy; task comment was queued"
 	}
+	s.upsertTaskThreadActionLocked(response)
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
 }
@@ -266,6 +415,7 @@ func (s *MockAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal 
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
 		Message:         "agent work was stopped by user request",
 	}
+	s.stopActiveTaskThreadLocked(response)
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
 }
@@ -392,6 +542,44 @@ func (s *MockAIAgentClientStore) SubscribeAIAgentClientEvents(ctx context.Contex
 	return history, events, cancel, nil
 }
 
+func (s *MockAIAgentClientStore) SubscribeAIAgentTaskThreadEvents(ctx context.Context, principal AuthorizationResult, taskID, threadID string) ([]AgentThreadProgressEvent, <-chan AgentThreadProgressEvent, func(), bool, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, nil, nil, false, err
+	}
+	taskID = strings.TrimSpace(taskID)
+	threadID = strings.TrimSpace(threadID)
+	if taskID == "" {
+		return nil, nil, nil, false, errors.New("task_id is required")
+	}
+	if threadID == "" {
+		return nil, nil, nil, false, errors.New("thread_id is required")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	thread, ok := s.visibleTaskThreadLocked(principal, taskID, threadID)
+	if !ok {
+		return nil, nil, nil, false, ErrAIAgentThreadNotFound
+	}
+	history := s.threadProgressEventsForPrincipalLocked(principal, taskID, threadID)
+	liveActive := thread.StreamState == AIAgentTaskThreadStreamStateActive
+	if !liveActive {
+		return history, nil, func() {}, false, nil
+	}
+	s.nextThreadSubscriberID++
+	id := s.nextThreadSubscriberID
+	events := make(chan AgentThreadProgressEvent, 32)
+	s.threadSubscribers[id] = aiAgentTaskThreadSubscriber{principal: principal, taskID: taskID, threadID: threadID, events: events}
+	cancel := func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		if subscriber, ok := s.threadSubscribers[id]; ok {
+			delete(s.threadSubscribers, id)
+			close(subscriber.events)
+		}
+	}
+	return history, events, cancel, true, nil
+}
+
 func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentThreadProgressBatchResponse{}, err
@@ -399,6 +587,7 @@ func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context
 	agentID = strings.TrimSpace(agentID)
 	req.TaskID = strings.TrimSpace(req.TaskID)
 	req.AssignmentID = strings.TrimSpace(req.AssignmentID)
+	req.ThreadID = strings.TrimSpace(req.ThreadID)
 	req.RunID = strings.TrimSpace(req.RunID)
 	if agentID == "" {
 		return AgentThreadProgressBatchResponse{}, errors.New("agent_id is required")
@@ -416,6 +605,7 @@ func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context
 	if req.RunID == "" {
 		req.RunID = "run-" + req.AssignmentID
 	}
+	threadID := taskThreadIDForProgress(req)
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	agent, ok := s.agents[agentID]
@@ -428,11 +618,14 @@ func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context
 		agent.AssignedTaskCount = 1
 	}
 	s.agents[agentID] = agent
+	entry := taskThreadEntryFromProgress(threadID, req, lines)
+	s.upsertTaskThreadProgressLocked(agentID, threadID, req, entry)
 	event := AgentThreadProgressEvent{
 		EventType:       AgentClientEventThreadProgress,
 		SchemaVersion:   SchemaVersion,
 		AgentID:         agentID,
 		TaskID:          req.TaskID,
+		ThreadID:        threadID,
 		RunID:           req.RunID,
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
@@ -441,7 +634,9 @@ func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context
 		BatchEndedAt:    req.BatchEndedAt,
 		Lines:           lines,
 	}
+	s.threadEvents[threadID] = append(s.threadEvents[threadID], copyAgentThreadProgressEvent(event))
 	s.appendClientEventLocked(event.EventType, event)
+	s.appendTaskThreadEventLocked(event)
 	return AgentThreadProgressBatchResponse{
 		SchemaVersion: SchemaVersion,
 		AcceptedLines: len(lines),
@@ -450,8 +645,9 @@ func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context
 }
 
 var (
-	ErrAIAgentNotFound = errors.New("ai agent not found")
-	ErrAIAgentAssigned = errors.New("ai agent has assigned tasks")
+	ErrAIAgentNotFound       = errors.New("ai agent not found")
+	ErrAIAgentThreadNotFound = errors.New("ai agent task thread not found")
+	ErrAIAgentAssigned       = errors.New("ai agent has assigned tasks")
 )
 
 func (s *MockAIAgentClientStore) visibleAgent(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
@@ -521,6 +717,62 @@ func (s *MockAIAgentClientStore) agentForTaskStop(principal AuthorizationResult,
 	return AgentClientRecord{}, false
 }
 
+func (s *MockAIAgentClientStore) visibleTaskThreadsLocked(principal AuthorizationResult, taskID string) ([]AIAgentTaskThreadRecord, string, error) {
+	source := s.taskThreads[taskID]
+	threads := make([]AIAgentTaskThreadRecord, 0, len(source))
+	activeThreadID := ""
+	for _, thread := range source {
+		agent, ok := s.agents[thread.AgentID]
+		if !ok || !aiAgentVisibleTo(principal, agent) {
+			continue
+		}
+		if thread.StreamState == AIAgentTaskThreadStreamStateActive {
+			if activeThreadID != "" {
+				return nil, "", errors.New("task has multiple active AI Agent threads")
+			}
+			activeThreadID = thread.ThreadID
+		}
+		threads = append(threads, copyAIAgentTaskThread(thread))
+	}
+	sort.SliceStable(threads, func(i, j int) bool {
+		if !threads[i].StartedAt.Equal(threads[j].StartedAt) {
+			return threads[i].StartedAt.Before(threads[j].StartedAt)
+		}
+		return threads[i].ThreadID < threads[j].ThreadID
+	})
+	return threads, activeThreadID, nil
+}
+
+func (s *MockAIAgentClientStore) visibleTaskThreadLocked(principal AuthorizationResult, taskID, threadID string) (AIAgentTaskThreadRecord, bool) {
+	for _, thread := range s.taskThreads[taskID] {
+		if thread.ThreadID != threadID {
+			continue
+		}
+		agent, ok := s.agents[thread.AgentID]
+		if !ok || !aiAgentVisibleTo(principal, agent) {
+			return AIAgentTaskThreadRecord{}, false
+		}
+		return copyAIAgentTaskThread(thread), true
+	}
+	return AIAgentTaskThreadRecord{}, false
+}
+
+func (s *MockAIAgentClientStore) threadProgressEventsForPrincipalLocked(principal AuthorizationResult, taskID, threadID string) []AgentThreadProgressEvent {
+	source := s.threadEvents[threadID]
+	events := make([]AgentThreadProgressEvent, 0, len(source))
+	for _, event := range source {
+		if event.TaskID != taskID || event.ThreadID != threadID {
+			continue
+		}
+		agent, ok := s.agents[event.AgentID]
+		if !ok || !aiAgentVisibleTo(principal, agent) {
+			continue
+		}
+		events = append(events, copyAgentThreadProgressEvent(event))
+	}
+	return events
+}
+
 func (s *MockAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {
 	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
 		EventType:       AgentClientEventWorkStatusChanged,
@@ -564,6 +816,22 @@ func (s *MockAIAgentClientStore) appendClientEventLocked(eventType string, paylo
 	return event
 }
 
+func (s *MockAIAgentClientStore) appendTaskThreadEventLocked(event AgentThreadProgressEvent) {
+	for _, subscriber := range s.threadSubscribers {
+		if subscriber.taskID != event.TaskID || subscriber.threadID != event.ThreadID {
+			continue
+		}
+		agent, ok := s.agents[event.AgentID]
+		if !ok || !aiAgentVisibleTo(subscriber.principal, agent) {
+			continue
+		}
+		select {
+		case subscriber.events <- copyAgentThreadProgressEvent(event):
+		default:
+		}
+	}
+}
+
 func clientEventVisibleToLocked(s *MockAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) bool {
 	agentID, ok := eventAgentID(event.Payload)
 	if !ok {
@@ -589,6 +857,133 @@ func normalizeProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgre
 		out = append(out, line)
 	}
 	return out
+}
+
+func taskThreadIDForProgress(req AgentThreadProgressBatchRequest) string {
+	if strings.TrimSpace(req.ThreadID) != "" {
+		return strings.TrimSpace(req.ThreadID)
+	}
+	return strings.TrimSpace(req.AssignmentID)
+}
+
+func taskThreadEntryFromProgress(threadID string, req AgentThreadProgressBatchRequest, lines []AgentThreadProgressLine) AIAgentTaskThreadEntry {
+	createdAt := req.BatchEndedAt
+	if createdAt.IsZero() {
+		createdAt = req.BatchStartedAt
+	}
+	if createdAt.IsZero() {
+		createdAt = time.Now().UTC()
+	}
+	message := lines[len(lines)-1].Message
+	return AIAgentTaskThreadEntry{
+		EntryID:     threadID + "-entry-" + strconv.Itoa(lines[0].Seq),
+		CommentKind: AgentTaskCommentRuntimeProgress,
+		Message:     message,
+		CreatedAt:   createdAt,
+		Lines:       append([]AgentThreadProgressLine(nil), lines...),
+	}
+}
+
+func (s *MockAIAgentClientStore) upsertTaskThreadProgressLocked(agentID, threadID string, req AgentThreadProgressBatchRequest, entry AIAgentTaskThreadEntry) {
+	threads := s.taskThreads[req.TaskID]
+	for i := range threads {
+		if threads[i].ThreadID == threadID {
+			threads[i].AgentID = agentID
+			threads[i].AssignmentID = req.AssignmentID
+			threads[i].RunID = req.RunID
+			threads[i].StreamState = AIAgentTaskThreadStreamStateActive
+			threads[i].WorkStatus = AgentWorkStatusRunning
+			threads[i].AssignmentState = AgentAssignmentStateRunning
+			threads[i].Entries = append(threads[i].Entries, entry)
+			s.taskThreads[req.TaskID] = threads
+			return
+		}
+		if threads[i].StreamState == AIAgentTaskThreadStreamStateActive {
+			threads[i].StreamState = AIAgentTaskThreadStreamStateTerminal
+			threads[i].EndedAt = entry.CreatedAt
+		}
+	}
+	threads = append(threads, AIAgentTaskThreadRecord{
+		ThreadID:        threadID,
+		TaskID:          req.TaskID,
+		AgentID:         agentID,
+		AssignmentID:    req.AssignmentID,
+		RunID:           req.RunID,
+		StreamState:     AIAgentTaskThreadStreamStateActive,
+		WorkStatus:      AgentWorkStatusRunning,
+		AssignmentState: AgentAssignmentStateRunning,
+		StartedAt:       entry.CreatedAt,
+		Entries:         []AIAgentTaskThreadEntry{entry},
+	})
+	s.taskThreads[req.TaskID] = threads
+}
+
+func (s *MockAIAgentClientStore) upsertTaskThreadActionLocked(response AIAgentTaskActionResponse) {
+	threadID := response.RunID
+	now := time.Now().UTC()
+	entry := AIAgentTaskThreadEntry{
+		EntryID:     threadID + "-entry-action",
+		CommentKind: response.CommentKind,
+		Message:     response.Message,
+		CreatedAt:   now,
+	}
+	streamState := AIAgentTaskThreadStreamStateCold
+	if response.WorkStatus == AgentWorkStatusRunning || response.WorkStatus == AgentWorkStatusWaitingForUser {
+		streamState = AIAgentTaskThreadStreamStateActive
+	}
+	threads := s.taskThreads[response.TaskID]
+	if streamState == AIAgentTaskThreadStreamStateActive {
+		for i := range threads {
+			if threads[i].StreamState == AIAgentTaskThreadStreamStateActive && threads[i].ThreadID != threadID {
+				threads[i].StreamState = AIAgentTaskThreadStreamStateTerminal
+				threads[i].EndedAt = now
+			}
+		}
+	}
+	for i := range threads {
+		if threads[i].ThreadID == threadID {
+			threads[i].WorkStatus = response.WorkStatus
+			threads[i].AssignmentState = response.AssignmentState
+			threads[i].StreamState = streamState
+			threads[i].Entries = append(threads[i].Entries, entry)
+			s.taskThreads[response.TaskID] = threads
+			return
+		}
+	}
+	threads = append(threads, AIAgentTaskThreadRecord{
+		ThreadID:        threadID,
+		TaskID:          response.TaskID,
+		AgentID:         response.AgentID,
+		AssignmentID:    response.RunID,
+		RunID:           response.RunID,
+		StreamState:     streamState,
+		WorkStatus:      response.WorkStatus,
+		AssignmentState: response.AssignmentState,
+		StartedAt:       now,
+		Entries:         []AIAgentTaskThreadEntry{entry},
+	})
+	s.taskThreads[response.TaskID] = threads
+}
+
+func (s *MockAIAgentClientStore) stopActiveTaskThreadLocked(response AIAgentTaskActionResponse) {
+	now := time.Now().UTC()
+	threads := s.taskThreads[response.TaskID]
+	for i := range threads {
+		if threads[i].AgentID != response.AgentID || threads[i].StreamState != AIAgentTaskThreadStreamStateActive {
+			continue
+		}
+		threads[i].StreamState = AIAgentTaskThreadStreamStateTerminal
+		threads[i].WorkStatus = response.WorkStatus
+		threads[i].AssignmentState = response.AssignmentState
+		threads[i].EndedAt = now
+		threads[i].Entries = append(threads[i].Entries, AIAgentTaskThreadEntry{
+			EntryID:     threads[i].ThreadID + "-entry-stop",
+			CommentKind: response.CommentKind,
+			Message:     response.Message,
+			CreatedAt:   now,
+		})
+	}
+	s.taskThreads[response.TaskID] = threads
 }
 
 func aiAgentVisibleTo(principal AuthorizationResult, agent AgentClientRecord) bool {
@@ -651,6 +1046,19 @@ func copyDevices(devices []DeviceRecord) []DeviceRecord {
 func copyDevice(device DeviceRecord) DeviceRecord {
 	device.Runtimes = append([]RuntimeRecord(nil), device.Runtimes...)
 	return device
+}
+
+func copyAIAgentTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
+	thread.Entries = append([]AIAgentTaskThreadEntry(nil), thread.Entries...)
+	for i := range thread.Entries {
+		thread.Entries[i].Lines = append([]AgentThreadProgressLine(nil), thread.Entries[i].Lines...)
+	}
+	return thread
+}
+
+func copyAgentThreadProgressEvent(event AgentThreadProgressEvent) AgentThreadProgressEvent {
+	event.Lines = append([]AgentThreadProgressLine(nil), event.Lines...)
+	return event
 }
 
 func runtimeKindByID(devices []DeviceRecord, runtimeID string) (RuntimeKind, bool) {

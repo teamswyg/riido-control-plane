@@ -46,6 +46,10 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"export function useSubmitAIAgentTaskComment",
 		"export function useStopAIAgentTask",
 		"Promise<AIAgentTaskActionResponse>",
+		"export async function getAIAgentTaskThreads",
+		"export async function streamAIAgentTaskThreadEvents",
+		"export async function openAIAgentTaskThreads",
+		"HTTP cold collection",
 		"export async function streamAIAgentClientEvents",
 		"Promise<Response>",
 	} {
