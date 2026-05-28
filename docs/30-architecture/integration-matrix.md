@@ -15,6 +15,7 @@ operator/private infra validation.
 | request authorization | static tokens and `httptest` external authorizer tests | none |
 | assignment polling/heartbeat/events | in-memory store and HTTP tests | none |
 | SSE | `httptest` streaming tests | none |
+| web frontend API transport | CORS allowlist/preflight HTTP tests and env parser tests | none |
 | metrics HTTP and stdout EMF | metrics read-model and writer tests | none |
 | DynamoDB/EventBridge adapters | fake endpoint HTTP tests with fake credentials | no live AWS |
 | `awsadapters` facade | compile and usage tests | none |
@@ -44,6 +45,8 @@ this public repository.
 go test ./...
 go list -m all
 go test ./awsadapters -count=1
+go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
+go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .

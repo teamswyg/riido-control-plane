@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -80,6 +81,36 @@ func TestConfigFromEnvParsesMetricsLogInterval(t *testing.T) {
 	}
 	if config.MetricsLogInterval != 15*time.Second {
 		t.Fatalf("metrics interval = %s", config.MetricsLogInterval)
+	}
+}
+
+func TestConfigFromEnvParsesWebAllowedOrigins(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envWebAllowedOrigins, " https://app.riido.io, http://localhost:5173/ , https://app.riido.io ")
+
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	want := []string{"https://app.riido.io", "http://localhost:5173"}
+	if !reflect.DeepEqual(config.WebAllowedOrigins, want) {
+		t.Fatalf("web origins = %v, want %v", config.WebAllowedOrigins, want)
+	}
+}
+
+func TestParseWebAllowedOriginsRejectsInvalidOrigins(t *testing.T) {
+	for _, value := range []string{
+		"*",
+		"ftp://app.riido.io",
+		"https://app.riido.io/path",
+		"https://app.riido.io?debug=true",
+		"https://user@app.riido.io",
+	} {
+		t.Run(value, func(t *testing.T) {
+			if _, err := parseWebAllowedOrigins(value); err == nil || !strings.Contains(err.Error(), envWebAllowedOrigins) {
+				t.Fatalf("parseWebAllowedOrigins err=%v", err)
+			}
+		})
 	}
 }
 
@@ -289,6 +320,7 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envExternalAuthzTimeout,
 		envReviewAccountTokenHash,
 		envMetricsLogInterval,
+		envWebAllowedOrigins,
 	} {
 		t.Setenv(key, "")
 	}

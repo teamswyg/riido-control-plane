@@ -9,7 +9,7 @@ after the split from the former private monolith.
 
 | Context | Public owner | Responsibility |
 | --- | --- | --- |
-| C10 SaaS Control Plane | `internal/riidoaiserver` | assignment creation, polling, heartbeat, event append, SSE, metrics read model, health/ready routes, review seed provisioning, provider status sync/read, agent catalog RBAC, request authorization ports |
+| C10 SaaS Control Plane | `internal/riidoaiserver` | assignment creation, polling, heartbeat, event append, SSE, metrics read model, health/ready routes, review seed provisioning, provider status sync/read, agent catalog RBAC, request authorization ports, browser frontend CORS transport |
 | C10 Runtime Adapter | `cmd/riido_ai_server` | environment parsing, HTTP server startup/shutdown, optional stdout metrics publisher startup |
 | C10 Public AWS Adapter Facade | `awsadapters` | module-consumable aliases for stdlib-only DynamoDB/EventBridge adapter DTOs, constructors, and ports needed by private infra evidence tooling |
 | C10 Container Contract | `packaging/containers` and `tools/containercontract` | public executable image shape for the control-plane binary |
@@ -37,7 +37,7 @@ import daemon internals, private infra modules, or former monolith package paths
 | Customer-PC daemon runtime | `riido-daemon` | provider process execution, local task DB, Unix socket API, customer host integration |
 | Shared contract tags | `riido-contracts` | cross-repo DTOs, state vocabulary, schema-versioned fixtures |
 | Infrastructure / deployment | `riido-infra` | Terraform modules, remote state, AWS account wiring, ECR push, ECS/Fargate deploy, DNS/ACM/WAF, deployment evidence |
-| Store/app clients | future desktop or web clients | user-facing UI over public HTTP contracts |
+| Store/app clients | future desktop or web clients | user-facing UI over public HTTP contracts and configured browser origins |
 
 ## Direction Rules
 

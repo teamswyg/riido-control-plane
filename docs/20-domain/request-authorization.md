@@ -88,6 +88,22 @@ If a static token authorizer returns forbidden because a known token lacks the
 requested scope, fallback must stop. This prevents a scoped deny from becoming
 an external-provider allow.
 
+## Browser Frontend Transport
+
+Browser frontends call the same public HTTP endpoints as other clients. CORS is
+therefore a transport allowlist, not an authorization decision.
+
+`cmd/riido_ai_server` may configure exact browser origins through
+`RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`. When configured, `ServerConfig` handles
+`OPTIONS` preflight before route authorization and allows only the HTTP methods
+and headers required by the existing API surface: `GET`, `POST`, `PATCH`,
+`DELETE`, `Authorization`, `Content-Type`, `Accept`, and `Last-Event-ID`.
+
+The server does not use wildcard origins and does not enable browser
+credentials. Protected endpoints still require bearer-token authorization and,
+where applicable, the agent-catalog RBAC decision described in
+[`agent-catalog-rbac.md`](agent-catalog-rbac.md).
+
 ## Migration State
 
 RIID-4664 moves the stdlib-only external HTTP authorizer adapter and
@@ -97,6 +113,10 @@ package into this public repository.
 RIID-4679 moves runtime environment parsing and HTTP route wiring into this
 public repository. RIID-4691 reuses the static token hash path for review
 account provisioning without storing raw token values.
+
+RIID-4717 adds browser frontend CORS transport configuration over the existing
+public HTTP API without changing bearer-token authorization, RBAC, or endpoint
+payload contracts.
 
 Production IdP rollout, tenant claim mapping, JWKS/OIDC validation, and
 production bearer token values remain separate migration units.

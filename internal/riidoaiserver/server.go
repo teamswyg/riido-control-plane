@@ -15,6 +15,7 @@ type ServerConfig struct {
 	Assignment        AssignmentStore
 	ProviderStatus    ProviderStatusStore
 	ProviderRead      ProviderStatusReader
+	WebAllowedOrigins []string
 }
 
 type Server struct {
@@ -26,6 +27,7 @@ type Server struct {
 }
 
 func NewServer(config ServerConfig) Server {
+	config.WebAllowedOrigins = normalizeWebAllowedOrigins(config.WebAllowedOrigins)
 	agentCatalog := config.AgentCatalogStore
 	if agentCatalog == nil {
 		if store, ok := config.Assignment.(AgentCatalogStore); ok {
@@ -62,7 +64,11 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/agent-catalog/", s.handleAgentCatalog)
 	mux.HandleFunc("/v1/component-tasks/", s.handleComponentTasks)
 	mux.HandleFunc("/v1/agents/", s.handleAgents)
-	return mux
+	var handler http.Handler = mux
+	if len(s.config.WebAllowedOrigins) > 0 {
+		handler = s.withWebFrontendCORS(handler)
+	}
+	return handler
 }
 
 func (s Server) handleHealth(w http.ResponseWriter, r *http.Request) {
