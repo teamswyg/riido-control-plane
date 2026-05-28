@@ -25,9 +25,11 @@ export interface AgentClientRecord {
   agent_id: string;
   assigned_task_count: number;
   editability: AgentEditability;
+  instruction?: string;
   is_owned_by_viewer: boolean;
   name: string;
   owner_principal_id: string;
+  profile_thumbnail_url?: string;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
   visibility: AgentVisibility;
@@ -166,7 +168,9 @@ export interface SubmitAIAgentTaskCommentRequest {
 }
 
 export interface UpdateAgentConfigurationRequest {
+  instruction?: string;
   name?: string;
+  profile_thumbnail_url?: string;
   runtime_id?: string;
   visibility?: AgentVisibility;
 }

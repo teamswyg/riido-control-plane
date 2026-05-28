@@ -55,6 +55,10 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task participant dropdown responses are ordered owned-first, then by name
 - non-owner, non-admin users cannot mutate other users' public agents
 - editing is blocked while `assigned_task_count` is greater than zero
+- `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
+  agent record; binary image upload/storage is outside this mock API
+- `instruction` is saved as optional client-authored agent guidance text and is
+  rejected when it exceeds 1000 characters
 - delete returns forced assignment effects for queued/running mock tasks
 - task-thread comments can enqueue work when the selected agent is busy
 - task-thread stop actions return `stopped_by_user_request`

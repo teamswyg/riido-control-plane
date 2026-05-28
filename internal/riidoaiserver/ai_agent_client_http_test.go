@@ -151,7 +151,19 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		Scopes:      []string{"ai-agent:*"},
 	}})
 
-	patchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(`{"name":"같은 이름 가능","visibility":"public","runtime_id":"runtime-cursor-mock"}`))
+	thumbnailURL := "https://cdn.riido.io/mock/ai-agents/updated-claude.png"
+	instruction := strings.Repeat("지", AgentInstructionMaxCharacters)
+	patchBody, err := json.Marshal(UpdateAgentConfigurationRequest{
+		Name:                "같은 이름 가능",
+		Visibility:          AgentVisibilityPublic,
+		RuntimeID:           "runtime-cursor-mock",
+		ProfileThumbnailURL: &thumbnailURL,
+		Instruction:         &instruction,
+	})
+	if err != nil {
+		t.Fatalf("marshal patch body: %v", err)
+	}
+	patchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(patchBody)))
 	patchReq.Header.Set("Authorization", "Bearer owner-token")
 	patchResp := httptest.NewRecorder()
 	server.ServeHTTP(patchResp, patchReq)
@@ -162,8 +174,41 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	if err := json.Unmarshal(patchResp.Body.Bytes(), &patched); err != nil {
 		t.Fatalf("patch json: %v", err)
 	}
-	if patched.Agent.Name != "같은 이름 가능" || patched.Agent.Visibility != AgentVisibilityPublic || patched.Agent.RuntimeKind != RuntimeKindCursor {
+	if patched.Agent.Name != "같은 이름 가능" ||
+		patched.Agent.Visibility != AgentVisibilityPublic ||
+		patched.Agent.RuntimeKind != RuntimeKindCursor ||
+		patched.Agent.ProfileThumbnailURL != thumbnailURL ||
+		patched.Agent.Instruction != instruction {
 		t.Fatalf("patched agent = %+v", patched.Agent)
+	}
+
+	bootstrapReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/bootstrap", nil)
+	bootstrapReq.Header.Set("Authorization", "Bearer owner-token")
+	bootstrapResp := httptest.NewRecorder()
+	server.ServeHTTP(bootstrapResp, bootstrapReq)
+	if bootstrapResp.Code != http.StatusOK {
+		t.Fatalf("bootstrap status=%d body=%s", bootstrapResp.Code, bootstrapResp.Body.String())
+	}
+	var bootstrap ClientBootstrapResponse
+	if err := json.Unmarshal(bootstrapResp.Body.Bytes(), &bootstrap); err != nil {
+		t.Fatalf("bootstrap json: %v", err)
+	}
+	updated, ok := findAIAgent(bootstrap.Agents, "agent-owned-claude")
+	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Instruction != instruction {
+		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
+	}
+
+	tooLongInstruction := strings.Repeat("가", AgentInstructionMaxCharacters+1)
+	tooLongBody, err := json.Marshal(UpdateAgentConfigurationRequest{Instruction: &tooLongInstruction})
+	if err != nil {
+		t.Fatalf("marshal too-long patch body: %v", err)
+	}
+	tooLongReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(tooLongBody)))
+	tooLongReq.Header.Set("Authorization", "Bearer owner-token")
+	tooLongResp := httptest.NewRecorder()
+	server.ServeHTTP(tooLongResp, tooLongReq)
+	if tooLongResp.Code != http.StatusBadRequest {
+		t.Fatalf("too-long patch status=%d body=%s", tooLongResp.Code, tooLongResp.Body.String())
 	}
 
 	assignedPatchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-codex", strings.NewReader(`{"name":"blocked"}`))
@@ -353,6 +398,15 @@ func aiAgentIDs(agents []AgentClientRecord) []string {
 		ids = append(ids, agent.AgentID)
 	}
 	return ids
+}
+
+func findAIAgent(agents []AgentClientRecord, id string) (AgentClientRecord, bool) {
+	for _, agent := range agents {
+		if agent.AgentID == id {
+			return agent, true
+		}
+	}
+	return AgentClientRecord{}, false
 }
 
 func containsString(values []string, want string) bool {

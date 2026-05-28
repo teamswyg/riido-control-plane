@@ -3,10 +3,12 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
+	"net/url"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 )
 
 type AIAgentClientStore interface {
@@ -86,48 +88,56 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 	}
 	agents := map[string]AgentClientRecord{
 		"agent-owned-codex": {
-			AgentID:           "agent-owned-codex",
-			OwnerPrincipalID:  "user-1",
-			Name:              "Codex 리뷰어",
-			Visibility:        AgentVisibilityPrivate,
-			RuntimeID:         "runtime-codex-mock",
-			RuntimeKind:       RuntimeKindCodex,
-			WorkStatus:        AgentWorkStatusRunning,
-			Editability:       AgentEditabilityBlockedAssignedTasks,
-			AssignedTaskCount: 1,
+			AgentID:             "agent-owned-codex",
+			OwnerPrincipalID:    "user-1",
+			Name:                "Codex 리뷰어",
+			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/codex-reviewer.png",
+			Instruction:         "코드 변경의 위험과 검증 근거를 우선 확인합니다.",
+			Visibility:          AgentVisibilityPrivate,
+			RuntimeID:           "runtime-codex-mock",
+			RuntimeKind:         RuntimeKindCodex,
+			WorkStatus:          AgentWorkStatusRunning,
+			Editability:         AgentEditabilityBlockedAssignedTasks,
+			AssignedTaskCount:   1,
 		},
 		"agent-owned-claude": {
-			AgentID:           "agent-owned-claude",
-			OwnerPrincipalID:  "user-1",
-			Name:              "Claude 설계 보조",
-			Visibility:        AgentVisibilityPrivate,
-			RuntimeID:         "runtime-claude-code-mock",
-			RuntimeKind:       RuntimeKindClaudeCode,
-			WorkStatus:        AgentWorkStatusOffline,
-			Editability:       AgentEditabilityEditable,
-			AssignedTaskCount: 0,
+			AgentID:             "agent-owned-claude",
+			OwnerPrincipalID:    "user-1",
+			Name:                "Claude 설계 보조",
+			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/claude-designer.png",
+			Instruction:         "기획 의도와 도메인 정책을 먼저 정리한 뒤 구현 범위를 제안합니다.",
+			Visibility:          AgentVisibilityPrivate,
+			RuntimeID:           "runtime-claude-code-mock",
+			RuntimeKind:         RuntimeKindClaudeCode,
+			WorkStatus:          AgentWorkStatusOffline,
+			Editability:         AgentEditabilityEditable,
+			AssignedTaskCount:   0,
 		},
 		"agent-public-openclaw": {
-			AgentID:           "agent-public-openclaw",
-			OwnerPrincipalID:  "user-2",
-			Name:              "OpenClaw 공개 에이전트",
-			Visibility:        AgentVisibilityPublic,
-			RuntimeID:         "runtime-openclaw-remote",
-			RuntimeKind:       RuntimeKindOpenClaw,
-			WorkStatus:        AgentWorkStatusIdle,
-			Editability:       AgentEditabilityEditable,
-			AssignedTaskCount: 0,
+			AgentID:             "agent-public-openclaw",
+			OwnerPrincipalID:    "user-2",
+			Name:                "OpenClaw 공개 에이전트",
+			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/openclaw-public.png",
+			Instruction:         "공개 워크스페이스에서 반복 가능한 보조 작업을 수행합니다.",
+			Visibility:          AgentVisibilityPublic,
+			RuntimeID:           "runtime-openclaw-remote",
+			RuntimeKind:         RuntimeKindOpenClaw,
+			WorkStatus:          AgentWorkStatusIdle,
+			Editability:         AgentEditabilityEditable,
+			AssignedTaskCount:   0,
 		},
 		"agent-private-cursor": {
-			AgentID:           "agent-private-cursor",
-			OwnerPrincipalID:  "user-2",
-			Name:              "Cursor 비공개 에이전트",
-			Visibility:        AgentVisibilityPrivate,
-			RuntimeID:         "runtime-cursor-mock",
-			RuntimeKind:       RuntimeKindCursor,
-			WorkStatus:        AgentWorkStatusIdle,
-			Editability:       AgentEditabilityEditable,
-			AssignedTaskCount: 0,
+			AgentID:             "agent-private-cursor",
+			OwnerPrincipalID:    "user-2",
+			Name:                "Cursor 비공개 에이전트",
+			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/cursor-private.png",
+			Instruction:         "소유자 전용 Cursor 기반 코드 탐색을 수행합니다.",
+			Visibility:          AgentVisibilityPrivate,
+			RuntimeID:           "runtime-cursor-mock",
+			RuntimeKind:         RuntimeKindCursor,
+			WorkStatus:          AgentWorkStatusIdle,
+			Editability:         AgentEditabilityEditable,
+			AssignedTaskCount:   0,
 		},
 	}
 	return &MockAIAgentClientStore{
@@ -307,6 +317,19 @@ func (s *MockAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context,
 	}
 	if strings.TrimSpace(req.Name) != "" {
 		agent.Name = strings.TrimSpace(req.Name)
+	}
+	if req.ProfileThumbnailURL != nil {
+		thumbnailURL, err := normalizeAgentProfileThumbnailURL(*req.ProfileThumbnailURL)
+		if err != nil {
+			return AgentClientRecordResponse{}, err
+		}
+		agent.ProfileThumbnailURL = thumbnailURL
+	}
+	if req.Instruction != nil {
+		if err := validateAgentInstruction(*req.Instruction); err != nil {
+			return AgentClientRecordResponse{}, err
+		}
+		agent.Instruction = *req.Instruction
 	}
 	if req.Visibility != "" {
 		if req.Visibility != AgentVisibilityPublic && req.Visibility != AgentVisibilityPrivate {
@@ -589,6 +612,25 @@ func normalizeProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgre
 		out = append(out, line)
 	}
 	return out
+}
+
+func normalizeAgentProfileThumbnailURL(value string) (string, error) {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return "", nil
+	}
+	parsed, err := url.Parse(trimmed)
+	if err != nil || parsed.Scheme != "https" || parsed.Host == "" {
+		return "", errors.New("profile_thumbnail_url must be an https URL")
+	}
+	return trimmed, nil
+}
+
+func validateAgentInstruction(value string) error {
+	if utf8.RuneCountInString(value) > AgentInstructionMaxCharacters {
+		return errors.New("instruction must be 1000 characters or fewer")
+	}
+	return nil
 }
 
 func aiAgentVisibleTo(principal AuthorizationResult, agent AgentClientRecord) bool {

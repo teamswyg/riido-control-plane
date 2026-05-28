@@ -4,6 +4,8 @@ import "time"
 
 const AIAgentClientContractID = "control-plane-ai-agent-client-api.v1"
 
+const AgentInstructionMaxCharacters = 1000
+
 const (
 	AgentClientEventDeviceRuntimeSnapshot = "device_runtime_snapshot"
 	AgentClientEventEditabilityChanged    = "agent_editability_changed"
@@ -111,16 +113,18 @@ type DeviceRecord struct {
 }
 
 type AgentClientRecord struct {
-	AgentID           string           `json:"agent_id"`
-	OwnerPrincipalID  string           `json:"owner_principal_id"`
-	IsOwnedByViewer   bool             `json:"is_owned_by_viewer"`
-	Name              string           `json:"name"`
-	Visibility        AgentVisibility  `json:"visibility"`
-	RuntimeID         string           `json:"runtime_id,omitempty"`
-	RuntimeKind       RuntimeKind      `json:"runtime_kind,omitempty"`
-	WorkStatus        AgentWorkStatus  `json:"work_status"`
-	Editability       AgentEditability `json:"editability"`
-	AssignedTaskCount int              `json:"assigned_task_count"`
+	AgentID             string           `json:"agent_id"`
+	OwnerPrincipalID    string           `json:"owner_principal_id"`
+	IsOwnedByViewer     bool             `json:"is_owned_by_viewer"`
+	Name                string           `json:"name"`
+	ProfileThumbnailURL string           `json:"profile_thumbnail_url,omitempty"`
+	Instruction         string           `json:"instruction,omitempty"`
+	Visibility          AgentVisibility  `json:"visibility"`
+	RuntimeID           string           `json:"runtime_id,omitempty"`
+	RuntimeKind         RuntimeKind      `json:"runtime_kind,omitempty"`
+	WorkStatus          AgentWorkStatus  `json:"work_status"`
+	Editability         AgentEditability `json:"editability"`
+	AssignedTaskCount   int              `json:"assigned_task_count"`
 }
 
 type AgentClientListResponse struct {
@@ -155,9 +159,11 @@ type AgentEditabilityResponse struct {
 }
 
 type UpdateAgentConfigurationRequest struct {
-	Name       string          `json:"name,omitempty"`
-	Visibility AgentVisibility `json:"visibility,omitempty"`
-	RuntimeID  string          `json:"runtime_id,omitempty"`
+	Name                string          `json:"name,omitempty"`
+	ProfileThumbnailURL *string         `json:"profile_thumbnail_url,omitempty"`
+	Instruction         *string         `json:"instruction,omitempty"`
+	Visibility          AgentVisibility `json:"visibility,omitempty"`
+	RuntimeID           string          `json:"runtime_id,omitempty"`
 }
 
 type DeleteAgentResponse struct {

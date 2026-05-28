@@ -60,7 +60,7 @@
     {
       "policy_id": "agent_mutation_safety.v1",
       "kind": "lifecycle",
-      "description": "Deleting an agent force-unassigns queued tasks and force-stops running tasks; editing is allowed only when the agent has no assigned tasks, and editability must be visible to clients before mutation.",
+      "description": "Deleting an agent force-unassigns queued tasks and force-stops running tasks; editing display/configuration/profile fields is allowed only when the agent has no assigned tasks, and editability must be visible to clients before mutation.",
       "rules": [
         "delete: unassign queued tasks and force-stop running tasks before confirming deletion",
         "edit: allowed only when assigned_task_count is zero",
@@ -102,6 +102,16 @@
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
         "client: render task-thread progress from typed event payloads and never parse provider raw output"
+      ]
+    },
+    {
+      "policy_id": "agent_profile_configuration.v1",
+      "kind": "profile",
+      "description": "Agent profile presentation fields are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
+      "rules": [
+        "profile_thumbnail_url: optional HTTPS image URL string; binary upload is outside this contract",
+        "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
+        "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
     }
   ],
@@ -430,6 +440,16 @@
             "type": "string"
           },
           {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "max_length": 1000
+          },
+          {
             "name": "visibility",
             "ref": "AgentVisibility"
           },
@@ -611,6 +631,16 @@
           {
             "name": "name",
             "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "max_length": 1000
           },
           {
             "name": "visibility",
@@ -1164,6 +1194,8 @@
       },
       "scenario_ids": [
         "updateAIAgentConfiguration.agent-name-is-not-unique",
+        "updateAIAgentConfiguration.profile-fields-are-saved",
+        "updateAIAgentConfiguration.instruction-max-length-is-enforced",
         "updateAIAgentConfiguration.edit-fails-while-assigned"
       ]
     },
@@ -1299,6 +1331,22 @@
       "given": "two owned agents share the same display name",
       "when": "the owner updates one agent name",
       "then": "the request is accepted because agent names are mutable and non-unique"
+    },
+    {
+      "scenario_id": "updateAIAgentConfiguration.profile-fields-are-saved",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "profile fields are saved",
+      "given": "an editable agent has no assigned task",
+      "when": "the owner updates profile_thumbnail_url and instruction",
+      "then": "the response and future client bootstrap contain the saved profile fields"
+    },
+    {
+      "scenario_id": "updateAIAgentConfiguration.instruction-max-length-is-enforced",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "instruction max length is enforced",
+      "given": "an editable agent has no assigned task",
+      "when": "the owner sends an instruction longer than 1000 characters",
+      "then": "the operation is rejected before saving the agent configuration"
     },
     {
       "scenario_id": "updateAIAgentConfiguration.edit-fails-while-assigned",
