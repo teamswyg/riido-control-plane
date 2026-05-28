@@ -724,6 +724,32 @@ This slice does not add production persistence, daemon runtime probing, final
 Route53 records, IdP rollout, Terraform state, AWS credentials, or frontend app
 implementation.
 
+### RIID-4746 — AI Agent client API delivery SSOT
+
+This slice defines how the control-plane AI Agent client API will be delivered
+as generated React Query code to `riido-client` without editing the client
+repository in this PR.
+
+This slice does:
+
+- define `riido-contracts` as canonical vocabulary and lifecycle owner
+- define `riido-control-plane` as owner of the AI Agent client API sub-DSL,
+  OpenAPI projection handoff, generated-client delivery boundary, and release
+  manifest
+- require business-meaning changes to escalate from control-plane to
+  `riido-contracts`
+- require generated-client delivery to run only from API release tags
+- define the target client branch shape `react-query-{tag}-{shortsha}`
+- define the target generated path allowlist
+  `src/generated/react-query/riido-control-plane/**`
+- require generated `apiHistory.generated.ts` and
+  `contractManifest.generated.ts` artifacts to preserve lifecycle/deprecation
+  context for frontend developers
+
+This slice does not edit `teamswyg/riido-client`, run Orval in the client
+repository, configure delivery secrets, publish npm packages, or implement the
+cross-repository delivery workflow.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -751,6 +777,7 @@ Architecture-doc migration PRs must also pass:
 ```bash
 test -f docs/20-domain/context-map.md
 test -f docs/30-architecture/module-decomposition.md
+test -f docs/30-architecture/api-client-delivery.md
 test -f docs/30-architecture/config-reference.md
 test -f docs/30-architecture/integration-matrix.md
 test -f docs/30-architecture/runtime-deployment-boundary.md
