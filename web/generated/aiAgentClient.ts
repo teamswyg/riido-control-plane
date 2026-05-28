@@ -699,62 +699,73 @@ export function useStopAIAgentTask(config: RiidoClientConfig, options: UseMutati
 }
 
 /**
- * control-plane AI Agent API를 namespace별로 묶은 config-bound facade입니다.
- * TanStack QueryClient를 대체하지 않고 request, queryKey, queryOptions, mutationOptions를 한곳에서 찾기 쉽게 제공합니다.
+ * control-plane API를 DSL client metadata의 module/namespace별로 묶은 config-bound facade입니다.
+ * TanStack QueryClient를 대체하지 않고 request, query/queryOptions, mutation/mutationOptions를 한곳에서 찾기 쉽게 제공합니다.
  */
 export function createRiidoControlPlaneClient(config: RiidoClientConfig) {
   return {
-    agents: {
-      delete: {
-        request: (params: DeleteAIAgentPathParams, options: RiidoRequestOptions = {}) => deleteAIAgent(config, params, options),
-        mutationKey: deleteAIAgentQueryKey,
-        mutationOptions: (options: UseMutationOptions<DeleteAgentResponse, Error, DeleteAIAgentMutationVariables> = {}) => deleteAIAgentMutationOptions(config, options),
+    aiAgent: {
+      agents: {
+        delete: {
+          request: (params: DeleteAIAgentPathParams, options: RiidoRequestOptions = {}) => deleteAIAgent(config, params, options),
+          mutationKey: deleteAIAgentQueryKey,
+          mutation: (options: UseMutationOptions<DeleteAgentResponse, Error, DeleteAIAgentMutationVariables> = {}) => deleteAIAgentMutationOptions(config, options),
+          mutationOptions: (options: UseMutationOptions<DeleteAgentResponse, Error, DeleteAIAgentMutationVariables> = {}) => deleteAIAgentMutationOptions(config, options),
+        },
+        editability: {
+          request: (params: GetAIAgentEditabilityPathParams, options: RiidoRequestOptions = {}) => getAIAgentEditability(config, params, options),
+          queryKey: getAIAgentEditabilityQueryKey,
+          query: (params: GetAIAgentEditabilityPathParams, options: Omit<UseQueryOptions<AgentEditabilityResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => getAIAgentEditabilityQueryOptions(config, params, options),
+          queryOptions: (params: GetAIAgentEditabilityPathParams, options: Omit<UseQueryOptions<AgentEditabilityResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => getAIAgentEditabilityQueryOptions(config, params, options),
+        },
+        updateConfiguration: {
+          request: (params: UpdateAIAgentConfigurationPathParams, body: UpdateAgentConfigurationRequest, options: RiidoRequestOptions = {}) => updateAIAgentConfiguration(config, params, body, options),
+          mutationKey: updateAIAgentConfigurationQueryKey,
+          mutation: (options: UseMutationOptions<AgentClientRecordResponse, Error, UpdateAIAgentConfigurationMutationVariables> = {}) => updateAIAgentConfigurationMutationOptions(config, options),
+          mutationOptions: (options: UseMutationOptions<AgentClientRecordResponse, Error, UpdateAIAgentConfigurationMutationVariables> = {}) => updateAIAgentConfigurationMutationOptions(config, options),
+        },
       },
-      editability: {
-        request: (params: GetAIAgentEditabilityPathParams, options: RiidoRequestOptions = {}) => getAIAgentEditability(config, params, options),
-        queryKey: getAIAgentEditabilityQueryKey,
-        queryOptions: (params: GetAIAgentEditabilityPathParams, options: Omit<UseQueryOptions<AgentEditabilityResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => getAIAgentEditabilityQueryOptions(config, params, options),
+      bootstrap: {
+        request: (options: RiidoRequestOptions = {}) => getAIAgentClientBootstrap(config, options),
+        queryKey: getAIAgentClientBootstrapQueryKey,
+        query: (options: Omit<UseQueryOptions<ClientBootstrapResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => getAIAgentClientBootstrapQueryOptions(config, options),
+        queryOptions: (options: Omit<UseQueryOptions<ClientBootstrapResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => getAIAgentClientBootstrapQueryOptions(config, options),
       },
-      updateConfiguration: {
-        request: (params: UpdateAIAgentConfigurationPathParams, body: UpdateAgentConfigurationRequest, options: RiidoRequestOptions = {}) => updateAIAgentConfiguration(config, params, body, options),
-        mutationKey: updateAIAgentConfigurationQueryKey,
-        mutationOptions: (options: UseMutationOptions<AgentClientRecordResponse, Error, UpdateAIAgentConfigurationMutationVariables> = {}) => updateAIAgentConfigurationMutationOptions(config, options),
+      devices: {
+        runtimes: {
+          request: (options: RiidoRequestOptions = {}) => listAIAgentDeviceRuntimes(config, options),
+          queryKey: listAIAgentDeviceRuntimesQueryKey,
+          query: (options: Omit<UseQueryOptions<DeviceRuntimeListResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => listAIAgentDeviceRuntimesQueryOptions(config, options),
+          queryOptions: (options: Omit<UseQueryOptions<DeviceRuntimeListResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => listAIAgentDeviceRuntimesQueryOptions(config, options),
+        },
       },
-    },
-    bootstrap: {
-      request: (options: RiidoRequestOptions = {}) => getAIAgentClientBootstrap(config, options),
-      queryKey: getAIAgentClientBootstrapQueryKey,
-      queryOptions: (options: Omit<UseQueryOptions<ClientBootstrapResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => getAIAgentClientBootstrapQueryOptions(config, options),
-    },
-    devices: {
-      runtimes: {
-        request: (options: RiidoRequestOptions = {}) => listAIAgentDeviceRuntimes(config, options),
-        queryKey: listAIAgentDeviceRuntimesQueryKey,
-        queryOptions: (options: Omit<UseQueryOptions<DeviceRuntimeListResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => listAIAgentDeviceRuntimesQueryOptions(config, options),
+      events: {
+        stream: {
+          request: (options: RiidoRequestOptions = {}) => streamAIAgentClientEvents(config, options),
+          queryKey: streamAIAgentClientEventsQueryKey,
+          query: (options: Omit<UseQueryOptions<Response>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => streamAIAgentClientEventsQueryOptions(config, options),
+          queryOptions: (options: Omit<UseQueryOptions<Response>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => streamAIAgentClientEventsQueryOptions(config, options),
+        },
       },
-    },
-    events: {
-      stream: {
-        request: (options: RiidoRequestOptions = {}) => streamAIAgentClientEvents(config, options),
-        queryKey: streamAIAgentClientEventsQueryKey,
-        queryOptions: (options: Omit<UseQueryOptions<Response>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => streamAIAgentClientEventsQueryOptions(config, options),
-      },
-    },
-    tasks: {
-      assignableAgents: {
-        request: (params: ListAIAgentTaskAssignableAgentsPathParams, options: RiidoRequestOptions = {}) => listAIAgentTaskAssignableAgents(config, params, options),
-        queryKey: listAIAgentTaskAssignableAgentsQueryKey,
-        queryOptions: (params: ListAIAgentTaskAssignableAgentsPathParams, options: Omit<UseQueryOptions<AgentClientListResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => listAIAgentTaskAssignableAgentsQueryOptions(config, params, options),
-      },
-      stop: {
-        request: (params: StopAIAgentTaskPathParams, body: StopAIAgentTaskRequest, options: RiidoRequestOptions = {}) => stopAIAgentTask(config, params, body, options),
-        mutationKey: stopAIAgentTaskQueryKey,
-        mutationOptions: (options: UseMutationOptions<AIAgentTaskActionResponse, Error, StopAIAgentTaskMutationVariables> = {}) => stopAIAgentTaskMutationOptions(config, options),
-      },
-      submitComment: {
-        request: (params: SubmitAIAgentTaskCommentPathParams, body: SubmitAIAgentTaskCommentRequest, options: RiidoRequestOptions = {}) => submitAIAgentTaskComment(config, params, body, options),
-        mutationKey: submitAIAgentTaskCommentQueryKey,
-        mutationOptions: (options: UseMutationOptions<AIAgentTaskActionResponse, Error, SubmitAIAgentTaskCommentMutationVariables> = {}) => submitAIAgentTaskCommentMutationOptions(config, options),
+      tasks: {
+        assignableAgents: {
+          request: (params: ListAIAgentTaskAssignableAgentsPathParams, options: RiidoRequestOptions = {}) => listAIAgentTaskAssignableAgents(config, params, options),
+          queryKey: listAIAgentTaskAssignableAgentsQueryKey,
+          query: (params: ListAIAgentTaskAssignableAgentsPathParams, options: Omit<UseQueryOptions<AgentClientListResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => listAIAgentTaskAssignableAgentsQueryOptions(config, params, options),
+          queryOptions: (params: ListAIAgentTaskAssignableAgentsPathParams, options: Omit<UseQueryOptions<AgentClientListResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) => listAIAgentTaskAssignableAgentsQueryOptions(config, params, options),
+        },
+        stop: {
+          request: (params: StopAIAgentTaskPathParams, body: StopAIAgentTaskRequest, options: RiidoRequestOptions = {}) => stopAIAgentTask(config, params, body, options),
+          mutationKey: stopAIAgentTaskQueryKey,
+          mutation: (options: UseMutationOptions<AIAgentTaskActionResponse, Error, StopAIAgentTaskMutationVariables> = {}) => stopAIAgentTaskMutationOptions(config, options),
+          mutationOptions: (options: UseMutationOptions<AIAgentTaskActionResponse, Error, StopAIAgentTaskMutationVariables> = {}) => stopAIAgentTaskMutationOptions(config, options),
+        },
+        submitComment: {
+          request: (params: SubmitAIAgentTaskCommentPathParams, body: SubmitAIAgentTaskCommentRequest, options: RiidoRequestOptions = {}) => submitAIAgentTaskComment(config, params, body, options),
+          mutationKey: submitAIAgentTaskCommentQueryKey,
+          mutation: (options: UseMutationOptions<AIAgentTaskActionResponse, Error, SubmitAIAgentTaskCommentMutationVariables> = {}) => submitAIAgentTaskCommentMutationOptions(config, options),
+          mutationOptions: (options: UseMutationOptions<AIAgentTaskActionResponse, Error, SubmitAIAgentTaskCommentMutationVariables> = {}) => submitAIAgentTaskCommentMutationOptions(config, options),
+        },
       },
     },
   } as const;

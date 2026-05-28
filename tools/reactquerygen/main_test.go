@@ -2,11 +2,17 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
+
+type testContractOperation struct {
+	OperationID string         `json:"operation_id"`
+	Client      clientMetadata `json:"client"`
+}
 
 func TestGenerateReactQueryClientDoesNotDrift(t *testing.T) {
 	openAPIPath := filepath.Join("..", "..", "contracts", "ai-agent-client", "control-plane-ai-agent-client.openapi.json")
@@ -56,6 +62,9 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"export interface StopAIAgentTaskMutationVariables",
 		"export function stopAIAgentTaskMutationOptions",
 		"export function createRiidoControlPlaneClient",
+		"aiAgent: {",
+		"query: (",
+		"mutation: (",
 		"tasks: {",
 		"assignableAgents: {",
 	} {
@@ -63,4 +72,78 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 			t.Fatalf("generated client missing %q", required)
 		}
 	}
+}
+
+func TestAIAgentClientMetadataFlowsThroughContractProjections(t *testing.T) {
+	base := filepath.Join("..", "..", "contracts", "ai-agent-client")
+	dsl := loadContractClientMetadata(t, filepath.Join(base, "control-plane-ai-agent-client.dsl.riido.json"))
+	ir := loadContractClientMetadata(t, filepath.Join(base, "control-plane-ai-agent-client.ir.riido.json"))
+	openapi := loadOpenAPIClientMetadata(t, filepath.Join(base, "control-plane-ai-agent-client.openapi.json"))
+
+	for operationID, want := range dsl {
+		if got, ok := ir[operationID]; !ok || got != want {
+			t.Fatalf("IR client metadata for %s = %q, want %q", operationID, got, want)
+		}
+		if got, ok := openapi[operationID]; !ok || got != want {
+			t.Fatalf("OpenAPI client metadata for %s = %q, want %q", operationID, got, want)
+		}
+	}
+	if len(ir) != len(dsl) {
+		t.Fatalf("IR metadata count = %d, want %d", len(ir), len(dsl))
+	}
+	if len(openapi) != len(dsl) {
+		t.Fatalf("OpenAPI metadata count = %d, want %d", len(openapi), len(dsl))
+	}
+}
+
+func loadContractClientMetadata(t *testing.T, path string) map[string]string {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read %s: %v", path, err)
+	}
+	var doc struct {
+		Operations []testContractOperation `json:"operations"`
+	}
+	if err := json.Unmarshal(data, &doc); err != nil {
+		t.Fatalf("decode %s: %v", path, err)
+	}
+	return clientMetadataByOperation(t, path, doc.Operations)
+}
+
+func loadOpenAPIClientMetadata(t *testing.T, path string) map[string]string {
+	t.Helper()
+	spec, err := loadOpenAPI(path)
+	if err != nil {
+		t.Fatalf("loadOpenAPI: %v", err)
+	}
+	var operations []testContractOperation
+	for _, byMethod := range spec.Paths {
+		for _, operation := range byMethod {
+			operations = append(operations, testContractOperation{
+				OperationID: operation.OperationID,
+				Client:      operation.Client,
+			})
+		}
+	}
+	return clientMetadataByOperation(t, path, operations)
+}
+
+func clientMetadataByOperation(t *testing.T, path string, operations []testContractOperation) map[string]string {
+	t.Helper()
+	out := map[string]string{}
+	for _, operation := range operations {
+		operationID := strings.TrimSpace(operation.OperationID)
+		if operationID == "" {
+			t.Fatalf("%s has operation without id", path)
+		}
+		if strings.TrimSpace(operation.Client.Module) == "" {
+			t.Fatalf("%s operation %s missing client.module", path, operationID)
+		}
+		if len(operation.Client.FacadePath) == 0 {
+			t.Fatalf("%s operation %s missing client.facade_path", path, operationID)
+		}
+		out[operationID] = operation.Client.Module + "." + strings.Join(operation.Client.FacadePath, ".")
+	}
+	return out
 }

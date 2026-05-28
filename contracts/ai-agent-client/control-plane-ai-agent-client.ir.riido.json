@@ -878,6 +878,12 @@
       "path": "/v1/client/ai-agent/bootstrap",
       "resource": "agent",
       "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "bootstrap"
+        ]
+      },
       "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
       "auth": {
         "scheme": "bearer",
@@ -901,6 +907,13 @@
       "path": "/v1/client/ai-agent/devices",
       "resource": "device",
       "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "runtimes"
+        ]
+      },
       "summary": "권한이 확인된 principal의 device runtime 상태를 조회합니다",
       "auth": {
         "scheme": "bearer",
@@ -925,6 +938,13 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignable-agents",
       "resource": "agent",
       "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "assignableAgents"
+        ]
+      },
       "summary": "task participant dropdown에서 할당 가능한 agent 목록을 조회합니다",
       "auth": {
         "scheme": "bearer",
@@ -950,6 +970,13 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/comments",
       "resource": "agent",
       "action": "create",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "submitComment"
+        ]
+      },
       "summary": "task thread comment를 할당된 AI agent에게 전달합니다",
       "auth": {
         "scheme": "bearer",
@@ -979,6 +1006,13 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/stop",
       "resource": "agent",
       "action": "stop",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "stop"
+        ]
+      },
       "summary": "task thread의 stop action으로 AI agent 작업을 중단합니다",
       "auth": {
         "scheme": "bearer",
@@ -1007,6 +1041,13 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}/editability",
       "resource": "agent",
       "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "editability"
+        ]
+      },
       "summary": "client control 활성화 전에 agent 수정 가능 여부를 조회합니다",
       "auth": {
         "scheme": "bearer",
@@ -1031,6 +1072,13 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}",
       "resource": "agent",
       "action": "update",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "updateConfiguration"
+        ]
+      },
       "summary": "할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다",
       "auth": {
         "scheme": "bearer",
@@ -1060,6 +1108,13 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}",
       "resource": "agent",
       "action": "delete",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "delete"
+        ]
+      },
       "summary": "agent를 삭제하고 queued/running assignment를 강제로 정리합니다",
       "auth": {
         "scheme": "bearer",
@@ -1084,6 +1139,13 @@
       "path": "/v1/client/ai-agent/events",
       "resource": "agent",
       "action": "stream",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "events",
+          "stream"
+        ]
+      },
       "summary": "editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다",
       "auth": {
         "scheme": "bearer",

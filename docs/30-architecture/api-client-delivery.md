@@ -107,6 +107,8 @@ Generator requirements:
   JSDoc so frontend developers do not have to infer API behavior from type names
 - generate a config-bound API facade so frontend developers can consume the
   surface as one module instead of stitching together isolated functions
+- derive the facade module and namespace from DSL/IR client metadata projected
+  into OpenAPI `x-riido-client`, not from generator-local operation-id switches
 
 `tools/reactquerygen` remains a small deterministic public fixture generator for
 the checked-in mock surface. It is useful for drift tests, but it is not the
@@ -127,11 +129,13 @@ The generated client must keep primitive exports and a facade together:
 
 - primitive request functions, query keys, query options, mutation options, and
   hooks remain individually exported for tests, tree-shaking, and direct use
-- `createRiidoControlPlaneClient(config)` groups the same primitives by API
-  namespace, for example `agents.editability`, `tasks.stop`, and
-  `devices.runtimes`
+- `createRiidoControlPlaneClient(config)` groups the same primitives by DSL
+  client metadata, for example `aiAgent.agents.editability`,
+  `aiAgent.tasks.stop`, and `aiAgent.devices.runtimes`
 - the facade is config-bound, so consumers do not repeatedly pass `baseUrl`,
   `token`, and optional `fetcher`
+- each operation exposes concise library-style aliases: `query(...)` mirrors
+  `queryOptions(...)`, and `mutation(...)` mirrors `mutationOptions(...)`
 - the facade does not create or replace TanStack `QueryClient`
 - the facade does not own token refresh, global error toasts, retry policy, cache
   invalidation, or app-specific optimistic updates
@@ -139,11 +143,11 @@ The generated client must keep primitive exports and a facade together:
 The intended frontend usage is:
 
 ```ts
-const aiAgent = createRiidoControlPlaneClient(config);
+const riido = createRiidoControlPlaneClient(config);
 
-useQuery(aiAgent.bootstrap.queryOptions());
-useMutation(aiAgent.tasks.stop.mutationOptions());
-queryClient.prefetchQuery(aiAgent.devices.runtimes.queryOptions());
+useQuery(riido.aiAgent.bootstrap.query());
+useMutation(riido.aiAgent.tasks.stop.mutation());
+queryClient.prefetchQuery(riido.aiAgent.devices.runtimes.query());
 ```
 
 This keeps the generated output feeling like a lightweight module while leaving
@@ -192,4 +196,6 @@ state, customer data, or production bearer tokens.
 - Generated clients include `queryOptions`, `mutationOptions`, and the
   config-bound `createRiidoControlPlaneClient` facade without taking ownership of
   app-level query policies.
+- Generated facade paths are sourced from DSL/IR/OpenAPI `client` metadata and
+  fail generation if that metadata is missing or inconsistent.
 - This slice does not edit `teamswyg/riido-client`.

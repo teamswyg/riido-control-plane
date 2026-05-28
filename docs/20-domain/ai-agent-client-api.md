@@ -25,6 +25,12 @@ modifies business meaning, policy scope, or canonical vocabulary, the decision
 must be escalated to `riido-contracts` before this repository updates the
 sub-DSL.
 
+Each operation also carries client facade metadata in the sub-DSL. The metadata
+is projected to IR and OpenAPI as `x-riido-client`, then consumed by the
+generated React Query client. The generator must fail when the metadata is
+missing; facade namespaces are not owned by generator-local hard-coded
+operation-id switches.
+
 Cross-repository React Query delivery to `riido-client` is owned by
 [`api-client-delivery.md`](../30-architecture/api-client-delivery.md).
 

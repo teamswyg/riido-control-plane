@@ -26,6 +26,12 @@ type operation struct {
 	Parameters  []parameter         `json:"parameters"`
 	RequestBody *requestBody        `json:"requestBody"`
 	Responses   map[string]response `json:"responses"`
+	Client      clientMetadata      `json:"x-riido-client"`
+}
+
+type clientMetadata struct {
+	Module     string   `json:"module"`
+	FacadePath []string `json:"facade_path"`
 }
 
 type parameter struct {
@@ -149,7 +155,9 @@ func generate(spec openAPISpec) ([]byte, error) {
 			return nil, err
 		}
 	}
-	writeFacade(&b, ops)
+	if err := writeFacade(&b, ops); err != nil {
+		return nil, err
+	}
 	out := bytes.TrimRight([]byte(b.String()), "\n")
 	return append(out, '\n'), nil
 }
@@ -325,20 +333,25 @@ type facadeNode struct {
 	Op       *routeOperation
 }
 
-func writeFacade(b *strings.Builder, ops []routeOperation) {
+func writeFacade(b *strings.Builder, ops []routeOperation) error {
 	root := &facadeNode{Children: map[string]*facadeNode{}}
 	for _, op := range ops {
-		insertFacadeOperation(root, facadePath(op), op)
+		path, err := facadePath(op)
+		if err != nil {
+			return err
+		}
+		insertFacadeOperation(root, path, op)
 	}
 	writeJSDoc(b,
-		"control-plane AI Agent API를 namespace별로 묶은 config-bound facade입니다.",
-		"TanStack QueryClient를 대체하지 않고 request, queryKey, queryOptions, mutationOptions를 한곳에서 찾기 쉽게 제공합니다.",
+		"control-plane API를 DSL client metadata의 module/namespace별로 묶은 config-bound facade입니다.",
+		"TanStack QueryClient를 대체하지 않고 request, query/queryOptions, mutation/mutationOptions를 한곳에서 찾기 쉽게 제공합니다.",
 	)
 	b.WriteString("export function createRiidoControlPlaneClient(config: RiidoClientConfig) {\n")
 	b.WriteString("  return {\n")
 	writeFacadeChildren(b, root, "    ")
 	b.WriteString("  } as const;\n")
 	b.WriteString("}\n\n")
+	return nil
 }
 
 func insertFacadeOperation(root *facadeNode, path []string, op routeOperation) {
@@ -386,38 +399,34 @@ func writeFacadeOperation(b *strings.Builder, op routeOperation, indent string) 
 	if strings.EqualFold(op.Method, "GET") {
 		fmt.Fprintf(b, "%srequest: (%s) => %s(%s),\n", indent, facadeQueryRequestSignature(pathParams, paramTypeName), name, facadeQueryRequestCallArgs(pathParams))
 		fmt.Fprintf(b, "%squeryKey: %s,\n", indent, name+"QueryKey")
+		fmt.Fprintf(b, "%squery: (%s) => %s(%s),\n", indent, facadeQueryOptionsSignature(pathParams, paramTypeName, responseType), name+"QueryOptions", facadeQueryOptionsCallArgs(pathParams))
 		fmt.Fprintf(b, "%squeryOptions: (%s) => %s(%s),\n", indent, facadeQueryOptionsSignature(pathParams, paramTypeName, responseType), name+"QueryOptions", facadeQueryOptionsCallArgs(pathParams))
 		return
 	}
 	mutationVariable := mutationVariableTypeName(name, pathParams, requestType)
 	fmt.Fprintf(b, "%srequest: (%s) => %s(%s),\n", indent, facadeMutationRequestSignature(pathParams, paramTypeName, requestType), name, facadeMutationRequestCallArgs(pathParams, requestType))
 	fmt.Fprintf(b, "%smutationKey: %s,\n", indent, name+"QueryKey")
+	fmt.Fprintf(b, "%smutation: (options: UseMutationOptions<%s, Error, %s> = {}) => %s(config, options),\n", indent, responseType, mutationVariable, name+"MutationOptions")
 	fmt.Fprintf(b, "%smutationOptions: (options: UseMutationOptions<%s, Error, %s> = {}) => %s(config, options),\n", indent, responseType, mutationVariable, name+"MutationOptions")
 }
 
-func facadePath(op routeOperation) []string {
-	switch op.Op.OperationID {
-	case "deleteAIAgent":
-		return []string{"agents", "delete"}
-	case "getAIAgentClientBootstrap":
-		return []string{"bootstrap"}
-	case "getAIAgentEditability":
-		return []string{"agents", "editability"}
-	case "listAIAgentDeviceRuntimes":
-		return []string{"devices", "runtimes"}
-	case "listAIAgentTaskAssignableAgents":
-		return []string{"tasks", "assignableAgents"}
-	case "stopAIAgentTask":
-		return []string{"tasks", "stop"}
-	case "streamAIAgentClientEvents":
-		return []string{"events", "stream"}
-	case "submitAIAgentTaskComment":
-		return []string{"tasks", "submitComment"}
-	case "updateAIAgentConfiguration":
-		return []string{"agents", "updateConfiguration"}
-	default:
-		return []string{"operations", op.Op.OperationID}
+func facadePath(op routeOperation) ([]string, error) {
+	module := strings.TrimSpace(op.Op.Client.Module)
+	if module == "" {
+		return nil, fmt.Errorf("%s %s missing x-riido-client.module", strings.ToUpper(op.Method), op.Path)
 	}
+	if len(op.Op.Client.FacadePath) == 0 {
+		return nil, fmt.Errorf("%s %s missing x-riido-client.facade_path", strings.ToUpper(op.Method), op.Path)
+	}
+	path := []string{module}
+	for _, part := range op.Op.Client.FacadePath {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			return nil, fmt.Errorf("%s %s has empty x-riido-client.facade_path segment", strings.ToUpper(op.Method), op.Path)
+		}
+		path = append(path, part)
+	}
+	return path, nil
 }
 
 func quoteFacadeProperty(name string) string {

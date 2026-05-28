@@ -60,6 +60,13 @@
         ],
         "x-riido-rbac-policy": "agent_mutation_safety.v1",
         "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "delete"
+          ]
+        },
         "x-riido-scenarios": [
           "deleteAIAgent.delete-unassigns-and-stops"
         ]
@@ -123,6 +130,13 @@
         ],
         "x-riido-rbac-policy": "agent_mutation_safety.v1",
         "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "updateConfiguration"
+          ]
+        },
         "x-riido-scenarios": [
           "updateAIAgentConfiguration.agent-name-is-not-unique",
           "updateAIAgentConfiguration.edit-fails-while-assigned"
@@ -179,6 +193,13 @@
         ],
         "x-riido-rbac-policy": "agent_mutation_safety.v1",
         "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "editability"
+          ]
+        },
         "x-riido-scenarios": [
           "getAIAgentEditability.assigned-agent-blocks-editing"
         ]
@@ -223,6 +244,12 @@
         ],
         "x-riido-rbac-policy": "ai_agent_rbac.v1",
         "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "bootstrap"
+          ]
+        },
         "x-riido-scenarios": [
           "getAIAgentClientBootstrap.figma-client-bootstrap"
         ]
@@ -267,6 +294,13 @@
         ],
         "x-riido-rbac-policy": "runtime_liveness.v1",
         "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "devices",
+            "runtimes"
+          ]
+        },
         "x-riido-scenarios": [
           "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
           "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent"
@@ -312,6 +346,13 @@
         ],
         "x-riido-rbac-policy": "api_codegen_safety.v1",
         "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "events",
+            "stream"
+          ]
+        },
         "x-riido-scenarios": [
           "streamAIAgentClientEvents.editability-updates-before-mutation",
           "streamAIAgentClientEvents.runtime-parse-status",
@@ -369,6 +410,13 @@
         ],
         "x-riido-rbac-policy": "ai_agent_rbac.v1",
         "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "tasks",
+            "assignableAgents"
+          ]
+        },
         "x-riido-scenarios": [
           "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
           "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering"
@@ -435,6 +483,13 @@
         ],
         "x-riido-rbac-policy": "api_codegen_safety.v1",
         "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "tasks",
+            "submitComment"
+          ]
+        },
         "x-riido-scenarios": [
           "submitAIAgentTaskComment.comment-routes-to-running-agent",
           "submitAIAgentTaskComment.comment-queues-behind-busy-agent"
@@ -501,6 +556,13 @@
         ],
         "x-riido-rbac-policy": "api_codegen_safety.v1",
         "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "tasks",
+            "stop"
+          ]
+        },
         "x-riido-scenarios": [
           "stopAIAgentTask.task-stop-emits-comment-status"
         ]
