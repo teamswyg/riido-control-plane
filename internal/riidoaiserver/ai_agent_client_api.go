@@ -4,6 +4,13 @@ import "time"
 
 const AIAgentClientContractID = "control-plane-ai-agent-client-api.v1"
 
+const (
+	AgentClientEventDeviceRuntimeSnapshot = "device_runtime_snapshot"
+	AgentClientEventEditabilityChanged    = "agent_editability_changed"
+	AgentClientEventWorkStatusChanged     = "agent_work_status_changed"
+	AgentClientEventThreadProgress        = "agent_thread_progress"
+)
+
 type AgentVisibility string
 
 const (

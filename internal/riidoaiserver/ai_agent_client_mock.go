@@ -138,18 +138,18 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		events: []ClientStreamEvent{
 			{
 				Seq:       1,
-				EventType: "device_runtime_snapshot",
+				EventType: AgentClientEventDeviceRuntimeSnapshot,
 				Payload: DeviceRuntimeSnapshotEvent{
-					EventType:     "device_runtime_snapshot",
+					EventType:     AgentClientEventDeviceRuntimeSnapshot,
 					SchemaVersion: SchemaVersion,
 					Device:        device,
 				},
 			},
 			{
 				Seq:       2,
-				EventType: "agent_work_status_changed",
+				EventType: AgentClientEventWorkStatusChanged,
 				Payload: AgentWorkStatusChangedEvent{
-					EventType:       "agent_work_status_changed",
+					EventType:       AgentClientEventWorkStatusChanged,
 					SchemaVersion:   SchemaVersion,
 					AgentID:         "agent-owned-codex",
 					TaskID:          "task-mock-1",
@@ -344,8 +344,8 @@ func (s *MockAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal Au
 		running = agent.AssignedTaskCount
 	}
 	delete(s.agents, agent.AgentID)
-	s.appendClientEventLocked("agent_work_status_changed", AgentWorkStatusChangedEvent{
-		EventType:       "agent_work_status_changed",
+	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
+		EventType:       AgentClientEventWorkStatusChanged,
 		SchemaVersion:   SchemaVersion,
 		AgentID:         agent.AgentID,
 		TaskID:          "task-mock-1",
@@ -429,7 +429,7 @@ func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context
 	}
 	s.agents[agentID] = agent
 	event := AgentThreadProgressEvent{
-		EventType:       "agent_thread_progress",
+		EventType:       AgentClientEventThreadProgress,
 		SchemaVersion:   SchemaVersion,
 		AgentID:         agentID,
 		TaskID:          req.TaskID,
@@ -522,8 +522,8 @@ func (s *MockAIAgentClientStore) agentForTaskStop(principal AuthorizationResult,
 }
 
 func (s *MockAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {
-	s.appendClientEventLocked("agent_work_status_changed", AgentWorkStatusChangedEvent{
-		EventType:       "agent_work_status_changed",
+	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
+		EventType:       AgentClientEventWorkStatusChanged,
 		SchemaVersion:   SchemaVersion,
 		AgentID:         response.AgentID,
 		TaskID:          response.TaskID,

@@ -711,7 +711,7 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 		SchemaVersion: SchemaVersion,
 		AcceptedLines: len(lines),
 		Event: AgentThreadProgressEvent{
-			EventType:       "agent_thread_progress",
+			EventType:       AgentClientEventThreadProgress,
 			SchemaVersion:   SchemaVersion,
 			AgentID:         agentID,
 			TaskID:          req.TaskID,

@@ -259,7 +259,7 @@ func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testin
 	if err := json.Unmarshal(ingestResp.Body.Bytes(), &response); err != nil {
 		t.Fatalf("ingest json: %v", err)
 	}
-	if response.AcceptedLines != 2 || response.Event.EventType != "agent_thread_progress" || len(response.Event.Lines) != 2 {
+	if response.AcceptedLines != 2 || response.Event.EventType != AgentClientEventThreadProgress || len(response.Event.Lines) != 2 {
 		t.Fatalf("ingest response = %+v", response)
 	}
 
@@ -297,7 +297,7 @@ func TestMockAIAgentClientStoreThreadProgressFanout(t *testing.T) {
 	select {
 	case event := <-events:
 		progress, ok := event.Payload.(AgentThreadProgressEvent)
-		if !ok || progress.EventType != "agent_thread_progress" || progress.Lines[0].Message != "웹 검색 실행 중" {
+		if !ok || progress.EventType != AgentClientEventThreadProgress || progress.Lines[0].Message != "웹 검색 실행 중" {
 			t.Fatalf("fanout event = %+v", event)
 		}
 	case <-time.After(time.Second):
