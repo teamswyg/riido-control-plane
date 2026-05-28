@@ -1,0 +1,69 @@
+name: web-frontend-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/web-frontend-api.yml"
+      - "docs/20-domain/context-map.md"
+      - "docs/20-domain/request-authorization.md"
+      - "docs/30-architecture/config-reference.md"
+      - "docs/30-architecture/integration-matrix.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "cmd/riido_ai_server/main.go"
+      - "cmd/riido_ai_server/main_test.go"
+      - "internal/riidoaiserver/doc.go"
+      - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/web_frontend_cors.go"
+      - "internal/riidoaiserver/web_frontend_cors_test.go"
+  pull_request:
+    paths:
+      - ".github/workflows/web-frontend-api.yml"
+      - "docs/20-domain/context-map.md"
+      - "docs/20-domain/request-authorization.md"
+      - "docs/30-architecture/config-reference.md"
+      - "docs/30-architecture/integration-matrix.md"
+      - "docs/migration/control-plane.md"
+      - "go.mod"
+      - "go.sum"
+      - "cmd/riido_ai_server/main.go"
+      - "cmd/riido_ai_server/main_test.go"
+      - "internal/riidoaiserver/doc.go"
+      - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/web_frontend_cors.go"
+      - "internal/riidoaiserver/web_frontend_cors_test.go"
+
+jobs:
+  web-frontend-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify web frontend API import boundary
+        run: |
+          disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./cmd/riido_ai_server ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed web frontend API imports:\n%s\n' "$disallowed"
+            exit 1
+          fi
+      - name: Verify web origin env is documented
+        run: |
+          grep -R "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS" docs/30-architecture/config-reference.md >/dev/null
+          grep -R "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS" docs/20-domain/request-authorization.md >/dev/null
+      - name: Test web frontend CORS adapter
+        run: go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
+      - name: Test command environment web origins
+        run: go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1

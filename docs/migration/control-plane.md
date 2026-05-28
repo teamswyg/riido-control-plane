@@ -681,6 +681,27 @@ This slice does not move Terraform, AWS account wiring, live plan/apply
 evidence, production secrets, daemon runtime code, or external AWS SDK
 dependencies.
 
+### RIID-4717 — web frontend API endpoint config
+
+This slice configures the public control-plane HTTP API for browser-based
+frontends without changing endpoint payload contracts.
+
+This slice does:
+
+- add `ServerConfig.WebAllowedOrigins` as the CORS transport allowlist
+- handle `OPTIONS` preflight for the existing public HTTP endpoints
+- allow only the methods and request headers needed by current API calls
+- parse `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS` as exact comma-separated browser
+  origins in `cmd/riido_ai_server`
+- document that CORS is transport configuration, not authorization
+- add black-box HTTP tests and a focused public CI workflow for the web
+  frontend API boundary
+
+This slice does not add new product UI routes, change bearer-token
+authorization, change agent-catalog RBAC, enable browser credentials, use
+wildcard origins, add raw tokens, move production IdP rollout, or add external
+dependencies.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -695,6 +716,8 @@ go test ./internal/riidoaiserver -run 'DynamoDB|EventBridge' -count=1
 go test ./awsadapters -count=1
 go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration' -count=1
 go test ./tools/containercontract -count=1
+go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
+go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
 ```

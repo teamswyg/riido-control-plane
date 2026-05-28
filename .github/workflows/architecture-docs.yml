@@ -56,7 +56,8 @@ jobs:
             RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE \
             RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS \
             RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256 \
-            RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS
+            RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS \
+            RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS
           do
             grep -R "$env" docs/30-architecture/config-reference.md >/dev/null
           done

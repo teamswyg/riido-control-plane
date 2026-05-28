@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strconv"
@@ -27,6 +28,7 @@ const (
 	envExternalAuthzTimeout   = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS"
 	envReviewAccountTokenHash = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
 	envMetricsLogInterval     = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
+	envWebAllowedOrigins      = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
 )
 
 type runtimeConfig struct {
@@ -36,6 +38,7 @@ type runtimeConfig struct {
 	Authorizer         riidoaiserver.RequestAuthorizer
 	ReviewProvision    *riidoaiserver.ReviewAccountProvisioning
 	MetricsLogInterval time.Duration
+	WebAllowedOrigins  []string
 }
 
 func main() {
@@ -59,7 +62,7 @@ func run() error {
 	}
 	server := &http.Server{
 		Addr:              config.Addr,
-		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, Authorizer: config.Authorizer}).Handler(),
+		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins}).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	metricsCancel, metricsErrCh := startMetricsPublisher(store, config.MetricsLogInterval, os.Stdout)
@@ -88,6 +91,10 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	webAllowedOrigins, err := webAllowedOriginsFromEnv()
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	return runtimeConfig{
 		Addr:               getenvDefault(envAddr, ":8080"),
 		ShutdownTimeout:    shutdownTimeout,
@@ -95,6 +102,7 @@ func configFromEnv() (runtimeConfig, error) {
 		Authorizer:         authorizer,
 		ReviewProvision:    reviewProvision,
 		MetricsLogInterval: metricsLogInterval,
+		WebAllowedOrigins:  webAllowedOrigins,
 	}, nil
 }
 
@@ -170,6 +178,55 @@ func envOptionalDurationSeconds(key string) (time.Duration, error) {
 		return 0, fmt.Errorf("%s must be a positive integer", key)
 	}
 	return time.Duration(seconds) * time.Second, nil
+}
+
+func webAllowedOriginsFromEnv() ([]string, error) {
+	return parseWebAllowedOrigins(os.Getenv(envWebAllowedOrigins))
+}
+
+func parseWebAllowedOrigins(raw string) ([]string, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, nil
+	}
+	seen := map[string]struct{}{}
+	var origins []string
+	for _, part := range strings.Split(raw, ",") {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		origin, err := normalizeWebOrigin(part)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", envWebAllowedOrigins, err)
+		}
+		if _, ok := seen[origin]; ok {
+			continue
+		}
+		seen[origin] = struct{}{}
+		origins = append(origins, origin)
+	}
+	return origins, nil
+}
+
+func normalizeWebOrigin(raw string) (string, error) {
+	if raw == "*" {
+		return "", errors.New("wildcard origin is not supported")
+	}
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return "", fmt.Errorf("parse origin %q: %w", raw, err)
+	}
+	if parsed.Scheme != "https" && parsed.Scheme != "http" {
+		return "", fmt.Errorf("origin %q must use http or https", raw)
+	}
+	if parsed.Host == "" {
+		return "", fmt.Errorf("origin %q must include a host", raw)
+	}
+	if parsed.User != nil || parsed.RawQuery != "" || parsed.Fragment != "" || (parsed.Path != "" && parsed.Path != "/") {
+		return "", fmt.Errorf("origin %q must not include path, query, fragment, or userinfo", raw)
+	}
+	return parsed.Scheme + "://" + parsed.Host, nil
 }
 
 func startMetricsPublisher(metrics riidoaiserver.MetricsReader, interval time.Duration, writer io.Writer) (context.CancelFunc, <-chan error) {
