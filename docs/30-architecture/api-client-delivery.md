@@ -68,6 +68,15 @@ panel, reply input layout, send-button visual state, or agent row presentation
 into API fields. Those remain client/task UI facts around the generated request
 and response shapes.
 
+Figma busy-agent queued screen (`node-id=153-8761`) is generated-client
+composition context for the same task-thread calls. The delivery artifact may
+document that `tasks.submitComment` can return
+`comment_kind=queued_by_busy_agent`, that `tasks.threads` returns the queued row
+on cold read, that `events.stream` can carry the typed queued status, and that
+`tasks.stop` is the visible stop/cancel affordance. It must not hard-code the
+Korean display copy, timestamp wording, avatar, or comment-row layout as a
+generated API fact.
+
 Figma participant dropdown annotations (`node-id=153-12742`) are generated-client
 consumption context for `listAIAgentTaskAssignableAgents`. The delivery artifact
 may document that this query feeds the AI Agent rows in the participant dropdown,

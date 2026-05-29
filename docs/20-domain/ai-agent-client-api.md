@@ -138,6 +138,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   saved and lets clients render update dates or absolute-time tooltips
 - delete returns forced assignment effects for queued/running mock tasks
 - task-thread comments can enqueue work when the selected agent is busy
+- busy-agent enqueue responses use `comment_kind=queued_by_busy_agent`,
+  `assignment_state=queued`, and `work_status=queued`; user-facing Korean copy
+  is client presentation over those typed fields
 - task-thread stop actions return `stopped_by_user_request`
 - task-thread status updates use typed `AgentTaskCommentKind` values
 - task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
@@ -168,7 +171,9 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
 - `node-id=236-21379`: normal task thread with the generic task comment input,
   an AI Agent reply row, an AI Agent reply input, and a `중지` action in the same
   task view
-- `node-id=153-8761`: queued task comment when the agent is already busy
+- `node-id=153-8761`: queued task comment when the agent is already busy; the
+  annotation on `node-id=153-8835` says "다른 작업 진행 중인 에이전트한테
+  참여자 할당했을 때 나오는 댓글 문구"
 - `node-id=227-19354`: task stop flow with stopped agent comment
 - `node-id=156-19307`: AI Agent menu placement in the workspace sidebar,
   including `Menubar/default` and `Menubar/setting` dark/light variants
@@ -217,6 +222,17 @@ button state stay client/task surface behavior. The server only distinguishes an
 AI-Agent-directed message once the client calls
 `POST /v1/client/ai-agent/tasks/{task_id}/comments` with `agent_id` and optional
 `source_comment_id`.
+
+`node-id=153-8761` confirms the busy-agent queued branch of the same task-thread
+composition. `tasks.submitComment` remains the creation command. When the
+selected agent is already working, the server returns a queued task-thread row
+with `comment_kind=queued_by_busy_agent`, `assignment_state=queued`, and
+`work_status=queued`; `tasks.threads` later returns that row as part of the cold
+collection, and `events.stream` may replay or stream the typed status change.
+The visible Korean copy, "방금 전" timestamp, avatar, row layout, and other
+comment presentation remain client-owned. The visible `중지` affordance still
+maps to `tasks.stop`; the server must not expose a second queued-cancel endpoint
+for this screen.
 
 `node-id=153-12742` maps to the existing
 `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents` endpoint and the
