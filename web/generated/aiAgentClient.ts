@@ -61,6 +61,15 @@ export interface AgentEditabilityResponse {
   schema_version: string;
 }
 
+export interface AgentOnboardingTemplate {
+  description: string;
+  instruction: string;
+  name: string;
+  profile_thumbnail_url?: string;
+  role_label?: string;
+  template_id: string;
+}
+
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
 
 export interface AgentThreadProgressEvent {
@@ -99,6 +108,7 @@ export interface AgentWorkStatusChangedEvent {
 }
 
 export interface ClientBootstrapResponse {
+  agent_templates: AgentOnboardingTemplate[];
   agents: AgentClientRecord[];
   client_kind: ClientKind;
   devices: DeviceRecord[];

@@ -37,6 +37,15 @@ func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
 	if containsString(aiAgentIDs(bootstrap.Agents), "agent-private-cursor") {
 		t.Fatalf("bootstrap leaked other private agent: %+v", bootstrap.Agents)
 	}
+	if len(bootstrap.AgentTemplates) != 4 || bootstrap.AgentTemplates[0].TemplateID != "riido_pm" {
+		t.Fatalf("bootstrap templates = %+v", bootstrap.AgentTemplates)
+	}
+	if bootstrap.AgentTemplates[0].Name != "리도" ||
+		bootstrap.AgentTemplates[0].Description == "" ||
+		bootstrap.AgentTemplates[0].Instruction == "" ||
+		bootstrap.AgentTemplates[0].RoleLabel != "PM Agent" {
+		t.Fatalf("bootstrap first template = %+v", bootstrap.AgentTemplates[0])
+	}
 
 	assignableReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-1/assignable-agents", nil)
 	assignableReq.Header.Set("Authorization", "Bearer user-token")

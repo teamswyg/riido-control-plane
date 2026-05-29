@@ -78,6 +78,14 @@ edit entry, save-button enablement, long-description presentation, dropdown
 rendering, or provider-specific model labels into generated API facts before
 the contracts model-catalog question is resolved.
 
+Figma onboarding annotations (`node-id=42-3014`) are generated-client
+consumption context for bootstrap, devices, and create APIs. The delivery
+artifact may document that `agent_templates` feeds the starter-agent selection
+screen, but workspace selection, row selection, direct-setting expansion,
+scroll, two-line ellipsis, and no-installed-AI step skipping remain client
+composition over generated data. It must not make frontend hard-coded template
+copy a second SSOT.
+
 ## DSL Lifecycle
 
 The sub-DSL must preserve lifecycle metadata before OpenAPI generation:

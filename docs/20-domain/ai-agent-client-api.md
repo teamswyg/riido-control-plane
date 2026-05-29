@@ -39,6 +39,9 @@ For agent settings:
 - `riido-contracts` owns the meaning of `profile_thumbnail_url` and
   `description` and `instruction`, including URL-only thumbnail policy, the 160
   character description limit, and the 1000 character instruction limit.
+- `riido-contracts` owns onboarding template catalog semantics. This repository
+  projects the catalog in `ClientBootstrapResponse.agent_templates` and seeds
+  deterministic mock templates for frontend development.
 - This repository owns POST/PATCH validation, create/save/update behavior,
   response projection, generated TypeScript shape, and smoke-test coverage.
 - `riido-daemon` owns runtime consumption of an assigned instruction value after
@@ -66,6 +69,12 @@ For agent settings:
   DTOs, and black-box tests. It does not own the agent hover popover, daemon
   stop modal, restart animation, or desktop-local daemon lifecycle command
   composition.
+- Figma onboarding annotations (`node-id=42-3014`) confirm the bootstrap
+  consumption context. This repository owns the protected bootstrap projection
+  of `agent_templates` and mock coverage. It does not own workspace selection,
+  row selection, direct-setting expansion, scrolling, two-line ellipsis,
+  preview-popover layout, or the client decision to skip template selection
+  when no selectable runtime exists.
 
 Bottom-up findings from this repository, such as validation cost, generator
 shape, or frontend usability, can start here. If the finding changes domain
@@ -100,6 +109,11 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task participant dropdown responses are ordered owned-first, then by name
 - task participant dropdown UI presentation, member sorting, and overflow
   behavior are client-owned and do not rewrite the returned agent order
+- bootstrap returns an ordered `agent_templates` catalog used by the Figma
+  onboarding agent-template selection screen
+- if no runtime is selectable, clients use existing device/runtime data to skip
+  the template-selection step; SaaS does not add a separate onboarding skip
+  command
 - non-owner, non-admin users cannot mutate other users' public agents
 - client-facing agent creation stamps `owner_principal_id` from authorization,
   requires `name`, `visibility`, and a viewer-owned `runtime_id`, and starts as
@@ -148,6 +162,11 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   description, runtime, model, visibility, and instruction fields
 - `node-id=134-6542`: agent add page with profile image, name, description,
   runtime, model, visibility, instruction, and save controls
+- `node-id=42-3014`: onboarding planning page; annotations include runtime
+  selection (`node-id=137-6746`), template/direct-setting selection
+  (`node-id=138-7389`, `node-id=164-26969`), two-line template description
+  ellipsis (`node-id=164-27719`), and no-installed-AI skip behavior
+  (`node-id=164-30206`)
 
 `node-id=156-19307` does not add a new endpoint. It confirms that the frontend
 needs visible entry points into AI Agent/runtime/agent-management surfaces; the
@@ -184,6 +203,15 @@ selected runtime, and does not accept a `model_id` yet. The client can use
 Figma. Row click, meatball edit entry, save-button enablement,
 long-description truncation, dropdown layout, and timestamp formatting remain
 client-owned.
+
+`node-id=42-3014` maps to existing bootstrap/devices/create behavior plus one
+explicit bootstrap field: `ClientBootstrapResponse.agent_templates`. The
+templates give clients stable starter-agent names, descriptions, role labels,
+thumbnail URLs, and instructions without hard-coding product copy in the
+frontend. Selecting a template still creates a normal agent through
+`POST /v1/client/ai-agent/agents`; direct setting uses the same create endpoint.
+No-installed-AI branching is derived from `devices.runtimes` and does not add a
+new SaaS command.
 
 The `model` field from `node-id=164-50215` is not implemented in this client API
 yet. Its ownership is tracked by `riido-contracts`

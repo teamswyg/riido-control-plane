@@ -39,6 +39,7 @@ type MockAIAgentClientStore struct {
 	workspaceID      string
 	devices          []DeviceRecord
 	agents           map[string]AgentClientRecord
+	templates        []AgentOnboardingTemplate
 	events           []ClientStreamEvent
 	subscribers      map[int]aiAgentClientSubscriber
 	nextSubscriberID int
@@ -155,6 +156,40 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		workspaceID: "workspace-mock-riid",
 		devices:     []DeviceRecord{device},
 		agents:      agents,
+		templates: []AgentOnboardingTemplate{
+			{
+				TemplateID:          "riido_pm",
+				Name:                "리도",
+				RoleLabel:           "PM Agent",
+				ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agent-templates/riido-pm.png",
+				Description:         "문제 정의부터 우선순위, 출시 계획까지 정리합니다.",
+				Instruction:         "기능 요청을 문제, 목표, 성공 기준으로 재정의하고 PRD, 우선순위, 로드맵, 출시 계획을 구조화합니다. 아이디어는 가설로 다루며 불확실한 내용은 [확인 필요]로 표시합니다.",
+			},
+			{
+				TemplateID:          "yeongsil_backend",
+				Name:                "영실",
+				RoleLabel:           "Backend Agent",
+				ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agent-templates/yeongsil-backend.png",
+				Description:         "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다.",
+				Instruction:         "요구사항을 API, 데이터 흐름, 저장 경계, 실패 처리 기준으로 나누고 안정적인 서버 구현 계획을 제안합니다.",
+			},
+			{
+				TemplateID:          "hongdo_frontend",
+				Name:                "홍도",
+				RoleLabel:           "Frontend Agent",
+				ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agent-templates/hongdo-frontend.png",
+				Description:         "사용자가 보는 화면을 구현하고, 성능과 접근성을 개선합니다.",
+				Instruction:         "화면 구조, 상태, 접근성, 성능을 함께 검토하고 사용자에게 자연스러운 프론트엔드 구현을 제안합니다.",
+			},
+			{
+				TemplateID:          "jiwon_research",
+				Name:                "지원",
+				RoleLabel:           "Research Agent",
+				ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agent-templates/jiwon-research.png",
+				Description:         "시장과 경쟁사를 조사하고, 의사결정에 필요한 인사이트를 정리합니다.",
+				Instruction:         "시장, 경쟁사, 사용자 맥락을 조사하고 의사결정에 필요한 근거와 확인이 필요한 가정을 분리해 정리합니다.",
+			},
+		},
 		subscribers: map[int]aiAgentClientSubscriber{},
 		events: []ClientStreamEvent{
 			{
@@ -191,11 +226,12 @@ func (s *MockAIAgentClientStore) BootstrapAIAgentClient(ctx context.Context, pri
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return ClientBootstrapResponse{
-		SchemaVersion: SchemaVersion,
-		ClientKind:    normalizeClientKind(clientKind),
-		WorkspaceID:   s.workspaceID,
-		Agents:        s.visibleAgents(principal),
-		Devices:       copyDevices(s.devices),
+		SchemaVersion:  SchemaVersion,
+		ClientKind:     normalizeClientKind(clientKind),
+		WorkspaceID:    s.workspaceID,
+		Agents:         s.visibleAgents(principal),
+		Devices:        copyDevices(s.devices),
+		AgentTemplates: copyAgentTemplates(s.templates),
 	}, nil
 }
 
@@ -784,6 +820,10 @@ func copyDevices(devices []DeviceRecord) []DeviceRecord {
 func copyDevice(device DeviceRecord) DeviceRecord {
 	device.Runtimes = append([]RuntimeRecord(nil), device.Runtimes...)
 	return device
+}
+
+func copyAgentTemplates(templates []AgentOnboardingTemplate) []AgentOnboardingTemplate {
+	return append([]AgentOnboardingTemplate(nil), templates...)
 }
 
 func runtimeKindByID(devices []DeviceRecord, runtimeID string) (RuntimeKind, bool) {

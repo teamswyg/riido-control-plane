@@ -283,7 +283,8 @@
         "x-riido-rbac-policy": "ai_agent_rbac.v1",
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
-          "getAIAgentClientBootstrap.figma-client-bootstrap"
+          "getAIAgentClientBootstrap.figma-client-bootstrap",
+          "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
         ]
       }
     },
@@ -779,6 +780,38 @@
         ],
         "type": "object"
       },
+      "AgentOnboardingTemplate": {
+        "properties": {
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
+          "instruction": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "role_label": {
+            "type": "string"
+          },
+          "template_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "template_id",
+          "name",
+          "description",
+          "instruction"
+        ],
+        "type": "object"
+      },
       "AgentTaskCommentKind": {
         "description": "Typed task-thread status update emitted for Figma task thread flows.",
         "enum": [
@@ -928,6 +961,12 @@
       },
       "ClientBootstrapResponse": {
         "properties": {
+          "agent_templates": {
+            "items": {
+              "$ref": "#/components/schemas/AgentOnboardingTemplate"
+            },
+            "type": "array"
+          },
           "agents": {
             "items": {
               "$ref": "#/components/schemas/AgentClientRecord"
@@ -955,7 +994,8 @@
           "client_kind",
           "workspace_id",
           "agents",
-          "devices"
+          "devices",
+          "agent_templates"
         ],
         "type": "object"
       },

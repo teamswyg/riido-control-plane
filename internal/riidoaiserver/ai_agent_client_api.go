@@ -140,12 +140,22 @@ type AgentClientRecordResponse struct {
 	Agent         AgentClientRecord `json:"agent"`
 }
 
+type AgentOnboardingTemplate struct {
+	TemplateID          string `json:"template_id"`
+	Name                string `json:"name"`
+	RoleLabel           string `json:"role_label,omitempty"`
+	ProfileThumbnailURL string `json:"profile_thumbnail_url,omitempty"`
+	Description         string `json:"description"`
+	Instruction         string `json:"instruction"`
+}
+
 type ClientBootstrapResponse struct {
-	SchemaVersion string              `json:"schema_version"`
-	ClientKind    ClientKind          `json:"client_kind"`
-	WorkspaceID   string              `json:"workspace_id"`
-	Agents        []AgentClientRecord `json:"agents"`
-	Devices       []DeviceRecord      `json:"devices"`
+	SchemaVersion  string                    `json:"schema_version"`
+	ClientKind     ClientKind                `json:"client_kind"`
+	WorkspaceID    string                    `json:"workspace_id"`
+	Agents         []AgentClientRecord       `json:"agents"`
+	Devices        []DeviceRecord            `json:"devices"`
+	AgentTemplates []AgentOnboardingTemplate `json:"agent_templates"`
 }
 
 type DeviceRuntimeListResponse struct {

@@ -117,6 +117,18 @@
         "create: client-facing agent creation stores the same profile fields, binds a viewer-owned runtime_id, stamps owner_principal_id from authorization, and returns updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
+    },
+    {
+      "policy_id": "agent_onboarding_templates.v1",
+      "kind": "onboarding",
+      "description": "The AI Agent onboarding template catalog is returned by the client bootstrap response so frontend clients do not hard-code agent names, descriptions, or instructions.",
+      "rules": [
+        "bootstrap: return a stable ordered template catalog for the Figma onboarding agent-selection screen",
+        "template: carry name, role_label, description, profile_thumbnail_url, and instruction as copyable agent configuration defaults",
+        "direct_setting: clients may still create an agent by submitting explicit configuration fields without choosing a template",
+        "no_runtime: when no selectable runtime is detected, clients skip the template-selection step and show the no-installed-AI start state",
+        "presentation: clients own scrolling, row selection, truncation, and preview popover layout"
+      ]
     }
   ],
   "enums": [
@@ -537,6 +549,48 @@
       }
     },
     {
+      "name": "AgentOnboardingTemplate",
+      "schema": {
+        "name": "AgentOnboardingTemplate",
+        "type": "object",
+        "required": [
+          "template_id",
+          "name",
+          "description",
+          "instruction"
+        ],
+        "properties": [
+          {
+            "name": "template_id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "role_label",
+            "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "max_length": 160
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "max_length": 1000
+          }
+        ]
+      }
+    },
+    {
       "name": "ClientBootstrapResponse",
       "schema": {
         "name": "ClientBootstrapResponse",
@@ -546,7 +600,8 @@
           "client_kind",
           "workspace_id",
           "agents",
-          "devices"
+          "devices",
+          "agent_templates"
         ],
         "properties": [
           {
@@ -573,6 +628,13 @@
             "type": "array",
             "items": {
               "ref": "DeviceRecord"
+            }
+          },
+          {
+            "name": "agent_templates",
+            "type": "array",
+            "items": {
+              "ref": "AgentOnboardingTemplate"
             }
           }
         ]
@@ -1096,7 +1158,8 @@
         "ref": "ClientBootstrapResponse"
       },
       "scenario_ids": [
-        "getAIAgentClientBootstrap.figma-client-bootstrap"
+        "getAIAgentClientBootstrap.figma-client-bootstrap",
+        "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
       ]
     },
     {
@@ -1349,7 +1412,15 @@
       "name": "figma client bootstrap",
       "given": "a web or desktop webview client opens the v1.22 AI Agent surface",
       "when": "the client requests bootstrap data",
-      "then": "the response contains visible agents and owned device runtimes required by the Figma onboarding, runtime setting, and agent setting screens"
+      "then": "the response contains visible agents, owned device runtimes, and onboarding agent templates required by the Figma onboarding, runtime setting, and agent setting screens"
+    },
+    {
+      "scenario_id": "getAIAgentClientBootstrap.figma-onboarding-no-runtime",
+      "operation_id": "getAIAgentClientBootstrap",
+      "name": "figma onboarding no runtime",
+      "given": "the Figma onboarding flow detects no selectable runtime on the viewer's device",
+      "when": "the client composes onboarding from bootstrap and device/runtime data",
+      "then": "the client can skip template selection and show the no-installed-AI start state without adding a new control-plane command"
     },
     {
       "scenario_id": "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
