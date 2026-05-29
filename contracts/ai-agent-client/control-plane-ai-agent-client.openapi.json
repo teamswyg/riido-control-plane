@@ -126,6 +126,7 @@
         "x-riido-scenarios": [
           "updateAIAgentConfiguration.agent-name-is-not-unique",
           "updateAIAgentConfiguration.profile-fields-are-saved",
+          "updateAIAgentConfiguration.description-max-length-is-enforced",
           "updateAIAgentConfiguration.instruction-max-length-is-enforced",
           "updateAIAgentConfiguration.edit-fails-while-assigned"
         ]
@@ -589,6 +590,10 @@
           },
           "assigned_task_count": {
             "type": "integer"
+          },
+          "description": {
+            "maxLength": 160,
+            "type": "string"
           },
           "editability": {
             "$ref": "#/components/schemas/AgentEditability"
@@ -1130,6 +1135,10 @@
       },
       "UpdateAgentConfigurationRequest": {
         "properties": {
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
           "instruction": {
             "maxLength": 1000,
             "type": "string"

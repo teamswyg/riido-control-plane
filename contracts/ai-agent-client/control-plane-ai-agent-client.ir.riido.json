@@ -110,6 +110,7 @@
       "description": "Agent profile presentation fields are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
       "rules": [
         "profile_thumbnail_url: optional HTTPS image URL string; binary upload is outside this contract",
+        "description: optional client-authored one-line summary with a maximum of 160 characters; empty string is allowed; client UI owns truncation and wrapping",
         "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
@@ -445,6 +446,11 @@
             "format": "uri"
           },
           {
+            "name": "description",
+            "type": "string",
+            "max_length": 160
+          },
+          {
             "name": "instruction",
             "type": "string",
             "max_length": 1000
@@ -636,6 +642,11 @@
             "name": "profile_thumbnail_url",
             "type": "string",
             "format": "uri"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "max_length": 160
           },
           {
             "name": "instruction",
@@ -1195,6 +1206,7 @@
       "scenario_ids": [
         "updateAIAgentConfiguration.agent-name-is-not-unique",
         "updateAIAgentConfiguration.profile-fields-are-saved",
+        "updateAIAgentConfiguration.description-max-length-is-enforced",
         "updateAIAgentConfiguration.instruction-max-length-is-enforced",
         "updateAIAgentConfiguration.edit-fails-while-assigned"
       ]
@@ -1337,8 +1349,16 @@
       "operation_id": "updateAIAgentConfiguration",
       "name": "profile fields are saved",
       "given": "an editable agent has no assigned task",
-      "when": "the owner updates profile_thumbnail_url and instruction",
+      "when": "the owner updates profile_thumbnail_url, description, and instruction",
       "then": "the response and future client bootstrap contain the saved profile fields"
+    },
+    {
+      "scenario_id": "updateAIAgentConfiguration.description-max-length-is-enforced",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "description max length is enforced",
+      "given": "an editable agent has no assigned task",
+      "when": "the owner sends a description longer than 160 characters",
+      "then": "the operation is rejected before saving the agent configuration"
     },
     {
       "scenario_id": "updateAIAgentConfiguration.instruction-max-length-is-enforced",

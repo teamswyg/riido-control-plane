@@ -37,8 +37,8 @@ generator output, and black-box harness coverage.
 For agent settings:
 
 - `riido-contracts` owns the meaning of `profile_thumbnail_url` and
-  `instruction`, including URL-only thumbnail policy and the 1000 character
-  instruction limit.
+  `description` and `instruction`, including URL-only thumbnail policy, the 160
+  character description limit, and the 1000 character instruction limit.
 - This repository owns PATCH validation, save/update behavior, response
   projection, generated TypeScript shape, and smoke-test coverage.
 - `riido-daemon` owns runtime consumption of an assigned instruction value after
@@ -84,6 +84,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
   agent record; binary image upload/storage is outside this mock API
+- `description` is saved as optional client-authored one-line agent summary
+  text and is rejected when it exceeds 160 characters; UI truncation/wrapping is
+  a client concern and does not rewrite the stored value
 - `instruction` is saved as optional client-authored agent guidance text and is
   rejected when it exceeds 1000 characters
 - delete returns forced assignment effects for queued/running mock tasks
@@ -104,11 +107,18 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
 - `node-id=227-19354`: task stop flow with stopped agent comment
 - `node-id=156-19307`: AI Agent menu placement in the workspace sidebar,
   including `Menubar/default` and `Menubar/setting` dark/light variants
+- `node-id=164-50215`: agent setting page with profile image, name,
+  description, runtime, model, visibility, and instruction fields
 
 `node-id=156-19307` does not add a new endpoint. It confirms that the frontend
 needs visible entry points into AI Agent/runtime/agent-management surfaces; the
 current server responsibility remains `bootstrap`, `devices`, agent mutation,
 task-thread actions, and `events`.
+
+The `model` field from `node-id=164-50215` is not implemented in this client API
+yet. Its ownership is tracked by `riido-contracts`
+`docs/50-roadmap/open-questions.md#q-con-006`; until that decision is settled,
+this repository must not hard-code model candidates into the generated client.
 
 ## Boundary
 

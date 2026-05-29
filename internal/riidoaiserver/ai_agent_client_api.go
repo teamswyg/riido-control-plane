@@ -5,6 +5,7 @@ import "time"
 const AIAgentClientContractID = "control-plane-ai-agent-client-api.v1"
 
 const AgentInstructionMaxCharacters = 1000
+const AgentDescriptionMaxCharacters = 160
 
 const (
 	AgentClientEventDeviceRuntimeSnapshot = "device_runtime_snapshot"
@@ -118,6 +119,7 @@ type AgentClientRecord struct {
 	IsOwnedByViewer     bool             `json:"is_owned_by_viewer"`
 	Name                string           `json:"name"`
 	ProfileThumbnailURL string           `json:"profile_thumbnail_url,omitempty"`
+	Description         string           `json:"description,omitempty"`
 	Instruction         string           `json:"instruction,omitempty"`
 	Visibility          AgentVisibility  `json:"visibility"`
 	RuntimeID           string           `json:"runtime_id,omitempty"`
@@ -161,6 +163,7 @@ type AgentEditabilityResponse struct {
 type UpdateAgentConfigurationRequest struct {
 	Name                string          `json:"name,omitempty"`
 	ProfileThumbnailURL *string         `json:"profile_thumbnail_url,omitempty"`
+	Description         *string         `json:"description,omitempty"`
 	Instruction         *string         `json:"instruction,omitempty"`
 	Visibility          AgentVisibility `json:"visibility,omitempty"`
 	RuntimeID           string          `json:"runtime_id,omitempty"`

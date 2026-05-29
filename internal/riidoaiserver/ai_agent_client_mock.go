@@ -92,6 +92,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			OwnerPrincipalID:    "user-1",
 			Name:                "Codex 리뷰어",
 			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/codex-reviewer.png",
+			Description:         "코드 변경 위험을 먼저 보는 리뷰 에이전트",
 			Instruction:         "코드 변경의 위험과 검증 근거를 우선 확인합니다.",
 			Visibility:          AgentVisibilityPrivate,
 			RuntimeID:           "runtime-codex-mock",
@@ -105,6 +106,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			OwnerPrincipalID:    "user-1",
 			Name:                "Claude 설계 보조",
 			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/claude-designer.png",
+			Description:         "기획 의도를 구현 범위로 정리하는 설계 에이전트",
 			Instruction:         "기획 의도와 도메인 정책을 먼저 정리한 뒤 구현 범위를 제안합니다.",
 			Visibility:          AgentVisibilityPrivate,
 			RuntimeID:           "runtime-claude-code-mock",
@@ -118,6 +120,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			OwnerPrincipalID:    "user-2",
 			Name:                "OpenClaw 공개 에이전트",
 			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/openclaw-public.png",
+			Description:         "공개 워크스페이스 반복 작업 에이전트",
 			Instruction:         "공개 워크스페이스에서 반복 가능한 보조 작업을 수행합니다.",
 			Visibility:          AgentVisibilityPublic,
 			RuntimeID:           "runtime-openclaw-remote",
@@ -131,6 +134,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			OwnerPrincipalID:    "user-2",
 			Name:                "Cursor 비공개 에이전트",
 			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/cursor-private.png",
+			Description:         "소유자 전용 Cursor 코드 탐색 에이전트",
 			Instruction:         "소유자 전용 Cursor 기반 코드 탐색을 수행합니다.",
 			Visibility:          AgentVisibilityPrivate,
 			RuntimeID:           "runtime-cursor-mock",
@@ -324,6 +328,12 @@ func (s *MockAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context,
 			return AgentClientRecordResponse{}, err
 		}
 		agent.ProfileThumbnailURL = thumbnailURL
+	}
+	if req.Description != nil {
+		if err := validateAgentDescription(*req.Description); err != nil {
+			return AgentClientRecordResponse{}, err
+		}
+		agent.Description = *req.Description
 	}
 	if req.Instruction != nil {
 		if err := validateAgentInstruction(*req.Instruction); err != nil {
@@ -629,6 +639,13 @@ func normalizeAgentProfileThumbnailURL(value string) (string, error) {
 func validateAgentInstruction(value string) error {
 	if utf8.RuneCountInString(value) > AgentInstructionMaxCharacters {
 		return errors.New("instruction must be 1000 characters or fewer")
+	}
+	return nil
+}
+
+func validateAgentDescription(value string) error {
+	if utf8.RuneCountInString(value) > AgentDescriptionMaxCharacters {
+		return errors.New("description must be 160 characters or fewer")
 	}
 	return nil
 }
