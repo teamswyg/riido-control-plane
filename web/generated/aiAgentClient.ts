@@ -11,7 +11,39 @@ export interface AIAgentTaskActionResponse {
   run_id: string;
   schema_version: string;
   task_id: string;
+  thread_id: string;
   work_status: AgentWorkStatus;
+}
+
+export interface AIAgentTaskThreadCollectionResponse {
+  active_stream?: AIAgentTaskThreadStreamLink;
+  schema_version: string;
+  task_id: string;
+  threads: AIAgentTaskThreadRecord[];
+}
+
+export interface AIAgentTaskThreadRecord {
+  agent_id: string;
+  assignment_state: AgentAssignmentState;
+  comment_kind: AgentTaskCommentKind;
+  completed_at?: string;
+  lines: AgentThreadProgressLine[];
+  message: string;
+  run_id: string;
+  source_comment_id?: string;
+  started_at?: string;
+  task_id: string;
+  thread_id: string;
+  work_status: AgentWorkStatus;
+}
+
+export interface AIAgentTaskThreadStreamLink {
+  event_type: "agent_thread_progress";
+  href: string;
+  rel: "agent_thread_progress_stream";
+  run_id: string;
+  task_id: string;
+  thread_id: string;
 }
 
 export type AgentAssignmentState = "queued" | "running" | "stopping" | "stopped" | "completed" | "failed" | "unassigned";
@@ -83,6 +115,7 @@ export interface AgentThreadProgressEvent {
   run_id: string;
   schema_version: string;
   task_id: string;
+  thread_id: string;
   work_status: AgentWorkStatus;
 }
 
@@ -104,6 +137,7 @@ export interface AgentWorkStatusChangedEvent {
   run_id?: string;
   schema_version: string;
   task_id?: string;
+  thread_id?: string;
   work_status: AgentWorkStatus;
 }
 
@@ -427,5 +461,26 @@ export function useStopAIAgentTask(config: RiidoClientConfig, options: UseMutati
   return useMutation<AIAgentTaskActionResponse, Error, { params: StopAIAgentTaskPathParams; body: StopAIAgentTaskRequest }>({
     ...options,
     mutationFn: (variables) => stopAIAgentTask(config, variables.params, variables.body, {}),
+  });
+}
+
+export interface ListAIAgentTaskThreadsPathParams {
+  task_id: string;
+}
+
+export async function listAIAgentTaskThreads(config: RiidoClientConfig, params: ListAIAgentTaskThreadsPathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadCollectionResponse> {
+  const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads`;
+  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+export function listAIAgentTaskThreadsQueryKey(params: ListAIAgentTaskThreadsPathParams): readonly unknown[] {
+  return ["listAIAgentTaskThreads", params] as const;
+}
+
+export function useListAIAgentTaskThreads(config: RiidoClientConfig, params: ListAIAgentTaskThreadsPathParams, options: Omit<UseQueryOptions<AIAgentTaskThreadCollectionResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) {
+  return useQuery<AIAgentTaskThreadCollectionResponse>({
+    ...options,
+    queryKey: listAIAgentTaskThreadsQueryKey(params),
+    queryFn: () => listAIAgentTaskThreads(config, params, options),
   });
 }

@@ -566,6 +566,63 @@
           "stopAIAgentTask.task-stop-emits-comment-status"
         ]
       }
+    },
+    "/v1/client/ai-agent/tasks/{task_id}/threads": {
+      "get": {
+        "operationId": "listAIAgentTaskThreads",
+        "summary": "List AI Agent task threads before optionally following an active stream link",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadCollectionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "task_thread_cold_collection.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-scenarios": [
+          "listAIAgentTaskThreads.completed-task-does-not-open-stream",
+          "listAIAgentTaskThreads.running-task-advertises-one-stream",
+          "listAIAgentTaskThreads.reassigned-task-has-multiple-threads"
+        ]
+      }
     }
   },
   "components": {
@@ -593,6 +650,9 @@
           "task_id": {
             "type": "string"
           },
+          "thread_id": {
+            "type": "string"
+          },
           "work_status": {
             "$ref": "#/components/schemas/AgentWorkStatus"
           }
@@ -601,11 +661,131 @@
           "schema_version",
           "task_id",
           "agent_id",
+          "thread_id",
           "run_id",
           "work_status",
           "assignment_state",
           "comment_kind",
           "message"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadCollectionResponse": {
+        "properties": {
+          "active_stream": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "threads": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadRecord": {
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "comment_kind": {
+            "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "completed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AgentThreadProgressLine"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "source_comment_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          }
+        },
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "comment_kind",
+          "message",
+          "lines"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadStreamLink": {
+        "properties": {
+          "event_type": {
+            "enum": [
+              "agent_thread_progress"
+            ],
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "rel": {
+            "enum": [
+              "agent_thread_progress_stream"
+            ],
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rel",
+          "href",
+          "event_type",
+          "task_id",
+          "thread_id",
+          "run_id"
         ],
         "type": "object"
       },
@@ -864,6 +1044,9 @@
           "task_id": {
             "type": "string"
           },
+          "thread_id": {
+            "type": "string"
+          },
           "work_status": {
             "$ref": "#/components/schemas/AgentWorkStatus"
           }
@@ -873,6 +1056,7 @@
           "schema_version",
           "agent_id",
           "task_id",
+          "thread_id",
           "run_id",
           "work_status",
           "assignment_state",
@@ -945,6 +1129,9 @@
             "type": "string"
           },
           "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
             "type": "string"
           },
           "work_status": {

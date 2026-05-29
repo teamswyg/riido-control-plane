@@ -92,6 +92,7 @@ The mock API implements:
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
+- `GET /v1/client/ai-agent/tasks/{task_id}/threads`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 - `POST /v1/client/ai-agent/agents`
@@ -133,10 +134,14 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task-thread comments can enqueue work when the selected agent is busy
 - task-thread stop actions return `stopped_by_user_request`
 - task-thread status updates use typed `AgentTaskCommentKind` values
+- task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
+  to render historical AI Agent comments; `active_stream` is present only when
+  the screen should also connect to the client event stream
 - daemon progress ingest accepts parsed `<riido_log>...<end>` batches through
   `POST /v1/agents/{agent_id}/thread-progress`
 - client task-thread progress is streamed as the typed
-  `agent_thread_progress` event on `GET /v1/client/ai-agent/events`
+  `agent_thread_progress` event with `thread_id` on
+  `GET /v1/client/ai-agent/events`
 - runtime settings consume `GET /v1/client/ai-agent/devices` and
   `device_runtime_snapshot`; SaaS does not expose a client endpoint to stop or
   restart a user's local daemon
@@ -173,10 +178,12 @@ needs visible entry points into AI Agent/runtime/agent-management surfaces; the
 current server responsibility remains `bootstrap`, `devices`, agent mutation,
 task-thread actions, and `events`.
 
-`node-id=153-15931` also does not add a new endpoint by itself. It confirms that
-the existing generated call paths must remain discoverable for frontend thread
-composition: `tasks.stop` maps to `POST /v1/client/ai-agent/tasks/{task_id}/stop`
-and `events.stream` maps to the `GET /v1/client/ai-agent/events` SSE surface.
+`node-id=153-15931` confirms that frontend thread composition needs a cold read
+before optional streaming. `tasks.threads` maps to
+`GET /v1/client/ai-agent/tasks/{task_id}/threads`, `tasks.stop` maps to
+`POST /v1/client/ai-agent/tasks/{task_id}/stop`, and `events.stream` maps to the
+`GET /v1/client/ai-agent/events` SSE surface. The server returns
+`active_stream` only for a currently active task thread.
 
 `node-id=153-12742` maps to the existing
 `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents` endpoint and the
@@ -237,6 +244,7 @@ ALB for:
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
+- `GET /v1/client/ai-agent/tasks/{task_id}/threads`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 - `POST /v1/client/ai-agent/agents`

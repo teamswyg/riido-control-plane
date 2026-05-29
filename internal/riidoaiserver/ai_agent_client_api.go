@@ -211,11 +211,43 @@ type AIAgentTaskActionResponse struct {
 	SchemaVersion   string               `json:"schema_version"`
 	TaskID          string               `json:"task_id"`
 	AgentID         string               `json:"agent_id"`
+	ThreadID        string               `json:"thread_id"`
 	RunID           string               `json:"run_id"`
 	WorkStatus      AgentWorkStatus      `json:"work_status"`
 	AssignmentState AgentAssignmentState `json:"assignment_state"`
 	CommentKind     AgentTaskCommentKind `json:"comment_kind"`
 	Message         string               `json:"message"`
+}
+
+type AIAgentTaskThreadStreamLink struct {
+	Rel       string `json:"rel"`
+	Href      string `json:"href"`
+	EventType string `json:"event_type"`
+	TaskID    string `json:"task_id"`
+	ThreadID  string `json:"thread_id"`
+	RunID     string `json:"run_id"`
+}
+
+type AIAgentTaskThreadRecord struct {
+	ThreadID        string                    `json:"thread_id"`
+	TaskID          string                    `json:"task_id"`
+	AgentID         string                    `json:"agent_id"`
+	RunID           string                    `json:"run_id"`
+	SourceCommentID string                    `json:"source_comment_id,omitempty"`
+	WorkStatus      AgentWorkStatus           `json:"work_status"`
+	AssignmentState AgentAssignmentState      `json:"assignment_state"`
+	CommentKind     AgentTaskCommentKind      `json:"comment_kind"`
+	Message         string                    `json:"message"`
+	StartedAt       time.Time                 `json:"started_at,omitempty"`
+	CompletedAt     time.Time                 `json:"completed_at,omitempty"`
+	Lines           []AgentThreadProgressLine `json:"lines"`
+}
+
+type AIAgentTaskThreadCollectionResponse struct {
+	SchemaVersion string                       `json:"schema_version"`
+	TaskID        string                       `json:"task_id"`
+	Threads       []AIAgentTaskThreadRecord    `json:"threads"`
+	ActiveStream  *AIAgentTaskThreadStreamLink `json:"active_stream,omitempty"`
 }
 
 type DeviceRuntimeSnapshotEvent struct {
@@ -237,6 +269,7 @@ type AgentWorkStatusChangedEvent struct {
 	SchemaVersion   string               `json:"schema_version"`
 	AgentID         string               `json:"agent_id"`
 	TaskID          string               `json:"task_id,omitempty"`
+	ThreadID        string               `json:"thread_id,omitempty"`
 	RunID           string               `json:"run_id,omitempty"`
 	WorkStatus      AgentWorkStatus      `json:"work_status"`
 	AssignmentState AgentAssignmentState `json:"assignment_state,omitempty"`
@@ -254,6 +287,7 @@ type AgentThreadProgressEvent struct {
 	SchemaVersion   string                    `json:"schema_version"`
 	AgentID         string                    `json:"agent_id"`
 	TaskID          string                    `json:"task_id"`
+	ThreadID        string                    `json:"thread_id"`
 	RunID           string                    `json:"run_id"`
 	WorkStatus      AgentWorkStatus           `json:"work_status"`
 	AssignmentState AgentAssignmentState      `json:"assignment_state"`
@@ -266,6 +300,7 @@ type AgentThreadProgressEvent struct {
 type AgentThreadProgressBatchRequest struct {
 	AssignmentID   string                    `json:"assignment_id"`
 	TaskID         string                    `json:"task_id"`
+	ThreadID       string                    `json:"thread_id,omitempty"`
 	DaemonID       string                    `json:"daemon_id,omitempty"`
 	DeviceID       string                    `json:"device_id,omitempty"`
 	RuntimeID      string                    `json:"runtime_id,omitempty"`

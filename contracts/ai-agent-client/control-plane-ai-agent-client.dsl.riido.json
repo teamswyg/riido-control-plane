@@ -91,6 +91,18 @@
       ]
     },
     {
+      "policy_id": "task_thread_cold_collection.v1",
+      "kind": "read_model",
+      "description": "Task screens read historical AI Agent task threads through HTTP first and connect the client event stream only when the response advertises an active stream link.",
+      "rules": [
+        "server: return all visible task threads for the requested task as a cold collection",
+        "server: include at most one active_stream link because one task can have only one active AI agent assignment at a time",
+        "server: omit active_stream for completed, stopped, failed, or fully cold task-thread collections",
+        "stream: every task-thread progress event carries thread_id so the client updates the targeted thread without inferring from task_id alone",
+        "client: never open the SSE stream solely because a task has historical AI Agent comments"
+      ]
+    },
+    {
       "policy_id": "agent_profile_configuration.v1",
       "kind": "profile",
       "description": "Agent profile presentation fields and server-authored update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
@@ -401,11 +413,12 @@
     {
       "name": "AIAgentTaskActionResponse",
       "type": "object",
-      "required": ["schema_version", "task_id", "agent_id", "run_id", "work_status", "assignment_state", "comment_kind", "message"],
+      "required": ["schema_version", "task_id", "agent_id", "thread_id", "run_id", "work_status", "assignment_state", "comment_kind", "message"],
       "properties": [
         {"name": "schema_version", "type": "string"},
         {"name": "task_id", "type": "string"},
         {"name": "agent_id", "type": "string"},
+        {"name": "thread_id", "type": "string"},
         {"name": "run_id", "type": "string"},
         {"name": "work_status", "ref": "AgentWorkStatus"},
         {"name": "assignment_state", "ref": "AgentAssignmentState"},
@@ -444,6 +457,7 @@
         {"name": "schema_version", "type": "string"},
         {"name": "agent_id", "type": "string"},
         {"name": "task_id", "type": "string"},
+        {"name": "thread_id", "type": "string"},
         {"name": "run_id", "type": "string"},
         {"name": "work_status", "ref": "AgentWorkStatus"},
         {"name": "assignment_state", "ref": "AgentAssignmentState"},
@@ -463,12 +477,13 @@
     {
       "name": "AgentThreadProgressEvent",
       "type": "object",
-      "required": ["event_type", "schema_version", "agent_id", "task_id", "run_id", "work_status", "assignment_state", "comment_kind", "lines"],
+      "required": ["event_type", "schema_version", "agent_id", "task_id", "thread_id", "run_id", "work_status", "assignment_state", "comment_kind", "lines"],
       "properties": [
         {"name": "event_type", "type": "string", "enum": ["agent_thread_progress"]},
         {"name": "schema_version", "type": "string"},
         {"name": "agent_id", "type": "string"},
         {"name": "task_id", "type": "string"},
+        {"name": "thread_id", "type": "string"},
         {"name": "run_id", "type": "string"},
         {"name": "work_status", "ref": "AgentWorkStatus"},
         {"name": "assignment_state", "ref": "AgentAssignmentState"},
@@ -476,6 +491,49 @@
         {"name": "batch_started_at", "type": "string", "format": "date-time"},
         {"name": "batch_ended_at", "type": "string", "format": "date-time"},
         {"name": "lines", "type": "array", "items": {"ref": "AgentThreadProgressLine"}}
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadStreamLink",
+      "type": "object",
+      "required": ["rel", "href", "event_type", "task_id", "thread_id", "run_id"],
+      "properties": [
+        {"name": "rel", "type": "string", "enum": ["agent_thread_progress_stream"]},
+        {"name": "href", "type": "string"},
+        {"name": "event_type", "type": "string", "enum": ["agent_thread_progress"]},
+        {"name": "task_id", "type": "string"},
+        {"name": "thread_id", "type": "string"},
+        {"name": "run_id", "type": "string"}
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadRecord",
+      "type": "object",
+      "required": ["thread_id", "task_id", "agent_id", "run_id", "work_status", "assignment_state", "comment_kind", "message", "lines"],
+      "properties": [
+        {"name": "thread_id", "type": "string"},
+        {"name": "task_id", "type": "string"},
+        {"name": "agent_id", "type": "string"},
+        {"name": "run_id", "type": "string"},
+        {"name": "source_comment_id", "type": "string"},
+        {"name": "work_status", "ref": "AgentWorkStatus"},
+        {"name": "assignment_state", "ref": "AgentAssignmentState"},
+        {"name": "comment_kind", "ref": "AgentTaskCommentKind"},
+        {"name": "message", "type": "string"},
+        {"name": "started_at", "type": "string", "format": "date-time"},
+        {"name": "completed_at", "type": "string", "format": "date-time"},
+        {"name": "lines", "type": "array", "items": {"ref": "AgentThreadProgressLine"}}
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadCollectionResponse",
+      "type": "object",
+      "required": ["schema_version", "task_id", "threads"],
+      "properties": [
+        {"name": "schema_version", "type": "string"},
+        {"name": "task_id", "type": "string"},
+        {"name": "threads", "type": "array", "items": {"ref": "AIAgentTaskThreadRecord"}},
+        {"name": "active_stream", "ref": "AIAgentTaskThreadStreamLink"}
       ]
     },
     {
@@ -564,6 +622,38 @@
           "given": "visible agents include owned agents and other users' public agents",
           "when": "the assignable-agent response is returned",
           "then": "owned agents appear first and names are ordered inside each ownership group"
+        }
+      ]
+    },
+    {
+      "operation_id": "listAIAgentTaskThreads",
+      "kind": "query",
+      "summary": "List AI Agent task threads before optionally following an active stream link",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/threads",
+      "resource": "agent",
+      "action": "read",
+      "auth": {"scheme": "bearer", "scopes": ["ai-agent:read", "task:{task_id}:read"]},
+      "rbac_policy": "task_thread_cold_collection.v1",
+      "response": {"status": 200, "ref": "AIAgentTaskThreadCollectionResponse"},
+      "scenarios": [
+        {
+          "name": "completed task does not open stream",
+          "given": "a client opens a task whose AI Agent work is already completed",
+          "when": "the client requests the task-thread collection",
+          "then": "the response contains historical threads and omits active_stream"
+        },
+        {
+          "name": "running task advertises one stream",
+          "given": "a task has one active AI Agent assignment",
+          "when": "the client requests the task-thread collection",
+          "then": "the response contains all cold threads and one active_stream link targeting the active thread_id"
+        },
+        {
+          "name": "reassigned task has multiple threads",
+          "given": "an agent finished work on a task and another agent was assigned later",
+          "when": "the client requests the task-thread collection",
+          "then": "the response returns two or more thread records while active_stream, if present, targets only the currently active one"
         }
       ]
     },
@@ -755,7 +845,7 @@
           "name": "runtime progress batch",
           "given": "the daemon parses multiple runtime progress markers such as thinking, collection, and web-search updates",
           "when": "the daemon submits a bounded progress batch to the control plane",
-          "then": "the event stream emits agent_thread_progress with ordered progress lines for the task thread"
+          "then": "the event stream emits agent_thread_progress with thread_id and ordered progress lines for the task thread"
         },
         {
           "name": "task comment status update",

@@ -53,7 +53,11 @@ Figma task-thread annotations (`node-id=153-15931`) are also consumption context
 They may name generated call chains such as `riido.aiAgent.events.stream` and
 `riido.aiAgent.tasks.stop`, but the delivery artifact must derive those chains
 from the control-plane OpenAPI projection and generated-client manifest. It must
-not hand-code annotation strings as a second source of truth.
+not hand-code annotation strings as a second source of truth. Task-thread
+screens first consume the generated cold collection call for
+`GET /v1/client/ai-agent/tasks/{task_id}/threads`; the returned
+`active_stream` link, when present, is the generated handoff into the SSE client
+event stream.
 
 Figma participant dropdown annotations (`node-id=153-12742`) are generated-client
 consumption context for `listAIAgentTaskAssignableAgents`. The delivery artifact
