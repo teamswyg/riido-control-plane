@@ -58,6 +58,13 @@ For agent settings:
   and generated shape. It does not own client scroll-to-thread behavior, hover
   states, modal layout, viewer-away notification rendering, or progress
   animation references.
+- Figma stopped-by-deleted-agent screen (`node-id=227-19354`) confirms that
+  deleting an agent with queued or running assignments projects stopped
+  task-thread rows. This repository owns the executable delete behavior,
+  `running_tasks_force_stopped` response count, task-thread cold collection
+  projection, and `stopped_by_agent_deleted` generated enum value. It does not
+  own the Korean display copy, Riido actor label, timestamp wording, hidden
+  action state, avatar, or row layout.
 - Figma participant dropdown annotations (`node-id=153-12742`) confirm the
   `assignable-agents` API consumption context. This repository owns only the
   visible AI Agent list, owned-first ordering, generated DTO shape, and black-box
@@ -137,6 +144,10 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `AgentClientRecord`; it is refreshed when editable agent configuration is
   saved and lets clients render update dates or absolute-time tooltips
 - delete returns forced assignment effects for queued/running mock tasks
+- agent deletion uses the existing `DELETE /v1/client/ai-agent/agents/{agent_id}`
+  command; if queued/running task threads are affected, the response increments
+  `running_tasks_force_stopped` and the read model exposes
+  `comment_kind=stopped_by_agent_deleted` with `assignment_state=stopped`
 - task-thread comments can enqueue work when the selected agent is busy
 - busy-agent enqueue responses use `comment_kind=queued_by_busy_agent`,
   `assignment_state=queued`, and `work_status=queued`; user-facing Korean copy
@@ -174,7 +185,9 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
 - `node-id=153-8761`: queued task comment when the agent is already busy; the
   annotation on `node-id=153-8835` says "다른 작업 진행 중인 에이전트한테
   참여자 할당했을 때 나오는 댓글 문구"
-- `node-id=227-19354`: task stop flow with stopped agent comment
+- `node-id=227-19354`: stopped-by-deleted-agent task thread row; the screen
+  shows Riido-authored copy that the agent was deleted and the running task was
+  stopped
 - `node-id=156-19307`: AI Agent menu placement in the workspace sidebar,
   including `Menubar/default` and `Menubar/setting` dark/light variants
 - `node-id=162-23090`: runtime settings page; Dev Mode annotations identify the
@@ -233,6 +246,18 @@ The visible Korean copy, "방금 전" timestamp, avatar, row layout, and other
 comment presentation remain client-owned. The visible `중지` affordance still
 maps to `tasks.stop`; the server must not expose a second queued-cancel endpoint
 for this screen.
+
+`node-id=227-19354` confirms the forced-stop projection after agent deletion.
+The generated client command is still `riido.aiAgent.agents.delete`, backed by
+`DELETE /v1/client/ai-agent/agents/{agent_id}`. When the deleted agent had
+queued or running assignments, `DeleteAgentResponse.running_tasks_force_stopped`
+reports the affected count. The same server-side effect updates task-thread
+read models so `riido.aiAgent.tasks.threads` can return a stopped row with
+`comment_kind=stopped_by_agent_deleted` and `assignment_state=stopped`; if a
+viewer is connected, `riido.aiAgent.events.stream` may deliver the typed status
+update. The server does not add a separate `deleted-agent stop` endpoint and
+does not own the Korean copy, Riido actor label, "방금 전" timestamp, hidden
+stop affordance, avatar, or row layout shown in Figma.
 
 `node-id=153-12742` maps to the existing
 `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents` endpoint and the

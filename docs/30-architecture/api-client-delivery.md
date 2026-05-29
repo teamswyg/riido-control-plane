@@ -77,6 +77,16 @@ on cold read, that `events.stream` can carry the typed queued status, and that
 Korean display copy, timestamp wording, avatar, or comment-row layout as a
 generated API fact.
 
+Figma stopped-by-deleted-agent screen (`node-id=227-19354`) is generated-client
+composition context for `riido.aiAgent.agents.delete`,
+`riido.aiAgent.tasks.threads`, and `riido.aiAgent.events.stream`. The delivery
+artifact may document that deleting an agent can return
+`running_tasks_force_stopped` and later expose
+`comment_kind=stopped_by_agent_deleted` in the task-thread cold collection or
+stream. It must not hard-code the Korean stopped-row copy, Riido actor label,
+timestamp wording, hidden action state, avatar, or row layout as generated API
+facts.
+
 Figma participant dropdown annotations (`node-id=153-12742`) are generated-client
 consumption context for `listAIAgentTaskAssignableAgents`. The delivery artifact
 may document that this query feeds the AI Agent rows in the participant dropdown,
