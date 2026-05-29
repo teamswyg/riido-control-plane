@@ -60,6 +60,8 @@ export interface AgentClientRecord {
   editability: AgentEditability;
   instruction?: string;
   is_owned_by_viewer: boolean;
+  model_id?: string;
+  model_label?: string;
   name: string;
   owner_principal_id: string;
   profile_thumbnail_url?: string;
@@ -157,6 +159,7 @@ export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | AgentEditabilityCha
 export interface CreateAgentConfigurationRequest {
   description?: string;
   instruction?: string;
+  model_id?: string;
   name: string;
   profile_thumbnail_url?: string;
   runtime_id: string;
@@ -200,6 +203,12 @@ export type RuntimeDetectionState = "detected" | "missing" | "error";
 
 export type RuntimeKind = "codex" | "claude_code" | "cursor" | "openclaw";
 
+export interface RuntimeModelRecord {
+  is_default: boolean;
+  label: string;
+  model_id: string;
+}
+
 export interface RuntimeRecord {
   availability: RuntimeAvailability;
   detection_state: RuntimeDetectionState;
@@ -207,6 +216,7 @@ export interface RuntimeRecord {
   has_assigned_agent: boolean;
   kind: RuntimeKind;
   last_detected_at?: string;
+  models: RuntimeModelRecord[];
   owner_principal_id?: string;
   runtime_id: string;
 }
@@ -225,6 +235,7 @@ export interface SubmitAIAgentTaskCommentRequest {
 export interface UpdateAgentConfigurationRequest {
   description?: string;
   instruction?: string;
+  model_id?: string;
   name?: string;
   profile_thumbnail_url?: string;
   runtime_id?: string;

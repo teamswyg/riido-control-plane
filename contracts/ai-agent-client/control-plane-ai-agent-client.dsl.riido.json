@@ -68,6 +68,19 @@
       ]
     },
     {
+      "policy_id": "runtime_model_catalog.v1",
+      "kind": "read_model",
+      "description": "Runtime model dropdown values are runtime-scoped catalog records projected through the device/runtime read model, not top-level API enum values.",
+      "rules": [
+        "runtime: project model candidates as RuntimeModelRecord values under each RuntimeRecord",
+        "model_id: treat as an opaque runtime-scoped identifier owned by the selected runtime catalog",
+        "label: treat as display data for clients, not a discriminator or generated enum",
+        "default: each selectable runtime has exactly one is_default model and omitted model_id resolves to that default",
+        "mutation: create/update validates model_id against the selected runtime before saving agent configuration",
+        "daemon: consume only the already-authorized model_id selected by the control plane and never define the client catalog"
+      ]
+    },
+    {
       "policy_id": "api_codegen_safety.v1",
       "kind": "projection",
       "description": "Control-plane API enums and union values are owned in DSL and preserved in IR before OpenAPI generation so Orval/client codegen gets safe discriminated shapes.",
@@ -111,7 +124,7 @@
         "description: optional client-authored one-line summary with a maximum of 160 characters; empty string is allowed; client UI owns truncation and wrapping",
         "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
         "updated_at: server-authored RFC3339 date-time used by clients for list timestamps and absolute-time tooltips",
-        "model: Figma model dropdown is not part of this configuration contract until the runtime model catalog ownership is settled",
+        "model_id: optional runtime-scoped model selection; omitted create/update values resolve to the selected runtime default",
         "create: client-facing agent creation stores the same profile fields, binds a viewer-owned runtime_id, stamps owner_principal_id from authorization, and returns updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
@@ -244,9 +257,19 @@
   ],
   "schemas": [
     {
+      "name": "RuntimeModelRecord",
+      "type": "object",
+      "required": ["model_id", "label", "is_default"],
+      "properties": [
+        {"name": "model_id", "type": "string"},
+        {"name": "label", "type": "string"},
+        {"name": "is_default", "type": "boolean"}
+      ]
+    },
+    {
       "name": "RuntimeRecord",
       "type": "object",
-      "required": ["runtime_id", "device_id", "kind", "availability", "detection_state", "has_assigned_agent"],
+      "required": ["runtime_id", "device_id", "kind", "availability", "detection_state", "has_assigned_agent", "models"],
       "properties": [
         {"name": "runtime_id", "type": "string"},
         {"name": "device_id", "type": "string"},
@@ -255,7 +278,8 @@
         {"name": "detection_state", "ref": "RuntimeDetectionState"},
         {"name": "owner_principal_id", "type": "string"},
         {"name": "last_detected_at", "type": "string", "format": "date-time"},
-        {"name": "has_assigned_agent", "type": "boolean"}
+        {"name": "has_assigned_agent", "type": "boolean"},
+        {"name": "models", "type": "array", "items": {"ref": "RuntimeModelRecord"}}
       ]
     },
     {
@@ -285,6 +309,8 @@
         {"name": "visibility", "ref": "AgentVisibility"},
         {"name": "runtime_id", "type": "string"},
         {"name": "runtime_kind", "ref": "RuntimeKind"},
+        {"name": "model_id", "type": "string"},
+        {"name": "model_label", "type": "string"},
         {"name": "work_status", "ref": "AgentWorkStatus"},
         {"name": "editability", "ref": "AgentEditability"},
         {"name": "assigned_task_count", "type": "integer"},
@@ -366,7 +392,8 @@
         {"name": "description", "type": "string", "max_length": 160},
         {"name": "instruction", "type": "string", "max_length": 1000},
         {"name": "visibility", "ref": "AgentVisibility"},
-        {"name": "runtime_id", "type": "string"}
+        {"name": "runtime_id", "type": "string"},
+        {"name": "model_id", "type": "string"}
       ]
     },
     {
@@ -378,7 +405,8 @@
         {"name": "description", "type": "string", "max_length": 160},
         {"name": "instruction", "type": "string", "max_length": 1000},
         {"name": "visibility", "ref": "AgentVisibility"},
-        {"name": "runtime_id", "type": "string"}
+        {"name": "runtime_id", "type": "string"},
+        {"name": "model_id", "type": "string"}
       ]
     },
     {
@@ -596,6 +624,12 @@
           "given": "a runtime was deleted on a device and no assigned agent references it",
           "when": "daemon scan reports the runtime missing",
           "then": "the client list omits the runtime as if it never existed"
+        },
+        {
+          "name": "runtime models are scoped catalog records",
+          "given": "the Figma agent setting or add screen opens a model dropdown for a selected runtime",
+          "when": "the client reads device runtime data",
+          "then": "each runtime projects model candidates as RuntimeModelRecord values instead of top-level enum values"
         }
       ]
     },
@@ -725,10 +759,16 @@
           "then": "the response contains a new owned agent with zero assigned tasks, editable status, server-authored updated_at, and the runtime kind derived from the selected runtime_id"
         },
         {
-          "name": "agent create omits model field",
+          "name": "agent create defaults selected runtime model",
           "given": "the Figma agent-add screen shows a model dropdown",
-          "when": "the client creates an agent before the runtime model catalog ownership is settled",
-          "then": "the API request does not include a model_id or model enum"
+          "when": "the client creates an agent without model_id",
+          "then": "the response stores the selected runtime's default model_id and model_label without exposing a top-level model enum"
+        },
+        {
+          "name": "agent create rejects model outside runtime catalog",
+          "given": "the client selected runtime-codex but sends a claude-scoped model_id",
+          "when": "the client creates an agent",
+          "then": "the operation is rejected before saving the agent configuration"
         }
       ]
     },
@@ -776,6 +816,12 @@
           "given": "an editable agent has no assigned task",
           "when": "the owner updates profile_thumbnail_url, description, and instruction",
           "then": "the response and future client bootstrap contain the saved profile fields and a server-authored updated_at timestamp"
+        },
+        {
+          "name": "model updates validate against runtime catalog",
+          "given": "an editable agent has no assigned task",
+          "when": "the owner updates runtime_id and model_id",
+          "then": "the operation accepts only a model_id from the selected runtime and stores the matching model_label"
         },
         {
           "name": "description max length is enforced",

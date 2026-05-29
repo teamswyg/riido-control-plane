@@ -62,7 +62,8 @@
         "x-riido-operation-kind": "command",
         "x-riido-scenarios": [
           "createAIAgent.agent-add-screen-creates-owned-agent",
-          "createAIAgent.agent-create-omits-model-field"
+          "createAIAgent.agent-create-defaults-selected-runtime-model",
+          "createAIAgent.agent-create-rejects-model-outside-runtime-catalog"
         ]
       }
     },
@@ -182,6 +183,7 @@
         "x-riido-scenarios": [
           "updateAIAgentConfiguration.agent-name-is-not-unique",
           "updateAIAgentConfiguration.profile-fields-are-saved",
+          "updateAIAgentConfiguration.model-updates-validate-against-runtime-catalog",
           "updateAIAgentConfiguration.description-max-length-is-enforced",
           "updateAIAgentConfiguration.instruction-max-length-is-enforced",
           "updateAIAgentConfiguration.edit-fails-while-assigned"
@@ -329,7 +331,8 @@
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
           "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
-          "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent"
+          "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent",
+          "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records"
         ]
       }
     },
@@ -842,6 +845,12 @@
           "is_owned_by_viewer": {
             "type": "boolean"
           },
+          "model_id": {
+            "type": "string"
+          },
+          "model_label": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -1230,6 +1239,9 @@
             "maxLength": 1000,
             "type": "string"
           },
+          "model_id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -1385,6 +1397,25 @@
         ],
         "type": "string"
       },
+      "RuntimeModelRecord": {
+        "properties": {
+          "is_default": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "model_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_id",
+          "label",
+          "is_default"
+        ],
+        "type": "object"
+      },
       "RuntimeRecord": {
         "properties": {
           "availability": {
@@ -1406,6 +1437,12 @@
             "format": "date-time",
             "type": "string"
           },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/RuntimeModelRecord"
+            },
+            "type": "array"
+          },
           "owner_principal_id": {
             "type": "string"
           },
@@ -1419,7 +1456,8 @@
           "kind",
           "availability",
           "detection_state",
-          "has_assigned_agent"
+          "has_assigned_agent",
+          "models"
         ],
         "type": "object"
       },
@@ -1460,6 +1498,9 @@
           },
           "instruction": {
             "maxLength": 1000,
+            "type": "string"
+          },
+          "model_id": {
             "type": "string"
           },
           "name": {

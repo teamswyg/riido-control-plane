@@ -69,6 +69,9 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 				OwnerPrincipalID: "user-1",
 				LastDetectedAt:   now,
 				HasAssignedAgent: true,
+				Models: []RuntimeModelRecord{
+					{ModelID: "codex-default", Label: "Codex 기본 모델", IsDefault: true},
+				},
 			},
 			{
 				RuntimeID:        "runtime-claude-code-mock",
@@ -79,6 +82,13 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 				OwnerPrincipalID: "user-1",
 				LastDetectedAt:   now.Add(-30 * time.Second),
 				HasAssignedAgent: true,
+				Models: []RuntimeModelRecord{
+					{ModelID: "claude-sonnect-4-6", Label: "Sonnect 4.6 (기본값)", IsDefault: true},
+					{ModelID: "claude-opus-4-7", Label: "Opus 4.7", IsDefault: false},
+					{ModelID: "claude-haiku-4-5", Label: "Haiku 4.5", IsDefault: false},
+					{ModelID: "claude-opus-4-6", Label: "Opus 4.6", IsDefault: false},
+					{ModelID: "claude-opus-3", Label: "Opus 3", IsDefault: false},
+				},
 			},
 			{
 				RuntimeID:        "runtime-cursor-mock",
@@ -89,6 +99,10 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 				OwnerPrincipalID: "user-1",
 				LastDetectedAt:   now,
 				HasAssignedAgent: false,
+				Models: []RuntimeModelRecord{
+					{ModelID: "cursor-auto", Label: "Cursor Auto", IsDefault: true},
+					{ModelID: "cursor-fast", Label: "Cursor Fast", IsDefault: false},
+				},
 			},
 		},
 	}
@@ -103,6 +117,8 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			Visibility:          AgentVisibilityPrivate,
 			RuntimeID:           "runtime-codex-mock",
 			RuntimeKind:         RuntimeKindCodex,
+			ModelID:             "codex-default",
+			ModelLabel:          "Codex 기본 모델",
 			WorkStatus:          AgentWorkStatusRunning,
 			Editability:         AgentEditabilityBlockedAssignedTasks,
 			AssignedTaskCount:   1,
@@ -118,6 +134,8 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			Visibility:          AgentVisibilityPrivate,
 			RuntimeID:           "runtime-claude-code-mock",
 			RuntimeKind:         RuntimeKindClaudeCode,
+			ModelID:             "claude-sonnect-4-6",
+			ModelLabel:          "Sonnect 4.6 (기본값)",
 			WorkStatus:          AgentWorkStatusOffline,
 			Editability:         AgentEditabilityEditable,
 			AssignedTaskCount:   0,
@@ -133,6 +151,8 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			Visibility:          AgentVisibilityPublic,
 			RuntimeID:           "runtime-openclaw-remote",
 			RuntimeKind:         RuntimeKindOpenClaw,
+			ModelID:             "openclaw-default",
+			ModelLabel:          "OpenClaw 기본 모델",
 			WorkStatus:          AgentWorkStatusIdle,
 			Editability:         AgentEditabilityEditable,
 			AssignedTaskCount:   0,
@@ -148,6 +168,8 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			Visibility:          AgentVisibilityPrivate,
 			RuntimeID:           "runtime-cursor-mock",
 			RuntimeKind:         RuntimeKindCursor,
+			ModelID:             "cursor-auto",
+			ModelLabel:          "Cursor Auto",
 			WorkStatus:          AgentWorkStatusIdle,
 			Editability:         AgentEditabilityEditable,
 			AssignedTaskCount:   0,
@@ -443,9 +465,9 @@ func (s *MockAIAgentClientStore) CreateAIAgent(ctx context.Context, principal Au
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	runtimeKind, ok := runtimeKindByIDForPrincipal(s.devices, principal, runtimeID)
+	runtimeKind, runtimeModel, ok := runtimeSelectionForPrincipal(s.devices, principal, runtimeID, req.ModelID)
 	if !ok {
-		return AgentClientRecordResponse{}, errors.New("runtime_id is not available")
+		return AgentClientRecordResponse{}, errors.New("runtime_id or model_id is not available")
 	}
 	now := time.Now().UTC()
 	agentID := uniqueAIAgentIDLocked(s.agents, "agent-"+principal.PrincipalID+"-"+runtimeID)
@@ -460,6 +482,8 @@ func (s *MockAIAgentClientStore) CreateAIAgent(ctx context.Context, principal Au
 		Visibility:          req.Visibility,
 		RuntimeID:           runtimeID,
 		RuntimeKind:         runtimeKind,
+		ModelID:             runtimeModel.ModelID,
+		ModelLabel:          runtimeModel.Label,
 		WorkStatus:          AgentWorkStatusIdle,
 		Editability:         AgentEditabilityEditable,
 		AssignedTaskCount:   0,
@@ -533,11 +557,19 @@ func (s *MockAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context,
 		}
 		agent.Visibility = req.Visibility
 	}
+	nextRuntimeID := agent.RuntimeID
 	if strings.TrimSpace(req.RuntimeID) != "" {
-		agent.RuntimeID = strings.TrimSpace(req.RuntimeID)
-		if kind, ok := runtimeKindByID(s.devices, agent.RuntimeID); ok {
-			agent.RuntimeKind = kind
+		nextRuntimeID = strings.TrimSpace(req.RuntimeID)
+	}
+	if strings.TrimSpace(req.RuntimeID) != "" || req.ModelID != nil {
+		runtimeKind, runtimeModel, ok := runtimeSelectionForPrincipal(s.devices, principal, nextRuntimeID, req.ModelID)
+		if !ok {
+			return AgentClientRecordResponse{}, errors.New("runtime_id or model_id is not available")
 		}
+		agent.RuntimeID = nextRuntimeID
+		agent.RuntimeKind = runtimeKind
+		agent.ModelID = runtimeModel.ModelID
+		agent.ModelLabel = runtimeModel.Label
 	}
 	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
 	agent.UpdatedAt = time.Now().UTC()
@@ -1039,7 +1071,12 @@ func copyDevices(devices []DeviceRecord) []DeviceRecord {
 }
 
 func copyDevice(device DeviceRecord) DeviceRecord {
-	device.Runtimes = append([]RuntimeRecord(nil), device.Runtimes...)
+	runtimes := make([]RuntimeRecord, len(device.Runtimes))
+	for i, runtime := range device.Runtimes {
+		runtime.Models = append([]RuntimeModelRecord(nil), runtime.Models...)
+		runtimes[i] = runtime
+	}
+	device.Runtimes = runtimes
 	return device
 }
 
@@ -1100,6 +1137,40 @@ func runtimeKindByIDForPrincipal(devices []DeviceRecord, principal Authorization
 		}
 	}
 	return "", false
+}
+
+func runtimeSelectionForPrincipal(devices []DeviceRecord, principal AuthorizationResult, runtimeID string, requestedModelID *string) (RuntimeKind, RuntimeModelRecord, bool) {
+	for _, device := range filterDevicesForPrincipal(devices, principal) {
+		for _, runtime := range device.Runtimes {
+			if runtime.RuntimeID != runtimeID {
+				continue
+			}
+			model, ok := runtimeModelSelection(runtime, requestedModelID)
+			return runtime.Kind, model, ok
+		}
+	}
+	return "", RuntimeModelRecord{}, false
+}
+
+func runtimeModelSelection(runtime RuntimeRecord, requestedModelID *string) (RuntimeModelRecord, bool) {
+	modelID := ""
+	if requestedModelID != nil {
+		modelID = strings.TrimSpace(*requestedModelID)
+	}
+	if modelID != "" {
+		for _, model := range runtime.Models {
+			if model.ModelID == modelID {
+				return model, true
+			}
+		}
+		return RuntimeModelRecord{}, false
+	}
+	for _, model := range runtime.Models {
+		if model.IsDefault {
+			return model, true
+		}
+	}
+	return RuntimeModelRecord{}, false
 }
 
 func markRuntimeHasAssignedAgentLocked(devices []DeviceRecord, runtimeID string, value bool) {

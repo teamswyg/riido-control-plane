@@ -45,6 +45,12 @@ const (
 	RuntimeDetectionStateError    RuntimeDetectionState = "error"
 )
 
+type RuntimeModelRecord struct {
+	ModelID   string `json:"model_id"`
+	Label     string `json:"label"`
+	IsDefault bool   `json:"is_default"`
+}
+
 type AgentEditability string
 
 const (
@@ -103,6 +109,7 @@ type RuntimeRecord struct {
 	OwnerPrincipalID string                `json:"owner_principal_id,omitempty"`
 	LastDetectedAt   time.Time             `json:"last_detected_at,omitempty"`
 	HasAssignedAgent bool                  `json:"has_assigned_agent"`
+	Models           []RuntimeModelRecord  `json:"models"`
 }
 
 type DeviceRecord struct {
@@ -124,6 +131,8 @@ type AgentClientRecord struct {
 	Visibility          AgentVisibility  `json:"visibility"`
 	RuntimeID           string           `json:"runtime_id,omitempty"`
 	RuntimeKind         RuntimeKind      `json:"runtime_kind,omitempty"`
+	ModelID             string           `json:"model_id,omitempty"`
+	ModelLabel          string           `json:"model_label,omitempty"`
 	WorkStatus          AgentWorkStatus  `json:"work_status"`
 	Editability         AgentEditability `json:"editability"`
 	AssignedTaskCount   int              `json:"assigned_task_count"`
@@ -178,6 +187,7 @@ type CreateAgentConfigurationRequest struct {
 	Instruction         *string         `json:"instruction,omitempty"`
 	Visibility          AgentVisibility `json:"visibility"`
 	RuntimeID           string          `json:"runtime_id"`
+	ModelID             *string         `json:"model_id,omitempty"`
 }
 
 type UpdateAgentConfigurationRequest struct {
@@ -187,6 +197,7 @@ type UpdateAgentConfigurationRequest struct {
 	Instruction         *string         `json:"instruction,omitempty"`
 	Visibility          AgentVisibility `json:"visibility,omitempty"`
 	RuntimeID           string          `json:"runtime_id,omitempty"`
+	ModelID             *string         `json:"model_id,omitempty"`
 }
 
 type DeleteAgentResponse struct {

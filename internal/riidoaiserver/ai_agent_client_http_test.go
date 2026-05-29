@@ -108,6 +108,10 @@ func TestHTTPAIAgentClientMockDevicesAndEditability(t *testing.T) {
 	if len(devices.Devices) != 1 || len(devices.Devices[0].Runtimes) != 3 {
 		t.Fatalf("devices = %+v", devices)
 	}
+	cursorRuntime := devices.Devices[0].Runtimes[2]
+	if cursorRuntime.RuntimeID != "runtime-cursor-mock" || len(cursorRuntime.Models) != 2 || cursorRuntime.Models[0].ModelID != "cursor-auto" || !cursorRuntime.Models[0].IsDefault {
+		t.Fatalf("cursor runtime models = %+v", cursorRuntime)
+	}
 
 	editReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/agents/agent-owned-codex/editability", nil)
 	editReq.Header.Set("Authorization", "Bearer user-token")
@@ -225,6 +229,8 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		!created.Agent.IsOwnedByViewer ||
 		created.Agent.Name != "신규 코리" ||
 		created.Agent.RuntimeKind != RuntimeKindCursor ||
+		created.Agent.ModelID != "cursor-auto" ||
+		created.Agent.ModelLabel != "Cursor Auto" ||
 		created.Agent.WorkStatus != AgentWorkStatusIdle ||
 		created.Agent.Editability != AgentEditabilityEditable ||
 		created.Agent.AssignedTaskCount != 0 ||
@@ -239,6 +245,7 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		Name:                "같은 이름 가능",
 		Visibility:          AgentVisibilityPublic,
 		RuntimeID:           "runtime-cursor-mock",
+		ModelID:             stringPtr("cursor-fast"),
 		ProfileThumbnailURL: &thumbnailURL,
 		Description:         &description,
 		Instruction:         &instruction,
@@ -260,6 +267,8 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	if patched.Agent.Name != "같은 이름 가능" ||
 		patched.Agent.Visibility != AgentVisibilityPublic ||
 		patched.Agent.RuntimeKind != RuntimeKindCursor ||
+		patched.Agent.ModelID != "cursor-fast" ||
+		patched.Agent.ModelLabel != "Cursor Fast" ||
 		patched.Agent.ProfileThumbnailURL != thumbnailURL ||
 		patched.Agent.Description != description ||
 		patched.Agent.Instruction != instruction {
@@ -290,6 +299,23 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	}
 	if !runtimeHasAssignedAgent(bootstrap.Devices, "runtime-cursor-mock") {
 		t.Fatalf("bootstrap runtime-cursor-mock was not marked assigned: %+v", bootstrap.Devices)
+	}
+
+	invalidModelBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:       "잘못된 모델",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  "runtime-cursor-mock",
+		ModelID:    stringPtr("claude-opus-4-7"),
+	})
+	if err != nil {
+		t.Fatalf("marshal invalid model body: %v", err)
+	}
+	invalidModelReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(invalidModelBody)))
+	invalidModelReq.Header.Set("Authorization", "Bearer owner-token")
+	invalidModelResp := httptest.NewRecorder()
+	server.ServeHTTP(invalidModelResp, invalidModelReq)
+	if invalidModelResp.Code != http.StatusBadRequest {
+		t.Fatalf("invalid model create status=%d body=%s", invalidModelResp.Code, invalidModelResp.Body.String())
 	}
 
 	tooLongDescription := strings.Repeat("가", AgentDescriptionMaxCharacters+1)
@@ -525,6 +551,10 @@ func runtimeHasAssignedAgent(devices []DeviceRecord, runtimeID string) bool {
 		}
 	}
 	return false
+}
+
+func stringPtr(value string) *string {
+	return &value
 }
 
 func containsString(values []string, want string) bool {

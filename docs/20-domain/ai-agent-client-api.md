@@ -201,15 +201,17 @@ fields. The daemon stop modal and restart animation are client/desktop-local
 behavior; this server does not add a protected SaaS `stop daemon` or
 `restart daemon` endpoint for that screen.
 
-`node-id=164-50215` maps to existing agent bootstrap/update behavior plus one
-explicit read-model field: `AgentClientRecord.updated_at`. `node-id=134-6542`
-adds the client-facing create behavior: `POST /v1/client/ai-agent/agents`
-returns the created `AgentClientRecord`, derives `runtime_kind` from the
-selected runtime, and does not accept a `model_id` yet. The client can use
-`updated_at` for the list's update date and the absolute-time tooltip shown in
-Figma. Row click, meatball edit entry, save-button enablement,
-long-description truncation, dropdown layout, and timestamp formatting remain
-client-owned.
+`node-id=164-50215` maps to existing agent bootstrap/update behavior plus the
+read-model fields `AgentClientRecord.updated_at`, `model_id`, and
+`model_label`. `node-id=134-6542` adds the client-facing create behavior:
+`POST /v1/client/ai-agent/agents` returns the created `AgentClientRecord`,
+derives `runtime_kind` from the selected runtime, and validates optional
+`model_id` against the selected runtime's `RuntimeRecord.models` catalog. If
+`model_id` is omitted, the server saves the selected runtime's default model.
+The client can use `updated_at` for the list's update date and the
+absolute-time tooltip shown in Figma. Row click, meatball edit entry,
+save-button enablement, long-description truncation, dropdown layout, and
+timestamp formatting remain client-owned.
 
 `node-id=42-3014` maps to existing bootstrap/devices/create behavior plus one
 explicit bootstrap field: `ClientBootstrapResponse.agent_templates`. The
@@ -220,11 +222,12 @@ frontend. Selecting a template still creates a normal agent through
 No-installed-AI branching is derived from `devices.runtimes` and does not add a
 new SaaS command.
 
-The `model` field from `node-id=164-50215` is not implemented in this client API
-yet. Its ownership is tracked by `riido-contracts`
-`docs/50-roadmap/open-questions.md#q-con-006`; until that decision is settled,
-this repository must not hard-code model candidates such as the Figma dropdown
-labels into the generated client.
+The `model` field from `node-id=164-50215` is implemented as a runtime-scoped
+catalog projection. This repository must not hard-code model candidates as
+generated enum values. It only mirrors the contracts decision
+`runtime_model_catalog.v1`: clients render `RuntimeRecord.models`, send an
+optional `model_id`, and receive the saved `model_id` plus `model_label` on
+agent records.
 
 ## Boundary
 
