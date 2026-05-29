@@ -1290,7 +1290,7 @@
       "name": "participant dropdown owned-first ordering",
       "given": "visible agents include owned agents and other users' public agents",
       "when": "the assignable-agent response is returned",
-      "then": "owned agents appear first and names are ordered inside each ownership group"
+      "then": "owned agents appear first, display names are ordered inside each ownership group, and equal display names are tied by agent_id"
     },
     {
       "scenario_id": "submitAIAgentTaskComment.comment-routes-to-running-agent",

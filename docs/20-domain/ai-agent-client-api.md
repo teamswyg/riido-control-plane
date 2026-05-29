@@ -76,7 +76,8 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 ## Policy
 
 - visible agents are the viewer's owned agents plus other users' public agents
-- task participant dropdown responses are ordered owned-first, then by name
+- task participant dropdown responses are ordered owned-first, then by display
+  name, then by `agent_id` when display names are equal
 - non-owner, non-admin users cannot mutate other users' public agents
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
@@ -100,6 +101,15 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
 - `node-id=153-8761`: queued task comment when the agent is already busy
 - `node-id=227-19354`: task stop flow with stopped agent comment
 - `node-id=156-19307`: AI Agent menu placement in the workspace sidebar
+
+Confirmed through the Figma plugin/Dev Mode annotations on 2026-05-29:
+
+- `node-id=153-12742`: task participant dropdown. The annotation says members
+  sort 가나다순, agents show viewer-owned agents first and then 가나다순, long
+  member/agent names need contained UI, and the dropdown presentation caps at
+  520px with scrollbar width handled by the client. This server owns only the
+  deterministic agent response order; member ordering and pixel sizing remain
+  client presentation behavior.
 
 ## Boundary
 
