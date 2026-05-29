@@ -59,6 +59,15 @@ screens first consume the generated cold collection call for
 `active_stream` link, when present, is the generated handoff into the SSE client
 event stream.
 
+Figma normal task-thread screen (`node-id=236-21379`) is generated-client
+composition context for `riido.aiAgent.tasks.threads`,
+`riido.aiAgent.tasks.submitComment`, and `riido.aiAgent.tasks.stop`. The
+generated artifact may document that those calls are commonly used together on
+the task page, but it must not turn the generic task comment box, right details
+panel, reply input layout, send-button visual state, or agent row presentation
+into API fields. Those remain client/task UI facts around the generated request
+and response shapes.
+
 Figma participant dropdown annotations (`node-id=153-12742`) are generated-client
 consumption context for `listAIAgentTaskAssignableAgents`. The delivery artifact
 may document that this query feeds the AI Agent rows in the participant dropdown,

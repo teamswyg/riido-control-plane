@@ -165,7 +165,9 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
 - `node-id=153-15931`: task-thread communication section; Dev Mode annotations
   include `riido.aiAgent.events.stream` on `node-id=153-8545` and
   `riido.aiAgent.tasks.stop` on `node-id=236-20768`
-- `node-id=236-21379`: normal task thread with comment input and agent reply
+- `node-id=236-21379`: normal task thread with the generic task comment input,
+  an AI Agent reply row, an AI Agent reply input, and a `중지` action in the same
+  task view
 - `node-id=153-8761`: queued task comment when the agent is already busy
 - `node-id=227-19354`: task stop flow with stopped agent comment
 - `node-id=156-19307`: AI Agent menu placement in the workspace sidebar,
@@ -205,6 +207,16 @@ before optional streaming. `tasks.threads` maps to
 while the viewer was elsewhere, the server responsibility is to return that
 persisted visible thread on the later cold read; the client owns any scroll or
 focus behavior that makes the newly relevant thread visible in the task view.
+
+`node-id=236-21379` confirms that the normal task screen consumes three
+generated operations as one route composition: `tasks.threads` for historical
+thread rows, `tasks.submitComment` for AI-Agent-directed thread replies, and
+`tasks.stop` for the visible active-thread stop affordance. The right details
+panel, generic task comment box layout, reply input presentation, and send
+button state stay client/task surface behavior. The server only distinguishes an
+AI-Agent-directed message once the client calls
+`POST /v1/client/ai-agent/tasks/{task_id}/comments` with `agent_id` and optional
+`source_comment_id`.
 
 `node-id=153-12742` maps to the existing
 `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents` endpoint and the
