@@ -49,6 +49,12 @@ which generated calls a route uses after navigation, but client menu labels,
 ordering, selected state, and route wiring stay outside the control-plane API
 projection.
 
+Figma task-thread annotations (`node-id=153-15931`) are also consumption context.
+They may name generated call chains such as `riido.aiAgent.events.stream` and
+`riido.aiAgent.tasks.stop`, but the delivery artifact must derive those chains
+from the control-plane OpenAPI projection and generated-client manifest. It must
+not hand-code annotation strings as a second source of truth.
+
 ## DSL Lifecycle
 
 The sub-DSL must preserve lifecycle metadata before OpenAPI generation:

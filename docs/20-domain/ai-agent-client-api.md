@@ -49,6 +49,11 @@ For agent settings:
 - Figma menu placement (`node-id=156-19307`) is a client route affordance, not
   a server menu contract. This repository owns the protected data endpoints used
   after a client opens the AI Agent, runtime, or agent-management route.
+- Figma task-thread annotations (`node-id=153-15931`) cite
+  `riido.aiAgent.events.stream` and `riido.aiAgent.tasks.stop` as generated
+  client consumption paths. This repository owns the matching HTTP/SSE behavior
+  and generated shape. It does not own client scroll-to-thread behavior, hover
+  states, modal layout, or progress animation references.
 
 Bottom-up findings from this repository, such as validation cost, generator
 shape, or frontend usability, can start here. If the finding changes domain
@@ -102,6 +107,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 
 Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
 
+- `node-id=153-15931`: task-thread communication section; Dev Mode annotations
+  include `riido.aiAgent.events.stream` on `node-id=153-8545` and
+  `riido.aiAgent.tasks.stop` on `node-id=236-20768`
 - `node-id=236-21379`: normal task thread with comment input and agent reply
 - `node-id=153-8761`: queued task comment when the agent is already busy
 - `node-id=227-19354`: task stop flow with stopped agent comment
@@ -114,6 +122,11 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
 needs visible entry points into AI Agent/runtime/agent-management surfaces; the
 current server responsibility remains `bootstrap`, `devices`, agent mutation,
 task-thread actions, and `events`.
+
+`node-id=153-15931` also does not add a new endpoint by itself. It confirms that
+the existing generated call paths must remain discoverable for frontend thread
+composition: `tasks.stop` maps to `POST /v1/client/ai-agent/tasks/{task_id}/stop`
+and `events.stream` maps to the `GET /v1/client/ai-agent/events` SSE surface.
 
 The `model` field from `node-id=164-50215` is not implemented in this client API
 yet. Its ownership is tracked by `riido-contracts`
