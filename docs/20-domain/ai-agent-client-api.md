@@ -87,9 +87,11 @@ For agent settings:
 - Figma runtime settings annotations (`node-id=162-23090`) confirm the
   `devices` API consumption context. This repository owns the protected
   device/runtime read model, `device_runtime_snapshot` event shape, generated
-  DTOs, and black-box tests. It does not own the agent hover popover, daemon
-  stop modal, restart animation, or desktop-local daemon lifecycle command
-  composition.
+  DTOs, and black-box tests for current-device and other-device grouping,
+  runtime name/version/status, and attached-agent records. It does not own the
+  agent hover popover, daemon stop modal, restart animation, local daemon
+  uptime/PID/daemon ID/profile/device-name detail, or desktop-local daemon
+  lifecycle command composition.
 - Figma onboarding annotations (`node-id=42-3014`) confirm the bootstrap and
   device/runtime consumption context. `node-id=137-6746` maps runtime selection
   to `GET /v1/client/ai-agent/devices`: Claude Code/Codex can be rendered as
@@ -344,10 +346,14 @@ and renders truncation, max height, and scrollbars.
 `listAIAgentDeviceRuntimes` query. A future nested wrapper may expose the same
 operation as a `riido.aiAgent.devices.runtimes` chain, but the chain must be
 generated from the OpenAPI operation rather than hard-coded from the Figma
-annotation. The agent hover popover is rendered from existing agent profile
-fields. The daemon stop modal and restart animation are client/desktop-local
-behavior; this server does not add a protected SaaS `stop daemon` or
-`restart daemon` endpoint for that screen.
+annotation. The response is the source for visible device/runtime rows,
+runtime name/version/status, and attached-agent records used by the `내 기기`
+and `다른 기기` groups. The agent hover popover is rendered from existing agent
+profile fields. Current-device daemon details such as uptime, PID, daemon ID,
+profile, and device name are local daemon/helper facts unless a later contract
+promotes them into this API. The daemon stop modal and restart animation are
+client/desktop-local behavior; this server does not add a protected SaaS
+`stop daemon` or `restart daemon` endpoint for that screen.
 
 `node-id=275-22731` also maps to `GET /v1/client/ai-agent/devices`. The server
 returns ordinary device/runtime rows or empty arrays; the client decides whether

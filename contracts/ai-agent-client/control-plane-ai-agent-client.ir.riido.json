@@ -91,6 +91,7 @@
         "runtime_reinstalled_same_device: mark runtime online according to online/offline policy only",
         "runtime_detection_error: expose offline to clients",
         "client: runtime-settings empty and install-card states are composed from device/runtime read-model data without changing liveness semantics",
+        "client: runtime-settings current-device and other-device groups are composed from DeviceRecord values; current-device daemon detail, stop, and restart presentation remain desktop-local helper behavior and do not add a SaaS daemon command",
         "client: provider install-card hover, Windows app waitlist copy, and marketing-consent presentation are downstream client/product facts until a separate owning SSOT adds a generated operation"
       ]
     },
@@ -1459,7 +1460,8 @@
         "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent",
         "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records",
         "listAIAgentDeviceRuntimes.figma-onboarding-runtime-selection",
-        "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model"
+        "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model",
+        "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition"
       ]
     },
     {
@@ -1792,6 +1794,14 @@
       "given": "the Figma runtime settings empty-state section shows no current-device runtime, no daemon, provider install cards, or Windows app waitlist variants",
       "when": "the client reads device runtime data",
       "then": "the client composes those empty/install/waitlist states from ordinary device and runtime records without adding provider-install or waitlist commands to this API"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition",
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "name": "runtime settings current and other device composition",
+      "given": "the Figma runtime settings page shows current-device and other-device groups with runtime name/version/status/attached-agent rows plus a current-device daemon row with local details and actions",
+      "when": "the client reads device runtime data",
+      "then": "the response provides ordinary device/runtime/attached-agent records while daemon uptime, PID, daemon ID, profile, device name, stop, and restart controls remain desktop-local and no SaaS stop/restart daemon operation is generated"
     },
     {
       "scenario_id": "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",

@@ -105,10 +105,12 @@ but generated code must not provide a misleading fallback path.
 Figma runtime settings annotations (`node-id=162-23090`) are generated-client
 consumption context for `listAIAgentDeviceRuntimes` and
 `device_runtime_snapshot`. The delivery artifact may document that these
-generated pieces feed the runtime settings route and attached-agent avatar rows.
-It must not turn the agent hover popover, daemon stop modal, or restart
-animation into a control-plane endpoint. Desktop-local daemon lifecycle
-composition remains outside the generated SaaS client.
+generated pieces feed the runtime settings route, `내 기기`/`다른 기기`
+grouping, runtime name/version/status rows, and attached-agent avatar rows. It
+must not turn local daemon uptime/PID/profile details, the agent hover popover,
+daemon stop modal, or restart animation into a control-plane endpoint.
+Desktop-local daemon lifecycle composition remains outside the generated SaaS
+client.
 
 Figma agent setting annotations (`node-id=164-50215`), add-screen evidence
 (`node-id=134-6542`), and list-screen evidence (`node-id=432-35713`) are
