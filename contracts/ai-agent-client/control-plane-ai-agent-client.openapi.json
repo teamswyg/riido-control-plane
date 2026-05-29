@@ -289,6 +289,7 @@
           "getAIAgentClientBootstrap.figma-client-bootstrap",
           "getAIAgentClientBootstrap.figma-agent-list-timestamps",
           "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
+          "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
           "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
         ]
       }

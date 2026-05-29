@@ -161,13 +161,19 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - runtime selection uses ordinary device/runtime records; SaaS validates the
   selected `runtime_id` through create/update and does not expose a separate
   runtime-selection mutation
+- the agent settings `에이전트 추가` affordance is client presentation over the
+  authorized device/runtime read model; Figma `node-id=337-24013` hides it when
+  no member-visible runtime is selectable and this does not add an eligibility
+  endpoint
 - if no runtime is selectable, clients use existing device/runtime data to skip
   the template-selection step; SaaS does not add a separate onboarding skip
   command
 - non-owner, non-admin users cannot mutate other users' public agents
 - client-facing agent creation stamps `owner_principal_id` from authorization,
-  requires `name`, `visibility`, and a viewer-owned `runtime_id`, and starts as
-  editable with zero assigned tasks
+  requires `name`, `visibility`, and an authorized selectable `runtime_id`, and
+  starts as editable with zero assigned tasks; non-admin users are normally
+  limited to viewer-owned runtimes, while admin users may use runtime rows made
+  visible by RBAC
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
   agent record; binary image upload/storage is outside this mock API
@@ -354,13 +360,17 @@ read-model fields `AgentClientRecord.created_at`,
 derives `runtime_kind` from the selected runtime, and validates optional
 `model_id` against the selected runtime's `RuntimeRecord.models` catalog. If
 `model_id` is omitted, the server saves the selected runtime's default model.
-`node-id=432-35713` adds the agent-list requirement that clients can render
-separate 생성일 and 업데이트일 columns from server-authored timestamps. The
-client can use `created_at` for the list's creation date, `updated_at` for the
-list's update date, and either value for absolute-time tooltips shown in Figma.
-Row click, meatball edit/delete entry, no-description row layout,
-status-label copy/color, save-button enablement, long-description truncation,
-dropdown layout, and timestamp formatting remain client-owned.
+`node-id=337-24001` and `node-id=432-35713` add the agent-list requirement that
+clients can render separate 생성일 and 업데이트일 columns from server-authored
+timestamps. The client can use `created_at` for the list's creation date,
+`updated_at` for the list's update date, and either value for absolute-time
+tooltips shown in Figma. `node-id=337-24013` also confirms that the
+`에이전트 추가` affordance is hidden when no member-visible runtime is
+selectable; that condition is derived from bootstrap/device runtime read-model
+data and does not add a separate endpoint. Row click, meatball edit/delete
+entry, no-description row layout, status-label copy/color, save-button
+enablement, long-description truncation, dropdown layout, and timestamp
+formatting remain client-owned.
 
 `node-id=42-3014` maps to existing bootstrap/devices/create behavior plus one
 explicit bootstrap field: `ClientBootstrapResponse.agent_templates`. The
