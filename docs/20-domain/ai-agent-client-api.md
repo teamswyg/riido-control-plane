@@ -75,14 +75,25 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `POST /v1/agents/{agent_id}/thread-progress`
 - client task-thread progress is streamed as the typed
   `agent_thread_progress` event on `GET /v1/client/ai-agent/events`
+- `openAIAgentTaskThreads` is generated only when the OpenAPI projection carries
+  the `x-riido-client-helpers` metadata emitted from the contracts DSL/IR. The
+  generator must not infer this helper merely from operation names.
 
 ## Figma Handoff Evidence
 
-Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
+Confirmed in Chrome/Figma against `v.1.22 AI Agent` on 2026-05-29:
 
+- `section=153:15931` / `댓글 소통`: thread communication surface. The Figma
+  label says "댓글", but the contract/API meaning is task thread.
+- `node-id=153-8545`: annotation names `riido.aiAgent.events.stream`
 - `node-id=236-21379`: normal task thread with comment input and agent reply
 - `node-id=153-8761`: queued task comment when the agent is already busy
-- `node-id=227-19354`: task stop flow with stopped agent comment
+- `node-id=236-20768`: annotation names `riido.aiAgent.tasks.stop`
+- `node-id=227-19354`: task stop flow with stopped agent comment modal
+- `node-id=153-8592`: long task body should scroll so the agent thread is
+  visible after assignment
+- `node-id=153-15916`: agent thinking/reference lines stream like the AI
+  content-fill loading UI
 - `node-id=156-19307`: AI Agent menu placement in the workspace sidebar
 
 ## Boundary

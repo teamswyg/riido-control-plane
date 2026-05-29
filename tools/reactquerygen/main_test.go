@@ -58,3 +58,20 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		}
 	}
 }
+
+func TestGenerateReactQueryClientHelperRequiresContractMetadata(t *testing.T) {
+	openAPIPath := filepath.Join("..", "..", "contracts", "ai-agent-client", "control-plane-ai-agent-client.openapi.json")
+	spec, err := loadOpenAPI(openAPIPath)
+	if err != nil {
+		t.Fatalf("loadOpenAPI: %v", err)
+	}
+	spec.RiidoClientHelpers = nil
+	got, err := generate(spec)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	body := string(got)
+	if strings.Contains(body, "export async function openAIAgentTaskThreads") {
+		t.Fatal("generated helper without x-riido-client-helpers metadata")
+	}
+}

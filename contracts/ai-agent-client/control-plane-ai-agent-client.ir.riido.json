@@ -1689,5 +1689,19 @@
       "when": "the assignment state changes",
       "then": "the event stream includes task_id, assignment_state, and a typed comment_kind for the client thread"
     }
+  ],
+  "client_helpers": [
+    {
+      "helper_id": "ai_agent_task_thread_handoff.v1",
+      "kind": "http_hateoas_stream",
+      "name": "openAIAgentTaskThreads",
+      "entry_operation_id": "getAIAgentTaskThreads",
+      "stream_operation_id": "streamAIAgentTaskThreadEvents",
+      "active_link_field": "links.active_stream",
+      "active_id_field": "active_thread_id",
+      "event_type": "agent_thread_progress",
+      "target_id_field": "thread_id",
+      "description": "Generated client helper that reads the cold task-thread collection first and opens the active_stream SSE handoff only when the server exposes that HATEOAS link."
+    }
   ]
 }

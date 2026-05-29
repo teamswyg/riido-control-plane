@@ -18,6 +18,7 @@ type openAPISpec struct {
 	Components struct {
 		Schemas map[string]schema `json:"schemas"`
 	} `json:"components"`
+	RiidoClientHelpers []clientHelper `json:"x-riido-client-helpers,omitempty"`
 }
 
 type operation struct {
@@ -64,6 +65,19 @@ type routeOperation struct {
 	Method string
 	Path   string
 	Op     operation
+}
+
+type clientHelper struct {
+	HelperID          string `json:"helper_id"`
+	Kind              string `json:"kind"`
+	Name              string `json:"name"`
+	EntryOperationID  string `json:"entry_operation_id"`
+	StreamOperationID string `json:"stream_operation_id,omitempty"`
+	ActiveLinkField   string `json:"active_link_field,omitempty"`
+	ActiveIDField     string `json:"active_id_field,omitempty"`
+	EventType         string `json:"event_type,omitempty"`
+	TargetIDField     string `json:"target_id_field,omitempty"`
+	Description       string `json:"description,omitempty"`
 }
 
 var pathParamPattern = regexp.MustCompile(`\{([^}/]+)\}`)
@@ -142,8 +156,8 @@ func generate(spec openAPISpec) ([]byte, error) {
 			return nil, err
 		}
 	}
-	if hasOperation(ops, "getAIAgentTaskThreads") && hasOperation(ops, "streamAIAgentTaskThreadEvents") {
-		writeAIAgentTaskThreadHandoff(&b)
+	if err := writeClientHelpers(&b, spec.RiidoClientHelpers, ops); err != nil {
+		return nil, err
 	}
 	out := bytes.TrimRight([]byte(b.String()), "\n")
 	return append(out, '\n'), nil
@@ -271,36 +285,69 @@ func writeOperation(b *strings.Builder, op routeOperation) error {
 	return nil
 }
 
-func writeAIAgentTaskThreadHandoff(b *strings.Builder) {
-	b.WriteString("export interface OpenAIAgentTaskThreadsOptions extends RiidoRequestOptions {\n")
-	b.WriteString("  onEvent?: (event: AgentThreadProgressEvent) => void;\n")
+func writeClientHelpers(b *strings.Builder, helpers []clientHelper, ops []routeOperation) error {
+	byID := operationIndex(ops)
+	for _, helper := range helpers {
+		if helper.Kind != "http_hateoas_stream" {
+			return fmt.Errorf("unsupported client helper kind %q for %q", helper.Kind, helper.HelperID)
+		}
+		entry, ok := byID[helper.EntryOperationID]
+		if !ok {
+			return fmt.Errorf("client helper %q entry operation %q missing", helper.HelperID, helper.EntryOperationID)
+		}
+		stream, ok := byID[helper.StreamOperationID]
+		if !ok {
+			return fmt.Errorf("client helper %q stream operation %q missing", helper.HelperID, helper.StreamOperationID)
+		}
+		writeHTTPHATEOASStreamHelper(b, helper, entry, stream)
+	}
+	return nil
+}
+
+func writeHTTPHATEOASStreamHelper(b *strings.Builder, helper clientHelper, entry, stream routeOperation) {
+	helperExported := exportedName(helper.Name)
+	optionsType := helperExported + "Options"
+	resultType := helperExported + "Result"
+	paramType := exportedName(entry.Op.OperationID) + "PathParams"
+	collectionType := responseType(entry.Op)
+	eventType := responseType(stream.Op)
+	readStreamName := "read" + helperExported + "Stream"
+	drainName := "drain" + helperExported + "SSE"
+	linkExpr := tsFieldAccess("collection", helper.ActiveLinkField)
+	activeIDExpr := tsFieldAccess("collection", helper.ActiveIDField)
+	activeIDField := safeIdentifier(helper.ActiveIDField)
+	linkTargetExpr := tsFieldAccess("link", helper.TargetIDField)
+	eventTargetExpr := tsFieldAccess("event", helper.TargetIDField)
+
+	fmt.Fprintf(b, "export interface %s extends RiidoRequestOptions {\n", optionsType)
+	fmt.Fprintf(b, "  onEvent?: (event: %s) => void;\n", eventType)
 	b.WriteString("}\n\n")
-	b.WriteString("export interface OpenAIAgentTaskThreadsResult {\n")
-	b.WriteString("  collection: AIAgentTaskThreadCollectionResponse;\n")
-	b.WriteString("  active_thread_id?: string;\n")
+	fmt.Fprintf(b, "export interface %s {\n", resultType)
+	fmt.Fprintf(b, "  collection: %s;\n", collectionType)
+	fmt.Fprintf(b, "  %s?: string;\n", activeIDField)
 	b.WriteString("  stream?: Response;\n")
 	b.WriteString("  done?: Promise<void>;\n")
 	b.WriteString("}\n\n")
 	b.WriteString("/**\n")
 	b.WriteString(" * task thread 화면은 과거 기록 조회만으로 끝날 수 있습니다.\n")
 	b.WriteString(" * 이 helper는 HTTP cold collection을 먼저 읽고, 서버가 내려준 active_stream HATEOAS link가 있을 때만 SSE를 엽니다.\n")
-	b.WriteString(" * onEvent를 넘기면 같은 thread_id의 agent_thread_progress 이벤트만 호출자에게 전달합니다.\n")
+	fmt.Fprintf(b, " * onEvent를 넘기면 같은 %s의 %s 이벤트만 호출자에게 전달합니다.\n", helper.TargetIDField, helper.EventType)
 	b.WriteString(" */\n")
-	b.WriteString("export async function openAIAgentTaskThreads(config: RiidoClientConfig, params: GetAIAgentTaskThreadsPathParams, options: OpenAIAgentTaskThreadsOptions = {}): Promise<OpenAIAgentTaskThreadsResult> {\n")
-	b.WriteString("  const collection = await getAIAgentTaskThreads(config, params, options);\n")
-	b.WriteString("  const link = collection.links.active_stream;\n")
+	fmt.Fprintf(b, "export async function %s(config: RiidoClientConfig, params: %s, options: %s = {}): Promise<%s> {\n", helper.Name, paramType, optionsType, resultType)
+	fmt.Fprintf(b, "  const collection = await %s(config, params, options);\n", entry.Op.OperationID)
+	fmt.Fprintf(b, "  const link = %s;\n", linkExpr)
 	b.WriteString("  if (!link) {\n")
 	b.WriteString("    return { collection };\n")
 	b.WriteString("  }\n")
-	b.WriteString("  if (collection.active_thread_id && link.thread_id !== collection.active_thread_id) {\n")
+	fmt.Fprintf(b, "  if (%s && %s !== %s) {\n", activeIDExpr, linkTargetExpr, activeIDExpr)
 	b.WriteString("    throw new Error('Riido API active_stream thread_id mismatch');\n")
 	b.WriteString("  }\n")
-	b.WriteString("  if (link.method !== 'GET' || link.content_type !== 'text/event-stream' || link.event_type !== 'agent_thread_progress') {\n")
+	fmt.Fprintf(b, "  if (link.method !== 'GET' || link.content_type !== 'text/event-stream' || link.event_type !== %q) {\n", helper.EventType)
 	b.WriteString("    throw new Error('Riido API active_stream link is not compatible');\n")
 	b.WriteString("  }\n")
 	b.WriteString("  const stream = await riidoRawRequest(config, riidoHateoasPath(config, link.href), { method: 'GET', signal: options.signal });\n")
-	b.WriteString("  const done = options.onEvent ? readAIAgentTaskThreadStream(stream, link.thread_id, options.onEvent) : undefined;\n")
-	b.WriteString("  return { collection, active_thread_id: link.thread_id, stream, done };\n")
+	fmt.Fprintf(b, "  const done = options.onEvent ? %s(stream, %s, options.onEvent) : undefined;\n", readStreamName, linkTargetExpr)
+	fmt.Fprintf(b, "  return { collection, %s: %s, stream, done };\n", activeIDField, linkTargetExpr)
 	b.WriteString("}\n\n")
 	b.WriteString("function riidoHateoasPath(config: RiidoClientConfig, href: string): string {\n")
 	b.WriteString("  const base = new URL(config.baseUrl);\n")
@@ -310,7 +357,7 @@ func writeAIAgentTaskThreadHandoff(b *strings.Builder) {
 	b.WriteString("  }\n")
 	b.WriteString("  return `${url.pathname}${url.search}`;\n")
 	b.WriteString("}\n\n")
-	b.WriteString("async function readAIAgentTaskThreadStream(response: Response, expectedThreadID: string, onEvent: (event: AgentThreadProgressEvent) => void): Promise<void> {\n")
+	fmt.Fprintf(b, "async function %s(response: Response, expectedTargetID: string, onEvent: (event: %s) => void): Promise<void> {\n", readStreamName, eventType)
 	b.WriteString("  if (!response.body) {\n")
 	b.WriteString("    return;\n")
 	b.WriteString("  }\n")
@@ -324,21 +371,21 @@ func writeAIAgentTaskThreadHandoff(b *strings.Builder) {
 	b.WriteString("    }\n")
 	b.WriteString("    buffer += decoder.decode(value, { stream: true });\n")
 	b.WriteString("    buffer = buffer.replace(/\\r\\n/g, '\\n');\n")
-	b.WriteString("    buffer = drainAIAgentTaskThreadSSE(buffer, expectedThreadID, onEvent);\n")
+	fmt.Fprintf(b, "    buffer = %s(buffer, expectedTargetID, onEvent);\n", drainName)
 	b.WriteString("  }\n")
 	b.WriteString("  buffer += decoder.decode();\n")
 	b.WriteString("  buffer = buffer.replace(/\\r\\n/g, '\\n');\n")
-	b.WriteString("  drainAIAgentTaskThreadSSE(buffer, expectedThreadID, onEvent);\n")
+	fmt.Fprintf(b, "  %s(buffer, expectedTargetID, onEvent);\n", drainName)
 	b.WriteString("}\n\n")
-	b.WriteString("function drainAIAgentTaskThreadSSE(buffer: string, expectedThreadID: string, onEvent: (event: AgentThreadProgressEvent) => void): string {\n")
+	fmt.Fprintf(b, "function %s(buffer: string, expectedTargetID: string, onEvent: (event: %s) => void): string {\n", drainName, eventType)
 	b.WriteString("  let boundary = buffer.indexOf('\\n\\n');\n")
 	b.WriteString("  while (boundary >= 0) {\n")
 	b.WriteString("    const block = buffer.slice(0, boundary).replace(/\\r/g, '');\n")
 	b.WriteString("    buffer = buffer.slice(boundary + 2);\n")
 	b.WriteString("    const data = block.split('\\n').filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\\n');\n")
 	b.WriteString("    if (data) {\n")
-	b.WriteString("      const event = JSON.parse(data) as AgentThreadProgressEvent;\n")
-	b.WriteString("      if (event.event_type === 'agent_thread_progress' && event.thread_id === expectedThreadID) {\n")
+	fmt.Fprintf(b, "      const event = JSON.parse(data) as %s;\n", eventType)
+	fmt.Fprintf(b, "      if (event.event_type === %q && %s === expectedTargetID) {\n", helper.EventType, eventTargetExpr)
 	b.WriteString("        onEvent(event);\n")
 	b.WriteString("      }\n")
 	b.WriteString("    }\n")
@@ -364,13 +411,20 @@ func flattenOperations(paths map[string]map[string]operation) []routeOperation {
 	return ops
 }
 
-func hasOperation(ops []routeOperation, operationID string) bool {
+func operationIndex(ops []routeOperation) map[string]routeOperation {
+	out := make(map[string]routeOperation, len(ops))
 	for _, op := range ops {
-		if op.Op.OperationID == operationID {
-			return true
-		}
+		out[op.Op.OperationID] = op
 	}
-	return false
+	return out
+}
+
+func tsFieldAccess(root, dotted string) string {
+	expr := root
+	for _, part := range strings.Split(dotted, ".") {
+		expr += "." + safeIdentifier(part)
+	}
+	return expr
 }
 
 func requestType(op operation) string {

@@ -502,11 +502,11 @@ export async function openAIAgentTaskThreads(config: RiidoClientConfig, params: 
   if (collection.active_thread_id && link.thread_id !== collection.active_thread_id) {
     throw new Error('Riido API active_stream thread_id mismatch');
   }
-  if (link.method !== 'GET' || link.content_type !== 'text/event-stream' || link.event_type !== 'agent_thread_progress') {
+  if (link.method !== 'GET' || link.content_type !== 'text/event-stream' || link.event_type !== "agent_thread_progress") {
     throw new Error('Riido API active_stream link is not compatible');
   }
   const stream = await riidoRawRequest(config, riidoHateoasPath(config, link.href), { method: 'GET', signal: options.signal });
-  const done = options.onEvent ? readAIAgentTaskThreadStream(stream, link.thread_id, options.onEvent) : undefined;
+  const done = options.onEvent ? readOpenAIAgentTaskThreadsStream(stream, link.thread_id, options.onEvent) : undefined;
   return { collection, active_thread_id: link.thread_id, stream, done };
 }
 
@@ -519,7 +519,7 @@ function riidoHateoasPath(config: RiidoClientConfig, href: string): string {
   return `${url.pathname}${url.search}`;
 }
 
-async function readAIAgentTaskThreadStream(response: Response, expectedThreadID: string, onEvent: (event: AgentThreadProgressEvent) => void): Promise<void> {
+async function readOpenAIAgentTaskThreadsStream(response: Response, expectedTargetID: string, onEvent: (event: AgentThreadProgressEvent) => void): Promise<void> {
   if (!response.body) {
     return;
   }
@@ -533,14 +533,14 @@ async function readAIAgentTaskThreadStream(response: Response, expectedThreadID:
     }
     buffer += decoder.decode(value, { stream: true });
     buffer = buffer.replace(/\r\n/g, '\n');
-    buffer = drainAIAgentTaskThreadSSE(buffer, expectedThreadID, onEvent);
+    buffer = drainOpenAIAgentTaskThreadsSSE(buffer, expectedTargetID, onEvent);
   }
   buffer += decoder.decode();
   buffer = buffer.replace(/\r\n/g, '\n');
-  drainAIAgentTaskThreadSSE(buffer, expectedThreadID, onEvent);
+  drainOpenAIAgentTaskThreadsSSE(buffer, expectedTargetID, onEvent);
 }
 
-function drainAIAgentTaskThreadSSE(buffer: string, expectedThreadID: string, onEvent: (event: AgentThreadProgressEvent) => void): string {
+function drainOpenAIAgentTaskThreadsSSE(buffer: string, expectedTargetID: string, onEvent: (event: AgentThreadProgressEvent) => void): string {
   let boundary = buffer.indexOf('\n\n');
   while (boundary >= 0) {
     const block = buffer.slice(0, boundary).replace(/\r/g, '');
@@ -548,7 +548,7 @@ function drainAIAgentTaskThreadSSE(buffer: string, expectedThreadID: string, onE
     const data = block.split('\n').filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\n');
     if (data) {
       const event = JSON.parse(data) as AgentThreadProgressEvent;
-      if (event.event_type === 'agent_thread_progress' && event.thread_id === expectedThreadID) {
+      if (event.event_type === "agent_thread_progress" && event.thread_id === expectedTargetID) {
         onEvent(event);
       }
     }
