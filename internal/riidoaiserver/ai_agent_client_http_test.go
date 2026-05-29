@@ -152,12 +152,14 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	}})
 
 	thumbnailURL := "https://cdn.riido.io/mock/ai-agents/updated-claude.png"
+	description := strings.Repeat("설", AgentDescriptionMaxCharacters)
 	instruction := strings.Repeat("지", AgentInstructionMaxCharacters)
 	patchBody, err := json.Marshal(UpdateAgentConfigurationRequest{
 		Name:                "같은 이름 가능",
 		Visibility:          AgentVisibilityPublic,
 		RuntimeID:           "runtime-cursor-mock",
 		ProfileThumbnailURL: &thumbnailURL,
+		Description:         &description,
 		Instruction:         &instruction,
 	})
 	if err != nil {
@@ -178,6 +180,7 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		patched.Agent.Visibility != AgentVisibilityPublic ||
 		patched.Agent.RuntimeKind != RuntimeKindCursor ||
 		patched.Agent.ProfileThumbnailURL != thumbnailURL ||
+		patched.Agent.Description != description ||
 		patched.Agent.Instruction != instruction {
 		t.Fatalf("patched agent = %+v", patched.Agent)
 	}
@@ -194,8 +197,21 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		t.Fatalf("bootstrap json: %v", err)
 	}
 	updated, ok := findAIAgent(bootstrap.Agents, "agent-owned-claude")
-	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Instruction != instruction {
+	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction {
 		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
+	}
+
+	tooLongDescription := strings.Repeat("가", AgentDescriptionMaxCharacters+1)
+	tooLongDescriptionBody, err := json.Marshal(UpdateAgentConfigurationRequest{Description: &tooLongDescription})
+	if err != nil {
+		t.Fatalf("marshal too-long description patch body: %v", err)
+	}
+	tooLongDescriptionReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(tooLongDescriptionBody)))
+	tooLongDescriptionReq.Header.Set("Authorization", "Bearer owner-token")
+	tooLongDescriptionResp := httptest.NewRecorder()
+	server.ServeHTTP(tooLongDescriptionResp, tooLongDescriptionReq)
+	if tooLongDescriptionResp.Code != http.StatusBadRequest {
+		t.Fatalf("too-long description patch status=%d body=%s", tooLongDescriptionResp.Code, tooLongDescriptionResp.Body.String())
 	}
 
 	tooLongInstruction := strings.Repeat("가", AgentInstructionMaxCharacters+1)

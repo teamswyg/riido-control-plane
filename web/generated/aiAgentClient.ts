@@ -24,6 +24,7 @@ export interface AgentClientListResponse {
 export interface AgentClientRecord {
   agent_id: string;
   assigned_task_count: number;
+  description?: string;
   editability: AgentEditability;
   instruction?: string;
   is_owned_by_viewer: boolean;
@@ -168,6 +169,7 @@ export interface SubmitAIAgentTaskCommentRequest {
 }
 
 export interface UpdateAgentConfigurationRequest {
+  description?: string;
   instruction?: string;
   name?: string;
   profile_thumbnail_url?: string;
