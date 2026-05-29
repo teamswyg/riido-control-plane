@@ -60,6 +60,12 @@ For agent settings:
   tests. It does not own member sorting, long-name truncation, max dropdown
   height, scrollbar width, checkbox layout, or the mixed member/agent visual
   composition.
+- Figma runtime settings annotations (`node-id=162-23090`) confirm the
+  `devices` API consumption context. This repository owns the protected
+  device/runtime read model, `device_runtime_snapshot` event shape, generated
+  DTOs, and black-box tests. It does not own the agent hover popover, daemon
+  stop modal, restart animation, or desktop-local daemon lifecycle command
+  composition.
 
 Bottom-up findings from this repository, such as validation cost, generator
 shape, or frontend usability, can start here. If the finding changes domain
@@ -110,10 +116,13 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `POST /v1/agents/{agent_id}/thread-progress`
 - client task-thread progress is streamed as the typed
   `agent_thread_progress` event on `GET /v1/client/ai-agent/events`
+- runtime settings consume `GET /v1/client/ai-agent/devices` and
+  `device_runtime_snapshot`; SaaS does not expose a client endpoint to stop or
+  restart a user's local daemon
 
 ## Figma Handoff Evidence
 
-Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
+Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
 
 - `node-id=153-12742`: task participant dropdown section; annotations confirm
   member 가나다 sorting, AI Agent owned-first then name ordering, long-name UI,
@@ -126,6 +135,8 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
 - `node-id=227-19354`: task stop flow with stopped agent comment
 - `node-id=156-19307`: AI Agent menu placement in the workspace sidebar,
   including `Menubar/default` and `Menubar/setting` dark/light variants
+- `node-id=162-23090`: runtime settings page; Dev Mode annotations identify the
+  agent hover popover, daemon stop modal, and restart-in-progress animation
 - `node-id=164-50215`: agent setting page with profile image, name,
   description, runtime, model, visibility, and instruction fields
 
@@ -144,6 +155,16 @@ and `events.stream` maps to the `GET /v1/client/ai-agent/events` SSE surface.
 generated `listAIAgentTaskAssignableAgents` query. The server must preserve the
 agent response policy, while the client composes that response with member rows
 and renders truncation, max height, and scrollbars.
+
+`node-id=162-23090` maps to the existing
+`GET /v1/client/ai-agent/devices` endpoint and the generated
+`listAIAgentDeviceRuntimes` query. A future nested wrapper may expose the same
+operation as a `riido.aiAgent.devices.runtimes` chain, but the chain must be
+generated from the OpenAPI operation rather than hard-coded from the Figma
+annotation. The agent hover popover is rendered from existing agent profile
+fields. The daemon stop modal and restart animation are client/desktop-local
+behavior; this server does not add a protected SaaS `stop daemon` or
+`restart daemon` endpoint for that screen.
 
 The `model` field from `node-id=164-50215` is not implemented in this client API
 yet. Its ownership is tracked by `riido-contracts`

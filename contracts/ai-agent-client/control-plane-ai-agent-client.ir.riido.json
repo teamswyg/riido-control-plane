@@ -1270,7 +1270,7 @@
       "name": "figma client bootstrap",
       "given": "a web or desktop webview client opens the v1.22 AI Agent surface",
       "when": "the client requests bootstrap data",
-      "then": "the response contains visible agents and owned device runtimes required by the Figma onboarding and agent setting screens"
+      "then": "the response contains visible agents and owned device runtimes required by the Figma onboarding, runtime setting, and agent setting screens"
     },
     {
       "scenario_id": "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",

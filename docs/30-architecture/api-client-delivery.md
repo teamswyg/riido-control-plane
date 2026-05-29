@@ -61,6 +61,14 @@ may document that this query feeds the AI Agent rows in the participant dropdown
 but member sorting, long-name truncation, max-height, scrollbar width, and
 checkbox layout remain client implementation details.
 
+Figma runtime settings annotations (`node-id=162-23090`) are generated-client
+consumption context for `listAIAgentDeviceRuntimes` and
+`device_runtime_snapshot`. The delivery artifact may document that these
+generated pieces feed the runtime settings route and attached-agent avatar rows.
+It must not turn the agent hover popover, daemon stop modal, or restart
+animation into a control-plane endpoint. Desktop-local daemon lifecycle
+composition remains outside the generated SaaS client.
+
 ## DSL Lifecycle
 
 The sub-DSL must preserve lifecycle metadata before OpenAPI generation:
