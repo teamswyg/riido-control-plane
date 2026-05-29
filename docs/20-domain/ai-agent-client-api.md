@@ -88,8 +88,9 @@ For agent settings:
   of `agent_templates` and mock coverage. It does not own workspace selection,
   workspace list scrolling or the `새 워크스페이스` row shown in
   `node-id=164-30192`, row selection, direct-setting expansion, scrolling,
-  two-line ellipsis, preview-popover layout, or the client decision to skip
-  template selection when no selectable runtime exists.
+  two-line ellipsis, preview-popover layout, all-disconnected provider-list
+  rendering and the `시작하기` CTA shown in `node-id=164-30206`, or the client
+  decision to skip template selection when no selectable runtime exists.
 - Figma web onboarding annotations (`node-id=236-29749`) confirm that sign-up,
   terms consent, member invite, macOS app download, Windows waitlist, and
   animation references are outside this protected AI Agent API unless a separate
@@ -220,8 +221,8 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   selection (`node-id=137-6746`), template/direct-setting selection
   (`node-id=138-7389`, `node-id=164-26969`), workspace selection/list scrolling
   and the `새 워크스페이스` row (`node-id=164-30192`), two-line template
-  description ellipsis (`node-id=164-27719`), and no-installed-AI skip behavior
-  (`node-id=164-30206`)
+  description ellipsis (`node-id=164-27719`), and no-installed-AI start behavior
+  with all provider rows marked `연결 안 됨` (`node-id=164-30206`)
 - `node-id=236-29749`: web onboarding section; annotations include chat
   animation reference, Google sign-up wording, Google sign-up requiring terms
   consent, email sign-up terms row click behavior, and button progress-bar
