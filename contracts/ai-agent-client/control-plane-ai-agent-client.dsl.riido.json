@@ -64,7 +64,9 @@
         "runtime_deleted_with_assigned_agent: mark runtime offline",
         "runtime_deleted_without_assigned_agent: treat runtime as absent",
         "runtime_reinstalled_same_device: mark runtime online according to online/offline policy only",
-        "runtime_detection_error: expose offline to clients"
+        "runtime_detection_error: expose offline to clients",
+        "client: runtime-settings empty and install-card states are composed from device/runtime read-model data without changing liveness semantics",
+        "client: provider install-card hover, Windows app waitlist copy, and marketing-consent presentation are downstream client/product facts until a separate owning SSOT adds a generated operation"
       ]
     },
     {
@@ -632,6 +634,12 @@
           "given": "the Figma agent setting or add screen opens a model dropdown for a selected runtime",
           "when": "the client reads device runtime data",
           "then": "each runtime projects model candidates as RuntimeModelRecord values instead of top-level enum values"
+        },
+        {
+          "name": "runtime settings empty state from read model",
+          "given": "the Figma runtime settings empty-state section shows no current-device runtime, no daemon, provider install cards, or Windows app waitlist variants",
+          "when": "the client reads device runtime data",
+          "then": "the client composes those empty/install/waitlist states from ordinary device and runtime records without adding provider-install or waitlist commands to this API"
         }
       ]
     },

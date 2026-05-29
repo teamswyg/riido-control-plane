@@ -167,6 +167,9 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   including `Menubar/default` and `Menubar/setting` dark/light variants
 - `node-id=162-23090`: runtime settings page; Dev Mode annotations identify the
   agent hover popover, daemon stop modal, and restart-in-progress animation
+- `node-id=275-22731`: runtime settings empty-state section; annotations mark
+  provider install-card hover states, while the screen text shows no-daemon,
+  no-current-runtime, Windows app waitlist, and marketing-consent variants
 - `node-id=164-50215`: agent setting page with profile image, name,
   description, runtime, model, visibility, and instruction fields
 - `node-id=134-6542`: agent add page with profile image, name, description,
@@ -207,6 +210,15 @@ annotation. The agent hover popover is rendered from existing agent profile
 fields. The daemon stop modal and restart animation are client/desktop-local
 behavior; this server does not add a protected SaaS `stop daemon` or
 `restart daemon` endpoint for that screen.
+
+`node-id=275-22731` also maps to `GET /v1/client/ai-agent/devices`. The server
+returns ordinary device/runtime rows or empty arrays; the client decides whether
+to render no-current-device runtime, no daemon, no installed runtime, other
+device rows, or provider install cards. Provider install-card hover behavior,
+external provider installation links, Windows app waitlist copy, and
+marketing-consent button states are not generated AI Agent API operations in
+this slice. `Q-CP-007` tracks whether the waitlist/marketing mutation belongs
+in this control-plane API or an existing product/user-marketing system.
 
 `node-id=164-50215` maps to existing agent bootstrap/update behavior plus the
 read-model fields `AgentClientRecord.updated_at`, `model_id`, and
