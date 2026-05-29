@@ -89,6 +89,7 @@
         "model_id: treat as an opaque runtime-scoped identifier owned by the selected runtime catalog",
         "label: treat as display data for clients, not a discriminator or generated enum",
         "default: each selectable runtime has exactly one is_default model and omitted model_id resolves to that default",
+        "client_required_control: Figma node-id=417-21803 / 432-35544 marks the model dropdown as a required form control, but the API field remains optional because the runtime default model is a deterministic selection",
         "mutation: create/update validates model_id against the selected runtime before saving agent configuration",
         "daemon: consume only the already-authorized model_id selected by the control plane and never define the client catalog"
       ]
@@ -141,6 +142,7 @@
         "created_at: server-authored RFC3339 date-time stamped when the agent is created; used by clients for list creation dates and absolute-time tooltips",
         "updated_at: server-authored RFC3339 date-time refreshed when editable agent configuration is saved; used by clients for list update dates and absolute-time tooltips",
         "model_id: optional runtime-scoped model selection; omitted create/update values resolve to the selected runtime default",
+        "required_form_controls: Figma node-id=417-21803 / 432-35544 says name, runtime, model, and visibility are required controls; profile_thumbnail_url, description, and instruction remain optional values",
         "create: client-facing agent creation stores the same profile fields, binds an authorized selectable runtime_id from the device/runtime read model, stamps owner_principal_id from authorization, and returns created_at and updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
@@ -829,9 +831,9 @@
         },
         {
           "name": "agent create defaults selected runtime model",
-          "given": "the Figma agent-add screen shows a model dropdown",
+          "given": "the Figma agent-add screen shows a required model dropdown backed by the selected runtime default model",
           "when": "the client creates an agent without model_id",
-          "then": "the response stores the selected runtime's default model_id and model_label without exposing a top-level model enum"
+          "then": "the API accepts the omitted model_id, stores the selected runtime's default model_id and model_label, and does not expose a top-level model enum"
         },
         {
           "name": "agent create rejects model outside runtime catalog",

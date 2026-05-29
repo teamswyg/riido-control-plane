@@ -46,6 +46,9 @@ For agent settings:
   repository projects protected `DeviceRecord.runtimes` values through
   `GET /v1/client/ai-agent/devices` and validates selected `runtime_id` values
   when agents are created or updated.
+- `riido-contracts` owns runtime model catalog semantics. This repository
+  projects `RuntimeRecord.models`, accepts omitted `model_id` as the selected
+  runtime default, and validates a supplied `model_id` against that runtime.
 - This repository owns POST/PATCH validation, create/save/update behavior,
   response projection, generated TypeScript shape, and smoke-test coverage.
 - `riido-daemon` owns runtime consumption of an assigned instruction value after
@@ -174,6 +177,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   starts as editable with zero assigned tasks; non-admin users are normally
   limited to viewer-owned runtimes, while admin users may use runtime rows made
   visible by RBAC
+- Figma `node-id=417-21803` / `node-id=432-35544` marks name, runtime, model,
+  and visibility as required controls; HTTP create still accepts omitted
+  `model_id` because the selected runtime default model is deterministic
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
   agent record; binary image upload/storage is outside this mock API
@@ -360,6 +366,10 @@ read-model fields `AgentClientRecord.created_at`,
 derives `runtime_kind` from the selected runtime, and validates optional
 `model_id` against the selected runtime's `RuntimeRecord.models` catalog. If
 `model_id` is omitted, the server saves the selected runtime's default model.
+This intentionally differs from the client form presentation: the model dropdown
+can be rendered as required because every selectable runtime has a default model
+that can be preselected, but generated HTTP clients do not need to send
+`model_id` to express that default.
 `node-id=337-24001` and `node-id=432-35713` add the agent-list requirement that
 clients can render separate 생성일 and 업데이트일 columns from server-authored
 timestamps. The client can use `created_at` for the list's creation date,
@@ -403,7 +413,9 @@ catalog projection. This repository must not hard-code model candidates as
 generated enum values. It only mirrors the contracts decision
 `runtime_model_catalog.v1`: clients render `RuntimeRecord.models`, send an
 optional `model_id`, and receive the saved `model_id` plus `model_label` on
-agent records.
+agent records. Figma required-control annotations for the save button are
+therefore UI validation state, not a breaking change to the generated request
+schema.
 
 ## Boundary
 
