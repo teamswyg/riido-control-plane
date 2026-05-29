@@ -46,6 +46,9 @@ For agent settings:
   prompt placement.
 - `riido-infra` owns deployment/storage changes only when the API requires new
   media storage, secrets, persistence topology, or release evidence.
+- Figma menu placement (`node-id=156-19307`) is a client route affordance, not
+  a server menu contract. This repository owns the protected data endpoints used
+  after a client opens the AI Agent, runtime, or agent-management route.
 
 Bottom-up findings from this repository, such as validation cost, generator
 shape, or frontend usability, can start here. If the finding changes domain
@@ -99,7 +102,13 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
 - `node-id=236-21379`: normal task thread with comment input and agent reply
 - `node-id=153-8761`: queued task comment when the agent is already busy
 - `node-id=227-19354`: task stop flow with stopped agent comment
-- `node-id=156-19307`: AI Agent menu placement in the workspace sidebar
+- `node-id=156-19307`: AI Agent menu placement in the workspace sidebar,
+  including `Menubar/default` and `Menubar/setting` dark/light variants
+
+`node-id=156-19307` does not add a new endpoint. It confirms that the frontend
+needs visible entry points into AI Agent/runtime/agent-management surfaces; the
+current server responsibility remains `bootstrap`, `devices`, agent mutation,
+task-thread actions, and `events`.
 
 ## Boundary
 

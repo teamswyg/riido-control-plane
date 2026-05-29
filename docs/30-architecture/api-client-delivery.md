@@ -42,6 +42,12 @@ client usage suggests a different thumbnail storage model or instruction
 semantics, the delivery workflow records the local finding but does not alter
 the canonical meaning without a contracts change.
 
+Figma menu placement (`node-id=156-19307`) is a generated-client consumption
+context, not a generated-client endpoint. The delivery workflow may document
+which generated calls a route uses after navigation, but client menu labels,
+ordering, selected state, and route wiring stay outside the control-plane API
+projection.
+
 ## DSL Lifecycle
 
 The sub-DSL must preserve lifecycle metadata before OpenAPI generation:
