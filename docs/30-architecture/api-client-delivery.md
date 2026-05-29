@@ -36,12 +36,13 @@ canonical concept. That does not immediately delete the lower API sub-DSL. The
 API surface moves through lifecycle states so existing clients can migrate.
 
 Agent setting fields follow that dependency direction. `profile_thumbnail_url`,
-`description`, `instruction`, and server-authored `updated_at` are canonical
-terms from `riido-contracts`; this repository delivers them as generated client
-API shape and history/manifest metadata. If client usage suggests a different
-thumbnail storage model, description limit, instruction semantics, timestamp
-meaning, or model catalog, the delivery workflow records the local finding but
-does not alter the canonical meaning without a contracts change.
+`description`, `instruction`, server-authored `created_at`, and
+server-authored `updated_at` are canonical terms from `riido-contracts`; this
+repository delivers them as generated client API shape and history/manifest
+metadata. If client usage suggests a different thumbnail storage model,
+description limit, instruction semantics, timestamp meaning, or model catalog,
+the delivery workflow records the local finding but does not alter the
+canonical meaning without a contracts change.
 
 Figma menu placement (`node-id=156-19307`) is a generated-client consumption
 context, not a generated-client endpoint. The delivery workflow may document
@@ -109,14 +110,16 @@ It must not turn the agent hover popover, daemon stop modal, or restart
 animation into a control-plane endpoint. Desktop-local daemon lifecycle
 composition remains outside the generated SaaS client.
 
-Figma agent setting annotations (`node-id=164-50215`) and add-screen evidence
-(`node-id=134-6542`) are generated-client consumption context for
-bootstrap/create/update/editability APIs. The delivery artifact may document
-that `createAIAgent` feeds the add-agent save flow and `updated_at` feeds list
-update dates and absolute-time tooltips. It must not turn row click, meatball
-edit entry, save-button enablement, long-description presentation, dropdown
-rendering, or provider-specific model labels into generated API facts before
-the contracts model-catalog question is resolved.
+Figma agent setting annotations (`node-id=164-50215`), add-screen evidence
+(`node-id=134-6542`), and list-screen evidence (`node-id=432-35713`) are
+generated-client consumption context for bootstrap/create/update/editability
+APIs. The delivery artifact may document that `createAIAgent` feeds the
+add-agent save flow, `created_at` feeds list creation dates, and `updated_at`
+feeds list update dates and absolute-time tooltips. It must not turn row click,
+meatball edit/delete entry, no-description row layout, status-label copy/color,
+save-button enablement, long-description presentation, dropdown rendering, or
+provider-specific model labels into generated API facts before the contracts
+model-catalog question is resolved.
 
 Figma onboarding annotations (`node-id=42-3014`) are generated-client
 consumption context for bootstrap, devices, and create APIs. The delivery

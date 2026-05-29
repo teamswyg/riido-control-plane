@@ -296,6 +296,7 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		created.Agent.ProfileThumbnailURL != thumbnailURL ||
 		created.Agent.Description != description ||
 		created.Agent.Instruction != instruction ||
+		created.Agent.CreatedAt.IsZero() ||
 		created.Agent.UpdatedAt.IsZero() {
 		t.Fatalf("created agent = %+v", created.Agent)
 	}
@@ -336,6 +337,9 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	if patched.Agent.UpdatedAt.IsZero() {
 		t.Fatalf("patched agent updated_at is zero: %+v", patched.Agent)
 	}
+	if patched.Agent.CreatedAt.IsZero() || !patched.Agent.CreatedAt.Before(patched.Agent.UpdatedAt) {
+		t.Fatalf("patched agent created_at must be preserved and before updated_at: %+v", patched.Agent)
+	}
 
 	bootstrapReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/bootstrap", nil)
 	bootstrapReq.Header.Set("Authorization", "Bearer owner-token")
@@ -349,11 +353,11 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		t.Fatalf("bootstrap json: %v", err)
 	}
 	updated, ok := findAIAgent(bootstrap.Agents, "agent-owned-claude")
-	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction || !updated.UpdatedAt.Equal(patched.Agent.UpdatedAt) {
+	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction || !updated.CreatedAt.Equal(patched.Agent.CreatedAt) || !updated.UpdatedAt.Equal(patched.Agent.UpdatedAt) {
 		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
 	}
 	createdAgain, ok := findAIAgent(bootstrap.Agents, created.Agent.AgentID)
-	if !ok || createdAgain.OwnerPrincipalID != "user-1" || createdAgain.RuntimeID != "runtime-cursor-mock" {
+	if !ok || createdAgain.OwnerPrincipalID != "user-1" || createdAgain.RuntimeID != "runtime-cursor-mock" || !createdAgain.CreatedAt.Equal(created.Agent.CreatedAt) || !createdAgain.UpdatedAt.Equal(created.Agent.UpdatedAt) {
 		t.Fatalf("bootstrap created agent = %+v found=%v", createdAgain, ok)
 	}
 	if !runtimeHasAssignedAgent(bootstrap.Devices, "runtime-cursor-mock") {

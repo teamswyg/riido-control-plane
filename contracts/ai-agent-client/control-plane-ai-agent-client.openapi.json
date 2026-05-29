@@ -287,6 +287,7 @@
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
           "getAIAgentClientBootstrap.figma-client-bootstrap",
+          "getAIAgentClientBootstrap.figma-agent-list-timestamps",
           "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
           "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
         ]
@@ -837,6 +838,10 @@
           "assigned_task_count": {
             "type": "integer"
           },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
           "description": {
             "maxLength": 160,
             "type": "string"
@@ -893,6 +898,7 @@
           "work_status",
           "editability",
           "assigned_task_count",
+          "created_at",
           "updated_at"
         ],
         "type": "object"

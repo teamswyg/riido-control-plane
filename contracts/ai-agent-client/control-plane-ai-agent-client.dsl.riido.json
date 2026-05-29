@@ -133,14 +133,15 @@
     {
       "policy_id": "agent_profile_configuration.v1",
       "kind": "profile",
-      "description": "Agent profile presentation fields and server-authored update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
+      "description": "Agent profile presentation fields and server-authored creation/update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
       "rules": [
         "profile_thumbnail_url: optional HTTPS image URL string; binary upload is outside this contract",
         "description: optional client-authored one-line summary with a maximum of 160 characters; empty string is allowed; client UI owns truncation and wrapping",
         "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
-        "updated_at: server-authored RFC3339 date-time used by clients for list timestamps and absolute-time tooltips",
+        "created_at: server-authored RFC3339 date-time stamped when the agent is created; used by clients for list creation dates and absolute-time tooltips",
+        "updated_at: server-authored RFC3339 date-time refreshed when editable agent configuration is saved; used by clients for list update dates and absolute-time tooltips",
         "model_id: optional runtime-scoped model selection; omitted create/update values resolve to the selected runtime default",
-        "create: client-facing agent creation stores the same profile fields, binds a viewer-owned runtime_id, stamps owner_principal_id from authorization, and returns updated_at",
+        "create: client-facing agent creation stores the same profile fields, binds a viewer-owned runtime_id, stamps owner_principal_id from authorization, and returns created_at and updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
     },
@@ -315,7 +316,7 @@
     {
       "name": "AgentClientRecord",
       "type": "object",
-      "required": ["agent_id", "owner_principal_id", "is_owned_by_viewer", "name", "visibility", "work_status", "editability", "assigned_task_count", "updated_at"],
+      "required": ["agent_id", "owner_principal_id", "is_owned_by_viewer", "name", "visibility", "work_status", "editability", "assigned_task_count", "created_at", "updated_at"],
       "properties": [
         {"name": "agent_id", "type": "string"},
         {"name": "owner_principal_id", "type": "string"},
@@ -332,6 +333,7 @@
         {"name": "work_status", "ref": "AgentWorkStatus"},
         {"name": "editability", "ref": "AgentEditability"},
         {"name": "assigned_task_count", "type": "integer"},
+        {"name": "created_at", "type": "string", "format": "date-time"},
         {"name": "updated_at", "type": "string", "format": "date-time"}
       ]
     },
@@ -612,6 +614,12 @@
           "then": "the response contains visible agents, owned device runtimes, and onboarding agent templates required by the Figma onboarding, runtime setting, and agent setting screens"
         },
         {
+          "name": "figma agent list timestamps",
+          "given": "the Figma agent list screen shows separate 업데이트일 and 생성일 columns with absolute-time tooltips",
+          "when": "the client requests bootstrap data",
+          "then": "each AgentClientRecord includes server-authored created_at and updated_at values while date formatting and tooltip presentation remain client-owned"
+        },
+        {
           "name": "figma onboarding template selection initial state",
           "given": "the Figma onboarding template-selection screen shows 리도, 영실, 홍도, 지원, a 직접 설정 row, a disabled-looking next button, and a right-side preview skeleton",
           "when": "the client requests bootstrap data",
@@ -804,7 +812,7 @@
           "name": "agent add screen creates owned agent",
           "given": "the Figma agent-add screen submits name, visibility, runtime_id, and optional profile fields",
           "when": "an authorized client creates an agent",
-          "then": "the response contains a new owned agent with zero assigned tasks, editable status, server-authored updated_at, and the runtime kind derived from the selected runtime_id"
+          "then": "the response contains a new owned agent with zero assigned tasks, editable status, server-authored created_at and updated_at, and the runtime kind derived from the selected runtime_id"
         },
         {
           "name": "onboarding direct setting creates explicit configuration",
@@ -869,7 +877,7 @@
           "name": "profile fields are saved",
           "given": "an editable agent has no assigned task",
           "when": "the owner updates profile_thumbnail_url, description, and instruction",
-          "then": "the response and future client bootstrap contain the saved profile fields and a server-authored updated_at timestamp"
+          "then": "the response and future client bootstrap contain the saved profile fields, preserve server-authored created_at, and refresh updated_at"
         },
         {
           "name": "model updates validate against runtime catalog",

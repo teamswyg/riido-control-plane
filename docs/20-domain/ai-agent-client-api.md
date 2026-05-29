@@ -176,6 +176,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   a client concern and does not rewrite the stored value
 - `instruction` is saved as optional client-authored agent guidance text and is
   rejected when it exceeds 1000 characters
+- `created_at` is a server-authored RFC3339 date-time on every
+  `AgentClientRecord`; it is stamped when the agent is created and remains
+  immutable so clients can render creation dates or absolute-time tooltips
 - `updated_at` is a server-authored RFC3339 date-time on every
   `AgentClientRecord`; it is refreshed when editable agent configuration is
   saved and lets clients render update dates or absolute-time tooltips
@@ -344,16 +347,20 @@ this slice. `Q-CP-007` tracks whether the waitlist/marketing mutation belongs
 in this control-plane API or an existing product/user-marketing system.
 
 `node-id=164-50215` maps to existing agent bootstrap/update behavior plus the
-read-model fields `AgentClientRecord.updated_at`, `model_id`, and
-`model_label`. `node-id=134-6542` adds the client-facing create behavior:
+read-model fields `AgentClientRecord.created_at`,
+`AgentClientRecord.updated_at`, `model_id`, and `model_label`.
+`node-id=134-6542` adds the client-facing create behavior:
 `POST /v1/client/ai-agent/agents` returns the created `AgentClientRecord`,
 derives `runtime_kind` from the selected runtime, and validates optional
 `model_id` against the selected runtime's `RuntimeRecord.models` catalog. If
 `model_id` is omitted, the server saves the selected runtime's default model.
-The client can use `updated_at` for the list's update date and the
-absolute-time tooltip shown in Figma. Row click, meatball edit entry,
-save-button enablement, long-description truncation, dropdown layout, and
-timestamp formatting remain client-owned.
+`node-id=432-35713` adds the agent-list requirement that clients can render
+separate 생성일 and 업데이트일 columns from server-authored timestamps. The
+client can use `created_at` for the list's creation date, `updated_at` for the
+list's update date, and either value for absolute-time tooltips shown in Figma.
+Row click, meatball edit/delete entry, no-description row layout,
+status-label copy/color, save-button enablement, long-description truncation,
+dropdown layout, and timestamp formatting remain client-owned.
 
 `node-id=42-3014` maps to existing bootstrap/devices/create behavior plus one
 explicit bootstrap field: `ClientBootstrapResponse.agent_templates`. The
