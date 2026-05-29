@@ -39,8 +39,8 @@ For agent settings:
 - `riido-contracts` owns the meaning of `profile_thumbnail_url` and
   `description` and `instruction`, including URL-only thumbnail policy, the 160
   character description limit, and the 1000 character instruction limit.
-- This repository owns PATCH validation, save/update behavior, response
-  projection, generated TypeScript shape, and smoke-test coverage.
+- This repository owns POST/PATCH validation, create/save/update behavior,
+  response projection, generated TypeScript shape, and smoke-test coverage.
 - `riido-daemon` owns runtime consumption of an assigned instruction value after
   the assignment contract carries it; this server doc does not define provider
   prompt placement.
@@ -85,6 +85,7 @@ The mock API implements:
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
+- `POST /v1/client/ai-agent/agents`
 - `GET /v1/client/ai-agent/agents/{agent_id}/editability`
 - `PATCH /v1/client/ai-agent/agents/{agent_id}`
 - `DELETE /v1/client/ai-agent/agents/{agent_id}`
@@ -100,6 +101,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task participant dropdown UI presentation, member sorting, and overflow
   behavior are client-owned and do not rewrite the returned agent order
 - non-owner, non-admin users cannot mutate other users' public agents
+- client-facing agent creation stamps `owner_principal_id` from authorization,
+  requires `name`, `visibility`, and a viewer-owned `runtime_id`, and starts as
+  editable with zero assigned tasks
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
   agent record; binary image upload/storage is outside this mock API
@@ -142,6 +146,8 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   agent hover popover, daemon stop modal, and restart-in-progress animation
 - `node-id=164-50215`: agent setting page with profile image, name,
   description, runtime, model, visibility, and instruction fields
+- `node-id=134-6542`: agent add page with profile image, name, description,
+  runtime, model, visibility, instruction, and save controls
 
 `node-id=156-19307` does not add a new endpoint. It confirms that the frontend
 needs visible entry points into AI Agent/runtime/agent-management surfaces; the
@@ -170,10 +176,14 @@ behavior; this server does not add a protected SaaS `stop daemon` or
 `restart daemon` endpoint for that screen.
 
 `node-id=164-50215` maps to existing agent bootstrap/update behavior plus one
-explicit read-model field: `AgentClientRecord.updated_at`. The client can use
-that timestamp for the list's update date and the absolute-time tooltip shown in
-Figma. Row click, meatball edit entry, long-description truncation, dropdown
-layout, and timestamp formatting remain client-owned.
+explicit read-model field: `AgentClientRecord.updated_at`. `node-id=134-6542`
+adds the client-facing create behavior: `POST /v1/client/ai-agent/agents`
+returns the created `AgentClientRecord`, derives `runtime_kind` from the
+selected runtime, and does not accept a `model_id` yet. The client can use
+`updated_at` for the list's update date and the absolute-time tooltip shown in
+Figma. Row click, meatball edit entry, save-button enablement,
+long-description truncation, dropdown layout, and timestamp formatting remain
+client-owned.
 
 The `model` field from `node-id=164-50215` is not implemented in this client API
 yet. Its ownership is tracked by `riido-contracts`
@@ -201,6 +211,7 @@ ALB for:
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
+- `POST /v1/client/ai-agent/agents`
 - `GET /v1/client/ai-agent/events?replay=1`
 - `POST /v1/agents/{agent_id}/thread-progress`
 

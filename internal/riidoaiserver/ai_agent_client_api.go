@@ -161,6 +161,15 @@ type AgentEditabilityResponse struct {
 	Reason            string           `json:"reason,omitempty"`
 }
 
+type CreateAgentConfigurationRequest struct {
+	Name                string          `json:"name"`
+	ProfileThumbnailURL *string         `json:"profile_thumbnail_url,omitempty"`
+	Description         *string         `json:"description,omitempty"`
+	Instruction         *string         `json:"instruction,omitempty"`
+	Visibility          AgentVisibility `json:"visibility"`
+	RuntimeID           string          `json:"runtime_id"`
+}
+
 type UpdateAgentConfigurationRequest struct {
 	Name                string          `json:"name,omitempty"`
 	ProfileThumbnailURL *string         `json:"profile_thumbnail_url,omitempty"`

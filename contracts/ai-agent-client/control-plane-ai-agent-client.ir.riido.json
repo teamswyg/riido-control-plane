@@ -114,6 +114,7 @@
         "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
         "updated_at: server-authored RFC3339 date-time used by clients for list timestamps and absolute-time tooltips",
         "model: Figma model dropdown is not part of this configuration contract until the runtime model catalog ownership is settled",
+        "create: client-facing agent creation stores the same profile fields, binds a viewer-owned runtime_id, stamps owner_principal_id from authorization, and returns updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
     }
@@ -631,6 +632,47 @@
           },
           {
             "name": "reason",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateAgentConfigurationRequest",
+      "schema": {
+        "name": "CreateAgentConfigurationRequest",
+        "type": "object",
+        "required": [
+          "name",
+          "visibility",
+          "runtime_id"
+        ],
+        "properties": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "max_length": 160
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "max_length": 1000
+          },
+          {
+            "name": "visibility",
+            "ref": "AgentVisibility"
+          },
+          {
+            "name": "runtime_id",
             "type": "string"
           }
         ]
@@ -1164,6 +1206,35 @@
       ]
     },
     {
+      "operation_id": "createAIAgent",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/agents",
+      "resource": "agent",
+      "action": "create",
+      "summary": "Create an AI agent configuration from the Figma agent-add screen",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ]
+      },
+      "rbac_policy": "agent_mutation_safety.v1",
+      "request": {
+        "ref": "CreateAgentConfigurationRequest",
+        "required": true
+      },
+      "response": {
+        "status": 201,
+        "ref": "AgentClientRecordResponse"
+      },
+      "scenario_ids": [
+        "createAIAgent.agent-add-screen-creates-owned-agent",
+        "createAIAgent.agent-create-omits-model-field"
+      ]
+    },
+    {
       "operation_id": "getAIAgentEditability",
       "kind": "query",
       "method": "GET",
@@ -1335,6 +1406,22 @@
       "given": "the Figma task thread shows a running AI agent response",
       "when": "the user presses the task stop action",
       "then": "the response and event stream use stopped_by_user_request so the client can render the stopped agent comment"
+    },
+    {
+      "scenario_id": "createAIAgent.agent-add-screen-creates-owned-agent",
+      "operation_id": "createAIAgent",
+      "name": "agent add screen creates owned agent",
+      "given": "the Figma agent-add screen submits name, visibility, runtime_id, and optional profile fields",
+      "when": "an authorized client creates an agent",
+      "then": "the response contains a new owned agent with zero assigned tasks, editable status, server-authored updated_at, and the runtime kind derived from the selected runtime_id"
+    },
+    {
+      "scenario_id": "createAIAgent.agent-create-omits-model-field",
+      "operation_id": "createAIAgent",
+      "name": "agent create omits model field",
+      "given": "the Figma agent-add screen shows a model dropdown",
+      "when": "the client creates an agent before the runtime model catalog ownership is settled",
+      "then": "the API request does not include a model_id or model enum"
     },
     {
       "scenario_id": "getAIAgentEditability.assigned-agent-blocks-editing",

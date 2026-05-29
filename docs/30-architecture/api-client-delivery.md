@@ -69,12 +69,14 @@ It must not turn the agent hover popover, daemon stop modal, or restart
 animation into a control-plane endpoint. Desktop-local daemon lifecycle
 composition remains outside the generated SaaS client.
 
-Figma agent setting annotations (`node-id=164-50215`) are generated-client
-consumption context for bootstrap/update/editability APIs. The delivery artifact
-may document that `updated_at` feeds list update dates and absolute-time
-tooltips. It must not turn row click, meatball edit entry, long-description
-presentation, dropdown rendering, or provider-specific model labels into
-generated API facts before the contracts model-catalog question is resolved.
+Figma agent setting annotations (`node-id=164-50215`) and add-screen evidence
+(`node-id=134-6542`) are generated-client consumption context for
+bootstrap/create/update/editability APIs. The delivery artifact may document
+that `createAIAgent` feeds the add-agent save flow and `updated_at` feeds list
+update dates and absolute-time tooltips. It must not turn row click, meatball
+edit entry, save-button enablement, long-description presentation, dropdown
+rendering, or provider-specific model labels into generated API facts before
+the contracts model-catalog question is resolved.
 
 ## DSL Lifecycle
 

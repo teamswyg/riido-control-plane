@@ -154,6 +154,42 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	thumbnailURL := "https://cdn.riido.io/mock/ai-agents/updated-claude.png"
 	description := strings.Repeat("설", AgentDescriptionMaxCharacters)
 	instruction := strings.Repeat("지", AgentInstructionMaxCharacters)
+	createBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:                "신규 코리",
+		Visibility:          AgentVisibilityPrivate,
+		RuntimeID:           "runtime-cursor-mock",
+		ProfileThumbnailURL: &thumbnailURL,
+		Description:         &description,
+		Instruction:         &instruction,
+	})
+	if err != nil {
+		t.Fatalf("marshal create body: %v", err)
+	}
+	createReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(createBody)))
+	createReq.Header.Set("Authorization", "Bearer owner-token")
+	createResp := httptest.NewRecorder()
+	server.ServeHTTP(createResp, createReq)
+	if createResp.Code != http.StatusCreated {
+		t.Fatalf("create status=%d body=%s", createResp.Code, createResp.Body.String())
+	}
+	var created AgentClientRecordResponse
+	if err := json.Unmarshal(createResp.Body.Bytes(), &created); err != nil {
+		t.Fatalf("create json: %v", err)
+	}
+	if created.Agent.OwnerPrincipalID != "user-1" ||
+		!created.Agent.IsOwnedByViewer ||
+		created.Agent.Name != "신규 코리" ||
+		created.Agent.RuntimeKind != RuntimeKindCursor ||
+		created.Agent.WorkStatus != AgentWorkStatusIdle ||
+		created.Agent.Editability != AgentEditabilityEditable ||
+		created.Agent.AssignedTaskCount != 0 ||
+		created.Agent.ProfileThumbnailURL != thumbnailURL ||
+		created.Agent.Description != description ||
+		created.Agent.Instruction != instruction ||
+		created.Agent.UpdatedAt.IsZero() {
+		t.Fatalf("created agent = %+v", created.Agent)
+	}
+
 	patchBody, err := json.Marshal(UpdateAgentConfigurationRequest{
 		Name:                "같은 이름 가능",
 		Visibility:          AgentVisibilityPublic,
@@ -202,6 +238,13 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	updated, ok := findAIAgent(bootstrap.Agents, "agent-owned-claude")
 	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction || !updated.UpdatedAt.Equal(patched.Agent.UpdatedAt) {
 		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
+	}
+	createdAgain, ok := findAIAgent(bootstrap.Agents, created.Agent.AgentID)
+	if !ok || createdAgain.OwnerPrincipalID != "user-1" || createdAgain.RuntimeID != "runtime-cursor-mock" {
+		t.Fatalf("bootstrap created agent = %+v found=%v", createdAgain, ok)
+	}
+	if !runtimeHasAssignedAgent(bootstrap.Devices, "runtime-cursor-mock") {
+		t.Fatalf("bootstrap runtime-cursor-mock was not marked assigned: %+v", bootstrap.Devices)
 	}
 
 	tooLongDescription := strings.Repeat("가", AgentDescriptionMaxCharacters+1)
@@ -426,6 +469,17 @@ func findAIAgent(agents []AgentClientRecord, id string) (AgentClientRecord, bool
 		}
 	}
 	return AgentClientRecord{}, false
+}
+
+func runtimeHasAssignedAgent(devices []DeviceRecord, runtimeID string) bool {
+	for _, device := range devices {
+		for _, runtime := range device.Runtimes {
+			if runtime.RuntimeID == runtimeID {
+				return runtime.HasAssignedAgent
+			}
+		}
+	}
+	return false
 }
 
 func containsString(values []string, want string) bool {

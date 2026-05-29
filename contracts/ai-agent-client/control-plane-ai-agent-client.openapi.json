@@ -10,6 +10,62 @@
     }
   ],
   "paths": {
+    "/v1/client/ai-agent/agents": {
+      "post": {
+        "operationId": "createAIAgent",
+        "summary": "Create an AI agent configuration from the Figma agent-add screen",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentConfigurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentClientRecordResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ],
+        "x-riido-rbac-policy": "agent_mutation_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-scenarios": [
+          "createAIAgent.agent-add-screen-creates-owned-agent",
+          "createAIAgent.agent-create-omits-model-field"
+        ]
+      }
+    },
     "/v1/client/ai-agent/agents/{agent_id}": {
       "delete": {
         "operationId": "deleteAIAgent",
@@ -936,6 +992,37 @@
             "$ref": "#/components/schemas/AgentThreadProgressEvent"
           }
         ]
+      },
+      "CreateAgentConfigurationRequest": {
+        "properties": {
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
+          "instruction": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "runtime_id": {
+            "type": "string"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AgentVisibility"
+          }
+        },
+        "required": [
+          "name",
+          "visibility",
+          "runtime_id"
+        ],
+        "type": "object"
       },
       "DeleteAgentResponse": {
         "properties": {

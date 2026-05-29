@@ -110,6 +110,15 @@ export type ClientKind = "web" | "desktop_webview";
 
 export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent;
 
+export interface CreateAgentConfigurationRequest {
+  description?: string;
+  instruction?: string;
+  name: string;
+  profile_thumbnail_url?: string;
+  runtime_id: string;
+  visibility: AgentVisibility;
+}
+
 export interface DeleteAgentResponse {
   agent_id: string;
   queued_tasks_unassigned: number;
@@ -220,6 +229,22 @@ async function riidoRawRequest(config: RiidoClientConfig, path: string, init: Re
     throw new Error(`Riido API ${response.status}: ${await response.text()}`);
   }
   return response;
+}
+
+export async function createAIAgent(config: RiidoClientConfig, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
+  const path = "/v1/client/ai-agent/agents";
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+export function createAIAgentQueryKey(body: CreateAgentConfigurationRequest): readonly unknown[] {
+  return ["createAIAgent", body] as const;
+}
+
+export function useCreateAIAgent(config: RiidoClientConfig, options: UseMutationOptions<AgentClientRecordResponse, Error, { body: CreateAgentConfigurationRequest }> = {}) {
+  return useMutation<AgentClientRecordResponse, Error, { body: CreateAgentConfigurationRequest }>({
+    ...options,
+    mutationFn: (variables) => createAIAgent(config, variables.body, {}),
+  });
 }
 
 export interface DeleteAIAgentPathParams {

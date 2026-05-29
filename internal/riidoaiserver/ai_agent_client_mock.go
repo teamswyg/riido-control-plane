@@ -5,9 +5,11 @@ import (
 	"errors"
 	"net/url"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -17,6 +19,7 @@ type AIAgentClientStore interface {
 	ListAIAgentTaskAssignableAgents(ctx context.Context, principal AuthorizationResult, taskID string) (AgentClientListResponse, error)
 	SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error)
 	StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
+	CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error)
 	GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error)
 	UpdateAIAgentConfiguration(ctx context.Context, principal AuthorizationResult, agentID string, req UpdateAgentConfigurationRequest) (AgentClientRecordResponse, error)
 	DeleteAIAgent(ctx context.Context, principal AuthorizationResult, agentID string) (DeleteAgentResponse, error)
@@ -286,6 +289,72 @@ func (s *MockAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal 
 	}
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
+}
+
+func (s *MockAIAgentClientStore) CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return AgentClientRecordResponse{}, err
+	}
+	name := strings.TrimSpace(req.Name)
+	runtimeID := strings.TrimSpace(req.RuntimeID)
+	if name == "" {
+		return AgentClientRecordResponse{}, errors.New("name is required")
+	}
+	if runtimeID == "" {
+		return AgentClientRecordResponse{}, errors.New("runtime_id is required")
+	}
+	if req.Visibility != AgentVisibilityPublic && req.Visibility != AgentVisibilityPrivate {
+		return AgentClientRecordResponse{}, errors.New("visibility must be public or private")
+	}
+	thumbnailURL := ""
+	if req.ProfileThumbnailURL != nil {
+		var err error
+		thumbnailURL, err = normalizeAgentProfileThumbnailURL(*req.ProfileThumbnailURL)
+		if err != nil {
+			return AgentClientRecordResponse{}, err
+		}
+	}
+	description := ""
+	if req.Description != nil {
+		if err := validateAgentDescription(*req.Description); err != nil {
+			return AgentClientRecordResponse{}, err
+		}
+		description = *req.Description
+	}
+	instruction := ""
+	if req.Instruction != nil {
+		if err := validateAgentInstruction(*req.Instruction); err != nil {
+			return AgentClientRecordResponse{}, err
+		}
+		instruction = *req.Instruction
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	runtimeKind, ok := runtimeKindByIDForPrincipal(s.devices, principal, runtimeID)
+	if !ok {
+		return AgentClientRecordResponse{}, errors.New("runtime_id is not available")
+	}
+	now := time.Now().UTC()
+	agentID := uniqueAIAgentIDLocked(s.agents, "agent-"+principal.PrincipalID+"-"+runtimeID)
+	agent := AgentClientRecord{
+		AgentID:             agentID,
+		OwnerPrincipalID:    principal.PrincipalID,
+		IsOwnedByViewer:     true,
+		Name:                name,
+		ProfileThumbnailURL: thumbnailURL,
+		Description:         description,
+		Instruction:         instruction,
+		Visibility:          req.Visibility,
+		RuntimeID:           runtimeID,
+		RuntimeKind:         runtimeKind,
+		WorkStatus:          AgentWorkStatusIdle,
+		Editability:         AgentEditabilityEditable,
+		AssignedTaskCount:   0,
+		UpdatedAt:           now,
+	}
+	s.agents[agent.AgentID] = agent
+	markRuntimeHasAssignedAgentLocked(s.devices, runtimeID, true)
+	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: agent}, nil
 }
 
 func (s *MockAIAgentClientStore) GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error) {
@@ -726,6 +795,62 @@ func runtimeKindByID(devices []DeviceRecord, runtimeID string) (RuntimeKind, boo
 		}
 	}
 	return "", false
+}
+
+func runtimeKindByIDForPrincipal(devices []DeviceRecord, principal AuthorizationResult, runtimeID string) (RuntimeKind, bool) {
+	for _, device := range filterDevicesForPrincipal(devices, principal) {
+		for _, runtime := range device.Runtimes {
+			if runtime.RuntimeID == runtimeID {
+				return runtime.Kind, true
+			}
+		}
+	}
+	return "", false
+}
+
+func markRuntimeHasAssignedAgentLocked(devices []DeviceRecord, runtimeID string, value bool) {
+	for deviceIndex := range devices {
+		for runtimeIndex := range devices[deviceIndex].Runtimes {
+			if devices[deviceIndex].Runtimes[runtimeIndex].RuntimeID == runtimeID {
+				devices[deviceIndex].Runtimes[runtimeIndex].HasAssignedAgent = value
+				return
+			}
+		}
+	}
+}
+
+func uniqueAIAgentIDLocked(agents map[string]AgentClientRecord, seed string) string {
+	base := slugAIAgentIDComponent(seed)
+	if base == "" {
+		base = "agent"
+	}
+	if _, exists := agents[base]; !exists {
+		return base
+	}
+	for i := 2; ; i++ {
+		candidate := base + "-" + strconv.Itoa(i)
+		if _, exists := agents[candidate]; !exists {
+			return candidate
+		}
+	}
+}
+
+func slugAIAgentIDComponent(value string) string {
+	var b strings.Builder
+	previousDash := false
+	for _, r := range strings.ToLower(strings.TrimSpace(value)) {
+		isAllowed := unicode.IsLetter(r) || unicode.IsDigit(r)
+		if isAllowed {
+			b.WriteRune(r)
+			previousDash = false
+			continue
+		}
+		if !previousDash {
+			b.WriteByte('-')
+			previousDash = true
+		}
+	}
+	return strings.Trim(b.String(), "-")
 }
 
 func eventAgentID(payload any) (string, bool) {
