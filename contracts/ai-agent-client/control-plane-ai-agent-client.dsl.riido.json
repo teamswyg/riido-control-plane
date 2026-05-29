@@ -152,8 +152,9 @@
         "bootstrap: return a stable ordered template catalog for the Figma onboarding agent-selection screen",
         "template: carry name, role_label, description, profile_thumbnail_url, and instruction as copyable agent configuration defaults",
         "figma_138_7389: current starter template rows are 리도, 영실, 홍도, and 지원 in bootstrap order",
-        "direct_setting: clients may still create an agent by submitting explicit configuration fields without choosing a template",
+        "direct_setting: Figma node-id=164-26969 expands 직접 설정 into name, description, and instruction input fields that submit through createAIAgent",
         "direct_setting_row: 직접 설정 is client presentation, not an AgentOnboardingTemplate record",
+        "direct_setting_presentation: dimmed starter-template rows, placeholder copy, row expansion, and scroll affordance are client presentation",
         "no_runtime: when no selectable runtime is detected, clients skip the template-selection step and show the no-installed-AI start state",
         "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout"
       ]
@@ -804,6 +805,12 @@
           "given": "the Figma agent-add screen submits name, visibility, runtime_id, and optional profile fields",
           "when": "an authorized client creates an agent",
           "then": "the response contains a new owned agent with zero assigned tasks, editable status, server-authored updated_at, and the runtime kind derived from the selected runtime_id"
+        },
+        {
+          "name": "onboarding direct setting creates explicit configuration",
+          "given": "the Figma onboarding direct-setting expansion shows name, description, and instruction fields after the user selects 직접 설정",
+          "when": "the client submits explicit name, description, instruction, runtime_id, and visibility",
+          "then": "createAIAgent saves a normal owned agent without creating an AgentOnboardingTemplate or a separate direct-setting operation"
         },
         {
           "name": "agent create defaults selected runtime model",

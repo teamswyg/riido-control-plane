@@ -250,7 +250,10 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   and OpenClaw/Cursor Agent as `감지 안 됨` non-selectable rows. The inspected
   `node-id=138-7389` screen shows `리도`, `영실`, `홍도`, and `지원` starter
   template rows, followed by `직접 설정`, with a disabled-looking `다음` button
-  before selection and a right-side preview skeleton.
+  before selection and a right-side preview skeleton. The inspected
+  `node-id=164-26969` expansion is annotated `직접 설정 선택 시 스크롤`; it dims
+  starter-template rows and opens `이름`, `설명`, and `지침` inputs with
+  placeholder copy.
 - `node-id=236-29749`: web onboarding section; annotations include chat
   animation reference, Google sign-up wording, Google sign-up requiring terms
   consent, email sign-up terms row click behavior, and button progress-bar
@@ -360,6 +363,12 @@ frontend. `node-id=138-7389` is the template-selection initial state for that
 field. Selecting a template still creates a normal agent through
 `POST /v1/client/ai-agent/agents`; direct setting uses the same create endpoint
 and is not represented as an extra template record.
+The direct-setting expansion from `node-id=164-26969` maps those expanded
+`이름`, `설명`, and `지침` inputs to
+`CreateAgentConfigurationRequest.name`, `description`, and `instruction`.
+Dimmed starter rows, placeholder copy, and scroll behavior remain client
+presentation. The server still validates `runtime_id`, `visibility`, optional
+profile image URL, and optional `model_id` through the normal create request.
 No-installed-AI branching is derived from `devices.runtimes` and does not add a
 new SaaS command.
 

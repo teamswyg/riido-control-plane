@@ -123,6 +123,7 @@ consumption context for bootstrap, devices, and create APIs. The delivery
 artifact may document that `agent_templates` feeds the starter-agent selection
 screen, but workspace selection/list scrolling and the `새 워크스페이스` row
 shown in `node-id=164-30192`, row selection, direct-setting expansion, scroll,
+direct-setting `이름` / `설명` / `지침` placeholders from `node-id=164-26969`,
 two-line ellipsis, and no-installed-AI start state rendering from
 `node-id=164-30206` remain client composition over generated data. The
 all-disconnected Claude Code/Codex/OpenClaw/Cursor Agent rows and `시작하기` CTA
