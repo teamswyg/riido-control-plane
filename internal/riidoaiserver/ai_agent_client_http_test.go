@@ -37,14 +37,29 @@ func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
 	if containsString(aiAgentIDs(bootstrap.Agents), "agent-private-cursor") {
 		t.Fatalf("bootstrap leaked other private agent: %+v", bootstrap.Agents)
 	}
-	if len(bootstrap.AgentTemplates) != 4 || bootstrap.AgentTemplates[0].TemplateID != "riido_pm" {
+	if len(bootstrap.AgentTemplates) != 4 {
 		t.Fatalf("bootstrap templates = %+v", bootstrap.AgentTemplates)
 	}
-	if bootstrap.AgentTemplates[0].Name != "리도" ||
-		bootstrap.AgentTemplates[0].Description == "" ||
-		bootstrap.AgentTemplates[0].Instruction == "" ||
-		bootstrap.AgentTemplates[0].RoleLabel != "PM Agent" {
-		t.Fatalf("bootstrap first template = %+v", bootstrap.AgentTemplates[0])
+	wantTemplates := []struct {
+		templateID string
+		name       string
+		roleLabel  string
+	}{
+		{templateID: "riido_pm", name: "리도", roleLabel: "PM Agent"},
+		{templateID: "yeongsil_backend", name: "영실", roleLabel: "Backend Agent"},
+		{templateID: "hongdo_frontend", name: "홍도", roleLabel: "Frontend Agent"},
+		{templateID: "jiwon_research", name: "지원", roleLabel: "Research Agent"},
+	}
+	for i, want := range wantTemplates {
+		got := bootstrap.AgentTemplates[i]
+		if got.TemplateID != want.templateID ||
+			got.Name != want.name ||
+			got.RoleLabel != want.roleLabel ||
+			got.Description == "" ||
+			got.Instruction == "" ||
+			got.ProfileThumbnailURL == "" {
+			t.Fatalf("bootstrap template[%d] = %+v, want %+v with copy fields", i, got, want)
+		}
 	}
 
 	assignableReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-1/assignable-agents", nil)

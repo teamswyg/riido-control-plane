@@ -92,12 +92,18 @@ For agent settings:
   to `GET /v1/client/ai-agent/devices`: Claude Code/Codex can be rendered as
   detected/selectable rows when their runtime records are online and detected,
   while OpenClaw/Cursor Agent can be rendered as non-detected disabled rows.
+  `node-id=138-7389` maps starter-agent selection to
+  `ClientBootstrapResponse.agent_templates`: the mock/bootstrap catalog exposes
+  the `리도`, `영실`, `홍도`, and `지원` starter templates in order, while
+  `직접 설정`, disabled-next state before selection, row selection, and preview
+  skeleton/popover rendering are client presentation.
   This repository owns the protected bootstrap projection of `agent_templates`,
   protected runtime read-model projection, selected `runtime_id` validation, and
   mock coverage. It does not own workspace selection, workspace list scrolling
   or the `새 워크스페이스` row shown in `node-id=164-30192`, runtime radio
   rendering, detected/non-detected Korean labels, row dimming, direct-setting
-  expansion, scrolling, two-line ellipsis, preview-popover layout,
+  row/rendering, disabled-next presentation, scrolling, two-line ellipsis,
+  preview skeleton/popover layout,
   all-disconnected provider-list rendering and the `시작하기` CTA shown in
   `node-id=164-30206`, or the client decision to skip template selection when
   no selectable runtime exists.
@@ -148,6 +154,10 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   endpoints; future target surfaces require a separate SSOT and generated API
 - bootstrap returns an ordered `agent_templates` catalog used by the Figma
   onboarding agent-template selection screen
+- the current deterministic mock catalog returns the Figma `node-id=138-7389`
+  starter templates in order: `리도`, `영실`, `홍도`, `지원`
+- `직접 설정` is a client route into explicit agent creation, not a fifth
+  `AgentOnboardingTemplate`
 - runtime selection uses ordinary device/runtime records; SaaS validates the
   selected `runtime_id` through create/update and does not expose a separate
   runtime-selection mutation
@@ -237,7 +247,10 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   description ellipsis (`node-id=164-27719`), and no-installed-AI start behavior
   with all provider rows marked `연결 안 됨` (`node-id=164-30206`). The inspected
   `node-id=137-6746` screen shows Claude Code/Codex as `감지됨` selectable rows
-  and OpenClaw/Cursor Agent as `감지 안 됨` non-selectable rows.
+  and OpenClaw/Cursor Agent as `감지 안 됨` non-selectable rows. The inspected
+  `node-id=138-7389` screen shows `리도`, `영실`, `홍도`, and `지원` starter
+  template rows, followed by `직접 설정`, with a disabled-looking `다음` button
+  before selection and a right-side preview skeleton.
 - `node-id=236-29749`: web onboarding section; annotations include chat
   animation reference, Google sign-up wording, Google sign-up requiring terms
   consent, email sign-up terms row click behavior, and button progress-bar
@@ -343,8 +356,10 @@ timestamp formatting remain client-owned.
 explicit bootstrap field: `ClientBootstrapResponse.agent_templates`. The
 templates give clients stable starter-agent names, descriptions, role labels,
 thumbnail URLs, and instructions without hard-coding product copy in the
-frontend. Selecting a template still creates a normal agent through
-`POST /v1/client/ai-agent/agents`; direct setting uses the same create endpoint.
+frontend. `node-id=138-7389` is the template-selection initial state for that
+field. Selecting a template still creates a normal agent through
+`POST /v1/client/ai-agent/agents`; direct setting uses the same create endpoint
+and is not represented as an extra template record.
 No-installed-AI branching is derived from `devices.runtimes` and does not add a
 new SaaS command.
 

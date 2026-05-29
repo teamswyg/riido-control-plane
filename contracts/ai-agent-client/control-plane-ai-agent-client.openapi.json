@@ -286,6 +286,7 @@
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
           "getAIAgentClientBootstrap.figma-client-bootstrap",
+          "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
           "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
         ]
       }

@@ -165,9 +165,11 @@
       "rules": [
         "bootstrap: return a stable ordered template catalog for the Figma onboarding agent-selection screen",
         "template: carry name, role_label, description, profile_thumbnail_url, and instruction as copyable agent configuration defaults",
+        "figma_138_7389: current starter template rows are 리도, 영실, 홍도, and 지원 in bootstrap order",
         "direct_setting: clients may still create an agent by submitting explicit configuration fields without choosing a template",
+        "direct_setting_row: 직접 설정 is client presentation, not an AgentOnboardingTemplate record",
         "no_runtime: when no selectable runtime is detected, clients skip the template-selection step and show the no-installed-AI start state",
-        "presentation: clients own scrolling, row selection, truncation, and preview popover layout"
+        "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout"
       ]
     }
   ],
@@ -1416,6 +1418,7 @@
       },
       "scenario_ids": [
         "getAIAgentClientBootstrap.figma-client-bootstrap",
+        "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
         "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
       ]
     },
@@ -1703,6 +1706,14 @@
       "given": "a web or desktop webview client opens the v1.22 AI Agent surface",
       "when": "the client requests bootstrap data",
       "then": "the response contains visible agents, owned device runtimes, and onboarding agent templates required by the Figma onboarding, runtime setting, and agent setting screens"
+    },
+    {
+      "scenario_id": "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
+      "operation_id": "getAIAgentClientBootstrap",
+      "name": "figma onboarding template selection initial state",
+      "given": "the Figma onboarding template-selection screen shows 리도, 영실, 홍도, 지원, a 직접 설정 row, a disabled-looking next button, and a right-side preview skeleton",
+      "when": "the client requests bootstrap data",
+      "then": "the response provides the ordered starter templates while 직접 설정, disabled-next, row selection, and preview skeleton behavior remain client presentation without a template-selection command"
     },
     {
       "scenario_id": "getAIAgentClientBootstrap.figma-onboarding-no-runtime",
