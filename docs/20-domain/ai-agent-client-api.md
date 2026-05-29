@@ -42,6 +42,10 @@ For agent settings:
 - `riido-contracts` owns onboarding template catalog semantics. This repository
   projects the catalog in `ClientBootstrapResponse.agent_templates` and seeds
   deterministic mock templates for frontend development.
+- `riido-contracts` owns onboarding runtime-selectability semantics. This
+  repository projects protected `DeviceRecord.runtimes` values through
+  `GET /v1/client/ai-agent/devices` and validates selected `runtime_id` values
+  when agents are created or updated.
 - This repository owns POST/PATCH validation, create/save/update behavior,
   response projection, generated TypeScript shape, and smoke-test coverage.
 - `riido-daemon` owns runtime consumption of an assigned instruction value after
@@ -83,14 +87,20 @@ For agent settings:
   DTOs, and black-box tests. It does not own the agent hover popover, daemon
   stop modal, restart animation, or desktop-local daemon lifecycle command
   composition.
-- Figma onboarding annotations (`node-id=42-3014`) confirm the bootstrap
-  consumption context. This repository owns the protected bootstrap projection
-  of `agent_templates` and mock coverage. It does not own workspace selection,
-  workspace list scrolling or the `새 워크스페이스` row shown in
-  `node-id=164-30192`, row selection, direct-setting expansion, scrolling,
-  two-line ellipsis, preview-popover layout, all-disconnected provider-list
-  rendering and the `시작하기` CTA shown in `node-id=164-30206`, or the client
-  decision to skip template selection when no selectable runtime exists.
+- Figma onboarding annotations (`node-id=42-3014`) confirm the bootstrap and
+  device/runtime consumption context. `node-id=137-6746` maps runtime selection
+  to `GET /v1/client/ai-agent/devices`: Claude Code/Codex can be rendered as
+  detected/selectable rows when their runtime records are online and detected,
+  while OpenClaw/Cursor Agent can be rendered as non-detected disabled rows.
+  This repository owns the protected bootstrap projection of `agent_templates`,
+  protected runtime read-model projection, selected `runtime_id` validation, and
+  mock coverage. It does not own workspace selection, workspace list scrolling
+  or the `새 워크스페이스` row shown in `node-id=164-30192`, runtime radio
+  rendering, detected/non-detected Korean labels, row dimming, direct-setting
+  expansion, scrolling, two-line ellipsis, preview-popover layout,
+  all-disconnected provider-list rendering and the `시작하기` CTA shown in
+  `node-id=164-30206`, or the client decision to skip template selection when
+  no selectable runtime exists.
 - Figma web onboarding annotations (`node-id=236-29749`) confirm that sign-up,
   terms consent, member invite, macOS app download, Windows waitlist, and
   animation references are outside this protected AI Agent API unless a separate
@@ -138,6 +148,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   endpoints; future target surfaces require a separate SSOT and generated API
 - bootstrap returns an ordered `agent_templates` catalog used by the Figma
   onboarding agent-template selection screen
+- runtime selection uses ordinary device/runtime records; SaaS validates the
+  selected `runtime_id` through create/update and does not expose a separate
+  runtime-selection mutation
 - if no runtime is selectable, clients use existing device/runtime data to skip
   the template-selection step; SaaS does not add a separate onboarding skip
   command
@@ -222,7 +235,9 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   (`node-id=138-7389`, `node-id=164-26969`), workspace selection/list scrolling
   and the `새 워크스페이스` row (`node-id=164-30192`), two-line template
   description ellipsis (`node-id=164-27719`), and no-installed-AI start behavior
-  with all provider rows marked `연결 안 됨` (`node-id=164-30206`)
+  with all provider rows marked `연결 안 됨` (`node-id=164-30206`). The inspected
+  `node-id=137-6746` screen shows Claude Code/Codex as `감지됨` selectable rows
+  and OpenClaw/Cursor Agent as `감지 안 됨` non-selectable rows.
 - `node-id=236-29749`: web onboarding section; annotations include chat
   animation reference, Google sign-up wording, Google sign-up requiring terms
   consent, email sign-up terms row click behavior, and button progress-bar

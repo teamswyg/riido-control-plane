@@ -647,6 +647,12 @@
           "then": "each runtime projects model candidates as RuntimeModelRecord values instead of top-level enum values"
         },
         {
+          "name": "figma onboarding runtime selection",
+          "given": "the Figma onboarding runtime-selection screen shows detected Claude Code and Codex rows plus non-detected OpenClaw and Cursor Agent rows",
+          "when": "the client reads device runtime data",
+          "then": "the client enables only online detected runtime rows for agent creation and renders detected/non-detected labels without adding a runtime-selection command"
+        },
+        {
           "name": "runtime settings empty state from read model",
           "given": "the Figma runtime settings empty-state section shows no current-device runtime, no daemon, provider install cards, or Windows app waitlist variants",
           "when": "the client reads device runtime data",

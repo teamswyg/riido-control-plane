@@ -333,6 +333,7 @@
           "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
           "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent",
           "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records",
+          "listAIAgentDeviceRuntimes.figma-onboarding-runtime-selection",
           "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model"
         ]
       }
