@@ -71,6 +71,12 @@ For agent settings:
   tests. It does not own member sorting, long-name truncation, max dropdown
   height, scrollbar width, checkbox layout, or the mixed member/agent visual
   composition.
+- Figma additional planning section (`node-id=153-15935`) confirms the
+  assignment target scope. This repository owns task/subtask-scoped generated
+  behavior under `/v1/client/ai-agent/tasks/{task_id}/...`. It does not expose
+  project, milestone, intake, existing AI property filler, or agent mention
+  operations from this screen. Those surfaces need a separate owning SSOT and a
+  new generated operation before the server accepts them.
 - Figma runtime settings annotations (`node-id=162-23090`) confirm the
   `devices` API consumption context. This repository owns the protected
   device/runtime read model, `device_runtime_snapshot` event shape, generated
@@ -123,6 +129,11 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task participant dropdown responses are ordered owned-first, then by name
 - task participant dropdown UI presentation, member sorting, and overflow
   behavior are client-owned and do not rewrite the returned agent order
+- AI Agent assignment targets are task and subtask surfaces only; `task_id`
+  path parameters in generated AI Agent APIs represent a task or subtask id
+- project, milestone, intake, AI property filler, and agent mention surfaces
+  must not call the task-scoped assignable-agent, comment, stop, or thread
+  endpoints; future target surfaces require a separate SSOT and generated API
 - bootstrap returns an ordered `agent_templates` catalog used by the Figma
   onboarding agent-template selection screen
 - if no runtime is selectable, clients use existing device/runtime data to skip
@@ -176,6 +187,11 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
 - `node-id=153-12742`: task participant dropdown section; annotations confirm
   member 가나다 sorting, AI Agent owned-first then name ordering, long-name UI,
   and max-height/scrollbar behavior
+- `node-id=153-15935`: additional planning section; visible planning text says
+  only tasks and subtasks can receive Agent assignment, existing Riido AI
+  property filling does not recommend agents, agent mentions are unsupported,
+  and device/runtime actions are owner-only. No annotation nodes were found on
+  this section, so the visible planning text is the evidence.
 - `node-id=153-15931`: task-thread communication section; Dev Mode annotations
   include `riido.aiAgent.events.stream` on `node-id=153-8545` and
   `riido.aiAgent.tasks.stop` on `node-id=236-20768`
@@ -258,6 +274,15 @@ viewer is connected, `riido.aiAgent.events.stream` may deliver the typed status
 update. The server does not add a separate `deleted-agent stop` endpoint and
 does not own the Korean copy, Riido actor label, "방금 전" timestamp, hidden
 stop affordance, avatar, or row layout shown in Figma.
+
+`node-id=153-15935` confirms that AI Agent target selection is not a general
+workspace object feature. `riido.aiAgent.tasks.assignableAgents`,
+`riido.aiAgent.tasks.submitComment`, `riido.aiAgent.tasks.threads`, and
+`riido.aiAgent.tasks.stop` are task/subtask route composition only. A client
+opening a project, milestone, intake, existing AI property filler, or mention
+surface should not use these calls as a fallback. The control plane also must
+not add placeholder endpoint families for those surfaces until a separate
+owning SSOT names the target and policy.
 
 `node-id=153-12742` maps to the existing
 `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents` endpoint and the

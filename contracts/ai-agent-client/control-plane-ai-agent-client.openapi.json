@@ -436,7 +436,8 @@
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
           "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
-          "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering"
+          "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering",
+          "listAIAgentTaskAssignableAgents.assignment-target-scope-is-task-or-subtask-only"
         ]
       }
     },

@@ -93,6 +93,14 @@ may document that this query feeds the AI Agent rows in the participant dropdown
 but member sorting, long-name truncation, max-height, scrollbar width, and
 checkbox layout remain client implementation details.
 
+Figma additional planning section (`node-id=153-15935`) is generated-client
+boundary context for assignment targets. The delivery artifact may document that
+AI Agent task calls are valid only on task and subtask surfaces. It must not
+ship helper chains for projects, milestones, intakes, existing AI property
+filling, or agent mentions unless a separate owning SSOT adds those operations.
+Client code may choose to hide or disable agent UI on those non-target surfaces,
+but generated code must not provide a misleading fallback path.
+
 Figma runtime settings annotations (`node-id=162-23090`) are generated-client
 consumption context for `listAIAgentDeviceRuntimes` and
 `device_runtime_snapshot`. The delivery artifact may document that these

@@ -58,6 +58,17 @@
       ]
     },
     {
+      "policy_id": "agent_assignment_target_scope.v1",
+      "kind": "target_scope",
+      "description": "AI Agent assignment, AI-Agent-directed comments, task-thread reads, and task stop actions are generated only for Riido task and subtask surfaces.",
+      "rules": [
+        "target: task_id path parameters represent a Riido task or subtask id",
+        "non_target: projects, milestones, intakes, existing AI property filler, and mention surfaces must not reuse task assignment/comment/stop/thread operations",
+        "client: non-target surfaces may hide, disable, or omit agent UI, but they must not call generated task-scoped AI Agent operations",
+        "future: any non-task target surface requires a separate owning SSOT and a newly generated operation"
+      ]
+    },
+    {
       "policy_id": "agent_mutation_safety.v1",
       "kind": "lifecycle",
       "description": "Deleting an agent force-unassigns queued tasks and force-stops running tasks; editing display/configuration/profile fields is allowed only when the agent has no assigned tasks, and editability must be visible to clients before mutation.",
@@ -1456,7 +1467,8 @@
       },
       "scenario_ids": [
         "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
-        "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering"
+        "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering",
+        "listAIAgentTaskAssignableAgents.assignment-target-scope-is-task-or-subtask-only"
       ]
     },
     {
@@ -1746,6 +1758,14 @@
       "given": "visible agents include owned agents and other users' public agents",
       "when": "the assignable-agent response is returned",
       "then": "owned agents appear first and names are ordered inside each ownership group"
+    },
+    {
+      "scenario_id": "listAIAgentTaskAssignableAgents.assignment-target-scope-is-task-or-subtask-only",
+      "operation_id": "listAIAgentTaskAssignableAgents",
+      "name": "assignment target scope is task or subtask only",
+      "given": "the Figma additional planning section says only tasks and subtasks can receive Agent assignment",
+      "when": "a client needs AI Agent candidates outside a task or subtask surface",
+      "then": "no generated AI Agent assignable-agent operation exists for projects, milestones, intakes, AI property filler, or mention surfaces"
     },
     {
       "scenario_id": "listAIAgentTaskThreads.completed-task-does-not-open-stream",
