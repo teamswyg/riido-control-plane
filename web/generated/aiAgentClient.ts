@@ -33,6 +33,7 @@ export interface AgentClientRecord {
   profile_thumbnail_url?: string;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
+  updated_at: string;
   visibility: AgentVisibility;
   work_status: AgentWorkStatus;
 }

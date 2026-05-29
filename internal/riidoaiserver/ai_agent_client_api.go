@@ -127,6 +127,7 @@ type AgentClientRecord struct {
 	WorkStatus          AgentWorkStatus  `json:"work_status"`
 	Editability         AgentEditability `json:"editability"`
 	AssignedTaskCount   int              `json:"assigned_task_count"`
+	UpdatedAt           time.Time        `json:"updated_at"`
 }
 
 type AgentClientListResponse struct {

@@ -108,6 +108,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   a client concern and does not rewrite the stored value
 - `instruction` is saved as optional client-authored agent guidance text and is
   rejected when it exceeds 1000 characters
+- `updated_at` is a server-authored RFC3339 date-time on every
+  `AgentClientRecord`; it is refreshed when editable agent configuration is
+  saved and lets clients render update dates or absolute-time tooltips
 - delete returns forced assignment effects for queued/running mock tasks
 - task-thread comments can enqueue work when the selected agent is busy
 - task-thread stop actions return `stopped_by_user_request`
@@ -166,10 +169,17 @@ fields. The daemon stop modal and restart animation are client/desktop-local
 behavior; this server does not add a protected SaaS `stop daemon` or
 `restart daemon` endpoint for that screen.
 
+`node-id=164-50215` maps to existing agent bootstrap/update behavior plus one
+explicit read-model field: `AgentClientRecord.updated_at`. The client can use
+that timestamp for the list's update date and the absolute-time tooltip shown in
+Figma. Row click, meatball edit entry, long-description truncation, dropdown
+layout, and timestamp formatting remain client-owned.
+
 The `model` field from `node-id=164-50215` is not implemented in this client API
 yet. Its ownership is tracked by `riido-contracts`
 `docs/50-roadmap/open-questions.md#q-con-006`; until that decision is settled,
-this repository must not hard-code model candidates into the generated client.
+this repository must not hard-code model candidates such as the Figma dropdown
+labels into the generated client.
 
 ## Boundary
 

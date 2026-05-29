@@ -184,6 +184,9 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		patched.Agent.Instruction != instruction {
 		t.Fatalf("patched agent = %+v", patched.Agent)
 	}
+	if patched.Agent.UpdatedAt.IsZero() {
+		t.Fatalf("patched agent updated_at is zero: %+v", patched.Agent)
+	}
 
 	bootstrapReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/bootstrap", nil)
 	bootstrapReq.Header.Set("Authorization", "Bearer owner-token")
@@ -197,7 +200,7 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		t.Fatalf("bootstrap json: %v", err)
 	}
 	updated, ok := findAIAgent(bootstrap.Agents, "agent-owned-claude")
-	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction {
+	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction || !updated.UpdatedAt.Equal(patched.Agent.UpdatedAt) {
 		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
 	}
 

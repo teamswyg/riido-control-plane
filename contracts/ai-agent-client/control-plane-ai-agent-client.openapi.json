@@ -621,6 +621,10 @@
           "runtime_kind": {
             "$ref": "#/components/schemas/RuntimeKind"
           },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
           "visibility": {
             "$ref": "#/components/schemas/AgentVisibility"
           },
@@ -636,7 +640,8 @@
           "visibility",
           "work_status",
           "editability",
-          "assigned_task_count"
+          "assigned_task_count",
+          "updated_at"
         ],
         "type": "object"
       },

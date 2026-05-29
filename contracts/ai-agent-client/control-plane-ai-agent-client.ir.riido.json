@@ -107,11 +107,13 @@
     {
       "policy_id": "agent_profile_configuration.v1",
       "kind": "profile",
-      "description": "Agent profile presentation fields are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
+      "description": "Agent profile presentation fields and server-authored update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
       "rules": [
         "profile_thumbnail_url: optional HTTPS image URL string; binary upload is outside this contract",
         "description: optional client-authored one-line summary with a maximum of 160 characters; empty string is allowed; client UI owns truncation and wrapping",
         "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
+        "updated_at: server-authored RFC3339 date-time used by clients for list timestamps and absolute-time tooltips",
+        "model: Figma model dropdown is not part of this configuration contract until the runtime model catalog ownership is settled",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
     }
@@ -421,7 +423,8 @@
           "visibility",
           "work_status",
           "editability",
-          "assigned_task_count"
+          "assigned_task_count",
+          "updated_at"
         ],
         "properties": [
           {
@@ -478,6 +481,11 @@
           {
             "name": "assigned_task_count",
             "type": "integer"
+          },
+          {
+            "name": "updated_at",
+            "type": "string",
+            "format": "date-time"
           }
         ]
       }
@@ -1350,7 +1358,7 @@
       "name": "profile fields are saved",
       "given": "an editable agent has no assigned task",
       "when": "the owner updates profile_thumbnail_url, description, and instruction",
-      "then": "the response and future client bootstrap contain the saved profile fields"
+      "then": "the response and future client bootstrap contain the saved profile fields and a server-authored updated_at timestamp"
     },
     {
       "scenario_id": "updateAIAgentConfiguration.description-max-length-is-enforced",

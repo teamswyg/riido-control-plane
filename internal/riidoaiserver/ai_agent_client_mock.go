@@ -100,6 +100,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			WorkStatus:          AgentWorkStatusRunning,
 			Editability:         AgentEditabilityBlockedAssignedTasks,
 			AssignedTaskCount:   1,
+			UpdatedAt:           now.Add(-6 * time.Hour),
 		},
 		"agent-owned-claude": {
 			AgentID:             "agent-owned-claude",
@@ -114,6 +115,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			WorkStatus:          AgentWorkStatusOffline,
 			Editability:         AgentEditabilityEditable,
 			AssignedTaskCount:   0,
+			UpdatedAt:           now.Add(-5 * time.Hour),
 		},
 		"agent-public-openclaw": {
 			AgentID:             "agent-public-openclaw",
@@ -128,6 +130,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			WorkStatus:          AgentWorkStatusIdle,
 			Editability:         AgentEditabilityEditable,
 			AssignedTaskCount:   0,
+			UpdatedAt:           now.Add(-4 * time.Hour),
 		},
 		"agent-private-cursor": {
 			AgentID:             "agent-private-cursor",
@@ -142,6 +145,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			WorkStatus:          AgentWorkStatusIdle,
 			Editability:         AgentEditabilityEditable,
 			AssignedTaskCount:   0,
+			UpdatedAt:           now.Add(-3 * time.Hour),
 		},
 	}
 	return &MockAIAgentClientStore{
@@ -354,6 +358,7 @@ func (s *MockAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context,
 		}
 	}
 	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
+	agent.UpdatedAt = time.Now().UTC()
 	s.agents[agent.AgentID] = agent
 	agent.IsOwnedByViewer = agent.OwnerPrincipalID == principal.PrincipalID
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: agent}, nil
