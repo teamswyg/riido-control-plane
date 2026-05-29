@@ -90,6 +90,15 @@ scroll, two-line ellipsis, and no-installed-AI step skipping remain client
 composition over generated data. It must not make frontend hard-coded template
 copy a second SSOT.
 
+Figma web onboarding annotations (`node-id=236-29749`) are not generated-client
+endpoint evidence for this API. The delivery artifact may mention that AI Agent
+screens are reached after auth/onboarding, but sign-up/login, terms consent,
+email validation, member invite, app download, Windows launch notification,
+marketing consent, and animation references stay in auth/team/product/client
+documentation until a separate owning SSOT adds a generated operation. The AI
+Agent generated client must not ship placeholder waitlist or marketing helpers
+from this screen alone.
+
 ## DSL Lifecycle
 
 The sub-DSL must preserve lifecycle metadata before OpenAPI generation:

@@ -76,6 +76,11 @@ For agent settings:
   row selection, direct-setting expansion, scrolling, two-line ellipsis,
   preview-popover layout, or the client decision to skip template selection
   when no selectable runtime exists.
+- Figma web onboarding annotations (`node-id=236-29749`) confirm that sign-up,
+  terms consent, member invite, macOS app download, Windows waitlist, and
+  animation references are outside this protected AI Agent API unless a separate
+  owning SSOT promotes them. This repository must not add generated operations
+  for auth/team/product/distribution presentation from that screen alone.
 
 Bottom-up findings from this repository, such as validation cost, generator
 shape, or frontend usability, can start here. If the finding changes domain
@@ -179,6 +184,12 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   (`node-id=138-7389`, `node-id=164-26969`), two-line template description
   ellipsis (`node-id=164-27719`), and no-installed-AI skip behavior
   (`node-id=164-30206`)
+- `node-id=236-29749`: web onboarding section; annotations include chat
+  animation reference, Google sign-up wording, Google sign-up requiring terms
+  consent, email sign-up terms row click behavior, and button progress-bar
+  references. The section also shows macOS app download, email sign-up, member
+  invite/link-copy, Windows launch notification, waitlist completion, and
+  marketing-consent variants.
 
 `node-id=156-19307` does not add a new endpoint. It confirms that the frontend
 needs visible entry points into AI Agent/runtime/agent-management surfaces; the
@@ -240,6 +251,15 @@ frontend. Selecting a template still creates a normal agent through
 `POST /v1/client/ai-agent/agents`; direct setting uses the same create endpoint.
 No-installed-AI branching is derived from `devices.runtimes` and does not add a
 new SaaS command.
+
+`node-id=236-29749` does not add a generated AI Agent client operation. Sign-up,
+login, Google-auth terms consent, email/password validation, terms row default
+state/click target, and member invitation are auth/team/client product surfaces.
+The macOS app download CTA is a distribution route, not a provider install or
+daemon lifecycle command. Windows launch notification and marketing-consent
+variants remain tracked by `Q-CP-007`; this API must not expose a waitlist or
+marketing mutation until that owning SSOT is chosen. Chat and progress-bar
+animation references stay client presentation facts.
 
 The `model` field from `node-id=164-50215` is implemented as a runtime-scoped
 catalog projection. This repository must not hard-code model candidates as
