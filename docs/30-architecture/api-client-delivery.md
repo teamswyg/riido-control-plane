@@ -55,6 +55,12 @@ They may name generated call chains such as `riido.aiAgent.events.stream` and
 from the control-plane OpenAPI projection and generated-client manifest. It must
 not hand-code annotation strings as a second source of truth.
 
+Figma participant dropdown annotations (`node-id=153-12742`) are generated-client
+consumption context for `listAIAgentTaskAssignableAgents`. The delivery artifact
+may document that this query feeds the AI Agent rows in the participant dropdown,
+but member sorting, long-name truncation, max-height, scrollbar width, and
+checkbox layout remain client implementation details.
+
 ## DSL Lifecycle
 
 The sub-DSL must preserve lifecycle metadata before OpenAPI generation:

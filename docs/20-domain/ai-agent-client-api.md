@@ -54,6 +54,12 @@ For agent settings:
   client consumption paths. This repository owns the matching HTTP/SSE behavior
   and generated shape. It does not own client scroll-to-thread behavior, hover
   states, modal layout, or progress animation references.
+- Figma participant dropdown annotations (`node-id=153-12742`) confirm the
+  `assignable-agents` API consumption context. This repository owns only the
+  visible AI Agent list, owned-first ordering, generated DTO shape, and black-box
+  tests. It does not own member sorting, long-name truncation, max dropdown
+  height, scrollbar width, checkbox layout, or the mixed member/agent visual
+  composition.
 
 Bottom-up findings from this repository, such as validation cost, generator
 shape, or frontend usability, can start here. If the finding changes domain
@@ -85,6 +91,8 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 
 - visible agents are the viewer's owned agents plus other users' public agents
 - task participant dropdown responses are ordered owned-first, then by name
+- task participant dropdown UI presentation, member sorting, and overflow
+  behavior are client-owned and do not rewrite the returned agent order
 - non-owner, non-admin users cannot mutate other users' public agents
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
@@ -107,6 +115,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 
 Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28:
 
+- `node-id=153-12742`: task participant dropdown section; annotations confirm
+  member 가나다 sorting, AI Agent owned-first then name ordering, long-name UI,
+  and max-height/scrollbar behavior
 - `node-id=153-15931`: task-thread communication section; Dev Mode annotations
   include `riido.aiAgent.events.stream` on `node-id=153-8545` and
   `riido.aiAgent.tasks.stop` on `node-id=236-20768`
@@ -127,6 +138,12 @@ task-thread actions, and `events`.
 the existing generated call paths must remain discoverable for frontend thread
 composition: `tasks.stop` maps to `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 and `events.stream` maps to the `GET /v1/client/ai-agent/events` SSE surface.
+
+`node-id=153-12742` maps to the existing
+`GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents` endpoint and the
+generated `listAIAgentTaskAssignableAgents` query. The server must preserve the
+agent response policy, while the client composes that response with member rows
+and renders truncation, max height, and scrollbars.
 
 The `model` field from `node-id=164-50215` is not implemented in this client API
 yet. Its ownership is tracked by `riido-contracts`
