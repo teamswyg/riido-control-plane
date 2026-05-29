@@ -623,7 +623,8 @@
         "x-riido-scenarios": [
           "listAIAgentTaskThreads.completed-task-does-not-open-stream",
           "listAIAgentTaskThreads.running-task-advertises-one-stream",
-          "listAIAgentTaskThreads.reassigned-task-has-multiple-threads"
+          "listAIAgentTaskThreads.reassigned-task-has-multiple-threads",
+          "listAIAgentTaskThreads.assignment-created-while-viewer-away"
         ]
       }
     }

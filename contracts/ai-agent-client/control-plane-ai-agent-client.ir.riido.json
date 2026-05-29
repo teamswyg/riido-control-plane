@@ -123,10 +123,12 @@
       "description": "Task screens read historical AI Agent task threads through HTTP first and connect the client event stream only when the response advertises an active stream link.",
       "rules": [
         "server: return all visible task threads for the requested task as a cold collection",
+        "server: persist and return visible task threads even when the assignment/comment was created while the viewer was on another screen",
         "server: include at most one active_stream link because one task can have only one active AI agent assignment at a time",
         "server: omit active_stream for completed, stopped, failed, or fully cold task-thread collections",
         "stream: every task-thread progress event carries thread_id so the client updates the targeted thread without inferring from task_id alone",
-        "client: never open the SSE stream solely because a task has historical AI Agent comments"
+        "client: never open the SSE stream solely because a task has historical AI Agent comments",
+        "client: owns long-body scroll/focus, hover, modal, and animation presentation around the returned thread records"
       ]
     },
     {
@@ -1477,7 +1479,8 @@
       "scenario_ids": [
         "listAIAgentTaskThreads.completed-task-does-not-open-stream",
         "listAIAgentTaskThreads.running-task-advertises-one-stream",
-        "listAIAgentTaskThreads.reassigned-task-has-multiple-threads"
+        "listAIAgentTaskThreads.reassigned-task-has-multiple-threads",
+        "listAIAgentTaskThreads.assignment-created-while-viewer-away"
       ]
     },
     {
@@ -1756,6 +1759,14 @@
       "given": "an agent finished work on a task and another agent was assigned later",
       "when": "the client requests the task-thread collection",
       "then": "the response returns two or more thread records while active_stream, if present, targets only the currently active one"
+    },
+    {
+      "scenario_id": "listAIAgentTaskThreads.assignment-created-while-viewer-away",
+      "operation_id": "listAIAgentTaskThreads",
+      "name": "assignment created while viewer away",
+      "given": "an AI Agent task thread was created while the viewer was on another screen",
+      "when": "the client later opens the task and requests the task-thread collection",
+      "then": "the response contains the visible persisted thread and advertises active_stream only if that thread is still active"
     },
     {
       "scenario_id": "submitAIAgentTaskComment.comment-routes-to-running-agent",

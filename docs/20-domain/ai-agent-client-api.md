@@ -56,7 +56,8 @@ For agent settings:
   `riido.aiAgent.events.stream` and `riido.aiAgent.tasks.stop` as generated
   client consumption paths. This repository owns the matching HTTP/SSE behavior
   and generated shape. It does not own client scroll-to-thread behavior, hover
-  states, modal layout, or progress animation references.
+  states, modal layout, viewer-away notification rendering, or progress
+  animation references.
 - Figma participant dropdown annotations (`node-id=153-12742`) confirm the
   `assignable-agents` API consumption context. This repository owns only the
   visible AI Agent list, owned-first ordering, generated DTO shape, and black-box
@@ -137,6 +138,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
   to render historical AI Agent comments; `active_stream` is present only when
   the screen should also connect to the client event stream
+- task-thread comments created while the viewer was on another screen are still
+  returned by the later cold collection; scroll/focus presentation remains a
+  client concern
 - daemon progress ingest accepts parsed `<riido_log>...<end>` batches through
   `POST /v1/agents/{agent_id}/thread-progress`
 - client task-thread progress is streamed as the typed
@@ -183,7 +187,10 @@ before optional streaming. `tasks.threads` maps to
 `GET /v1/client/ai-agent/tasks/{task_id}/threads`, `tasks.stop` maps to
 `POST /v1/client/ai-agent/tasks/{task_id}/stop`, and `events.stream` maps to the
 `GET /v1/client/ai-agent/events` SSE surface. The server returns
-`active_stream` only for a currently active task thread.
+`active_stream` only for a currently active task thread. If a thread was created
+while the viewer was elsewhere, the server responsibility is to return that
+persisted visible thread on the later cold read; the client owns any scroll or
+focus behavior that makes the newly relevant thread visible in the task view.
 
 `node-id=153-12742` maps to the existing
 `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents` endpoint and the
