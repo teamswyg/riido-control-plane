@@ -121,10 +121,11 @@ the contracts model-catalog question is resolved.
 Figma onboarding annotations (`node-id=42-3014`) are generated-client
 consumption context for bootstrap, devices, and create APIs. The delivery
 artifact may document that `agent_templates` feeds the starter-agent selection
-screen, but workspace selection, row selection, direct-setting expansion,
-scroll, two-line ellipsis, and no-installed-AI step skipping remain client
-composition over generated data. It must not make frontend hard-coded template
-copy a second SSOT.
+screen, but workspace selection/list scrolling and the `새 워크스페이스` row
+shown in `node-id=164-30192`, row selection, direct-setting expansion, scroll,
+two-line ellipsis, and no-installed-AI step skipping remain client composition
+over generated data. It must not make frontend hard-coded template copy a
+second SSOT.
 
 Figma web onboarding annotations (`node-id=236-29749`) are not generated-client
 endpoint evidence for this API. The delivery artifact may mention that AI Agent

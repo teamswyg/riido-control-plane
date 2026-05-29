@@ -86,9 +86,10 @@ For agent settings:
 - Figma onboarding annotations (`node-id=42-3014`) confirm the bootstrap
   consumption context. This repository owns the protected bootstrap projection
   of `agent_templates` and mock coverage. It does not own workspace selection,
-  row selection, direct-setting expansion, scrolling, two-line ellipsis,
-  preview-popover layout, or the client decision to skip template selection
-  when no selectable runtime exists.
+  workspace list scrolling or the `새 워크스페이스` row shown in
+  `node-id=164-30192`, row selection, direct-setting expansion, scrolling,
+  two-line ellipsis, preview-popover layout, or the client decision to skip
+  template selection when no selectable runtime exists.
 - Figma web onboarding annotations (`node-id=236-29749`) confirm that sign-up,
   terms consent, member invite, macOS app download, Windows waitlist, and
   animation references are outside this protected AI Agent API unless a separate
@@ -217,8 +218,9 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   runtime, model, visibility, instruction, and save controls
 - `node-id=42-3014`: onboarding planning page; annotations include runtime
   selection (`node-id=137-6746`), template/direct-setting selection
-  (`node-id=138-7389`, `node-id=164-26969`), two-line template description
-  ellipsis (`node-id=164-27719`), and no-installed-AI skip behavior
+  (`node-id=138-7389`, `node-id=164-26969`), workspace selection/list scrolling
+  and the `새 워크스페이스` row (`node-id=164-30192`), two-line template
+  description ellipsis (`node-id=164-27719`), and no-installed-AI skip behavior
   (`node-id=164-30206`)
 - `node-id=236-29749`: web onboarding section; annotations include chat
   animation reference, Google sign-up wording, Google sign-up requiring terms
