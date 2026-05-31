@@ -13,6 +13,7 @@ on:
       - ".github/workflows/ai-agent-client-testnet-smoke.yml"
       - "contracts/ai-agent-client/**"
       - "internal/riidoaiserver/ai_agent_client_*.go"
+      - "internal/riidoaiserver/authorization.go"
       - "internal/riidoaiserver/server.go"
       - "cmd/riido_ai_server/main.go"
       - "web/generated/aiAgentClient.ts"
@@ -63,6 +64,14 @@ jobs:
             | jq -e '.schema_version == "riido-ai-server.v1" and (.devices | length) > 0' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/assignable-agents" \
             | jq -e '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == "agent-owned-codex")' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/threads" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and (.threads | length) >= 1 and .active_stream.thread_id == "thread-task-1-codex-2"' >/dev/null
+          curl_json \
+            -H "$auth_header" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"Smoke 신규 에이전트","visibility":"private","runtime_id":"runtime-cursor-mock","description":"testnet smoke agent","instruction":"smoke test instruction"}' \
+            "$base_url/v1/client/ai-agent/agents" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .agent.is_owned_by_viewer == true and .agent.runtime_kind == "cursor" and .agent.editability == "editable" and .agent.assigned_task_count == 0 and (.agent.updated_at | length) > 0' >/dev/null
           curl_json \
             -H "$auth_header" \
             -H "Content-Type: application/json" \

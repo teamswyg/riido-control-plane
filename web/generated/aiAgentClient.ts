@@ -11,7 +11,39 @@ export interface AIAgentTaskActionResponse {
   run_id: string;
   schema_version: string;
   task_id: string;
+  thread_id: string;
   work_status: AgentWorkStatus;
+}
+
+export interface AIAgentTaskThreadCollectionResponse {
+  active_stream?: AIAgentTaskThreadStreamLink;
+  schema_version: string;
+  task_id: string;
+  threads: AIAgentTaskThreadRecord[];
+}
+
+export interface AIAgentTaskThreadRecord {
+  agent_id: string;
+  assignment_state: AgentAssignmentState;
+  comment_kind: AgentTaskCommentKind;
+  completed_at?: string;
+  lines: AgentThreadProgressLine[];
+  message: string;
+  run_id: string;
+  source_comment_id?: string;
+  started_at?: string;
+  task_id: string;
+  thread_id: string;
+  work_status: AgentWorkStatus;
+}
+
+export interface AIAgentTaskThreadStreamLink {
+  event_type: "agent_thread_progress";
+  href: string;
+  rel: "agent_thread_progress_stream";
+  run_id: string;
+  task_id: string;
+  thread_id: string;
 }
 
 export type AgentAssignmentState = "queued" | "running" | "stopping" | "stopped" | "completed" | "failed" | "unassigned";
@@ -24,12 +56,19 @@ export interface AgentClientListResponse {
 export interface AgentClientRecord {
   agent_id: string;
   assigned_task_count: number;
+  created_at: string;
+  description?: string;
   editability: AgentEditability;
+  instruction?: string;
   is_owned_by_viewer: boolean;
+  model_id?: string;
+  model_label?: string;
   name: string;
   owner_principal_id: string;
+  profile_thumbnail_url?: string;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
+  updated_at: string;
   visibility: AgentVisibility;
   work_status: AgentWorkStatus;
 }
@@ -57,6 +96,15 @@ export interface AgentEditabilityResponse {
   schema_version: string;
 }
 
+export interface AgentOnboardingTemplate {
+  description: string;
+  instruction: string;
+  name: string;
+  profile_thumbnail_url?: string;
+  role_label?: string;
+  template_id: string;
+}
+
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
 
 export interface AgentThreadProgressEvent {
@@ -70,6 +118,7 @@ export interface AgentThreadProgressEvent {
   run_id: string;
   schema_version: string;
   task_id: string;
+  thread_id: string;
   work_status: AgentWorkStatus;
 }
 
@@ -91,10 +140,12 @@ export interface AgentWorkStatusChangedEvent {
   run_id?: string;
   schema_version: string;
   task_id?: string;
+  thread_id?: string;
   work_status: AgentWorkStatus;
 }
 
 export interface ClientBootstrapResponse {
+  agent_templates: AgentOnboardingTemplate[];
   agents: AgentClientRecord[];
   client_kind: ClientKind;
   devices: DeviceRecord[];
@@ -105,6 +156,16 @@ export interface ClientBootstrapResponse {
 export type ClientKind = "web" | "desktop_webview";
 
 export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent;
+
+export interface CreateAgentConfigurationRequest {
+  description?: string;
+  instruction?: string;
+  model_id?: string;
+  name: string;
+  profile_thumbnail_url?: string;
+  runtime_id: string;
+  visibility: AgentVisibility;
+}
 
 export interface DeleteAgentResponse {
   agent_id: string;
@@ -143,6 +204,12 @@ export type RuntimeDetectionState = "detected" | "missing" | "error";
 
 export type RuntimeKind = "codex" | "claude_code" | "cursor" | "openclaw";
 
+export interface RuntimeModelRecord {
+  is_default: boolean;
+  label: string;
+  model_id: string;
+}
+
 export interface RuntimeRecord {
   availability: RuntimeAvailability;
   detection_state: RuntimeDetectionState;
@@ -150,6 +217,7 @@ export interface RuntimeRecord {
   has_assigned_agent: boolean;
   kind: RuntimeKind;
   last_detected_at?: string;
+  models: RuntimeModelRecord[];
   owner_principal_id?: string;
   runtime_id: string;
 }
@@ -166,7 +234,11 @@ export interface SubmitAIAgentTaskCommentRequest {
 }
 
 export interface UpdateAgentConfigurationRequest {
+  description?: string;
+  instruction?: string;
+  model_id?: string;
   name?: string;
+  profile_thumbnail_url?: string;
   runtime_id?: string;
   visibility?: AgentVisibility;
 }
@@ -213,6 +285,22 @@ async function riidoRawRequest(config: RiidoClientConfig, path: string, init: Re
     throw new Error(`Riido API ${response.status}: ${await response.text()}`);
   }
   return response;
+}
+
+export async function createAIAgent(config: RiidoClientConfig, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
+  const path = "/v1/client/ai-agent/agents";
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+export function createAIAgentQueryKey(body: CreateAgentConfigurationRequest): readonly unknown[] {
+  return ["createAIAgent", body] as const;
+}
+
+export function useCreateAIAgent(config: RiidoClientConfig, options: UseMutationOptions<AgentClientRecordResponse, Error, { body: CreateAgentConfigurationRequest }> = {}) {
+  return useMutation<AgentClientRecordResponse, Error, { body: CreateAgentConfigurationRequest }>({
+    ...options,
+    mutationFn: (variables) => createAIAgent(config, variables.body, {}),
+  });
 }
 
 export interface DeleteAIAgentPathParams {
@@ -385,5 +473,26 @@ export function useStopAIAgentTask(config: RiidoClientConfig, options: UseMutati
   return useMutation<AIAgentTaskActionResponse, Error, { params: StopAIAgentTaskPathParams; body: StopAIAgentTaskRequest }>({
     ...options,
     mutationFn: (variables) => stopAIAgentTask(config, variables.params, variables.body, {}),
+  });
+}
+
+export interface ListAIAgentTaskThreadsPathParams {
+  task_id: string;
+}
+
+export async function listAIAgentTaskThreads(config: RiidoClientConfig, params: ListAIAgentTaskThreadsPathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadCollectionResponse> {
+  const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads`;
+  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+export function listAIAgentTaskThreadsQueryKey(params: ListAIAgentTaskThreadsPathParams): readonly unknown[] {
+  return ["listAIAgentTaskThreads", params] as const;
+}
+
+export function useListAIAgentTaskThreads(config: RiidoClientConfig, params: ListAIAgentTaskThreadsPathParams, options: Omit<UseQueryOptions<AIAgentTaskThreadCollectionResponse>, 'queryKey' | 'queryFn'> & RiidoRequestOptions = {}) {
+  return useQuery<AIAgentTaskThreadCollectionResponse>({
+    ...options,
+    queryKey: listAIAgentTaskThreadsQueryKey(params),
+    queryFn: () => listAIAgentTaskThreads(config, params, options),
   });
 }

@@ -37,6 +37,30 @@ func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
 	if containsString(aiAgentIDs(bootstrap.Agents), "agent-private-cursor") {
 		t.Fatalf("bootstrap leaked other private agent: %+v", bootstrap.Agents)
 	}
+	if len(bootstrap.AgentTemplates) != 4 {
+		t.Fatalf("bootstrap templates = %+v", bootstrap.AgentTemplates)
+	}
+	wantTemplates := []struct {
+		templateID string
+		name       string
+		roleLabel  string
+	}{
+		{templateID: "riido_pm", name: "리도", roleLabel: "PM Agent"},
+		{templateID: "yeongsil_backend", name: "영실", roleLabel: "Backend Agent"},
+		{templateID: "hongdo_frontend", name: "홍도", roleLabel: "Frontend Agent"},
+		{templateID: "jiwon_research", name: "지원", roleLabel: "Research Agent"},
+	}
+	for i, want := range wantTemplates {
+		got := bootstrap.AgentTemplates[i]
+		if got.TemplateID != want.templateID ||
+			got.Name != want.name ||
+			got.RoleLabel != want.roleLabel ||
+			got.Description == "" ||
+			got.Instruction == "" ||
+			got.ProfileThumbnailURL == "" {
+			t.Fatalf("bootstrap template[%d] = %+v, want %+v with copy fields", i, got, want)
+		}
+	}
 
 	assignableReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-1/assignable-agents", nil)
 	assignableReq.Header.Set("Authorization", "Bearer user-token")
@@ -57,6 +81,24 @@ func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
 	}
 	if assignable.Agents[0].Name > assignable.Agents[1].Name {
 		t.Fatalf("owned agents should be ordered by name: %+v", assignable.Agents[:2])
+	}
+
+	threadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-1/threads", nil)
+	threadsReq.Header.Set("Authorization", "Bearer user-token")
+	threadsResp := httptest.NewRecorder()
+	server.ServeHTTP(threadsResp, threadsReq)
+	if threadsResp.Code != http.StatusOK {
+		t.Fatalf("threads status=%d body=%s", threadsResp.Code, threadsResp.Body.String())
+	}
+	var threads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
+		t.Fatalf("threads json: %v", err)
+	}
+	if threads.TaskID != "task-1" || len(threads.Threads) != 2 {
+		t.Fatalf("threads response = %+v", threads)
+	}
+	if threads.ActiveStream == nil || threads.ActiveStream.ThreadID != "thread-task-1-codex-2" || threads.ActiveStream.Href != "/v1/client/ai-agent/events" {
+		t.Fatalf("active stream = %+v", threads.ActiveStream)
 	}
 }
 
@@ -80,6 +122,10 @@ func TestHTTPAIAgentClientMockDevicesAndEditability(t *testing.T) {
 	}
 	if len(devices.Devices) != 1 || len(devices.Devices[0].Runtimes) != 3 {
 		t.Fatalf("devices = %+v", devices)
+	}
+	cursorRuntime := devices.Devices[0].Runtimes[2]
+	if cursorRuntime.RuntimeID != "runtime-cursor-mock" || len(cursorRuntime.Models) != 2 || cursorRuntime.Models[0].ModelID != "cursor-auto" || !cursorRuntime.Models[0].IsDefault {
+		t.Fatalf("cursor runtime models = %+v", cursorRuntime)
 	}
 
 	editReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/agents/agent-owned-codex/editability", nil)
@@ -134,6 +180,24 @@ func TestHTTPAIAgentClientMockTaskCommentAndStop(t *testing.T) {
 	if stopped.AssignmentState != AgentAssignmentStateStopped || stopped.CommentKind != AgentTaskCommentStoppedByUserRequest {
 		t.Fatalf("stop response = %+v", stopped)
 	}
+	if stopped.ThreadID == "" {
+		t.Fatalf("stop response missing thread_id: %+v", stopped)
+	}
+
+	threadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-1/threads", nil)
+	threadsReq.Header.Set("Authorization", "Bearer user-token")
+	threadsResp := httptest.NewRecorder()
+	server.ServeHTTP(threadsResp, threadsReq)
+	if threadsResp.Code != http.StatusOK {
+		t.Fatalf("threads status=%d body=%s", threadsResp.Code, threadsResp.Body.String())
+	}
+	var threads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
+		t.Fatalf("threads json: %v", err)
+	}
+	if threads.ActiveStream != nil {
+		t.Fatalf("stopped thread collection should not advertise active stream: %+v", threads.ActiveStream)
+	}
 
 	eventsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/events?replay=1", nil)
 	eventsReq.Header.Set("Authorization", "Bearer user-token")
@@ -144,6 +208,50 @@ func TestHTTPAIAgentClientMockTaskCommentAndStop(t *testing.T) {
 	}
 }
 
+func TestHTTPAIAgentClientMockTaskThreadColdCollectionAfterViewerAwayAssignment(t *testing.T) {
+	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
+		PrincipalID: "user-1",
+		Token:       "user-token",
+		Scopes:      []string{"ai-agent:*", "task:task-viewer-away:read", "task:task-viewer-away:comment"},
+	}})
+
+	commentReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/tasks/task-viewer-away/comments", strings.NewReader(`{"agent_id":"agent-public-openclaw","body":"Start while the viewer is looking elsewhere","source_comment_id":"comment-viewer-away"}`))
+	commentReq.Header.Set("Authorization", "Bearer user-token")
+	commentResp := httptest.NewRecorder()
+	server.ServeHTTP(commentResp, commentReq)
+	if commentResp.Code != http.StatusAccepted {
+		t.Fatalf("comment status=%d body=%s", commentResp.Code, commentResp.Body.String())
+	}
+	var comment AIAgentTaskActionResponse
+	if err := json.Unmarshal(commentResp.Body.Bytes(), &comment); err != nil {
+		t.Fatalf("comment json: %v", err)
+	}
+	if comment.ThreadID == "" || comment.AssignmentState != AgentAssignmentStateRunning {
+		t.Fatalf("comment response = %+v", comment)
+	}
+
+	threadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-viewer-away/threads", nil)
+	threadsReq.Header.Set("Authorization", "Bearer user-token")
+	threadsResp := httptest.NewRecorder()
+	server.ServeHTTP(threadsResp, threadsReq)
+	if threadsResp.Code != http.StatusOK {
+		t.Fatalf("threads status=%d body=%s", threadsResp.Code, threadsResp.Body.String())
+	}
+	var threads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
+		t.Fatalf("threads json: %v", err)
+	}
+	if len(threads.Threads) != 1 || threads.Threads[0].ThreadID != comment.ThreadID {
+		t.Fatalf("threads did not return persisted viewer-away thread: %+v", threads)
+	}
+	if threads.Threads[0].SourceCommentID != "comment-viewer-away" {
+		t.Fatalf("source comment id = %q", threads.Threads[0].SourceCommentID)
+	}
+	if threads.ActiveStream == nil || threads.ActiveStream.ThreadID != comment.ThreadID || threads.ActiveStream.TaskID != "task-viewer-away" {
+		t.Fatalf("active stream = %+v", threads.ActiveStream)
+	}
+}
+
 func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
@@ -151,7 +259,61 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		Scopes:      []string{"ai-agent:*"},
 	}})
 
-	patchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(`{"name":"같은 이름 가능","visibility":"public","runtime_id":"runtime-cursor-mock"}`))
+	thumbnailURL := "https://cdn.riido.io/mock/ai-agents/updated-claude.png"
+	description := strings.Repeat("설", AgentDescriptionMaxCharacters)
+	instruction := strings.Repeat("지", AgentInstructionMaxCharacters)
+	createBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:                "신규 코리",
+		Visibility:          AgentVisibilityPrivate,
+		RuntimeID:           "runtime-cursor-mock",
+		ProfileThumbnailURL: &thumbnailURL,
+		Description:         &description,
+		Instruction:         &instruction,
+	})
+	if err != nil {
+		t.Fatalf("marshal create body: %v", err)
+	}
+	createReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(createBody)))
+	createReq.Header.Set("Authorization", "Bearer owner-token")
+	createResp := httptest.NewRecorder()
+	server.ServeHTTP(createResp, createReq)
+	if createResp.Code != http.StatusCreated {
+		t.Fatalf("create status=%d body=%s", createResp.Code, createResp.Body.String())
+	}
+	var created AgentClientRecordResponse
+	if err := json.Unmarshal(createResp.Body.Bytes(), &created); err != nil {
+		t.Fatalf("create json: %v", err)
+	}
+	if created.Agent.OwnerPrincipalID != "user-1" ||
+		!created.Agent.IsOwnedByViewer ||
+		created.Agent.Name != "신규 코리" ||
+		created.Agent.RuntimeKind != RuntimeKindCursor ||
+		created.Agent.ModelID != "cursor-auto" ||
+		created.Agent.ModelLabel != "Cursor Auto" ||
+		created.Agent.WorkStatus != AgentWorkStatusIdle ||
+		created.Agent.Editability != AgentEditabilityEditable ||
+		created.Agent.AssignedTaskCount != 0 ||
+		created.Agent.ProfileThumbnailURL != thumbnailURL ||
+		created.Agent.Description != description ||
+		created.Agent.Instruction != instruction ||
+		created.Agent.CreatedAt.IsZero() ||
+		created.Agent.UpdatedAt.IsZero() {
+		t.Fatalf("created agent = %+v", created.Agent)
+	}
+
+	patchBody, err := json.Marshal(UpdateAgentConfigurationRequest{
+		Name:                "같은 이름 가능",
+		Visibility:          AgentVisibilityPublic,
+		RuntimeID:           "runtime-cursor-mock",
+		ModelID:             stringPtr("cursor-fast"),
+		ProfileThumbnailURL: &thumbnailURL,
+		Description:         &description,
+		Instruction:         &instruction,
+	})
+	if err != nil {
+		t.Fatalf("marshal patch body: %v", err)
+	}
+	patchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(patchBody)))
 	patchReq.Header.Set("Authorization", "Bearer owner-token")
 	patchResp := httptest.NewRecorder()
 	server.ServeHTTP(patchResp, patchReq)
@@ -162,8 +324,87 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	if err := json.Unmarshal(patchResp.Body.Bytes(), &patched); err != nil {
 		t.Fatalf("patch json: %v", err)
 	}
-	if patched.Agent.Name != "같은 이름 가능" || patched.Agent.Visibility != AgentVisibilityPublic || patched.Agent.RuntimeKind != RuntimeKindCursor {
+	if patched.Agent.Name != "같은 이름 가능" ||
+		patched.Agent.Visibility != AgentVisibilityPublic ||
+		patched.Agent.RuntimeKind != RuntimeKindCursor ||
+		patched.Agent.ModelID != "cursor-fast" ||
+		patched.Agent.ModelLabel != "Cursor Fast" ||
+		patched.Agent.ProfileThumbnailURL != thumbnailURL ||
+		patched.Agent.Description != description ||
+		patched.Agent.Instruction != instruction {
 		t.Fatalf("patched agent = %+v", patched.Agent)
+	}
+	if patched.Agent.UpdatedAt.IsZero() {
+		t.Fatalf("patched agent updated_at is zero: %+v", patched.Agent)
+	}
+	if patched.Agent.CreatedAt.IsZero() || !patched.Agent.CreatedAt.Before(patched.Agent.UpdatedAt) {
+		t.Fatalf("patched agent created_at must be preserved and before updated_at: %+v", patched.Agent)
+	}
+
+	bootstrapReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/bootstrap", nil)
+	bootstrapReq.Header.Set("Authorization", "Bearer owner-token")
+	bootstrapResp := httptest.NewRecorder()
+	server.ServeHTTP(bootstrapResp, bootstrapReq)
+	if bootstrapResp.Code != http.StatusOK {
+		t.Fatalf("bootstrap status=%d body=%s", bootstrapResp.Code, bootstrapResp.Body.String())
+	}
+	var bootstrap ClientBootstrapResponse
+	if err := json.Unmarshal(bootstrapResp.Body.Bytes(), &bootstrap); err != nil {
+		t.Fatalf("bootstrap json: %v", err)
+	}
+	updated, ok := findAIAgent(bootstrap.Agents, "agent-owned-claude")
+	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction || !updated.CreatedAt.Equal(patched.Agent.CreatedAt) || !updated.UpdatedAt.Equal(patched.Agent.UpdatedAt) {
+		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
+	}
+	createdAgain, ok := findAIAgent(bootstrap.Agents, created.Agent.AgentID)
+	if !ok || createdAgain.OwnerPrincipalID != "user-1" || createdAgain.RuntimeID != "runtime-cursor-mock" || !createdAgain.CreatedAt.Equal(created.Agent.CreatedAt) || !createdAgain.UpdatedAt.Equal(created.Agent.UpdatedAt) {
+		t.Fatalf("bootstrap created agent = %+v found=%v", createdAgain, ok)
+	}
+	if !runtimeHasAssignedAgent(bootstrap.Devices, "runtime-cursor-mock") {
+		t.Fatalf("bootstrap runtime-cursor-mock was not marked assigned: %+v", bootstrap.Devices)
+	}
+
+	invalidModelBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:       "잘못된 모델",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  "runtime-cursor-mock",
+		ModelID:    stringPtr("claude-opus-4-7"),
+	})
+	if err != nil {
+		t.Fatalf("marshal invalid model body: %v", err)
+	}
+	invalidModelReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(invalidModelBody)))
+	invalidModelReq.Header.Set("Authorization", "Bearer owner-token")
+	invalidModelResp := httptest.NewRecorder()
+	server.ServeHTTP(invalidModelResp, invalidModelReq)
+	if invalidModelResp.Code != http.StatusBadRequest {
+		t.Fatalf("invalid model create status=%d body=%s", invalidModelResp.Code, invalidModelResp.Body.String())
+	}
+
+	tooLongDescription := strings.Repeat("가", AgentDescriptionMaxCharacters+1)
+	tooLongDescriptionBody, err := json.Marshal(UpdateAgentConfigurationRequest{Description: &tooLongDescription})
+	if err != nil {
+		t.Fatalf("marshal too-long description patch body: %v", err)
+	}
+	tooLongDescriptionReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(tooLongDescriptionBody)))
+	tooLongDescriptionReq.Header.Set("Authorization", "Bearer owner-token")
+	tooLongDescriptionResp := httptest.NewRecorder()
+	server.ServeHTTP(tooLongDescriptionResp, tooLongDescriptionReq)
+	if tooLongDescriptionResp.Code != http.StatusBadRequest {
+		t.Fatalf("too-long description patch status=%d body=%s", tooLongDescriptionResp.Code, tooLongDescriptionResp.Body.String())
+	}
+
+	tooLongInstruction := strings.Repeat("가", AgentInstructionMaxCharacters+1)
+	tooLongBody, err := json.Marshal(UpdateAgentConfigurationRequest{Instruction: &tooLongInstruction})
+	if err != nil {
+		t.Fatalf("marshal too-long patch body: %v", err)
+	}
+	tooLongReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(tooLongBody)))
+	tooLongReq.Header.Set("Authorization", "Bearer owner-token")
+	tooLongResp := httptest.NewRecorder()
+	server.ServeHTTP(tooLongResp, tooLongReq)
+	if tooLongResp.Code != http.StatusBadRequest {
+		t.Fatalf("too-long patch status=%d body=%s", tooLongResp.Code, tooLongResp.Body.String())
 	}
 
 	assignedPatchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-codex", strings.NewReader(`{"name":"blocked"}`))
@@ -187,6 +428,69 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	}
 	if deleted.RunningTasksForceStopped != 1 || deleted.AgentID != "agent-owned-codex" {
 		t.Fatalf("delete response = %+v", deleted)
+	}
+}
+
+func TestHTTPAIAgentClientMockAdminCreateUsesAuthorizedWorkspaceRuntime(t *testing.T) {
+	adminServer := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
+		PrincipalID: "admin-1",
+		Token:       "admin-token",
+		Scopes:      []string{"ai-agent:*"},
+		Roles:       []AgentCatalogRole{AgentCatalogRoleAdmin},
+	}})
+
+	devicesReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/devices", nil)
+	devicesReq.Header.Set("Authorization", "Bearer admin-token")
+	devicesResp := httptest.NewRecorder()
+	adminServer.ServeHTTP(devicesResp, devicesReq)
+	if devicesResp.Code != http.StatusOK {
+		t.Fatalf("admin devices status=%d body=%s", devicesResp.Code, devicesResp.Body.String())
+	}
+	var devices DeviceRuntimeListResponse
+	if err := json.Unmarshal(devicesResp.Body.Bytes(), &devices); err != nil {
+		t.Fatalf("admin devices json: %v", err)
+	}
+	if len(devices.Devices) != 1 || devices.Devices[0].OwnerPrincipalID != "user-1" {
+		t.Fatalf("admin devices = %+v", devices.Devices)
+	}
+
+	createBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:       "관리자 생성 에이전트",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  "runtime-codex-mock",
+	})
+	if err != nil {
+		t.Fatalf("marshal admin create body: %v", err)
+	}
+	createReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(createBody)))
+	createReq.Header.Set("Authorization", "Bearer admin-token")
+	createResp := httptest.NewRecorder()
+	adminServer.ServeHTTP(createResp, createReq)
+	if createResp.Code != http.StatusCreated {
+		t.Fatalf("admin create status=%d body=%s", createResp.Code, createResp.Body.String())
+	}
+	var created AgentClientRecordResponse
+	if err := json.Unmarshal(createResp.Body.Bytes(), &created); err != nil {
+		t.Fatalf("admin create json: %v", err)
+	}
+	if created.Agent.OwnerPrincipalID != "admin-1" ||
+		created.Agent.RuntimeID != "runtime-codex-mock" ||
+		created.Agent.RuntimeKind != RuntimeKindCodex ||
+		!created.Agent.IsOwnedByViewer {
+		t.Fatalf("admin created agent = %+v", created.Agent)
+	}
+
+	nonAdminServer := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
+		PrincipalID: "user-2",
+		Token:       "user-token",
+		Scopes:      []string{"ai-agent:*"},
+	}})
+	deniedReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(createBody)))
+	deniedReq.Header.Set("Authorization", "Bearer user-token")
+	deniedResp := httptest.NewRecorder()
+	nonAdminServer.ServeHTTP(deniedResp, deniedReq)
+	if deniedResp.Code != http.StatusBadRequest {
+		t.Fatalf("non-admin create status=%d body=%s", deniedResp.Code, deniedResp.Body.String())
 	}
 }
 
@@ -247,7 +551,7 @@ func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testin
 		Authorizer:    authorizer,
 	}).Handler()
 
-	body := `{"assignment_id":"` + assignment.ID + `","task_id":"task-1","daemon_id":"daemon-1","runtime_id":"runtime-1","run_id":"run-1","lines":[{"seq":1,"message":"생각 중..."},{"seq":2,"message":"팀 프로젝트 수집 중 - 팀의 프로젝트 목록을 조회 중."}]}`
+	body := `{"assignment_id":"` + assignment.ID + `","task_id":"task-1","thread_id":"thread-task-1-codex-live","daemon_id":"daemon-1","runtime_id":"runtime-1","run_id":"run-1","lines":[{"seq":1,"message":"생각 중..."},{"seq":2,"message":"팀 프로젝트 수집 중 - 팀의 프로젝트 목록을 조회 중."}]}`
 	ingestReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-owned-codex/thread-progress", strings.NewReader(body))
 	ingestReq.Header.Set("Authorization", "Bearer daemon-token")
 	ingestResp := httptest.NewRecorder()
@@ -259,7 +563,7 @@ func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testin
 	if err := json.Unmarshal(ingestResp.Body.Bytes(), &response); err != nil {
 		t.Fatalf("ingest json: %v", err)
 	}
-	if response.AcceptedLines != 2 || response.Event.EventType != AgentClientEventThreadProgress || len(response.Event.Lines) != 2 {
+	if response.AcceptedLines != 2 || response.Event.EventType != AgentClientEventThreadProgress || response.Event.ThreadID != "thread-task-1-codex-live" || len(response.Event.Lines) != 2 {
 		t.Fatalf("ingest response = %+v", response)
 	}
 
@@ -353,6 +657,30 @@ func aiAgentIDs(agents []AgentClientRecord) []string {
 		ids = append(ids, agent.AgentID)
 	}
 	return ids
+}
+
+func findAIAgent(agents []AgentClientRecord, id string) (AgentClientRecord, bool) {
+	for _, agent := range agents {
+		if agent.AgentID == id {
+			return agent, true
+		}
+	}
+	return AgentClientRecord{}, false
+}
+
+func runtimeHasAssignedAgent(devices []DeviceRecord, runtimeID string) bool {
+	for _, device := range devices {
+		for _, runtime := range device.Runtimes {
+			if runtime.RuntimeID == runtimeID {
+				return runtime.HasAssignedAgent
+			}
+		}
+	}
+	return false
+}
+
+func stringPtr(value string) *string {
+	return &value
 }
 
 func containsString(values []string, want string) bool {

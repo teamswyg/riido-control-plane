@@ -58,9 +58,20 @@
       ]
     },
     {
+      "policy_id": "agent_assignment_target_scope.v1",
+      "kind": "target_scope",
+      "description": "AI Agent assignment, AI-Agent-directed comments, task-thread reads, and task stop actions are generated only for Riido task and subtask surfaces.",
+      "rules": [
+        "target: task_id path parameters represent a Riido task or subtask id",
+        "non_target: projects, milestones, intakes, existing AI property filler, and mention surfaces must not reuse task assignment/comment/stop/thread operations",
+        "client: non-target surfaces may hide, disable, or omit agent UI, but they must not call generated task-scoped AI Agent operations",
+        "future: any non-task target surface requires a separate owning SSOT and a newly generated operation"
+      ]
+    },
+    {
       "policy_id": "agent_mutation_safety.v1",
       "kind": "lifecycle",
-      "description": "Deleting an agent force-unassigns queued tasks and force-stops running tasks; editing is allowed only when the agent has no assigned tasks, and editability must be visible to clients before mutation.",
+      "description": "Deleting an agent force-unassigns queued tasks and force-stops running tasks; editing display/configuration/profile fields is allowed only when the agent has no assigned tasks, and editability must be visible to clients before mutation.",
       "rules": [
         "delete: unassign queued tasks and force-stop running tasks before confirming deletion",
         "edit: allowed only when assigned_task_count is zero",
@@ -78,7 +89,24 @@
         "runtime_deleted_with_assigned_agent: mark runtime offline",
         "runtime_deleted_without_assigned_agent: treat runtime as absent",
         "runtime_reinstalled_same_device: mark runtime online according to online/offline policy only",
-        "runtime_detection_error: expose offline to clients"
+        "runtime_detection_error: expose offline to clients",
+        "client: runtime-settings empty and install-card states are composed from device/runtime read-model data without changing liveness semantics",
+        "client: runtime-settings current-device and other-device groups are composed from DeviceRecord values; current-device daemon detail, stop, and restart presentation remain desktop-local helper behavior and do not add a SaaS daemon command",
+        "client: provider install-card hover, Windows app waitlist copy, and marketing-consent presentation are downstream client/product facts until a separate owning SSOT adds a generated operation"
+      ]
+    },
+    {
+      "policy_id": "runtime_model_catalog.v1",
+      "kind": "read_model",
+      "description": "Runtime model dropdown values are runtime-scoped catalog records projected through the device/runtime read model, not top-level API enum values.",
+      "rules": [
+        "runtime: project model candidates as RuntimeModelRecord values under each RuntimeRecord",
+        "model_id: treat as an opaque runtime-scoped identifier owned by the selected runtime catalog",
+        "label: treat as display data for clients, not a discriminator or generated enum",
+        "default: each selectable runtime has exactly one is_default model and omitted model_id resolves to that default",
+        "client_required_control: Figma node-id=417-21803 / 432-35544 marks the model dropdown as a required form control, but the API field remains optional because the runtime default model is a deterministic selection",
+        "mutation: create/update validates model_id against the selected runtime before saving agent configuration",
+        "daemon: consume only the already-authorized model_id selected by the control plane and never define the client catalog"
       ]
     },
     {
@@ -102,6 +130,52 @@
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
         "client: render task-thread progress from typed event payloads and never parse provider raw output"
+      ]
+    },
+    {
+      "policy_id": "task_thread_cold_collection.v1",
+      "kind": "read_model",
+      "description": "Task screens read historical AI Agent task threads through HTTP first and connect the client event stream only when the response advertises an active stream link.",
+      "rules": [
+        "server: return all visible task threads for the requested task as a cold collection",
+        "server: persist and return visible task threads even when the assignment/comment was created while the viewer was on another screen",
+        "server: include at most one active_stream link because one task can have only one active AI agent assignment at a time",
+        "server: omit active_stream for completed, stopped, failed, or fully cold task-thread collections",
+        "stream: every task-thread progress event carries thread_id so the client updates the targeted thread without inferring from task_id alone",
+        "client: never open the SSE stream solely because a task has historical AI Agent comments",
+        "client: owns long-body scroll/focus, hover, modal, and animation presentation around the returned thread records"
+      ]
+    },
+    {
+      "policy_id": "agent_profile_configuration.v1",
+      "kind": "profile",
+      "description": "Agent profile presentation fields and server-authored creation/update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
+      "rules": [
+        "profile_thumbnail_url: optional HTTPS image URL string; binary upload is outside this contract",
+        "description: optional client-authored one-line summary with a maximum of 160 characters; empty string is allowed; client UI owns truncation and wrapping",
+        "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
+        "created_at: server-authored RFC3339 date-time stamped when the agent is created; used by clients for list creation dates and absolute-time tooltips",
+        "updated_at: server-authored RFC3339 date-time refreshed when editable agent configuration is saved; used by clients for list update dates and absolute-time tooltips",
+        "model_id: optional runtime-scoped model selection; omitted create/update values resolve to the selected runtime default",
+        "required_form_controls: Figma node-id=417-21803 / 432-35544 says name, runtime, model, and visibility are required controls; profile_thumbnail_url, description, and instruction remain optional values",
+        "create: client-facing agent creation stores the same profile fields, binds an authorized selectable runtime_id from the device/runtime read model, stamps owner_principal_id from authorization, and returns created_at and updated_at",
+        "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
+      ]
+    },
+    {
+      "policy_id": "agent_onboarding_templates.v1",
+      "kind": "onboarding",
+      "description": "The AI Agent onboarding template catalog is returned by the client bootstrap response so frontend clients do not hard-code agent names, descriptions, or instructions.",
+      "rules": [
+        "bootstrap: return a stable ordered template catalog for the Figma onboarding agent-selection screen",
+        "template: carry name, role_label, description, profile_thumbnail_url, and instruction as copyable agent configuration defaults",
+        "figma_138_7389: current starter template rows are 리도, 영실, 홍도, and 지원 in bootstrap order",
+        "direct_setting: Figma node-id=164-26969 expands 직접 설정 into name, description, and instruction input fields that submit through createAIAgent",
+        "direct_setting_row: 직접 설정 is client presentation, not an AgentOnboardingTemplate record",
+        "direct_setting_presentation: dimmed starter-template rows, placeholder copy, row expansion, and scroll affordance are client presentation",
+        "no_runtime: when no selectable runtime is detected, clients skip the template-selection step and show the no-installed-AI start state",
+        "agent_add_visibility: Figma node-id=337-24013 hides the agent-add affordance when the authorized workspace/member device-runtime read model has no selectable runtime; this is client presentation and does not add a separate eligibility endpoint",
+        "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout"
       ]
     }
   ],
@@ -310,6 +384,32 @@
   ],
   "components": [
     {
+      "name": "RuntimeModelRecord",
+      "schema": {
+        "name": "RuntimeModelRecord",
+        "type": "object",
+        "required": [
+          "model_id",
+          "label",
+          "is_default"
+        ],
+        "properties": [
+          {
+            "name": "model_id",
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "type": "string"
+          },
+          {
+            "name": "is_default",
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    {
       "name": "RuntimeRecord",
       "schema": {
         "name": "RuntimeRecord",
@@ -320,7 +420,8 @@
           "kind",
           "availability",
           "detection_state",
-          "has_assigned_agent"
+          "has_assigned_agent",
+          "models"
         ],
         "properties": [
           {
@@ -355,6 +456,13 @@
           {
             "name": "has_assigned_agent",
             "type": "boolean"
+          },
+          {
+            "name": "models",
+            "type": "array",
+            "items": {
+              "ref": "RuntimeModelRecord"
+            }
           }
         ]
       }
@@ -410,7 +518,9 @@
           "visibility",
           "work_status",
           "editability",
-          "assigned_task_count"
+          "assigned_task_count",
+          "created_at",
+          "updated_at"
         ],
         "properties": [
           {
@@ -430,6 +540,21 @@
             "type": "string"
           },
           {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "max_length": 160
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "max_length": 1000
+          },
+          {
             "name": "visibility",
             "ref": "AgentVisibility"
           },
@@ -442,6 +567,14 @@
             "ref": "RuntimeKind"
           },
           {
+            "name": "model_id",
+            "type": "string"
+          },
+          {
+            "name": "model_label",
+            "type": "string"
+          },
+          {
             "name": "work_status",
             "ref": "AgentWorkStatus"
           },
@@ -452,6 +585,16 @@
           {
             "name": "assigned_task_count",
             "type": "integer"
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "updated_at",
+            "type": "string",
+            "format": "date-time"
           }
         ]
       }
@@ -502,6 +645,48 @@
       }
     },
     {
+      "name": "AgentOnboardingTemplate",
+      "schema": {
+        "name": "AgentOnboardingTemplate",
+        "type": "object",
+        "required": [
+          "template_id",
+          "name",
+          "description",
+          "instruction"
+        ],
+        "properties": [
+          {
+            "name": "template_id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "role_label",
+            "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "max_length": 160
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "max_length": 1000
+          }
+        ]
+      }
+    },
+    {
       "name": "ClientBootstrapResponse",
       "schema": {
         "name": "ClientBootstrapResponse",
@@ -511,7 +696,8 @@
           "client_kind",
           "workspace_id",
           "agents",
-          "devices"
+          "devices",
+          "agent_templates"
         ],
         "properties": [
           {
@@ -538,6 +724,13 @@
             "type": "array",
             "items": {
               "ref": "DeviceRecord"
+            }
+          },
+          {
+            "name": "agent_templates",
+            "type": "array",
+            "items": {
+              "ref": "AgentOnboardingTemplate"
             }
           }
         ]
@@ -603,6 +796,51 @@
       }
     },
     {
+      "name": "CreateAgentConfigurationRequest",
+      "schema": {
+        "name": "CreateAgentConfigurationRequest",
+        "type": "object",
+        "required": [
+          "name",
+          "visibility",
+          "runtime_id"
+        ],
+        "properties": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "max_length": 160
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "max_length": 1000
+          },
+          {
+            "name": "visibility",
+            "ref": "AgentVisibility"
+          },
+          {
+            "name": "runtime_id",
+            "type": "string"
+          },
+          {
+            "name": "model_id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateAgentConfigurationRequest",
       "schema": {
         "name": "UpdateAgentConfigurationRequest",
@@ -613,11 +851,30 @@
             "type": "string"
           },
           {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "max_length": 160
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "max_length": 1000
+          },
+          {
             "name": "visibility",
             "ref": "AgentVisibility"
           },
           {
             "name": "runtime_id",
+            "type": "string"
+          },
+          {
+            "name": "model_id",
             "type": "string"
           }
         ]
@@ -705,6 +962,7 @@
           "schema_version",
           "task_id",
           "agent_id",
+          "thread_id",
           "run_id",
           "work_status",
           "assignment_state",
@@ -722,6 +980,10 @@
           },
           {
             "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "thread_id",
             "type": "string"
           },
           {
@@ -846,6 +1108,10 @@
             "type": "string"
           },
           {
+            "name": "thread_id",
+            "type": "string"
+          },
+          {
             "name": "run_id",
             "type": "string"
           },
@@ -900,6 +1166,7 @@
           "schema_version",
           "agent_id",
           "task_id",
+          "thread_id",
           "run_id",
           "work_status",
           "assignment_state",
@@ -924,6 +1191,10 @@
           },
           {
             "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "thread_id",
             "type": "string"
           },
           {
@@ -958,6 +1229,159 @@
             "items": {
               "ref": "AgentThreadProgressLine"
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadStreamLink",
+      "schema": {
+        "name": "AIAgentTaskThreadStreamLink",
+        "type": "object",
+        "required": [
+          "rel",
+          "href",
+          "event_type",
+          "task_id",
+          "thread_id",
+          "run_id"
+        ],
+        "properties": [
+          {
+            "name": "rel",
+            "type": "string",
+            "enum": [
+              "agent_thread_progress_stream"
+            ]
+          },
+          {
+            "name": "href",
+            "type": "string"
+          },
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "agent_thread_progress"
+            ]
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "thread_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadRecord",
+      "schema": {
+        "name": "AIAgentTaskThreadRecord",
+        "type": "object",
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "comment_kind",
+          "message",
+          "lines"
+        ],
+        "properties": [
+          {
+            "name": "thread_id",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "source_comment_id",
+            "type": "string"
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
+          },
+          {
+            "name": "comment_kind",
+            "ref": "AgentTaskCommentKind"
+          },
+          {
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "name": "started_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "completed_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "lines",
+            "type": "array",
+            "items": {
+              "ref": "AgentThreadProgressLine"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadCollectionResponse",
+      "schema": {
+        "name": "AIAgentTaskThreadCollectionResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "threads",
+            "type": "array",
+            "items": {
+              "ref": "AIAgentTaskThreadRecord"
+            }
+          },
+          {
+            "name": "active_stream",
+            "ref": "AIAgentTaskThreadStreamLink"
           }
         ]
       }
@@ -1005,7 +1429,11 @@
         "ref": "ClientBootstrapResponse"
       },
       "scenario_ids": [
-        "getAIAgentClientBootstrap.figma-client-bootstrap"
+        "getAIAgentClientBootstrap.figma-client-bootstrap",
+        "getAIAgentClientBootstrap.figma-agent-list-timestamps",
+        "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
+        "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
+        "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
       ]
     },
     {
@@ -1029,7 +1457,11 @@
       },
       "scenario_ids": [
         "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
-        "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent"
+        "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent",
+        "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records",
+        "listAIAgentDeviceRuntimes.figma-onboarding-runtime-selection",
+        "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model",
+        "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition"
       ]
     },
     {
@@ -1054,7 +1486,35 @@
       },
       "scenario_ids": [
         "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
-        "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering"
+        "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering",
+        "listAIAgentTaskAssignableAgents.assignment-target-scope-is-task-or-subtask-only"
+      ]
+    },
+    {
+      "operation_id": "listAIAgentTaskThreads",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/threads",
+      "resource": "agent",
+      "action": "read",
+      "summary": "List AI Agent task threads before optionally following an active stream link",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ]
+      },
+      "rbac_policy": "task_thread_cold_collection.v1",
+      "response": {
+        "status": 200,
+        "ref": "AIAgentTaskThreadCollectionResponse"
+      },
+      "scenario_ids": [
+        "listAIAgentTaskThreads.completed-task-does-not-open-stream",
+        "listAIAgentTaskThreads.running-task-advertises-one-stream",
+        "listAIAgentTaskThreads.reassigned-task-has-multiple-threads",
+        "listAIAgentTaskThreads.assignment-created-while-viewer-away"
       ]
     },
     {
@@ -1115,6 +1575,37 @@
       ]
     },
     {
+      "operation_id": "createAIAgent",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/agents",
+      "resource": "agent",
+      "action": "create",
+      "summary": "Create an AI agent configuration from the Figma agent-add screen",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ]
+      },
+      "rbac_policy": "agent_mutation_safety.v1",
+      "request": {
+        "ref": "CreateAgentConfigurationRequest",
+        "required": true
+      },
+      "response": {
+        "status": 201,
+        "ref": "AgentClientRecordResponse"
+      },
+      "scenario_ids": [
+        "createAIAgent.agent-add-screen-creates-owned-agent",
+        "createAIAgent.onboarding-direct-setting-creates-explicit-configuration",
+        "createAIAgent.agent-create-defaults-selected-runtime-model",
+        "createAIAgent.agent-create-rejects-model-outside-runtime-catalog"
+      ]
+    },
+    {
       "operation_id": "getAIAgentEditability",
       "kind": "query",
       "method": "GET",
@@ -1164,6 +1655,10 @@
       },
       "scenario_ids": [
         "updateAIAgentConfiguration.agent-name-is-not-unique",
+        "updateAIAgentConfiguration.profile-fields-are-saved",
+        "updateAIAgentConfiguration.model-updates-validate-against-runtime-catalog",
+        "updateAIAgentConfiguration.description-max-length-is-enforced",
+        "updateAIAgentConfiguration.instruction-max-length-is-enforced",
         "updateAIAgentConfiguration.edit-fails-while-assigned"
       ]
     },
@@ -1226,7 +1721,39 @@
       "name": "figma client bootstrap",
       "given": "a web or desktop webview client opens the v1.22 AI Agent surface",
       "when": "the client requests bootstrap data",
-      "then": "the response contains visible agents and owned device runtimes required by the Figma onboarding and agent setting screens"
+      "then": "the response contains visible agents, authorized device/runtime read-model data, and onboarding agent templates required by the Figma onboarding, runtime setting, and agent setting screens"
+    },
+    {
+      "scenario_id": "getAIAgentClientBootstrap.figma-agent-list-timestamps",
+      "operation_id": "getAIAgentClientBootstrap",
+      "name": "figma agent list timestamps",
+      "given": "the Figma agent list screen shows separate 업데이트일 and 생성일 columns with absolute-time tooltips",
+      "when": "the client requests bootstrap data",
+      "then": "each AgentClientRecord includes server-authored created_at and updated_at values while date formatting and tooltip presentation remain client-owned"
+    },
+    {
+      "scenario_id": "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
+      "operation_id": "getAIAgentClientBootstrap",
+      "name": "figma onboarding template selection initial state",
+      "given": "the Figma onboarding template-selection screen shows 리도, 영실, 홍도, 지원, a 직접 설정 row, a disabled-looking next button, and a right-side preview skeleton",
+      "when": "the client requests bootstrap data",
+      "then": "the response provides the ordered starter templates while 직접 설정, disabled-next, row selection, and preview skeleton behavior remain client presentation without a template-selection command"
+    },
+    {
+      "scenario_id": "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
+      "operation_id": "getAIAgentClientBootstrap",
+      "name": "figma agent add button visibility",
+      "given": "the Figma agent settings screen hides 에이전트 추가 when no member-visible runtime is selectable",
+      "when": "the client composes the agent list and add affordance from bootstrap and device/runtime data",
+      "then": "the client can hide the add affordance without a separate eligibility command while createAIAgent still validates the selected authorized runtime_id"
+    },
+    {
+      "scenario_id": "getAIAgentClientBootstrap.figma-onboarding-no-runtime",
+      "operation_id": "getAIAgentClientBootstrap",
+      "name": "figma onboarding no runtime",
+      "given": "the Figma onboarding flow detects no selectable runtime on the viewer's device",
+      "when": "the client composes onboarding from bootstrap and device/runtime data",
+      "then": "the client can skip template selection and show the no-installed-AI start state without adding a new control-plane command"
     },
     {
       "scenario_id": "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
@@ -1245,6 +1772,38 @@
       "then": "the client list omits the runtime as if it never existed"
     },
     {
+      "scenario_id": "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records",
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "name": "runtime models are scoped catalog records",
+      "given": "the Figma agent setting or add screen opens a model dropdown for a selected runtime",
+      "when": "the client reads device runtime data",
+      "then": "each runtime projects model candidates as RuntimeModelRecord values instead of top-level enum values"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceRuntimes.figma-onboarding-runtime-selection",
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "name": "figma onboarding runtime selection",
+      "given": "the Figma onboarding runtime-selection screen shows detected Claude Code and Codex rows plus non-detected OpenClaw and Cursor Agent rows",
+      "when": "the client reads device runtime data",
+      "then": "the client enables only online detected runtime rows for agent creation and renders detected/non-detected labels without adding a runtime-selection command"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model",
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "name": "runtime settings empty state from read model",
+      "given": "the Figma runtime settings empty-state section shows no current-device runtime, no daemon, provider install cards, or Windows app waitlist variants",
+      "when": "the client reads device runtime data",
+      "then": "the client composes those empty/install/waitlist states from ordinary device and runtime records without adding provider-install or waitlist commands to this API"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition",
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "name": "runtime settings current and other device composition",
+      "given": "the Figma runtime settings page shows current-device and other-device groups with runtime name/version/status/attached-agent rows plus a current-device daemon row with local details and actions",
+      "when": "the client reads device runtime data",
+      "then": "the response provides ordinary device/runtime/attached-agent records while daemon uptime, PID, daemon ID, profile, device name, stop, and restart controls remain desktop-local and no SaaS stop/restart daemon operation is generated"
+    },
+    {
       "scenario_id": "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
       "operation_id": "listAIAgentTaskAssignableAgents",
       "name": "participant dropdown visible agents",
@@ -1259,6 +1818,46 @@
       "given": "visible agents include owned agents and other users' public agents",
       "when": "the assignable-agent response is returned",
       "then": "owned agents appear first and names are ordered inside each ownership group"
+    },
+    {
+      "scenario_id": "listAIAgentTaskAssignableAgents.assignment-target-scope-is-task-or-subtask-only",
+      "operation_id": "listAIAgentTaskAssignableAgents",
+      "name": "assignment target scope is task or subtask only",
+      "given": "the Figma additional planning section says only tasks and subtasks can receive Agent assignment",
+      "when": "a client needs AI Agent candidates outside a task or subtask surface",
+      "then": "no generated AI Agent assignable-agent operation exists for projects, milestones, intakes, AI property filler, or mention surfaces"
+    },
+    {
+      "scenario_id": "listAIAgentTaskThreads.completed-task-does-not-open-stream",
+      "operation_id": "listAIAgentTaskThreads",
+      "name": "completed task does not open stream",
+      "given": "a client opens a task whose AI Agent work is already completed",
+      "when": "the client requests the task-thread collection",
+      "then": "the response contains historical threads and omits active_stream"
+    },
+    {
+      "scenario_id": "listAIAgentTaskThreads.running-task-advertises-one-stream",
+      "operation_id": "listAIAgentTaskThreads",
+      "name": "running task advertises one stream",
+      "given": "a task has one active AI Agent assignment",
+      "when": "the client requests the task-thread collection",
+      "then": "the response contains all cold threads and one active_stream link targeting the active thread_id"
+    },
+    {
+      "scenario_id": "listAIAgentTaskThreads.reassigned-task-has-multiple-threads",
+      "operation_id": "listAIAgentTaskThreads",
+      "name": "reassigned task has multiple threads",
+      "given": "an agent finished work on a task and another agent was assigned later",
+      "when": "the client requests the task-thread collection",
+      "then": "the response returns two or more thread records while active_stream, if present, targets only the currently active one"
+    },
+    {
+      "scenario_id": "listAIAgentTaskThreads.assignment-created-while-viewer-away",
+      "operation_id": "listAIAgentTaskThreads",
+      "name": "assignment created while viewer away",
+      "given": "an AI Agent task thread was created while the viewer was on another screen",
+      "when": "the client later opens the task and requests the task-thread collection",
+      "then": "the response contains the visible persisted thread and advertises active_stream only if that thread is still active"
     },
     {
       "scenario_id": "submitAIAgentTaskComment.comment-routes-to-running-agent",
@@ -1285,6 +1884,38 @@
       "then": "the response and event stream use stopped_by_user_request so the client can render the stopped agent comment"
     },
     {
+      "scenario_id": "createAIAgent.agent-add-screen-creates-owned-agent",
+      "operation_id": "createAIAgent",
+      "name": "agent add screen creates owned agent",
+      "given": "the Figma agent-add screen submits name, visibility, runtime_id, and optional profile fields",
+      "when": "an authorized client creates an agent",
+      "then": "the response contains a new owned agent with zero assigned tasks, editable status, server-authored created_at and updated_at, and the runtime kind derived from the selected runtime_id"
+    },
+    {
+      "scenario_id": "createAIAgent.onboarding-direct-setting-creates-explicit-configuration",
+      "operation_id": "createAIAgent",
+      "name": "onboarding direct setting creates explicit configuration",
+      "given": "the Figma onboarding direct-setting expansion shows name, description, and instruction fields after the user selects 직접 설정",
+      "when": "the client submits explicit name, description, instruction, runtime_id, and visibility",
+      "then": "createAIAgent saves a normal owned agent without creating an AgentOnboardingTemplate or a separate direct-setting operation"
+    },
+    {
+      "scenario_id": "createAIAgent.agent-create-defaults-selected-runtime-model",
+      "operation_id": "createAIAgent",
+      "name": "agent create defaults selected runtime model",
+      "given": "the Figma agent-add screen shows a required model dropdown backed by the selected runtime default model",
+      "when": "the client creates an agent without model_id",
+      "then": "the API accepts the omitted model_id, stores the selected runtime's default model_id and model_label, and does not expose a top-level model enum"
+    },
+    {
+      "scenario_id": "createAIAgent.agent-create-rejects-model-outside-runtime-catalog",
+      "operation_id": "createAIAgent",
+      "name": "agent create rejects model outside runtime catalog",
+      "given": "the client selected runtime-codex but sends a claude-scoped model_id",
+      "when": "the client creates an agent",
+      "then": "the operation is rejected before saving the agent configuration"
+    },
+    {
       "scenario_id": "getAIAgentEditability.assigned-agent-blocks-editing",
       "operation_id": "getAIAgentEditability",
       "name": "assigned agent blocks editing",
@@ -1299,6 +1930,38 @@
       "given": "two owned agents share the same display name",
       "when": "the owner updates one agent name",
       "then": "the request is accepted because agent names are mutable and non-unique"
+    },
+    {
+      "scenario_id": "updateAIAgentConfiguration.profile-fields-are-saved",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "profile fields are saved",
+      "given": "an editable agent has no assigned task",
+      "when": "the owner updates profile_thumbnail_url, description, and instruction",
+      "then": "the response and future client bootstrap contain the saved profile fields, preserve server-authored created_at, and refresh updated_at"
+    },
+    {
+      "scenario_id": "updateAIAgentConfiguration.model-updates-validate-against-runtime-catalog",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "model updates validate against runtime catalog",
+      "given": "an editable agent has no assigned task",
+      "when": "the owner updates runtime_id and model_id",
+      "then": "the operation accepts only a model_id from the selected runtime and stores the matching model_label"
+    },
+    {
+      "scenario_id": "updateAIAgentConfiguration.description-max-length-is-enforced",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "description max length is enforced",
+      "given": "an editable agent has no assigned task",
+      "when": "the owner sends a description longer than 160 characters",
+      "then": "the operation is rejected before saving the agent configuration"
+    },
+    {
+      "scenario_id": "updateAIAgentConfiguration.instruction-max-length-is-enforced",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "instruction max length is enforced",
+      "given": "an editable agent has no assigned task",
+      "when": "the owner sends an instruction longer than 1000 characters",
+      "then": "the operation is rejected before saving the agent configuration"
     },
     {
       "scenario_id": "updateAIAgentConfiguration.edit-fails-while-assigned",
@@ -1338,7 +2001,7 @@
       "name": "runtime progress batch",
       "given": "the daemon parses multiple runtime progress markers such as thinking, collection, and web-search updates",
       "when": "the daemon submits a bounded progress batch to the control plane",
-      "then": "the event stream emits agent_thread_progress with ordered progress lines for the task thread"
+      "then": "the event stream emits agent_thread_progress with thread_id and ordered progress lines for the task thread"
     },
     {
       "scenario_id": "streamAIAgentClientEvents.task-comment-status-update",
