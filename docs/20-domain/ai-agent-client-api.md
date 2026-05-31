@@ -149,7 +149,8 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 ## Policy
 
 - visible agents are the viewer's owned agents plus other users' public agents
-- task participant dropdown responses are ordered owned-first, then by name
+- task participant dropdown responses are ordered owned-first, then by display
+  name, then by `agent_id` when display names are equal
 - task participant dropdown UI presentation, member sorting, and overflow
   behavior are client-owned and do not rewrite the returned agent order
 - AI Agent assignment targets are task and subtask surfaces only; `task_id`
@@ -422,6 +423,15 @@ optional `model_id`, and receive the saved `model_id` plus `model_label` on
 agent records. Figma required-control annotations for the save button are
 therefore UI validation state, not a breaking change to the generated request
 schema.
+
+Confirmed through the Figma plugin/Dev Mode annotations on 2026-05-29:
+
+- `node-id=153-12742`: task participant dropdown. The annotation says members
+  sort 가나다순, agents show viewer-owned agents first and then 가나다순, long
+  member/agent names need contained UI, and the dropdown presentation caps at
+  520px with scrollbar width handled by the client. This server owns only the
+  deterministic agent response order; member ordering and pixel sizing remain
+  client presentation behavior.
 
 ## Boundary
 
