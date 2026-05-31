@@ -122,6 +122,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			WorkStatus:          AgentWorkStatusRunning,
 			Editability:         AgentEditabilityBlockedAssignedTasks,
 			AssignedTaskCount:   1,
+			CreatedAt:           now.Add(-72 * time.Hour),
 			UpdatedAt:           now.Add(-6 * time.Hour),
 		},
 		"agent-owned-claude": {
@@ -139,6 +140,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			WorkStatus:          AgentWorkStatusOffline,
 			Editability:         AgentEditabilityEditable,
 			AssignedTaskCount:   0,
+			CreatedAt:           now.Add(-96 * time.Hour),
 			UpdatedAt:           now.Add(-5 * time.Hour),
 		},
 		"agent-public-openclaw": {
@@ -156,6 +158,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			WorkStatus:          AgentWorkStatusIdle,
 			Editability:         AgentEditabilityEditable,
 			AssignedTaskCount:   0,
+			CreatedAt:           now.Add(-48 * time.Hour),
 			UpdatedAt:           now.Add(-4 * time.Hour),
 		},
 		"agent-private-cursor": {
@@ -173,6 +176,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			WorkStatus:          AgentWorkStatusIdle,
 			Editability:         AgentEditabilityEditable,
 			AssignedTaskCount:   0,
+			CreatedAt:           now.Add(-24 * time.Hour),
 			UpdatedAt:           now.Add(-3 * time.Hour),
 		},
 	}
@@ -487,6 +491,7 @@ func (s *MockAIAgentClientStore) CreateAIAgent(ctx context.Context, principal Au
 		WorkStatus:          AgentWorkStatusIdle,
 		Editability:         AgentEditabilityEditable,
 		AssignedTaskCount:   0,
+		CreatedAt:           now,
 		UpdatedAt:           now,
 	}
 	s.agents[agent.AgentID] = agent
