@@ -91,6 +91,7 @@
         "runtime_reinstalled_same_device: mark runtime online according to online/offline policy only",
         "runtime_detection_error: expose offline to clients",
         "client: runtime-settings empty and install-card states are composed from device/runtime read-model data without changing liveness semantics",
+        "client: runtime-settings current-device and other-device groups are composed from DeviceRecord values; current-device daemon detail, stop, and restart presentation remain desktop-local helper behavior and do not add a SaaS daemon command",
         "client: provider install-card hover, Windows app waitlist copy, and marketing-consent presentation are downstream client/product facts until a separate owning SSOT adds a generated operation"
       ]
     },
@@ -103,6 +104,7 @@
         "model_id: treat as an opaque runtime-scoped identifier owned by the selected runtime catalog",
         "label: treat as display data for clients, not a discriminator or generated enum",
         "default: each selectable runtime has exactly one is_default model and omitted model_id resolves to that default",
+        "client_required_control: Figma node-id=417-21803 / 432-35544 marks the model dropdown as a required form control, but the API field remains optional because the runtime default model is a deterministic selection",
         "mutation: create/update validates model_id against the selected runtime before saving agent configuration",
         "daemon: consume only the already-authorized model_id selected by the control plane and never define the client catalog"
       ]
@@ -147,14 +149,16 @@
     {
       "policy_id": "agent_profile_configuration.v1",
       "kind": "profile",
-      "description": "Agent profile presentation fields and server-authored update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
+      "description": "Agent profile presentation fields and server-authored creation/update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
       "rules": [
         "profile_thumbnail_url: optional HTTPS image URL string; binary upload is outside this contract",
         "description: optional client-authored one-line summary with a maximum of 160 characters; empty string is allowed; client UI owns truncation and wrapping",
         "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
-        "updated_at: server-authored RFC3339 date-time used by clients for list timestamps and absolute-time tooltips",
+        "created_at: server-authored RFC3339 date-time stamped when the agent is created; used by clients for list creation dates and absolute-time tooltips",
+        "updated_at: server-authored RFC3339 date-time refreshed when editable agent configuration is saved; used by clients for list update dates and absolute-time tooltips",
         "model_id: optional runtime-scoped model selection; omitted create/update values resolve to the selected runtime default",
-        "create: client-facing agent creation stores the same profile fields, binds a viewer-owned runtime_id, stamps owner_principal_id from authorization, and returns updated_at",
+        "required_form_controls: Figma node-id=417-21803 / 432-35544 says name, runtime, model, and visibility are required controls; profile_thumbnail_url, description, and instruction remain optional values",
+        "create: client-facing agent creation stores the same profile fields, binds an authorized selectable runtime_id from the device/runtime read model, stamps owner_principal_id from authorization, and returns created_at and updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
     },
@@ -166,9 +170,11 @@
         "bootstrap: return a stable ordered template catalog for the Figma onboarding agent-selection screen",
         "template: carry name, role_label, description, profile_thumbnail_url, and instruction as copyable agent configuration defaults",
         "figma_138_7389: current starter template rows are 리도, 영실, 홍도, and 지원 in bootstrap order",
-        "direct_setting: clients may still create an agent by submitting explicit configuration fields without choosing a template",
+        "direct_setting: Figma node-id=164-26969 expands 직접 설정 into name, description, and instruction input fields that submit through createAIAgent",
         "direct_setting_row: 직접 설정 is client presentation, not an AgentOnboardingTemplate record",
+        "direct_setting_presentation: dimmed starter-template rows, placeholder copy, row expansion, and scroll affordance are client presentation",
         "no_runtime: when no selectable runtime is detected, clients skip the template-selection step and show the no-installed-AI start state",
+        "agent_add_visibility: Figma node-id=337-24013 hides the agent-add affordance when the authorized workspace/member device-runtime read model has no selectable runtime; this is client presentation and does not add a separate eligibility endpoint",
         "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout"
       ]
     }
@@ -513,6 +519,7 @@
           "work_status",
           "editability",
           "assigned_task_count",
+          "created_at",
           "updated_at"
         ],
         "properties": [
@@ -578,6 +585,11 @@
           {
             "name": "assigned_task_count",
             "type": "integer"
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "format": "date-time"
           },
           {
             "name": "updated_at",
@@ -1418,7 +1430,9 @@
       },
       "scenario_ids": [
         "getAIAgentClientBootstrap.figma-client-bootstrap",
+        "getAIAgentClientBootstrap.figma-agent-list-timestamps",
         "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
+        "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
         "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
       ]
     },
@@ -1446,7 +1460,8 @@
         "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent",
         "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records",
         "listAIAgentDeviceRuntimes.figma-onboarding-runtime-selection",
-        "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model"
+        "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model",
+        "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition"
       ]
     },
     {
@@ -1585,6 +1600,7 @@
       },
       "scenario_ids": [
         "createAIAgent.agent-add-screen-creates-owned-agent",
+        "createAIAgent.onboarding-direct-setting-creates-explicit-configuration",
         "createAIAgent.agent-create-defaults-selected-runtime-model",
         "createAIAgent.agent-create-rejects-model-outside-runtime-catalog"
       ]
@@ -1705,7 +1721,15 @@
       "name": "figma client bootstrap",
       "given": "a web or desktop webview client opens the v1.22 AI Agent surface",
       "when": "the client requests bootstrap data",
-      "then": "the response contains visible agents, owned device runtimes, and onboarding agent templates required by the Figma onboarding, runtime setting, and agent setting screens"
+      "then": "the response contains visible agents, authorized device/runtime read-model data, and onboarding agent templates required by the Figma onboarding, runtime setting, and agent setting screens"
+    },
+    {
+      "scenario_id": "getAIAgentClientBootstrap.figma-agent-list-timestamps",
+      "operation_id": "getAIAgentClientBootstrap",
+      "name": "figma agent list timestamps",
+      "given": "the Figma agent list screen shows separate 업데이트일 and 생성일 columns with absolute-time tooltips",
+      "when": "the client requests bootstrap data",
+      "then": "each AgentClientRecord includes server-authored created_at and updated_at values while date formatting and tooltip presentation remain client-owned"
     },
     {
       "scenario_id": "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
@@ -1714,6 +1738,14 @@
       "given": "the Figma onboarding template-selection screen shows 리도, 영실, 홍도, 지원, a 직접 설정 row, a disabled-looking next button, and a right-side preview skeleton",
       "when": "the client requests bootstrap data",
       "then": "the response provides the ordered starter templates while 직접 설정, disabled-next, row selection, and preview skeleton behavior remain client presentation without a template-selection command"
+    },
+    {
+      "scenario_id": "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
+      "operation_id": "getAIAgentClientBootstrap",
+      "name": "figma agent add button visibility",
+      "given": "the Figma agent settings screen hides 에이전트 추가 when no member-visible runtime is selectable",
+      "when": "the client composes the agent list and add affordance from bootstrap and device/runtime data",
+      "then": "the client can hide the add affordance without a separate eligibility command while createAIAgent still validates the selected authorized runtime_id"
     },
     {
       "scenario_id": "getAIAgentClientBootstrap.figma-onboarding-no-runtime",
@@ -1762,6 +1794,14 @@
       "given": "the Figma runtime settings empty-state section shows no current-device runtime, no daemon, provider install cards, or Windows app waitlist variants",
       "when": "the client reads device runtime data",
       "then": "the client composes those empty/install/waitlist states from ordinary device and runtime records without adding provider-install or waitlist commands to this API"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition",
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "name": "runtime settings current and other device composition",
+      "given": "the Figma runtime settings page shows current-device and other-device groups with runtime name/version/status/attached-agent rows plus a current-device daemon row with local details and actions",
+      "when": "the client reads device runtime data",
+      "then": "the response provides ordinary device/runtime/attached-agent records while daemon uptime, PID, daemon ID, profile, device name, stop, and restart controls remain desktop-local and no SaaS stop/restart daemon operation is generated"
     },
     {
       "scenario_id": "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
@@ -1849,15 +1889,23 @@
       "name": "agent add screen creates owned agent",
       "given": "the Figma agent-add screen submits name, visibility, runtime_id, and optional profile fields",
       "when": "an authorized client creates an agent",
-      "then": "the response contains a new owned agent with zero assigned tasks, editable status, server-authored updated_at, and the runtime kind derived from the selected runtime_id"
+      "then": "the response contains a new owned agent with zero assigned tasks, editable status, server-authored created_at and updated_at, and the runtime kind derived from the selected runtime_id"
+    },
+    {
+      "scenario_id": "createAIAgent.onboarding-direct-setting-creates-explicit-configuration",
+      "operation_id": "createAIAgent",
+      "name": "onboarding direct setting creates explicit configuration",
+      "given": "the Figma onboarding direct-setting expansion shows name, description, and instruction fields after the user selects 직접 설정",
+      "when": "the client submits explicit name, description, instruction, runtime_id, and visibility",
+      "then": "createAIAgent saves a normal owned agent without creating an AgentOnboardingTemplate or a separate direct-setting operation"
     },
     {
       "scenario_id": "createAIAgent.agent-create-defaults-selected-runtime-model",
       "operation_id": "createAIAgent",
       "name": "agent create defaults selected runtime model",
-      "given": "the Figma agent-add screen shows a model dropdown",
+      "given": "the Figma agent-add screen shows a required model dropdown backed by the selected runtime default model",
       "when": "the client creates an agent without model_id",
-      "then": "the response stores the selected runtime's default model_id and model_label without exposing a top-level model enum"
+      "then": "the API accepts the omitted model_id, stores the selected runtime's default model_id and model_label, and does not expose a top-level model enum"
     },
     {
       "scenario_id": "createAIAgent.agent-create-rejects-model-outside-runtime-catalog",
@@ -1889,7 +1937,7 @@
       "name": "profile fields are saved",
       "given": "an editable agent has no assigned task",
       "when": "the owner updates profile_thumbnail_url, description, and instruction",
-      "then": "the response and future client bootstrap contain the saved profile fields and a server-authored updated_at timestamp"
+      "then": "the response and future client bootstrap contain the saved profile fields, preserve server-authored created_at, and refresh updated_at"
     },
     {
       "scenario_id": "updateAIAgentConfiguration.model-updates-validate-against-runtime-catalog",
