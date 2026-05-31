@@ -184,6 +184,103 @@ func TestHTTPAIAgentClientMockDevicesAndEditability(t *testing.T) {
 	}
 }
 
+func TestHTTPAIAgentClientMockDeviceDaemonDetailAndControl(t *testing.T) {
+	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{
+		{
+			PrincipalID: "user-1",
+			Token:       "user-token",
+			Scopes:      []string{"ai-agent:*"},
+		},
+		{
+			PrincipalID: "admin-user",
+			Token:       "admin-token",
+			Scopes:      []string{"ai-agent:*"},
+			Roles:       []AgentCatalogRole{AgentCatalogRoleAdmin},
+		},
+	})
+
+	detailReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/devices/device-mock-macbook/daemon", nil)
+	detailReq.Header.Set("Authorization", "Bearer user-token")
+	detailResp := httptest.NewRecorder()
+	server.ServeHTTP(detailResp, detailReq)
+	if detailResp.Code != http.StatusOK {
+		t.Fatalf("daemon detail status=%d body=%s", detailResp.Code, detailResp.Body.String())
+	}
+	var detail DeviceDaemonDetailResponse
+	if err := json.Unmarshal(detailResp.Body.Bytes(), &detail); err != nil {
+		t.Fatalf("daemon detail json: %v", err)
+	}
+	if detail.Daemon.Availability != DaemonAvailabilityOnline || detail.Daemon.PID != 5111 || detail.Daemon.Profile != "desktop-api.riido.ai" {
+		t.Fatalf("daemon detail = %+v", detail.Daemon)
+	}
+	if !sameDaemonActions(detail.Daemon.SupportedActions, []DaemonControlAction{DaemonControlActionRestart, DaemonControlActionStop}) {
+		t.Fatalf("daemon supported actions = %+v", detail.Daemon.SupportedActions)
+	}
+
+	restartReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/devices/device-mock-macbook/daemon/restart", strings.NewReader(`{"reason":"settings page restart"}`))
+	restartReq.Header.Set("Authorization", "Bearer user-token")
+	restartResp := httptest.NewRecorder()
+	server.ServeHTTP(restartResp, restartReq)
+	if restartResp.Code != http.StatusAccepted {
+		t.Fatalf("daemon restart status=%d body=%s", restartResp.Code, restartResp.Body.String())
+	}
+	var restart DeviceDaemonCommandResponse
+	if err := json.Unmarshal(restartResp.Body.Bytes(), &restart); err != nil {
+		t.Fatalf("daemon restart json: %v", err)
+	}
+	if restart.Action != DaemonControlActionRestart || restart.ControlState != DaemonControlStateRestarting {
+		t.Fatalf("daemon restart = %+v", restart)
+	}
+
+	stopReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/devices/device-mock-macbook/daemon/stop", strings.NewReader(`{"reason":"settings page stop"}`))
+	stopReq.Header.Set("Authorization", "Bearer user-token")
+	stopResp := httptest.NewRecorder()
+	server.ServeHTTP(stopResp, stopReq)
+	if stopResp.Code != http.StatusAccepted {
+		t.Fatalf("daemon stop status=%d body=%s", stopResp.Code, stopResp.Body.String())
+	}
+	var stop DeviceDaemonCommandResponse
+	if err := json.Unmarshal(stopResp.Body.Bytes(), &stop); err != nil {
+		t.Fatalf("daemon stop json: %v", err)
+	}
+	if stop.Action != DaemonControlActionStop || stop.Availability != DaemonAvailabilityOffline || stop.ControlState != DaemonControlStateStopping {
+		t.Fatalf("daemon stop = %+v", stop)
+	}
+
+	devicesReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/devices", nil)
+	devicesReq.Header.Set("Authorization", "Bearer user-token")
+	devicesResp := httptest.NewRecorder()
+	server.ServeHTTP(devicesResp, devicesReq)
+	if devicesResp.Code != http.StatusOK {
+		t.Fatalf("devices after daemon stop status=%d body=%s", devicesResp.Code, devicesResp.Body.String())
+	}
+	var devices DeviceRuntimeListResponse
+	if err := json.Unmarshal(devicesResp.Body.Bytes(), &devices); err != nil {
+		t.Fatalf("devices json: %v", err)
+	}
+	for _, runtime := range devices.Devices[0].Runtimes {
+		if runtime.Availability != RuntimeAvailabilityOffline {
+			t.Fatalf("runtime should be offline after daemon stop: %+v", runtime)
+		}
+	}
+
+	eventsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/events?replay=1", nil)
+	eventsReq.Header.Set("Authorization", "Bearer user-token")
+	eventsResp := httptest.NewRecorder()
+	server.ServeHTTP(eventsResp, eventsReq)
+	if eventsResp.Code != http.StatusOK || !strings.Contains(eventsResp.Body.String(), AgentClientEventDeviceDaemonStatus) {
+		t.Fatalf("events should include daemon status, status=%d body=%s", eventsResp.Code, eventsResp.Body.String())
+	}
+
+	adminStopReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/devices/device-mock-macbook/daemon/stop", nil)
+	adminStopReq.Header.Set("Authorization", "Bearer admin-token")
+	adminStopResp := httptest.NewRecorder()
+	server.ServeHTTP(adminStopResp, adminStopReq)
+	if adminStopResp.Code != http.StatusNotFound {
+		t.Fatalf("admin other-device daemon control status=%d body=%s", adminStopResp.Code, adminStopResp.Body.String())
+	}
+}
+
 func TestHTTPAIAgentClientMockTaskCommentAndStop(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
@@ -822,4 +919,16 @@ func containsString(values []string, want string) bool {
 		}
 	}
 	return false
+}
+
+func sameDaemonActions(got, want []DaemonControlAction) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	for i := range got {
+		if got[i] != want[i] {
+			return false
+		}
+	}
+	return true
 }

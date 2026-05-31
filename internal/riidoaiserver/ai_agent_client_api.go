@@ -9,6 +9,7 @@ const AgentDescriptionMaxCharacters = 160
 
 const (
 	AgentClientEventDeviceRuntimeSnapshot = "device_runtime_snapshot"
+	AgentClientEventDeviceDaemonStatus    = "device_daemon_status_changed"
 	AgentClientEventEditabilityChanged    = "agent_editability_changed"
 	AgentClientEventWorkStatusChanged     = "agent_work_status_changed"
 	AgentClientEventThreadProgress        = "agent_thread_progress"
@@ -43,6 +44,31 @@ const (
 	RuntimeDetectionStateDetected RuntimeDetectionState = "detected"
 	RuntimeDetectionStateMissing  RuntimeDetectionState = "missing"
 	RuntimeDetectionStateError    RuntimeDetectionState = "error"
+)
+
+type DaemonAvailability string
+
+const (
+	DaemonAvailabilityOnline  DaemonAvailability = "online"
+	DaemonAvailabilityOffline DaemonAvailability = "offline"
+)
+
+type DaemonControlAction string
+
+const (
+	DaemonControlActionStart   DaemonControlAction = "start"
+	DaemonControlActionRestart DaemonControlAction = "restart"
+	DaemonControlActionStop    DaemonControlAction = "stop"
+)
+
+type DaemonControlState string
+
+const (
+	DaemonControlStateIdle       DaemonControlState = "idle"
+	DaemonControlStateStarting   DaemonControlState = "starting"
+	DaemonControlStateRestarting DaemonControlState = "restarting"
+	DaemonControlStateStopping   DaemonControlState = "stopping"
+	DaemonControlStateFailed     DaemonControlState = "failed"
 )
 
 type RuntimeModelRecord struct {
@@ -119,6 +145,44 @@ type DeviceRecord struct {
 	DisplayName      string          `json:"display_name,omitempty"`
 	DaemonLastSeenAt time.Time       `json:"daemon_last_seen_at,omitempty"`
 	Runtimes         []RuntimeRecord `json:"runtimes"`
+}
+
+type DeviceDaemonRecord struct {
+	DeviceID               string                `json:"device_id"`
+	OwnerPrincipalID       string                `json:"owner_principal_id"`
+	DeviceDisplayName      string                `json:"device_display_name,omitempty"`
+	DaemonID               string                `json:"daemon_id,omitempty"`
+	Profile                string                `json:"profile,omitempty"`
+	PID                    int                   `json:"pid,omitempty"`
+	UptimeSeconds          int                   `json:"uptime_seconds,omitempty"`
+	StartedAt              time.Time             `json:"started_at,omitempty"`
+	LastSeenAt             time.Time             `json:"last_seen_at,omitempty"`
+	Availability           DaemonAvailability    `json:"availability"`
+	ControlState           DaemonControlState    `json:"control_state"`
+	SupportedActions       []DaemonControlAction `json:"supported_actions"`
+	LastCommandID          string                `json:"last_command_id,omitempty"`
+	LastCommandAction      DaemonControlAction   `json:"last_command_action,omitempty"`
+	LastCommandRequestedAt time.Time             `json:"last_command_requested_at,omitempty"`
+}
+
+type DeviceDaemonDetailResponse struct {
+	SchemaVersion string             `json:"schema_version"`
+	Daemon        DeviceDaemonRecord `json:"daemon"`
+}
+
+type ControlDeviceDaemonRequest struct {
+	Reason string `json:"reason,omitempty"`
+}
+
+type DeviceDaemonCommandResponse struct {
+	SchemaVersion string              `json:"schema_version"`
+	CommandID     string              `json:"command_id"`
+	DeviceID      string              `json:"device_id"`
+	Action        DaemonControlAction `json:"action"`
+	Availability  DaemonAvailability  `json:"availability"`
+	ControlState  DaemonControlState  `json:"control_state"`
+	AcceptedAt    time.Time           `json:"accepted_at"`
+	Message       string              `json:"message"`
 }
 
 type AgentClientRecord struct {
@@ -276,6 +340,12 @@ type DeviceRuntimeSnapshotEvent struct {
 	EventType     string       `json:"event_type"`
 	SchemaVersion string       `json:"schema_version"`
 	Device        DeviceRecord `json:"device"`
+}
+
+type DeviceDaemonStatusEvent struct {
+	EventType     string             `json:"event_type"`
+	SchemaVersion string             `json:"schema_version"`
+	Daemon        DeviceDaemonRecord `json:"daemon"`
 }
 
 type AgentEditabilityChangedEvent struct {

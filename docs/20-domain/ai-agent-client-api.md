@@ -16,15 +16,14 @@ The contract projection is checked in under
 - generated React Query: `web/generated/aiAgentClient.ts`
 - generated React hook wrapper: `web/generated/aiAgentClient.react.ts`
 
-Canonical vocabulary, shared enum semantics, and lifecycle/deprecation grammar
-are owned by `riido-contracts`. This repository owns the AI Agent client API
-sub-DSL that imports those canonical terms and projects them to OpenAPI for the
-running mock API, smoke tests, and generated frontend client.
+Canonical vocabulary, shared enum semantics, lifecycle/deprecation grammar, and
+generated-client metadata are owned by `riido-contracts`. This repository keeps
+the executable mirror under `contracts/ai-agent-client/` so the running mock
+API, smoke tests, and generated frontend client can be verified in the same PR.
 
-Client-usability API changes enter through `riido-control-plane`. If a change
-modifies business meaning, policy scope, or canonical vocabulary, the decision
-must be escalated to `riido-contracts` before this repository updates the
-sub-DSL.
+Client-usability API changes can be proposed from `riido-control-plane`, but the
+canonical contract change must land in `riido-contracts` before this repository
+refreshes the mirrored DSL/IR/OpenAPI and generated output.
 
 Client library metadata is part of the sub-DSL, not a second `dsl2`/`ir2`
 source:
@@ -113,13 +112,14 @@ For agent settings:
   operations from this screen. Those surfaces need a separate owning SSOT and a
   new generated operation before the server accepts them.
 - Figma runtime settings annotations (`node-id=162-23090`) confirm the
-  `devices` API consumption context. This repository owns the protected
-  device/runtime read model, `device_runtime_snapshot` event shape, generated
-  DTOs, and black-box tests for current-device and other-device grouping,
-  runtime name/version/status, and attached-agent records. It does not own the
-  agent hover popover, daemon stop modal, restart animation, local daemon
-  uptime/PID/daemon ID/profile/device-name detail, or desktop-local daemon
-  lifecycle command composition.
+  `devices` and `devices.daemon` API consumption context. This repository owns
+  the protected device/runtime read model, current-device daemon detail,
+  start/restart/stop command requests, `device_runtime_snapshot` and
+  `device_daemon_status_changed` event shapes, generated DTOs, and black-box
+  tests for current-device and other-device grouping, runtime
+  name/version/status, attached-agent records, daemon detail labels, and daemon
+  command acceptance. It does not own the agent hover popover, daemon stop modal
+  layout, or restart animation rendering.
 - Figma onboarding annotations (`node-id=42-3014`) confirm the bootstrap and
   device/runtime consumption context. `node-id=137-6746` maps runtime selection
   to `GET /v1/client/ai-agent/devices`: Claude Code/Codex can be rendered as
@@ -161,6 +161,10 @@ The mock API implements:
 
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
+- `GET /v1/client/ai-agent/devices/{device_id}/daemon`
+- `POST /v1/client/ai-agent/devices/{device_id}/daemon/start`
+- `POST /v1/client/ai-agent/devices/{device_id}/daemon/restart`
+- `POST /v1/client/ai-agent/devices/{device_id}/daemon/stop`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
 - `POST /v1/client/ai-agent/tasks/{task_id}/assignment`
 - `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`
@@ -249,9 +253,11 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - client task-thread progress is streamed as the typed
   `agent_thread_progress` event with `thread_id` on
   `GET /v1/client/ai-agent/events`
-- runtime settings consume `GET /v1/client/ai-agent/devices` and
-  `device_runtime_snapshot`; SaaS does not expose a client endpoint to stop or
-  restart a user's local daemon
+- runtime settings consume `GET /v1/client/ai-agent/devices`,
+  `GET /v1/client/ai-agent/devices/{device_id}/daemon`, daemon command
+  endpoints, `device_runtime_snapshot`, and `device_daemon_status_changed`
+- daemon detail/control is current-device owner-only. Admin agent authority does
+  not let a user inspect or control another user's desktop local daemon.
 
 ## Figma Handoff Evidence
 
@@ -383,19 +389,17 @@ generated `listAIAgentTaskAssignableAgents` query. The server must preserve the
 agent response policy, while the client composes that response with member rows
 and renders truncation, max height, and scrollbars.
 
-`node-id=162-23090` maps to the existing
-`GET /v1/client/ai-agent/devices` endpoint and the generated
-`listAIAgentDeviceRuntimes` query. A future nested wrapper may expose the same
-operation as a `riido.aiAgent.devices.runtimes` chain, but the chain must be
-generated from the OpenAPI operation rather than hard-coded from the Figma
-annotation. The response is the source for visible device/runtime rows,
-runtime name/version/status, and attached-agent records used by the `내 기기`
-and `다른 기기` groups. The agent hover popover is rendered from existing agent
-profile fields. Current-device daemon details such as uptime, PID, daemon ID,
-profile, and device name are local daemon/helper facts unless a later contract
-promotes them into this API. The daemon stop modal and restart animation are
-client/desktop-local behavior; this server does not add a protected SaaS
-`stop daemon` or `restart daemon` endpoint for that screen.
+`node-id=162-23090` maps to `GET /v1/client/ai-agent/devices`, the generated
+`listAIAgentDeviceRuntimes` query, and the generated
+`riido.aiAgent.devices.daemon.details/start/restart/stop` endpoints. The device
+response is the source for visible device/runtime rows, runtime
+name/version/status, and attached-agent records used by the `내 기기` and
+`다른 기기` groups. The daemon detail endpoint is the source for current-device
+daemon labels such as status, uptime, PID, daemon ID, profile, and device name.
+Daemon start/restart/stop are SaaS command requests; the daemon later reads and
+executes accepted commands locally. A stop command makes affected runtimes
+client-visible as offline through the runtime read model. The agent hover
+popover, stop modal layout, and restart animation are still client presentation.
 
 `node-id=275-22731` also maps to `GET /v1/client/ai-agent/devices`. The server
 returns ordinary device/runtime rows or empty arrays; the client decides whether
@@ -491,6 +495,10 @@ ALB for:
 - `GET /readyz`
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
+- `GET /v1/client/ai-agent/devices/{device_id}/daemon`
+- `POST /v1/client/ai-agent/devices/{device_id}/daemon/start`
+- `POST /v1/client/ai-agent/devices/{device_id}/daemon/restart`
+- `POST /v1/client/ai-agent/devices/{device_id}/daemon/stop`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
 - `POST /v1/client/ai-agent/tasks/{task_id}/assignment`
 - `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`

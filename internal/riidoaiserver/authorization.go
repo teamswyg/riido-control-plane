@@ -27,6 +27,7 @@ const (
 	AuthorizationActionAssign              AuthorizationAction = "assign"
 	AuthorizationActionCreate              AuthorizationAction = "create"
 	AuthorizationActionDelete              AuthorizationAction = "delete"
+	AuthorizationActionDeviceControl       AuthorizationAction = "device:control"
 	AuthorizationActionDeviceRead          AuthorizationAction = "device:read"
 	AuthorizationActionEventsRead          AuthorizationAction = "events:read"
 	AuthorizationActionEventsWrite         AuthorizationAction = "events:write"
@@ -49,6 +50,7 @@ type AuthorizationRequest struct {
 	Resource AuthorizationResource
 	Action   AuthorizationAction
 	AgentID  string
+	DeviceID string
 	TaskID   string
 }
 
@@ -239,6 +241,14 @@ func authorizationScopeCandidates(req AuthorizationRequest) []string {
 		switch req.Action {
 		case AuthorizationActionDeviceRead:
 			candidates = append(candidates, "ai-agent:device:read", "ai-agent:read")
+			if req.DeviceID != "" {
+				candidates = append(candidates, "ai-agent:device:"+req.DeviceID+":read")
+			}
+		case AuthorizationActionDeviceControl:
+			candidates = append(candidates, "ai-agent:device:write")
+			if req.DeviceID != "" {
+				candidates = append(candidates, "ai-agent:device:"+req.DeviceID+":write")
+			}
 		case AuthorizationActionStream:
 			candidates = append(candidates, "ai-agent:stream")
 		case AuthorizationActionRead:
