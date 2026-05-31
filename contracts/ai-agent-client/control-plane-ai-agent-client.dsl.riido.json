@@ -12,9 +12,9 @@
       "description": "AI Agent client API module입니다. 화면 구성을 소유하지 않고, client가 화면을 구성할 때 필요한 API 의미, 정책, lifecycle, cache 관계를 제공합니다.",
       "namespaces": [
         {"path": ["agents"], "description": "agent 설정과 mutation을 다루는 namespace입니다. agent 이름은 중복될 수 있고 assigned task가 있으면 수정할 수 없습니다."},
+        {"path": ["agents", "daemon"], "description": "agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다."},
         {"path": ["bootstrap"], "description": "AI Agent 화면 진입 시 필요한 초기 read model입니다. viewer가 볼 수 있는 agent와 device runtime snapshot을 제공합니다."},
         {"path": ["devices"], "description": "device와 runtime 상태를 다루는 namespace입니다."},
-        {"path": ["devices", "daemon"], "description": "runtime 설정 화면에서 현재 device의 desktop local daemon 상세와 제어 command를 다루는 namespace입니다."},
         {"path": ["devices", "runtimes"], "description": "권한이 확인된 principal의 device runtime 목록입니다. assigned agent가 있는 runtime은 삭제되어도 offline 상태로 유지됩니다."},
         {"path": ["events"], "description": "client가 SSE로 수신하는 상태 변경 stream namespace입니다."},
         {"path": ["tasks"], "description": "task thread에서 AI Agent assignment와 comment action을 다루는 namespace입니다."}
@@ -91,11 +91,13 @@
         "runtime_deleted_without_assigned_agent: treat runtime as absent",
         "runtime_reinstalled_same_device: mark runtime online according to online/offline policy only",
         "runtime_detection_error: client에는 offline으로 노출합니다",
-        "daemon_control: runtime settings 화면의 current-device daemon 상세, 시작, 재시작, 중지는 SaaS command/read-model을 통해서만 client에 노출합니다",
-        "daemon_control_owner_boundary: desktop local daemon 제어는 device owner만 요청할 수 있고 admin도 다른 사용자의 local device owner boundary를 우회하지 않습니다",
+        "daemon_control: runtime settings 화면의 daemon 상세, 시작, 재시작, 중지는 SaaS command/read-model을 통해서만 client에 노출합니다",
+        "daemon_control_agent_access: desktop local daemon 상세/제어는 agent visibility/access 권한을 기준으로 요청합니다",
+        "daemon_control_public_agent: public agent는 같은 workspace 팀원이 해당 agent에 연결된 daemon/runtime을 통해 작업 실행과 daemon 제어 요청을 할 수 있습니다",
+        "daemon_control_private_agent: private agent는 같은 workspace admin 또는 owner만 해당 agent에 연결된 daemon/runtime을 통해 작업 실행과 daemon 제어 요청을 할 수 있습니다",
         "daemon_stop_effect: daemon stop이 accepted되면 해당 device의 runtimes는 client에 offline으로 노출되어야 합니다",
         "client: runtime-settings empty and install-card states are composed from device/runtime read-model data without changing liveness semantics",
-        "client: runtime-settings current-device and other-device groups are composed from DeviceRecord values; current-device daemon detail/actions are read through devices.daemon generated endpoints",
+        "client: runtime-settings current-device and other-device groups are composed from DeviceRecord values; daemon detail/actions are read through agents.daemon generated endpoints with an agent_id",
         "client: provider install-card hover, Windows app waitlist copy, and marketing-consent presentation are downstream client/product facts until a separate owning SSOT adds a generated operation"
       ]
     },
@@ -373,7 +375,7 @@
     },
     {
       "name": "DeviceDaemonRecord",
-      "description": "runtime 설정 화면에서 현재 device의 daemon 상세 표시와 제어 버튼 상태를 구성하는 read model입니다.",
+      "description": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세 표시와 제어 버튼 상태를 구성하는 read model입니다.",
       "type": "object",
       "required": ["device_id", "owner_principal_id", "availability", "control_state", "supported_actions"],
       "properties": [
@@ -396,7 +398,7 @@
     },
     {
       "name": "DeviceDaemonDetailResponse",
-      "description": "runtime 설정 화면의 daemon 상세 row와 상세 패널을 위한 응답입니다.",
+      "description": "runtime 설정 화면의 agent-bound daemon 상세 row와 상세 패널을 위한 응답입니다.",
       "type": "object",
       "required": ["schema_version", "daemon"],
       "properties": [
@@ -406,7 +408,7 @@
     },
     {
       "name": "ControlDeviceDaemonRequest",
-      "description": "current-device daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.",
+      "description": "agent 권한으로 접근 가능한 daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.",
       "type": "object",
       "properties": [
         {"name": "reason", "type": "string"}
@@ -634,7 +636,7 @@
     },
     {
       "name": "DeviceDaemonStatusEvent",
-      "description": "current-device daemon 상세/제어 상태가 변경되었음을 client SSE로 전달하는 event입니다.",
+      "description": "agent 권한으로 접근 가능한 daemon 상세/제어 상태가 변경되었음을 client SSE로 전달하는 event입니다.",
       "type": "object",
       "required": ["event_type", "schema_version", "daemon"],
       "properties": [
@@ -854,7 +856,7 @@
           "name": "runtime settings current and other device composition",
           "given": "the Figma runtime settings page shows current-device and other-device groups with runtime name/version/status/attached-agent rows plus a current-device daemon row with local details and actions",
           "when": "the client reads device runtime data",
-          "then": "the response provides ordinary device/runtime records and the client reads current-device daemon details/actions through the devices.daemon generated endpoints"
+          "then": "the response provides ordinary device/runtime records and the client reads daemon details/actions through agent-bound agents.daemon generated endpoints"
         },
         {
           "name": "runtime settings daemon stop makes runtimes offline",
@@ -865,42 +867,48 @@
       ]
     },
     {
-      "operation_id": "getAIAgentDeviceDaemon",
+      "operation_id": "getAIAgentDaemon",
       "kind": "query",
-      "summary": "runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다",
+      "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다",
       "method": "GET",
-      "path": "/v1/client/ai-agent/devices/{device_id}/daemon",
-      "resource": "device",
+      "path": "/v1/client/ai-agent/agents/{agent_id}/daemon",
+      "resource": "agent",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "details"], "cache_tag": "aiAgent.devices.daemon"},
-      "auth": {"scheme": "bearer", "scopes": ["ai-agent:device:read", "ai-agent:device:{device_id}:read"]},
+      "client": {"module": "aiAgent", "facade_path": ["agents", "daemon", "details"], "cache_tag": "aiAgent.agents.daemon"},
+      "auth": {"scheme": "bearer", "scopes": ["ai-agent:agent:read", "ai-agent:agent:{agent_id}:read"]},
       "rbac_policy": "runtime_liveness.v1",
       "response": {"status": 200, "ref": "DeviceDaemonDetailResponse"},
       "scenarios": [
         {
           "name": "figma runtime settings daemon details",
           "given": "the Figma runtime settings current-device daemon row shows 상태, 실행 시간, PID, 데몬 ID, 프로필, 디바이스 이름",
-          "when": "the device owner opens the runtime setting screen",
+          "when": "a principal who can use the agent opens the runtime setting screen",
           "then": "the response contains the daemon detail read model required for those labels without requiring the client to talk to the local daemon directly"
         },
         {
-          "name": "daemon detail is current-device owned",
-          "given": "an admin or another workspace member can see other workspace data",
-          "when": "they request another user's desktop local daemon detail",
-          "then": "the request is rejected because local daemon detail follows device-owner boundary"
+          "name": "public agent grants daemon detail access",
+          "given": "another workspace member can read a public agent",
+          "when": "they request daemon detail through that agent",
+          "then": "the request is allowed because public agent access delegates indirect runtime execution and daemon command visibility"
+        },
+        {
+          "name": "private agent daemon detail requires admin or owner",
+          "given": "another workspace member is not admin and does not own a private agent",
+          "when": "they request daemon detail through that private agent",
+          "then": "the request is rejected because private agent access is limited to admin or owner"
         }
       ]
     },
     {
-      "operation_id": "startAIAgentDeviceDaemon",
+      "operation_id": "startAIAgentDaemon",
       "kind": "command",
-      "summary": "runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다",
+      "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다",
       "method": "POST",
-      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/start",
-      "resource": "device",
+      "path": "/v1/client/ai-agent/agents/{agent_id}/daemon/start",
+      "resource": "agent",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "start"], "invalidates": ["aiAgent.devices.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "bearer", "scopes": ["ai-agent:device:write", "ai-agent:device:{device_id}:write"]},
+      "client": {"module": "aiAgent", "facade_path": ["agents", "daemon", "start"], "invalidates": ["aiAgent.agents.daemon", "aiAgent.devices.runtimes"]},
+      "auth": {"scheme": "bearer", "scopes": ["ai-agent:agent:control", "ai-agent:agent:{agent_id}:control"]},
       "rbac_policy": "runtime_liveness.v1",
       "request": {"ref": "ControlDeviceDaemonRequest"},
       "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
@@ -908,21 +916,21 @@
         {
           "name": "figma runtime settings daemon start",
           "given": "the Figma runtime settings current-device daemon row is offline and shows 시작",
-          "when": "the device owner requests start",
+          "when": "a principal who can use the agent requests start",
           "then": "the response accepts a start daemon command and the client invalidates daemon detail plus runtime read models"
         }
       ]
     },
     {
-      "operation_id": "restartAIAgentDeviceDaemon",
+      "operation_id": "restartAIAgentDaemon",
       "kind": "command",
-      "summary": "runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다",
+      "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다",
       "method": "POST",
-      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/restart",
-      "resource": "device",
+      "path": "/v1/client/ai-agent/agents/{agent_id}/daemon/restart",
+      "resource": "agent",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "restart"], "invalidates": ["aiAgent.devices.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "bearer", "scopes": ["ai-agent:device:write", "ai-agent:device:{device_id}:write"]},
+      "client": {"module": "aiAgent", "facade_path": ["agents", "daemon", "restart"], "invalidates": ["aiAgent.agents.daemon", "aiAgent.devices.runtimes"]},
+      "auth": {"scheme": "bearer", "scopes": ["ai-agent:agent:control", "ai-agent:agent:{agent_id}:control"]},
       "rbac_policy": "runtime_liveness.v1",
       "request": {"ref": "ControlDeviceDaemonRequest"},
       "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
@@ -930,21 +938,21 @@
         {
           "name": "figma runtime settings daemon restart",
           "given": "the Figma runtime settings current-device daemon row is online and shows 재시작",
-          "when": "the device owner requests restart",
+          "when": "a principal who can use the agent requests restart",
           "then": "the response exposes restarting control_state so the client can show 재시작 중 while waiting for the next status event"
         }
       ]
     },
     {
-      "operation_id": "stopAIAgentDeviceDaemon",
+      "operation_id": "stopAIAgentDaemon",
       "kind": "command",
-      "summary": "runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다",
+      "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다",
       "method": "POST",
-      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/stop",
-      "resource": "device",
+      "path": "/v1/client/ai-agent/agents/{agent_id}/daemon/stop",
+      "resource": "agent",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "stop"], "invalidates": ["aiAgent.devices.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "bearer", "scopes": ["ai-agent:device:write", "ai-agent:device:{device_id}:write"]},
+      "client": {"module": "aiAgent", "facade_path": ["agents", "daemon", "stop"], "invalidates": ["aiAgent.agents.daemon", "aiAgent.devices.runtimes"]},
+      "auth": {"scheme": "bearer", "scopes": ["ai-agent:agent:control", "ai-agent:agent:{agent_id}:control"]},
       "rbac_policy": "runtime_liveness.v1",
       "request": {"ref": "ControlDeviceDaemonRequest"},
       "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
@@ -952,7 +960,7 @@
         {
           "name": "figma runtime settings daemon stop",
           "given": "the Figma runtime settings stop modal says local runtimes become offline",
-          "when": "the device owner confirms stop",
+          "when": "a principal who can use the agent confirms stop",
           "then": "the response accepts a stop daemon command, exposes stopping/offline state, and the following runtime read model shows that device's runtimes offline"
         }
       ]

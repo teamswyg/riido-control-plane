@@ -16,8 +16,8 @@ import (
 type AIAgentClientStore interface {
 	BootstrapAIAgentClient(ctx context.Context, principal AuthorizationResult, clientKind ClientKind) (ClientBootstrapResponse, error)
 	ListAIAgentDevices(ctx context.Context, principal AuthorizationResult) (DeviceRuntimeListResponse, error)
-	GetAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string) (DeviceDaemonDetailResponse, error)
-	ControlAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error)
+	GetAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string) (DeviceDaemonDetailResponse, error)
+	ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error)
 	ListAIAgentTaskAssignableAgents(ctx context.Context, principal AuthorizationResult, taskID string) (AgentClientListResponse, error)
 	ListAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error)
 	AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
@@ -126,6 +126,55 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		ControlState:      DaemonControlStateIdle,
 		SupportedActions:  []DaemonControlAction{DaemonControlActionRestart, DaemonControlActionStop},
 	}
+	sharedDevice := DeviceRecord{
+		DeviceID:         "device-shared-studio",
+		OwnerPrincipalID: "user-2",
+		DisplayName:      "Shared Studio Mac",
+		DaemonLastSeenAt: now,
+		Runtimes: []RuntimeRecord{
+			{
+				RuntimeID:        "runtime-openclaw-shared",
+				DeviceID:         "device-shared-studio",
+				Kind:             RuntimeKindOpenClaw,
+				Availability:     RuntimeAvailabilityOnline,
+				DetectionState:   RuntimeDetectionStateDetected,
+				OwnerPrincipalID: "user-2",
+				LastDetectedAt:   now,
+				HasAssignedAgent: true,
+				Models: []RuntimeModelRecord{
+					{ModelID: "openclaw-default", Label: "OpenClaw 기본 모델", IsDefault: true},
+				},
+			},
+			{
+				RuntimeID:        "runtime-cursor-private",
+				DeviceID:         "device-shared-studio",
+				Kind:             RuntimeKindCursor,
+				Availability:     RuntimeAvailabilityOnline,
+				DetectionState:   RuntimeDetectionStateDetected,
+				OwnerPrincipalID: "user-2",
+				LastDetectedAt:   now,
+				HasAssignedAgent: true,
+				Models: []RuntimeModelRecord{
+					{ModelID: "cursor-auto", Label: "Cursor Auto", IsDefault: true},
+					{ModelID: "cursor-fast", Label: "Cursor Fast", IsDefault: false},
+				},
+			},
+		},
+	}
+	sharedDaemon := DeviceDaemonRecord{
+		DeviceID:          sharedDevice.DeviceID,
+		OwnerPrincipalID:  sharedDevice.OwnerPrincipalID,
+		DeviceDisplayName: sharedDevice.DisplayName,
+		DaemonID:          "daemon-shared-studio",
+		Profile:           "desktop-api.riido.ai",
+		PID:               6111,
+		UptimeSeconds:     42 * 60,
+		StartedAt:         now.Add(-42 * time.Minute),
+		LastSeenAt:        now,
+		Availability:      DaemonAvailabilityOnline,
+		ControlState:      DaemonControlStateIdle,
+		SupportedActions:  []DaemonControlAction{DaemonControlActionRestart, DaemonControlActionStop},
+	}
 	agents := map[string]AgentClientRecord{
 		"agent-owned-codex": {
 			AgentID:             "agent-owned-codex",
@@ -171,7 +220,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			Description:         "공개 워크스페이스 반복 작업 에이전트",
 			Instruction:         "공개 워크스페이스에서 반복 가능한 보조 작업을 수행합니다.",
 			Visibility:          AgentVisibilityPublic,
-			RuntimeID:           "runtime-openclaw-remote",
+			RuntimeID:           "runtime-openclaw-shared",
 			RuntimeKind:         RuntimeKindOpenClaw,
 			ModelID:             "openclaw-default",
 			ModelLabel:          "OpenClaw 기본 모델",
@@ -189,7 +238,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			Description:         "소유자 전용 Cursor 코드 탐색 에이전트",
 			Instruction:         "소유자 전용 Cursor 기반 코드 탐색을 수행합니다.",
 			Visibility:          AgentVisibilityPrivate,
-			RuntimeID:           "runtime-cursor-mock",
+			RuntimeID:           "runtime-cursor-private",
 			RuntimeKind:         RuntimeKindCursor,
 			ModelID:             "cursor-auto",
 			ModelLabel:          "Cursor Auto",
@@ -238,8 +287,8 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 	}
 	return &MockAIAgentClientStore{
 		workspaceID:       "workspace-mock-riid",
-		devices:           []DeviceRecord{device},
-		daemons:           map[string]DeviceDaemonRecord{device.DeviceID: daemon},
+		devices:           []DeviceRecord{device, sharedDevice},
+		daemons:           map[string]DeviceDaemonRecord{device.DeviceID: daemon, sharedDevice.DeviceID: sharedDaemon},
 		nextDaemonCommand: 1,
 		agents:            agents,
 		templates: []AgentOnboardingTemplate{
@@ -327,7 +376,7 @@ func (s *MockAIAgentClientStore) BootstrapAIAgentClient(ctx context.Context, pri
 		ClientKind:     normalizeClientKind(clientKind),
 		WorkspaceID:    s.workspaceID,
 		Agents:         s.visibleAgents(principal),
-		Devices:        filterDevicesForPrincipal(s.devices, principal),
+		Devices:        s.visibleDevicesLocked(principal),
 		AgentTemplates: copyAgentTemplates(s.templates),
 	}, nil
 }
@@ -338,37 +387,37 @@ func (s *MockAIAgentClientStore) ListAIAgentDevices(ctx context.Context, princip
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return DeviceRuntimeListResponse{SchemaVersion: SchemaVersion, Devices: filterDevicesForPrincipal(s.devices, principal)}, nil
+	return DeviceRuntimeListResponse{SchemaVersion: SchemaVersion, Devices: s.visibleDevicesLocked(principal)}, nil
 }
 
-func (s *MockAIAgentClientStore) GetAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string) (DeviceDaemonDetailResponse, error) {
+func (s *MockAIAgentClientStore) GetAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string) (DeviceDaemonDetailResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return DeviceDaemonDetailResponse{}, err
 	}
-	deviceID = strings.TrimSpace(deviceID)
-	if deviceID == "" {
-		return DeviceDaemonDetailResponse{}, errors.New("device_id is required")
+	agentID = strings.TrimSpace(agentID)
+	if agentID == "" {
+		return DeviceDaemonDetailResponse{}, errors.New("agent_id is required")
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	daemon, ok := s.deviceDaemonForOwnerLocked(principal, deviceID)
+	_, daemon, ok := s.deviceDaemonForAgentAccessLocked(principal, agentID)
 	if !ok {
 		return DeviceDaemonDetailResponse{}, ErrAIAgentNotFound
 	}
 	return DeviceDaemonDetailResponse{SchemaVersion: SchemaVersion, Daemon: copyDeviceDaemon(daemon)}, nil
 }
 
-func (s *MockAIAgentClientStore) ControlAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
+func (s *MockAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return DeviceDaemonCommandResponse{}, err
 	}
-	deviceID = strings.TrimSpace(deviceID)
-	if deviceID == "" {
-		return DeviceDaemonCommandResponse{}, errors.New("device_id is required")
+	agentID = strings.TrimSpace(agentID)
+	if agentID == "" {
+		return DeviceDaemonCommandResponse{}, errors.New("agent_id is required")
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	daemon, ok := s.deviceDaemonForOwnerLocked(principal, deviceID)
+	agent, daemon, ok := s.deviceDaemonForAgentAccessLocked(principal, agentID)
 	if !ok {
 		return DeviceDaemonCommandResponse{}, ErrAIAgentNotFound
 	}
@@ -405,19 +454,19 @@ func (s *MockAIAgentClientStore) ControlAIAgentDeviceDaemon(ctx context.Context,
 		daemon.PID = 0
 		daemon.UptimeSeconds = 0
 		daemon.SupportedActions = []DaemonControlAction{DaemonControlActionStart}
-		s.markDeviceRuntimesOfflineLocked(deviceID, now)
+		s.markDeviceRuntimesOfflineLocked(daemon.DeviceID, now)
 		message = "daemon stop command accepted"
 	default:
 		return DeviceDaemonCommandResponse{}, errors.New("unsupported daemon action")
 	}
-	s.daemons[deviceID] = daemon
+	s.daemons[daemon.DeviceID] = daemon
 	s.appendClientEventLocked(AgentClientEventDeviceDaemonStatus, DeviceDaemonStatusEvent{
 		EventType:     AgentClientEventDeviceDaemonStatus,
 		SchemaVersion: SchemaVersion,
 		Daemon:        copyDeviceDaemon(daemon),
 	})
 	if action == DaemonControlActionStop {
-		if device, ok := s.deviceByIDLocked(deviceID); ok {
+		if device, ok := s.deviceByIDLocked(daemon.DeviceID); ok {
 			s.appendClientEventLocked(AgentClientEventDeviceRuntimeSnapshot, DeviceRuntimeSnapshotEvent{
 				EventType:     AgentClientEventDeviceRuntimeSnapshot,
 				SchemaVersion: SchemaVersion,
@@ -428,12 +477,12 @@ func (s *MockAIAgentClientStore) ControlAIAgentDeviceDaemon(ctx context.Context,
 	return DeviceDaemonCommandResponse{
 		SchemaVersion: SchemaVersion,
 		CommandID:     commandID,
-		DeviceID:      deviceID,
+		DeviceID:      daemon.DeviceID,
 		Action:        action,
 		Availability:  daemon.Availability,
 		ControlState:  daemon.ControlState,
 		AcceptedAt:    now,
-		Message:       message,
+		Message:       message + " for agent " + agent.AgentID,
 	}, nil
 }
 
@@ -1197,10 +1246,11 @@ func (s *MockAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTask
 func (s *MockAIAgentClientStore) clientEventsForPrincipalLocked(principal AuthorizationResult) []ClientStreamEvent {
 	events := make([]ClientStreamEvent, 0, len(s.events))
 	for _, event := range s.events {
-		if !clientEventVisibleToLocked(s, principal, event) {
+		visible, ok := clientEventForPrincipalLocked(s, principal, event)
+		if !ok {
 			continue
 		}
-		events = append(events, event)
+		events = append(events, visible)
 	}
 	return events
 }
@@ -1213,23 +1263,40 @@ func (s *MockAIAgentClientStore) appendClientEventLocked(eventType string, paylo
 	}
 	s.events = append(s.events, event)
 	for _, subscriber := range s.subscribers {
-		if !clientEventVisibleToLocked(s, subscriber.principal, event) {
+		visible, ok := clientEventForPrincipalLocked(s, subscriber.principal, event)
+		if !ok {
 			continue
 		}
 		select {
-		case subscriber.events <- event:
+		case subscriber.events <- visible:
 		default:
 		}
 	}
 	return event
 }
 
+func clientEventForPrincipalLocked(s *MockAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) (ClientStreamEvent, bool) {
+	if deviceEvent, ok := event.Payload.(DeviceRuntimeSnapshotEvent); ok {
+		device, ok := s.visibleDeviceRecordLocked(principal, deviceEvent.Device)
+		if !ok {
+			return ClientStreamEvent{}, false
+		}
+		deviceEvent.Device = device
+		event.Payload = deviceEvent
+		return event, true
+	}
+	if !clientEventVisibleToLocked(s, principal, event) {
+		return ClientStreamEvent{}, false
+	}
+	return event, true
+}
+
 func clientEventVisibleToLocked(s *MockAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) bool {
 	if daemon, ok := eventDeviceDaemon(event.Payload); ok {
-		return daemon.OwnerPrincipalID == principal.PrincipalID
+		return s.daemonVisibleToPrincipalLocked(principal, daemon)
 	}
 	if device, ok := eventDeviceRecord(event.Payload); ok {
-		return aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID
+		return s.deviceVisibleToPrincipalLocked(principal, device)
 	}
 	agentID, ok := eventAgentID(event.Payload)
 	if !ok {
@@ -1350,6 +1417,104 @@ func filterDevicesForPrincipal(devices []DeviceRecord, principal AuthorizationRe
 	return out
 }
 
+func (s *MockAIAgentClientStore) visibleDevicesLocked(principal AuthorizationResult) []DeviceRecord {
+	if aiAgentIsAdmin(principal) {
+		return copyDevices(s.devices)
+	}
+	visibleRuntimeIDs := map[string]struct{}{}
+	for _, agent := range s.agents {
+		if !aiAgentVisibleTo(principal, agent) || agent.RuntimeID == "" {
+			continue
+		}
+		visibleRuntimeIDs[agent.RuntimeID] = struct{}{}
+	}
+	out := make([]DeviceRecord, 0, len(s.devices))
+	for _, device := range s.devices {
+		if device.OwnerPrincipalID == principal.PrincipalID {
+			out = append(out, copyDevice(device))
+			continue
+		}
+		filtered := device
+		filtered.Runtimes = nil
+		for _, runtime := range device.Runtimes {
+			if _, ok := visibleRuntimeIDs[runtime.RuntimeID]; ok {
+				filtered.Runtimes = append(filtered.Runtimes, copyRuntime(runtime))
+			}
+		}
+		if len(filtered.Runtimes) > 0 {
+			out = append(out, filtered)
+		}
+	}
+	return out
+}
+
+func (s *MockAIAgentClientStore) visibleDeviceRecordLocked(principal AuthorizationResult, device DeviceRecord) (DeviceRecord, bool) {
+	if aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID {
+		return copyDevice(device), true
+	}
+	filtered := device
+	filtered.Runtimes = nil
+	for _, runtime := range device.Runtimes {
+		if s.runtimeVisibleThroughAgentLocked(principal, runtime.RuntimeID) {
+			filtered.Runtimes = append(filtered.Runtimes, copyRuntime(runtime))
+		}
+	}
+	if len(filtered.Runtimes) == 0 {
+		return DeviceRecord{}, false
+	}
+	return filtered, true
+}
+
+func (s *MockAIAgentClientStore) deviceVisibleToPrincipalLocked(principal AuthorizationResult, device DeviceRecord) bool {
+	if aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID {
+		return true
+	}
+	for _, runtime := range device.Runtimes {
+		if s.runtimeVisibleThroughAgentLocked(principal, runtime.RuntimeID) {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *MockAIAgentClientStore) daemonVisibleToPrincipalLocked(principal AuthorizationResult, daemon DeviceDaemonRecord) bool {
+	if aiAgentIsAdmin(principal) || daemon.OwnerPrincipalID == principal.PrincipalID {
+		return true
+	}
+	for _, device := range s.devices {
+		if device.DeviceID != daemon.DeviceID {
+			continue
+		}
+		return s.deviceVisibleToPrincipalLocked(principal, device)
+	}
+	return false
+}
+
+func (s *MockAIAgentClientStore) runtimeVisibleThroughAgentLocked(principal AuthorizationResult, runtimeID string) bool {
+	for _, agent := range s.agents {
+		if agent.RuntimeID == runtimeID && aiAgentVisibleTo(principal, agent) {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *MockAIAgentClientStore) deviceDaemonForAgentAccessLocked(principal AuthorizationResult, agentID string) (AgentClientRecord, DeviceDaemonRecord, bool) {
+	agent, ok := s.visibleAgent(principal, agentID)
+	if !ok {
+		return AgentClientRecord{}, DeviceDaemonRecord{}, false
+	}
+	device, ok := s.deviceByRuntimeIDLocked(agent.RuntimeID)
+	if !ok {
+		return AgentClientRecord{}, DeviceDaemonRecord{}, false
+	}
+	daemon, ok := s.daemons[device.DeviceID]
+	if !ok {
+		return AgentClientRecord{}, DeviceDaemonRecord{}, false
+	}
+	return agent, copyDeviceDaemon(daemon), true
+}
+
 func (s *MockAIAgentClientStore) deviceDaemonForOwnerLocked(principal AuthorizationResult, deviceID string) (DeviceDaemonRecord, bool) {
 	for _, device := range s.devices {
 		if device.DeviceID != deviceID || device.OwnerPrincipalID != principal.PrincipalID {
@@ -1362,6 +1527,17 @@ func (s *MockAIAgentClientStore) deviceDaemonForOwnerLocked(principal Authorizat
 		return copyDeviceDaemon(daemon), true
 	}
 	return DeviceDaemonRecord{}, false
+}
+
+func (s *MockAIAgentClientStore) deviceByRuntimeIDLocked(runtimeID string) (DeviceRecord, bool) {
+	for _, device := range s.devices {
+		for _, runtime := range device.Runtimes {
+			if runtime.RuntimeID == runtimeID {
+				return copyDevice(device), true
+			}
+		}
+	}
+	return DeviceRecord{}, false
 }
 
 func (s *MockAIAgentClientStore) deviceByIDLocked(deviceID string) (DeviceRecord, bool) {
@@ -1408,11 +1584,15 @@ func copyDevices(devices []DeviceRecord) []DeviceRecord {
 func copyDevice(device DeviceRecord) DeviceRecord {
 	runtimes := make([]RuntimeRecord, len(device.Runtimes))
 	for i, runtime := range device.Runtimes {
-		runtime.Models = append([]RuntimeModelRecord(nil), runtime.Models...)
-		runtimes[i] = runtime
+		runtimes[i] = copyRuntime(runtime)
 	}
 	device.Runtimes = runtimes
 	return device
+}
+
+func copyRuntime(runtime RuntimeRecord) RuntimeRecord {
+	runtime.Models = append([]RuntimeModelRecord(nil), runtime.Models...)
+	return runtime
 }
 
 func copyDeviceDaemon(daemon DeviceDaemonRecord) DeviceDaemonRecord {

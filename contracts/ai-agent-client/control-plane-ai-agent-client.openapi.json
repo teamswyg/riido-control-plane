@@ -22,6 +22,13 @@
         },
         {
           "path": [
+            "agents",
+            "daemon"
+          ],
+          "description": "agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다."
+        },
+        {
+          "path": [
             "bootstrap"
           ],
           "description": "AI Agent 화면 진입 시 필요한 초기 read model입니다. viewer가 볼 수 있는 agent와 device runtime snapshot을 제공합니다."
@@ -31,13 +38,6 @@
             "devices"
           ],
           "description": "device와 runtime 상태를 다루는 namespace입니다."
-        },
-        {
-          "path": [
-            "devices",
-            "daemon"
-          ],
-          "description": "runtime 설정 화면에서 현재 device의 desktop local daemon 상세와 제어 command를 다루는 namespace입니다."
         },
         {
           "path": [
@@ -281,6 +281,300 @@
         ]
       }
     },
+    "/v1/client/ai-agent/agents/{agent_id}/daemon": {
+      "get": {
+        "operationId": "getAIAgentDaemon",
+        "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonDetailResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "daemon",
+            "details"
+          ],
+          "cache_tag": "aiAgent.agents.daemon"
+        },
+        "x-riido-scenarios": [
+          "getAIAgentDaemon.figma-runtime-settings-daemon-details",
+          "getAIAgentDaemon.public-agent-grants-daemon-detail-access",
+          "getAIAgentDaemon.private-agent-daemon-detail-requires-admin-or-owner"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/agents/{agent_id}/daemon/restart": {
+      "post": {
+        "operationId": "restartAIAgentDaemon",
+        "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:control",
+          "ai-agent:agent:{agent_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "daemon",
+            "restart"
+          ],
+          "invalidates": [
+            "aiAgent.agents.daemon",
+            "aiAgent.devices.runtimes"
+          ]
+        },
+        "x-riido-scenarios": [
+          "restartAIAgentDaemon.figma-runtime-settings-daemon-restart"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/agents/{agent_id}/daemon/start": {
+      "post": {
+        "operationId": "startAIAgentDaemon",
+        "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:control",
+          "ai-agent:agent:{agent_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "daemon",
+            "start"
+          ],
+          "invalidates": [
+            "aiAgent.agents.daemon",
+            "aiAgent.devices.runtimes"
+          ]
+        },
+        "x-riido-scenarios": [
+          "startAIAgentDaemon.figma-runtime-settings-daemon-start"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/agents/{agent_id}/daemon/stop": {
+      "post": {
+        "operationId": "stopAIAgentDaemon",
+        "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:control",
+          "ai-agent:agent:{agent_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "daemon",
+            "stop"
+          ],
+          "invalidates": [
+            "aiAgent.agents.daemon",
+            "aiAgent.devices.runtimes"
+          ]
+        },
+        "x-riido-scenarios": [
+          "stopAIAgentDaemon.figma-runtime-settings-daemon-stop"
+        ]
+      }
+    },
     "/v1/client/ai-agent/agents/{agent_id}/editability": {
       "get": {
         "operationId": "getAIAgentEditability",
@@ -454,299 +748,6 @@
           "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model",
           "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition",
           "listAIAgentDeviceRuntimes.runtime-settings-daemon-stop-makes-runtimes-offline"
-        ]
-      }
-    },
-    "/v1/client/ai-agent/devices/{device_id}/daemon": {
-      "get": {
-        "operationId": "getAIAgentDeviceDaemon",
-        "summary": "runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeviceDaemonDetailResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:device:read",
-          "ai-agent:device:{device_id}:read"
-        ],
-        "x-riido-rbac-policy": "runtime_liveness.v1",
-        "x-riido-operation-kind": "query",
-        "x-riido-client": {
-          "module": "aiAgent",
-          "facade_path": [
-            "devices",
-            "daemon",
-            "details"
-          ],
-          "cache_tag": "aiAgent.devices.daemon"
-        },
-        "x-riido-scenarios": [
-          "getAIAgentDeviceDaemon.figma-runtime-settings-daemon-details",
-          "getAIAgentDeviceDaemon.daemon-detail-is-current-device-owned"
-        ]
-      }
-    },
-    "/v1/client/ai-agent/devices/{device_id}/daemon/restart": {
-      "post": {
-        "operationId": "restartAIAgentDeviceDaemon",
-        "summary": "runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:device:write",
-          "ai-agent:device:{device_id}:write"
-        ],
-        "x-riido-rbac-policy": "runtime_liveness.v1",
-        "x-riido-operation-kind": "command",
-        "x-riido-client": {
-          "module": "aiAgent",
-          "facade_path": [
-            "devices",
-            "daemon",
-            "restart"
-          ],
-          "invalidates": [
-            "aiAgent.devices.daemon",
-            "aiAgent.devices.runtimes"
-          ]
-        },
-        "x-riido-scenarios": [
-          "restartAIAgentDeviceDaemon.figma-runtime-settings-daemon-restart"
-        ]
-      }
-    },
-    "/v1/client/ai-agent/devices/{device_id}/daemon/start": {
-      "post": {
-        "operationId": "startAIAgentDeviceDaemon",
-        "summary": "runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:device:write",
-          "ai-agent:device:{device_id}:write"
-        ],
-        "x-riido-rbac-policy": "runtime_liveness.v1",
-        "x-riido-operation-kind": "command",
-        "x-riido-client": {
-          "module": "aiAgent",
-          "facade_path": [
-            "devices",
-            "daemon",
-            "start"
-          ],
-          "invalidates": [
-            "aiAgent.devices.daemon",
-            "aiAgent.devices.runtimes"
-          ]
-        },
-        "x-riido-scenarios": [
-          "startAIAgentDeviceDaemon.figma-runtime-settings-daemon-start"
-        ]
-      }
-    },
-    "/v1/client/ai-agent/devices/{device_id}/daemon/stop": {
-      "post": {
-        "operationId": "stopAIAgentDeviceDaemon",
-        "summary": "runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:device:write",
-          "ai-agent:device:{device_id}:write"
-        ],
-        "x-riido-rbac-policy": "runtime_liveness.v1",
-        "x-riido-operation-kind": "command",
-        "x-riido-client": {
-          "module": "aiAgent",
-          "facade_path": [
-            "devices",
-            "daemon",
-            "stop"
-          ],
-          "invalidates": [
-            "aiAgent.devices.daemon",
-            "aiAgent.devices.runtimes"
-          ]
-        },
-        "x-riido-scenarios": [
-          "stopAIAgentDeviceDaemon.figma-runtime-settings-daemon-stop"
         ]
       }
     },
@@ -1885,7 +1886,7 @@
         ]
       },
       "ControlDeviceDaemonRequest": {
-        "description": "current-device daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.",
+        "description": "agent 권한으로 접근 가능한 daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.",
         "properties": {
           "reason": {
             "type": "string"
@@ -2022,7 +2023,7 @@
         "type": "object"
       },
       "DeviceDaemonDetailResponse": {
-        "description": "runtime 설정 화면의 daemon 상세 row와 상세 패널을 위한 응답입니다.",
+        "description": "runtime 설정 화면의 agent-bound daemon 상세 row와 상세 패널을 위한 응답입니다.",
         "properties": {
           "daemon": {
             "$ref": "#/components/schemas/DeviceDaemonRecord"
@@ -2038,7 +2039,7 @@
         "type": "object"
       },
       "DeviceDaemonRecord": {
-        "description": "runtime 설정 화면에서 현재 device의 daemon 상세 표시와 제어 버튼 상태를 구성하는 read model입니다.",
+        "description": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세 표시와 제어 버튼 상태를 구성하는 read model입니다.",
         "properties": {
           "availability": {
             "$ref": "#/components/schemas/DaemonAvailability"
@@ -2102,7 +2103,7 @@
         "type": "object"
       },
       "DeviceDaemonStatusEvent": {
-        "description": "current-device daemon 상세/제어 상태가 변경되었음을 client SSE로 전달하는 event입니다.",
+        "description": "agent 권한으로 접근 가능한 daemon 상세/제어 상태가 변경되었음을 client SSE로 전달하는 event입니다.",
         "properties": {
           "daemon": {
             "$ref": "#/components/schemas/DeviceDaemonRecord"
