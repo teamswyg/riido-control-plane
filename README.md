@@ -82,10 +82,10 @@ visibility policy를 통과해야 합니다.
 - `GET /readyz`
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
-- `GET /v1/client/ai-agent/devices/{device_id}/daemon`
-- `POST /v1/client/ai-agent/devices/{device_id}/daemon/start`
-- `POST /v1/client/ai-agent/devices/{device_id}/daemon/restart`
-- `POST /v1/client/ai-agent/devices/{device_id}/daemon/stop`
+- `GET /v1/client/ai-agent/agents/{agent_id}/daemon`
+- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/start`
+- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/restart`
+- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/stop`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
 - `POST /v1/client/ai-agent/tasks/{task_id}/assignment`
 - `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`

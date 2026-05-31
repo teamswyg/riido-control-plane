@@ -160,10 +160,18 @@ func TestHTTPAIAgentClientMockDevicesAndEditability(t *testing.T) {
 	if err := json.Unmarshal(devicesResp.Body.Bytes(), &devices); err != nil {
 		t.Fatalf("devices json: %v", err)
 	}
-	if len(devices.Devices) != 1 || len(devices.Devices[0].Runtimes) != 3 {
+	if len(devices.Devices) != 2 {
 		t.Fatalf("devices = %+v", devices)
 	}
-	cursorRuntime := devices.Devices[0].Runtimes[2]
+	ownedDevice, ok := findDevice(devices.Devices, "device-mock-macbook")
+	if !ok || len(ownedDevice.Runtimes) != 3 {
+		t.Fatalf("owned device = %+v, ok=%v", ownedDevice, ok)
+	}
+	sharedDevice, ok := findDevice(devices.Devices, "device-shared-studio")
+	if !ok || len(sharedDevice.Runtimes) != 1 || sharedDevice.Runtimes[0].RuntimeID != "runtime-openclaw-shared" {
+		t.Fatalf("shared public-agent device = %+v, ok=%v", sharedDevice, ok)
+	}
+	cursorRuntime := ownedDevice.Runtimes[2]
 	if cursorRuntime.RuntimeID != "runtime-cursor-mock" || len(cursorRuntime.Models) != 2 || cursorRuntime.Models[0].ModelID != "cursor-auto" || !cursorRuntime.Models[0].IsDefault {
 		t.Fatalf("cursor runtime models = %+v", cursorRuntime)
 	}
@@ -199,7 +207,7 @@ func TestHTTPAIAgentClientMockDeviceDaemonDetailAndControl(t *testing.T) {
 		},
 	})
 
-	detailReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/devices/device-mock-macbook/daemon", nil)
+	detailReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/agents/agent-owned-codex/daemon", nil)
 	detailReq.Header.Set("Authorization", "Bearer user-token")
 	detailResp := httptest.NewRecorder()
 	server.ServeHTTP(detailResp, detailReq)
@@ -217,7 +225,38 @@ func TestHTTPAIAgentClientMockDeviceDaemonDetailAndControl(t *testing.T) {
 		t.Fatalf("daemon supported actions = %+v", detail.Daemon.SupportedActions)
 	}
 
-	restartReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/devices/device-mock-macbook/daemon/restart", strings.NewReader(`{"reason":"settings page restart"}`))
+	publicDetailReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/agents/agent-public-openclaw/daemon", nil)
+	publicDetailReq.Header.Set("Authorization", "Bearer user-token")
+	publicDetailResp := httptest.NewRecorder()
+	server.ServeHTTP(publicDetailResp, publicDetailReq)
+	if publicDetailResp.Code != http.StatusOK {
+		t.Fatalf("public agent daemon detail status=%d body=%s", publicDetailResp.Code, publicDetailResp.Body.String())
+	}
+	var publicDetail DeviceDaemonDetailResponse
+	if err := json.Unmarshal(publicDetailResp.Body.Bytes(), &publicDetail); err != nil {
+		t.Fatalf("public daemon detail json: %v", err)
+	}
+	if publicDetail.Daemon.DeviceID != "device-shared-studio" || publicDetail.Daemon.OwnerPrincipalID != "user-2" {
+		t.Fatalf("public agent daemon detail = %+v", publicDetail.Daemon)
+	}
+
+	privateDeniedReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/agents/agent-private-cursor/daemon", nil)
+	privateDeniedReq.Header.Set("Authorization", "Bearer user-token")
+	privateDeniedResp := httptest.NewRecorder()
+	server.ServeHTTP(privateDeniedResp, privateDeniedReq)
+	if privateDeniedResp.Code != http.StatusNotFound {
+		t.Fatalf("private agent daemon detail for non-admin status=%d body=%s", privateDeniedResp.Code, privateDeniedResp.Body.String())
+	}
+
+	adminPrivateReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/agents/agent-private-cursor/daemon", nil)
+	adminPrivateReq.Header.Set("Authorization", "Bearer admin-token")
+	adminPrivateResp := httptest.NewRecorder()
+	server.ServeHTTP(adminPrivateResp, adminPrivateReq)
+	if adminPrivateResp.Code != http.StatusOK {
+		t.Fatalf("private agent daemon detail for admin status=%d body=%s", adminPrivateResp.Code, adminPrivateResp.Body.String())
+	}
+
+	restartReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents/agent-public-openclaw/daemon/restart", strings.NewReader(`{"reason":"settings page restart"}`))
 	restartReq.Header.Set("Authorization", "Bearer user-token")
 	restartResp := httptest.NewRecorder()
 	server.ServeHTTP(restartResp, restartReq)
@@ -232,7 +271,7 @@ func TestHTTPAIAgentClientMockDeviceDaemonDetailAndControl(t *testing.T) {
 		t.Fatalf("daemon restart = %+v", restart)
 	}
 
-	stopReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/devices/device-mock-macbook/daemon/stop", strings.NewReader(`{"reason":"settings page stop"}`))
+	stopReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents/agent-public-openclaw/daemon/stop", strings.NewReader(`{"reason":"settings page stop"}`))
 	stopReq.Header.Set("Authorization", "Bearer user-token")
 	stopResp := httptest.NewRecorder()
 	server.ServeHTTP(stopResp, stopReq)
@@ -258,9 +297,19 @@ func TestHTTPAIAgentClientMockDeviceDaemonDetailAndControl(t *testing.T) {
 	if err := json.Unmarshal(devicesResp.Body.Bytes(), &devices); err != nil {
 		t.Fatalf("devices json: %v", err)
 	}
-	for _, runtime := range devices.Devices[0].Runtimes {
-		if runtime.Availability != RuntimeAvailabilityOffline {
-			t.Fatalf("runtime should be offline after daemon stop: %+v", runtime)
+	var sharedDevice DeviceRecord
+	for _, device := range devices.Devices {
+		if device.DeviceID == "device-shared-studio" {
+			sharedDevice = device
+			break
+		}
+	}
+	if sharedDevice.DeviceID == "" || len(sharedDevice.Runtimes) != 1 {
+		t.Fatalf("shared public-agent device should be visible with one public runtime: %+v", devices.Devices)
+	}
+	for _, runtime := range sharedDevice.Runtimes {
+		if runtime.RuntimeID != "runtime-openclaw-shared" || runtime.Availability != RuntimeAvailabilityOffline {
+			t.Fatalf("public runtime should be offline after daemon stop: %+v", runtime)
 		}
 	}
 
@@ -272,12 +321,12 @@ func TestHTTPAIAgentClientMockDeviceDaemonDetailAndControl(t *testing.T) {
 		t.Fatalf("events should include daemon status, status=%d body=%s", eventsResp.Code, eventsResp.Body.String())
 	}
 
-	adminStopReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/devices/device-mock-macbook/daemon/stop", nil)
-	adminStopReq.Header.Set("Authorization", "Bearer admin-token")
-	adminStopResp := httptest.NewRecorder()
-	server.ServeHTTP(adminStopResp, adminStopReq)
-	if adminStopResp.Code != http.StatusNotFound {
-		t.Fatalf("admin other-device daemon control status=%d body=%s", adminStopResp.Code, adminStopResp.Body.String())
+	privateStopReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents/agent-private-cursor/daemon/stop", nil)
+	privateStopReq.Header.Set("Authorization", "Bearer user-token")
+	privateStopResp := httptest.NewRecorder()
+	server.ServeHTTP(privateStopResp, privateStopReq)
+	if privateStopResp.Code != http.StatusNotFound {
+		t.Fatalf("private agent daemon control for non-admin status=%d body=%s", privateStopResp.Code, privateStopResp.Body.String())
 	}
 }
 
@@ -669,8 +718,16 @@ func TestHTTPAIAgentClientMockAdminCreateUsesAuthorizedWorkspaceRuntime(t *testi
 	if err := json.Unmarshal(devicesResp.Body.Bytes(), &devices); err != nil {
 		t.Fatalf("admin devices json: %v", err)
 	}
-	if len(devices.Devices) != 1 || devices.Devices[0].OwnerPrincipalID != "user-1" {
+	if len(devices.Devices) != 2 {
 		t.Fatalf("admin devices = %+v", devices.Devices)
+	}
+	ownedDevice, ok := findDevice(devices.Devices, "device-mock-macbook")
+	if !ok || ownedDevice.OwnerPrincipalID != "user-1" || len(ownedDevice.Runtimes) != 3 {
+		t.Fatalf("admin owned device = %+v, ok=%v", ownedDevice, ok)
+	}
+	sharedDevice, ok := findDevice(devices.Devices, "device-shared-studio")
+	if !ok || sharedDevice.OwnerPrincipalID != "user-2" || len(sharedDevice.Runtimes) != 2 {
+		t.Fatalf("admin shared device = %+v, ok=%v", sharedDevice, ok)
 	}
 
 	createBody, err := json.Marshal(CreateAgentConfigurationRequest{
@@ -895,6 +952,15 @@ func findAIAgent(agents []AgentClientRecord, id string) (AgentClientRecord, bool
 		}
 	}
 	return AgentClientRecord{}, false
+}
+
+func findDevice(devices []DeviceRecord, id string) (DeviceRecord, bool) {
+	for _, device := range devices {
+		if device.DeviceID == id {
+			return device, true
+		}
+	}
+	return DeviceRecord{}, false
 }
 
 func runtimeHasAssignedAgent(devices []DeviceRecord, runtimeID string) bool {

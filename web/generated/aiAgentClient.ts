@@ -228,7 +228,7 @@ export type ClientKind = "web" | "desktop_webview";
 export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent;
 
 /**
- * current-device daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.
+ * agent 권한으로 접근 가능한 daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.
  */
 export interface ControlDeviceDaemonRequest {
   reason?: string;
@@ -287,7 +287,7 @@ export interface DeviceDaemonCommandResponse {
 }
 
 /**
- * runtime 설정 화면의 daemon 상세 row와 상세 패널을 위한 응답입니다.
+ * runtime 설정 화면의 agent-bound daemon 상세 row와 상세 패널을 위한 응답입니다.
  */
 export interface DeviceDaemonDetailResponse {
   daemon: DeviceDaemonRecord;
@@ -295,7 +295,7 @@ export interface DeviceDaemonDetailResponse {
 }
 
 /**
- * runtime 설정 화면에서 현재 device의 daemon 상세 표시와 제어 버튼 상태를 구성하는 read model입니다.
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세 표시와 제어 버튼 상태를 구성하는 read model입니다.
  */
 export interface DeviceDaemonRecord {
   availability: DaemonAvailability;
@@ -316,7 +316,7 @@ export interface DeviceDaemonRecord {
 }
 
 /**
- * current-device daemon 상세/제어 상태가 변경되었음을 client SSE로 전달하는 event입니다.
+ * agent 권한으로 접근 가능한 daemon 상세/제어 상태가 변경되었음을 client SSE로 전달하는 event입니다.
  */
 export interface DeviceDaemonStatusEvent {
   daemon: DeviceDaemonRecord;
@@ -628,6 +628,187 @@ export function updateAIAgentConfigurationMutationOptions(config: RiidoClientCon
 }
 
 /**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다
+ * 경로 파라미터입니다.
+ */
+export interface GetAIAgentDaemonPathParams {
+  agent_id: string;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다
+ */
+export async function getAIAgentDaemon(config: RiidoClientConfig, params: GetAIAgentDaemonPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
+  const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon`;
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다
+ * cache tag: `aiAgent.agents.daemon`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAIAgentDaemonQueryKeyRoot(): readonly unknown[] {
+  return ["aiAgent.agents.daemon"] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAIAgentDaemonQueryKey(params: GetAIAgentDaemonPathParams): readonly unknown[] {
+  return [...getAIAgentDaemonQueryKeyRoot(), params] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAIAgentDaemonQueryOptions(config: RiidoClientConfig, params: GetAIAgentDaemonPathParams, options: RiidoQueryOptions<DeviceDaemonDetailResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAIAgentDaemonQueryKey(params),
+    queryFn: () => getAIAgentDaemon(config, params, { signal }),
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다
+ * 경로 파라미터입니다.
+ */
+export interface RestartAIAgentDaemonPathParams {
+  agent_id: string;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다
+ */
+export async function restartAIAgentDaemon(config: RiidoClientConfig, params: RestartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
+  const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon/restart`;
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface RestartAIAgentDaemonMutationVariables {
+  params: RestartAIAgentDaemonPathParams;
+  body: ControlDeviceDaemonRequest;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function restartAIAgentDaemonMutationKey(): readonly unknown[] {
+  return ["restartAIAgentDaemon"] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function restartAIAgentDaemonMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: restartAIAgentDaemonMutationKey(),
+    mutationFn: (variables: RestartAIAgentDaemonMutationVariables) => restartAIAgentDaemon(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다
+ * 경로 파라미터입니다.
+ */
+export interface StartAIAgentDaemonPathParams {
+  agent_id: string;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다
+ */
+export async function startAIAgentDaemon(config: RiidoClientConfig, params: StartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
+  const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon/start`;
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface StartAIAgentDaemonMutationVariables {
+  params: StartAIAgentDaemonPathParams;
+  body: ControlDeviceDaemonRequest;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function startAIAgentDaemonMutationKey(): readonly unknown[] {
+  return ["startAIAgentDaemon"] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function startAIAgentDaemonMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: startAIAgentDaemonMutationKey(),
+    mutationFn: (variables: StartAIAgentDaemonMutationVariables) => startAIAgentDaemon(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다
+ * 경로 파라미터입니다.
+ */
+export interface StopAIAgentDaemonPathParams {
+  agent_id: string;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다
+ */
+export async function stopAIAgentDaemon(config: RiidoClientConfig, params: StopAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
+  const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon/stop`;
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface StopAIAgentDaemonMutationVariables {
+  params: StopAIAgentDaemonPathParams;
+  body: ControlDeviceDaemonRequest;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function stopAIAgentDaemonMutationKey(): readonly unknown[] {
+  return ["stopAIAgentDaemon"] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function stopAIAgentDaemonMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: stopAIAgentDaemonMutationKey(),
+    mutationFn: (variables: StopAIAgentDaemonMutationVariables) => stopAIAgentDaemon(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
  * client control 활성화 전에 agent 수정 가능 여부를 조회합니다
  * 경로 파라미터입니다.
  */
@@ -746,187 +927,6 @@ export function listAIAgentDeviceRuntimesQueryOptions(config: RiidoClientConfig,
     ...queryOptions,
     queryKey: listAIAgentDeviceRuntimesQueryKey(),
     queryFn: () => listAIAgentDeviceRuntimes(config, { signal }),
-  };
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다
- * 경로 파라미터입니다.
- */
-export interface GetAIAgentDeviceDaemonPathParams {
-  device_id: string;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다
- */
-export async function getAIAgentDeviceDaemon(config: RiidoClientConfig, params: GetAIAgentDeviceDaemonPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
-  const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon`;
-  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다
- * cache tag: `aiAgent.devices.daemon`
- * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
- */
-export function getAIAgentDeviceDaemonQueryKeyRoot(): readonly unknown[] {
-  return ["aiAgent.devices.daemon"] as const;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다
- * 이 호출에 사용하는 React Query 키입니다.
- */
-export function getAIAgentDeviceDaemonQueryKey(params: GetAIAgentDeviceDaemonPathParams): readonly unknown[] {
-  return [...getAIAgentDeviceDaemonQueryKeyRoot(), params] as const;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다
- * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
- */
-export function getAIAgentDeviceDaemonQueryOptions(config: RiidoClientConfig, params: GetAIAgentDeviceDaemonPathParams, options: RiidoQueryOptions<DeviceDaemonDetailResponse> = {}) {
-  const { signal, ...queryOptions } = options;
-  return {
-    ...queryOptions,
-    queryKey: getAIAgentDeviceDaemonQueryKey(params),
-    queryFn: () => getAIAgentDeviceDaemon(config, params, { signal }),
-  };
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다
- * 경로 파라미터입니다.
- */
-export interface RestartAIAgentDeviceDaemonPathParams {
-  device_id: string;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다
- */
-export async function restartAIAgentDeviceDaemon(config: RiidoClientConfig, params: RestartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
-  const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon/restart`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다
- * mutation 함수에 전달하는 변수입니다.
- */
-export interface RestartAIAgentDeviceDaemonMutationVariables {
-  params: RestartAIAgentDeviceDaemonPathParams;
-  body: ControlDeviceDaemonRequest;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다
- * 이 mutation을 구분하는 React Query mutation key입니다.
- */
-export function restartAIAgentDeviceDaemonMutationKey(): readonly unknown[] {
-  return ["restartAIAgentDeviceDaemon"] as const;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다
- * useMutation에 전달할 수 있는 옵션입니다.
- */
-export function restartAIAgentDeviceDaemonMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDeviceDaemonMutationVariables> = {}) {
-  return {
-    ...options,
-    mutationKey: restartAIAgentDeviceDaemonMutationKey(),
-    mutationFn: (variables: RestartAIAgentDeviceDaemonMutationVariables) => restartAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
-  };
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다
- * 경로 파라미터입니다.
- */
-export interface StartAIAgentDeviceDaemonPathParams {
-  device_id: string;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다
- */
-export async function startAIAgentDeviceDaemon(config: RiidoClientConfig, params: StartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
-  const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon/start`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다
- * mutation 함수에 전달하는 변수입니다.
- */
-export interface StartAIAgentDeviceDaemonMutationVariables {
-  params: StartAIAgentDeviceDaemonPathParams;
-  body: ControlDeviceDaemonRequest;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다
- * 이 mutation을 구분하는 React Query mutation key입니다.
- */
-export function startAIAgentDeviceDaemonMutationKey(): readonly unknown[] {
-  return ["startAIAgentDeviceDaemon"] as const;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다
- * useMutation에 전달할 수 있는 옵션입니다.
- */
-export function startAIAgentDeviceDaemonMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDeviceDaemonMutationVariables> = {}) {
-  return {
-    ...options,
-    mutationKey: startAIAgentDeviceDaemonMutationKey(),
-    mutationFn: (variables: StartAIAgentDeviceDaemonMutationVariables) => startAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
-  };
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다
- * 경로 파라미터입니다.
- */
-export interface StopAIAgentDeviceDaemonPathParams {
-  device_id: string;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다
- */
-export async function stopAIAgentDeviceDaemon(config: RiidoClientConfig, params: StopAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
-  const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon/stop`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다
- * mutation 함수에 전달하는 변수입니다.
- */
-export interface StopAIAgentDeviceDaemonMutationVariables {
-  params: StopAIAgentDeviceDaemonPathParams;
-  body: ControlDeviceDaemonRequest;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다
- * 이 mutation을 구분하는 React Query mutation key입니다.
- */
-export function stopAIAgentDeviceDaemonMutationKey(): readonly unknown[] {
-  return ["stopAIAgentDeviceDaemon"] as const;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다
- * useMutation에 전달할 수 있는 옵션입니다.
- */
-export function stopAIAgentDeviceDaemonMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDeviceDaemonMutationVariables> = {}) {
-  return {
-    ...options,
-    mutationKey: stopAIAgentDeviceDaemonMutationKey(),
-    mutationFn: (variables: StopAIAgentDeviceDaemonMutationVariables) => stopAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
   };
 }
 
@@ -1384,6 +1384,169 @@ export interface UpdateAIAgentConfigurationEndpoint {
 }
 
 /**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다
+ * DSL facade path: `aiAgent.agents.daemon.details`
+ * cache tag: `aiAgent.agents.daemon`
+ */
+export interface GetAIAgentDaemonEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAIAgentDaemonPathParams, options?: RiidoRequestOptions) => Promise<DeviceDaemonDetailResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAIAgentDaemonPathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAIAgentDaemonPathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => ReturnType<typeof getAIAgentDaemonQueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAIAgentDaemonPathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => ReturnType<typeof getAIAgentDaemonQueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAIAgentDaemonPathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAIAgentDaemonPathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => Promise<void>;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다
+ * DSL facade path: `aiAgent.agents.daemon.restart`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface RestartAIAgentDaemonEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: RestartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => Promise<DeviceDaemonCommandResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonMutationVariables>) => ReturnType<typeof restartAIAgentDaemonMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonMutationVariables>) => ReturnType<typeof restartAIAgentDaemonMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `aiAgent.agents.daemon` cache tag를 무효화합니다.
+     */
+    readonly agentsDaemon: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly devicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다
+ * DSL facade path: `aiAgent.agents.daemon.start`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface StartAIAgentDaemonEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: StartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => Promise<DeviceDaemonCommandResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonMutationVariables>) => ReturnType<typeof startAIAgentDaemonMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonMutationVariables>) => ReturnType<typeof startAIAgentDaemonMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `aiAgent.agents.daemon` cache tag를 무효화합니다.
+     */
+    readonly agentsDaemon: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly devicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다
+ * DSL facade path: `aiAgent.agents.daemon.stop`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface StopAIAgentDaemonEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: StopAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => Promise<DeviceDaemonCommandResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonMutationVariables>) => ReturnType<typeof stopAIAgentDaemonMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonMutationVariables>) => ReturnType<typeof stopAIAgentDaemonMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `aiAgent.agents.daemon` cache tag를 무효화합니다.
+     */
+    readonly agentsDaemon: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly devicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
  * client control 활성화 전에 agent 수정 가능 여부를 조회합니다
  * DSL facade path: `aiAgent.agents.editability`
  * cache tag: `aiAgent.agents.editability`
@@ -1501,169 +1664,6 @@ export interface ListAIAgentDeviceRuntimesEndpoint {
    * 현재 endpoint를 prefetch합니다.
    */
   readonly prefetch: (queryClient: QueryClient, options?: RiidoQueryOptions<DeviceRuntimeListResponse>) => Promise<void>;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다
- * DSL facade path: `aiAgent.devices.daemon.details`
- * cache tag: `aiAgent.devices.daemon`
- */
-export interface GetAIAgentDeviceDaemonEndpoint {
-  /**
-   * HTTP 요청을 직접 실행합니다.
-   */
-  readonly request: (params: GetAIAgentDeviceDaemonPathParams, options?: RiidoRequestOptions) => Promise<DeviceDaemonDetailResponse>;
-  /**
-   * 이 endpoint cache 전체를 가리키는 root query key입니다.
-   */
-  readonly queryKeyRoot: () => readonly unknown[];
-  /**
-   * 특정 호출을 가리키는 query key입니다.
-   */
-  readonly queryKey: (params: GetAIAgentDeviceDaemonPathParams) => readonly unknown[];
-  /**
-   * useQuery에 전달할 수 있는 query option입니다.
-   */
-  readonly query: (params: GetAIAgentDeviceDaemonPathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => ReturnType<typeof getAIAgentDeviceDaemonQueryOptions>;
-  /**
-   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
-   */
-  readonly queryOptions: (params: GetAIAgentDeviceDaemonPathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => ReturnType<typeof getAIAgentDeviceDaemonQueryOptions>;
-  /**
-   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
-   */
-  readonly invalidate: (queryClient: QueryClient, params: GetAIAgentDeviceDaemonPathParams) => Promise<void>;
-  /**
-   * 이 endpoint의 root cache tag 전체를 무효화합니다.
-   */
-  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
-  /**
-   * 현재 endpoint를 prefetch합니다.
-   */
-  readonly prefetch: (queryClient: QueryClient, params: GetAIAgentDeviceDaemonPathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => Promise<void>;
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다
- * DSL facade path: `aiAgent.devices.daemon.restart`
- * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
- */
-export interface RestartAIAgentDeviceDaemonEndpoint {
-  /**
-   * HTTP 요청을 직접 실행합니다.
-   */
-  readonly request: (params: RestartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => Promise<DeviceDaemonCommandResponse>;
-  /**
-   * 이 mutation을 구분하는 key입니다.
-   */
-  readonly mutationKey: () => readonly unknown[];
-  /**
-   * useMutation에 전달할 수 있는 mutation option입니다.
-   */
-  readonly mutation: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDeviceDaemonMutationVariables>) => ReturnType<typeof restartAIAgentDeviceDaemonMutationOptions>;
-  /**
-   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
-   */
-  readonly mutationOptions: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDeviceDaemonMutationVariables>) => ReturnType<typeof restartAIAgentDeviceDaemonMutationOptions>;
-  /**
-   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
-   */
-  readonly invalidates: {
-    /**
-     * `aiAgent.devices.daemon` cache tag를 무효화합니다.
-     */
-    readonly devicesDaemon: (queryClient: QueryClient) => Promise<void>;
-    /**
-     * `aiAgent.devices.runtimes` cache tag를 무효화합니다.
-     */
-    readonly devicesRuntimes: (queryClient: QueryClient) => Promise<void>;
-    /**
-     * 선언된 모든 cache tag를 한 번에 무효화합니다.
-     */
-    readonly all: (queryClient: QueryClient) => Promise<void[]>;
-  };
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다
- * DSL facade path: `aiAgent.devices.daemon.start`
- * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
- */
-export interface StartAIAgentDeviceDaemonEndpoint {
-  /**
-   * HTTP 요청을 직접 실행합니다.
-   */
-  readonly request: (params: StartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => Promise<DeviceDaemonCommandResponse>;
-  /**
-   * 이 mutation을 구분하는 key입니다.
-   */
-  readonly mutationKey: () => readonly unknown[];
-  /**
-   * useMutation에 전달할 수 있는 mutation option입니다.
-   */
-  readonly mutation: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDeviceDaemonMutationVariables>) => ReturnType<typeof startAIAgentDeviceDaemonMutationOptions>;
-  /**
-   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
-   */
-  readonly mutationOptions: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDeviceDaemonMutationVariables>) => ReturnType<typeof startAIAgentDeviceDaemonMutationOptions>;
-  /**
-   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
-   */
-  readonly invalidates: {
-    /**
-     * `aiAgent.devices.daemon` cache tag를 무효화합니다.
-     */
-    readonly devicesDaemon: (queryClient: QueryClient) => Promise<void>;
-    /**
-     * `aiAgent.devices.runtimes` cache tag를 무효화합니다.
-     */
-    readonly devicesRuntimes: (queryClient: QueryClient) => Promise<void>;
-    /**
-     * 선언된 모든 cache tag를 한 번에 무효화합니다.
-     */
-    readonly all: (queryClient: QueryClient) => Promise<void[]>;
-  };
-}
-
-/**
- * runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다
- * DSL facade path: `aiAgent.devices.daemon.stop`
- * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
- */
-export interface StopAIAgentDeviceDaemonEndpoint {
-  /**
-   * HTTP 요청을 직접 실행합니다.
-   */
-  readonly request: (params: StopAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => Promise<DeviceDaemonCommandResponse>;
-  /**
-   * 이 mutation을 구분하는 key입니다.
-   */
-  readonly mutationKey: () => readonly unknown[];
-  /**
-   * useMutation에 전달할 수 있는 mutation option입니다.
-   */
-  readonly mutation: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDeviceDaemonMutationVariables>) => ReturnType<typeof stopAIAgentDeviceDaemonMutationOptions>;
-  /**
-   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
-   */
-  readonly mutationOptions: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDeviceDaemonMutationVariables>) => ReturnType<typeof stopAIAgentDeviceDaemonMutationOptions>;
-  /**
-   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
-   */
-  readonly invalidates: {
-    /**
-     * `aiAgent.devices.daemon` cache tag를 무효화합니다.
-     */
-    readonly devicesDaemon: (queryClient: QueryClient) => Promise<void>;
-    /**
-     * `aiAgent.devices.runtimes` cache tag를 무효화합니다.
-     */
-    readonly devicesRuntimes: (queryClient: QueryClient) => Promise<void>;
-    /**
-     * 선언된 모든 cache tag를 한 번에 무효화합니다.
-     */
-    readonly all: (queryClient: QueryClient) => Promise<void[]>;
-  };
 }
 
 /**
@@ -1967,6 +1967,28 @@ export interface ListAIAgentTaskThreadsEndpoint {
 }
 
 /**
+ * agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
+ */
+export interface RiidoAIAgentAgentsDaemonNamespace {
+  /**
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 cache tag: `aiAgent.agents.daemon`
+   */
+  readonly details: GetAIAgentDaemonEndpoint;
+  /**
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 invalidates: `aiAgent.agents.daemon`, `aiAgent.devices.runtimes`
+   */
+  readonly restart: RestartAIAgentDaemonEndpoint;
+  /**
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 invalidates: `aiAgent.agents.daemon`, `aiAgent.devices.runtimes`
+   */
+  readonly start: StartAIAgentDaemonEndpoint;
+  /**
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 invalidates: `aiAgent.agents.daemon`, `aiAgent.devices.runtimes`
+   */
+  readonly stop: StopAIAgentDaemonEndpoint;
+}
+
+/**
  * agent 설정과 mutation을 다루는 namespace입니다. agent 이름은 중복될 수 있고 assigned task가 있으면 수정할 수 없습니다.
  */
 export interface RiidoAIAgentAgentsNamespace {
@@ -1974,6 +1996,10 @@ export interface RiidoAIAgentAgentsNamespace {
    * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
    */
   readonly create: CreateAIAgentEndpoint;
+  /**
+   * agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
+   */
+  readonly daemon: RiidoAIAgentAgentsDaemonNamespace;
   /**
    * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.agents.editability`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
@@ -1989,35 +2015,9 @@ export interface RiidoAIAgentAgentsNamespace {
 }
 
 /**
- * runtime 설정 화면에서 현재 device의 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
- */
-export interface RiidoAIAgentDevicesDaemonNamespace {
-  /**
-   * runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다 cache tag: `aiAgent.devices.daemon`
-   */
-  readonly details: GetAIAgentDeviceDaemonEndpoint;
-  /**
-   * runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다 invalidates: `aiAgent.devices.daemon`, `aiAgent.devices.runtimes`
-   */
-  readonly restart: RestartAIAgentDeviceDaemonEndpoint;
-  /**
-   * runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다 invalidates: `aiAgent.devices.daemon`, `aiAgent.devices.runtimes`
-   */
-  readonly start: StartAIAgentDeviceDaemonEndpoint;
-  /**
-   * runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다 invalidates: `aiAgent.devices.daemon`, `aiAgent.devices.runtimes`
-   */
-  readonly stop: StopAIAgentDeviceDaemonEndpoint;
-}
-
-/**
  * device와 runtime 상태를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentDevicesNamespace {
-  /**
-   * runtime 설정 화면에서 현재 device의 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
-   */
-  readonly daemon: RiidoAIAgentDevicesDaemonNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다 cache tag: `aiAgent.devices.runtimes`
    */
@@ -2120,6 +2120,51 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() })]),
           },
         },
+        daemon: {
+          details: {
+            request: (params: GetAIAgentDaemonPathParams, options?: RiidoRequestOptions) => getAIAgentDaemon(config, params, options),
+            queryKeyRoot: getAIAgentDaemonQueryKeyRoot,
+            queryKey: getAIAgentDaemonQueryKey,
+            query: (params: GetAIAgentDaemonPathParams, options: RiidoQueryOptions<DeviceDaemonDetailResponse> = {}) => getAIAgentDaemonQueryOptions(config, params, options),
+            queryOptions: (params: GetAIAgentDaemonPathParams, options: RiidoQueryOptions<DeviceDaemonDetailResponse> = {}) => getAIAgentDaemonQueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: GetAIAgentDaemonPathParams) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonQueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonQueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: GetAIAgentDaemonPathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => queryClient.prefetchQuery(getAIAgentDaemonQueryOptions(config, params, options)),
+          },
+          restart: {
+            request: (params: RestartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => restartAIAgentDaemon(config, params, body, options),
+            mutationKey: restartAIAgentDaemonMutationKey,
+            mutation: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonMutationVariables> = {}) => restartAIAgentDaemonMutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonMutationVariables> = {}) => restartAIAgentDaemonMutationOptions(config, options),
+            invalidates: {
+              agentsDaemon: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonQueryKeyRoot() }),
+              devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDaemonQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() })]),
+            },
+          },
+          start: {
+            request: (params: StartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => startAIAgentDaemon(config, params, body, options),
+            mutationKey: startAIAgentDaemonMutationKey,
+            mutation: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonMutationVariables> = {}) => startAIAgentDaemonMutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonMutationVariables> = {}) => startAIAgentDaemonMutationOptions(config, options),
+            invalidates: {
+              agentsDaemon: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonQueryKeyRoot() }),
+              devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDaemonQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() })]),
+            },
+          },
+          stop: {
+            request: (params: StopAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => stopAIAgentDaemon(config, params, body, options),
+            mutationKey: stopAIAgentDaemonMutationKey,
+            mutation: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonMutationVariables> = {}) => stopAIAgentDaemonMutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonMutationVariables> = {}) => stopAIAgentDaemonMutationOptions(config, options),
+            invalidates: {
+              agentsDaemon: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonQueryKeyRoot() }),
+              devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDaemonQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() })]),
+            },
+          },
+        },
         delete: {
           request: (params: DeleteAIAgentPathParams, options?: RiidoRequestOptions) => deleteAIAgent(config, params, options),
           mutationKey: deleteAIAgentMutationKey,
@@ -2168,51 +2213,6 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
         prefetch: (queryClient: QueryClient, options?: RiidoQueryOptions<ClientBootstrapResponse>) => queryClient.prefetchQuery(getAIAgentClientBootstrapQueryOptions(config, options)),
       },
       devices: {
-        daemon: {
-          details: {
-            request: (params: GetAIAgentDeviceDaemonPathParams, options?: RiidoRequestOptions) => getAIAgentDeviceDaemon(config, params, options),
-            queryKeyRoot: getAIAgentDeviceDaemonQueryKeyRoot,
-            queryKey: getAIAgentDeviceDaemonQueryKey,
-            query: (params: GetAIAgentDeviceDaemonPathParams, options: RiidoQueryOptions<DeviceDaemonDetailResponse> = {}) => getAIAgentDeviceDaemonQueryOptions(config, params, options),
-            queryOptions: (params: GetAIAgentDeviceDaemonPathParams, options: RiidoQueryOptions<DeviceDaemonDetailResponse> = {}) => getAIAgentDeviceDaemonQueryOptions(config, params, options),
-            invalidate: (queryClient: QueryClient, params: GetAIAgentDeviceDaemonPathParams) => queryClient.invalidateQueries({ queryKey: getAIAgentDeviceDaemonQueryKey(params) }),
-            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDeviceDaemonQueryKeyRoot() }),
-            prefetch: (queryClient: QueryClient, params: GetAIAgentDeviceDaemonPathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => queryClient.prefetchQuery(getAIAgentDeviceDaemonQueryOptions(config, params, options)),
-          },
-          restart: {
-            request: (params: RestartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => restartAIAgentDeviceDaemon(config, params, body, options),
-            mutationKey: restartAIAgentDeviceDaemonMutationKey,
-            mutation: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDeviceDaemonMutationVariables> = {}) => restartAIAgentDeviceDaemonMutationOptions(config, options),
-            mutationOptions: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDeviceDaemonMutationVariables> = {}) => restartAIAgentDeviceDaemonMutationOptions(config, options),
-            invalidates: {
-              devicesDaemon: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDeviceDaemonQueryKeyRoot() }),
-              devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
-              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDeviceDaemonQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() })]),
-            },
-          },
-          start: {
-            request: (params: StartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => startAIAgentDeviceDaemon(config, params, body, options),
-            mutationKey: startAIAgentDeviceDaemonMutationKey,
-            mutation: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDeviceDaemonMutationVariables> = {}) => startAIAgentDeviceDaemonMutationOptions(config, options),
-            mutationOptions: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDeviceDaemonMutationVariables> = {}) => startAIAgentDeviceDaemonMutationOptions(config, options),
-            invalidates: {
-              devicesDaemon: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDeviceDaemonQueryKeyRoot() }),
-              devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
-              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDeviceDaemonQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() })]),
-            },
-          },
-          stop: {
-            request: (params: StopAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => stopAIAgentDeviceDaemon(config, params, body, options),
-            mutationKey: stopAIAgentDeviceDaemonMutationKey,
-            mutation: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDeviceDaemonMutationVariables> = {}) => stopAIAgentDeviceDaemonMutationOptions(config, options),
-            mutationOptions: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDeviceDaemonMutationVariables> = {}) => stopAIAgentDeviceDaemonMutationOptions(config, options),
-            invalidates: {
-              devicesDaemon: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDeviceDaemonQueryKeyRoot() }),
-              devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
-              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDeviceDaemonQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() })]),
-            },
-          },
-        },
         runtimes: {
           request: (options?: RiidoRequestOptions) => listAIAgentDeviceRuntimes(config, options),
           queryKeyRoot: listAIAgentDeviceRuntimesQueryKeyRoot,

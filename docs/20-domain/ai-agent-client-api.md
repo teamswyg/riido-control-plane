@@ -112,8 +112,8 @@ For agent settings:
   operations from this screen. Those surfaces need a separate owning SSOT and a
   new generated operation before the server accepts them.
 - Figma runtime settings annotations (`node-id=162-23090`) confirm the
-  `devices` and `devices.daemon` API consumption context. This repository owns
-  the protected device/runtime read model, current-device daemon detail,
+  `devices` and `agents.daemon` API consumption context. This repository owns
+  the protected device/runtime read model, agent-bound daemon detail,
   start/restart/stop command requests, `device_runtime_snapshot` and
   `device_daemon_status_changed` event shapes, generated DTOs, and black-box
   tests for current-device and other-device grouping, runtime
@@ -161,10 +161,10 @@ The mock API implements:
 
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
-- `GET /v1/client/ai-agent/devices/{device_id}/daemon`
-- `POST /v1/client/ai-agent/devices/{device_id}/daemon/start`
-- `POST /v1/client/ai-agent/devices/{device_id}/daemon/restart`
-- `POST /v1/client/ai-agent/devices/{device_id}/daemon/stop`
+- `GET /v1/client/ai-agent/agents/{agent_id}/daemon`
+- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/start`
+- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/restart`
+- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/stop`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
 - `POST /v1/client/ai-agent/tasks/{task_id}/assignment`
 - `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`
@@ -254,10 +254,12 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `agent_thread_progress` event with `thread_id` on
   `GET /v1/client/ai-agent/events`
 - runtime settings consume `GET /v1/client/ai-agent/devices`,
-  `GET /v1/client/ai-agent/devices/{device_id}/daemon`, daemon command
+  `GET /v1/client/ai-agent/agents/{agent_id}/daemon`, daemon command
   endpoints, `device_runtime_snapshot`, and `device_daemon_status_changed`
-- daemon detail/control is current-device owner-only. Admin agent authority does
-  not let a user inspect or control another user's desktop local daemon.
+- daemon detail/control is agent-bound. Public agent access lets workspace
+  members indirectly trigger the connected daemon/runtime; private agent access
+  limits that path to admins and owners. Knowing only a `device_id` is not enough
+  to inspect or control another user's desktop local daemon.
 
 ## Figma Handoff Evidence
 
@@ -269,8 +271,10 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
 - `node-id=153-15935`: additional planning section; visible planning text says
   only tasks and subtasks can receive Agent assignment, existing Riido AI
   property filling does not recommend agents, agent mentions are unsupported,
-  and device/runtime actions are owner-only. No annotation nodes were found on
-  this section, so the visible planning text is the evidence.
+  and device/runtime actions are agent-bound. Public agents delegate indirect
+  daemon/runtime execution to workspace members; private agents limit that path
+  to admins and owners. No annotation nodes were found on this section, so the
+  visible planning text plus RIID-4784 SSOT correction is the evidence.
 - `node-id=153-15931`: task-thread communication section; Dev Mode annotations
   include `riido.aiAgent.events.stream` on `node-id=153-8545` and
   `riido.aiAgent.tasks.stop` on `node-id=236-20768`
@@ -391,14 +395,15 @@ and renders truncation, max height, and scrollbars.
 
 `node-id=162-23090` maps to `GET /v1/client/ai-agent/devices`, the generated
 `listAIAgentDeviceRuntimes` query, and the generated
-`riido.aiAgent.devices.daemon.details/start/restart/stop` endpoints. The device
+`riido.aiAgent.agents.daemon.details/start/restart/stop` endpoints. The device
 response is the source for visible device/runtime rows, runtime
 name/version/status, and attached-agent records used by the `내 기기` and
-`다른 기기` groups. The daemon detail endpoint is the source for current-device
+`다른 기기` groups. The daemon detail endpoint is the source for agent-accessible
 daemon labels such as status, uptime, PID, daemon ID, profile, and device name.
-Daemon start/restart/stop are SaaS command requests; the daemon later reads and
-executes accepted commands locally. A stop command makes affected runtimes
-client-visible as offline through the runtime read model. The agent hover
+Daemon start/restart/stop are SaaS command requests authorized through the
+agent's visibility/access policy; the daemon later reads and executes accepted
+commands locally. A stop command makes affected runtimes client-visible as
+offline through the runtime read model. The agent hover
 popover, stop modal layout, and restart animation are still client presentation.
 
 `node-id=275-22731` also maps to `GET /v1/client/ai-agent/devices`. The server
@@ -495,10 +500,10 @@ ALB for:
 - `GET /readyz`
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
-- `GET /v1/client/ai-agent/devices/{device_id}/daemon`
-- `POST /v1/client/ai-agent/devices/{device_id}/daemon/start`
-- `POST /v1/client/ai-agent/devices/{device_id}/daemon/restart`
-- `POST /v1/client/ai-agent/devices/{device_id}/daemon/stop`
+- `GET /v1/client/ai-agent/agents/{agent_id}/daemon`
+- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/start`
+- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/restart`
+- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/stop`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
 - `POST /v1/client/ai-agent/tasks/{task_id}/assignment`
 - `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`

@@ -244,10 +244,16 @@ func authorizationScopeCandidates(req AuthorizationRequest) []string {
 			if req.DeviceID != "" {
 				candidates = append(candidates, "ai-agent:device:"+req.DeviceID+":read")
 			}
+			if req.AgentID != "" {
+				candidates = append(candidates, "ai-agent:agent:read", "ai-agent:agent:"+req.AgentID+":read", "ai-agent:"+req.AgentID+":read")
+			}
 		case AuthorizationActionDeviceControl:
 			candidates = append(candidates, "ai-agent:device:write")
 			if req.DeviceID != "" {
 				candidates = append(candidates, "ai-agent:device:"+req.DeviceID+":write")
+			}
+			if req.AgentID != "" {
+				candidates = append(candidates, "ai-agent:agent:control", "ai-agent:agent:"+req.AgentID+":control", "ai-agent:"+req.AgentID+":control", "ai-agent:write")
 			}
 		case AuthorizationActionStream:
 			candidates = append(candidates, "ai-agent:stream")

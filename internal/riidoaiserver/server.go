@@ -190,28 +190,25 @@ func (s Server) handleAIAgentClientDeviceRoutes(w http.ResponseWriter, r *http.R
 		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
 		return
 	}
-	deviceID, suffix, ok := splitAIAgentClientDevicePath(r.URL.Path)
+	_, suffix, ok := splitAIAgentClientDevicePath(r.URL.Path)
 	if !ok {
 		writeError(w, http.StatusNotFound, "not found")
 		return
 	}
 	switch {
-	case suffix == "daemon" && r.Method == http.MethodGet:
-		s.handleAIAgentClientDeviceDaemon(w, r, deviceID)
-	case strings.HasPrefix(suffix, "daemon/") && r.Method == http.MethodPost:
-		action := strings.TrimPrefix(suffix, "daemon/")
-		s.handleAIAgentClientDeviceDaemonControl(w, r, deviceID, action)
-	default:
+	case suffix == "":
 		writeMethodNotAllowed(w)
+	default:
+		writeError(w, http.StatusNotFound, "not found")
 	}
 }
 
-func (s Server) handleAIAgentClientDeviceDaemon(w http.ResponseWriter, r *http.Request, deviceID string) {
-	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDeviceRead, DeviceID: deviceID})
+func (s Server) handleAIAgentClientAgentDaemon(w http.ResponseWriter, r *http.Request, agentID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDeviceRead, AgentID: agentID})
 	if !ok {
 		return
 	}
-	response, err := s.aiAgent.GetAIAgentDeviceDaemon(r.Context(), principal, deviceID)
+	response, err := s.aiAgent.GetAIAgentDaemon(r.Context(), principal, agentID)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
@@ -219,7 +216,7 @@ func (s Server) handleAIAgentClientDeviceDaemon(w http.ResponseWriter, r *http.R
 	writeJSON(w, http.StatusOK, response)
 }
 
-func (s Server) handleAIAgentClientDeviceDaemonControl(w http.ResponseWriter, r *http.Request, deviceID, actionValue string) {
+func (s Server) handleAIAgentClientAgentDaemonControl(w http.ResponseWriter, r *http.Request, agentID, actionValue string) {
 	var action DaemonControlAction
 	switch actionValue {
 	case string(DaemonControlActionStart):
@@ -232,7 +229,7 @@ func (s Server) handleAIAgentClientDeviceDaemonControl(w http.ResponseWriter, r 
 		writeError(w, http.StatusNotFound, "not found")
 		return
 	}
-	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDeviceControl, DeviceID: deviceID})
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDeviceControl, AgentID: agentID})
 	if !ok {
 		return
 	}
@@ -243,7 +240,7 @@ func (s Server) handleAIAgentClientDeviceDaemonControl(w http.ResponseWriter, r 
 			return
 		}
 	}
-	response, err := s.aiAgent.ControlAIAgentDeviceDaemon(r.Context(), principal, deviceID, action, req)
+	response, err := s.aiAgent.ControlAIAgentDaemon(r.Context(), principal, agentID, action, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
@@ -398,6 +395,11 @@ func (s Server) handleAIAgentClientAgents(w http.ResponseWriter, r *http.Request
 		return
 	}
 	switch {
+	case suffix == "daemon" && r.Method == http.MethodGet:
+		s.handleAIAgentClientAgentDaemon(w, r, agentID)
+	case strings.HasPrefix(suffix, "daemon/") && r.Method == http.MethodPost:
+		action := strings.TrimPrefix(suffix, "daemon/")
+		s.handleAIAgentClientAgentDaemonControl(w, r, agentID, action)
 	case suffix == "editability" && r.Method == http.MethodGet:
 		s.handleAIAgentClientEditability(w, r, agentID)
 	case suffix == "" && r.Method == http.MethodPatch:
@@ -1038,19 +1040,22 @@ func splitAIAgentClientAgentPath(path string) (string, string, bool) {
 		return "", "", false
 	}
 	parts := strings.Split(rest, "/")
+	if len(parts) < 1 || len(parts) > 3 {
+		return "", "", false
+	}
+	for _, part := range parts {
+		if strings.TrimSpace(part) == "" {
+			return "", "", false
+		}
+	}
 	switch len(parts) {
 	case 1:
 		if strings.TrimSpace(parts[0]) == "" {
 			return "", "", false
 		}
 		return parts[0], "", true
-	case 2:
-		if strings.TrimSpace(parts[0]) == "" || strings.TrimSpace(parts[1]) == "" {
-			return "", "", false
-		}
-		return parts[0], parts[1], true
 	default:
-		return "", "", false
+		return parts[0], strings.Join(parts[1:], "/"), true
 	}
 }
 
