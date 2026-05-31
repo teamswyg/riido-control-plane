@@ -10,6 +10,64 @@
     }
   ],
   "paths": {
+    "/v1/client/ai-agent/agents": {
+      "post": {
+        "operationId": "createAIAgent",
+        "summary": "Create an AI agent configuration from the Figma agent-add screen",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentConfigurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentClientRecordResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ],
+        "x-riido-rbac-policy": "agent_mutation_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-scenarios": [
+          "createAIAgent.agent-add-screen-creates-owned-agent",
+          "createAIAgent.onboarding-direct-setting-creates-explicit-configuration",
+          "createAIAgent.agent-create-defaults-selected-runtime-model",
+          "createAIAgent.agent-create-rejects-model-outside-runtime-catalog"
+        ]
+      }
+    },
     "/v1/client/ai-agent/agents/{agent_id}": {
       "delete": {
         "operationId": "deleteAIAgent",
@@ -126,6 +184,7 @@
         "x-riido-scenarios": [
           "updateAIAgentConfiguration.agent-name-is-not-unique",
           "updateAIAgentConfiguration.profile-fields-are-saved",
+          "updateAIAgentConfiguration.model-updates-validate-against-runtime-catalog",
           "updateAIAgentConfiguration.description-max-length-is-enforced",
           "updateAIAgentConfiguration.instruction-max-length-is-enforced",
           "updateAIAgentConfiguration.edit-fails-while-assigned"
@@ -227,7 +286,11 @@
         "x-riido-rbac-policy": "ai_agent_rbac.v1",
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
-          "getAIAgentClientBootstrap.figma-client-bootstrap"
+          "getAIAgentClientBootstrap.figma-client-bootstrap",
+          "getAIAgentClientBootstrap.figma-agent-list-timestamps",
+          "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
+          "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
+          "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
         ]
       }
     },
@@ -272,7 +335,11 @@
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
           "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
-          "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent"
+          "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent",
+          "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records",
+          "listAIAgentDeviceRuntimes.figma-onboarding-runtime-selection",
+          "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model",
+          "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition"
         ]
       }
     },
@@ -375,7 +442,8 @@
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
           "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
-          "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering"
+          "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering",
+          "listAIAgentTaskAssignableAgents.assignment-target-scope-is-task-or-subtask-only"
         ]
       }
     },
@@ -509,6 +577,64 @@
           "stopAIAgentTask.task-stop-emits-comment-status"
         ]
       }
+    },
+    "/v1/client/ai-agent/tasks/{task_id}/threads": {
+      "get": {
+        "operationId": "listAIAgentTaskThreads",
+        "summary": "List AI Agent task threads before optionally following an active stream link",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadCollectionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "task_thread_cold_collection.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-scenarios": [
+          "listAIAgentTaskThreads.completed-task-does-not-open-stream",
+          "listAIAgentTaskThreads.running-task-advertises-one-stream",
+          "listAIAgentTaskThreads.reassigned-task-has-multiple-threads",
+          "listAIAgentTaskThreads.assignment-created-while-viewer-away"
+        ]
+      }
     }
   },
   "components": {
@@ -536,6 +662,9 @@
           "task_id": {
             "type": "string"
           },
+          "thread_id": {
+            "type": "string"
+          },
           "work_status": {
             "$ref": "#/components/schemas/AgentWorkStatus"
           }
@@ -544,11 +673,131 @@
           "schema_version",
           "task_id",
           "agent_id",
+          "thread_id",
           "run_id",
           "work_status",
           "assignment_state",
           "comment_kind",
           "message"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadCollectionResponse": {
+        "properties": {
+          "active_stream": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "threads": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadRecord": {
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "comment_kind": {
+            "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "completed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AgentThreadProgressLine"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "source_comment_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          }
+        },
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "comment_kind",
+          "message",
+          "lines"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadStreamLink": {
+        "properties": {
+          "event_type": {
+            "enum": [
+              "agent_thread_progress"
+            ],
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "rel": {
+            "enum": [
+              "agent_thread_progress_stream"
+            ],
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rel",
+          "href",
+          "event_type",
+          "task_id",
+          "thread_id",
+          "run_id"
         ],
         "type": "object"
       },
@@ -591,6 +840,10 @@
           "assigned_task_count": {
             "type": "integer"
           },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
           "description": {
             "maxLength": 160,
             "type": "string"
@@ -604,6 +857,12 @@
           },
           "is_owned_by_viewer": {
             "type": "boolean"
+          },
+          "model_id": {
+            "type": "string"
+          },
+          "model_label": {
+            "type": "string"
           },
           "name": {
             "type": "string"
@@ -621,6 +880,10 @@
           "runtime_kind": {
             "$ref": "#/components/schemas/RuntimeKind"
           },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
           "visibility": {
             "$ref": "#/components/schemas/AgentVisibility"
           },
@@ -636,7 +899,9 @@
           "visibility",
           "work_status",
           "editability",
-          "assigned_task_count"
+          "assigned_task_count",
+          "created_at",
+          "updated_at"
         ],
         "type": "object"
       },
@@ -718,6 +983,38 @@
         ],
         "type": "object"
       },
+      "AgentOnboardingTemplate": {
+        "properties": {
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
+          "instruction": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "role_label": {
+            "type": "string"
+          },
+          "template_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "template_id",
+          "name",
+          "description",
+          "instruction"
+        ],
+        "type": "object"
+      },
       "AgentTaskCommentKind": {
         "description": "Typed task-thread status update emitted for Figma task thread flows.",
         "enum": [
@@ -770,6 +1067,9 @@
           "task_id": {
             "type": "string"
           },
+          "thread_id": {
+            "type": "string"
+          },
           "work_status": {
             "$ref": "#/components/schemas/AgentWorkStatus"
           }
@@ -779,6 +1079,7 @@
           "schema_version",
           "agent_id",
           "task_id",
+          "thread_id",
           "run_id",
           "work_status",
           "assignment_state",
@@ -853,6 +1154,9 @@
           "task_id": {
             "type": "string"
           },
+          "thread_id": {
+            "type": "string"
+          },
           "work_status": {
             "$ref": "#/components/schemas/AgentWorkStatus"
           }
@@ -867,6 +1171,12 @@
       },
       "ClientBootstrapResponse": {
         "properties": {
+          "agent_templates": {
+            "items": {
+              "$ref": "#/components/schemas/AgentOnboardingTemplate"
+            },
+            "type": "array"
+          },
           "agents": {
             "items": {
               "$ref": "#/components/schemas/AgentClientRecord"
@@ -894,7 +1204,8 @@
           "client_kind",
           "workspace_id",
           "agents",
-          "devices"
+          "devices",
+          "agent_templates"
         ],
         "type": "object"
       },
@@ -931,6 +1242,40 @@
             "$ref": "#/components/schemas/AgentThreadProgressEvent"
           }
         ]
+      },
+      "CreateAgentConfigurationRequest": {
+        "properties": {
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
+          "instruction": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "model_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "runtime_id": {
+            "type": "string"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AgentVisibility"
+          }
+        },
+        "required": [
+          "name",
+          "visibility",
+          "runtime_id"
+        ],
+        "type": "object"
       },
       "DeleteAgentResponse": {
         "properties": {
@@ -1066,6 +1411,25 @@
         ],
         "type": "string"
       },
+      "RuntimeModelRecord": {
+        "properties": {
+          "is_default": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "model_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_id",
+          "label",
+          "is_default"
+        ],
+        "type": "object"
+      },
       "RuntimeRecord": {
         "properties": {
           "availability": {
@@ -1087,6 +1451,12 @@
             "format": "date-time",
             "type": "string"
           },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/RuntimeModelRecord"
+            },
+            "type": "array"
+          },
           "owner_principal_id": {
             "type": "string"
           },
@@ -1100,7 +1470,8 @@
           "kind",
           "availability",
           "detection_state",
-          "has_assigned_agent"
+          "has_assigned_agent",
+          "models"
         ],
         "type": "object"
       },
@@ -1141,6 +1512,9 @@
           },
           "instruction": {
             "maxLength": 1000,
+            "type": "string"
+          },
+          "model_id": {
             "type": "string"
           },
           "name": {

@@ -66,6 +66,7 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/client/ai-agent/bootstrap", s.handleAIAgentClientBootstrap)
 	mux.HandleFunc("/v1/client/ai-agent/devices", s.handleAIAgentClientDevices)
 	mux.HandleFunc("/v1/client/ai-agent/tasks/", s.handleAIAgentClientTasks)
+	mux.HandleFunc("/v1/client/ai-agent/agents", s.handleAIAgentClientAgents)
 	mux.HandleFunc("/v1/client/ai-agent/agents/", s.handleAIAgentClientAgents)
 	mux.HandleFunc("/v1/client/ai-agent/events", s.handleAIAgentClientEvents)
 	mux.HandleFunc("/v1/agent-catalog", s.handleAgentCatalog)
@@ -196,6 +197,8 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 	switch {
 	case suffix == "assignable-agents" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskAssignableAgents(w, r, taskID)
+	case suffix == "threads" && r.Method == http.MethodGet:
+		s.handleAIAgentClientTaskThreads(w, r, taskID)
 	case suffix == "comments" && r.Method == http.MethodPost:
 		s.handleAIAgentClientSubmitTaskComment(w, r, taskID)
 	case suffix == "stop" && r.Method == http.MethodPost:
@@ -211,6 +214,19 @@ func (s Server) handleAIAgentClientTaskAssignableAgents(w http.ResponseWriter, r
 		return
 	}
 	response, err := s.aiAgent.ListAIAgentTaskAssignableAgents(r.Context(), principal, taskID)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientTaskThreads(w http.ResponseWriter, r *http.Request, taskID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead, TaskID: taskID})
+	if !ok {
+		return
+	}
+	response, err := s.aiAgent.ListAIAgentTaskThreads(r.Context(), principal, taskID)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
@@ -261,6 +277,14 @@ func (s Server) handleAIAgentClientAgents(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
 		return
 	}
+	if r.URL.Path == "/v1/client/ai-agent/agents" || r.URL.Path == "/v1/client/ai-agent/agents/" {
+		if r.Method == http.MethodPost {
+			s.handleAIAgentClientCreate(w, r)
+			return
+		}
+		writeMethodNotAllowed(w)
+		return
+	}
 	agentID, suffix, ok := splitAIAgentClientAgentPath(r.URL.Path)
 	if !ok {
 		writeError(w, http.StatusNotFound, "not found")
@@ -276,6 +300,24 @@ func (s Server) handleAIAgentClientAgents(w http.ResponseWriter, r *http.Request
 	default:
 		writeError(w, http.StatusNotFound, "not found")
 	}
+}
+
+func (s Server) handleAIAgentClientCreate(w http.ResponseWriter, r *http.Request) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionCreate})
+	if !ok {
+		return
+	}
+	var req CreateAgentConfigurationRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.aiAgent.CreateAIAgent(r.Context(), principal, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, response)
 }
 
 func (s Server) handleAIAgentClientEditability(w http.ResponseWriter, r *http.Request, agentID string) {
@@ -662,6 +704,7 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 	}
 	req.AssignmentID = strings.TrimSpace(req.AssignmentID)
 	req.TaskID = strings.TrimSpace(req.TaskID)
+	req.ThreadID = strings.TrimSpace(req.ThreadID)
 	req.RunID = strings.TrimSpace(req.RunID)
 	if req.AssignmentID == "" {
 		writeError(w, http.StatusBadRequest, "assignment_id is required")
@@ -673,6 +716,9 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 	}
 	if req.RunID == "" {
 		req.RunID = "run-" + req.AssignmentID
+	}
+	if req.ThreadID == "" {
+		req.ThreadID = threadIDForRun(req.TaskID, agentID, req.RunID)
 	}
 	lines := normalizeProgressLines(req.Lines)
 	if len(lines) == 0 {
@@ -715,6 +761,7 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 			SchemaVersion:   SchemaVersion,
 			AgentID:         agentID,
 			TaskID:          req.TaskID,
+			ThreadID:        req.ThreadID,
 			RunID:           req.RunID,
 			WorkStatus:      AgentWorkStatusRunning,
 			AssignmentState: AgentAssignmentStateRunning,
