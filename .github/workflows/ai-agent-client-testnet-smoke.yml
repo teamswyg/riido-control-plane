@@ -7,17 +7,6 @@ on:
         description: "Optional AI Agent testnet base URL. Falls back to RIIDO_AI_SERVER_TESTNET_BASE_URL repository variable."
         required: false
         type: string
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
-      - "contracts/ai-agent-client/**"
-      - "internal/riidoaiserver/ai_agent_client_*.go"
-      - "internal/riidoaiserver/authorization.go"
-      - "internal/riidoaiserver/server.go"
-      - "cmd/riido_ai_server/main.go"
-      - "web/generated/aiAgentClient.ts"
-      - "web/generated/aiAgentClient.react.ts"
 
 concurrency:
   group: ai-agent-client-testnet-smoke
