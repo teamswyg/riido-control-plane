@@ -76,6 +76,50 @@ export interface ListAIAgentDeviceRuntimesReactEndpoint extends core.ListAIAgent
 }
 
 /**
+ * runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAIAgentDeviceDaemonReactEndpoint extends core.GetAIAgentDeviceDaemonEndpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAIAgentDeviceDaemonPathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonDetailResponse>) => UseQueryResult<core.DeviceDaemonDetailResponse, Error>;
+}
+
+/**
+ * runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface RestartAIAgentDeviceDaemonReactEndpoint extends core.RestartAIAgentDeviceDaemonEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.RestartAIAgentDeviceDaemonMutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.RestartAIAgentDeviceDaemonMutationVariables>;
+}
+
+/**
+ * runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface StartAIAgentDeviceDaemonReactEndpoint extends core.StartAIAgentDeviceDaemonEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StartAIAgentDeviceDaemonMutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.StartAIAgentDeviceDaemonMutationVariables>;
+}
+
+/**
+ * runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface StopAIAgentDeviceDaemonReactEndpoint extends core.StopAIAgentDeviceDaemonEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDeviceDaemonMutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDeviceDaemonMutationVariables>;
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
  */
@@ -175,9 +219,35 @@ export interface RiidoAIAgentAgentsReactNamespace {
 }
 
 /**
+ * runtime 설정 화면에서 현재 device의 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
+ */
+export interface RiidoAIAgentDevicesDaemonReactNamespace {
+  /**
+   * runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다 cache tag: `aiAgent.devices.daemon`
+   */
+  readonly details: GetAIAgentDeviceDaemonReactEndpoint;
+  /**
+   * runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다 invalidates: `aiAgent.devices.daemon`, `aiAgent.devices.runtimes`
+   */
+  readonly restart: RestartAIAgentDeviceDaemonReactEndpoint;
+  /**
+   * runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다 invalidates: `aiAgent.devices.daemon`, `aiAgent.devices.runtimes`
+   */
+  readonly start: StartAIAgentDeviceDaemonReactEndpoint;
+  /**
+   * runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다 invalidates: `aiAgent.devices.daemon`, `aiAgent.devices.runtimes`
+   */
+  readonly stop: StopAIAgentDeviceDaemonReactEndpoint;
+}
+
+/**
  * device와 runtime 상태를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentDevicesReactNamespace {
+  /**
+   * runtime 설정 화면에서 현재 device의 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
+   */
+  readonly daemon: RiidoAIAgentDevicesDaemonReactNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다 cache tag: `aiAgent.devices.runtimes`
    */
@@ -293,6 +363,24 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
           useQuery: (options?: core.RiidoQueryOptions<core.ClientBootstrapResponse>) => useQuery<core.ClientBootstrapResponse, Error>(coreClient.aiAgent.bootstrap.query(options)),
         },
         devices: {
+          daemon: {
+            details: {
+              ...coreClient.aiAgent.devices.daemon.details,
+              useQuery: (params: core.GetAIAgentDeviceDaemonPathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonDetailResponse>) => useQuery<core.DeviceDaemonDetailResponse, Error>(coreClient.aiAgent.devices.daemon.details.query(params, options)),
+            },
+            restart: {
+              ...coreClient.aiAgent.devices.daemon.restart,
+              useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.RestartAIAgentDeviceDaemonMutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.RestartAIAgentDeviceDaemonMutationVariables>(coreClient.aiAgent.devices.daemon.restart.mutation(options)),
+            },
+            start: {
+              ...coreClient.aiAgent.devices.daemon.start,
+              useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StartAIAgentDeviceDaemonMutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StartAIAgentDeviceDaemonMutationVariables>(coreClient.aiAgent.devices.daemon.start.mutation(options)),
+            },
+            stop: {
+              ...coreClient.aiAgent.devices.daemon.stop,
+              useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDeviceDaemonMutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDeviceDaemonMutationVariables>(coreClient.aiAgent.devices.daemon.stop.mutation(options)),
+            },
+          },
           runtimes: {
             ...coreClient.aiAgent.devices.runtimes,
             useQuery: (options?: core.RiidoQueryOptions<core.DeviceRuntimeListResponse>) => useQuery<core.DeviceRuntimeListResponse, Error>(coreClient.aiAgent.devices.runtimes.query(options)),

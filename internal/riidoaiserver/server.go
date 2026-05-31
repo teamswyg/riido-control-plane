@@ -65,6 +65,7 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/metrics", s.handleMetrics)
 	mux.HandleFunc("/v1/client/ai-agent/bootstrap", s.handleAIAgentClientBootstrap)
 	mux.HandleFunc("/v1/client/ai-agent/devices", s.handleAIAgentClientDevices)
+	mux.HandleFunc("/v1/client/ai-agent/devices/", s.handleAIAgentClientDeviceRoutes)
 	mux.HandleFunc("/v1/client/ai-agent/tasks/", s.handleAIAgentClientTasks)
 	mux.HandleFunc("/v1/client/ai-agent/agents", s.handleAIAgentClientAgents)
 	mux.HandleFunc("/v1/client/ai-agent/agents/", s.handleAIAgentClientAgents)
@@ -182,6 +183,72 @@ func (s Server) handleAIAgentClientDevices(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientDeviceRoutes(w http.ResponseWriter, r *http.Request) {
+	if s.aiAgent == nil {
+		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		return
+	}
+	deviceID, suffix, ok := splitAIAgentClientDevicePath(r.URL.Path)
+	if !ok {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	switch {
+	case suffix == "daemon" && r.Method == http.MethodGet:
+		s.handleAIAgentClientDeviceDaemon(w, r, deviceID)
+	case strings.HasPrefix(suffix, "daemon/") && r.Method == http.MethodPost:
+		action := strings.TrimPrefix(suffix, "daemon/")
+		s.handleAIAgentClientDeviceDaemonControl(w, r, deviceID, action)
+	default:
+		writeMethodNotAllowed(w)
+	}
+}
+
+func (s Server) handleAIAgentClientDeviceDaemon(w http.ResponseWriter, r *http.Request, deviceID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDeviceRead, DeviceID: deviceID})
+	if !ok {
+		return
+	}
+	response, err := s.aiAgent.GetAIAgentDeviceDaemon(r.Context(), principal, deviceID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientDeviceDaemonControl(w http.ResponseWriter, r *http.Request, deviceID, actionValue string) {
+	var action DaemonControlAction
+	switch actionValue {
+	case string(DaemonControlActionStart):
+		action = DaemonControlActionStart
+	case string(DaemonControlActionRestart):
+		action = DaemonControlActionRestart
+	case string(DaemonControlActionStop):
+		action = DaemonControlActionStop
+	default:
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDeviceControl, DeviceID: deviceID})
+	if !ok {
+		return
+	}
+	var req ControlDeviceDaemonRequest
+	if r.Body != nil && r.ContentLength != 0 {
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+	response, err := s.aiAgent.ControlAIAgentDeviceDaemon(r.Context(), principal, deviceID, action, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
 }
 
 func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request) {
@@ -941,6 +1008,24 @@ func splitResourcePath(path, prefix string) (string, string, bool) {
 		return "", "", false
 	}
 	return parts[0], parts[1], true
+}
+
+func splitAIAgentClientDevicePath(path string) (string, string, bool) {
+	const prefix = "/v1/client/ai-agent/devices/"
+	if !strings.HasPrefix(path, prefix) {
+		return "", "", false
+	}
+	rest := strings.Trim(strings.TrimPrefix(path, prefix), "/")
+	parts := strings.Split(rest, "/")
+	if len(parts) < 2 || len(parts) > 3 || strings.TrimSpace(parts[0]) == "" {
+		return "", "", false
+	}
+	for _, part := range parts[1:] {
+		if strings.TrimSpace(part) == "" {
+			return "", "", false
+		}
+	}
+	return parts[0], strings.Join(parts[1:], "/"), true
 }
 
 func splitAIAgentClientAgentPath(path string) (string, string, bool) {

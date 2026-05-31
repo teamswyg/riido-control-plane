@@ -33,6 +33,13 @@
         {
           "path": [
             "devices",
+            "daemon"
+          ],
+          "description": "runtime 설정 화면에서 현재 device의 desktop local daemon 상세와 제어 command를 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "devices",
             "runtimes"
           ],
           "description": "권한이 확인된 principal의 device runtime 목록입니다. assigned agent가 있는 runtime은 삭제되어도 offline 상태로 유지됩니다."
@@ -135,8 +142,11 @@
         "runtime_deleted_without_assigned_agent: treat runtime as absent",
         "runtime_reinstalled_same_device: mark runtime online according to online/offline policy only",
         "runtime_detection_error: client에는 offline으로 노출합니다",
+        "daemon_control: runtime settings 화면의 current-device daemon 상세, 시작, 재시작, 중지는 SaaS command/read-model을 통해서만 client에 노출합니다",
+        "daemon_control_owner_boundary: desktop local daemon 제어는 device owner만 요청할 수 있고 admin도 다른 사용자의 local device owner boundary를 우회하지 않습니다",
+        "daemon_stop_effect: daemon stop이 accepted되면 해당 device의 runtimes는 client에 offline으로 노출되어야 합니다",
         "client: runtime-settings empty and install-card states are composed from device/runtime read-model data without changing liveness semantics",
-        "client: runtime-settings current-device and other-device groups are composed from DeviceRecord values; current-device daemon detail, stop, and restart presentation remain desktop-local helper behavior and do not add a SaaS daemon command",
+        "client: runtime-settings current-device and other-device groups are composed from DeviceRecord values; current-device daemon detail/actions are read through devices.daemon generated endpoints",
         "client: provider install-card hover, Windows app waitlist copy, and marketing-consent presentation are downstream client/product facts until a separate owning SSOT adds a generated operation"
       ]
     },
@@ -170,7 +180,7 @@
       "kind": "telemetry",
       "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
       "rules": [
-        "daemon: parse only explicit runtime progress markers such as <riido_log>...<end>",
+        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
@@ -285,6 +295,57 @@
         },
         {
           "value": "error"
+        }
+      ]
+    },
+    {
+      "name": "DaemonAvailability",
+      "type": "string",
+      "description": "runtime 설정 화면에서 표시하는 desktop local daemon online/offline 상태입니다.",
+      "values": [
+        {
+          "value": "online"
+        },
+        {
+          "value": "offline"
+        }
+      ]
+    },
+    {
+      "name": "DaemonControlAction",
+      "type": "string",
+      "description": "SaaS가 desktop local daemon에 전달할 수 있는 제어 command 종류입니다.",
+      "values": [
+        {
+          "value": "start"
+        },
+        {
+          "value": "restart"
+        },
+        {
+          "value": "stop"
+        }
+      ]
+    },
+    {
+      "name": "DaemonControlState",
+      "type": "string",
+      "description": "daemon command가 접수된 뒤 client가 버튼/상태를 표시할 때 사용하는 제어 상태입니다.",
+      "values": [
+        {
+          "value": "idle"
+        },
+        {
+          "value": "starting"
+        },
+        {
+          "value": "restarting"
+        },
+        {
+          "value": "stopping"
+        },
+        {
+          "value": "failed"
         }
       ]
     },
@@ -417,6 +478,10 @@
           "schema": "DeviceRuntimeSnapshotEvent"
         },
         {
+          "kind": "device_daemon_status_changed",
+          "schema": "DeviceDaemonStatusEvent"
+        },
+        {
           "kind": "agent_editability_changed",
           "schema": "AgentEditabilityChangedEvent"
         },
@@ -463,6 +528,7 @@
       "name": "RuntimeRecord",
       "schema": {
         "name": "RuntimeRecord",
+        "description": "device에 설치되었거나 assignment 정책상 offline으로 유지되는 runtime record입니다.",
         "type": "object",
         "required": [
           "runtime_id",
@@ -521,6 +587,7 @@
       "name": "DeviceRecord",
       "schema": {
         "name": "DeviceRecord",
+        "description": "데몬이 연결된 device와 해당 device에서 감지된 runtime 목록입니다.",
         "type": "object",
         "required": [
           "device_id",
@@ -556,9 +623,182 @@
       }
     },
     {
+      "name": "DeviceDaemonRecord",
+      "schema": {
+        "name": "DeviceDaemonRecord",
+        "description": "runtime 설정 화면에서 현재 device의 daemon 상세 표시와 제어 버튼 상태를 구성하는 read model입니다.",
+        "type": "object",
+        "required": [
+          "device_id",
+          "owner_principal_id",
+          "availability",
+          "control_state",
+          "supported_actions"
+        ],
+        "properties": [
+          {
+            "name": "device_id",
+            "type": "string"
+          },
+          {
+            "name": "owner_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "device_display_name",
+            "type": "string"
+          },
+          {
+            "name": "daemon_id",
+            "type": "string"
+          },
+          {
+            "name": "profile",
+            "type": "string"
+          },
+          {
+            "name": "pid",
+            "type": "integer"
+          },
+          {
+            "name": "uptime_seconds",
+            "type": "integer"
+          },
+          {
+            "name": "started_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "last_seen_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "availability",
+            "ref": "DaemonAvailability"
+          },
+          {
+            "name": "control_state",
+            "ref": "DaemonControlState"
+          },
+          {
+            "name": "supported_actions",
+            "type": "array",
+            "items": {
+              "ref": "DaemonControlAction"
+            }
+          },
+          {
+            "name": "last_command_id",
+            "type": "string"
+          },
+          {
+            "name": "last_command_action",
+            "ref": "DaemonControlAction"
+          },
+          {
+            "name": "last_command_requested_at",
+            "type": "string",
+            "format": "date-time"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeviceDaemonDetailResponse",
+      "schema": {
+        "name": "DeviceDaemonDetailResponse",
+        "description": "runtime 설정 화면의 daemon 상세 row와 상세 패널을 위한 응답입니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "daemon"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "daemon",
+            "ref": "DeviceDaemonRecord"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ControlDeviceDaemonRequest",
+      "schema": {
+        "name": "ControlDeviceDaemonRequest",
+        "description": "current-device daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.",
+        "type": "object",
+        "properties": [
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeviceDaemonCommandResponse",
+      "schema": {
+        "name": "DeviceDaemonCommandResponse",
+        "description": "daemon command가 SaaS에 접수된 뒤 client가 즉시 버튼과 runtime offline 상태를 갱신할 수 있도록 반환하는 응답입니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "command_id",
+          "device_id",
+          "action",
+          "availability",
+          "control_state",
+          "accepted_at",
+          "message"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "command_id",
+            "type": "string"
+          },
+          {
+            "name": "device_id",
+            "type": "string"
+          },
+          {
+            "name": "action",
+            "ref": "DaemonControlAction"
+          },
+          {
+            "name": "availability",
+            "ref": "DaemonAvailability"
+          },
+          {
+            "name": "control_state",
+            "ref": "DaemonControlState"
+          },
+          {
+            "name": "accepted_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "message",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "AgentClientRecord",
       "schema": {
         "name": "AgentClientRecord",
+        "description": "client 화면에 표시하는 agent 요약 record입니다.",
         "type": "object",
         "required": [
           "agent_id",
@@ -653,6 +893,7 @@
       "name": "AgentClientListResponse",
       "schema": {
         "name": "AgentClientListResponse",
+        "description": "task 또는 화면에서 표시할 agent 목록 응답입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -677,6 +918,7 @@
       "name": "AgentClientRecordResponse",
       "schema": {
         "name": "AgentClientRecordResponse",
+        "description": "단일 agent 변경 후 최신 agent record를 반환하는 응답입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -741,6 +983,7 @@
       "name": "ClientBootstrapResponse",
       "schema": {
         "name": "ClientBootstrapResponse",
+        "description": "AI Agent 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -791,6 +1034,7 @@
       "name": "DeviceRuntimeListResponse",
       "schema": {
         "name": "DeviceRuntimeListResponse",
+        "description": "권한이 있는 principal이 볼 수 있는 device runtime 목록 응답입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -815,6 +1059,7 @@
       "name": "AgentEditabilityResponse",
       "schema": {
         "name": "AgentEditabilityResponse",
+        "description": "agent 수정 가능 여부와 차단 사유를 알려주는 응답입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -896,6 +1141,7 @@
       "name": "UpdateAgentConfigurationRequest",
       "schema": {
         "name": "UpdateAgentConfigurationRequest",
+        "description": "agent 이름, 공개 범위, runtime 연결을 수정하기 위한 요청입니다.",
         "type": "object",
         "properties": [
           {
@@ -936,6 +1182,7 @@
       "name": "DeleteAgentResponse",
       "schema": {
         "name": "DeleteAgentResponse",
+        "description": "agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -1005,6 +1252,7 @@
       "name": "SubmitAIAgentTaskCommentRequest",
       "schema": {
         "name": "SubmitAIAgentTaskCommentRequest",
+        "description": "task thread comment를 agent에게 전달하기 위한 요청입니다.",
         "type": "object",
         "required": [
           "agent_id",
@@ -1030,6 +1278,7 @@
       "name": "StopAIAgentTaskRequest",
       "schema": {
         "name": "StopAIAgentTaskRequest",
+        "description": "task thread에서 agent 작업을 중단하기 위한 요청입니다.",
         "type": "object",
         "properties": [
           {
@@ -1047,6 +1296,7 @@
       "name": "AIAgentTaskActionResponse",
       "schema": {
         "name": "AIAgentTaskActionResponse",
+        "description": "task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -1103,6 +1353,7 @@
       "name": "DeviceRuntimeSnapshotEvent",
       "schema": {
         "name": "DeviceRuntimeSnapshotEvent",
+        "description": "device runtime 감지 결과가 갱신되었음을 알리는 SSE event입니다.",
         "type": "object",
         "required": [
           "event_type",
@@ -1129,9 +1380,40 @@
       }
     },
     {
+      "name": "DeviceDaemonStatusEvent",
+      "schema": {
+        "name": "DeviceDaemonStatusEvent",
+        "description": "current-device daemon 상세/제어 상태가 변경되었음을 client SSE로 전달하는 event입니다.",
+        "type": "object",
+        "required": [
+          "event_type",
+          "schema_version",
+          "daemon"
+        ],
+        "properties": [
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "device_daemon_status_changed"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "daemon",
+            "ref": "DeviceDaemonRecord"
+          }
+        ]
+      }
+    },
+    {
       "name": "AgentEditabilityChangedEvent",
       "schema": {
         "name": "AgentEditabilityChangedEvent",
+        "description": "agent 수정 가능 여부 변경을 전달하는 SSE event입니다.",
         "type": "object",
         "required": [
           "event_type",
@@ -1170,6 +1452,7 @@
       "name": "AgentWorkStatusChangedEvent",
       "schema": {
         "name": "AgentWorkStatusChangedEvent",
+        "description": "agent 작업 상태와 task thread comment 상태 변경을 전달하는 SSE event입니다.",
         "type": "object",
         "required": [
           "event_type",
@@ -1485,6 +1768,7 @@
       "name": "ErrorEnvelope",
       "schema": {
         "name": "ErrorEnvelope",
+        "description": "control-plane API 오류 응답 envelope입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -1571,7 +1855,159 @@
         "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records",
         "listAIAgentDeviceRuntimes.figma-onboarding-runtime-selection",
         "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model",
-        "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition"
+        "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition",
+        "listAIAgentDeviceRuntimes.runtime-settings-daemon-stop-makes-runtimes-offline"
+      ]
+    },
+    {
+      "operation_id": "getAIAgentDeviceDaemon",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "details"
+        ],
+        "cache_tag": "aiAgent.devices.daemon"
+      },
+      "summary": "runtime 설정 화면에서 현재 device의 daemon 상세를 조회합니다",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonDetailResponse"
+      },
+      "scenario_ids": [
+        "getAIAgentDeviceDaemon.figma-runtime-settings-daemon-details",
+        "getAIAgentDeviceDaemon.daemon-detail-is-current-device-owned"
+      ]
+    },
+    {
+      "operation_id": "startAIAgentDeviceDaemon",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/start",
+      "resource": "device",
+      "action": "control",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "start"
+        ],
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "summary": "runtime 설정 화면에서 현재 device의 daemon 시작을 요청합니다",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:device:write",
+          "ai-agent:device:{device_id}:write"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
+      "scenario_ids": [
+        "startAIAgentDeviceDaemon.figma-runtime-settings-daemon-start"
+      ]
+    },
+    {
+      "operation_id": "restartAIAgentDeviceDaemon",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/restart",
+      "resource": "device",
+      "action": "control",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "restart"
+        ],
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "summary": "runtime 설정 화면에서 현재 device의 daemon 재시작을 요청합니다",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:device:write",
+          "ai-agent:device:{device_id}:write"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
+      "scenario_ids": [
+        "restartAIAgentDeviceDaemon.figma-runtime-settings-daemon-restart"
+      ]
+    },
+    {
+      "operation_id": "stopAIAgentDeviceDaemon",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/stop",
+      "resource": "device",
+      "action": "control",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "stop"
+        ],
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "summary": "runtime 설정 화면에서 현재 device의 daemon 중지를 요청합니다",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:device:write",
+          "ai-agent:device:{device_id}:write"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
+      "scenario_ids": [
+        "stopAIAgentDeviceDaemon.figma-runtime-settings-daemon-stop"
       ]
     },
     {
@@ -2088,7 +2524,55 @@
       "name": "runtime settings current and other device composition",
       "given": "the Figma runtime settings page shows current-device and other-device groups with runtime name/version/status/attached-agent rows plus a current-device daemon row with local details and actions",
       "when": "the client reads device runtime data",
-      "then": "the response provides ordinary device/runtime/attached-agent records while daemon uptime, PID, daemon ID, profile, device name, stop, and restart controls remain desktop-local and no SaaS stop/restart daemon operation is generated"
+      "then": "the response provides ordinary device/runtime records and the client reads current-device daemon details/actions through the devices.daemon generated endpoints"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceRuntimes.runtime-settings-daemon-stop-makes-runtimes-offline",
+      "operation_id": "listAIAgentDeviceRuntimes",
+      "name": "runtime settings daemon stop makes runtimes offline",
+      "given": "the Figma runtime settings stop modal says stopping the daemon changes local runtimes to offline",
+      "when": "a stop daemon command is accepted for the current device",
+      "then": "the following device/runtime read model and client stream expose affected runtimes as offline"
+    },
+    {
+      "scenario_id": "getAIAgentDeviceDaemon.figma-runtime-settings-daemon-details",
+      "operation_id": "getAIAgentDeviceDaemon",
+      "name": "figma runtime settings daemon details",
+      "given": "the Figma runtime settings current-device daemon row shows 상태, 실행 시간, PID, 데몬 ID, 프로필, 디바이스 이름",
+      "when": "the device owner opens the runtime setting screen",
+      "then": "the response contains the daemon detail read model required for those labels without requiring the client to talk to the local daemon directly"
+    },
+    {
+      "scenario_id": "getAIAgentDeviceDaemon.daemon-detail-is-current-device-owned",
+      "operation_id": "getAIAgentDeviceDaemon",
+      "name": "daemon detail is current-device owned",
+      "given": "an admin or another workspace member can see other workspace data",
+      "when": "they request another user's desktop local daemon detail",
+      "then": "the request is rejected because local daemon detail follows device-owner boundary"
+    },
+    {
+      "scenario_id": "startAIAgentDeviceDaemon.figma-runtime-settings-daemon-start",
+      "operation_id": "startAIAgentDeviceDaemon",
+      "name": "figma runtime settings daemon start",
+      "given": "the Figma runtime settings current-device daemon row is offline and shows 시작",
+      "when": "the device owner requests start",
+      "then": "the response accepts a start daemon command and the client invalidates daemon detail plus runtime read models"
+    },
+    {
+      "scenario_id": "restartAIAgentDeviceDaemon.figma-runtime-settings-daemon-restart",
+      "operation_id": "restartAIAgentDeviceDaemon",
+      "name": "figma runtime settings daemon restart",
+      "given": "the Figma runtime settings current-device daemon row is online and shows 재시작",
+      "when": "the device owner requests restart",
+      "then": "the response exposes restarting control_state so the client can show 재시작 중 while waiting for the next status event"
+    },
+    {
+      "scenario_id": "stopAIAgentDeviceDaemon.figma-runtime-settings-daemon-stop",
+      "operation_id": "stopAIAgentDeviceDaemon",
+      "name": "figma runtime settings daemon stop",
+      "given": "the Figma runtime settings stop modal says local runtimes become offline",
+      "when": "the device owner confirms stop",
+      "then": "the response accepts a stop daemon command, exposes stopping/offline state, and the following runtime read model shows that device's runtimes offline"
     },
     {
       "scenario_id": "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",

@@ -52,6 +52,8 @@ jobs:
             | jq -e '.schema_version == "riido-ai-server.v1" and (.agents | length) > 0 and (.devices | length) > 0' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/devices" \
             | jq -e '.schema_version == "riido-ai-server.v1" and (.devices | length) > 0' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/devices/device-mock-macbook/daemon" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .daemon.device_id == "device-mock-macbook" and (.daemon.supported_actions | length) > 0' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/assignable-agents" \
             | jq -e '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == "agent-owned-codex")' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/threads" \
