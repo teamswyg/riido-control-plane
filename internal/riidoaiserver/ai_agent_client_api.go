@@ -86,6 +86,7 @@ type AgentTaskCommentKind string
 
 const (
 	AgentTaskCommentQueuedByBusyAgent     AgentTaskCommentKind = "queued_by_busy_agent"
+	AgentTaskCommentAssignmentStarted     AgentTaskCommentKind = "assignment_started"
 	AgentTaskCommentStoppedByAgentDeleted AgentTaskCommentKind = "stopped_by_agent_deleted"
 	AgentTaskCommentStoppedByUserRequest  AgentTaskCommentKind = "stopped_by_user_request"
 	AgentTaskCommentRuntimeProgress       AgentTaskCommentKind = "runtime_progress"
@@ -206,6 +207,15 @@ type DeleteAgentResponse struct {
 	AgentID                  string `json:"agent_id"`
 	QueuedTasksUnassigned    int    `json:"queued_tasks_unassigned"`
 	RunningTasksForceStopped int    `json:"running_tasks_force_stopped"`
+}
+
+type AssignAIAgentTaskRequest struct {
+	AgentID string `json:"agent_id"`
+}
+
+type UnassignAIAgentTaskRequest struct {
+	AgentID string `json:"agent_id"`
+	Reason  string `json:"reason,omitempty"`
 }
 
 type SubmitAIAgentTaskCommentRequest struct {

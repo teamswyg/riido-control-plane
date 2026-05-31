@@ -170,7 +170,7 @@
       "kind": "telemetry",
       "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
       "rules": [
-        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
+        "daemon: parse only explicit runtime progress markers such as <riido_log>...<end>",
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
@@ -365,6 +365,10 @@
         {
           "value": "queued_by_busy_agent",
           "description": "선택된 agent가 이미 작업 중이어서 assignment가 queue에 대기합니다."
+        },
+        {
+          "value": "assignment_started",
+          "description": "task participant 배정으로 첫 agent-authored thread row가 생성되었습니다."
         },
         {
           "value": "stopped_by_agent_deleted",
@@ -955,6 +959,44 @@
           {
             "name": "running_tasks_force_stopped",
             "type": "integer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssignAIAgentTaskRequest",
+      "schema": {
+        "name": "AssignAIAgentTaskRequest",
+        "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다.",
+        "type": "object",
+        "required": [
+          "agent_id"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UnassignAIAgentTaskRequest",
+      "schema": {
+        "name": "UnassignAIAgentTaskRequest",
+        "description": "task participant에서 agent를 제거하며 active/queued 작업을 중단하기 위한 요청입니다.",
+        "type": "object",
+        "required": [
+          "agent_id"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "reason",
+            "type": "string"
           }
         ]
       }
@@ -1567,6 +1609,89 @@
       ]
     },
     {
+      "operation_id": "assignAIAgentTask",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/assignment",
+      "resource": "agent",
+      "action": "assign",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "assign"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents",
+          "aiAgent.tasks.threads"
+        ]
+      },
+      "summary": "task participant dropdown에서 AI agent를 배정합니다",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "request": {
+        "ref": "AssignAIAgentTaskRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenario_ids": [
+        "assignAIAgentTask.participant-dropdown-assigns-agent",
+        "assignAIAgentTask.only-one-active-assigned-agent-per-task"
+      ]
+    },
+    {
+      "operation_id": "unassignAIAgentTask",
+      "kind": "command",
+      "method": "DELETE",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/assignment",
+      "resource": "agent",
+      "action": "stop",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "unassign"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents",
+          "aiAgent.tasks.threads"
+        ]
+      },
+      "summary": "task participant에서 AI agent를 제거하고 작업을 중단합니다",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "request": {
+        "ref": "UnassignAIAgentTaskRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenario_ids": [
+        "unassignAIAgentTask.participant-removal-stops-agent-work"
+      ]
+    },
+    {
       "operation_id": "listAIAgentTaskThreads",
       "kind": "query",
       "method": "GET",
@@ -1988,6 +2113,30 @@
       "given": "the Figma additional planning section says only tasks and subtasks can receive Agent assignment",
       "when": "a client needs AI Agent candidates outside a task or subtask surface",
       "then": "no generated AI Agent assignable-agent operation exists for projects, milestones, intakes, AI property filler, or mention surfaces"
+    },
+    {
+      "scenario_id": "assignAIAgentTask.participant-dropdown-assigns-agent",
+      "operation_id": "assignAIAgentTask",
+      "name": "participant dropdown assigns agent",
+      "given": "task participant dropdown이 human member와 AI agent section을 구분해 보여줍니다",
+      "when": "client가 보이는 agent 하나를 task에 배정합니다",
+      "then": "선택된 agent가 busy가 아니면 response는 assignment_started task thread를 생성하거나 반환합니다"
+    },
+    {
+      "scenario_id": "assignAIAgentTask.only-one-active-assigned-agent-per-task",
+      "operation_id": "assignAIAgentTask",
+      "name": "only one active assigned agent per task",
+      "given": "task에 이미 active AI Agent assignment가 있습니다",
+      "when": "client가 participant dropdown에서 다른 agent를 배정합니다",
+      "then": "control-plane은 task당 active agent가 하나라는 invariant를 보존한 뒤 새 active thread를 노출합니다"
+    },
+    {
+      "scenario_id": "unassignAIAgentTask.participant-removal-stops-agent-work",
+      "operation_id": "unassignAIAgentTask",
+      "name": "participant removal stops agent work",
+      "given": "AI Agent가 task participant로 active 또는 queued 상태입니다",
+      "when": "client가 해당 agent를 task participant에서 제거합니다",
+      "then": "response와 event stream은 stopped_by_user_request를 사용하고, 중지된 row를 숨길지는 client presentation이 결정합니다"
     },
     {
       "scenario_id": "listAIAgentTaskThreads.completed-task-does-not-open-stream",

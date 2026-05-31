@@ -152,6 +152,8 @@ func TestAIAgentClientMetadataFlowsThroughContractProjections(t *testing.T) {
 	for operationID, required := range map[string][]string{
 		"getAIAgentClientBootstrap":       {"cache_tag"},
 		"listAIAgentTaskAssignableAgents": {"cache_tag"},
+		"assignAIAgentTask":               {"invalidates"},
+		"unassignAIAgentTask":             {"invalidates"},
 		"deleteAIAgent":                   {"invalidates"},
 		"submitAIAgentTaskComment":        {"invalidates"},
 		"stopAIAgentTask":                 {"invalidates"},

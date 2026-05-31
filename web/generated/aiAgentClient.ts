@@ -144,7 +144,7 @@ export interface AgentOnboardingTemplate {
 /**
  * Figma comment 소통 흐름에서 task thread에 기록되는 상태 update 종류입니다.
  */
-export type AgentTaskCommentKind = "queued_by_busy_agent" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
+export type AgentTaskCommentKind = "queued_by_busy_agent" | "assignment_started" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
 
 /**
  * 활성 task thread에 추가된 AI Agent 진행 상태를 client SSE로 전달하는 event입니다.
@@ -196,6 +196,13 @@ export interface AgentWorkStatusChangedEvent {
   task_id?: string;
   thread_id?: string;
   work_status: AgentWorkStatus;
+}
+
+/**
+ * task participant dropdown에서 agent를 배정하기 위한 요청입니다.
+ */
+export interface AssignAIAgentTaskRequest {
+  agent_id: string;
 }
 
 /**
@@ -333,6 +340,14 @@ export interface SubmitAIAgentTaskCommentRequest {
   agent_id: string;
   body: string;
   source_comment_id?: string;
+}
+
+/**
+ * task participant에서 agent를 제거하며 active/queued 작업을 중단하기 위한 요청입니다.
+ */
+export interface UnassignAIAgentTaskRequest {
+  agent_id: string;
+  reason?: string;
 }
 
 /**
@@ -741,6 +756,96 @@ export function listAIAgentTaskAssignableAgentsQueryOptions(config: RiidoClientC
     ...queryOptions,
     queryKey: listAIAgentTaskAssignableAgentsQueryKey(params),
     queryFn: () => listAIAgentTaskAssignableAgents(config, params, { signal }),
+  };
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다
+ * 경로 파라미터입니다.
+ */
+export interface UnassignAIAgentTaskPathParams {
+  task_id: string;
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다
+ */
+export async function unassignAIAgentTask(config: RiidoClientConfig, params: UnassignAIAgentTaskPathParams, body: UnassignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v1/client/ai-agent/tasks/${params.task_id}/assignment`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface UnassignAIAgentTaskMutationVariables {
+  params: UnassignAIAgentTaskPathParams;
+  body: UnassignAIAgentTaskRequest;
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function unassignAIAgentTaskMutationKey(): readonly unknown[] {
+  return ["unassignAIAgentTask"] as const;
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function unassignAIAgentTaskMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: unassignAIAgentTaskMutationKey(),
+    mutationFn: (variables: UnassignAIAgentTaskMutationVariables) => unassignAIAgentTask(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다
+ * 경로 파라미터입니다.
+ */
+export interface AssignAIAgentTaskPathParams {
+  task_id: string;
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다
+ */
+export async function assignAIAgentTask(config: RiidoClientConfig, params: AssignAIAgentTaskPathParams, body: AssignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v1/client/ai-agent/tasks/${params.task_id}/assignment`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface AssignAIAgentTaskMutationVariables {
+  params: AssignAIAgentTaskPathParams;
+  body: AssignAIAgentTaskRequest;
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function assignAIAgentTaskMutationKey(): readonly unknown[] {
+  return ["assignAIAgentTask"] as const;
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function assignAIAgentTaskMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: assignAIAgentTaskMutationKey(),
+    mutationFn: (variables: AssignAIAgentTaskMutationVariables) => assignAIAgentTask(config, variables.params, variables.body, {}),
   };
 }
 
@@ -1224,6 +1329,96 @@ export interface ListAIAgentTaskAssignableAgentsEndpoint {
 }
 
 /**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다
+ * DSL facade path: `aiAgent.tasks.unassign`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface UnassignAIAgentTaskEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: UnassignAIAgentTaskPathParams, body: UnassignAIAgentTaskRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskMutationVariables>) => ReturnType<typeof unassignAIAgentTaskMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskMutationVariables>) => ReturnType<typeof unassignAIAgentTaskMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly bootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly tasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly tasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다
+ * DSL facade path: `aiAgent.tasks.assign`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface AssignAIAgentTaskEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: AssignAIAgentTaskPathParams, body: AssignAIAgentTaskRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskMutationVariables>) => ReturnType<typeof assignAIAgentTaskMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskMutationVariables>) => ReturnType<typeof assignAIAgentTaskMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly bootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly tasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly tasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
  * task thread comment를 할당된 AI agent에게 전달합니다
  * DSL facade path: `aiAgent.tasks.submitComment`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
@@ -1400,6 +1595,10 @@ export interface RiidoAIAgentEventsNamespace {
  */
 export interface RiidoAIAgentTasksNamespace {
   /**
+   * task participant dropdown에서 AI agent를 배정합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   */
+  readonly assign: AssignAIAgentTaskEndpoint;
+  /**
    * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 cache tag: `aiAgent.tasks.assignableAgents`
    */
   readonly assignableAgents: ListAIAgentTaskAssignableAgentsEndpoint;
@@ -1415,6 +1614,10 @@ export interface RiidoAIAgentTasksNamespace {
    * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 cache tag: `aiAgent.tasks.threads`
    */
   readonly threads: ListAIAgentTaskThreadsEndpoint;
+  /**
+   * task participant에서 AI agent를 제거하고 작업을 중단합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   */
+  readonly unassign: UnassignAIAgentTaskEndpoint;
 }
 
 /**
@@ -1545,6 +1748,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
         },
       },
       tasks: {
+        assign: {
+          request: (params: AssignAIAgentTaskPathParams, body: AssignAIAgentTaskRequest, options?: RiidoRequestOptions) => assignAIAgentTask(config, params, body, options),
+          mutationKey: assignAIAgentTaskMutationKey,
+          mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskMutationVariables> = {}) => assignAIAgentTaskMutationOptions(config, options),
+          mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskMutationVariables> = {}) => assignAIAgentTaskMutationOptions(config, options),
+          invalidates: {
+            bootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }),
+            tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
+            tasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
+            all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() })]),
+          },
+        },
         assignableAgents: {
           request: (params: ListAIAgentTaskAssignableAgentsPathParams, options?: RiidoRequestOptions) => listAIAgentTaskAssignableAgents(config, params, options),
           queryKeyRoot: listAIAgentTaskAssignableAgentsQueryKeyRoot,
@@ -1588,6 +1803,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
           invalidate: (queryClient: QueryClient, params: ListAIAgentTaskThreadsPathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKey(params) }),
           invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
           prefetch: (queryClient: QueryClient, params: ListAIAgentTaskThreadsPathParams, options?: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse>) => queryClient.prefetchQuery(listAIAgentTaskThreadsQueryOptions(config, params, options)),
+        },
+        unassign: {
+          request: (params: UnassignAIAgentTaskPathParams, body: UnassignAIAgentTaskRequest, options?: RiidoRequestOptions) => unassignAIAgentTask(config, params, body, options),
+          mutationKey: unassignAIAgentTaskMutationKey,
+          mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskMutationVariables> = {}) => unassignAIAgentTaskMutationOptions(config, options),
+          mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskMutationVariables> = {}) => unassignAIAgentTaskMutationOptions(config, options),
+          invalidates: {
+            bootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }),
+            tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
+            tasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
+            all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() })]),
+          },
         },
       },
     },
