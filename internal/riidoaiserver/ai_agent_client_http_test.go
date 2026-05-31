@@ -37,14 +37,29 @@ func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
 	if containsString(aiAgentIDs(bootstrap.Agents), "agent-private-cursor") {
 		t.Fatalf("bootstrap leaked other private agent: %+v", bootstrap.Agents)
 	}
-	if len(bootstrap.AgentTemplates) != 4 || bootstrap.AgentTemplates[0].TemplateID != "riido_pm" {
+	if len(bootstrap.AgentTemplates) != 4 {
 		t.Fatalf("bootstrap templates = %+v", bootstrap.AgentTemplates)
 	}
-	if bootstrap.AgentTemplates[0].Name != "리도" ||
-		bootstrap.AgentTemplates[0].Description == "" ||
-		bootstrap.AgentTemplates[0].Instruction == "" ||
-		bootstrap.AgentTemplates[0].RoleLabel != "PM Agent" {
-		t.Fatalf("bootstrap first template = %+v", bootstrap.AgentTemplates[0])
+	wantTemplates := []struct {
+		templateID string
+		name       string
+		roleLabel  string
+	}{
+		{templateID: "riido_pm", name: "리도", roleLabel: "PM Agent"},
+		{templateID: "yeongsil_backend", name: "영실", roleLabel: "Backend Agent"},
+		{templateID: "hongdo_frontend", name: "홍도", roleLabel: "Frontend Agent"},
+		{templateID: "jiwon_research", name: "지원", roleLabel: "Research Agent"},
+	}
+	for i, want := range wantTemplates {
+		got := bootstrap.AgentTemplates[i]
+		if got.TemplateID != want.templateID ||
+			got.Name != want.name ||
+			got.RoleLabel != want.roleLabel ||
+			got.Description == "" ||
+			got.Instruction == "" ||
+			got.ProfileThumbnailURL == "" {
+			t.Fatalf("bootstrap template[%d] = %+v, want %+v with copy fields", i, got, want)
+		}
 	}
 
 	assignableReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-1/assignable-agents", nil)
@@ -281,6 +296,7 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		created.Agent.ProfileThumbnailURL != thumbnailURL ||
 		created.Agent.Description != description ||
 		created.Agent.Instruction != instruction ||
+		created.Agent.CreatedAt.IsZero() ||
 		created.Agent.UpdatedAt.IsZero() {
 		t.Fatalf("created agent = %+v", created.Agent)
 	}
@@ -321,6 +337,9 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	if patched.Agent.UpdatedAt.IsZero() {
 		t.Fatalf("patched agent updated_at is zero: %+v", patched.Agent)
 	}
+	if patched.Agent.CreatedAt.IsZero() || !patched.Agent.CreatedAt.Before(patched.Agent.UpdatedAt) {
+		t.Fatalf("patched agent created_at must be preserved and before updated_at: %+v", patched.Agent)
+	}
 
 	bootstrapReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/bootstrap", nil)
 	bootstrapReq.Header.Set("Authorization", "Bearer owner-token")
@@ -334,11 +353,11 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		t.Fatalf("bootstrap json: %v", err)
 	}
 	updated, ok := findAIAgent(bootstrap.Agents, "agent-owned-claude")
-	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction || !updated.UpdatedAt.Equal(patched.Agent.UpdatedAt) {
+	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction || !updated.CreatedAt.Equal(patched.Agent.CreatedAt) || !updated.UpdatedAt.Equal(patched.Agent.UpdatedAt) {
 		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
 	}
 	createdAgain, ok := findAIAgent(bootstrap.Agents, created.Agent.AgentID)
-	if !ok || createdAgain.OwnerPrincipalID != "user-1" || createdAgain.RuntimeID != "runtime-cursor-mock" {
+	if !ok || createdAgain.OwnerPrincipalID != "user-1" || createdAgain.RuntimeID != "runtime-cursor-mock" || !createdAgain.CreatedAt.Equal(created.Agent.CreatedAt) || !createdAgain.UpdatedAt.Equal(created.Agent.UpdatedAt) {
 		t.Fatalf("bootstrap created agent = %+v found=%v", createdAgain, ok)
 	}
 	if !runtimeHasAssignedAgent(bootstrap.Devices, "runtime-cursor-mock") {
@@ -409,6 +428,69 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	}
 	if deleted.RunningTasksForceStopped != 1 || deleted.AgentID != "agent-owned-codex" {
 		t.Fatalf("delete response = %+v", deleted)
+	}
+}
+
+func TestHTTPAIAgentClientMockAdminCreateUsesAuthorizedWorkspaceRuntime(t *testing.T) {
+	adminServer := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
+		PrincipalID: "admin-1",
+		Token:       "admin-token",
+		Scopes:      []string{"ai-agent:*"},
+		Roles:       []AgentCatalogRole{AgentCatalogRoleAdmin},
+	}})
+
+	devicesReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/devices", nil)
+	devicesReq.Header.Set("Authorization", "Bearer admin-token")
+	devicesResp := httptest.NewRecorder()
+	adminServer.ServeHTTP(devicesResp, devicesReq)
+	if devicesResp.Code != http.StatusOK {
+		t.Fatalf("admin devices status=%d body=%s", devicesResp.Code, devicesResp.Body.String())
+	}
+	var devices DeviceRuntimeListResponse
+	if err := json.Unmarshal(devicesResp.Body.Bytes(), &devices); err != nil {
+		t.Fatalf("admin devices json: %v", err)
+	}
+	if len(devices.Devices) != 1 || devices.Devices[0].OwnerPrincipalID != "user-1" {
+		t.Fatalf("admin devices = %+v", devices.Devices)
+	}
+
+	createBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:       "관리자 생성 에이전트",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  "runtime-codex-mock",
+	})
+	if err != nil {
+		t.Fatalf("marshal admin create body: %v", err)
+	}
+	createReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(createBody)))
+	createReq.Header.Set("Authorization", "Bearer admin-token")
+	createResp := httptest.NewRecorder()
+	adminServer.ServeHTTP(createResp, createReq)
+	if createResp.Code != http.StatusCreated {
+		t.Fatalf("admin create status=%d body=%s", createResp.Code, createResp.Body.String())
+	}
+	var created AgentClientRecordResponse
+	if err := json.Unmarshal(createResp.Body.Bytes(), &created); err != nil {
+		t.Fatalf("admin create json: %v", err)
+	}
+	if created.Agent.OwnerPrincipalID != "admin-1" ||
+		created.Agent.RuntimeID != "runtime-codex-mock" ||
+		created.Agent.RuntimeKind != RuntimeKindCodex ||
+		!created.Agent.IsOwnedByViewer {
+		t.Fatalf("admin created agent = %+v", created.Agent)
+	}
+
+	nonAdminServer := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
+		PrincipalID: "user-2",
+		Token:       "user-token",
+		Scopes:      []string{"ai-agent:*"},
+	}})
+	deniedReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(createBody)))
+	deniedReq.Header.Set("Authorization", "Bearer user-token")
+	deniedResp := httptest.NewRecorder()
+	nonAdminServer.ServeHTTP(deniedResp, deniedReq)
+	if deniedResp.Code != http.StatusBadRequest {
+		t.Fatalf("non-admin create status=%d body=%s", deniedResp.Code, deniedResp.Body.String())
 	}
 }
 
