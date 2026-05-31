@@ -62,6 +62,7 @@
         "x-riido-operation-kind": "command",
         "x-riido-scenarios": [
           "createAIAgent.agent-add-screen-creates-owned-agent",
+          "createAIAgent.onboarding-direct-setting-creates-explicit-configuration",
           "createAIAgent.agent-create-defaults-selected-runtime-model",
           "createAIAgent.agent-create-rejects-model-outside-runtime-catalog"
         ]
@@ -286,6 +287,9 @@
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
           "getAIAgentClientBootstrap.figma-client-bootstrap",
+          "getAIAgentClientBootstrap.figma-agent-list-timestamps",
+          "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
+          "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
           "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
         ]
       }
@@ -333,7 +337,9 @@
           "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
           "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent",
           "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records",
-          "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model"
+          "listAIAgentDeviceRuntimes.figma-onboarding-runtime-selection",
+          "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model",
+          "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition"
         ]
       }
     },
@@ -436,7 +442,8 @@
         "x-riido-operation-kind": "query",
         "x-riido-scenarios": [
           "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
-          "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering"
+          "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering",
+          "listAIAgentTaskAssignableAgents.assignment-target-scope-is-task-or-subtask-only"
         ]
       }
     },
@@ -833,6 +840,10 @@
           "assigned_task_count": {
             "type": "integer"
           },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
           "description": {
             "maxLength": 160,
             "type": "string"
@@ -889,6 +900,7 @@
           "work_status",
           "editability",
           "assigned_task_count",
+          "created_at",
           "updated_at"
         ],
         "type": "object"
