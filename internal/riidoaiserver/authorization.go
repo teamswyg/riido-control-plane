@@ -254,6 +254,11 @@ func authorizationScopeCandidates(req AuthorizationRequest) []string {
 			if req.TaskID != "" {
 				candidates = append(candidates, "task:"+req.TaskID+":comment")
 			}
+		case AuthorizationActionAssign:
+			candidates = append(candidates, "ai-agent:write")
+			if req.TaskID != "" {
+				candidates = append(candidates, "task:"+req.TaskID+":assign", "task:"+req.TaskID+":write")
+			}
 		case AuthorizationActionStop:
 			candidates = append(candidates, "ai-agent:write")
 			if req.TaskID != "" {

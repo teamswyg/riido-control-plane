@@ -197,6 +197,10 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 	switch {
 	case suffix == "assignable-agents" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskAssignableAgents(w, r, taskID)
+	case suffix == "assignment" && r.Method == http.MethodPost:
+		s.handleAIAgentClientAssignTask(w, r, taskID)
+	case suffix == "assignment" && r.Method == http.MethodDelete:
+		s.handleAIAgentClientUnassignTask(w, r, taskID)
 	case suffix == "threads" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskThreads(w, r, taskID)
 	case suffix == "comments" && r.Method == http.MethodPost:
@@ -219,6 +223,42 @@ func (s Server) handleAIAgentClientTaskAssignableAgents(w http.ResponseWriter, r
 		return
 	}
 	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Request, taskID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionAssign, TaskID: taskID})
+	if !ok {
+		return
+	}
+	var req AssignAIAgentTaskRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.aiAgent.AssignAIAgentTask(r.Context(), principal, taskID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
+}
+
+func (s Server) handleAIAgentClientUnassignTask(w http.ResponseWriter, r *http.Request, taskID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStop, TaskID: taskID})
+	if !ok {
+		return
+	}
+	var req UnassignAIAgentTaskRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.aiAgent.UnassignAIAgentTask(r.Context(), principal, taskID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
 }
 
 func (s Server) handleAIAgentClientTaskThreads(w http.ResponseWriter, r *http.Request, taskID string) {

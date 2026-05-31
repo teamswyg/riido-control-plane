@@ -789,6 +789,161 @@
           "listAIAgentTaskThreads.assignment-created-while-viewer-away"
         ]
       }
+    },
+    "/v1/client/ai-agent/tasks/{task_id}/assignment": {
+      "post": {
+        "operationId": "assignAIAgentTask",
+        "summary": "task participant dropdown에서 AI agent를 배정합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignAIAgentTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-scenarios": [
+          "assignAIAgentTask.participant-dropdown-assigns-agent",
+          "assignAIAgentTask.only-one-active-assigned-agent-per-task"
+        ],
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "tasks",
+            "assign"
+          ],
+          "invalidates": [
+            "aiAgent.bootstrap",
+            "aiAgent.tasks.assignableAgents",
+            "aiAgent.tasks.threads"
+          ]
+        }
+      },
+      "delete": {
+        "operationId": "unassignAIAgentTask",
+        "summary": "task participant에서 AI agent를 제거하고 작업을 중단합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnassignAIAgentTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-scenarios": [
+          "unassignAIAgentTask.participant-removal-stops-agent-work"
+        ],
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "tasks",
+            "unassign"
+          ],
+          "invalidates": [
+            "aiAgent.bootstrap",
+            "aiAgent.tasks.assignableAgents",
+            "aiAgent.tasks.threads"
+          ]
+        }
+      }
     }
   },
   "components": {
@@ -1180,16 +1335,17 @@
         "type": "object"
       },
       "AgentTaskCommentKind": {
+        "type": "string",
         "description": "Figma comment 소통 흐름에서 task thread에 기록되는 상태 update 종류입니다.",
         "enum": [
           "queued_by_busy_agent",
+          "assignment_started",
           "stopped_by_agent_deleted",
           "stopped_by_user_request",
           "runtime_progress",
           "task_completed",
           "task_failed"
-        ],
-        "type": "string"
+        ]
       },
       "AgentThreadProgressEvent": {
         "description": "활성 task thread에 추가된 AI Agent 진행 상태를 client SSE로 전달하는 event입니다.",
@@ -1711,6 +1867,33 @@
           }
         },
         "type": "object"
+      },
+      "AssignAIAgentTaskRequest": {
+        "type": "object",
+        "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다.",
+        "required": [
+          "agent_id"
+        ],
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          }
+        }
+      },
+      "UnassignAIAgentTaskRequest": {
+        "type": "object",
+        "description": "task participant에서 agent를 제거하며 active/queued 작업을 중단하기 위한 요청입니다.",
+        "required": [
+          "agent_id"
+        ],
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
       }
     },
     "securitySchemes": {

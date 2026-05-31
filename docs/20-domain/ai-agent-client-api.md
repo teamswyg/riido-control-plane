@@ -100,6 +100,12 @@ For agent settings:
   tests. It does not own member sorting, long-name truncation, max dropdown
   height, scrollbar width, checkbox layout, or the mixed member/agent visual
   composition.
+- The same task participant flow uses generated `riido.aiAgent.tasks.assign` and
+  `riido.aiAgent.tasks.unassign` commands for selecting or removing an AI Agent.
+  Assignment creates the initial typed task-thread row with
+  `comment_kind=assignment_started` unless the agent is busy; unassign maps
+  participant removal to `stopped_by_user_request`. Hiding stopped rows remains
+  client presentation.
 - Figma additional planning section (`node-id=153-15935`) confirms the
   assignment target scope. This repository owns task/subtask-scoped generated
   behavior under `/v1/client/ai-agent/tasks/{task_id}/...`. It does not expose
@@ -156,6 +162,8 @@ The mock API implements:
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
+- `POST /v1/client/ai-agent/tasks/{task_id}/assignment`
+- `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`
 - `GET /v1/client/ai-agent/tasks/{task_id}/threads`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
@@ -307,7 +315,9 @@ current server responsibility remains `bootstrap`, `devices`, agent mutation,
 task-thread actions, and `events`.
 
 `node-id=153-15931` confirms that frontend thread composition needs a cold read
-before optional streaming. `tasks.threads` maps to
+before optional streaming. `tasks.assign` maps to `POST
+/v1/client/ai-agent/tasks/{task_id}/assignment`, `tasks.unassign` maps to
+`DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`, `tasks.threads` maps to
 `GET /v1/client/ai-agent/tasks/{task_id}/threads`, `tasks.stop` maps to
 `POST /v1/client/ai-agent/tasks/{task_id}/stop`, and `events.stream` maps to the
 `GET /v1/client/ai-agent/events` SSE surface. The server returns
@@ -315,6 +325,14 @@ before optional streaming. `tasks.threads` maps to
 while the viewer was elsewhere, the server responsibility is to return that
 persisted visible thread on the later cold read; the client owns any scroll or
 focus behavior that makes the newly relevant thread visible in the task view.
+
+Task participant selection is not inferred from generic comments. The generated
+assignment command returns an `AIAgentTaskActionResponse` so the task screen can
+show the first agent-authored row immediately. If the user removes the agent from
+participants while it is queued or running, `tasks.unassign` returns the same
+response shape with `stopped_by_user_request`. The server keeps the stopped
+thread in the cold collection; the client decides whether that stopped content is
+rendered or hidden.
 
 `node-id=236-21379` confirms that the normal task screen consumes three
 generated operations as one route composition: `tasks.threads` for historical
@@ -351,6 +369,7 @@ stop affordance, avatar, or row layout shown in Figma.
 
 `node-id=153-15935` confirms that AI Agent target selection is not a general
 workspace object feature. `riido.aiAgent.tasks.assignableAgents`,
+`riido.aiAgent.tasks.assign`, `riido.aiAgent.tasks.unassign`,
 `riido.aiAgent.tasks.submitComment`, `riido.aiAgent.tasks.threads`, and
 `riido.aiAgent.tasks.stop` are task/subtask route composition only. A client
 opening a project, milestone, intake, existing AI property filler, or mention
@@ -473,6 +492,8 @@ ALB for:
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/devices`
 - `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
+- `POST /v1/client/ai-agent/tasks/{task_id}/assignment`
+- `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`
 - `GET /v1/client/ai-agent/tasks/{task_id}/threads`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`

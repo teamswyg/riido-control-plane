@@ -98,6 +98,28 @@ export interface ListAIAgentTaskAssignableAgentsReactEndpoint extends core.ListA
 }
 
 /**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface UnassignAIAgentTaskReactEndpoint extends core.UnassignAIAgentTaskEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.UnassignAIAgentTaskMutationVariables>) => UseMutationResult<core.AIAgentTaskActionResponse, Error, core.UnassignAIAgentTaskMutationVariables>;
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface AssignAIAgentTaskReactEndpoint extends core.AssignAIAgentTaskEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.AssignAIAgentTaskMutationVariables>) => UseMutationResult<core.AIAgentTaskActionResponse, Error, core.AssignAIAgentTaskMutationVariables>;
+}
+
+/**
  * task thread comment를 할당된 AI agent에게 전달합니다
  * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
  */
@@ -177,6 +199,10 @@ export interface RiidoAIAgentEventsReactNamespace {
  */
 export interface RiidoAIAgentTasksReactNamespace {
   /**
+   * task participant dropdown에서 AI agent를 배정합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   */
+  readonly assign: AssignAIAgentTaskReactEndpoint;
+  /**
    * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 cache tag: `aiAgent.tasks.assignableAgents`
    */
   readonly assignableAgents: ListAIAgentTaskAssignableAgentsReactEndpoint;
@@ -192,6 +218,10 @@ export interface RiidoAIAgentTasksReactNamespace {
    * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 cache tag: `aiAgent.tasks.threads`
    */
   readonly threads: ListAIAgentTaskThreadsReactEndpoint;
+  /**
+   * task participant에서 AI agent를 제거하고 작업을 중단합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   */
+  readonly unassign: UnassignAIAgentTaskReactEndpoint;
 }
 
 /**
@@ -275,6 +305,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
           },
         },
         tasks: {
+          assign: {
+            ...coreClient.aiAgent.tasks.assign,
+            useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.AssignAIAgentTaskMutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.AssignAIAgentTaskMutationVariables>(coreClient.aiAgent.tasks.assign.mutation(options)),
+          },
           assignableAgents: {
             ...coreClient.aiAgent.tasks.assignableAgents,
             useQuery: (params: core.ListAIAgentTaskAssignableAgentsPathParams, options?: core.RiidoQueryOptions<core.AgentClientListResponse>) => useQuery<core.AgentClientListResponse, Error>(coreClient.aiAgent.tasks.assignableAgents.query(params, options)),
@@ -290,6 +324,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
           threads: {
             ...coreClient.aiAgent.tasks.threads,
             useQuery: (params: core.ListAIAgentTaskThreadsPathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadCollectionResponse>) => useQuery<core.AIAgentTaskThreadCollectionResponse, Error>(coreClient.aiAgent.tasks.threads.query(params, options)),
+          },
+          unassign: {
+            ...coreClient.aiAgent.tasks.unassign,
+            useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.UnassignAIAgentTaskMutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.UnassignAIAgentTaskMutationVariables>(coreClient.aiAgent.tasks.unassign.mutation(options)),
           },
         },
       },

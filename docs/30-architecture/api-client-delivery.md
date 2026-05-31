@@ -52,6 +52,7 @@ projection.
 
 Figma task-thread annotations (`node-id=153-15931`) are also consumption context.
 They may name generated call chains such as `riido.aiAgent.events.stream` and
+`riido.aiAgent.tasks.assign`, `riido.aiAgent.tasks.unassign`, and
 `riido.aiAgent.tasks.stop`, but the delivery artifact must derive those chains
 from the control-plane OpenAPI projection and generated-client manifest. It must
 not hand-code annotation strings as a second source of truth. Task-thread
@@ -61,13 +62,20 @@ screens first consume the generated cold collection call for
 event stream.
 
 Figma normal task-thread screen (`node-id=236-21379`) is generated-client
-composition context for `riido.aiAgent.tasks.threads`,
+composition context for `riido.aiAgent.tasks.assign`,
+`riido.aiAgent.tasks.unassign`, `riido.aiAgent.tasks.threads`,
 `riido.aiAgent.tasks.submitComment`, and `riido.aiAgent.tasks.stop`. The
 generated artifact may document that those calls are commonly used together on
 the task page, but it must not turn the generic task comment box, right details
 panel, reply input layout, send-button visual state, or agent row presentation
 into API fields. Those remain client/task UI facts around the generated request
 and response shapes.
+
+Task participant assignment is documented as generated API behavior:
+`tasks.assign` creates the initial typed thread response with
+`comment_kind=assignment_started`, and `tasks.unassign` maps participant removal
+to `comment_kind=stopped_by_user_request`. Whether stopped rows are hidden after
+unassign is client presentation and must not become generated API copy.
 
 Figma busy-agent queued screen (`node-id=153-8761`) is generated-client
 composition context for the same task-thread calls. The delivery artifact may
@@ -285,7 +293,8 @@ together:
   direct use
 - `createRiidoControlPlaneClient(config)` groups the same primitives by DSL
   client metadata, for example `aiAgent.agents.editability`,
-  `aiAgent.tasks.stop`, and `aiAgent.devices.runtimes`
+  `aiAgent.tasks.assign`, `aiAgent.tasks.unassign`, `aiAgent.tasks.stop`, and
+  `aiAgent.devices.runtimes`
 - the facade is config-bound, so consumers do not repeatedly pass `baseUrl`,
   `token`, and optional `fetcher`
 - each operation exposes concise library-style aliases: `query(...)` mirrors
@@ -307,6 +316,7 @@ The intended frontend usage is:
 const riido = createRiidoControlPlaneClient(config);
 
 useQuery(riido.aiAgent.bootstrap.query());
+useMutation(riido.aiAgent.tasks.assign.mutation());
 useMutation(riido.aiAgent.tasks.stop.mutation());
 queryClient.prefetchQuery(riido.aiAgent.devices.runtimes.query());
 await riido.aiAgent.tasks.stop.invalidates.bootstrap(queryClient);
