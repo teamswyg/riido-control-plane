@@ -46,6 +46,9 @@ For agent settings:
   repository projects protected `DeviceRecord.runtimes` values through
   `GET /v1/client/ai-agent/devices` and validates selected `runtime_id` values
   when agents are created or updated.
+- `riido-contracts` owns runtime model catalog semantics. This repository
+  projects `RuntimeRecord.models`, accepts omitted `model_id` as the selected
+  runtime default, and validates a supplied `model_id` against that runtime.
 - This repository owns POST/PATCH validation, create/save/update behavior,
   response projection, generated TypeScript shape, and smoke-test coverage.
 - `riido-daemon` owns runtime consumption of an assigned instruction value after
@@ -84,9 +87,11 @@ For agent settings:
 - Figma runtime settings annotations (`node-id=162-23090`) confirm the
   `devices` API consumption context. This repository owns the protected
   device/runtime read model, `device_runtime_snapshot` event shape, generated
-  DTOs, and black-box tests. It does not own the agent hover popover, daemon
-  stop modal, restart animation, or desktop-local daemon lifecycle command
-  composition.
+  DTOs, and black-box tests for current-device and other-device grouping,
+  runtime name/version/status, and attached-agent records. It does not own the
+  agent hover popover, daemon stop modal, restart animation, local daemon
+  uptime/PID/daemon ID/profile/device-name detail, or desktop-local daemon
+  lifecycle command composition.
 - Figma onboarding annotations (`node-id=42-3014`) confirm the bootstrap and
   device/runtime consumption context. `node-id=137-6746` maps runtime selection
   to `GET /v1/client/ai-agent/devices`: Claude Code/Codex can be rendered as
@@ -161,13 +166,22 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - runtime selection uses ordinary device/runtime records; SaaS validates the
   selected `runtime_id` through create/update and does not expose a separate
   runtime-selection mutation
+- the agent settings `에이전트 추가` affordance is client presentation over the
+  authorized device/runtime read model; Figma `node-id=337-24013` hides it when
+  no member-visible runtime is selectable and this does not add an eligibility
+  endpoint
 - if no runtime is selectable, clients use existing device/runtime data to skip
   the template-selection step; SaaS does not add a separate onboarding skip
   command
 - non-owner, non-admin users cannot mutate other users' public agents
 - client-facing agent creation stamps `owner_principal_id` from authorization,
-  requires `name`, `visibility`, and a viewer-owned `runtime_id`, and starts as
-  editable with zero assigned tasks
+  requires `name`, `visibility`, and an authorized selectable `runtime_id`, and
+  starts as editable with zero assigned tasks; non-admin users are normally
+  limited to viewer-owned runtimes, while admin users may use runtime rows made
+  visible by RBAC
+- Figma `node-id=417-21803` / `node-id=432-35544` marks name, runtime, model,
+  and visibility as required controls; HTTP create still accepts omitted
+  `model_id` because the selected runtime default model is deterministic
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
   agent record; binary image upload/storage is outside this mock API
@@ -176,6 +190,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   a client concern and does not rewrite the stored value
 - `instruction` is saved as optional client-authored agent guidance text and is
   rejected when it exceeds 1000 characters
+- `created_at` is a server-authored RFC3339 date-time on every
+  `AgentClientRecord`; it is stamped when the agent is created and remains
+  immutable so clients can render creation dates or absolute-time tooltips
 - `updated_at` is a server-authored RFC3339 date-time on every
   `AgentClientRecord`; it is refreshed when editable agent configuration is
   saved and lets clients render update dates or absolute-time tooltips
@@ -329,10 +346,14 @@ and renders truncation, max height, and scrollbars.
 `listAIAgentDeviceRuntimes` query. A future nested wrapper may expose the same
 operation as a `riido.aiAgent.devices.runtimes` chain, but the chain must be
 generated from the OpenAPI operation rather than hard-coded from the Figma
-annotation. The agent hover popover is rendered from existing agent profile
-fields. The daemon stop modal and restart animation are client/desktop-local
-behavior; this server does not add a protected SaaS `stop daemon` or
-`restart daemon` endpoint for that screen.
+annotation. The response is the source for visible device/runtime rows,
+runtime name/version/status, and attached-agent records used by the `내 기기`
+and `다른 기기` groups. The agent hover popover is rendered from existing agent
+profile fields. Current-device daemon details such as uptime, PID, daemon ID,
+profile, and device name are local daemon/helper facts unless a later contract
+promotes them into this API. The daemon stop modal and restart animation are
+client/desktop-local behavior; this server does not add a protected SaaS
+`stop daemon` or `restart daemon` endpoint for that screen.
 
 `node-id=275-22731` also maps to `GET /v1/client/ai-agent/devices`. The server
 returns ordinary device/runtime rows or empty arrays; the client decides whether
@@ -344,16 +365,28 @@ this slice. `Q-CP-007` tracks whether the waitlist/marketing mutation belongs
 in this control-plane API or an existing product/user-marketing system.
 
 `node-id=164-50215` maps to existing agent bootstrap/update behavior plus the
-read-model fields `AgentClientRecord.updated_at`, `model_id`, and
-`model_label`. `node-id=134-6542` adds the client-facing create behavior:
+read-model fields `AgentClientRecord.created_at`,
+`AgentClientRecord.updated_at`, `model_id`, and `model_label`.
+`node-id=134-6542` adds the client-facing create behavior:
 `POST /v1/client/ai-agent/agents` returns the created `AgentClientRecord`,
 derives `runtime_kind` from the selected runtime, and validates optional
 `model_id` against the selected runtime's `RuntimeRecord.models` catalog. If
 `model_id` is omitted, the server saves the selected runtime's default model.
-The client can use `updated_at` for the list's update date and the
-absolute-time tooltip shown in Figma. Row click, meatball edit entry,
-save-button enablement, long-description truncation, dropdown layout, and
-timestamp formatting remain client-owned.
+This intentionally differs from the client form presentation: the model dropdown
+can be rendered as required because every selectable runtime has a default model
+that can be preselected, but generated HTTP clients do not need to send
+`model_id` to express that default.
+`node-id=337-24001` and `node-id=432-35713` add the agent-list requirement that
+clients can render separate 생성일 and 업데이트일 columns from server-authored
+timestamps. The client can use `created_at` for the list's creation date,
+`updated_at` for the list's update date, and either value for absolute-time
+tooltips shown in Figma. `node-id=337-24013` also confirms that the
+`에이전트 추가` affordance is hidden when no member-visible runtime is
+selectable; that condition is derived from bootstrap/device runtime read-model
+data and does not add a separate endpoint. Row click, meatball edit/delete
+entry, no-description row layout, status-label copy/color, save-button
+enablement, long-description truncation, dropdown layout, and timestamp
+formatting remain client-owned.
 
 `node-id=42-3014` maps to existing bootstrap/devices/create behavior plus one
 explicit bootstrap field: `ClientBootstrapResponse.agent_templates`. The
@@ -386,7 +419,9 @@ catalog projection. This repository must not hard-code model candidates as
 generated enum values. It only mirrors the contracts decision
 `runtime_model_catalog.v1`: clients render `RuntimeRecord.models`, send an
 optional `model_id`, and receive the saved `model_id` plus `model_label` on
-agent records.
+agent records. Figma required-control annotations for the save button are
+therefore UI validation state, not a breaking change to the generated request
+schema.
 
 ## Boundary
 
