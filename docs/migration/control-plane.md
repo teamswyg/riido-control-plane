@@ -714,8 +714,8 @@ This slice does:
 - add stdlib-only mock handlers for the AI Agent web/desktop webview endpoints
 - enable the mock surface only when `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true`
 - add black-box tests for bootstrap, devices, assignable agents, editability,
-  task-thread comment submit, task-thread stop, mutation, deletion, and SSE
-  replay
+  task-thread cold collection, task-thread comment submit, task-thread stop,
+  mutation, deletion, and SSE replay
 - add `tools/reactquerygen` to generate `web/generated/aiAgentClient.ts` from
   the checked-in OpenAPI projection
 - add a focused CI workflow for mock API and generated-client drift

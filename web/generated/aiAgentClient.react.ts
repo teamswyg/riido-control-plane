@@ -10,6 +10,17 @@ import { useMutation, useQuery, type UseMutationResult, type UseQueryResult } fr
 import * as core from './aiAgentClient';
 
 /**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface CreateAIAgentReactEndpoint extends core.CreateAIAgentEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AgentClientRecordResponse, core.CreateAIAgentMutationVariables>) => UseMutationResult<core.AgentClientRecordResponse, Error, core.CreateAIAgentMutationVariables>;
+}
+
+/**
  * agent를 삭제하고 queued/running assignment를 강제로 정리합니다
  * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
  */
@@ -65,7 +76,7 @@ export interface ListAIAgentDeviceRuntimesReactEndpoint extends core.ListAIAgent
 }
 
 /**
- * editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
  */
 export interface StreamAIAgentClientEventsReactEndpoint extends core.StreamAIAgentClientEventsEndpoint {
@@ -109,11 +120,26 @@ export interface StopAIAgentTaskReactEndpoint extends core.StopAIAgentTaskEndpoi
 }
 
 /**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface ListAIAgentTaskThreadsReactEndpoint extends core.ListAIAgentTaskThreadsEndpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.ListAIAgentTaskThreadsPathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadCollectionResponse>) => UseQueryResult<core.AIAgentTaskThreadCollectionResponse, Error>;
+}
+
+/**
  * agent 설정과 mutation을 다루는 namespace입니다. agent 이름은 중복될 수 있고 assigned task가 있으면 수정할 수 없습니다.
  */
 export interface RiidoAIAgentAgentsReactNamespace {
   /**
-   * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.agents.editability`, `aiAgent.tasks.assignableAgents`
+   * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
+   */
+  readonly create: CreateAIAgentReactEndpoint;
+  /**
+   * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.agents.editability`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly delete: DeleteAIAgentReactEndpoint;
   /**
@@ -141,7 +167,7 @@ export interface RiidoAIAgentDevicesReactNamespace {
  */
 export interface RiidoAIAgentEventsReactNamespace {
   /**
-   * editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다 cache tag: `aiAgent.events.stream`
+   * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 cache tag: `aiAgent.events.stream`
    */
   readonly stream: StreamAIAgentClientEventsReactEndpoint;
 }
@@ -155,13 +181,17 @@ export interface RiidoAIAgentTasksReactNamespace {
    */
   readonly assignableAgents: ListAIAgentTaskAssignableAgentsReactEndpoint;
   /**
-   * task thread의 stop action으로 AI agent 작업을 중단합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`
+   * task thread의 stop action으로 AI agent 작업을 중단합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly stop: StopAIAgentTaskReactEndpoint;
   /**
-   * task thread comment를 할당된 AI agent에게 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`
+   * task thread comment를 할당된 AI agent에게 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly submitComment: SubmitAIAgentTaskCommentReactEndpoint;
+  /**
+   * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 cache tag: `aiAgent.tasks.threads`
+   */
+  readonly threads: ListAIAgentTaskThreadsReactEndpoint;
 }
 
 /**
@@ -211,6 +241,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
     () => ({
       aiAgent: {
         agents: {
+          create: {
+            ...coreClient.aiAgent.agents.create,
+            useMutation: (options: core.RiidoMutationOptions<core.AgentClientRecordResponse, core.CreateAIAgentMutationVariables> = {}) => useMutation<core.AgentClientRecordResponse, Error, core.CreateAIAgentMutationVariables>(coreClient.aiAgent.agents.create.mutation(options)),
+          },
           delete: {
             ...coreClient.aiAgent.agents.delete,
             useMutation: (options: core.RiidoMutationOptions<core.DeleteAgentResponse, core.DeleteAIAgentMutationVariables> = {}) => useMutation<core.DeleteAgentResponse, Error, core.DeleteAIAgentMutationVariables>(coreClient.aiAgent.agents.delete.mutation(options)),
@@ -252,6 +286,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
           submitComment: {
             ...coreClient.aiAgent.tasks.submitComment,
             useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.SubmitAIAgentTaskCommentMutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.SubmitAIAgentTaskCommentMutationVariables>(coreClient.aiAgent.tasks.submitComment.mutation(options)),
+          },
+          threads: {
+            ...coreClient.aiAgent.tasks.threads,
+            useQuery: (params: core.ListAIAgentTaskThreadsPathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadCollectionResponse>) => useQuery<core.AIAgentTaskThreadCollectionResponse, Error>(coreClient.aiAgent.tasks.threads.query(params, options)),
           },
         },
       },

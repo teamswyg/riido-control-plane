@@ -14,7 +14,48 @@ export interface AIAgentTaskActionResponse {
   run_id: string;
   schema_version: string;
   task_id: string;
+  thread_id: string;
   work_status: AgentWorkStatus;
+}
+
+/**
+ * task 화면 진입 시 먼저 읽는 AI Agent thread cold collection 응답입니다.
+ */
+export interface AIAgentTaskThreadCollectionResponse {
+  active_stream?: AIAgentTaskThreadStreamLink;
+  schema_version: string;
+  task_id: string;
+  threads: AIAgentTaskThreadRecord[];
+}
+
+/**
+ * task 화면에 표시할 AI Agent thread의 cold record입니다.
+ */
+export interface AIAgentTaskThreadRecord {
+  agent_id: string;
+  assignment_state: AgentAssignmentState;
+  comment_kind: AgentTaskCommentKind;
+  completed_at?: string;
+  lines: AgentThreadProgressLine[];
+  message: string;
+  run_id: string;
+  source_comment_id?: string;
+  started_at?: string;
+  task_id: string;
+  thread_id: string;
+  work_status: AgentWorkStatus;
+}
+
+/**
+ * 활성 task thread가 있을 때 client가 연결할 SSE stream handoff link입니다.
+ */
+export interface AIAgentTaskThreadStreamLink {
+  event_type: "agent_thread_progress";
+  href: string;
+  rel: "agent_thread_progress_stream";
+  run_id: string;
+  task_id: string;
+  thread_id: string;
 }
 
 /**
@@ -36,12 +77,19 @@ export interface AgentClientListResponse {
 export interface AgentClientRecord {
   agent_id: string;
   assigned_task_count: number;
+  created_at: string;
+  description?: string;
   editability: AgentEditability;
+  instruction?: string;
   is_owned_by_viewer: boolean;
+  model_id?: string;
+  model_label?: string;
   name: string;
   owner_principal_id: string;
+  profile_thumbnail_url?: string;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
+  updated_at: string;
   visibility: AgentVisibility;
   work_status: AgentWorkStatus;
 }
@@ -82,9 +130,48 @@ export interface AgentEditabilityResponse {
 }
 
 /**
+ * AI Agent 온보딩에서 선택할 수 있는 starter agent template입니다.
+ */
+export interface AgentOnboardingTemplate {
+  description: string;
+  instruction: string;
+  name: string;
+  profile_thumbnail_url?: string;
+  role_label?: string;
+  template_id: string;
+}
+
+/**
  * Figma comment 소통 흐름에서 task thread에 기록되는 상태 update 종류입니다.
  */
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
+
+/**
+ * 활성 task thread에 추가된 AI Agent 진행 상태를 client SSE로 전달하는 event입니다.
+ */
+export interface AgentThreadProgressEvent {
+  agent_id: string;
+  assignment_state: AgentAssignmentState;
+  batch_ended_at?: string;
+  batch_started_at?: string;
+  comment_kind: AgentTaskCommentKind;
+  event_type: "agent_thread_progress";
+  lines: AgentThreadProgressLine[];
+  run_id: string;
+  schema_version: string;
+  task_id: string;
+  thread_id: string;
+  work_status: AgentWorkStatus;
+}
+
+/**
+ * daemon이 batch로 보고한 runtime 진행 메시지 한 줄입니다.
+ */
+export interface AgentThreadProgressLine {
+  message: string;
+  observed_at?: string;
+  seq: number;
+}
 
 /**
  * agent의 workspace 공개 범위입니다.
@@ -107,6 +194,7 @@ export interface AgentWorkStatusChangedEvent {
   run_id?: string;
   schema_version: string;
   task_id?: string;
+  thread_id?: string;
   work_status: AgentWorkStatus;
 }
 
@@ -114,6 +202,7 @@ export interface AgentWorkStatusChangedEvent {
  * AI Agent 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다.
  */
 export interface ClientBootstrapResponse {
+  agent_templates: AgentOnboardingTemplate[];
   agents: AgentClientRecord[];
   client_kind: ClientKind;
   devices: DeviceRecord[];
@@ -129,7 +218,20 @@ export type ClientKind = "web" | "desktop_webview";
 /**
  * web과 desktop webview client가 소비하는 SSE event union입니다.
  */
-export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent;
+export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent;
+
+/**
+ * agent 이름, 공개 범위, runtime, model, profile field를 저장하기 위한 생성 요청입니다.
+ */
+export interface CreateAgentConfigurationRequest {
+  description?: string;
+  instruction?: string;
+  model_id?: string;
+  name: string;
+  profile_thumbnail_url?: string;
+  runtime_id: string;
+  visibility: AgentVisibility;
+}
 
 /**
  * agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.
@@ -193,6 +295,15 @@ export type RuntimeDetectionState = "detected" | "missing" | "error";
 export type RuntimeKind = "codex" | "claude_code" | "cursor" | "openclaw";
 
 /**
+ * runtime이 제공하는 model 후보 record입니다. model_id는 runtime 범위 안에서만 의미가 있는 opaque identifier입니다.
+ */
+export interface RuntimeModelRecord {
+  is_default: boolean;
+  label: string;
+  model_id: string;
+}
+
+/**
  * device에 설치되었거나 assignment 정책상 offline으로 유지되는 runtime record입니다.
  */
 export interface RuntimeRecord {
@@ -202,6 +313,7 @@ export interface RuntimeRecord {
   has_assigned_agent: boolean;
   kind: RuntimeKind;
   last_detected_at?: string;
+  models: RuntimeModelRecord[];
   owner_principal_id?: string;
   runtime_id: string;
 }
@@ -227,7 +339,11 @@ export interface SubmitAIAgentTaskCommentRequest {
  * agent 이름, 공개 범위, runtime 연결을 수정하기 위한 요청입니다.
  */
 export interface UpdateAgentConfigurationRequest {
+  description?: string;
+  instruction?: string;
+  model_id?: string;
   name?: string;
+  profile_thumbnail_url?: string;
   runtime_id?: string;
   visibility?: AgentVisibility;
 }
@@ -295,6 +411,42 @@ async function riidoRawRequest(config: RiidoClientConfig, path: string, init: Re
     throw new Error(`Riido API ${response.status}: ${await response.text()}`);
   }
   return response;
+}
+
+/**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
+ */
+export async function createAIAgent(config: RiidoClientConfig, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
+  const path = "/v1/client/ai-agent/agents";
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentMutationVariables {
+  body: CreateAgentConfigurationRequest;
+}
+
+/**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentMutationKey(): readonly unknown[] {
+  return ["createAIAgent"] as const;
+}
+
+/**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentMutationKey(),
+    mutationFn: (variables: CreateAIAgentMutationVariables) => createAIAgent(config, variables.body, {}),
+  };
 }
 
 /**
@@ -509,7 +661,7 @@ export function listAIAgentDeviceRuntimesQueryOptions(config: RiidoClientConfig,
 }
 
 /**
- * editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  */
 export async function streamAIAgentClientEvents(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<Response> {
   const path = "/v1/client/ai-agent/events";
@@ -517,7 +669,7 @@ export async function streamAIAgentClientEvents(config: RiidoClientConfig, optio
 }
 
 /**
- * editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * cache tag: `aiAgent.events.stream`
  * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
  */
@@ -526,7 +678,7 @@ export function streamAIAgentClientEventsQueryKeyRoot(): readonly unknown[] {
 }
 
 /**
- * editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * 이 호출에 사용하는 React Query 키입니다.
  */
 export function streamAIAgentClientEventsQueryKey(): readonly unknown[] {
@@ -534,7 +686,7 @@ export function streamAIAgentClientEventsQueryKey(): readonly unknown[] {
 }
 
 /**
- * editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
  */
 export function streamAIAgentClientEventsQueryOptions(config: RiidoClientConfig, options: RiidoQueryOptions<Response> = {}) {
@@ -683,6 +835,97 @@ export function stopAIAgentTaskMutationOptions(config: RiidoClientConfig, option
 }
 
 /**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentTaskThreadsPathParams {
+  task_id: string;
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다
+ */
+export async function listAIAgentTaskThreads(config: RiidoClientConfig, params: ListAIAgentTaskThreadsPathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadCollectionResponse> {
+  const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads`;
+  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다
+ * cache tag: `aiAgent.tasks.threads`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentTaskThreadsQueryKeyRoot(): readonly unknown[] {
+  return ["aiAgent.tasks.threads"] as const;
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentTaskThreadsQueryKey(params: ListAIAgentTaskThreadsPathParams): readonly unknown[] {
+  return [...listAIAgentTaskThreadsQueryKeyRoot(), params] as const;
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentTaskThreadsQueryOptions(config: RiidoClientConfig, params: ListAIAgentTaskThreadsPathParams, options: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentTaskThreadsQueryKey(params),
+    queryFn: () => listAIAgentTaskThreads(config, params, { signal }),
+  };
+}
+
+/**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
+ * DSL facade path: `aiAgent.agents.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentMutationVariables>) => ReturnType<typeof createAIAgentMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentMutationVariables>) => ReturnType<typeof createAIAgentMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly bootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly devicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly tasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
  * agent를 삭제하고 queued/running assignment를 강제로 정리합니다
  * DSL facade path: `aiAgent.agents.delete`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
@@ -724,6 +967,10 @@ export interface DeleteAIAgentEndpoint {
      * `aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
      */
     readonly tasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly tasksThreads: (queryClient: QueryClient) => Promise<void>;
     /**
      * 선언된 모든 cache tag를 한 번에 무효화합니다.
      */
@@ -897,7 +1144,7 @@ export interface ListAIAgentDeviceRuntimesEndpoint {
 }
 
 /**
- * editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * DSL facade path: `aiAgent.events.stream`
  * cache tag: `aiAgent.events.stream`
  */
@@ -1011,6 +1258,10 @@ export interface SubmitAIAgentTaskCommentEndpoint {
      */
     readonly tasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
     /**
+     * `aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly tasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
      * 선언된 모든 cache tag를 한 번에 무효화합니다.
      */
     readonly all: (queryClient: QueryClient) => Promise<void[]>;
@@ -1052,6 +1303,10 @@ export interface StopAIAgentTaskEndpoint {
      */
     readonly tasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
     /**
+     * `aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly tasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
      * 선언된 모든 cache tag를 한 번에 무효화합니다.
      */
     readonly all: (queryClient: QueryClient) => Promise<void[]>;
@@ -1059,11 +1314,55 @@ export interface StopAIAgentTaskEndpoint {
 }
 
 /**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다
+ * DSL facade path: `aiAgent.tasks.threads`
+ * cache tag: `aiAgent.tasks.threads`
+ */
+export interface ListAIAgentTaskThreadsEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentTaskThreadsPathParams, options?: RiidoRequestOptions) => Promise<AIAgentTaskThreadCollectionResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentTaskThreadsPathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentTaskThreadsPathParams, options?: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse>) => ReturnType<typeof listAIAgentTaskThreadsQueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentTaskThreadsPathParams, options?: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse>) => ReturnType<typeof listAIAgentTaskThreadsQueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentTaskThreadsPathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentTaskThreadsPathParams, options?: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse>) => Promise<void>;
+}
+
+/**
  * agent 설정과 mutation을 다루는 namespace입니다. agent 이름은 중복될 수 있고 assigned task가 있으면 수정할 수 없습니다.
  */
 export interface RiidoAIAgentAgentsNamespace {
   /**
-   * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.agents.editability`, `aiAgent.tasks.assignableAgents`
+   * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
+   */
+  readonly create: CreateAIAgentEndpoint;
+  /**
+   * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.agents.editability`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly delete: DeleteAIAgentEndpoint;
   /**
@@ -1091,7 +1390,7 @@ export interface RiidoAIAgentDevicesNamespace {
  */
 export interface RiidoAIAgentEventsNamespace {
   /**
-   * editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다 cache tag: `aiAgent.events.stream`
+   * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 cache tag: `aiAgent.events.stream`
    */
   readonly stream: StreamAIAgentClientEventsEndpoint;
 }
@@ -1105,13 +1404,17 @@ export interface RiidoAIAgentTasksNamespace {
    */
   readonly assignableAgents: ListAIAgentTaskAssignableAgentsEndpoint;
   /**
-   * task thread의 stop action으로 AI agent 작업을 중단합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`
+   * task thread의 stop action으로 AI agent 작업을 중단합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly stop: StopAIAgentTaskEndpoint;
   /**
-   * task thread comment를 할당된 AI agent에게 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`
+   * task thread comment를 할당된 AI agent에게 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly submitComment: SubmitAIAgentTaskCommentEndpoint;
+  /**
+   * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 cache tag: `aiAgent.tasks.threads`
+   */
+  readonly threads: ListAIAgentTaskThreadsEndpoint;
 }
 
 /**
@@ -1158,6 +1461,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
   return {
     aiAgent: {
       agents: {
+        create: {
+          request: (body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => createAIAgent(config, body, options),
+          mutationKey: createAIAgentMutationKey,
+          mutation: (options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentMutationVariables> = {}) => createAIAgentMutationOptions(config, options),
+          mutationOptions: (options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentMutationVariables> = {}) => createAIAgentMutationOptions(config, options),
+          invalidates: {
+            bootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }),
+            devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
+            tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
+            all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() })]),
+          },
+        },
         delete: {
           request: (params: DeleteAIAgentPathParams, options?: RiidoRequestOptions) => deleteAIAgent(config, params, options),
           mutationKey: deleteAIAgentMutationKey,
@@ -1168,7 +1483,8 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
             agentsEditability: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentEditabilityQueryKeyRoot() }),
             tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
-            all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentEditabilityQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() })]),
+            tasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
+            all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentEditabilityQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() })]),
           },
         },
         editability: {
@@ -1247,7 +1563,8 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
           invalidates: {
             bootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }),
             tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
-            all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() })]),
+            tasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
+            all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() })]),
           },
         },
         submitComment: {
@@ -1258,8 +1575,19 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
           invalidates: {
             bootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }),
             tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
-            all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() })]),
+            tasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
+            all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() })]),
           },
+        },
+        threads: {
+          request: (params: ListAIAgentTaskThreadsPathParams, options?: RiidoRequestOptions) => listAIAgentTaskThreads(config, params, options),
+          queryKeyRoot: listAIAgentTaskThreadsQueryKeyRoot,
+          queryKey: listAIAgentTaskThreadsQueryKey,
+          query: (params: ListAIAgentTaskThreadsPathParams, options: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse> = {}) => listAIAgentTaskThreadsQueryOptions(config, params, options),
+          queryOptions: (params: ListAIAgentTaskThreadsPathParams, options: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse> = {}) => listAIAgentTaskThreadsQueryOptions(config, params, options),
+          invalidate: (queryClient: QueryClient, params: ListAIAgentTaskThreadsPathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKey(params) }),
+          invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
+          prefetch: (queryClient: QueryClient, params: ListAIAgentTaskThreadsPathParams, options?: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse>) => queryClient.prefetchQuery(listAIAgentTaskThreadsQueryOptions(config, params, options)),
         },
       },
     },

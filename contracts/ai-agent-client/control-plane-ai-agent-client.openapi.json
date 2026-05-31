@@ -55,6 +55,76 @@
     }
   ],
   "paths": {
+    "/v1/client/ai-agent/agents": {
+      "post": {
+        "operationId": "createAIAgent",
+        "summary": "Figma agent 추가 화면에서 AI agent 설정을 생성합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentConfigurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentClientRecordResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ],
+        "x-riido-rbac-policy": "agent_mutation_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "create"
+          ],
+          "invalidates": [
+            "aiAgent.bootstrap",
+            "aiAgent.devices.runtimes",
+            "aiAgent.tasks.assignableAgents"
+          ]
+        },
+        "x-riido-scenarios": [
+          "createAIAgent.agent-add-screen-creates-owned-agent",
+          "createAIAgent.onboarding-direct-setting-creates-explicit-configuration",
+          "createAIAgent.agent-create-defaults-selected-runtime-model",
+          "createAIAgent.agent-create-rejects-model-outside-runtime-catalog"
+        ]
+      }
+    },
     "/v1/client/ai-agent/agents/{agent_id}": {
       "delete": {
         "operationId": "deleteAIAgent",
@@ -115,7 +185,8 @@
             "aiAgent.bootstrap",
             "aiAgent.devices.runtimes",
             "aiAgent.agents.editability",
-            "aiAgent.tasks.assignableAgents"
+            "aiAgent.tasks.assignableAgents",
+            "aiAgent.tasks.threads"
           ]
         },
         "x-riido-scenarios": [
@@ -195,6 +266,10 @@
         },
         "x-riido-scenarios": [
           "updateAIAgentConfiguration.agent-name-is-not-unique",
+          "updateAIAgentConfiguration.profile-fields-are-saved",
+          "updateAIAgentConfiguration.model-updates-validate-against-runtime-catalog",
+          "updateAIAgentConfiguration.description-max-length-is-enforced",
+          "updateAIAgentConfiguration.instruction-max-length-is-enforced",
           "updateAIAgentConfiguration.edit-fails-while-assigned"
         ]
       }
@@ -309,7 +384,11 @@
           "cache_tag": "aiAgent.bootstrap"
         },
         "x-riido-scenarios": [
-          "getAIAgentClientBootstrap.figma-client-bootstrap"
+          "getAIAgentClientBootstrap.figma-client-bootstrap",
+          "getAIAgentClientBootstrap.figma-agent-list-timestamps",
+          "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
+          "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
+          "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
         ]
       }
     },
@@ -362,14 +441,18 @@
         },
         "x-riido-scenarios": [
           "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
-          "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent"
+          "listAIAgentDeviceRuntimes.missing-runtime-without-assigned-agent-is-absent",
+          "listAIAgentDeviceRuntimes.runtime-models-are-scoped-catalog-records",
+          "listAIAgentDeviceRuntimes.figma-onboarding-runtime-selection",
+          "listAIAgentDeviceRuntimes.runtime-settings-empty-state-from-read-model",
+          "listAIAgentDeviceRuntimes.runtime-settings-current-and-other-device-composition"
         ]
       }
     },
     "/v1/client/ai-agent/events": {
       "get": {
         "operationId": "streamAIAgentClientEvents",
-        "summary": "editability, work status, runtime snapshot에 대한 AI Agent client update를 스트리밍합니다",
+        "summary": "editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다",
         "tags": [
           "ai_agent_client"
         ],
@@ -416,6 +499,7 @@
         "x-riido-scenarios": [
           "streamAIAgentClientEvents.editability-updates-before-mutation",
           "streamAIAgentClientEvents.runtime-parse-status",
+          "streamAIAgentClientEvents.runtime-progress-batch",
           "streamAIAgentClientEvents.task-comment-status-update"
         ]
       }
@@ -480,7 +564,8 @@
         },
         "x-riido-scenarios": [
           "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
-          "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering"
+          "listAIAgentTaskAssignableAgents.participant-dropdown-owned-first-ordering",
+          "listAIAgentTaskAssignableAgents.assignment-target-scope-is-task-or-subtask-only"
         ]
       }
     },
@@ -552,7 +637,8 @@
           ],
           "invalidates": [
             "aiAgent.bootstrap",
-            "aiAgent.tasks.assignableAgents"
+            "aiAgent.tasks.assignableAgents",
+            "aiAgent.tasks.threads"
           ]
         },
         "x-riido-scenarios": [
@@ -629,11 +715,78 @@
           ],
           "invalidates": [
             "aiAgent.bootstrap",
-            "aiAgent.tasks.assignableAgents"
+            "aiAgent.tasks.assignableAgents",
+            "aiAgent.tasks.threads"
           ]
         },
         "x-riido-scenarios": [
           "stopAIAgentTask.task-stop-emits-comment-status"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/tasks/{task_id}/threads": {
+      "get": {
+        "operationId": "listAIAgentTaskThreads",
+        "summary": "active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadCollectionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "task_thread_cold_collection.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "tasks",
+            "threads"
+          ],
+          "cache_tag": "aiAgent.tasks.threads"
+        },
+        "x-riido-scenarios": [
+          "listAIAgentTaskThreads.completed-task-does-not-open-stream",
+          "listAIAgentTaskThreads.running-task-advertises-one-stream",
+          "listAIAgentTaskThreads.reassigned-task-has-multiple-threads",
+          "listAIAgentTaskThreads.assignment-created-while-viewer-away"
         ]
       }
     }
@@ -664,6 +817,9 @@
           "task_id": {
             "type": "string"
           },
+          "thread_id": {
+            "type": "string"
+          },
           "work_status": {
             "$ref": "#/components/schemas/AgentWorkStatus"
           }
@@ -672,11 +828,134 @@
           "schema_version",
           "task_id",
           "agent_id",
+          "thread_id",
           "run_id",
           "work_status",
           "assignment_state",
           "comment_kind",
           "message"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadCollectionResponse": {
+        "description": "task 화면 진입 시 먼저 읽는 AI Agent thread cold collection 응답입니다.",
+        "properties": {
+          "active_stream": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "threads": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadRecord": {
+        "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "comment_kind": {
+            "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "completed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AgentThreadProgressLine"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "source_comment_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          }
+        },
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "comment_kind",
+          "message",
+          "lines"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadStreamLink": {
+        "description": "활성 task thread가 있을 때 client가 연결할 SSE stream handoff link입니다.",
+        "properties": {
+          "event_type": {
+            "enum": [
+              "agent_thread_progress"
+            ],
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "rel": {
+            "enum": [
+              "agent_thread_progress_stream"
+            ],
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rel",
+          "href",
+          "event_type",
+          "task_id",
+          "thread_id",
+          "run_id"
         ],
         "type": "object"
       },
@@ -721,11 +1000,29 @@
           "assigned_task_count": {
             "type": "integer"
           },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
           "editability": {
             "$ref": "#/components/schemas/AgentEditability"
           },
+          "instruction": {
+            "maxLength": 1000,
+            "type": "string"
+          },
           "is_owned_by_viewer": {
             "type": "boolean"
+          },
+          "model_id": {
+            "type": "string"
+          },
+          "model_label": {
+            "type": "string"
           },
           "name": {
             "type": "string"
@@ -733,11 +1030,19 @@
           "owner_principal_id": {
             "type": "string"
           },
+          "profile_thumbnail_url": {
+            "format": "uri",
+            "type": "string"
+          },
           "runtime_id": {
             "type": "string"
           },
           "runtime_kind": {
             "$ref": "#/components/schemas/RuntimeKind"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
           },
           "visibility": {
             "$ref": "#/components/schemas/AgentVisibility"
@@ -754,7 +1059,9 @@
           "visibility",
           "work_status",
           "editability",
-          "assigned_task_count"
+          "assigned_task_count",
+          "created_at",
+          "updated_at"
         ],
         "type": "object"
       },
@@ -839,6 +1146,39 @@
         ],
         "type": "object"
       },
+      "AgentOnboardingTemplate": {
+        "description": "AI Agent 온보딩에서 선택할 수 있는 starter agent template입니다.",
+        "properties": {
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
+          "instruction": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "role_label": {
+            "type": "string"
+          },
+          "template_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "template_id",
+          "name",
+          "description",
+          "instruction"
+        ],
+        "type": "object"
+      },
       "AgentTaskCommentKind": {
         "description": "Figma comment 소통 흐름에서 task thread에 기록되는 상태 update 종류입니다.",
         "enum": [
@@ -850,6 +1190,88 @@
           "task_failed"
         ],
         "type": "string"
+      },
+      "AgentThreadProgressEvent": {
+        "description": "활성 task thread에 추가된 AI Agent 진행 상태를 client SSE로 전달하는 event입니다.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "batch_ended_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "batch_started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "comment_kind": {
+            "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "event_type": {
+            "enum": [
+              "agent_thread_progress"
+            ],
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/AgentThreadProgressLine"
+            },
+            "type": "array"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          }
+        },
+        "required": [
+          "event_type",
+          "schema_version",
+          "agent_id",
+          "task_id",
+          "thread_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "comment_kind",
+          "lines"
+        ],
+        "type": "object"
+      },
+      "AgentThreadProgressLine": {
+        "description": "daemon이 batch로 보고한 runtime 진행 메시지 한 줄입니다.",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seq",
+          "message"
+        ],
+        "type": "object"
       },
       "AgentVisibility": {
         "description": "agent의 workspace 공개 범위입니다.",
@@ -899,6 +1321,9 @@
           "task_id": {
             "type": "string"
           },
+          "thread_id": {
+            "type": "string"
+          },
           "work_status": {
             "$ref": "#/components/schemas/AgentWorkStatus"
           }
@@ -914,6 +1339,12 @@
       "ClientBootstrapResponse": {
         "description": "AI Agent 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다.",
         "properties": {
+          "agent_templates": {
+            "items": {
+              "$ref": "#/components/schemas/AgentOnboardingTemplate"
+            },
+            "type": "array"
+          },
           "agents": {
             "items": {
               "$ref": "#/components/schemas/AgentClientRecord"
@@ -941,7 +1372,8 @@
           "client_kind",
           "workspace_id",
           "agents",
-          "devices"
+          "devices",
+          "agent_templates"
         ],
         "type": "object"
       },
@@ -958,6 +1390,7 @@
         "discriminator": {
           "mapping": {
             "agent_editability_changed": "#/components/schemas/AgentEditabilityChangedEvent",
+            "agent_thread_progress": "#/components/schemas/AgentThreadProgressEvent",
             "agent_work_status_changed": "#/components/schemas/AgentWorkStatusChangedEvent",
             "device_runtime_snapshot": "#/components/schemas/DeviceRuntimeSnapshotEvent"
           },
@@ -972,8 +1405,46 @@
           },
           {
             "$ref": "#/components/schemas/AgentWorkStatusChangedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AgentThreadProgressEvent"
           }
         ]
+      },
+      "CreateAgentConfigurationRequest": {
+        "description": "agent 이름, 공개 범위, runtime, model, profile field를 저장하기 위한 생성 요청입니다.",
+        "properties": {
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
+          "instruction": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "model_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "runtime_id": {
+            "type": "string"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AgentVisibility"
+          }
+        },
+        "required": [
+          "name",
+          "visibility",
+          "runtime_id"
+        ],
+        "type": "object"
       },
       "DeleteAgentResponse": {
         "description": "agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.",
@@ -1114,6 +1585,26 @@
         ],
         "type": "string"
       },
+      "RuntimeModelRecord": {
+        "description": "runtime이 제공하는 model 후보 record입니다. model_id는 runtime 범위 안에서만 의미가 있는 opaque identifier입니다.",
+        "properties": {
+          "is_default": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "model_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_id",
+          "label",
+          "is_default"
+        ],
+        "type": "object"
+      },
       "RuntimeRecord": {
         "description": "device에 설치되었거나 assignment 정책상 offline으로 유지되는 runtime record입니다.",
         "properties": {
@@ -1136,6 +1627,12 @@
             "format": "date-time",
             "type": "string"
           },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/RuntimeModelRecord"
+            },
+            "type": "array"
+          },
           "owner_principal_id": {
             "type": "string"
           },
@@ -1149,7 +1646,8 @@
           "kind",
           "availability",
           "detection_state",
-          "has_assigned_agent"
+          "has_assigned_agent",
+          "models"
         ],
         "type": "object"
       },
@@ -1187,7 +1685,22 @@
       "UpdateAgentConfigurationRequest": {
         "description": "agent 이름, 공개 범위, runtime 연결을 수정하기 위한 요청입니다.",
         "properties": {
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
+          "instruction": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "model_id": {
+            "type": "string"
+          },
           "name": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "format": "uri",
             "type": "string"
           },
           "runtime_id": {
