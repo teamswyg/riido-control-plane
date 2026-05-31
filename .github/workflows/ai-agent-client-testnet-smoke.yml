@@ -17,6 +17,7 @@ on:
       - "internal/riidoaiserver/server.go"
       - "cmd/riido_ai_server/main.go"
       - "web/generated/aiAgentClient.ts"
+      - "web/generated/aiAgentClient.react.ts"
 
 concurrency:
   group: ai-agent-client-testnet-smoke

@@ -14,6 +14,7 @@ The contract projection is checked in under
 - IR: `control-plane-ai-agent-client.ir.riido.json`
 - OpenAPI: `control-plane-ai-agent-client.openapi.json`
 - generated React Query: `web/generated/aiAgentClient.ts`
+- generated React hook wrapper: `web/generated/aiAgentClient.react.ts`
 
 Canonical vocabulary, shared enum semantics, and lifecycle/deprecation grammar
 are owned by `riido-contracts`. This repository owns the AI Agent client API
@@ -24,6 +25,27 @@ Client-usability API changes enter through `riido-control-plane`. If a change
 modifies business meaning, policy scope, or canonical vocabulary, the decision
 must be escalated to `riido-contracts` before this repository updates the
 sub-DSL.
+
+Client library metadata is part of the sub-DSL, not a second `dsl2`/`ir2`
+source:
+
+- `client_modules` owns generated module and namespace comments.
+- `client.module` and `client.facade_path` own the nested facade path.
+- query operation `client.cache_tag` owns the root query key.
+- command operation `client.invalidates` owns the deterministic cache roots that
+  a client may invalidate after a mutation.
+
+The metadata is projected to IR without loss and to OpenAPI as
+`x-riido-client-modules` plus `x-riido-client`, then consumed by the generated
+TypeScript client. The generator must fail when the metadata is missing or when
+`invalidates` references an unknown query `cache_tag`; facade namespaces are not
+owned by generator-local hard-coded operation-id switches.
+
+The generated core client does not own screen composition or React hook policy.
+`riido-client` owns when hooks are called, when invalidation helpers run, retry
+policy, optimistic updates, token refresh, and global error UX. The generated
+React wrapper only makes that surface easier to consume and must import hooks
+through `@/lib/react-query` so client-owned policies are preserved.
 
 Cross-repository React Query delivery to `riido-client` is owned by
 [`api-client-delivery.md`](../30-architecture/api-client-delivery.md).
