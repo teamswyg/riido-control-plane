@@ -56,6 +56,7 @@ export interface AgentClientListResponse {
 export interface AgentClientRecord {
   agent_id: string;
   assigned_task_count: number;
+  created_at: string;
   description?: string;
   editability: AgentEditability;
   instruction?: string;
