@@ -37,6 +37,12 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 		sourceCoverage.ID != manifest.SourceContractsManifest.ID {
 		t.Fatalf("source coverage mirror = %s/%s, want %s/%s", sourceCoverage.SchemaVersion, sourceCoverage.ID, manifest.SourceContractsManifest.SchemaVersion, manifest.SourceContractsManifest.ID)
 	}
+	if got, want := len(sourceCoverage.ExpectedPages), 3; got != want {
+		t.Fatalf("source coverage expected_pages = %d, want %d", got, want)
+	}
+	if got, want := len(sourceCoverage.NonUITopLevelNodes), 4; got != want {
+		t.Fatalf("source coverage non_ui_top_level_nodes = %d, want %d", got, want)
+	}
 	if strings.TrimSpace(manifest.ProjectionPolicy.TopDown) == "" || strings.TrimSpace(manifest.ProjectionPolicy.BottomUp) == "" {
 		t.Fatalf("projection policy must include both directions: %+v", manifest.ProjectionPolicy)
 	}
@@ -296,9 +302,16 @@ type figmaProjectionEntry struct {
 }
 
 type figmaSourceCoverageManifest struct {
-	SchemaVersion string                     `json:"schema_version"`
-	ID            string                     `json:"id"`
-	Entries       []figmaSourceCoverageEntry `json:"entries"`
+	SchemaVersion      string                     `json:"schema_version"`
+	ID                 string                     `json:"id"`
+	ExpectedPages      []figmaSourceCoveragePage  `json:"expected_pages"`
+	NonUITopLevelNodes []figmaSourceCoverageEntry `json:"non_ui_top_level_nodes"`
+	Entries            []figmaSourceCoverageEntry `json:"entries"`
+}
+
+type figmaSourceCoveragePage struct {
+	NodeID string `json:"node_id"`
+	Name   string `json:"name"`
 }
 
 type figmaSourceCoverageEntry struct {

@@ -19,8 +19,11 @@ The mirrored upstream coverage manifest is
 [`../../contracts/ai-agent-client/figma-ai-agent-coverage.riido.json`](../../contracts/ai-agent-client/figma-ai-agent-coverage.riido.json).
 It is copied from `riido-contracts` only so this repository can prove its
 projection does not ask for generated paths that upstream coverage did not
-name. The generator test reads both manifests and verifies that every required
-generated path exists in the upstream coverage mirror and in:
+name. The mirror also carries the upstream page registry and non-UI top-level
+wireframe evidence so this repository can prove it is consuming the whole-file
+coverage map, not only the primary `UI` page. The generator test reads both
+manifests and verifies that every required generated path exists in the
+upstream coverage mirror and in:
 
 - `contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json`
 - `web/generated/aiAgentClient.ts`
@@ -103,6 +106,8 @@ The test catches three classes of drift:
   expose;
 - the local projection manifest requires a generated path that the mirrored
   contracts Figma coverage did not name for the same node;
+- the mirrored contracts coverage no longer records the three inspected Figma
+  pages or the four non-UI top-level evidence nodes;
 - generated TypeScript or React wrapper comments no longer carry the required
   generated path;
 - a no-endpoint Figma section accidentally gains forbidden helper names such as

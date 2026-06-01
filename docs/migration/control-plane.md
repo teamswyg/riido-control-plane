@@ -958,6 +958,24 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4829 — Figma non-UI page coverage projection
+
+This slice absorbs the contracts-owned whole-file Figma coverage expansion into
+the control-plane projection gate.
+
+This slice does:
+
+- update the mirrored Figma AI Agent coverage manifest from `riido-contracts`
+- require the mirror to include the three inspected Figma pages and four
+  non-UI top-level evidence nodes
+- document that control-plane generated-client projection consumes whole-file
+  coverage evidence but still only projects HTTP/SSE/generated-client behavior
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
