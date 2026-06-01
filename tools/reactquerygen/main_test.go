@@ -61,6 +61,8 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"export type AgentTaskCommentKind",
 		"export type RiidoQueryOptions",
 		"export type RiidoMutationOptions",
+		"aiAgentToken: string",
+		"'X-Riido-AI-Agent-Token': config.aiAgentToken",
 		"/v1/client/ai-agent/tasks/${params.task_id}/assignable-agents",
 		"export function listAIAgentTaskThreadsQueryOptions",
 		"/v1/client/ai-agent/tasks/${params.task_id}/threads",
@@ -70,6 +72,9 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"export function getAIAgentDaemonQueryOptions",
 		"export function restartAIAgentDaemonMutationOptions",
 		"export function submitAIAgentTaskCommentMutationOptions",
+		"export function createAIAgentTaskThreadMessageMutationOptions",
+		"/v1/client/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages",
+		"readonly threadMessages",
 		"export function stopAIAgentTaskMutationOptions",
 		"Promise<AIAgentTaskActionResponse>",
 		"export async function streamAIAgentClientEvents",
@@ -91,6 +96,10 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"readonly invalidateAll",
 		"readonly prefetch",
 		"invalidates: {",
+		"default_visibility: AgentVisibility;",
+		"recommended_runtime_kind?: RuntimeKind;",
+		"템플릿 선택 시 생성 폼에 미리 채울 공개 범위입니다.",
+		"템플릿에 권장하는 런타임 종류입니다.",
 		"import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@/lib/react-query';",
 	} {
 		if !strings.Contains(body, required) {
@@ -112,6 +121,7 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"readonly useQuery",
 		"readonly useMutation",
 		"readonly threads",
+		"readonly threadMessages",
 		"from '@/lib/react-query'",
 		"core.RiidoQueryOptions<Response>",
 		"hook은 반드시 `@/lib/react-query`를 통과하므로",
@@ -162,6 +172,7 @@ func TestAIAgentClientMetadataFlowsThroughContractProjections(t *testing.T) {
 		"unassignAIAgentTask":             {"invalidates"},
 		"deleteAIAgent":                   {"invalidates"},
 		"submitAIAgentTaskComment":        {"invalidates"},
+		"createAIAgentTaskThreadMessage":  {"invalidates"},
 		"stopAIAgentTask":                 {"invalidates"},
 	} {
 		metadata := dsl.operations[operationID]

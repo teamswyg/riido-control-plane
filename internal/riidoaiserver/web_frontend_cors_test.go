@@ -12,7 +12,7 @@ func TestHTTPWebFrontendCORSAllowsConfiguredOriginPreflight(t *testing.T) {
 	req := httptest.NewRequest(http.MethodOptions, "/v1/agent-catalog", nil)
 	req.Header.Set("Origin", "https://console.riido.io")
 	req.Header.Set("Access-Control-Request-Method", http.MethodGet)
-	req.Header.Set("Access-Control-Request-Headers", "Authorization, Content-Type")
+	req.Header.Set("Access-Control-Request-Headers", "X-Riido-AI-Agent-Token, Content-Type")
 	resp := httptest.NewRecorder()
 
 	server.ServeHTTP(resp, req)
@@ -26,7 +26,7 @@ func TestHTTPWebFrontendCORSAllowsConfiguredOriginPreflight(t *testing.T) {
 	if got := resp.Header().Get("Access-Control-Allow-Methods"); !strings.Contains(got, http.MethodPatch) || !strings.Contains(got, http.MethodDelete) {
 		t.Fatalf("allow methods = %q", got)
 	}
-	if got := resp.Header().Get("Access-Control-Allow-Headers"); !strings.Contains(got, "Authorization") || !strings.Contains(got, "Content-Type") {
+	if got := resp.Header().Get("Access-Control-Allow-Headers"); !strings.Contains(got, "X-Riido-AI-Agent-Token") || !strings.Contains(got, "Content-Type") {
 		t.Fatalf("allow headers = %q", got)
 	}
 	if got := strings.Join(resp.Header().Values("Vary"), ","); !strings.Contains(got, "Origin") {

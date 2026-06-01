@@ -7,15 +7,16 @@ import (
 
 const (
 	webCORSAllowedMethods = "GET, POST, PATCH, DELETE, OPTIONS"
-	webCORSAllowedHeaders = "Authorization, Content-Type, Accept, Last-Event-ID"
+	webCORSAllowedHeaders = "X-Riido-AI-Agent-Token, Authorization, Content-Type, Accept, Last-Event-ID"
 	webCORSMaxAge         = "600"
 )
 
 var webCORSAllowedRequestHeaders = map[string]struct{}{
-	"accept":        {},
-	"authorization": {},
-	"content-type":  {},
-	"last-event-id": {},
+	"accept":                 {},
+	"authorization":          {},
+	"content-type":           {},
+	"last-event-id":          {},
+	"x-riido-ai-agent-token": {},
 }
 
 func (s Server) withWebFrontendCORS(next http.Handler) http.Handler {

@@ -64,7 +64,10 @@ event stream.
 Figma normal task-thread screen (`node-id=236-21379`) is generated-client
 composition context for `riido.aiAgent.tasks.assign`,
 `riido.aiAgent.tasks.unassign`, `riido.aiAgent.tasks.threads`,
-`riido.aiAgent.tasks.submitComment`, and `riido.aiAgent.tasks.stop`. The
+`riido.aiAgent.tasks.threadMessages.create`, and
+`riido.aiAgent.tasks.stop`. The compatibility
+`riido.aiAgent.tasks.submitComment` route may remain in the artifact while
+client screens still submit a comment-like action without a `thread_id`. The
 generated artifact may document that those calls are commonly used together on
 the task page, but it must not turn the generic task comment box, right details
 panel, reply input layout, send-button visual state, or agent row presentation
@@ -79,7 +82,8 @@ unassign is client presentation and must not become generated API copy.
 
 Figma busy-agent queued screen (`node-id=153-8761`) is generated-client
 composition context for the same task-thread calls. The delivery artifact may
-document that `tasks.submitComment` can return
+document that `tasks.threadMessages.create` targets a known `thread_id` for a
+next instruction, that the compatibility `tasks.submitComment` can still return
 `comment_kind=queued_by_busy_agent`, that `tasks.threads` returns the queued row
 on cold read, that `events.stream` can carry the typed queued status, and that
 `tasks.stop` is the visible stop/cancel affordance. It must not hard-code the
@@ -136,7 +140,11 @@ model-catalog question is resolved.
 Figma onboarding annotations (`node-id=42-3014`) are generated-client
 consumption context for bootstrap, devices, and create APIs. The delivery
 artifact may document that `agent_templates` feeds the starter-agent selection
-screen, but workspace selection/list scrolling and the `새 워크스페이스` row
+screen, including copyable profile fields, `default_visibility`, and
+`recommended_runtime_kind`. Template records must not include model defaults
+until the canonical contracts model-catalog policy promotes them; clients derive
+the selected model from `RuntimeRecord.models`. Workspace selection/list
+scrolling and the `새 워크스페이스` row
 shown in `node-id=164-30192`, row selection, direct-setting expansion, scroll,
 direct-setting `이름` / `설명` / `지침` placeholders from `node-id=164-26969`,
 two-line ellipsis, and no-installed-AI start state rendering from
@@ -180,6 +188,11 @@ that represents an API release, for example `v1.20.2`.
 Regular pushes to `main` may validate local drift, but they must not push a
 branch to `riido-client`. This keeps frequent server development from creating
 client churn and CI cost.
+
+The contracts SSOT defines generated client delivery PRs as review handoffs.
+This workflow may open or update a `riido-client` PR, but it must not auto-merge
+that PR. `riido-client` owns the final generated-code review, application
+integration, and merge decision.
 
 ## Target Branch
 
@@ -298,7 +311,7 @@ together:
   `aiAgent.tasks.assign`, `aiAgent.tasks.unassign`, `aiAgent.tasks.stop`, and
   `aiAgent.devices.runtimes`
 - the facade is config-bound, so consumers do not repeatedly pass `baseUrl`,
-  `token`, and optional `fetcher`
+  `aiAgentToken`, and optional `fetcher`
 - each operation exposes concise library-style aliases: `query(...)` mirrors
   `queryOptions(...)`, and `mutation(...)` mirrors `mutationOptions(...)`
 - query endpoints expose `queryKeyRoot`, `queryKey`, `invalidate`,
@@ -330,7 +343,7 @@ React wrapper is imported explicitly:
 ```ts
 const riido = useRiidoControlPlaneClient(config);
 
-const bootstrap = riido.aiAgent.bootstrap.useQuery({ enabled: !!config.token });
+const bootstrap = riido.aiAgent.bootstrap.useQuery({ enabled: !!config.aiAgentToken });
 const stopTask = riido.aiAgent.tasks.stop.useMutation({
   onSuccess: async () => {
     await riido.aiAgent.tasks.stop.invalidates.all(queryClient);
@@ -367,13 +380,15 @@ If a fine-grained token is used temporarily, it must be scoped to the target
 repository and limited to contents and pull-request write permissions.
 
 The workflow must not require npm publish tokens, cloud credentials, Terraform
-state, customer data, or production bearer tokens.
+state, customer data, or production request tokens.
 
 ## Acceptance Criteria
 
 - `riido-control-plane` docs name the API sub-DSL owner and canonical contract
   escalation path.
 - Release delivery is tag-triggered, not main-push-triggered.
+- Generated-client delivery opens or updates a client PR only; it never
+  auto-merges the client PR.
 - Target `riido-client` branch naming and generated path allowlist are defined.
 - Orval is a pinned control-plane generator dependency when the workflow is
   implemented.
