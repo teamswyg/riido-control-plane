@@ -59,6 +59,7 @@ client 코드는 generated facade에서 `riido.v2.aiAgent.agents.create`처럼
 | runtime/agent binding domain | [`docs/20-domain/agent-runtime-binding.md`](docs/20-domain/agent-runtime-binding.md) |
 | control-plane bounded context | [`docs/20-domain/context-map.md`](docs/20-domain/context-map.md) |
 | riido-client generated React Query 전달 정책 | [`docs/30-architecture/api-client-delivery.md`](docs/30-architecture/api-client-delivery.md) |
+| Figma AI Agent coverage의 control-plane generated-client 투영 | [`docs/30-architecture/figma-ai-agent-control-plane-projection.md`](docs/30-architecture/figma-ai-agent-control-plane-projection.md) |
 | module/package 책임 분해 | [`docs/30-architecture/module-decomposition.md`](docs/30-architecture/module-decomposition.md) |
 | runtime env 변수와 설정 책임 | [`docs/30-architecture/config-reference.md`](docs/30-architecture/config-reference.md) |
 | daemon/contracts/infra/client와의 연결 | [`docs/30-architecture/integration-matrix.md`](docs/30-architecture/integration-matrix.md) |
