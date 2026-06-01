@@ -1,7 +1,8 @@
 {
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
-  "riido_task": "RIID-4814",
+  "riido_task": "RIID-4815",
+  "supersedes_tasks": ["RIID-4814"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
     "id": "ecs-rolling-task-definition-revision",
@@ -19,10 +20,36 @@
       "run healthz readyz and v2 bootstrap smoke"
     ]
   },
+  "optional_workflow_modes": [
+    {
+      "id": "codedeploy-blue-green",
+      "status": "workflow-ready-topology-gated",
+      "cd_owner": "riido-control-plane",
+      "topology_owner": "riido-infra",
+      "workflow": ".github/workflows/deploy-ai-agent-testnet.yml",
+      "activation_inputs": [
+        "RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION",
+        "RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP"
+      ],
+      "allowed_actions": [
+        "reuse the immutable image and registered ECS task-definition revision from the current workflow",
+        "create CodeDeploy AppSpec content in same-job runner temp files",
+        "create a CodeDeploy deployment from infra-provided application and deployment group names",
+        "wait for CodeDeploy deployment success",
+        "run healthz readyz and v2 bootstrap smoke after the deployment succeeds"
+      ],
+      "must_not_own": [
+        "CodeDeploy application or deployment group topology",
+        "blue green target groups or listener topology",
+        "CodeDeploy service role or IAM boundary",
+        "rollback or traffic-shift policy"
+      ]
+    }
+  ],
   "future_strategies": [
     {
       "id": "codedeploy-blue-green",
-      "status": "future-topology",
+      "status": "topology-gated",
       "cd_owner": "riido-control-plane",
       "topology_owner": "riido-infra",
       "control_plane_may_own": [
@@ -46,6 +73,11 @@
       "GitHub secret and variable names",
       "redaction allow and deny policy",
       "non-live behavior documentation"
+    ],
+    "public_repo_should_minimize": [
+      "publish only stable configuration key names that operators must set",
+      "avoid environment-specific examples for domains, clusters, services, applications, deployment groups, ARNs, and URLs",
+      "keep live handoff values in same-job runner temp files instead of reusable workflow outputs or artifacts"
     ],
     "public_repo_must_not_commit_or_upload": [
       "live URL values",
