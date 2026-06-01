@@ -529,12 +529,19 @@ This slice does:
 - smoke `healthz`, `readyz`, and v2 workspace-scoped AI Agent bootstrap after
   deployment
 - document the public secret/variable names without committing their values
+- keep live URL, AWS account id, task-definition ARN, image digest, workflow run
+  URL, smoke payload, Terraform state, plan output, and raw evidence out of
+  checked-in public docs
 
 This slice does not move ECR repository creation, ECS cluster/service topology,
 IAM role topology, ALB/Route53/ACM/WAF resources, DynamoDB/EventBridge
 resources, Terraform state, production secret payloads, or private live
 evidence. Those remain `riido-infra` responsibilities. It also does not add
 CodeDeploy blue/green; rolling ECS deployment is the current testnet CD model.
+
+RIID-4812 tightens that public boundary: the deploy workflow may own runtime
+artifact CD, but durable deployment evidence and environment values remain
+private/operator-owned. Public docs name only configuration keys and behavior.
 
 ### RIID-4671 — provider status contract migration
 

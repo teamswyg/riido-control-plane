@@ -53,8 +53,10 @@ The `deploy-ai-agent-testnet` workflow is allowed to:
 - smoke `healthz`, `readyz`, and the v2 workspace-scoped AI Agent bootstrap API
 
 The workflow must not commit or print unmasked AWS account values, raw token
-values, Terraform state, plan output, or production secret payloads. Public repo
-configuration uses only GitHub secrets/variables:
+values, Terraform state, plan output, production secret payloads, task
+definition JSON, task-definition ARNs, image digests, live workflow run URLs, or
+smoke response payloads. Public repo configuration uses only GitHub
+secrets/variables:
 
 - secret: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`
 - secret: `RIIDO_AI_SERVER_TESTNET_TOKEN`
@@ -65,6 +67,12 @@ configuration uses only GitHub secrets/variables:
 - variable: `RIIDO_AI_SERVER_ECS_CONTAINER_NAME`
 - variable: `RIIDO_AI_SERVER_TESTNET_BASE_URL`
 - optional variable: `RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID`
+
+The names above are a workflow contract. Their values, the current live URL, and
+any deployment evidence stay in GitHub environment configuration or
+`riido-infra`/operator evidence, not in checked-in public docs. The workflow may
+carry masked values between steps through GitHub outputs, but it must not upload
+deployment artifacts from the live run.
 
 `riido-infra` still owns the Terraform module that creates ECR, ECS, ALB,
 security groups, IAM boundaries, DynamoDB, EventBridge, DNS/ACM/WAF, and the

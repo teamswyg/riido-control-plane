@@ -83,7 +83,6 @@ visibility policy를 통과해야 합니다.
 - deploy workflow: `deploy-ai-agent-testnet`
 - base URL: `RIIDO_AI_SERVER_TESTNET_BASE_URL`
 - AI Agent token secret: `RIIDO_AI_SERVER_TESTNET_TOKEN`
-- 현재 testnet URL: `http://ai-api.riido.io`
 
 `deploy-ai-agent-testnet`은 `v*` tag push 또는 수동 dispatch에서만 실행합니다.
 이 workflow는 GitHub OIDC로 deploy role을 assume하고, image tag를 Git ref와
@@ -91,6 +90,8 @@ commit SHA에서 만들며, ECR image digest를 ECS task definition revision에
 명시합니다. `latest` tag를 배포 기준으로 쓰지 않습니다.
 
 필요한 GitHub 설정은 이름만 공개 문서화하고 값은 secrets/variables에 둡니다.
+live URL, AWS account id, ARN, image digest, task-definition revision, workflow
+run URL, smoke 결과 payload는 이 public repo에 고정하지 않습니다.
 
 - secrets: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`,
   `RIIDO_AI_SERVER_TESTNET_TOKEN`
