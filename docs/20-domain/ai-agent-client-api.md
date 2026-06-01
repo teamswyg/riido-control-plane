@@ -72,9 +72,12 @@ For agent settings:
   runtime default, and validates a supplied `model_id` against that runtime.
 - This repository owns POST/PATCH validation, create/save/update behavior,
   response projection, generated TypeScript shape, and smoke-test coverage.
-- `riido-daemon` owns runtime consumption of an assigned instruction value after
-  the assignment contract carries it; this server doc does not define provider
-  prompt placement.
+- `riido-control-plane` copies the saved agent `instruction` into
+  `Assignment.agent_instruction` when a task assignment is created. That value is
+  an assignment-time snapshot, so later agent edits do not mutate queued or
+  running assignments.
+- `riido-daemon` owns runtime consumption of `Assignment.agent_instruction`;
+  this server doc does not define provider prompt placement.
 - `riido-infra` owns deployment/storage changes only when the API requires new
   media storage, secrets, persistence topology, or release evidence.
 - Figma menu placement (`node-id=156-19307`) is a client route affordance, not

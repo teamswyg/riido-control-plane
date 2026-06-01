@@ -941,6 +941,9 @@ func assignmentProjectionDynamoDBItem(record AssignmentOperationRecord) (map[str
 	if record.Assignment.LeaseToken != "" {
 		item["lease_token"] = map[string]string{"S": record.Assignment.LeaseToken}
 	}
+	if record.Assignment.AgentInstruction != "" {
+		item["agent_instruction"] = map[string]string{"S": record.Assignment.AgentInstruction}
+	}
 	if record.Assignment.ReplacesAssignmentID != "" {
 		item["replaces_assignment_id"] = map[string]string{"S": record.Assignment.ReplacesAssignmentID}
 	}

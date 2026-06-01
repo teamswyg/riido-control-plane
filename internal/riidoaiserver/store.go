@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/teamswyg/riido-contracts/provider/capability"
 )
@@ -468,6 +469,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	req.AgentID = strings.TrimSpace(req.AgentID)
 	req.RuntimeProvider = strings.TrimSpace(req.RuntimeProvider)
 	req.Prompt = strings.TrimSpace(req.Prompt)
+	req.AgentInstruction = strings.TrimSpace(req.AgentInstruction)
 	if taskID == "" {
 		return Assignment{}, errors.New("task_id is required")
 	}
@@ -479,6 +481,9 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	}
 	if req.Prompt == "" {
 		return Assignment{}, errors.New("prompt is required")
+	}
+	if utf8.RuneCountInString(req.AgentInstruction) > AgentInstructionMaxCharacters {
+		return Assignment{}, errors.New("agent_instruction must be 1000 characters or fewer")
 	}
 	if err := validateAssignmentBinding(s.agentRegistry, req.AgentID, req.RuntimeProvider); err != nil {
 		return Assignment{}, err
@@ -527,6 +532,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		AgentID:               req.AgentID,
 		RuntimeProvider:       req.RuntimeProvider,
 		Prompt:                req.Prompt,
+		AgentInstruction:      req.AgentInstruction,
 		State:                 AssignmentQueued,
 		ReplacesAssignmentID:  replacesID,
 		BlockedByAssignmentID: blockedByID,
