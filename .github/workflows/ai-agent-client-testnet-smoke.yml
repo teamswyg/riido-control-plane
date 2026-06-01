@@ -31,6 +31,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          umask 077
           base_url="${TESTNET_BASE_URL%/}"
           auth_header="X-Riido-AI-Agent-Token: ${TESTNET_TOKEN}"
           workspace_id="workspace-smoke"
@@ -76,6 +77,7 @@ jobs:
             | jq -e '.schema_version == "riido-ai-server.v1" and .comment_kind == "stopped_by_user_request" and .assignment_state == "stopped"' >/dev/null
 
           replay="$(mktemp)"
+          trap 'rm -f "$replay"' EXIT
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/events?replay=1" > "$replay"
           grep -q "queued_by_busy_agent" "$replay"
           grep -q "stopped_by_user_request" "$replay"

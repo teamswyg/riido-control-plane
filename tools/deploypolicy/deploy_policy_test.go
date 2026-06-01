@@ -48,6 +48,9 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "printf '%s' \"$image_uri\" > \"$RUNNER_TEMP/riido-image-uri\"")
 	requireContains(t, workflow, "printf '%s' \"$next_task_definition\" > \"$RUNNER_TEMP/riido-task-definition-arn\"")
 	requireContains(t, workflow, "printf '%s' \"$container_port\" > \"$RUNNER_TEMP/riido-container-port\"")
+	requireContains(t, workflow, "umask 077")
+	requireContains(t, workflow, "chmod 600 \"$current_json\"")
+	requireContains(t, workflow, "chmod 600 \"$next_json\"")
 	requireContains(t, workflow, "Cleanup live handoff files")
 	requireContains(t, workflow, "if: always()")
 	requireContains(t, workflow, "rm -f \\")
@@ -66,6 +69,8 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, smokeWorkflow, "TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}")
 	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_BASE_URL\"")
 	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_TOKEN\"")
+	requireContains(t, smokeWorkflow, "umask 077")
+	requireContains(t, smokeWorkflow, "trap 'rm -f \"$replay\"' EXIT")
 	requireContains(t, clientAPI, "not from a manual")
 	requireContains(t, clientAPI, "The workflow masks both values")
 
@@ -125,10 +130,11 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	integration := mustRead(t, "../../docs/30-architecture/integration-matrix.md")
 
 	var parsed struct {
-		SchemaVersion string `json:"schema_version"`
-		ID            string `json:"id"`
-		RiidoTask     string `json:"riido_task"`
-		Runtime       string `json:"runtime_service"`
+		SchemaVersion string   `json:"schema_version"`
+		ID            string   `json:"id"`
+		RiidoTask     string   `json:"riido_task"`
+		Hardening     []string `json:"hardening_tasks"`
+		Runtime       string   `json:"runtime_service"`
 		Current       struct {
 			ID            string   `json:"id"`
 			CDOwner       string   `json:"cd_owner"`
@@ -195,6 +201,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	if parsed.ID != "runtime-cd-ownership" || parsed.RiidoTask != "RIID-4825" || parsed.Runtime != "riido_ai_server" {
 		t.Fatalf("manifest identity drifted: %#v", parsed)
 	}
+	requireSliceContains(t, parsed.Hardening, "RIID-4833")
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
 		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
 	}
@@ -259,12 +266,14 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "publish only stable configuration key names that operators must set")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "centralize required deploy key names in the workflow and ownership docs instead of scattering environment-specific examples")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "avoid environment-specific examples for domains, clusters, services, applications, deployment groups, ARNs, and URLs")
+	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "apply restrictive file permissions before writing live handoff, task-definition, CodeDeploy, or smoke replay files")
 	if parsed.Handoff.Scope != "same-job-runner-temp-only" {
 		t.Fatalf("handoff scope drifted: %#v", parsed.Handoff)
 	}
-	requireSliceContains(t, parsed.Handoff.AllowedStorage, "$RUNNER_TEMP files with chmod 600")
+	requireSliceContains(t, parsed.Handoff.AllowedStorage, "$RUNNER_TEMP files created under umask 077 and chmod 600 before reuse")
 	requireSliceContains(t, parsed.Handoff.RequiredCleanup, "remove image URI, ECS task-definition ARN, and container-port temp files in an always-running cleanup step")
 	requireSliceContains(t, parsed.Handoff.RequiredCleanup, "remove generated CodeDeploy AppSpec, request JSON, and deployment-id files with same-step traps")
+	requireSliceContains(t, parsed.Handoff.RequiredCleanup, "remove smoke replay temp files with same-step traps")
 	requireSliceContains(t, parsed.Handoff.ForbiddenMechanism, "GitHub step outputs for live deployment values")
 	requireSliceContains(t, parsed.Handoff.ForbiddenMechanism, "uploaded workflow artifacts")
 	if parsed.Infra.Repo != "riido-infra" {
@@ -285,6 +294,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.InfraVisibility.MustKnow, "riido-control-plane owns runtime artifact CD execution")
 	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "generated CodeDeploy AppSpec JSON")
 	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "image digests or image URIs")
+	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "smoke replay temp files")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
 

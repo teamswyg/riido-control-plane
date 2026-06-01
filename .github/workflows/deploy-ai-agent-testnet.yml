@@ -108,6 +108,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          umask 077
           ref_name="${GITHUB_REF_NAME:-manual}"
           safe_ref="$(printf '%s' "$ref_name" | tr -c 'A-Za-z0-9_.-' '-')"
           image_tag="${safe_ref}-${GITHUB_SHA:0:12}"
@@ -146,6 +147,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          umask 077
           image_uri="$(cat "$RUNNER_TEMP/riido-image-uri")"
           echo "::add-mask::$image_uri"
           current_json="$RUNNER_TEMP/task-definition.current.json"
@@ -165,6 +167,7 @@ jobs:
             --task-definition "$current_task_definition" \
             --query 'taskDefinition' \
             > "$current_json"
+          chmod 600 "$current_json"
 
           jq -e --arg name "$ECS_CONTAINER_NAME" \
             '.containerDefinitions[] | select(.name == $name)' \
@@ -187,6 +190,7 @@ jobs:
                 .registeredBy
               )
           ' "$current_json" > "$next_json"
+          chmod 600 "$next_json"
 
           next_task_definition="$(
             aws ecs register-task-definition \
@@ -204,6 +208,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          umask 077
           task_definition="$(cat "$RUNNER_TEMP/riido-task-definition-arn")"
           echo "::add-mask::$task_definition"
           if [ -n "${CODEDEPLOY_APPLICATION:-}" ]; then
@@ -282,6 +287,7 @@ jobs:
           TESTNET_TOKEN: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN }}
         run: |
           set -euo pipefail
+          umask 077
           if [ -z "${TESTNET_TOKEN:-}" ]; then
             echo "RIIDO_AI_SERVER_TESTNET_TOKEN is required"
             exit 1

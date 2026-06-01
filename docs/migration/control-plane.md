@@ -664,6 +664,27 @@ This slice does not create or modify AWS resources, Terraform topology,
 production traffic shifting, GitHub environment values, live deployment
 evidence, or uploaded deployment artifacts.
 
+### RIID-4833 — CD public redaction hardening
+
+This slice hardens the RIID-4825 ownership model at workflow implementation
+level. Runtime artifact CD execution still belongs to `riido-control-plane`,
+and `riido-infra` still owns topology/evidence interpretation, but public
+workflow temp payloads are made more local and short-lived.
+
+Changed:
+
+- set restrictive `umask 077` in deploy/smoke shell steps that write live
+  handoff, task-definition, CodeDeploy, or smoke replay temp files
+- explicitly `chmod 600` task-definition JSON files before they are reused by
+  later commands
+- remove companion smoke SSE replay capture with a same-step trap
+- extend `runtime-cd-ownership.riido.json` and `tools/deploypolicy` so future
+  workflow changes must preserve those file-permission and cleanup rules
+
+This slice does not create or modify AWS resources, Terraform topology,
+GitHub environment values, live deployment execution, release evidence files,
+or uploaded workflow artifacts.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public
