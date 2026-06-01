@@ -45,10 +45,12 @@ dispatch.
 | production secret wiring | `riido-infra` plus secret manager | redacted runtime secret evidence |
 | live DynamoDB/EventBridge behavior | `riido-infra` | backend bootstrap and traffic/evidence tools |
 
-Private gates may consume public module tags, container image digests, workflow
-run URLs, and the `awsadapters` facade. They must not push account-specific
-state, raw secret values, or unredacted live evidence back into this public
-repository.
+Private gates may consume public module tags, the `awsadapters` facade, and
+private/operator evidence summaries that reference image digests or workflow
+runs. Image values and workflow run references must not be exported from public
+workflow outputs, uploaded artifacts, checked-in docs, generated client examples,
+or reusable handoff files. Private gates must not push account-specific state,
+raw secret values, or unredacted live evidence back into this public repository.
 
 ## Optional Local Commands
 

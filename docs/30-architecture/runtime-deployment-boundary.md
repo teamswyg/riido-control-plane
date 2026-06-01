@@ -155,5 +155,11 @@ surface for live host literals, AWS account literals, checked-in ARN literals,
 live ALB/API Gateway/CloudFront URL literals, and public workflow handoff
 mechanisms. This scan is a public redaction gate, not a release artifact.
 
+RIID-4837 extends the same scan to generated-client delivery docs and the
+generated React wrapper. Those are not deploy workflows, but they are public
+surfaces that frontend developers read and copy from. They may explain stable
+configuration keys and generated call chains, but they must not pin live hosts or
+teach public workflow handoff payloads.
+
 PR descriptions and chat messages are not release SSOT. Any durable decision must
 land in a domain, architecture, ADR, migration, or infra evidence document.

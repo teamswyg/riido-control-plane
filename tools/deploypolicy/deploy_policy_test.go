@@ -16,9 +16,11 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	boundary := mustRead(t, "../../docs/30-architecture/runtime-deployment-boundary.md")
 	domain := mustRead(t, "../../docs/20-domain/saas-control-plane.md")
 	clientAPI := mustRead(t, "../../docs/20-domain/ai-agent-client-api.md")
+	clientDelivery := mustRead(t, "../../docs/30-architecture/api-client-delivery.md")
 	migration := mustRead(t, "../../docs/migration/control-plane.md")
 	generator := mustRead(t, "../../tools/reactquerygen/main.go")
 	generatedClient := mustRead(t, "../../web/generated/aiAgentClient.ts")
+	generatedReactClient := mustRead(t, "../../web/generated/aiAgentClient.react.ts")
 
 	requireContains(t, workflow, "echo \"::add-mask::$aws_account_id\"")
 	requireContains(t, workflow, "echo \"::add-mask::$registry\"")
@@ -112,13 +114,15 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, migration, "RIID-4835")
 
 	for path, body := range map[string]string{
-		"README.md":                      readme,
-		"runtime-deployment-boundary.md": boundary,
-		"saas-control-plane.md":          domain,
-		"ai-agent-client-api.md":         clientAPI,
-		"control-plane.md":               migration,
-		"tools/reactquerygen/main.go":    generator,
-		"web/generated/aiAgentClient.ts": generatedClient,
+		"README.md":                            readme,
+		"runtime-deployment-boundary.md":       boundary,
+		"saas-control-plane.md":                domain,
+		"ai-agent-client-api.md":               clientAPI,
+		"api-client-delivery.md":               clientDelivery,
+		"control-plane.md":                     migration,
+		"tools/reactquerygen/main.go":          generator,
+		"web/generated/aiAgentClient.ts":       generatedClient,
+		"web/generated/aiAgentClient.react.ts": generatedReactClient,
 	} {
 		if strings.Contains(body, "ai-api.riido.io") {
 			t.Fatalf("%s must not pin the live testnet host", path)
@@ -226,6 +230,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	}
 	requireSliceContains(t, parsed.Hardening, "RIID-4833")
 	requireSliceContains(t, parsed.Hardening, "RIID-4835")
+	requireSliceContains(t, parsed.Hardening, "RIID-4836")
+	requireSliceContains(t, parsed.Hardening, "RIID-4837")
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
 		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
 	}
@@ -313,6 +319,10 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.InfraTopology.MustNotConsume, "target group ARN")
 	requireSliceContains(t, parsed.Infra.Paths, "docs/architecture/terraform-authoring.md")
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4825-control-plane-cd-ownership-remodel.riido.json")
+	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4833-control-plane-cd-public-redaction-hardening.riido.json")
+	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4835-control-plane-cd-public-export-contract.riido.json")
+	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4836-control-plane-cd-public-surface-redaction-scan.riido.json")
+	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json")
 	if parsed.InfraVisibility.Repo != "riido-infra" {
 		t.Fatalf("infra visibility repo drifted: %q", parsed.InfraVisibility.Repo)
 	}
@@ -345,9 +355,10 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	if parsed.PublicSurfaceScan.CanonicalOwner != "riido-control-plane" || parsed.PublicSurfaceScan.InfraAwarenessOwner != "riido-infra" {
 		t.Fatalf("public surface scan ownership drifted: %#v", parsed.PublicSurfaceScan)
 	}
-	requireSliceContains(t, parsed.Hardening, "RIID-4836")
 	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, ".github/workflows/deploy-ai-agent-testnet.yml")
+	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, "docs/30-architecture/api-client-delivery.md")
 	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, "docs/30-architecture/runtime-cd-ownership.md")
+	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, "web/generated/aiAgentClient.react.ts")
 	requireSliceContains(t, parsed.PublicSurfaceScan.ForbiddenLiterals, "ai-api.riido.io")
 	requireSliceContains(t, parsed.PublicSurfaceScan.WorkflowForbiddenMechanism, "GITHUB_OUTPUT")
 	requireSliceContains(t, parsed.PublicSurfaceScan.AllowedPublicSurface, "AWS CLI response field names inside the deploy workflow")

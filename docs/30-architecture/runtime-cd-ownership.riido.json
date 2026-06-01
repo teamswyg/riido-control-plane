@@ -2,7 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
-  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836"],
+  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -146,7 +146,11 @@
       "docs/architecture/terraform-authoring.md",
       "docs/migration/infra.md",
       "deploy/work-units/riid-4814-control-plane-codedeploy-handoff-ssot.riido.json",
-      "deploy/work-units/riid-4825-control-plane-cd-ownership-remodel.riido.json"
+      "deploy/work-units/riid-4825-control-plane-cd-ownership-remodel.riido.json",
+      "deploy/work-units/riid-4833-control-plane-cd-public-redaction-hardening.riido.json",
+      "deploy/work-units/riid-4835-control-plane-cd-public-export-contract.riido.json",
+      "deploy/work-units/riid-4836-control-plane-cd-public-surface-redaction-scan.riido.json",
+      "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json"
     ],
     "local_scope": "Infra owns topology, drift policy, IAM, and operator evidence. It does not own runtime artifact CD execution."
   },
@@ -213,6 +217,7 @@
       "README.md",
       "docs/20-domain/saas-control-plane.md",
       "docs/20-domain/ai-agent-client-api.md",
+      "docs/30-architecture/api-client-delivery.md",
       "docs/30-architecture/runtime-deployment-boundary.md",
       "docs/30-architecture/runtime-cd-ownership.md",
       "docs/30-architecture/integration-matrix.md",
@@ -220,7 +225,8 @@
       ".github/workflows/deploy-ai-agent-testnet.yml",
       ".github/workflows/ai-agent-client-testnet-smoke.yml",
       "tools/reactquerygen/main.go",
-      "web/generated/aiAgentClient.ts"
+      "web/generated/aiAgentClient.ts",
+      "web/generated/aiAgentClient.react.ts"
     ],
     "forbidden_literals": [
       "ai-api.riido.io"

@@ -732,6 +732,29 @@ This slice does not create or modify AWS resources, Terraform topology,
 GitHub environment values, live deployment execution, release evidence files,
 or uploaded workflow artifacts.
 
+### RIID-4837 — CD ownership final guard and public surface minimization
+
+This slice closes the CD ownership remodel after the final ownership discussion.
+Runtime artifact CD execution, CodeDeploy create/wait/smoke, and public redaction
+gates stay in `riido-control-plane`. `riido-infra` must know the complete
+hardening sequence, but it must still consume only stable names, redaction
+categories, and private/operator evidence summaries.
+
+Changed:
+
+- add RIID-4837 to the runtime CD ownership hardening sequence
+- extend the public surface scan to generated-client delivery docs and the
+  generated React wrapper
+- list every infra no-diff hardening work unit in the manifest's infra awareness
+  path
+- clarify that image digests and workflow run references can appear only in
+  private/operator evidence summaries, not public workflow outputs, uploaded
+  artifacts, checked-in examples, or generated client guidance
+
+This slice does not create or modify AWS resources, Terraform topology,
+GitHub environment values, live deployment execution, release evidence files,
+uploaded workflow artifacts, or generated deployment payload handoffs.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

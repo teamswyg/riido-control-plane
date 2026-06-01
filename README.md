@@ -129,6 +129,11 @@ deploy/smoke workflow, generated-client 안내에서 live host, AWS account lite
 checked-in ARN, live ALB/API Gateway/CloudFront URL, public workflow handoff
 mechanism이 새로 들어오면 `tools/deploypolicy` 검증에서 실패해야 합니다.
 
+RIID-4837은 이 스캔을 generated React wrapper와 generated-client delivery 문서까지
+확장합니다. Private/operator evidence가 image digest나 workflow run reference를
+다룰 수는 있지만, public workflow output/artifact, checked-in example, generated
+client 안내로 넘기지 않습니다.
+
 검증하는 endpoint:
 
 - `GET /healthz`
