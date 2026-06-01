@@ -5,11 +5,6 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
-    inputs:
-      base_url:
-        description: "Optional AI Agent testnet base URL. Falls back to RIIDO_AI_SERVER_TESTNET_BASE_URL."
-        required: false
-        type: string
 
 concurrency:
   group: deploy-ai-agent-testnet
@@ -30,7 +25,7 @@ jobs:
       ECS_CLUSTER: ${{ vars.RIIDO_AI_SERVER_ECS_CLUSTER }}
       ECS_SERVICE: ${{ vars.RIIDO_AI_SERVER_ECS_SERVICE }}
       ECS_CONTAINER_NAME: ${{ vars.RIIDO_AI_SERVER_ECS_CONTAINER_NAME }}
-      TESTNET_BASE_URL: ${{ inputs.base_url || vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
+      TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
       TESTNET_WORKSPACE_ID: ${{ vars.RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID }}
     steps:
       - uses: actions/checkout@v4
@@ -100,7 +95,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Build and push immutable image
-        id: image
         shell: bash
         run: |
           set -euo pipefail
@@ -135,14 +129,19 @@ jobs:
           )"
           image_uri="${registry}/${ECR_REPOSITORY}@${image_digest}"
           echo "::add-mask::$image_uri"
-          echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
-          echo "image_uri=$image_uri" >> "$GITHUB_OUTPUT"
+          printf '%s' "$image_uri" > "$RUNNER_TEMP/riido-image-uri"
+          chmod 600 "$RUNNER_TEMP/riido-image-uri"
 
       - name: Register task definition revision
-        id: taskdef
         shell: bash
         run: |
           set -euo pipefail
+          image_uri="$(cat "$RUNNER_TEMP/riido-image-uri")"
+          echo "::add-mask::$image_uri"
+          current_json="$RUNNER_TEMP/task-definition.current.json"
+          next_json="$RUNNER_TEMP/task-definition.next.json"
+          trap 'rm -f "$current_json" "$next_json"' EXIT
+
           current_task_definition="$(
             aws ecs describe-services \
               --cluster "$ECS_CLUSTER" \
@@ -155,13 +154,13 @@ jobs:
           aws ecs describe-task-definition \
             --task-definition "$current_task_definition" \
             --query 'taskDefinition' \
-            > task-definition.current.json
+            > "$current_json"
 
           jq -e --arg name "$ECS_CONTAINER_NAME" \
             '.containerDefinitions[] | select(.name == $name)' \
-            task-definition.current.json >/dev/null
+            "$current_json" >/dev/null
 
-          jq --arg name "$ECS_CONTAINER_NAME" --arg image "${{ steps.image.outputs.image_uri }}" '
+          jq --arg name "$ECS_CONTAINER_NAME" --arg image "$image_uri" '
             .containerDefinitions |= map(if .name == $name then .image = $image else . end)
             | del(
                 .taskDefinitionArn,
@@ -172,25 +171,28 @@ jobs:
                 .registeredAt,
                 .registeredBy
               )
-          ' task-definition.current.json > task-definition.next.json
+          ' "$current_json" > "$next_json"
 
           next_task_definition="$(
             aws ecs register-task-definition \
-              --cli-input-json file://task-definition.next.json \
+              --cli-input-json "file://$next_json" \
               --query 'taskDefinition.taskDefinitionArn' \
               --output text
           )"
           echo "::add-mask::$next_task_definition"
-          echo "task_definition=$next_task_definition" >> "$GITHUB_OUTPUT"
+          printf '%s' "$next_task_definition" > "$RUNNER_TEMP/riido-task-definition-arn"
+          chmod 600 "$RUNNER_TEMP/riido-task-definition-arn"
 
       - name: Deploy ECS service and wait
         shell: bash
         run: |
           set -euo pipefail
+          task_definition="$(cat "$RUNNER_TEMP/riido-task-definition-arn")"
+          echo "::add-mask::$task_definition"
           aws ecs update-service \
             --cluster "$ECS_CLUSTER" \
             --service "$ECS_SERVICE" \
-            --task-definition "${{ steps.taskdef.outputs.task_definition }}" \
+            --task-definition "$task_definition" \
             --force-new-deployment \
             >/dev/null
           aws ecs wait services-stable \

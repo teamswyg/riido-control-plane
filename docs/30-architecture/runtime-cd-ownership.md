@@ -54,6 +54,8 @@ deployment values. The public workflow must not commit or upload:
 - task-definition revision values
 - CodeDeploy deployment IDs
 - image digests or image URIs
+- workflow_dispatch input values carrying live URLs
+- GitHub step outputs carrying live deployment values
 - task definition JSON
 - CodeDeploy AppSpec JSON
 - smoke response payloads
@@ -61,6 +63,11 @@ deployment values. The public workflow must not commit or upload:
 
 Those values may exist only in GitHub environment configuration, AWS, or
 ignored operator evidence owned by `riido-infra`.
+
+When one deploy step must hand a live value to the next step in the same job, it
+uses `$RUNNER_TEMP` files with restrictive permissions and masks the value again
+before use. Live URL overrides are not accepted as manual workflow inputs; the
+configured GitHub environment variable is the only smoke target source.
 
 ## Drift Rule
 

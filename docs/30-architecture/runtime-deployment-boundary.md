@@ -56,8 +56,9 @@ The `deploy-ai-agent-testnet` workflow is allowed to:
 
 The workflow must not commit or print unmasked AWS account values, raw token
 values, Terraform state, plan output, production secret payloads, task
-definition JSON, task-definition ARNs, image digests, live workflow run URLs, or
-smoke response payloads. Public repo configuration uses only GitHub
+definition JSON, task-definition ARNs, image digests, live workflow run URLs,
+workflow_dispatch URL inputs, GitHub step outputs that carry live deployment
+values, or smoke response payloads. Public repo configuration uses only GitHub
 secrets/variables:
 
 - secret: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`
@@ -72,9 +73,11 @@ secrets/variables:
 
 The names above are a workflow contract. Their values, the current live URL, and
 any deployment evidence stay in GitHub environment configuration or
-`riido-infra`/operator evidence, not in checked-in public docs. The workflow may
-carry masked values between steps through GitHub outputs, but it must not upload
-deployment artifacts from the live run.
+`riido-infra`/operator evidence, not in checked-in public docs. Live values
+needed only inside the job are passed through `$RUNNER_TEMP` files with
+restrictive permissions and re-masked before use, not through reusable GitHub
+step outputs. The workflow must not upload deployment artifacts from the live
+run.
 
 `riido-infra` still owns the Terraform module that creates ECR, ECS, ALB,
 security groups, IAM boundaries, DynamoDB, EventBridge, DNS/ACM/WAF, and the

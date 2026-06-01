@@ -36,9 +36,17 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "workflow_dispatch")
 	requireContains(t, workflow, "tags:")
 	requireContains(t, workflow, "- \"v*\"")
+	requireContains(t, workflow, "TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}")
+	requireContains(t, workflow, "printf '%s' \"$image_uri\" > \"$RUNNER_TEMP/riido-image-uri\"")
+	requireContains(t, workflow, "printf '%s' \"$next_task_definition\" > \"$RUNNER_TEMP/riido-task-definition-arn\"")
+	requireContains(t, workflow, "current_json=\"$RUNNER_TEMP/task-definition.current.json\"")
+	requireContains(t, workflow, "next_json=\"$RUNNER_TEMP/task-definition.next.json\"")
 
 	for _, forbidden := range []string{
 		"actions/upload-artifact",
+		"inputs.base_url",
+		"description: \"Optional AI Agent testnet base URL",
+		"GITHUB_OUTPUT",
 		"latest\" >>",
 		"latest' >>",
 		"task-definition.next.json\" >>",
@@ -54,7 +62,7 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, readme, "live URL, AWS account id, ARN, image digest")
 	requireContains(t, boundary, "task-definition ARNs, image digests, live workflow run URLs")
 	requireContains(t, boundary, "must not upload")
-	requireContains(t, boundary, "deployment artifacts from the live run")
+	requireContains(t, boundary, "deployment artifacts from the live")
 	requireContains(t, boundary, "CodeDeploy Handoff")
 	requireContains(t, boundary, "runtime artifact CD execution still belongs")
 	requireContains(t, domain, "live URLs, task-definition ARNs")
@@ -154,6 +162,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		"ARNs",
 		"CodeDeploy deployment IDs",
 		"image digests or image URIs",
+		"workflow_dispatch input values carrying live URLs",
+		"GitHub step outputs carrying live deployment values",
 		"task definition JSON",
 		"CodeDeploy AppSpec JSON",
 		"smoke response payloads",

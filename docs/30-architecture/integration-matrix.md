@@ -23,8 +23,8 @@ operator/private infra validation.
 | DynamoDB/EventBridge adapters | fake endpoint HTTP tests with fake credentials | no live AWS |
 | `awsadapters` facade | compile and usage tests | none |
 | container image contract | `tools/containercontract` and optional local Docker build | Docker only for image build check |
-| AI Agent testnet runtime CD | tag-triggered `deploy-ai-agent-testnet` workflow: build, ECR push, ECS service wait, live smoke | GitHub OIDC, masked AWS account boundary, configured testnet secrets |
-| future CodeDeploy runtime CD | control-plane workflow creates/waits/smokes deployment after infra supplies topology | GitHub OIDC, masked deployment target config, no uploaded deployment artifacts |
+| AI Agent testnet runtime CD | tag-triggered `deploy-ai-agent-testnet` workflow: build, ECR push, ECS service wait, live smoke | GitHub OIDC, masked AWS account boundary, configured testnet secrets, no live URL dispatch input or live-value step output |
+| future CodeDeploy runtime CD | control-plane workflow creates/waits/smokes deployment after infra supplies topology | GitHub OIDC, masked deployment target config, no uploaded deployment artifacts or live-value step output |
 
 Public PR checks must not require AWS credentials, Terraform state, ECR access,
 production secret material, or write access to `riido-client`. Testnet runtime CD

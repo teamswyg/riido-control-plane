@@ -564,6 +564,9 @@ This slice does:
   revision values, image digests, AppSpec/task-definition JSON, smoke payloads,
   Terraform plans, state, tfvars, apply logs, and raw evidence out of checked-in
   public artifacts
+- avoid workflow_dispatch live URL inputs and avoid GitHub step outputs for
+  image URI / task-definition ARN handoff; use masked `$RUNNER_TEMP` values
+  inside the single deploy job instead
 
 This slice does not create CodeDeploy AWS resources, alter Terraform topology,
 change production traffic shifting, run a live deployment, or upload deployment
