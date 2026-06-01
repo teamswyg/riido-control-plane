@@ -2,7 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
-  "hardening_tasks": ["RIID-4833", "RIID-4835"],
+  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -204,6 +204,46 @@
       "workflow_dispatch inputs for live URLs",
       "cross-workflow handoff for live deployment values"
     ]
+  },
+  "public_surface_scan_contract": {
+    "riido_task": "RIID-4836",
+    "canonical_owner": "riido-control-plane",
+    "infra_awareness_owner": "riido-infra",
+    "scope_paths": [
+      "README.md",
+      "docs/20-domain/saas-control-plane.md",
+      "docs/20-domain/ai-agent-client-api.md",
+      "docs/30-architecture/runtime-deployment-boundary.md",
+      "docs/30-architecture/runtime-cd-ownership.md",
+      "docs/30-architecture/integration-matrix.md",
+      "docs/migration/control-plane.md",
+      ".github/workflows/deploy-ai-agent-testnet.yml",
+      ".github/workflows/ai-agent-client-testnet-smoke.yml",
+      "tools/reactquerygen/main.go",
+      "web/generated/aiAgentClient.ts"
+    ],
+    "forbidden_literals": [
+      "ai-api.riido.io"
+    ],
+    "forbidden_regexes": [
+      "\\barn:aws:[^\\s`\"']+",
+      "\\b[0-9]{12}\\b",
+      "https?://[^\\s`\"'<>]*(?:elb\\.amazonaws\\.com|cloudfront\\.net|execute-api\\.)[^\\s`\"'<>]*"
+    ],
+    "workflow_forbidden_mechanisms": [
+      "actions/upload-artifact",
+      "GITHUB_OUTPUT",
+      "inputs.base_url",
+      "cross-workflow live value handoff"
+    ],
+    "allowed_public_surface": [
+      "stable GitHub secret and variable key names",
+      "stable infra output key names",
+      "non-live workflow behavior descriptions",
+      "placeholder host examples that use angle brackets",
+      "AWS CLI response field names inside the deploy workflow"
+    ],
+    "infra_must_treat_scan_as": "awareness policy only; scan results are not infra inputs, release artifacts, or operator evidence"
   },
   "dependency_direction": {
     "top_down": "Runtime artifact CD behavior changes in control-plane first; infra consumes the required topology/evidence needs.",

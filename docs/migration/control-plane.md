@@ -709,6 +709,29 @@ This slice does not create or modify AWS resources, Terraform topology,
 GitHub environment values, live deployment execution, release evidence files,
 or uploaded workflow artifacts.
 
+### RIID-4836 — CD public surface redaction scan
+
+This slice makes the public CD export boundary executable as a focused scan.
+Runtime artifact CD execution, CodeDeploy create/wait/smoke, and public
+redaction enforcement remain owned by `riido-control-plane`; `riido-infra`
+remains the topology, IAM, Terraform drift, and private evidence owner.
+
+Changed:
+
+- add `public_surface_scan_contract` to
+  `runtime-cd-ownership.riido.json`
+- scan the explicit public CD surface for live host literals, AWS account
+  number literals, checked-in ARN literals, live ALB/API Gateway/CloudFront URL
+  literals, and public handoff mechanisms for live deploy values
+- keep AWS CLI response field names and angle-bracket placeholder host examples
+  allowed because they are non-live behavior descriptions
+- state that infra must know the scan exists, but must not consume scan output
+  as release evidence or a live workflow handoff
+
+This slice does not create or modify AWS resources, Terraform topology,
+GitHub environment values, live deployment execution, release evidence files,
+or uploaded workflow artifacts.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

@@ -124,6 +124,11 @@ live URL, AWS 식별자, image 값, task definition/AppSpec JSON, deployment id,
 smoke payload, Terraform evidence는 GitHub environment나 private infra/operator
 evidence에만 둡니다.
 
+RIID-4836은 위 경계를 공개 표면 스캔으로 고정합니다. README, CD 관련 문서,
+deploy/smoke workflow, generated-client 안내에서 live host, AWS account literal,
+checked-in ARN, live ALB/API Gateway/CloudFront URL, public workflow handoff
+mechanism이 새로 들어오면 `tools/deploypolicy` 검증에서 실패해야 합니다.
+
 검증하는 endpoint:
 
 - `GET /healthz`

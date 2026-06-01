@@ -150,5 +150,10 @@ task-definition revision/ARN, detailed ECS stability evidence, CodeDeploy
 deployment id, and smoke payloads are not public hand-off artifacts. They remain
 same-job temp values or private/operator evidence when an operator needs them.
 
+RIID-4836 keeps that hand-off boundary executable by scanning the public CD
+surface for live host literals, AWS account literals, checked-in ARN literals,
+live ALB/API Gateway/CloudFront URL literals, and public workflow handoff
+mechanisms. This scan is a public redaction gate, not a release artifact.
+
 PR descriptions and chat messages are not release SSOT. Any durable decision must
 land in a domain, architecture, ADR, migration, or infra evidence document.
