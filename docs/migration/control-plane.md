@@ -638,6 +638,32 @@ Changed:
 - extend the runtime CD ownership manifest and deploy-policy gate so both
   public workflows obey the same redaction rule
 
+### RIID-4825 — CD ownership remodel and public redaction SSOT
+
+This slice records the settled ownership model after the CodeDeploy discussion:
+runtime artifact CD execution stays in `riido-control-plane`, while
+`riido-infra` must know the topology/evidence contract without receiving public
+workflow live values.
+
+Changed:
+
+- update `runtime-cd-ownership.riido.json` so RIID-4825 is the current
+  ownership/redaction work unit
+- add an explicit same-job handoff policy: image URI, task-definition ARN,
+  container port, CodeDeploy AppSpec/request JSON, and deployment IDs are temp
+  deploy implementation values only
+- add an `always()` cleanup step for long-lived deploy temp files and require
+  CodeDeploy generated files to stay under same-step traps
+- document that infra consumes stable output names and redaction categories, not
+  generated deploy payloads, image values, task-definition JSON, deployment IDs,
+  or smoke payloads
+- keep public docs focused on stable key names and behavior rather than
+  environment-specific examples
+
+This slice does not create or modify AWS resources, Terraform topology,
+production traffic shifting, GitHub environment values, live deployment
+evidence, or uploaded deployment artifacts.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

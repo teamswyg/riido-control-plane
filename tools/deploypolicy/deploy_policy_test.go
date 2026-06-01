@@ -48,12 +48,20 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "printf '%s' \"$image_uri\" > \"$RUNNER_TEMP/riido-image-uri\"")
 	requireContains(t, workflow, "printf '%s' \"$next_task_definition\" > \"$RUNNER_TEMP/riido-task-definition-arn\"")
 	requireContains(t, workflow, "printf '%s' \"$container_port\" > \"$RUNNER_TEMP/riido-container-port\"")
+	requireContains(t, workflow, "Cleanup live handoff files")
+	requireContains(t, workflow, "if: always()")
+	requireContains(t, workflow, "rm -f \\")
+	requireContains(t, workflow, "\"$RUNNER_TEMP/riido-image-uri\"")
+	requireContains(t, workflow, "\"$RUNNER_TEMP/riido-task-definition-arn\"")
+	requireContains(t, workflow, "\"$RUNNER_TEMP/riido-container-port\"")
 	requireContains(t, workflow, "current_json=\"$RUNNER_TEMP/task-definition.current.json\"")
 	requireContains(t, workflow, "next_json=\"$RUNNER_TEMP/task-definition.next.json\"")
 	requireContains(t, workflow, "appspec_json=\"$RUNNER_TEMP/codedeploy-appspec.json\"")
 	requireContains(t, workflow, "deployment_json=\"$RUNNER_TEMP/codedeploy-deployment.json\"")
 	requireContains(t, workflow, "revisionType: \"AppSpecContent\"")
 	requireContains(t, workflow, "aws deploy create-deployment")
+	requireContains(t, workflow, "wait_deployment_id=\"$(cat \"$deployment_id_file\")\"")
+	requireContains(t, workflow, "echo \"::add-mask::$wait_deployment_id\"")
 	requireContains(t, workflow, "aws deploy wait deployment-successful")
 	requireContains(t, smokeWorkflow, "TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}")
 	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_BASE_URL\"")
@@ -93,6 +101,7 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, migration, "RIID-4814")
 	requireContains(t, migration, "RIID-4815")
 	requireContains(t, migration, "RIID-4822")
+	requireContains(t, migration, "RIID-4825")
 
 	for path, body := range map[string]string{
 		"README.md":                      readme,
@@ -148,11 +157,22 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			ShouldMinimize []string `json:"public_repo_should_minimize"`
 			MustNot        []string `json:"public_repo_must_not_commit_or_upload"`
 		} `json:"public_redaction_policy"`
+		Handoff struct {
+			Scope              string   `json:"scope"`
+			AllowedStorage     []string `json:"allowed_storage"`
+			RequiredCleanup    []string `json:"required_cleanup"`
+			ForbiddenMechanism []string `json:"forbidden_mechanisms"`
+		} `json:"live_handoff_policy"`
 		Infra struct {
 			Repo       string   `json:"repo"`
 			Paths      []string `json:"paths"`
 			LocalScope string   `json:"local_scope"`
 		} `json:"infra_consumes"`
+		InfraVisibility struct {
+			Repo        string   `json:"repo"`
+			MustKnow    []string `json:"must_know"`
+			MustNotFrom []string `json:"must_not_receive_from_public_workflow"`
+		} `json:"infra_visibility_policy"`
 		InfraTopology struct {
 			RiidoTask      string   `json:"riido_task"`
 			Repo           string   `json:"repo"`
@@ -172,7 +192,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	if parsed.SchemaVersion != "riido-control-plane-runtime-cd-ownership.v1" {
 		t.Fatalf("unexpected schema version: %q", parsed.SchemaVersion)
 	}
-	if parsed.ID != "runtime-cd-ownership" || parsed.RiidoTask != "RIID-4822" || parsed.Runtime != "riido_ai_server" {
+	if parsed.ID != "runtime-cd-ownership" || parsed.RiidoTask != "RIID-4825" || parsed.Runtime != "riido_ai_server" {
 		t.Fatalf("manifest identity drifted: %#v", parsed)
 	}
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
@@ -237,7 +257,16 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/deploy-ai-agent-testnet.yml")
 	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/ai-agent-client-testnet-smoke.yml")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "publish only stable configuration key names that operators must set")
+	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "centralize required deploy key names in the workflow and ownership docs instead of scattering environment-specific examples")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "avoid environment-specific examples for domains, clusters, services, applications, deployment groups, ARNs, and URLs")
+	if parsed.Handoff.Scope != "same-job-runner-temp-only" {
+		t.Fatalf("handoff scope drifted: %#v", parsed.Handoff)
+	}
+	requireSliceContains(t, parsed.Handoff.AllowedStorage, "$RUNNER_TEMP files with chmod 600")
+	requireSliceContains(t, parsed.Handoff.RequiredCleanup, "remove image URI, ECS task-definition ARN, and container-port temp files in an always-running cleanup step")
+	requireSliceContains(t, parsed.Handoff.RequiredCleanup, "remove generated CodeDeploy AppSpec, request JSON, and deployment-id files with same-step traps")
+	requireSliceContains(t, parsed.Handoff.ForbiddenMechanism, "GitHub step outputs for live deployment values")
+	requireSliceContains(t, parsed.Handoff.ForbiddenMechanism, "uploaded workflow artifacts")
 	if parsed.Infra.Repo != "riido-infra" {
 		t.Fatalf("infra consumer repo drifted: %q", parsed.Infra.Repo)
 	}
@@ -249,6 +278,13 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.InfraTopology.MustNotConsume, "CodeDeploy service role ARN")
 	requireSliceContains(t, parsed.InfraTopology.MustNotConsume, "target group ARN")
 	requireSliceContains(t, parsed.Infra.Paths, "docs/architecture/terraform-authoring.md")
+	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4825-control-plane-cd-ownership-remodel.riido.json")
+	if parsed.InfraVisibility.Repo != "riido-infra" {
+		t.Fatalf("infra visibility repo drifted: %q", parsed.InfraVisibility.Repo)
+	}
+	requireSliceContains(t, parsed.InfraVisibility.MustKnow, "riido-control-plane owns runtime artifact CD execution")
+	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "generated CodeDeploy AppSpec JSON")
+	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "image digests or image URIs")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
 

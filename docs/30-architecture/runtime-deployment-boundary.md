@@ -40,6 +40,8 @@ this public repository while keeping AWS topology and secret values outside the
 repository.
 RIID-4814 adds the executable ownership projection in
 [`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json).
+RIID-4825 keeps that ownership in `riido-control-plane` while tightening the
+public redaction and same-job handoff cleanup policy.
 
 The `deploy-ai-agent-testnet` workflow is allowed to:
 
@@ -79,7 +81,9 @@ any deployment evidence stay in GitHub environment configuration or
 needed only inside the job are passed through `$RUNNER_TEMP` files with
 restrictive permissions and re-masked before use, not through reusable GitHub
 step outputs. The workflow must not upload deployment artifacts from the live
-run.
+run. The workflow also removes image URI, task-definition ARN, and container
+port temp files in an `always()` cleanup step so those values remain live deploy
+implementation details, not public release evidence.
 
 `riido-infra` still owns the Terraform module that creates ECR, ECS, ALB,
 security groups, IAM boundaries, DynamoDB, EventBridge, DNS/ACM/WAF, and the
@@ -104,7 +108,8 @@ from GitHub environment variables populated from infra outputs; it must not
 consume service role ARNs, target group/listener ARNs, task definition JSON,
 AppSpec JSON, deployment IDs, image digests, or smoke payloads as reusable
 inputs or artifacts. Generated CodeDeploy AppSpec/request JSON and the
-deployment id stay in same-job `$RUNNER_TEMP` files and are removed by the job.
+deployment id stay in same-job `$RUNNER_TEMP` files, are masked before use, and
+are removed by same-step traps.
 
 ## AWS Adapter Boundary
 

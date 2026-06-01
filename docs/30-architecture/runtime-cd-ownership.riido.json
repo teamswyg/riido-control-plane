@@ -1,8 +1,8 @@
 {
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
-  "riido_task": "RIID-4822",
-  "supersedes_tasks": ["RIID-4814", "RIID-4815"],
+  "riido_task": "RIID-4825",
+  "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
     "id": "ecs-rolling-task-definition-revision",
@@ -97,6 +97,7 @@
     ],
     "public_repo_should_minimize": [
       "publish only stable configuration key names that operators must set",
+      "centralize required deploy key names in the workflow and ownership docs instead of scattering environment-specific examples",
       "avoid environment-specific examples for domains, clusters, services, applications, deployment groups, ARNs, and URLs",
       "keep live handoff values in same-job runner temp files instead of reusable workflow outputs or artifacts"
     ],
@@ -119,14 +120,49 @@
       "raw operator evidence"
     ]
   },
+  "live_handoff_policy": {
+    "scope": "same-job-runner-temp-only",
+    "allowed_storage": [
+      "$RUNNER_TEMP files with chmod 600",
+      "masked shell variables inside the active deploy job"
+    ],
+    "required_cleanup": [
+      "remove image URI, ECS task-definition ARN, and container-port temp files in an always-running cleanup step",
+      "remove generated CodeDeploy AppSpec, request JSON, and deployment-id files with same-step traps"
+    ],
+    "forbidden_mechanisms": [
+      "GitHub step outputs for live deployment values",
+      "uploaded workflow artifacts",
+      "workflow_dispatch inputs carrying live URLs",
+      "cross-workflow live value handoff"
+    ]
+  },
   "infra_consumes": {
     "repo": "riido-infra",
     "paths": [
       "docs/architecture/terraform-authoring.md",
       "docs/migration/infra.md",
-      "deploy/work-units/riid-4814-control-plane-codedeploy-handoff-ssot.riido.json"
+      "deploy/work-units/riid-4814-control-plane-codedeploy-handoff-ssot.riido.json",
+      "deploy/work-units/riid-4825-control-plane-cd-ownership-remodel.riido.json"
     ],
     "local_scope": "Infra owns topology, drift policy, IAM, and operator evidence. It does not own runtime artifact CD execution."
+  },
+  "infra_visibility_policy": {
+    "repo": "riido-infra",
+    "must_know": [
+      "riido-control-plane owns runtime artifact CD execution",
+      "infra owns topology, IAM, drift, and operator evidence",
+      "control-plane workflow consumes only stable deployment target names from infra outputs",
+      "public redaction changes are Terraform no-diff unless they require new AWS topology"
+    ],
+    "must_not_receive_from_public_workflow": [
+      "CodeDeploy deployment IDs",
+      "generated CodeDeploy AppSpec JSON",
+      "generated CodeDeploy request JSON",
+      "ECS task-definition JSON",
+      "image digests or image URIs",
+      "smoke response payloads"
+    ]
   },
   "dependency_direction": {
     "top_down": "Runtime artifact CD behavior changes in control-plane first; infra consumes the required topology/evidence needs.",

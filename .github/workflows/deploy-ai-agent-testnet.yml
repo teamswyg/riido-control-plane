@@ -260,8 +260,10 @@ jobs:
             echo "::add-mask::$deployment_id"
             printf '%s' "$deployment_id" > "$deployment_id_file"
             chmod 600 "$deployment_id_file"
+            wait_deployment_id="$(cat "$deployment_id_file")"
+            echo "::add-mask::$wait_deployment_id"
             aws deploy wait deployment-successful \
-              --deployment-id "$(cat "$deployment_id_file")"
+              --deployment-id "$wait_deployment_id"
           else
             aws ecs update-service \
               --cluster "$ECS_CLUSTER" \
@@ -301,3 +303,13 @@ jobs:
             | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ready"' >/dev/null
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/bootstrap" \
             | jq -e --arg workspace_id "$workspace_id" '.schema_version == "riido-ai-server.v1" and .workspace_id == $workspace_id and (.devices | length) >= 1' >/dev/null
+
+      - name: Cleanup live handoff files
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f \
+            "$RUNNER_TEMP/riido-image-uri" \
+            "$RUNNER_TEMP/riido-task-definition-arn" \
+            "$RUNNER_TEMP/riido-container-port"

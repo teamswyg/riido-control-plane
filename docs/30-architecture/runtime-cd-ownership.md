@@ -1,6 +1,6 @@
 # Runtime CD Ownership
 
-> Riido task: RIID-4822 `[Infra/Control Plane] CodeDeploy topology ownership and public redaction`
+> Riido task: RIID-4825 `[Control Plane/Infra] CD ownership remodel and public redaction SSOT`
 
 This document explains the deploy ownership manifest in
 [`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json). It does
@@ -55,9 +55,10 @@ must not become public workflow inputs or uploaded artifacts.
 ## Public Redaction
 
 Public repo docs and workflow files may contain only stable key names and
-behavior. They should avoid environment-specific examples for domains, clusters,
-services, applications, deployment groups, ARNs, and URLs. The public workflow
-must not commit or upload:
+behavior. Required deploy key names should stay centralized in the workflow and
+ownership/configuration docs, and public files should avoid environment-specific
+examples for domains, clusters, services, applications, deployment groups, ARNs,
+and URLs. The public workflow must not commit or upload:
 
 - live URL values
 - AWS account IDs
@@ -84,6 +85,12 @@ the configured GitHub environment variable is the only smoke target source.
 This rule applies to both the runtime deploy workflow and the companion
 AI Agent client testnet smoke workflow.
 
+The deploy job removes long-lived handoff temp files in an `always()` cleanup
+step, and CodeDeploy-only generated JSON/deployment-id files are removed by
+same-step shell traps. That cleanup rule is part of the public redaction
+contract: temp files are an implementation detail of one deploy job, not release
+evidence, workflow output, or an artifact.
+
 ## Drift Rule
 
 Top-down changes start in this manifest or the runtime deployment boundary.
@@ -91,3 +98,9 @@ Bottom-up infra findings can ask for topology changes, but they do not move CD
 execution into `riido-infra`. Bottom-up workflow findings can tighten public
 redaction locally; if they require new AWS resources, they must create an infra
 work unit first.
+
+`riido-infra` must know this SSOT because it owns the target topology and
+operator evidence, but it should only receive stable output names and evidence
+categories from this public repo. It must not receive generated AppSpec/request
+JSON, deployment IDs, image URIs/digests, task-definition JSON, or smoke
+payloads through public workflow outputs or artifacts.
