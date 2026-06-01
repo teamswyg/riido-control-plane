@@ -443,7 +443,11 @@ wait for ECS service stability, and run live `healthz`/`readyz`/v2 bootstrap
 smoke. The workflow uses GitHub OIDC and named secrets/variables only; no AWS
 account values, raw tokens, Terraform state, live URLs, task-definition ARNs,
 image digests, workflow run URLs, or live evidence payloads are committed to
-this public repository.
+this public repository. The live smoke target comes only from the configured
+GitHub environment variable, not from workflow_dispatch URL inputs. Live values
+that are needed between deploy steps stay in `$RUNNER_TEMP` files inside the
+same job and are re-masked before use rather than published as GitHub step
+outputs.
 
 If production later switches to CodeDeploy blue/green, the same ownership rule
 holds: `riido-control-plane` owns the runtime artifact CD workflow and post-shift

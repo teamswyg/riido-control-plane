@@ -92,7 +92,10 @@ commit SHA에서 만들며, ECR image digest를 ECS task definition revision에
 
 필요한 GitHub 설정은 이름만 공개 문서화하고 값은 secrets/variables에 둡니다.
 live URL, AWS account id, ARN, image digest, task-definition revision, workflow
-run URL, smoke 결과 payload는 이 public repo에 고정하지 않습니다.
+run URL, smoke 결과 payload는 이 public repo에 고정하지 않습니다. 수동
+dispatch에서도 live URL은 입력값으로 받지 않고 environment variable만
+사용하며, image URI/task-definition ARN 같은 live 중간값은 GitHub step
+output이 아니라 job 내부 `$RUNNER_TEMP` 파일로만 전달합니다.
 
 CodeDeploy blue/green으로 전환하더라도 CD 실행 owner는
 `riido-control-plane`입니다. CodeDeploy application/deployment group, target
