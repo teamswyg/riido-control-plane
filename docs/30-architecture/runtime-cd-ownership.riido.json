@@ -71,7 +71,7 @@
       "cd_owner": "riido-control-plane",
       "topology_owner": "riido-infra",
       "control_plane_may_own": [
-        "create CodeDeploy deployment from the public image digest and infra-provided deployment target",
+        "create CodeDeploy deployment from the same-job immutable image value and infra-provided deployment target",
         "wait for CodeDeploy deployment completion",
         "run healthz readyz and v2 bootstrap smoke after traffic shift",
         "tighten public workflow redaction without changing AWS topology"

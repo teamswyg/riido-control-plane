@@ -248,6 +248,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			if future.CDOwner != "riido-control-plane" || future.TopologyOwner != "riido-infra" {
 				t.Fatalf("CodeDeploy owner drifted: %#v", future)
 			}
+			requireSliceContains(t, future.ControlPlaneMayOwn, "create CodeDeploy deployment from the same-job immutable image value and infra-provided deployment target")
 			requireSliceContains(t, future.ControlPlaneMayOwn, "wait for CodeDeploy deployment completion")
 			requireSliceContains(t, future.InfraMustOwn, "CodeDeploy application and deployment group")
 			requireSliceContains(t, future.InfraMustOwn, "blue green target groups and listener topology")
@@ -327,7 +328,11 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicExport.WorkflowMustNotUse, "workflow_dispatch inputs for live URLs")
 	requireContains(t, doc, "Public Export Contract")
 	requireContains(t, doc, "RIID-4835")
+	requireContains(t, doc, "Image values are deliberately not in that public export set")
 	requireContains(t, boundary, "RIID-4835")
+	requireContains(t, boundary, "aggregate deploy/smoke pass-fail status without live payload values")
+	requireContains(t, boundary, "are not public hand-off artifacts")
+	requireNotContains(t, doc+"\n"+boundary+"\n"+integration, "public image digest")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
 
@@ -351,6 +356,13 @@ func requireContains(t *testing.T, body, want string) {
 	t.Helper()
 	if !strings.Contains(body, want) {
 		t.Fatalf("missing %q", want)
+	}
+}
+
+func requireNotContains(t *testing.T, body, want string) {
+	t.Helper()
+	if strings.Contains(body, want) {
+		t.Fatalf("unexpected %q", want)
 	}
 }
 

@@ -103,8 +103,8 @@ default testnet mechanism. The public workflow is allowed to use CodeDeploy only
 when the optional CodeDeploy application and deployment group names are
 configured together. In that mode, runtime artifact CD execution still belongs
 to `riido-control-plane`: this repository owns creating the deployment from an
-immutable image digest and task-definition revision, waiting for the deployment
-to finish, and running smoke after traffic shift.
+immutable same-job image value and task-definition revision, waiting for the
+deployment to finish, and running smoke after traffic shift.
 
 `riido-infra` owns the CodeDeploy application/deployment group, blue/green
 target group and listener topology, CodeDeploy IAM role, rollback policy,
@@ -143,8 +143,12 @@ The public hand-off artifacts are:
 - Git commit / tag for `github.com/teamswyg/riido-control-plane`
 - Go module version when tagged
 - container image contract result
-- image digest produced by the tag-triggered testnet CD workflow
-- ECS service stability and AI Agent testnet smoke result
+- aggregate deploy/smoke pass-fail status without live payload values
+
+The image URI/digest produced by the tag-triggered testnet CD workflow, the ECS
+task-definition revision/ARN, detailed ECS stability evidence, CodeDeploy
+deployment id, and smoke payloads are not public hand-off artifacts. They remain
+same-job temp values or private/operator evidence when an operator needs them.
 
 PR descriptions and chat messages are not release SSOT. Any durable decision must
 land in a domain, architecture, ADR, migration, or infra evidence document.
