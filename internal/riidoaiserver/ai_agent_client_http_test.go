@@ -41,20 +41,24 @@ func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
 		t.Fatalf("bootstrap templates = %+v", bootstrap.AgentTemplates)
 	}
 	wantTemplates := []struct {
-		templateID string
-		name       string
-		roleLabel  string
+		templateID             string
+		name                   string
+		roleLabel              string
+		defaultVisibility      AgentVisibility
+		recommendedRuntimeKind RuntimeKind
 	}{
-		{templateID: "riido_pm", name: "리도", roleLabel: "PM Agent"},
-		{templateID: "yeongsil_backend", name: "영실", roleLabel: "Backend Agent"},
-		{templateID: "hongdo_frontend", name: "홍도", roleLabel: "Frontend Agent"},
-		{templateID: "jiwon_research", name: "지원", roleLabel: "Research Agent"},
+		{templateID: "riido_pm", name: "리도", roleLabel: "PM Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindCodex},
+		{templateID: "yeongsil_backend", name: "영실", roleLabel: "Backend Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindClaudeCode},
+		{templateID: "hongdo_frontend", name: "홍도", roleLabel: "Frontend Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindCursor},
+		{templateID: "jiwon_research", name: "지원", roleLabel: "Research Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindOpenClaw},
 	}
 	for i, want := range wantTemplates {
 		got := bootstrap.AgentTemplates[i]
 		if got.TemplateID != want.templateID ||
 			got.Name != want.name ||
 			got.RoleLabel != want.roleLabel ||
+			got.DefaultVisibility != want.defaultVisibility ||
+			got.RecommendedRuntimeKind != want.recommendedRuntimeKind ||
 			got.Description == "" ||
 			got.Instruction == "" ||
 			got.ProfileThumbnailURL == "" {

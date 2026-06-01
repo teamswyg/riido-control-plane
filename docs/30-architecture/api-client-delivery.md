@@ -140,7 +140,11 @@ model-catalog question is resolved.
 Figma onboarding annotations (`node-id=42-3014`) are generated-client
 consumption context for bootstrap, devices, and create APIs. The delivery
 artifact may document that `agent_templates` feeds the starter-agent selection
-screen, but workspace selection/list scrolling and the `새 워크스페이스` row
+screen, including copyable profile fields, `default_visibility`, and
+`recommended_runtime_kind`. Template records must not include model defaults
+until the canonical contracts model-catalog policy promotes them; clients derive
+the selected model from `RuntimeRecord.models`. Workspace selection/list
+scrolling and the `새 워크스페이스` row
 shown in `node-id=164-30192`, row selection, direct-setting expansion, scroll,
 direct-setting `이름` / `설명` / `지침` placeholders from `node-id=164-26969`,
 two-line ellipsis, and no-installed-AI start state rendering from

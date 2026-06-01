@@ -246,7 +246,8 @@
       "description": "The AI Agent onboarding template catalog is returned by the client bootstrap response so frontend clients do not hard-code agent names, descriptions, or instructions.",
       "rules": [
         "bootstrap: return a stable ordered template catalog for the Figma onboarding agent-selection screen",
-        "template: carry name, role_label, description, profile_thumbnail_url, and instruction as copyable agent configuration defaults",
+        "template: carry name, role_label, description, profile_thumbnail_url, instruction, default_visibility, and recommended_runtime_kind as copyable/default agent configuration hints",
+        "model: AgentOnboardingTemplate does not own model_id; model defaults are derived from the selected runtime model catalog until the canonical contracts model-catalog policy promotes template model recommendations",
         "figma_138_7389: current starter template rows are 리도, 영실, 홍도, and 지원 in bootstrap order",
         "direct_setting: Figma node-id=164-26969 expands 직접 설정 into name, description, and instruction input fields that submit through createAIAgent",
         "direct_setting_row: 직접 설정 is client presentation, not an AgentOnboardingTemplate record",
@@ -969,35 +970,52 @@
           "template_id",
           "name",
           "description",
-          "instruction"
+          "instruction",
+          "default_visibility"
         ],
         "properties": [
           {
             "name": "template_id",
-            "type": "string"
+            "type": "string",
+            "description": "템플릿을 안정적으로 구분하는 ID입니다. 직접 설정 행은 포함되지 않습니다."
           },
           {
             "name": "name",
-            "type": "string"
+            "type": "string",
+            "description": "에이전트 생성 폼에 복사할 기본 이름입니다."
           },
           {
             "name": "role_label",
-            "type": "string"
+            "type": "string",
+            "description": "템플릿 목록에 보조로 표시할 역할 라벨입니다."
           },
           {
             "name": "profile_thumbnail_url",
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "description": "에이전트 프로필 이미지로 복사할 HTTPS 썸네일 URL입니다."
           },
           {
             "name": "description",
             "type": "string",
-            "max_length": 160
+            "max_length": 160,
+            "description": "에이전트 설명 기본값입니다. 최대 160자입니다."
           },
           {
             "name": "instruction",
             "type": "string",
-            "max_length": 1000
+            "max_length": 1000,
+            "description": "에이전트 지침 기본값입니다. 최대 1000자입니다."
+          },
+          {
+            "name": "default_visibility",
+            "ref": "AgentVisibility",
+            "description": "템플릿 선택 시 생성 폼에 미리 채울 공개 범위입니다. mock은 안전하게 private 값을 사용합니다."
+          },
+          {
+            "name": "recommended_runtime_kind",
+            "ref": "RuntimeKind",
+            "description": "템플릿에 권장하는 런타임 종류입니다. 선택 가능 여부는 devices.runtimes로 다시 판단합니다."
           }
         ]
       }

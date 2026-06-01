@@ -134,11 +134,37 @@ export interface AgentEditabilityResponse {
  * AI Agent 온보딩에서 선택할 수 있는 starter agent template입니다.
  */
 export interface AgentOnboardingTemplate {
+  /**
+   * 템플릿 선택 시 생성 폼에 미리 채울 공개 범위입니다. mock은 안전하게 private 값을 사용합니다.
+   */
+  default_visibility: AgentVisibility;
+  /**
+   * 에이전트 설명 기본값입니다. 최대 160자입니다.
+   */
   description: string;
+  /**
+   * 에이전트 지침 기본값입니다. 최대 1000자입니다.
+   */
   instruction: string;
+  /**
+   * 에이전트 생성 폼에 복사할 기본 이름입니다.
+   */
   name: string;
+  /**
+   * 에이전트 프로필 이미지로 복사할 HTTPS 썸네일 URL입니다.
+   */
   profile_thumbnail_url?: string;
+  /**
+   * 템플릿에 권장하는 런타임 종류입니다. 선택 가능 여부는 devices.runtimes로 다시 판단합니다.
+   */
+  recommended_runtime_kind?: RuntimeKind;
+  /**
+   * 템플릿 목록에 보조로 표시할 역할 라벨입니다.
+   */
   role_label?: string;
+  /**
+   * 템플릿을 안정적으로 구분하는 ID입니다. 직접 설정 행은 포함되지 않습니다.
+   */
   template_id: string;
 }
 
