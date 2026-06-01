@@ -47,15 +47,17 @@ var (
 )
 
 type AuthorizationRequest struct {
-	Resource AuthorizationResource
-	Action   AuthorizationAction
-	AgentID  string
-	DeviceID string
-	TaskID   string
+	Resource    AuthorizationResource
+	Action      AuthorizationAction
+	WorkspaceID string
+	AgentID     string
+	DeviceID    string
+	TaskID      string
 }
 
 type AuthorizationResult struct {
 	PrincipalID string
+	WorkspaceID string
 	Roles       []AgentCatalogRole
 }
 
@@ -183,7 +185,7 @@ func (a *StaticTokenAuthorizer) Authorize(ctx context.Context, bearerToken strin
 		if !authorizationScopesPermit(credential.scopes, req) {
 			return AuthorizationResult{}, ErrAuthorizationForbidden
 		}
-		return AuthorizationResult{PrincipalID: credential.principalID, Roles: append([]AgentCatalogRole(nil), credential.roles...)}, nil
+		return AuthorizationResult{PrincipalID: credential.principalID, WorkspaceID: strings.TrimSpace(req.WorkspaceID), Roles: append([]AgentCatalogRole(nil), credential.roles...)}, nil
 	}
 	return AuthorizationResult{}, ErrAuthorizationUnauthenticated
 }

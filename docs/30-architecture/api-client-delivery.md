@@ -319,6 +319,9 @@ together:
   client metadata, for example `aiAgent.agents.editability`,
   `aiAgent.tasks.assign`, `aiAgent.tasks.unassign`, `aiAgent.tasks.stop`, and
   `aiAgent.devices.runtimes`
+- workspace-scoped v2 operations are grouped under the versioned module root,
+  for example `v2.aiAgent.bootstrap`, `v2.aiAgent.agents.create`, and
+  `v2.aiAgent.tasks.threadMessages.create`
 - the facade is config-bound, so consumers do not repeatedly pass `baseUrl`,
   `aiAgentToken`, and optional `fetcher`
 - each operation exposes concise library-style aliases: `query(...)` mirrors
@@ -340,7 +343,9 @@ The intended frontend usage is:
 const riido = createRiidoControlPlaneClient(config);
 
 useQuery(riido.aiAgent.bootstrap.query());
+useQuery(riido.v2.aiAgent.bootstrap.query({ params: { workspace_id } }));
 useMutation(riido.aiAgent.tasks.assign.mutation());
+useMutation(riido.v2.aiAgent.agents.create.mutation());
 useMutation(riido.aiAgent.tasks.stop.mutation());
 queryClient.prefetchQuery(riido.aiAgent.devices.runtimes.query());
 await riido.aiAgent.tasks.stop.invalidates.bootstrap(queryClient);
@@ -353,6 +358,10 @@ React wrapper is imported explicitly:
 const riido = useRiidoControlPlaneClient(config);
 
 const bootstrap = riido.aiAgent.bootstrap.useQuery({ enabled: !!config.aiAgentToken });
+const workspaceBootstrap = riido.v2.aiAgent.bootstrap.useQuery({
+  params: { workspace_id },
+  enabled: !!config.aiAgentToken && !!workspace_id,
+});
 const stopTask = riido.aiAgent.tasks.stop.useMutation({
   onSuccess: async () => {
     await riido.aiAgent.tasks.stop.invalidates.all(queryClient);

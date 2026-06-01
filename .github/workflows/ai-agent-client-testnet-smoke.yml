@@ -36,6 +36,7 @@ jobs:
           set -euo pipefail
           base_url="${TESTNET_BASE_URL%/}"
           auth_header="X-Riido-AI-Agent-Token: ${TESTNET_TOKEN}"
+          workspace_id="workspace-smoke"
 
           curl_json() {
             curl --fail --silent --show-error \
@@ -81,3 +82,22 @@ jobs:
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/events?replay=1" > "$replay"
           grep -q "queued_by_busy_agent" "$replay"
           grep -q "stopped_by_user_request" "$replay"
+
+          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/bootstrap" \
+            | jq -e --arg workspace_id "$workspace_id" '.schema_version == "riido-ai-server.v1" and .workspace_id == $workspace_id and (.devices | length) > 0' >/dev/null
+          created_v2_agent="$(
+            curl_json \
+              -H "$auth_header" \
+              -H "Content-Type: application/json" \
+              -d '{"name":"Smoke v2 에이전트","visibility":"private","runtime_id":"runtime-cursor-mock","description":"workspace scoped smoke agent","instruction":"smoke test instruction"}' \
+              "$base_url/v2/client/workspaces/$workspace_id/ai-agent/agents" \
+              | jq -re --arg workspace_id "$workspace_id" 'if .schema_version == "riido-ai-server.v1" and .agent.workspace_id == $workspace_id and .agent.is_owned_by_viewer == true and .agent.runtime_kind == "cursor" then .agent.agent_id else empty end' \
+          )"
+          curl_json \
+            -H "$auth_header" \
+            -H "Content-Type: application/json" \
+            -d "{\"agent_id\":\"$created_v2_agent\"}" \
+            "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/task-smoke-v2/assignment" \
+            | jq -e --arg agent_id "$created_v2_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/task-smoke-v2/threads" \
+            | jq -e --arg agent_id "$created_v2_agent" --arg href "/v2/client/workspaces/$workspace_id/ai-agent/events" '.schema_version == "riido-ai-server.v1" and any(.threads[]; .agent_id == $agent_id) and .active_stream.href == $href' >/dev/null

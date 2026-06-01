@@ -135,6 +135,103 @@ func TestHTTPAIAgentClientMockAcceptsExplicitAIAgentTokenHeader(t *testing.T) {
 	}
 }
 
+func TestHTTPAIAgentClientMockV2WorkspaceScopedCreateAndThreadStream(t *testing.T) {
+	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
+		PrincipalID: "user-1",
+		Token:       "owner-token",
+		Scopes:      []string{"ai-agent:*"},
+	}})
+
+	body, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:       "워크스페이스 A 에이전트",
+		Visibility: AgentVisibilityPublic,
+		RuntimeID:  "runtime-cursor-mock",
+		ModelID:    stringPtr("cursor-fast"),
+	})
+	if err != nil {
+		t.Fatalf("marshal create body: %v", err)
+	}
+	createReq := httptest.NewRequest(http.MethodPost, "/v2/client/workspaces/workspace-a/ai-agent/agents", strings.NewReader(string(body)))
+	createReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	createResp := httptest.NewRecorder()
+	server.ServeHTTP(createResp, createReq)
+	if createResp.Code != http.StatusCreated {
+		t.Fatalf("v2 create status=%d body=%s", createResp.Code, createResp.Body.String())
+	}
+	var created AgentClientRecordResponse
+	if err := json.Unmarshal(createResp.Body.Bytes(), &created); err != nil {
+		t.Fatalf("v2 create json: %v", err)
+	}
+	if created.Agent.WorkspaceID != "workspace-a" ||
+		created.Agent.OwnerPrincipalID != "user-1" ||
+		created.Agent.RuntimeID != "runtime-cursor-mock" ||
+		created.Agent.ModelID != "cursor-fast" {
+		t.Fatalf("v2 created agent = %+v", created.Agent)
+	}
+
+	bootstrapAReq := httptest.NewRequest(http.MethodGet, "/v2/client/workspaces/workspace-a/ai-agent/bootstrap?client_kind=web", nil)
+	bootstrapAReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	bootstrapAResp := httptest.NewRecorder()
+	server.ServeHTTP(bootstrapAResp, bootstrapAReq)
+	if bootstrapAResp.Code != http.StatusOK {
+		t.Fatalf("v2 workspace-a bootstrap status=%d body=%s", bootstrapAResp.Code, bootstrapAResp.Body.String())
+	}
+	var bootstrapA ClientBootstrapResponse
+	if err := json.Unmarshal(bootstrapAResp.Body.Bytes(), &bootstrapA); err != nil {
+		t.Fatalf("v2 workspace-a bootstrap json: %v", err)
+	}
+	if bootstrapA.WorkspaceID != "workspace-a" || bootstrapA.ClientKind != ClientKindWeb {
+		t.Fatalf("v2 workspace-a bootstrap = %+v", bootstrapA)
+	}
+	if got, ok := findAIAgent(bootstrapA.Agents, created.Agent.AgentID); !ok || got.WorkspaceID != "workspace-a" {
+		t.Fatalf("v2 workspace-a created agent = %+v, ok=%v", got, ok)
+	}
+	if _, ok := findAIAgent(bootstrapA.Agents, "agent-owned-codex"); ok {
+		t.Fatalf("v2 workspace-a leaked default workspace agent: %+v", bootstrapA.Agents)
+	}
+
+	assignReq := httptest.NewRequest(http.MethodPost, "/v2/client/workspaces/workspace-a/ai-agent/tasks/task-v2/assignment", strings.NewReader(`{"agent_id":"`+created.Agent.AgentID+`"}`))
+	assignReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	assignResp := httptest.NewRecorder()
+	server.ServeHTTP(assignResp, assignReq)
+	if assignResp.Code != http.StatusAccepted {
+		t.Fatalf("v2 assign status=%d body=%s", assignResp.Code, assignResp.Body.String())
+	}
+
+	threadsReq := httptest.NewRequest(http.MethodGet, "/v2/client/workspaces/workspace-a/ai-agent/tasks/task-v2/threads", nil)
+	threadsReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	threadsResp := httptest.NewRecorder()
+	server.ServeHTTP(threadsResp, threadsReq)
+	if threadsResp.Code != http.StatusOK {
+		t.Fatalf("v2 threads status=%d body=%s", threadsResp.Code, threadsResp.Body.String())
+	}
+	var threads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
+		t.Fatalf("v2 threads json: %v", err)
+	}
+	if len(threads.Threads) != 1 || threads.Threads[0].AgentID != created.Agent.AgentID {
+		t.Fatalf("v2 threads = %+v", threads)
+	}
+	if threads.ActiveStream == nil || threads.ActiveStream.Href != "/v2/client/workspaces/workspace-a/ai-agent/events" {
+		t.Fatalf("v2 active stream = %+v", threads.ActiveStream)
+	}
+
+	bootstrapBReq := httptest.NewRequest(http.MethodGet, "/v2/client/workspaces/workspace-b/ai-agent/bootstrap", nil)
+	bootstrapBReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	bootstrapBResp := httptest.NewRecorder()
+	server.ServeHTTP(bootstrapBResp, bootstrapBReq)
+	if bootstrapBResp.Code != http.StatusOK {
+		t.Fatalf("v2 workspace-b bootstrap status=%d body=%s", bootstrapBResp.Code, bootstrapBResp.Body.String())
+	}
+	var bootstrapB ClientBootstrapResponse
+	if err := json.Unmarshal(bootstrapBResp.Body.Bytes(), &bootstrapB); err != nil {
+		t.Fatalf("v2 workspace-b bootstrap json: %v", err)
+	}
+	if _, ok := findAIAgent(bootstrapB.Agents, created.Agent.AgentID); ok {
+		t.Fatalf("v2 workspace-b leaked workspace-a agent: %+v", bootstrapB.Agents)
+	}
+}
+
 func TestHTTPAIAgentClientMockAssignableAgentsUseStableIDTieBreak(t *testing.T) {
 	store := NewMockAIAgentClientStore()
 	ownedCodex := store.agents["agent-owned-codex"]

@@ -73,6 +73,14 @@ export interface AgentClientListResponse {
 }
 
 /**
+ * v2 task 또는 화면에서 표시할 workspace-scoped agent 목록 응답입니다.
+ */
+export interface AgentClientListResponseV2 {
+  agents: AgentClientRecordV2[];
+  schema_version: string;
+}
+
+/**
  * client 화면에 표시하는 agent 요약 record입니다.
  */
 export interface AgentClientRecord {
@@ -101,6 +109,41 @@ export interface AgentClientRecord {
 export interface AgentClientRecordResponse {
   agent: AgentClientRecord;
   schema_version: string;
+}
+
+/**
+ * v2 단일 agent 변경 후 최신 workspace-scoped agent record를 반환하는 응답입니다.
+ */
+export interface AgentClientRecordResponseV2 {
+  agent: AgentClientRecordV2;
+  schema_version: string;
+}
+
+/**
+ * v2 client 화면에 표시하는 workspace-scoped agent 요약 record입니다.
+ */
+export interface AgentClientRecordV2 {
+  agent_id: string;
+  assigned_task_count: number;
+  created_at: string;
+  description?: string;
+  editability: AgentEditability;
+  instruction?: string;
+  is_owned_by_viewer: boolean;
+  model_id?: string;
+  model_label?: string;
+  name: string;
+  owner_principal_id: string;
+  profile_thumbnail_url?: string;
+  runtime_id?: string;
+  runtime_kind?: RuntimeKind;
+  updated_at: string;
+  visibility: AgentVisibility;
+  work_status: AgentWorkStatus;
+  /**
+   * agent가 소속된 workspace id입니다. v2에서는 URL path의 workspace_id로 서버가 stamp합니다.
+   */
+  workspace_id: string;
 }
 
 /**
@@ -245,6 +288,17 @@ export interface AssignAIAgentTaskRequest {
  */
 export interface ClientBootstrapResponse {
   agents: AgentClientRecord[];
+  client_kind: ClientKind;
+  devices: DeviceRecord[];
+  schema_version: string;
+  workspace_id: string;
+}
+
+/**
+ * v2 AI Agent 화면 진입 시 선택된 workspace의 agent와 account-owned device runtime 초기 데이터입니다.
+ */
+export interface ClientBootstrapResponseV2 {
+  agents: AgentClientRecordV2[];
   client_kind: ClientKind;
   devices: DeviceRecord[];
   schema_version: string;
@@ -1414,6 +1468,929 @@ export function createAIAgentTaskThreadMessageMutationOptions(config: RiidoClien
 }
 
 /**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface CreateAIAgentV2PathParams {
+  workspace_id: string;
+}
+
+/**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 (v2 workspace-scoped)
+ */
+export async function createAIAgentV2(config: RiidoClientConfig, params: CreateAIAgentV2PathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents`;
+  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentV2MutationVariables {
+  params: CreateAIAgentV2PathParams;
+  body: CreateAgentConfigurationRequest;
+}
+
+/**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentV2MutationKey(): readonly unknown[] {
+  return ["createAIAgentV2"] as const;
+}
+
+/**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentV2MutationKey(),
+    mutationFn: (variables: CreateAIAgentV2MutationVariables) => createAIAgentV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface DeleteAIAgentV2PathParams {
+  workspace_id: string;
+  agent_id: string;
+}
+
+/**
+ * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
+ */
+export async function deleteAIAgentV2(config: RiidoClientConfig, params: DeleteAIAgentV2PathParams, options: RiidoRequestOptions = {}): Promise<DeleteAgentResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}`;
+  return riidoRequest<DeleteAgentResponse>(config, path, { method: 'DELETE', signal: options.signal });
+}
+
+/**
+ * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface DeleteAIAgentV2MutationVariables {
+  params: DeleteAIAgentV2PathParams;
+}
+
+/**
+ * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function deleteAIAgentV2MutationKey(): readonly unknown[] {
+  return ["deleteAIAgentV2"] as const;
+}
+
+/**
+ * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function deleteAIAgentV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeleteAgentResponse, DeleteAIAgentV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: deleteAIAgentV2MutationKey(),
+    mutationFn: (variables: DeleteAIAgentV2MutationVariables) => deleteAIAgentV2(config, variables.params, {}),
+  };
+}
+
+/**
+ * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface UpdateAIAgentConfigurationV2PathParams {
+  workspace_id: string;
+  agent_id: string;
+}
+
+/**
+ * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다 (v2 workspace-scoped)
+ */
+export async function updateAIAgentConfigurationV2(config: RiidoClientConfig, params: UpdateAIAgentConfigurationV2PathParams, body: UpdateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}`;
+  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'PATCH', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface UpdateAIAgentConfigurationV2MutationVariables {
+  params: UpdateAIAgentConfigurationV2PathParams;
+  body: UpdateAgentConfigurationRequest;
+}
+
+/**
+ * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function updateAIAgentConfigurationV2MutationKey(): readonly unknown[] {
+  return ["updateAIAgentConfigurationV2"] as const;
+}
+
+/**
+ * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function updateAIAgentConfigurationV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AgentClientRecordResponseV2, UpdateAIAgentConfigurationV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: updateAIAgentConfigurationV2MutationKey(),
+    mutationFn: (variables: UpdateAIAgentConfigurationV2MutationVariables) => updateAIAgentConfigurationV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface GetAIAgentDaemonV2PathParams {
+  workspace_id: string;
+  agent_id: string;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 (v2 workspace-scoped)
+ */
+export async function getAIAgentDaemonV2(config: RiidoClientConfig, params: GetAIAgentDaemonV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon`;
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.agents.daemon`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAIAgentDaemonV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.agents.daemon"] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAIAgentDaemonV2QueryKey(params: GetAIAgentDaemonV2PathParams): readonly unknown[] {
+  return [...getAIAgentDaemonV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAIAgentDaemonV2QueryOptions(config: RiidoClientConfig, params: GetAIAgentDaemonV2PathParams, options: RiidoQueryOptions<DeviceDaemonDetailResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAIAgentDaemonV2QueryKey(params),
+    queryFn: () => getAIAgentDaemonV2(config, params, { signal }),
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface RestartAIAgentDaemonV2PathParams {
+  workspace_id: string;
+  agent_id: string;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 (v2 workspace-scoped)
+ */
+export async function restartAIAgentDaemonV2(config: RiidoClientConfig, params: RestartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon/restart`;
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface RestartAIAgentDaemonV2MutationVariables {
+  params: RestartAIAgentDaemonV2PathParams;
+  body: ControlDeviceDaemonRequest;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function restartAIAgentDaemonV2MutationKey(): readonly unknown[] {
+  return ["restartAIAgentDaemonV2"] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function restartAIAgentDaemonV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: restartAIAgentDaemonV2MutationKey(),
+    mutationFn: (variables: RestartAIAgentDaemonV2MutationVariables) => restartAIAgentDaemonV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface StartAIAgentDaemonV2PathParams {
+  workspace_id: string;
+  agent_id: string;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 (v2 workspace-scoped)
+ */
+export async function startAIAgentDaemonV2(config: RiidoClientConfig, params: StartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon/start`;
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface StartAIAgentDaemonV2MutationVariables {
+  params: StartAIAgentDaemonV2PathParams;
+  body: ControlDeviceDaemonRequest;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function startAIAgentDaemonV2MutationKey(): readonly unknown[] {
+  return ["startAIAgentDaemonV2"] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function startAIAgentDaemonV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: startAIAgentDaemonV2MutationKey(),
+    mutationFn: (variables: StartAIAgentDaemonV2MutationVariables) => startAIAgentDaemonV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface StopAIAgentDaemonV2PathParams {
+  workspace_id: string;
+  agent_id: string;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 (v2 workspace-scoped)
+ */
+export async function stopAIAgentDaemonV2(config: RiidoClientConfig, params: StopAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon/stop`;
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface StopAIAgentDaemonV2MutationVariables {
+  params: StopAIAgentDaemonV2PathParams;
+  body: ControlDeviceDaemonRequest;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function stopAIAgentDaemonV2MutationKey(): readonly unknown[] {
+  return ["stopAIAgentDaemonV2"] as const;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function stopAIAgentDaemonV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: stopAIAgentDaemonV2MutationKey(),
+    mutationFn: (variables: StopAIAgentDaemonV2MutationVariables) => stopAIAgentDaemonV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface GetAIAgentEditabilityV2PathParams {
+  workspace_id: string;
+  agent_id: string;
+}
+
+/**
+ * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
+ */
+export async function getAIAgentEditabilityV2(config: RiidoClientConfig, params: GetAIAgentEditabilityV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentEditabilityResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/editability`;
+  return riidoRequest<AgentEditabilityResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.agents.editability`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAIAgentEditabilityV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.agents.editability"] as const;
+}
+
+/**
+ * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAIAgentEditabilityV2QueryKey(params: GetAIAgentEditabilityV2PathParams): readonly unknown[] {
+  return [...getAIAgentEditabilityV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAIAgentEditabilityV2QueryOptions(config: RiidoClientConfig, params: GetAIAgentEditabilityV2PathParams, options: RiidoQueryOptions<AgentEditabilityResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAIAgentEditabilityV2QueryKey(params),
+    queryFn: () => getAIAgentEditabilityV2(config, params, { signal }),
+  };
+}
+
+/**
+ * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface GetAIAgentClientBootstrapV2PathParams {
+  workspace_id: string;
+}
+
+/**
+ * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ */
+export async function getAIAgentClientBootstrapV2(config: RiidoClientConfig, params: GetAIAgentClientBootstrapV2PathParams, options: RiidoRequestOptions = {}): Promise<ClientBootstrapResponseV2> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/bootstrap`;
+  return riidoRequest<ClientBootstrapResponseV2>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.bootstrap`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAIAgentClientBootstrapV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.bootstrap"] as const;
+}
+
+/**
+ * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAIAgentClientBootstrapV2QueryKey(params: GetAIAgentClientBootstrapV2PathParams): readonly unknown[] {
+  return [...getAIAgentClientBootstrapV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAIAgentClientBootstrapV2QueryOptions(config: RiidoClientConfig, params: GetAIAgentClientBootstrapV2PathParams, options: RiidoQueryOptions<ClientBootstrapResponseV2> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAIAgentClientBootstrapV2QueryKey(params),
+    queryFn: () => getAIAgentClientBootstrapV2(config, params, { signal }),
+  };
+}
+
+/**
+ * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentDeviceRuntimesV2PathParams {
+  workspace_id: string;
+}
+
+/**
+ * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
+ */
+export async function listAIAgentDeviceRuntimesV2(config: RiidoClientConfig, params: ListAIAgentDeviceRuntimesV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceRuntimeListResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices`;
+  return riidoRequest<DeviceRuntimeListResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.devices.runtimes`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentDeviceRuntimesV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.devices.runtimes"] as const;
+}
+
+/**
+ * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentDeviceRuntimesV2QueryKey(params: ListAIAgentDeviceRuntimesV2PathParams): readonly unknown[] {
+  return [...listAIAgentDeviceRuntimesV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentDeviceRuntimesV2QueryOptions(config: RiidoClientConfig, params: ListAIAgentDeviceRuntimesV2PathParams, options: RiidoQueryOptions<DeviceRuntimeListResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentDeviceRuntimesV2QueryKey(params),
+    queryFn: () => listAIAgentDeviceRuntimesV2(config, params, { signal }),
+  };
+}
+
+/**
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface StreamAIAgentClientEventsV2PathParams {
+  workspace_id: string;
+}
+
+/**
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
+ */
+export async function streamAIAgentClientEventsV2(config: RiidoClientConfig, params: StreamAIAgentClientEventsV2PathParams, options: RiidoRequestOptions = {}): Promise<Response> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/events`;
+  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.events.stream`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function streamAIAgentClientEventsV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.events.stream"] as const;
+}
+
+/**
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function streamAIAgentClientEventsV2QueryKey(params: StreamAIAgentClientEventsV2PathParams): readonly unknown[] {
+  return [...streamAIAgentClientEventsV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function streamAIAgentClientEventsV2QueryOptions(config: RiidoClientConfig, params: StreamAIAgentClientEventsV2PathParams, options: RiidoQueryOptions<Response> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: streamAIAgentClientEventsV2QueryKey(params),
+    queryFn: () => streamAIAgentClientEventsV2(config, params, { signal }),
+  };
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentOnboardingFixturesV2PathParams {
+  workspace_id: string;
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 (v2 workspace-scoped)
+ */
+export async function listAIAgentOnboardingFixturesV2(config: RiidoClientConfig, params: ListAIAgentOnboardingFixturesV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentOnboardingFixtureListResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/onboarding/fixtures`;
+  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.onboarding.fixtures`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentOnboardingFixturesV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.onboarding.fixtures"] as const;
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentOnboardingFixturesV2QueryKey(params: ListAIAgentOnboardingFixturesV2PathParams): readonly unknown[] {
+  return [...listAIAgentOnboardingFixturesV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentOnboardingFixturesV2QueryOptions(config: RiidoClientConfig, params: ListAIAgentOnboardingFixturesV2PathParams, options: RiidoQueryOptions<AgentOnboardingFixtureListResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentOnboardingFixturesV2QueryKey(params),
+    queryFn: () => listAIAgentOnboardingFixturesV2(config, params, { signal }),
+  };
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface CreateAIAgentFromOnboardingFixtureV2PathParams {
+  workspace_id: string;
+  fixture_id: string;
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)
+ */
+export async function createAIAgentFromOnboardingFixtureV2(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/onboarding/fixtures/${params.fixture_id}/agents`;
+  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentFromOnboardingFixtureV2MutationVariables {
+  params: CreateAIAgentFromOnboardingFixtureV2PathParams;
+  body: CreateAgentConfigurationRequest;
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentFromOnboardingFixtureV2MutationKey(): readonly unknown[] {
+  return ["createAIAgentFromOnboardingFixtureV2"] as const;
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentFromOnboardingFixtureV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentFromOnboardingFixtureV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentFromOnboardingFixtureV2MutationKey(),
+    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureV2MutationVariables) => createAIAgentFromOnboardingFixtureV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentTaskAssignableAgentsV2PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)
+ */
+export async function listAIAgentTaskAssignableAgentsV2(config: RiidoClientConfig, params: ListAIAgentTaskAssignableAgentsV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentClientListResponseV2> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/assignable-agents`;
+  return riidoRequest<AgentClientListResponseV2>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.tasks.assignableAgents`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentTaskAssignableAgentsV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.tasks.assignableAgents"] as const;
+}
+
+/**
+ * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentTaskAssignableAgentsV2QueryKey(params: ListAIAgentTaskAssignableAgentsV2PathParams): readonly unknown[] {
+  return [...listAIAgentTaskAssignableAgentsV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentTaskAssignableAgentsV2QueryOptions(config: RiidoClientConfig, params: ListAIAgentTaskAssignableAgentsV2PathParams, options: RiidoQueryOptions<AgentClientListResponseV2> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentTaskAssignableAgentsV2QueryKey(params),
+    queryFn: () => listAIAgentTaskAssignableAgentsV2(config, params, { signal }),
+  };
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface UnassignAIAgentTaskV2PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다 (v2 workspace-scoped)
+ */
+export async function unassignAIAgentTaskV2(config: RiidoClientConfig, params: UnassignAIAgentTaskV2PathParams, body: UnassignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/assignment`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface UnassignAIAgentTaskV2MutationVariables {
+  params: UnassignAIAgentTaskV2PathParams;
+  body: UnassignAIAgentTaskRequest;
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function unassignAIAgentTaskV2MutationKey(): readonly unknown[] {
+  return ["unassignAIAgentTaskV2"] as const;
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function unassignAIAgentTaskV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: unassignAIAgentTaskV2MutationKey(),
+    mutationFn: (variables: UnassignAIAgentTaskV2MutationVariables) => unassignAIAgentTaskV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface AssignAIAgentTaskV2PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다 (v2 workspace-scoped)
+ */
+export async function assignAIAgentTaskV2(config: RiidoClientConfig, params: AssignAIAgentTaskV2PathParams, body: AssignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/assignment`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface AssignAIAgentTaskV2MutationVariables {
+  params: AssignAIAgentTaskV2PathParams;
+  body: AssignAIAgentTaskRequest;
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function assignAIAgentTaskV2MutationKey(): readonly unknown[] {
+  return ["assignAIAgentTaskV2"] as const;
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function assignAIAgentTaskV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: assignAIAgentTaskV2MutationKey(),
+    mutationFn: (variables: AssignAIAgentTaskV2MutationVariables) => assignAIAgentTaskV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface SubmitAIAgentTaskCommentV2PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다 (v2 workspace-scoped)
+ */
+export async function submitAIAgentTaskCommentV2(config: RiidoClientConfig, params: SubmitAIAgentTaskCommentV2PathParams, body: SubmitAIAgentTaskCommentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/comments`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface SubmitAIAgentTaskCommentV2MutationVariables {
+  params: SubmitAIAgentTaskCommentV2PathParams;
+  body: SubmitAIAgentTaskCommentRequest;
+}
+
+/**
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function submitAIAgentTaskCommentV2MutationKey(): readonly unknown[] {
+  return ["submitAIAgentTaskCommentV2"] as const;
+}
+
+/**
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function submitAIAgentTaskCommentV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, SubmitAIAgentTaskCommentV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: submitAIAgentTaskCommentV2MutationKey(),
+    mutationFn: (variables: SubmitAIAgentTaskCommentV2MutationVariables) => submitAIAgentTaskCommentV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface StopAIAgentTaskV2PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
+ */
+export async function stopAIAgentTaskV2(config: RiidoClientConfig, params: StopAIAgentTaskV2PathParams, body: StopAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/stop`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface StopAIAgentTaskV2MutationVariables {
+  params: StopAIAgentTaskV2PathParams;
+  body: StopAIAgentTaskRequest;
+}
+
+/**
+ * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function stopAIAgentTaskV2MutationKey(): readonly unknown[] {
+  return ["stopAIAgentTaskV2"] as const;
+}
+
+/**
+ * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function stopAIAgentTaskV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, StopAIAgentTaskV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: stopAIAgentTaskV2MutationKey(),
+    mutationFn: (variables: StopAIAgentTaskV2MutationVariables) => stopAIAgentTaskV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentTaskThreadsV2PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 (v2 workspace-scoped)
+ */
+export async function listAIAgentTaskThreadsV2(config: RiidoClientConfig, params: ListAIAgentTaskThreadsV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadCollectionResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads`;
+  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.tasks.threads`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentTaskThreadsV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.tasks.threads"] as const;
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentTaskThreadsV2QueryKey(params: ListAIAgentTaskThreadsV2PathParams): readonly unknown[] {
+  return [...listAIAgentTaskThreadsV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentTaskThreadsV2QueryOptions(config: RiidoClientConfig, params: ListAIAgentTaskThreadsV2PathParams, options: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentTaskThreadsV2QueryKey(params),
+    queryFn: () => listAIAgentTaskThreadsV2(config, params, { signal }),
+  };
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface CreateAIAgentTaskThreadMessageV2PathParams {
+  workspace_id: string;
+  task_id: string;
+  thread_id: string;
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 (v2 workspace-scoped)
+ */
+export async function createAIAgentTaskThreadMessageV2(config: RiidoClientConfig, params: CreateAIAgentTaskThreadMessageV2PathParams, body: CreateAIAgentTaskThreadMessageRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentTaskThreadMessageV2MutationVariables {
+  params: CreateAIAgentTaskThreadMessageV2PathParams;
+  body: CreateAIAgentTaskThreadMessageRequest;
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentTaskThreadMessageV2MutationKey(): readonly unknown[] {
+  return ["createAIAgentTaskThreadMessageV2"] as const;
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentTaskThreadMessageV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentTaskThreadMessageV2MutationKey(),
+    mutationFn: (variables: CreateAIAgentTaskThreadMessageV2MutationVariables) => createAIAgentTaskThreadMessageV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
  * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
  * 계약 generated path: `aiAgent.agents.create`
  * 검색용 generated 경로: `agents.create`
@@ -2310,6 +3287,902 @@ export interface CreateAIAgentTaskThreadMessageEndpoint {
 }
 
 /**
+ * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.agents.create`
+ * 검색용 generated 경로: `aiAgent.agents.create`
+ * 접근 예시: `riido.v2.aiAgent.agents.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: CreateAIAgentV2PathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponseV2>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentV2MutationVariables>) => ReturnType<typeof createAIAgentV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentV2MutationVariables>) => ReturnType<typeof createAIAgentV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly aiAgentDevicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.agents.delete`
+ * 검색용 generated 경로: `aiAgent.agents.delete`
+ * 접근 예시: `riido.v2.aiAgent.agents.delete`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface DeleteAIAgentV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: DeleteAIAgentV2PathParams, options?: RiidoRequestOptions) => Promise<DeleteAgentResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<DeleteAgentResponse, DeleteAIAgentV2MutationVariables>) => ReturnType<typeof deleteAIAgentV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<DeleteAgentResponse, DeleteAIAgentV2MutationVariables>) => ReturnType<typeof deleteAIAgentV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly aiAgentDevicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.agents.editability` cache tag를 무효화합니다.
+     */
+    readonly aiAgentAgentsEditability: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.agents.updateConfiguration`
+ * 검색용 generated 경로: `aiAgent.agents.updateConfiguration`
+ * 접근 예시: `riido.v2.aiAgent.agents.updateConfiguration`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface UpdateAIAgentConfigurationV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: UpdateAIAgentConfigurationV2PathParams, body: UpdateAgentConfigurationRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponseV2>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AgentClientRecordResponseV2, UpdateAIAgentConfigurationV2MutationVariables>) => ReturnType<typeof updateAIAgentConfigurationV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AgentClientRecordResponseV2, UpdateAIAgentConfigurationV2MutationVariables>) => ReturnType<typeof updateAIAgentConfigurationV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.agents.editability` cache tag를 무효화합니다.
+     */
+    readonly aiAgentAgentsEditability: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.agents.daemon.details`
+ * 검색용 generated 경로: `aiAgent.agents.daemon.details`
+ * 접근 예시: `riido.v2.aiAgent.agents.daemon.details`
+ * cache tag: `v2.aiAgent.agents.daemon`
+ */
+export interface GetAIAgentDaemonV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAIAgentDaemonV2PathParams, options?: RiidoRequestOptions) => Promise<DeviceDaemonDetailResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAIAgentDaemonV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAIAgentDaemonV2PathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => ReturnType<typeof getAIAgentDaemonV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAIAgentDaemonV2PathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => ReturnType<typeof getAIAgentDaemonV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAIAgentDaemonV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAIAgentDaemonV2PathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => Promise<void>;
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.agents.daemon.restart`
+ * 검색용 generated 경로: `aiAgent.agents.daemon.restart`
+ * 접근 예시: `riido.v2.aiAgent.agents.daemon.restart`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface RestartAIAgentDaemonV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: RestartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => Promise<DeviceDaemonCommandResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonV2MutationVariables>) => ReturnType<typeof restartAIAgentDaemonV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonV2MutationVariables>) => ReturnType<typeof restartAIAgentDaemonV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.agents.daemon` cache tag를 무효화합니다.
+     */
+    readonly aiAgentAgentsDaemon: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly aiAgentDevicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.agents.daemon.start`
+ * 검색용 generated 경로: `aiAgent.agents.daemon.start`
+ * 접근 예시: `riido.v2.aiAgent.agents.daemon.start`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface StartAIAgentDaemonV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: StartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => Promise<DeviceDaemonCommandResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonV2MutationVariables>) => ReturnType<typeof startAIAgentDaemonV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonV2MutationVariables>) => ReturnType<typeof startAIAgentDaemonV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.agents.daemon` cache tag를 무효화합니다.
+     */
+    readonly aiAgentAgentsDaemon: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly aiAgentDevicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.agents.daemon.stop`
+ * 검색용 generated 경로: `aiAgent.agents.daemon.stop`
+ * 접근 예시: `riido.v2.aiAgent.agents.daemon.stop`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface StopAIAgentDaemonV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: StopAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => Promise<DeviceDaemonCommandResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonV2MutationVariables>) => ReturnType<typeof stopAIAgentDaemonV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonV2MutationVariables>) => ReturnType<typeof stopAIAgentDaemonV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.agents.daemon` cache tag를 무효화합니다.
+     */
+    readonly aiAgentAgentsDaemon: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly aiAgentDevicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.agents.editability`
+ * 검색용 generated 경로: `aiAgent.agents.editability`
+ * 접근 예시: `riido.v2.aiAgent.agents.editability`
+ * cache tag: `v2.aiAgent.agents.editability`
+ */
+export interface GetAIAgentEditabilityV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAIAgentEditabilityV2PathParams, options?: RiidoRequestOptions) => Promise<AgentEditabilityResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAIAgentEditabilityV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAIAgentEditabilityV2PathParams, options?: RiidoQueryOptions<AgentEditabilityResponse>) => ReturnType<typeof getAIAgentEditabilityV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAIAgentEditabilityV2PathParams, options?: RiidoQueryOptions<AgentEditabilityResponse>) => ReturnType<typeof getAIAgentEditabilityV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAIAgentEditabilityV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAIAgentEditabilityV2PathParams, options?: RiidoQueryOptions<AgentEditabilityResponse>) => Promise<void>;
+}
+
+/**
+ * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.bootstrap`
+ * 검색용 generated 경로: `aiAgent.bootstrap`
+ * 접근 예시: `riido.v2.aiAgent.bootstrap`
+ * cache tag: `v2.aiAgent.bootstrap`
+ */
+export interface GetAIAgentClientBootstrapV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAIAgentClientBootstrapV2PathParams, options?: RiidoRequestOptions) => Promise<ClientBootstrapResponseV2>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAIAgentClientBootstrapV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAIAgentClientBootstrapV2PathParams, options?: RiidoQueryOptions<ClientBootstrapResponseV2>) => ReturnType<typeof getAIAgentClientBootstrapV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAIAgentClientBootstrapV2PathParams, options?: RiidoQueryOptions<ClientBootstrapResponseV2>) => ReturnType<typeof getAIAgentClientBootstrapV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAIAgentClientBootstrapV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAIAgentClientBootstrapV2PathParams, options?: RiidoQueryOptions<ClientBootstrapResponseV2>) => Promise<void>;
+}
+
+/**
+ * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.devices.runtimes`
+ * 검색용 generated 경로: `aiAgent.devices.runtimes`
+ * 접근 예시: `riido.v2.aiAgent.devices.runtimes`
+ * cache tag: `v2.aiAgent.devices.runtimes`
+ */
+export interface ListAIAgentDeviceRuntimesV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentDeviceRuntimesV2PathParams, options?: RiidoRequestOptions) => Promise<DeviceRuntimeListResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentDeviceRuntimesV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentDeviceRuntimesV2PathParams, options?: RiidoQueryOptions<DeviceRuntimeListResponse>) => ReturnType<typeof listAIAgentDeviceRuntimesV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentDeviceRuntimesV2PathParams, options?: RiidoQueryOptions<DeviceRuntimeListResponse>) => ReturnType<typeof listAIAgentDeviceRuntimesV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceRuntimesV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceRuntimesV2PathParams, options?: RiidoQueryOptions<DeviceRuntimeListResponse>) => Promise<void>;
+}
+
+/**
+ * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.events.stream`
+ * 검색용 generated 경로: `aiAgent.events.stream`
+ * 접근 예시: `riido.v2.aiAgent.events.stream`
+ * cache tag: `v2.aiAgent.events.stream`
+ */
+export interface StreamAIAgentClientEventsV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: StreamAIAgentClientEventsV2PathParams, options?: RiidoRequestOptions) => Promise<Response>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: StreamAIAgentClientEventsV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: StreamAIAgentClientEventsV2PathParams, options?: RiidoQueryOptions<Response>) => ReturnType<typeof streamAIAgentClientEventsV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: StreamAIAgentClientEventsV2PathParams, options?: RiidoQueryOptions<Response>) => ReturnType<typeof streamAIAgentClientEventsV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: StreamAIAgentClientEventsV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: StreamAIAgentClientEventsV2PathParams, options?: RiidoQueryOptions<Response>) => Promise<void>;
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.onboarding.fixtures`
+ * 검색용 generated 경로: `aiAgent.onboarding.fixtures`
+ * 접근 예시: `riido.v2.aiAgent.onboarding.fixtures`
+ * cache tag: `v2.aiAgent.onboarding.fixtures`
+ */
+export interface ListAIAgentOnboardingFixturesV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentOnboardingFixturesV2PathParams, options?: RiidoRequestOptions) => Promise<AgentOnboardingFixtureListResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentOnboardingFixturesV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentOnboardingFixturesV2PathParams, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => ReturnType<typeof listAIAgentOnboardingFixturesV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentOnboardingFixturesV2PathParams, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => ReturnType<typeof listAIAgentOnboardingFixturesV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentOnboardingFixturesV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentOnboardingFixturesV2PathParams, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => Promise<void>;
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.onboarding.fixtures.createAgent`
+ * 검색용 generated 경로: `aiAgent.onboarding.fixtures.createAgent`
+ * 접근 예시: `riido.v2.aiAgent.onboarding.fixtures.createAgent`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentFromOnboardingFixtureV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponseV2>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentFromOnboardingFixtureV2MutationVariables>) => ReturnType<typeof createAIAgentFromOnboardingFixtureV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentFromOnboardingFixtureV2MutationVariables>) => ReturnType<typeof createAIAgentFromOnboardingFixtureV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly aiAgentDevicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.assignableAgents`
+ * 검색용 generated 경로: `aiAgent.tasks.assignableAgents`
+ * 접근 예시: `riido.v2.aiAgent.tasks.assignableAgents`
+ * cache tag: `v2.aiAgent.tasks.assignableAgents`
+ */
+export interface ListAIAgentTaskAssignableAgentsV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentTaskAssignableAgentsV2PathParams, options?: RiidoRequestOptions) => Promise<AgentClientListResponseV2>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentTaskAssignableAgentsV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentTaskAssignableAgentsV2PathParams, options?: RiidoQueryOptions<AgentClientListResponseV2>) => ReturnType<typeof listAIAgentTaskAssignableAgentsV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentTaskAssignableAgentsV2PathParams, options?: RiidoQueryOptions<AgentClientListResponseV2>) => ReturnType<typeof listAIAgentTaskAssignableAgentsV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentTaskAssignableAgentsV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentTaskAssignableAgentsV2PathParams, options?: RiidoQueryOptions<AgentClientListResponseV2>) => Promise<void>;
+}
+
+/**
+ * task participant에서 AI agent를 제거하고 작업을 중단합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.unassign`
+ * 검색용 generated 경로: `aiAgent.tasks.unassign`
+ * 접근 예시: `riido.v2.aiAgent.tasks.unassign`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface UnassignAIAgentTaskV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: UnassignAIAgentTaskV2PathParams, body: UnassignAIAgentTaskRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskV2MutationVariables>) => ReturnType<typeof unassignAIAgentTaskV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskV2MutationVariables>) => ReturnType<typeof unassignAIAgentTaskV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * task participant dropdown에서 AI agent를 배정합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.assign`
+ * 검색용 generated 경로: `aiAgent.tasks.assign`
+ * 접근 예시: `riido.v2.aiAgent.tasks.assign`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface AssignAIAgentTaskV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: AssignAIAgentTaskV2PathParams, body: AssignAIAgentTaskRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskV2MutationVariables>) => ReturnType<typeof assignAIAgentTaskV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskV2MutationVariables>) => ReturnType<typeof assignAIAgentTaskV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.submitComment`
+ * 검색용 generated 경로: `aiAgent.tasks.submitComment`
+ * 접근 예시: `riido.v2.aiAgent.tasks.submitComment`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface SubmitAIAgentTaskCommentV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: SubmitAIAgentTaskCommentV2PathParams, body: SubmitAIAgentTaskCommentRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, SubmitAIAgentTaskCommentV2MutationVariables>) => ReturnType<typeof submitAIAgentTaskCommentV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, SubmitAIAgentTaskCommentV2MutationVariables>) => ReturnType<typeof submitAIAgentTaskCommentV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.stop`
+ * 검색용 generated 경로: `aiAgent.tasks.stop`
+ * 접근 예시: `riido.v2.aiAgent.tasks.stop`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface StopAIAgentTaskV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: StopAIAgentTaskV2PathParams, body: StopAIAgentTaskRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, StopAIAgentTaskV2MutationVariables>) => ReturnType<typeof stopAIAgentTaskV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, StopAIAgentTaskV2MutationVariables>) => ReturnType<typeof stopAIAgentTaskV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.threads`
+ * 검색용 generated 경로: `aiAgent.tasks.threads`
+ * 접근 예시: `riido.v2.aiAgent.tasks.threads`
+ * cache tag: `v2.aiAgent.tasks.threads`
+ */
+export interface ListAIAgentTaskThreadsV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentTaskThreadsV2PathParams, options?: RiidoRequestOptions) => Promise<AIAgentTaskThreadCollectionResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentTaskThreadsV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentTaskThreadsV2PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse>) => ReturnType<typeof listAIAgentTaskThreadsV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentTaskThreadsV2PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse>) => ReturnType<typeof listAIAgentTaskThreadsV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentTaskThreadsV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentTaskThreadsV2PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse>) => Promise<void>;
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.threadMessages.create`
+ * 검색용 generated 경로: `aiAgent.tasks.threadMessages.create`
+ * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentTaskThreadMessageV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: CreateAIAgentTaskThreadMessageV2PathParams, body: CreateAIAgentTaskThreadMessageRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageV2MutationVariables>) => ReturnType<typeof createAIAgentTaskThreadMessageV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageV2MutationVariables>) => ReturnType<typeof createAIAgentTaskThreadMessageV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
  * agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentAgentsDaemonNamespace {
@@ -2548,6 +4421,254 @@ export interface RiidoAIAgentModule {
 }
 
 /**
+ * workspace-scoped agent 권한을 통해 daemon 상세와 제어 command를 다루는 v2 namespace입니다.
+ */
+export interface RiidoV2AIAgentAgentsDaemonNamespace {
+  /**
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.agents.daemon.details`
+   * 검색용 generated 경로: `aiAgent.agents.daemon.details`
+   * 접근 예시: `riido.v2.aiAgent.agents.daemon.details`
+   * cache tag: `v2.aiAgent.agents.daemon`
+   */
+  readonly details: GetAIAgentDaemonV2Endpoint;
+  /**
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.agents.daemon.restart`
+   * 검색용 generated 경로: `aiAgent.agents.daemon.restart`
+   * 접근 예시: `riido.v2.aiAgent.agents.daemon.restart`
+   * invalidates: `v2.aiAgent.agents.daemon`, `v2.aiAgent.devices.runtimes`
+   */
+  readonly restart: RestartAIAgentDaemonV2Endpoint;
+  /**
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.agents.daemon.start`
+   * 검색용 generated 경로: `aiAgent.agents.daemon.start`
+   * 접근 예시: `riido.v2.aiAgent.agents.daemon.start`
+   * invalidates: `v2.aiAgent.agents.daemon`, `v2.aiAgent.devices.runtimes`
+   */
+  readonly start: StartAIAgentDaemonV2Endpoint;
+  /**
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.agents.daemon.stop`
+   * 검색용 generated 경로: `aiAgent.agents.daemon.stop`
+   * 접근 예시: `riido.v2.aiAgent.agents.daemon.stop`
+   * invalidates: `v2.aiAgent.agents.daemon`, `v2.aiAgent.devices.runtimes`
+   */
+  readonly stop: StopAIAgentDaemonV2Endpoint;
+}
+
+/**
+ * workspace 안에 생성되는 agent 설정과 mutation을 다루는 v2 namespace입니다.
+ */
+export interface RiidoV2AIAgentAgentsNamespace {
+  /**
+   * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.agents.create`
+   * 검색용 generated 경로: `aiAgent.agents.create`
+   * 접근 예시: `riido.v2.aiAgent.agents.create`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.devices.runtimes`, `v2.aiAgent.tasks.assignableAgents`
+   */
+  readonly create: CreateAIAgentV2Endpoint;
+  /**
+   * workspace-scoped agent 권한을 통해 daemon 상세와 제어 command를 다루는 v2 namespace입니다.
+   */
+  readonly daemon: RiidoV2AIAgentAgentsDaemonNamespace;
+  /**
+   * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.agents.delete`
+   * 검색용 generated 경로: `aiAgent.agents.delete`
+   * 접근 예시: `riido.v2.aiAgent.agents.delete`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.devices.runtimes`, `v2.aiAgent.agents.editability`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   */
+  readonly delete: DeleteAIAgentV2Endpoint;
+  /**
+   * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.agents.editability`
+   * 검색용 generated 경로: `aiAgent.agents.editability`
+   * 접근 예시: `riido.v2.aiAgent.agents.editability`
+   * cache tag: `v2.aiAgent.agents.editability`
+   */
+  readonly editability: GetAIAgentEditabilityV2Endpoint;
+  /**
+   * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.agents.updateConfiguration`
+   * 검색용 generated 경로: `aiAgent.agents.updateConfiguration`
+   * 접근 예시: `riido.v2.aiAgent.agents.updateConfiguration`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.agents.editability`, `v2.aiAgent.tasks.assignableAgents`
+   */
+  readonly updateConfiguration: UpdateAIAgentConfigurationV2Endpoint;
+}
+
+/**
+ * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
+ */
+export interface RiidoV2AIAgentDevicesNamespace {
+  /**
+   * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.devices.runtimes`
+   * 검색용 generated 경로: `aiAgent.devices.runtimes`
+   * 접근 예시: `riido.v2.aiAgent.devices.runtimes`
+   * cache tag: `v2.aiAgent.devices.runtimes`
+   */
+  readonly runtimes: ListAIAgentDeviceRuntimesV2Endpoint;
+}
+
+/**
+ * 선택된 workspace 범위로 client가 수신하는 SSE stream namespace입니다.
+ */
+export interface RiidoV2AIAgentEventsNamespace {
+  /**
+   * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.events.stream`
+   * 검색용 generated 경로: `aiAgent.events.stream`
+   * 접근 예시: `riido.v2.aiAgent.events.stream`
+   * cache tag: `v2.aiAgent.events.stream`
+   */
+  readonly stream: StreamAIAgentClientEventsV2Endpoint;
+}
+
+/**
+ * 서버 제공 fixture 목록과 fixture 기반 agent 생성 진입점입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
+ */
+export interface RiidoV2AIAgentOnboardingFixturesNamespace extends ListAIAgentOnboardingFixturesV2Endpoint {
+  /**
+   * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.onboarding.fixtures.createAgent`
+   * 검색용 generated 경로: `aiAgent.onboarding.fixtures.createAgent`
+   * 접근 예시: `riido.v2.aiAgent.onboarding.fixtures.createAgent`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.devices.runtimes`, `v2.aiAgent.tasks.assignableAgents`
+   */
+  readonly createAgent: CreateAIAgentFromOnboardingFixtureV2Endpoint;
+}
+
+/**
+ * 선택된 workspace에서 빠른 agent 생성을 돕는 onboarding fixture namespace입니다.
+ */
+export interface RiidoV2AIAgentOnboardingNamespace {
+  /**
+   * 서버 제공 fixture 목록과 fixture 기반 agent 생성 진입점입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
+   */
+  readonly fixtures: RiidoV2AIAgentOnboardingFixturesNamespace;
+}
+
+/**
+ * 선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다.
+ */
+export interface RiidoV2AIAgentTasksThreadMessagesNamespace {
+  /**
+   * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.threadMessages.create`
+   * 검색용 generated 경로: `aiAgent.tasks.threadMessages.create`
+   * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.create`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   */
+  readonly create: CreateAIAgentTaskThreadMessageV2Endpoint;
+}
+
+/**
+ * 선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
+ */
+export interface RiidoV2AIAgentTasksNamespace {
+  /**
+   * task participant dropdown에서 AI agent를 배정합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.assign`
+   * 검색용 generated 경로: `aiAgent.tasks.assign`
+   * 접근 예시: `riido.v2.aiAgent.tasks.assign`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   */
+  readonly assign: AssignAIAgentTaskV2Endpoint;
+  /**
+   * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.assignableAgents`
+   * 검색용 generated 경로: `aiAgent.tasks.assignableAgents`
+   * 접근 예시: `riido.v2.aiAgent.tasks.assignableAgents`
+   * cache tag: `v2.aiAgent.tasks.assignableAgents`
+   */
+  readonly assignableAgents: ListAIAgentTaskAssignableAgentsV2Endpoint;
+  /**
+   * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.stop`
+   * 검색용 generated 경로: `aiAgent.tasks.stop`
+   * 접근 예시: `riido.v2.aiAgent.tasks.stop`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   */
+  readonly stop: StopAIAgentTaskV2Endpoint;
+  /**
+   * 호환 task comment route로 AI agent에게 메시지를 전달합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.submitComment`
+   * 검색용 generated 경로: `aiAgent.tasks.submitComment`
+   * 접근 예시: `riido.v2.aiAgent.tasks.submitComment`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   */
+  readonly submitComment: SubmitAIAgentTaskCommentV2Endpoint;
+  /**
+   * 선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다.
+   */
+  readonly threadMessages: RiidoV2AIAgentTasksThreadMessagesNamespace;
+  /**
+   * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.threads`
+   * 검색용 generated 경로: `aiAgent.tasks.threads`
+   * 접근 예시: `riido.v2.aiAgent.tasks.threads`
+   * cache tag: `v2.aiAgent.tasks.threads`
+   */
+  readonly threads: ListAIAgentTaskThreadsV2Endpoint;
+  /**
+   * task participant에서 AI agent를 제거하고 작업을 중단합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.unassign`
+   * 검색용 generated 경로: `aiAgent.tasks.unassign`
+   * 접근 예시: `riido.v2.aiAgent.tasks.unassign`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   */
+  readonly unassign: UnassignAIAgentTaskV2Endpoint;
+}
+
+/**
+ * workspace_id path parameter로 범위가 정해지는 AI Agent v2 namespace입니다.
+ */
+export interface RiidoV2AIAgentNamespace {
+  /**
+   * workspace 안에 생성되는 agent 설정과 mutation을 다루는 v2 namespace입니다.
+   */
+  readonly agents: RiidoV2AIAgentAgentsNamespace;
+  /**
+   * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.bootstrap`
+   * 검색용 generated 경로: `aiAgent.bootstrap`
+   * 접근 예시: `riido.v2.aiAgent.bootstrap`
+   * cache tag: `v2.aiAgent.bootstrap`
+   */
+  readonly bootstrap: GetAIAgentClientBootstrapV2Endpoint;
+  /**
+   * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
+   */
+  readonly devices: RiidoV2AIAgentDevicesNamespace;
+  /**
+   * 선택된 workspace 범위로 client가 수신하는 SSE stream namespace입니다.
+   */
+  readonly events: RiidoV2AIAgentEventsNamespace;
+  /**
+   * 선택된 workspace에서 빠른 agent 생성을 돕는 onboarding fixture namespace입니다.
+   */
+  readonly onboarding: RiidoV2AIAgentOnboardingNamespace;
+  /**
+   * 선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
+   */
+  readonly tasks: RiidoV2AIAgentTasksNamespace;
+}
+
+/**
+ * v2 client API module입니다. workspace-scoped AI Agent API를 riido.v2.aiAgent.* 경로로 제공합니다. v1은 UI 테스트 호환 표면으로 유지됩니다.
+ */
+export interface RiidoV2Module {
+  /**
+   * workspace_id path parameter로 범위가 정해지는 AI Agent v2 namespace입니다.
+   */
+  readonly aiAgent: RiidoV2AIAgentNamespace;
+}
+
+/**
  * control-plane API를 DSL client metadata의 module/namespace별로 묶은 config-bound facade입니다.
  */
 export interface RiidoControlPlaneClient {
@@ -2555,6 +4676,10 @@ export interface RiidoControlPlaneClient {
    * AI Agent client API module입니다. 화면 구성을 소유하지 않고, client가 화면을 구성할 때 필요한 API 의미, 정책, lifecycle, cache 관계를 제공합니다.
    */
   readonly aiAgent: RiidoAIAgentModule;
+  /**
+   * v2 client API module입니다. workspace-scoped AI Agent API를 riido.v2.aiAgent.* 경로로 제공합니다. v1은 UI 테스트 호환 표면으로 유지됩니다.
+   */
+  readonly v2: RiidoV2Module;
 }
 
 /**
@@ -2798,6 +4923,247 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
             tasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
             all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() })]),
+          },
+        },
+      },
+    },
+    v2: {
+      aiAgent: {
+        agents: {
+          create: {
+            request: (params: CreateAIAgentV2PathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => createAIAgentV2(config, params, body, options),
+            mutationKey: createAIAgentV2MutationKey,
+            mutation: (options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentV2MutationVariables> = {}) => createAIAgentV2MutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentV2MutationVariables> = {}) => createAIAgentV2MutationOptions(config, options),
+            invalidates: {
+              aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+              aiAgentDevicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
+              aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() })]),
+            },
+          },
+          daemon: {
+            details: {
+              request: (params: GetAIAgentDaemonV2PathParams, options?: RiidoRequestOptions) => getAIAgentDaemonV2(config, params, options),
+              queryKeyRoot: getAIAgentDaemonV2QueryKeyRoot,
+              queryKey: getAIAgentDaemonV2QueryKey,
+              query: (params: GetAIAgentDaemonV2PathParams, options: RiidoQueryOptions<DeviceDaemonDetailResponse> = {}) => getAIAgentDaemonV2QueryOptions(config, params, options),
+              queryOptions: (params: GetAIAgentDaemonV2PathParams, options: RiidoQueryOptions<DeviceDaemonDetailResponse> = {}) => getAIAgentDaemonV2QueryOptions(config, params, options),
+              invalidate: (queryClient: QueryClient, params: GetAIAgentDaemonV2PathParams) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonV2QueryKey(params) }),
+              invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonV2QueryKeyRoot() }),
+              prefetch: (queryClient: QueryClient, params: GetAIAgentDaemonV2PathParams, options?: RiidoQueryOptions<DeviceDaemonDetailResponse>) => queryClient.prefetchQuery(getAIAgentDaemonV2QueryOptions(config, params, options)),
+            },
+            restart: {
+              request: (params: RestartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => restartAIAgentDaemonV2(config, params, body, options),
+              mutationKey: restartAIAgentDaemonV2MutationKey,
+              mutation: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonV2MutationVariables> = {}) => restartAIAgentDaemonV2MutationOptions(config, options),
+              mutationOptions: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, RestartAIAgentDaemonV2MutationVariables> = {}) => restartAIAgentDaemonV2MutationOptions(config, options),
+              invalidates: {
+                aiAgentAgentsDaemon: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonV2QueryKeyRoot() }),
+                aiAgentDevicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDaemonV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() })]),
+              },
+            },
+            start: {
+              request: (params: StartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => startAIAgentDaemonV2(config, params, body, options),
+              mutationKey: startAIAgentDaemonV2MutationKey,
+              mutation: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonV2MutationVariables> = {}) => startAIAgentDaemonV2MutationOptions(config, options),
+              mutationOptions: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StartAIAgentDaemonV2MutationVariables> = {}) => startAIAgentDaemonV2MutationOptions(config, options),
+              invalidates: {
+                aiAgentAgentsDaemon: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonV2QueryKeyRoot() }),
+                aiAgentDevicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDaemonV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() })]),
+              },
+            },
+            stop: {
+              request: (params: StopAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options?: RiidoRequestOptions) => stopAIAgentDaemonV2(config, params, body, options),
+              mutationKey: stopAIAgentDaemonV2MutationKey,
+              mutation: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonV2MutationVariables> = {}) => stopAIAgentDaemonV2MutationOptions(config, options),
+              mutationOptions: (options: RiidoMutationOptions<DeviceDaemonCommandResponse, StopAIAgentDaemonV2MutationVariables> = {}) => stopAIAgentDaemonV2MutationOptions(config, options),
+              invalidates: {
+                aiAgentAgentsDaemon: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDaemonV2QueryKeyRoot() }),
+                aiAgentDevicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDaemonV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() })]),
+              },
+            },
+          },
+          delete: {
+            request: (params: DeleteAIAgentV2PathParams, options?: RiidoRequestOptions) => deleteAIAgentV2(config, params, options),
+            mutationKey: deleteAIAgentV2MutationKey,
+            mutation: (options: RiidoMutationOptions<DeleteAgentResponse, DeleteAIAgentV2MutationVariables> = {}) => deleteAIAgentV2MutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<DeleteAgentResponse, DeleteAIAgentV2MutationVariables> = {}) => deleteAIAgentV2MutationOptions(config, options),
+            invalidates: {
+              aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+              aiAgentDevicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
+              aiAgentAgentsEditability: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentEditabilityV2QueryKeyRoot() }),
+              aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+              aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentEditabilityV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() })]),
+            },
+          },
+          editability: {
+            request: (params: GetAIAgentEditabilityV2PathParams, options?: RiidoRequestOptions) => getAIAgentEditabilityV2(config, params, options),
+            queryKeyRoot: getAIAgentEditabilityV2QueryKeyRoot,
+            queryKey: getAIAgentEditabilityV2QueryKey,
+            query: (params: GetAIAgentEditabilityV2PathParams, options: RiidoQueryOptions<AgentEditabilityResponse> = {}) => getAIAgentEditabilityV2QueryOptions(config, params, options),
+            queryOptions: (params: GetAIAgentEditabilityV2PathParams, options: RiidoQueryOptions<AgentEditabilityResponse> = {}) => getAIAgentEditabilityV2QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: GetAIAgentEditabilityV2PathParams) => queryClient.invalidateQueries({ queryKey: getAIAgentEditabilityV2QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentEditabilityV2QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: GetAIAgentEditabilityV2PathParams, options?: RiidoQueryOptions<AgentEditabilityResponse>) => queryClient.prefetchQuery(getAIAgentEditabilityV2QueryOptions(config, params, options)),
+          },
+          updateConfiguration: {
+            request: (params: UpdateAIAgentConfigurationV2PathParams, body: UpdateAgentConfigurationRequest, options?: RiidoRequestOptions) => updateAIAgentConfigurationV2(config, params, body, options),
+            mutationKey: updateAIAgentConfigurationV2MutationKey,
+            mutation: (options: RiidoMutationOptions<AgentClientRecordResponseV2, UpdateAIAgentConfigurationV2MutationVariables> = {}) => updateAIAgentConfigurationV2MutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AgentClientRecordResponseV2, UpdateAIAgentConfigurationV2MutationVariables> = {}) => updateAIAgentConfigurationV2MutationOptions(config, options),
+            invalidates: {
+              aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+              aiAgentAgentsEditability: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentEditabilityV2QueryKeyRoot() }),
+              aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentEditabilityV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() })]),
+            },
+          },
+        },
+        bootstrap: {
+          request: (params: GetAIAgentClientBootstrapV2PathParams, options?: RiidoRequestOptions) => getAIAgentClientBootstrapV2(config, params, options),
+          queryKeyRoot: getAIAgentClientBootstrapV2QueryKeyRoot,
+          queryKey: getAIAgentClientBootstrapV2QueryKey,
+          query: (params: GetAIAgentClientBootstrapV2PathParams, options: RiidoQueryOptions<ClientBootstrapResponseV2> = {}) => getAIAgentClientBootstrapV2QueryOptions(config, params, options),
+          queryOptions: (params: GetAIAgentClientBootstrapV2PathParams, options: RiidoQueryOptions<ClientBootstrapResponseV2> = {}) => getAIAgentClientBootstrapV2QueryOptions(config, params, options),
+          invalidate: (queryClient: QueryClient, params: GetAIAgentClientBootstrapV2PathParams) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKey(params) }),
+          invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+          prefetch: (queryClient: QueryClient, params: GetAIAgentClientBootstrapV2PathParams, options?: RiidoQueryOptions<ClientBootstrapResponseV2>) => queryClient.prefetchQuery(getAIAgentClientBootstrapV2QueryOptions(config, params, options)),
+        },
+        devices: {
+          runtimes: {
+            request: (params: ListAIAgentDeviceRuntimesV2PathParams, options?: RiidoRequestOptions) => listAIAgentDeviceRuntimesV2(config, params, options),
+            queryKeyRoot: listAIAgentDeviceRuntimesV2QueryKeyRoot,
+            queryKey: listAIAgentDeviceRuntimesV2QueryKey,
+            query: (params: ListAIAgentDeviceRuntimesV2PathParams, options: RiidoQueryOptions<DeviceRuntimeListResponse> = {}) => listAIAgentDeviceRuntimesV2QueryOptions(config, params, options),
+            queryOptions: (params: ListAIAgentDeviceRuntimesV2PathParams, options: RiidoQueryOptions<DeviceRuntimeListResponse> = {}) => listAIAgentDeviceRuntimesV2QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceRuntimesV2PathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceRuntimesV2PathParams, options?: RiidoQueryOptions<DeviceRuntimeListResponse>) => queryClient.prefetchQuery(listAIAgentDeviceRuntimesV2QueryOptions(config, params, options)),
+          },
+        },
+        events: {
+          stream: {
+            request: (params: StreamAIAgentClientEventsV2PathParams, options?: RiidoRequestOptions) => streamAIAgentClientEventsV2(config, params, options),
+            queryKeyRoot: streamAIAgentClientEventsV2QueryKeyRoot,
+            queryKey: streamAIAgentClientEventsV2QueryKey,
+            query: (params: StreamAIAgentClientEventsV2PathParams, options: RiidoQueryOptions<Response> = {}) => streamAIAgentClientEventsV2QueryOptions(config, params, options),
+            queryOptions: (params: StreamAIAgentClientEventsV2PathParams, options: RiidoQueryOptions<Response> = {}) => streamAIAgentClientEventsV2QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: StreamAIAgentClientEventsV2PathParams) => queryClient.invalidateQueries({ queryKey: streamAIAgentClientEventsV2QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: streamAIAgentClientEventsV2QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: StreamAIAgentClientEventsV2PathParams, options?: RiidoQueryOptions<Response>) => queryClient.prefetchQuery(streamAIAgentClientEventsV2QueryOptions(config, params, options)),
+          },
+        },
+        onboarding: {
+          fixtures: {
+            request: (params: ListAIAgentOnboardingFixturesV2PathParams, options?: RiidoRequestOptions) => listAIAgentOnboardingFixturesV2(config, params, options),
+            queryKeyRoot: listAIAgentOnboardingFixturesV2QueryKeyRoot,
+            queryKey: listAIAgentOnboardingFixturesV2QueryKey,
+            query: (params: ListAIAgentOnboardingFixturesV2PathParams, options: RiidoQueryOptions<AgentOnboardingFixtureListResponse> = {}) => listAIAgentOnboardingFixturesV2QueryOptions(config, params, options),
+            queryOptions: (params: ListAIAgentOnboardingFixturesV2PathParams, options: RiidoQueryOptions<AgentOnboardingFixtureListResponse> = {}) => listAIAgentOnboardingFixturesV2QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: ListAIAgentOnboardingFixturesV2PathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentOnboardingFixturesV2QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentOnboardingFixturesV2QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: ListAIAgentOnboardingFixturesV2PathParams, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => queryClient.prefetchQuery(listAIAgentOnboardingFixturesV2QueryOptions(config, params, options)),
+            createAgent: {
+              request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixtureV2(config, params, body, options),
+              mutationKey: createAIAgentFromOnboardingFixtureV2MutationKey,
+              mutation: (options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentFromOnboardingFixtureV2MutationVariables> = {}) => createAIAgentFromOnboardingFixtureV2MutationOptions(config, options),
+              mutationOptions: (options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentFromOnboardingFixtureV2MutationVariables> = {}) => createAIAgentFromOnboardingFixtureV2MutationOptions(config, options),
+              invalidates: {
+                aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+                aiAgentDevicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
+                aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() })]),
+              },
+            },
+          },
+        },
+        tasks: {
+          assign: {
+            request: (params: AssignAIAgentTaskV2PathParams, body: AssignAIAgentTaskRequest, options?: RiidoRequestOptions) => assignAIAgentTaskV2(config, params, body, options),
+            mutationKey: assignAIAgentTaskV2MutationKey,
+            mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskV2MutationVariables> = {}) => assignAIAgentTaskV2MutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, AssignAIAgentTaskV2MutationVariables> = {}) => assignAIAgentTaskV2MutationOptions(config, options),
+            invalidates: {
+              aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+              aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+              aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() })]),
+            },
+          },
+          assignableAgents: {
+            request: (params: ListAIAgentTaskAssignableAgentsV2PathParams, options?: RiidoRequestOptions) => listAIAgentTaskAssignableAgentsV2(config, params, options),
+            queryKeyRoot: listAIAgentTaskAssignableAgentsV2QueryKeyRoot,
+            queryKey: listAIAgentTaskAssignableAgentsV2QueryKey,
+            query: (params: ListAIAgentTaskAssignableAgentsV2PathParams, options: RiidoQueryOptions<AgentClientListResponseV2> = {}) => listAIAgentTaskAssignableAgentsV2QueryOptions(config, params, options),
+            queryOptions: (params: ListAIAgentTaskAssignableAgentsV2PathParams, options: RiidoQueryOptions<AgentClientListResponseV2> = {}) => listAIAgentTaskAssignableAgentsV2QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: ListAIAgentTaskAssignableAgentsV2PathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: ListAIAgentTaskAssignableAgentsV2PathParams, options?: RiidoQueryOptions<AgentClientListResponseV2>) => queryClient.prefetchQuery(listAIAgentTaskAssignableAgentsV2QueryOptions(config, params, options)),
+          },
+          stop: {
+            request: (params: StopAIAgentTaskV2PathParams, body: StopAIAgentTaskRequest, options?: RiidoRequestOptions) => stopAIAgentTaskV2(config, params, body, options),
+            mutationKey: stopAIAgentTaskV2MutationKey,
+            mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, StopAIAgentTaskV2MutationVariables> = {}) => stopAIAgentTaskV2MutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, StopAIAgentTaskV2MutationVariables> = {}) => stopAIAgentTaskV2MutationOptions(config, options),
+            invalidates: {
+              aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+              aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+              aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() })]),
+            },
+          },
+          submitComment: {
+            request: (params: SubmitAIAgentTaskCommentV2PathParams, body: SubmitAIAgentTaskCommentRequest, options?: RiidoRequestOptions) => submitAIAgentTaskCommentV2(config, params, body, options),
+            mutationKey: submitAIAgentTaskCommentV2MutationKey,
+            mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, SubmitAIAgentTaskCommentV2MutationVariables> = {}) => submitAIAgentTaskCommentV2MutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, SubmitAIAgentTaskCommentV2MutationVariables> = {}) => submitAIAgentTaskCommentV2MutationOptions(config, options),
+            invalidates: {
+              aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+              aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+              aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() })]),
+            },
+          },
+          threadMessages: {
+            create: {
+              request: (params: CreateAIAgentTaskThreadMessageV2PathParams, body: CreateAIAgentTaskThreadMessageRequest, options?: RiidoRequestOptions) => createAIAgentTaskThreadMessageV2(config, params, body, options),
+              mutationKey: createAIAgentTaskThreadMessageV2MutationKey,
+              mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageV2MutationVariables> = {}) => createAIAgentTaskThreadMessageV2MutationOptions(config, options),
+              mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageV2MutationVariables> = {}) => createAIAgentTaskThreadMessageV2MutationOptions(config, options),
+              invalidates: {
+                aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+                aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+                aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() })]),
+              },
+            },
+          },
+          threads: {
+            request: (params: ListAIAgentTaskThreadsV2PathParams, options?: RiidoRequestOptions) => listAIAgentTaskThreadsV2(config, params, options),
+            queryKeyRoot: listAIAgentTaskThreadsV2QueryKeyRoot,
+            queryKey: listAIAgentTaskThreadsV2QueryKey,
+            query: (params: ListAIAgentTaskThreadsV2PathParams, options: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse> = {}) => listAIAgentTaskThreadsV2QueryOptions(config, params, options),
+            queryOptions: (params: ListAIAgentTaskThreadsV2PathParams, options: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse> = {}) => listAIAgentTaskThreadsV2QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: ListAIAgentTaskThreadsV2PathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: ListAIAgentTaskThreadsV2PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadCollectionResponse>) => queryClient.prefetchQuery(listAIAgentTaskThreadsV2QueryOptions(config, params, options)),
+          },
+          unassign: {
+            request: (params: UnassignAIAgentTaskV2PathParams, body: UnassignAIAgentTaskRequest, options?: RiidoRequestOptions) => unassignAIAgentTaskV2(config, params, body, options),
+            mutationKey: unassignAIAgentTaskV2MutationKey,
+            mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskV2MutationVariables> = {}) => unassignAIAgentTaskV2MutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, UnassignAIAgentTaskV2MutationVariables> = {}) => unassignAIAgentTaskV2MutationOptions(config, options),
+            invalidates: {
+              aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+              aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+              aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() })]),
+            },
           },
         },
       },

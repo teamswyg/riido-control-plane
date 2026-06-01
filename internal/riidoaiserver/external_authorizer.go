@@ -41,10 +41,11 @@ type externalAuthorizerRequest struct {
 }
 
 type externalAuthorizationRequest struct {
-	Resource AuthorizationResource `json:"resource"`
-	Action   AuthorizationAction   `json:"action"`
-	AgentID  string                `json:"agent_id,omitempty"`
-	TaskID   string                `json:"task_id,omitempty"`
+	Resource    AuthorizationResource `json:"resource"`
+	Action      AuthorizationAction   `json:"action"`
+	WorkspaceID string                `json:"workspace_id,omitempty"`
+	AgentID     string                `json:"agent_id,omitempty"`
+	TaskID      string                `json:"task_id,omitempty"`
 }
 
 type externalAuthorizerResponse struct {
@@ -90,10 +91,11 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 		BearerToken:   bearerToken,
 		Audience:      a.audience,
 		Request: externalAuthorizationRequest{
-			Resource: req.Resource,
-			Action:   req.Action,
-			AgentID:  strings.TrimSpace(req.AgentID),
-			TaskID:   strings.TrimSpace(req.TaskID),
+			Resource:    req.Resource,
+			Action:      req.Action,
+			WorkspaceID: strings.TrimSpace(req.WorkspaceID),
+			AgentID:     strings.TrimSpace(req.AgentID),
+			TaskID:      strings.TrimSpace(req.TaskID),
 		},
 	})
 	if err != nil {
@@ -150,7 +152,7 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	if err != nil {
 		return AuthorizationResult{}, fmt.Errorf("riidoaiserver: external authorizer roles: %w", err)
 	}
-	return AuthorizationResult{PrincipalID: out.PrincipalID, Roles: roles}, nil
+	return AuthorizationResult{PrincipalID: out.PrincipalID, WorkspaceID: strings.TrimSpace(req.WorkspaceID), Roles: roles}, nil
 }
 
 func normalizeExternalAuthorizerEndpoint(endpoint string) (string, error) {
