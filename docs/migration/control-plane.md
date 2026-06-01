@@ -1137,6 +1137,32 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4838 — Legacy Wireframe semantic absorption projection
+
+This slice mirrors the contracts-owned legacy Wireframe semantic-node coverage
+gate from `teamswyg/riido-contracts#51`.
+
+The upstream contracts manifest now promotes meaningful page `0:1`
+(`Wireframe`) frames from inventory-only evidence to explicit coverage
+decisions: runtime, agent, agent edit, agent add, daemon detail, and runtime
+detail. Control-plane does not create new endpoints for those legacy frames.
+Instead, this repo records that each legacy frame is absorbed by the current UI
+coverage entry that already owns the generated-client surface.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- add `legacy_non_ui_absorptions` to the local projection manifest
+- require each legacy absorption to point to a covered upstream non-UI node and a
+  covered current UI node
+- require each inherited generated path to exist in OpenAPI and generated
+  TypeScript/React comments
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

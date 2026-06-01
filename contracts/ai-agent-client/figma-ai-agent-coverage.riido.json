@@ -201,10 +201,230 @@
     },
     {
       "page_id": "0:1",
+      "node_id": "13:3789",
+      "name": "런타임",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_legacy_wireframe_section",
+      "absorbed_by_top_level_node_id": "162:23090",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "generated_paths": [
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.devices.runtimes"
+      ],
+      "covered_facts": [
+        "legacy runtime list wireframe is absorbed by the current UI runtime settings section",
+        "device/runtime liveness stays the durable read-model contract",
+        "runtime list rendering does not create a separate legacy endpoint"
+      ],
+      "direction_loop": {
+        "top_down": "A revived runtime-list business rule from this legacy frame updates ai-agent-policy and API DSL before control-plane or client changes.",
+        "bottom_up": "A control-plane or daemon runtime-liveness contradiction escalates to the current runtime settings entry instead of reviving this legacy frame as a second source."
+      }
+    },
+    {
+      "page_id": "0:1",
+      "node_id": "86:9988",
+      "name": "런타임",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_legacy_wireframe_section",
+      "absorbed_by_top_level_node_id": "162:23090",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "generated_paths": [
+        "aiAgent.devices.runtimes",
+        "aiAgent.agents.daemon.details",
+        "v2.aiAgent.devices.runtimes",
+        "v2.aiAgent.agents.daemon.details"
+      ],
+      "covered_facts": [
+        "expanded legacy runtime wireframe is absorbed by the current UI runtime settings section",
+        "daemon facts on a runtime settings surface are reached only through agent-bound daemon detail policy",
+        "legacy runtime frame variants do not create route forks"
+      ],
+      "direction_loop": {
+        "top_down": "A revived runtime-detail rule from this legacy frame updates the current runtime settings policy/API entry first.",
+        "bottom_up": "Implementation evidence about daemon detail stays on the agent-bound daemon contract unless product changes the current UI section."
+      }
+    },
+    {
+      "page_id": "0:1",
+      "node_id": "17:3551",
+      "name": "에이전트",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_legacy_wireframe_section",
+      "absorbed_by_top_level_node_id": "432:37336",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-client", "riido-daemon"],
+      "generated_paths": [
+        "aiAgent.bootstrap",
+        "aiAgent.agents.create",
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.delete",
+        "aiAgent.agents.editability",
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.bootstrap",
+        "v2.aiAgent.agents.create",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.delete",
+        "v2.aiAgent.agents.editability",
+        "v2.aiAgent.devices.runtimes"
+      ],
+      "covered_facts": [
+        "legacy agent list wireframe is absorbed by the current UI agent settings section",
+        "agent identity, lifecycle, timestamps, and runtime/model fields are owned by agent settings policy and API DSL",
+        "legacy agent list rendering does not create an alternate agent read model"
+      ],
+      "direction_loop": {
+        "top_down": "A revived agent-list policy from this legacy frame updates the current agent settings policy/API entry first.",
+        "bottom_up": "A client or control-plane list mismatch escalates to the current agent settings entry, not to a duplicate legacy list SSOT."
+      }
+    },
+    {
+      "page_id": "0:1",
+      "node_id": "17:4231",
+      "name": "에이전트 수정",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_legacy_wireframe_section",
+      "absorbed_by_top_level_node_id": "432:37336",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-client"],
+      "generated_paths": [
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.editability",
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.editability",
+        "v2.aiAgent.devices.runtimes"
+      ],
+      "covered_facts": [
+        "legacy agent edit wireframe is absorbed by the current UI agent settings section",
+        "editability still requires zero assigned tasks and the generated updateConfiguration operation",
+        "legacy edit form layout does not redefine field limits or RBAC"
+      ],
+      "direction_loop": {
+        "top_down": "A revived edit-field rule from this legacy frame updates ai-agent-policy and the API DSL before generated-client changes.",
+        "bottom_up": "A validation or RBAC mismatch changes control-plane behavior first, then escalates only if the shared policy meaning changes."
+      }
+    },
+    {
+      "page_id": "0:1",
+      "node_id": "84:9846",
+      "name": "에이전트 추가",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_legacy_wireframe_section",
+      "absorbed_by_top_level_node_id": "432:37336",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-client"],
+      "generated_paths": [
+        "aiAgent.bootstrap",
+        "aiAgent.agents.create",
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.bootstrap",
+        "v2.aiAgent.agents.create",
+        "v2.aiAgent.devices.runtimes"
+      ],
+      "covered_facts": [
+        "legacy agent add wireframe is absorbed by the current UI agent settings section",
+        "direct add uses ordinary agent create with workspace-scoped v2 semantics",
+        "legacy add form does not introduce a template entity or alternate create route"
+      ],
+      "direction_loop": {
+        "top_down": "A revived create-field rule from this legacy frame updates the current agent settings create policy/API entry first.",
+        "bottom_up": "A runtime selection or create validation finding escalates through the current create contract rather than this legacy frame."
+      }
+    },
+    {
+      "page_id": "0:1",
+      "node_id": "17:2871",
+      "name": "데몬 상세",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_legacy_wireframe_section",
+      "absorbed_by_top_level_node_id": "162:23090",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "generated_paths": [
+        "aiAgent.agents.daemon.details",
+        "aiAgent.agents.daemon.start",
+        "aiAgent.agents.daemon.restart",
+        "aiAgent.agents.daemon.stop",
+        "aiAgent.events.stream",
+        "v2.aiAgent.agents.daemon.details",
+        "v2.aiAgent.agents.daemon.start",
+        "v2.aiAgent.agents.daemon.restart",
+        "v2.aiAgent.agents.daemon.stop",
+        "v2.aiAgent.events.stream"
+      ],
+      "covered_facts": [
+        "legacy daemon detail wireframe is absorbed by the current UI runtime settings section",
+        "daemon detail and lifecycle commands are agent-bound SaaS commands, not direct local frontend calls",
+        "daemon status streaming uses typed events rather than legacy screen copy"
+      ],
+      "direction_loop": {
+        "top_down": "A revived daemon-control rule from this legacy frame updates the current runtime settings policy/API entry first.",
+        "bottom_up": "A daemon execution limitation is recorded in daemon SSOT first and escalates only if client-facing SaaS command semantics change."
+      }
+    },
+    {
+      "page_id": "0:1",
+      "node_id": "17:3111",
+      "name": "런타임 상세",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_legacy_wireframe_section",
+      "absorbed_by_top_level_node_id": "162:23090",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "generated_paths": [
+        "aiAgent.devices.runtimes",
+        "aiAgent.agents.daemon.details",
+        "v2.aiAgent.devices.runtimes",
+        "v2.aiAgent.agents.daemon.details"
+      ],
+      "covered_facts": [
+        "legacy runtime detail wireframe is absorbed by the current UI runtime settings section",
+        "runtime detail is read from the device/runtime model and agent-bound daemon detail projection",
+        "runtime detail rendering does not create a standalone runtime-detail operation"
+      ],
+      "direction_loop": {
+        "top_down": "A revived runtime-detail rule updates the current runtime settings contract before downstream code changes.",
+        "bottom_up": "A read-model mismatch is fixed in control-plane/daemon projection and escalates only if shared runtime semantics change."
+      }
+    },
+    {
+      "page_id": "0:1",
       "node_id": "153:15934",
       "name": "추가 기획 내용",
       "coverage_status": "covered",
       "evidence_kind": "figma_wireframe_section",
+      "absorbed_by_top_level_node_id": "153:15935",
       "ssot_docs": [
         "docs/20-domain/ai-agent-policy.md",
         "docs/30-architecture/ssot-dependency-map.md",
