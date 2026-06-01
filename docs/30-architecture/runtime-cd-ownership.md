@@ -108,6 +108,11 @@ status. Those values are enough for operators and `riido-infra` to understand
 what must be configured without teaching the public repository live environment
 details.
 
+Image values are deliberately not in that public export set. The deploy job may
+resolve an immutable image URI/digest and pass it between steps in same-job
+runner temp files, but that value is runtime evidence, not a public handoff
+artifact, reusable workflow output, uploaded artifact, or checked-in example.
+
 `riido-infra` must know the contract because it owns topology and operator
 evidence, but it must consume only stable output names, redaction categories,
 out-of-band GitHub environment values, and private evidence summaries. It must
