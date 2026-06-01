@@ -181,6 +181,11 @@ Regular pushes to `main` may validate local drift, but they must not push a
 branch to `riido-client`. This keeps frequent server development from creating
 client churn and CI cost.
 
+The contracts SSOT defines generated client delivery PRs as review handoffs.
+This workflow may open or update a `riido-client` PR, but it must not auto-merge
+that PR. `riido-client` owns the final generated-code review, application
+integration, and merge decision.
+
 ## Target Branch
 
 The future workflow creates a branch in `teamswyg/riido-client` from its current
@@ -298,7 +303,7 @@ together:
   `aiAgent.tasks.assign`, `aiAgent.tasks.unassign`, `aiAgent.tasks.stop`, and
   `aiAgent.devices.runtimes`
 - the facade is config-bound, so consumers do not repeatedly pass `baseUrl`,
-  `token`, and optional `fetcher`
+  `aiAgentToken`, and optional `fetcher`
 - each operation exposes concise library-style aliases: `query(...)` mirrors
   `queryOptions(...)`, and `mutation(...)` mirrors `mutationOptions(...)`
 - query endpoints expose `queryKeyRoot`, `queryKey`, `invalidate`,
@@ -330,7 +335,7 @@ React wrapper is imported explicitly:
 ```ts
 const riido = useRiidoControlPlaneClient(config);
 
-const bootstrap = riido.aiAgent.bootstrap.useQuery({ enabled: !!config.token });
+const bootstrap = riido.aiAgent.bootstrap.useQuery({ enabled: !!config.aiAgentToken });
 const stopTask = riido.aiAgent.tasks.stop.useMutation({
   onSuccess: async () => {
     await riido.aiAgent.tasks.stop.invalidates.all(queryClient);
@@ -367,13 +372,15 @@ If a fine-grained token is used temporarily, it must be scoped to the target
 repository and limited to contents and pull-request write permissions.
 
 The workflow must not require npm publish tokens, cloud credentials, Terraform
-state, customer data, or production bearer tokens.
+state, customer data, or production request tokens.
 
 ## Acceptance Criteria
 
 - `riido-control-plane` docs name the API sub-DSL owner and canonical contract
   escalation path.
 - Release delivery is tag-triggered, not main-push-triggered.
+- Generated-client delivery opens or updates a client PR only; it never
+  auto-merges the client PR.
 - Target `riido-client` branch naming and generated path allowlist are defined.
 - Orval is a pinned control-plane generator dependency when the workflow is
   implemented.

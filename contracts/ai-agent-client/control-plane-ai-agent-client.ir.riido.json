@@ -1806,7 +1806,7 @@
       },
       "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:read"
         ]
@@ -1841,7 +1841,7 @@
       },
       "summary": "권한이 확인된 principal의 device runtime 상태를 조회합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:device:read"
         ]
@@ -1879,7 +1879,7 @@
       },
       "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:agent:read",
           "ai-agent:agent:{agent_id}:read"
@@ -1917,7 +1917,7 @@
       },
       "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:agent:control",
           "ai-agent:agent:{agent_id}:control"
@@ -1956,7 +1956,7 @@
       },
       "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:agent:control",
           "ai-agent:agent:{agent_id}:control"
@@ -1995,7 +1995,7 @@
       },
       "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:agent:control",
           "ai-agent:agent:{agent_id}:control"
@@ -2030,7 +2030,7 @@
       },
       "summary": "task participant dropdown에서 할당 가능한 agent 목록을 조회합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:read",
           "task:{task_id}:read"
@@ -2068,7 +2068,7 @@
       },
       "summary": "task participant dropdown에서 AI agent를 배정합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "task:{task_id}:assign",
@@ -2110,7 +2110,7 @@
       },
       "summary": "task participant에서 AI agent를 제거하고 작업을 중단합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "task:{task_id}:stop",
@@ -2147,7 +2147,7 @@
       },
       "summary": "active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:read",
           "task:{task_id}:read"
@@ -2186,7 +2186,7 @@
       },
       "summary": "task thread comment를 할당된 AI agent에게 전달합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "task:{task_id}:comment"
@@ -2227,7 +2227,7 @@
       },
       "summary": "task thread의 stop action으로 AI agent 작업을 중단합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "task:{task_id}:stop",
@@ -2267,7 +2267,7 @@
       },
       "summary": "Figma agent 추가 화면에서 AI agent 설정을 생성합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "ai-agent:create"
@@ -2306,7 +2306,7 @@
       },
       "summary": "client control 활성화 전에 agent 수정 가능 여부를 조회합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:read",
           "ai-agent:{agent_id}:read"
@@ -2342,7 +2342,7 @@
       },
       "summary": "할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "ai-agent:{agent_id}:update"
@@ -2389,7 +2389,7 @@
       },
       "summary": "agent를 삭제하고 queued/running assignment를 강제로 정리합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "ai-agent:{agent_id}:delete"
@@ -2421,7 +2421,7 @@
       },
       "summary": "editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다",
       "auth": {
-        "scheme": "bearer",
+        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:stream"
         ]
