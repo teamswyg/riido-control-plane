@@ -85,7 +85,10 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"cache tag: `aiAgent.tasks.assignableAgents`",
 		"export function getAIAgentClientBootstrapQueryOptions",
 		"export function listAIAgentTaskAssignableAgentsQueryKeyRoot",
+		"export function listAIAgentOnboardingFixturesQueryKeyRoot",
+		"export function createAIAgentFromOnboardingFixtureMutationOptions",
 		"export interface StopAIAgentTaskMutationVariables",
+		"export interface CreateAIAgentFromOnboardingFixtureMutationVariables",
 		"export function stopAIAgentTaskMutationOptions",
 		"export interface RiidoControlPlaneClient",
 		"export interface RiidoAIAgentDevicesNamespace",
@@ -98,8 +101,8 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"invalidates: {",
 		"default_visibility: AgentVisibility;",
 		"recommended_runtime_kind?: RuntimeKind;",
-		"템플릿 선택 시 생성 폼에 미리 채울 공개 범위입니다.",
-		"템플릿에 권장하는 런타임 종류입니다.",
+		"fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다.",
+		"fixture에 권장하는 런타임 종류입니다.",
 		"import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@/lib/react-query';",
 	} {
 		if !strings.Contains(body, required) {

@@ -138,12 +138,15 @@ provider-specific model labels into generated API facts before the contracts
 model-catalog question is resolved.
 
 Figma onboarding annotations (`node-id=42-3014`) are generated-client
-consumption context for bootstrap, devices, and create APIs. The delivery
-artifact may document that `agent_templates` feeds the starter-agent selection
-screen, including copyable profile fields, `default_visibility`, and
-`recommended_runtime_kind`. Template records must not include model defaults
-until the canonical contracts model-catalog policy promotes them; clients derive
-the selected model from `RuntimeRecord.models`. Workspace selection/list
+consumption context for bootstrap, devices, fixture query, and create APIs. The
+delivery artifact may document that `riido.aiAgent.onboarding.fixtures` feeds
+the starter-agent selection screen, including copyable profile fields,
+`default_visibility`, and `recommended_runtime_kind`, and that
+`riido.aiAgent.onboarding.fixtures.createAgent` creates a normal agent with a
+complete `CreateAgentConfigurationRequest` body. Fixture records must not
+include model defaults until the canonical contracts model-catalog policy
+promotes them; clients derive the selected model from `RuntimeRecord.models`.
+Workspace selection/list
 scrolling and the `새 워크스페이스` row
 shown in `node-id=164-30192`, row selection, direct-setting expansion, scroll,
 direct-setting `이름` / `설명` / `지침` placeholders from `node-id=164-26969`,
@@ -151,7 +154,7 @@ two-line ellipsis, and no-installed-AI start state rendering from
 `node-id=164-30206` remain client composition over generated data. The
 all-disconnected Claude Code/Codex/OpenClaw/Cursor Agent rows and `시작하기` CTA
 must not become generated provider-install/start helpers without a separate
-owning SSOT. It must not make frontend hard-coded template copy a second SSOT.
+owning SSOT. It must not make frontend hard-coded fixture copy a second SSOT.
 
 Figma web onboarding annotations (`node-id=236-29749`) are not generated-client
 endpoint evidence for this API. The delivery artifact may mention that AI Agent

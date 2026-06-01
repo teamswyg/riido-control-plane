@@ -215,8 +215,8 @@ type AgentClientRecordResponse struct {
 	Agent         AgentClientRecord `json:"agent"`
 }
 
-type AgentOnboardingTemplate struct {
-	TemplateID             string          `json:"template_id"`
+type AgentOnboardingFixture struct {
+	FixtureID              string          `json:"fixture_id"`
 	Name                   string          `json:"name"`
 	RoleLabel              string          `json:"role_label,omitempty"`
 	ProfileThumbnailURL    string          `json:"profile_thumbnail_url,omitempty"`
@@ -226,13 +226,17 @@ type AgentOnboardingTemplate struct {
 	RecommendedRuntimeKind RuntimeKind     `json:"recommended_runtime_kind,omitempty"`
 }
 
+type AgentOnboardingFixtureListResponse struct {
+	SchemaVersion string                   `json:"schema_version"`
+	Fixtures      []AgentOnboardingFixture `json:"fixtures"`
+}
+
 type ClientBootstrapResponse struct {
-	SchemaVersion  string                    `json:"schema_version"`
-	ClientKind     ClientKind                `json:"client_kind"`
-	WorkspaceID    string                    `json:"workspace_id"`
-	Agents         []AgentClientRecord       `json:"agents"`
-	Devices        []DeviceRecord            `json:"devices"`
-	AgentTemplates []AgentOnboardingTemplate `json:"agent_templates"`
+	SchemaVersion string              `json:"schema_version"`
+	ClientKind    ClientKind          `json:"client_kind"`
+	WorkspaceID   string              `json:"workspace_id"`
+	Agents        []AgentClientRecord `json:"agents"`
+	Devices       []DeviceRecord      `json:"devices"`
 }
 
 type DeviceRuntimeListResponse struct {

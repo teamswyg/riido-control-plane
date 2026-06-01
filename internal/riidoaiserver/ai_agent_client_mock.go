@@ -15,6 +15,8 @@ import (
 
 type AIAgentClientStore interface {
 	BootstrapAIAgentClient(ctx context.Context, principal AuthorizationResult, clientKind ClientKind) (ClientBootstrapResponse, error)
+	ListAIAgentOnboardingFixtures(ctx context.Context, principal AuthorizationResult) (AgentOnboardingFixtureListResponse, error)
+	CreateAIAgentFromOnboardingFixture(ctx context.Context, principal AuthorizationResult, fixtureID string, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error)
 	ListAIAgentDevices(ctx context.Context, principal AuthorizationResult) (DeviceRuntimeListResponse, error)
 	GetAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string) (DeviceDaemonDetailResponse, error)
 	ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error)
@@ -47,7 +49,7 @@ type MockAIAgentClientStore struct {
 	daemons           map[string]DeviceDaemonRecord
 	nextDaemonCommand int
 	agents            map[string]AgentClientRecord
-	templates         []AgentOnboardingTemplate
+	fixtures          []AgentOnboardingFixture
 	taskThreads       map[string][]AIAgentTaskThreadRecord
 	events            []ClientStreamEvent
 	subscribers       map[int]aiAgentClientSubscriber
@@ -292,42 +294,42 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		daemons:           map[string]DeviceDaemonRecord{device.DeviceID: daemon, sharedDevice.DeviceID: sharedDaemon},
 		nextDaemonCommand: 1,
 		agents:            agents,
-		templates: []AgentOnboardingTemplate{
+		fixtures: []AgentOnboardingFixture{
 			{
-				TemplateID:             "riido_pm",
+				FixtureID:              "riido_pm",
 				Name:                   "리도",
 				RoleLabel:              "PM Agent",
-				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-templates/riido-pm.png",
+				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-fixtures/riido-pm.png",
 				Description:            "문제 정의부터 우선순위, 출시 계획까지 정리합니다.",
 				Instruction:            "기능 요청을 문제, 목표, 성공 기준으로 재정의하고 PRD, 우선순위, 로드맵, 출시 계획을 구조화합니다. 아이디어는 가설로 다루며 불확실한 내용은 [확인 필요]로 표시합니다.",
 				DefaultVisibility:      AgentVisibilityPrivate,
 				RecommendedRuntimeKind: RuntimeKindCodex,
 			},
 			{
-				TemplateID:             "yeongsil_backend",
+				FixtureID:              "yeongsil_backend",
 				Name:                   "영실",
 				RoleLabel:              "Backend Agent",
-				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-templates/yeongsil-backend.png",
+				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-fixtures/yeongsil-backend.png",
 				Description:            "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다.",
 				Instruction:            "요구사항을 API, 데이터 흐름, 저장 경계, 실패 처리 기준으로 나누고 안정적인 서버 구현 계획을 제안합니다.",
 				DefaultVisibility:      AgentVisibilityPrivate,
 				RecommendedRuntimeKind: RuntimeKindClaudeCode,
 			},
 			{
-				TemplateID:             "hongdo_frontend",
+				FixtureID:              "hongdo_frontend",
 				Name:                   "홍도",
 				RoleLabel:              "Frontend Agent",
-				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-templates/hongdo-frontend.png",
+				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-fixtures/hongdo-frontend.png",
 				Description:            "사용자가 보는 화면을 구현하고, 성능과 접근성을 개선합니다.",
 				Instruction:            "화면 구조, 상태, 접근성, 성능을 함께 검토하고 사용자에게 자연스러운 프론트엔드 구현을 제안합니다.",
 				DefaultVisibility:      AgentVisibilityPrivate,
 				RecommendedRuntimeKind: RuntimeKindCursor,
 			},
 			{
-				TemplateID:             "jiwon_research",
+				FixtureID:              "jiwon_research",
 				Name:                   "지원",
 				RoleLabel:              "Research Agent",
-				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-templates/jiwon-research.png",
+				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-fixtures/jiwon-research.png",
 				Description:            "시장과 경쟁사를 조사하고, 의사결정에 필요한 인사이트를 정리합니다.",
 				Instruction:            "시장, 경쟁사, 사용자 맥락을 조사하고 의사결정에 필요한 근거와 확인이 필요한 가정을 분리해 정리합니다.",
 				DefaultVisibility:      AgentVisibilityPrivate,
@@ -381,13 +383,41 @@ func (s *MockAIAgentClientStore) BootstrapAIAgentClient(ctx context.Context, pri
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return ClientBootstrapResponse{
-		SchemaVersion:  SchemaVersion,
-		ClientKind:     normalizeClientKind(clientKind),
-		WorkspaceID:    s.workspaceID,
-		Agents:         s.visibleAgents(principal),
-		Devices:        s.visibleDevicesLocked(principal),
-		AgentTemplates: copyAgentTemplates(s.templates),
+		SchemaVersion: SchemaVersion,
+		ClientKind:    normalizeClientKind(clientKind),
+		WorkspaceID:   s.workspaceID,
+		Agents:        s.visibleAgents(principal),
+		Devices:       s.visibleDevicesLocked(principal),
 	}, nil
+}
+
+func (s *MockAIAgentClientStore) ListAIAgentOnboardingFixtures(ctx context.Context, principal AuthorizationResult) (AgentOnboardingFixtureListResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return AgentOnboardingFixtureListResponse{}, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return AgentOnboardingFixtureListResponse{
+		SchemaVersion: SchemaVersion,
+		Fixtures:      copyAgentOnboardingFixtures(s.fixtures),
+	}, nil
+}
+
+func (s *MockAIAgentClientStore) CreateAIAgentFromOnboardingFixture(ctx context.Context, principal AuthorizationResult, fixtureID string, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return AgentClientRecordResponse{}, err
+	}
+	fixtureID = strings.TrimSpace(fixtureID)
+	if fixtureID == "" {
+		return AgentClientRecordResponse{}, errors.New("fixture_id is required")
+	}
+	s.mu.Lock()
+	_, ok := s.findOnboardingFixtureLocked(fixtureID)
+	s.mu.Unlock()
+	if !ok {
+		return AgentClientRecordResponse{}, ErrAIAgentNotFound
+	}
+	return s.CreateAIAgent(ctx, principal, req)
 }
 
 func (s *MockAIAgentClientStore) ListAIAgentDevices(ctx context.Context, principal AuthorizationResult) (DeviceRuntimeListResponse, error) {
@@ -1067,6 +1097,15 @@ func (s *MockAIAgentClientStore) visibleAgent(principal AuthorizationResult, age
 	return agent, true
 }
 
+func (s *MockAIAgentClientStore) findOnboardingFixtureLocked(fixtureID string) (AgentOnboardingFixture, bool) {
+	for _, fixture := range s.fixtures {
+		if fixture.FixtureID == fixtureID {
+			return fixture, true
+		}
+	}
+	return AgentOnboardingFixture{}, false
+}
+
 func (s *MockAIAgentClientStore) visibleAgents(principal AuthorizationResult) []AgentClientRecord {
 	agents := make([]AgentClientRecord, 0, len(s.agents))
 	for _, agent := range s.agents {
@@ -1744,8 +1783,8 @@ func copyProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLin
 	return append([]AgentThreadProgressLine(nil), lines...)
 }
 
-func copyAgentTemplates(templates []AgentOnboardingTemplate) []AgentOnboardingTemplate {
-	return append([]AgentOnboardingTemplate(nil), templates...)
+func copyAgentOnboardingFixtures(fixtures []AgentOnboardingFixture) []AgentOnboardingFixture {
+	return append([]AgentOnboardingFixture(nil), fixtures...)
 }
 
 func taskThreadHasActiveStream(thread AIAgentTaskThreadRecord) bool {
