@@ -17,10 +17,11 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 	defer store.Close()
 
 	assignment, err := store.AssignTask(ctx, "task-a", AssignRequest{
-		ComponentID:     "component-a",
-		AgentID:         "agent-1",
-		RuntimeProvider: "codex",
-		Prompt:          "ship it",
+		ComponentID:      "component-a",
+		AgentID:          "agent-1",
+		RuntimeProvider:  "codex",
+		Prompt:           "ship it",
+		AgentInstruction: "act as a release captain",
 	})
 	if err != nil {
 		t.Fatalf("AssignTask: %v", err)
@@ -39,6 +40,9 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 	}
 	if poll.Assignment.LeaseToken == "" {
 		t.Fatalf("poll start lease_token is empty")
+	}
+	if poll.Assignment.AgentInstruction != "act as a release captain" {
+		t.Fatalf("agent_instruction = %q", poll.Assignment.AgentInstruction)
 	}
 
 	now = now.Add(time.Minute)
@@ -98,6 +102,23 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 	}
 	if metrics.AgentEventsTotal != 2 || metrics.TaskEventsTotal != 4 {
 		t.Fatalf("metrics events = %+v", metrics)
+	}
+}
+
+func TestStoreActorRejectsLongAgentInstruction(t *testing.T) {
+	ctx := context.Background()
+	store := NewStore()
+	defer store.Close()
+
+	_, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:      "component-a",
+		AgentID:          "agent-1",
+		RuntimeProvider:  "codex",
+		Prompt:           "ship it",
+		AgentInstruction: strings.Repeat("지", AgentInstructionMaxCharacters+1),
+	})
+	if err == nil || !strings.Contains(err.Error(), "agent_instruction") {
+		t.Fatalf("expected agent_instruction validation error, got %v", err)
 	}
 }
 
