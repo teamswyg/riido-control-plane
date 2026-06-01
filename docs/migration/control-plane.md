@@ -923,6 +923,23 @@ This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
 change generated API shape, add deployment secrets, introduce live endpoint
 examples, or move client UI ownership into this repository.
 
+### RIID-4827 — bootstrap scenario wording SSOT projection
+
+This slice mirrors the contracts-owned BDD wording clarification into the
+control-plane generated-client projection.
+
+This slice does:
+
+- update the mirrored AI Agent client DSL/IR fixtures from `riido-contracts`
+- keep the generated OpenAPI/API surface unchanged
+- extend the projection regression gate so ambiguous future-client/bootstrap
+  wording cannot remain in mirrored contracts or generated-client projection docs
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
