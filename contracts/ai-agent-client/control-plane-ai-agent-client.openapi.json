@@ -138,6 +138,7 @@
             "agents",
             "create"
           ],
+          "generated_path": "aiAgent.agents.create",
           "invalidates": [
             "aiAgent.bootstrap",
             "aiAgent.devices.runtimes",
@@ -208,6 +209,7 @@
             "agents",
             "delete"
           ],
+          "generated_path": "aiAgent.agents.delete",
           "invalidates": [
             "aiAgent.bootstrap",
             "aiAgent.devices.runtimes",
@@ -285,6 +287,7 @@
             "agents",
             "updateConfiguration"
           ],
+          "generated_path": "aiAgent.agents.updateConfiguration",
           "invalidates": [
             "aiAgent.bootstrap",
             "aiAgent.agents.editability",
@@ -358,6 +361,7 @@
             "daemon",
             "details"
           ],
+          "generated_path": "aiAgent.agents.daemon.details",
           "cache_tag": "aiAgent.agents.daemon"
         },
         "x-riido-scenarios": [
@@ -433,6 +437,7 @@
             "daemon",
             "restart"
           ],
+          "generated_path": "aiAgent.agents.daemon.restart",
           "invalidates": [
             "aiAgent.agents.daemon",
             "aiAgent.devices.runtimes"
@@ -509,6 +514,7 @@
             "daemon",
             "start"
           ],
+          "generated_path": "aiAgent.agents.daemon.start",
           "invalidates": [
             "aiAgent.agents.daemon",
             "aiAgent.devices.runtimes"
@@ -585,6 +591,7 @@
             "daemon",
             "stop"
           ],
+          "generated_path": "aiAgent.agents.daemon.stop",
           "invalidates": [
             "aiAgent.agents.daemon",
             "aiAgent.devices.runtimes"
@@ -651,6 +658,7 @@
             "agents",
             "editability"
           ],
+          "generated_path": "aiAgent.agents.editability",
           "cache_tag": "aiAgent.agents.editability"
         },
         "x-riido-scenarios": [
@@ -702,6 +710,7 @@
           "facade_path": [
             "bootstrap"
           ],
+          "generated_path": "aiAgent.bootstrap",
           "cache_tag": "aiAgent.bootstrap"
         },
         "x-riido-scenarios": [
@@ -757,6 +766,7 @@
             "devices",
             "runtimes"
           ],
+          "generated_path": "aiAgent.devices.runtimes",
           "cache_tag": "aiAgent.devices.runtimes"
         },
         "x-riido-scenarios": [
@@ -815,6 +825,7 @@
             "events",
             "stream"
           ],
+          "generated_path": "aiAgent.events.stream",
           "cache_tag": "aiAgent.events.stream"
         },
         "x-riido-scenarios": [
@@ -870,6 +881,7 @@
             "onboarding",
             "fixtures"
           ],
+          "generated_path": "aiAgent.onboarding.fixtures",
           "cache_tag": "aiAgent.onboarding.fixtures"
         },
         "x-riido-scenarios": [
@@ -945,6 +957,7 @@
             "fixtures",
             "createAgent"
           ],
+          "generated_path": "aiAgent.onboarding.fixtures.createAgent",
           "invalidates": [
             "aiAgent.bootstrap",
             "aiAgent.devices.runtimes",
@@ -1013,6 +1026,7 @@
             "tasks",
             "assignableAgents"
           ],
+          "generated_path": "aiAgent.tasks.assignableAgents",
           "cache_tag": "aiAgent.tasks.assignableAgents"
         },
         "x-riido-scenarios": [
@@ -1089,6 +1103,7 @@
             "tasks",
             "unassign"
           ],
+          "generated_path": "aiAgent.tasks.unassign",
           "invalidates": [
             "aiAgent.bootstrap",
             "aiAgent.tasks.assignableAgents",
@@ -1165,6 +1180,7 @@
             "tasks",
             "assign"
           ],
+          "generated_path": "aiAgent.tasks.assign",
           "invalidates": [
             "aiAgent.bootstrap",
             "aiAgent.tasks.assignableAgents",
@@ -1243,6 +1259,7 @@
             "tasks",
             "submitComment"
           ],
+          "generated_path": "aiAgent.tasks.submitComment",
           "invalidates": [
             "aiAgent.bootstrap",
             "aiAgent.tasks.assignableAgents",
@@ -1321,6 +1338,7 @@
             "tasks",
             "stop"
           ],
+          "generated_path": "aiAgent.tasks.stop",
           "invalidates": [
             "aiAgent.bootstrap",
             "aiAgent.tasks.assignableAgents",
@@ -1388,6 +1406,7 @@
             "tasks",
             "threads"
           ],
+          "generated_path": "aiAgent.tasks.threads",
           "cache_tag": "aiAgent.tasks.threads"
         },
         "x-riido-scenarios": [
@@ -1473,6 +1492,7 @@
             "threadMessages",
             "create"
           ],
+          "generated_path": "aiAgent.tasks.threadMessages.create",
           "invalidates": [
             "aiAgent.bootstrap",
             "aiAgent.tasks.assignableAgents",

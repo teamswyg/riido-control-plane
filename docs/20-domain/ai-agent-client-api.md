@@ -30,6 +30,8 @@ source:
 
 - `client_modules` owns generated module and namespace comments.
 - `client.module` and `client.facade_path` own the nested facade path.
+- `client.generated_path` is projected from `module + facade_path` by
+  `riido-contracts` and must be emitted into generated comments.
 - query operation `client.cache_tag` owns the root query key.
 - command operation `client.invalidates` owns the deterministic cache roots that
   a client may invalidate after a mutation.
@@ -39,6 +41,12 @@ The metadata is projected to IR without loss and to OpenAPI as
 TypeScript client. The generator must fail when the metadata is missing or when
 `invalidates` references an unknown query `cache_tag`; facade namespaces are not
 owned by generator-local hard-coded operation-id switches.
+
+Generated TypeScript comments must include both the contract path
+(`aiAgent.tasks.threadMessages.create`) and the module-local search path
+(`tasks.threadMessages.create`). This is intentionally searchable because
+frontend developers often know the generated facade route before they know the
+operation id or HTTP endpoint.
 
 The generated core client does not own screen composition or React hook policy.
 `riido-client` owns when hooks are called, when invalidation helpers run, retry

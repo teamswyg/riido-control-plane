@@ -1415,7 +1415,9 @@ export function createAIAgentTaskThreadMessageMutationOptions(config: RiidoClien
 
 /**
  * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
- * DSL facade path: `aiAgent.agents.create`
+ * 계약 generated path: `aiAgent.agents.create`
+ * 검색용 generated 경로: `agents.create`
+ * 접근 예시: `riido.aiAgent.agents.create`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface CreateAIAgentEndpoint {
@@ -1460,7 +1462,9 @@ export interface CreateAIAgentEndpoint {
 
 /**
  * agent를 삭제하고 queued/running assignment를 강제로 정리합니다
- * DSL facade path: `aiAgent.agents.delete`
+ * 계약 generated path: `aiAgent.agents.delete`
+ * 검색용 generated 경로: `agents.delete`
+ * 접근 예시: `riido.aiAgent.agents.delete`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface DeleteAIAgentEndpoint {
@@ -1513,7 +1517,9 @@ export interface DeleteAIAgentEndpoint {
 
 /**
  * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다
- * DSL facade path: `aiAgent.agents.updateConfiguration`
+ * 계약 generated path: `aiAgent.agents.updateConfiguration`
+ * 검색용 generated 경로: `agents.updateConfiguration`
+ * 접근 예시: `riido.aiAgent.agents.updateConfiguration`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface UpdateAIAgentConfigurationEndpoint {
@@ -1558,7 +1564,9 @@ export interface UpdateAIAgentConfigurationEndpoint {
 
 /**
  * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다
- * DSL facade path: `aiAgent.agents.daemon.details`
+ * 계약 generated path: `aiAgent.agents.daemon.details`
+ * 검색용 generated 경로: `agents.daemon.details`
+ * 접근 예시: `riido.aiAgent.agents.daemon.details`
  * cache tag: `aiAgent.agents.daemon`
  */
 export interface GetAIAgentDaemonEndpoint {
@@ -1598,7 +1606,9 @@ export interface GetAIAgentDaemonEndpoint {
 
 /**
  * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다
- * DSL facade path: `aiAgent.agents.daemon.restart`
+ * 계약 generated path: `aiAgent.agents.daemon.restart`
+ * 검색용 generated 경로: `agents.daemon.restart`
+ * 접근 예시: `riido.aiAgent.agents.daemon.restart`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface RestartAIAgentDaemonEndpoint {
@@ -1639,7 +1649,9 @@ export interface RestartAIAgentDaemonEndpoint {
 
 /**
  * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다
- * DSL facade path: `aiAgent.agents.daemon.start`
+ * 계약 generated path: `aiAgent.agents.daemon.start`
+ * 검색용 generated 경로: `agents.daemon.start`
+ * 접근 예시: `riido.aiAgent.agents.daemon.start`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface StartAIAgentDaemonEndpoint {
@@ -1680,7 +1692,9 @@ export interface StartAIAgentDaemonEndpoint {
 
 /**
  * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다
- * DSL facade path: `aiAgent.agents.daemon.stop`
+ * 계약 generated path: `aiAgent.agents.daemon.stop`
+ * 검색용 generated 경로: `agents.daemon.stop`
+ * 접근 예시: `riido.aiAgent.agents.daemon.stop`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface StopAIAgentDaemonEndpoint {
@@ -1721,7 +1735,9 @@ export interface StopAIAgentDaemonEndpoint {
 
 /**
  * client control 활성화 전에 agent 수정 가능 여부를 조회합니다
- * DSL facade path: `aiAgent.agents.editability`
+ * 계약 generated path: `aiAgent.agents.editability`
+ * 검색용 generated 경로: `agents.editability`
+ * 접근 예시: `riido.aiAgent.agents.editability`
  * cache tag: `aiAgent.agents.editability`
  */
 export interface GetAIAgentEditabilityEndpoint {
@@ -1761,7 +1777,9 @@ export interface GetAIAgentEditabilityEndpoint {
 
 /**
  * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
- * DSL facade path: `aiAgent.bootstrap`
+ * 계약 generated path: `aiAgent.bootstrap`
+ * 검색용 generated 경로: `bootstrap`
+ * 접근 예시: `riido.aiAgent.bootstrap`
  * cache tag: `aiAgent.bootstrap`
  */
 export interface GetAIAgentClientBootstrapEndpoint {
@@ -1801,7 +1819,9 @@ export interface GetAIAgentClientBootstrapEndpoint {
 
 /**
  * 권한이 확인된 principal의 device runtime 상태를 조회합니다
- * DSL facade path: `aiAgent.devices.runtimes`
+ * 계약 generated path: `aiAgent.devices.runtimes`
+ * 검색용 generated 경로: `devices.runtimes`
+ * 접근 예시: `riido.aiAgent.devices.runtimes`
  * cache tag: `aiAgent.devices.runtimes`
  */
 export interface ListAIAgentDeviceRuntimesEndpoint {
@@ -1841,7 +1861,9 @@ export interface ListAIAgentDeviceRuntimesEndpoint {
 
 /**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
- * DSL facade path: `aiAgent.events.stream`
+ * 계약 generated path: `aiAgent.events.stream`
+ * 검색용 generated 경로: `events.stream`
+ * 접근 예시: `riido.aiAgent.events.stream`
  * cache tag: `aiAgent.events.stream`
  */
 export interface StreamAIAgentClientEventsEndpoint {
@@ -1881,7 +1903,9 @@ export interface StreamAIAgentClientEventsEndpoint {
 
 /**
  * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다
- * DSL facade path: `aiAgent.onboarding.fixtures`
+ * 계약 generated path: `aiAgent.onboarding.fixtures`
+ * 검색용 generated 경로: `onboarding.fixtures`
+ * 접근 예시: `riido.aiAgent.onboarding.fixtures`
  * cache tag: `aiAgent.onboarding.fixtures`
  */
 export interface ListAIAgentOnboardingFixturesEndpoint {
@@ -1921,7 +1945,9 @@ export interface ListAIAgentOnboardingFixturesEndpoint {
 
 /**
  * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
- * DSL facade path: `aiAgent.onboarding.fixtures.createAgent`
+ * 계약 generated path: `aiAgent.onboarding.fixtures.createAgent`
+ * 검색용 generated 경로: `onboarding.fixtures.createAgent`
+ * 접근 예시: `riido.aiAgent.onboarding.fixtures.createAgent`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface CreateAIAgentFromOnboardingFixtureEndpoint {
@@ -1966,7 +1992,9 @@ export interface CreateAIAgentFromOnboardingFixtureEndpoint {
 
 /**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다
- * DSL facade path: `aiAgent.tasks.assignableAgents`
+ * 계약 generated path: `aiAgent.tasks.assignableAgents`
+ * 검색용 generated 경로: `tasks.assignableAgents`
+ * 접근 예시: `riido.aiAgent.tasks.assignableAgents`
  * cache tag: `aiAgent.tasks.assignableAgents`
  */
 export interface ListAIAgentTaskAssignableAgentsEndpoint {
@@ -2006,7 +2034,9 @@ export interface ListAIAgentTaskAssignableAgentsEndpoint {
 
 /**
  * task participant에서 AI agent를 제거하고 작업을 중단합니다
- * DSL facade path: `aiAgent.tasks.unassign`
+ * 계약 generated path: `aiAgent.tasks.unassign`
+ * 검색용 generated 경로: `tasks.unassign`
+ * 접근 예시: `riido.aiAgent.tasks.unassign`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface UnassignAIAgentTaskEndpoint {
@@ -2051,7 +2081,9 @@ export interface UnassignAIAgentTaskEndpoint {
 
 /**
  * task participant dropdown에서 AI agent를 배정합니다
- * DSL facade path: `aiAgent.tasks.assign`
+ * 계약 generated path: `aiAgent.tasks.assign`
+ * 검색용 generated 경로: `tasks.assign`
+ * 접근 예시: `riido.aiAgent.tasks.assign`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface AssignAIAgentTaskEndpoint {
@@ -2096,7 +2128,9 @@ export interface AssignAIAgentTaskEndpoint {
 
 /**
  * 호환 task comment route로 AI agent에게 메시지를 전달합니다
- * DSL facade path: `aiAgent.tasks.submitComment`
+ * 계약 generated path: `aiAgent.tasks.submitComment`
+ * 검색용 generated 경로: `tasks.submitComment`
+ * 접근 예시: `riido.aiAgent.tasks.submitComment`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface SubmitAIAgentTaskCommentEndpoint {
@@ -2141,7 +2175,9 @@ export interface SubmitAIAgentTaskCommentEndpoint {
 
 /**
  * task thread의 stop action으로 AI agent 작업을 중단합니다
- * DSL facade path: `aiAgent.tasks.stop`
+ * 계약 generated path: `aiAgent.tasks.stop`
+ * 검색용 generated 경로: `tasks.stop`
+ * 접근 예시: `riido.aiAgent.tasks.stop`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface StopAIAgentTaskEndpoint {
@@ -2186,7 +2222,9 @@ export interface StopAIAgentTaskEndpoint {
 
 /**
  * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다
- * DSL facade path: `aiAgent.tasks.threads`
+ * 계약 generated path: `aiAgent.tasks.threads`
+ * 검색용 generated 경로: `tasks.threads`
+ * 접근 예시: `riido.aiAgent.tasks.threads`
  * cache tag: `aiAgent.tasks.threads`
  */
 export interface ListAIAgentTaskThreadsEndpoint {
@@ -2226,7 +2264,9 @@ export interface ListAIAgentTaskThreadsEndpoint {
 
 /**
  * task thread message로 AI agent에게 다음 작업 지시를 전달합니다
- * DSL facade path: `aiAgent.tasks.threadMessages.create`
+ * 계약 generated path: `aiAgent.tasks.threadMessages.create`
+ * 검색용 generated 경로: `tasks.threadMessages.create`
+ * 접근 예시: `riido.aiAgent.tasks.threadMessages.create`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
 export interface CreateAIAgentTaskThreadMessageEndpoint {
@@ -2274,19 +2314,35 @@ export interface CreateAIAgentTaskThreadMessageEndpoint {
  */
 export interface RiidoAIAgentAgentsDaemonNamespace {
   /**
-   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 cache tag: `aiAgent.agents.daemon`
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다
+   * 계약 generated path: `aiAgent.agents.daemon.details`
+   * 검색용 generated 경로: `agents.daemon.details`
+   * 접근 예시: `riido.aiAgent.agents.daemon.details`
+   * cache tag: `aiAgent.agents.daemon`
    */
   readonly details: GetAIAgentDaemonEndpoint;
   /**
-   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 invalidates: `aiAgent.agents.daemon`, `aiAgent.devices.runtimes`
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다
+   * 계약 generated path: `aiAgent.agents.daemon.restart`
+   * 검색용 generated 경로: `agents.daemon.restart`
+   * 접근 예시: `riido.aiAgent.agents.daemon.restart`
+   * invalidates: `aiAgent.agents.daemon`, `aiAgent.devices.runtimes`
    */
   readonly restart: RestartAIAgentDaemonEndpoint;
   /**
-   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 invalidates: `aiAgent.agents.daemon`, `aiAgent.devices.runtimes`
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다
+   * 계약 generated path: `aiAgent.agents.daemon.start`
+   * 검색용 generated 경로: `agents.daemon.start`
+   * 접근 예시: `riido.aiAgent.agents.daemon.start`
+   * invalidates: `aiAgent.agents.daemon`, `aiAgent.devices.runtimes`
    */
   readonly start: StartAIAgentDaemonEndpoint;
   /**
-   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 invalidates: `aiAgent.agents.daemon`, `aiAgent.devices.runtimes`
+   * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다
+   * 계약 generated path: `aiAgent.agents.daemon.stop`
+   * 검색용 generated 경로: `agents.daemon.stop`
+   * 접근 예시: `riido.aiAgent.agents.daemon.stop`
+   * invalidates: `aiAgent.agents.daemon`, `aiAgent.devices.runtimes`
    */
   readonly stop: StopAIAgentDaemonEndpoint;
 }
@@ -2296,7 +2352,11 @@ export interface RiidoAIAgentAgentsDaemonNamespace {
  */
 export interface RiidoAIAgentAgentsNamespace {
   /**
-   * Figma agent 추가 화면에서 AI agent 설정을 생성합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
+   * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
+   * 계약 generated path: `aiAgent.agents.create`
+   * 검색용 generated 경로: `agents.create`
+   * 접근 예시: `riido.aiAgent.agents.create`
+   * invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
    */
   readonly create: CreateAIAgentEndpoint;
   /**
@@ -2304,15 +2364,27 @@ export interface RiidoAIAgentAgentsNamespace {
    */
   readonly daemon: RiidoAIAgentAgentsDaemonNamespace;
   /**
-   * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.agents.editability`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   * agent를 삭제하고 queued/running assignment를 강제로 정리합니다
+   * 계약 generated path: `aiAgent.agents.delete`
+   * 검색용 generated 경로: `agents.delete`
+   * 접근 예시: `riido.aiAgent.agents.delete`
+   * invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.agents.editability`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly delete: DeleteAIAgentEndpoint;
   /**
-   * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 cache tag: `aiAgent.agents.editability`
+   * client control 활성화 전에 agent 수정 가능 여부를 조회합니다
+   * 계약 generated path: `aiAgent.agents.editability`
+   * 검색용 generated 경로: `agents.editability`
+   * 접근 예시: `riido.aiAgent.agents.editability`
+   * cache tag: `aiAgent.agents.editability`
    */
   readonly editability: GetAIAgentEditabilityEndpoint;
   /**
-   * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.agents.editability`, `aiAgent.tasks.assignableAgents`
+   * 할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다
+   * 계약 generated path: `aiAgent.agents.updateConfiguration`
+   * 검색용 generated 경로: `agents.updateConfiguration`
+   * 접근 예시: `riido.aiAgent.agents.updateConfiguration`
+   * invalidates: `aiAgent.bootstrap`, `aiAgent.agents.editability`, `aiAgent.tasks.assignableAgents`
    */
   readonly updateConfiguration: UpdateAIAgentConfigurationEndpoint;
 }
@@ -2322,7 +2394,11 @@ export interface RiidoAIAgentAgentsNamespace {
  */
 export interface RiidoAIAgentDevicesNamespace {
   /**
-   * 권한이 확인된 principal의 device runtime 상태를 조회합니다 cache tag: `aiAgent.devices.runtimes`
+   * 권한이 확인된 principal의 device runtime 상태를 조회합니다
+   * 계약 generated path: `aiAgent.devices.runtimes`
+   * 검색용 generated 경로: `devices.runtimes`
+   * 접근 예시: `riido.aiAgent.devices.runtimes`
+   * cache tag: `aiAgent.devices.runtimes`
    */
   readonly runtimes: ListAIAgentDeviceRuntimesEndpoint;
 }
@@ -2332,7 +2408,11 @@ export interface RiidoAIAgentDevicesNamespace {
  */
 export interface RiidoAIAgentEventsNamespace {
   /**
-   * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 cache tag: `aiAgent.events.stream`
+   * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
+   * 계약 generated path: `aiAgent.events.stream`
+   * 검색용 generated 경로: `events.stream`
+   * 접근 예시: `riido.aiAgent.events.stream`
+   * cache tag: `aiAgent.events.stream`
    */
   readonly stream: StreamAIAgentClientEventsEndpoint;
 }
@@ -2342,7 +2422,11 @@ export interface RiidoAIAgentEventsNamespace {
  */
 export interface RiidoAIAgentOnboardingFixturesNamespace extends ListAIAgentOnboardingFixturesEndpoint {
   /**
-   * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
+   * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
+   * 계약 generated path: `aiAgent.onboarding.fixtures.createAgent`
+   * 검색용 generated 경로: `onboarding.fixtures.createAgent`
+   * 접근 예시: `riido.aiAgent.onboarding.fixtures.createAgent`
+   * invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
    */
   readonly createAgent: CreateAIAgentFromOnboardingFixtureEndpoint;
 }
@@ -2362,7 +2446,11 @@ export interface RiidoAIAgentOnboardingNamespace {
  */
 export interface RiidoAIAgentTasksThreadMessagesNamespace {
   /**
-   * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   * task thread message로 AI agent에게 다음 작업 지시를 전달합니다
+   * 계약 generated path: `aiAgent.tasks.threadMessages.create`
+   * 검색용 generated 경로: `tasks.threadMessages.create`
+   * 접근 예시: `riido.aiAgent.tasks.threadMessages.create`
+   * invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly create: CreateAIAgentTaskThreadMessageEndpoint;
 }
@@ -2372,19 +2460,35 @@ export interface RiidoAIAgentTasksThreadMessagesNamespace {
  */
 export interface RiidoAIAgentTasksNamespace {
   /**
-   * task participant dropdown에서 AI agent를 배정합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   * task participant dropdown에서 AI agent를 배정합니다
+   * 계약 generated path: `aiAgent.tasks.assign`
+   * 검색용 generated 경로: `tasks.assign`
+   * 접근 예시: `riido.aiAgent.tasks.assign`
+   * invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly assign: AssignAIAgentTaskEndpoint;
   /**
-   * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 cache tag: `aiAgent.tasks.assignableAgents`
+   * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다
+   * 계약 generated path: `aiAgent.tasks.assignableAgents`
+   * 검색용 generated 경로: `tasks.assignableAgents`
+   * 접근 예시: `riido.aiAgent.tasks.assignableAgents`
+   * cache tag: `aiAgent.tasks.assignableAgents`
    */
   readonly assignableAgents: ListAIAgentTaskAssignableAgentsEndpoint;
   /**
-   * task thread의 stop action으로 AI agent 작업을 중단합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   * task thread의 stop action으로 AI agent 작업을 중단합니다
+   * 계약 generated path: `aiAgent.tasks.stop`
+   * 검색용 generated 경로: `tasks.stop`
+   * 접근 예시: `riido.aiAgent.tasks.stop`
+   * invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly stop: StopAIAgentTaskEndpoint;
   /**
-   * 호환 task comment route로 AI agent에게 메시지를 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   * 호환 task comment route로 AI agent에게 메시지를 전달합니다
+   * 계약 generated path: `aiAgent.tasks.submitComment`
+   * 검색용 generated 경로: `tasks.submitComment`
+   * 접근 예시: `riido.aiAgent.tasks.submitComment`
+   * invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly submitComment: SubmitAIAgentTaskCommentEndpoint;
   /**
@@ -2392,11 +2496,19 @@ export interface RiidoAIAgentTasksNamespace {
    */
   readonly threadMessages: RiidoAIAgentTasksThreadMessagesNamespace;
   /**
-   * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 cache tag: `aiAgent.tasks.threads`
+   * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다
+   * 계약 generated path: `aiAgent.tasks.threads`
+   * 검색용 generated 경로: `tasks.threads`
+   * 접근 예시: `riido.aiAgent.tasks.threads`
+   * cache tag: `aiAgent.tasks.threads`
    */
   readonly threads: ListAIAgentTaskThreadsEndpoint;
   /**
-   * task participant에서 AI agent를 제거하고 작업을 중단합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   * task participant에서 AI agent를 제거하고 작업을 중단합니다
+   * 계약 generated path: `aiAgent.tasks.unassign`
+   * 검색용 generated 경로: `tasks.unassign`
+   * 접근 예시: `riido.aiAgent.tasks.unassign`
+   * invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly unassign: UnassignAIAgentTaskEndpoint;
 }
@@ -2410,7 +2522,11 @@ export interface RiidoAIAgentModule {
    */
   readonly agents: RiidoAIAgentAgentsNamespace;
   /**
-   * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 cache tag: `aiAgent.bootstrap`
+   * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
+   * 계약 generated path: `aiAgent.bootstrap`
+   * 검색용 generated 경로: `bootstrap`
+   * 접근 예시: `riido.aiAgent.bootstrap`
+   * cache tag: `aiAgent.bootstrap`
    */
   readonly bootstrap: GetAIAgentClientBootstrapEndpoint;
   /**

@@ -1898,6 +1898,7 @@
         "facade_path": [
           "bootstrap"
         ],
+        "generated_path": "aiAgent.bootstrap",
         "cache_tag": "aiAgent.bootstrap"
       },
       "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
@@ -1933,6 +1934,7 @@
           "onboarding",
           "fixtures"
         ],
+        "generated_path": "aiAgent.onboarding.fixtures",
         "cache_tag": "aiAgent.onboarding.fixtures"
       },
       "summary": "AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다",
@@ -1967,6 +1969,7 @@
           "fixtures",
           "createAgent"
         ],
+        "generated_path": "aiAgent.onboarding.fixtures.createAgent",
         "invalidates": [
           "aiAgent.bootstrap",
           "aiAgent.devices.runtimes",
@@ -2009,6 +2012,7 @@
           "devices",
           "runtimes"
         ],
+        "generated_path": "aiAgent.devices.runtimes",
         "cache_tag": "aiAgent.devices.runtimes"
       },
       "summary": "권한이 확인된 principal의 device runtime 상태를 조회합니다",
@@ -2048,6 +2052,7 @@
           "daemon",
           "details"
         ],
+        "generated_path": "aiAgent.agents.daemon.details",
         "cache_tag": "aiAgent.agents.daemon"
       },
       "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다",
@@ -2084,6 +2089,7 @@
           "daemon",
           "start"
         ],
+        "generated_path": "aiAgent.agents.daemon.start",
         "invalidates": [
           "aiAgent.agents.daemon",
           "aiAgent.devices.runtimes"
@@ -2124,6 +2130,7 @@
           "daemon",
           "restart"
         ],
+        "generated_path": "aiAgent.agents.daemon.restart",
         "invalidates": [
           "aiAgent.agents.daemon",
           "aiAgent.devices.runtimes"
@@ -2164,6 +2171,7 @@
           "daemon",
           "stop"
         ],
+        "generated_path": "aiAgent.agents.daemon.stop",
         "invalidates": [
           "aiAgent.agents.daemon",
           "aiAgent.devices.runtimes"
@@ -2203,6 +2211,7 @@
           "tasks",
           "assignableAgents"
         ],
+        "generated_path": "aiAgent.tasks.assignableAgents",
         "cache_tag": "aiAgent.tasks.assignableAgents"
       },
       "summary": "task participant dropdown에서 할당 가능한 agent 목록을 조회합니다",
@@ -2238,6 +2247,7 @@
           "tasks",
           "assign"
         ],
+        "generated_path": "aiAgent.tasks.assign",
         "invalidates": [
           "aiAgent.bootstrap",
           "aiAgent.tasks.assignableAgents",
@@ -2281,6 +2291,7 @@
           "tasks",
           "unassign"
         ],
+        "generated_path": "aiAgent.tasks.unassign",
         "invalidates": [
           "aiAgent.bootstrap",
           "aiAgent.tasks.assignableAgents",
@@ -2323,6 +2334,7 @@
           "tasks",
           "threads"
         ],
+        "generated_path": "aiAgent.tasks.threads",
         "cache_tag": "aiAgent.tasks.threads"
       },
       "summary": "active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다",
@@ -2359,6 +2371,7 @@
           "tasks",
           "submitComment"
         ],
+        "generated_path": "aiAgent.tasks.submitComment",
         "invalidates": [
           "aiAgent.bootstrap",
           "aiAgent.tasks.assignableAgents",
@@ -2402,6 +2415,7 @@
           "threadMessages",
           "create"
         ],
+        "generated_path": "aiAgent.tasks.threadMessages.create",
         "invalidates": [
           "aiAgent.bootstrap",
           "aiAgent.tasks.assignableAgents",
@@ -2444,6 +2458,7 @@
           "tasks",
           "stop"
         ],
+        "generated_path": "aiAgent.tasks.stop",
         "invalidates": [
           "aiAgent.bootstrap",
           "aiAgent.tasks.assignableAgents",
@@ -2485,6 +2500,7 @@
           "agents",
           "create"
         ],
+        "generated_path": "aiAgent.agents.create",
         "invalidates": [
           "aiAgent.bootstrap",
           "aiAgent.devices.runtimes",
@@ -2529,6 +2545,7 @@
           "agents",
           "editability"
         ],
+        "generated_path": "aiAgent.agents.editability",
         "cache_tag": "aiAgent.agents.editability"
       },
       "summary": "client control 활성화 전에 agent 수정 가능 여부를 조회합니다",
@@ -2562,6 +2579,7 @@
           "agents",
           "updateConfiguration"
         ],
+        "generated_path": "aiAgent.agents.updateConfiguration",
         "invalidates": [
           "aiAgent.bootstrap",
           "aiAgent.agents.editability",
@@ -2608,6 +2626,7 @@
           "agents",
           "delete"
         ],
+        "generated_path": "aiAgent.agents.delete",
         "invalidates": [
           "aiAgent.bootstrap",
           "aiAgent.devices.runtimes",
@@ -2647,6 +2666,7 @@
           "events",
           "stream"
         ],
+        "generated_path": "aiAgent.events.stream",
         "cache_tag": "aiAgent.events.stream"
       },
       "summary": "editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다",

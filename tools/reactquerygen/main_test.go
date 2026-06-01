@@ -75,6 +75,10 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"export function createAIAgentTaskThreadMessageMutationOptions",
 		"/v1/client/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages",
 		"readonly threadMessages",
+		"계약 generated path: `aiAgent.tasks.threadMessages.create`",
+		"검색용 generated 경로: `tasks.threadMessages.create`",
+		"접근 예시: `riido.aiAgent.tasks.threadMessages.create`",
+		"검색용 generated 경로: `onboarding.fixtures.createAgent`",
 		"export function stopAIAgentTaskMutationOptions",
 		"Promise<AIAgentTaskActionResponse>",
 		"export async function streamAIAgentClientEvents",
@@ -128,6 +132,8 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"readonly useMutation",
 		"readonly threads",
 		"readonly threadMessages",
+		"검색용 generated 경로: `tasks.threadMessages.create`",
+		"접근 예시: `riido.aiAgent.tasks.threadMessages.create`",
 		"export interface RiidoAIAgentOnboardingFixturesReactNamespace extends ListAIAgentOnboardingFixturesReactEndpoint",
 		"readonly fixtures: RiidoAIAgentOnboardingFixturesReactNamespace;",
 		"readonly createAgent: CreateAIAgentFromOnboardingFixtureReactEndpoint;",
@@ -252,6 +258,7 @@ func clientMetadataByOperation(t *testing.T, path string, operations []testContr
 		if len(operation.Client.FacadePath) == 0 {
 			t.Fatalf("%s operation %s missing client.facade_path", path, operationID)
 		}
+		operation.Client.GeneratedPath = generatedPathFromClient(operation.Client)
 		out[operationID] = canonicalJSON(t, operation.Client)
 	}
 	return out

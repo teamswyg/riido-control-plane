@@ -42,10 +42,11 @@ type operation struct {
 }
 
 type clientMetadata struct {
-	Module      string   `json:"module"`
-	FacadePath  []string `json:"facade_path"`
-	CacheTag    string   `json:"cache_tag"`
-	Invalidates []string `json:"invalidates"`
+	Module        string   `json:"module"`
+	FacadePath    []string `json:"facade_path"`
+	GeneratedPath string   `json:"generated_path"`
+	CacheTag      string   `json:"cache_tag"`
+	Invalidates   []string `json:"invalidates"`
 }
 
 type parameter struct {
@@ -249,6 +250,12 @@ func validateClientMetadata(spec openAPISpec, ops []routeOperation) error {
 		for _, segment := range op.Op.Client.FacadePath {
 			if strings.TrimSpace(segment) == "" {
 				return fmt.Errorf("%s %s has empty x-riido-client.facade_path segment", strings.ToUpper(op.Method), op.Path)
+			}
+		}
+		if generatedPath := strings.TrimSpace(op.Op.Client.GeneratedPath); generatedPath != "" {
+			want := generatedPathFromClient(op.Op.Client)
+			if generatedPath != want {
+				return fmt.Errorf("%s %s has x-riido-client.generated_path %q, want %q", strings.ToUpper(op.Method), op.Path, generatedPath, want)
 			}
 		}
 		for _, invalidates := range op.Op.Client.Invalidates {
@@ -495,11 +502,9 @@ func writeCoreEndpointInterfaces(b *strings.Builder, ops []routeOperation) error
 }
 
 func writeCoreQueryEndpointInterface(b *strings.Builder, info operationInfo) {
-	writeJSDoc(b,
-		operationSummary(info.Route),
-		fmt.Sprintf("DSL facade path: `%s`", strings.Join(facadePathParts(info.Route), ".")),
+	writeJSDoc(b, append(operationGeneratedPathCommentLines(info.Route),
 		fmt.Sprintf("cache tag: `%s`", info.Route.Op.Client.CacheTag),
-	)
+	)...)
 	fmt.Fprintf(b, "export interface %s {\n", endpointInterfaceName(info.Name))
 	writeIndentedJSDoc(b, "  ", "HTTP 요청을 직접 실행합니다.")
 	fmt.Fprintf(b, "  readonly request: (%s) => Promise<%s>;\n", facadeQueryRequestSignature(info.PathParams, info.ParamTypeName), info.ResponseType)
@@ -521,11 +526,9 @@ func writeCoreQueryEndpointInterface(b *strings.Builder, info operationInfo) {
 }
 
 func writeCoreMutationEndpointInterface(b *strings.Builder, info operationInfo, cacheTargets map[string]routeOperation) {
-	writeJSDoc(b,
-		operationSummary(info.Route),
-		fmt.Sprintf("DSL facade path: `%s`", strings.Join(facadePathParts(info.Route), ".")),
+	writeJSDoc(b, append(operationGeneratedPathCommentLines(info.Route),
 		"자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.",
-	)
+	)...)
 	fmt.Fprintf(b, "export interface %s {\n", endpointInterfaceName(info.Name))
 	writeIndentedJSDoc(b, "  ", "HTTP 요청을 직접 실행합니다.")
 	fmt.Fprintf(b, "  readonly request: (%s) => Promise<%s>;\n", facadeMutationRequestSignature(info.PathParams, info.ParamTypeName, info.RequestType), info.ResponseType)
@@ -558,7 +561,7 @@ func writeReactEndpointInterfaces(b *strings.Builder, ops []routeOperation) erro
 			return err
 		}
 		if strings.EqualFold(op.Method, "GET") {
-			writeJSDoc(b, operationSummary(op), "client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.")
+			writeJSDoc(b, append(operationGeneratedPathCommentLines(op), "client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.")...)
 			fmt.Fprintf(b, "export interface %s extends core.%s {\n", reactEndpointInterfaceName(info.Name), endpointInterfaceName(info.Name))
 			writeIndentedJSDoc(b, "  ", "React Query useQuery hook입니다.")
 			fmt.Fprintf(b, "  readonly useQuery: (%s) => UseQueryResult<%s, Error>;\n", reactQueryHookSignature(info), reactType(info.ResponseType))
@@ -566,7 +569,7 @@ func writeReactEndpointInterfaces(b *strings.Builder, ops []routeOperation) erro
 			continue
 		}
 		info.MutationVariables = mutationVariableTypeName(info.Name, info.PathParams, info.RequestType)
-		writeJSDoc(b, operationSummary(op), "client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.")
+		writeJSDoc(b, append(operationGeneratedPathCommentLines(op), "client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.")...)
 		fmt.Fprintf(b, "export interface %s extends core.%s {\n", reactEndpointInterfaceName(info.Name), endpointInterfaceName(info.Name))
 		writeIndentedJSDoc(b, "  ", "React Query useMutation hook입니다.")
 		fmt.Fprintf(b, "  readonly useMutation: (options?: core.RiidoMutationOptions<%s, %s>) => UseMutationResult<%s, Error, %s>;\n", reactType(info.ResponseType), reactType(info.MutationVariables), reactType(info.ResponseType), reactType(info.MutationVariables))
@@ -602,7 +605,7 @@ func writeNamespaceInterface(b *strings.Builder, module string, path []string, n
 		child := node.Children[name]
 		if child.Op != nil && len(child.Children) == 0 {
 			info, _ := newOperationInfo(*child.Op)
-			writeIndentedJSDoc(b, "  ", operationPropertyDescription(info))
+			writeIndentedJSDoc(b, "  ", operationPropertyDescriptionLines(info)...)
 			fmt.Fprintf(b, "  readonly %s: %s;\n", quoteProperty(name), operationEndpointType(info.Name, react))
 			continue
 		}
@@ -611,7 +614,7 @@ func writeNamespaceInterface(b *strings.Builder, module string, path []string, n
 		if desc == "" {
 			if child.Op != nil {
 				info, _ := newOperationInfo(*child.Op)
-				desc = operationPropertyDescription(info)
+				desc = strings.Join(operationPropertyDescriptionLines(info), " ")
 			} else {
 				desc = strings.Join(append([]string{module}, childPath...), ".") + " namespace입니다."
 			}
@@ -875,14 +878,45 @@ func facadePathParts(op routeOperation) []string {
 	return append([]string{op.Op.Client.Module}, op.Op.Client.FacadePath...)
 }
 
-func operationPropertyDescription(info operationInfo) string {
-	lines := []string{operationSummary(info.Route)}
+func generatedPathFromClient(client clientMetadata) string {
+	if strings.TrimSpace(client.Module) == "" || len(client.FacadePath) == 0 {
+		return ""
+	}
+	return client.Module + "." + strings.Join(client.FacadePath, ".")
+}
+
+func contractGeneratedPath(op routeOperation) string {
+	if generatedPath := strings.TrimSpace(op.Op.Client.GeneratedPath); generatedPath != "" {
+		return generatedPath
+	}
+	return generatedPathFromClient(op.Op.Client)
+}
+
+func moduleLocalGeneratedPath(op routeOperation) string {
+	return strings.Join(op.Op.Client.FacadePath, ".")
+}
+
+func generatedAccessPath(op routeOperation) string {
+	return "riido." + contractGeneratedPath(op)
+}
+
+func operationGeneratedPathCommentLines(op routeOperation) []string {
+	return []string{
+		operationSummary(op),
+		fmt.Sprintf("계약 generated path: `%s`", contractGeneratedPath(op)),
+		fmt.Sprintf("검색용 generated 경로: `%s`", moduleLocalGeneratedPath(op)),
+		fmt.Sprintf("접근 예시: `%s`", generatedAccessPath(op)),
+	}
+}
+
+func operationPropertyDescriptionLines(info operationInfo) []string {
+	lines := operationGeneratedPathCommentLines(info.Route)
 	if strings.EqualFold(info.Route.Method, "GET") {
 		lines = append(lines, fmt.Sprintf("cache tag: `%s`", info.Route.Op.Client.CacheTag))
 	} else if len(info.Route.Op.Client.Invalidates) > 0 {
 		lines = append(lines, "invalidates: `"+strings.Join(info.Route.Op.Client.Invalidates, "`, `")+"`")
 	}
-	return strings.Join(lines, " ")
+	return lines
 }
 
 func operationEndpointType(operationID string, react bool) string {
