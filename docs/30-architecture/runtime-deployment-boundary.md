@@ -42,6 +42,8 @@ RIID-4814 adds the executable ownership projection in
 [`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json).
 RIID-4825 keeps that ownership in `riido-control-plane` while tightening the
 public redaction and same-job handoff cleanup policy.
+RIID-4835 narrows public export to stable key names, non-live behavior
+descriptions, git identifiers, and aggregate status only.
 
 The `deploy-ai-agent-testnet` workflow is allowed to:
 
@@ -84,6 +86,10 @@ step outputs. The workflow must not upload deployment artifacts from the live
 run. The workflow also removes image URI, task-definition ARN, and container
 port temp files in an `always()` cleanup step so those values remain live deploy
 implementation details, not public release evidence.
+The public export contract intentionally avoids publishing live URLs, AWS
+identifiers, image values, task-definition JSON/ARNs, CodeDeploy JSON or
+deployment IDs, smoke payloads, Terraform plans, state, tfvars, apply logs, and
+raw operator evidence.
 
 `riido-infra` still owns the Terraform module that creates ECR, ECS, ALB,
 security groups, IAM boundaries, DynamoDB, EventBridge, DNS/ACM/WAF, and the

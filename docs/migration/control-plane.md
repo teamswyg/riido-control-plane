@@ -685,6 +685,30 @@ This slice does not create or modify AWS resources, Terraform topology,
 GitHub environment values, live deployment execution, release evidence files,
 or uploaded workflow artifacts.
 
+### RIID-4835 — CD public export contract
+
+This slice narrows the CD ownership remodel into an explicit public export
+contract. Runtime artifact CD execution and CodeDeploy create/wait/smoke remain
+owned by `riido-control-plane`, while `riido-infra` must know only the stable
+topology/evidence contract.
+
+Changed:
+
+- add `public_export_contract` to `runtime-cd-ownership.riido.json`
+- state that public CD exports are limited to workflow names, stable secret and
+  variable key names, stable infra output names, git identifiers, and aggregate
+  pass/fail status
+- state that public repos must not upload or output live deployment payloads,
+  including URLs, AWS identifiers, image values, task-definition/AppSpec JSON,
+  deployment IDs, smoke payloads, Terraform plans/state/tfvars/apply logs, or
+  raw operator evidence
+- extend `tools/deploypolicy` so the manifest, workflow, and docs preserve this
+  public/export boundary
+
+This slice does not create or modify AWS resources, Terraform topology,
+GitHub environment values, live deployment execution, release evidence files,
+or uploaded workflow artifacts.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

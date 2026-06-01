@@ -107,6 +107,7 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, migration, "RIID-4815")
 	requireContains(t, migration, "RIID-4822")
 	requireContains(t, migration, "RIID-4825")
+	requireContains(t, migration, "RIID-4835")
 
 	for path, body := range map[string]string{
 		"README.md":                      readme,
@@ -179,6 +180,15 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			MustKnow    []string `json:"must_know"`
 			MustNotFrom []string `json:"must_not_receive_from_public_workflow"`
 		} `json:"infra_visibility_policy"`
+		PublicExport struct {
+			RiidoTask              string   `json:"riido_task"`
+			CanonicalOwner         string   `json:"canonical_owner"`
+			InfraAwarenessOwner    string   `json:"infra_awareness_owner"`
+			AllowedPublicExports   []string `json:"allowed_public_exports"`
+			ForbiddenPublicExports []string `json:"forbidden_public_exports"`
+			InfraMustConsumeOnly   []string `json:"infra_must_consume_only"`
+			WorkflowMustNotUse     []string `json:"workflow_must_not_use"`
+		} `json:"public_export_contract"`
 		InfraTopology struct {
 			RiidoTask      string   `json:"riido_task"`
 			Repo           string   `json:"repo"`
@@ -202,6 +212,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		t.Fatalf("manifest identity drifted: %#v", parsed)
 	}
 	requireSliceContains(t, parsed.Hardening, "RIID-4833")
+	requireSliceContains(t, parsed.Hardening, "RIID-4835")
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
 		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
 	}
@@ -295,6 +306,28 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "generated CodeDeploy AppSpec JSON")
 	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "image digests or image URIs")
 	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "smoke replay temp files")
+	if parsed.PublicExport.RiidoTask != "RIID-4835" {
+		t.Fatalf("public export work unit drifted: %#v", parsed.PublicExport)
+	}
+	if parsed.PublicExport.CanonicalOwner != "riido-control-plane" || parsed.PublicExport.InfraAwarenessOwner != "riido-infra" {
+		t.Fatalf("public export ownership drifted: %#v", parsed.PublicExport)
+	}
+	requireSliceContains(t, parsed.PublicExport.AllowedPublicExports, "stable GitHub secret and variable key names")
+	requireSliceContains(t, parsed.PublicExport.AllowedPublicExports, "stable infra output key names that operators map into GitHub environment variables")
+	requireSliceContains(t, parsed.PublicExport.AllowedPublicExports, "aggregate pass or fail status without live payload values")
+	requireSliceContains(t, parsed.PublicExport.ForbiddenPublicExports, "image URIs or digests")
+	requireSliceContains(t, parsed.PublicExport.ForbiddenPublicExports, "ECS task-definition JSON")
+	requireSliceContains(t, parsed.PublicExport.ForbiddenPublicExports, "CodeDeploy create-deployment request JSON")
+	requireSliceContains(t, parsed.PublicExport.ForbiddenPublicExports, "Terraform plan output, state, tfvars, apply logs, or raw operator evidence")
+	requireSliceContains(t, parsed.PublicExport.InfraMustConsumeOnly, "stable output names")
+	requireSliceContains(t, parsed.PublicExport.InfraMustConsumeOnly, "redaction categories")
+	requireSliceContains(t, parsed.PublicExport.InfraMustConsumeOnly, "operator evidence summaries stored outside public repositories")
+	requireSliceContains(t, parsed.PublicExport.WorkflowMustNotUse, "actions/upload-artifact for live deployment payloads")
+	requireSliceContains(t, parsed.PublicExport.WorkflowMustNotUse, "GITHUB_OUTPUT for live deployment values")
+	requireSliceContains(t, parsed.PublicExport.WorkflowMustNotUse, "workflow_dispatch inputs for live URLs")
+	requireContains(t, doc, "Public Export Contract")
+	requireContains(t, doc, "RIID-4835")
+	requireContains(t, boundary, "RIID-4835")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
 
