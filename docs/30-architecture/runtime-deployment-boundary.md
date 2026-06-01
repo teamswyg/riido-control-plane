@@ -62,23 +62,15 @@ The workflow must not commit or print unmasked AWS account values, raw token
 values, Terraform state, plan output, production secret payloads, task
 definition JSON, task-definition ARNs, image digests, live workflow run URLs,
 workflow_dispatch URL inputs, GitHub step outputs that carry live deployment
-values, or smoke response payloads. Public repo configuration uses only GitHub
-secrets/variables:
+values, or smoke response payloads. Public repo configuration uses only the
+stable GitHub secret/variable categories recorded in
+[`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json). RIID-4845
+keeps the exact deploy/smoke key-name list in that machine-readable manifest and
+in the workflow files that consume those keys, not repeated in human-readable
+public docs.
 
-- secret: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`
-- secret: `RIIDO_AI_SERVER_TESTNET_TOKEN`
-- variable: `RIIDO_AI_SERVER_AWS_REGION`
-- variable: `RIIDO_AI_SERVER_ECR_REPOSITORY`
-- variable: `RIIDO_AI_SERVER_ECS_CLUSTER`
-- variable: `RIIDO_AI_SERVER_ECS_SERVICE`
-- variable: `RIIDO_AI_SERVER_ECS_CONTAINER_NAME`
-- variable: `RIIDO_AI_SERVER_TESTNET_BASE_URL`
-- optional variable: `RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID`
-- optional variable pair: `RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION`,
-  `RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP`
-
-The names above are a workflow contract. Their values, the current live URL, and
-any deployment evidence stay in GitHub environment configuration or
+Those keys are a workflow contract. Their values, the current live URL, and any
+deployment evidence stay in GitHub environment configuration or
 `riido-infra`/operator evidence, not in checked-in public docs. Live values
 needed only inside the job are passed through `$RUNNER_TEMP` files with
 restrictive permissions and re-masked before use, not through reusable GitHub
@@ -175,6 +167,11 @@ The existing names can stay public because operators need them, but a new
 appears in README, docs, or workflow files. `riido-infra` consumes the stable
 categories and source names only; it does not receive live payloads through
 public outputs or artifacts.
+
+RIID-4845 narrows the human-readable public docs one more step. Exact deploy and
+smoke key-name lists stay in the machine-readable manifest and workflow files;
+docs like this boundary describe key categories, ownership, and the manifest
+location without repeating the list.
 
 PR descriptions and chat messages are not release SSOT. Any durable decision must
 land in a domain, architecture, ADR, migration, or infra evidence document.

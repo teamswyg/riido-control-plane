@@ -2,7 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
-  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842", "RIID-4844"],
+  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842", "RIID-4844", "RIID-4845"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -98,7 +98,8 @@
     ],
     "public_repo_should_minimize": [
       "publish only stable configuration key names that operators must set",
-      "centralize required deploy key names in the workflow and ownership docs instead of scattering environment-specific examples",
+      "centralize required deploy key names in the workflow files and machine-readable ownership manifest instead of scattering environment-specific examples",
+      "keep exact deploy key-name lists out of human-readable public docs except the workflow files that consume them",
       "avoid environment-specific examples for domains, clusters, services, applications, deployment groups, ARNs, and URLs",
       "keep live handoff values in same-job runner temp files instead of reusable workflow outputs or artifacts",
       "apply restrictive file permissions before writing live handoff, task-definition, CodeDeploy, or smoke replay files"
@@ -152,7 +153,8 @@
       "deploy/work-units/riid-4836-control-plane-cd-public-surface-redaction-scan.riido.json",
       "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json",
       "deploy/work-units/riid-4839-cd-public-config-key-minimization.riido.json",
-      "deploy/work-units/riid-4844-cd-public-surface-minimal-exposure-ratchet.riido.json"
+      "deploy/work-units/riid-4844-cd-public-surface-minimal-exposure-ratchet.riido.json",
+      "deploy/work-units/riid-4845-cd-public-key-name-docs-minimization-ratchet.riido.json"
     ],
     "local_scope": "Infra owns topology, drift policy, IAM, and operator evidence. It does not own runtime artifact CD execution."
   },
@@ -285,11 +287,13 @@
       "operator-provided-testnet-base-url"
     ],
     "public_docs_may_reference": [
-      "required or optional key names",
+      "required or optional key categories",
+      "the machine-readable manifest path that contains the exact key list",
       "which repository owns each key category",
       "non-live behavior descriptions"
     ],
     "public_docs_must_not_reference": [
+      "exact deploy or smoke key-name lists outside the machine-readable manifest and workflow files",
       "key values",
       "environment-specific example values",
       "live hosts",
@@ -306,7 +310,7 @@
     "riido_task": "RIID-4842",
     "canonical_owner": "riido-control-plane",
     "infra_awareness_owner": "riido-infra",
-    "rule": "Public CD documentation and workflows treat configuration key names as a sensitivity budget, not a glossary. Existing stable keys may be named only where operators need them; new RIIDO_AI_SERVER_* public key names require this manifest to change before docs or workflows reference them.",
+    "rule": "Public CD documentation and workflows treat configuration key names as a sensitivity budget, not a glossary. Existing stable keys may be named only in the machine-readable manifest and workflow files that consume them; human-readable docs should link to this manifest and describe categories. New RIIDO_AI_SERVER_* public key names require this manifest to change before docs or workflows reference them.",
     "public_key_names_are_sensitive": true,
     "key_name_scope_paths": [
       "README.md",
@@ -317,7 +321,7 @@
       ".github/workflows/ai-agent-client-testnet-smoke.yml"
     ],
     "allowed_public_information": [
-      "current stable RIIDO_AI_SERVER_* key names listed in public_config_key_minimization",
+      "current stable RIIDO_AI_SERVER_* key names listed in public_config_key_minimization only in canonical machine-readable and workflow paths",
       "explicit non-CD runtime key exceptions listed in this guard",
       "stable infra output source names listed in public_config_key_minimization",
       "non-live ownership and behavior descriptions",
@@ -325,14 +329,15 @@
     ],
     "canonical_cd_key_list_paths": [
       "docs/30-architecture/runtime-cd-ownership.riido.json",
-      "docs/30-architecture/runtime-cd-ownership.md",
-      "docs/30-architecture/runtime-deployment-boundary.md",
       ".github/workflows/deploy-ai-agent-testnet.yml",
       ".github/workflows/ai-agent-client-testnet-smoke.yml"
     ],
     "broad_summary_docs_must_link_not_list_cd_keys": [
       "README.md",
-      "docs/20-domain/ai-agent-client-api.md"
+      "docs/20-domain/ai-agent-client-api.md",
+      "docs/30-architecture/runtime-deployment-boundary.md",
+      "docs/30-architecture/runtime-cd-ownership.md",
+      "docs/migration/control-plane.md"
     ],
     "allowed_public_non_cd_runtime_keys": [
       {
@@ -346,6 +351,7 @@
     ],
     "forbidden_public_information": [
       "new RIIDO_AI_SERVER_* key names that are not listed in public_config_key_minimization",
+      "exact deploy/smoke key-name lists in human-readable public docs outside canonical machine-readable and workflow paths",
       "example values for allowed public key names",
       "live URLs or hostnames",
       "AWS account identifiers or ARNs",
@@ -359,6 +365,7 @@
     "infra_must_know": [
       "CD execution remains owned by riido-control-plane",
       "infra consumes the stable key categories and source names only",
+      "human-readable public docs link to the manifest instead of repeating exact deploy/smoke key lists",
       "infra must not ask public workflows to export live deployment payloads as convenience handoffs"
     ]
   },
