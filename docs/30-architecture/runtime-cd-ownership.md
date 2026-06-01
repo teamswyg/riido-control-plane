@@ -1,6 +1,6 @@
 # Runtime CD Ownership
 
-> Riido task: RIID-4815 `[Control Plane/Infra] CodeDeploy 선택형 CD workflow와 public redaction 최소화`
+> Riido task: RIID-4822 `[Infra/Control Plane] CodeDeploy topology ownership and public redaction`
 
 This document explains the deploy ownership manifest in
 [`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json). It does
@@ -44,11 +44,13 @@ waits for deployment success, and runs the same smoke checks after the
 deployment succeeds.
 
 The ownership does not flip in that mode: `riido-control-plane` owns create /
-wait / smoke execution, while `riido-infra` must first create or expose the
-CodeDeploy application, deployment group, blue/green target group/listener
-topology, rollback policy, and IAM boundary through Terraform/operator
-evidence. The public workflow consumes only the configured application and
-deployment-group names through GitHub environment variables.
+wait / smoke execution, while `riido-infra` owns the CodeDeploy application,
+deployment group, blue/green target group/listener topology, rollback policy,
+and IAM boundary through Terraform/operator evidence. After RIID-4822 the public
+workflow consumes only the configured application and deployment-group names
+from infra outputs; service role ARNs, target group/listener ARNs,
+task-definition JSON, generated AppSpec JSON, deployment IDs, and smoke payloads
+must not become public workflow inputs or uploaded artifacts.
 
 ## Public Redaction
 

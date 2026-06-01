@@ -1,8 +1,8 @@
 {
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
-  "riido_task": "RIID-4815",
-  "supersedes_tasks": ["RIID-4814"],
+  "riido_task": "RIID-4822",
+  "supersedes_tasks": ["RIID-4814", "RIID-4815"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
     "id": "ecs-rolling-task-definition-revision",
@@ -23,7 +23,7 @@
   "optional_workflow_modes": [
     {
       "id": "codedeploy-blue-green",
-      "status": "workflow-ready-topology-gated",
+      "status": "workflow-ready-infra-output-gated",
       "cd_owner": "riido-control-plane",
       "topology_owner": "riido-infra",
       "workflow": ".github/workflows/deploy-ai-agent-testnet.yml",
@@ -46,6 +46,23 @@
       ]
     }
   ],
+  "infra_topology_contract": {
+    "riido_task": "RIID-4822",
+    "repo": "riido-infra",
+    "terraform_work_unit": "deploy/work-units/riid-4822-codedeploy-blue-green-topology.riido.json",
+    "required_outputs": [
+      "codedeploy_application_name",
+      "codedeploy_deployment_group_name"
+    ],
+    "control_plane_must_not_consume": [
+      "CodeDeploy service role ARN",
+      "target group ARN",
+      "listener ARN",
+      "task definition JSON",
+      "CodeDeploy AppSpec JSON",
+      "CodeDeploy deployment ID"
+    ]
+  },
   "future_strategies": [
     {
       "id": "codedeploy-blue-green",

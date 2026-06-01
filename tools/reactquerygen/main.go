@@ -323,7 +323,7 @@ func writeCoreRuntime(b *strings.Builder) {
 	b.WriteString("export type RiidoFetcher = typeof fetch;\n\n")
 	writeJSDoc(b,
 		"control-plane 호출에 필요한 기본 설정입니다.",
-		"`baseUrl`은 예: `http://ai-api.riido.io`처럼 마지막 슬래시 없이 전달해도 됩니다.",
+		"`baseUrl`은 예: `https://<control-plane-host>`처럼 마지막 슬래시 없이 전달해도 됩니다.",
 		"`aiAgentToken`은 기존 Riido 앱 로그인 토큰과 구분되는 AI Agent SaaS 전용 토큰입니다.",
 		"요청에는 `X-Riido-AI-Agent-Token` 헤더로 전달됩니다.",
 		"`fetcher`는 테스트나 앱 공통 transport 래핑이 필요할 때만 주입합니다.",

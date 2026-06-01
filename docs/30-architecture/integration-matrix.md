@@ -24,7 +24,7 @@ operator/private infra validation.
 | `awsadapters` facade | compile and usage tests | none |
 | container image contract | `tools/containercontract` and optional local Docker build | Docker only for image build check |
 | AI Agent testnet runtime CD | tag-triggered `deploy-ai-agent-testnet` workflow: build, ECR push, ECS service wait, live smoke | GitHub OIDC, masked AWS account boundary, configured testnet secrets, no live URL dispatch input or live-value step output |
-| topology-gated CodeDeploy runtime CD | same workflow creates/waits/smokes CodeDeploy deployment only after infra supplies topology and both CodeDeploy variables are configured | GitHub OIDC, masked deployment target config, same-job temp AppSpec/request files, no uploaded deployment artifacts or live-value step output |
+| infra-output-gated CodeDeploy runtime CD | same workflow creates/waits/smokes CodeDeploy deployment only after infra supplies topology evidence and both CodeDeploy variables are configured from infra outputs | GitHub OIDC, masked deployment target config, same-job temp AppSpec/request files, no service-role/target-group/listener ARN input, no uploaded deployment artifacts or live-value step output |
 
 Public PR checks must not require AWS credentials, Terraform state, ECR access,
 production secret material, or write access to `riido-client`. Testnet runtime CD
@@ -40,7 +40,7 @@ dispatch.
 | testnet ECR image push | `riido-control-plane` tag CD | immutable tag, image digest, masked workflow logs |
 | ECS/Fargate topology | `riido-infra` | Terraform plan/apply evidence and drift policy |
 | testnet ECS service deployment | `riido-control-plane` tag CD | task-definition revision, service-stability wait, AI Agent smoke |
-| CodeDeploy application/deployment group topology | `riido-infra` | Terraform plan/apply evidence and rollback/traffic-shift policy before the control-plane optional mode is configured |
+| CodeDeploy application/deployment group topology | `riido-infra` | RIID-4822 Terraform plan/apply evidence, rollback/traffic-shift policy, and exported application/deployment group names before the control-plane optional mode is configured |
 | DNS/ACM/WAF/public ingress | `riido-infra` | traffic, certificate, and ingress evidence |
 | production secret wiring | `riido-infra` plus secret manager | redacted runtime secret evidence |
 | live DynamoDB/EventBridge behavior | `riido-infra` | backend bootstrap and traffic/evidence tools |
