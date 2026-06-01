@@ -21,9 +21,16 @@ It is copied from `riido-contracts` only so this repository can prove its
 projection does not ask for generated paths that upstream coverage did not
 name. The mirror also carries the upstream page registry and non-UI top-level
 wireframe evidence so this repository can prove it is consuming the whole-file
-coverage map, not only the primary `UI` page. The generator test reads both
-manifests and verifies that every required generated path exists in the
-upstream coverage mirror and in:
+coverage map, not only the primary `UI` page.
+
+The mirrored page registry keeps the contracts-owned inspection method:
+`figma.root.children` and `page.children.length` from the Figma Plugin API are
+the authority for top-level page child counts. Metadata XML/read output remains
+supporting evidence only and must not redefine page-level counts in the
+control-plane mirror.
+
+The generator test reads both manifests and verifies that every required
+generated path exists in the upstream coverage mirror and in:
 
 - `contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json`
 - `web/generated/aiAgentClient.ts`
@@ -100,7 +107,7 @@ go test ./tools/reactquerygen -run TestFigmaAIAgentControlPlaneProjectionManifes
 go test ./tools/reactquerygen -count=1
 ```
 
-The test catches three classes of drift:
+The test catches these drift classes:
 
 - the local projection manifest names a generated path that OpenAPI does not
   expose;
@@ -108,6 +115,8 @@ The test catches three classes of drift:
   contracts Figma coverage did not name for the same node;
 - the mirrored contracts coverage no longer records the three inspected Figma
   pages or the four non-UI top-level evidence nodes;
+- the mirrored contracts coverage loses the Figma Plugin API inspection method
+  that owns page registry and child-count evidence;
 - generated TypeScript or React wrapper comments no longer carry the required
   generated path;
 - a no-endpoint Figma section accidentally gains forbidden helper names such as

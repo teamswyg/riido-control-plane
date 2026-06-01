@@ -14,6 +14,17 @@
     "inspected_at": "2026-06-02",
     "inspection_source": "Figma metadata, top-level frame list, cited node-id existence check, and annotations"
   },
+  "inspection_method": {
+    "id": "figma-plugin-api-page-registry.v1",
+    "authority": "Figma Plugin API via use_figma",
+    "page_registry_expression": "figma.root.children",
+    "top_level_child_count_expression": "page.children.length",
+    "supporting_tools": [
+      "Figma metadata XML/read output",
+      "node-specific metadata lookup"
+    ],
+    "rule": "expected_pages.child_count and expected_top_level_nodes are taken from Figma Plugin API figma.root.children/page.children. Metadata XML/read tools are supporting evidence only because they may expand node subtrees and must not redefine page-level child counts."
+  },
   "coverage_policy": {
     "summary": "Figma is product/design evidence, not the durable SSOT. A Figma node is covered only when it points to an owning domain/API/infrastructure/client boundary and a deterministic follow-up rule.",
     "top_down": "When Figma changes product meaning, update the owning contracts policy or API DSL first, then regenerate IR/OpenAPI and downstream fixtures.",

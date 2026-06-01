@@ -976,6 +976,27 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4830 — Figma coverage inspection method projection
+
+This slice mirrors the contracts-owned Figma inspection method so the
+control-plane projection cannot accidentally treat metadata XML expansion as
+page-level child-count drift.
+
+This slice does:
+
+- update the mirrored Figma AI Agent coverage manifest from `riido-contracts`
+- require the mirror to preserve `figma.root.children` and
+  `page.children.length` as the Figma Plugin API authority for page registry
+  and top-level child counts
+- document that metadata XML/read output is supporting evidence only
+- extend the generated-client projection gate so the mirror and human doc agree
+  on the inspection method
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
