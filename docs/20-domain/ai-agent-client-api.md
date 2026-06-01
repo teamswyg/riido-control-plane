@@ -519,5 +519,7 @@ ALB for:
 - `POST /v1/agents/{agent_id}/thread-progress`
 
 The workflow reads the ALB base URL from a manual workflow input or the
-`RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable, and the bearer token
-from the `RIIDO_AI_SERVER_TESTNET_TOKEN` repository secret.
+`RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable, and the AI Agent SaaS
+token from the `RIIDO_AI_SERVER_TESTNET_TOKEN` repository secret. Smoke calls
+send that value through `X-Riido-AI-Agent-Token`, matching the generated client
+transport.

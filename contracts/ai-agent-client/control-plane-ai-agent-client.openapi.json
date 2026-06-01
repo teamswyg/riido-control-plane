@@ -103,7 +103,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -173,7 +173,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -250,7 +250,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -322,7 +322,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -397,7 +397,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -473,7 +473,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -549,7 +549,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -616,7 +616,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -669,7 +669,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -724,7 +724,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -782,7 +782,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -847,7 +847,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -922,7 +922,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -998,7 +998,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -1077,7 +1077,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -1154,7 +1154,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -1222,7 +1222,7 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "aiAgentTokenAuth": []
           }
         ],
         "x-riido-auth-scopes": [
@@ -2384,10 +2384,11 @@
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "opaque"
+      "aiAgentTokenAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Riido-AI-Agent-Token",
+        "description": "AI Agent SaaS 전용 opaque token입니다. 기존 Riido 앱 로그인 token과 혼동하지 않도록 generated client는 이 전용 헤더만 사용합니다."
       }
     }
   }

@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           base_url="${TESTNET_BASE_URL%/}"
-          auth_header="Authorization: Bearer ${TESTNET_TOKEN}"
+          auth_header="X-Riido-AI-Agent-Token: ${TESTNET_TOKEN}"
 
           curl_json() {
             curl --fail --silent --show-error \

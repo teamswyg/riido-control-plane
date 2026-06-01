@@ -13,7 +13,7 @@ provider status, authorization port, RBAC read model, mock/testnet API를
 ## 이 레포가 하는 일
 
 - Riido SaaS HTTP/SSE endpoint를 구현합니다.
-- bearer token authorization port와 static/external authorizer adapter를
+- request-token authorization port와 static/external authorizer adapter를
   제공합니다.
 - agent catalog, AI Agent client API, provider status, assignment polling
   같은 control-plane domain slice를 검증합니다.
@@ -26,7 +26,7 @@ provider status, authorization port, RBAC read model, mock/testnet API를
 
 - Terraform state, AWS 계정 topology, ECR push 설정, Fargate task-definition
   wiring을 커밋하지 않습니다.
-- raw bearer token, IdP secret, customer data export를 소유하지 않습니다.
+- raw request token, IdP secret, customer data export를 소유하지 않습니다.
 - provider runtime process를 실행하거나 provider CLI binary를 번들하지 않습니다.
 - production persistence와 DNS 운영 evidence를 SSOT로 삼지 않습니다.
 
@@ -66,14 +66,14 @@ AI Agent client mock API는 다음 env로 켭니다.
 RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true
 ```
 
-mock API도 인증 없이 열리지 않습니다. bearer token scope와 owner/public/private
+mock API도 인증 없이 열리지 않습니다. request-token scope와 owner/public/private
 visibility policy를 통과해야 합니다.
 
 현재 testnet smoke는 별도 GitHub Actions workflow가 담당합니다.
 
 - workflow: `ai-agent-client-testnet-smoke`
 - base URL: `RIIDO_AI_SERVER_TESTNET_BASE_URL`
-- token secret: `RIIDO_AI_SERVER_TESTNET_TOKEN`
+- AI Agent token secret: `RIIDO_AI_SERVER_TESTNET_TOKEN`
 - 현재 testnet URL: `http://ai-api.riido.io`
 
 검증하는 endpoint:

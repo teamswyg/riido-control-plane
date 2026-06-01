@@ -298,7 +298,7 @@ together:
   `aiAgent.tasks.assign`, `aiAgent.tasks.unassign`, `aiAgent.tasks.stop`, and
   `aiAgent.devices.runtimes`
 - the facade is config-bound, so consumers do not repeatedly pass `baseUrl`,
-  `token`, and optional `fetcher`
+  `aiAgentToken`, and optional `fetcher`
 - each operation exposes concise library-style aliases: `query(...)` mirrors
   `queryOptions(...)`, and `mutation(...)` mirrors `mutationOptions(...)`
 - query endpoints expose `queryKeyRoot`, `queryKey`, `invalidate`,
@@ -330,7 +330,7 @@ React wrapper is imported explicitly:
 ```ts
 const riido = useRiidoControlPlaneClient(config);
 
-const bootstrap = riido.aiAgent.bootstrap.useQuery({ enabled: !!config.token });
+const bootstrap = riido.aiAgent.bootstrap.useQuery({ enabled: !!config.aiAgentToken });
 const stopTask = riido.aiAgent.tasks.stop.useMutation({
   onSuccess: async () => {
     await riido.aiAgent.tasks.stop.invalidates.all(queryClient);
@@ -367,7 +367,7 @@ If a fine-grained token is used temporarily, it must be scoped to the target
 repository and limited to contents and pull-request write permissions.
 
 The workflow must not require npm publish tokens, cloud credentials, Terraform
-state, customer data, or production bearer tokens.
+state, customer data, or production request tokens.
 
 ## Acceptance Criteria
 
