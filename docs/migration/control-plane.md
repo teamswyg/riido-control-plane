@@ -803,6 +803,29 @@ This slice does not create or modify AWS resources, Terraform topology,
 GitHub environment values, live deployment execution, release evidence files,
 uploaded workflow artifacts, or generated deployment payload handoffs.
 
+### RIID-4844 — CD public surface minimal exposure ratchet
+
+This slice keeps the same remodel: runtime artifact CD execution and
+CodeDeploy create/wait/smoke remain in `riido-control-plane`, while
+`riido-infra` owns topology, IAM, drift policy, and private/operator evidence.
+It narrows the public disclosure pattern by keeping the exact deploy/smoke
+GitHub key list in the runtime CD ownership SSOT and workflow files instead of
+repeating it in broad README/client-facing docs.
+
+Changed:
+
+- add RIID-4844 to `runtime-cd-ownership.riido.json` hardening tasks
+- declare canonical CD key-list paths and broad docs that must link instead of
+  listing deploy/smoke keys
+- remove repeated deploy/smoke key names from README/client API prose while
+  preserving operator pointers to the ownership SSOT
+- extend deploy-policy tests so public summary docs cannot grow another CD key
+  list by accident
+
+This slice does not create or modify AWS resources, Terraform topology,
+GitHub environment values, live deployment execution, release evidence files,
+uploaded workflow artifacts, or generated deployment payload handoffs.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

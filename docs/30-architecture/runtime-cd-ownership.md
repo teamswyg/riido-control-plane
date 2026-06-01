@@ -214,6 +214,13 @@ actual values out of band through GitHub environment configuration, AWS, or
 ignored operator evidence. It must not ask public workflows to export live
 deployment payloads as convenience handoffs.
 
+RIID-4844 tightens the same rule by reducing repeated key-name disclosure. Broad
+public summary docs should link to this ownership SSOT instead of repeating the
+deploy/smoke key list. The canonical key list remains in this document, the
+machine-readable ownership manifest, the runtime deployment boundary, and the
+workflow files that actually consume those names. This keeps the repo usable for
+operators while making accidental key-name sprawl a deterministic test failure.
+
 ## Drift Rule
 
 Top-down changes start in this manifest or the runtime deployment boundary.
