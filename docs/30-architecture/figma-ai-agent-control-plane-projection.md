@@ -34,6 +34,14 @@ objects can be lazy/unloaded, so metadata XML/read output and unloaded
 `page.children.length` reads remain supporting evidence only and must not
 redefine page-level counts in the control-plane mirror.
 
+The mirror also preserves
+`figma-metadata-page-list-underreports-pages.v1`. On 2026-06-02, no-`nodeId`
+Figma `get_metadata` listed only `129:5215` `UI`, while the Figma Plugin API
+page registry returned `129:5215`, `42:3014`, and `0:1`. Control-plane must not
+turn that supporting metadata output into a generated-client decision: it must
+not remove `expected_pages`, drop `non_ui_top_level_inventory`, or delete
+`legacy_non_ui_absorptions`.
+
 The mirror also preserves contracts-owned `client_delivery_annotations`. Figma
 Dev Mode category `39:0` / `클라이언트 전달` may show frontend facade examples
 such as `riido.aiAgent.events.stream` or `riido.aiAgent.tasks.stop`. This repo

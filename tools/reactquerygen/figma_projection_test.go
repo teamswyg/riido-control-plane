@@ -57,6 +57,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 		t.Fatalf("projection doc must name the downstream-only boundary")
 	}
 	verifyMirroredFigmaInspectionMethod(t, sourceCoverage.InspectionMethod, docText)
+	verifyMirroredFigmaSupportingToolLimitations(t, manifest.MirroredSupportingToolLimitations, sourceCoverage.SupportingToolLimitations, docText)
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164-50215")
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164:50215")
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "starter-agent")
@@ -240,6 +241,61 @@ func verifyMirroredFigmaInspectionMethod(t *testing.T, method figmaCoverageInspe
 	for _, needle := range []string{"figma.root.children", "await figma.setCurrentPageAsync(page)", "page.children.length", "supporting evidence only", "lazy/unloaded"} {
 		if !strings.Contains(docText, needle) {
 			t.Fatalf("projection doc must mention mirrored inspection method with %q", needle)
+		}
+	}
+}
+
+func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []figmaProjectionSupportingToolLimitation, sourceLimitations []figmaSourceSupportingToolLimitation, docText string) {
+	t.Helper()
+	sourceByID := map[string]figmaSourceSupportingToolLimitation{}
+	for _, limitation := range sourceLimitations {
+		sourceByID[limitation.ID] = limitation
+	}
+	if len(projections) == 0 {
+		t.Fatalf("mirrored_supporting_tool_limitations must record consumed source tooling limits")
+	}
+	var projection figmaProjectionSupportingToolLimitation
+	for _, candidate := range projections {
+		if candidate.SourceID == "figma-metadata-page-list-underreports-pages.v1" {
+			projection = candidate
+			break
+		}
+	}
+	if projection.SourceID == "" {
+		t.Fatalf("mirrored_supporting_tool_limitations must include figma-metadata-page-list-underreports-pages.v1")
+	}
+	source, ok := sourceByID[projection.SourceID]
+	if !ok {
+		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", projection.SourceID)
+	}
+	if !strings.Contains(source.Tool, "get_metadata") || !strings.Contains(source.ObservedResult, "only page 129:5215 UI") {
+		t.Fatalf("source supporting limit must preserve no-nodeId metadata under-report evidence: %+v", source)
+	}
+	if strings.TrimSpace(projection.LocalScope) == "" || !strings.Contains(projection.LocalScope, "must not collapse") {
+		t.Fatalf("projection supporting limit must explain local scope: %+v", projection)
+	}
+	requiredPages := map[string]bool{"129:5215": false, "42:3014": false, "0:1": false}
+	for _, pageID := range projection.RequiredAuthoritativePages {
+		if _, ok := requiredPages[pageID]; ok {
+			requiredPages[pageID] = true
+		}
+		if !hasString(source.AuthoritativeResult, pageID) {
+			t.Fatalf("projection supporting limit page %q is absent from source authoritative_result: %+v", pageID, source.AuthoritativeResult)
+		}
+	}
+	for pageID, seen := range requiredPages {
+		if !seen {
+			t.Fatalf("projection supporting limit is missing authoritative page %s", pageID)
+		}
+	}
+	for _, forbidden := range []string{"remove expected_pages", "remove non_ui_top_level_inventory", "remove legacy_non_ui_absorptions"} {
+		if !hasString(projection.ForbiddenProjectionEffects, forbidden) {
+			t.Fatalf("projection supporting limit must forbid %q: %+v", forbidden, projection.ForbiddenProjectionEffects)
+		}
+	}
+	for _, needle := range []string{"figma-metadata-page-list-underreports-pages.v1", "get_metadata", "`129:5215`", "`42:3014`", "`0:1`", "`expected_pages`", "`non_ui_top_level_inventory`", "`legacy_non_ui_absorptions`"} {
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must mention mirrored supporting tool limitation with %q", needle)
 		}
 	}
 }
@@ -509,13 +565,14 @@ func hasString(items []string, want string) bool {
 }
 
 type figmaProjectionManifest struct {
-	SchemaVersion           string                            `json:"schema_version"`
-	ID                      string                            `json:"id"`
-	RiidoTask               string                            `json:"riido_task"`
-	SourceContractsManifest figmaProjectionSourceManifest     `json:"source_contracts_manifest"`
-	ProjectionPolicy        figmaProjectionPolicy             `json:"projection_policy"`
-	LegacyNonUIAbsorptions  []figmaProjectionLegacyAbsorption `json:"legacy_non_ui_absorptions"`
-	Entries                 []figmaProjectionEntry            `json:"entries"`
+	SchemaVersion                     string                                    `json:"schema_version"`
+	ID                                string                                    `json:"id"`
+	RiidoTask                         string                                    `json:"riido_task"`
+	SourceContractsManifest           figmaProjectionSourceManifest             `json:"source_contracts_manifest"`
+	ProjectionPolicy                  figmaProjectionPolicy                     `json:"projection_policy"`
+	MirroredSupportingToolLimitations []figmaProjectionSupportingToolLimitation `json:"mirrored_supporting_tool_limitations"`
+	LegacyNonUIAbsorptions            []figmaProjectionLegacyAbsorption         `json:"legacy_non_ui_absorptions"`
+	Entries                           []figmaProjectionEntry                    `json:"entries"`
 }
 
 type figmaProjectionSourceManifest struct {
@@ -530,6 +587,13 @@ type figmaProjectionPolicy struct {
 	Summary  string `json:"summary"`
 	TopDown  string `json:"top_down"`
 	BottomUp string `json:"bottom_up"`
+}
+
+type figmaProjectionSupportingToolLimitation struct {
+	SourceID                   string   `json:"source_id"`
+	LocalScope                 string   `json:"local_scope"`
+	RequiredAuthoritativePages []string `json:"required_authoritative_pages"`
+	ForbiddenProjectionEffects []string `json:"forbidden_projection_effects"`
 }
 
 type figmaProjectionEntry struct {
@@ -557,6 +621,7 @@ type figmaSourceCoverageManifest struct {
 	SchemaVersion             string                                `json:"schema_version"`
 	ID                        string                                `json:"id"`
 	InspectionMethod          figmaCoverageInspectionMethod         `json:"inspection_method"`
+	SupportingToolLimitations []figmaSourceSupportingToolLimitation `json:"supporting_tool_limitations"`
 	ExpectedPages             []figmaSourceCoveragePage             `json:"expected_pages"`
 	NonUITopLevelInventory    []figmaSourceCoverageInventory        `json:"non_ui_top_level_inventory"`
 	VerifiedEvidenceNodes     []figmaSourceCoverageNode             `json:"verified_evidence_nodes"`
@@ -586,6 +651,13 @@ type figmaCoverageInspectionMethod struct {
 	PageRegistryExpression       string `json:"page_registry_expression"`
 	TopLevelChildCountExpression string `json:"top_level_child_count_expression"`
 	Rule                         string `json:"rule"`
+}
+
+type figmaSourceSupportingToolLimitation struct {
+	ID                  string   `json:"id"`
+	Tool                string   `json:"tool"`
+	ObservedResult      string   `json:"observed_result"`
+	AuthoritativeResult []string `json:"authoritative_result"`
 }
 
 type figmaSourceCoverageEntry struct {
