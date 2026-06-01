@@ -49,6 +49,8 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "starter agent")
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "future desktop or web clients")
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "future desktop/web clients")
+	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "future client bootstrap")
+	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "contracts", "ai-agent-client"), "future client bootstrap")
 
 	spec, err := loadOpenAPI(openAPIPath)
 	if err != nil {

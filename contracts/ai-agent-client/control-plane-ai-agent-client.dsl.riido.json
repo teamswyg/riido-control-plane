@@ -1449,7 +1449,7 @@
           "name": "profile fields are saved",
           "given": "an editable agent has no assigned task",
           "when": "the owner updates profile_thumbnail_url, description, and instruction",
-          "then": "the response and future client bootstrap contain the saved profile fields, preserve server-authored created_at, and refresh updated_at"
+          "then": "the response and subsequent aiAgent.bootstrap reads contain the saved profile fields, preserve server-authored created_at, and refresh updated_at"
         },
         {
           "name": "model updates validate against runtime catalog",
