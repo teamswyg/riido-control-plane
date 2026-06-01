@@ -2,7 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
-  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839"],
+  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -300,6 +300,55 @@
       "smoke request or response payloads"
     ],
     "workflow_key_source": "The deploy and smoke workflows are allowed to reference exactly the required and optional keys listed here; any additional RIIDO_AI_SERVER_* GitHub secret or variable name must update this SSOT first."
+  },
+  "public_sensitive_surface_guard": {
+    "riido_task": "RIID-4842",
+    "canonical_owner": "riido-control-plane",
+    "infra_awareness_owner": "riido-infra",
+    "rule": "Public CD documentation and workflows treat configuration key names as a sensitivity budget, not a glossary. Existing stable keys may be named only where operators need them; new RIIDO_AI_SERVER_* public key names require this manifest to change before docs or workflows reference them.",
+    "public_key_names_are_sensitive": true,
+    "key_name_scope_paths": [
+      "README.md",
+      "docs/20-domain/ai-agent-client-api.md",
+      "docs/30-architecture/runtime-deployment-boundary.md",
+      "docs/30-architecture/runtime-cd-ownership.md",
+      ".github/workflows/deploy-ai-agent-testnet.yml",
+      ".github/workflows/ai-agent-client-testnet-smoke.yml"
+    ],
+    "allowed_public_information": [
+      "current stable RIIDO_AI_SERVER_* key names listed in public_config_key_minimization",
+      "explicit non-CD runtime key exceptions listed in this guard",
+      "stable infra output source names listed in public_config_key_minimization",
+      "non-live ownership and behavior descriptions",
+      "aggregate deploy or smoke pass-fail status without live payload values"
+    ],
+    "allowed_public_non_cd_runtime_keys": [
+      {
+        "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK",
+        "reason": "testnet mock runtime feature flag documented for disposable local/testnet configuration; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_ADDR",
+        "reason": "container listen-address contract documented as non-live runtime shape; it is not a deploy/smoke GitHub configuration key"
+      }
+    ],
+    "forbidden_public_information": [
+      "new RIIDO_AI_SERVER_* key names that are not listed in public_config_key_minimization",
+      "example values for allowed public key names",
+      "live URLs or hostnames",
+      "AWS account identifiers or ARNs",
+      "image URI or digest values",
+      "task-definition revision, ARN, or JSON values",
+      "CodeDeploy generated AppSpec or request JSON",
+      "CodeDeploy deployment IDs",
+      "smoke request or response payloads",
+      "raw operator evidence"
+    ],
+    "infra_must_know": [
+      "CD execution remains owned by riido-control-plane",
+      "infra consumes the stable key categories and source names only",
+      "infra must not ask public workflows to export live deployment payloads as convenience handoffs"
+    ]
   },
   "dependency_direction": {
     "top_down": "Runtime artifact CD behavior changes in control-plane first; infra consumes the required topology/evidence needs.",

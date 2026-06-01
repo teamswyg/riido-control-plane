@@ -169,5 +169,12 @@ names are public; their values, live examples, generated deploy payloads, image
 values, task-definition values, CodeDeploy generated JSON, deployment IDs, smoke
 payloads, and detailed evidence are not public hand-off artifacts.
 
+RIID-4842 treats even those public key names as a managed sensitivity budget.
+The existing names can stay public because operators need them, but a new
+`RIIDO_AI_SERVER_*` name must be added to the ownership manifest before it
+appears in README, docs, or workflow files. `riido-infra` consumes the stable
+categories and source names only; it does not receive live payloads through
+public outputs or artifacts.
+
 PR descriptions and chat messages are not release SSOT. Any durable decision must
 land in a domain, architecture, ADR, migration, or infra evidence document.

@@ -780,6 +780,29 @@ This slice does not create or modify AWS resources, Terraform topology,
 GitHub environment values, live deployment execution, release evidence files,
 uploaded workflow artifacts, or generated deployment payload handoffs.
 
+### RIID-4842 — CD owner SSOT and public sensitive surface guard
+
+This slice keeps the settled remodel: runtime artifact CD execution and
+CodeDeploy create/wait/smoke remain in `riido-control-plane`; `riido-infra`
+owns topology, IAM, drift policy, and private/operator evidence. It adds the
+extra rule that public CD configuration key names are a managed sensitivity
+budget, not an open glossary.
+
+Changed:
+
+- add `public_sensitive_surface_guard` to
+  `docs/30-architecture/runtime-cd-ownership.riido.json`
+- record that new `RIIDO_AI_SERVER_*` public key names must update the
+  ownership manifest before README, docs, or workflows reference them
+- scan the public CD surface for unknown `RIIDO_AI_SERVER_*` key names, not only
+  live values
+- document that `riido-infra` consumes stable key categories/source names only
+  and must not ask public workflows for live payload handoffs
+
+This slice does not create or modify AWS resources, Terraform topology,
+GitHub environment values, live deployment execution, release evidence files,
+uploaded workflow artifacts, or generated deployment payload handoffs.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

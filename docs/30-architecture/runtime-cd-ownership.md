@@ -191,6 +191,29 @@ CodeDeploy generated JSON, deployment IDs, smoke payloads, Terraform plans,
 state, tfvars, apply logs, or raw operator evidence through public outputs or
 artifacts.
 
+## Public Sensitive Surface Guard
+
+RIID-4842 treats public CD configuration key names as a sensitivity budget, not
+a glossary. The stable `RIIDO_AI_SERVER_*` names listed in the manifest may be
+used where operators need to configure GitHub environments, but public docs and
+workflows must not introduce another key name first and justify it later.
+
+That ratchet matters because public repositories are allowed to describe the
+deploy mechanism, while still minimizing anything that helps reconstruct a live
+environment. New public key names, live examples, hostnames, AWS identifiers,
+image/task-definition values, generated CodeDeploy payloads, deployment IDs,
+smoke payloads, and raw operator evidence remain outside the public surface.
+The current non-CD exceptions are `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK`, a
+disposable testnet mock runtime flag, and `RIIDO_AI_SERVER_ADDR`, the
+non-live container listen-address shape. Neither one is a deploy/smoke GitHub
+configuration key.
+
+`riido-infra` still needs to know this rule because it owns topology, IAM, drift,
+and evidence. It consumes the stable key categories and source names, then wires
+actual values out of band through GitHub environment configuration, AWS, or
+ignored operator evidence. It must not ask public workflows to export live
+deployment payloads as convenience handoffs.
+
 ## Drift Rule
 
 Top-down changes start in this manifest or the runtime deployment boundary.
