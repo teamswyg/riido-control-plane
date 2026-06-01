@@ -221,6 +221,32 @@
       }
     }
   ],
+  "client_delivery_annotations": [
+    {
+      "node_id": "153:8545",
+      "top_level_node_id": "153:15931",
+      "coverage_entry_node_id": "153:15931",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_label": "riido.aiAgent.events.stream\n\n상세내용은 작업중입니다",
+      "figma_generated_path": "riido.aiAgent.events.stream",
+      "canonical_generated_path": "aiAgent.events.stream",
+      "resolution_status": "resolved_stale_handoff_copy",
+      "resolution": "The Figma handoff note '상세내용은 작업중입니다' is stale copy. The stream consumption hint is resolved by the task-thread coverage entry, the API DSL/OpenAPI generated path, and downstream generated-client comments."
+    },
+    {
+      "node_id": "236:20768",
+      "top_level_node_id": "153:15931",
+      "coverage_entry_node_id": "153:15931",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_label": "riido.aiAgent.tasks.stop",
+      "figma_generated_path": "riido.aiAgent.tasks.stop",
+      "canonical_generated_path": "aiAgent.tasks.stop",
+      "resolution_status": "resolved_consumption_hint",
+      "resolution": "The Figma handoff path is a frontend facade example. The durable generated path is aiAgent.tasks.stop and is covered by the task-thread coverage entry, API DSL/OpenAPI, and downstream generated-client comments."
+    }
+  ],
   "entries": [
     {
       "node_id": "153:12742",
