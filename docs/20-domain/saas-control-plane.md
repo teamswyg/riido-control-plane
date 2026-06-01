@@ -467,6 +467,10 @@ variable names listed in the runtime CD ownership manifest. Adding another
 public key is a CD surface change; key values, live examples, generated deploy
 payloads, image/task-definition values, CodeDeploy generated JSON, deployment
 IDs, smoke payloads, and detailed evidence stay outside public repositories.
+RIID-4842 adds the ratchet: public key names are a managed sensitivity budget.
+The existing names can be documented only because operators need to configure
+them, and any new `RIIDO_AI_SERVER_*` name must be added to the runtime CD
+ownership manifest before public docs or workflows reference it.
 
 ## Durable Operation Boundary
 

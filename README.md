@@ -125,6 +125,12 @@ RIID-4839 기준으로 위 목록이 public CD configuration key의 최소 공�
 deploy payload, image/task-definition/CodeDeploy/smoke evidence는 공개 문서나
 workflow output/artifact로 남기지 않습니다.
 
+RIID-4842 기준으로 public configuration key 이름도 민감 표면 예산으로 봅니다.
+기존 stable key 이름은 운영자가 GitHub environment를 설정하는 데 필요한 범위에서만
+공개하고, 새 `RIIDO_AI_SERVER_*` key 이름은 manifest가 먼저 갱신되지 않으면
+README/docs/workflow에 등장할 수 없습니다. `riido-infra`는 이 key category와
+stable source name만 알고, 실제 값과 live payload는 계속 out-of-band로 관리합니다.
+
 RIID-4835 public export contract에 따라 이 레포가 외부로 남겨도 되는 CD 정보는
 stable key 이름, workflow 이름, git tag/commit, aggregate pass/fail 상태뿐입니다.
 live URL, AWS 식별자, image 값, task definition/AppSpec JSON, deployment id,

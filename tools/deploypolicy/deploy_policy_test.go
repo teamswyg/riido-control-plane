@@ -224,6 +224,21 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			PublicDocsMustNotRef   []string `json:"public_docs_must_not_reference"`
 			WorkflowKeySource      string   `json:"workflow_key_source"`
 		} `json:"public_config_key_minimization"`
+		PublicSensitiveSurfaceGuard struct {
+			RiidoTask                  string   `json:"riido_task"`
+			CanonicalOwner             string   `json:"canonical_owner"`
+			InfraAwarenessOwner        string   `json:"infra_awareness_owner"`
+			Rule                       string   `json:"rule"`
+			PublicKeyNamesAreSensitive bool     `json:"public_key_names_are_sensitive"`
+			KeyNameScopePaths          []string `json:"key_name_scope_paths"`
+			AllowedPublicInformation   []string `json:"allowed_public_information"`
+			AllowedPublicNonCDRuntime  []struct {
+				Name   string `json:"name"`
+				Reason string `json:"reason"`
+			} `json:"allowed_public_non_cd_runtime_keys"`
+			ForbiddenPublicInformation []string `json:"forbidden_public_information"`
+			InfraMustKnow              []string `json:"infra_must_know"`
+		} `json:"public_sensitive_surface_guard"`
 		InfraTopology struct {
 			RiidoTask      string   `json:"riido_task"`
 			Repo           string   `json:"repo"`
@@ -251,6 +266,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Hardening, "RIID-4836")
 	requireSliceContains(t, parsed.Hardening, "RIID-4837")
 	requireSliceContains(t, parsed.Hardening, "RIID-4839")
+	requireSliceContains(t, parsed.Hardening, "RIID-4842")
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
 		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
 	}
@@ -423,21 +439,49 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMustNotRef, "live hosts")
 	requireStringSetExact(t, collectGitHubConfigRefs(deployWorkflow+"\n"+smokeWorkflow, "secrets"), expectedSecrets)
 	requireStringSetExact(t, collectGitHubConfigRefs(deployWorkflow+"\n"+smokeWorkflow, "vars"), append(expectedRequiredVars, expectedOptionalVars...))
+	if parsed.PublicSensitiveSurfaceGuard.RiidoTask != "RIID-4842" {
+		t.Fatalf("public sensitive surface guard work unit drifted: %#v", parsed.PublicSensitiveSurfaceGuard)
+	}
+	if parsed.PublicSensitiveSurfaceGuard.CanonicalOwner != "riido-control-plane" ||
+		parsed.PublicSensitiveSurfaceGuard.InfraAwarenessOwner != "riido-infra" {
+		t.Fatalf("public sensitive surface guard ownership drifted: %#v", parsed.PublicSensitiveSurfaceGuard)
+	}
+	if !parsed.PublicSensitiveSurfaceGuard.PublicKeyNamesAreSensitive {
+		t.Fatal("public sensitive surface guard must treat public key names as sensitive")
+	}
+	requireContains(t, parsed.PublicSensitiveSurfaceGuard.Rule, "sensitivity budget")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicInformation, "current stable RIIDO_AI_SERVER_* key names listed in public_config_key_minimization")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicInformation, "explicit non-CD runtime key exceptions listed in this guard")
+	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK", "not a deploy/smoke GitHub configuration key")
+	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_ADDR", "not a deploy/smoke GitHub configuration key")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "README.md")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "docs/30-architecture/runtime-cd-ownership.md")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, ".github/workflows/deploy-ai-agent-testnet.yml")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.ForbiddenPublicInformation, "new RIIDO_AI_SERVER_* key names that are not listed in public_config_key_minimization")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.ForbiddenPublicInformation, "example values for allowed public key names")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "CD execution remains owned by riido-control-plane")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "infra consumes the stable key categories and source names only")
 	requireContains(t, doc, "Public Export Contract")
 	requireContains(t, doc, "RIID-4835")
 	requireContains(t, doc, "Public Surface Scan")
 	requireContains(t, doc, "RIID-4836")
 	requireContains(t, doc, "Public Config Key Minimization")
 	requireContains(t, doc, "RIID-4839")
+	requireContains(t, doc, "Public Sensitive Surface Guard")
+	requireContains(t, doc, "RIID-4842")
 	requireContains(t, doc, "infra is the same ownership rule")
 	requireContains(t, doc, "Image values are deliberately not in that public export set")
 	requireContains(t, boundary, "RIID-4835")
 	requireContains(t, boundary, "RIID-4839")
+	requireContains(t, boundary, "RIID-4842")
 	requireContains(t, boundary, "aggregate deploy/smoke pass-fail status without live payload values")
 	requireContains(t, boundary, "are not public hand-off artifacts")
 	requireContains(t, readme, "RIID-4839")
+	requireContains(t, readme, "RIID-4842")
 	requireContains(t, domain, "RIID-4839")
+	requireContains(t, domain, "RIID-4842")
 	requireContains(t, migration, "RIID-4839")
+	requireContains(t, migration, "RIID-4842")
 	requireNotContains(t, doc+"\n"+boundary+"\n"+integration, "public image digest")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
@@ -459,12 +503,35 @@ func TestRuntimeCDPublicSurfaceScanContract(t *testing.T) {
 			ForbiddenRegexes           []string `json:"forbidden_regexes"`
 			WorkflowForbiddenMechanism []string `json:"workflow_forbidden_mechanisms"`
 		} `json:"public_surface_scan_contract"`
+		PublicConfigKeyMinimization struct {
+			RequiredSecretKeys   []string `json:"required_secret_keys"`
+			RequiredVariableKeys []string `json:"required_variable_keys"`
+			OptionalVariableKeys []string `json:"optional_variable_keys"`
+		} `json:"public_config_key_minimization"`
+		PublicSensitiveSurfaceGuard struct {
+			RiidoTask                  string   `json:"riido_task"`
+			PublicKeyNamesAreSensitive bool     `json:"public_key_names_are_sensitive"`
+			KeyNameScopePaths          []string `json:"key_name_scope_paths"`
+			AllowedPublicNonCDRuntime  []struct {
+				Name string `json:"name"`
+			} `json:"allowed_public_non_cd_runtime_keys"`
+		} `json:"public_sensitive_surface_guard"`
 	}
 	if err := json.Unmarshal([]byte(manifest), &parsed); err != nil {
 		t.Fatalf("decode runtime CD ownership manifest: %v", err)
 	}
 	if parsed.PublicSurfaceScan.RiidoTask != "RIID-4836" {
 		t.Fatalf("public surface scan task drifted: %#v", parsed.PublicSurfaceScan)
+	}
+	if parsed.PublicSensitiveSurfaceGuard.RiidoTask != "RIID-4842" || !parsed.PublicSensitiveSurfaceGuard.PublicKeyNamesAreSensitive {
+		t.Fatalf("public sensitive surface guard drifted: %#v", parsed.PublicSensitiveSurfaceGuard)
+	}
+	allowedPublicKeys := append(
+		append([]string{}, parsed.PublicConfigKeyMinimization.RequiredSecretKeys...),
+		append(parsed.PublicConfigKeyMinimization.RequiredVariableKeys, parsed.PublicConfigKeyMinimization.OptionalVariableKeys...)...,
+	)
+	for _, key := range parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime {
+		allowedPublicKeys = append(allowedPublicKeys, key.Name)
 	}
 
 	for _, repoPath := range parsed.PublicSurfaceScan.ScopePaths {
@@ -481,6 +548,15 @@ func TestRuntimeCDPublicSurfaceScanContract(t *testing.T) {
 			}
 			if match := re.FindString(body); match != "" {
 				t.Fatalf("%s contains forbidden public CD pattern %q via %q", repoPath, pattern, match)
+			}
+		}
+	}
+
+	for _, repoPath := range parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths {
+		body := mustRead(t, filepath.Join("..", "..", filepath.FromSlash(repoPath)))
+		for _, key := range collectRiidoAIServerKeyLiterals(body) {
+			if !stringSliceContains(allowedPublicKeys, key) {
+				t.Fatalf("%s contains unregistered public CD configuration key %q", repoPath, key)
 			}
 		}
 	}
@@ -511,6 +587,21 @@ func collectGitHubConfigRefs(body, namespace string) []string {
 		refs = append(refs, match[1])
 	}
 	return refs
+}
+
+func collectRiidoAIServerKeyLiterals(body string) []string {
+	re := regexp.MustCompile(`RIIDO_AI_SERVER_[A-Z0-9_]+`)
+	matches := re.FindAllString(body, -1)
+	seen := map[string]bool{}
+	var keys []string
+	for _, match := range matches {
+		if seen[match] {
+			continue
+		}
+		seen[match] = true
+		keys = append(keys, match)
+	}
+	return keys
 }
 
 func mustRead(t *testing.T, path string) string {
@@ -567,4 +658,27 @@ func requireStringSetExact(t *testing.T, got, want []string) {
 			t.Fatalf("unexpected %q in %#v, expected %#v", item, got, want)
 		}
 	}
+}
+
+func requireNonCDRuntimeKey(t *testing.T, keys []struct {
+	Name   string `json:"name"`
+	Reason string `json:"reason"`
+}, wantName, wantReason string) {
+	t.Helper()
+	for _, key := range keys {
+		if key.Name == wantName {
+			requireContains(t, key.Reason, wantReason)
+			return
+		}
+	}
+	t.Fatalf("missing non-CD runtime key %q in %#v", wantName, keys)
+}
+
+func stringSliceContains(items []string, want string) bool {
+	for _, item := range items {
+		if item == want {
+			return true
+		}
+	}
+	return false
 }
