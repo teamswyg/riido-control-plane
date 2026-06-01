@@ -150,7 +150,7 @@ model-catalog question is resolved.
 Figma onboarding annotations (`node-id=42-3014`) are generated-client
 consumption context for bootstrap, devices, fixture query, and create APIs. The
 delivery artifact may document that `riido.aiAgent.onboarding.fixtures` feeds
-the starter-agent selection screen, including copyable profile fields,
+the fixture-selection screen, including copyable profile fields,
 `default_visibility`, and `recommended_runtime_kind`, and that
 `riido.aiAgent.onboarding.fixtures.createAgent` creates a normal agent with a
 complete `CreateAgentConfigurationRequest` body. Fixture records must not

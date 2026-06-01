@@ -45,6 +45,8 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	}
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164-50215")
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164:50215")
+	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "starter-agent")
+	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "starter agent")
 
 	spec, err := loadOpenAPI(openAPIPath)
 	if err != nil {
@@ -74,6 +76,33 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 			t.Fatalf("projection doc must mention node %s %s", entry.NodeID, entry.Name)
 		}
 		verifyFigmaProjectionEntry(t, entry, generatedPaths, generatedHaystack, string(core), string(react))
+	}
+}
+
+func assertNoStaleControlPlanePhrase(t *testing.T, root, phrase string) {
+	t.Helper()
+	needle := strings.ToLower(phrase)
+	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		switch filepath.Ext(path) {
+		case ".md", ".json":
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			if strings.Contains(strings.ToLower(string(data)), needle) {
+				t.Fatalf("%s contains stale control-plane Figma wording %q; use onboarding fixture wording instead", path, phrase)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walk docs for stale control-plane wording: %v", err)
 	}
 }
 
