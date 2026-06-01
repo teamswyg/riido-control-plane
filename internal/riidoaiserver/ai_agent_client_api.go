@@ -2,7 +2,8 @@ package riidoaiserver
 
 import "time"
 
-const AIAgentClientContractID = "control-plane-ai-agent-client-api.v1"
+const AIAgentClientContractID = "control-plane-ai-agent-client-api.v2"
+const AIAgentClientPersistenceSchemaVersion = "riido-ai-agent-client-persistence.v2"
 
 const AgentInstructionMaxCharacters = 1000
 const AgentDescriptionMaxCharacters = 160
@@ -188,6 +189,7 @@ type DeviceDaemonCommandResponse struct {
 type AgentClientRecord struct {
 	AgentID             string           `json:"agent_id"`
 	OwnerPrincipalID    string           `json:"owner_principal_id"`
+	WorkspaceID         string           `json:"workspace_id,omitempty"`
 	IsOwnedByViewer     bool             `json:"is_owned_by_viewer"`
 	Name                string           `json:"name"`
 	ProfileThumbnailURL string           `json:"profile_thumbnail_url,omitempty"`

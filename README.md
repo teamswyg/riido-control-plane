@@ -42,6 +42,11 @@ client API sub-DSL과 handler/generator delivery boundary를 소유합니다.
 client 사용성 때문에 API surface 변경이 필요하면 `riido-control-plane`에서
 시작하고, 비즈니스 의미가 바뀌는 순간 `riido-contracts`로 escalation합니다.
 
+새로 추가되는 AI Agent client API는 workspace-aware v2 surface입니다. v1은
+기존 UI 테스트와 임시 client 작업을 깨지 않기 위한 호환 경로로 유지하고, 새
+client 코드는 generated facade에서 `riido.v2.aiAgent.agents.create`처럼
+버전이 루트에 보이는 라이브러리 경로를 사용합니다.
+
 ## 어떤 문서를 보면 되나
 
 | 알고 싶은 것 | 문서 |
@@ -92,6 +97,8 @@ visibility policy를 통과해야 합니다.
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 - `GET /v1/client/ai-agent/events?replay=1`
+- v2 workspace-scoped duplicate:
+  `/v2/client/workspaces/{workspace_id}/ai-agent/...`
 
 ## Contract / generated client 흐름
 

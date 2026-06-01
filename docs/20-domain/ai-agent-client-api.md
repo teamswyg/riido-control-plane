@@ -42,6 +42,14 @@ TypeScript client. The generator must fail when the metadata is missing or when
 `invalidates` references an unknown query `cache_tag`; facade namespaces are not
 owned by generator-local hard-coded operation-id switches.
 
+The v2 AI Agent client API is additive, not a migration. v1 routes remain
+registered so existing UI tests and temporary client work do not break, while
+new workspace-aware client code should call
+`/v2/client/workspaces/{workspace_id}/ai-agent/...` through generated facade
+paths such as `riido.v2.aiAgent.agents.create`. The `workspace_id` comes from
+the existing Riido workspace surface and is a path parameter; AI Agent client
+requests do not create or list workspaces.
+
 Generated TypeScript comments must include both the contract path
 (`aiAgent.tasks.threadMessages.create`) and the module-local search path
 (`tasks.threadMessages.create`). This is intentionally searchable because
@@ -70,6 +78,8 @@ For agent settings:
   character description limit, and the 1000 character instruction limit.
 - `riido-contracts` owns onboarding fixture catalog semantics. This repository
   projects the catalog through `GET /v1/client/ai-agent/onboarding/fixtures`
+  and its v2 workspace-scoped duplicate
+  `GET /v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures`
   and seeds deterministic mock fixtures for frontend development. Fixture
   records carry copyable profile fields, a safe `default_visibility`, and a
   `recommended_runtime_kind` hint. They do not carry a `model_id`, and they are
@@ -95,6 +105,10 @@ For agent settings:
 - The existing Riido API server owns the read-only task context endpoint used by
   the composer. This AI Agent client API does not add task body, branch, or
   repository fields to generated client assignment requests.
+- Workspace list/create remains outside this API. v2 request handling accepts
+  the selected `workspace_id` from the URL, stamps created agents with that
+  value, filters agent/task-thread visibility by that workspace, and keeps
+  device/runtime ownership account-scoped.
 - In production assignment wiring, the task-context read is server-to-server
   only. The generated client does not receive or send
   `X-Workspace-Api-Key`; control-plane uses that key only when composing the
@@ -220,12 +234,25 @@ The mock API implements:
 - `DELETE /v1/client/ai-agent/agents/{agent_id}`
 - `GET /v1/client/ai-agent/events`
 
+The same client-facing AI Agent surface is also exposed under
+`/v2/client/workspaces/{workspace_id}/ai-agent/...`. v2 responses include the
+selected `workspace_id` on v2 agent records and use v2 generated paths such as
+`riido.v2.aiAgent.bootstrap`, `riido.v2.aiAgent.agents.create`, and
+`riido.v2.aiAgent.tasks.threads`.
+
 The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 `replay=1`, it keeps the connection open as a client event stream.
 
 ## Policy
 
 - visible agents are the viewer's owned agents plus other users' public agents
+- v2 visible agents are additionally scoped to the requested `workspace_id`;
+  agents created in one workspace must not appear in another workspace
+- v2 agent creation stamps `workspace_id` from the URL path and
+  `owner_principal_id` from authorization; request bodies cannot override
+  workspace ownership
+- v1 remains the compatibility surface. New client code that knows the current
+  workspace should prefer generated `riido.v2.aiAgent.*` calls.
 - task participant dropdown responses are ordered owned-first, then by display
   name, then by `agent_id` when display names are equal
 - task participant dropdown UI presentation, member sorting, and overflow
@@ -302,7 +329,8 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `POST /v1/agents/{agent_id}/thread-progress`
 - client task-thread progress is streamed as the typed
   `agent_thread_progress` event with `thread_id` on
-  `GET /v1/client/ai-agent/events`
+  `GET /v1/client/ai-agent/events` and the v2 duplicate
+  `GET /v2/client/workspaces/{workspace_id}/ai-agent/events`
 - runtime settings consume `GET /v1/client/ai-agent/devices`,
   `GET /v1/client/ai-agent/agents/{agent_id}/daemon`, daemon command
   endpoints, `device_runtime_snapshot`, and `device_daemon_status_changed`
@@ -583,6 +611,10 @@ ALB for:
 - `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`
 - `GET /v1/client/ai-agent/events?replay=1`
 - `POST /v1/agents/{agent_id}/thread-progress`
+- `GET /v2/client/workspaces/{workspace_id}/ai-agent/bootstrap`
+- `POST /v2/client/workspaces/{workspace_id}/ai-agent/agents`
+- `POST /v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignment`
+- `GET /v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads`
 
 The workflow reads the ALB base URL from a manual workflow input or the
 `RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable, and the AI Agent SaaS

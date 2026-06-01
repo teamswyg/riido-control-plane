@@ -42,6 +42,8 @@ type AIAgentThreadProgressRecorder interface {
 	RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error)
 }
 
+const defaultAIAgentClientWorkspaceID = "workspace-mock-riid"
+
 type MockAIAgentClientStore struct {
 	mu                sync.Mutex
 	workspaceID       string
@@ -182,6 +184,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		"agent-owned-codex": {
 			AgentID:             "agent-owned-codex",
 			OwnerPrincipalID:    "user-1",
+			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "Codex 리뷰어",
 			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/codex-reviewer.png",
 			Description:         "코드 변경 위험을 먼저 보는 리뷰 에이전트",
@@ -200,6 +203,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		"agent-owned-claude": {
 			AgentID:             "agent-owned-claude",
 			OwnerPrincipalID:    "user-1",
+			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "Claude 설계 보조",
 			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/claude-designer.png",
 			Description:         "기획 의도를 구현 범위로 정리하는 설계 에이전트",
@@ -218,6 +222,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		"agent-public-openclaw": {
 			AgentID:             "agent-public-openclaw",
 			OwnerPrincipalID:    "user-2",
+			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "OpenClaw 공개 에이전트",
 			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/openclaw-public.png",
 			Description:         "공개 워크스페이스 반복 작업 에이전트",
@@ -236,6 +241,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		"agent-private-cursor": {
 			AgentID:             "agent-private-cursor",
 			OwnerPrincipalID:    "user-2",
+			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "Cursor 비공개 에이전트",
 			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/cursor-private.png",
 			Description:         "소유자 전용 Cursor 코드 탐색 에이전트",
@@ -289,7 +295,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		},
 	}
 	return &MockAIAgentClientStore{
-		workspaceID:       "workspace-mock-riid",
+		workspaceID:       defaultAIAgentClientWorkspaceID,
 		devices:           []DeviceRecord{device, sharedDevice},
 		daemons:           map[string]DeviceDaemonRecord{device.DeviceID: daemon, sharedDevice.DeviceID: sharedDaemon},
 		nextDaemonCommand: 1,
@@ -385,7 +391,7 @@ func (s *MockAIAgentClientStore) BootstrapAIAgentClient(ctx context.Context, pri
 	return ClientBootstrapResponse{
 		SchemaVersion: SchemaVersion,
 		ClientKind:    normalizeClientKind(clientKind),
-		WorkspaceID:   s.workspaceID,
+		WorkspaceID:   s.workspaceScope(principal),
 		Agents:        s.visibleAgents(principal),
 		Devices:       s.visibleDevicesLocked(principal),
 	}, nil
@@ -557,7 +563,7 @@ func (s *MockAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Context, pri
 		if !taskThreadHasActiveStream(threads[i]) {
 			continue
 		}
-		link := activeStreamLinkForThread(threads[i])
+		link := activeStreamLinkForThread(threads[i], strings.TrimSpace(principal.WorkspaceID))
 		response.ActiveStream = &link
 		break
 	}
@@ -833,7 +839,8 @@ func (s *MockAIAgentClientStore) CreateAIAgent(ctx context.Context, principal Au
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	runtimeKind, runtimeModel, ok := runtimeSelectionForPrincipal(s.devices, principal, runtimeID, req.ModelID)
+	workspaceID := s.workspaceScope(principal)
+	runtimeKind, runtimeModel, ok := runtimeSelectionFromDevices(s.visibleDevicesLocked(principal), runtimeID, req.ModelID)
 	if !ok {
 		return AgentClientRecordResponse{}, errors.New("runtime_id or model_id is not available")
 	}
@@ -842,6 +849,7 @@ func (s *MockAIAgentClientStore) CreateAIAgent(ctx context.Context, principal Au
 	agent := AgentClientRecord{
 		AgentID:             agentID,
 		OwnerPrincipalID:    principal.PrincipalID,
+		WorkspaceID:         workspaceID,
 		IsOwnedByViewer:     true,
 		Name:                name,
 		ProfileThumbnailURL: thumbnailURL,
@@ -860,7 +868,7 @@ func (s *MockAIAgentClientStore) CreateAIAgent(ctx context.Context, principal Au
 	}
 	s.agents[agent.AgentID] = agent
 	markRuntimeHasAssignedAgentLocked(s.devices, runtimeID, true)
-	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: agent}, nil
+	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }
 
 func (s *MockAIAgentClientStore) GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error) {
@@ -931,7 +939,7 @@ func (s *MockAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context,
 		nextRuntimeID = strings.TrimSpace(req.RuntimeID)
 	}
 	if strings.TrimSpace(req.RuntimeID) != "" || req.ModelID != nil {
-		runtimeKind, runtimeModel, ok := runtimeSelectionForPrincipal(s.devices, principal, nextRuntimeID, req.ModelID)
+		runtimeKind, runtimeModel, ok := runtimeSelectionFromDevices(s.visibleDevicesLocked(principal), nextRuntimeID, req.ModelID)
 		if !ok {
 			return AgentClientRecordResponse{}, errors.New("runtime_id or model_id is not available")
 		}
@@ -943,8 +951,7 @@ func (s *MockAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context,
 	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
 	agent.UpdatedAt = time.Now().UTC()
 	s.agents[agent.AgentID] = agent
-	agent.IsOwnedByViewer = agent.OwnerPrincipalID == principal.PrincipalID
-	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: agent}, nil
+	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }
 
 func (s *MockAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal AuthorizationResult, agentID string) (DeleteAgentResponse, error) {
@@ -1090,11 +1097,10 @@ func (s *MockAIAgentClientStore) visibleAgent(principal AuthorizationResult, age
 		return AgentClientRecord{}, false
 	}
 	agent, ok := s.agents[agentID]
-	if !ok || !aiAgentVisibleTo(principal, agent) {
+	if !ok || !s.aiAgentVisibleTo(principal, agent) {
 		return AgentClientRecord{}, false
 	}
-	agent.IsOwnedByViewer = agent.OwnerPrincipalID == principal.PrincipalID
-	return agent, true
+	return s.agentForPrincipal(agent, principal), true
 }
 
 func (s *MockAIAgentClientStore) findOnboardingFixtureLocked(fixtureID string) (AgentOnboardingFixture, bool) {
@@ -1109,12 +1115,10 @@ func (s *MockAIAgentClientStore) findOnboardingFixtureLocked(fixtureID string) (
 func (s *MockAIAgentClientStore) visibleAgents(principal AuthorizationResult) []AgentClientRecord {
 	agents := make([]AgentClientRecord, 0, len(s.agents))
 	for _, agent := range s.agents {
-		if !aiAgentVisibleTo(principal, agent) {
+		if !s.aiAgentVisibleTo(principal, agent) {
 			continue
 		}
-		agent.IsOwnedByViewer = agent.OwnerPrincipalID == principal.PrincipalID
-		agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
-		agents = append(agents, agent)
+		agents = append(agents, s.agentForPrincipal(agent, principal))
 	}
 	sort.SliceStable(agents, func(i, j int) bool {
 		if agents[i].IsOwnedByViewer != agents[j].IsOwnedByViewer {
@@ -1141,7 +1145,7 @@ func (s *MockAIAgentClientStore) visibleTaskThreadsLocked(principal Authorizatio
 	out := make([]AIAgentTaskThreadRecord, 0, len(source))
 	for _, thread := range source {
 		agent, ok := s.agents[thread.AgentID]
-		if !ok || !aiAgentVisibleTo(principal, agent) {
+		if !ok || !s.aiAgentVisibleTo(principal, agent) {
 			continue
 		}
 		out = append(out, copyTaskThread(thread))
@@ -1155,7 +1159,7 @@ func (s *MockAIAgentClientStore) visibleTaskThreadLocked(principal Authorization
 			continue
 		}
 		agent, ok := s.agents[thread.AgentID]
-		if !ok || !aiAgentVisibleTo(principal, agent) {
+		if !ok || !s.aiAgentVisibleTo(principal, agent) {
 			return AIAgentTaskThreadRecord{}, false
 		}
 		return copyTaskThread(thread), true
@@ -1385,7 +1389,7 @@ func (s *MockAIAgentClientStore) agentForMutation(principal AuthorizationResult,
 		return AgentClientRecord{}, false
 	}
 	agent, ok := s.agents[agentID]
-	if !ok || !aiAgentMutableBy(principal, agent) {
+	if !ok || !s.aiAgentMutableBy(principal, agent) {
 		return AgentClientRecord{}, false
 	}
 	return agent, true
@@ -1480,7 +1484,7 @@ func clientEventVisibleToLocked(s *MockAIAgentClientStore, principal Authorizati
 	if !exists {
 		return aiAgentIsAdmin(principal)
 	}
-	return aiAgentVisibleTo(principal, agent)
+	return s.aiAgentVisibleTo(principal, agent)
 }
 
 func eventDeviceDaemon(payload any) (DeviceDaemonRecord, bool) {
@@ -1542,14 +1546,46 @@ func validateAgentDescription(value string) error {
 	return nil
 }
 
-func aiAgentVisibleTo(principal AuthorizationResult, agent AgentClientRecord) bool {
+func (s *MockAIAgentClientStore) workspaceScope(principal AuthorizationResult) string {
+	if workspaceID := strings.TrimSpace(principal.WorkspaceID); workspaceID != "" {
+		return workspaceID
+	}
+	if s != nil && strings.TrimSpace(s.workspaceID) != "" {
+		return strings.TrimSpace(s.workspaceID)
+	}
+	return defaultAIAgentClientWorkspaceID
+}
+
+func (s *MockAIAgentClientStore) agentWorkspaceID(agent AgentClientRecord) string {
+	if workspaceID := strings.TrimSpace(agent.WorkspaceID); workspaceID != "" {
+		return workspaceID
+	}
+	return s.workspaceScope(AuthorizationResult{})
+}
+
+func (s *MockAIAgentClientStore) agentForPrincipal(agent AgentClientRecord, principal AuthorizationResult) AgentClientRecord {
+	agent.IsOwnedByViewer = agent.OwnerPrincipalID == principal.PrincipalID
+	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
+	if strings.TrimSpace(principal.WorkspaceID) == "" {
+		agent.WorkspaceID = ""
+	}
+	return agent
+}
+
+func (s *MockAIAgentClientStore) aiAgentVisibleTo(principal AuthorizationResult, agent AgentClientRecord) bool {
+	if s.agentWorkspaceID(agent) != s.workspaceScope(principal) {
+		return false
+	}
 	if aiAgentIsAdmin(principal) || agent.OwnerPrincipalID == principal.PrincipalID {
 		return true
 	}
 	return agent.Visibility == AgentVisibilityPublic
 }
 
-func aiAgentMutableBy(principal AuthorizationResult, agent AgentClientRecord) bool {
+func (s *MockAIAgentClientStore) aiAgentMutableBy(principal AuthorizationResult, agent AgentClientRecord) bool {
+	if s.agentWorkspaceID(agent) != s.workspaceScope(principal) {
+		return false
+	}
 	return aiAgentIsAdmin(principal) || agent.OwnerPrincipalID == principal.PrincipalID
 }
 
@@ -1597,7 +1633,7 @@ func (s *MockAIAgentClientStore) visibleDevicesLocked(principal AuthorizationRes
 	}
 	visibleRuntimeIDs := map[string]struct{}{}
 	for _, agent := range s.agents {
-		if !aiAgentVisibleTo(principal, agent) || agent.RuntimeID == "" {
+		if !s.aiAgentVisibleTo(principal, agent) || agent.RuntimeID == "" {
 			continue
 		}
 		visibleRuntimeIDs[agent.RuntimeID] = struct{}{}
@@ -1666,7 +1702,7 @@ func (s *MockAIAgentClientStore) daemonVisibleToPrincipalLocked(principal Author
 
 func (s *MockAIAgentClientStore) runtimeVisibleThroughAgentLocked(principal AuthorizationResult, runtimeID string) bool {
 	for _, agent := range s.agents {
-		if agent.RuntimeID == runtimeID && aiAgentVisibleTo(principal, agent) {
+		if agent.RuntimeID == runtimeID && s.aiAgentVisibleTo(principal, agent) {
 			return true
 		}
 	}
@@ -1796,10 +1832,14 @@ func taskThreadHasActiveStream(thread AIAgentTaskThreadRecord) bool {
 	}
 }
 
-func activeStreamLinkForThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadStreamLink {
+func activeStreamLinkForThread(thread AIAgentTaskThreadRecord, workspaceID string) AIAgentTaskThreadStreamLink {
+	href := "/v1/client/ai-agent/events"
+	if workspaceID != "" {
+		href = "/v2/client/workspaces/" + url.PathEscape(workspaceID) + "/ai-agent/events"
+	}
 	return AIAgentTaskThreadStreamLink{
 		Rel:       "agent_thread_progress_stream",
-		Href:      "/v1/client/ai-agent/events",
+		Href:      href,
 		EventType: AgentClientEventThreadProgress,
 		TaskID:    thread.TaskID,
 		ThreadID:  thread.ThreadID,
@@ -1833,8 +1873,8 @@ func runtimeKindByIDForPrincipal(devices []DeviceRecord, principal Authorization
 	return "", false
 }
 
-func runtimeSelectionForPrincipal(devices []DeviceRecord, principal AuthorizationResult, runtimeID string, requestedModelID *string) (RuntimeKind, RuntimeModelRecord, bool) {
-	for _, device := range filterDevicesForPrincipal(devices, principal) {
+func runtimeSelectionFromDevices(devices []DeviceRecord, runtimeID string, requestedModelID *string) (RuntimeKind, RuntimeModelRecord, bool) {
+	for _, device := range devices {
 		for _, runtime := range device.Runtimes {
 			if runtime.RuntimeID != runtimeID {
 				continue

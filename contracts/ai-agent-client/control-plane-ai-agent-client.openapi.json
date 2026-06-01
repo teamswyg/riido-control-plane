@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "control-plane-ai-agent-client-api.v1",
+    "title": "control-plane-ai-agent-client-api.v2",
     "version": "riido-ai-server.v1"
   },
   "tags": [
@@ -77,6 +77,92 @@
             "threadMessages"
           ],
           "description": "task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다."
+        }
+      ]
+    },
+    {
+      "module": "v2",
+      "description": "v2 client API module입니다. workspace-scoped AI Agent API를 riido.v2.aiAgent.* 경로로 제공합니다. v1은 UI 테스트 호환 표면으로 유지됩니다.",
+      "namespaces": [
+        {
+          "path": [
+            "aiAgent"
+          ],
+          "description": "workspace_id path parameter로 범위가 정해지는 AI Agent v2 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "agents"
+          ],
+          "description": "workspace 안에 생성되는 agent 설정과 mutation을 다루는 v2 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "agents",
+            "daemon"
+          ],
+          "description": "workspace-scoped agent 권한을 통해 daemon 상세와 제어 command를 다루는 v2 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "bootstrap"
+          ],
+          "description": "선택된 workspace의 AI Agent 화면 초기 read model입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "devices"
+          ],
+          "description": "account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "devices",
+            "runtimes"
+          ],
+          "description": "선택된 workspace에서 viewer가 볼 수 있는 device runtime 목록입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "events"
+          ],
+          "description": "선택된 workspace 범위로 client가 수신하는 SSE stream namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "onboarding"
+          ],
+          "description": "선택된 workspace에서 빠른 agent 생성을 돕는 onboarding fixture namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "onboarding",
+            "fixtures"
+          ],
+          "description": "서버 제공 fixture 목록과 fixture 기반 agent 생성 진입점입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks"
+          ],
+          "description": "선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "threadMessages"
+          ],
+          "description": "선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다."
         }
       ]
     }
@@ -1505,6 +1591,1533 @@
           "createAIAgentTaskThreadMessage.rejects-other-active-thread"
         ]
       }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/agents": {
+      "post": {
+        "operationId": "createAIAgentV2",
+        "summary": "Figma agent 추가 화면에서 AI agent 설정을 생성합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentConfigurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentClientRecordResponseV2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ],
+        "x-riido-rbac-policy": "agent_mutation_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "create"
+          ],
+          "generated_path": "v2.aiAgent.agents.create",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.devices.runtimes",
+            "v2.aiAgent.tasks.assignableAgents"
+          ]
+        },
+        "x-riido-scenarios": [
+          "createAIAgentV2.workspace-scoped-agent-creation"
+        ]
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}": {
+      "delete": {
+        "operationId": "deleteAIAgentV2",
+        "summary": "agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteAgentResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "ai-agent:{agent_id}:delete"
+        ],
+        "x-riido-rbac-policy": "agent_mutation_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "delete"
+          ],
+          "generated_path": "v2.aiAgent.agents.delete",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.devices.runtimes",
+            "v2.aiAgent.agents.editability",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads"
+          ]
+        }
+      },
+      "patch": {
+        "operationId": "updateAIAgentConfigurationV2",
+        "summary": "할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAgentConfigurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentClientRecordResponseV2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "ai-agent:{agent_id}:update"
+        ],
+        "x-riido-rbac-policy": "agent_mutation_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "updateConfiguration"
+          ],
+          "generated_path": "v2.aiAgent.agents.updateConfiguration",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.agents.editability",
+            "v2.aiAgent.tasks.assignableAgents"
+          ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon": {
+      "get": {
+        "operationId": "getAIAgentDaemonV2",
+        "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonDetailResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "daemon",
+            "details"
+          ],
+          "generated_path": "v2.aiAgent.agents.daemon.details",
+          "cache_tag": "v2.aiAgent.agents.daemon"
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon/restart": {
+      "post": {
+        "operationId": "restartAIAgentDaemonV2",
+        "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:control",
+          "ai-agent:agent:{agent_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "daemon",
+            "restart"
+          ],
+          "generated_path": "v2.aiAgent.agents.daemon.restart",
+          "invalidates": [
+            "v2.aiAgent.agents.daemon",
+            "v2.aiAgent.devices.runtimes"
+          ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon/start": {
+      "post": {
+        "operationId": "startAIAgentDaemonV2",
+        "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:control",
+          "ai-agent:agent:{agent_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "daemon",
+            "start"
+          ],
+          "generated_path": "v2.aiAgent.agents.daemon.start",
+          "invalidates": [
+            "v2.aiAgent.agents.daemon",
+            "v2.aiAgent.devices.runtimes"
+          ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon/stop": {
+      "post": {
+        "operationId": "stopAIAgentDaemonV2",
+        "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:control",
+          "ai-agent:agent:{agent_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "daemon",
+            "stop"
+          ],
+          "generated_path": "v2.aiAgent.agents.daemon.stop",
+          "invalidates": [
+            "v2.aiAgent.agents.daemon",
+            "v2.aiAgent.devices.runtimes"
+          ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/editability": {
+      "get": {
+        "operationId": "getAIAgentEditabilityV2",
+        "summary": "client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEditabilityResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "ai-agent:{agent_id}:read"
+        ],
+        "x-riido-rbac-policy": "agent_mutation_safety.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "editability"
+          ],
+          "generated_path": "v2.aiAgent.agents.editability",
+          "cache_tag": "v2.aiAgent.agents.editability"
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/bootstrap": {
+      "get": {
+        "operationId": "getAIAgentClientBootstrapV2",
+        "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientBootstrapResponseV2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read"
+        ],
+        "x-riido-rbac-policy": "ai_agent_rbac.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "bootstrap"
+          ],
+          "generated_path": "v2.aiAgent.bootstrap",
+          "cache_tag": "v2.aiAgent.bootstrap"
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/devices": {
+      "get": {
+        "operationId": "listAIAgentDeviceRuntimesV2",
+        "summary": "권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceRuntimeListResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:read"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "devices",
+            "runtimes"
+          ],
+          "generated_path": "v2.aiAgent.devices.runtimes",
+          "cache_tag": "v2.aiAgent.devices.runtimes"
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/events": {
+      "get": {
+        "operationId": "streamAIAgentClientEventsV2",
+        "summary": "editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientStreamEvent"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:stream"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "events",
+            "stream"
+          ],
+          "generated_path": "v2.aiAgent.events.stream",
+          "cache_tag": "v2.aiAgent.events.stream"
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures": {
+      "get": {
+        "operationId": "listAIAgentOnboardingFixturesV2",
+        "summary": "AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentOnboardingFixtureListResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read"
+        ],
+        "x-riido-rbac-policy": "agent_onboarding_fixtures.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "onboarding",
+            "fixtures"
+          ],
+          "generated_path": "v2.aiAgent.onboarding.fixtures",
+          "cache_tag": "v2.aiAgent.onboarding.fixtures"
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures/{fixture_id}/agents": {
+      "post": {
+        "operationId": "createAIAgentFromOnboardingFixtureV2",
+        "summary": "선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "fixture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentConfigurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentClientRecordResponseV2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ],
+        "x-riido-rbac-policy": "agent_onboarding_fixtures.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "onboarding",
+            "fixtures",
+            "createAgent"
+          ],
+          "generated_path": "v2.aiAgent.onboarding.fixtures.createAgent",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.devices.runtimes",
+            "v2.aiAgent.tasks.assignableAgents"
+          ]
+        },
+        "x-riido-scenarios": [
+          "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation"
+        ]
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignable-agents": {
+      "get": {
+        "operationId": "listAIAgentTaskAssignableAgentsV2",
+        "summary": "task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentClientListResponseV2"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "ai_agent_rbac.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "assignableAgents"
+          ],
+          "generated_path": "v2.aiAgent.tasks.assignableAgents",
+          "cache_tag": "v2.aiAgent.tasks.assignableAgents"
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignment": {
+      "delete": {
+        "operationId": "unassignAIAgentTaskV2",
+        "summary": "task participant에서 AI agent를 제거하고 작업을 중단합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnassignAIAgentTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "unassign"
+          ],
+          "generated_path": "v2.aiAgent.tasks.unassign",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads"
+          ]
+        }
+      },
+      "post": {
+        "operationId": "assignAIAgentTaskV2",
+        "summary": "task participant dropdown에서 AI agent를 배정합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignAIAgentTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "assign"
+          ],
+          "generated_path": "v2.aiAgent.tasks.assign",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads"
+          ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/comments": {
+      "post": {
+        "operationId": "submitAIAgentTaskCommentV2",
+        "summary": "호환 task comment route로 AI agent에게 메시지를 전달합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitAIAgentTaskCommentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:comment"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "submitComment"
+          ],
+          "generated_path": "v2.aiAgent.tasks.submitComment",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads"
+          ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/stop": {
+      "post": {
+        "operationId": "stopAIAgentTaskV2",
+        "summary": "task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StopAIAgentTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "stop"
+          ],
+          "generated_path": "v2.aiAgent.tasks.stop",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads"
+          ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads": {
+      "get": {
+        "operationId": "listAIAgentTaskThreadsV2",
+        "summary": "active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadCollectionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "task_thread_cold_collection.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "threads"
+          ],
+          "generated_path": "v2.aiAgent.tasks.threads",
+          "cache_tag": "v2.aiAgent.tasks.threads"
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages": {
+      "post": {
+        "operationId": "createAIAgentTaskThreadMessageV2",
+        "summary": "task thread message로 AI agent에게 다음 작업 지시를 전달합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "thread_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAIAgentTaskThreadMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:comment"
+        ],
+        "x-riido-rbac-policy": "task_thread_next_instruction.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "threadMessages",
+            "create"
+          ],
+          "generated_path": "v2.aiAgent.tasks.threadMessages.create",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads"
+          ]
+        }
+      }
     }
   },
   "components": {
@@ -1710,6 +3323,25 @@
         ],
         "type": "object"
       },
+      "AgentClientListResponseV2": {
+        "description": "v2 task 또는 화면에서 표시할 workspace-scoped agent 목록 응답입니다.",
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/AgentClientRecordV2"
+            },
+            "type": "array"
+          },
+          "schema_version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "agents"
+        ],
+        "type": "object"
+      },
       "AgentClientRecord": {
         "description": "client 화면에 표시하는 agent 요약 record입니다.",
         "properties": {
@@ -1797,6 +3429,101 @@
         "required": [
           "schema_version",
           "agent"
+        ],
+        "type": "object"
+      },
+      "AgentClientRecordResponseV2": {
+        "description": "v2 단일 agent 변경 후 최신 workspace-scoped agent record를 반환하는 응답입니다.",
+        "properties": {
+          "agent": {
+            "$ref": "#/components/schemas/AgentClientRecordV2"
+          },
+          "schema_version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "agent"
+        ],
+        "type": "object"
+      },
+      "AgentClientRecordV2": {
+        "description": "v2 client 화면에 표시하는 workspace-scoped agent 요약 record입니다.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assigned_task_count": {
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 160,
+            "type": "string"
+          },
+          "editability": {
+            "$ref": "#/components/schemas/AgentEditability"
+          },
+          "instruction": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "is_owned_by_viewer": {
+            "type": "boolean"
+          },
+          "model_id": {
+            "type": "string"
+          },
+          "model_label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner_principal_id": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "runtime_id": {
+            "type": "string"
+          },
+          "runtime_kind": {
+            "$ref": "#/components/schemas/RuntimeKind"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AgentVisibility"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          },
+          "workspace_id": {
+            "description": "agent가 소속된 workspace id입니다. v2에서는 URL path의 workspace_id로 서버가 stamp합니다.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "owner_principal_id",
+          "workspace_id",
+          "is_owned_by_viewer",
+          "name",
+          "visibility",
+          "work_status",
+          "editability",
+          "assigned_task_count",
+          "created_at",
+          "updated_at"
         ],
         "type": "object"
       },
@@ -2108,6 +3835,40 @@
           "agents": {
             "items": {
               "$ref": "#/components/schemas/AgentClientRecord"
+            },
+            "type": "array"
+          },
+          "client_kind": {
+            "$ref": "#/components/schemas/ClientKind"
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceRecord"
+            },
+            "type": "array"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "client_kind",
+          "workspace_id",
+          "agents",
+          "devices"
+        ],
+        "type": "object"
+      },
+      "ClientBootstrapResponseV2": {
+        "description": "v2 AI Agent 화면 진입 시 선택된 workspace의 agent와 account-owned device runtime 초기 데이터입니다.",
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/AgentClientRecordV2"
             },
             "type": "array"
           },

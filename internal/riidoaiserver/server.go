@@ -33,6 +33,8 @@ type Server struct {
 	config       ServerConfig
 }
 
+type aiAgentWorkspaceIDContextKey struct{}
+
 func NewServer(config ServerConfig) Server {
 	config.WebAllowedOrigins = normalizeWebAllowedOrigins(config.WebAllowedOrigins)
 	agentCatalog := config.AgentCatalogStore
@@ -69,6 +71,7 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/healthz", s.handleHealth)
 	mux.HandleFunc("/readyz", s.handleReady)
 	mux.HandleFunc("/metrics", s.handleMetrics)
+	mux.HandleFunc("/v2/client/workspaces/", s.handleAIAgentClientWorkspaceRoutes)
 	mux.HandleFunc("/v1/client/ai-agent/bootstrap", s.handleAIAgentClientBootstrap)
 	mux.HandleFunc("/v1/client/ai-agent/devices", s.handleAIAgentClientDevices)
 	mux.HandleFunc("/v1/client/ai-agent/devices/", s.handleAIAgentClientDeviceRoutes)
@@ -123,6 +126,33 @@ func (s Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, snapshot)
+}
+
+func (s Server) handleAIAgentClientWorkspaceRoutes(w http.ResponseWriter, r *http.Request) {
+	workspaceID, v1Path, ok := splitAIAgentClientWorkspacePath(r.URL.Path)
+	if !ok {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	r = requestWithAIAgentWorkspaceIDAndPath(r, workspaceID, v1Path)
+	switch {
+	case v1Path == "/v1/client/ai-agent/bootstrap":
+		s.handleAIAgentClientBootstrap(w, r)
+	case v1Path == "/v1/client/ai-agent/devices":
+		s.handleAIAgentClientDevices(w, r)
+	case strings.HasPrefix(v1Path, "/v1/client/ai-agent/devices/"):
+		s.handleAIAgentClientDeviceRoutes(w, r)
+	case v1Path == "/v1/client/ai-agent/onboarding/fixtures" || strings.HasPrefix(v1Path, "/v1/client/ai-agent/onboarding/fixtures/"):
+		s.handleAIAgentClientOnboardingFixtures(w, r)
+	case strings.HasPrefix(v1Path, "/v1/client/ai-agent/tasks/"):
+		s.handleAIAgentClientTasks(w, r)
+	case v1Path == "/v1/client/ai-agent/agents" || strings.HasPrefix(v1Path, "/v1/client/ai-agent/agents/"):
+		s.handleAIAgentClientAgents(w, r)
+	case v1Path == "/v1/client/ai-agent/events":
+		s.handleAIAgentClientEvents(w, r)
+	default:
+		writeError(w, http.StatusNotFound, "not found")
+	}
 }
 
 func (s Server) handleAgentCatalog(w http.ResponseWriter, r *http.Request) {
@@ -1057,9 +1087,13 @@ func (s Server) authorizeAgentCatalog(w http.ResponseWriter, r *http.Request, re
 }
 
 func (s Server) authorizeAIAgentClient(w http.ResponseWriter, r *http.Request, req AuthorizationRequest) (AuthorizationResult, bool) {
+	req.WorkspaceID = strings.TrimSpace(aiAgentWorkspaceIDFromRequest(r))
 	result, ok := s.authorizeRequest(w, r, req)
 	if !ok {
 		return AuthorizationResult{}, false
+	}
+	if result.WorkspaceID == "" {
+		result.WorkspaceID = req.WorkspaceID
 	}
 	if strings.TrimSpace(result.PrincipalID) == "" {
 		writeError(w, http.StatusForbidden, "forbidden")
@@ -1106,6 +1140,40 @@ func requestToken(r *http.Request) (string, bool) {
 		return "", false
 	}
 	return token, true
+}
+
+func aiAgentWorkspaceIDFromRequest(r *http.Request) string {
+	if r == nil {
+		return ""
+	}
+	if value, ok := r.Context().Value(aiAgentWorkspaceIDContextKey{}).(string); ok {
+		return strings.TrimSpace(value)
+	}
+	return ""
+}
+
+func requestWithAIAgentWorkspaceIDAndPath(r *http.Request, workspaceID, path string) *http.Request {
+	urlCopy := *r.URL
+	urlCopy.Path = path
+	next := r.Clone(context.WithValue(r.Context(), aiAgentWorkspaceIDContextKey{}, strings.TrimSpace(workspaceID)))
+	next.URL = &urlCopy
+	return next
+}
+
+func splitAIAgentClientWorkspacePath(path string) (string, string, bool) {
+	workspaceID, suffix, ok := splitNestedResourcePath(path, "/v2/client/workspaces/")
+	if !ok || strings.TrimSpace(workspaceID) == "" {
+		return "", "", false
+	}
+	suffix = strings.Trim(suffix, "/")
+	switch {
+	case suffix == "ai-agent":
+		return workspaceID, "/v1/client/ai-agent", true
+	case strings.HasPrefix(suffix, "ai-agent/"):
+		return workspaceID, "/v1/client/ai-agent/" + strings.TrimPrefix(suffix, "ai-agent/"), true
+	default:
+		return "", "", false
+	}
 }
 
 func splitOptionalResourcePath(path, prefix string) (string, bool, bool) {
