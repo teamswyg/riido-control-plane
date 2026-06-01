@@ -57,7 +57,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 		t.Fatalf("projection doc must name the downstream-only boundary")
 	}
 	verifyMirroredFigmaInspectionMethod(t, sourceCoverage.InspectionMethod, docText)
-	verifyMirroredFigmaSupportingToolLimitations(t, manifest.MirroredSupportingToolLimitations, sourceCoverage.SupportingToolLimitations, docText)
+	verifyMirroredFigmaSupportingToolLimitations(t, manifest.MirroredSupportingToolLimitations, sourceCoverage.SupportingToolLimitations, manifest.SourceContractsManifest.StabilizedBy, docText)
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164-50215")
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164:50215")
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "starter-agent")
@@ -245,7 +245,7 @@ func verifyMirroredFigmaInspectionMethod(t *testing.T, method figmaCoverageInspe
 	}
 }
 
-func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []figmaProjectionSupportingToolLimitation, sourceLimitations []figmaSourceSupportingToolLimitation, docText string) {
+func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []figmaProjectionSupportingToolLimitation, sourceLimitations []figmaSourceSupportingToolLimitation, stabilizedBy []string, docText string) {
 	t.Helper()
 	sourceByID := map[string]figmaSourceSupportingToolLimitation{}
 	for _, limitation := range sourceLimitations {
@@ -271,6 +271,9 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 	if !strings.Contains(source.Tool, "get_metadata") || !strings.Contains(source.ObservedResult, "only page 129:5215 UI") {
 		t.Fatalf("source supporting limit must preserve no-nodeId metadata under-report evidence: %+v", source)
 	}
+	if !hasString(stabilizedBy, "teamswyg/riido-contracts#52") {
+		t.Fatalf("source_contracts_manifest.stabilized_by must include contracts #52 for mirrored metadata limitation: %+v", stabilizedBy)
+	}
 	if strings.TrimSpace(projection.LocalScope) == "" || !strings.Contains(projection.LocalScope, "must not collapse") {
 		t.Fatalf("projection supporting limit must explain local scope: %+v", projection)
 	}
@@ -293,7 +296,7 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 			t.Fatalf("projection supporting limit must forbid %q: %+v", forbidden, projection.ForbiddenProjectionEffects)
 		}
 	}
-	for _, needle := range []string{"figma-metadata-page-list-underreports-pages.v1", "get_metadata", "`129:5215`", "`42:3014`", "`0:1`", "`expected_pages`", "`non_ui_top_level_inventory`", "`legacy_non_ui_absorptions`"} {
+	for _, needle := range []string{"figma-metadata-page-list-underreports-pages.v1", "get_metadata", "teamswyg/riido-contracts#52", "`129:5215`", "`42:3014`", "`0:1`", "`expected_pages`", "`non_ui_top_level_inventory`", "`legacy_non_ui_absorptions`"} {
 		if !strings.Contains(docText, needle) {
 			t.Fatalf("projection doc must mention mirrored supporting tool limitation with %q", needle)
 		}

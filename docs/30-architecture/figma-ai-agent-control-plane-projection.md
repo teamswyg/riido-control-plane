@@ -42,6 +42,11 @@ turn that supporting metadata output into a generated-client decision: it must
 not remove `expected_pages`, drop `non_ui_top_level_inventory`, or delete
 `legacy_non_ui_absorptions`.
 
+Because that limitation entered the upstream contracts coverage in
+`teamswyg/riido-contracts#52`, the local `source_contracts_manifest.stabilized_by`
+list also includes `teamswyg/riido-contracts#52`. The projection gate treats
+that provenance as part of the mirror contract, not as PR-description trivia.
+
 The mirror also preserves contracts-owned `client_delivery_annotations`. Figma
 Dev Mode category `39:0` / `클라이언트 전달` may show frontend facade examples
 such as `riido.aiAgent.events.stream` or `riido.aiAgent.tasks.stop`. This repo
