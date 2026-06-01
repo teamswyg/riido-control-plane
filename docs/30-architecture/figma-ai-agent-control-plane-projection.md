@@ -24,10 +24,12 @@ wireframe evidence so this repository can prove it is consuming the whole-file
 coverage map, not only the primary `UI` page.
 
 The mirrored page registry keeps the contracts-owned inspection method:
-`figma.root.children` and `page.children.length` from the Figma Plugin API are
-the authority for top-level page child counts. Metadata XML/read output remains
-supporting evidence only and must not redefine page-level counts in the
-control-plane mirror.
+`figma.root.children` from the Figma Plugin API is the page registry authority,
+but non-current page child counts are authoritative only after
+`await figma.setCurrentPageAsync(page); page.children.length`. Passive page
+objects can be lazy/unloaded, so metadata XML/read output and unloaded
+`page.children.length` reads remain supporting evidence only and must not
+redefine page-level counts in the control-plane mirror.
 
 The generator test reads both manifests and verifies that every required
 generated path exists in the upstream coverage mirror and in:
@@ -114,7 +116,8 @@ The test catches these drift classes:
 - the local projection manifest requires a generated path that the mirrored
   contracts Figma coverage did not name for the same node;
 - the mirrored contracts coverage no longer records the three inspected Figma
-  pages or the four non-UI top-level evidence nodes;
+  pages, the four non-UI top-level coverage evidence nodes, or the loaded
+  non-UI top-level inventory;
 - the mirrored contracts coverage loses the Figma Plugin API inspection method
   that owns page registry and child-count evidence;
 - generated TypeScript or React wrapper comments no longer carry the required

@@ -43,6 +43,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	if got, want := len(sourceCoverage.NonUITopLevelNodes), 4; got != want {
 		t.Fatalf("source coverage non_ui_top_level_nodes = %d, want %d", got, want)
 	}
+	verifyMirroredNonUITopLevelInventory(t, sourceCoverage)
 	if strings.TrimSpace(manifest.ProjectionPolicy.TopDown) == "" || strings.TrimSpace(manifest.ProjectionPolicy.BottomUp) == "" {
 		t.Fatalf("projection policy must include both directions: %+v", manifest.ProjectionPolicy)
 	}
@@ -105,19 +106,43 @@ func verifyMirroredFigmaInspectionMethod(t *testing.T, method figmaCoverageInspe
 	if method.PageRegistryExpression != "figma.root.children" {
 		t.Fatalf("source coverage page registry expression = %q", method.PageRegistryExpression)
 	}
-	if method.TopLevelChildCountExpression != "page.children.length" {
+	if method.TopLevelChildCountExpression != "await figma.setCurrentPageAsync(page); page.children.length" {
 		t.Fatalf("source coverage top-level child count expression = %q", method.TopLevelChildCountExpression)
 	}
 	rule := strings.ToLower(method.Rule)
-	for _, needle := range []string{"supporting evidence", "must not redefine page-level child counts"} {
+	for _, needle := range []string{"supporting evidence", "must not redefine page-level child counts", "lazy/unloaded"} {
 		if !strings.Contains(rule, needle) {
 			t.Fatalf("source coverage inspection rule must contain %q: %q", needle, method.Rule)
 		}
 	}
-	for _, needle := range []string{"figma.root.children", "page.children.length", "supporting evidence only"} {
+	for _, needle := range []string{"figma.root.children", "await figma.setCurrentPageAsync(page)", "page.children.length", "supporting evidence only", "lazy/unloaded"} {
 		if !strings.Contains(docText, needle) {
 			t.Fatalf("projection doc must mention mirrored inspection method with %q", needle)
 		}
+	}
+}
+
+func verifyMirroredNonUITopLevelInventory(t *testing.T, sourceCoverage figmaSourceCoverageManifest) {
+	t.Helper()
+	pages := map[string]figmaSourceCoveragePage{}
+	for _, page := range sourceCoverage.ExpectedPages {
+		pages[page.NodeID] = page
+	}
+	if got, want := len(sourceCoverage.NonUITopLevelInventory), 2; got != want {
+		t.Fatalf("source coverage non_ui_top_level_inventory pages = %d, want %d", got, want)
+	}
+	for _, inventory := range sourceCoverage.NonUITopLevelInventory {
+		page, ok := pages[inventory.PageID]
+		if !ok {
+			t.Fatalf("non-UI inventory references unknown page %q", inventory.PageID)
+		}
+		if got, want := len(inventory.Nodes), page.ChildCount; got != want {
+			t.Fatalf("non-UI inventory page %q nodes = %d, want loaded child_count %d", inventory.PageID, got, want)
+		}
+	}
+	wireframe := pages["0:1"]
+	if wireframe.ChildCount != 28 {
+		t.Fatalf("Wireframe page loaded child_count = %d, want 28", wireframe.ChildCount)
 	}
 }
 
@@ -327,15 +352,27 @@ type figmaProjectionEntry struct {
 }
 
 type figmaSourceCoverageManifest struct {
-	SchemaVersion      string                        `json:"schema_version"`
-	ID                 string                        `json:"id"`
-	InspectionMethod   figmaCoverageInspectionMethod `json:"inspection_method"`
-	ExpectedPages      []figmaSourceCoveragePage     `json:"expected_pages"`
-	NonUITopLevelNodes []figmaSourceCoverageEntry    `json:"non_ui_top_level_nodes"`
-	Entries            []figmaSourceCoverageEntry    `json:"entries"`
+	SchemaVersion          string                         `json:"schema_version"`
+	ID                     string                         `json:"id"`
+	InspectionMethod       figmaCoverageInspectionMethod  `json:"inspection_method"`
+	ExpectedPages          []figmaSourceCoveragePage      `json:"expected_pages"`
+	NonUITopLevelInventory []figmaSourceCoverageInventory `json:"non_ui_top_level_inventory"`
+	NonUITopLevelNodes     []figmaSourceCoverageEntry     `json:"non_ui_top_level_nodes"`
+	Entries                []figmaSourceCoverageEntry     `json:"entries"`
 }
 
 type figmaSourceCoveragePage struct {
+	NodeID     string `json:"node_id"`
+	Name       string `json:"name"`
+	ChildCount int    `json:"child_count"`
+}
+
+type figmaSourceCoverageInventory struct {
+	PageID string                    `json:"page_id"`
+	Nodes  []figmaSourceCoverageNode `json:"nodes"`
+}
+
+type figmaSourceCoverageNode struct {
 	NodeID string `json:"node_id"`
 	Name   string `json:"name"`
 }

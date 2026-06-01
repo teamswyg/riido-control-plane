@@ -12,18 +12,18 @@
     "page_id": "129:5215",
     "page_name": "UI",
     "inspected_at": "2026-06-02",
-    "inspection_source": "Figma metadata, top-level frame list, cited node-id existence check, and annotations"
+    "inspection_source": "Figma Plugin API loaded-page registry, top-level frame list, cited node-id existence check, and annotations"
   },
   "inspection_method": {
     "id": "figma-plugin-api-page-registry.v1",
     "authority": "Figma Plugin API via use_figma",
     "page_registry_expression": "figma.root.children",
-    "top_level_child_count_expression": "page.children.length",
+    "top_level_child_count_expression": "await figma.setCurrentPageAsync(page); page.children.length",
     "supporting_tools": [
       "Figma metadata XML/read output",
       "node-specific metadata lookup"
     ],
-    "rule": "expected_pages.child_count and expected_top_level_nodes are taken from Figma Plugin API figma.root.children/page.children. Metadata XML/read tools are supporting evidence only because they may expand node subtrees and must not redefine page-level child counts."
+    "rule": "expected_pages.child_count and top-level inventories are taken from the Figma Plugin API after loading each page with await figma.setCurrentPageAsync(page), then reading page.children.length/page.children. Passive figma.root.children metadata is only the page registry; metadata XML/read tools are supporting evidence only because they may expand node subtrees or report lazy/unloaded child counts and must not redefine page-level child counts."
   },
   "coverage_policy": {
     "summary": "Figma is product/design evidence, not the durable SSOT. A Figma node is covered only when it points to an owning domain/API/infrastructure/client boundary and a deterministic follow-up rule.",
@@ -33,7 +33,7 @@
   "expected_pages": [
     {"node_id": "129:5215", "name": "UI", "child_count": 16},
     {"node_id": "42:3014", "name": "Wireframe - 온보딩", "child_count": 3},
-    {"node_id": "0:1", "name": "Wireframe", "child_count": 1}
+    {"node_id": "0:1", "name": "Wireframe", "child_count": 28}
   ],
   "expected_top_level_nodes": [
     {"node_id": "153:12742", "name": "컴포넌트 참여자 드롭다운"},
@@ -52,6 +52,49 @@
     {"node_id": "236:29749", "name": "웹 온보딩"},
     {"node_id": "275:22731", "name": "런타임 설정페이지 엠티"},
     {"node_id": "432:37336", "name": "에이전트 설정페이지"}
+  ],
+  "non_ui_top_level_inventory": [
+    {
+      "page_id": "42:3014",
+      "nodes": [
+        {"node_id": "164:30657", "name": "데스크탑앱 온보딩"},
+        {"node_id": "188:27707", "name": "macOS"},
+        {"node_id": "188:27708", "name": "windows"}
+      ]
+    },
+    {
+      "page_id": "0:1",
+      "nodes": [
+        {"node_id": "2:15", "name": "image 1"},
+        {"node_id": "2:18", "name": "image 2"},
+        {"node_id": "2:21", "name": "image 3"},
+        {"node_id": "2:24", "name": "image 4"},
+        {"node_id": "2:27", "name": "image 5"},
+        {"node_id": "8:2929", "name": "작업"},
+        {"node_id": "8:3354", "name": "작업"},
+        {"node_id": "11:712", "name": "작업"},
+        {"node_id": "103:5185", "name": "작업"},
+        {"node_id": "102:4726", "name": "que"},
+        {"node_id": "102:4356", "name": "image 15"},
+        {"node_id": "12:2251", "name": "작업"},
+        {"node_id": "102:4360", "name": "작업"},
+        {"node_id": "12:3140", "name": "image 7"},
+        {"node_id": "12:3143", "name": "image 8"},
+        {"node_id": "12:3158", "name": "Group 6"},
+        {"node_id": "12:3163", "name": "image 13"},
+        {"node_id": "12:3166", "name": "image 14"},
+        {"node_id": "12:3303", "name": "메뉴바"},
+        {"node_id": "13:2655", "name": "메뉴바"},
+        {"node_id": "13:3789", "name": "런타임"},
+        {"node_id": "86:9988", "name": "런타임"},
+        {"node_id": "17:3551", "name": "에이전트"},
+        {"node_id": "17:4231", "name": "에이전트 수정"},
+        {"node_id": "84:9846", "name": "에이전트 추가"},
+        {"node_id": "17:2871", "name": "데몬 상세"},
+        {"node_id": "17:3111", "name": "런타임 상세"},
+        {"node_id": "153:15934", "name": "추가 기획 내용"}
+      ]
+    }
   ],
   "verified_evidence_nodes": [
     {"node_id": "134:6542", "name": "에이전트 추가"},

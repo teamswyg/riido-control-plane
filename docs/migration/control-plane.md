@@ -997,6 +997,31 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4832 — Figma lazy page load coverage projection
+
+This slice mirrors the contracts-owned loaded-page Figma coverage correction.
+
+The upstream contracts coverage now distinguishes passive page registry reads
+from loaded page child counts. `figma.root.children` remains the page registry,
+but non-current page top-level counts must come after
+`await figma.setCurrentPageAsync(page); page.children.length`. This matters
+because page `0:1` (`Wireframe`) can appear as one child in passive/lazy reads
+but has 28 top-level children after loading the page.
+
+This slice does:
+
+- update the mirrored Figma AI Agent coverage manifest from `riido-contracts`
+- preserve the loaded-page child-count rule in the control-plane projection doc
+- require the projection gate to verify `non_ui_top_level_inventory` length
+  against each mirrored page's loaded `child_count`
+- keep generated-client coverage unchanged because this is an evidence/projection
+  correction, not an API surface change
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
