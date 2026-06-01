@@ -164,7 +164,7 @@ export interface AssignAIAgentTaskReactEndpoint extends core.AssignAIAgentTaskEn
 }
 
 /**
- * task thread comment를 할당된 AI agent에게 전달합니다
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다
  * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
  */
 export interface SubmitAIAgentTaskCommentReactEndpoint extends core.SubmitAIAgentTaskCommentEndpoint {
@@ -194,6 +194,17 @@ export interface ListAIAgentTaskThreadsReactEndpoint extends core.ListAIAgentTas
    * React Query useQuery hook입니다.
    */
   readonly useQuery: (params: core.ListAIAgentTaskThreadsPathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadCollectionResponse>) => UseQueryResult<core.AIAgentTaskThreadCollectionResponse, Error>;
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface CreateAIAgentTaskThreadMessageReactEndpoint extends core.CreateAIAgentTaskThreadMessageEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CreateAIAgentTaskThreadMessageMutationVariables>) => UseMutationResult<core.AIAgentTaskActionResponse, Error, core.CreateAIAgentTaskThreadMessageMutationVariables>;
 }
 
 /**
@@ -265,7 +276,17 @@ export interface RiidoAIAgentEventsReactNamespace {
 }
 
 /**
- * task thread에서 AI Agent assignment와 comment action을 다루는 namespace입니다.
+ * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
+ */
+export interface RiidoAIAgentTasksThreadMessagesReactNamespace {
+  /**
+   * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   */
+  readonly create: CreateAIAgentTaskThreadMessageReactEndpoint;
+}
+
+/**
+ * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
  */
 export interface RiidoAIAgentTasksReactNamespace {
   /**
@@ -281,9 +302,13 @@ export interface RiidoAIAgentTasksReactNamespace {
    */
   readonly stop: StopAIAgentTaskReactEndpoint;
   /**
-   * task thread comment를 할당된 AI agent에게 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   * 호환 task comment route로 AI agent에게 메시지를 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly submitComment: SubmitAIAgentTaskCommentReactEndpoint;
+  /**
+   * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
+   */
+  readonly threadMessages: RiidoAIAgentTasksThreadMessagesReactNamespace;
   /**
    * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 cache tag: `aiAgent.tasks.threads`
    */
@@ -315,7 +340,7 @@ export interface RiidoAIAgentReactModule {
    */
   readonly events: RiidoAIAgentEventsReactNamespace;
   /**
-   * task thread에서 AI Agent assignment와 comment action을 다루는 namespace입니다.
+   * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
   readonly tasks: RiidoAIAgentTasksReactNamespace;
 }
@@ -408,6 +433,12 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
           submitComment: {
             ...coreClient.aiAgent.tasks.submitComment,
             useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.SubmitAIAgentTaskCommentMutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.SubmitAIAgentTaskCommentMutationVariables>(coreClient.aiAgent.tasks.submitComment.mutation(options)),
+          },
+          threadMessages: {
+            create: {
+              ...coreClient.aiAgent.tasks.threadMessages.create,
+              useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CreateAIAgentTaskThreadMessageMutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.CreateAIAgentTaskThreadMessageMutationVariables>(coreClient.aiAgent.tasks.threadMessages.create.mutation(options)),
+            },
           },
           threads: {
             ...coreClient.aiAgent.tasks.threads,

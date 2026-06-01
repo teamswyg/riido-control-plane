@@ -288,6 +288,11 @@ type SubmitAIAgentTaskCommentRequest struct {
 	SourceCommentID string `json:"source_comment_id,omitempty"`
 }
 
+type CreateAIAgentTaskThreadMessageRequest struct {
+	Body            string `json:"body"`
+	SourceMessageID string `json:"source_message_id,omitempty"`
+}
+
 type StopAIAgentTaskRequest struct {
 	AgentID string `json:"agent_id,omitempty"`
 	Reason  string `json:"reason,omitempty"`
@@ -320,6 +325,7 @@ type AIAgentTaskThreadRecord struct {
 	AgentID         string                    `json:"agent_id"`
 	RunID           string                    `json:"run_id"`
 	SourceCommentID string                    `json:"source_comment_id,omitempty"`
+	SourceMessageID string                    `json:"source_message_id,omitempty"`
 	WorkStatus      AgentWorkStatus           `json:"work_status"`
 	AssignmentState AgentAssignmentState      `json:"assignment_state"`
 	CommentKind     AgentTaskCommentKind      `json:"comment_kind"`

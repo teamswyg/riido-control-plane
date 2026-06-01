@@ -64,7 +64,10 @@ event stream.
 Figma normal task-thread screen (`node-id=236-21379`) is generated-client
 composition context for `riido.aiAgent.tasks.assign`,
 `riido.aiAgent.tasks.unassign`, `riido.aiAgent.tasks.threads`,
-`riido.aiAgent.tasks.submitComment`, and `riido.aiAgent.tasks.stop`. The
+`riido.aiAgent.tasks.threadMessages.create`, and
+`riido.aiAgent.tasks.stop`. The compatibility
+`riido.aiAgent.tasks.submitComment` route may remain in the artifact while
+client screens still submit a comment-like action without a `thread_id`. The
 generated artifact may document that those calls are commonly used together on
 the task page, but it must not turn the generic task comment box, right details
 panel, reply input layout, send-button visual state, or agent row presentation
@@ -79,7 +82,8 @@ unassign is client presentation and must not become generated API copy.
 
 Figma busy-agent queued screen (`node-id=153-8761`) is generated-client
 composition context for the same task-thread calls. The delivery artifact may
-document that `tasks.submitComment` can return
+document that `tasks.threadMessages.create` targets a known `thread_id` for a
+next instruction, that the compatibility `tasks.submitComment` can still return
 `comment_kind=queued_by_busy_agent`, that `tasks.threads` returns the queued row
 on cold read, that `events.stream` can carry the typed queued status, and that
 `tasks.stop` is the visible stop/cancel affordance. It must not hard-code the
