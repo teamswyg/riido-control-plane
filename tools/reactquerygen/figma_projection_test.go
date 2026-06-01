@@ -43,6 +43,8 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	if !strings.Contains(docText, "does not redefine the Figma top-level UI coverage") {
 		t.Fatalf("projection doc must name the downstream-only boundary")
 	}
+	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164-50215")
+	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164:50215")
 
 	spec, err := loadOpenAPI(openAPIPath)
 	if err != nil {
@@ -72,6 +74,32 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 			t.Fatalf("projection doc must mention node %s %s", entry.NodeID, entry.Name)
 		}
 		verifyFigmaProjectionEntry(t, entry, generatedPaths, generatedHaystack, string(core), string(react))
+	}
+}
+
+func assertNoStaleFigmaNodeReference(t *testing.T, root, staleNode string) {
+	t.Helper()
+	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		switch filepath.Ext(path) {
+		case ".md", ".json":
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			if strings.Contains(string(data), staleNode) {
+				t.Fatalf("%s still cites stale Figma node %s; use the contracts coverage manifest evidence nodes", path, staleNode)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walk docs for stale Figma node references: %v", err)
 	}
 }
 

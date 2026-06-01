@@ -136,7 +136,7 @@ agent-bound daemon start/restart/stop buttons. It must not turn the agent
 hover popover, daemon stop modal layout, or restart animation rendering into
 server-owned presentation logic.
 
-Figma agent setting annotations (`node-id=164-50215`), add-screen evidence
+Figma agent setting section evidence (`node-id=432-37336`), add-screen evidence
 (`node-id=134-6542`), and list-screen evidence (`node-id=432-35713`) are
 generated-client consumption context for bootstrap/create/update/editability
 APIs. The delivery artifact may document that `createAIAgent` feeds the
