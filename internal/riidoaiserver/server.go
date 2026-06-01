@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+const aiAgentTokenHeader = "X-Riido-AI-Agent-Token"
+
 type ServerConfig struct {
 	Authorizer        RequestAuthorizer
 	AgentCatalogStore AgentCatalogStore
@@ -257,7 +259,7 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
 		return
 	}
-	taskID, suffix, ok := splitResourcePath(r.URL.Path, "/v1/client/ai-agent/tasks/")
+	taskID, suffix, ok := splitNestedResourcePath(r.URL.Path, "/v1/client/ai-agent/tasks/")
 	if !ok {
 		writeError(w, http.StatusNotFound, "not found")
 		return
@@ -273,6 +275,13 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 		s.handleAIAgentClientTaskThreads(w, r, taskID)
 	case suffix == "comments" && r.Method == http.MethodPost:
 		s.handleAIAgentClientSubmitTaskComment(w, r, taskID)
+	case strings.HasPrefix(suffix, "threads/") && strings.HasSuffix(suffix, "/messages") && r.Method == http.MethodPost:
+		threadID, ok := threadMessageSuffixThreadID(suffix)
+		if !ok {
+			writeError(w, http.StatusNotFound, "not found")
+			return
+		}
+		s.handleAIAgentClientCreateTaskThreadMessage(w, r, taskID, threadID)
 	case suffix == "stop" && r.Method == http.MethodPost:
 		s.handleAIAgentClientStopTask(w, r, taskID)
 	default:
@@ -353,6 +362,24 @@ func (s Server) handleAIAgentClientSubmitTaskComment(w http.ResponseWriter, r *h
 		return
 	}
 	response, err := s.aiAgent.SubmitAIAgentTaskComment(r.Context(), principal, taskID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
+}
+
+func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter, r *http.Request, taskID, threadID string) {
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionCreate, TaskID: taskID})
+	if !ok {
+		return
+	}
+	var req CreateAIAgentTaskThreadMessageRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.aiAgent.CreateAIAgentTaskThreadMessage(r.Context(), principal, taskID, threadID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
@@ -991,7 +1018,7 @@ func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req Aut
 		writeError(w, http.StatusServiceUnavailable, "scoped request authorizer is not configured")
 		return AuthorizationResult{}, false
 	}
-	token, ok := bearerToken(r)
+	token, ok := requestToken(r)
 	if !ok {
 		writeUnauthorized(w)
 		return AuthorizationResult{}, false
@@ -1011,7 +1038,10 @@ func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req Aut
 	return result, true
 }
 
-func bearerToken(r *http.Request) (string, bool) {
+func requestToken(r *http.Request) (string, bool) {
+	if token := strings.TrimSpace(r.Header.Get(aiAgentTokenHeader)); token != "" {
+		return token, true
+	}
 	got := strings.TrimSpace(r.Header.Get("Authorization"))
 	if !strings.HasPrefix(got, "Bearer ") {
 		return "", false
@@ -1048,6 +1078,26 @@ func splitResourcePath(path, prefix string) (string, string, bool) {
 		return "", "", false
 	}
 	return parts[0], parts[1], true
+}
+
+func splitNestedResourcePath(path, prefix string) (string, string, bool) {
+	if !strings.HasPrefix(path, prefix) {
+		return "", "", false
+	}
+	rest := strings.Trim(strings.TrimPrefix(path, prefix), "/")
+	parts := strings.SplitN(rest, "/", 2)
+	if len(parts) != 2 || strings.TrimSpace(parts[0]) == "" || strings.TrimSpace(parts[1]) == "" {
+		return "", "", false
+	}
+	return parts[0], parts[1], true
+}
+
+func threadMessageSuffixThreadID(suffix string) (string, bool) {
+	parts := strings.Split(strings.Trim(suffix, "/"), "/")
+	if len(parts) != 3 || parts[0] != "threads" || strings.TrimSpace(parts[1]) == "" || parts[2] != "messages" {
+		return "", false
+	}
+	return parts[1], true
 }
 
 func splitAIAgentClientDevicePath(path string) (string, string, bool) {
@@ -1146,6 +1196,8 @@ func writeAIAgentClientError(w http.ResponseWriter, err error) {
 	case errors.Is(err, ErrAIAgentNotFound):
 		writeError(w, http.StatusNotFound, "not found")
 	case errors.Is(err, ErrAIAgentAssigned):
+		writeError(w, http.StatusConflict, err.Error())
+	case errors.Is(err, ErrAIAgentTaskThreadConflict):
 		writeError(w, http.StatusConflict, err.Error())
 	default:
 		writeError(w, http.StatusBadRequest, err.Error())

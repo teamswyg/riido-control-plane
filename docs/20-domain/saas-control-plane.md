@@ -119,6 +119,7 @@ repository selection rule. It does not own:
   markdown conversion
 - daemon/provider-specific placement of `Assignment.prompt` versus
   `Assignment.agent_instruction`
+- production secret names for server-to-server calls
 
 > Riido task: RIID-4800 `server task context http client assignment prompt wiring`
 

@@ -23,6 +23,7 @@ type AIAgentClientStore interface {
 	AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
 	UnassignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
 	SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error)
+	CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error)
 	StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
 	CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error)
 	GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error)
@@ -293,36 +294,44 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		agents:            agents,
 		templates: []AgentOnboardingTemplate{
 			{
-				TemplateID:          "riido_pm",
-				Name:                "리도",
-				RoleLabel:           "PM Agent",
-				ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agent-templates/riido-pm.png",
-				Description:         "문제 정의부터 우선순위, 출시 계획까지 정리합니다.",
-				Instruction:         "기능 요청을 문제, 목표, 성공 기준으로 재정의하고 PRD, 우선순위, 로드맵, 출시 계획을 구조화합니다. 아이디어는 가설로 다루며 불확실한 내용은 [확인 필요]로 표시합니다.",
+				TemplateID:             "riido_pm",
+				Name:                   "리도",
+				RoleLabel:              "PM Agent",
+				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-templates/riido-pm.png",
+				Description:            "문제 정의부터 우선순위, 출시 계획까지 정리합니다.",
+				Instruction:            "기능 요청을 문제, 목표, 성공 기준으로 재정의하고 PRD, 우선순위, 로드맵, 출시 계획을 구조화합니다. 아이디어는 가설로 다루며 불확실한 내용은 [확인 필요]로 표시합니다.",
+				DefaultVisibility:      AgentVisibilityPrivate,
+				RecommendedRuntimeKind: RuntimeKindCodex,
 			},
 			{
-				TemplateID:          "yeongsil_backend",
-				Name:                "영실",
-				RoleLabel:           "Backend Agent",
-				ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agent-templates/yeongsil-backend.png",
-				Description:         "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다.",
-				Instruction:         "요구사항을 API, 데이터 흐름, 저장 경계, 실패 처리 기준으로 나누고 안정적인 서버 구현 계획을 제안합니다.",
+				TemplateID:             "yeongsil_backend",
+				Name:                   "영실",
+				RoleLabel:              "Backend Agent",
+				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-templates/yeongsil-backend.png",
+				Description:            "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다.",
+				Instruction:            "요구사항을 API, 데이터 흐름, 저장 경계, 실패 처리 기준으로 나누고 안정적인 서버 구현 계획을 제안합니다.",
+				DefaultVisibility:      AgentVisibilityPrivate,
+				RecommendedRuntimeKind: RuntimeKindClaudeCode,
 			},
 			{
-				TemplateID:          "hongdo_frontend",
-				Name:                "홍도",
-				RoleLabel:           "Frontend Agent",
-				ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agent-templates/hongdo-frontend.png",
-				Description:         "사용자가 보는 화면을 구현하고, 성능과 접근성을 개선합니다.",
-				Instruction:         "화면 구조, 상태, 접근성, 성능을 함께 검토하고 사용자에게 자연스러운 프론트엔드 구현을 제안합니다.",
+				TemplateID:             "hongdo_frontend",
+				Name:                   "홍도",
+				RoleLabel:              "Frontend Agent",
+				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-templates/hongdo-frontend.png",
+				Description:            "사용자가 보는 화면을 구현하고, 성능과 접근성을 개선합니다.",
+				Instruction:            "화면 구조, 상태, 접근성, 성능을 함께 검토하고 사용자에게 자연스러운 프론트엔드 구현을 제안합니다.",
+				DefaultVisibility:      AgentVisibilityPrivate,
+				RecommendedRuntimeKind: RuntimeKindCursor,
 			},
 			{
-				TemplateID:          "jiwon_research",
-				Name:                "지원",
-				RoleLabel:           "Research Agent",
-				ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agent-templates/jiwon-research.png",
-				Description:         "시장과 경쟁사를 조사하고, 의사결정에 필요한 인사이트를 정리합니다.",
-				Instruction:         "시장, 경쟁사, 사용자 맥락을 조사하고 의사결정에 필요한 근거와 확인이 필요한 가정을 분리해 정리합니다.",
+				TemplateID:             "jiwon_research",
+				Name:                   "지원",
+				RoleLabel:              "Research Agent",
+				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-templates/jiwon-research.png",
+				Description:            "시장과 경쟁사를 조사하고, 의사결정에 필요한 인사이트를 정리합니다.",
+				Instruction:            "시장, 경쟁사, 사용자 맥락을 조사하고 의사결정에 필요한 근거와 확인이 필요한 가정을 분리해 정리합니다.",
+				DefaultVisibility:      AgentVisibilityPrivate,
+				RecommendedRuntimeKind: RuntimeKindOpenClaw,
 			},
 		},
 		taskThreads: taskThreads,
@@ -663,6 +672,61 @@ func (s *MockAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, p
 	return response, nil
 }
 
+func (s *MockAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
+	taskID = strings.TrimSpace(taskID)
+	threadID = strings.TrimSpace(threadID)
+	req.Body = strings.TrimSpace(req.Body)
+	if taskID == "" {
+		return AIAgentTaskActionResponse{}, errors.New("task_id is required")
+	}
+	if threadID == "" {
+		return AIAgentTaskActionResponse{}, errors.New("thread_id is required")
+	}
+	if req.Body == "" {
+		return AIAgentTaskActionResponse{}, errors.New("body is required")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	thread, ok := s.visibleTaskThreadLocked(principal, taskID, threadID)
+	if !ok {
+		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
+	}
+	agent, ok := s.visibleAgent(principal, thread.AgentID)
+	if !ok {
+		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
+	}
+	if active, ok := s.activeTaskThreadLocked(taskID); ok && active.ThreadID != threadID {
+		return AIAgentTaskActionResponse{}, ErrAIAgentTaskThreadConflict
+	}
+	response := AIAgentTaskActionResponse{
+		SchemaVersion:   SchemaVersion,
+		TaskID:          taskID,
+		AgentID:         agent.AgentID,
+		ThreadID:        threadID,
+		RunID:           thread.RunID,
+		WorkStatus:      AgentWorkStatusRunning,
+		AssignmentState: AgentAssignmentStateRunning,
+		CommentKind:     AgentTaskCommentRuntimeProgress,
+		Message:         "agent work continued from task thread message",
+	}
+	threadWasActive := taskThreadHasActiveStream(thread)
+	if !threadWasActive {
+		response.RunID = "run-mock-message-" + taskID + "-" + threadID
+	}
+	if !threadWasActive && (agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser || agent.WorkStatus == AgentWorkStatusQueued) {
+		response.WorkStatus = AgentWorkStatusQueued
+		response.AssignmentState = AgentAssignmentStateQueued
+		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
+		response.Message = "agent is busy; task thread message was queued"
+	}
+	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID)
+	s.appendAgentTaskActionEvent(response)
+	return response, nil
+}
+
 func (s *MockAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
@@ -985,8 +1049,9 @@ func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context
 }
 
 var (
-	ErrAIAgentNotFound = errors.New("ai agent not found")
-	ErrAIAgentAssigned = errors.New("ai agent has assigned tasks")
+	ErrAIAgentNotFound           = errors.New("ai agent not found")
+	ErrAIAgentAssigned           = errors.New("ai agent has assigned tasks")
+	ErrAIAgentTaskThreadConflict = errors.New("task already has another active ai agent thread")
 )
 
 func (s *MockAIAgentClientStore) visibleAgent(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
@@ -1043,6 +1108,31 @@ func (s *MockAIAgentClientStore) visibleTaskThreadsLocked(principal Authorizatio
 		out = append(out, copyTaskThread(thread))
 	}
 	return out
+}
+
+func (s *MockAIAgentClientStore) visibleTaskThreadLocked(principal AuthorizationResult, taskID, threadID string) (AIAgentTaskThreadRecord, bool) {
+	for _, thread := range s.taskThreads[taskID] {
+		if thread.ThreadID != threadID {
+			continue
+		}
+		agent, ok := s.agents[thread.AgentID]
+		if !ok || !aiAgentVisibleTo(principal, agent) {
+			return AIAgentTaskThreadRecord{}, false
+		}
+		return copyTaskThread(thread), true
+	}
+	return AIAgentTaskThreadRecord{}, false
+}
+
+func (s *MockAIAgentClientStore) activeTaskThreadLocked(taskID string) (AIAgentTaskThreadRecord, bool) {
+	threads := s.taskThreads[taskID]
+	for i := len(threads) - 1; i >= 0; i-- {
+		thread := threads[i]
+		if taskThreadHasActiveStream(thread) {
+			return copyTaskThread(thread), true
+		}
+	}
+	return AIAgentTaskThreadRecord{}, false
 }
 
 func (s *MockAIAgentClientStore) activeTaskThreadForAgentLocked(taskID, agentID string) (AIAgentTaskThreadRecord, bool) {
@@ -1104,6 +1194,51 @@ func (s *MockAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAge
 			threads[i].StartedAt = now
 		}
 		if !taskThreadHasActiveStream(threads[i]) {
+			threads[i].CompletedAt = now
+		}
+		s.taskThreads[response.TaskID] = threads
+		return
+	}
+	s.taskThreads[response.TaskID] = append(threads, thread)
+}
+
+func (s *MockAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(response AIAgentTaskActionResponse, sourceMessageID string) {
+	now := time.Now().UTC()
+	thread := AIAgentTaskThreadRecord{
+		ThreadID:        response.ThreadID,
+		TaskID:          response.TaskID,
+		AgentID:         response.AgentID,
+		RunID:           response.RunID,
+		SourceMessageID: strings.TrimSpace(sourceMessageID),
+		WorkStatus:      response.WorkStatus,
+		AssignmentState: response.AssignmentState,
+		CommentKind:     response.CommentKind,
+		Message:         response.Message,
+		StartedAt:       now,
+		Lines:           []AgentThreadProgressLine{},
+	}
+	if !taskThreadHasActiveStream(thread) {
+		thread.CompletedAt = now
+	}
+	threads := s.taskThreads[response.TaskID]
+	for i := range threads {
+		if threads[i].ThreadID != response.ThreadID {
+			continue
+		}
+		threads[i].RunID = response.RunID
+		threads[i].WorkStatus = response.WorkStatus
+		threads[i].AssignmentState = response.AssignmentState
+		threads[i].CommentKind = response.CommentKind
+		threads[i].Message = response.Message
+		if sourceMessageID != "" {
+			threads[i].SourceMessageID = sourceMessageID
+		}
+		if threads[i].StartedAt.IsZero() {
+			threads[i].StartedAt = now
+		}
+		if taskThreadHasActiveStream(threads[i]) {
+			threads[i].CompletedAt = time.Time{}
+		} else {
 			threads[i].CompletedAt = now
 		}
 		s.taskThreads[response.TaskID] = threads
