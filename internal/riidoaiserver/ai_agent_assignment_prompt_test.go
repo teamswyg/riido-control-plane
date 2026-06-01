@@ -13,7 +13,7 @@ func TestComposeAIAgentAssignmentPromptUsesTaskContextSnapshot(t *testing.T) {
 				ID:            "component-1",
 				ComponentType: "task",
 				Title:         "Ship AI Agent assignment",
-				KeyNumber:     4799,
+				KeyNumber:     "4799",
 				BranchName:    "RIID-4799-assignment-prompt-composer",
 			},
 			Document: AIAgentTaskContextDocument{
@@ -21,8 +21,8 @@ func TestComposeAIAgentAssignmentPromptUsesTaskContextSnapshot(t *testing.T) {
 				ContentFormat: "markdown",
 			},
 			Hierarchy: AIAgentTaskContextHierarchy{
-				Project:   AIAgentTaskContextReference{KeyNumber: 4539, Title: "[v1.22] AI Contributors"},
-				Milestone: AIAgentTaskContextReference{KeyNumber: 4719, Title: "Riido AI Agent Policy"},
+				Project:   AIAgentTaskContextReference{KeyNumber: "4539", Title: "[v1.22] AI Contributors"},
+				Milestone: AIAgentTaskContextReference{KeyNumber: "4719", Title: "Riido AI Agent Policy"},
 			},
 			Repositories: []AIAgentTaskContextRepository{
 				{

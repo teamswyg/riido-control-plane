@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,6 +17,7 @@ type ServerConfig struct {
 	AgentCatalogStore AgentCatalogStore
 	AIAgentClient     AIAgentClientStore
 	Assignment        AssignmentStore
+	TaskContext       AIAgentTaskContextReader
 	ProviderStatus    ProviderStatusStore
 	ProviderRead      ProviderStatusReader
 	WebAllowedOrigins []string
@@ -25,6 +27,7 @@ type Server struct {
 	assignment   AssignmentStore
 	agentCatalog AgentCatalogStore
 	aiAgent      AIAgentClientStore
+	taskContext  AIAgentTaskContextReader
 	provider     ProviderStatusStore
 	providerRead ProviderStatusReader
 	config       ServerConfig
@@ -54,6 +57,7 @@ func NewServer(config ServerConfig) Server {
 		assignment:   config.Assignment,
 		agentCatalog: agentCatalog,
 		aiAgent:      config.AIAgentClient,
+		taskContext:  config.TaskContext,
 		provider:     provider,
 		providerRead: providerRead,
 		config:       config,
@@ -740,6 +744,14 @@ func (s Server) handleComponentTaskAssign(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if strings.TrimSpace(req.Prompt) == "" && s.taskContext != nil {
+		composedReq, err := s.assignRequestWithTaskContextPrompt(r.Context(), taskID, req)
+		if err != nil {
+			writeError(w, http.StatusBadGateway, err.Error())
+			return
+		}
+		req = composedReq
+	}
 	assignment, err := s.assignment.AssignTask(r.Context(), taskID, req)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
@@ -749,6 +761,32 @@ func (s Server) handleComponentTaskAssign(w http.ResponseWriter, r *http.Request
 		SchemaVersion string     `json:"schema_version"`
 		Assignment    Assignment `json:"assignment"`
 	}{SchemaVersion: SchemaVersion, Assignment: assignment})
+}
+
+func (s Server) assignRequestWithTaskContextPrompt(ctx context.Context, taskID string, req AssignRequest) (AssignRequest, error) {
+	componentID := strings.TrimSpace(req.ComponentID)
+	if componentID == "" {
+		componentID = strings.TrimSpace(taskID)
+	}
+	contextSnapshot, err := s.taskContext.GetAIAgentTaskContext(ctx, componentID)
+	if err != nil {
+		return AssignRequest{}, err
+	}
+	composed, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
+		TaskID:  taskID,
+		Context: contextSnapshot,
+	})
+	if err != nil {
+		return AssignRequest{}, err
+	}
+	req.Prompt = composed.Prompt
+	if strings.TrimSpace(req.ComponentID) == "" {
+		req.ComponentID = strings.TrimSpace(contextSnapshot.Component.ID)
+		if req.ComponentID == "" {
+			req.ComponentID = componentID
+		}
+	}
+	return req, nil
 }
 
 func (s Server) handleComponentTaskEvents(w http.ResponseWriter, r *http.Request, taskID string) {
