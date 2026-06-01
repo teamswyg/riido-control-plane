@@ -41,6 +41,8 @@ jobs:
           test -f docs/30-architecture/config-reference.md
           test -f docs/30-architecture/integration-matrix.md
           test -f docs/30-architecture/runtime-deployment-boundary.md
+          test -f docs/30-architecture/runtime-cd-ownership.md
+          test -f docs/30-architecture/runtime-cd-ownership.riido.json
           test -f docs/50-roadmap/open-questions.md
       - name: Verify architecture docs avoid stale ownership paths
         run: |

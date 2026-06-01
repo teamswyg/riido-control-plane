@@ -24,6 +24,7 @@ operator/private infra validation.
 | `awsadapters` facade | compile and usage tests | none |
 | container image contract | `tools/containercontract` and optional local Docker build | Docker only for image build check |
 | AI Agent testnet runtime CD | tag-triggered `deploy-ai-agent-testnet` workflow: build, ECR push, ECS service wait, live smoke | GitHub OIDC, masked AWS account boundary, configured testnet secrets |
+| future CodeDeploy runtime CD | control-plane workflow creates/waits/smokes deployment after infra supplies topology | GitHub OIDC, masked deployment target config, no uploaded deployment artifacts |
 
 Public PR checks must not require AWS credentials, Terraform state, ECR access,
 production secret material, or write access to `riido-client`. Testnet runtime CD
@@ -39,6 +40,7 @@ dispatch.
 | testnet ECR image push | `riido-control-plane` tag CD | immutable tag, image digest, masked workflow logs |
 | ECS/Fargate topology | `riido-infra` | Terraform plan/apply evidence and drift policy |
 | testnet ECS service deployment | `riido-control-plane` tag CD | task-definition revision, service-stability wait, AI Agent smoke |
+| future CodeDeploy application/deployment group topology | `riido-infra` | Terraform plan/apply evidence and rollback/traffic-shift policy |
 | DNS/ACM/WAF/public ingress | `riido-infra` | traffic, certificate, and ingress evidence |
 | production secret wiring | `riido-infra` plus secret manager | redacted runtime secret evidence |
 | live DynamoDB/EventBridge behavior | `riido-infra` | backend bootstrap and traffic/evidence tools |

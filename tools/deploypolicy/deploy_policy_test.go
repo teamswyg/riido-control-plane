@@ -1,6 +1,7 @@
 package deploypolicy
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
@@ -18,6 +19,19 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "echo \"::add-mask::$image_uri\"")
 	requireContains(t, workflow, "echo \"::add-mask::$current_task_definition\"")
 	requireContains(t, workflow, "echo \"::add-mask::$next_task_definition\"")
+	for _, masked := range []string{
+		"AWS_REGION",
+		"ECR_REPOSITORY",
+		"ECS_CLUSTER",
+		"ECS_SERVICE",
+		"ECS_CONTAINER_NAME",
+		"TESTNET_BASE_URL",
+		"TESTNET_WORKSPACE_ID",
+	} {
+		requireContains(t, workflow, masked)
+	}
+	requireContains(t, workflow, "redacted=(")
+	requireContains(t, workflow, "echo \"::add-mask::${!name}\"")
 	requireContains(t, workflow, "if [ \"$image_tag\" = \"latest\" ]")
 	requireContains(t, workflow, "workflow_dispatch")
 	requireContains(t, workflow, "tags:")
@@ -29,6 +43,8 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 		"latest' >>",
 		"task-definition.next.json\" >>",
 		"task-definition.current.json\" >>",
+		"appspec.json\" >>",
+		"deployment-id\" >>",
 	} {
 		if strings.Contains(workflow, forbidden) {
 			t.Fatalf("deploy workflow must not contain %q", forbidden)
@@ -39,8 +55,12 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, boundary, "task-definition ARNs, image digests, live workflow run URLs")
 	requireContains(t, boundary, "must not upload")
 	requireContains(t, boundary, "deployment artifacts from the live run")
+	requireContains(t, boundary, "CodeDeploy Handoff")
+	requireContains(t, boundary, "runtime artifact CD execution still belongs")
 	requireContains(t, domain, "live URLs, task-definition ARNs")
+	requireContains(t, domain, "CodeDeploy blue/green")
 	requireContains(t, migration, "RIID-4812 tightens that public boundary")
+	requireContains(t, migration, "RIID-4814")
 
 	for path, body := range map[string]string{
 		"README.md":                      readme,
@@ -51,6 +71,107 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 		if strings.Contains(body, "http://ai-api.riido.io") {
 			t.Fatalf("%s must not pin the live testnet URL", path)
 		}
+	}
+}
+
+func TestRuntimeCDOwnershipManifest(t *testing.T) {
+	manifest := mustRead(t, "../../docs/30-architecture/runtime-cd-ownership.riido.json")
+	doc := mustRead(t, "../../docs/30-architecture/runtime-cd-ownership.md")
+	boundary := mustRead(t, "../../docs/30-architecture/runtime-deployment-boundary.md")
+	integration := mustRead(t, "../../docs/30-architecture/integration-matrix.md")
+
+	var parsed struct {
+		SchemaVersion string `json:"schema_version"`
+		ID            string `json:"id"`
+		RiidoTask     string `json:"riido_task"`
+		Runtime       string `json:"runtime_service"`
+		Current       struct {
+			ID            string   `json:"id"`
+			CDOwner       string   `json:"cd_owner"`
+			TopologyOwner string   `json:"topology_owner"`
+			Workflow      string   `json:"workflow"`
+			Allowed       []string `json:"allowed_actions"`
+		} `json:"current_strategy"`
+		Future []struct {
+			ID                 string   `json:"id"`
+			CDOwner            string   `json:"cd_owner"`
+			TopologyOwner      string   `json:"topology_owner"`
+			ControlPlaneMayOwn []string `json:"control_plane_may_own"`
+			InfraMustOwn       []string `json:"infra_must_own"`
+		} `json:"future_strategies"`
+		Redaction struct {
+			MustNot []string `json:"public_repo_must_not_commit_or_upload"`
+		} `json:"public_redaction_policy"`
+		Infra struct {
+			Repo       string   `json:"repo"`
+			Paths      []string `json:"paths"`
+			LocalScope string   `json:"local_scope"`
+		} `json:"infra_consumes"`
+		DependencyDirection struct {
+			TopDown  string `json:"top_down"`
+			BottomUp string `json:"bottom_up"`
+		} `json:"dependency_direction"`
+	}
+	if err := json.Unmarshal([]byte(manifest), &parsed); err != nil {
+		t.Fatalf("decode runtime CD ownership manifest: %v", err)
+	}
+
+	if parsed.SchemaVersion != "riido-control-plane-runtime-cd-ownership.v1" {
+		t.Fatalf("unexpected schema version: %q", parsed.SchemaVersion)
+	}
+	if parsed.ID != "runtime-cd-ownership" || parsed.RiidoTask != "RIID-4814" || parsed.Runtime != "riido_ai_server" {
+		t.Fatalf("manifest identity drifted: %#v", parsed)
+	}
+	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
+		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
+	}
+	if parsed.Current.Workflow != ".github/workflows/deploy-ai-agent-testnet.yml" {
+		t.Fatalf("workflow drifted: %q", parsed.Current.Workflow)
+	}
+	if len(parsed.Current.Allowed) < 5 {
+		t.Fatalf("current CD allowed actions are underspecified: %#v", parsed.Current.Allowed)
+	}
+
+	var codeDeployFound bool
+	for _, future := range parsed.Future {
+		if future.ID == "codedeploy-blue-green" {
+			codeDeployFound = true
+			if future.CDOwner != "riido-control-plane" || future.TopologyOwner != "riido-infra" {
+				t.Fatalf("CodeDeploy owner drifted: %#v", future)
+			}
+			requireSliceContains(t, future.ControlPlaneMayOwn, "wait for CodeDeploy deployment completion")
+			requireSliceContains(t, future.InfraMustOwn, "CodeDeploy application and deployment group")
+			requireSliceContains(t, future.InfraMustOwn, "blue green target groups and listener topology")
+		}
+	}
+	if !codeDeployFound {
+		t.Fatal("future CodeDeploy strategy is missing")
+	}
+
+	for _, forbidden := range []string{
+		"live URL values",
+		"AWS account IDs",
+		"ARNs",
+		"CodeDeploy deployment IDs",
+		"image digests or image URIs",
+		"task definition JSON",
+		"CodeDeploy AppSpec JSON",
+		"smoke response payloads",
+		"Terraform state",
+	} {
+		requireSliceContains(t, parsed.Redaction.MustNot, forbidden)
+	}
+	if parsed.Infra.Repo != "riido-infra" {
+		t.Fatalf("infra consumer repo drifted: %q", parsed.Infra.Repo)
+	}
+	requireSliceContains(t, parsed.Infra.Paths, "docs/architecture/terraform-authoring.md")
+	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
+	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
+
+	for _, body := range []string{doc, boundary, integration} {
+		requireContains(t, body, "CodeDeploy")
+		requireContains(t, body, "riido-control-plane")
+		requireContains(t, body, "riido-infra")
 	}
 }
 
@@ -68,4 +189,14 @@ func requireContains(t *testing.T, body, want string) {
 	if !strings.Contains(body, want) {
 		t.Fatalf("missing %q", want)
 	}
+}
+
+func requireSliceContains(t *testing.T, items []string, want string) {
+	t.Helper()
+	for _, item := range items {
+		if item == want {
+			return
+		}
+	}
+	t.Fatalf("missing %q in %#v", want, items)
 }

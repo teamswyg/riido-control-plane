@@ -14,6 +14,7 @@ public CI can verify the backend without AWS credentials.
 | `internal/riidoaiserver` | C10 domain and adapter implementation: assignment store actor, HTTP/SSE/metrics/health routes, AI Agent client mock routes, request authorization, RBAC, provider status, review seed provisioning, file snapshot/outbox, stdlib-only DynamoDB/EventBridge request adapters | daemon runtime, external AWS SDK, live deploy evidence, cloud resource topology |
 | `awsadapters` | public facade for private infra/evidence tools that need the public AWS adapter surface | new adapter behavior, duplicated DTOs, credential storage |
 | `tools/containercontract` | executable verifier for `riido-container-image-contract.v1` | image publishing, ECR credentials, ECS task definition deployment |
+| `tools/deploypolicy` | public workflow/docs redaction and CD ownership drift tests | live AWS deploy execution or private operator evidence |
 | `tools/reactquerygen` | deterministic OpenAPI-to-React-Query fixture generator for the AI Agent client mock surface | frontend app implementation, cross-repository client delivery, Orval runtime ownership |
 | `internal/contractscompat` | dependency compatibility smoke tests for shared public contracts | domain redefinition |
 | `internal/repoidentity` | repository identity guard | runtime behavior |
@@ -63,5 +64,6 @@ Forbidden without a new ADR:
 `cmd/riido_ai_server` is a thin runtime shell. It may parse environment
 variables, start the HTTP server, wire review provisioning, and start optional
 stdout metrics publication. It must not make deployment decisions. Container
-shape is validated by `tools/containercontract`; deployment of that image is
-owned by `riido-infra`.
+shape is validated by `tools/containercontract`; runtime artifact CD execution
+is owned by this repository's tag/manual workflow, while AWS topology and
+operator evidence stay in `riido-infra`.
