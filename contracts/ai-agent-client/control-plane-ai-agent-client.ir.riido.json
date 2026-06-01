@@ -362,6 +362,7 @@
         "model: AgentOnboardingFixture does not own model_id; model defaults are derived from the selected runtime model catalog until a separate model recommendation policy is promoted",
         "figma_138_7389: current onboarding fixture rows are 리도, 영실, 홍도, and 지원 in fixture response order",
         "fixture_create: selecting 리도/영실/홍도/지원 calls createAIAgentFromOnboardingFixture with fixture_id plus a complete CreateAgentConfigurationRequest body and creates a normal owned agent",
+        "fixture_identity: fixture-created agents keep the submitted display name exactly, may share names with other agents, use agent_id as durable identity and tie-breaker, and remain editable/deletable through normal agent RBAC and editability rules",
         "no_template_entity: the control plane must not expose template create/update/delete APIs or persist AgentTemplate records for this onboarding flow",
         "direct_setting: Figma node-id=164-26969 expands 직접 설정 into name, description, and instruction input fields that submit through createAIAgent",
         "direct_setting_row: 직접 설정 is client presentation, not an AgentOnboardingFixture record",
@@ -2286,6 +2287,7 @@
       },
       "scenario_ids": [
         "createAIAgentFromOnboardingFixture.fixture-creates-normal-agent",
+        "createAIAgentFromOnboardingFixture.fixture-created-duplicate-name-stays-normal",
         "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model"
       ]
     },
@@ -2896,6 +2898,7 @@
       },
       "scenario_ids": [
         "updateAIAgentConfiguration.agent-name-is-not-unique",
+        "updateAIAgentConfiguration.fixture-created-agent-updates-as-normal",
         "updateAIAgentConfiguration.profile-fields-are-saved",
         "updateAIAgentConfiguration.model-updates-validate-against-runtime-catalog",
         "updateAIAgentConfiguration.description-max-length-is-enforced",
@@ -2940,7 +2943,8 @@
         "ref": "DeleteAgentResponse"
       },
       "scenario_ids": [
-        "deleteAIAgent.delete-unassigns-and-stops"
+        "deleteAIAgent.delete-unassigns-and-stops",
+        "deleteAIAgent.fixture-created-agent-deletes-as-normal"
       ]
     },
     {
@@ -3082,7 +3086,8 @@
         "ref": "AgentClientRecordResponseV2"
       },
       "scenario_ids": [
-        "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation"
+        "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation",
+        "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal"
       ]
     },
     {
@@ -3776,6 +3781,14 @@
       "then": "the response contains a normal owned agent and no AgentTemplate or AgentOnboardingFixture entity is created"
     },
     {
+      "scenario_id": "createAIAgentFromOnboardingFixture.fixture-created-duplicate-name-stays-normal",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "fixture created duplicate name stays normal",
+      "given": "the workspace already has an agent named 리도 and the user creates another agent from the 리도 fixture",
+      "when": "the client sends name 리도 in the complete agent creation body",
+      "then": "the response keeps the submitted display name, returns a distinct agent_id, and the new agent remains a normal editable and deletable agent"
+    },
+    {
       "scenario_id": "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model",
       "operation_id": "createAIAgentFromOnboardingFixture",
       "name": "fixture create validates runtime and model",
@@ -4064,6 +4077,14 @@
       "then": "the request is accepted because agent names are mutable and non-unique"
     },
     {
+      "scenario_id": "updateAIAgentConfiguration.fixture-created-agent-updates-as-normal",
+      "operation_id": "updateAIAgentConfiguration",
+      "name": "fixture created agent updates as normal",
+      "given": "an editable agent was originally created from an onboarding fixture",
+      "when": "the owner updates its name, profile fields, runtime_id, or model_id",
+      "then": "the operation applies the normal agent mutation safety and does not require fixture-specific state"
+    },
+    {
       "scenario_id": "updateAIAgentConfiguration.profile-fields-are-saved",
       "operation_id": "updateAIAgentConfiguration",
       "name": "profile fields are saved",
@@ -4112,6 +4133,14 @@
       "then": "queued tasks are unassigned and the running task is force-stopped before deletion is confirmed"
     },
     {
+      "scenario_id": "deleteAIAgent.fixture-created-agent-deletes-as-normal",
+      "operation_id": "deleteAIAgent",
+      "name": "fixture created agent deletes as normal",
+      "given": "an agent was originally created from an onboarding fixture",
+      "when": "an admin or owner deletes the agent",
+      "then": "the operation uses the same delete safety rules and does not preserve any template or fixture entity"
+    },
+    {
       "scenario_id": "streamAIAgentClientEvents.editability-updates-before-mutation",
       "operation_id": "streamAIAgentClientEvents",
       "name": "editability updates before mutation",
@@ -4150,6 +4179,14 @@
       "given": "a viewer has selected workspace_id workspace-a and an onboarding fixture such as 리도/영실/홍도/지원",
       "when": "the client calls riido.v2.aiAgent.onboarding.fixtures.createAgent with workspace_id in the URL path",
       "then": "the server creates a normal workspace-scoped agent from fixture defaults without creating or persisting an agent template entity"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "workspace fixture duplicate name stays normal",
+      "given": "workspace-a already has an agent named 리도 and the user creates another agent from the 리도 fixture",
+      "when": "the client calls riido.v2.aiAgent.onboarding.fixtures.createAgent with name 리도",
+      "then": "the response keeps the submitted display name, returns a distinct workspace-scoped agent_id, and uses the normal v2 update/delete/editability operations for later lifecycle changes"
     },
     {
       "scenario_id": "createAIAgentV2.workspace-scoped-agent-creation",
