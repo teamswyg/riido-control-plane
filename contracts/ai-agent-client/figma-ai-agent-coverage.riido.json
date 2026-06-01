@@ -19,6 +19,11 @@
     "top_down": "When Figma changes product meaning, update the owning contracts policy or API DSL first, then regenerate IR/OpenAPI and downstream fixtures.",
     "bottom_up": "When implementation or harness work finds a contradiction, record the local finding, escalate the owning SSOT, then update this coverage manifest."
   },
+  "expected_pages": [
+    {"node_id": "129:5215", "name": "UI", "child_count": 16},
+    {"node_id": "42:3014", "name": "Wireframe - 온보딩", "child_count": 3},
+    {"node_id": "0:1", "name": "Wireframe", "child_count": 1}
+  ],
   "expected_top_level_nodes": [
     {"node_id": "153:12742", "name": "컴포넌트 참여자 드롭다운"},
     {"node_id": "153:15931", "name": "댓글 소통"},
@@ -63,7 +68,6 @@
     {"node_id": "337:24001", "name": "에이전트"},
     {"node_id": "337:24013", "name": "SolidButton"},
     {"node_id": "417:21803", "name": "SolidButton"},
-    {"node_id": "42:3014", "name": "Wireframe - 온보딩"},
     {"node_id": "432:23265", "name": "input"},
     {"node_id": "432:35544", "name": "SolidButton"},
     {"node_id": "432:35595", "name": "input"},
@@ -74,6 +78,94 @@
     {"node_id": "432:38853", "name": "DropdownContents"},
     {"node_id": "I432:22235;6885:15212", "name": "레이블"},
     {"node_id": "I432:35655;6885:15212", "name": "레이블"}
+  ],
+  "non_ui_top_level_nodes": [
+    {
+      "page_id": "42:3014",
+      "node_id": "164:30657",
+      "name": "데스크탑앱 온보딩",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_wireframe_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client", "riido-desktop"],
+      "covered_facts": [
+        "wireframe onboarding is absorbed by the UI page onboarding sections",
+        "desktop webview creates agents only through workspace-scoped fixture/direct-create generated paths",
+        "desktop app owns daemon launch trigger presentation and does not create a separate SaaS API"
+      ],
+      "direction_loop": {
+        "top_down": "A new onboarding business rule in this wireframe updates ai-agent-policy and API DSL before client or daemon changes.",
+        "bottom_up": "A desktop implementation constraint stays desktop/daemon-local unless it changes the SaaS read model or agent creation contract."
+      }
+    },
+    {
+      "page_id": "42:3014",
+      "node_id": "188:27707",
+      "name": "macOS",
+      "coverage_status": "no_diff_product_surface",
+      "evidence_kind": "figma_platform_wireframe",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md"
+      ],
+      "owner_repos": ["riido-desktop", "riido-daemon", "riido-client"],
+      "covered_facts": [
+        "macOS onboarding/install presentation is a desktop/client product surface",
+        "AI Agent API coverage still comes from device/runtime liveness and onboarding generated paths",
+        "no macOS-specific control-plane endpoint is created by this wireframe"
+      ],
+      "direction_loop": {
+        "top_down": "A macOS product rule becomes an API/daemon contract only after policy names a new durable fact.",
+        "bottom_up": "A macOS packaging or launch finding stays desktop/daemon-local unless it changes SaaS runtime liveness semantics."
+      }
+    },
+    {
+      "page_id": "42:3014",
+      "node_id": "188:27708",
+      "name": "windows",
+      "coverage_status": "no_diff_product_surface",
+      "evidence_kind": "figma_platform_wireframe",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md"
+      ],
+      "owner_repos": ["riido-desktop", "riido-client"],
+      "covered_facts": [
+        "Windows onboarding/install presentation is a desktop/client product surface",
+        "Windows waitlist or launch-notification actions remain outside the AI Agent generated API",
+        "no Windows-specific control-plane endpoint is created by this wireframe"
+      ],
+      "direction_loop": {
+        "top_down": "A Windows product action needs a separate product/marketing or desktop SSOT before it becomes a generated API.",
+        "bottom_up": "A Windows packaging or store-distribution finding stays outside AI Agent API unless it changes runtime liveness semantics."
+      }
+    },
+    {
+      "page_id": "0:1",
+      "node_id": "153:15934",
+      "name": "추가 기획 내용",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_wireframe_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "covered_facts": [
+        "legacy wireframe planning is resolved by the UI page 추가 기획 내용 section",
+        "task/subtask-only assignment scope remains the durable API boundary",
+        "non-task target surfaces still require a separate owning SSOT and generated operation"
+      ],
+      "direction_loop": {
+        "top_down": "A revived planning sentence from this wireframe must update ai-agent-policy and API DSL before implementation.",
+        "bottom_up": "A server/client mismatch in target scope escalates to the UI planning entry before local behavior diverges."
+      }
+    }
   ],
   "entries": [
     {
