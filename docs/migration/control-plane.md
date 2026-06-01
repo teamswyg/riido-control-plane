@@ -940,6 +940,24 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4828 — task-thread v2 submitComment coverage projection gate
+
+This slice tightens the top-down Figma coverage projection gate.
+
+This slice does:
+
+- mirror the contracts-owned Figma AI Agent coverage manifest into the
+  AI Agent client contract mirror directory
+- require each control-plane projection `required_generated_paths` entry to be
+  named by the mirrored upstream coverage entry for the same Figma node
+- absorb the upstream task-thread coverage fix for
+  `v2.aiAgent.tasks.submitComment`
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

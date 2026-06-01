@@ -14,8 +14,10 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	manifestPath := filepath.Join("..", "..", "docs", "30-architecture", "figma-ai-agent-control-plane-projection.riido.json")
 	docPath := filepath.Join("..", "..", "docs", "30-architecture", "figma-ai-agent-control-plane-projection.md")
 	openAPIPath := filepath.Join("..", "..", "contracts", "ai-agent-client", "control-plane-ai-agent-client.openapi.json")
+	sourceCoveragePath := filepath.Join("..", "..", "contracts", "ai-agent-client", "figma-ai-agent-coverage.riido.json")
 
 	manifest := loadFigmaProjectionManifest(t, manifestPath)
+	sourceCoverage := loadFigmaSourceCoverageManifest(t, sourceCoveragePath)
 	if manifest.SchemaVersion != "riido-control-plane-figma-ai-agent-projection.v1" {
 		t.Fatalf("schema_version = %q", manifest.SchemaVersion)
 	}
@@ -30,6 +32,10 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 		manifest.SourceContractsManifest.SchemaVersion != "riido-figma-ai-agent-coverage.v1" ||
 		manifest.SourceContractsManifest.ID != "figma-v1-22-ai-agent-ui-coverage" {
 		t.Fatalf("source contracts manifest = %+v", manifest.SourceContractsManifest)
+	}
+	if sourceCoverage.SchemaVersion != manifest.SourceContractsManifest.SchemaVersion ||
+		sourceCoverage.ID != manifest.SourceContractsManifest.ID {
+		t.Fatalf("source coverage mirror = %s/%s, want %s/%s", sourceCoverage.SchemaVersion, sourceCoverage.ID, manifest.SourceContractsManifest.SchemaVersion, manifest.SourceContractsManifest.ID)
 	}
 	if strings.TrimSpace(manifest.ProjectionPolicy.TopDown) == "" || strings.TrimSpace(manifest.ProjectionPolicy.BottomUp) == "" {
 		t.Fatalf("projection policy must include both directions: %+v", manifest.ProjectionPolicy)
@@ -66,6 +72,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	}
 	generatedPaths := generatedPathsByOperation(spec)
 	generatedHaystack := generatedPathHaystack(spec, generatedPaths)
+	sourceGeneratedPaths := sourceCoverageGeneratedPathsByNode(sourceCoverage)
 
 	if got, want := len(manifest.Entries), 16; got != want {
 		t.Fatalf("entries = %d, want %d", got, want)
@@ -79,7 +86,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 		if !strings.Contains(docText, entry.NodeID) || !strings.Contains(docText, entry.Name) {
 			t.Fatalf("projection doc must mention node %s %s", entry.NodeID, entry.Name)
 		}
-		verifyFigmaProjectionEntry(t, entry, generatedPaths, generatedHaystack, string(core), string(react))
+		verifyFigmaProjectionEntry(t, entry, sourceGeneratedPaths, generatedPaths, generatedHaystack, string(core), string(react))
 	}
 }
 
@@ -151,7 +158,33 @@ func loadFigmaProjectionManifest(t *testing.T, path string) figmaProjectionManif
 	return manifest
 }
 
-func verifyFigmaProjectionEntry(t *testing.T, entry figmaProjectionEntry, generatedPaths map[string]string, generatedHaystack, core, react string) {
+func loadFigmaSourceCoverageManifest(t *testing.T, path string) figmaSourceCoverageManifest {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read source coverage manifest: %v", err)
+	}
+	var manifest figmaSourceCoverageManifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		t.Fatalf("decode source coverage manifest: %v", err)
+	}
+	return manifest
+}
+
+func sourceCoverageGeneratedPathsByNode(manifest figmaSourceCoverageManifest) map[string]map[string]bool {
+	out := map[string]map[string]bool{}
+	for _, entry := range manifest.Entries {
+		if _, ok := out[entry.NodeID]; !ok {
+			out[entry.NodeID] = map[string]bool{}
+		}
+		for _, generatedPath := range entry.GeneratedPaths {
+			out[entry.NodeID][generatedPath] = true
+		}
+	}
+	return out
+}
+
+func verifyFigmaProjectionEntry(t *testing.T, entry figmaProjectionEntry, sourceGeneratedPaths map[string]map[string]bool, generatedPaths map[string]string, generatedHaystack, core, react string) {
 	t.Helper()
 	if strings.TrimSpace(entry.NodeID) == "" || strings.TrimSpace(entry.Name) == "" {
 		t.Fatalf("entry has empty node id or name: %+v", entry)
@@ -167,7 +200,14 @@ func verifyFigmaProjectionEntry(t *testing.T, entry figmaProjectionEntry, genera
 		if len(entry.RequiredGeneratedPaths) == 0 {
 			t.Fatalf("entry %q must require generated paths", entry.NodeID)
 		}
+		sourcePaths, ok := sourceGeneratedPaths[entry.NodeID]
+		if !ok {
+			t.Fatalf("entry %q is missing from mirrored contracts Figma coverage", entry.NodeID)
+		}
 		for _, path := range entry.RequiredGeneratedPaths {
+			if !sourcePaths[path] {
+				t.Fatalf("entry %q requires generated path %q that is absent from mirrored contracts Figma coverage", entry.NodeID, path)
+			}
 			if route, ok := generatedPaths[path]; !ok {
 				t.Fatalf("entry %q requires unknown generated path %q", entry.NodeID, path)
 			} else if strings.TrimSpace(route) == "" {
@@ -253,4 +293,15 @@ type figmaProjectionEntry struct {
 	RequiredGeneratedPaths          []string `json:"required_generated_paths,omitempty"`
 	ForbiddenGeneratedPathFragments []string `json:"forbidden_generated_path_fragments,omitempty"`
 	NoEndpointReason                string   `json:"no_endpoint_reason,omitempty"`
+}
+
+type figmaSourceCoverageManifest struct {
+	SchemaVersion string                     `json:"schema_version"`
+	ID            string                     `json:"id"`
+	Entries       []figmaSourceCoverageEntry `json:"entries"`
+}
+
+type figmaSourceCoverageEntry struct {
+	NodeID         string   `json:"node_id"`
+	GeneratedPaths []string `json:"generated_paths,omitempty"`
 }

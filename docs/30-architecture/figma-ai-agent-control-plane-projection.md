@@ -15,8 +15,12 @@ generated-client behavior.
 
 The executable local manifest is
 [`figma-ai-agent-control-plane-projection.riido.json`](figma-ai-agent-control-plane-projection.riido.json).
-The generator test reads that manifest and verifies that every required
-generated path exists in:
+The mirrored upstream coverage manifest is
+[`../../contracts/ai-agent-client/figma-ai-agent-coverage.riido.json`](../../contracts/ai-agent-client/figma-ai-agent-coverage.riido.json).
+It is copied from `riido-contracts` only so this repository can prove its
+projection does not ask for generated paths that upstream coverage did not
+name. The generator test reads both manifests and verifies that every required
+generated path exists in the upstream coverage mirror and in:
 
 - `contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json`
 - `web/generated/aiAgentClient.ts`
@@ -97,6 +101,8 @@ The test catches three classes of drift:
 
 - the local projection manifest names a generated path that OpenAPI does not
   expose;
+- the local projection manifest requires a generated path that the mirrored
+  contracts Figma coverage did not name for the same node;
 - generated TypeScript or React wrapper comments no longer carry the required
   generated path;
 - a no-endpoint Figma section accidentally gains forbidden helper names such as
