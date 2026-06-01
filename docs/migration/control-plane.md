@@ -601,6 +601,26 @@ topology, live deployments, uploaded deployment artifacts, or checked-in live
 values. Those remain `riido-infra` topology/evidence responsibilities before
 the optional workflow mode can be configured.
 
+### RIID-4822 — infra-output-gated CodeDeploy topology
+
+This slice records the follow-up once `riido-infra` owns optional CodeDeploy
+ECS blue/green topology. The public workflow ownership still does not move:
+`riido-control-plane` creates/waits/smokes deployments, while `riido-infra`
+creates/exposes the application and deployment group names after plan/apply
+evidence.
+
+Changed:
+
+- update `runtime-cd-ownership.riido.json` so RIID-4822 is the current CD
+  ownership task and RIID-4814/RIID-4815 are superseded history
+- document that the optional workflow mode is infra-output-gated, not merely
+  repo-gated
+- keep service role ARNs, target group/listener ARNs, task-definition JSON,
+  generated AppSpec/request JSON, deployment IDs, image digests, live URLs,
+  smoke payloads, and environment-specific examples out of public docs,
+  workflow inputs, reusable step outputs, and uploaded artifacts
+- remove live host examples from generated-client comments
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

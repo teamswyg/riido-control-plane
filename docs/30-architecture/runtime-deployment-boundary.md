@@ -96,12 +96,14 @@ to `riido-control-plane`: this repository owns creating the deployment from an
 immutable image digest and task-definition revision, waiting for the deployment
 to finish, and running smoke after traffic shift.
 
-`riido-infra` must own the CodeDeploy application/deployment group, blue/green
+`riido-infra` owns the CodeDeploy application/deployment group, blue/green
 target group and listener topology, CodeDeploy IAM role, rollback policy,
-Terraform drift handling, and operator evidence. The public workflow may consume
-only configured names/ARNs from GitHub environment secrets/variables and must
-not upload AppSpec JSON, task definition JSON, deployment IDs, image digests, or
-smoke payloads as artifacts. Generated CodeDeploy AppSpec/request JSON and the
+Terraform drift handling, and operator evidence. After RIID-4822 the public
+workflow may consume only the configured application and deployment-group names
+from GitHub environment variables populated from infra outputs; it must not
+consume service role ARNs, target group/listener ARNs, task definition JSON,
+AppSpec JSON, deployment IDs, image digests, or smoke payloads as reusable
+inputs or artifacts. Generated CodeDeploy AppSpec/request JSON and the
 deployment id stay in same-job `$RUNNER_TEMP` files and are removed by the job.
 
 ## AWS Adapter Boundary

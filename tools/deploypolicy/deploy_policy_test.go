@@ -13,6 +13,8 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	boundary := mustRead(t, "../../docs/30-architecture/runtime-deployment-boundary.md")
 	domain := mustRead(t, "../../docs/20-domain/saas-control-plane.md")
 	migration := mustRead(t, "../../docs/migration/control-plane.md")
+	generator := mustRead(t, "../../tools/reactquerygen/main.go")
+	generatedClient := mustRead(t, "../../web/generated/aiAgentClient.ts")
 
 	requireContains(t, workflow, "echo \"::add-mask::$aws_account_id\"")
 	requireContains(t, workflow, "echo \"::add-mask::$registry\"")
@@ -80,15 +82,18 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, migration, "RIID-4812 tightens that public boundary")
 	requireContains(t, migration, "RIID-4814")
 	requireContains(t, migration, "RIID-4815")
+	requireContains(t, migration, "RIID-4822")
 
 	for path, body := range map[string]string{
 		"README.md":                      readme,
 		"runtime-deployment-boundary.md": boundary,
 		"saas-control-plane.md":          domain,
 		"control-plane.md":               migration,
+		"tools/reactquerygen/main.go":    generator,
+		"web/generated/aiAgentClient.ts": generatedClient,
 	} {
-		if strings.Contains(body, "http://ai-api.riido.io") {
-			t.Fatalf("%s must not pin the live testnet URL", path)
+		if strings.Contains(body, "ai-api.riido.io") {
+			t.Fatalf("%s must not pin the live testnet host", path)
 		}
 	}
 }
@@ -136,6 +141,13 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			Paths      []string `json:"paths"`
 			LocalScope string   `json:"local_scope"`
 		} `json:"infra_consumes"`
+		InfraTopology struct {
+			RiidoTask      string   `json:"riido_task"`
+			Repo           string   `json:"repo"`
+			WorkUnit       string   `json:"terraform_work_unit"`
+			RequiredOutput []string `json:"required_outputs"`
+			MustNotConsume []string `json:"control_plane_must_not_consume"`
+		} `json:"infra_topology_contract"`
 		DependencyDirection struct {
 			TopDown  string `json:"top_down"`
 			BottomUp string `json:"bottom_up"`
@@ -148,7 +160,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	if parsed.SchemaVersion != "riido-control-plane-runtime-cd-ownership.v1" {
 		t.Fatalf("unexpected schema version: %q", parsed.SchemaVersion)
 	}
-	if parsed.ID != "runtime-cd-ownership" || parsed.RiidoTask != "RIID-4815" || parsed.Runtime != "riido_ai_server" {
+	if parsed.ID != "runtime-cd-ownership" || parsed.RiidoTask != "RIID-4822" || parsed.Runtime != "riido_ai_server" {
 		t.Fatalf("manifest identity drifted: %#v", parsed)
 	}
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
@@ -215,6 +227,13 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	if parsed.Infra.Repo != "riido-infra" {
 		t.Fatalf("infra consumer repo drifted: %q", parsed.Infra.Repo)
 	}
+	if parsed.InfraTopology.RiidoTask != "RIID-4822" || parsed.InfraTopology.Repo != "riido-infra" {
+		t.Fatalf("infra topology contract drifted: %#v", parsed.InfraTopology)
+	}
+	requireSliceContains(t, parsed.InfraTopology.RequiredOutput, "codedeploy_application_name")
+	requireSliceContains(t, parsed.InfraTopology.RequiredOutput, "codedeploy_deployment_group_name")
+	requireSliceContains(t, parsed.InfraTopology.MustNotConsume, "CodeDeploy service role ARN")
+	requireSliceContains(t, parsed.InfraTopology.MustNotConsume, "target group ARN")
 	requireSliceContains(t, parsed.Infra.Paths, "docs/architecture/terraform-authoring.md")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
