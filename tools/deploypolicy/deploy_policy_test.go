@@ -25,6 +25,8 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 		"ECS_CLUSTER",
 		"ECS_SERVICE",
 		"ECS_CONTAINER_NAME",
+		"CODEDEPLOY_APPLICATION",
+		"CODEDEPLOY_DEPLOYMENT_GROUP",
 		"TESTNET_BASE_URL",
 		"TESTNET_WORKSPACE_ID",
 	} {
@@ -37,10 +39,18 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "tags:")
 	requireContains(t, workflow, "- \"v*\"")
 	requireContains(t, workflow, "TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}")
+	requireContains(t, workflow, "CODEDEPLOY_APPLICATION: ${{ vars.RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION }}")
+	requireContains(t, workflow, "CODEDEPLOY_DEPLOYMENT_GROUP: ${{ vars.RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP }}")
 	requireContains(t, workflow, "printf '%s' \"$image_uri\" > \"$RUNNER_TEMP/riido-image-uri\"")
 	requireContains(t, workflow, "printf '%s' \"$next_task_definition\" > \"$RUNNER_TEMP/riido-task-definition-arn\"")
+	requireContains(t, workflow, "printf '%s' \"$container_port\" > \"$RUNNER_TEMP/riido-container-port\"")
 	requireContains(t, workflow, "current_json=\"$RUNNER_TEMP/task-definition.current.json\"")
 	requireContains(t, workflow, "next_json=\"$RUNNER_TEMP/task-definition.next.json\"")
+	requireContains(t, workflow, "appspec_json=\"$RUNNER_TEMP/codedeploy-appspec.json\"")
+	requireContains(t, workflow, "deployment_json=\"$RUNNER_TEMP/codedeploy-deployment.json\"")
+	requireContains(t, workflow, "revisionType: \"AppSpecContent\"")
+	requireContains(t, workflow, "aws deploy create-deployment")
+	requireContains(t, workflow, "aws deploy wait deployment-successful")
 
 	for _, forbidden := range []string{
 		"actions/upload-artifact",
@@ -69,6 +79,7 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, domain, "CodeDeploy blue/green")
 	requireContains(t, migration, "RIID-4812 tightens that public boundary")
 	requireContains(t, migration, "RIID-4814")
+	requireContains(t, migration, "RIID-4815")
 
 	for path, body := range map[string]string{
 		"README.md":                      readme,
@@ -100,6 +111,15 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			Workflow      string   `json:"workflow"`
 			Allowed       []string `json:"allowed_actions"`
 		} `json:"current_strategy"`
+		OptionalModes []struct {
+			ID               string   `json:"id"`
+			Status           string   `json:"status"`
+			CDOwner          string   `json:"cd_owner"`
+			TopologyOwner    string   `json:"topology_owner"`
+			ActivationInputs []string `json:"activation_inputs"`
+			Allowed          []string `json:"allowed_actions"`
+			MustNotOwn       []string `json:"must_not_own"`
+		} `json:"optional_workflow_modes"`
 		Future []struct {
 			ID                 string   `json:"id"`
 			CDOwner            string   `json:"cd_owner"`
@@ -108,7 +128,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			InfraMustOwn       []string `json:"infra_must_own"`
 		} `json:"future_strategies"`
 		Redaction struct {
-			MustNot []string `json:"public_repo_must_not_commit_or_upload"`
+			ShouldMinimize []string `json:"public_repo_should_minimize"`
+			MustNot        []string `json:"public_repo_must_not_commit_or_upload"`
 		} `json:"public_redaction_policy"`
 		Infra struct {
 			Repo       string   `json:"repo"`
@@ -127,7 +148,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	if parsed.SchemaVersion != "riido-control-plane-runtime-cd-ownership.v1" {
 		t.Fatalf("unexpected schema version: %q", parsed.SchemaVersion)
 	}
-	if parsed.ID != "runtime-cd-ownership" || parsed.RiidoTask != "RIID-4814" || parsed.Runtime != "riido_ai_server" {
+	if parsed.ID != "runtime-cd-ownership" || parsed.RiidoTask != "RIID-4815" || parsed.Runtime != "riido_ai_server" {
 		t.Fatalf("manifest identity drifted: %#v", parsed)
 	}
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
@@ -138,6 +159,24 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	}
 	if len(parsed.Current.Allowed) < 5 {
 		t.Fatalf("current CD allowed actions are underspecified: %#v", parsed.Current.Allowed)
+	}
+
+	var optionalCodeDeployFound bool
+	for _, mode := range parsed.OptionalModes {
+		if mode.ID == "codedeploy-blue-green" {
+			optionalCodeDeployFound = true
+			if mode.CDOwner != "riido-control-plane" || mode.TopologyOwner != "riido-infra" {
+				t.Fatalf("optional CodeDeploy owner drifted: %#v", mode)
+			}
+			requireSliceContains(t, mode.ActivationInputs, "RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION")
+			requireSliceContains(t, mode.ActivationInputs, "RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP")
+			requireSliceContains(t, mode.Allowed, "create CodeDeploy AppSpec content in same-job runner temp files")
+			requireSliceContains(t, mode.Allowed, "wait for CodeDeploy deployment success")
+			requireSliceContains(t, mode.MustNotOwn, "CodeDeploy application or deployment group topology")
+		}
+	}
+	if !optionalCodeDeployFound {
+		t.Fatal("optional CodeDeploy workflow mode is missing")
 	}
 
 	var codeDeployFound bool
@@ -171,6 +210,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	} {
 		requireSliceContains(t, parsed.Redaction.MustNot, forbidden)
 	}
+	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "publish only stable configuration key names that operators must set")
+	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "avoid environment-specific examples for domains, clusters, services, applications, deployment groups, ARNs, and URLs")
 	if parsed.Infra.Repo != "riido-infra" {
 		t.Fatalf("infra consumer repo drifted: %q", parsed.Infra.Repo)
 	}

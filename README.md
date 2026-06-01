@@ -100,7 +100,9 @@ output이 아니라 job 내부 `$RUNNER_TEMP` 파일로만 전달합니다.
 CodeDeploy blue/green으로 전환하더라도 CD 실행 owner는
 `riido-control-plane`입니다. CodeDeploy application/deployment group, target
 group/listener topology, IAM, rollback policy는 `riido-infra`가 Terraform으로
-소유하고, 이 public repo는 설정 이름과 동작만 문서화합니다.
+소유하고, 이 public repo는 설정 이름과 동작만 문서화합니다. 선택형
+CodeDeploy 모드는 아래 두 variable이 모두 있을 때만 켜지며, 없으면 기존 ECS
+rolling 경로를 유지합니다.
 
 - secrets: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`,
   `RIIDO_AI_SERVER_TESTNET_TOKEN`
@@ -109,6 +111,8 @@ group/listener topology, IAM, rollback policy는 `riido-infra`가 Terraform으�
   `RIIDO_AI_SERVER_ECS_SERVICE`, `RIIDO_AI_SERVER_ECS_CONTAINER_NAME`,
   `RIIDO_AI_SERVER_TESTNET_BASE_URL`
 - optional variable: `RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID`
+- optional variable pair: `RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION`,
+  `RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP`
 
 검증하는 endpoint:
 

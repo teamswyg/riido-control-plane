@@ -70,6 +70,8 @@ secrets/variables:
 - variable: `RIIDO_AI_SERVER_ECS_CONTAINER_NAME`
 - variable: `RIIDO_AI_SERVER_TESTNET_BASE_URL`
 - optional variable: `RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID`
+- optional variable pair: `RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION`,
+  `RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP`
 
 The names above are a workflow contract. Their values, the current live URL, and
 any deployment evidence stay in GitHub environment configuration or
@@ -86,18 +88,21 @@ CD promotes a new image digest.
 
 ## CodeDeploy Handoff
 
-CodeDeploy blue/green is a future production hardening strategy, not the current
-testnet mechanism. If it is adopted, runtime artifact CD execution still belongs
+CodeDeploy blue/green is a topology-gated production hardening strategy, not the
+default testnet mechanism. The public workflow is allowed to use CodeDeploy only
+when the optional CodeDeploy application and deployment group names are
+configured together. In that mode, runtime artifact CD execution still belongs
 to `riido-control-plane`: this repository owns creating the deployment from an
-immutable image digest, waiting for the deployment to finish, and running smoke
-after traffic shift.
+immutable image digest and task-definition revision, waiting for the deployment
+to finish, and running smoke after traffic shift.
 
 `riido-infra` must own the CodeDeploy application/deployment group, blue/green
 target group and listener topology, CodeDeploy IAM role, rollback policy,
 Terraform drift handling, and operator evidence. The public workflow may consume
 only configured names/ARNs from GitHub environment secrets/variables and must
 not upload AppSpec JSON, task definition JSON, deployment IDs, image digests, or
-smoke payloads as artifacts.
+smoke payloads as artifacts. Generated CodeDeploy AppSpec/request JSON and the
+deployment id stay in same-job `$RUNNER_TEMP` files and are removed by the job.
 
 ## AWS Adapter Boundary
 

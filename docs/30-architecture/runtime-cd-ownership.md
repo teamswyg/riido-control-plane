@@ -1,6 +1,6 @@
 # Runtime CD Ownership
 
-> Riido task: RIID-4814 `[Control Plane/Infra] CodeDeploy 전환 CD 소유권과 public redaction SSOT`
+> Riido task: RIID-4815 `[Control Plane/Infra] CodeDeploy 선택형 CD workflow와 public redaction 최소화`
 
 This document explains the deploy ownership manifest in
 [`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json). It does
@@ -31,22 +31,31 @@ That means this repository owns the workflow that:
 
 ## Current And Future Strategies
 
-The current testnet strategy is ECS rolling deployment by registering a new task
-definition revision and updating the ECS service. That execution remains in the
-`deploy-ai-agent-testnet` workflow.
+The current testnet default strategy is ECS rolling deployment by registering a
+new task definition revision and updating the ECS service. That execution
+remains in the `deploy-ai-agent-testnet` workflow.
 
-If production moves to CodeDeploy blue/green, the ownership does not flip:
-`riido-control-plane` still owns the deployment workflow and smoke checks.
-`riido-infra` must first create or expose the CodeDeploy application,
-deployment group, blue/green target group/listener topology, rollback policy,
-and IAM boundary through Terraform/operator evidence. The public workflow may
-only consume the configured names or ARNs through GitHub environment
-secrets/variables.
+The same workflow also has a topology-gated CodeDeploy mode. When
+`RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION` and
+`RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP` are both configured, the workflow
+still builds and registers the task-definition revision itself, then creates
+CodeDeploy AppSpec content in `$RUNNER_TEMP`, creates a CodeDeploy deployment,
+waits for deployment success, and runs the same smoke checks after the
+deployment succeeds.
+
+The ownership does not flip in that mode: `riido-control-plane` owns create /
+wait / smoke execution, while `riido-infra` must first create or expose the
+CodeDeploy application, deployment group, blue/green target group/listener
+topology, rollback policy, and IAM boundary through Terraform/operator
+evidence. The public workflow consumes only the configured application and
+deployment-group names through GitHub environment variables.
 
 ## Public Redaction
 
-Public repo docs and workflow files may contain key names and behavior, not live
-deployment values. The public workflow must not commit or upload:
+Public repo docs and workflow files may contain only stable key names and
+behavior. They should avoid environment-specific examples for domains, clusters,
+services, applications, deployment groups, ARNs, and URLs. The public workflow
+must not commit or upload:
 
 - live URL values
 - AWS account IDs
@@ -66,8 +75,10 @@ ignored operator evidence owned by `riido-infra`.
 
 When one deploy step must hand a live value to the next step in the same job, it
 uses `$RUNNER_TEMP` files with restrictive permissions and masks the value again
-before use. Live URL overrides are not accepted as manual workflow inputs; the
-configured GitHub environment variable is the only smoke target source.
+before use. That includes image URI, ECS task-definition ARN, generated
+CodeDeploy AppSpec JSON, generated CodeDeploy request JSON, and CodeDeploy
+deployment id. Live URL overrides are not accepted as manual workflow inputs;
+the configured GitHub environment variable is the only smoke target source.
 
 ## Drift Rule
 

@@ -572,6 +572,35 @@ This slice does not create CodeDeploy AWS resources, alter Terraform topology,
 change production traffic shifting, run a live deployment, or upload deployment
 evidence artifacts.
 
+### RIID-4815 — topology-gated CodeDeploy workflow mode
+
+This slice turns the CodeDeploy handoff from documentation-only into a dormant
+workflow mode while preserving the same ownership boundary. The default
+`deploy-ai-agent-testnet` path remains ECS rolling deployment. If
+`RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION` and
+`RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP` are both configured, the workflow
+uses the already-built immutable image and registered ECS task-definition
+revision to create a CodeDeploy deployment, wait for deployment success, and run
+the same AI Agent smoke checks.
+
+Changed:
+
+- add optional CodeDeploy application/deployment group variables to the public
+  deploy workflow
+- generate CodeDeploy AppSpec content and create-deployment request JSON only in
+  same-job `$RUNNER_TEMP` files with restrictive permissions
+- keep the CodeDeploy deployment id masked and stored only as a same-job temp
+  value
+- fail configuration early if exactly one CodeDeploy variable is present
+- update the runtime CD ownership manifest, boundary docs, README, integration
+  matrix, and deploy-policy tests
+
+This slice does not create CodeDeploy application/deployment group resources,
+blue/green target groups/listeners, IAM roles, rollback policy, Terraform
+topology, live deployments, uploaded deployment artifacts, or checked-in live
+values. Those remain `riido-infra` topology/evidence responsibilities before
+the optional workflow mode can be configured.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

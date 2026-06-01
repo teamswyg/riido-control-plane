@@ -452,9 +452,14 @@ outputs.
 If production later switches to CodeDeploy blue/green, the same ownership rule
 holds: `riido-control-plane` owns the runtime artifact CD workflow and post-shift
 smoke, while `riido-infra` owns the CodeDeploy topology, IAM, rollback policy,
-Terraform drift, and operator evidence. Public control-plane docs/workflows may
-name configuration keys, but they must not commit or upload deployment IDs,
-AppSpec/task-definition JSON, image digests, live URLs, ARNs, or smoke payloads.
+Terraform drift, and operator evidence. RIID-4815 makes the workflow
+topology-gated rather than repo-gated: if the optional CodeDeploy application
+and deployment-group variables are both configured, the workflow creates
+same-job temporary AppSpec/request JSON, creates the CodeDeploy deployment,
+waits for success, and runs the same smoke checks. Public control-plane
+docs/workflows may name stable configuration keys, but they must not commit or
+upload deployment IDs, AppSpec/task-definition JSON, image digests, live URLs,
+ARNs, smoke payloads, or environment-specific examples.
 
 ## Durable Operation Boundary
 
