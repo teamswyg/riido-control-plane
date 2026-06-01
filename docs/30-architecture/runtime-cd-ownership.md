@@ -126,6 +126,28 @@ The workflow must not use uploaded artifacts, `GITHUB_OUTPUT`, manual
 values. Same-job `$RUNNER_TEMP` files with restrictive permissions remain the
 only allowed bridge between deploy steps.
 
+## Public Surface Scan
+
+RIID-4836 turns the public export contract into a deterministic scan. The scan
+does not try to hide that this repository has a deploy workflow. It checks that
+the public surface only contains stable names and non-live behavior, and that it
+does not accidentally pin live hosts, AWS account IDs, literal ARNs, ALB/API
+Gateway/CloudFront URLs, or public handoff mechanisms for live deploy values.
+
+The scan scope is intentionally small and explicit: README, the CD ownership and
+deployment-boundary docs, the SaaS/client API docs, the migration log, the two
+public deploy/smoke workflows, and generated-client guidance. Workflow-internal
+AWS CLI field names such as `imageDigest` or `deploymentId` are allowed because
+they describe the API shape, not a live value. Placeholder host examples that
+use angle brackets are also allowed.
+
+`riido-infra` must know that this scan exists because it owns topology and
+operator evidence. It must not treat scan output as a deployment artifact,
+release evidence, or a source of live handoff values. The only durable takeaway
+for infra is the same ownership rule: CD execution and public redaction gates
+stay in `riido-control-plane`; topology, IAM, drift, and private evidence stay in
+`riido-infra`.
+
 ## Drift Rule
 
 Top-down changes start in this manifest or the runtime deployment boundary.

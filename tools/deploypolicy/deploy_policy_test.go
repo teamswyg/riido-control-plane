@@ -3,6 +3,8 @@ package deploypolicy
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -189,6 +191,17 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			InfraMustConsumeOnly   []string `json:"infra_must_consume_only"`
 			WorkflowMustNotUse     []string `json:"workflow_must_not_use"`
 		} `json:"public_export_contract"`
+		PublicSurfaceScan struct {
+			RiidoTask                  string   `json:"riido_task"`
+			CanonicalOwner             string   `json:"canonical_owner"`
+			InfraAwarenessOwner        string   `json:"infra_awareness_owner"`
+			ScopePaths                 []string `json:"scope_paths"`
+			ForbiddenLiterals          []string `json:"forbidden_literals"`
+			ForbiddenRegexes           []string `json:"forbidden_regexes"`
+			WorkflowForbiddenMechanism []string `json:"workflow_forbidden_mechanisms"`
+			AllowedPublicSurface       []string `json:"allowed_public_surface"`
+			InfraMustTreatScanAs       string   `json:"infra_must_treat_scan_as"`
+		} `json:"public_surface_scan_contract"`
 		InfraTopology struct {
 			RiidoTask      string   `json:"riido_task"`
 			Repo           string   `json:"repo"`
@@ -326,8 +339,24 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicExport.WorkflowMustNotUse, "actions/upload-artifact for live deployment payloads")
 	requireSliceContains(t, parsed.PublicExport.WorkflowMustNotUse, "GITHUB_OUTPUT for live deployment values")
 	requireSliceContains(t, parsed.PublicExport.WorkflowMustNotUse, "workflow_dispatch inputs for live URLs")
+	if parsed.PublicSurfaceScan.RiidoTask != "RIID-4836" {
+		t.Fatalf("public surface scan work unit drifted: %#v", parsed.PublicSurfaceScan)
+	}
+	if parsed.PublicSurfaceScan.CanonicalOwner != "riido-control-plane" || parsed.PublicSurfaceScan.InfraAwarenessOwner != "riido-infra" {
+		t.Fatalf("public surface scan ownership drifted: %#v", parsed.PublicSurfaceScan)
+	}
+	requireSliceContains(t, parsed.Hardening, "RIID-4836")
+	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, ".github/workflows/deploy-ai-agent-testnet.yml")
+	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, "docs/30-architecture/runtime-cd-ownership.md")
+	requireSliceContains(t, parsed.PublicSurfaceScan.ForbiddenLiterals, "ai-api.riido.io")
+	requireSliceContains(t, parsed.PublicSurfaceScan.WorkflowForbiddenMechanism, "GITHUB_OUTPUT")
+	requireSliceContains(t, parsed.PublicSurfaceScan.AllowedPublicSurface, "AWS CLI response field names inside the deploy workflow")
+	requireContains(t, parsed.PublicSurfaceScan.InfraMustTreatScanAs, "awareness policy only")
 	requireContains(t, doc, "Public Export Contract")
 	requireContains(t, doc, "RIID-4835")
+	requireContains(t, doc, "Public Surface Scan")
+	requireContains(t, doc, "RIID-4836")
+	requireContains(t, doc, "infra is the same ownership rule")
 	requireContains(t, doc, "Image values are deliberately not in that public export set")
 	requireContains(t, boundary, "RIID-4835")
 	requireContains(t, boundary, "aggregate deploy/smoke pass-fail status without live payload values")
@@ -340,6 +369,55 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		requireContains(t, body, "CodeDeploy")
 		requireContains(t, body, "riido-control-plane")
 		requireContains(t, body, "riido-infra")
+	}
+}
+
+func TestRuntimeCDPublicSurfaceScanContract(t *testing.T) {
+	manifest := mustRead(t, "../../docs/30-architecture/runtime-cd-ownership.riido.json")
+	var parsed struct {
+		PublicSurfaceScan struct {
+			RiidoTask                  string   `json:"riido_task"`
+			ScopePaths                 []string `json:"scope_paths"`
+			ForbiddenLiterals          []string `json:"forbidden_literals"`
+			ForbiddenRegexes           []string `json:"forbidden_regexes"`
+			WorkflowForbiddenMechanism []string `json:"workflow_forbidden_mechanisms"`
+		} `json:"public_surface_scan_contract"`
+	}
+	if err := json.Unmarshal([]byte(manifest), &parsed); err != nil {
+		t.Fatalf("decode runtime CD ownership manifest: %v", err)
+	}
+	if parsed.PublicSurfaceScan.RiidoTask != "RIID-4836" {
+		t.Fatalf("public surface scan task drifted: %#v", parsed.PublicSurfaceScan)
+	}
+
+	for _, repoPath := range parsed.PublicSurfaceScan.ScopePaths {
+		body := mustRead(t, filepath.Join("..", "..", filepath.FromSlash(repoPath)))
+		for _, forbidden := range parsed.PublicSurfaceScan.ForbiddenLiterals {
+			if strings.Contains(body, forbidden) {
+				t.Fatalf("%s contains forbidden public CD literal %q", repoPath, forbidden)
+			}
+		}
+		for _, pattern := range parsed.PublicSurfaceScan.ForbiddenRegexes {
+			re, err := regexp.Compile(pattern)
+			if err != nil {
+				t.Fatalf("compile public CD forbidden regex %q: %v", pattern, err)
+			}
+			if match := re.FindString(body); match != "" {
+				t.Fatalf("%s contains forbidden public CD pattern %q via %q", repoPath, pattern, match)
+			}
+		}
+	}
+
+	for _, workflowPath := range []string{
+		".github/workflows/deploy-ai-agent-testnet.yml",
+		".github/workflows/ai-agent-client-testnet-smoke.yml",
+	} {
+		body := mustRead(t, filepath.Join("..", "..", filepath.FromSlash(workflowPath)))
+		for _, forbidden := range parsed.PublicSurfaceScan.WorkflowForbiddenMechanism {
+			if strings.Contains(body, forbidden) {
+				t.Fatalf("%s contains forbidden public CD handoff mechanism %q", workflowPath, forbidden)
+			}
+		}
 	}
 }
 
