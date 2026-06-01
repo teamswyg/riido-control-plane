@@ -1043,6 +1043,30 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4834 — Figma client-delivery annotation projection gate
+
+This slice mirrors the contracts-owned Figma client-delivery annotation
+normalization.
+
+This slice does:
+
+- update the mirrored Figma AI Agent coverage manifest from `riido-contracts`
+- preserve `client_delivery_annotations` for Dev Mode category `39:0`
+  `클라이언트 전달`
+- normalize Figma facade examples such as `riido.aiAgent.events.stream` and
+  `riido.aiAgent.tasks.stop` to canonical generated paths
+  `aiAgent.events.stream` and `aiAgent.tasks.stop`
+- require the projection gate to prove both the canonical generated path and the
+  Korean generated-client access example exist in generated TypeScript/React
+  comments
+- document that `상세내용은 작업중입니다` is stale Figma handoff copy, not a new
+  endpoint requirement
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

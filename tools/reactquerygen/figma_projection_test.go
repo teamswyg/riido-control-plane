@@ -81,6 +81,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	generatedPaths := generatedPathsByOperation(spec)
 	generatedHaystack := generatedPathHaystack(spec, generatedPaths)
 	sourceGeneratedPaths := sourceCoverageGeneratedPathsByNode(sourceCoverage)
+	verifyFigmaClientDeliveryAnnotations(t, sourceCoverage.ClientDeliveryAnnotations, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
 
 	if got, want := len(manifest.Entries), 16; got != want {
 		t.Fatalf("entries = %d, want %d", got, want)
@@ -294,6 +295,66 @@ func verifyFigmaProjectionEntry(t *testing.T, entry figmaProjectionEntry, source
 	}
 }
 
+func verifyFigmaClientDeliveryAnnotations(t *testing.T, annotations []figmaSourceClientDeliveryAnnotation, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
+	t.Helper()
+	if got, want := len(annotations), 2; got != want {
+		t.Fatalf("mirrored client_delivery_annotations = %d, want %d", got, want)
+	}
+	seen := map[string]bool{}
+	for _, annotation := range annotations {
+		if seen[annotation.NodeID] {
+			t.Fatalf("duplicate mirrored client delivery annotation %q", annotation.NodeID)
+		}
+		seen[annotation.NodeID] = true
+		if annotation.CategoryID != "39:0" || annotation.CategoryLabel != "클라이언트 전달" {
+			t.Fatalf("mirrored client delivery annotation %q category drifted: %+v", annotation.NodeID, annotation)
+		}
+		if !strings.HasPrefix(annotation.FigmaGeneratedPath, "riido.") {
+			t.Fatalf("mirrored client delivery annotation %q must preserve Figma facade path: %q", annotation.NodeID, annotation.FigmaGeneratedPath)
+		}
+		canonical := strings.TrimPrefix(annotation.FigmaGeneratedPath, "riido.")
+		if annotation.CanonicalGeneratedPath != canonical {
+			t.Fatalf("mirrored client delivery annotation %q canonical path = %q, want %q", annotation.NodeID, annotation.CanonicalGeneratedPath, canonical)
+		}
+		if _, ok := generatedPaths[annotation.CanonicalGeneratedPath]; !ok {
+			t.Fatalf("mirrored client delivery annotation %q references unknown generated path %q", annotation.NodeID, annotation.CanonicalGeneratedPath)
+		}
+		sourcePaths, ok := sourceGeneratedPaths[annotation.CoverageEntryNodeID]
+		if !ok || !sourcePaths[annotation.CanonicalGeneratedPath] {
+			t.Fatalf("mirrored client delivery annotation %q canonical path %q is not covered by source entry %q", annotation.NodeID, annotation.CanonicalGeneratedPath, annotation.CoverageEntryNodeID)
+		}
+		canonicalComment := "계약 generated path: `" + annotation.CanonicalGeneratedPath + "`"
+		accessComment := "접근 예시: `" + annotation.FigmaGeneratedPath + "`"
+		for _, generated := range []struct {
+			name string
+			body string
+		}{
+			{name: "core", body: core},
+			{name: "react", body: react},
+		} {
+			if !strings.Contains(generated.body, canonicalComment) {
+				t.Fatalf("%s generated client missing %q for mirrored client delivery annotation %q", generated.name, canonicalComment, annotation.NodeID)
+			}
+			if !strings.Contains(generated.body, accessComment) {
+				t.Fatalf("%s generated client missing %q for mirrored client delivery annotation %q", generated.name, accessComment, annotation.NodeID)
+			}
+		}
+		for _, needle := range []string{annotation.NodeID, annotation.FigmaGeneratedPath, annotation.CanonicalGeneratedPath, annotation.CategoryLabel} {
+			if !strings.Contains(docText, needle) {
+				t.Fatalf("projection doc must mention mirrored client delivery annotation %q", needle)
+			}
+		}
+		if strings.Contains(annotation.FigmaLabel, "작업중") {
+			if annotation.ResolutionStatus != "resolved_stale_handoff_copy" || !strings.Contains(annotation.Resolution, "stale") {
+				t.Fatalf("mirrored client delivery annotation %q stale copy is not resolved: %+v", annotation.NodeID, annotation)
+			}
+			if !strings.Contains(docText, "상세내용은 작업중입니다") {
+				t.Fatalf("projection doc must mention stale Figma handoff copy for annotation %q", annotation.NodeID)
+			}
+		}
+	}
+}
+
 func generatedPathsByOperation(spec openAPISpec) map[string]string {
 	out := map[string]string{}
 	for path, methods := range spec.Paths {
@@ -352,13 +413,14 @@ type figmaProjectionEntry struct {
 }
 
 type figmaSourceCoverageManifest struct {
-	SchemaVersion          string                         `json:"schema_version"`
-	ID                     string                         `json:"id"`
-	InspectionMethod       figmaCoverageInspectionMethod  `json:"inspection_method"`
-	ExpectedPages          []figmaSourceCoveragePage      `json:"expected_pages"`
-	NonUITopLevelInventory []figmaSourceCoverageInventory `json:"non_ui_top_level_inventory"`
-	NonUITopLevelNodes     []figmaSourceCoverageEntry     `json:"non_ui_top_level_nodes"`
-	Entries                []figmaSourceCoverageEntry     `json:"entries"`
+	SchemaVersion             string                                `json:"schema_version"`
+	ID                        string                                `json:"id"`
+	InspectionMethod          figmaCoverageInspectionMethod         `json:"inspection_method"`
+	ExpectedPages             []figmaSourceCoveragePage             `json:"expected_pages"`
+	NonUITopLevelInventory    []figmaSourceCoverageInventory        `json:"non_ui_top_level_inventory"`
+	NonUITopLevelNodes        []figmaSourceCoverageEntry            `json:"non_ui_top_level_nodes"`
+	ClientDeliveryAnnotations []figmaSourceClientDeliveryAnnotation `json:"client_delivery_annotations"`
+	Entries                   []figmaSourceCoverageEntry            `json:"entries"`
 }
 
 type figmaSourceCoveragePage struct {
@@ -387,4 +449,17 @@ type figmaCoverageInspectionMethod struct {
 type figmaSourceCoverageEntry struct {
 	NodeID         string   `json:"node_id"`
 	GeneratedPaths []string `json:"generated_paths,omitempty"`
+}
+
+type figmaSourceClientDeliveryAnnotation struct {
+	NodeID                 string `json:"node_id"`
+	TopLevelNodeID         string `json:"top_level_node_id"`
+	CoverageEntryNodeID    string `json:"coverage_entry_node_id"`
+	CategoryID             string `json:"category_id"`
+	CategoryLabel          string `json:"category_label"`
+	FigmaLabel             string `json:"figma_label"`
+	FigmaGeneratedPath     string `json:"figma_generated_path"`
+	CanonicalGeneratedPath string `json:"canonical_generated_path"`
+	ResolutionStatus       string `json:"resolution_status"`
+	Resolution             string `json:"resolution"`
 }

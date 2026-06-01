@@ -31,6 +31,23 @@ objects can be lazy/unloaded, so metadata XML/read output and unloaded
 `page.children.length` reads remain supporting evidence only and must not
 redefine page-level counts in the control-plane mirror.
 
+The mirror also preserves contracts-owned `client_delivery_annotations`. Figma
+Dev Mode category `39:0` / `클라이언트 전달` may show frontend facade examples
+such as `riido.aiAgent.events.stream` or `riido.aiAgent.tasks.stop`. This repo
+does not treat the leading `riido.` variable name as a contracts generated path;
+the projection gate normalizes those examples to canonical generated paths such
+as `aiAgent.events.stream` and `aiAgent.tasks.stop`, then verifies that both the
+canonical path and the Korean generated-client access example appear in
+`web/generated/aiAgentClient.ts` and `web/generated/aiAgentClient.react.ts`.
+The stale Figma handoff copy `상세내용은 작업중입니다` on `node-id=153:8545`
+is therefore resolved by generated-client projection rather than by adding a
+separate endpoint.
+
+| Figma annotation node | Figma facade example | Canonical generated path |
+| --- | --- | --- |
+| `153:8545` | `riido.aiAgent.events.stream` | `aiAgent.events.stream` |
+| `236:20768` | `riido.aiAgent.tasks.stop` | `aiAgent.tasks.stop` |
+
 The generator test reads both manifests and verifies that every required
 generated path exists in the upstream coverage mirror and in:
 
@@ -120,6 +137,8 @@ The test catches these drift classes:
   non-UI top-level inventory;
 - the mirrored contracts coverage loses the Figma Plugin API inspection method
   that owns page registry and child-count evidence;
+- the mirrored contracts coverage loses `클라이언트 전달` annotation
+  normalization from `riido.*` facade examples to canonical generated paths;
 - generated TypeScript or React wrapper comments no longer carry the required
   generated path;
 - a no-endpoint Figma section accidentally gains forbidden helper names such as
