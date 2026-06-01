@@ -1213,6 +1213,29 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4841 — Figma coverage upstream provenance guard
+
+This slice closes the provenance gap left after RIID-4840.
+
+The control-plane mirror now contains the contracts-owned
+`supporting_tool_limitations` entry introduced by `teamswyg/riido-contracts#52`.
+However, the local projection manifest's `source_contracts_manifest.stabilized_by`
+list still stopped at `teamswyg/riido-contracts#51`. That made the mirror
+content newer than its recorded upstream stabilization boundary.
+
+This slice does:
+
+- add `teamswyg/riido-contracts#52` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to fail when the metadata page-list limitation is
+  mirrored without the matching upstream stabilization PR
+- document that upstream provenance is part of the mirror contract
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
