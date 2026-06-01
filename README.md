@@ -118,6 +118,13 @@ definition JSON, deployment id, smoke payload는 public workflow 입력이나 ar
 - optional variable pair: `RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION`,
   `RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP`
 
+RIID-4839 기준으로 위 목록이 public CD configuration key의 최소 공개 집합입니다.
+새 `RIIDO_AI_SERVER_*` GitHub secret/variable 이름이 필요하면 workflow보다 먼저
+`docs/30-architecture/runtime-cd-ownership.riido.json`의
+`public_config_key_minimization`을 갱신해야 합니다. key 값, live 예시, generated
+deploy payload, image/task-definition/CodeDeploy/smoke evidence는 공개 문서나
+workflow output/artifact로 남기지 않습니다.
+
 RIID-4835 public export contract에 따라 이 레포가 외부로 남겨도 되는 CD 정보는
 stable key 이름, workflow 이름, git tag/commit, aggregate pass/fail 상태뿐입니다.
 live URL, AWS 식별자, image 값, task definition/AppSpec JSON, deployment id,

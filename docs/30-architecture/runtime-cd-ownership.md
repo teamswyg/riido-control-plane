@@ -160,6 +160,37 @@ out-of-band evidence summaries. They are not public release hand-off artifacts,
 workflow outputs, uploaded artifacts, checked-in examples, or reusable inputs for
 `riido-infra`.
 
+## Public Config Key Minimization
+
+RIID-4839 makes the public configuration surface explicit. The public
+`riido-control-plane` workflows and docs may name only the stable GitHub
+configuration keys needed for runtime artifact CD and smoke:
+
+- secrets: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`,
+  `RIIDO_AI_SERVER_TESTNET_TOKEN`
+- required variables: `RIIDO_AI_SERVER_AWS_REGION`,
+  `RIIDO_AI_SERVER_ECR_REPOSITORY`, `RIIDO_AI_SERVER_ECS_CLUSTER`,
+  `RIIDO_AI_SERVER_ECS_SERVICE`, `RIIDO_AI_SERVER_ECS_CONTAINER_NAME`,
+  `RIIDO_AI_SERVER_TESTNET_BASE_URL`
+- optional variables: `RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID`,
+  `RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION`,
+  `RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP`
+
+Those names are enough for operators to wire GitHub environment configuration.
+Their values, live examples, generated deploy payloads, and detailed evidence do
+not belong in this public repository. Adding another
+`RIIDO_AI_SERVER_*` GitHub key is a public surface change and must update
+[`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json) before the
+workflow uses it.
+
+`riido-infra` may know the stable source names that map to those keys, such as
+`ecr_repository_name`, `ecs_cluster_name`, `service_name`, `container_name`,
+`codedeploy_application_name`, and `codedeploy_deployment_group_name`. It must
+still not receive live workflow payloads, image values, task-definition values,
+CodeDeploy generated JSON, deployment IDs, smoke payloads, Terraform plans,
+state, tfvars, apply logs, or raw operator evidence through public outputs or
+artifacts.
+
 ## Drift Rule
 
 Top-down changes start in this manifest or the runtime deployment boundary.

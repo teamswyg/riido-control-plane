@@ -755,6 +755,31 @@ This slice does not create or modify AWS resources, Terraform topology,
 GitHub environment values, live deployment execution, release evidence files,
 uploaded workflow artifacts, or generated deployment payload handoffs.
 
+### RIID-4839 — CD public config key minimization SSOT
+
+This slice narrows the public CD ownership remodel into an explicit key-name
+surface. Runtime artifact CD execution, CodeDeploy create/wait/smoke, and public
+redaction gates still stay in `riido-control-plane`. `riido-infra` must know the
+stable key categories, but public repositories should disclose only the minimum
+`RIIDO_AI_SERVER_*` GitHub secret and variable names needed to configure deploy
+and smoke.
+
+Changed:
+
+- add `public_config_key_minimization` to
+  `docs/30-architecture/runtime-cd-ownership.riido.json`
+- verify that deploy/smoke workflows reference only the allowed
+  `RIIDO_AI_SERVER_*` GitHub configuration keys
+- document that adding another public CD configuration key must update the
+  runtime CD ownership manifest before workflow use
+- keep key values, live examples, generated deploy payloads, image values,
+  task-definition values, CodeDeploy generated JSON, deployment IDs, smoke
+  payloads, and detailed evidence outside public repositories
+
+This slice does not create or modify AWS resources, Terraform topology,
+GitHub environment values, live deployment execution, release evidence files,
+uploaded workflow artifacts, or generated deployment payload handoffs.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

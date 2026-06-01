@@ -135,6 +135,11 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	doc := mustRead(t, "../../docs/30-architecture/runtime-cd-ownership.md")
 	boundary := mustRead(t, "../../docs/30-architecture/runtime-deployment-boundary.md")
 	integration := mustRead(t, "../../docs/30-architecture/integration-matrix.md")
+	readme := mustRead(t, "../../README.md")
+	domain := mustRead(t, "../../docs/20-domain/saas-control-plane.md")
+	migration := mustRead(t, "../../docs/migration/control-plane.md")
+	deployWorkflow := mustRead(t, "../../.github/workflows/deploy-ai-agent-testnet.yml")
+	smokeWorkflow := mustRead(t, "../../.github/workflows/ai-agent-client-testnet-smoke.yml")
 
 	var parsed struct {
 		SchemaVersion string   `json:"schema_version"`
@@ -206,6 +211,19 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			AllowedPublicSurface       []string `json:"allowed_public_surface"`
 			InfraMustTreatScanAs       string   `json:"infra_must_treat_scan_as"`
 		} `json:"public_surface_scan_contract"`
+		PublicConfigKeyMinimization struct {
+			RiidoTask              string   `json:"riido_task"`
+			CanonicalOwner         string   `json:"canonical_owner"`
+			InfraAwarenessOwner    string   `json:"infra_awareness_owner"`
+			Rule                   string   `json:"rule"`
+			RequiredSecretKeys     []string `json:"required_secret_keys"`
+			RequiredVariableKeys   []string `json:"required_variable_keys"`
+			OptionalVariableKeys   []string `json:"optional_variable_keys"`
+			StableInfraSourceNames []string `json:"stable_infra_source_names"`
+			PublicDocsMayReference []string `json:"public_docs_may_reference"`
+			PublicDocsMustNotRef   []string `json:"public_docs_must_not_reference"`
+			WorkflowKeySource      string   `json:"workflow_key_source"`
+		} `json:"public_config_key_minimization"`
 		InfraTopology struct {
 			RiidoTask      string   `json:"riido_task"`
 			Repo           string   `json:"repo"`
@@ -232,6 +250,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Hardening, "RIID-4835")
 	requireSliceContains(t, parsed.Hardening, "RIID-4836")
 	requireSliceContains(t, parsed.Hardening, "RIID-4837")
+	requireSliceContains(t, parsed.Hardening, "RIID-4839")
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
 		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
 	}
@@ -323,6 +342,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4835-control-plane-cd-public-export-contract.riido.json")
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4836-control-plane-cd-public-surface-redaction-scan.riido.json")
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json")
+	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4839-cd-public-config-key-minimization.riido.json")
 	if parsed.InfraVisibility.Repo != "riido-infra" {
 		t.Fatalf("infra visibility repo drifted: %q", parsed.InfraVisibility.Repo)
 	}
@@ -363,15 +383,61 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicSurfaceScan.WorkflowForbiddenMechanism, "GITHUB_OUTPUT")
 	requireSliceContains(t, parsed.PublicSurfaceScan.AllowedPublicSurface, "AWS CLI response field names inside the deploy workflow")
 	requireContains(t, parsed.PublicSurfaceScan.InfraMustTreatScanAs, "awareness policy only")
+	if parsed.PublicConfigKeyMinimization.RiidoTask != "RIID-4839" {
+		t.Fatalf("public config key minimization work unit drifted: %#v", parsed.PublicConfigKeyMinimization)
+	}
+	if parsed.PublicConfigKeyMinimization.CanonicalOwner != "riido-control-plane" ||
+		parsed.PublicConfigKeyMinimization.InfraAwarenessOwner != "riido-infra" {
+		t.Fatalf("public config key minimization ownership drifted: %#v", parsed.PublicConfigKeyMinimization)
+	}
+	requireContains(t, parsed.PublicConfigKeyMinimization.Rule, "minimum stable GitHub configuration keys")
+	requireContains(t, parsed.PublicConfigKeyMinimization.WorkflowKeySource, "any additional RIIDO_AI_SERVER_*")
+	expectedSecrets := []string{
+		"RIIDO_AI_SERVER_DEPLOY_ROLE_ARN",
+		"RIIDO_AI_SERVER_TESTNET_TOKEN",
+	}
+	expectedRequiredVars := []string{
+		"RIIDO_AI_SERVER_AWS_REGION",
+		"RIIDO_AI_SERVER_ECR_REPOSITORY",
+		"RIIDO_AI_SERVER_ECS_CLUSTER",
+		"RIIDO_AI_SERVER_ECS_SERVICE",
+		"RIIDO_AI_SERVER_ECS_CONTAINER_NAME",
+		"RIIDO_AI_SERVER_TESTNET_BASE_URL",
+	}
+	expectedOptionalVars := []string{
+		"RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID",
+		"RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION",
+		"RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP",
+	}
+	requireStringSetExact(t, parsed.PublicConfigKeyMinimization.RequiredSecretKeys, expectedSecrets)
+	requireStringSetExact(t, parsed.PublicConfigKeyMinimization.RequiredVariableKeys, expectedRequiredVars)
+	requireStringSetExact(t, parsed.PublicConfigKeyMinimization.OptionalVariableKeys, expectedOptionalVars)
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "ecr_repository_name")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "ecs_cluster_name")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "service_name")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "container_name")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "codedeploy_application_name")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "codedeploy_deployment_group_name")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMayReference, "required or optional key names")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMustNotRef, "environment-specific example values")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMustNotRef, "live hosts")
+	requireStringSetExact(t, collectGitHubConfigRefs(deployWorkflow+"\n"+smokeWorkflow, "secrets"), expectedSecrets)
+	requireStringSetExact(t, collectGitHubConfigRefs(deployWorkflow+"\n"+smokeWorkflow, "vars"), append(expectedRequiredVars, expectedOptionalVars...))
 	requireContains(t, doc, "Public Export Contract")
 	requireContains(t, doc, "RIID-4835")
 	requireContains(t, doc, "Public Surface Scan")
 	requireContains(t, doc, "RIID-4836")
+	requireContains(t, doc, "Public Config Key Minimization")
+	requireContains(t, doc, "RIID-4839")
 	requireContains(t, doc, "infra is the same ownership rule")
 	requireContains(t, doc, "Image values are deliberately not in that public export set")
 	requireContains(t, boundary, "RIID-4835")
+	requireContains(t, boundary, "RIID-4839")
 	requireContains(t, boundary, "aggregate deploy/smoke pass-fail status without live payload values")
 	requireContains(t, boundary, "are not public hand-off artifacts")
+	requireContains(t, readme, "RIID-4839")
+	requireContains(t, domain, "RIID-4839")
+	requireContains(t, migration, "RIID-4839")
 	requireNotContains(t, doc+"\n"+boundary+"\n"+integration, "public image digest")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
@@ -432,6 +498,21 @@ func TestRuntimeCDPublicSurfaceScanContract(t *testing.T) {
 	}
 }
 
+func collectGitHubConfigRefs(body, namespace string) []string {
+	re := regexp.MustCompile(`\$\{\{\s*` + regexp.QuoteMeta(namespace) + `\.([A-Z0-9_]+)\s*\}\}`)
+	matches := re.FindAllStringSubmatch(body, -1)
+	seen := map[string]bool{}
+	var refs []string
+	for _, match := range matches {
+		if len(match) < 2 || seen[match[1]] {
+			continue
+		}
+		seen[match[1]] = true
+		refs = append(refs, match[1])
+	}
+	return refs
+}
+
 func mustRead(t *testing.T, path string) string {
 	t.Helper()
 	body, err := os.ReadFile(path)
@@ -463,4 +544,27 @@ func requireSliceContains(t *testing.T, items []string, want string) {
 		}
 	}
 	t.Fatalf("missing %q in %#v", want, items)
+}
+
+func requireStringSetExact(t *testing.T, got, want []string) {
+	t.Helper()
+	gotSet := map[string]int{}
+	for _, item := range got {
+		gotSet[item]++
+		if gotSet[item] > 1 {
+			t.Fatalf("duplicate item %q in %#v", item, got)
+		}
+	}
+	wantSet := map[string]bool{}
+	for _, item := range want {
+		wantSet[item] = true
+		if gotSet[item] == 0 {
+			t.Fatalf("missing %q in %#v", item, got)
+		}
+	}
+	for item := range gotSet {
+		if !wantSet[item] {
+			t.Fatalf("unexpected %q in %#v, expected %#v", item, got, want)
+		}
+	}
 }

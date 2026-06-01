@@ -161,5 +161,13 @@ surfaces that frontend developers read and copy from. They may explain stable
 configuration keys and generated call chains, but they must not pin live hosts or
 teach public workflow handoff payloads.
 
+RIID-4839 narrows the public configuration surface itself. The public deploy and
+smoke workflows may reference only the stable `RIIDO_AI_SERVER_*` GitHub secret
+and variable names listed in
+[`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json). Those key
+names are public; their values, live examples, generated deploy payloads, image
+values, task-definition values, CodeDeploy generated JSON, deployment IDs, smoke
+payloads, and detailed evidence are not public hand-off artifacts.
+
 PR descriptions and chat messages are not release SSOT. Any durable decision must
 land in a domain, architecture, ADR, migration, or infra evidence document.
