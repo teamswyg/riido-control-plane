@@ -88,6 +88,44 @@ stores each accepted line as an assignment `riido_log` task event and, when the
 AI Agent client event store is configured, fans out the same batch as
 `agent_thread_progress` on the client SSE surface.
 
+## Assignment Prompt Composer Boundary
+
+> Riido task: RIID-4799 `contracts server assignment prompt composer ssot`
+
+`riido-control-plane` owns the provider-neutral assignment prompt composer.
+When an AI Agent is assigned to a task from the client-facing participant flow,
+the client sends only the selected `agent_id`; it does not send task body,
+branch, repository, or agent instruction text.
+
+The prompt composer consumes a read-only task context snapshot whose source is
+the existing Riido API server endpoint added by RIID-4798:
+
+- task/component id, type, title, key number, and branch name
+- task document content, projected as markdown by the existing API server
+- project, milestone, and parent-task hierarchy labels
+- connected GitHub repository candidates, with pull-request-connected
+  repositories preferred over workspace-connected fallback repositories
+
+The composed `AssignRequest.prompt` is an assignment-time immutable snapshot.
+Later task document edits, repository relation edits, or agent setting edits do
+not rewrite queued or running assignments. The saved agent `instruction` is
+snapshotted separately into `AssignRequest.agent_instruction`.
+
+This boundary owns only the deterministic, provider-neutral prompt scaffold and
+repository selection rule. It does not own:
+
+- frontend participant dropdown shape or `agent_id` request body
+- existing Riido API server authorization, database queries, or document HTML to
+  markdown conversion
+- daemon/provider-specific placement of `Assignment.prompt` versus
+  `Assignment.agent_instruction`
+- production secret names for server-to-server calls
+
+If task context lookup is unavailable in the production wiring path, assignment
+must fail before daemon polling can lease provider work. Mock-only frontend
+development may still use deterministic synthetic thread responses, but those
+responses are not evidence that a daemon assignment prompt exists.
+
 The control-plane-local DTO surface is:
 
 - `Health`
