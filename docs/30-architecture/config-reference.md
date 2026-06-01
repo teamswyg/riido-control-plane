@@ -20,6 +20,11 @@ This file is the public Factor 12 configuration catalog for
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | disabled | `cmd/riido_ai_server` | positive integer interval for stdout CloudWatch EMF JSON Lines |
 | `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS` | empty | `cmd/riido_ai_server` | comma-separated exact `http://` or `https://` browser origins allowed to call the public HTTP API with CORS preflight support |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` | `false` | `cmd/riido_ai_server` | enables the mock AI Agent client API backed by synthetic in-memory data |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL` | empty | `cmd/riido_ai_server` | existing Riido API server base URL used for server-to-server task context lookup |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID` | empty | `cmd/riido_ai_server` | workspace id used in the existing API server task context path |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID` | empty | `cmd/riido_ai_server` | team id used in the existing API server task context path |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY` | empty | `cmd/riido_ai_server` | existing API server Open API key sent as `X-Workspace-Api-Key`; secret, server-only |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS` | task-context client default when unset | `cmd/riido_ai_server` | positive integer timeout override for task context lookup requests |
 
 All JSON env vars are decoded with unknown-field rejection and trailing-data
 rejection. Empty values disable the optional feature rather than selecting a
@@ -33,6 +38,12 @@ still requires the bearer-token authorization rules owned by
 `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` is a temporary testnet/review switch. It
 does not enable unauthenticated access; all AI Agent client endpoints still
 require bearer scopes.
+
+The task-context base URL, workspace id, team id, and workspace API key must be
+set together. If only part of the group is set, the server fails during startup.
+The workspace API key is never a generated client token; frontend clients should
+continue using the AI Agent SaaS bearer header defined in the generated API
+surface.
 
 ## Non-Config Facts
 

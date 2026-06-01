@@ -111,6 +111,66 @@ func TestConfigFromEnvParsesAIAgentClientMockFlag(t *testing.T) {
 	}
 }
 
+func TestConfigFromEnvParsesTaskContextReader(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	var gotPath string
+	var gotAPIKey string
+	taskContextServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		gotAPIKey = r.Header.Get(riidoaiserver.AIAgentTaskContextHeaderWorkspaceAPIKey)
+		_ = json.NewEncoder(w).Encode(riidoaiserver.AIAgentTaskContext{
+			Component: riidoaiserver.AIAgentTaskContextComponent{
+				ID:         "component-a",
+				Title:      "Task context from existing API server",
+				BranchName: "RIID-4800-server-task-context-http-client-assignment-prompt-wiring",
+			},
+			Document: riidoaiserver.AIAgentTaskContextDocument{
+				Content:       "Existing API server document markdown.",
+				ContentFormat: "markdown",
+			},
+			Hierarchy:    riidoaiserver.AIAgentTaskContextHierarchy{},
+			Repositories: []riidoaiserver.AIAgentTaskContextRepository{},
+		})
+	}))
+	defer taskContextServer.Close()
+
+	t.Setenv(envTaskContextBaseURL, taskContextServer.URL)
+	t.Setenv(envTaskContextWorkspaceID, "workspace-a")
+	t.Setenv(envTaskContextTeamID, "RIID")
+	t.Setenv(envTaskContextAPIKey, "workspace-key")
+	t.Setenv(envTaskContextTimeout, "1")
+
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	if config.TaskContextReader == nil {
+		t.Fatal("task context reader missing")
+	}
+	contextSnapshot, err := config.TaskContextReader.GetAIAgentTaskContext(context.Background(), "component-a")
+	if err != nil {
+		t.Fatalf("GetAIAgentTaskContext: %v", err)
+	}
+	if gotPath != "/workspaces/workspace-a/open-api/v1/teams/RIID/components/component-a/ai-agent-context" {
+		t.Fatalf("task context path = %q", gotPath)
+	}
+	if gotAPIKey != "workspace-key" {
+		t.Fatalf("task context api key = %q", gotAPIKey)
+	}
+	if contextSnapshot.Component.BranchName != "RIID-4800-server-task-context-http-client-assignment-prompt-wiring" {
+		t.Fatalf("task context snapshot = %+v", contextSnapshot)
+	}
+}
+
+func TestConfigFromEnvRejectsPartialTaskContextConfig(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envTaskContextBaseURL, "https://api.riido.io")
+
+	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envTaskContextWorkspaceID) {
+		t.Fatalf("configFromEnv err=%v", err)
+	}
+}
+
 func TestConfigFromEnvRejectsInvalidAIAgentClientMockFlag(t *testing.T) {
 	clearRiidoAIServerEnv(t)
 	t.Setenv(envAIAgentClientMock, "sometimes")
@@ -344,6 +404,11 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envMetricsLogInterval,
 		envWebAllowedOrigins,
 		envAIAgentClientMock,
+		envTaskContextBaseURL,
+		envTaskContextWorkspaceID,
+		envTaskContextTeamID,
+		envTaskContextAPIKey,
+		envTaskContextTimeout,
 	} {
 		t.Setenv(key, "")
 	}

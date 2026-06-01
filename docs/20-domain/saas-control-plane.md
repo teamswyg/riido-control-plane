@@ -119,12 +119,21 @@ repository selection rule. It does not own:
   markdown conversion
 - daemon/provider-specific placement of `Assignment.prompt` versus
   `Assignment.agent_instruction`
-- production secret names for server-to-server calls
 
-If task context lookup is unavailable in the production wiring path, assignment
-must fail before daemon polling can lease provider work. Mock-only frontend
-development may still use deterministic synthetic thread responses, but those
-responses are not evidence that a daemon assignment prompt exists.
+> Riido task: RIID-4800 `server task context http client assignment prompt wiring`
+
+The production wiring path uses the existing API server's Open API task context
+endpoint as a server-to-server read. When `POST
+/v1/component-tasks/{task_id}/assignment` receives an empty
+`AssignRequest.prompt` and a task-context reader is configured, control-plane
+looks up the context by `component_id` or the path `task_id`, decodes the
+existing API server's camelCase response, composes `AssignRequest.prompt`, and
+then calls the assignment store. If lookup or composition fails, the HTTP
+handler returns `502` before a daemon can lease provider work.
+
+Mock-only frontend development may still use deterministic synthetic thread
+responses, but those responses are not evidence that a daemon assignment prompt
+exists.
 
 The control-plane-local DTO surface is:
 
@@ -343,6 +352,11 @@ public repository. It owns only these environment variables:
 - `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`
 - `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`
 - `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK`
+- `RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL`
+- `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID`
+- `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID`
+- `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY`
+- `RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS`
 
 The agent binding and static-token JSON values use strict decoding, so unknown
 fields and trailing JSON are rejected. Static-token authorization may be
@@ -357,6 +371,12 @@ repository.
 
 `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` enables only the temporary AI Agent
 client mock API described in [`ai-agent-client-api.md`](ai-agent-client-api.md).
+
+The task-context variables configure the production server-to-server read from
+the existing Riido API server. The base URL, workspace id, team id, and
+workspace API key must be set together. The API key is sent only as
+`X-Workspace-Api-Key`; it is not a browser/client token and must not be exposed
+to generated frontend clients.
 
 This boundary does not own legacy broad bearer-token compatibility,
 snapshot/outbox stores, durable operation save/claim wiring, DynamoDB,

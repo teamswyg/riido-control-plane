@@ -23,36 +23,36 @@ type AIAgentTaskContext struct {
 
 type AIAgentTaskContextComponent struct {
 	ID            string `json:"id"`
-	ComponentType string `json:"component_type,omitempty"`
+	ComponentType string `json:"componentType,omitempty"`
 	Title         string `json:"title"`
-	KeyNumber     int    `json:"key_number,omitempty"`
-	BranchName    string `json:"branch_name,omitempty"`
+	KeyNumber     string `json:"keyNumber,omitempty"`
+	BranchName    string `json:"branchName,omitempty"`
 }
 
 type AIAgentTaskContextDocument struct {
 	ID               string `json:"id,omitempty"`
-	TiptapDocumentID string `json:"tiptap_document_id,omitempty"`
+	TiptapDocumentID string `json:"tiptapDocumentId,omitempty"`
 	Content          string `json:"content"`
-	ContentFormat    string `json:"content_format,omitempty"`
+	ContentFormat    string `json:"contentFormat,omitempty"`
 }
 
 type AIAgentTaskContextHierarchy struct {
 	Project    AIAgentTaskContextReference `json:"project,omitempty"`
 	Milestone  AIAgentTaskContextReference `json:"milestone,omitempty"`
-	ParentTask AIAgentTaskContextReference `json:"parent_task,omitempty"`
+	ParentTask AIAgentTaskContextReference `json:"parentTask,omitempty"`
 }
 
 type AIAgentTaskContextReference struct {
 	ID        string `json:"id,omitempty"`
 	Title     string `json:"title,omitempty"`
-	KeyNumber int    `json:"key_number,omitempty"`
+	KeyNumber string `json:"keyNumber,omitempty"`
 }
 
 type AIAgentTaskContextRepository struct {
 	ID            string `json:"id,omitempty"`
-	FullName      string `json:"full_name,omitempty"`
-	IsPrivate     bool   `json:"is_private,omitempty"`
-	RepositoryURL string `json:"repository_url,omitempty"`
+	FullName      string `json:"fullName,omitempty"`
+	IsPrivate     bool   `json:"isPrivate,omitempty"`
+	RepositoryURL string `json:"repositoryUrl,omitempty"`
 	Source        string `json:"source,omitempty"`
 }
 
@@ -96,8 +96,8 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	writePromptLine(&builder, "task_id", taskID)
 	writePromptLine(&builder, "component_id", component.ID)
 	writePromptLine(&builder, "component_type", component.ComponentType)
-	if component.KeyNumber > 0 {
-		writePromptLine(&builder, "key_number", fmt.Sprintf("%d", component.KeyNumber))
+	if component.KeyNumber != "" {
+		writePromptLine(&builder, "key_number", component.KeyNumber)
 	}
 	writePromptLine(&builder, "title", component.Title)
 	writePromptLine(&builder, "branch_name", component.BranchName)
@@ -184,6 +184,7 @@ func normalizeAIAgentTaskContextComponent(component AIAgentTaskContextComponent)
 	component.ID = strings.TrimSpace(component.ID)
 	component.ComponentType = strings.TrimSpace(component.ComponentType)
 	component.Title = strings.TrimSpace(component.Title)
+	component.KeyNumber = strings.TrimSpace(component.KeyNumber)
 	component.BranchName = strings.TrimSpace(component.BranchName)
 	return component
 }
@@ -206,6 +207,7 @@ func normalizeAIAgentTaskContextHierarchy(hierarchy AIAgentTaskContextHierarchy)
 func normalizeAIAgentTaskContextReference(reference AIAgentTaskContextReference) AIAgentTaskContextReference {
 	reference.ID = strings.TrimSpace(reference.ID)
 	reference.Title = strings.TrimSpace(reference.Title)
+	reference.KeyNumber = strings.TrimSpace(reference.KeyNumber)
 	return reference
 }
 
@@ -223,11 +225,19 @@ func writePromptLine(builder *strings.Builder, key, value string) {
 
 func writePromptReference(builder *strings.Builder, key string, reference AIAgentTaskContextReference) {
 	value := strings.TrimSpace(reference.Title)
-	if reference.KeyNumber > 0 {
-		value = fmt.Sprintf("RIID-%d %s", reference.KeyNumber, value)
+	if reference.KeyNumber != "" {
+		value = fmt.Sprintf("%s %s", formatTaskContextKeyNumber(reference.KeyNumber), value)
 	}
 	if value == "" {
 		value = reference.ID
 	}
 	writePromptLine(builder, key, value)
+}
+
+func formatTaskContextKeyNumber(keyNumber string) string {
+	keyNumber = strings.TrimSpace(keyNumber)
+	if keyNumber == "" || strings.HasPrefix(keyNumber, "RIID-") {
+		return keyNumber
+	}
+	return "RIID-" + keyNumber
 }

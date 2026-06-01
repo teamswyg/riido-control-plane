@@ -30,6 +30,11 @@ const (
 	envMetricsLogInterval     = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
 	envWebAllowedOrigins      = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
 	envAIAgentClientMock      = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK"
+	envTaskContextBaseURL     = "RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL"
+	envTaskContextWorkspaceID = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID"
+	envTaskContextTeamID      = "RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID"
+	envTaskContextAPIKey      = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY"
+	envTaskContextTimeout     = "RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS"
 )
 
 type runtimeConfig struct {
@@ -41,6 +46,7 @@ type runtimeConfig struct {
 	MetricsLogInterval time.Duration
 	WebAllowedOrigins  []string
 	AIAgentClientMock  bool
+	TaskContextReader  riidoaiserver.AIAgentTaskContextReader
 }
 
 func main() {
@@ -68,7 +74,7 @@ func run() error {
 	}
 	server := &http.Server{
 		Addr:              config.Addr,
-		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins}).Handler(),
+		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, TaskContext: config.TaskContextReader, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins}).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	metricsCancel, metricsErrCh := startMetricsPublisher(store, config.MetricsLogInterval, os.Stdout)
@@ -105,6 +111,10 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	taskContextReader, err := taskContextReaderFromEnv()
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	return runtimeConfig{
 		Addr:               getenvDefault(envAddr, ":8080"),
 		ShutdownTimeout:    shutdownTimeout,
@@ -114,6 +124,7 @@ func configFromEnv() (runtimeConfig, error) {
 		MetricsLogInterval: metricsLogInterval,
 		WebAllowedOrigins:  webAllowedOrigins,
 		AIAgentClientMock:  aiAgentClientMock,
+		TaskContextReader:  taskContextReader,
 	}, nil
 }
 
@@ -208,6 +219,35 @@ func envOptionalBool(key string) (bool, error) {
 
 func webAllowedOriginsFromEnv() ([]string, error) {
 	return parseWebAllowedOrigins(os.Getenv(envWebAllowedOrigins))
+}
+
+func taskContextReaderFromEnv() (riidoaiserver.AIAgentTaskContextReader, error) {
+	baseURL := strings.TrimSpace(os.Getenv(envTaskContextBaseURL))
+	workspaceID := strings.TrimSpace(os.Getenv(envTaskContextWorkspaceID))
+	teamID := strings.TrimSpace(os.Getenv(envTaskContextTeamID))
+	apiKey := strings.TrimSpace(os.Getenv(envTaskContextAPIKey))
+	timeoutRaw := strings.TrimSpace(os.Getenv(envTaskContextTimeout))
+	if baseURL == "" && workspaceID == "" && teamID == "" && apiKey == "" && timeoutRaw == "" {
+		return nil, nil
+	}
+	if baseURL == "" || workspaceID == "" || teamID == "" || apiKey == "" {
+		return nil, fmt.Errorf("%s, %s, %s, and %s must be set together", envTaskContextBaseURL, envTaskContextWorkspaceID, envTaskContextTeamID, envTaskContextAPIKey)
+	}
+	timeout, err := envDurationSeconds(envTaskContextTimeout, 0)
+	if err != nil {
+		return nil, err
+	}
+	client, err := riidoaiserver.NewAIAgentTaskContextClient(riidoaiserver.AIAgentTaskContextClientConfig{
+		BaseURL:         baseURL,
+		WorkspaceID:     workspaceID,
+		TeamID:          teamID,
+		WorkspaceAPIKey: apiKey,
+		Timeout:         timeout,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", envTaskContextBaseURL, err)
+	}
+	return client, nil
 }
 
 func parseWebAllowedOrigins(raw string) ([]string, error) {

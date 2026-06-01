@@ -2,7 +2,9 @@ package riidoaiserver
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -114,6 +116,68 @@ func TestHTTPAssignmentRejectsUnknownPrivateFields(t *testing.T) {
 	}
 }
 
+func TestHTTPAssignmentComposesPromptFromTaskContext(t *testing.T) {
+	store := NewStore()
+	defer store.Close()
+	taskContext := &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()}
+	server := NewServer(ServerConfig{
+		Assignment:  store,
+		TaskContext: taskContext,
+		Authorizer:  assignmentHTTPAuthorizer(t, []string{"component-task:task-a:assign"}),
+	}).Handler()
+
+	req := httptest.NewRequest(http.MethodPost, "/v1/component-tasks/task-a/assignment", strings.NewReader(`{"component_id":"component-a","agent_id":"agent-a","runtime_provider":"codex"}`))
+	req.Header.Set("Authorization", "Bearer assignment-token")
+	resp := httptest.NewRecorder()
+	server.ServeHTTP(resp, req)
+	if resp.Code != http.StatusOK {
+		t.Fatalf("assign status=%d body=%s", resp.Code, resp.Body.String())
+	}
+	var out struct {
+		SchemaVersion string     `json:"schema_version"`
+		Assignment    Assignment `json:"assignment"`
+	}
+	if err := json.Unmarshal(resp.Body.Bytes(), &out); err != nil {
+		t.Fatalf("assign json: %v", err)
+	}
+	if got, want := taskContext.componentIDs, []string{"component-a"}; !sameStrings(got, want) {
+		t.Fatalf("task context component ids = %v, want %v", got, want)
+	}
+	if out.Assignment.ComponentID != "component-a" {
+		t.Fatalf("component id = %q", out.Assignment.ComponentID)
+	}
+	for _, want := range []string{
+		"# Riido AI Agent Assignment",
+		"branch_name: RIID-4800-server-task-context-http-client-assignment-prompt-wiring",
+		"full_name: teamswyg/riido-control-plane",
+	} {
+		if !strings.Contains(out.Assignment.Prompt, want) {
+			t.Fatalf("assignment prompt missing %q:\n%s", want, out.Assignment.Prompt)
+		}
+	}
+}
+
+func TestHTTPAssignmentTaskContextFailureFailsClosed(t *testing.T) {
+	store := NewStore()
+	defer store.Close()
+	server := NewServer(ServerConfig{
+		Assignment:  store,
+		TaskContext: &assignmentHTTPTaskContextReader{err: errors.New("task context unavailable")},
+		Authorizer:  assignmentHTTPAuthorizer(t, []string{"component-task:task-a:assign"}),
+	}).Handler()
+
+	req := httptest.NewRequest(http.MethodPost, "/v1/component-tasks/task-a/assignment", strings.NewReader(`{"component_id":"component-a","agent_id":"agent-a","runtime_provider":"codex"}`))
+	req.Header.Set("Authorization", "Bearer assignment-token")
+	resp := httptest.NewRecorder()
+	server.ServeHTTP(resp, req)
+	if resp.Code != http.StatusBadGateway {
+		t.Fatalf("assign status=%d body=%s", resp.Code, resp.Body.String())
+	}
+	if strings.Contains(resp.Body.String(), "prompt is required") {
+		t.Fatalf("should fail on task context before assignment store: %s", resp.Body.String())
+	}
+}
+
 func TestHTTPAssignmentStoreNotConfiguredFailsClosed(t *testing.T) {
 	server := NewServer(ServerConfig{Authorizer: assignmentHTTPAuthorizer(t, []string{"component-task:task-a:assign"})}).Handler()
 
@@ -137,4 +201,21 @@ func assignmentHTTPAuthorizer(t *testing.T, scopes []string) RequestAuthorizer {
 		t.Fatalf("NewStaticTokenAuthorizer: %v", err)
 	}
 	return authorizer
+}
+
+type assignmentHTTPTaskContextReader struct {
+	contextSnapshot AIAgentTaskContext
+	err             error
+	componentIDs    []string
+}
+
+func (r *assignmentHTTPTaskContextReader) GetAIAgentTaskContext(ctx context.Context, componentID string) (AIAgentTaskContext, error) {
+	if err := ctx.Err(); err != nil {
+		return AIAgentTaskContext{}, err
+	}
+	r.componentIDs = append(r.componentIDs, componentID)
+	if r.err != nil {
+		return AIAgentTaskContext{}, r.err
+	}
+	return r.contextSnapshot, nil
 }
