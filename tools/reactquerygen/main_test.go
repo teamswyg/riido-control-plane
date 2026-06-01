@@ -61,6 +61,8 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"export type AgentTaskCommentKind",
 		"export type RiidoQueryOptions",
 		"export type RiidoMutationOptions",
+		"aiAgentToken: string",
+		"'X-Riido-AI-Agent-Token': config.aiAgentToken",
 		"/v1/client/ai-agent/tasks/${params.task_id}/assignable-agents",
 		"export function listAIAgentTaskThreadsQueryOptions",
 		"/v1/client/ai-agent/tasks/${params.task_id}/threads",

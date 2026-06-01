@@ -317,9 +317,11 @@ func writeCoreRuntime(b *strings.Builder) {
 	writeJSDoc(b,
 		"control-plane 호출에 필요한 기본 설정입니다.",
 		"`baseUrl`은 예: `http://ai-api.riido.io`처럼 마지막 슬래시 없이 전달해도 됩니다.",
+		"`aiAgentToken`은 기존 Riido 앱 로그인 토큰과 구분되는 AI Agent SaaS 전용 토큰입니다.",
+		"요청에는 `X-Riido-AI-Agent-Token` 헤더로 전달됩니다.",
 		"`fetcher`는 테스트나 앱 공통 transport 래핑이 필요할 때만 주입합니다.",
 	)
-	b.WriteString("export interface RiidoClientConfig {\n  baseUrl: string;\n  token: string;\n  fetcher?: RiidoFetcher;\n}\n\n")
+	b.WriteString("export interface RiidoClientConfig {\n  baseUrl: string;\n  aiAgentToken: string;\n  fetcher?: RiidoFetcher;\n}\n\n")
 	writeJSDoc(b, "요청 단위로 전달할 수 있는 옵션입니다. 현재는 AbortSignal만 전달합니다.")
 	b.WriteString("export interface RiidoRequestOptions {\n  signal?: AbortSignal;\n}\n\n")
 	writeJSDoc(b, "React Query query option에 Riido 요청 옵션을 함께 전달하기 위한 타입입니다.")
@@ -329,13 +331,13 @@ func writeCoreRuntime(b *strings.Builder) {
 	b.WriteString("async function riidoRequest<T>(config: RiidoClientConfig, path: string, init: RequestInit = {}): Promise<T> {\n")
 	b.WriteString("  const fetcher = config.fetcher ?? fetch;\n")
 	b.WriteString("  const response = await fetcher(`${config.baseUrl.replace(/\\/$/, '')}${path}`, {\n")
-	b.WriteString("    ...init,\n    headers: {\n      Accept: 'application/json',\n      Authorization: `Bearer ${config.token}`,\n      ...(init.body ? { 'Content-Type': 'application/json' } : {}),\n      ...init.headers,\n    },\n  });\n")
+	b.WriteString("    ...init,\n    headers: {\n      Accept: 'application/json',\n      'X-Riido-AI-Agent-Token': config.aiAgentToken,\n      ...(init.body ? { 'Content-Type': 'application/json' } : {}),\n      ...init.headers,\n    },\n  });\n")
 	b.WriteString("  if (!response.ok) {\n    throw new Error(`Riido API ${response.status}: ${await response.text()}`);\n  }\n")
 	b.WriteString("  return response.json() as Promise<T>;\n}\n\n")
 	b.WriteString("async function riidoRawRequest(config: RiidoClientConfig, path: string, init: RequestInit = {}): Promise<Response> {\n")
 	b.WriteString("  const fetcher = config.fetcher ?? fetch;\n")
 	b.WriteString("  const response = await fetcher(`${config.baseUrl.replace(/\\/$/, '')}${path}`, {\n")
-	b.WriteString("    ...init,\n    headers: {\n      Authorization: `Bearer ${config.token}`,\n      ...init.headers,\n    },\n  });\n")
+	b.WriteString("    ...init,\n    headers: {\n      'X-Riido-AI-Agent-Token': config.aiAgentToken,\n      ...init.headers,\n    },\n  });\n")
 	b.WriteString("  if (!response.ok) {\n    throw new Error(`Riido API ${response.status}: ${await response.text()}`);\n  }\n")
 	b.WriteString("  return response;\n}\n\n")
 }
@@ -703,7 +705,7 @@ func writeReactFacade(b *strings.Builder, ops []routeOperation) error {
 		"hook은 반드시 `@/lib/react-query`를 통과하므로 riido-client의 workspace/demo 정책을 우회하지 않습니다.",
 	)
 	b.WriteString("export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): RiidoControlPlaneReactClient {\n")
-	b.WriteString("  const coreClient = useMemo(() => core.createRiidoControlPlaneClient(config), [config.baseUrl, config.fetcher, config.token]);\n\n")
+	b.WriteString("  const coreClient = useMemo(() => core.createRiidoControlPlaneClient(config), [config.baseUrl, config.fetcher, config.aiAgentToken]);\n\n")
 	b.WriteString("  return useMemo(\n")
 	b.WriteString("    () => ({\n")
 	writeReactFacadeChildren(b, root, nil, "      ")

@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const aiAgentTokenHeader = "X-Riido-AI-Agent-Token"
+
 type ServerConfig struct {
 	Authorizer        RequestAuthorizer
 	AgentCatalogStore AgentCatalogStore
@@ -978,7 +980,7 @@ func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req Aut
 		writeError(w, http.StatusServiceUnavailable, "scoped request authorizer is not configured")
 		return AuthorizationResult{}, false
 	}
-	token, ok := bearerToken(r)
+	token, ok := requestToken(r)
 	if !ok {
 		writeUnauthorized(w)
 		return AuthorizationResult{}, false
@@ -998,7 +1000,10 @@ func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req Aut
 	return result, true
 }
 
-func bearerToken(r *http.Request) (string, bool) {
+func requestToken(r *http.Request) (string, bool) {
+	if token := strings.TrimSpace(r.Header.Get(aiAgentTokenHeader)); token != "" {
+		return token, true
+	}
 	got := strings.TrimSpace(r.Header.Get("Authorization"))
 	if !strings.HasPrefix(got, "Bearer ") {
 		return "", false
