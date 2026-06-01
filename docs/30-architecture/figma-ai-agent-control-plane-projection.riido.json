@@ -7,13 +7,129 @@
     "path": "docs/30-architecture/figma-ai-agent-coverage.riido.json",
     "schema_version": "riido-figma-ai-agent-coverage.v1",
     "id": "figma-v1-22-ai-agent-ui-coverage",
-    "stabilized_by": ["teamswyg/riido-contracts#38", "teamswyg/riido-contracts#39", "teamswyg/riido-contracts#45", "teamswyg/riido-contracts#46"]
+    "stabilized_by": ["teamswyg/riido-contracts#38", "teamswyg/riido-contracts#39", "teamswyg/riido-contracts#45", "teamswyg/riido-contracts#46", "teamswyg/riido-contracts#51"]
   },
   "projection_policy": {
     "summary": "Control-plane does not own the Figma top-level coverage SSOT. It only projects the coverage entries that require HTTP/SSE/OpenAPI/generated-client behavior.",
     "top_down": "When contracts coverage adds or changes required generated paths, update the control-plane API DSL/OpenAPI/generated client and this projection gate together.",
     "bottom_up": "When control-plane implementation discovers a path, cache, stream, or endpoint contradiction, fix local projection if the meaning is local; escalate to contracts if Figma coverage or business policy is wrong."
   },
+  "legacy_non_ui_absorptions": [
+    {
+      "node_id": "13:3789",
+      "name": "런타임",
+      "projection_status": "absorbed_by_current_ui_generated_client",
+      "source_coverage_status": "covered",
+      "absorbed_by_top_level_node_id": "162:23090",
+      "local_scope": "Legacy runtime list frame is projected through the current runtime settings generated client surface.",
+      "required_generated_paths": [
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.devices.runtimes"
+      ]
+    },
+    {
+      "node_id": "86:9988",
+      "name": "런타임",
+      "projection_status": "absorbed_by_current_ui_generated_client",
+      "source_coverage_status": "covered",
+      "absorbed_by_top_level_node_id": "162:23090",
+      "local_scope": "Expanded legacy runtime frame is projected through runtime settings and agent-bound daemon detail.",
+      "required_generated_paths": [
+        "aiAgent.devices.runtimes",
+        "aiAgent.agents.daemon.details",
+        "v2.aiAgent.devices.runtimes",
+        "v2.aiAgent.agents.daemon.details"
+      ]
+    },
+    {
+      "node_id": "17:3551",
+      "name": "에이전트",
+      "projection_status": "absorbed_by_current_ui_generated_client",
+      "source_coverage_status": "covered",
+      "absorbed_by_top_level_node_id": "432:37336",
+      "local_scope": "Legacy agent list frame is projected through the current agent settings lifecycle generated client surface.",
+      "required_generated_paths": [
+        "aiAgent.bootstrap",
+        "aiAgent.agents.create",
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.delete",
+        "aiAgent.agents.editability",
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.bootstrap",
+        "v2.aiAgent.agents.create",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.delete",
+        "v2.aiAgent.agents.editability",
+        "v2.aiAgent.devices.runtimes"
+      ]
+    },
+    {
+      "node_id": "17:4231",
+      "name": "에이전트 수정",
+      "projection_status": "absorbed_by_current_ui_generated_client",
+      "source_coverage_status": "covered",
+      "absorbed_by_top_level_node_id": "432:37336",
+      "local_scope": "Legacy agent edit frame is projected through updateConfiguration, editability, and runtime candidate reads.",
+      "required_generated_paths": [
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.editability",
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.editability",
+        "v2.aiAgent.devices.runtimes"
+      ]
+    },
+    {
+      "node_id": "84:9846",
+      "name": "에이전트 추가",
+      "projection_status": "absorbed_by_current_ui_generated_client",
+      "source_coverage_status": "covered",
+      "absorbed_by_top_level_node_id": "432:37336",
+      "local_scope": "Legacy agent add frame is projected through ordinary direct agent create and runtime candidate reads.",
+      "required_generated_paths": [
+        "aiAgent.bootstrap",
+        "aiAgent.agents.create",
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.bootstrap",
+        "v2.aiAgent.agents.create",
+        "v2.aiAgent.devices.runtimes"
+      ]
+    },
+    {
+      "node_id": "17:2871",
+      "name": "데몬 상세",
+      "projection_status": "absorbed_by_current_ui_generated_client",
+      "source_coverage_status": "covered",
+      "absorbed_by_top_level_node_id": "162:23090",
+      "local_scope": "Legacy daemon detail frame is projected through the current agent-bound daemon detail/command generated paths.",
+      "required_generated_paths": [
+        "aiAgent.agents.daemon.details",
+        "aiAgent.agents.daemon.start",
+        "aiAgent.agents.daemon.restart",
+        "aiAgent.agents.daemon.stop",
+        "aiAgent.events.stream",
+        "v2.aiAgent.agents.daemon.details",
+        "v2.aiAgent.agents.daemon.start",
+        "v2.aiAgent.agents.daemon.restart",
+        "v2.aiAgent.agents.daemon.stop",
+        "v2.aiAgent.events.stream"
+      ]
+    },
+    {
+      "node_id": "17:3111",
+      "name": "런타임 상세",
+      "projection_status": "absorbed_by_current_ui_generated_client",
+      "source_coverage_status": "covered",
+      "absorbed_by_top_level_node_id": "162:23090",
+      "local_scope": "Legacy runtime detail frame is projected through device/runtime reads and agent-bound daemon detail.",
+      "required_generated_paths": [
+        "aiAgent.devices.runtimes",
+        "aiAgent.agents.daemon.details",
+        "v2.aiAgent.devices.runtimes",
+        "v2.aiAgent.agents.daemon.details"
+      ]
+    }
+  ],
   "entries": [
     {
       "node_id": "153:12742",

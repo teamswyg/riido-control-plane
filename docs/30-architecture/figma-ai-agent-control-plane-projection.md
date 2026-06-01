@@ -21,7 +21,10 @@ It is copied from `riido-contracts` only so this repository can prove its
 projection does not ask for generated paths that upstream coverage did not
 name. The mirror also carries the upstream page registry and non-UI top-level
 wireframe evidence so this repository can prove it is consuming the whole-file
-coverage map, not only the primary `UI` page.
+coverage map, not only the primary `UI` page. Legacy non-UI Wireframe nodes
+that carry current product/API meaning are projected as absorptions, not as new
+endpoints. Each one points back to the current UI top-level node that already
+owns the generated-client surface.
 
 The mirrored page registry keeps the contracts-owned inspection method:
 `figma.root.children` from the Figma Plugin API is the page registry authority,
@@ -95,6 +98,23 @@ control-plane implementation finding
 | `275:22731` | 런타임 설정페이지 엠티 | generated client covered |
 | `432:37336` | 에이전트 설정페이지 | generated client covered |
 
+## Legacy Non-UI Absorptions
+
+These nodes come from page `0:1` (`Wireframe`). The upstream contracts coverage
+marks them as covered because they are meaningful, but the control-plane
+projection does not create a second route family for them. They inherit the
+generated paths from the current UI section named in the last column.
+
+| Legacy Figma node | Section | Absorbed by current UI node | Control-plane projection |
+| --- | --- | --- | --- |
+| `13:3789` | 런타임 | `162:23090` 런타임 설정페이지 | `aiAgent.devices.runtimes`, `v2.aiAgent.devices.runtimes` |
+| `86:9988` | 런타임 | `162:23090` 런타임 설정페이지 | device/runtime read plus agent-bound daemon detail |
+| `17:3551` | 에이전트 | `432:37336` 에이전트 설정페이지 | bootstrap, agent lifecycle, editability, and runtime candidate paths |
+| `17:4231` | 에이전트 수정 | `432:37336` 에이전트 설정페이지 | `agents.updateConfiguration`, `agents.editability`, and runtime candidate paths |
+| `84:9846` | 에이전트 추가 | `432:37336` 에이전트 설정페이지 | direct `agents.create`, bootstrap, and runtime candidate paths |
+| `17:2871` | 데몬 상세 | `162:23090` 런타임 설정페이지 | agent-bound daemon detail/start/restart/stop and event stream paths |
+| `17:3111` | 런타임 상세 | `162:23090` 런타임 설정페이지 | device/runtime read plus agent-bound daemon detail |
+
 ## Important Boundaries
 
 - The menu section can mention route consumption, but it must not create an API
@@ -138,8 +158,8 @@ The test catches these drift classes:
 - the local projection manifest requires a generated path that the mirrored
   contracts Figma coverage did not name for the same node;
 - the mirrored contracts coverage no longer records the three inspected Figma
-  pages, the four non-UI top-level coverage evidence nodes, or the loaded
-  non-UI top-level inventory;
+  pages, the eleven non-UI top-level coverage evidence nodes, the seven legacy
+  semantic Wireframe absorptions, or the loaded non-UI top-level inventory;
 - the mirrored contracts coverage loses the Figma Plugin API inspection method
   that owns page registry and child-count evidence;
 - the mirrored contracts coverage loses `클라이언트 전달` annotation
