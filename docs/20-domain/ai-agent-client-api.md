@@ -78,6 +78,14 @@ For agent settings:
   `Assignment.agent_instruction` when a task assignment is created. That value is
   an assignment-time snapshot, so later agent edits do not mutate queued or
   running assignments.
+- `riido-control-plane` also owns the provider-neutral assignment prompt
+  composer. Client-facing assignment requests keep only `agent_id`; task title,
+  document markdown, branch name, hierarchy, and repository candidates are read
+  from the server-side task context snapshot and composed into
+  `Assignment.prompt`.
+- The existing Riido API server owns the read-only task context endpoint used by
+  the composer. This AI Agent client API does not add task body, branch, or
+  repository fields to generated client assignment requests.
 - `riido-daemon` owns runtime consumption of `Assignment.agent_instruction`;
   this server doc does not define provider prompt placement.
 - `riido-infra` owns deployment/storage changes only when the API requires new
@@ -110,6 +118,10 @@ For agent settings:
   `comment_kind=assignment_started` unless the agent is busy; unassign maps
   participant removal to `stopped_by_user_request`. Hiding stopped rows remains
   client presentation.
+- `riido.aiAgent.tasks.assign` intentionally does not accept task body, branch
+  name, repository, or instruction fields. Those values are server-owned
+  assignment snapshots, so frontend code cannot accidentally diverge from the
+  daemon prompt context by constructing its own prompt.
 - Figma still labels the task input as "댓글", but this repository treats the
   AI-Agent-directed user input as a task-thread message. The canonical generated
   command is `riido.aiAgent.tasks.threadMessages.create`, backed by
