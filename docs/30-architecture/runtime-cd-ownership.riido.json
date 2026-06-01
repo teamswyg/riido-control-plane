@@ -2,7 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
-  "hardening_tasks": ["RIID-4833"],
+  "hardening_tasks": ["RIID-4833", "RIID-4835"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -166,6 +166,43 @@
       "image digests or image URIs",
       "smoke response payloads",
       "smoke replay temp files"
+    ]
+  },
+  "public_export_contract": {
+    "riido_task": "RIID-4835",
+    "canonical_owner": "riido-control-plane",
+    "infra_awareness_owner": "riido-infra",
+    "allowed_public_exports": [
+      "workflow file names and non-live behavior descriptions",
+      "stable GitHub secret and variable key names",
+      "stable infra output key names that operators map into GitHub environment variables",
+      "control-plane git tag or commit identifiers",
+      "aggregate pass or fail status without live payload values"
+    ],
+    "forbidden_public_exports": [
+      "live deployment URLs",
+      "AWS account IDs",
+      "ARNs",
+      "image URIs or digests",
+      "ECS task-definition ARNs or revision numbers",
+      "ECS task-definition JSON",
+      "CodeDeploy AppSpec JSON",
+      "CodeDeploy create-deployment request JSON",
+      "CodeDeploy deployment IDs",
+      "smoke request or response payloads",
+      "Terraform plan output, state, tfvars, apply logs, or raw operator evidence"
+    ],
+    "infra_must_consume_only": [
+      "stable output names",
+      "redaction categories",
+      "operator evidence summaries stored outside public repositories",
+      "GitHub environment values configured out of band"
+    ],
+    "workflow_must_not_use": [
+      "actions/upload-artifact for live deployment payloads",
+      "GITHUB_OUTPUT for live deployment values",
+      "workflow_dispatch inputs for live URLs",
+      "cross-workflow handoff for live deployment values"
     ]
   },
   "dependency_direction": {
