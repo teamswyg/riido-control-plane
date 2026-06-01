@@ -2,11 +2,6 @@ name: ai-agent-client-testnet-smoke
 
 on:
   workflow_dispatch:
-    inputs:
-      base_url:
-        description: "Optional AI Agent testnet base URL. Falls back to RIIDO_AI_SERVER_TESTNET_BASE_URL repository variable."
-        required: false
-        type: string
 
 concurrency:
   group: ai-agent-client-testnet-smoke
@@ -17,19 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      TESTNET_BASE_URL: ${{ inputs.base_url || vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
+      TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
       TESTNET_TOKEN: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN }}
     steps:
       - name: Verify testnet configuration
         run: |
           test -n "$TESTNET_BASE_URL" || {
-            echo "RIIDO_AI_SERVER_TESTNET_BASE_URL repository variable or workflow input is required"
+            echo "RIIDO_AI_SERVER_TESTNET_BASE_URL repository variable is required"
             exit 1
           }
           test -n "$TESTNET_TOKEN" || {
             echo "RIIDO_AI_SERVER_TESTNET_TOKEN repository secret is required"
             exit 1
           }
+          echo "::add-mask::$TESTNET_BASE_URL"
+          echo "::add-mask::$TESTNET_TOKEN"
       - name: Smoke AI Agent client API
         shell: bash
         run: |

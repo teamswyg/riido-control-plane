@@ -81,6 +81,8 @@ before use. That includes image URI, ECS task-definition ARN, generated
 CodeDeploy AppSpec JSON, generated CodeDeploy request JSON, and CodeDeploy
 deployment id. Live URL overrides are not accepted as manual workflow inputs;
 the configured GitHub environment variable is the only smoke target source.
+This rule applies to both the runtime deploy workflow and the companion
+AI Agent client testnet smoke workflow.
 
 ## Drift Rule
 

@@ -621,6 +621,23 @@ Changed:
   workflow inputs, reusable step outputs, and uploaded artifacts
 - remove live host examples from generated-client comments
 
+### RIID-4824 — testnet smoke URL redaction gate
+
+This slice tightens the public redaction rule for the companion
+`ai-agent-client-testnet-smoke` workflow. CD execution still belongs to
+`riido-control-plane`, and `riido-infra` still owns topology/evidence only. The
+public smoke workflow may verify the configured testnet target, but it must not
+accept a live base URL through manual dispatch metadata.
+
+Changed:
+
+- remove the `base_url` `workflow_dispatch` input from
+  `ai-agent-client-testnet-smoke`
+- read the smoke target only from `RIIDO_AI_SERVER_TESTNET_BASE_URL`
+- mask both the smoke target and AI Agent token before issuing smoke requests
+- extend the runtime CD ownership manifest and deploy-policy gate so both
+  public workflows obey the same redaction rule
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

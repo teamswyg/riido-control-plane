@@ -85,6 +85,10 @@
     }
   ],
   "public_redaction_policy": {
+    "public_repo_workflows": [
+      ".github/workflows/deploy-ai-agent-testnet.yml",
+      ".github/workflows/ai-agent-client-testnet-smoke.yml"
+    ],
     "public_repo_may_commit": [
       "workflow file",
       "GitHub secret and variable names",

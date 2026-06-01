@@ -630,8 +630,10 @@ AWS-free.
 - `POST /v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignment`
 - `GET /v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads`
 
-The workflow reads the ALB base URL from a manual workflow input or the
-`RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable, and the AI Agent SaaS
-token from the `RIIDO_AI_SERVER_TESTNET_TOKEN` repository secret. Smoke calls
-send that value through `X-Riido-AI-Agent-Token`, matching the generated client
+The workflow reads the ALB base URL only from the
+`RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable, not from a manual
+workflow input. This keeps live URL values out of public dispatch metadata. The
+AI Agent SaaS token comes from the `RIIDO_AI_SERVER_TESTNET_TOKEN` repository
+secret. The workflow masks both values before any smoke call. Smoke calls send
+the token through `X-Riido-AI-Agent-Token`, matching the generated client
 transport.
