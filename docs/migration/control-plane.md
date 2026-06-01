@@ -519,7 +519,7 @@ This slice does:
 
 - add `.github/workflows/deploy-ai-agent-testnet.yml`
 - trigger deployment only from `v*` tags or explicit manual dispatch
-- use GitHub OIDC via `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`
+- use GitHub OIDC via the configured deploy-role secret
 - build the checked-in `riido_ai_server` container image contract
 - push an immutable ECR tag derived from the Git ref and commit SHA
 - resolve the pushed image to an ECR digest
@@ -576,12 +576,12 @@ evidence artifacts.
 
 This slice turns the CodeDeploy handoff from documentation-only into a dormant
 workflow mode while preserving the same ownership boundary. The default
-`deploy-ai-agent-testnet` path remains ECS rolling deployment. If
-`RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION` and
-`RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP` are both configured, the workflow
-uses the already-built immutable image and registered ECS task-definition
-revision to create a CodeDeploy deployment, wait for deployment success, and run
-the same AI Agent smoke checks.
+`deploy-ai-agent-testnet` path remains ECS rolling deployment. If the optional
+CodeDeploy application/deployment-group GitHub environment keys from the
+machine-readable manifest are configured together, the workflow uses the
+already-built immutable image and registered ECS task-definition revision to
+create a CodeDeploy deployment, wait for deployment success, and run the same AI
+Agent smoke checks.
 
 Changed:
 
@@ -633,7 +633,7 @@ Changed:
 
 - remove the `base_url` `workflow_dispatch` input from
   `ai-agent-client-testnet-smoke`
-- read the smoke target only from `RIIDO_AI_SERVER_TESTNET_BASE_URL`
+- read the smoke target only from the configured GitHub environment variable
 - mask both the smoke target and AI Agent token before issuing smoke requests
 - extend the runtime CD ownership manifest and deploy-policy gate so both
   public workflows obey the same redaction rule
@@ -825,6 +825,30 @@ Changed:
 This slice does not create or modify AWS resources, Terraform topology,
 GitHub environment values, live deployment execution, release evidence files,
 uploaded workflow artifacts, or generated deployment payload handoffs.
+
+### RIID-4845 — CD public key-name docs minimization ratchet
+
+This slice keeps the same ownership model: runtime artifact CD execution,
+CodeDeploy create/wait/smoke, and public workflow redaction stay in
+`riido-control-plane`; `riido-infra` owns topology, IAM, drift policy, and
+private/operator evidence. It narrows public human-readable docs so exact
+deploy/smoke key-name lists do not spread beyond the machine-readable manifest
+and the workflow files that consume them.
+
+Changed:
+
+- add RIID-4845 to `runtime-cd-ownership.riido.json` hardening tasks
+- keep the exact deploy/smoke key-name list canonical in the manifest and
+  workflow files
+- update runtime CD ownership, deployment-boundary, and migration prose to
+  describe key categories and link to the manifest instead of repeating the list
+- extend deploy-policy tests so these human-readable public docs cannot grow a
+  duplicate CD key list again
+
+This slice does not create or modify AWS resources, Terraform topology,
+GitHub environment values, live deployment execution, release evidence files,
+uploaded workflow artifacts, generated deployment payload handoffs, or workflow
+key names.
 
 ### RIID-4671 — provider status contract migration
 

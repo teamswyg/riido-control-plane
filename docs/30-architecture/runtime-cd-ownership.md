@@ -35,13 +35,13 @@ The current testnet default strategy is ECS rolling deployment by registering a
 new task definition revision and updating the ECS service. That execution
 remains in the `deploy-ai-agent-testnet` workflow.
 
-The same workflow also has a topology-gated CodeDeploy mode. When
-`RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION` and
-`RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP` are both configured, the workflow
-still builds and registers the task-definition revision itself, then creates
-CodeDeploy AppSpec content in `$RUNNER_TEMP`, creates a CodeDeploy deployment,
-waits for deployment success, and runs the same smoke checks after the
-deployment succeeds.
+The same workflow also has a topology-gated CodeDeploy mode. When the optional
+CodeDeploy application/deployment-group GitHub environment keys listed in the
+machine-readable manifest are configured together, the workflow still builds
+and registers the task-definition revision itself, then creates CodeDeploy
+AppSpec content in `$RUNNER_TEMP`, creates a CodeDeploy deployment, waits for
+deployment success, and runs the same smoke checks after the deployment
+succeeds.
 
 The ownership does not flip in that mode: `riido-control-plane` owns create /
 wait / smoke execution, while `riido-infra` owns the CodeDeploy application,
@@ -163,22 +163,19 @@ workflow outputs, uploaded artifacts, checked-in examples, or reusable inputs fo
 ## Public Config Key Minimization
 
 RIID-4839 makes the public configuration surface explicit. The public
-`riido-control-plane` workflows and docs may name only the stable GitHub
-configuration keys needed for runtime artifact CD and smoke:
+`riido-control-plane` workflows may name only the stable GitHub configuration
+keys needed for runtime artifact CD and smoke. RIID-4845 narrows the public
+human-readable docs further: exact deploy/smoke key-name lists live in the
+machine-readable
+[`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json) manifest
+and in the workflow files that consume those keys. This document describes the
+categories and ownership rule, then links to the manifest instead of repeating
+the list.
 
-- secrets: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`,
-  `RIIDO_AI_SERVER_TESTNET_TOKEN`
-- required variables: `RIIDO_AI_SERVER_AWS_REGION`,
-  `RIIDO_AI_SERVER_ECR_REPOSITORY`, `RIIDO_AI_SERVER_ECS_CLUSTER`,
-  `RIIDO_AI_SERVER_ECS_SERVICE`, `RIIDO_AI_SERVER_ECS_CONTAINER_NAME`,
-  `RIIDO_AI_SERVER_TESTNET_BASE_URL`
-- optional variables: `RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID`,
-  `RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION`,
-  `RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP`
-
-Those names are enough for operators to wire GitHub environment configuration.
-Their values, live examples, generated deploy payloads, and detailed evidence do
-not belong in this public repository. Adding another
+Those manifest-defined names are enough for operators to wire GitHub
+environment configuration. Their values, live examples, generated deploy
+payloads, and detailed evidence do not belong in this public repository. Adding
+another
 `RIIDO_AI_SERVER_*` GitHub key is a public surface change and must update
 [`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json) before the
 workflow uses it.
@@ -216,10 +213,11 @@ deployment payloads as convenience handoffs.
 
 RIID-4844 tightens the same rule by reducing repeated key-name disclosure. Broad
 public summary docs should link to this ownership SSOT instead of repeating the
-deploy/smoke key list. The canonical key list remains in this document, the
-machine-readable ownership manifest, the runtime deployment boundary, and the
-workflow files that actually consume those names. This keeps the repo usable for
-operators while making accidental key-name sprawl a deterministic test failure.
+deploy/smoke key list. RIID-4845 tightens it again: the canonical exact key list
+remains in the machine-readable ownership manifest and the workflow files that
+actually consume those names. Human-readable docs keep the repo usable for
+operators by describing categories, ownership, and the manifest location while
+making accidental key-name sprawl a deterministic test failure.
 
 ## Drift Rule
 

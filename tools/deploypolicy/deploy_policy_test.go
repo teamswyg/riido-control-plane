@@ -270,6 +270,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Hardening, "RIID-4839")
 	requireSliceContains(t, parsed.Hardening, "RIID-4842")
 	requireSliceContains(t, parsed.Hardening, "RIID-4844")
+	requireSliceContains(t, parsed.Hardening, "RIID-4845")
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
 		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
 	}
@@ -333,7 +334,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/deploy-ai-agent-testnet.yml")
 	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/ai-agent-client-testnet-smoke.yml")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "publish only stable configuration key names that operators must set")
-	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "centralize required deploy key names in the workflow and ownership docs instead of scattering environment-specific examples")
+	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "centralize required deploy key names in the workflow files and machine-readable ownership manifest instead of scattering environment-specific examples")
+	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "keep exact deploy key-name lists out of human-readable public docs except the workflow files that consume them")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "avoid environment-specific examples for domains, clusters, services, applications, deployment groups, ARNs, and URLs")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "apply restrictive file permissions before writing live handoff, task-definition, CodeDeploy, or smoke replay files")
 	if parsed.Handoff.Scope != "same-job-runner-temp-only" {
@@ -438,7 +440,9 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "container_name")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "codedeploy_application_name")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "codedeploy_deployment_group_name")
-	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMayReference, "required or optional key names")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMayReference, "required or optional key categories")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMayReference, "the machine-readable manifest path that contains the exact key list")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMustNotRef, "exact deploy or smoke key-name lists outside the machine-readable manifest and workflow files")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMustNotRef, "environment-specific example values")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMustNotRef, "live hosts")
 	requireStringSetExact(t, collectGitHubConfigRefs(deployWorkflow+"\n"+smokeWorkflow, "secrets"), expectedSecrets)
@@ -454,7 +458,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		t.Fatal("public sensitive surface guard must treat public key names as sensitive")
 	}
 	requireContains(t, parsed.PublicSensitiveSurfaceGuard.Rule, "sensitivity budget")
-	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicInformation, "current stable RIIDO_AI_SERVER_* key names listed in public_config_key_minimization")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicInformation, "current stable RIIDO_AI_SERVER_* key names listed in public_config_key_minimization only in canonical machine-readable and workflow paths")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicInformation, "explicit non-CD runtime key exceptions listed in this guard")
 	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK", "not a deploy/smoke GitHub configuration key")
 	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_ADDR", "not a deploy/smoke GitHub configuration key")
@@ -462,14 +466,22 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "docs/30-architecture/runtime-cd-ownership.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, ".github/workflows/deploy-ai-agent-testnet.yml")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, "docs/30-architecture/runtime-cd-ownership.riido.json")
-	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, "docs/30-architecture/runtime-cd-ownership.md")
+	if stringSliceContains(parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, "docs/30-architecture/runtime-cd-ownership.md") ||
+		stringSliceContains(parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, "docs/30-architecture/runtime-deployment-boundary.md") {
+		t.Fatalf("human-readable docs must not be canonical exact CD key-list paths: %#v", parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths)
+	}
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, ".github/workflows/deploy-ai-agent-testnet.yml")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "README.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "docs/20-domain/ai-agent-client-api.md")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "docs/30-architecture/runtime-deployment-boundary.md")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "docs/30-architecture/runtime-cd-ownership.md")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "docs/migration/control-plane.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.ForbiddenPublicInformation, "new RIIDO_AI_SERVER_* key names that are not listed in public_config_key_minimization")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.ForbiddenPublicInformation, "exact deploy/smoke key-name lists in human-readable public docs outside canonical machine-readable and workflow paths")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.ForbiddenPublicInformation, "example values for allowed public key names")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "CD execution remains owned by riido-control-plane")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "infra consumes the stable key categories and source names only")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "human-readable public docs link to the manifest instead of repeating exact deploy/smoke key lists")
 	for _, repoPath := range parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink {
 		body := mustRead(t, filepath.Join("..", "..", filepath.FromSlash(repoPath)))
 		for _, key := range expectedCDKeys {
@@ -487,11 +499,13 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, doc, "Public Sensitive Surface Guard")
 	requireContains(t, doc, "RIID-4842")
 	requireContains(t, doc, "RIID-4844")
+	requireContains(t, doc, "RIID-4845")
 	requireContains(t, doc, "infra is the same ownership rule")
 	requireContains(t, doc, "Image values are deliberately not in that public export set")
 	requireContains(t, boundary, "RIID-4835")
 	requireContains(t, boundary, "RIID-4839")
 	requireContains(t, boundary, "RIID-4842")
+	requireContains(t, boundary, "RIID-4845")
 	requireContains(t, boundary, "aggregate deploy/smoke pass-fail status without live payload values")
 	requireContains(t, boundary, "are not public hand-off artifacts")
 	requireContains(t, readme, "RIID-4839")
@@ -502,6 +516,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, migration, "RIID-4839")
 	requireContains(t, migration, "RIID-4842")
 	requireContains(t, migration, "RIID-4844")
+	requireContains(t, migration, "RIID-4845")
 	requireNotContains(t, doc+"\n"+boundary+"\n"+integration, "public image digest")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
