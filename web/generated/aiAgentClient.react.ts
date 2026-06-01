@@ -300,7 +300,7 @@ export interface RiidoAIAgentEventsReactNamespace {
 /**
  * 리도, 영실, 홍도, 지원처럼 제품이 제공하는 고정 onboarding fixture 목록과 fixture 기반 agent 생성 진입점입니다.
  */
-export interface RiidoAIAgentOnboardingFixturesReactNamespace {
+export interface RiidoAIAgentOnboardingFixturesReactNamespace extends ListAIAgentOnboardingFixturesReactEndpoint {
   /**
    * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
    */
@@ -312,9 +312,9 @@ export interface RiidoAIAgentOnboardingFixturesReactNamespace {
  */
 export interface RiidoAIAgentOnboardingReactNamespace {
   /**
-   * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 cache tag: `aiAgent.onboarding.fixtures`
+   * 리도, 영실, 홍도, 지원처럼 제품이 제공하는 고정 onboarding fixture 목록과 fixture 기반 agent 생성 진입점입니다.
    */
-  readonly fixtures: ListAIAgentOnboardingFixturesReactEndpoint;
+  readonly fixtures: RiidoAIAgentOnboardingFixturesReactNamespace;
 }
 
 /**
