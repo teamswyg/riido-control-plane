@@ -85,6 +85,13 @@ the configured GitHub environment variable is the only smoke target source.
 This rule applies to both the runtime deploy workflow and the companion
 AI Agent client testnet smoke workflow.
 
+RIID-4833 tightens the implementation side of that rule. Shell steps that write
+live deployment handoff files, task-definition JSON, CodeDeploy JSON, or smoke
+replay files set `umask 077` before writing them. Cross-step handoff files are
+still explicitly `chmod 600` before reuse, and same-step files are deleted by
+traps. The companion smoke workflow treats its SSE replay capture as a temporary
+payload, not a public artifact or evidence file.
+
 The deploy job removes long-lived handoff temp files in an `always()` cleanup
 step, and CodeDeploy-only generated JSON/deployment-id files are removed by
 same-step shell traps. That cleanup rule is part of the public redaction

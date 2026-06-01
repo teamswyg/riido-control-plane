@@ -2,6 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
+  "hardening_tasks": ["RIID-4833"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -99,7 +100,8 @@
       "publish only stable configuration key names that operators must set",
       "centralize required deploy key names in the workflow and ownership docs instead of scattering environment-specific examples",
       "avoid environment-specific examples for domains, clusters, services, applications, deployment groups, ARNs, and URLs",
-      "keep live handoff values in same-job runner temp files instead of reusable workflow outputs or artifacts"
+      "keep live handoff values in same-job runner temp files instead of reusable workflow outputs or artifacts",
+      "apply restrictive file permissions before writing live handoff, task-definition, CodeDeploy, or smoke replay files"
     ],
     "public_repo_must_not_commit_or_upload": [
       "live URL values",
@@ -123,12 +125,13 @@
   "live_handoff_policy": {
     "scope": "same-job-runner-temp-only",
     "allowed_storage": [
-      "$RUNNER_TEMP files with chmod 600",
+      "$RUNNER_TEMP files created under umask 077 and chmod 600 before reuse",
       "masked shell variables inside the active deploy job"
     ],
     "required_cleanup": [
       "remove image URI, ECS task-definition ARN, and container-port temp files in an always-running cleanup step",
-      "remove generated CodeDeploy AppSpec, request JSON, and deployment-id files with same-step traps"
+      "remove generated CodeDeploy AppSpec, request JSON, and deployment-id files with same-step traps",
+      "remove smoke replay temp files with same-step traps"
     ],
     "forbidden_mechanisms": [
       "GitHub step outputs for live deployment values",
@@ -161,7 +164,8 @@
       "generated CodeDeploy request JSON",
       "ECS task-definition JSON",
       "image digests or image URIs",
-      "smoke response payloads"
+      "smoke response payloads",
+      "smoke replay temp files"
     ]
   },
   "dependency_direction": {
