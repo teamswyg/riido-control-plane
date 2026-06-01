@@ -372,7 +372,7 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
 - `node-id=275-22731`: runtime settings empty-state section; annotations mark
   provider install-card hover states, while the screen text shows no-daemon,
   no-current-runtime, Windows app waitlist, and marketing-consent variants
-- `node-id=164-50215`: agent setting page with profile image, name,
+- `node-id=432-37336`: agent setting page with profile image, name,
   description, runtime, model, visibility, and instruction fields
 - `node-id=134-6542`: agent add page with profile image, name, description,
   runtime, model, visibility, instruction, and save controls
@@ -502,7 +502,7 @@ this slice. `Q-CP-007` resolves that boundary as no-diff for the AI Agent
 control-plane API; a future product/marketing SSOT must define a separate
 generated surface before waitlist or marketing-consent helpers can exist.
 
-`node-id=164-50215` maps to existing agent bootstrap/update behavior plus the
+`node-id=432-37336` maps to existing agent bootstrap/update behavior plus the
 read-model fields `AgentClientRecord.created_at`,
 `AgentClientRecord.updated_at`, `model_id`, and `model_label`.
 `node-id=134-6542` adds the client-facing create behavior:
@@ -558,7 +558,7 @@ variants follow the `Q-CP-007` no-diff decision; this API must not expose a
 waitlist or marketing mutation. Chat and progress-bar animation references stay
 client presentation facts.
 
-The `model` field from `node-id=164-50215` is implemented as a runtime-scoped
+The `model` field from `node-id=432-37336` is implemented as a runtime-scoped
 catalog projection. This repository must not hard-code model candidates as
 generated enum values. It only mirrors the contracts decision
 `runtime_model_catalog.v1`: clients render `RuntimeRecord.models`, send an
