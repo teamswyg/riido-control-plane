@@ -305,7 +305,8 @@
           ]
         },
         "x-riido-scenarios": [
-          "deleteAIAgent.delete-unassigns-and-stops"
+          "deleteAIAgent.delete-unassigns-and-stops",
+          "deleteAIAgent.fixture-created-agent-deletes-as-normal"
         ]
       },
       "patch": {
@@ -382,6 +383,7 @@
         },
         "x-riido-scenarios": [
           "updateAIAgentConfiguration.agent-name-is-not-unique",
+          "updateAIAgentConfiguration.fixture-created-agent-updates-as-normal",
           "updateAIAgentConfiguration.profile-fields-are-saved",
           "updateAIAgentConfiguration.model-updates-validate-against-runtime-catalog",
           "updateAIAgentConfiguration.description-max-length-is-enforced",
@@ -1052,6 +1054,7 @@
         },
         "x-riido-scenarios": [
           "createAIAgentFromOnboardingFixture.fixture-creates-normal-agent",
+          "createAIAgentFromOnboardingFixture.fixture-created-duplicate-name-stays-normal",
           "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model"
         ]
       }
@@ -2546,7 +2549,8 @@
           ]
         },
         "x-riido-scenarios": [
-          "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation"
+          "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation",
+          "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal"
         ]
       }
     },

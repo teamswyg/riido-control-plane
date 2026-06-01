@@ -81,9 +81,20 @@
     {
       "node_id": "162:23468",
       "name": "논의 필요",
-      "projection_status": "planning_evidence",
-      "source_coverage_status": "planning_evidence",
-      "no_endpoint_reason": "Discussion-only evidence must resolve in contracts before control-plane adds API or generated-client behavior."
+      "projection_status": "generated_client_covered",
+      "source_coverage_status": "covered",
+      "local_scope": "Figma node-id=162-23475 resolves the former discussion note: fixture-created agents are normal agents, duplicate display names are allowed, agent_id is the durable identity, and lifecycle actions use existing generated agent operations.",
+      "required_generated_paths": [
+        "aiAgent.onboarding.fixtures.createAgent",
+        "aiAgent.tasks.assignableAgents",
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.delete",
+        "v2.aiAgent.onboarding.fixtures.createAgent",
+        "v2.aiAgent.tasks.assignableAgents",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.delete"
+      ],
+      "forbidden_generated_path_fragments": ["template"]
     },
     {
       "node_id": "156:18767",

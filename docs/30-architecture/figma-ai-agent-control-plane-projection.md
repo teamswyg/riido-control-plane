@@ -49,7 +49,7 @@ control-plane implementation finding
 | `153:15931` | 댓글 소통 | generated client covered |
 | `153:15932` | image 14 | non-decision asset |
 | `153:15935` | 추가 기획 내용 | generated client covered |
-| `162:23468` | 논의 필요 | planning evidence |
+| `162:23468` | 논의 필요 | generated client covered |
 | `156:18767` | image 13 | non-decision asset |
 | `156:19307` | 메뉴바 | client route, no endpoint |
 | `156:19308` | Group 6 | non-decision asset |
@@ -75,6 +75,12 @@ control-plane implementation finding
 - Task/subtask-only assignment is represented by task-scoped generated paths.
   This repo must not ship project, milestone, intake, mention, or property-filler
   helpers without a new owning SSOT.
+- The former discussion node `node-id=162-23468`, with resolved evidence in
+  `node-id=162-23475`, is now covered by generated paths. Fixture-created
+  agents use `onboarding.fixtures.createAgent`, keep duplicate display names
+  without suffixing, appear through `tasks.assignableAgents`, and use normal
+  `agents.updateConfiguration`, `agents.delete`, and `agents.editability`
+  lifecycle paths.
 - Daemon detail uses `aiAgent.agents.daemon.details`; `aiAgent.agents.daemon` is
   a cache tag / namespace, not the operation generated path.
 - Agent configuration update uses `aiAgent.agents.updateConfiguration`, matching

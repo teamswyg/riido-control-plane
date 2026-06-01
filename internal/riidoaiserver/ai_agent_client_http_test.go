@@ -788,6 +788,46 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		t.Fatalf("fixture created agent = %+v", fixtureCreated.Agent)
 	}
 
+	duplicateFixtureReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/onboarding/fixtures/yeongsil_backend/agents", strings.NewReader(string(fixtureBody)))
+	duplicateFixtureReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	duplicateFixtureResp := httptest.NewRecorder()
+	server.ServeHTTP(duplicateFixtureResp, duplicateFixtureReq)
+	if duplicateFixtureResp.Code != http.StatusCreated {
+		t.Fatalf("duplicate fixture create status=%d body=%s", duplicateFixtureResp.Code, duplicateFixtureResp.Body.String())
+	}
+	var duplicateFixtureCreated AgentClientRecordResponse
+	if err := json.Unmarshal(duplicateFixtureResp.Body.Bytes(), &duplicateFixtureCreated); err != nil {
+		t.Fatalf("duplicate fixture create json: %v", err)
+	}
+	if duplicateFixtureCreated.Agent.Name != "영실" ||
+		duplicateFixtureCreated.Agent.AgentID == fixtureCreated.Agent.AgentID ||
+		duplicateFixtureCreated.Agent.Editability != AgentEditabilityEditable {
+		t.Fatalf("duplicate fixture-created agent = %+v first=%+v", duplicateFixtureCreated.Agent, fixtureCreated.Agent)
+	}
+	duplicatePatchBody, err := json.Marshal(UpdateAgentConfigurationRequest{
+		Name:       "영실",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  "runtime-cursor-mock",
+		ModelID:    stringPtr("cursor-fast"),
+	})
+	if err != nil {
+		t.Fatalf("marshal duplicate fixture patch body: %v", err)
+	}
+	duplicatePatchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/"+duplicateFixtureCreated.Agent.AgentID, strings.NewReader(string(duplicatePatchBody)))
+	duplicatePatchReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	duplicatePatchResp := httptest.NewRecorder()
+	server.ServeHTTP(duplicatePatchResp, duplicatePatchReq)
+	if duplicatePatchResp.Code != http.StatusOK {
+		t.Fatalf("duplicate fixture patch status=%d body=%s", duplicatePatchResp.Code, duplicatePatchResp.Body.String())
+	}
+	duplicateDeleteReq := httptest.NewRequest(http.MethodDelete, "/v1/client/ai-agent/agents/"+duplicateFixtureCreated.Agent.AgentID, nil)
+	duplicateDeleteReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	duplicateDeleteResp := httptest.NewRecorder()
+	server.ServeHTTP(duplicateDeleteResp, duplicateDeleteReq)
+	if duplicateDeleteResp.Code != http.StatusOK {
+		t.Fatalf("duplicate fixture delete status=%d body=%s", duplicateDeleteResp.Code, duplicateDeleteResp.Body.String())
+	}
+
 	missingFixtureReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/onboarding/fixtures/missing_fixture/agents", strings.NewReader(string(fixtureBody)))
 	missingFixtureReq.Header.Set(aiAgentTokenHeader, "owner-token")
 	missingFixtureResp := httptest.NewRecorder()
