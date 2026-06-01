@@ -37,7 +37,7 @@ import daemon internals, private infra modules, or former monolith package paths
 | Customer-PC daemon runtime | `riido-daemon` | provider process execution, local task DB, Unix socket API, customer host integration |
 | Shared contract tags | `riido-contracts` | cross-repo DTOs, state vocabulary, schema-versioned fixtures |
 | Infrastructure / deployment | `riido-infra` | Terraform modules, remote state, AWS account wiring, ECR push, ECS/Fargate deploy, DNS/ACM/WAF, deployment evidence |
-| Store/app clients | future desktop or web clients | user-facing UI over public HTTP contracts and configured browser origins |
+| Store/app clients | `riido-client` web and `riido-desktop` webview | user-facing UI over public HTTP contracts, generated AI Agent client artifacts, and configured browser origins. Clients own screen composition and route wiring; control-plane owns HTTP/SSE behavior, OpenAPI projection, and generated-client delivery boundaries. |
 
 ## Direction Rules
 

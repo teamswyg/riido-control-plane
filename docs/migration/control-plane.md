@@ -904,6 +904,25 @@ This slice does not edit `teamswyg/riido-client`, run Orval in the client
 repository, configure delivery secrets, publish npm packages, or implement the
 cross-repository delivery workflow.
 
+### RIID-4826 — riido-client/riido-desktop consumer boundary wording
+
+This slice tightens the control-plane context map after the AI Agent client
+consumer boundary became concrete.
+
+This slice does:
+
+- replace the old deferred-client context-map wording with `riido-client` web
+  and `riido-desktop` webview as the current user-facing consumers
+- state that those clients consume public HTTP contracts and generated AI Agent
+  client artifacts while owning screen composition and route wiring
+- keep `riido-control-plane` as the owner of HTTP/SSE behavior, OpenAPI
+  projection, and generated-client delivery boundaries
+- add a regression gate so stale future-client wording does not return to docs
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add deployment secrets, introduce live endpoint
+examples, or move client UI ownership into this repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
