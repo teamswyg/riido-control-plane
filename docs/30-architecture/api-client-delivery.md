@@ -181,6 +181,11 @@ Regular pushes to `main` may validate local drift, but they must not push a
 branch to `riido-client`. This keeps frequent server development from creating
 client churn and CI cost.
 
+The contracts SSOT defines generated client delivery PRs as review handoffs.
+This workflow may open or update a `riido-client` PR, but it must not auto-merge
+that PR. `riido-client` owns the final generated-code review, application
+integration, and merge decision.
+
 ## Target Branch
 
 The future workflow creates a branch in `teamswyg/riido-client` from its current
@@ -374,6 +379,8 @@ state, customer data, or production request tokens.
 - `riido-control-plane` docs name the API sub-DSL owner and canonical contract
   escalation path.
 - Release delivery is tag-triggered, not main-push-triggered.
+- Generated-client delivery opens or updates a client PR only; it never
+  auto-merges the client PR.
 - Target `riido-client` branch naming and generated path allowlist are defined.
 - Orval is a pinned control-plane generator dependency when the workflow is
   implemented.
