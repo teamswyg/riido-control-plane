@@ -52,6 +52,19 @@
         },
         {
           "path": [
+            "onboarding"
+          ],
+          "description": "AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다."
+        },
+        {
+          "path": [
+            "onboarding",
+            "fixtures"
+          ],
+          "description": "리도, 영실, 홍도, 지원처럼 제품이 제공하는 고정 onboarding fixture 목록과 fixture 기반 agent 생성 진입점입니다."
+        },
+        {
+          "path": [
             "tasks"
           ],
           "description": "task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다."
@@ -189,7 +202,7 @@
       "kind": "telemetry",
       "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
       "rules": [
-        "daemon: parse only explicit runtime progress markers such as <riido_log>...<end>",
+        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
@@ -241,18 +254,20 @@
       ]
     },
     {
-      "policy_id": "agent_onboarding_templates.v1",
+      "policy_id": "agent_onboarding_fixtures.v1",
       "kind": "onboarding",
-      "description": "The AI Agent onboarding template catalog is returned by the client bootstrap response so frontend clients do not hard-code agent names, descriptions, or instructions.",
+      "description": "AI Agent onboarding fixtures are product-provided initial configuration records for fast agent creation. They are not backend-managed template entities, and selecting one creates a normal agent.",
       "rules": [
-        "bootstrap: return a stable ordered template catalog for the Figma onboarding agent-selection screen",
-        "template: carry name, role_label, description, profile_thumbnail_url, instruction, default_visibility, and recommended_runtime_kind as copyable/default agent configuration hints",
-        "model: AgentOnboardingTemplate does not own model_id; model defaults are derived from the selected runtime model catalog until the canonical contracts model-catalog policy promotes template model recommendations",
-        "figma_138_7389: current starter template rows are 리도, 영실, 홍도, and 지원 in bootstrap order",
+        "fixture_query: return a stable ordered fixture catalog through onboarding.fixtures so frontend clients do not hard-code fixture names, descriptions, or instructions",
+        "fixture: carry name, role_label, description, profile_thumbnail_url, instruction, default_visibility, and recommended_runtime_kind as copyable/default agent configuration values",
+        "model: AgentOnboardingFixture does not own model_id; model defaults are derived from the selected runtime model catalog until a separate model recommendation policy is promoted",
+        "figma_138_7389: current onboarding fixture rows are 리도, 영실, 홍도, and 지원 in fixture response order",
+        "fixture_create: selecting 리도/영실/홍도/지원 calls createAIAgentFromOnboardingFixture with fixture_id plus a complete CreateAgentConfigurationRequest body and creates a normal owned agent",
+        "no_template_entity: the control plane must not expose template create/update/delete APIs or persist AgentTemplate records for this onboarding flow",
         "direct_setting: Figma node-id=164-26969 expands 직접 설정 into name, description, and instruction input fields that submit through createAIAgent",
-        "direct_setting_row: 직접 설정 is client presentation, not an AgentOnboardingTemplate record",
-        "direct_setting_presentation: dimmed starter-template rows, placeholder copy, row expansion, and scroll affordance are client presentation",
-        "no_runtime: when no selectable runtime is detected, clients skip the template-selection step and show the no-installed-AI start state",
+        "direct_setting_row: 직접 설정 is client presentation, not an AgentOnboardingFixture record",
+        "direct_setting_presentation: dimmed fixture rows, placeholder copy, row expansion, and scroll affordance are client presentation",
+        "no_runtime: when no selectable runtime is detected, clients skip the fixture-selection step and show the no-installed-AI start state",
         "agent_add_visibility: Figma node-id=337-24013 hides the agent-add affordance when the authorized workspace/member device-runtime read model has no selectable runtime; this is client presentation and does not add a separate eligibility endpoint",
         "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout"
       ]
@@ -961,13 +976,13 @@
       }
     },
     {
-      "name": "AgentOnboardingTemplate",
+      "name": "AgentOnboardingFixture",
       "schema": {
-        "name": "AgentOnboardingTemplate",
-        "description": "AI Agent 온보딩에서 선택할 수 있는 starter agent template입니다.",
+        "name": "AgentOnboardingFixture",
+        "description": "AI Agent 온보딩에서 선택할 수 있는 서버 제공 fixture입니다. 템플릿 엔티티가 아니라 agent 생성 폼에 복사할 고정 초기값입니다.",
         "type": "object",
         "required": [
-          "template_id",
+          "fixture_id",
           "name",
           "description",
           "instruction",
@@ -975,9 +990,9 @@
         ],
         "properties": [
           {
-            "name": "template_id",
+            "name": "fixture_id",
             "type": "string",
-            "description": "템플릿을 안정적으로 구분하는 ID입니다. 직접 설정 행은 포함되지 않습니다."
+            "description": "fixture를 안정적으로 구분하는 ID입니다. 직접 설정 행은 포함되지 않습니다."
           },
           {
             "name": "name",
@@ -987,35 +1002,60 @@
           {
             "name": "role_label",
             "type": "string",
-            "description": "템플릿 목록에 보조로 표시할 역할 라벨입니다."
+            "description": "fixture 목록에 보조로 표시할 역할 라벨입니다."
           },
           {
             "name": "profile_thumbnail_url",
             "type": "string",
-            "format": "uri",
-            "description": "에이전트 프로필 이미지로 복사할 HTTPS 썸네일 URL입니다."
+            "description": "에이전트 프로필 이미지로 복사할 HTTPS 썸네일 URL입니다.",
+            "format": "uri"
           },
           {
             "name": "description",
             "type": "string",
-            "max_length": 160,
-            "description": "에이전트 설명 기본값입니다. 최대 160자입니다."
+            "description": "에이전트 설명 기본값입니다. 최대 160자입니다.",
+            "max_length": 160
           },
           {
             "name": "instruction",
             "type": "string",
-            "max_length": 1000,
-            "description": "에이전트 지침 기본값입니다. 최대 1000자입니다."
+            "description": "에이전트 지침 기본값입니다. 최대 1000자입니다.",
+            "max_length": 1000
           },
           {
             "name": "default_visibility",
-            "ref": "AgentVisibility",
-            "description": "템플릿 선택 시 생성 폼에 미리 채울 공개 범위입니다. mock은 안전하게 private 값을 사용합니다."
+            "description": "fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. mock은 안전하게 private 값을 사용합니다.",
+            "ref": "AgentVisibility"
           },
           {
             "name": "recommended_runtime_kind",
-            "ref": "RuntimeKind",
-            "description": "템플릿에 권장하는 런타임 종류입니다. 선택 가능 여부는 devices.runtimes로 다시 판단합니다."
+            "description": "fixture에 권장하는 런타임 종류입니다. 선택 가능 여부는 devices.runtimes로 다시 판단합니다.",
+            "ref": "RuntimeKind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentOnboardingFixtureListResponse",
+      "schema": {
+        "name": "AgentOnboardingFixtureListResponse",
+        "description": "온보딩 화면에서 사용할 서버 제공 fixture 목록 응답입니다. 직접 설정은 포함하지 않습니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "fixtures"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "fixtures",
+            "type": "array",
+            "items": {
+              "ref": "AgentOnboardingFixture"
+            }
           }
         ]
       }
@@ -1031,8 +1071,7 @@
           "client_kind",
           "workspace_id",
           "agents",
-          "devices",
-          "agent_templates"
+          "devices"
         ],
         "properties": [
           {
@@ -1059,13 +1098,6 @@
             "type": "array",
             "items": {
               "ref": "DeviceRecord"
-            }
-          },
-          {
-            "name": "agent_templates",
-            "type": "array",
-            "items": {
-              "ref": "AgentOnboardingTemplate"
             }
           }
         ]
@@ -1870,7 +1902,8 @@
       },
       "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:read"
         ]
@@ -1883,9 +1916,84 @@
       "scenario_ids": [
         "getAIAgentClientBootstrap.figma-client-bootstrap",
         "getAIAgentClientBootstrap.figma-agent-list-timestamps",
-        "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
         "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
         "getAIAgentClientBootstrap.figma-onboarding-no-runtime"
+      ]
+    },
+    {
+      "operation_id": "listAIAgentOnboardingFixtures",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/onboarding/fixtures",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "onboarding",
+          "fixtures"
+        ],
+        "cache_tag": "aiAgent.onboarding.fixtures"
+      },
+      "summary": "AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read"
+        ]
+      },
+      "rbac_policy": "agent_onboarding_fixtures.v1",
+      "response": {
+        "status": 200,
+        "ref": "AgentOnboardingFixtureListResponse"
+      },
+      "scenario_ids": [
+        "listAIAgentOnboardingFixtures.figma-onboarding-fixture-selection-initial-state",
+        "listAIAgentOnboardingFixtures.fixtures-are-not-templates"
+      ]
+    },
+    {
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents",
+      "resource": "agent",
+      "action": "create",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "onboarding",
+          "fixtures",
+          "createAgent"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.devices.runtimes",
+          "aiAgent.tasks.assignableAgents"
+        ]
+      },
+      "summary": "선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ]
+      },
+      "rbac_policy": "agent_onboarding_fixtures.v1",
+      "request": {
+        "ref": "CreateAgentConfigurationRequest",
+        "required": true
+      },
+      "response": {
+        "status": 201,
+        "ref": "AgentClientRecordResponse"
+      },
+      "scenario_ids": [
+        "createAIAgentFromOnboardingFixture.fixture-creates-normal-agent",
+        "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model"
       ]
     },
     {
@@ -1905,7 +2013,8 @@
       },
       "summary": "권한이 확인된 principal의 device runtime 상태를 조회합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:device:read"
         ]
@@ -1943,7 +2052,8 @@
       },
       "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세를 조회합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:agent:read",
           "ai-agent:agent:{agent_id}:read"
@@ -1981,7 +2091,8 @@
       },
       "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 시작을 요청합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:agent:control",
           "ai-agent:agent:{agent_id}:control"
@@ -2020,7 +2131,8 @@
       },
       "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 재시작을 요청합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:agent:control",
           "ai-agent:agent:{agent_id}:control"
@@ -2059,7 +2171,8 @@
       },
       "summary": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 중지를 요청합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:agent:control",
           "ai-agent:agent:{agent_id}:control"
@@ -2094,7 +2207,8 @@
       },
       "summary": "task participant dropdown에서 할당 가능한 agent 목록을 조회합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:read",
           "task:{task_id}:read"
@@ -2132,7 +2246,8 @@
       },
       "summary": "task participant dropdown에서 AI agent를 배정합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "task:{task_id}:assign",
@@ -2174,7 +2289,8 @@
       },
       "summary": "task participant에서 AI agent를 제거하고 작업을 중단합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "task:{task_id}:stop",
@@ -2211,7 +2327,8 @@
       },
       "summary": "active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:read",
           "task:{task_id}:read"
@@ -2250,7 +2367,8 @@
       },
       "summary": "호환 task comment route로 AI agent에게 메시지를 전달합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "task:{task_id}:comment"
@@ -2334,7 +2452,8 @@
       },
       "summary": "task thread의 stop action으로 AI agent 작업을 중단합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "task:{task_id}:stop",
@@ -2374,7 +2493,8 @@
       },
       "summary": "Figma agent 추가 화면에서 AI agent 설정을 생성합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "ai-agent:create"
@@ -2413,7 +2533,8 @@
       },
       "summary": "client control 활성화 전에 agent 수정 가능 여부를 조회합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:read",
           "ai-agent:{agent_id}:read"
@@ -2449,7 +2570,8 @@
       },
       "summary": "할당된 task가 없을 때 agent 표시/설정 필드를 수정합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "ai-agent:{agent_id}:update"
@@ -2496,7 +2618,8 @@
       },
       "summary": "agent를 삭제하고 queued/running assignment를 강제로 정리합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:write",
           "ai-agent:{agent_id}:delete"
@@ -2528,7 +2651,8 @@
       },
       "summary": "editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다",
       "auth": {
-        "scheme": "apiKey", "header": "X-Riido-AI-Agent-Token",
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
         "scopes": [
           "ai-agent:stream"
         ]
@@ -2554,7 +2678,7 @@
       "name": "figma client bootstrap",
       "given": "a web or desktop webview client opens the v1.22 AI Agent surface",
       "when": "the client requests bootstrap data",
-      "then": "the response contains visible agents, authorized device/runtime read-model data, and onboarding agent templates required by the Figma onboarding, runtime setting, and agent setting screens"
+      "then": "the response contains visible agents and authorized device/runtime read-model data required by the Figma onboarding, runtime setting, and agent setting screens"
     },
     {
       "scenario_id": "getAIAgentClientBootstrap.figma-agent-list-timestamps",
@@ -2563,14 +2687,6 @@
       "given": "the Figma agent list screen shows separate 업데이트일 and 생성일 columns with absolute-time tooltips",
       "when": "the client requests bootstrap data",
       "then": "each AgentClientRecord includes server-authored created_at and updated_at values while date formatting and tooltip presentation remain client-owned"
-    },
-    {
-      "scenario_id": "getAIAgentClientBootstrap.figma-onboarding-template-selection-initial-state",
-      "operation_id": "getAIAgentClientBootstrap",
-      "name": "figma onboarding template selection initial state",
-      "given": "the Figma onboarding template-selection screen shows 리도, 영실, 홍도, 지원, a 직접 설정 row, a disabled-looking next button, and a right-side preview skeleton",
-      "when": "the client requests bootstrap data",
-      "then": "the response provides the ordered starter templates while 직접 설정, disabled-next, row selection, and preview skeleton behavior remain client presentation without a template-selection command"
     },
     {
       "scenario_id": "getAIAgentClientBootstrap.figma-agent-add-button-visibility",
@@ -2586,7 +2702,39 @@
       "name": "figma onboarding no runtime",
       "given": "the Figma onboarding flow detects no selectable runtime on the viewer's device",
       "when": "the client composes onboarding from bootstrap and device/runtime data",
-      "then": "the client can skip template selection and show the no-installed-AI start state without adding a new control-plane command"
+      "then": "the client can skip fixture selection and show the no-installed-AI start state without adding a new control-plane command"
+    },
+    {
+      "scenario_id": "listAIAgentOnboardingFixtures.figma-onboarding-fixture-selection-initial-state",
+      "operation_id": "listAIAgentOnboardingFixtures",
+      "name": "figma onboarding fixture selection initial state",
+      "given": "the Figma onboarding fixture-selection screen shows 리도, 영실, 홍도, 지원, a 직접 설정 row, a disabled-looking next button, and a right-side preview skeleton",
+      "when": "the client requests onboarding fixtures",
+      "then": "the response provides the ordered fixtures while 직접 설정, disabled-next, row selection, and preview skeleton behavior remain client presentation without a backend template entity"
+    },
+    {
+      "scenario_id": "listAIAgentOnboardingFixtures.fixtures-are-not-templates",
+      "operation_id": "listAIAgentOnboardingFixtures",
+      "name": "fixtures are not templates",
+      "given": "product planning confirms 리도, 영실, 홍도, 지원 are provided onboarding presets and not user-managed templates",
+      "when": "the client reads fixture data",
+      "then": "the API exposes fixture_id and does not expose template_id, template CRUD, or AgentTemplate records"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixture.fixture-creates-normal-agent",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "fixture creates normal agent",
+      "given": "the user selects 리도, 영실, 홍도, or 지원 during onboarding",
+      "when": "the client sends fixture_id plus the complete agent creation body copied or edited from the fixture",
+      "then": "the response contains a normal owned agent and no AgentTemplate or AgentOnboardingFixture entity is created"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "fixture create validates runtime and model",
+      "given": "the client copied fixture defaults but selected a runtime and optional model from devices.runtimes",
+      "when": "the client creates an agent from the fixture",
+      "then": "the API applies the same runtime_id and model_id validation as createAIAgent before saving"
     },
     {
       "scenario_id": "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
@@ -2834,7 +2982,7 @@
       "name": "onboarding direct setting creates explicit configuration",
       "given": "the Figma onboarding direct-setting expansion shows name, description, and instruction fields after the user selects 직접 설정",
       "when": "the client submits explicit name, description, instruction, runtime_id, and visibility",
-      "then": "createAIAgent saves a normal owned agent without creating an AgentOnboardingTemplate or a separate direct-setting operation"
+      "then": "createAIAgent saves a normal owned agent without creating an AgentOnboardingFixture, AgentTemplate, or a separate direct-setting operation"
     },
     {
       "scenario_id": "createAIAgent.agent-create-defaults-selected-runtime-model",

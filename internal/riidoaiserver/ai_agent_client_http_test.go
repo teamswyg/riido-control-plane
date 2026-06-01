@@ -37,24 +37,36 @@ func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
 	if containsString(aiAgentIDs(bootstrap.Agents), "agent-private-cursor") {
 		t.Fatalf("bootstrap leaked other private agent: %+v", bootstrap.Agents)
 	}
-	if len(bootstrap.AgentTemplates) != 4 {
-		t.Fatalf("bootstrap templates = %+v", bootstrap.AgentTemplates)
+
+	fixturesReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/onboarding/fixtures", nil)
+	fixturesReq.Header.Set(aiAgentTokenHeader, "user-token")
+	fixturesResp := httptest.NewRecorder()
+	server.ServeHTTP(fixturesResp, fixturesReq)
+	if fixturesResp.Code != http.StatusOK {
+		t.Fatalf("fixtures status=%d body=%s", fixturesResp.Code, fixturesResp.Body.String())
 	}
-	wantTemplates := []struct {
-		templateID             string
+	var fixtures AgentOnboardingFixtureListResponse
+	if err := json.Unmarshal(fixturesResp.Body.Bytes(), &fixtures); err != nil {
+		t.Fatalf("fixtures json: %v", err)
+	}
+	if len(fixtures.Fixtures) != 4 {
+		t.Fatalf("fixtures = %+v", fixtures.Fixtures)
+	}
+	wantFixtures := []struct {
+		fixtureID              string
 		name                   string
 		roleLabel              string
 		defaultVisibility      AgentVisibility
 		recommendedRuntimeKind RuntimeKind
 	}{
-		{templateID: "riido_pm", name: "리도", roleLabel: "PM Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindCodex},
-		{templateID: "yeongsil_backend", name: "영실", roleLabel: "Backend Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindClaudeCode},
-		{templateID: "hongdo_frontend", name: "홍도", roleLabel: "Frontend Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindCursor},
-		{templateID: "jiwon_research", name: "지원", roleLabel: "Research Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindOpenClaw},
+		{fixtureID: "riido_pm", name: "리도", roleLabel: "PM Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindCodex},
+		{fixtureID: "yeongsil_backend", name: "영실", roleLabel: "Backend Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindClaudeCode},
+		{fixtureID: "hongdo_frontend", name: "홍도", roleLabel: "Frontend Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindCursor},
+		{fixtureID: "jiwon_research", name: "지원", roleLabel: "Research Agent", defaultVisibility: AgentVisibilityPrivate, recommendedRuntimeKind: RuntimeKindOpenClaw},
 	}
-	for i, want := range wantTemplates {
-		got := bootstrap.AgentTemplates[i]
-		if got.TemplateID != want.templateID ||
+	for i, want := range wantFixtures {
+		got := fixtures.Fixtures[i]
+		if got.FixtureID != want.fixtureID ||
 			got.Name != want.name ||
 			got.RoleLabel != want.roleLabel ||
 			got.DefaultVisibility != want.defaultVisibility ||
@@ -62,7 +74,7 @@ func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
 			got.Description == "" ||
 			got.Instruction == "" ||
 			got.ProfileThumbnailURL == "" {
-			t.Fatalf("bootstrap template[%d] = %+v, want %+v with copy fields", i, got, want)
+			t.Fatalf("fixture[%d] = %+v, want %+v with copy fields", i, got, want)
 		}
 	}
 
@@ -643,6 +655,48 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		created.Agent.CreatedAt.IsZero() ||
 		created.Agent.UpdatedAt.IsZero() {
 		t.Fatalf("created agent = %+v", created.Agent)
+	}
+
+	fixtureDescription := "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다."
+	fixtureInstruction := "fixture 선택 후에도 client가 agent 생성에 들어가는 값을 모두 담아 보냅니다."
+	fixtureBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:                "영실",
+		Visibility:          AgentVisibilityPrivate,
+		RuntimeID:           "runtime-cursor-mock",
+		ModelID:             stringPtr("cursor-fast"),
+		ProfileThumbnailURL: stringPtr("https://cdn.riido.io/mock/ai-agent-fixtures/yeongsil-backend.png"),
+		Description:         &fixtureDescription,
+		Instruction:         &fixtureInstruction,
+	})
+	if err != nil {
+		t.Fatalf("marshal fixture create body: %v", err)
+	}
+	fixtureCreateReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/onboarding/fixtures/yeongsil_backend/agents", strings.NewReader(string(fixtureBody)))
+	fixtureCreateReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	fixtureCreateResp := httptest.NewRecorder()
+	server.ServeHTTP(fixtureCreateResp, fixtureCreateReq)
+	if fixtureCreateResp.Code != http.StatusCreated {
+		t.Fatalf("fixture create status=%d body=%s", fixtureCreateResp.Code, fixtureCreateResp.Body.String())
+	}
+	var fixtureCreated AgentClientRecordResponse
+	if err := json.Unmarshal(fixtureCreateResp.Body.Bytes(), &fixtureCreated); err != nil {
+		t.Fatalf("fixture create json: %v", err)
+	}
+	if fixtureCreated.Agent.Name != "영실" ||
+		fixtureCreated.Agent.RuntimeKind != RuntimeKindCursor ||
+		fixtureCreated.Agent.ModelID != "cursor-fast" ||
+		fixtureCreated.Agent.Description != fixtureDescription ||
+		fixtureCreated.Agent.Instruction != fixtureInstruction ||
+		fixtureCreated.Agent.ProfileThumbnailURL == "" {
+		t.Fatalf("fixture created agent = %+v", fixtureCreated.Agent)
+	}
+
+	missingFixtureReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/onboarding/fixtures/missing_fixture/agents", strings.NewReader(string(fixtureBody)))
+	missingFixtureReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	missingFixtureResp := httptest.NewRecorder()
+	server.ServeHTTP(missingFixtureResp, missingFixtureReq)
+	if missingFixtureResp.Code != http.StatusNotFound {
+		t.Fatalf("missing fixture status=%d body=%s", missingFixtureResp.Code, missingFixtureResp.Body.String())
 	}
 
 	patchBody, err := json.Marshal(UpdateAgentConfigurationRequest{

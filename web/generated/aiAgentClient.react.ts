@@ -131,6 +131,28 @@ export interface StreamAIAgentClientEventsReactEndpoint extends core.StreamAIAge
 }
 
 /**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface ListAIAgentOnboardingFixturesReactEndpoint extends core.ListAIAgentOnboardingFixturesEndpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (options?: core.RiidoQueryOptions<core.AgentOnboardingFixtureListResponse>) => UseQueryResult<core.AgentOnboardingFixtureListResponse, Error>;
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface CreateAIAgentFromOnboardingFixtureReactEndpoint extends core.CreateAIAgentFromOnboardingFixtureEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AgentClientRecordResponse, core.CreateAIAgentFromOnboardingFixtureMutationVariables>) => UseMutationResult<core.AgentClientRecordResponse, Error, core.CreateAIAgentFromOnboardingFixtureMutationVariables>;
+}
+
+/**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다
  * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
  */
@@ -276,6 +298,26 @@ export interface RiidoAIAgentEventsReactNamespace {
 }
 
 /**
+ * 리도, 영실, 홍도, 지원처럼 제품이 제공하는 고정 onboarding fixture 목록과 fixture 기반 agent 생성 진입점입니다.
+ */
+export interface RiidoAIAgentOnboardingFixturesReactNamespace {
+  /**
+   * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
+   */
+  readonly createAgent: CreateAIAgentFromOnboardingFixtureReactEndpoint;
+}
+
+/**
+ * AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
+ */
+export interface RiidoAIAgentOnboardingReactNamespace {
+  /**
+   * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 cache tag: `aiAgent.onboarding.fixtures`
+   */
+  readonly fixtures: ListAIAgentOnboardingFixturesReactEndpoint;
+}
+
+/**
  * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
  */
 export interface RiidoAIAgentTasksThreadMessagesReactNamespace {
@@ -339,6 +381,10 @@ export interface RiidoAIAgentReactModule {
    * client가 SSE로 수신하는 상태 변경 stream namespace입니다.
    */
   readonly events: RiidoAIAgentEventsReactNamespace;
+  /**
+   * AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
+   */
+  readonly onboarding: RiidoAIAgentOnboardingReactNamespace;
   /**
    * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -415,6 +461,16 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
           stream: {
             ...coreClient.aiAgent.events.stream,
             useQuery: (options?: core.RiidoQueryOptions<Response>) => useQuery<Response, Error>(coreClient.aiAgent.events.stream.query(options)),
+          },
+        },
+        onboarding: {
+          fixtures: {
+            ...coreClient.aiAgent.onboarding.fixtures,
+            useQuery: (options?: core.RiidoQueryOptions<core.AgentOnboardingFixtureListResponse>) => useQuery<core.AgentOnboardingFixtureListResponse, Error>(coreClient.aiAgent.onboarding.fixtures.query(options)),
+            createAgent: {
+              ...coreClient.aiAgent.onboarding.fixtures.createAgent,
+              useMutation: (options: core.RiidoMutationOptions<core.AgentClientRecordResponse, core.CreateAIAgentFromOnboardingFixtureMutationVariables> = {}) => useMutation<core.AgentClientRecordResponse, Error, core.CreateAIAgentFromOnboardingFixtureMutationVariables>(coreClient.aiAgent.onboarding.fixtures.createAgent.mutation(options)),
+            },
           },
         },
         tasks: {

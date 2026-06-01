@@ -60,11 +60,12 @@ For agent settings:
 - `riido-contracts` owns the meaning of `profile_thumbnail_url` and
   `description` and `instruction`, including URL-only thumbnail policy, the 160
   character description limit, and the 1000 character instruction limit.
-- `riido-contracts` owns onboarding template catalog semantics. This repository
-  projects the catalog in `ClientBootstrapResponse.agent_templates` and seeds
-  deterministic mock templates for frontend development. Template records carry
-  copyable profile fields, a safe `default_visibility`, and a
-  `recommended_runtime_kind` hint. They do not carry a `model_id`.
+- `riido-contracts` owns onboarding fixture catalog semantics. This repository
+  projects the catalog through `GET /v1/client/ai-agent/onboarding/fixtures`
+  and seeds deterministic mock fixtures for frontend development. Fixture
+  records carry copyable profile fields, a safe `default_visibility`, and a
+  `recommended_runtime_kind` hint. They do not carry a `model_id`, and they are
+  not backend-managed template entities.
 - `riido-contracts` owns onboarding runtime-selectability semantics. This
   repository projects protected `DeviceRecord.runtimes` values through
   `GET /v1/client/ai-agent/devices` and validates selected `runtime_id` values
@@ -153,22 +154,23 @@ For agent settings:
   detected/selectable rows when their runtime records are online and detected,
   while OpenClaw/Cursor Agent can be rendered as non-detected disabled rows.
   `node-id=138-7389` maps starter-agent selection to
-  `ClientBootstrapResponse.agent_templates`: the mock/bootstrap catalog exposes
-  the `리도`, `영실`, `홍도`, and `지원` starter templates in order, while
+  `AgentOnboardingFixtureListResponse.fixtures`: the mock fixture catalog exposes
+  the `리도`, `영실`, `홍도`, and `지원` starter fixtures in order, while
   `직접 설정`, disabled-next state before selection, row selection, and preview
-  skeleton/popover rendering are client presentation. Each template also carries
+  skeleton/popover rendering are client presentation. Each fixture also carries
   `default_visibility` and `recommended_runtime_kind` so clients can prefill the
-  create form without making template copy a frontend SSOT. The selected model
+  create form without making fixture copy a frontend SSOT. The selected model
   still comes from the chosen runtime's `RuntimeRecord.models` catalog.
-  This repository owns the protected bootstrap projection of `agent_templates`,
-  protected runtime read-model projection, selected `runtime_id` validation, and
-  mock coverage. It does not own workspace selection, workspace list scrolling
+  This repository owns the protected fixture projection, fixture-based agent
+  creation endpoint, protected runtime read-model projection, selected
+  `runtime_id` validation, and mock coverage. It does not own workspace
+  selection, workspace list scrolling
   or the `새 워크스페이스` row shown in `node-id=164-30192`, runtime radio
   rendering, detected/non-detected Korean labels, row dimming, direct-setting
   row/rendering, disabled-next presentation, scrolling, two-line ellipsis,
   preview skeleton/popover layout,
   all-disconnected provider-list rendering and the `시작하기` CTA shown in
-  `node-id=164-30206`, or the client decision to skip template selection when
+  `node-id=164-30206`, or the client decision to skip fixture selection when
   no selectable runtime exists.
 - Figma web onboarding annotations (`node-id=236-29749`) confirm that sign-up,
   terms consent, member invite, macOS app download, Windows waitlist, and
@@ -190,6 +192,8 @@ of returning synthetic data.
 The mock API implements:
 
 - `GET /v1/client/ai-agent/bootstrap`
+- `GET /v1/client/ai-agent/onboarding/fixtures`
+- `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`
 - `GET /v1/client/ai-agent/devices`
 - `GET /v1/client/ai-agent/agents/{agent_id}/daemon`
 - `POST /v1/client/ai-agent/agents/{agent_id}/daemon/start`
@@ -223,12 +227,15 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - project, milestone, intake, AI property filler, and agent mention surfaces
   must not call the task-scoped assignable-agent, comment, stop, or thread
   endpoints; future target surfaces require a separate SSOT and generated API
-- bootstrap returns an ordered `agent_templates` catalog used by the Figma
-  onboarding agent-template selection screen
+- `GET /v1/client/ai-agent/onboarding/fixtures` returns an ordered fixture
+  catalog used by the Figma onboarding fixture selection screen
+- `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents` creates a
+  normal owned agent from a selected fixture and a complete
+  `CreateAgentConfigurationRequest` body
 - the current deterministic mock catalog returns the Figma `node-id=138-7389`
-  starter templates in order: `리도`, `영실`, `홍도`, `지원`
+  starter fixtures in order: `리도`, `영실`, `홍도`, `지원`
 - `직접 설정` is a client route into explicit agent creation, not a fifth
-  `AgentOnboardingTemplate`
+  `AgentOnboardingFixture`
 - runtime selection uses ordinary device/runtime records; SaaS validates the
   selected `runtime_id` through create/update and does not expose a separate
   runtime-selection mutation
@@ -237,7 +244,7 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   no member-visible runtime is selectable and this does not add an eligibility
   endpoint
 - if no runtime is selectable, clients use existing device/runtime data to skip
-  the template-selection step; SaaS does not add a separate onboarding skip
+  the fixture-selection step; SaaS does not add a separate onboarding skip
   command
 - non-owner, non-admin users cannot mutate other users' public agents
 - client-facing agent creation stamps `owner_principal_id` from authorization,
@@ -334,18 +341,18 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
 - `node-id=134-6542`: agent add page with profile image, name, description,
   runtime, model, visibility, instruction, and save controls
 - `node-id=42-3014`: onboarding planning page; annotations include runtime
-  selection (`node-id=137-6746`), template/direct-setting selection
+  selection (`node-id=137-6746`), fixture/direct-setting selection
   (`node-id=138-7389`, `node-id=164-26969`), workspace selection/list scrolling
-  and the `새 워크스페이스` row (`node-id=164-30192`), two-line template
+  and the `새 워크스페이스` row (`node-id=164-30192`), two-line fixture
   description ellipsis (`node-id=164-27719`), and no-installed-AI start behavior
   with all provider rows marked `연결 안 됨` (`node-id=164-30206`). The inspected
   `node-id=137-6746` screen shows Claude Code/Codex as `감지됨` selectable rows
   and OpenClaw/Cursor Agent as `감지 안 됨` non-selectable rows. The inspected
   `node-id=138-7389` screen shows `리도`, `영실`, `홍도`, and `지원` starter
-  template rows, followed by `직접 설정`, with a disabled-looking `다음` button
+  fixture rows, followed by `직접 설정`, with a disabled-looking `다음` button
   before selection and a right-side preview skeleton. The inspected
   `node-id=164-26969` expansion is annotated `직접 설정 선택 시 스크롤`; it dims
-  starter-template rows and opens `이름`, `설명`, and `지침` inputs with
+  starter-fixture rows and opens `이름`, `설명`, and `지침` inputs with
   placeholder copy.
 - `node-id=236-29749`: web onboarding section; annotations include chat
   animation reference, Google sign-up wording, Google sign-up requiring terms
@@ -483,24 +490,25 @@ entry, no-description row layout, status-label copy/color, save-button
 enablement, long-description truncation, dropdown layout, and timestamp
 formatting remain client-owned.
 
-`node-id=42-3014` maps to existing bootstrap/devices/create behavior plus one
-explicit bootstrap field: `ClientBootstrapResponse.agent_templates`. The
-templates give clients stable starter-agent names, descriptions, role labels,
-thumbnail URLs, instructions, safe private visibility defaults, and recommended
-runtime-kind hints without hard-coding product copy in the frontend.
-`node-id=138-7389` is the template-selection initial state for that field.
-Selecting a template still creates a normal agent through
-`POST /v1/client/ai-agent/agents`; direct setting uses the same create endpoint
-and is not represented as an extra template record.
+`node-id=42-3014` maps to existing bootstrap/devices/create behavior plus the
+explicit fixture endpoints. `GET /v1/client/ai-agent/onboarding/fixtures` gives
+clients stable starter-agent names, descriptions, role labels, thumbnail URLs,
+instructions, safe private visibility defaults, and recommended runtime-kind
+hints without hard-coding product copy in the frontend.
+`node-id=138-7389` is the fixture-selection initial state for that response.
+Selecting a fixture creates a normal agent through
+`POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`; direct
+setting uses `POST /v1/client/ai-agent/agents` and is not represented as an
+extra fixture record.
 The direct-setting expansion from `node-id=164-26969` maps those expanded
 `이름`, `설명`, and `지침` inputs to
 `CreateAgentConfigurationRequest.name`, `description`, and `instruction`.
 Dimmed starter rows, placeholder copy, and scroll behavior remain client
 presentation. The server still validates `runtime_id`, `visibility`, optional
 profile image URL, and optional `model_id` through the normal create request.
-Template runtime hints are advisory: if the recommended runtime is not detected
+Fixture runtime hints are advisory: if the recommended runtime is not detected
 or not selectable for the current principal, the client must choose from the
-authorized `devices.runtimes` projection. Template records do not ship a model
+authorized `devices.runtimes` projection. Fixture records do not ship a model
 default; omitted `model_id` continues to resolve to the selected runtime default.
 No-installed-AI branching is derived from `devices.runtimes` and does not add a
 new SaaS command.
@@ -548,6 +556,8 @@ ALB for:
 - `GET /healthz`
 - `GET /readyz`
 - `GET /v1/client/ai-agent/bootstrap`
+- `GET /v1/client/ai-agent/onboarding/fixtures`
+- `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`
 - `GET /v1/client/ai-agent/devices`
 - `GET /v1/client/ai-agent/agents/{agent_id}/daemon`
 - `POST /v1/client/ai-agent/agents/{agent_id}/daemon/start`
@@ -561,6 +571,8 @@ ALB for:
 - `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 - `POST /v1/client/ai-agent/agents`
+- `GET /v1/client/ai-agent/onboarding/fixtures`
+- `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`
 - `GET /v1/client/ai-agent/events?replay=1`
 - `POST /v1/agents/{agent_id}/thread-progress`
 

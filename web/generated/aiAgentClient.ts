@@ -131,17 +131,21 @@ export interface AgentEditabilityResponse {
 }
 
 /**
- * AI Agent 온보딩에서 선택할 수 있는 starter agent template입니다.
+ * AI Agent 온보딩에서 선택할 수 있는 서버 제공 fixture입니다. 템플릿 엔티티가 아니라 agent 생성 폼에 복사할 고정 초기값입니다.
  */
-export interface AgentOnboardingTemplate {
+export interface AgentOnboardingFixture {
   /**
-   * 템플릿 선택 시 생성 폼에 미리 채울 공개 범위입니다. mock은 안전하게 private 값을 사용합니다.
+   * fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. mock은 안전하게 private 값을 사용합니다.
    */
   default_visibility: AgentVisibility;
   /**
    * 에이전트 설명 기본값입니다. 최대 160자입니다.
    */
   description: string;
+  /**
+   * fixture를 안정적으로 구분하는 ID입니다. 직접 설정 행은 포함되지 않습니다.
+   */
+  fixture_id: string;
   /**
    * 에이전트 지침 기본값입니다. 최대 1000자입니다.
    */
@@ -155,17 +159,21 @@ export interface AgentOnboardingTemplate {
    */
   profile_thumbnail_url?: string;
   /**
-   * 템플릿에 권장하는 런타임 종류입니다. 선택 가능 여부는 devices.runtimes로 다시 판단합니다.
+   * fixture에 권장하는 런타임 종류입니다. 선택 가능 여부는 devices.runtimes로 다시 판단합니다.
    */
   recommended_runtime_kind?: RuntimeKind;
   /**
-   * 템플릿 목록에 보조로 표시할 역할 라벨입니다.
+   * fixture 목록에 보조로 표시할 역할 라벨입니다.
    */
   role_label?: string;
-  /**
-   * 템플릿을 안정적으로 구분하는 ID입니다. 직접 설정 행은 포함되지 않습니다.
-   */
-  template_id: string;
+}
+
+/**
+ * 온보딩 화면에서 사용할 서버 제공 fixture 목록 응답입니다. 직접 설정은 포함하지 않습니다.
+ */
+export interface AgentOnboardingFixtureListResponse {
+  fixtures: AgentOnboardingFixture[];
+  schema_version: string;
 }
 
 /**
@@ -236,7 +244,6 @@ export interface AssignAIAgentTaskRequest {
  * AI Agent 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다.
  */
 export interface ClientBootstrapResponse {
-  agent_templates: AgentOnboardingTemplate[];
   agents: AgentClientRecord[];
   client_kind: ClientKind;
   devices: DeviceRecord[];
@@ -1002,6 +1009,89 @@ export function streamAIAgentClientEventsQueryOptions(config: RiidoClientConfig,
     ...queryOptions,
     queryKey: streamAIAgentClientEventsQueryKey(),
     queryFn: () => streamAIAgentClientEvents(config, { signal }),
+  };
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다
+ */
+export async function listAIAgentOnboardingFixtures(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<AgentOnboardingFixtureListResponse> {
+  const path = "/v1/client/ai-agent/onboarding/fixtures";
+  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다
+ * cache tag: `aiAgent.onboarding.fixtures`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentOnboardingFixturesQueryKeyRoot(): readonly unknown[] {
+  return ["aiAgent.onboarding.fixtures"] as const;
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentOnboardingFixturesQueryKey(): readonly unknown[] {
+  return [...listAIAgentOnboardingFixturesQueryKeyRoot()] as const;
+}
+
+/**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentOnboardingFixturesQueryOptions(config: RiidoClientConfig, options: RiidoQueryOptions<AgentOnboardingFixtureListResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentOnboardingFixturesQueryKey(),
+    queryFn: () => listAIAgentOnboardingFixtures(config, { signal }),
+  };
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
+ * 경로 파라미터입니다.
+ */
+export interface CreateAIAgentFromOnboardingFixturePathParams {
+  fixture_id: string;
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
+ */
+export async function createAIAgentFromOnboardingFixture(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
+  const path = `/v1/client/ai-agent/onboarding/fixtures/${params.fixture_id}/agents`;
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentFromOnboardingFixtureMutationVariables {
+  params: CreateAIAgentFromOnboardingFixturePathParams;
+  body: CreateAgentConfigurationRequest;
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentFromOnboardingFixtureMutationKey(): readonly unknown[] {
+  return ["createAIAgentFromOnboardingFixture"] as const;
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentFromOnboardingFixtureMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentFromOnboardingFixtureMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentFromOnboardingFixtureMutationKey(),
+    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureMutationVariables) => createAIAgentFromOnboardingFixture(config, variables.params, variables.body, {}),
   };
 }
 
@@ -1790,6 +1880,91 @@ export interface StreamAIAgentClientEventsEndpoint {
 }
 
 /**
+ * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다
+ * DSL facade path: `aiAgent.onboarding.fixtures`
+ * cache tag: `aiAgent.onboarding.fixtures`
+ */
+export interface ListAIAgentOnboardingFixturesEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (options?: RiidoRequestOptions) => Promise<AgentOnboardingFixtureListResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: () => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => ReturnType<typeof listAIAgentOnboardingFixturesQueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => ReturnType<typeof listAIAgentOnboardingFixturesQueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => Promise<void>;
+}
+
+/**
+ * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
+ * DSL facade path: `aiAgent.onboarding.fixtures.createAgent`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentFromOnboardingFixtureEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentFromOnboardingFixtureMutationVariables>) => ReturnType<typeof createAIAgentFromOnboardingFixtureMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentFromOnboardingFixtureMutationVariables>) => ReturnType<typeof createAIAgentFromOnboardingFixtureMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly bootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.devices.runtimes` cache tag를 무효화합니다.
+     */
+    readonly devicesRuntimes: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly tasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다
  * DSL facade path: `aiAgent.tasks.assignableAgents`
  * cache tag: `aiAgent.tasks.assignableAgents`
@@ -2163,6 +2338,26 @@ export interface RiidoAIAgentEventsNamespace {
 }
 
 /**
+ * 리도, 영실, 홍도, 지원처럼 제품이 제공하는 고정 onboarding fixture 목록과 fixture 기반 agent 생성 진입점입니다.
+ */
+export interface RiidoAIAgentOnboardingFixturesNamespace {
+  /**
+   * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.devices.runtimes`, `aiAgent.tasks.assignableAgents`
+   */
+  readonly createAgent: CreateAIAgentFromOnboardingFixtureEndpoint;
+}
+
+/**
+ * AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
+ */
+export interface RiidoAIAgentOnboardingNamespace {
+  /**
+   * AI Agent 온보딩에서 사용할 서버 제공 fixture 목록을 조회합니다 cache tag: `aiAgent.onboarding.fixtures`
+   */
+  readonly fixtures: ListAIAgentOnboardingFixturesEndpoint;
+}
+
+/**
  * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
  */
 export interface RiidoAIAgentTasksThreadMessagesNamespace {
@@ -2226,6 +2421,10 @@ export interface RiidoAIAgentModule {
    * client가 SSE로 수신하는 상태 변경 stream namespace입니다.
    */
   readonly events: RiidoAIAgentEventsNamespace;
+  /**
+   * AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
+   */
+  readonly onboarding: RiidoAIAgentOnboardingNamespace;
   /**
    * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -2376,6 +2575,30 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
           invalidate: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: streamAIAgentClientEventsQueryKey() }),
           invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: streamAIAgentClientEventsQueryKeyRoot() }),
           prefetch: (queryClient: QueryClient, options?: RiidoQueryOptions<Response>) => queryClient.prefetchQuery(streamAIAgentClientEventsQueryOptions(config, options)),
+        },
+      },
+      onboarding: {
+        fixtures: {
+          request: (options?: RiidoRequestOptions) => listAIAgentOnboardingFixtures(config, options),
+          queryKeyRoot: listAIAgentOnboardingFixturesQueryKeyRoot,
+          queryKey: listAIAgentOnboardingFixturesQueryKey,
+          query: (options: RiidoQueryOptions<AgentOnboardingFixtureListResponse> = {}) => listAIAgentOnboardingFixturesQueryOptions(config, options),
+          queryOptions: (options: RiidoQueryOptions<AgentOnboardingFixtureListResponse> = {}) => listAIAgentOnboardingFixturesQueryOptions(config, options),
+          invalidate: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentOnboardingFixturesQueryKey() }),
+          invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentOnboardingFixturesQueryKeyRoot() }),
+          prefetch: (queryClient: QueryClient, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => queryClient.prefetchQuery(listAIAgentOnboardingFixturesQueryOptions(config, options)),
+          createAgent: {
+            request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixture(config, params, body, options),
+            mutationKey: createAIAgentFromOnboardingFixtureMutationKey,
+            mutation: (options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentFromOnboardingFixtureMutationVariables> = {}) => createAIAgentFromOnboardingFixtureMutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentFromOnboardingFixtureMutationVariables> = {}) => createAIAgentFromOnboardingFixtureMutationOptions(config, options),
+            invalidates: {
+              bootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }),
+              devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
+              tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() })]),
+            },
+          },
         },
       },
       tasks: {
