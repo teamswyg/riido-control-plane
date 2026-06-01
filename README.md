@@ -82,8 +82,6 @@ visibility policy를 통과해야 합니다.
 
 - workflow: `ai-agent-client-testnet-smoke`
 - deploy workflow: `deploy-ai-agent-testnet`
-- base URL: `RIIDO_AI_SERVER_TESTNET_BASE_URL`
-- AI Agent token secret: `RIIDO_AI_SERVER_TESTNET_TOKEN`
 
 `deploy-ai-agent-testnet`은 `v*` tag push 또는 수동 dispatch에서만 실행합니다.
 이 workflow는 GitHub OIDC로 deploy role을 assume하고, image tag를 Git ref와
@@ -102,24 +100,18 @@ CodeDeploy blue/green으로 전환하더라도 CD 실행 owner는
 `riido-control-plane`입니다. CodeDeploy application/deployment group, target
 group/listener topology, IAM, rollback policy는 `riido-infra`가 Terraform으로
 소유하고, 이 public repo는 설정 이름과 동작만 문서화합니다. RIID-4822 이후
-infra output으로 검증된 application/deployment group 이름만 workflow variable로
+infra output으로 검증된 application/deployment group 이름만 workflow 환경 설정으로
 전달할 수 있으며, service role ARN, target group/listener ARN, AppSpec/task
 definition JSON, deployment id, smoke payload는 public workflow 입력이나 artifact로
-노출하지 않습니다. 선택형 CodeDeploy 모드는 아래 두 variable이 모두 있을 때만
-켜지며, 없으면 기존 ECS rolling 경로를 유지합니다.
+노출하지 않습니다. optional CodeDeploy 설정이 없으면 기존 ECS rolling 경로를
+유지합니다.
 
-- secrets: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`,
-  `RIIDO_AI_SERVER_TESTNET_TOKEN`
-- variables: `RIIDO_AI_SERVER_AWS_REGION`,
-  `RIIDO_AI_SERVER_ECR_REPOSITORY`, `RIIDO_AI_SERVER_ECS_CLUSTER`,
-  `RIIDO_AI_SERVER_ECS_SERVICE`, `RIIDO_AI_SERVER_ECS_CONTAINER_NAME`,
-  `RIIDO_AI_SERVER_TESTNET_BASE_URL`
-- optional variable: `RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID`
-- optional variable pair: `RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION`,
-  `RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP`
-
-RIID-4839 기준으로 위 목록이 public CD configuration key의 최소 공개 집합입니다.
-새 `RIIDO_AI_SERVER_*` GitHub secret/variable 이름이 필요하면 workflow보다 먼저
+RIID-4839 기준으로 runtime CD ownership SSOT가 public CD configuration key의
+최소 공개 집합입니다.
+정확한 GitHub secret/variable 이름 목록은 README에서 반복하지 않고
+[`docs/30-architecture/runtime-cd-ownership.md`](docs/30-architecture/runtime-cd-ownership.md)와
+[`docs/30-architecture/runtime-cd-ownership.riido.json`](docs/30-architecture/runtime-cd-ownership.riido.json)에서
+관리합니다. 새 `RIIDO_AI_SERVER_*` GitHub secret/variable 이름이 필요하면 workflow보다 먼저
 `docs/30-architecture/runtime-cd-ownership.riido.json`의
 `public_config_key_minimization`을 갱신해야 합니다. key 값, live 예시, generated
 deploy payload, image/task-definition/CodeDeploy/smoke evidence는 공개 문서나

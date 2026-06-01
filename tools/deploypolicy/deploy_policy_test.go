@@ -231,6 +231,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			Rule                       string   `json:"rule"`
 			PublicKeyNamesAreSensitive bool     `json:"public_key_names_are_sensitive"`
 			KeyNameScopePaths          []string `json:"key_name_scope_paths"`
+			CanonicalCDKeyListPaths    []string `json:"canonical_cd_key_list_paths"`
+			BroadSummaryDocsMustLink   []string `json:"broad_summary_docs_must_link_not_list_cd_keys"`
 			AllowedPublicInformation   []string `json:"allowed_public_information"`
 			AllowedPublicNonCDRuntime  []struct {
 				Name   string `json:"name"`
@@ -267,6 +269,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Hardening, "RIID-4837")
 	requireSliceContains(t, parsed.Hardening, "RIID-4839")
 	requireSliceContains(t, parsed.Hardening, "RIID-4842")
+	requireSliceContains(t, parsed.Hardening, "RIID-4844")
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
 		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
 	}
@@ -425,6 +428,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		"RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION",
 		"RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP",
 	}
+	expectedCDKeys := append(append([]string{}, expectedSecrets...), append(expectedRequiredVars, expectedOptionalVars...)...)
 	requireStringSetExact(t, parsed.PublicConfigKeyMinimization.RequiredSecretKeys, expectedSecrets)
 	requireStringSetExact(t, parsed.PublicConfigKeyMinimization.RequiredVariableKeys, expectedRequiredVars)
 	requireStringSetExact(t, parsed.PublicConfigKeyMinimization.OptionalVariableKeys, expectedOptionalVars)
@@ -457,10 +461,23 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "README.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "docs/30-architecture/runtime-cd-ownership.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, ".github/workflows/deploy-ai-agent-testnet.yml")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, "docs/30-architecture/runtime-cd-ownership.riido.json")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, "docs/30-architecture/runtime-cd-ownership.md")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, ".github/workflows/deploy-ai-agent-testnet.yml")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "README.md")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "docs/20-domain/ai-agent-client-api.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.ForbiddenPublicInformation, "new RIIDO_AI_SERVER_* key names that are not listed in public_config_key_minimization")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.ForbiddenPublicInformation, "example values for allowed public key names")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "CD execution remains owned by riido-control-plane")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "infra consumes the stable key categories and source names only")
+	for _, repoPath := range parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink {
+		body := mustRead(t, filepath.Join("..", "..", filepath.FromSlash(repoPath)))
+		for _, key := range expectedCDKeys {
+			if strings.Contains(body, key) {
+				t.Fatalf("%s must link to runtime CD ownership instead of listing CD key %q", repoPath, key)
+			}
+		}
+	}
 	requireContains(t, doc, "Public Export Contract")
 	requireContains(t, doc, "RIID-4835")
 	requireContains(t, doc, "Public Surface Scan")
@@ -469,6 +486,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, doc, "RIID-4839")
 	requireContains(t, doc, "Public Sensitive Surface Guard")
 	requireContains(t, doc, "RIID-4842")
+	requireContains(t, doc, "RIID-4844")
 	requireContains(t, doc, "infra is the same ownership rule")
 	requireContains(t, doc, "Image values are deliberately not in that public export set")
 	requireContains(t, boundary, "RIID-4835")
@@ -478,10 +496,12 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, boundary, "are not public hand-off artifacts")
 	requireContains(t, readme, "RIID-4839")
 	requireContains(t, readme, "RIID-4842")
+	requireContains(t, readme, "runtime-cd-ownership.md")
 	requireContains(t, domain, "RIID-4839")
 	requireContains(t, domain, "RIID-4842")
 	requireContains(t, migration, "RIID-4839")
 	requireContains(t, migration, "RIID-4842")
+	requireContains(t, migration, "RIID-4844")
 	requireNotContains(t, doc+"\n"+boundary+"\n"+integration, "public image digest")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
@@ -512,6 +532,7 @@ func TestRuntimeCDPublicSurfaceScanContract(t *testing.T) {
 			RiidoTask                  string   `json:"riido_task"`
 			PublicKeyNamesAreSensitive bool     `json:"public_key_names_are_sensitive"`
 			KeyNameScopePaths          []string `json:"key_name_scope_paths"`
+			BroadSummaryDocsMustLink   []string `json:"broad_summary_docs_must_link_not_list_cd_keys"`
 			AllowedPublicNonCDRuntime  []struct {
 				Name string `json:"name"`
 			} `json:"allowed_public_non_cd_runtime_keys"`
@@ -560,6 +581,17 @@ func TestRuntimeCDPublicSurfaceScanContract(t *testing.T) {
 			}
 		}
 	}
+	for _, repoPath := range parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink {
+		body := mustRead(t, filepath.Join("..", "..", filepath.FromSlash(repoPath)))
+		for _, key := range allowedPublicKeys {
+			if stringSliceContains(collectNonCDRuntimeKeyNames(parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime), key) {
+				continue
+			}
+			if strings.Contains(body, key) {
+				t.Fatalf("%s must not repeat public CD configuration key %q", repoPath, key)
+			}
+		}
+	}
 
 	for _, workflowPath := range []string{
 		".github/workflows/deploy-ai-agent-testnet.yml",
@@ -602,6 +634,16 @@ func collectRiidoAIServerKeyLiterals(body string) []string {
 		keys = append(keys, match)
 	}
 	return keys
+}
+
+func collectNonCDRuntimeKeyNames(keys []struct {
+	Name string `json:"name"`
+}) []string {
+	names := make([]string, 0, len(keys))
+	for _, key := range keys {
+		names = append(names, key.Name)
+	}
+	return names
 }
 
 func mustRead(t *testing.T, path string) string {

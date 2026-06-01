@@ -2,7 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
-  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842"],
+  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842", "RIID-4844"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -151,7 +151,8 @@
       "deploy/work-units/riid-4835-control-plane-cd-public-export-contract.riido.json",
       "deploy/work-units/riid-4836-control-plane-cd-public-surface-redaction-scan.riido.json",
       "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json",
-      "deploy/work-units/riid-4839-cd-public-config-key-minimization.riido.json"
+      "deploy/work-units/riid-4839-cd-public-config-key-minimization.riido.json",
+      "deploy/work-units/riid-4844-cd-public-surface-minimal-exposure-ratchet.riido.json"
     ],
     "local_scope": "Infra owns topology, drift policy, IAM, and operator evidence. It does not own runtime artifact CD execution."
   },
@@ -321,6 +322,17 @@
       "stable infra output source names listed in public_config_key_minimization",
       "non-live ownership and behavior descriptions",
       "aggregate deploy or smoke pass-fail status without live payload values"
+    ],
+    "canonical_cd_key_list_paths": [
+      "docs/30-architecture/runtime-cd-ownership.riido.json",
+      "docs/30-architecture/runtime-cd-ownership.md",
+      "docs/30-architecture/runtime-deployment-boundary.md",
+      ".github/workflows/deploy-ai-agent-testnet.yml",
+      ".github/workflows/ai-agent-client-testnet-smoke.yml"
+    ],
+    "broad_summary_docs_must_link_not_list_cd_keys": [
+      "README.md",
+      "docs/20-domain/ai-agent-client-api.md"
     ],
     "allowed_public_non_cd_runtime_keys": [
       {
