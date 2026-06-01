@@ -9,9 +9,11 @@ import (
 
 func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	workflow := mustRead(t, "../../.github/workflows/deploy-ai-agent-testnet.yml")
+	smokeWorkflow := mustRead(t, "../../.github/workflows/ai-agent-client-testnet-smoke.yml")
 	readme := mustRead(t, "../../README.md")
 	boundary := mustRead(t, "../../docs/30-architecture/runtime-deployment-boundary.md")
 	domain := mustRead(t, "../../docs/20-domain/saas-control-plane.md")
+	clientAPI := mustRead(t, "../../docs/20-domain/ai-agent-client-api.md")
 	migration := mustRead(t, "../../docs/migration/control-plane.md")
 	generator := mustRead(t, "../../tools/reactquerygen/main.go")
 	generatedClient := mustRead(t, "../../web/generated/aiAgentClient.ts")
@@ -53,6 +55,11 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "revisionType: \"AppSpecContent\"")
 	requireContains(t, workflow, "aws deploy create-deployment")
 	requireContains(t, workflow, "aws deploy wait deployment-successful")
+	requireContains(t, smokeWorkflow, "TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}")
+	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_BASE_URL\"")
+	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_TOKEN\"")
+	requireContains(t, clientAPI, "not from a manual")
+	requireContains(t, clientAPI, "The workflow masks both values")
 
 	for _, forbidden := range []string{
 		"actions/upload-artifact",
@@ -68,6 +75,9 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	} {
 		if strings.Contains(workflow, forbidden) {
 			t.Fatalf("deploy workflow must not contain %q", forbidden)
+		}
+		if strings.Contains(smokeWorkflow, forbidden) {
+			t.Fatalf("smoke workflow must not contain %q", forbidden)
 		}
 	}
 
@@ -88,6 +98,7 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 		"README.md":                      readme,
 		"runtime-deployment-boundary.md": boundary,
 		"saas-control-plane.md":          domain,
+		"ai-agent-client-api.md":         clientAPI,
 		"control-plane.md":               migration,
 		"tools/reactquerygen/main.go":    generator,
 		"web/generated/aiAgentClient.ts": generatedClient,
@@ -133,6 +144,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			InfraMustOwn       []string `json:"infra_must_own"`
 		} `json:"future_strategies"`
 		Redaction struct {
+			Workflows      []string `json:"public_repo_workflows"`
 			ShouldMinimize []string `json:"public_repo_should_minimize"`
 			MustNot        []string `json:"public_repo_must_not_commit_or_upload"`
 		} `json:"public_redaction_policy"`
@@ -222,6 +234,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	} {
 		requireSliceContains(t, parsed.Redaction.MustNot, forbidden)
 	}
+	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/deploy-ai-agent-testnet.yml")
+	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/ai-agent-client-testnet-smoke.yml")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "publish only stable configuration key names that operators must set")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "avoid environment-specific examples for domains, clusters, services, applications, deployment groups, ARNs, and URLs")
 	if parsed.Infra.Repo != "riido-infra" {
