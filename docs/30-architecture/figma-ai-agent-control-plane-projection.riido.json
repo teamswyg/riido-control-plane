@@ -1,0 +1,219 @@
+{
+  "schema_version": "riido-control-plane-figma-ai-agent-projection.v1",
+  "id": "figma-ai-agent-control-plane-generated-client-projection",
+  "riido_task": "RIID-4810",
+  "source_contracts_manifest": {
+    "repo": "riido-contracts",
+    "path": "docs/30-architecture/figma-ai-agent-coverage.riido.json",
+    "schema_version": "riido-figma-ai-agent-coverage.v1",
+    "id": "figma-v1-22-ai-agent-ui-coverage",
+    "stabilized_by": ["teamswyg/riido-contracts#38", "teamswyg/riido-contracts#39"]
+  },
+  "projection_policy": {
+    "summary": "Control-plane does not own the Figma top-level coverage SSOT. It only projects the coverage entries that require HTTP/SSE/OpenAPI/generated-client behavior.",
+    "top_down": "When contracts coverage adds or changes required generated paths, update the control-plane API DSL/OpenAPI/generated client and this projection gate together.",
+    "bottom_up": "When control-plane implementation discovers a path, cache, stream, or endpoint contradiction, fix local projection if the meaning is local; escalate to contracts if Figma coverage or business policy is wrong."
+  },
+  "entries": [
+    {
+      "node_id": "153:12742",
+      "name": "컴포넌트 참여자 드롭다운",
+      "projection_status": "generated_client_covered",
+      "source_coverage_status": "covered",
+      "local_scope": "AI Agent rows in the participant dropdown consume assignable-agent query plus assign/unassign commands.",
+      "required_generated_paths": [
+        "aiAgent.tasks.assignableAgents",
+        "aiAgent.tasks.assign",
+        "aiAgent.tasks.unassign",
+        "v2.aiAgent.tasks.assignableAgents",
+        "v2.aiAgent.tasks.assign",
+        "v2.aiAgent.tasks.unassign"
+      ]
+    },
+    {
+      "node_id": "153:15931",
+      "name": "댓글 소통",
+      "projection_status": "generated_client_covered",
+      "source_coverage_status": "covered",
+      "local_scope": "Task-thread screens consume cold thread collection, next-instruction message command, compatibility comment command, stop command, and SSE stream.",
+      "required_generated_paths": [
+        "aiAgent.tasks.threads",
+        "aiAgent.tasks.threadMessages.create",
+        "aiAgent.tasks.submitComment",
+        "aiAgent.tasks.stop",
+        "aiAgent.events.stream",
+        "v2.aiAgent.tasks.threads",
+        "v2.aiAgent.tasks.threadMessages.create",
+        "v2.aiAgent.tasks.submitComment",
+        "v2.aiAgent.tasks.stop",
+        "v2.aiAgent.events.stream"
+      ]
+    },
+    {
+      "node_id": "153:15932",
+      "name": "image 14",
+      "projection_status": "non_decision_asset",
+      "source_coverage_status": "non_decision_asset",
+      "no_endpoint_reason": "Contracts classified this as static task-thread image evidence. Control-plane must not add endpoints from this asset."
+    },
+    {
+      "node_id": "153:15935",
+      "name": "추가 기획 내용",
+      "projection_status": "generated_client_covered",
+      "source_coverage_status": "covered",
+      "local_scope": "Task/subtask assignment scope, agent CRUD, and visibility policy are projected through generated AI Agent task/agent operations.",
+      "required_generated_paths": [
+        "aiAgent.tasks.assignableAgents",
+        "aiAgent.tasks.assign",
+        "aiAgent.tasks.unassign",
+        "aiAgent.agents.create",
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.delete",
+        "v2.aiAgent.tasks.assignableAgents",
+        "v2.aiAgent.tasks.assign",
+        "v2.aiAgent.tasks.unassign",
+        "v2.aiAgent.agents.create",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.delete"
+      ],
+      "forbidden_generated_path_fragments": ["projects", "milestones", "intakes", "mentions", "propertyFiller"]
+    },
+    {
+      "node_id": "162:23468",
+      "name": "논의 필요",
+      "projection_status": "planning_evidence",
+      "source_coverage_status": "planning_evidence",
+      "no_endpoint_reason": "Discussion-only evidence must resolve in contracts before control-plane adds API or generated-client behavior."
+    },
+    {
+      "node_id": "156:18767",
+      "name": "image 13",
+      "projection_status": "non_decision_asset",
+      "source_coverage_status": "non_decision_asset",
+      "no_endpoint_reason": "Static menu image evidence. Menu data requirements are covered by explicit route/API decisions, not by this asset."
+    },
+    {
+      "node_id": "156:19307",
+      "name": "메뉴바",
+      "projection_status": "client_route_no_endpoint",
+      "source_coverage_status": "covered",
+      "local_scope": "Control-plane serves data after the client route opens; menu labels, route ordering, and selected state do not create generated endpoints.",
+      "no_endpoint_reason": "Menu placement is a client route affordance, not an HTTP/SSE operation."
+    },
+    {
+      "node_id": "156:19308",
+      "name": "Group 6",
+      "projection_status": "non_decision_asset",
+      "source_coverage_status": "non_decision_asset",
+      "no_endpoint_reason": "Static menu grouping. No generated path is required."
+    },
+    {
+      "node_id": "162:23090",
+      "name": "런타임 설정페이지",
+      "projection_status": "generated_client_covered",
+      "source_coverage_status": "covered",
+      "local_scope": "Runtime settings consume device/runtime read model, agent-bound daemon detail/control commands, and SSE state changes.",
+      "required_generated_paths": [
+        "aiAgent.devices.runtimes",
+        "aiAgent.agents.daemon.details",
+        "aiAgent.agents.daemon.start",
+        "aiAgent.agents.daemon.restart",
+        "aiAgent.agents.daemon.stop",
+        "aiAgent.events.stream",
+        "v2.aiAgent.devices.runtimes",
+        "v2.aiAgent.agents.daemon.details",
+        "v2.aiAgent.agents.daemon.start",
+        "v2.aiAgent.agents.daemon.restart",
+        "v2.aiAgent.agents.daemon.stop",
+        "v2.aiAgent.events.stream"
+      ]
+    },
+    {
+      "node_id": "164:30658",
+      "name": "데스크탑앱 온보딩-런타임 감지 O",
+      "projection_status": "generated_client_covered",
+      "source_coverage_status": "covered",
+      "local_scope": "Desktop webview onboarding consumes bootstrap, device/runtime read model, fixture list/create, and direct agent create operations.",
+      "required_generated_paths": [
+        "aiAgent.bootstrap",
+        "aiAgent.devices.runtimes",
+        "aiAgent.onboarding.fixtures",
+        "aiAgent.onboarding.fixtures.createAgent",
+        "aiAgent.agents.create",
+        "v2.aiAgent.bootstrap",
+        "v2.aiAgent.devices.runtimes",
+        "v2.aiAgent.onboarding.fixtures",
+        "v2.aiAgent.onboarding.fixtures.createAgent",
+        "v2.aiAgent.agents.create"
+      ]
+    },
+    {
+      "node_id": "435:60050",
+      "name": "데스크탑앱 온보딩-런타임 감지 X",
+      "projection_status": "generated_client_covered",
+      "source_coverage_status": "covered",
+      "local_scope": "No-runtime onboarding is derived from the device/runtime read model. Provider install rendering remains client/product surface.",
+      "required_generated_paths": [
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.devices.runtimes"
+      ],
+      "forbidden_generated_path_fragments": ["installProvider", "startProvider"]
+    },
+    {
+      "node_id": "164:45736",
+      "name": "image 8",
+      "projection_status": "non_decision_asset",
+      "source_coverage_status": "non_decision_asset",
+      "no_endpoint_reason": "Static onboarding image evidence. Runtime/fixture/direct-setting requirements are covered by onboarding entries."
+    },
+    {
+      "node_id": "164:45741",
+      "name": "Group 5",
+      "projection_status": "non_decision_asset",
+      "source_coverage_status": "non_decision_asset",
+      "no_endpoint_reason": "Static onboarding grouping. No generated path is required."
+    },
+    {
+      "node_id": "236:29749",
+      "name": "웹 온보딩",
+      "projection_status": "product_surface_no_endpoint",
+      "source_coverage_status": "no_diff_product_surface",
+      "local_scope": "Auth, team invite, app download, Windows waitlist, and marketing consent stay outside the AI Agent generated client.",
+      "no_endpoint_reason": "Web onboarding does not add AI Agent API operations without a separate product/marketing SSOT.",
+      "forbidden_generated_path_fragments": ["waitlist", "marketing", "consent"]
+    },
+    {
+      "node_id": "275:22731",
+      "name": "런타임 설정페이지 엠티",
+      "projection_status": "generated_client_covered",
+      "source_coverage_status": "covered",
+      "local_scope": "Runtime empty states are composed from the device/runtime read model. Waitlist and provider install-card presentation stay outside AI Agent API.",
+      "required_generated_paths": [
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.devices.runtimes"
+      ],
+      "forbidden_generated_path_fragments": ["waitlist", "marketing", "consent", "installProvider"]
+    },
+    {
+      "node_id": "432:37336",
+      "name": "에이전트 설정페이지",
+      "projection_status": "generated_client_covered",
+      "source_coverage_status": "covered",
+      "local_scope": "Agent settings consume bootstrap, device/runtime read model, create/update/delete/editability operations, and runtime-scoped model catalog fields.",
+      "required_generated_paths": [
+        "aiAgent.bootstrap",
+        "aiAgent.agents.create",
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.delete",
+        "aiAgent.agents.editability",
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.bootstrap",
+        "v2.aiAgent.agents.create",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.delete",
+        "v2.aiAgent.agents.editability",
+        "v2.aiAgent.devices.runtimes"
+      ]
+    }
+  ]
+}

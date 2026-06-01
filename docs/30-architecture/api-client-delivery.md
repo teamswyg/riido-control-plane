@@ -50,6 +50,16 @@ which generated calls a route uses after navigation, but client menu labels,
 ordering, selected state, and route wiring stay outside the control-plane API
 projection.
 
+The exhaustive Figma top-level coverage SSOT is owned by `riido-contracts` in
+`docs/30-architecture/figma-ai-agent-coverage.riido.json`. This repository keeps
+only a downstream generated-client projection in
+[`figma-ai-agent-control-plane-projection.md`](figma-ai-agent-control-plane-projection.md)
+and
+[`figma-ai-agent-control-plane-projection.riido.json`](figma-ai-agent-control-plane-projection.riido.json).
+That local projection may repeat node ids and generated path hints, but only to
+check OpenAPI/generated TypeScript drift. It must not redefine Figma coverage,
+business policy, daemon lifecycle, client layout, or infra topology.
+
 Figma task-thread annotations (`node-id=153-15931`) are also consumption context.
 They may name generated call chains such as `riido.aiAgent.events.stream` and
 `riido.aiAgent.tasks.assign`, `riido.aiAgent.tasks.unassign`, and
