@@ -8,7 +8,7 @@ domain slice.
 ## Ownership
 
 `internal/riidoaiserver.RequestAuthorizer` owns the server-side decision of
-whether a bearer token can perform a resource/action request. The authorizer
+whether a request token can perform a resource/action request. The authorizer
 returns a server-side `principal_id` plus optional control-plane roles. Client
 payloads cannot directly submit an owner or role.
 
@@ -27,7 +27,7 @@ This slice does not own:
 - tenant claim mapping, JWKS, or OIDC validation
 - HTTP route wiring in `cmd/riido_ai_server`
 - Terraform, SSM, secret rotation, or deployment evidence
-- production bearer token values
+- production request-token values
 
 ## Resources And Actions
 
@@ -69,7 +69,7 @@ POST to the configured endpoint.
 
 The request includes:
 
-- raw bearer token
+- raw request token
 - optional audience
 - resource
 - action
@@ -111,14 +111,23 @@ an external-provider allow.
 Browser frontends call the same public HTTP endpoints as other clients. CORS is
 therefore a transport allowlist, not an authorization decision.
 
+Generated AI Agent clients must send the token through
+`X-Riido-AI-Agent-Token`. This header name is intentionally different from the
+legacy Riido app `token`/`Authorization` path so frontend call sites can tell
+which SaaS token they are passing. Server-side authorization still treats the
+value as the same opaque request token after extraction. If this header is
+absent, and no compatibility `Authorization: Bearer ...` token is present, the
+request is unauthenticated because the server has no principal to authorize.
+
 `cmd/riido_ai_server` may configure exact browser origins through
 `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`. When configured, `ServerConfig` handles
 `OPTIONS` preflight before route authorization and allows only the HTTP methods
 and headers required by the existing API surface: `GET`, `POST`, `PATCH`,
-`DELETE`, `Authorization`, `Content-Type`, `Accept`, and `Last-Event-ID`.
+`DELETE`, `X-Riido-AI-Agent-Token`, `Authorization`, `Content-Type`, `Accept`,
+and `Last-Event-ID`.
 
 The server does not use wildcard origins and does not enable browser
-credentials. Protected endpoints still require bearer-token authorization and,
+credentials. Protected endpoints still require request-token authorization and,
 where applicable, the agent-catalog RBAC decision described in
 [`agent-catalog-rbac.md`](agent-catalog-rbac.md).
 
@@ -133,15 +142,20 @@ public repository. RIID-4691 reuses the static token hash path for review
 account provisioning without storing raw token values.
 
 RIID-4717 adds browser frontend CORS transport configuration over the existing
-public HTTP API without changing bearer-token authorization, RBAC, or endpoint
+public HTTP API without changing request-token authorization, RBAC, or endpoint
 payload contracts.
 
-RIID-4721 adds the bearer-protected AI Agent client mock API. It reuses the
-same static/external authorizer port and keeps owner/public/private visibility
-checks inside the route handler/store boundary.
+RIID-4721 adds the request-token-protected AI Agent client mock API. It reuses
+the same static/external authorizer port and keeps owner/public/private
+visibility checks inside the route handler/store boundary.
+
+RIID-4795 adds `X-Riido-AI-Agent-Token` as the canonical generated-client
+transport header. `Authorization: Bearer ...` remains a compatibility input for
+non-generated/internal callers, but generated web and desktop-webview clients no
+longer use `token` or `Authorization` in their API wrapper.
 
 Production IdP rollout, tenant claim mapping, JWKS/OIDC validation, and
-production bearer token values remain separate migration units.
+production request-token values remain separate migration units.
 
 Unresolved production identity mapping questions are tracked in
 [`../50-roadmap/open-questions.md`](../50-roadmap/open-questions.md).

@@ -23,6 +23,7 @@ type AIAgentClientStore interface {
 	AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
 	UnassignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
 	SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error)
+	CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error)
 	StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
 	CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error)
 	GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error)
@@ -671,6 +672,61 @@ func (s *MockAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, p
 	return response, nil
 }
 
+func (s *MockAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
+	taskID = strings.TrimSpace(taskID)
+	threadID = strings.TrimSpace(threadID)
+	req.Body = strings.TrimSpace(req.Body)
+	if taskID == "" {
+		return AIAgentTaskActionResponse{}, errors.New("task_id is required")
+	}
+	if threadID == "" {
+		return AIAgentTaskActionResponse{}, errors.New("thread_id is required")
+	}
+	if req.Body == "" {
+		return AIAgentTaskActionResponse{}, errors.New("body is required")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	thread, ok := s.visibleTaskThreadLocked(principal, taskID, threadID)
+	if !ok {
+		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
+	}
+	agent, ok := s.visibleAgent(principal, thread.AgentID)
+	if !ok {
+		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
+	}
+	if active, ok := s.activeTaskThreadLocked(taskID); ok && active.ThreadID != threadID {
+		return AIAgentTaskActionResponse{}, ErrAIAgentTaskThreadConflict
+	}
+	response := AIAgentTaskActionResponse{
+		SchemaVersion:   SchemaVersion,
+		TaskID:          taskID,
+		AgentID:         agent.AgentID,
+		ThreadID:        threadID,
+		RunID:           thread.RunID,
+		WorkStatus:      AgentWorkStatusRunning,
+		AssignmentState: AgentAssignmentStateRunning,
+		CommentKind:     AgentTaskCommentRuntimeProgress,
+		Message:         "agent work continued from task thread message",
+	}
+	threadWasActive := taskThreadHasActiveStream(thread)
+	if !threadWasActive {
+		response.RunID = "run-mock-message-" + taskID + "-" + threadID
+	}
+	if !threadWasActive && (agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser || agent.WorkStatus == AgentWorkStatusQueued) {
+		response.WorkStatus = AgentWorkStatusQueued
+		response.AssignmentState = AgentAssignmentStateQueued
+		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
+		response.Message = "agent is busy; task thread message was queued"
+	}
+	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID)
+	s.appendAgentTaskActionEvent(response)
+	return response, nil
+}
+
 func (s *MockAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
@@ -993,8 +1049,9 @@ func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context
 }
 
 var (
-	ErrAIAgentNotFound = errors.New("ai agent not found")
-	ErrAIAgentAssigned = errors.New("ai agent has assigned tasks")
+	ErrAIAgentNotFound           = errors.New("ai agent not found")
+	ErrAIAgentAssigned           = errors.New("ai agent has assigned tasks")
+	ErrAIAgentTaskThreadConflict = errors.New("task already has another active ai agent thread")
 )
 
 func (s *MockAIAgentClientStore) visibleAgent(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
@@ -1051,6 +1108,31 @@ func (s *MockAIAgentClientStore) visibleTaskThreadsLocked(principal Authorizatio
 		out = append(out, copyTaskThread(thread))
 	}
 	return out
+}
+
+func (s *MockAIAgentClientStore) visibleTaskThreadLocked(principal AuthorizationResult, taskID, threadID string) (AIAgentTaskThreadRecord, bool) {
+	for _, thread := range s.taskThreads[taskID] {
+		if thread.ThreadID != threadID {
+			continue
+		}
+		agent, ok := s.agents[thread.AgentID]
+		if !ok || !aiAgentVisibleTo(principal, agent) {
+			return AIAgentTaskThreadRecord{}, false
+		}
+		return copyTaskThread(thread), true
+	}
+	return AIAgentTaskThreadRecord{}, false
+}
+
+func (s *MockAIAgentClientStore) activeTaskThreadLocked(taskID string) (AIAgentTaskThreadRecord, bool) {
+	threads := s.taskThreads[taskID]
+	for i := len(threads) - 1; i >= 0; i-- {
+		thread := threads[i]
+		if taskThreadHasActiveStream(thread) {
+			return copyTaskThread(thread), true
+		}
+	}
+	return AIAgentTaskThreadRecord{}, false
 }
 
 func (s *MockAIAgentClientStore) activeTaskThreadForAgentLocked(taskID, agentID string) (AIAgentTaskThreadRecord, bool) {
@@ -1112,6 +1194,51 @@ func (s *MockAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAge
 			threads[i].StartedAt = now
 		}
 		if !taskThreadHasActiveStream(threads[i]) {
+			threads[i].CompletedAt = now
+		}
+		s.taskThreads[response.TaskID] = threads
+		return
+	}
+	s.taskThreads[response.TaskID] = append(threads, thread)
+}
+
+func (s *MockAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(response AIAgentTaskActionResponse, sourceMessageID string) {
+	now := time.Now().UTC()
+	thread := AIAgentTaskThreadRecord{
+		ThreadID:        response.ThreadID,
+		TaskID:          response.TaskID,
+		AgentID:         response.AgentID,
+		RunID:           response.RunID,
+		SourceMessageID: strings.TrimSpace(sourceMessageID),
+		WorkStatus:      response.WorkStatus,
+		AssignmentState: response.AssignmentState,
+		CommentKind:     response.CommentKind,
+		Message:         response.Message,
+		StartedAt:       now,
+		Lines:           []AgentThreadProgressLine{},
+	}
+	if !taskThreadHasActiveStream(thread) {
+		thread.CompletedAt = now
+	}
+	threads := s.taskThreads[response.TaskID]
+	for i := range threads {
+		if threads[i].ThreadID != response.ThreadID {
+			continue
+		}
+		threads[i].RunID = response.RunID
+		threads[i].WorkStatus = response.WorkStatus
+		threads[i].AssignmentState = response.AssignmentState
+		threads[i].CommentKind = response.CommentKind
+		threads[i].Message = response.Message
+		if sourceMessageID != "" {
+			threads[i].SourceMessageID = sourceMessageID
+		}
+		if threads[i].StartedAt.IsZero() {
+			threads[i].StartedAt = now
+		}
+		if taskThreadHasActiveStream(threads[i]) {
+			threads[i].CompletedAt = time.Time{}
+		} else {
 			threads[i].CompletedAt = now
 		}
 		s.taskThreads[response.TaskID] = threads

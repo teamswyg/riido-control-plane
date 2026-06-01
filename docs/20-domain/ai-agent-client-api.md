@@ -110,6 +110,12 @@ For agent settings:
   `comment_kind=assignment_started` unless the agent is busy; unassign maps
   participant removal to `stopped_by_user_request`. Hiding stopped rows remains
   client presentation.
+- Figma still labels the task input as "댓글", but this repository treats the
+  AI-Agent-directed user input as a task-thread message. The canonical generated
+  command is `riido.aiAgent.tasks.threadMessages.create`, backed by
+  `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`.
+  The older `tasks.submitComment` command remains a compatibility route for
+  existing task-comment surfaces until the client migration is complete.
 - Figma additional planning section (`node-id=153-15935`) confirms the
   assignment target scope. This repository owns task/subtask-scoped generated
   behavior under `/v1/client/ai-agent/tasks/{task_id}/...`. It does not expose
@@ -178,6 +184,7 @@ The mock API implements:
 - `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`
 - `GET /v1/client/ai-agent/tasks/{task_id}/threads`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
+- `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 - `POST /v1/client/ai-agent/agents`
 - `GET /v1/client/ai-agent/agents/{agent_id}/editability`
@@ -244,16 +251,20 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   command; if queued/running task threads are affected, the response increments
   `running_tasks_force_stopped` and the read model exposes
   `comment_kind=stopped_by_agent_deleted` with `assignment_state=stopped`
-- task-thread comments can enqueue work when the selected agent is busy
+- task-thread messages can enqueue work when the selected agent is busy
+- `POST /v1/client/ai-agent/tasks/{task_id}/comments` is a compatibility route
+  for Figma/task surfaces that still submit a generic comment-like action with
+  `agent_id`; new client code should target a known `thread_id` through
+  `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`
 - busy-agent enqueue responses use `comment_kind=queued_by_busy_agent`,
   `assignment_state=queued`, and `work_status=queued`; user-facing Korean copy
   is client presentation over those typed fields
 - task-thread stop actions return `stopped_by_user_request`
 - task-thread status updates use typed `AgentTaskCommentKind` values
 - task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
-  to render historical AI Agent comments; `active_stream` is present only when
-  the screen should also connect to the client event stream
-- task-thread comments created while the viewer was on another screen are still
+  to render historical AI Agent thread rows; `active_stream` is present only
+  when the screen should also connect to the client event stream
+- task-thread messages created while the viewer was on another screen are still
   returned by the later cold collection; scroll/focus presentation remains a
   client concern
 - daemon progress ingest accepts parsed `<riido_log>...<end>` batches through
@@ -353,21 +364,27 @@ thread in the cold collection; the client decides whether that stopped content i
 rendered or hidden.
 
 `node-id=236-21379` confirms that the normal task screen consumes three
-generated operations as one route composition: `tasks.threads` for historical
-thread rows, `tasks.submitComment` for AI-Agent-directed thread replies, and
-`tasks.stop` for the visible active-thread stop affordance. The right details
-panel, generic task comment box layout, reply input presentation, and send
-button state stay client/task surface behavior. The server only distinguishes an
-AI-Agent-directed message once the client calls
-`POST /v1/client/ai-agent/tasks/{task_id}/comments` with `agent_id` and optional
-`source_comment_id`.
+generated concepts as one route composition: `tasks.threads` for historical
+thread rows, `tasks.threadMessages.create` for AI-Agent-directed next
+instructions against a known `thread_id`, and `tasks.stop` for the visible
+active-thread stop affordance. The right details panel, generic task comment
+box layout, reply input presentation, and send button state stay client/task
+surface behavior. The server only treats the user input as AI-Agent-directed
+once the client targets a task thread through
+`POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages` with a
+message `body`. The legacy
+`POST /v1/client/ai-agent/tasks/{task_id}/comments` route remains accepted for
+client surfaces that have not yet carried `thread_id` through their composition.
 
 `node-id=153-8761` confirms the busy-agent queued branch of the same task-thread
-composition. `tasks.submitComment` remains the creation command. When the
-selected agent is already working, the server returns a queued task-thread row
-with `comment_kind=queued_by_busy_agent`, `assignment_state=queued`, and
-`work_status=queued`; `tasks.threads` later returns that row as part of the cold
-collection, and `events.stream` may replay or stream the typed status change.
+composition. `tasks.threadMessages.create` is the canonical next-instruction
+command. When the selected agent is already working on another active thread,
+the server rejects the request as a task-thread conflict; when a compatible
+queued path is used by the legacy comment route, the response returns a queued
+task-thread row with `comment_kind=queued_by_busy_agent`,
+`assignment_state=queued`, and `work_status=queued`; `tasks.threads` later
+returns that row as part of the cold collection, and `events.stream` may replay
+or stream the typed status change.
 The visible Korean copy, "방금 전" timestamp, avatar, row layout, and other
 comment presentation remain client-owned. The visible `중지` affordance still
 maps to `tasks.stop`; the server must not expose a second queued-cancel endpoint
@@ -388,8 +405,10 @@ stop affordance, avatar, or row layout shown in Figma.
 `node-id=153-15935` confirms that AI Agent target selection is not a general
 workspace object feature. `riido.aiAgent.tasks.assignableAgents`,
 `riido.aiAgent.tasks.assign`, `riido.aiAgent.tasks.unassign`,
-`riido.aiAgent.tasks.submitComment`, `riido.aiAgent.tasks.threads`, and
-`riido.aiAgent.tasks.stop` are task/subtask route composition only. A client
+`riido.aiAgent.tasks.threadMessages.create`, `riido.aiAgent.tasks.threads`, and
+`riido.aiAgent.tasks.stop` are task/subtask route composition only. The
+compatibility `riido.aiAgent.tasks.submitComment` route follows the same target
+scope while it exists. A client
 opening a project, milestone, intake, existing AI property filler, or mention
 surface should not use these calls as a fallback. The control plane also must
 not add placeholder endpoint families for those surfaces until a separate
@@ -523,11 +542,14 @@ ALB for:
 - `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`
 - `GET /v1/client/ai-agent/tasks/{task_id}/threads`
 - `POST /v1/client/ai-agent/tasks/{task_id}/comments`
+- `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 - `POST /v1/client/ai-agent/agents`
 - `GET /v1/client/ai-agent/events?replay=1`
 - `POST /v1/agents/{agent_id}/thread-progress`
 
 The workflow reads the ALB base URL from a manual workflow input or the
-`RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable, and the bearer token
-from the `RIIDO_AI_SERVER_TESTNET_TOKEN` repository secret.
+`RIIDO_AI_SERVER_TESTNET_BASE_URL` repository variable, and the AI Agent SaaS
+token from the `RIIDO_AI_SERVER_TESTNET_TOKEN` repository secret. Smoke calls
+send that value through `X-Riido-AI-Agent-Token`, matching the generated client
+transport.
