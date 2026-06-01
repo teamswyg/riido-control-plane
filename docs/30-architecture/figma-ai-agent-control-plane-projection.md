@@ -105,6 +105,11 @@ control-plane implementation finding
 - Runtime empty states are derived from `aiAgent.devices.runtimes`; provider
   install cards stay client/product presentation until a separate SSOT adds a
   server operation.
+- Runtime settings contains an endpoint-looking Figma label at
+  `node-id=129:17930`, but this repo must not project it as a canonical base
+  URL, generated path, live host, or checked-in configuration value. Generated
+  clients use caller-provided base URL configuration and typed operation paths.
+  It is not a canonical base URL, generated path, or live host export.
 - Task/subtask-only assignment is represented by task-scoped generated paths.
   This repo must not ship project, milestone, intake, mention, or property-filler
   helpers without a new owning SSOT.

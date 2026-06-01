@@ -65,6 +65,9 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "future desktop/web clients")
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "future client bootstrap")
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "contracts", "ai-agent-client"), "future client bootstrap")
+	staleRuntimeHost := "desktop-api." + "riido.ai"
+	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), staleRuntimeHost)
+	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "contracts", "ai-agent-client"), staleRuntimeHost)
 
 	spec, err := loadOpenAPI(openAPIPath)
 	if err != nil {
@@ -81,6 +84,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	generatedPaths := generatedPathsByOperation(spec)
 	generatedHaystack := generatedPathHaystack(spec, generatedPaths)
 	sourceGeneratedPaths := sourceCoverageGeneratedPathsByNode(sourceCoverage)
+	verifyRuntimeEndpointLabelProjection(t, sourceCoverage, docText)
 	verifyFigmaClientDeliveryAnnotations(t, sourceCoverage.ClientDeliveryAnnotations, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
 
 	if got, want := len(manifest.Entries), 16; got != want {
@@ -96,6 +100,46 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 			t.Fatalf("projection doc must mention node %s %s", entry.NodeID, entry.Name)
 		}
 		verifyFigmaProjectionEntry(t, entry, sourceGeneratedPaths, generatedPaths, generatedHaystack, string(core), string(react))
+	}
+}
+
+func verifyRuntimeEndpointLabelProjection(t *testing.T, sourceCoverage figmaSourceCoverageManifest, docText string) {
+	t.Helper()
+	var evidenceFound bool
+	for _, node := range sourceCoverage.VerifiedEvidenceNodes {
+		if node.NodeID == "129:17930" {
+			evidenceFound = true
+			if !strings.Contains(strings.ToLower(node.Name), "endpoint") {
+				t.Fatalf("source coverage runtime endpoint-looking evidence node must explain its role: %+v", node)
+			}
+		}
+	}
+	if !evidenceFound {
+		t.Fatal("source coverage must register runtime settings endpoint-looking label node-id=129:17930")
+	}
+	var runtimeEntry figmaSourceCoverageEntry
+	for _, entry := range sourceCoverage.Entries {
+		if entry.NodeID == "162:23090" {
+			runtimeEntry = entry
+			break
+		}
+	}
+	if runtimeEntry.NodeID == "" {
+		t.Fatal("source coverage runtime settings entry 162:23090 is missing")
+	}
+	facts := strings.Join(runtimeEntry.CoveredFacts, "\n")
+	for _, needle := range []string{
+		"node-id=129:17930",
+		"not a canonical base URL",
+		"generated path",
+		"live host export",
+	} {
+		if !strings.Contains(facts, needle) {
+			t.Fatalf("source coverage runtime settings facts must classify endpoint-looking label with %q: %q", needle, facts)
+		}
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must preserve endpoint-looking label boundary with %q", needle)
+		}
 	}
 }
 
@@ -418,6 +462,7 @@ type figmaSourceCoverageManifest struct {
 	InspectionMethod          figmaCoverageInspectionMethod         `json:"inspection_method"`
 	ExpectedPages             []figmaSourceCoveragePage             `json:"expected_pages"`
 	NonUITopLevelInventory    []figmaSourceCoverageInventory        `json:"non_ui_top_level_inventory"`
+	VerifiedEvidenceNodes     []figmaSourceCoverageNode             `json:"verified_evidence_nodes"`
 	NonUITopLevelNodes        []figmaSourceCoverageEntry            `json:"non_ui_top_level_nodes"`
 	ClientDeliveryAnnotations []figmaSourceClientDeliveryAnnotation `json:"client_delivery_annotations"`
 	Entries                   []figmaSourceCoverageEntry            `json:"entries"`
@@ -449,6 +494,7 @@ type figmaCoverageInspectionMethod struct {
 type figmaSourceCoverageEntry struct {
 	NodeID         string   `json:"node_id"`
 	GeneratedPaths []string `json:"generated_paths,omitempty"`
+	CoveredFacts   []string `json:"covered_facts,omitempty"`
 }
 
 type figmaSourceClientDeliveryAnnotation struct {

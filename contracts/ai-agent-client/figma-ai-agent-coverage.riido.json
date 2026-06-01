@@ -106,6 +106,7 @@
     {"node_id": "153:8749", "name": "Frame 6349974"},
     {"node_id": "153:8761", "name": "que"},
     {"node_id": "153:8835", "name": "Frame 6349974"},
+    {"node_id": "129:17930", "name": "endpoint-looking runtime settings label"},
     {"node_id": "162:23475", "name": "템플릿 선택해서 에이전트 만들면 이름 중복 가능?"},
     {"node_id": "164:26969", "name": "Frame 6350445"},
     {"node_id": "164:27719", "name": "한 줄 설명 길 경우 한 줄 설명 길 경우 한 줄 설명 길 경우 한 줄 설명 길 경우 한 줄 설명 길 경우"},
@@ -447,7 +448,8 @@
       "covered_facts": [
         "device/runtime liveness is read from SaaS",
         "daemon detail and control are agent-bound SaaS commands",
-        "public agent daemon control is available to workspace members, private control is admin/owner-scoped"
+        "public agent daemon control is available to workspace members, private control is admin/owner-scoped",
+        "Figma node-id=129:17930 is an endpoint-looking runtime settings label, not a canonical base URL, generated path, or live host export"
       ],
       "direction_loop": {
         "top_down": "New daemon controls require contracts/API ownership before daemon or client behavior is added.",

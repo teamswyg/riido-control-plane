@@ -123,7 +123,7 @@
       "name": "런타임 설정페이지",
       "projection_status": "generated_client_covered",
       "source_coverage_status": "covered",
-      "local_scope": "Runtime settings consume device/runtime read model, agent-bound daemon detail/control commands, and SSE state changes.",
+      "local_scope": "Runtime settings consume device/runtime read model, agent-bound daemon detail/control commands, and SSE state changes. Figma node-id=129:17930 is not a canonical base URL, generated path, or live host export.",
       "required_generated_paths": [
         "aiAgent.devices.runtimes",
         "aiAgent.agents.daemon.details",
