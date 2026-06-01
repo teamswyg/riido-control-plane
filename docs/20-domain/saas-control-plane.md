@@ -441,8 +441,9 @@ artifact CD workflow: build the checked-in image contract, push an immutable ECR
 image tag, resolve it to a digest, register a new ECS task-definition revision,
 wait for ECS service stability, and run live `healthz`/`readyz`/v2 bootstrap
 smoke. The workflow uses GitHub OIDC and named secrets/variables only; no AWS
-account values, raw tokens, Terraform state, or live evidence payloads are
-committed to this public repository.
+account values, raw tokens, Terraform state, live URLs, task-definition ARNs,
+image digests, workflow run URLs, or live evidence payloads are committed to
+this public repository.
 
 ## Durable Operation Boundary
 
