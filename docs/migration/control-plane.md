@@ -1188,6 +1188,31 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4840 — Figma metadata page-list limitation projection
+
+This slice mirrors a contracts-owned Figma tooling limitation into the
+control-plane projection gate.
+
+On 2026-06-02, no-`nodeId` Figma `get_metadata` listed only `129:5215` `UI`,
+while the Figma Plugin API page registry returned `129:5215`, `42:3014`, and
+`0:1`. Control-plane needs this fact because the generated-client projection
+must keep the whole-file coverage mirror, including non-UI inventories and
+legacy Wireframe absorptions.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- add `mirrored_supporting_tool_limitations` to the local projection manifest
+- require the projection gate to prove the limitation exists in the upstream
+  mirror and preserves the three authoritative page IDs
+- document that no-`nodeId` metadata output must not remove `expected_pages`,
+  `non_ui_top_level_inventory`, or `legacy_non_ui_absorptions`
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

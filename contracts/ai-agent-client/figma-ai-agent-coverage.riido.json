@@ -25,6 +25,17 @@
     ],
     "rule": "expected_pages.child_count and top-level inventories are taken from the Figma Plugin API after loading each page with await figma.setCurrentPageAsync(page), then reading page.children.length/page.children. Passive figma.root.children metadata is only the page registry; metadata XML/read tools are supporting evidence only because they may expand node subtrees or report lazy/unloaded child counts and must not redefine page-level child counts."
   },
+  "supporting_tool_limitations": [
+    {
+      "id": "figma-metadata-page-list-underreports-pages.v1",
+      "tool": "Figma get_metadata without nodeId",
+      "observed_at": "2026-06-02",
+      "observed_result": "No-nodeId get_metadata listed only page 129:5215 UI for file MUOd9lctoEHASUStN3vUuK.",
+      "authoritative_source": "Figma Plugin API figma.root.children after loaded-page inspection",
+      "authoritative_result": ["129:5215", "42:3014", "0:1"],
+      "rule": "metadata page-list output is supporting evidence only and must not remove expected_pages or non-UI inventories."
+    }
+  ],
   "coverage_policy": {
     "summary": "Figma is product/design evidence, not the durable SSOT. A Figma node is covered only when it points to an owning domain/API/infrastructure/client boundary and a deterministic follow-up rule.",
     "top_down": "When Figma changes product meaning, update the owning contracts policy or API DSL first, then regenerate IR/OpenAPI and downstream fixtures.",

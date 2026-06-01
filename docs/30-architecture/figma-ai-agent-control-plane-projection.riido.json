@@ -14,6 +14,18 @@
     "top_down": "When contracts coverage adds or changes required generated paths, update the control-plane API DSL/OpenAPI/generated client and this projection gate together.",
     "bottom_up": "When control-plane implementation discovers a path, cache, stream, or endpoint contradiction, fix local projection if the meaning is local; escalate to contracts if Figma coverage or business policy is wrong."
   },
+  "mirrored_supporting_tool_limitations": [
+    {
+      "source_id": "figma-metadata-page-list-underreports-pages.v1",
+      "local_scope": "Control-plane must not collapse the mirrored coverage to the single UI page when no-nodeId get_metadata under-reports the file page list.",
+      "required_authoritative_pages": ["129:5215", "42:3014", "0:1"],
+      "forbidden_projection_effects": [
+        "remove expected_pages",
+        "remove non_ui_top_level_inventory",
+        "remove legacy_non_ui_absorptions"
+      ]
+    }
+  ],
   "legacy_non_ui_absorptions": [
     {
       "node_id": "13:3789",
