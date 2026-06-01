@@ -55,6 +55,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	if !strings.Contains(docText, "does not redefine the Figma top-level UI coverage") {
 		t.Fatalf("projection doc must name the downstream-only boundary")
 	}
+	verifyMirroredFigmaInspectionMethod(t, sourceCoverage.InspectionMethod, docText)
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164-50215")
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164:50215")
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "starter-agent")
@@ -93,6 +94,30 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 			t.Fatalf("projection doc must mention node %s %s", entry.NodeID, entry.Name)
 		}
 		verifyFigmaProjectionEntry(t, entry, sourceGeneratedPaths, generatedPaths, generatedHaystack, string(core), string(react))
+	}
+}
+
+func verifyMirroredFigmaInspectionMethod(t *testing.T, method figmaCoverageInspectionMethod, docText string) {
+	t.Helper()
+	if method.ID != "figma-plugin-api-page-registry.v1" {
+		t.Fatalf("source coverage inspection method id = %q", method.ID)
+	}
+	if method.PageRegistryExpression != "figma.root.children" {
+		t.Fatalf("source coverage page registry expression = %q", method.PageRegistryExpression)
+	}
+	if method.TopLevelChildCountExpression != "page.children.length" {
+		t.Fatalf("source coverage top-level child count expression = %q", method.TopLevelChildCountExpression)
+	}
+	rule := strings.ToLower(method.Rule)
+	for _, needle := range []string{"supporting evidence", "must not redefine page-level child counts"} {
+		if !strings.Contains(rule, needle) {
+			t.Fatalf("source coverage inspection rule must contain %q: %q", needle, method.Rule)
+		}
+	}
+	for _, needle := range []string{"figma.root.children", "page.children.length", "supporting evidence only"} {
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must mention mirrored inspection method with %q", needle)
+		}
 	}
 }
 
@@ -302,16 +327,24 @@ type figmaProjectionEntry struct {
 }
 
 type figmaSourceCoverageManifest struct {
-	SchemaVersion      string                     `json:"schema_version"`
-	ID                 string                     `json:"id"`
-	ExpectedPages      []figmaSourceCoveragePage  `json:"expected_pages"`
-	NonUITopLevelNodes []figmaSourceCoverageEntry `json:"non_ui_top_level_nodes"`
-	Entries            []figmaSourceCoverageEntry `json:"entries"`
+	SchemaVersion      string                        `json:"schema_version"`
+	ID                 string                        `json:"id"`
+	InspectionMethod   figmaCoverageInspectionMethod `json:"inspection_method"`
+	ExpectedPages      []figmaSourceCoveragePage     `json:"expected_pages"`
+	NonUITopLevelNodes []figmaSourceCoverageEntry    `json:"non_ui_top_level_nodes"`
+	Entries            []figmaSourceCoverageEntry    `json:"entries"`
 }
 
 type figmaSourceCoveragePage struct {
 	NodeID string `json:"node_id"`
 	Name   string `json:"name"`
+}
+
+type figmaCoverageInspectionMethod struct {
+	ID                           string `json:"id"`
+	PageRegistryExpression       string `json:"page_registry_expression"`
+	TopLevelChildCountExpression string `json:"top_level_child_count_expression"`
+	Rule                         string `json:"rule"`
 }
 
 type figmaSourceCoverageEntry struct {
