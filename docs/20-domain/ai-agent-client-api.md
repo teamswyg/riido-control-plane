@@ -415,8 +415,9 @@ to render no-current-device runtime, no daemon, no installed runtime, other
 device rows, or provider install cards. Provider install-card hover behavior,
 external provider installation links, Windows app waitlist copy, and
 marketing-consent button states are not generated AI Agent API operations in
-this slice. `Q-CP-007` tracks whether the waitlist/marketing mutation belongs
-in this control-plane API or an existing product/user-marketing system.
+this slice. `Q-CP-007` resolves that boundary as no-diff for the AI Agent
+control-plane API; a future product/marketing SSOT must define a separate
+generated surface before waitlist or marketing-consent helpers can exist.
 
 `node-id=164-50215` maps to existing agent bootstrap/update behavior plus the
 read-model fields `AgentClientRecord.created_at`,
@@ -464,9 +465,9 @@ login, Google-auth terms consent, email/password validation, terms row default
 state/click target, and member invitation are auth/team/client product surfaces.
 The macOS app download CTA is a distribution route, not a provider install or
 daemon lifecycle command. Windows launch notification and marketing-consent
-variants remain tracked by `Q-CP-007`; this API must not expose a waitlist or
-marketing mutation until that owning SSOT is chosen. Chat and progress-bar
-animation references stay client presentation facts.
+variants follow the `Q-CP-007` no-diff decision; this API must not expose a
+waitlist or marketing mutation. Chat and progress-bar animation references stay
+client presentation facts.
 
 The `model` field from `node-id=164-50215` is implemented as a runtime-scoped
 catalog projection. This repository must not hard-code model candidates as
