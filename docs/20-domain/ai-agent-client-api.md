@@ -608,6 +608,13 @@ ALB for:
 - `POST /v1/client/ai-agent/tasks/{task_id}/stop`
 - `POST /v1/client/ai-agent/agents`
 - `GET /v1/client/ai-agent/onboarding/fixtures`
+
+The `deploy-ai-agent-testnet` workflow runs before its own live smoke when a
+`v*` tag or manual dispatch is used for runtime artifact deployment. That CD
+workflow is the only public-repo path that may assume the configured AWS deploy
+role, push the control-plane image, register an ECS task-definition revision,
+and wait for service stability. Pull request API/generator checks remain
+AWS-free.
 - `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`
 - `GET /v1/client/ai-agent/events?replay=1`
 - `POST /v1/agents/{agent_id}/thread-progress`

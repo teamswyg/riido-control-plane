@@ -21,11 +21,13 @@ provider status, authorization port, RBAC read model, mock/testnet API를
   sub-DSL -> OpenAPI projection -> generated React Query client가 drift 나지
   않도록 합니다.
 - 공개 GitHub Actions에서 black-box/domain/generator 검증을 실행합니다.
+- tag 기반 testnet CD에서 컨테이너 이미지를 빌드하고 ECS 서비스 안정화 후
+  smoke를 검증합니다. AWS topology와 secret 값은 커밋하지 않습니다.
 
 ## 이 레포가 하지 않는 일
 
-- Terraform state, AWS 계정 topology, ECR push 설정, Fargate task-definition
-  wiring을 커밋하지 않습니다.
+- Terraform state, AWS 계정 topology, Fargate/ECS resource topology, raw
+  secret 값을 커밋하지 않습니다.
 - raw request token, IdP secret, customer data export를 소유하지 않습니다.
 - provider runtime process를 실행하거나 provider CLI binary를 번들하지 않습니다.
 - production persistence와 DNS 운영 evidence를 SSOT로 삼지 않습니다.
@@ -77,9 +79,25 @@ visibility policy를 통과해야 합니다.
 현재 testnet smoke는 별도 GitHub Actions workflow가 담당합니다.
 
 - workflow: `ai-agent-client-testnet-smoke`
+- deploy workflow: `deploy-ai-agent-testnet`
 - base URL: `RIIDO_AI_SERVER_TESTNET_BASE_URL`
 - AI Agent token secret: `RIIDO_AI_SERVER_TESTNET_TOKEN`
 - 현재 testnet URL: `http://ai-api.riido.io`
+
+`deploy-ai-agent-testnet`은 `v*` tag push 또는 수동 dispatch에서만 실행합니다.
+이 workflow는 GitHub OIDC로 deploy role을 assume하고, image tag를 Git ref와
+commit SHA에서 만들며, ECR image digest를 ECS task definition revision에
+명시합니다. `latest` tag를 배포 기준으로 쓰지 않습니다.
+
+필요한 GitHub 설정은 이름만 공개 문서화하고 값은 secrets/variables에 둡니다.
+
+- secrets: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`,
+  `RIIDO_AI_SERVER_TESTNET_TOKEN`
+- variables: `RIIDO_AI_SERVER_AWS_REGION`,
+  `RIIDO_AI_SERVER_ECR_REPOSITORY`, `RIIDO_AI_SERVER_ECS_CLUSTER`,
+  `RIIDO_AI_SERVER_ECS_SERVICE`, `RIIDO_AI_SERVER_ECS_CONTAINER_NAME`,
+  `RIIDO_AI_SERVER_TESTNET_BASE_URL`
+- optional variable: `RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID`
 
 검증하는 endpoint:
 
@@ -136,9 +154,10 @@ go run ./tools/containercontract -contract packaging/containers/riido_ai_server_
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
 ```
 
-CI는 public repo에서 가벼운 검증을 돌리기 위한 경계입니다. private infra
-billing pool에서 테스트 비용이 커지지 않도록, 배포 wiring은 `riido-infra`에
-두고 API/generator/smoke 검증은 이 레포에서 수행합니다.
+CI는 public repo에서 가벼운 검증을 돌리기 위한 경계입니다. 배포 비용이 생기는
+동작은 pull request에서 실행하지 않습니다. runtime artifact CD는 tag/manual
+workflow가 소유하고, AWS resource topology와 Terraform drift 정책은
+`riido-infra`가 소유합니다.
 
 ## Module
 

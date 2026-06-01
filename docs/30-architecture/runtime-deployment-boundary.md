@@ -31,8 +31,45 @@ The public image contract requires:
 - `RIIDO_AI_SERVER_ADDR=:8080`
 - `/riido_ai_server` entrypoint
 
-`tools/containercontract` validates this shape. ECR upload, digest promotion,
-and ECS/Fargate rollout are private infra responsibilities.
+`tools/containercontract` validates this shape.
+
+## Testnet Runtime CD
+
+Riido task RIID-4807 moves the **testnet runtime artifact CD execution** into
+this public repository while keeping AWS topology and secret values outside the
+repository.
+
+The `deploy-ai-agent-testnet` workflow is allowed to:
+
+- run only from a `v*` tag push or explicit manual dispatch
+- assume the deploy role through GitHub OIDC
+- build the checked-in container contract image
+- push an immutable ECR tag derived from the Git ref and commit SHA
+- resolve the pushed image to an ECR image digest
+- register a new ECS task-definition revision by replacing only the configured
+  container image
+- update the configured ECS service
+- wait for ECS service stability
+- smoke `healthz`, `readyz`, and the v2 workspace-scoped AI Agent bootstrap API
+
+The workflow must not commit or print unmasked AWS account values, raw token
+values, Terraform state, plan output, or production secret payloads. Public repo
+configuration uses only GitHub secrets/variables:
+
+- secret: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`
+- secret: `RIIDO_AI_SERVER_TESTNET_TOKEN`
+- variable: `RIIDO_AI_SERVER_AWS_REGION`
+- variable: `RIIDO_AI_SERVER_ECR_REPOSITORY`
+- variable: `RIIDO_AI_SERVER_ECS_CLUSTER`
+- variable: `RIIDO_AI_SERVER_ECS_SERVICE`
+- variable: `RIIDO_AI_SERVER_ECS_CONTAINER_NAME`
+- variable: `RIIDO_AI_SERVER_TESTNET_BASE_URL`
+- optional variable: `RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID`
+
+`riido-infra` still owns the Terraform module that creates ECR, ECS, ALB,
+security groups, IAM boundaries, DynamoDB, EventBridge, DNS/ACM/WAF, and the
+policy that Terraform should not roll back the ECS service task definition after
+CD promotes a new image digest.
 
 ## AWS Adapter Boundary
 
@@ -60,7 +97,8 @@ The public hand-off artifacts are:
 - Git commit / tag for `github.com/teamswyg/riido-control-plane`
 - Go module version when tagged
 - container image contract result
-- optional image digest produced by private infra release tooling
+- image digest produced by the tag-triggered testnet CD workflow
+- ECS service stability and AI Agent testnet smoke result
 
 PR descriptions and chat messages are not release SSOT. Any durable decision must
 land in a domain, architecture, ADR, migration, or infra evidence document.

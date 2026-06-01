@@ -1,0 +1,211 @@
+name: deploy-ai-agent-testnet
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Optional AI Agent testnet base URL. Falls back to RIIDO_AI_SERVER_TESTNET_BASE_URL."
+        required: false
+        type: string
+
+concurrency:
+  group: deploy-ai-agent-testnet
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ai-agent-testnet
+    env:
+      AWS_REGION: ${{ vars.RIIDO_AI_SERVER_AWS_REGION }}
+      ECR_REPOSITORY: ${{ vars.RIIDO_AI_SERVER_ECR_REPOSITORY }}
+      ECS_CLUSTER: ${{ vars.RIIDO_AI_SERVER_ECS_CLUSTER }}
+      ECS_SERVICE: ${{ vars.RIIDO_AI_SERVER_ECS_SERVICE }}
+      ECS_CONTAINER_NAME: ${{ vars.RIIDO_AI_SERVER_ECS_CONTAINER_NAME }}
+      TESTNET_BASE_URL: ${{ inputs.base_url || vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
+      TESTNET_WORKSPACE_ID: ${{ vars.RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Verify deploy configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            AWS_REGION
+            ECR_REPOSITORY
+            ECS_CLUSTER
+            ECS_SERVICE
+            ECS_CONTAINER_NAME
+            TESTNET_BASE_URL
+          )
+          for name in "${required[@]}"; do
+            if [ -z "${!name:-}" ]; then
+              echo "$name is required"
+              exit 1
+            fi
+          done
+
+      - name: Verify no non-Riido Go dependencies
+        run: |
+          allowed="github.com/teamswyg/riido-contracts"
+          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
+          if [ -n "$disallowed" ]; then
+            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
+            exit 1
+          fi
+
+      - name: Test AI Agent mock API and command wiring
+        run: |
+          go test ./internal/riidoaiserver -run 'AIAgentClient|HTTPHealth|HTTPReady|WebFrontendCORS' -count=1
+          go test ./cmd/riido_ai_server -run 'AIAgentClientMock|ConfigFromEnv|WebAllowedOrigins' -count=1
+
+      - name: Verify container image contract
+        run: |
+          go test ./tools/containercontract -count=1
+          go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.RIIDO_AI_SERVER_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build and push immutable image
+        id: image
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref_name="${GITHUB_REF_NAME:-manual}"
+          safe_ref="$(printf '%s' "$ref_name" | tr -c 'A-Za-z0-9_.-' '-')"
+          image_tag="${safe_ref}-${GITHUB_SHA:0:12}"
+          if [ "$image_tag" = "latest" ] || [[ "$image_tag" == latest-* ]]; then
+            echo "image tag must not be latest"
+            exit 1
+          fi
+
+          aws_account_id="$(aws sts get-caller-identity --query Account --output text)"
+          registry="${aws_account_id}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          echo "::add-mask::$aws_account_id"
+          echo "::add-mask::$registry"
+
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "$registry"
+
+          local_image="riido-control-plane:${GITHUB_SHA}"
+          tagged_image="${registry}/${ECR_REPOSITORY}:${image_tag}"
+          docker build -f packaging/containers/riido_ai_server.Dockerfile -t "$local_image" .
+          docker tag "$local_image" "$tagged_image"
+          docker push "$tagged_image"
+
+          image_digest="$(
+            aws ecr describe-images \
+              --repository-name "$ECR_REPOSITORY" \
+              --image-ids imageTag="$image_tag" \
+              --query 'imageDetails[0].imageDigest' \
+              --output text
+          )"
+          image_uri="${registry}/${ECR_REPOSITORY}@${image_digest}"
+          echo "::add-mask::$image_uri"
+          echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
+          echo "image_uri=$image_uri" >> "$GITHUB_OUTPUT"
+
+      - name: Register task definition revision
+        id: taskdef
+        shell: bash
+        run: |
+          set -euo pipefail
+          current_task_definition="$(
+            aws ecs describe-services \
+              --cluster "$ECS_CLUSTER" \
+              --services "$ECS_SERVICE" \
+              --query 'services[0].taskDefinition' \
+              --output text
+          )"
+          echo "::add-mask::$current_task_definition"
+
+          aws ecs describe-task-definition \
+            --task-definition "$current_task_definition" \
+            --query 'taskDefinition' \
+            > task-definition.current.json
+
+          jq -e --arg name "$ECS_CONTAINER_NAME" \
+            '.containerDefinitions[] | select(.name == $name)' \
+            task-definition.current.json >/dev/null
+
+          jq --arg name "$ECS_CONTAINER_NAME" --arg image "${{ steps.image.outputs.image_uri }}" '
+            .containerDefinitions |= map(if .name == $name then .image = $image else . end)
+            | del(
+                .taskDefinitionArn,
+                .revision,
+                .status,
+                .requiresAttributes,
+                .compatibilities,
+                .registeredAt,
+                .registeredBy
+              )
+          ' task-definition.current.json > task-definition.next.json
+
+          next_task_definition="$(
+            aws ecs register-task-definition \
+              --cli-input-json file://task-definition.next.json \
+              --query 'taskDefinition.taskDefinitionArn' \
+              --output text
+          )"
+          echo "::add-mask::$next_task_definition"
+          echo "task_definition=$next_task_definition" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy ECS service and wait
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_SERVICE" \
+            --task-definition "${{ steps.taskdef.outputs.task_definition }}" \
+            --force-new-deployment \
+            >/dev/null
+          aws ecs wait services-stable \
+            --cluster "$ECS_CLUSTER" \
+            --services "$ECS_SERVICE"
+
+      - name: Smoke deployed AI Agent API
+        shell: bash
+        env:
+          TESTNET_TOKEN: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TESTNET_TOKEN:-}" ]; then
+            echo "RIIDO_AI_SERVER_TESTNET_TOKEN is required"
+            exit 1
+          fi
+          base_url="${TESTNET_BASE_URL%/}"
+          workspace_id="${TESTNET_WORKSPACE_ID:-workspace-smoke}"
+          auth_header="X-Riido-AI-Agent-Token: ${TESTNET_TOKEN}"
+
+          curl_json() {
+            curl --fail --silent --show-error \
+              --connect-timeout 5 \
+              --max-time 15 \
+              "$@"
+          }
+
+          curl_json "$base_url/healthz" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ok"' >/dev/null
+          curl_json "$base_url/readyz" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ready"' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/bootstrap" \
+            | jq -e --arg workspace_id "$workspace_id" '.schema_version == "riido-ai-server.v1" and .workspace_id == $workspace_id and (.devices | length) >= 1' >/dev/null

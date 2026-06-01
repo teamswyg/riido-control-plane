@@ -23,24 +23,30 @@ operator/private infra validation.
 | DynamoDB/EventBridge adapters | fake endpoint HTTP tests with fake credentials | no live AWS |
 | `awsadapters` facade | compile and usage tests | none |
 | container image contract | `tools/containercontract` and optional local Docker build | Docker only for image build check |
+| AI Agent testnet runtime CD | tag-triggered `deploy-ai-agent-testnet` workflow: build, ECR push, ECS service wait, live smoke | GitHub OIDC, masked AWS account boundary, configured testnet secrets |
 
 Public PR checks must not require AWS credentials, Terraform state, ECR access,
-production secret material, or write access to `riido-client`.
+production secret material, or write access to `riido-client`. Testnet runtime CD
+is not a pull-request gate; it runs only for `v*` tag pushes or explicit manual
+dispatch.
 
 ## Private / Operator Gates
 
 | Surface | Owner | Evidence |
 | --- | --- | --- |
 | Terraform plan/apply | `riido-infra` | typed plan/apply evidence and Terraform work-unit records |
-| ECR image push | `riido-infra` | image digest and push evidence |
-| ECS/Fargate deployment | `riido-infra` | task-definition and service rollout evidence |
+| ECR repository/topology | `riido-infra` | Terraform plan/apply evidence |
+| testnet ECR image push | `riido-control-plane` tag CD | immutable tag, image digest, masked workflow logs |
+| ECS/Fargate topology | `riido-infra` | Terraform plan/apply evidence and drift policy |
+| testnet ECS service deployment | `riido-control-plane` tag CD | task-definition revision, service-stability wait, AI Agent smoke |
 | DNS/ACM/WAF/public ingress | `riido-infra` | traffic, certificate, and ingress evidence |
 | production secret wiring | `riido-infra` plus secret manager | redacted runtime secret evidence |
 | live DynamoDB/EventBridge behavior | `riido-infra` | backend bootstrap and traffic/evidence tools |
 
-Private gates may consume public module tags, container image digests, and the
-`awsadapters` facade. They must not push account-specific evidence back into
-this public repository.
+Private gates may consume public module tags, container image digests, workflow
+run URLs, and the `awsadapters` facade. They must not push account-specific
+state, raw secret values, or unredacted live evidence back into this public
+repository.
 
 ## Optional Local Commands
 
