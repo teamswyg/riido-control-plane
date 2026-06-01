@@ -461,6 +461,12 @@ name stable configuration keys, but they must not commit or upload deployment
 IDs, AppSpec/task-definition JSON, image digests, live URLs, ARNs, smoke
 payloads, service role ARNs, target group/listener ARNs, or environment-specific
 examples.
+RIID-4839 narrows that public configuration surface further: deploy and smoke
+workflows may reference only the stable `RIIDO_AI_SERVER_*` GitHub secret and
+variable names listed in the runtime CD ownership manifest. Adding another
+public key is a CD surface change; key values, live examples, generated deploy
+payloads, image/task-definition values, CodeDeploy generated JSON, deployment
+IDs, smoke payloads, and detailed evidence stay outside public repositories.
 
 ## Durable Operation Boundary
 

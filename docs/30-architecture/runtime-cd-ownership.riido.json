@@ -2,7 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
-  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837"],
+  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -150,7 +150,8 @@
       "deploy/work-units/riid-4833-control-plane-cd-public-redaction-hardening.riido.json",
       "deploy/work-units/riid-4835-control-plane-cd-public-export-contract.riido.json",
       "deploy/work-units/riid-4836-control-plane-cd-public-surface-redaction-scan.riido.json",
-      "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json"
+      "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json",
+      "deploy/work-units/riid-4839-cd-public-config-key-minimization.riido.json"
     ],
     "local_scope": "Infra owns topology, drift policy, IAM, and operator evidence. It does not own runtime artifact CD execution."
   },
@@ -250,6 +251,55 @@
       "AWS CLI response field names inside the deploy workflow"
     ],
     "infra_must_treat_scan_as": "awareness policy only; scan results are not infra inputs, release artifacts, or operator evidence"
+  },
+  "public_config_key_minimization": {
+    "riido_task": "RIID-4839",
+    "canonical_owner": "riido-control-plane",
+    "infra_awareness_owner": "riido-infra",
+    "rule": "Public repositories may name only the minimum stable GitHub configuration keys required to run control-plane CD and smoke. Values, environment-specific examples, generated payloads, and live evidence remain outside public repositories.",
+    "required_secret_keys": [
+      "RIIDO_AI_SERVER_DEPLOY_ROLE_ARN",
+      "RIIDO_AI_SERVER_TESTNET_TOKEN"
+    ],
+    "required_variable_keys": [
+      "RIIDO_AI_SERVER_AWS_REGION",
+      "RIIDO_AI_SERVER_ECR_REPOSITORY",
+      "RIIDO_AI_SERVER_ECS_CLUSTER",
+      "RIIDO_AI_SERVER_ECS_SERVICE",
+      "RIIDO_AI_SERVER_ECS_CONTAINER_NAME",
+      "RIIDO_AI_SERVER_TESTNET_BASE_URL"
+    ],
+    "optional_variable_keys": [
+      "RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID",
+      "RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION",
+      "RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP"
+    ],
+    "stable_infra_source_names": [
+      "ecr_repository_name",
+      "ecs_cluster_name",
+      "service_name",
+      "container_name",
+      "codedeploy_application_name",
+      "codedeploy_deployment_group_name",
+      "operator-provided-testnet-base-url"
+    ],
+    "public_docs_may_reference": [
+      "required or optional key names",
+      "which repository owns each key category",
+      "non-live behavior descriptions"
+    ],
+    "public_docs_must_not_reference": [
+      "key values",
+      "environment-specific example values",
+      "live hosts",
+      "AWS account identifiers",
+      "ARNs",
+      "image values",
+      "task-definition values",
+      "CodeDeploy generated payload values",
+      "smoke request or response payloads"
+    ],
+    "workflow_key_source": "The deploy and smoke workflows are allowed to reference exactly the required and optional keys listed here; any additional RIIDO_AI_SERVER_* GitHub secret or variable name must update this SSOT first."
   },
   "dependency_direction": {
     "top_down": "Runtime artifact CD behavior changes in control-plane first; infra consumes the required topology/evidence needs.",
