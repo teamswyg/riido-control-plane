@@ -178,9 +178,9 @@ For agent settings:
   to `GET /v1/client/ai-agent/devices`: Claude Code/Codex can be rendered as
   detected/selectable rows when their runtime records are online and detected,
   while OpenClaw/Cursor Agent can be rendered as non-detected disabled rows.
-  `node-id=138-7389` maps starter-agent selection to
+  `node-id=138-7389` maps fixture selection to
   `AgentOnboardingFixtureListResponse.fixtures`: the mock fixture catalog exposes
-  the `리도`, `영실`, `홍도`, and `지원` starter fixtures in order, while
+  the `리도`, `영실`, `홍도`, and `지원` onboarding fixtures in order, while
   `직접 설정`, disabled-next state before selection, row selection, and preview
   skeleton/popover rendering are client presentation. Each fixture also carries
   `default_visibility` and `recommended_runtime_kind` so clients can prefill the
@@ -271,7 +271,7 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   normal owned agent from a selected fixture and a complete
   `CreateAgentConfigurationRequest` body
 - the current deterministic mock catalog returns the Figma `node-id=138-7389`
-  starter fixtures in order: `리도`, `영실`, `홍도`, `지원`
+  onboarding fixtures in order: `리도`, `영실`, `홍도`, `지원`
 - `직접 설정` is a client route into explicit agent creation, not a fifth
   `AgentOnboardingFixture`
 - runtime selection uses ordinary device/runtime records; SaaS validates the
@@ -387,11 +387,11 @@ Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
   with all provider rows marked `연결 안 됨` (`node-id=164-30206`). The inspected
   `node-id=137-6746` screen shows Claude Code/Codex as `감지됨` selectable rows
   and OpenClaw/Cursor Agent as `감지 안 됨` non-selectable rows. The inspected
-  `node-id=138-7389` screen shows `리도`, `영실`, `홍도`, and `지원` starter
+  `node-id=138-7389` screen shows `리도`, `영실`, `홍도`, and `지원` onboarding
   fixture rows, followed by `직접 설정`, with a disabled-looking `다음` button
   before selection and a right-side preview skeleton. The inspected
   `node-id=164-26969` expansion is annotated `직접 설정 선택 시 스크롤`; it dims
-  starter-fixture rows and opens `이름`, `설명`, and `지침` inputs with
+  onboarding fixture rows and opens `이름`, `설명`, and `지침` inputs with
   placeholder copy.
 - `node-id=236-29749`: web onboarding section; annotations include chat
   animation reference, Google sign-up wording, Google sign-up requiring terms
@@ -531,7 +531,7 @@ formatting remain client-owned.
 
 `node-id=42-3014` maps to existing bootstrap/devices/create behavior plus the
 explicit fixture endpoints. `GET /v1/client/ai-agent/onboarding/fixtures` gives
-clients stable starter-agent names, descriptions, role labels, thumbnail URLs,
+clients stable fixture names, descriptions, role labels, thumbnail URLs,
 instructions, safe private visibility defaults, and recommended runtime-kind
 hints without hard-coding product copy in the frontend.
 `node-id=138-7389` is the fixture-selection initial state for that response.
@@ -545,9 +545,10 @@ means the mock API keeps submitted duplicate names exactly and relies on
 The direct-setting expansion from `node-id=164-26969` maps those expanded
 `이름`, `설명`, and `지침` inputs to
 `CreateAgentConfigurationRequest.name`, `description`, and `instruction`.
-Dimmed starter rows, placeholder copy, and scroll behavior remain client
-presentation. The server still validates `runtime_id`, `visibility`, optional
-profile image URL, and optional `model_id` through the normal create request.
+Dimmed onboarding fixture rows, placeholder copy, and scroll behavior remain
+client presentation. The server still validates `runtime_id`, `visibility`,
+optional profile image URL, and optional `model_id` through the normal create
+request.
 Fixture runtime hints are advisory: if the recommended runtime is not detected
 or not selectable for the current principal, the client must choose from the
 authorized `devices.runtimes` projection. Fixture records do not ship a model
