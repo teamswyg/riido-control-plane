@@ -591,10 +591,16 @@ func writeNamespaceInterface(b *strings.Builder, module string, path []string, n
 		description = strings.Join(append([]string{module}, path...), ".") + " namespace입니다."
 	}
 	writeJSDoc(b, description)
-	fmt.Fprintf(b, "export interface %s {\n", namespaceInterfaceName(module, path, react))
+	interfaceName := namespaceInterfaceName(module, path, react)
+	if node.Op != nil {
+		info, _ := newOperationInfo(*node.Op)
+		fmt.Fprintf(b, "export interface %s extends %s {\n", interfaceName, operationEndpointType(info.Name, react))
+	} else {
+		fmt.Fprintf(b, "export interface %s {\n", interfaceName)
+	}
 	for _, name := range sortedNodeNames(node) {
 		child := node.Children[name]
-		if child.Op != nil {
+		if child.Op != nil && len(child.Children) == 0 {
 			info, _ := newOperationInfo(*child.Op)
 			writeIndentedJSDoc(b, "  ", operationPropertyDescription(info))
 			fmt.Fprintf(b, "  readonly %s: %s;\n", quoteProperty(name), operationEndpointType(info.Name, react))
@@ -603,7 +609,12 @@ func writeNamespaceInterface(b *strings.Builder, module string, path []string, n
 		childPath := append(path, name)
 		desc := descriptions[namespaceKey(module, childPath)]
 		if desc == "" {
-			desc = strings.Join(append([]string{module}, childPath...), ".") + " namespace입니다."
+			if child.Op != nil {
+				info, _ := newOperationInfo(*child.Op)
+				desc = operationPropertyDescription(info)
+			} else {
+				desc = strings.Join(append([]string{module}, childPath...), ".") + " namespace입니다."
+			}
 		}
 		writeIndentedJSDoc(b, "  ", desc)
 		fmt.Fprintf(b, "  readonly %s: %s;\n", quoteProperty(name), namespaceInterfaceName(module, childPath, react))
