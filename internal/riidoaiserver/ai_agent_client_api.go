@@ -216,12 +216,14 @@ type AgentClientRecordResponse struct {
 }
 
 type AgentOnboardingTemplate struct {
-	TemplateID          string `json:"template_id"`
-	Name                string `json:"name"`
-	RoleLabel           string `json:"role_label,omitempty"`
-	ProfileThumbnailURL string `json:"profile_thumbnail_url,omitempty"`
-	Description         string `json:"description"`
-	Instruction         string `json:"instruction"`
+	TemplateID             string          `json:"template_id"`
+	Name                   string          `json:"name"`
+	RoleLabel              string          `json:"role_label,omitempty"`
+	ProfileThumbnailURL    string          `json:"profile_thumbnail_url,omitempty"`
+	Description            string          `json:"description"`
+	Instruction            string          `json:"instruction"`
+	DefaultVisibility      AgentVisibility `json:"default_visibility"`
+	RecommendedRuntimeKind RuntimeKind     `json:"recommended_runtime_kind,omitempty"`
 }
 
 type ClientBootstrapResponse struct {

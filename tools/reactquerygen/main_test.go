@@ -91,6 +91,10 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"readonly invalidateAll",
 		"readonly prefetch",
 		"invalidates: {",
+		"default_visibility: AgentVisibility;",
+		"recommended_runtime_kind?: RuntimeKind;",
+		"템플릿 선택 시 생성 폼에 미리 채울 공개 범위입니다.",
+		"템플릿에 권장하는 런타임 종류입니다.",
 		"import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@/lib/react-query';",
 	} {
 		if !strings.Contains(body, required) {

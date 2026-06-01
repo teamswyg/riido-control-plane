@@ -62,7 +62,9 @@ For agent settings:
   character description limit, and the 1000 character instruction limit.
 - `riido-contracts` owns onboarding template catalog semantics. This repository
   projects the catalog in `ClientBootstrapResponse.agent_templates` and seeds
-  deterministic mock templates for frontend development.
+  deterministic mock templates for frontend development. Template records carry
+  copyable profile fields, a safe `default_visibility`, and a
+  `recommended_runtime_kind` hint. They do not carry a `model_id`.
 - `riido-contracts` owns onboarding runtime-selectability semantics. This
   repository projects protected `DeviceRecord.runtimes` values through
   `GET /v1/client/ai-agent/devices` and validates selected `runtime_id` values
@@ -132,7 +134,10 @@ For agent settings:
   `ClientBootstrapResponse.agent_templates`: the mock/bootstrap catalog exposes
   the `리도`, `영실`, `홍도`, and `지원` starter templates in order, while
   `직접 설정`, disabled-next state before selection, row selection, and preview
-  skeleton/popover rendering are client presentation.
+  skeleton/popover rendering are client presentation. Each template also carries
+  `default_visibility` and `recommended_runtime_kind` so clients can prefill the
+  create form without making template copy a frontend SSOT. The selected model
+  still comes from the chosen runtime's `RuntimeRecord.models` catalog.
   This repository owns the protected bootstrap projection of `agent_templates`,
   protected runtime read-model projection, selected `runtime_id` validation, and
   mock coverage. It does not own workspace selection, workspace list scrolling
@@ -446,9 +451,10 @@ formatting remain client-owned.
 `node-id=42-3014` maps to existing bootstrap/devices/create behavior plus one
 explicit bootstrap field: `ClientBootstrapResponse.agent_templates`. The
 templates give clients stable starter-agent names, descriptions, role labels,
-thumbnail URLs, and instructions without hard-coding product copy in the
-frontend. `node-id=138-7389` is the template-selection initial state for that
-field. Selecting a template still creates a normal agent through
+thumbnail URLs, instructions, safe private visibility defaults, and recommended
+runtime-kind hints without hard-coding product copy in the frontend.
+`node-id=138-7389` is the template-selection initial state for that field.
+Selecting a template still creates a normal agent through
 `POST /v1/client/ai-agent/agents`; direct setting uses the same create endpoint
 and is not represented as an extra template record.
 The direct-setting expansion from `node-id=164-26969` maps those expanded
@@ -457,6 +463,10 @@ The direct-setting expansion from `node-id=164-26969` maps those expanded
 Dimmed starter rows, placeholder copy, and scroll behavior remain client
 presentation. The server still validates `runtime_id`, `visibility`, optional
 profile image URL, and optional `model_id` through the normal create request.
+Template runtime hints are advisory: if the recommended runtime is not detected
+or not selectable for the current principal, the client must choose from the
+authorized `devices.runtimes` projection. Template records do not ship a model
+default; omitted `model_id` continues to resolve to the selected runtime default.
 No-installed-AI branching is derived from `devices.runtimes` and does not add a
 new SaaS command.
 
