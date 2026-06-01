@@ -70,6 +70,9 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"export function getAIAgentDaemonQueryOptions",
 		"export function restartAIAgentDaemonMutationOptions",
 		"export function submitAIAgentTaskCommentMutationOptions",
+		"export function createAIAgentTaskThreadMessageMutationOptions",
+		"/v1/client/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages",
+		"readonly threadMessages",
 		"export function stopAIAgentTaskMutationOptions",
 		"Promise<AIAgentTaskActionResponse>",
 		"export async function streamAIAgentClientEvents",
@@ -112,6 +115,7 @@ func TestGenerateReactQueryClientIncludesAIAgentSurface(t *testing.T) {
 		"readonly useQuery",
 		"readonly useMutation",
 		"readonly threads",
+		"readonly threadMessages",
 		"from '@/lib/react-query'",
 		"core.RiidoQueryOptions<Response>",
 		"hook은 반드시 `@/lib/react-query`를 통과하므로",
@@ -162,6 +166,7 @@ func TestAIAgentClientMetadataFlowsThroughContractProjections(t *testing.T) {
 		"unassignAIAgentTask":             {"invalidates"},
 		"deleteAIAgent":                   {"invalidates"},
 		"submitAIAgentTaskComment":        {"invalidates"},
+		"createAIAgentTaskThreadMessage":  {"invalidates"},
 		"stopAIAgentTask":                 {"invalidates"},
 	} {
 		metadata := dsl.operations[operationID]

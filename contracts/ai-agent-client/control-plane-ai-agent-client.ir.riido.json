@@ -54,7 +54,14 @@
           "path": [
             "tasks"
           ],
-          "description": "task thread에서 AI Agent assignment와 comment action을 다루는 namespace입니다."
+          "description": "task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "tasks",
+            "threadMessages"
+          ],
+          "description": "task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다."
         }
       ]
     }
@@ -112,10 +119,10 @@
     {
       "policy_id": "agent_assignment_target_scope.v1",
       "kind": "target_scope",
-      "description": "AI Agent assignment, AI-Agent-directed comments, task-thread reads, and task stop actions are generated only for Riido task and subtask surfaces.",
+      "description": "AI Agent assignment, AI-Agent-directed task-thread messages, task-thread reads, and task stop actions are generated only for Riido task and subtask surfaces.",
       "rules": [
         "target: task_id path parameters represent a Riido task or subtask id",
-        "non_target: projects, milestones, intakes, existing AI property filler, and mention surfaces must not reuse task assignment/comment/stop/thread operations",
+        "non_target: projects, milestones, intakes, existing AI property filler, and mention surfaces must not reuse task assignment/message/comment/stop/thread operations",
         "client: non-target surfaces may hide, disable, or omit agent UI, but they must not call generated task-scoped AI Agent operations",
         "future: any non-task target surface requires a separate owning SSOT and a newly generated operation"
       ]
@@ -182,7 +189,7 @@
       "kind": "telemetry",
       "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
       "rules": [
-        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
+        "daemon: parse only explicit runtime progress markers such as <riido_log>...<end>",
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
@@ -195,12 +202,26 @@
       "description": "Task screens read historical AI Agent task threads through HTTP first and connect the client event stream only when the response advertises an active stream link.",
       "rules": [
         "server: return all visible task threads for the requested task as a cold collection",
-        "server: persist and return visible task threads even when the assignment/comment was created while the viewer was on another screen",
+        "server: persist and return visible task threads even when the assignment/message was created while the viewer was on another screen",
         "server: include at most one active_stream link because one task can have only one active AI agent assignment at a time",
         "server: omit active_stream for completed, stopped, failed, or fully cold task-thread collections",
         "stream: every task-thread progress event carries thread_id so the client updates the targeted thread without inferring from task_id alone",
-        "client: never open the SSE stream solely because a task has historical AI Agent comments",
+        "client: never open the SSE stream solely because a task has historical AI Agent thread rows",
         "client: owns long-body scroll/focus, hover, modal, and animation presentation around the returned thread records"
+      ]
+    },
+    {
+      "policy_id": "task_thread_next_instruction.v1",
+      "kind": "command",
+      "description": "Figma가 댓글 상호작용으로 표현한 입력은 정식으로 task-thread message이며, 사용자가 해당 thread에 다음 작업 지시를 남기는 command입니다.",
+      "rules": [
+        "client: call tasks.threadMessages.create only after tasks.threads returned a visible thread_id",
+        "client: send a message body and optional source_message_id; do not send agent_id because thread_id resolves the target agent",
+        "server: accept the message on the targeted active thread as the next instruction for the same thread",
+        "server: a completed visible thread can be reactivated by creating a new run in that same thread when no other task thread is active",
+        "server: reject the command with conflict when the task already has another active AI Agent thread",
+        "server: return the same AIAgentTaskActionResponse shape so clients can update the thread immediately",
+        "compatibility: tasks.submitComment remains a legacy route for client surfaces that have not carried thread_id through the UI composition"
       ]
     },
     {
@@ -423,7 +444,7 @@
     {
       "name": "AgentTaskCommentKind",
       "type": "string",
-      "description": "Figma comment 소통 흐름에서 task thread에 기록되는 상태 update 종류입니다.",
+      "description": "task thread에 기록되는 AI Agent 상태 update 종류입니다. 기존 comment 필드명은 호환명입니다.",
       "values": [
         {
           "value": "queued_by_busy_agent",
@@ -1254,7 +1275,7 @@
       "name": "SubmitAIAgentTaskCommentRequest",
       "schema": {
         "name": "SubmitAIAgentTaskCommentRequest",
-        "description": "task thread comment를 agent에게 전달하기 위한 요청입니다.",
+        "description": "호환 task comment route로 agent에게 메시지를 전달하기 위한 요청입니다. 정식 command는 CreateAIAgentTaskThreadMessageRequest를 사용합니다.",
         "type": "object",
         "required": [
           "agent_id",
@@ -1271,6 +1292,27 @@
           },
           {
             "name": "source_comment_id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateAIAgentTaskThreadMessageRequest",
+      "schema": {
+        "name": "CreateAIAgentTaskThreadMessageRequest",
+        "description": "task thread에 사용자의 다음 작업 지시 메시지를 남기는 정식 요청입니다. thread_id가 target agent를 결정하므로 agent_id를 받지 않습니다.",
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "properties": [
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "source_message_id",
             "type": "string"
           }
         ]
@@ -1454,7 +1496,7 @@
       "name": "AgentWorkStatusChangedEvent",
       "schema": {
         "name": "AgentWorkStatusChangedEvent",
-        "description": "agent 작업 상태와 task thread comment 상태 변경을 전달하는 SSE event입니다.",
+        "description": "agent 작업 상태와 task thread 상태 변경을 전달하는 SSE event입니다.",
         "type": "object",
         "required": [
           "event_type",
@@ -1694,6 +1736,10 @@
           },
           {
             "name": "source_comment_id",
+            "type": "string"
+          },
+          {
+            "name": "source_message_id",
             "type": "string"
           },
           {
@@ -2184,7 +2230,7 @@
           "aiAgent.tasks.threads"
         ]
       },
-      "summary": "task thread comment를 할당된 AI agent에게 전달합니다",
+      "summary": "호환 task comment route로 AI agent에게 메시지를 전달합니다",
       "auth": {
         "scheme": "bearer",
         "scopes": [
@@ -2202,8 +2248,51 @@
         "ref": "AIAgentTaskActionResponse"
       },
       "scenario_ids": [
-        "submitAIAgentTaskComment.comment-routes-to-running-agent",
-        "submitAIAgentTaskComment.comment-queues-behind-busy-agent"
+        "submitAIAgentTaskComment.legacy-comment-route-routes-to-running-agent",
+        "submitAIAgentTaskComment.legacy-comment-route-queues-behind-busy-agent"
+      ]
+    },
+    {
+      "operation_id": "createAIAgentTaskThreadMessage",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages",
+      "resource": "agent",
+      "action": "create",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "threadMessages",
+          "create"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents",
+          "aiAgent.tasks.threads"
+        ]
+      },
+      "summary": "task thread message로 AI agent에게 다음 작업 지시를 전달합니다",
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:comment"
+        ]
+      },
+      "rbac_policy": "task_thread_next_instruction.v1",
+      "request": {
+        "ref": "CreateAIAgentTaskThreadMessageRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenario_ids": [
+        "createAIAgentTaskThreadMessage.active-thread-next-instruction",
+        "createAIAgentTaskThreadMessage.completed-thread-new-run",
+        "createAIAgentTaskThreadMessage.rejects-other-active-thread"
       ]
     },
     {
@@ -2243,7 +2332,7 @@
         "ref": "AIAgentTaskActionResponse"
       },
       "scenario_ids": [
-        "stopAIAgentTask.task-stop-emits-comment-status"
+        "stopAIAgentTask.task-stop-emits-thread-status"
       ]
     },
     {
@@ -2436,7 +2525,7 @@
         "streamAIAgentClientEvents.editability-updates-before-mutation",
         "streamAIAgentClientEvents.runtime-parse-status",
         "streamAIAgentClientEvents.runtime-progress-batch",
-        "streamAIAgentClientEvents.task-comment-status-update"
+        "streamAIAgentClientEvents.task-thread-status-update"
       ]
     }
   ],
@@ -2666,28 +2755,52 @@
       "then": "the response contains the visible persisted thread and advertises active_stream only if that thread is still active"
     },
     {
-      "scenario_id": "submitAIAgentTaskComment.comment-routes-to-running-agent",
+      "scenario_id": "submitAIAgentTaskComment.legacy-comment-route-routes-to-running-agent",
       "operation_id": "submitAIAgentTaskComment",
-      "name": "comment routes to running agent",
-      "given": "the Figma task comment box submits a user message to a selected AI agent",
+      "name": "legacy comment route routes to running agent",
+      "given": "a legacy Figma task comment route submits a user message to a selected AI agent",
       "when": "the selected agent is idle and has an online runtime",
       "then": "the response reports running work and the event stream emits agent_thread_progress batches for the task thread"
     },
     {
-      "scenario_id": "submitAIAgentTaskComment.comment-queues-behind-busy-agent",
+      "scenario_id": "submitAIAgentTaskComment.legacy-comment-route-queues-behind-busy-agent",
       "operation_id": "submitAIAgentTaskComment",
-      "name": "comment queues behind busy agent",
+      "name": "legacy comment route queues behind busy agent",
       "given": "the selected AI agent is already running another task",
-      "when": "the Figma task comment box submits a new user message",
+      "when": "a legacy Figma task comment route submits a new user message",
       "then": "the response reports queued work and the event stream emits queued_by_busy_agent for the task thread"
     },
     {
-      "scenario_id": "stopAIAgentTask.task-stop-emits-comment-status",
+      "scenario_id": "createAIAgentTaskThreadMessage.active-thread-next-instruction",
+      "operation_id": "createAIAgentTaskThreadMessage",
+      "name": "active thread next instruction",
+      "given": "the client has a visible active AI Agent task thread_id from tasks.threads",
+      "when": "the user submits a next instruction message on that thread",
+      "then": "the response reports running work for the same thread_id and the daemon picks up the SaaS command through normal polling"
+    },
+    {
+      "scenario_id": "createAIAgentTaskThreadMessage.completed-thread-new-run",
+      "operation_id": "createAIAgentTaskThreadMessage",
+      "name": "completed thread new run",
+      "given": "the client has a completed visible AI Agent task thread and no other active AI Agent thread exists for the task",
+      "when": "the user submits a next instruction message on that thread",
+      "then": "the server creates a new run for the same thread_id and returns running work"
+    },
+    {
+      "scenario_id": "createAIAgentTaskThreadMessage.rejects-other-active-thread",
+      "operation_id": "createAIAgentTaskThreadMessage",
+      "name": "rejects other active thread",
+      "given": "a task already has another active AI Agent thread",
+      "when": "the user submits a message to a different historical thread",
+      "then": "the server rejects the command with conflict so the client does not accidentally fan out work to two agents"
+    },
+    {
+      "scenario_id": "stopAIAgentTask.task-stop-emits-thread-status",
       "operation_id": "stopAIAgentTask",
-      "name": "task stop emits comment status",
+      "name": "task stop emits thread status",
       "given": "the Figma task thread shows a running AI agent response",
       "when": "the user presses the task stop action",
-      "then": "the response and event stream use stopped_by_user_request so the client can render the stopped agent comment"
+      "then": "the response and event stream use stopped_by_user_request so the client can render the stopped agent thread row"
     },
     {
       "scenario_id": "createAIAgent.agent-add-screen-creates-owned-agent",
@@ -2810,9 +2923,9 @@
       "then": "the event stream emits agent_thread_progress with thread_id and ordered progress lines for the task thread"
     },
     {
-      "scenario_id": "streamAIAgentClientEvents.task-comment-status-update",
+      "scenario_id": "streamAIAgentClientEvents.task-thread-status-update",
       "operation_id": "streamAIAgentClientEvents",
-      "name": "task comment status update",
+      "name": "task thread status update",
       "given": "the Figma task thread flow shows a queued or stopped agent update",
       "when": "the assignment state changes",
       "then": "the event stream includes task_id, assignment_state, and a typed comment_kind for the client thread"

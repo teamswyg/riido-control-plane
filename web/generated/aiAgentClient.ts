@@ -40,6 +40,7 @@ export interface AIAgentTaskThreadRecord {
   message: string;
   run_id: string;
   source_comment_id?: string;
+  source_message_id?: string;
   started_at?: string;
   task_id: string;
   thread_id: string;
@@ -142,7 +143,7 @@ export interface AgentOnboardingTemplate {
 }
 
 /**
- * Figma comment 소통 흐름에서 task thread에 기록되는 상태 update 종류입니다.
+ * task thread에 기록되는 AI Agent 상태 update 종류입니다. 기존 comment 필드명은 호환명입니다.
  */
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "assignment_started" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
 
@@ -184,7 +185,7 @@ export type AgentVisibility = "public" | "private";
 export type AgentWorkStatus = "idle" | "queued" | "running" | "waiting_for_user" | "completed" | "failed" | "offline";
 
 /**
- * agent 작업 상태와 task thread comment 상태 변경을 전달하는 SSE event입니다.
+ * agent 작업 상태와 task thread 상태 변경을 전달하는 SSE event입니다.
  */
 export interface AgentWorkStatusChangedEvent {
   agent_id: string;
@@ -232,6 +233,14 @@ export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusE
  */
 export interface ControlDeviceDaemonRequest {
   reason?: string;
+}
+
+/**
+ * task thread에 사용자의 다음 작업 지시 메시지를 남기는 정식 요청입니다. thread_id가 target agent를 결정하므로 agent_id를 받지 않습니다.
+ */
+export interface CreateAIAgentTaskThreadMessageRequest {
+  body: string;
+  source_message_id?: string;
 }
 
 /**
@@ -408,7 +417,7 @@ export interface StopAIAgentTaskRequest {
 }
 
 /**
- * task thread comment를 agent에게 전달하기 위한 요청입니다.
+ * 호환 task comment route로 agent에게 메시지를 전달하기 위한 요청입니다. 정식 command는 CreateAIAgentTaskThreadMessageRequest를 사용합니다.
  */
 export interface SubmitAIAgentTaskCommentRequest {
   agent_id: string;
@@ -1105,7 +1114,7 @@ export function assignAIAgentTaskMutationOptions(config: RiidoClientConfig, opti
 }
 
 /**
- * task thread comment를 할당된 AI agent에게 전달합니다
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다
  * 경로 파라미터입니다.
  */
 export interface SubmitAIAgentTaskCommentPathParams {
@@ -1113,7 +1122,7 @@ export interface SubmitAIAgentTaskCommentPathParams {
 }
 
 /**
- * task thread comment를 할당된 AI agent에게 전달합니다
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다
  */
 export async function submitAIAgentTaskComment(config: RiidoClientConfig, params: SubmitAIAgentTaskCommentPathParams, body: SubmitAIAgentTaskCommentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/comments`;
@@ -1121,7 +1130,7 @@ export async function submitAIAgentTaskComment(config: RiidoClientConfig, params
 }
 
 /**
- * task thread comment를 할당된 AI agent에게 전달합니다
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다
  * mutation 함수에 전달하는 변수입니다.
  */
 export interface SubmitAIAgentTaskCommentMutationVariables {
@@ -1130,7 +1139,7 @@ export interface SubmitAIAgentTaskCommentMutationVariables {
 }
 
 /**
- * task thread comment를 할당된 AI agent에게 전달합니다
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다
  * 이 mutation을 구분하는 React Query mutation key입니다.
  */
 export function submitAIAgentTaskCommentMutationKey(): readonly unknown[] {
@@ -1138,7 +1147,7 @@ export function submitAIAgentTaskCommentMutationKey(): readonly unknown[] {
 }
 
 /**
- * task thread comment를 할당된 AI agent에게 전달합니다
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다
  * useMutation에 전달할 수 있는 옵션입니다.
  */
 export function submitAIAgentTaskCommentMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, SubmitAIAgentTaskCommentMutationVariables> = {}) {
@@ -1237,6 +1246,52 @@ export function listAIAgentTaskThreadsQueryOptions(config: RiidoClientConfig, pa
     ...queryOptions,
     queryKey: listAIAgentTaskThreadsQueryKey(params),
     queryFn: () => listAIAgentTaskThreads(config, params, { signal }),
+  };
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다
+ * 경로 파라미터입니다.
+ */
+export interface CreateAIAgentTaskThreadMessagePathParams {
+  task_id: string;
+  thread_id: string;
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다
+ */
+export async function createAIAgentTaskThreadMessage(config: RiidoClientConfig, params: CreateAIAgentTaskThreadMessagePathParams, body: CreateAIAgentTaskThreadMessageRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentTaskThreadMessageMutationVariables {
+  params: CreateAIAgentTaskThreadMessagePathParams;
+  body: CreateAIAgentTaskThreadMessageRequest;
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentTaskThreadMessageMutationKey(): readonly unknown[] {
+  return ["createAIAgentTaskThreadMessage"] as const;
+}
+
+/**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentTaskThreadMessageMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentTaskThreadMessageMutationKey(),
+    mutationFn: (variables: CreateAIAgentTaskThreadMessageMutationVariables) => createAIAgentTaskThreadMessage(config, variables.params, variables.body, {}),
   };
 }
 
@@ -1837,7 +1892,7 @@ export interface AssignAIAgentTaskEndpoint {
 }
 
 /**
- * task thread comment를 할당된 AI agent에게 전달합니다
+ * 호환 task comment route로 AI agent에게 메시지를 전달합니다
  * DSL facade path: `aiAgent.tasks.submitComment`
  * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
  */
@@ -1967,6 +2022,51 @@ export interface ListAIAgentTaskThreadsEndpoint {
 }
 
 /**
+ * task thread message로 AI agent에게 다음 작업 지시를 전달합니다
+ * DSL facade path: `aiAgent.tasks.threadMessages.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentTaskThreadMessageEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: CreateAIAgentTaskThreadMessagePathParams, body: CreateAIAgentTaskThreadMessageRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageMutationVariables>) => ReturnType<typeof createAIAgentTaskThreadMessageMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageMutationVariables>) => ReturnType<typeof createAIAgentTaskThreadMessageMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly bootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly tasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly tasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
  * agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentAgentsDaemonNamespace {
@@ -2035,7 +2135,17 @@ export interface RiidoAIAgentEventsNamespace {
 }
 
 /**
- * task thread에서 AI Agent assignment와 comment action을 다루는 namespace입니다.
+ * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
+ */
+export interface RiidoAIAgentTasksThreadMessagesNamespace {
+  /**
+   * task thread message로 AI agent에게 다음 작업 지시를 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   */
+  readonly create: CreateAIAgentTaskThreadMessageEndpoint;
+}
+
+/**
+ * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
  */
 export interface RiidoAIAgentTasksNamespace {
   /**
@@ -2051,9 +2161,13 @@ export interface RiidoAIAgentTasksNamespace {
    */
   readonly stop: StopAIAgentTaskEndpoint;
   /**
-   * task thread comment를 할당된 AI agent에게 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
+   * 호환 task comment route로 AI agent에게 메시지를 전달합니다 invalidates: `aiAgent.bootstrap`, `aiAgent.tasks.assignableAgents`, `aiAgent.tasks.threads`
    */
   readonly submitComment: SubmitAIAgentTaskCommentEndpoint;
+  /**
+   * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
+   */
+  readonly threadMessages: RiidoAIAgentTasksThreadMessagesNamespace;
   /**
    * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 cache tag: `aiAgent.tasks.threads`
    */
@@ -2085,7 +2199,7 @@ export interface RiidoAIAgentModule {
    */
   readonly events: RiidoAIAgentEventsNamespace;
   /**
-   * task thread에서 AI Agent assignment와 comment action을 다루는 namespace입니다.
+   * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
   readonly tasks: RiidoAIAgentTasksNamespace;
 }
@@ -2281,6 +2395,20 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
             tasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
             all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() })]),
+          },
+        },
+        threadMessages: {
+          create: {
+            request: (params: CreateAIAgentTaskThreadMessagePathParams, body: CreateAIAgentTaskThreadMessageRequest, options?: RiidoRequestOptions) => createAIAgentTaskThreadMessage(config, params, body, options),
+            mutationKey: createAIAgentTaskThreadMessageMutationKey,
+            mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageMutationVariables> = {}) => createAIAgentTaskThreadMessageMutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, CreateAIAgentTaskThreadMessageMutationVariables> = {}) => createAIAgentTaskThreadMessageMutationOptions(config, options),
+            invalidates: {
+              bootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }),
+              tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
+              tasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsQueryKeyRoot() })]),
+            },
           },
         },
         threads: {

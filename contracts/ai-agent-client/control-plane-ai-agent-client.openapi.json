@@ -56,7 +56,14 @@
           "path": [
             "tasks"
           ],
-          "description": "task thread에서 AI Agent assignment와 comment action을 다루는 namespace입니다."
+          "description": "task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "tasks",
+            "threadMessages"
+          ],
+          "description": "task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다."
         }
       ]
     }
@@ -802,7 +809,7 @@
           "streamAIAgentClientEvents.editability-updates-before-mutation",
           "streamAIAgentClientEvents.runtime-parse-status",
           "streamAIAgentClientEvents.runtime-progress-batch",
-          "streamAIAgentClientEvents.task-comment-status-update"
+          "streamAIAgentClientEvents.task-thread-status-update"
         ]
       }
     },
@@ -1029,7 +1036,7 @@
     "/v1/client/ai-agent/tasks/{task_id}/comments": {
       "post": {
         "operationId": "submitAIAgentTaskComment",
-        "summary": "task thread comment를 할당된 AI agent에게 전달합니다",
+        "summary": "호환 task comment route로 AI agent에게 메시지를 전달합니다",
         "tags": [
           "ai_agent_client"
         ],
@@ -1099,8 +1106,8 @@
           ]
         },
         "x-riido-scenarios": [
-          "submitAIAgentTaskComment.comment-routes-to-running-agent",
-          "submitAIAgentTaskComment.comment-queues-behind-busy-agent"
+          "submitAIAgentTaskComment.legacy-comment-route-routes-to-running-agent",
+          "submitAIAgentTaskComment.legacy-comment-route-queues-behind-busy-agent"
         ]
       }
     },
@@ -1122,6 +1129,7 @@
           }
         ],
         "requestBody": {
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
@@ -1177,7 +1185,7 @@
           ]
         },
         "x-riido-scenarios": [
-          "stopAIAgentTask.task-stop-emits-comment-status"
+          "stopAIAgentTask.task-stop-emits-thread-status"
         ]
       }
     },
@@ -1244,6 +1252,94 @@
           "listAIAgentTaskThreads.running-task-advertises-one-stream",
           "listAIAgentTaskThreads.reassigned-task-has-multiple-threads",
           "listAIAgentTaskThreads.assignment-created-while-viewer-away"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages": {
+      "post": {
+        "operationId": "createAIAgentTaskThreadMessage",
+        "summary": "task thread message로 AI agent에게 다음 작업 지시를 전달합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "thread_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAIAgentTaskThreadMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:comment"
+        ],
+        "x-riido-rbac-policy": "task_thread_next_instruction.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "tasks",
+            "threadMessages",
+            "create"
+          ],
+          "invalidates": [
+            "aiAgent.bootstrap",
+            "aiAgent.tasks.assignableAgents",
+            "aiAgent.tasks.threads"
+          ]
+        },
+        "x-riido-scenarios": [
+          "createAIAgentTaskThreadMessage.active-thread-next-instruction",
+          "createAIAgentTaskThreadMessage.completed-thread-new-run",
+          "createAIAgentTaskThreadMessage.rejects-other-active-thread"
         ]
       }
     }
@@ -1323,14 +1419,39 @@
       "AIAgentTaskThreadRecord": {
         "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
         "properties": {
+          "thread_id": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
           "agent_id": {
             "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "source_comment_id": {
+            "type": "string"
+          },
+          "source_message_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
           },
           "assignment_state": {
             "$ref": "#/components/schemas/AgentAssignmentState"
           },
           "comment_kind": {
             "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "message": {
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
           },
           "completed_at": {
             "format": "date-time",
@@ -1341,28 +1462,6 @@
               "$ref": "#/components/schemas/AgentThreadProgressLine"
             },
             "type": "array"
-          },
-          "message": {
-            "type": "string"
-          },
-          "run_id": {
-            "type": "string"
-          },
-          "source_comment_id": {
-            "type": "string"
-          },
-          "started_at": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "task_id": {
-            "type": "string"
-          },
-          "thread_id": {
-            "type": "string"
-          },
-          "work_status": {
-            "$ref": "#/components/schemas/AgentWorkStatus"
           }
         },
         "required": [
@@ -1637,7 +1736,7 @@
         "type": "object"
       },
       "AgentTaskCommentKind": {
-        "description": "Figma comment 소통 흐름에서 task thread에 기록되는 상태 update 종류입니다.",
+        "description": "task thread에 기록되는 AI Agent 상태 update 종류입니다. 기존 comment 필드명은 호환명입니다.",
         "enum": [
           "queued_by_busy_agent",
           "assignment_started",
@@ -1753,27 +1852,18 @@
         "type": "string"
       },
       "AgentWorkStatusChangedEvent": {
-        "description": "agent 작업 상태와 task thread comment 상태 변경을 전달하는 SSE event입니다.",
+        "description": "agent 작업 상태와 task thread 상태 변경을 전달하는 SSE event입니다.",
         "properties": {
-          "agent_id": {
-            "type": "string"
-          },
-          "assignment_state": {
-            "$ref": "#/components/schemas/AgentAssignmentState"
-          },
-          "comment_kind": {
-            "$ref": "#/components/schemas/AgentTaskCommentKind"
-          },
           "event_type": {
             "enum": [
               "agent_work_status_changed"
             ],
             "type": "string"
           },
-          "run_id": {
+          "schema_version": {
             "type": "string"
           },
-          "schema_version": {
+          "agent_id": {
             "type": "string"
           },
           "task_id": {
@@ -1782,8 +1872,17 @@
           "thread_id": {
             "type": "string"
           },
+          "run_id": {
+            "type": "string"
+          },
           "work_status": {
             "$ref": "#/components/schemas/AgentWorkStatus"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "comment_kind": {
+            "$ref": "#/components/schemas/AgentTaskCommentKind"
           }
         },
         "required": [
@@ -2319,7 +2418,7 @@
         "type": "object"
       },
       "SubmitAIAgentTaskCommentRequest": {
-        "description": "task thread comment를 agent에게 전달하기 위한 요청입니다.",
+        "description": "호환 task comment route로 agent에게 메시지를 전달하기 위한 요청입니다. 정식 command는 CreateAIAgentTaskThreadMessageRequest를 사용합니다.",
         "properties": {
           "agent_id": {
             "type": "string"
@@ -2380,6 +2479,21 @@
             "$ref": "#/components/schemas/AgentVisibility"
           }
         },
+        "type": "object"
+      },
+      "CreateAIAgentTaskThreadMessageRequest": {
+        "description": "task thread에 사용자의 다음 작업 지시 메시지를 남기는 정식 요청입니다. thread_id가 target agent를 결정하므로 agent_id를 받지 않습니다.",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "source_message_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "body"
+        ],
         "type": "object"
       }
     },

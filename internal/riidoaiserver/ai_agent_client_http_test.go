@@ -421,7 +421,7 @@ func TestHTTPAIAgentClientMockTaskAssignmentAndParticipantRemoval(t *testing.T) 
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
-		Scopes:      []string{"ai-agent:*", "task:task-new:read", "task:task-new:assign", "task:task-new:stop"},
+		Scopes:      []string{"ai-agent:*", "task:task-new:read", "task:task-new:assign", "task:task-new:comment", "task:task-new:stop"},
 	}})
 
 	assignReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/tasks/task-new/assignment", strings.NewReader(`{"agent_id":"agent-public-openclaw"}`))
@@ -456,6 +456,38 @@ func TestHTTPAIAgentClientMockTaskAssignmentAndParticipantRemoval(t *testing.T) 
 	}
 	if len(threads.Threads) != 1 || threads.ActiveStream == nil || threads.ActiveStream.ThreadID != assigned.ThreadID {
 		t.Fatalf("threads after assign = %+v", threads)
+	}
+
+	messageReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/tasks/task-new/threads/"+assigned.ThreadID+"/messages", strings.NewReader(`{"body":"다음 작업을 이어서 진행해 주세요.","source_message_id":"message-next-1"}`))
+	messageReq.Header.Set("Authorization", "Bearer user-token")
+	messageResp := httptest.NewRecorder()
+	server.ServeHTTP(messageResp, messageReq)
+	if messageResp.Code != http.StatusAccepted {
+		t.Fatalf("thread message status=%d body=%s", messageResp.Code, messageResp.Body.String())
+	}
+	var message AIAgentTaskActionResponse
+	if err := json.Unmarshal(messageResp.Body.Bytes(), &message); err != nil {
+		t.Fatalf("thread message json: %v", err)
+	}
+	if message.ThreadID != assigned.ThreadID ||
+		message.AssignmentState != AgentAssignmentStateRunning ||
+		message.CommentKind != AgentTaskCommentRuntimeProgress {
+		t.Fatalf("thread message response = %+v", message)
+	}
+
+	threadsAfterMessageReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-new/threads", nil)
+	threadsAfterMessageReq.Header.Set("Authorization", "Bearer user-token")
+	threadsAfterMessageResp := httptest.NewRecorder()
+	server.ServeHTTP(threadsAfterMessageResp, threadsAfterMessageReq)
+	if threadsAfterMessageResp.Code != http.StatusOK {
+		t.Fatalf("threads after message status=%d body=%s", threadsAfterMessageResp.Code, threadsAfterMessageResp.Body.String())
+	}
+	var threadsAfterMessage AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(threadsAfterMessageResp.Body.Bytes(), &threadsAfterMessage); err != nil {
+		t.Fatalf("threads after message json: %v", err)
+	}
+	if len(threadsAfterMessage.Threads) != 1 || threadsAfterMessage.Threads[0].SourceMessageID != "message-next-1" {
+		t.Fatalf("threads after message = %+v", threadsAfterMessage)
 	}
 
 	unassignReq := httptest.NewRequest(http.MethodDelete, "/v1/client/ai-agent/tasks/task-new/assignment", strings.NewReader(`{"agent_id":"agent-public-openclaw","reason":"removed from participants"}`))
