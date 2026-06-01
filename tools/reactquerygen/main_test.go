@@ -210,6 +210,35 @@ func TestAIAgentClientMetadataFlowsThroughContractProjections(t *testing.T) {
 	}
 }
 
+func TestAPIClientDeliveryUsesResolvedRuntimeModelCatalogWording(t *testing.T) {
+	docPath := filepath.Join("..", "..", "docs", "30-architecture", "api-client-delivery.md")
+	data, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatalf("read api client delivery doc: %v", err)
+	}
+	body := string(data)
+	for _, forbidden := range []string{
+		"model-catalog question is resolved",
+		"until the canonical contracts model-catalog policy",
+		"promotes them; clients derive the selected model",
+	} {
+		if strings.Contains(body, forbidden) {
+			t.Fatalf("api client delivery doc still uses unresolved runtime model catalog wording %q", forbidden)
+		}
+	}
+	for _, required := range []string{
+		"`runtime_model_catalog.v1`",
+		"clients render `RuntimeRecord.models`",
+		"model labels stay runtime-scoped display data rather than enum members",
+		"include model defaults or `model_id`",
+		"omitted-`model_id` defaulting rule",
+	} {
+		if !strings.Contains(body, required) {
+			t.Fatalf("api client delivery doc missing resolved runtime model catalog wording %q", required)
+		}
+	}
+}
+
 type clientProjection struct {
 	modules    string
 	operations map[string]string
