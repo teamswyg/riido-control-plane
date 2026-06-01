@@ -431,10 +431,18 @@ certificates, `EXPOSE 8080`, `RIIDO_AI_SERVER_ADDR=:8080`, non-root
 `riido-container-image-contract-check.v1` evidence and may optionally validate a
 private Fargate task-definition IR when another repository supplies that path.
 
-This boundary does not own ECR repositories, image push permissions, immutable
-image digest evidence, Terraform/Fargate task definitions, AWS credentials,
-runtime secret values, production environment variables, or deployment
-evidence. Those remain `riido-infra` responsibilities.
+This boundary does not own ECR repositories, Terraform-created ECS/Fargate
+topology, AWS account topology, raw runtime secret values, production
+environment values, DNS/ACM/WAF resources, or Terraform state. Those remain
+`riido-infra` responsibilities.
+
+For the AI Agent testnet, `riido-control-plane` owns the tag-triggered runtime
+artifact CD workflow: build the checked-in image contract, push an immutable ECR
+image tag, resolve it to a digest, register a new ECS task-definition revision,
+wait for ECS service stability, and run live `healthz`/`readyz`/v2 bootstrap
+smoke. The workflow uses GitHub OIDC and named secrets/variables only; no AWS
+account values, raw tokens, Terraform state, or live evidence payloads are
+committed to this public repository.
 
 ## Durable Operation Boundary
 

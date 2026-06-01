@@ -510,6 +510,32 @@ immutable image digest evidence, Terraform/Fargate task definitions, AWS
 credentials, runtime secret values, production environment values, private
 deployment evidence, review account seed data, dashboards, or daemon consumers.
 
+### RIID-4807 — tag-based AI Agent testnet CD
+
+This slice moves the executable **testnet runtime artifact CD** into the public
+control-plane repository without moving Terraform topology or secret values.
+
+This slice does:
+
+- add `.github/workflows/deploy-ai-agent-testnet.yml`
+- trigger deployment only from `v*` tags or explicit manual dispatch
+- use GitHub OIDC via `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`
+- build the checked-in `riido_ai_server` container image contract
+- push an immutable ECR tag derived from the Git ref and commit SHA
+- resolve the pushed image to an ECR digest
+- register a new ECS task-definition revision by changing only the configured
+  container image
+- update the configured ECS service and wait for service stability
+- smoke `healthz`, `readyz`, and v2 workspace-scoped AI Agent bootstrap after
+  deployment
+- document the public secret/variable names without committing their values
+
+This slice does not move ECR repository creation, ECS cluster/service topology,
+IAM role topology, ALB/Route53/ACM/WAF resources, DynamoDB/EventBridge
+resources, Terraform state, production secret payloads, or private live
+evidence. Those remain `riido-infra` responsibilities. It also does not add
+CodeDeploy blue/green; rolling ECS deployment is the current testnet CD model.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public
@@ -797,9 +823,11 @@ Server black-box tests should cover:
 ## Infra Boundary
 
 `riido-control-plane` may build an image and verify the executable image
-contract. Deployment is not owned here.
+contract. After RIID-4807 it also owns tag-triggered testnet runtime artifact CD:
+immutable image push, ECS task-definition revision registration, ECS service
+stability wait, and live AI Agent mock smoke.
 
-`riido-infra` consumes immutable artifacts by:
+`riido-infra` still owns AWS topology and consumes immutable artifacts by:
 
 - Git tag
 - module version
