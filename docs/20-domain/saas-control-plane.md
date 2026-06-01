@@ -445,6 +445,13 @@ account values, raw tokens, Terraform state, live URLs, task-definition ARNs,
 image digests, workflow run URLs, or live evidence payloads are committed to
 this public repository.
 
+If production later switches to CodeDeploy blue/green, the same ownership rule
+holds: `riido-control-plane` owns the runtime artifact CD workflow and post-shift
+smoke, while `riido-infra` owns the CodeDeploy topology, IAM, rollback policy,
+Terraform drift, and operator evidence. Public control-plane docs/workflows may
+name configuration keys, but they must not commit or upload deployment IDs,
+AppSpec/task-definition JSON, image digests, live URLs, ARNs, or smoke payloads.
+
 ## Durable Operation Boundary
 
 The assignment operation journal and claim-port contract is owned by

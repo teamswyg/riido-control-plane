@@ -543,6 +543,32 @@ RIID-4812 tightens that public boundary: the deploy workflow may own runtime
 artifact CD, but durable deployment evidence and environment values remain
 private/operator-owned. Public docs name only configuration keys and behavior.
 
+### RIID-4814 — CodeDeploy ownership and public redaction SSOT
+
+This slice makes the runtime CD ownership rule explicit before any CodeDeploy
+blue/green implementation work lands.
+
+This slice does:
+
+- add `docs/30-architecture/runtime-cd-ownership.md`
+- add `docs/30-architecture/runtime-cd-ownership.riido.json`
+- keep current testnet ECS rolling CD under the existing
+  `deploy-ai-agent-testnet` workflow
+- state that future CodeDeploy create/wait/smoke execution also stays in
+  `riido-control-plane`
+- require CodeDeploy application/deployment group, target groups/listeners,
+  rollback policy, IAM, Terraform drift, and operator evidence to stay in
+  `riido-infra`
+- mask configured deploy target values in the public workflow before AWS calls
+- keep live URL values, AWS account ids, ARNs, deployment ids, task-definition
+  revision values, image digests, AppSpec/task-definition JSON, smoke payloads,
+  Terraform plans, state, tfvars, apply logs, and raw evidence out of checked-in
+  public artifacts
+
+This slice does not create CodeDeploy AWS resources, alter Terraform topology,
+change production traffic shifting, run a live deployment, or upload deployment
+evidence artifacts.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public

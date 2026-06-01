@@ -59,6 +59,21 @@ jobs:
             fi
           done
 
+          redacted=(
+            AWS_REGION
+            ECR_REPOSITORY
+            ECS_CLUSTER
+            ECS_SERVICE
+            ECS_CONTAINER_NAME
+            TESTNET_BASE_URL
+            TESTNET_WORKSPACE_ID
+          )
+          for name in "${redacted[@]}"; do
+            if [ -n "${!name:-}" ]; then
+              echo "::add-mask::${!name}"
+            fi
+          done
+
       - name: Verify no non-Riido Go dependencies
         run: |
           allowed="github.com/teamswyg/riido-contracts"

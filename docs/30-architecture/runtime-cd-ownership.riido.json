@@ -1,0 +1,80 @@
+{
+  "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
+  "id": "runtime-cd-ownership",
+  "riido_task": "RIID-4814",
+  "runtime_service": "riido_ai_server",
+  "current_strategy": {
+    "id": "ecs-rolling-task-definition-revision",
+    "status": "active-testnet",
+    "cd_owner": "riido-control-plane",
+    "topology_owner": "riido-infra",
+    "workflow": ".github/workflows/deploy-ai-agent-testnet.yml",
+    "allowed_actions": [
+      "build checked-in container contract",
+      "push immutable ECR image tag",
+      "resolve image digest",
+      "register ECS task-definition revision",
+      "update ECS service",
+      "wait for ECS service stability",
+      "run healthz readyz and v2 bootstrap smoke"
+    ]
+  },
+  "future_strategies": [
+    {
+      "id": "codedeploy-blue-green",
+      "status": "future-topology",
+      "cd_owner": "riido-control-plane",
+      "topology_owner": "riido-infra",
+      "control_plane_may_own": [
+        "create CodeDeploy deployment from the public image digest and infra-provided deployment target",
+        "wait for CodeDeploy deployment completion",
+        "run healthz readyz and v2 bootstrap smoke after traffic shift",
+        "tighten public workflow redaction without changing AWS topology"
+      ],
+      "infra_must_own": [
+        "CodeDeploy application and deployment group",
+        "blue green target groups and listener topology",
+        "CodeDeploy service role and IAM permission boundary",
+        "rollback and traffic-shift policy",
+        "Terraform drift and operator evidence interpretation"
+      ]
+    }
+  ],
+  "public_redaction_policy": {
+    "public_repo_may_commit": [
+      "workflow file",
+      "GitHub secret and variable names",
+      "redaction allow and deny policy",
+      "non-live behavior documentation"
+    ],
+    "public_repo_must_not_commit_or_upload": [
+      "live URL values",
+      "AWS account IDs",
+      "ARNs",
+      "task-definition revision values",
+      "CodeDeploy deployment IDs",
+      "image digests or image URIs",
+      "task definition JSON",
+      "CodeDeploy AppSpec JSON",
+      "smoke response payloads",
+      "Terraform plan output",
+      "Terraform state",
+      "tfvars",
+      "apply logs",
+      "raw operator evidence"
+    ]
+  },
+  "infra_consumes": {
+    "repo": "riido-infra",
+    "paths": [
+      "docs/architecture/terraform-authoring.md",
+      "docs/migration/infra.md",
+      "deploy/work-units/riid-4814-control-plane-codedeploy-handoff-ssot.riido.json"
+    ],
+    "local_scope": "Infra owns topology, drift policy, IAM, and operator evidence. It does not own runtime artifact CD execution."
+  },
+  "dependency_direction": {
+    "top_down": "Runtime artifact CD behavior changes in control-plane first; infra consumes the required topology/evidence needs.",
+    "bottom_up": "Infra may discover topology or security constraints and request a control-plane workflow change, but that does not move CD execution out of control-plane."
+  }
+}

@@ -64,6 +64,7 @@ client 코드는 generated facade에서 `riido.v2.aiAgent.agents.create`처럼
 | runtime env 변수와 설정 책임 | [`docs/30-architecture/config-reference.md`](docs/30-architecture/config-reference.md) |
 | daemon/contracts/infra/client와의 연결 | [`docs/30-architecture/integration-matrix.md`](docs/30-architecture/integration-matrix.md) |
 | public runtime과 deploy boundary | [`docs/30-architecture/runtime-deployment-boundary.md`](docs/30-architecture/runtime-deployment-boundary.md) |
+| runtime artifact CD 소유권과 CodeDeploy 전환 경계 | [`docs/30-architecture/runtime-cd-ownership.md`](docs/30-architecture/runtime-cd-ownership.md) |
 | 마이그레이션 히스토리 | [`docs/migration/control-plane.md`](docs/migration/control-plane.md) |
 
 ## AI Agent mock testnet
@@ -92,6 +93,11 @@ commit SHA에서 만들며, ECR image digest를 ECS task definition revision에
 필요한 GitHub 설정은 이름만 공개 문서화하고 값은 secrets/variables에 둡니다.
 live URL, AWS account id, ARN, image digest, task-definition revision, workflow
 run URL, smoke 결과 payload는 이 public repo에 고정하지 않습니다.
+
+CodeDeploy blue/green으로 전환하더라도 CD 실행 owner는
+`riido-control-plane`입니다. CodeDeploy application/deployment group, target
+group/listener topology, IAM, rollback policy는 `riido-infra`가 Terraform으로
+소유하고, 이 public repo는 설정 이름과 동작만 문서화합니다.
 
 - secrets: `RIIDO_AI_SERVER_DEPLOY_ROLE_ARN`,
   `RIIDO_AI_SERVER_TESTNET_TOKEN`
