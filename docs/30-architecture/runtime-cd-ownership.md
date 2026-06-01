@@ -148,6 +148,18 @@ for infra is the same ownership rule: CD execution and public redaction gates
 stay in `riido-control-plane`; topology, IAM, drift, and private evidence stay in
 `riido-infra`.
 
+RIID-4837 closes the final guard around that remodel. The scan scope also covers
+the generated-client delivery guide and generated React wrapper because those
+files are public client-facing surfaces that can accidentally teach a live host
+or handoff mechanism. The infra awareness path also lists every no-diff
+hardening work unit from RIID-4833, RIID-4835, RIID-4836, and RIID-4837 so infra
+knows the policy sequence without consuming workflow payloads.
+
+Private/operator gates may use image digests or workflow run references only as
+out-of-band evidence summaries. They are not public release hand-off artifacts,
+workflow outputs, uploaded artifacts, checked-in examples, or reusable inputs for
+`riido-infra`.
+
 ## Drift Rule
 
 Top-down changes start in this manifest or the runtime deployment boundary.
