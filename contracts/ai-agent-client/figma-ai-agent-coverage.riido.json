@@ -1,0 +1,438 @@
+{
+  "schema_version": "riido-figma-ai-agent-coverage.v1",
+  "id": "figma-v1-22-ai-agent-ui-coverage",
+  "riido_task": "RIID-4809",
+  "human_doc": "docs/30-architecture/figma-ai-agent-coverage.md",
+  "related_manifests": [
+    "docs/30-architecture/ssot-dependency-map.riido.json"
+  ],
+  "figma": {
+    "file_key": "MUOd9lctoEHASUStN3vUuK",
+    "file_name": "v.1.22 AI Agent",
+    "page_id": "129:5215",
+    "page_name": "UI",
+    "inspected_at": "2026-06-02",
+    "inspection_source": "Figma metadata, top-level frame list, cited node-id existence check, and annotations"
+  },
+  "coverage_policy": {
+    "summary": "Figma is product/design evidence, not the durable SSOT. A Figma node is covered only when it points to an owning domain/API/infrastructure/client boundary and a deterministic follow-up rule.",
+    "top_down": "When Figma changes product meaning, update the owning contracts policy or API DSL first, then regenerate IR/OpenAPI and downstream fixtures.",
+    "bottom_up": "When implementation or harness work finds a contradiction, record the local finding, escalate the owning SSOT, then update this coverage manifest."
+  },
+  "expected_top_level_nodes": [
+    {"node_id": "153:12742", "name": "컴포넌트 참여자 드롭다운"},
+    {"node_id": "153:15931", "name": "댓글 소통"},
+    {"node_id": "153:15932", "name": "image 14"},
+    {"node_id": "153:15935", "name": "추가 기획 내용"},
+    {"node_id": "162:23468", "name": "논의 필요"},
+    {"node_id": "156:18767", "name": "image 13"},
+    {"node_id": "156:19307", "name": "메뉴바"},
+    {"node_id": "156:19308", "name": "Group 6"},
+    {"node_id": "162:23090", "name": "런타임 설정페이지"},
+    {"node_id": "164:30658", "name": "데스크탑앱 온보딩-런타임 감지 O"},
+    {"node_id": "435:60050", "name": "데스크탑앱 온보딩-런타임 감지 X"},
+    {"node_id": "164:45736", "name": "image 8"},
+    {"node_id": "164:45741", "name": "Group 5"},
+    {"node_id": "236:29749", "name": "웹 온보딩"},
+    {"node_id": "275:22731", "name": "런타임 설정페이지 엠티"},
+    {"node_id": "432:37336", "name": "에이전트 설정페이지"}
+  ],
+  "verified_evidence_nodes": [
+    {"node_id": "134:6542", "name": "에이전트 추가"},
+    {"node_id": "137:6746", "name": "돌아가는 AI 보여주기"},
+    {"node_id": "138:7389", "name": "에이전트 선택"},
+    {"node_id": "153:12743", "name": "화면 기록 2026-05-27 오후 6.27.05 1"},
+    {"node_id": "153:8545", "name": "contents"},
+    {"node_id": "153:8592", "name": "Frame 6349974"},
+    {"node_id": "153:8749", "name": "Frame 6349974"},
+    {"node_id": "153:8761", "name": "que"},
+    {"node_id": "153:8835", "name": "Frame 6349974"},
+    {"node_id": "162:23475", "name": "템플릿 선택해서 에이전트 만들면 이름 중복 가능?"},
+    {"node_id": "164:26969", "name": "Frame 6350445"},
+    {"node_id": "164:27719", "name": "한 줄 설명 길 경우 한 줄 설명 길 경우 한 줄 설명 길 경우 한 줄 설명 길 경우 한 줄 설명 길 경우"},
+    {"node_id": "164:30192", "name": "Frame 6350447"},
+    {"node_id": "164:30206", "name": "돌아가는 AI 보여주기"},
+    {"node_id": "227:19354", "name": "작업 중지"},
+    {"node_id": "236:20768", "name": "SolidButton"},
+    {"node_id": "236:20762", "name": "Modal/medium"},
+    {"node_id": "236:20848", "name": "Frame 6349974"},
+    {"node_id": "236:21048", "name": "Modal/medium"},
+    {"node_id": "236:21199", "name": "Frame 6349974"},
+    {"node_id": "236:21379", "name": "작업"},
+    {"node_id": "236:21467", "name": "화면 기록 2026-05-27 오후 6.27.05 2"},
+    {"node_id": "337:24001", "name": "에이전트"},
+    {"node_id": "337:24013", "name": "SolidButton"},
+    {"node_id": "417:21803", "name": "SolidButton"},
+    {"node_id": "42:3014", "name": "Wireframe - 온보딩"},
+    {"node_id": "432:23265", "name": "input"},
+    {"node_id": "432:35544", "name": "SolidButton"},
+    {"node_id": "432:35595", "name": "input"},
+    {"node_id": "432:35713", "name": "에이전트"},
+    {"node_id": "432:37740", "name": "Modal/medium"},
+    {"node_id": "432:37900", "name": "DropdownContents"},
+    {"node_id": "432:38683", "name": "Modal/medium"},
+    {"node_id": "432:38853", "name": "DropdownContents"},
+    {"node_id": "I432:22235;6885:15212", "name": "레이블"},
+    {"node_id": "I432:35655;6885:15212", "name": "레이블"}
+  ],
+  "entries": [
+    {
+      "node_id": "153:12742",
+      "name": "컴포넌트 참여자 드롭다운",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-client"],
+      "generated_paths": [
+        "aiAgent.tasks.assignableAgents",
+        "aiAgent.tasks.assign",
+        "aiAgent.tasks.unassign",
+        "v2.aiAgent.tasks.assignableAgents",
+        "v2.aiAgent.tasks.assign",
+        "v2.aiAgent.tasks.unassign"
+      ],
+      "covered_facts": [
+        "visible agents are viewer-owned agents plus other users' public agents",
+        "agent ordering is owned-first, display-name ordered, then agent_id tied",
+        "task participant assignment and unassignment are command operations"
+      ],
+      "direction_loop": {
+        "top_down": "A new participant dropdown business rule changes ai-agent-policy and the API DSL before control-plane/client code.",
+        "bottom_up": "A frontend or server sorting mismatch escalates to the participant-dropdown fact in contracts before local patches diverge."
+      }
+    },
+    {
+      "node_id": "153:15931",
+      "name": "댓글 소통",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "generated_paths": [
+        "aiAgent.tasks.threads",
+        "aiAgent.tasks.threadMessages.create",
+        "aiAgent.tasks.submitComment",
+        "aiAgent.tasks.stop",
+        "aiAgent.events.stream",
+        "v2.aiAgent.tasks.threads",
+        "v2.aiAgent.tasks.threadMessages.create",
+        "v2.aiAgent.tasks.submitComment",
+        "v2.aiAgent.tasks.stop",
+        "v2.aiAgent.events.stream"
+      ],
+      "covered_facts": [
+        "the Figma comment label is projected as task-thread messages",
+        "cold thread collection is fetched before following an advertised active stream",
+        "daemon progress is batched and projected through typed stream events",
+        "stop is a SaaS command consumed later by daemon polling"
+      ],
+      "direction_loop": {
+        "top_down": "A new thread state, message kind, or stop semantic changes the API DSL and stream event contract first.",
+        "bottom_up": "A daemon batching or client stream-cost finding updates daemon/control-plane evidence, then contracts if thread meaning changes."
+      }
+    },
+    {
+      "node_id": "153:15932",
+      "name": "image 14",
+      "coverage_status": "non_decision_asset",
+      "evidence_kind": "figma_asset",
+      "reason": "Static image asset attached near task-thread evidence; it does not create vocabulary, API, daemon, or infra facts."
+    },
+    {
+      "node_id": "153:15935",
+      "name": "추가 기획 내용",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_planning_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "generated_paths": [
+        "aiAgent.tasks.assignableAgents",
+        "aiAgent.tasks.assign",
+        "aiAgent.tasks.unassign",
+        "aiAgent.agents.create",
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.delete",
+        "v2.aiAgent.tasks.assignableAgents",
+        "v2.aiAgent.tasks.assign",
+        "v2.aiAgent.tasks.unassign",
+        "v2.aiAgent.agents.create",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.delete"
+      ],
+      "covered_facts": [
+        "only task/subtask surfaces receive AI Agent assignment",
+        "admin/owner/public/private visibility controls read and mutation behavior",
+        "device and runtime operations stay account-owned while agents are workspace-scoped"
+      ],
+      "direction_loop": {
+        "top_down": "Planning text becomes canonical only after it lands in ai-agent-policy and the API DSL.",
+        "bottom_up": "If implementation finds that a planning sentence is ambiguous, resolve the policy wording before adding new generated operations."
+      }
+    },
+    {
+      "node_id": "162:23468",
+      "name": "논의 필요",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_planning_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/20-domain/api-contract-projection.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-infra", "riido-client"],
+      "generated_paths": [
+        "aiAgent.onboarding.fixtures.createAgent",
+        "aiAgent.tasks.assignableAgents",
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.delete",
+        "v2.aiAgent.onboarding.fixtures.createAgent",
+        "v2.aiAgent.tasks.assignableAgents",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.delete"
+      ],
+      "covered_facts": [
+        "Figma node-id=162-23475 resolves fixture-created agent names as mutable and non-unique",
+        "fixture selection creates a normal agent and never creates a template entity",
+        "the control plane must not auto-suffix duplicate display names such as 리도(1); agent_id is the stable identity and tie-breaker",
+        "fixture-created agents follow normal agent editability, RBAC, update, and delete rules"
+      ],
+      "direction_loop": {
+        "top_down": "A future onboarding fixture identity change updates ai-agent-policy and the API DSL before generated clients or server mocks change.",
+        "bottom_up": "If control-plane, infra, or client implementation finds fixture-created agents need special handling, it must first prove the normal-agent policy is wrong here."
+      }
+    },
+    {
+      "node_id": "156:18767",
+      "name": "image 13",
+      "coverage_status": "non_decision_asset",
+      "evidence_kind": "figma_asset",
+      "reason": "Static menu-related image evidence; menu route responsibility is covered by node 156:19307."
+    },
+    {
+      "node_id": "156:19307",
+      "name": "메뉴바",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md"
+      ],
+      "owner_repos": ["riido-client", "riido-control-plane", "riido-contracts"],
+      "covered_facts": [
+        "AI Agent, runtime, and agent-management menu placement is a client route affordance",
+        "route rendering does not create a new daemon or infra fact"
+      ],
+      "direction_loop": {
+        "top_down": "A route that needs data must point to an existing generated API path or create a policy/API change.",
+        "bottom_up": "A client navigation mismatch remains client-local unless it changes the data contract."
+      }
+    },
+    {
+      "node_id": "156:19308",
+      "name": "Group 6",
+      "coverage_status": "non_decision_asset",
+      "evidence_kind": "figma_group",
+      "reason": "Static grouping near menu evidence; no independent contract or implementation decision."
+    },
+    {
+      "node_id": "162:23090",
+      "name": "런타임 설정페이지",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "generated_paths": [
+        "aiAgent.devices.runtimes",
+        "aiAgent.agents.daemon.details",
+        "aiAgent.agents.daemon.start",
+        "aiAgent.agents.daemon.restart",
+        "aiAgent.agents.daemon.stop",
+        "aiAgent.events.stream",
+        "v2.aiAgent.devices.runtimes",
+        "v2.aiAgent.agents.daemon.details",
+        "v2.aiAgent.agents.daemon.start",
+        "v2.aiAgent.agents.daemon.restart",
+        "v2.aiAgent.agents.daemon.stop",
+        "v2.aiAgent.events.stream"
+      ],
+      "covered_facts": [
+        "device/runtime liveness is read from SaaS",
+        "daemon detail and control are agent-bound SaaS commands",
+        "public agent daemon control is available to workspace members, private control is admin/owner-scoped"
+      ],
+      "direction_loop": {
+        "top_down": "New daemon controls require contracts/API ownership before daemon or client behavior is added.",
+        "bottom_up": "A daemon lifecycle limitation changes daemon SSOT first, then contracts only when the client-facing command semantics change."
+      }
+    },
+    {
+      "node_id": "164:30658",
+      "name": "데스크탑앱 온보딩-런타임 감지 O",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client", "riido-desktop"],
+      "generated_paths": [
+        "aiAgent.bootstrap",
+        "aiAgent.devices.runtimes",
+        "aiAgent.onboarding.fixtures",
+        "aiAgent.onboarding.fixtures.createAgent",
+        "aiAgent.agents.create",
+        "v2.aiAgent.bootstrap",
+        "v2.aiAgent.devices.runtimes",
+        "v2.aiAgent.onboarding.fixtures",
+        "v2.aiAgent.onboarding.fixtures.createAgent",
+        "v2.aiAgent.agents.create"
+      ],
+      "covered_facts": [
+        "desktop webview chooses a workspace before workspace-scoped agent creation",
+        "fixture selection creates an agent, not a template entity",
+        "direct setting maps to the normal agent create fields"
+      ],
+      "direction_loop": {
+        "top_down": "Onboarding fixture or workspace-scoped creation changes contracts before control-plane/client implementation.",
+        "bottom_up": "Desktop launch/runtime detection issues stay daemon or desktop-local unless they change the SaaS read model."
+      }
+    },
+    {
+      "node_id": "435:60050",
+      "name": "데스크탑앱 온보딩-런타임 감지 X",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client", "riido-desktop"],
+      "generated_paths": [
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.devices.runtimes"
+      ],
+      "covered_facts": [
+        "no selectable runtime is derived from device/runtime liveness",
+        "provider install-card rendering is client/product presentation",
+        "skipping runtime selection does not create a new AI Agent command"
+      ],
+      "direction_loop": {
+        "top_down": "A new no-runtime server action requires a separate owning SSOT before API expansion.",
+        "bottom_up": "Provider detection failures are daemon evidence unless they require new client-facing liveness fields."
+      }
+    },
+    {
+      "node_id": "164:45736",
+      "name": "image 8",
+      "coverage_status": "non_decision_asset",
+      "evidence_kind": "figma_asset",
+      "reason": "Static onboarding image evidence; onboarding runtime/fixture/direct-setting decisions are covered by nodes 164:30658 and 435:60050."
+    },
+    {
+      "node_id": "164:45741",
+      "name": "Group 5",
+      "coverage_status": "non_decision_asset",
+      "evidence_kind": "figma_group",
+      "reason": "Static onboarding grouping; no independent SSOT decision."
+    },
+    {
+      "node_id": "236:29749",
+      "name": "웹 온보딩",
+      "coverage_status": "no_diff_product_surface",
+      "evidence_kind": "figma_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "docs/50-roadmap/open-questions.md"
+      ],
+      "owner_repos": ["riido-client", "riido-desktop", "riido-control-plane", "riido-infra"],
+      "covered_facts": [
+        "auth, terms, invite, app download, and Windows waitlist are product/client/distribution surfaces",
+        "AI Agent API does not expose waitlist or marketing-consent operations"
+      ],
+      "direction_loop": {
+        "top_down": "If web onboarding needs AI Agent data, route it through the existing generated AI Agent API or create a new SSOT.",
+        "bottom_up": "Marketing/waitlist implementation work must not silently add AI Agent API fields."
+      }
+    },
+    {
+      "node_id": "275:22731",
+      "name": "런타임 설정페이지 엠티",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "docs/50-roadmap/open-questions.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "generated_paths": [
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.devices.runtimes"
+      ],
+      "covered_facts": [
+        "empty state is derived from the device/runtime read model",
+        "provider install-card hover and Windows waitlist UI do not add AI Agent API operations"
+      ],
+      "direction_loop": {
+        "top_down": "New empty-state data must extend the device/runtime read model through contracts.",
+        "bottom_up": "Client presentation-only variants stay out of contracts unless they need typed server data."
+      }
+    },
+    {
+      "node_id": "432:37336",
+      "name": "에이전트 설정페이지",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client"],
+      "generated_paths": [
+        "aiAgent.bootstrap",
+        "aiAgent.agents.create",
+        "aiAgent.agents.updateConfiguration",
+        "aiAgent.agents.delete",
+        "aiAgent.agents.editability",
+        "aiAgent.devices.runtimes",
+        "v2.aiAgent.bootstrap",
+        "v2.aiAgent.agents.create",
+        "v2.aiAgent.agents.updateConfiguration",
+        "v2.aiAgent.agents.delete",
+        "v2.aiAgent.agents.editability",
+        "v2.aiAgent.devices.runtimes"
+      ],
+      "covered_facts": [
+        "agent profile thumbnail, description, instruction, visibility, runtime, model, editability, and timestamps are contract fields",
+        "model candidates are runtime-scoped catalog records, not enum members",
+        "agent add availability is derived from selectable runtime data"
+      ],
+      "direction_loop": {
+        "top_down": "New saved agent fields or mutation safety rules enter ai-agent-policy and API DSL first.",
+        "bottom_up": "A control-plane validation or client usability contradiction escalates to the field owner before local divergence."
+      }
+    }
+  ]
+}
