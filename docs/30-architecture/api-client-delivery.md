@@ -144,8 +144,9 @@ add-agent save flow, `created_at` feeds list creation dates, and `updated_at`
 feeds list update dates and absolute-time tooltips. It must not turn row click,
 meatball edit/delete entry, no-description row layout, status-label copy/color,
 save-button enablement, long-description presentation, dropdown rendering, or
-provider-specific model labels into generated API facts before the contracts
-model-catalog question is resolved.
+provider-specific model labels into generated enum/API facts. The resolved
+`runtime_model_catalog.v1` rule is that clients render `RuntimeRecord.models`;
+model labels stay runtime-scoped display data rather than enum members.
 
 Figma onboarding annotations (`node-id=42-3014`) are generated-client
 consumption context for bootstrap, devices, fixture query, and create APIs. The
@@ -154,8 +155,9 @@ the fixture-selection screen, including copyable profile fields,
 `default_visibility`, and `recommended_runtime_kind`, and that
 `riido.aiAgent.onboarding.fixtures.createAgent` creates a normal agent with a
 complete `CreateAgentConfigurationRequest` body. Fixture records must not
-include model defaults until the canonical contracts model-catalog policy
-promotes them; clients derive the selected model from `RuntimeRecord.models`.
+include model defaults or `model_id`; `runtime_model_catalog.v1` derives the
+selected model from the chosen runtime's `RuntimeRecord.models` and the
+omitted-`model_id` defaulting rule.
 Workspace selection/list
 scrolling and the `새 워크스페이스` row
 shown in `node-id=164-30192`, row selection, direct-setting expansion, scroll,
