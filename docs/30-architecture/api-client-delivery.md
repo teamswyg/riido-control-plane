@@ -240,6 +240,9 @@ Generator requirements:
   names
 - carry OpenAPI schema descriptions and operation summaries into generated
   JSDoc so frontend developers do not have to infer API behavior from type names
+- carry `x-riido-client.generated_path` into generated JSDoc, and additionally
+  emit the module-local path such as `tasks.threadMessages.create` so generated
+  files can be searched by the route developers discuss in handoff notes
 - generate a config-bound API facade so frontend developers can consume the
   surface as one module instead of stitching together isolated functions
 - derive the facade module and namespace from DSL/IR client metadata projected
@@ -267,6 +270,9 @@ existing AI Agent API sub-DSL:
 - top-level `client_modules` describes generated module and namespace comments
 - operation-level `client.module` and `client.facade_path` describe the nested
   library path
+- operation-level `client.generated_path` is derived by `riido-contracts` from
+  `client.module + "." + client.facade_path` and is used as generated comment
+  metadata, not as a second route owner
 - query operation `client.cache_tag` describes the cache root key
 - command operation `client.invalidates` describes deterministic cache roots
   that a client may invalidate after a mutation
@@ -274,9 +280,9 @@ existing AI Agent API sub-DSL:
 The IR projection must preserve those fields without changing their meaning.
 OpenAPI exposes the same data as `x-riido-client-modules` and
 `x-riido-client`. TypeScript codegen consumes only those OpenAPI extension
-fields for facade structure, comments, root query keys, and invalidation
-helpers. If the metadata is missing or references an unknown cache tag,
-generation fails.
+fields for facade structure, searchable generated comments, root query keys, and
+invalidation helpers. If the metadata is missing, has a mismatched
+`generated_path`, or references an unknown cache tag, generation fails.
 
 This keeps SSOT ownership layered instead of duplicated:
 
@@ -399,6 +405,9 @@ state, customer data, or production request tokens.
   information from DSL/IR through the client handoff.
 - Client-facing generated comments and notes are Korean-first and preserve
   OpenAPI descriptions in JSDoc.
+- Generated JSDoc includes searchable generated paths, including the
+  module-local form such as `tasks.threadMessages.create` and the example access
+  form such as `riido.aiAgent.tasks.threadMessages.create`.
 - Generated clients include `queryOptions`, `mutationOptions`, and the
   config-bound `createRiidoControlPlaneClient` facade without taking ownership of
   app-level query policies.
