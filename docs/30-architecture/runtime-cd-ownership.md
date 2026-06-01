@@ -98,6 +98,29 @@ same-step shell traps. That cleanup rule is part of the public redaction
 contract: temp files are an implementation detail of one deploy job, not release
 evidence, workflow output, or an artifact.
 
+## Public Export Contract
+
+RIID-4835 narrows the remodel into a public export contract. The public
+`riido-control-plane` repository may export only stable, non-live information:
+workflow file names, GitHub secret/variable key names, stable infra output key
+names, control-plane git tag or commit identifiers, and aggregate pass/fail
+status. Those values are enough for operators and `riido-infra` to understand
+what must be configured without teaching the public repository live environment
+details.
+
+`riido-infra` must know the contract because it owns topology and operator
+evidence, but it must consume only stable output names, redaction categories,
+out-of-band GitHub environment values, and private evidence summaries. It must
+not receive public workflow payloads such as image URIs, image digests, ECS
+task-definition ARNs, task-definition JSON, CodeDeploy AppSpec/request JSON,
+deployment IDs, smoke payloads, Terraform plans, state, tfvars, apply logs, or
+raw operator evidence.
+
+The workflow must not use uploaded artifacts, `GITHUB_OUTPUT`, manual
+`workflow_dispatch` URL inputs, or cross-workflow handoff for live deployment
+values. Same-job `$RUNNER_TEMP` files with restrictive permissions remain the
+only allowed bridge between deploy steps.
+
 ## Drift Rule
 
 Top-down changes start in this manifest or the runtime deployment boundary.

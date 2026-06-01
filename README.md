@@ -118,6 +118,12 @@ definition JSON, deployment id, smoke payload는 public workflow 입력이나 ar
 - optional variable pair: `RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION`,
   `RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP`
 
+RIID-4835 public export contract에 따라 이 레포가 외부로 남겨도 되는 CD 정보는
+stable key 이름, workflow 이름, git tag/commit, aggregate pass/fail 상태뿐입니다.
+live URL, AWS 식별자, image 값, task definition/AppSpec JSON, deployment id,
+smoke payload, Terraform evidence는 GitHub environment나 private infra/operator
+evidence에만 둡니다.
+
 검증하는 endpoint:
 
 - `GET /healthz`
