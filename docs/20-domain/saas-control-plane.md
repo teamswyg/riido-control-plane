@@ -88,6 +88,15 @@ stores each accepted line as an assignment `riido_log` task event and, when the
 AI Agent client event store is configured, fans out the same batch as
 `agent_thread_progress` on the client SSE surface.
 
+The daemon's standard assignment event path,
+`POST /v1/agents/{agent_id}/events`, is also part of the client task-thread
+projection. `riido_log` events append to the generated client's thread lines.
+`completed`, `failed`, and `cancelled` assignment states close the thread's
+`active_stream` read-model state so a completed historical thread remains a
+cold collection row instead of a live stream candidate. This projection is
+derived from the assignment/device principal boundary; it does not use team id
+or an Open API workspace key.
+
 ## Assignment Prompt Composer Boundary
 
 > Riido task: RIID-4799 `contracts server assignment prompt composer ssot`

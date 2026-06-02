@@ -181,6 +181,13 @@ func (s *PersistentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.C
 	return response, s.saveSnapshot(ctx)
 }
 
+func (s *PersistentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context.Context, agentID string, req AgentEventRequest, event TaskEvent) error {
+	if err := s.DevelopmentAIAgentClientStore.RecordAIAgentAssignmentEvent(ctx, agentID, req, event); err != nil {
+		return err
+	}
+	return s.saveSnapshot(ctx)
+}
+
 func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil

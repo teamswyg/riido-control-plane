@@ -1384,6 +1384,127 @@ func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testin
 	}
 }
 
+func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
+	ctx := context.Background()
+	aiAgentStore := NewDevelopmentAIAgentClientStore()
+	assignmentStore := NewStoreWithConfig(StoreConfig{AgentRegistry: aiAgentStore})
+	defer assignmentStore.Close()
+	authorizer, err := NewStaticTokenAuthorizer([]StaticTokenCredential{{
+		PrincipalID: "user-1",
+		Token:       "user-token",
+		Scopes:      []string{"ai-agent:*", "task:task-new:read", "task:task-new:assign"},
+	}, {
+		PrincipalID: "daemon-shared-studio",
+		Token:       "daemon-token",
+		Scopes:      []string{"agent:*:events:write"},
+	}})
+	if err != nil {
+		t.Fatalf("NewStaticTokenAuthorizer: %v", err)
+	}
+	handler := NewServer(ServerConfig{
+		Assignment:    assignmentStore,
+		AIAgentClient: aiAgentStore,
+		TaskContext:   &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()},
+		Authorizer:    authorizer,
+	}).Handler()
+
+	assignReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/tasks/task-new/assignment", strings.NewReader(`{"agent_id":"agent-public-openclaw"}`))
+	assignReq.Header.Set("Authorization", "Bearer user-token")
+	assignResp := httptest.NewRecorder()
+	handler.ServeHTTP(assignResp, assignReq)
+	if assignResp.Code != http.StatusAccepted {
+		t.Fatalf("assign status=%d body=%s", assignResp.Code, assignResp.Body.String())
+	}
+	var assigned AIAgentTaskActionResponse
+	if err := json.Unmarshal(assignResp.Body.Bytes(), &assigned); err != nil {
+		t.Fatalf("assign json: %v", err)
+	}
+
+	poll, err := assignmentStore.PollAgent(ctx, "agent-public-openclaw", PollRequest{
+		DaemonID:  "daemon-shared-studio",
+		DeviceID:  "device-shared-studio",
+		RuntimeID: "runtime-openclaw-shared",
+	})
+	if err != nil {
+		t.Fatalf("PollAgent: %v", err)
+	}
+	if poll.Assignment == nil || poll.Assignment.ID == "" {
+		t.Fatalf("poll response = %+v", poll)
+	}
+
+	logBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","state":"running","event_type":"riido_log","message":"팀 프로젝트 수집 중 - 진행 상태를 조회 중.","metadata":{"thread_progress_seq":"1"}}`
+	logReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-public-openclaw/events", strings.NewReader(logBody))
+	logReq.Header.Set("Authorization", "Bearer daemon-token")
+	logResp := httptest.NewRecorder()
+	handler.ServeHTTP(logResp, logReq)
+	if logResp.Code != http.StatusOK {
+		t.Fatalf("log event status=%d body=%s", logResp.Code, logResp.Body.String())
+	}
+
+	threadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-new/threads", nil)
+	threadsReq.Header.Set("Authorization", "Bearer user-token")
+	threadsResp := httptest.NewRecorder()
+	handler.ServeHTTP(threadsResp, threadsReq)
+	if threadsResp.Code != http.StatusOK {
+		t.Fatalf("threads status=%d body=%s", threadsResp.Code, threadsResp.Body.String())
+	}
+	var threads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
+		t.Fatalf("threads json: %v", err)
+	}
+	if len(threads.Threads) != 1 ||
+		threads.ActiveStream == nil ||
+		threads.ActiveStream.ThreadID != assigned.ThreadID ||
+		len(threads.Threads[0].Lines) != 1 ||
+		threads.Threads[0].Lines[0].Message != "팀 프로젝트 수집 중 - 진행 상태를 조회 중." {
+		t.Fatalf("threads after log event = %+v", threads)
+	}
+
+	completedBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","state":"completed","event_type":"assignment_completed","message":"작업 완료"}`
+	completedReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-public-openclaw/events", strings.NewReader(completedBody))
+	completedReq.Header.Set("Authorization", "Bearer daemon-token")
+	completedResp := httptest.NewRecorder()
+	handler.ServeHTTP(completedResp, completedReq)
+	if completedResp.Code != http.StatusOK {
+		t.Fatalf("completed event status=%d body=%s", completedResp.Code, completedResp.Body.String())
+	}
+
+	completedThreadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-new/threads", nil)
+	completedThreadsReq.Header.Set("Authorization", "Bearer user-token")
+	completedThreadsResp := httptest.NewRecorder()
+	handler.ServeHTTP(completedThreadsResp, completedThreadsReq)
+	if completedThreadsResp.Code != http.StatusOK {
+		t.Fatalf("completed threads status=%d body=%s", completedThreadsResp.Code, completedThreadsResp.Body.String())
+	}
+	var completedThreads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(completedThreadsResp.Body.Bytes(), &completedThreads); err != nil {
+		t.Fatalf("completed threads json: %v", err)
+	}
+	if completedThreads.ActiveStream != nil ||
+		len(completedThreads.Threads) != 1 ||
+		completedThreads.Threads[0].ThreadID != assigned.ThreadID ||
+		completedThreads.Threads[0].AssignmentState != AgentAssignmentStateCompleted ||
+		completedThreads.Threads[0].CommentKind != AgentTaskCommentTaskCompleted ||
+		completedThreads.Threads[0].Message != "작업 완료" ||
+		completedThreads.Threads[0].CompletedAt.IsZero() ||
+		len(completedThreads.Threads[0].Lines) != 1 {
+		t.Fatalf("completed threads = %+v", completedThreads)
+	}
+
+	eventsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/events?replay=1", nil)
+	eventsReq.Header.Set("Authorization", "Bearer user-token")
+	eventsResp := httptest.NewRecorder()
+	handler.ServeHTTP(eventsResp, eventsReq)
+	if eventsResp.Code != http.StatusOK {
+		t.Fatalf("events status=%d body=%s", eventsResp.Code, eventsResp.Body.String())
+	}
+	eventsBody := eventsResp.Body.String()
+	if !strings.Contains(eventsBody, "event: agent_thread_progress\n") ||
+		!strings.Contains(eventsBody, "event: agent_work_status_changed\n") {
+		t.Fatalf("events body = %q", eventsBody)
+	}
+}
+
 func TestDevelopmentAIAgentClientStoreThreadProgressFanout(t *testing.T) {
 	store := NewDevelopmentAIAgentClientStore()
 	history, events, cancel, err := store.SubscribeAIAgentClientEvents(context.Background(), AuthorizationResult{PrincipalID: "user-1"})

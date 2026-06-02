@@ -42,6 +42,10 @@ type AIAgentThreadProgressRecorder interface {
 	RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error)
 }
 
+type AIAgentAssignmentEventRecorder interface {
+	RecordAIAgentAssignmentEvent(ctx context.Context, agentID string, req AgentEventRequest, event TaskEvent) error
+}
+
 const defaultAIAgentClientWorkspaceID = "workspace-dev-riid"
 
 type DevelopmentAIAgentClientStore struct {
@@ -1088,6 +1092,119 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 	}, nil
 }
 
+func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context.Context, agentID string, req AgentEventRequest, event TaskEvent) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	agentID = strings.TrimSpace(agentID)
+	taskID := strings.TrimSpace(event.TaskID)
+	if taskID == "" {
+		taskID = strings.TrimSpace(req.TaskID)
+	}
+	assignmentID := strings.TrimSpace(event.AssignmentID)
+	if assignmentID == "" {
+		assignmentID = strings.TrimSpace(req.AssignmentID)
+	}
+	if agentID == "" {
+		return errors.New("agent_id is required")
+	}
+	if taskID == "" {
+		return errors.New("task_id is required")
+	}
+	if assignmentID == "" {
+		return errors.New("assignment_id is required")
+	}
+	state := event.State
+	if state == "" {
+		state = req.State
+	}
+	if state == "" {
+		state = AssignmentRunning
+	}
+	message := strings.TrimSpace(event.Message)
+	if message == "" {
+		message = strings.TrimSpace(req.Message)
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	agent, ok := s.agents[agentID]
+	if !ok {
+		return ErrAIAgentNotFound
+	}
+	thread, ok := s.activeTaskThreadForAgentLocked(taskID, agentID)
+	if !ok {
+		runID := "run-" + assignmentID
+		thread = AIAgentTaskThreadRecord{
+			ThreadID:        threadIDForRun(taskID, agentID, runID),
+			TaskID:          taskID,
+			AgentID:         agentID,
+			RunID:           runID,
+			WorkStatus:      AgentWorkStatusRunning,
+			AssignmentState: AgentAssignmentStateRunning,
+			CommentKind:     AgentTaskCommentRuntimeProgress,
+			Message:         message,
+			StartedAt:       event.At,
+			Lines:           []AgentThreadProgressLine{},
+		}
+		if thread.StartedAt.IsZero() {
+			thread.StartedAt = time.Now().UTC()
+		}
+		s.taskThreads[taskID] = append(s.taskThreads[taskID], thread)
+	}
+
+	if strings.TrimSpace(event.Type) == EventRiidoLog && message != "" {
+		line := AgentThreadProgressLine{
+			Seq:        s.nextThreadProgressSeqLocked(thread.TaskID, thread.ThreadID, event.Metadata),
+			Message:    message,
+			ObservedAt: event.At,
+		}
+		if line.ObservedAt.IsZero() {
+			line.ObservedAt = time.Now().UTC()
+		}
+		progressEvent := AgentThreadProgressEvent{
+			EventType:       AgentClientEventThreadProgress,
+			SchemaVersion:   SchemaVersion,
+			AgentID:         agentID,
+			TaskID:          thread.TaskID,
+			ThreadID:        thread.ThreadID,
+			RunID:           thread.RunID,
+			WorkStatus:      AgentWorkStatusRunning,
+			AssignmentState: AgentAssignmentStateRunning,
+			CommentKind:     AgentTaskCommentRuntimeProgress,
+			BatchStartedAt:  line.ObservedAt,
+			BatchEndedAt:    line.ObservedAt,
+			Lines:           []AgentThreadProgressLine{line},
+		}
+		s.appendThreadProgressLocked(progressEvent)
+		s.appendClientEventLocked(progressEvent.EventType, progressEvent)
+		agent.WorkStatus = AgentWorkStatusRunning
+		agent.Editability = AgentEditabilityBlockedAssignedTasks
+		if agent.AssignedTaskCount == 0 {
+			agent.AssignedTaskCount = 1
+		}
+		s.agents[agentID] = agent
+		return nil
+	}
+
+	response := assignmentEventActionResponse(thread, state, message)
+	s.upsertTaskThreadFromActionLocked(response, "")
+	if !taskThreadHasActiveStream(AIAgentTaskThreadRecord{AssignmentState: response.AssignmentState}) && agent.AssignedTaskCount > 0 {
+		agent.AssignedTaskCount--
+	}
+	agent.WorkStatus = response.WorkStatus
+	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
+	if taskThreadHasActiveStream(AIAgentTaskThreadRecord{AssignmentState: response.AssignmentState}) {
+		agent.Editability = AgentEditabilityBlockedAssignedTasks
+		if agent.AssignedTaskCount == 0 {
+			agent.AssignedTaskCount = 1
+		}
+	}
+	s.agents[agentID] = agent
+	s.appendAgentTaskActionEvent(response)
+	return nil
+}
+
 var (
 	ErrAIAgentNotFound           = errors.New("ai agent not found")
 	ErrAIAgentAssigned           = errors.New("ai agent has assigned tasks")
@@ -1204,6 +1321,69 @@ func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionR
 		CommentKind:     thread.CommentKind,
 		Message:         thread.Message,
 	}
+}
+
+func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state AssignmentState, message string) AIAgentTaskActionResponse {
+	response := AIAgentTaskActionResponse{
+		SchemaVersion:   SchemaVersion,
+		TaskID:          thread.TaskID,
+		AgentID:         thread.AgentID,
+		ThreadID:        thread.ThreadID,
+		RunID:           thread.RunID,
+		WorkStatus:      AgentWorkStatusRunning,
+		AssignmentState: AgentAssignmentStateRunning,
+		CommentKind:     AgentTaskCommentRuntimeProgress,
+		Message:         strings.TrimSpace(message),
+	}
+	switch state {
+	case AssignmentQueued, AssignmentLeased, AssignmentReady:
+		response.WorkStatus = AgentWorkStatusQueued
+		response.AssignmentState = AgentAssignmentStateQueued
+		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
+		if response.Message == "" {
+			response.Message = "agent assignment is queued"
+		}
+	case AssignmentRunning:
+		response.WorkStatus = AgentWorkStatusRunning
+		response.AssignmentState = AgentAssignmentStateRunning
+		response.CommentKind = AgentTaskCommentRuntimeProgress
+		if response.Message == "" {
+			response.Message = "agent work is running"
+		}
+	case AssignmentCancelling:
+		response.WorkStatus = AgentWorkStatusRunning
+		response.AssignmentState = AgentAssignmentStateStopping
+		response.CommentKind = AgentTaskCommentStoppedByUserRequest
+		if response.Message == "" {
+			response.Message = "agent work is stopping"
+		}
+	case AssignmentCancelled:
+		response.WorkStatus = AgentWorkStatusIdle
+		response.AssignmentState = AgentAssignmentStateStopped
+		response.CommentKind = AgentTaskCommentStoppedByUserRequest
+		if response.Message == "" {
+			response.Message = "agent work was stopped"
+		}
+	case AssignmentCompleted:
+		response.WorkStatus = AgentWorkStatusCompleted
+		response.AssignmentState = AgentAssignmentStateCompleted
+		response.CommentKind = AgentTaskCommentTaskCompleted
+		if response.Message == "" {
+			response.Message = "agent work completed"
+		}
+	case AssignmentFailed:
+		response.WorkStatus = AgentWorkStatusFailed
+		response.AssignmentState = AgentAssignmentStateFailed
+		response.CommentKind = AgentTaskCommentTaskFailed
+		if response.Message == "" {
+			response.Message = "agent work failed"
+		}
+	default:
+		if response.Message == "" {
+			response.Message = "agent assignment state updated"
+		}
+	}
+	return response
 }
 
 func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAgentTaskActionResponse, sourceCommentID string) {
@@ -1327,6 +1507,22 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		StartedAt:       now,
 		Lines:           copyProgressLines(event.Lines),
 	})
+}
+
+func (s *DevelopmentAIAgentClientStore) nextThreadProgressSeqLocked(taskID, threadID string, metadata map[string]string) int {
+	if value := strings.TrimSpace(metadata["thread_progress_seq"]); value != "" {
+		if seq, err := strconv.Atoi(value); err == nil && seq > 0 {
+			return seq
+		}
+	}
+	threads := s.taskThreads[taskID]
+	for i := range threads {
+		if threads[i].ThreadID != threadID {
+			continue
+		}
+		return len(threads[i].Lines) + 1
+	}
+	return 1
 }
 
 func (s *DevelopmentAIAgentClientStore) markTaskActiveThreadsStoppedLocked(taskID string, kind AgentTaskCommentKind, message string) {
