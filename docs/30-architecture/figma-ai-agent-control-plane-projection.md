@@ -42,10 +42,19 @@ turn that supporting metadata output into a generated-client decision: it must
 not remove `expected_pages`, drop `non_ui_top_level_inventory`, or delete
 `legacy_non_ui_absorptions`.
 
-Because that limitation entered the upstream contracts coverage in
-`teamswyg/riido-contracts#52`, the local `source_contracts_manifest.stabilized_by`
-list also includes `teamswyg/riido-contracts#52`. The projection gate treats
-that provenance as part of the mirror contract, not as PR-description trivia.
+The local `source_contracts_manifest.stabilized_by` list mirrors the full
+upstream coverage provenance used by this projection:
+`teamswyg/riido-contracts#38`, `teamswyg/riido-contracts#39`,
+`teamswyg/riido-contracts#45`, `teamswyg/riido-contracts#46`,
+`teamswyg/riido-contracts#51`, and `teamswyg/riido-contracts#52`. The
+projection gate treats that full upstream coverage provenance as part of the
+mirror contract, not as PR-description trivia.
+
+That is separate from limitation-local provenance. The specific
+`figma-metadata-page-list-underreports-pages.v1` limitation entered the
+upstream contracts coverage in `teamswyg/riido-contracts#52`, so #52 remains
+the local provenance for that tooling limitation while the full list above
+identifies the whole contracts coverage history consumed by control-plane.
 
 The mirror also preserves contracts-owned `client_delivery_annotations`. Figma
 Dev Mode category `39:0` / `클라이언트 전달` may show frontend facade examples
