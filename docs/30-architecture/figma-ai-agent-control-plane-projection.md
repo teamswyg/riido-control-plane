@@ -46,7 +46,8 @@ The local `source_contracts_manifest.stabilized_by` list mirrors the full
 upstream coverage provenance used by this projection:
 `teamswyg/riido-contracts#38`, `teamswyg/riido-contracts#39`,
 `teamswyg/riido-contracts#45`, `teamswyg/riido-contracts#46`,
-`teamswyg/riido-contracts#51`, and `teamswyg/riido-contracts#52`. The
+`teamswyg/riido-contracts#51`, `teamswyg/riido-contracts#52`, and
+`teamswyg/riido-contracts#54`. The
 projection gate treats that full upstream coverage provenance as part of the
 mirror contract, not as PR-description trivia.
 
@@ -60,6 +61,13 @@ That is separate from limitation-local provenance. The specific
 upstream contracts coverage in `teamswyg/riido-contracts#52`, so #52 remains
 the local provenance for that tooling limitation while the full list above
 identifies the whole contracts coverage history consumed by control-plane.
+
+`teamswyg/riido-contracts#54` adds Figma planning node `432:46849`
+(`Ex AI - 온보딩 순서 변경 메모`). Control-plane absorbs it as onboarding
+generated-client projection, not as a persisted draft API. The revised order is
+agent draft/configuration, runtime selection, then workspace selection, but the
+draft is client-local until final submit uses the existing fixture/direct create
+operations with selected `workspace_id` and `runtime_id`.
 
 The mirror also preserves contracts-owned `client_delivery_annotations`. Figma
 Dev Mode category `39:0` / `클라이언트 전달` may show frontend facade examples
@@ -142,6 +150,16 @@ generated paths from the current UI section named in the last column.
 | `17:2871` | 데몬 상세 | `162:23090` 런타임 설정페이지 | agent-bound daemon detail/start/restart/stop and event stream paths |
 | `17:3111` | 런타임 상세 | `162:23090` 런타임 설정페이지 | device/runtime read plus agent-bound daemon detail |
 
+## Non-UI Planning Absorptions
+
+These nodes come from loaded non-UI Figma planning pages, not from the current
+UI page. Control-plane projects only the generated-client effect that contracts
+owns and does not create extra HTTP/SSE endpoints for planning notes.
+
+| Planning Figma node | Section | Control-plane projection |
+| --- | --- | --- |
+| `432:46849` | Ex AI - 온보딩 순서 변경 메모 | local onboarding draft/configuration is client-owned; final create uses `aiAgent.onboarding.fixtures`, `aiAgent.onboarding.fixtures.createAgent`, `aiAgent.agents.create`, and v2 equivalents |
+
 ## Important Boundaries
 
 - The menu section can mention route consumption, but it must not create an API
@@ -170,6 +188,9 @@ generated paths from the current UI section named in the last column.
   a cache tag / namespace, not the operation generated path.
 - Agent configuration update uses `aiAgent.agents.updateConfiguration`, matching
   the OpenAPI `x-riido-client.generated_path`.
+- Figma planning node `432:46849` changes onboarding order, but the first
+  agent draft/configuration step stays client-local. Control-plane must not add
+  a persisted draft route or workspace-less create route from this note.
 
 ## Verification
 
@@ -185,8 +206,9 @@ The test catches these drift classes:
 - the local projection manifest requires a generated path that the mirrored
   contracts Figma coverage did not name for the same node;
 - the mirrored contracts coverage no longer records the three inspected Figma
-  pages, the eleven non-UI top-level coverage evidence nodes, the seven legacy
-  semantic Wireframe absorptions, or the loaded non-UI top-level inventory;
+  pages, the twelve non-UI top-level coverage evidence nodes, the seven legacy
+  semantic Wireframe absorptions, the onboarding planning absorption, or the
+  loaded non-UI top-level inventory;
 - the mirrored contracts coverage loses the Figma Plugin API inspection method
   that owns page registry and child-count evidence;
 - the mirrored contracts coverage loses `클라이언트 전달` annotation

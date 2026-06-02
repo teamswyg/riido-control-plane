@@ -1670,7 +1670,8 @@
           ]
         },
         "x-riido-scenarios": [
-          "createAIAgentV2.workspace-scoped-agent-creation"
+          "createAIAgentV2.workspace-scoped-agent-creation",
+          "createAIAgentV2.onboarding-direct-draft-finalizes-only-with-workspace-and-runtime"
         ]
       }
     },
@@ -2550,7 +2551,8 @@
         },
         "x-riido-scenarios": [
           "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation",
-          "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal"
+          "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal",
+          "createAIAgentFromOnboardingFixtureV2.onboarding-draft-order-does-not-bypass-workspace-scope"
         ]
       }
     },
