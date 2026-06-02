@@ -17,7 +17,8 @@
     "teamswyg/riido-contracts#60",
     "teamswyg/riido-contracts#62",
     "teamswyg/riido-contracts#63",
-    "teamswyg/riido-contracts#64"
+    "teamswyg/riido-contracts#64",
+    "teamswyg/riido-contracts#65"
   ],
   "human_doc": "docs/30-architecture/figma-ai-agent-coverage.md",
   "related_manifests": [
@@ -51,6 +52,15 @@
       "authoritative_source": "Figma Plugin API figma.root.children after loaded-page inspection",
       "authoritative_result": ["129:5215", "42:3014", "0:1"],
       "rule": "metadata page-list output is supporting evidence only and must not remove expected_pages or non-UI inventories."
+    },
+    {
+      "id": "figma-headless-file-key-placeholder.v1",
+      "tool": "Figma Plugin API use_figma figma.fileKey",
+      "observed_at": "2026-06-02",
+      "observed_result": "A live use_figma root/category inspection for file MUOd9lctoEHASUStN3vUuK returned figma.fileKey=headless while the same invocation successfully read the AI Agent file pages and annotation categories.",
+      "authoritative_source": "User-provided Figma URL/tool input fileKey and this manifest's figma.file_key",
+      "authoritative_result": ["MUOd9lctoEHASUStN3vUuK", "v.1.22 AI Agent"],
+      "rule": "The use_figma runtime's figma.fileKey value is supporting evidence only and must not overwrite figma.file_key, expected_pages, or downstream projection source identity."
     },
     {
       "id": "figma-onboarding-page-load-timeout.v1",

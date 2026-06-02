@@ -42,6 +42,14 @@ turn that supporting metadata output into a generated-client decision: it must
 not remove `expected_pages`, drop `non_ui_top_level_inventory`, or delete
 `legacy_non_ui_absorptions`.
 
+The mirror also preserves `figma-headless-file-key-placeholder.v1`. A live
+`use_figma` root/category inspection for file `MUOd9lctoEHASUStN3vUuK` returned
+`figma.fileKey=headless`, even though the same invocation read the AI Agent pages
+and annotation categories. Control-plane must keep the contracts mirror's
+`figma.file_key` and local `source_contracts_manifest` identity from the
+contracts manifest and must not replace either with the headless runtime
+placeholder. The value `headless` is a headless runtime placeholder only.
+
 The mirror also preserves `figma-onboarding-page-load-timeout.v1`. Current live
 reads of `node-id=42:3014` (`Wireframe - 온보딩`) can time out after 120s when
 using Figma `get_metadata(nodeId=42:3014)` or `use_figma` scripts that attempt
@@ -61,7 +69,7 @@ upstream coverage provenance used by this projection:
 `teamswyg/riido-contracts#56`, `teamswyg/riido-contracts#57`,
 `teamswyg/riido-contracts#58`, `teamswyg/riido-contracts#60`,
 `teamswyg/riido-contracts#62`, `teamswyg/riido-contracts#63`, and
-`teamswyg/riido-contracts#64`. The
+`teamswyg/riido-contracts#64`, and `teamswyg/riido-contracts#65`. The
 projection gate treats the full upstream coverage provenance as part of the
 mirror contract, not as PR-description trivia.
 

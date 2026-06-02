@@ -7,7 +7,7 @@
     "path": "docs/30-architecture/figma-ai-agent-coverage.riido.json",
     "schema_version": "riido-figma-ai-agent-coverage.v1",
     "id": "figma-v1-22-ai-agent-ui-coverage",
-    "stabilized_by": ["teamswyg/riido-contracts#38", "teamswyg/riido-contracts#39", "teamswyg/riido-contracts#45", "teamswyg/riido-contracts#46", "teamswyg/riido-contracts#51", "teamswyg/riido-contracts#52", "teamswyg/riido-contracts#54", "teamswyg/riido-contracts#55", "teamswyg/riido-contracts#56", "teamswyg/riido-contracts#57", "teamswyg/riido-contracts#58", "teamswyg/riido-contracts#60", "teamswyg/riido-contracts#62", "teamswyg/riido-contracts#63", "teamswyg/riido-contracts#64"]
+    "stabilized_by": ["teamswyg/riido-contracts#38", "teamswyg/riido-contracts#39", "teamswyg/riido-contracts#45", "teamswyg/riido-contracts#46", "teamswyg/riido-contracts#51", "teamswyg/riido-contracts#52", "teamswyg/riido-contracts#54", "teamswyg/riido-contracts#55", "teamswyg/riido-contracts#56", "teamswyg/riido-contracts#57", "teamswyg/riido-contracts#58", "teamswyg/riido-contracts#60", "teamswyg/riido-contracts#62", "teamswyg/riido-contracts#63", "teamswyg/riido-contracts#64", "teamswyg/riido-contracts#65"]
   },
   "projection_policy": {
     "summary": "Control-plane does not own the Figma top-level coverage SSOT. It only projects the coverage entries that require HTTP/SSE/OpenAPI/generated-client behavior.",
@@ -23,6 +23,16 @@
         "remove expected_pages",
         "remove non_ui_top_level_inventory",
         "remove legacy_non_ui_absorptions"
+      ]
+    },
+    {
+      "source_id": "figma-headless-file-key-placeholder.v1",
+      "local_scope": "Control-plane must not treat use_figma figma.fileKey=headless as the contracts coverage source identity.",
+      "required_authoritative_results": ["MUOd9lctoEHASUStN3vUuK", "v.1.22 AI Agent"],
+      "forbidden_projection_effects": [
+        "overwrite source_contracts_manifest.path",
+        "overwrite mirrored figma.file_key",
+        "replace upstream file identity with headless"
       ]
     },
     {
