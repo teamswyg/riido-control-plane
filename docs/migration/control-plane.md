@@ -1358,6 +1358,30 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### Figma retired client-delivery annotation category mirror
+
+This slice consumes `teamswyg/riido-contracts#63`, which records old Figma
+category `39:0` / `클라이언트 전달` as retired and unused.
+
+The control-plane mirror keeps that fact so generated-client delivery does not
+accidentally treat the old category as an active handoff category again. The
+current live usage count is 0. The category definition may still exist in Figma
+because the current Figma MCP exposes category data without callable `remove` or
+`setLabel` methods.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#63` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to preserve the retired category id, label,
+  `unused_not_deleted` status, zero usage count, and tool limitation
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ### Figma onboarding page load timeout limitation mirror
 
 This slice mirrors the contracts-owned Figma onboarding page load timeout

@@ -58,7 +58,7 @@ upstream coverage provenance used by this projection:
 `teamswyg/riido-contracts#54`, `teamswyg/riido-contracts#55`,
 `teamswyg/riido-contracts#56`, `teamswyg/riido-contracts#57`,
 `teamswyg/riido-contracts#58`, `teamswyg/riido-contracts#60`, and
-`teamswyg/riido-contracts#62`. The
+`teamswyg/riido-contracts#62`, and `teamswyg/riido-contracts#63`. The
 projection gate treats the full upstream coverage provenance as part of the
 mirror contract, not as PR-description trivia.
 
@@ -108,6 +108,12 @@ Korean `배경:` text, while the generated TypeScript artifact still derives
 canonical paths from OpenAPI. The mirrored live inspection counts are 53
 `riido.*` annotations on `129:5215` `UI`, 6 on `42:3014` `Wireframe - 온보딩`,
 and 0 on `0:1` `Wireframe`, all with zero missing kind/background counts.
+
+`teamswyg/riido-contracts#63` records old category `39:0` / `클라이언트 전달` as
+retired. The mirrored live usage count is 0, so generated-client delivery must
+not point new handoff notes at that category. The category definition may still
+exist in Figma because the current Figma MCP returns category data without
+callable `remove` or `setLabel` methods.
 
 | Figma annotation node | Figma facade example | Kind | Canonical generated path |
 | --- | --- | --- | --- |
