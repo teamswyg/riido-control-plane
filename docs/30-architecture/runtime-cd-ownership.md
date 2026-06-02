@@ -212,10 +212,10 @@ deploy mechanism, while still minimizing anything that helps reconstruct a live
 environment. New public key names, live examples, hostnames, AWS identifiers,
 image/task-definition values, generated CodeDeploy payloads, deployment IDs,
 smoke payloads, and raw operator evidence remain outside the public surface.
-The current non-CD exceptions are `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK`, a
-disposable testnet mock runtime flag, and `RIIDO_AI_SERVER_ADDR`, the
-non-live container listen-address shape. Neither one is a deploy/smoke GitHub
-configuration key.
+The current non-CD exception is `RIIDO_AI_SERVER_ADDR`, the non-live container
+listen-address shape. It is not a deploy/smoke GitHub configuration key. AI
+Agent client runtime behavior is now selected by the configured development
+DynamoDB store, not by a local feature flag.
 
 `riido-infra` still needs to know this rule because it owns topology, IAM, drift,
 and evidence. It consumes the stable key categories and source names, then wires

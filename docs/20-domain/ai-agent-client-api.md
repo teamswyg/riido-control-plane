@@ -2,7 +2,7 @@
 
 > Riido task: RIID-4721 `[Server] AI Agent client-facing endpoint handlers`
 
-This file is the control-plane SSOT for the mockable AI Agent client API
+This file is the control-plane SSOT for the AI Agent client API
 implemented by `internal/riidoaiserver`.
 
 ## Contract Source
@@ -18,8 +18,9 @@ The contract projection is checked in under
 
 Canonical vocabulary, shared enum semantics, lifecycle/deprecation grammar, and
 generated-client metadata are owned by `riido-contracts`. This repository keeps
-the executable mirror under `contracts/ai-agent-client/` so the running mock
-API, smoke tests, and generated frontend client can be verified in the same PR.
+the executable mirror under `contracts/ai-agent-client/` so the running
+development API, smoke tests, and generated frontend client can be verified in
+the same PR.
 
 Client-usability API changes can be proposed from `riido-control-plane`, but the
 canonical contract change must land in `riido-contracts` before this repository
@@ -68,8 +69,8 @@ Cross-repository React Query delivery to `riido-client` is owned by
 ## SSOT Dependency Direction
 
 This file is downstream of the canonical AI Agent policy in `riido-contracts`.
-It may repeat policy words only to explain local HTTP behavior, mock data,
-generator output, and black-box harness coverage.
+It may repeat policy words only to explain local HTTP behavior, development
+fixture data, generator output, and black-box harness coverage.
 
 For agent settings:
 
@@ -80,7 +81,7 @@ For agent settings:
   projects the catalog through `GET /v1/client/ai-agent/onboarding/fixtures`
   and its v2 workspace-scoped duplicate
   `GET /v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures`
-  and seeds deterministic mock fixtures for frontend development. Fixture
+  and seeds deterministic onboarding fixtures for frontend development. Fixture
   records carry copyable profile fields, a safe `default_visibility`, and a
   `recommended_runtime_kind` hint. They do not carry a `model_id`, and they are
   not backend-managed template entities. Agents created from fixtures are
@@ -179,7 +180,7 @@ For agent settings:
   detected/selectable rows when their runtime records are online and detected,
   while OpenClaw/Cursor Agent can be rendered as non-detected disabled rows.
   `node-id=138-7389` maps fixture selection to
-  `AgentOnboardingFixtureListResponse.fixtures`: the mock fixture catalog exposes
+	  `AgentOnboardingFixtureListResponse.fixtures`: the fixture catalog exposes
   the `리도`, `영실`, `홍도`, and `지원` onboarding fixtures in order, while
   `직접 설정`, disabled-next state before selection, row selection, and preview
   skeleton/popover rendering are client presentation. Each fixture also carries
@@ -188,7 +189,7 @@ For agent settings:
   still comes from the chosen runtime's `RuntimeRecord.models` catalog.
   This repository owns the protected fixture projection, fixture-based agent
   creation endpoint, protected runtime read-model projection, selected
-  `runtime_id` validation, and mock coverage. It does not own workspace
+	  `runtime_id` validation, and black-box coverage. It does not own workspace
   selection, workspace list scrolling
   or the `새 워크스페이스` row shown in `node-id=164-30192`, runtime radio
   rendering, detected/non-detected Korean labels, row dimming, direct-setting
@@ -208,13 +209,16 @@ shape, or frontend usability, can start here. If the finding changes domain
 meaning, the next PR must update `riido-contracts` first and then refresh this
 sub-DSL and generated output.
 
-## Mock Runtime
+## Development Runtime
 
-The mock surface is enabled by `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true`.
-When disabled, protected AI Agent client routes fail closed with `503` instead
-of returning synthetic data.
+The AI Agent client surface is backed by the development AI Agent client store.
+`cmd/riido_ai_server` opens that store from DynamoDB and fails startup when no
+AI Agent client table can be resolved. Local-only in-memory mode is not a normal
+runtime path. Test fixtures may still use deterministic in-memory stores, but
+the deployed development environment must persist agents, device credentials,
+daemon runtime snapshots, task threads, and client events.
 
-The mock API implements:
+The development API implements:
 
 - `GET /v1/client/ai-agent/bootstrap`
 - `GET /v1/client/ai-agent/onboarding/fixtures`
@@ -270,7 +274,7 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents` creates a
   normal owned agent from a selected fixture and a complete
   `CreateAgentConfigurationRequest` body
-- the current deterministic mock catalog returns the Figma `node-id=138-7389`
+- the current deterministic fixture catalog returns the Figma `node-id=138-7389`
   onboarding fixtures in order: `리도`, `영실`, `홍도`, `지원`
 - `직접 설정` is a client route into explicit agent creation, not a fifth
   `AgentOnboardingFixture`
@@ -295,7 +299,7 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `model_id` because the selected runtime default model is deterministic
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
-  agent record; binary image upload/storage is outside this mock API
+  agent record; binary image upload/storage is outside this API
 - `description` is saved as optional client-authored one-line agent summary
   text and is rejected when it exceeds 160 characters; UI truncation/wrapping is
   a client concern and does not rewrite the stored value
@@ -307,7 +311,7 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - `updated_at` is a server-authored RFC3339 date-time on every
   `AgentClientRecord`; it is refreshed when editable agent configuration is
   saved and lets clients render update dates or absolute-time tooltips
-- delete returns forced assignment effects for queued/running mock tasks
+- delete returns forced assignment effects for queued/running tasks
 - agent deletion uses the existing `DELETE /v1/client/ai-agent/agents/{agent_id}`
   command; if queued/running task threads are affected, the response increments
   `running_tasks_force_stopped` and the read model exposes
@@ -540,7 +544,7 @@ Selecting a fixture creates a normal agent through
 setting uses `POST /v1/client/ai-agent/agents` and is not represented as an
 extra fixture record.
 The resolved discussion evidence from `node-id=162-23468` / `node-id=162-23475`
-means the mock API keeps submitted duplicate names exactly and relies on
+means the API keeps submitted duplicate names exactly and relies on
 `agent_id` plus normal lifecycle endpoints rather than fixture-specific state.
 The direct-setting expansion from `node-id=164-26969` maps those expanded
 `이름`, `설명`, and `지침` inputs to
@@ -585,10 +589,11 @@ Confirmed through the Figma plugin/Dev Mode annotations on 2026-05-29:
 
 ## Boundary
 
-This repository owns the mock HTTP behavior, API sub-DSL projection, generated
-client drift gate, and future generated-client delivery workflow. It does not
-own production persistence, daemon runtime probing, Terraform state, live AWS
-evidence, final DNS naming, or direct edits to the target frontend repository.
+This repository owns the HTTP behavior, API sub-DSL projection, generated client
+drift gate, DynamoDB-backed development store behavior, and future
+generated-client delivery workflow. It does not own daemon runtime probing,
+Terraform state, live AWS evidence, final DNS naming, or direct edits to the
+target frontend repository.
 
 ## Testnet Smoke
 

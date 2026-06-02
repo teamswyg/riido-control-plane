@@ -14,6 +14,36 @@ type AgentRegistry interface {
 	LookupAgent(agentID string) (AgentRuntimeBinding, bool)
 }
 
+type compositeAgentRegistry struct {
+	registries []AgentRegistry
+}
+
+func NewCompositeAgentRegistry(registries ...AgentRegistry) AgentRegistry {
+	filtered := make([]AgentRegistry, 0, len(registries))
+	for _, registry := range registries {
+		if registry != nil {
+			filtered = append(filtered, registry)
+		}
+	}
+	if len(filtered) == 0 {
+		return nil
+	}
+	if len(filtered) == 1 {
+		return filtered[0]
+	}
+	return compositeAgentRegistry{registries: filtered}
+}
+
+func (r compositeAgentRegistry) LookupAgent(agentID string) (AgentRuntimeBinding, bool) {
+	for _, registry := range r.registries {
+		binding, ok := registry.LookupAgent(agentID)
+		if ok {
+			return binding, true
+		}
+	}
+	return AgentRuntimeBinding{}, false
+}
+
 type StaticAgentRegistry struct {
 	byAgent map[string]AgentRuntimeBinding
 }

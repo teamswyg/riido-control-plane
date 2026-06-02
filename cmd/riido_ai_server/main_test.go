@@ -16,17 +16,10 @@ import (
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
-func TestConfigFromEnvParsesAddressShutdownRegistryAndStaticAuthorizer(t *testing.T) {
+func TestConfigFromEnvParsesAddressShutdownAndStaticAuthorizer(t *testing.T) {
 	clearRiidoAIServerEnv(t)
 	t.Setenv(envAddr, ":9090")
 	t.Setenv(envShutdownTimeoutSeconds, "7")
-	t.Setenv(envAgentBindingsJSON, `[{
-		"agent_id":"agent-a",
-		"daemon_id":"daemon-a",
-		"device_id":"device-a",
-		"runtime_id":"runtime-a",
-		"runtime_provider":"codex"
-	}]`)
 	t.Setenv(envAuthzTokensJSON, `[{
 		"principal_id":"daemon:agent-a",
 		"token":"static-token",
@@ -39,10 +32,6 @@ func TestConfigFromEnvParsesAddressShutdownRegistryAndStaticAuthorizer(t *testin
 	}
 	if config.Addr != ":9090" || config.ShutdownTimeout != 7*time.Second {
 		t.Fatalf("config = %+v", config)
-	}
-	binding, ok := config.AgentRegistry.LookupAgent("agent-a")
-	if !ok || binding.RuntimeID != "runtime-a" || binding.RuntimeProvider != "codex" {
-		t.Fatalf("binding = %+v ok=%v", binding, ok)
 	}
 	if _, err := config.Authorizer.Authorize(context.Background(), "static-token", riidoaiserver.AuthorizationRequest{
 		Resource: riidoaiserver.AuthorizationResourceAgent,
@@ -66,7 +55,7 @@ func TestConfigFromEnvDefaultsToPublicHealthOnlyRuntime(t *testing.T) {
 	if config.MetricsLogInterval != 0 {
 		t.Fatalf("metrics interval should default disabled: %s", config.MetricsLogInterval)
 	}
-	if config.AgentRegistry != nil || config.Authorizer != nil {
+	if config.Authorizer != nil || config.AIAgentClientTable != "" || config.AssignmentTable != "" {
 		t.Fatalf("optional config should be nil: %+v", config)
 	}
 }
@@ -98,16 +87,26 @@ func TestConfigFromEnvParsesWebAllowedOrigins(t *testing.T) {
 	}
 }
 
-func TestConfigFromEnvParsesAIAgentClientMockFlag(t *testing.T) {
+func TestConfigFromEnvParsesDevelopmentDynamoDBConfig(t *testing.T) {
 	clearRiidoAIServerEnv(t)
-	t.Setenv(envAIAgentClientMock, "true")
+	t.Setenv(envAIAgentClientTable, "ai-agent-client")
+	t.Setenv(envDynamoDBAssignmentTable, "assignments")
+	t.Setenv(envDynamoDBOutboxTable, "outbox")
+	t.Setenv(envDynamoDBEndpoint, "http://localhost:8000")
+	t.Setenv(envAWSRegion, "ap-northeast-2")
+	t.Setenv(envAssignmentActiveLease, "42")
 
 	config, err := configFromEnv()
 	if err != nil {
 		t.Fatalf("configFromEnv: %v", err)
 	}
-	if !config.AIAgentClientMock {
-		t.Fatal("AI Agent client mock flag should be enabled")
+	if config.AIAgentClientTable != "ai-agent-client" ||
+		config.AssignmentTable != "assignments" ||
+		config.OutboxTable != "outbox" ||
+		config.DynamoDBEndpoint != "http://localhost:8000" ||
+		config.AWSRegion != "ap-northeast-2" ||
+		config.ActiveLease != 42*time.Second {
+		t.Fatalf("development DynamoDB config = %+v", config)
 	}
 }
 
@@ -171,12 +170,16 @@ func TestConfigFromEnvRejectsPartialTaskContextConfig(t *testing.T) {
 	}
 }
 
-func TestConfigFromEnvRejectsInvalidAIAgentClientMockFlag(t *testing.T) {
+func TestConfigFromEnvUsesAssignmentTableAsAIAgentClientTableFallback(t *testing.T) {
 	clearRiidoAIServerEnv(t)
-	t.Setenv(envAIAgentClientMock, "sometimes")
+	t.Setenv(envDynamoDBAssignmentTable, "shared-development-table")
 
-	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envAIAgentClientMock) {
-		t.Fatalf("configFromEnv err=%v", err)
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	if config.AIAgentClientTable != "shared-development-table" {
+		t.Fatalf("AIAgentClientTable = %q", config.AIAgentClientTable)
 	}
 }
 
@@ -215,12 +218,6 @@ func TestConfigFromEnvIncludesReviewAccountProvisioning(t *testing.T) {
 		Action:   riidoaiserver.AuthorizationActionRead,
 	}); err != nil {
 		t.Fatalf("review token should read catalog: %v", err)
-	}
-}
-
-func TestParseAgentRegistryJSONRejectsUnknownField(t *testing.T) {
-	if _, err := parseAgentRegistryJSON(`[{"agent_id":"agent-a","daemon_id":"daemon-a","runtime_id":"runtime-a","runtime_provider":"codex","extra":true}]`); err == nil {
-		t.Fatal("expected unknown field error")
 	}
 }
 
@@ -395,7 +392,6 @@ func clearRiidoAIServerEnv(t *testing.T) {
 	for _, key := range []string{
 		envAddr,
 		envShutdownTimeoutSeconds,
-		envAgentBindingsJSON,
 		envAuthzTokensJSON,
 		envExternalAuthzURL,
 		envExternalAuthzAudience,
@@ -403,7 +399,12 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envReviewAccountTokenHash,
 		envMetricsLogInterval,
 		envWebAllowedOrigins,
-		envAIAgentClientMock,
+		envAIAgentClientTable,
+		envDynamoDBAssignmentTable,
+		envDynamoDBOutboxTable,
+		envDynamoDBEndpoint,
+		envAWSRegion,
+		envAssignmentActiveLease,
 		envTaskContextBaseURL,
 		envTaskContextWorkspaceID,
 		envTaskContextTeamID,

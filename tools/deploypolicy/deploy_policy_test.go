@@ -74,7 +74,7 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_BASE_URL\"")
 	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_TOKEN\"")
 	requireContains(t, smokeWorkflow, "umask 077")
-	requireContains(t, smokeWorkflow, "trap 'rm -f \"$replay\"' EXIT")
+	requireContains(t, smokeWorkflow, "trap 'rm -f \"$devices\"' EXIT")
 	requireContains(t, clientAPI, "not from a manual")
 	requireContains(t, clientAPI, "The workflow masks both values")
 
@@ -486,7 +486,6 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, parsed.PublicSensitiveSurfaceGuard.Rule, "sensitivity budget")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicInformation, "current stable RIIDO_AI_SERVER_* key names listed in public_config_key_minimization only in canonical machine-readable and workflow paths")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicInformation, "explicit non-CD runtime key exceptions listed in this guard")
-	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK", "not a deploy/smoke GitHub configuration key")
 	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_ADDR", "not a deploy/smoke GitHub configuration key")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "README.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "docs/30-architecture/runtime-cd-ownership.md")

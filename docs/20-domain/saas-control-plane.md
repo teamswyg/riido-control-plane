@@ -132,7 +132,7 @@ existing API server's camelCase response, composes `AssignRequest.prompt`, and
 then calls the assignment store. If lookup or composition fails, the HTTP
 handler returns `502` before a daemon can lease provider work.
 
-Mock-only frontend development may still use deterministic synthetic thread
+Fixture-only frontend tests may still use deterministic synthetic thread
 responses, but those responses are not evidence that a daemon assignment prompt
 exists.
 
@@ -344,7 +344,6 @@ public repository. It owns only these environment variables:
 
 - `RIIDO_AI_SERVER_ADDR`
 - `RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS`
-- `RIIDO_AI_SERVER_AGENT_BINDINGS_JSON`
 - `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
@@ -352,26 +351,33 @@ public repository. It owns only these environment variables:
 - `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`
 - `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`
 - `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`
-- `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK`
+- `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE`
+- `RIIDO_AI_SERVER_DYNAMODB_ASSIGNMENT_TABLE`
+- `RIIDO_AI_SERVER_DYNAMODB_OUTBOX_TABLE`
+- `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT`
+- `RIIDO_AI_SERVER_AWS_REGION`
+- `RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS`
 
-The agent binding and static-token JSON values use strict decoding, so unknown
-fields and trailing JSON are rejected. Static-token authorization may be
-combined with the external HTTP authorizer through the existing fallback
-authorizer rule: only unauthenticated results fall through to the next
-authorizer, while forbidden results stop evaluation.
+Static-token JSON values use strict decoding, so unknown fields and trailing
+JSON are rejected. Static-token authorization may be combined with the external
+HTTP authorizer through the existing fallback authorizer rule: only
+unauthenticated results fall through to the next authorizer, while forbidden
+results stop evaluation.
 
 `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` enables only the public-safe
 review account provisioning path. The environment value is a SHA-256 hash of an
 externally supplied review token; the raw token remains outside this
 repository.
 
-`RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` enables only the temporary AI Agent
-client mock API described in [`ai-agent-client-api.md`](ai-agent-client-api.md).
+The AI Agent client API is backed by the development DynamoDB store described in
+[`ai-agent-client-api.md`](ai-agent-client-api.md). Static env agent bindings
+are not part of the current daemon assignment path; daemon-visible bindings are
+derived from persisted agents plus daemon runtime snapshots.
 
 The task-context variables configure the production server-to-server read from
 the existing Riido API server. The base URL, workspace id, team id, and

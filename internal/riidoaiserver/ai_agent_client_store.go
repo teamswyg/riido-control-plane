@@ -42,13 +42,16 @@ type AIAgentThreadProgressRecorder interface {
 	RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error)
 }
 
-const defaultAIAgentClientWorkspaceID = "workspace-mock-riid"
+const defaultAIAgentClientWorkspaceID = "workspace-development-riid"
 
-type MockAIAgentClientStore struct {
+type DevelopmentAIAgentClientStore struct {
 	mu                sync.Mutex
 	workspaceID       string
+	persistence       AIAgentClientPersistence
 	devices           []DeviceRecord
 	daemons           map[string]DeviceDaemonRecord
+	deviceCredentials map[string]deviceCredentialRecord
+	nextDeviceID      int
 	nextDaemonCommand int
 	agents            map[string]AgentClientRecord
 	fixtures          []AgentOnboardingFixture
@@ -63,17 +66,17 @@ type aiAgentClientSubscriber struct {
 	events    chan ClientStreamEvent
 }
 
-func NewMockAIAgentClientStore() *MockAIAgentClientStore {
+func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 	now := time.Date(2026, 5, 28, 6, 0, 0, 0, time.UTC)
 	device := DeviceRecord{
-		DeviceID:         "device-mock-macbook",
+		DeviceID:         "device-development-macbook",
 		OwnerPrincipalID: "user-1",
-		DisplayName:      "Mock MacBook Pro",
+		DisplayName:      "Development MacBook Pro",
 		DaemonLastSeenAt: now,
 		Runtimes: []RuntimeRecord{
 			{
-				RuntimeID:        "runtime-codex-mock",
-				DeviceID:         "device-mock-macbook",
+				RuntimeID:        "runtime-codex-development",
+				DeviceID:         "device-development-macbook",
 				Kind:             RuntimeKindCodex,
 				Availability:     RuntimeAvailabilityOnline,
 				DetectionState:   RuntimeDetectionStateDetected,
@@ -85,8 +88,8 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 				},
 			},
 			{
-				RuntimeID:        "runtime-claude-code-mock",
-				DeviceID:         "device-mock-macbook",
+				RuntimeID:        "runtime-claude-code-development",
+				DeviceID:         "device-development-macbook",
 				Kind:             RuntimeKindClaudeCode,
 				Availability:     RuntimeAvailabilityOffline,
 				DetectionState:   RuntimeDetectionStateMissing,
@@ -102,8 +105,8 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 				},
 			},
 			{
-				RuntimeID:        "runtime-cursor-mock",
-				DeviceID:         "device-mock-macbook",
+				RuntimeID:        "runtime-cursor-development",
+				DeviceID:         "device-development-macbook",
 				Kind:             RuntimeKindCursor,
 				Availability:     RuntimeAvailabilityOnline,
 				DetectionState:   RuntimeDetectionStateDetected,
@@ -121,7 +124,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 		DeviceID:          device.DeviceID,
 		OwnerPrincipalID:  device.OwnerPrincipalID,
 		DeviceDisplayName: device.DisplayName,
-		DaemonID:          "daemon-mock-macbook",
+		DaemonID:          "daemon-development-macbook",
 		Profile:           "desktop-api.riido.ai",
 		PID:               5111,
 		UptimeSeconds:     74 * 60,
@@ -186,11 +189,11 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			OwnerPrincipalID:    "user-1",
 			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "Codex 리뷰어",
-			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/codex-reviewer.png",
+			ProfileThumbnailURL: "https://cdn.riido.io/development-fixtures/ai-agents/codex-reviewer.png",
 			Description:         "코드 변경 위험을 먼저 보는 리뷰 에이전트",
 			Instruction:         "코드 변경의 위험과 검증 근거를 우선 확인합니다.",
 			Visibility:          AgentVisibilityPrivate,
-			RuntimeID:           "runtime-codex-mock",
+			RuntimeID:           "runtime-codex-development",
 			RuntimeKind:         RuntimeKindCodex,
 			ModelID:             "codex-default",
 			ModelLabel:          "Codex 기본 모델",
@@ -205,11 +208,11 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			OwnerPrincipalID:    "user-1",
 			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "Claude 설계 보조",
-			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/claude-designer.png",
+			ProfileThumbnailURL: "https://cdn.riido.io/development-fixtures/ai-agents/claude-designer.png",
 			Description:         "기획 의도를 구현 범위로 정리하는 설계 에이전트",
 			Instruction:         "기획 의도와 도메인 정책을 먼저 정리한 뒤 구현 범위를 제안합니다.",
 			Visibility:          AgentVisibilityPrivate,
-			RuntimeID:           "runtime-claude-code-mock",
+			RuntimeID:           "runtime-claude-code-development",
 			RuntimeKind:         RuntimeKindClaudeCode,
 			ModelID:             "claude-sonnect-4-6",
 			ModelLabel:          "Sonnect 4.6 (기본값)",
@@ -224,7 +227,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			OwnerPrincipalID:    "user-2",
 			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "OpenClaw 공개 에이전트",
-			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/openclaw-public.png",
+			ProfileThumbnailURL: "https://cdn.riido.io/development-fixtures/ai-agents/openclaw-public.png",
 			Description:         "공개 워크스페이스 반복 작업 에이전트",
 			Instruction:         "공개 워크스페이스에서 반복 가능한 보조 작업을 수행합니다.",
 			Visibility:          AgentVisibilityPublic,
@@ -243,7 +246,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			OwnerPrincipalID:    "user-2",
 			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "Cursor 비공개 에이전트",
-			ProfileThumbnailURL: "https://cdn.riido.io/mock/ai-agents/cursor-private.png",
+			ProfileThumbnailURL: "https://cdn.riido.io/development-fixtures/ai-agents/cursor-private.png",
 			Description:         "소유자 전용 Cursor 코드 탐색 에이전트",
 			Instruction:         "소유자 전용 Cursor 기반 코드 탐색을 수행합니다.",
 			Visibility:          AgentVisibilityPrivate,
@@ -264,8 +267,8 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 				ThreadID:        "thread-task-1-claude-1",
 				TaskID:          "task-1",
 				AgentID:         "agent-owned-claude",
-				RunID:           "run-mock-completed-1",
-				SourceCommentID: "comment-mock-1",
+				RunID:           "run-development-completed-1",
+				SourceCommentID: "comment-development-1",
 				WorkStatus:      AgentWorkStatusCompleted,
 				AssignmentState: AgentAssignmentStateCompleted,
 				CommentKind:     AgentTaskCommentTaskCompleted,
@@ -280,8 +283,8 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 				ThreadID:        "thread-task-1-codex-2",
 				TaskID:          "task-1",
 				AgentID:         "agent-owned-codex",
-				RunID:           "run-mock-1",
-				SourceCommentID: "comment-mock-2",
+				RunID:           "run-development-1",
+				SourceCommentID: "comment-development-2",
 				WorkStatus:      AgentWorkStatusRunning,
 				AssignmentState: AgentAssignmentStateRunning,
 				CommentKind:     AgentTaskCommentRuntimeProgress,
@@ -294,56 +297,16 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 			},
 		},
 	}
-	return &MockAIAgentClientStore{
+	return &DevelopmentAIAgentClientStore{
 		workspaceID:       defaultAIAgentClientWorkspaceID,
 		devices:           []DeviceRecord{device, sharedDevice},
 		daemons:           map[string]DeviceDaemonRecord{device.DeviceID: daemon, sharedDevice.DeviceID: sharedDaemon},
+		deviceCredentials: map[string]deviceCredentialRecord{},
 		nextDaemonCommand: 1,
 		agents:            agents,
-		fixtures: []AgentOnboardingFixture{
-			{
-				FixtureID:              "riido_pm",
-				Name:                   "리도",
-				RoleLabel:              "PM Agent",
-				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-fixtures/riido-pm.png",
-				Description:            "문제 정의부터 우선순위, 출시 계획까지 정리합니다.",
-				Instruction:            "기능 요청을 문제, 목표, 성공 기준으로 재정의하고 PRD, 우선순위, 로드맵, 출시 계획을 구조화합니다. 아이디어는 가설로 다루며 불확실한 내용은 [확인 필요]로 표시합니다.",
-				DefaultVisibility:      AgentVisibilityPrivate,
-				RecommendedRuntimeKind: RuntimeKindCodex,
-			},
-			{
-				FixtureID:              "yeongsil_backend",
-				Name:                   "영실",
-				RoleLabel:              "Backend Agent",
-				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-fixtures/yeongsil-backend.png",
-				Description:            "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다.",
-				Instruction:            "요구사항을 API, 데이터 흐름, 저장 경계, 실패 처리 기준으로 나누고 안정적인 서버 구현 계획을 제안합니다.",
-				DefaultVisibility:      AgentVisibilityPrivate,
-				RecommendedRuntimeKind: RuntimeKindClaudeCode,
-			},
-			{
-				FixtureID:              "hongdo_frontend",
-				Name:                   "홍도",
-				RoleLabel:              "Frontend Agent",
-				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-fixtures/hongdo-frontend.png",
-				Description:            "사용자가 보는 화면을 구현하고, 성능과 접근성을 개선합니다.",
-				Instruction:            "화면 구조, 상태, 접근성, 성능을 함께 검토하고 사용자에게 자연스러운 프론트엔드 구현을 제안합니다.",
-				DefaultVisibility:      AgentVisibilityPrivate,
-				RecommendedRuntimeKind: RuntimeKindCursor,
-			},
-			{
-				FixtureID:              "jiwon_research",
-				Name:                   "지원",
-				RoleLabel:              "Research Agent",
-				ProfileThumbnailURL:    "https://cdn.riido.io/mock/ai-agent-fixtures/jiwon-research.png",
-				Description:            "시장과 경쟁사를 조사하고, 의사결정에 필요한 인사이트를 정리합니다.",
-				Instruction:            "시장, 경쟁사, 사용자 맥락을 조사하고 의사결정에 필요한 근거와 확인이 필요한 가정을 분리해 정리합니다.",
-				DefaultVisibility:      AgentVisibilityPrivate,
-				RecommendedRuntimeKind: RuntimeKindOpenClaw,
-			},
-		},
-		taskThreads: taskThreads,
-		subscribers: map[int]aiAgentClientSubscriber{},
+		fixtures:          defaultAgentOnboardingFixtures(),
+		taskThreads:       taskThreads,
+		subscribers:       map[int]aiAgentClientSubscriber{},
 		events: []ClientStreamEvent{
 			{
 				Seq:       1,
@@ -372,7 +335,7 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 					AgentID:         "agent-owned-codex",
 					TaskID:          "task-1",
 					ThreadID:        "thread-task-1-codex-2",
-					RunID:           "run-mock-1",
+					RunID:           "run-development-1",
 					WorkStatus:      AgentWorkStatusQueued,
 					AssignmentState: AgentAssignmentStateQueued,
 					CommentKind:     AgentTaskCommentQueuedByBusyAgent,
@@ -382,7 +345,68 @@ func NewMockAIAgentClientStore() *MockAIAgentClientStore {
 	}
 }
 
-func (s *MockAIAgentClientStore) BootstrapAIAgentClient(ctx context.Context, principal AuthorizationResult, clientKind ClientKind) (ClientBootstrapResponse, error) {
+func newEmptyAIAgentClientStore(persistence AIAgentClientPersistence) *DevelopmentAIAgentClientStore {
+	return &DevelopmentAIAgentClientStore{
+		workspaceID:       defaultAIAgentClientWorkspaceID,
+		persistence:       persistence,
+		devices:           []DeviceRecord{},
+		daemons:           map[string]DeviceDaemonRecord{},
+		deviceCredentials: map[string]deviceCredentialRecord{},
+		nextDaemonCommand: 1,
+		agents:            map[string]AgentClientRecord{},
+		fixtures:          defaultAgentOnboardingFixtures(),
+		taskThreads:       map[string][]AIAgentTaskThreadRecord{},
+		subscribers:       map[int]aiAgentClientSubscriber{},
+		events:            []ClientStreamEvent{},
+	}
+}
+
+func defaultAgentOnboardingFixtures() []AgentOnboardingFixture {
+	return []AgentOnboardingFixture{
+		{
+			FixtureID:              "riido_pm",
+			Name:                   "리도",
+			RoleLabel:              "PM Agent",
+			ProfileThumbnailURL:    "https://cdn.riido.io/ai-agent-fixtures/riido-pm.png",
+			Description:            "문제 정의부터 우선순위, 출시 계획까지 정리합니다.",
+			Instruction:            "기능 요청을 문제, 목표, 성공 기준으로 재정의하고 PRD, 우선순위, 로드맵, 출시 계획을 구조화합니다. 아이디어는 가설로 다루며 불확실한 내용은 [확인 필요]로 표시합니다.",
+			DefaultVisibility:      AgentVisibilityPrivate,
+			RecommendedRuntimeKind: RuntimeKindCodex,
+		},
+		{
+			FixtureID:              "yeongsil_backend",
+			Name:                   "영실",
+			RoleLabel:              "Backend Agent",
+			ProfileThumbnailURL:    "https://cdn.riido.io/ai-agent-fixtures/yeongsil-backend.png",
+			Description:            "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다.",
+			Instruction:            "요구사항을 API, 데이터 흐름, 저장 경계, 실패 처리 기준으로 나누고 안정적인 서버 구현 계획을 제안합니다.",
+			DefaultVisibility:      AgentVisibilityPrivate,
+			RecommendedRuntimeKind: RuntimeKindClaudeCode,
+		},
+		{
+			FixtureID:              "hongdo_frontend",
+			Name:                   "홍도",
+			RoleLabel:              "Frontend Agent",
+			ProfileThumbnailURL:    "https://cdn.riido.io/ai-agent-fixtures/hongdo-frontend.png",
+			Description:            "사용자가 보는 화면을 구현하고, 성능과 접근성을 개선합니다.",
+			Instruction:            "화면 구조, 상태, 접근성, 성능을 함께 검토하고 사용자에게 자연스러운 프론트엔드 구현을 제안합니다.",
+			DefaultVisibility:      AgentVisibilityPrivate,
+			RecommendedRuntimeKind: RuntimeKindCursor,
+		},
+		{
+			FixtureID:              "jiwon_research",
+			Name:                   "지원",
+			RoleLabel:              "Research Agent",
+			ProfileThumbnailURL:    "https://cdn.riido.io/ai-agent-fixtures/jiwon-research.png",
+			Description:            "시장과 경쟁사를 조사하고, 의사결정에 필요한 인사이트를 정리합니다.",
+			Instruction:            "시장, 경쟁사, 사용자 맥락을 조사하고 의사결정에 필요한 근거와 확인이 필요한 가정을 분리해 정리합니다.",
+			DefaultVisibility:      AgentVisibilityPrivate,
+			RecommendedRuntimeKind: RuntimeKindOpenClaw,
+		},
+	}
+}
+
+func (s *DevelopmentAIAgentClientStore) BootstrapAIAgentClient(ctx context.Context, principal AuthorizationResult, clientKind ClientKind) (ClientBootstrapResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return ClientBootstrapResponse{}, err
 	}
@@ -397,7 +421,7 @@ func (s *MockAIAgentClientStore) BootstrapAIAgentClient(ctx context.Context, pri
 	}, nil
 }
 
-func (s *MockAIAgentClientStore) ListAIAgentOnboardingFixtures(ctx context.Context, principal AuthorizationResult) (AgentOnboardingFixtureListResponse, error) {
+func (s *DevelopmentAIAgentClientStore) ListAIAgentOnboardingFixtures(ctx context.Context, principal AuthorizationResult) (AgentOnboardingFixtureListResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentOnboardingFixtureListResponse{}, err
 	}
@@ -409,7 +433,7 @@ func (s *MockAIAgentClientStore) ListAIAgentOnboardingFixtures(ctx context.Conte
 	}, nil
 }
 
-func (s *MockAIAgentClientStore) CreateAIAgentFromOnboardingFixture(ctx context.Context, principal AuthorizationResult, fixtureID string, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
+func (s *DevelopmentAIAgentClientStore) CreateAIAgentFromOnboardingFixture(ctx context.Context, principal AuthorizationResult, fixtureID string, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentClientRecordResponse{}, err
 	}
@@ -426,7 +450,7 @@ func (s *MockAIAgentClientStore) CreateAIAgentFromOnboardingFixture(ctx context.
 	return s.CreateAIAgent(ctx, principal, req)
 }
 
-func (s *MockAIAgentClientStore) ListAIAgentDevices(ctx context.Context, principal AuthorizationResult) (DeviceRuntimeListResponse, error) {
+func (s *DevelopmentAIAgentClientStore) ListAIAgentDevices(ctx context.Context, principal AuthorizationResult) (DeviceRuntimeListResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return DeviceRuntimeListResponse{}, err
 	}
@@ -435,7 +459,7 @@ func (s *MockAIAgentClientStore) ListAIAgentDevices(ctx context.Context, princip
 	return DeviceRuntimeListResponse{SchemaVersion: SchemaVersion, Devices: s.visibleDevicesLocked(principal)}, nil
 }
 
-func (s *MockAIAgentClientStore) GetAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string) (DeviceDaemonDetailResponse, error) {
+func (s *DevelopmentAIAgentClientStore) GetAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string) (DeviceDaemonDetailResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return DeviceDaemonDetailResponse{}, err
 	}
@@ -452,7 +476,7 @@ func (s *MockAIAgentClientStore) GetAIAgentDaemon(ctx context.Context, principal
 	return DeviceDaemonDetailResponse{SchemaVersion: SchemaVersion, Daemon: copyDeviceDaemon(daemon)}, nil
 }
 
-func (s *MockAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
+func (s *DevelopmentAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return DeviceDaemonCommandResponse{}, err
 	}
@@ -519,6 +543,9 @@ func (s *MockAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context, princ
 			})
 		}
 	}
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return DeviceDaemonCommandResponse{}, err
+	}
 	return DeviceDaemonCommandResponse{
 		SchemaVersion: SchemaVersion,
 		CommandID:     commandID,
@@ -531,7 +558,7 @@ func (s *MockAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context, princ
 	}, nil
 }
 
-func (s *MockAIAgentClientStore) ListAIAgentTaskAssignableAgents(ctx context.Context, principal AuthorizationResult, taskID string) (AgentClientListResponse, error) {
+func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskAssignableAgents(ctx context.Context, principal AuthorizationResult, taskID string) (AgentClientListResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentClientListResponse{}, err
 	}
@@ -543,7 +570,7 @@ func (s *MockAIAgentClientStore) ListAIAgentTaskAssignableAgents(ctx context.Con
 	return AgentClientListResponse{SchemaVersion: SchemaVersion, Agents: s.visibleAgents(principal)}, nil
 }
 
-func (s *MockAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error) {
+func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskThreadCollectionResponse{}, err
 	}
@@ -570,7 +597,7 @@ func (s *MockAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Context, pri
 	return response, nil
 }
 
-func (s *MockAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+func (s *DevelopmentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
@@ -596,7 +623,7 @@ func (s *MockAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principa
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
-		RunID:           "run-mock-assignment-" + taskID + "-" + strconv.Itoa(len(s.taskThreads[taskID])+1),
+		RunID:           "run-development-assignment-" + taskID + "-" + strconv.Itoa(len(s.taskThreads[taskID])+1),
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentAssignmentStarted,
@@ -615,10 +642,13 @@ func (s *MockAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principa
 	s.agents[agent.AgentID] = agent
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.appendAgentTaskActionEvent(response)
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
 	return response, nil
 }
 
-func (s *MockAIAgentClientStore) UnassignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
@@ -640,7 +670,7 @@ func (s *MockAIAgentClientStore) UnassignAIAgentTask(ctx context.Context, princi
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
-		RunID:           "run-mock-unassign-" + taskID,
+		RunID:           "run-development-unassign-" + taskID,
 		WorkStatus:      AgentWorkStatusIdle,
 		AssignmentState: AgentAssignmentStateStopped,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
@@ -661,10 +691,13 @@ func (s *MockAIAgentClientStore) UnassignAIAgentTask(ctx context.Context, princi
 	s.agents[agent.AgentID] = agent
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.appendAgentTaskActionEvent(response)
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
 	return response, nil
 }
 
-func (s *MockAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error) {
+func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
@@ -690,7 +723,7 @@ func (s *MockAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, p
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
-		RunID:           "run-mock-comment-" + taskID,
+		RunID:           "run-development-comment-" + taskID,
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentRuntimeProgress,
@@ -705,10 +738,13 @@ func (s *MockAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, p
 	}
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
 	s.appendAgentTaskActionEvent(response)
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
 	return response, nil
 }
 
-func (s *MockAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error) {
+func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
@@ -750,7 +786,7 @@ func (s *MockAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Cont
 	}
 	threadWasActive := taskThreadHasActiveStream(thread)
 	if !threadWasActive {
-		response.RunID = "run-mock-message-" + taskID + "-" + threadID
+		response.RunID = "run-development-message-" + taskID + "-" + threadID
 	}
 	if !threadWasActive && (agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser || agent.WorkStatus == AgentWorkStatusQueued) {
 		response.WorkStatus = AgentWorkStatusQueued
@@ -760,10 +796,13 @@ func (s *MockAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Cont
 	}
 	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID)
 	s.appendAgentTaskActionEvent(response)
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
 	return response, nil
 }
 
-func (s *MockAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
@@ -782,7 +821,7 @@ func (s *MockAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal 
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
-		RunID:           "run-mock-stop-" + taskID,
+		RunID:           "run-development-stop-" + taskID,
 		WorkStatus:      AgentWorkStatusIdle,
 		AssignmentState: AgentAssignmentStateStopped,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
@@ -797,10 +836,13 @@ func (s *MockAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal 
 	s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.appendAgentTaskActionEvent(response)
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
 	return response, nil
 }
 
-func (s *MockAIAgentClientStore) CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
+func (s *DevelopmentAIAgentClientStore) CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentClientRecordResponse{}, err
 	}
@@ -868,10 +910,13 @@ func (s *MockAIAgentClientStore) CreateAIAgent(ctx context.Context, principal Au
 	}
 	s.agents[agent.AgentID] = agent
 	markRuntimeHasAssignedAgentLocked(s.devices, runtimeID, true)
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return AgentClientRecordResponse{}, err
+	}
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }
 
-func (s *MockAIAgentClientStore) GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error) {
+func (s *DevelopmentAIAgentClientStore) GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentEditabilityResponse{}, err
 	}
@@ -893,7 +938,7 @@ func (s *MockAIAgentClientStore) GetAIAgentEditability(ctx context.Context, prin
 	return response, nil
 }
 
-func (s *MockAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context, principal AuthorizationResult, agentID string, req UpdateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
+func (s *DevelopmentAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context, principal AuthorizationResult, agentID string, req UpdateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentClientRecordResponse{}, err
 	}
@@ -951,10 +996,13 @@ func (s *MockAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context,
 	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
 	agent.UpdatedAt = time.Now().UTC()
 	s.agents[agent.AgentID] = agent
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return AgentClientRecordResponse{}, err
+	}
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }
 
-func (s *MockAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal AuthorizationResult, agentID string) (DeleteAgentResponse, error) {
+func (s *DevelopmentAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal AuthorizationResult, agentID string) (DeleteAgentResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return DeleteAgentResponse{}, err
 	}
@@ -983,6 +1031,9 @@ func (s *MockAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal Au
 		AssignmentState: AgentAssignmentStateStopped,
 		CommentKind:     AgentTaskCommentStoppedByAgentDeleted,
 	})
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return DeleteAgentResponse{}, err
+	}
 	return DeleteAgentResponse{
 		SchemaVersion:            SchemaVersion,
 		AgentID:                  agent.AgentID,
@@ -991,7 +1042,7 @@ func (s *MockAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal Au
 	}, nil
 }
 
-func (s *MockAIAgentClientStore) AIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, error) {
+func (s *DevelopmentAIAgentClientStore) AIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -1000,7 +1051,7 @@ func (s *MockAIAgentClientStore) AIAgentClientEvents(ctx context.Context, princi
 	return s.clientEventsForPrincipalLocked(principal), nil
 }
 
-func (s *MockAIAgentClientStore) SubscribeAIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, <-chan ClientStreamEvent, func(), error) {
+func (s *DevelopmentAIAgentClientStore) SubscribeAIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, <-chan ClientStreamEvent, func(), error) {
 	if err := ctx.Err(); err != nil {
 		return nil, nil, nil, err
 	}
@@ -1022,7 +1073,7 @@ func (s *MockAIAgentClientStore) SubscribeAIAgentClientEvents(ctx context.Contex
 	return history, events, cancel, nil
 }
 
-func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error) {
+func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentThreadProgressBatchResponse{}, err
 	}
@@ -1078,6 +1129,9 @@ func (s *MockAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context
 	}
 	s.appendThreadProgressLocked(event)
 	s.appendClientEventLocked(event.EventType, event)
+	if err := s.saveSnapshotLocked(ctx); err != nil {
+		return AgentThreadProgressBatchResponse{}, err
+	}
 	return AgentThreadProgressBatchResponse{
 		SchemaVersion: SchemaVersion,
 		AcceptedLines: len(lines),
@@ -1091,7 +1145,7 @@ var (
 	ErrAIAgentTaskThreadConflict = errors.New("task already has another active ai agent thread")
 )
 
-func (s *MockAIAgentClientStore) visibleAgent(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) visibleAgent(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
 	agentID = strings.TrimSpace(agentID)
 	if agentID == "" {
 		return AgentClientRecord{}, false
@@ -1103,7 +1157,7 @@ func (s *MockAIAgentClientStore) visibleAgent(principal AuthorizationResult, age
 	return s.agentForPrincipal(agent, principal), true
 }
 
-func (s *MockAIAgentClientStore) findOnboardingFixtureLocked(fixtureID string) (AgentOnboardingFixture, bool) {
+func (s *DevelopmentAIAgentClientStore) findOnboardingFixtureLocked(fixtureID string) (AgentOnboardingFixture, bool) {
 	for _, fixture := range s.fixtures {
 		if fixture.FixtureID == fixtureID {
 			return fixture, true
@@ -1112,7 +1166,7 @@ func (s *MockAIAgentClientStore) findOnboardingFixtureLocked(fixtureID string) (
 	return AgentOnboardingFixture{}, false
 }
 
-func (s *MockAIAgentClientStore) visibleAgents(principal AuthorizationResult) []AgentClientRecord {
+func (s *DevelopmentAIAgentClientStore) visibleAgents(principal AuthorizationResult) []AgentClientRecord {
 	agents := make([]AgentClientRecord, 0, len(s.agents))
 	for _, agent := range s.agents {
 		if !s.aiAgentVisibleTo(principal, agent) {
@@ -1132,7 +1186,7 @@ func (s *MockAIAgentClientStore) visibleAgents(principal AuthorizationResult) []
 	return agents
 }
 
-func (s *MockAIAgentClientStore) visibleAgentIDs(principal AuthorizationResult) map[string]struct{} {
+func (s *DevelopmentAIAgentClientStore) visibleAgentIDs(principal AuthorizationResult) map[string]struct{} {
 	out := map[string]struct{}{}
 	for _, agent := range s.visibleAgents(principal) {
 		out[agent.AgentID] = struct{}{}
@@ -1140,7 +1194,7 @@ func (s *MockAIAgentClientStore) visibleAgentIDs(principal AuthorizationResult) 
 	return out
 }
 
-func (s *MockAIAgentClientStore) visibleTaskThreadsLocked(principal AuthorizationResult, taskID string) []AIAgentTaskThreadRecord {
+func (s *DevelopmentAIAgentClientStore) visibleTaskThreadsLocked(principal AuthorizationResult, taskID string) []AIAgentTaskThreadRecord {
 	source := s.taskThreads[taskID]
 	out := make([]AIAgentTaskThreadRecord, 0, len(source))
 	for _, thread := range source {
@@ -1153,7 +1207,7 @@ func (s *MockAIAgentClientStore) visibleTaskThreadsLocked(principal Authorizatio
 	return out
 }
 
-func (s *MockAIAgentClientStore) visibleTaskThreadLocked(principal AuthorizationResult, taskID, threadID string) (AIAgentTaskThreadRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) visibleTaskThreadLocked(principal AuthorizationResult, taskID, threadID string) (AIAgentTaskThreadRecord, bool) {
 	for _, thread := range s.taskThreads[taskID] {
 		if thread.ThreadID != threadID {
 			continue
@@ -1167,7 +1221,7 @@ func (s *MockAIAgentClientStore) visibleTaskThreadLocked(principal Authorization
 	return AIAgentTaskThreadRecord{}, false
 }
 
-func (s *MockAIAgentClientStore) activeTaskThreadLocked(taskID string) (AIAgentTaskThreadRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) activeTaskThreadLocked(taskID string) (AIAgentTaskThreadRecord, bool) {
 	threads := s.taskThreads[taskID]
 	for i := len(threads) - 1; i >= 0; i-- {
 		thread := threads[i]
@@ -1178,7 +1232,7 @@ func (s *MockAIAgentClientStore) activeTaskThreadLocked(taskID string) (AIAgentT
 	return AIAgentTaskThreadRecord{}, false
 }
 
-func (s *MockAIAgentClientStore) activeTaskThreadForAgentLocked(taskID, agentID string) (AIAgentTaskThreadRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) activeTaskThreadForAgentLocked(taskID, agentID string) (AIAgentTaskThreadRecord, bool) {
 	threads := s.taskThreads[taskID]
 	for i := len(threads) - 1; i >= 0; i-- {
 		thread := threads[i]
@@ -1203,7 +1257,7 @@ func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionR
 	}
 }
 
-func (s *MockAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAgentTaskActionResponse, sourceCommentID string) {
+func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAgentTaskActionResponse, sourceCommentID string) {
 	now := time.Now().UTC()
 	thread := AIAgentTaskThreadRecord{
 		ThreadID:        response.ThreadID,
@@ -1245,7 +1299,7 @@ func (s *MockAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAge
 	s.taskThreads[response.TaskID] = append(threads, thread)
 }
 
-func (s *MockAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(response AIAgentTaskActionResponse, sourceMessageID string) {
+func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(response AIAgentTaskActionResponse, sourceMessageID string) {
 	now := time.Now().UTC()
 	thread := AIAgentTaskThreadRecord{
 		ThreadID:        response.ThreadID,
@@ -1290,7 +1344,7 @@ func (s *MockAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(respons
 	s.taskThreads[response.TaskID] = append(threads, thread)
 }
 
-func (s *MockAIAgentClientStore) appendThreadProgressLocked(event AgentThreadProgressEvent) {
+func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentThreadProgressEvent) {
 	now := time.Now().UTC()
 	threads := s.taskThreads[event.TaskID]
 	for i := range threads {
@@ -1326,7 +1380,7 @@ func (s *MockAIAgentClientStore) appendThreadProgressLocked(event AgentThreadPro
 	})
 }
 
-func (s *MockAIAgentClientStore) markTaskActiveThreadsStoppedLocked(taskID string, kind AgentTaskCommentKind, message string) {
+func (s *DevelopmentAIAgentClientStore) markTaskActiveThreadsStoppedLocked(taskID string, kind AgentTaskCommentKind, message string) {
 	now := time.Now().UTC()
 	threads := s.taskThreads[taskID]
 	for i := range threads {
@@ -1350,7 +1404,7 @@ func (s *MockAIAgentClientStore) markTaskActiveThreadsStoppedLocked(taskID strin
 	s.taskThreads[taskID] = threads
 }
 
-func (s *MockAIAgentClientStore) markAgentTaskThreadsStoppedLocked(agentID string, kind AgentTaskCommentKind, message string) {
+func (s *DevelopmentAIAgentClientStore) markAgentTaskThreadsStoppedLocked(agentID string, kind AgentTaskCommentKind, message string) {
 	now := time.Now().UTC()
 	for taskID, threads := range s.taskThreads {
 		for i := range threads {
@@ -1367,7 +1421,7 @@ func (s *MockAIAgentClientStore) markAgentTaskThreadsStoppedLocked(agentID strin
 	}
 }
 
-func (s *MockAIAgentClientStore) markTaskAgentThreadsStoppedLocked(taskID, agentID string, kind AgentTaskCommentKind, message string) {
+func (s *DevelopmentAIAgentClientStore) markTaskAgentThreadsStoppedLocked(taskID, agentID string, kind AgentTaskCommentKind, message string) {
 	now := time.Now().UTC()
 	threads := s.taskThreads[taskID]
 	for i := range threads {
@@ -1383,7 +1437,7 @@ func (s *MockAIAgentClientStore) markTaskAgentThreadsStoppedLocked(taskID, agent
 	s.taskThreads[taskID] = threads
 }
 
-func (s *MockAIAgentClientStore) agentForMutation(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) agentForMutation(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
 	agentID = strings.TrimSpace(agentID)
 	if agentID == "" {
 		return AgentClientRecord{}, false
@@ -1395,7 +1449,7 @@ func (s *MockAIAgentClientStore) agentForMutation(principal AuthorizationResult,
 	return agent, true
 }
 
-func (s *MockAIAgentClientStore) agentForTaskStop(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) agentForTaskStop(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
 	if strings.TrimSpace(agentID) != "" {
 		return s.visibleAgent(principal, agentID)
 	}
@@ -1407,7 +1461,7 @@ func (s *MockAIAgentClientStore) agentForTaskStop(principal AuthorizationResult,
 	return AgentClientRecord{}, false
 }
 
-func (s *MockAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {
+func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {
 	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
 		EventType:       AgentClientEventWorkStatusChanged,
 		SchemaVersion:   SchemaVersion,
@@ -1421,7 +1475,7 @@ func (s *MockAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTask
 	})
 }
 
-func (s *MockAIAgentClientStore) clientEventsForPrincipalLocked(principal AuthorizationResult) []ClientStreamEvent {
+func (s *DevelopmentAIAgentClientStore) clientEventsForPrincipalLocked(principal AuthorizationResult) []ClientStreamEvent {
 	events := make([]ClientStreamEvent, 0, len(s.events))
 	for _, event := range s.events {
 		visible, ok := clientEventForPrincipalLocked(s, principal, event)
@@ -1433,7 +1487,7 @@ func (s *MockAIAgentClientStore) clientEventsForPrincipalLocked(principal Author
 	return events
 }
 
-func (s *MockAIAgentClientStore) appendClientEventLocked(eventType string, payload any) ClientStreamEvent {
+func (s *DevelopmentAIAgentClientStore) appendClientEventLocked(eventType string, payload any) ClientStreamEvent {
 	event := ClientStreamEvent{
 		Seq:       int64(len(s.events) + 1),
 		EventType: eventType,
@@ -1453,7 +1507,7 @@ func (s *MockAIAgentClientStore) appendClientEventLocked(eventType string, paylo
 	return event
 }
 
-func clientEventForPrincipalLocked(s *MockAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) (ClientStreamEvent, bool) {
+func clientEventForPrincipalLocked(s *DevelopmentAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) (ClientStreamEvent, bool) {
 	if deviceEvent, ok := event.Payload.(DeviceRuntimeSnapshotEvent); ok {
 		device, ok := s.visibleDeviceRecordLocked(principal, deviceEvent.Device)
 		if !ok {
@@ -1469,7 +1523,7 @@ func clientEventForPrincipalLocked(s *MockAIAgentClientStore, principal Authoriz
 	return event, true
 }
 
-func clientEventVisibleToLocked(s *MockAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) bool {
+func clientEventVisibleToLocked(s *DevelopmentAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) bool {
 	if daemon, ok := eventDeviceDaemon(event.Payload); ok {
 		return s.daemonVisibleToPrincipalLocked(principal, daemon)
 	}
@@ -1546,7 +1600,7 @@ func validateAgentDescription(value string) error {
 	return nil
 }
 
-func (s *MockAIAgentClientStore) workspaceScope(principal AuthorizationResult) string {
+func (s *DevelopmentAIAgentClientStore) workspaceScope(principal AuthorizationResult) string {
 	if workspaceID := strings.TrimSpace(principal.WorkspaceID); workspaceID != "" {
 		return workspaceID
 	}
@@ -1556,14 +1610,14 @@ func (s *MockAIAgentClientStore) workspaceScope(principal AuthorizationResult) s
 	return defaultAIAgentClientWorkspaceID
 }
 
-func (s *MockAIAgentClientStore) agentWorkspaceID(agent AgentClientRecord) string {
+func (s *DevelopmentAIAgentClientStore) agentWorkspaceID(agent AgentClientRecord) string {
 	if workspaceID := strings.TrimSpace(agent.WorkspaceID); workspaceID != "" {
 		return workspaceID
 	}
 	return s.workspaceScope(AuthorizationResult{})
 }
 
-func (s *MockAIAgentClientStore) agentForPrincipal(agent AgentClientRecord, principal AuthorizationResult) AgentClientRecord {
+func (s *DevelopmentAIAgentClientStore) agentForPrincipal(agent AgentClientRecord, principal AuthorizationResult) AgentClientRecord {
 	agent.IsOwnedByViewer = agent.OwnerPrincipalID == principal.PrincipalID
 	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
 	if strings.TrimSpace(principal.WorkspaceID) == "" {
@@ -1572,7 +1626,7 @@ func (s *MockAIAgentClientStore) agentForPrincipal(agent AgentClientRecord, prin
 	return agent
 }
 
-func (s *MockAIAgentClientStore) aiAgentVisibleTo(principal AuthorizationResult, agent AgentClientRecord) bool {
+func (s *DevelopmentAIAgentClientStore) aiAgentVisibleTo(principal AuthorizationResult, agent AgentClientRecord) bool {
 	if s.agentWorkspaceID(agent) != s.workspaceScope(principal) {
 		return false
 	}
@@ -1582,7 +1636,7 @@ func (s *MockAIAgentClientStore) aiAgentVisibleTo(principal AuthorizationResult,
 	return agent.Visibility == AgentVisibilityPublic
 }
 
-func (s *MockAIAgentClientStore) aiAgentMutableBy(principal AuthorizationResult, agent AgentClientRecord) bool {
+func (s *DevelopmentAIAgentClientStore) aiAgentMutableBy(principal AuthorizationResult, agent AgentClientRecord) bool {
 	if s.agentWorkspaceID(agent) != s.workspaceScope(principal) {
 		return false
 	}
@@ -1627,7 +1681,7 @@ func filterDevicesForPrincipal(devices []DeviceRecord, principal AuthorizationRe
 	return out
 }
 
-func (s *MockAIAgentClientStore) visibleDevicesLocked(principal AuthorizationResult) []DeviceRecord {
+func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal AuthorizationResult) []DeviceRecord {
 	if aiAgentIsAdmin(principal) {
 		return copyDevices(s.devices)
 	}
@@ -1658,7 +1712,7 @@ func (s *MockAIAgentClientStore) visibleDevicesLocked(principal AuthorizationRes
 	return out
 }
 
-func (s *MockAIAgentClientStore) visibleDeviceRecordLocked(principal AuthorizationResult, device DeviceRecord) (DeviceRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) visibleDeviceRecordLocked(principal AuthorizationResult, device DeviceRecord) (DeviceRecord, bool) {
 	if aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID {
 		return copyDevice(device), true
 	}
@@ -1675,7 +1729,7 @@ func (s *MockAIAgentClientStore) visibleDeviceRecordLocked(principal Authorizati
 	return filtered, true
 }
 
-func (s *MockAIAgentClientStore) deviceVisibleToPrincipalLocked(principal AuthorizationResult, device DeviceRecord) bool {
+func (s *DevelopmentAIAgentClientStore) deviceVisibleToPrincipalLocked(principal AuthorizationResult, device DeviceRecord) bool {
 	if aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID {
 		return true
 	}
@@ -1687,7 +1741,7 @@ func (s *MockAIAgentClientStore) deviceVisibleToPrincipalLocked(principal Author
 	return false
 }
 
-func (s *MockAIAgentClientStore) daemonVisibleToPrincipalLocked(principal AuthorizationResult, daemon DeviceDaemonRecord) bool {
+func (s *DevelopmentAIAgentClientStore) daemonVisibleToPrincipalLocked(principal AuthorizationResult, daemon DeviceDaemonRecord) bool {
 	if aiAgentIsAdmin(principal) || daemon.OwnerPrincipalID == principal.PrincipalID {
 		return true
 	}
@@ -1700,7 +1754,7 @@ func (s *MockAIAgentClientStore) daemonVisibleToPrincipalLocked(principal Author
 	return false
 }
 
-func (s *MockAIAgentClientStore) runtimeVisibleThroughAgentLocked(principal AuthorizationResult, runtimeID string) bool {
+func (s *DevelopmentAIAgentClientStore) runtimeVisibleThroughAgentLocked(principal AuthorizationResult, runtimeID string) bool {
 	for _, agent := range s.agents {
 		if agent.RuntimeID == runtimeID && s.aiAgentVisibleTo(principal, agent) {
 			return true
@@ -1709,7 +1763,7 @@ func (s *MockAIAgentClientStore) runtimeVisibleThroughAgentLocked(principal Auth
 	return false
 }
 
-func (s *MockAIAgentClientStore) deviceDaemonForAgentAccessLocked(principal AuthorizationResult, agentID string) (AgentClientRecord, DeviceDaemonRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) deviceDaemonForAgentAccessLocked(principal AuthorizationResult, agentID string) (AgentClientRecord, DeviceDaemonRecord, bool) {
 	agent, ok := s.visibleAgent(principal, agentID)
 	if !ok {
 		return AgentClientRecord{}, DeviceDaemonRecord{}, false
@@ -1725,7 +1779,7 @@ func (s *MockAIAgentClientStore) deviceDaemonForAgentAccessLocked(principal Auth
 	return agent, copyDeviceDaemon(daemon), true
 }
 
-func (s *MockAIAgentClientStore) deviceDaemonForOwnerLocked(principal AuthorizationResult, deviceID string) (DeviceDaemonRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) deviceDaemonForOwnerLocked(principal AuthorizationResult, deviceID string) (DeviceDaemonRecord, bool) {
 	for _, device := range s.devices {
 		if device.DeviceID != deviceID || device.OwnerPrincipalID != principal.PrincipalID {
 			continue
@@ -1739,7 +1793,7 @@ func (s *MockAIAgentClientStore) deviceDaemonForOwnerLocked(principal Authorizat
 	return DeviceDaemonRecord{}, false
 }
 
-func (s *MockAIAgentClientStore) deviceByRuntimeIDLocked(runtimeID string) (DeviceRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) deviceByRuntimeIDLocked(runtimeID string) (DeviceRecord, bool) {
 	for _, device := range s.devices {
 		for _, runtime := range device.Runtimes {
 			if runtime.RuntimeID == runtimeID {
@@ -1750,7 +1804,7 @@ func (s *MockAIAgentClientStore) deviceByRuntimeIDLocked(runtimeID string) (Devi
 	return DeviceRecord{}, false
 }
 
-func (s *MockAIAgentClientStore) deviceByIDLocked(deviceID string) (DeviceRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) deviceByIDLocked(deviceID string) (DeviceRecord, bool) {
 	for _, device := range s.devices {
 		if device.DeviceID == deviceID {
 			return copyDevice(device), true
@@ -1759,7 +1813,7 @@ func (s *MockAIAgentClientStore) deviceByIDLocked(deviceID string) (DeviceRecord
 	return DeviceRecord{}, false
 }
 
-func (s *MockAIAgentClientStore) markDeviceRuntimesOfflineLocked(deviceID string, observedAt time.Time) {
+func (s *DevelopmentAIAgentClientStore) markDeviceRuntimesOfflineLocked(deviceID string, observedAt time.Time) {
 	for deviceIndex := range s.devices {
 		if s.devices[deviceIndex].DeviceID != deviceID {
 			continue

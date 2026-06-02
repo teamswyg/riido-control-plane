@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
+func TestHTTPAIAgentClientFixtureBootstrapAndAssignableAgents(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -118,7 +118,7 @@ func TestHTTPAIAgentClientMockBootstrapAndAssignableAgents(t *testing.T) {
 	}
 }
 
-func TestHTTPAIAgentClientMockAcceptsExplicitAIAgentTokenHeader(t *testing.T) {
+func TestHTTPAIAgentClientFixtureAcceptsExplicitAIAgentTokenHeader(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -135,7 +135,7 @@ func TestHTTPAIAgentClientMockAcceptsExplicitAIAgentTokenHeader(t *testing.T) {
 	}
 }
 
-func TestHTTPAIAgentClientMockV2WorkspaceScopedCreateAndThreadStream(t *testing.T) {
+func TestHTTPAIAgentClientFixtureV2WorkspaceScopedCreateAndThreadStream(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "owner-token",
@@ -145,7 +145,7 @@ func TestHTTPAIAgentClientMockV2WorkspaceScopedCreateAndThreadStream(t *testing.
 	body, err := json.Marshal(CreateAgentConfigurationRequest{
 		Name:       "워크스페이스 A 에이전트",
 		Visibility: AgentVisibilityPublic,
-		RuntimeID:  "runtime-cursor-mock",
+		RuntimeID:  "runtime-cursor-development",
 		ModelID:    stringPtr("cursor-fast"),
 	})
 	if err != nil {
@@ -164,7 +164,7 @@ func TestHTTPAIAgentClientMockV2WorkspaceScopedCreateAndThreadStream(t *testing.
 	}
 	if created.Agent.WorkspaceID != "workspace-a" ||
 		created.Agent.OwnerPrincipalID != "user-1" ||
-		created.Agent.RuntimeID != "runtime-cursor-mock" ||
+		created.Agent.RuntimeID != "runtime-cursor-development" ||
 		created.Agent.ModelID != "cursor-fast" {
 		t.Fatalf("v2 created agent = %+v", created.Agent)
 	}
@@ -232,8 +232,8 @@ func TestHTTPAIAgentClientMockV2WorkspaceScopedCreateAndThreadStream(t *testing.
 	}
 }
 
-func TestHTTPAIAgentClientMockAssignableAgentsUseStableIDTieBreak(t *testing.T) {
-	store := NewMockAIAgentClientStore()
+func TestHTTPAIAgentClientFixtureAssignableAgentsUseStableIDTieBreak(t *testing.T) {
+	store := NewFixtureAIAgentClientStore()
 	ownedCodex := store.agents["agent-owned-codex"]
 	ownedClaude := store.agents["agent-owned-claude"]
 	ownedCodex.Name = "중복 이름"
@@ -272,7 +272,7 @@ func TestHTTPAIAgentClientMockAssignableAgentsUseStableIDTieBreak(t *testing.T) 
 	}
 }
 
-func TestHTTPAIAgentClientMockDevicesAndEditability(t *testing.T) {
+func TestHTTPAIAgentClientFixtureDevicesAndEditability(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -293,7 +293,7 @@ func TestHTTPAIAgentClientMockDevicesAndEditability(t *testing.T) {
 	if len(devices.Devices) != 2 {
 		t.Fatalf("devices = %+v", devices)
 	}
-	ownedDevice, ok := findDevice(devices.Devices, "device-mock-macbook")
+	ownedDevice, ok := findDevice(devices.Devices, "device-development-macbook")
 	if !ok || len(ownedDevice.Runtimes) != 3 {
 		t.Fatalf("owned device = %+v, ok=%v", ownedDevice, ok)
 	}
@@ -302,7 +302,7 @@ func TestHTTPAIAgentClientMockDevicesAndEditability(t *testing.T) {
 		t.Fatalf("shared public-agent device = %+v, ok=%v", sharedDevice, ok)
 	}
 	cursorRuntime := ownedDevice.Runtimes[2]
-	if cursorRuntime.RuntimeID != "runtime-cursor-mock" || len(cursorRuntime.Models) != 2 || cursorRuntime.Models[0].ModelID != "cursor-auto" || !cursorRuntime.Models[0].IsDefault {
+	if cursorRuntime.RuntimeID != "runtime-cursor-development" || len(cursorRuntime.Models) != 2 || cursorRuntime.Models[0].ModelID != "cursor-auto" || !cursorRuntime.Models[0].IsDefault {
 		t.Fatalf("cursor runtime models = %+v", cursorRuntime)
 	}
 
@@ -322,7 +322,7 @@ func TestHTTPAIAgentClientMockDevicesAndEditability(t *testing.T) {
 	}
 }
 
-func TestHTTPAIAgentClientMockDoesNotExposeWaitlistMarketingMutation(t *testing.T) {
+func TestHTTPAIAgentClientFixtureDoesNotExposeWaitlistMarketingMutation(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -345,7 +345,7 @@ func TestHTTPAIAgentClientMockDoesNotExposeWaitlistMarketingMutation(t *testing.
 	}
 }
 
-func TestHTTPAIAgentClientMockDeviceDaemonDetailAndControl(t *testing.T) {
+func TestHTTPAIAgentClientFixtureDeviceDaemonDetailAndControl(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{
 		{
 			PrincipalID: "user-1",
@@ -483,7 +483,7 @@ func TestHTTPAIAgentClientMockDeviceDaemonDetailAndControl(t *testing.T) {
 	}
 }
 
-func TestHTTPAIAgentClientMockTaskCommentAndStop(t *testing.T) {
+func TestHTTPAIAgentClientFixtureTaskCommentAndStop(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -547,7 +547,7 @@ func TestHTTPAIAgentClientMockTaskCommentAndStop(t *testing.T) {
 	}
 }
 
-func TestHTTPAIAgentClientMockTaskAssignmentAndParticipantRemoval(t *testing.T) {
+func TestHTTPAIAgentClientFixtureTaskAssignmentAndParticipantRemoval(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -661,7 +661,7 @@ func TestHTTPAIAgentClientMockTaskAssignmentAndParticipantRemoval(t *testing.T) 
 	}
 }
 
-func TestHTTPAIAgentClientMockTaskThreadColdCollectionAfterViewerAwayAssignment(t *testing.T) {
+func TestHTTPAIAgentClientFixtureTaskThreadColdCollectionAfterViewerAwayAssignment(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -705,20 +705,20 @@ func TestHTTPAIAgentClientMockTaskThreadColdCollectionAfterViewerAwayAssignment(
 	}
 }
 
-func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
+func TestHTTPAIAgentClientFixtureMutationAndDeletion(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "owner-token",
 		Scopes:      []string{"ai-agent:*"},
 	}})
 
-	thumbnailURL := "https://cdn.riido.io/mock/ai-agents/updated-claude.png"
+	thumbnailURL := "https://cdn.riido.io/development-fixtures/ai-agents/updated-claude.png"
 	description := strings.Repeat("설", AgentDescriptionMaxCharacters)
 	instruction := strings.Repeat("지", AgentInstructionMaxCharacters)
 	createBody, err := json.Marshal(CreateAgentConfigurationRequest{
 		Name:                "신규 코리",
 		Visibility:          AgentVisibilityPrivate,
-		RuntimeID:           "runtime-cursor-mock",
+		RuntimeID:           "runtime-cursor-development",
 		ProfileThumbnailURL: &thumbnailURL,
 		Description:         &description,
 		Instruction:         &instruction,
@@ -759,9 +759,9 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	fixtureBody, err := json.Marshal(CreateAgentConfigurationRequest{
 		Name:                "영실",
 		Visibility:          AgentVisibilityPrivate,
-		RuntimeID:           "runtime-cursor-mock",
+		RuntimeID:           "runtime-cursor-development",
 		ModelID:             stringPtr("cursor-fast"),
-		ProfileThumbnailURL: stringPtr("https://cdn.riido.io/mock/ai-agent-fixtures/yeongsil-backend.png"),
+		ProfileThumbnailURL: stringPtr("https://cdn.riido.io/development-fixtures/ai-agent-fixtures/yeongsil-backend.png"),
 		Description:         &fixtureDescription,
 		Instruction:         &fixtureInstruction,
 	})
@@ -807,7 +807,7 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	duplicatePatchBody, err := json.Marshal(UpdateAgentConfigurationRequest{
 		Name:       "영실",
 		Visibility: AgentVisibilityPrivate,
-		RuntimeID:  "runtime-cursor-mock",
+		RuntimeID:  "runtime-cursor-development",
 		ModelID:    stringPtr("cursor-fast"),
 	})
 	if err != nil {
@@ -839,7 +839,7 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	patchBody, err := json.Marshal(UpdateAgentConfigurationRequest{
 		Name:                "같은 이름 가능",
 		Visibility:          AgentVisibilityPublic,
-		RuntimeID:           "runtime-cursor-mock",
+		RuntimeID:           "runtime-cursor-development",
 		ModelID:             stringPtr("cursor-fast"),
 		ProfileThumbnailURL: &thumbnailURL,
 		Description:         &description,
@@ -892,17 +892,17 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
 	}
 	createdAgain, ok := findAIAgent(bootstrap.Agents, created.Agent.AgentID)
-	if !ok || createdAgain.OwnerPrincipalID != "user-1" || createdAgain.RuntimeID != "runtime-cursor-mock" || !createdAgain.CreatedAt.Equal(created.Agent.CreatedAt) || !createdAgain.UpdatedAt.Equal(created.Agent.UpdatedAt) {
+	if !ok || createdAgain.OwnerPrincipalID != "user-1" || createdAgain.RuntimeID != "runtime-cursor-development" || !createdAgain.CreatedAt.Equal(created.Agent.CreatedAt) || !createdAgain.UpdatedAt.Equal(created.Agent.UpdatedAt) {
 		t.Fatalf("bootstrap created agent = %+v found=%v", createdAgain, ok)
 	}
-	if !runtimeHasAssignedAgent(bootstrap.Devices, "runtime-cursor-mock") {
-		t.Fatalf("bootstrap runtime-cursor-mock was not marked assigned: %+v", bootstrap.Devices)
+	if !runtimeHasAssignedAgent(bootstrap.Devices, "runtime-cursor-development") {
+		t.Fatalf("bootstrap runtime-cursor-development was not marked assigned: %+v", bootstrap.Devices)
 	}
 
 	invalidModelBody, err := json.Marshal(CreateAgentConfigurationRequest{
 		Name:       "잘못된 모델",
 		Visibility: AgentVisibilityPrivate,
-		RuntimeID:  "runtime-cursor-mock",
+		RuntimeID:  "runtime-cursor-development",
 		ModelID:    stringPtr("claude-opus-4-7"),
 	})
 	if err != nil {
@@ -966,7 +966,7 @@ func TestHTTPAIAgentClientMockMutationAndDeletion(t *testing.T) {
 	}
 }
 
-func TestHTTPAIAgentClientMockAdminCreateUsesAuthorizedWorkspaceRuntime(t *testing.T) {
+func TestHTTPAIAgentClientFixtureAdminCreateUsesAuthorizedWorkspaceRuntime(t *testing.T) {
 	adminServer := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "admin-1",
 		Token:       "admin-token",
@@ -988,7 +988,7 @@ func TestHTTPAIAgentClientMockAdminCreateUsesAuthorizedWorkspaceRuntime(t *testi
 	if len(devices.Devices) != 2 {
 		t.Fatalf("admin devices = %+v", devices.Devices)
 	}
-	ownedDevice, ok := findDevice(devices.Devices, "device-mock-macbook")
+	ownedDevice, ok := findDevice(devices.Devices, "device-development-macbook")
 	if !ok || ownedDevice.OwnerPrincipalID != "user-1" || len(ownedDevice.Runtimes) != 3 {
 		t.Fatalf("admin owned device = %+v, ok=%v", ownedDevice, ok)
 	}
@@ -1000,7 +1000,7 @@ func TestHTTPAIAgentClientMockAdminCreateUsesAuthorizedWorkspaceRuntime(t *testi
 	createBody, err := json.Marshal(CreateAgentConfigurationRequest{
 		Name:       "관리자 생성 에이전트",
 		Visibility: AgentVisibilityPrivate,
-		RuntimeID:  "runtime-codex-mock",
+		RuntimeID:  "runtime-codex-development",
 	})
 	if err != nil {
 		t.Fatalf("marshal admin create body: %v", err)
@@ -1017,7 +1017,7 @@ func TestHTTPAIAgentClientMockAdminCreateUsesAuthorizedWorkspaceRuntime(t *testi
 		t.Fatalf("admin create json: %v", err)
 	}
 	if created.Agent.OwnerPrincipalID != "admin-1" ||
-		created.Agent.RuntimeID != "runtime-codex-mock" ||
+		created.Agent.RuntimeID != "runtime-codex-development" ||
 		created.Agent.RuntimeKind != RuntimeKindCodex ||
 		!created.Agent.IsOwnedByViewer {
 		t.Fatalf("admin created agent = %+v", created.Agent)
@@ -1037,7 +1037,7 @@ func TestHTTPAIAgentClientMockAdminCreateUsesAuthorizedWorkspaceRuntime(t *testi
 	}
 }
 
-func TestHTTPAIAgentClientMockSSEReplaysTypedCommentStatus(t *testing.T) {
+func TestHTTPAIAgentClientFixtureSSEReplaysTypedCommentStatus(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -1090,7 +1090,7 @@ func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testin
 	}
 	handler := NewServer(ServerConfig{
 		Assignment:    assignmentStore,
-		AIAgentClient: NewMockAIAgentClientStore(),
+		AIAgentClient: NewFixtureAIAgentClientStore(),
 		Authorizer:    authorizer,
 	}).Handler()
 
@@ -1123,8 +1123,8 @@ func TestHTTPAIAgentThreadProgressBatchIngestsAssignmentAndClientEvent(t *testin
 	}
 }
 
-func TestMockAIAgentClientStoreThreadProgressFanout(t *testing.T) {
-	store := NewMockAIAgentClientStore()
+func TestDevelopmentAIAgentClientStoreThreadProgressFanout(t *testing.T) {
+	store := NewFixtureAIAgentClientStore()
 	history, events, cancel, err := store.SubscribeAIAgentClientEvents(context.Background(), AuthorizationResult{PrincipalID: "user-1"})
 	if err != nil {
 		t.Fatalf("SubscribeAIAgentClientEvents: %v", err)
@@ -1152,7 +1152,7 @@ func TestMockAIAgentClientStoreThreadProgressFanout(t *testing.T) {
 	}
 }
 
-func TestHTTPAIAgentClientMockRequiresConfigurationAndAuthorization(t *testing.T) {
+func TestHTTPAIAgentClientFixtureRequiresConfigurationAndAuthorization(t *testing.T) {
 	unconfigured := NewServer(ServerConfig{Authorizer: aiAgentClientHTTPAuthorizer(t, []string{"ai-agent:*"}, "user-1")}).Handler()
 	req := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/bootstrap", nil)
 	req.Header.Set("Authorization", "Bearer ai-agent-token")
@@ -1162,7 +1162,7 @@ func TestHTTPAIAgentClientMockRequiresConfigurationAndAuthorization(t *testing.T
 		t.Fatalf("unconfigured status=%d body=%s", resp.Code, resp.Body.String())
 	}
 
-	configured := NewServer(ServerConfig{AIAgentClient: NewMockAIAgentClientStore(), Authorizer: aiAgentClientHTTPAuthorizer(t, []string{"ai-agent:stream"}, "user-1")}).Handler()
+	configured := NewServer(ServerConfig{AIAgentClient: NewFixtureAIAgentClientStore(), Authorizer: aiAgentClientHTTPAuthorizer(t, []string{"ai-agent:stream"}, "user-1")}).Handler()
 	forbiddenReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(`{"name":"nope"}`))
 	forbiddenReq.Header.Set("Authorization", "Bearer ai-agent-token")
 	forbiddenResp := httptest.NewRecorder()
@@ -1178,7 +1178,7 @@ func newAIAgentClientHTTPTestServer(t *testing.T, credentials []StaticTokenCrede
 	if err != nil {
 		t.Fatalf("NewStaticTokenAuthorizer: %v", err)
 	}
-	return NewServer(ServerConfig{AIAgentClient: NewMockAIAgentClientStore(), Authorizer: authorizer}).Handler()
+	return NewServer(ServerConfig{AIAgentClient: NewFixtureAIAgentClientStore(), Authorizer: authorizer}).Handler()
 }
 
 func aiAgentClientHTTPAuthorizer(t *testing.T, scopes []string, principalID string) RequestAuthorizer {

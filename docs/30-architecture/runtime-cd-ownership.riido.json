@@ -383,10 +383,6 @@
     ],
     "allowed_public_non_cd_runtime_keys": [
       {
-        "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK",
-        "reason": "testnet mock runtime feature flag documented for disposable local/testnet configuration; it is not a deploy/smoke GitHub configuration key"
-      },
-      {
         "name": "RIIDO_AI_SERVER_ADDR",
         "reason": "container listen-address contract documented as non-live runtime shape; it is not a deploy/smoke GitHub configuration key"
       }

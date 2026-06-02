@@ -2,7 +2,7 @@
 
 `riido-control-plane`은 Riido SaaS control plane의 공개 backend boundary입니다.
 web client와 desktop app webview가 호출하는 HTTP/SSE API, assignment polling,
-provider status, authorization port, RBAC read model, mock/testnet API를
+provider status, authorization port, RBAC read model, development/testnet API를
 소유합니다.
 
 이 레포는 provider CLI를 실행하지 않습니다. 런타임 실행과 로컬 디바이스 제어는
@@ -35,7 +35,7 @@ provider status, authorization port, RBAC read model, mock/testnet API를
 ## 왜 이 작업을 여기서 했나
 
 AI Agent client-facing endpoint는 Riido web과 desktop webview가 직접 호출하는
-SaaS API입니다. 따라서 handler, auth scope gate, mock store, SSE replay,
+SaaS API입니다. 따라서 handler, auth scope gate, development store, SSE replay,
 React Query generated client는 `riido-control-plane`에서 함께 검증해야 합니다.
 
 다만 canonical business vocabulary와 lifecycle/deprecation grammar의 최종
@@ -53,7 +53,7 @@ client 코드는 generated facade에서 `riido.v2.aiAgent.agents.create`처럼
 
 | 알고 싶은 것 | 문서 |
 | --- | --- |
-| AI Agent client API endpoint와 mock/testnet 정책 | [`docs/20-domain/ai-agent-client-api.md`](docs/20-domain/ai-agent-client-api.md) |
+| AI Agent client API endpoint와 development/testnet 정책 | [`docs/20-domain/ai-agent-client-api.md`](docs/20-domain/ai-agent-client-api.md) |
 | authorization resource/action/scope 규칙 | [`docs/20-domain/request-authorization.md`](docs/20-domain/request-authorization.md) |
 | agent catalog RBAC 규칙 | [`docs/20-domain/agent-catalog-rbac.md`](docs/20-domain/agent-catalog-rbac.md) |
 | runtime/agent binding domain | [`docs/20-domain/agent-runtime-binding.md`](docs/20-domain/agent-runtime-binding.md) |
@@ -67,18 +67,17 @@ client 코드는 generated facade에서 `riido.v2.aiAgent.agents.create`처럼
 | runtime artifact CD 소유권과 CodeDeploy 전환 경계 | [`docs/30-architecture/runtime-cd-ownership.md`](docs/30-architecture/runtime-cd-ownership.md) |
 | 마이그레이션 히스토리 | [`docs/migration/control-plane.md`](docs/migration/control-plane.md) |
 
-## AI Agent mock testnet
+## AI Agent development testnet
 
-AI Agent client mock API는 다음 env로 켭니다.
+AI Agent client API는 DynamoDB-backed development store를 사용합니다. 배포된
+development 환경도 agents, devices, daemon runtime snapshots, device
+credentials, task threads, client events를 영속 store에서 읽고 씁니다. 정적
+agent binding secret이나 local-only development switch를 정상 실행 경로로 사용하지
+않습니다.
 
-```bash
-RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true
-```
-
-mock API도 인증 없이 열리지 않습니다. request-token scope와 owner/public/private
-visibility policy를 통과해야 합니다.
-
-현재 testnet smoke는 별도 GitHub Actions workflow가 담당합니다.
+현재 testnet smoke는 별도 GitHub Actions workflow가 담당합니다. smoke는
+health/ready와 generated read surface를 검증하고, 등록된 runtime이 있는 경우에
+한해 agent 생성/assignment mutation smoke를 추가로 수행합니다.
 
 - workflow: `ai-agent-client-testnet-smoke`
 - deploy workflow: `deploy-ai-agent-testnet`
@@ -186,7 +185,7 @@ client repo에서 Orval을 직접 실행하지 않는 것이 원칙입니다.
 go test ./...
 go list -m all
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
-go test ./cmd/riido_ai_server -run 'AIAgentClientMock|ConfigFromEnv' -count=1
+go test ./cmd/riido_ai_server -run 'AIAgentClientFixture|ConfigFromEnv' -count=1
 go test ./tools/reactquerygen -count=1
 go run ./tools/reactquerygen -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json -out web/generated/aiAgentClient.ts
 go test ./tools/containercontract -count=1

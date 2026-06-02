@@ -45,7 +45,7 @@ Scopes are endpoint-call gates only. Agent catalog reads and writes must still
 re-run the RBAC decision described in
 [`agent-catalog-rbac.md`](agent-catalog-rbac.md).
 
-The `ai_agent_client` mock API accepts these static scope families:
+The `ai_agent_client` API accepts these static scope families:
 
 - `ai-agent:*`
 - `ai-agent:read`
@@ -59,8 +59,9 @@ The `ai_agent_client` mock API accepts these static scope families:
 - `task:{task_id}:comment` for task-thread AI Agent comment submit
 - `task:{task_id}:stop` or `task:{task_id}:write` for task-thread AI Agent stop
 
-Those scopes only gate HTTP access. The mock API still evaluates principal
-ownership/admin roles before returning private agents or accepting mutations.
+Those scopes only gate HTTP access. The AI Agent client API still evaluates
+principal ownership/admin roles before returning private agents or accepting
+mutations.
 
 ## External Authorizer Contract
 
@@ -145,7 +146,7 @@ RIID-4717 adds browser frontend CORS transport configuration over the existing
 public HTTP API without changing request-token authorization, RBAC, or endpoint
 payload contracts.
 
-RIID-4721 adds the request-token-protected AI Agent client mock API. It reuses
+RIID-4721 adds the request-token-protected AI Agent client API. It reuses
 the same static/external authorizer port and keeps owner/public/private
 visibility checks inside the route handler/store boundary.
 
