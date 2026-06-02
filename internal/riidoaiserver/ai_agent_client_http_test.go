@@ -499,6 +499,9 @@ func TestHTTPAIAgentClientAssignUsesRequestScopedTaskContext(t *testing.T) {
 	if !pollOut.Assignment.AllowExperimentalRuntime {
 		t.Fatalf("assignment experimental opt-in = false, assignment=%+v", *pollOut.Assignment)
 	}
+	if pollOut.Assignment.ModelID != "codex-default" {
+		t.Fatalf("assignment model_id = %q, want codex-default", pollOut.Assignment.ModelID)
+	}
 }
 
 func TestHTTPAIAgentClientDevelopmentAssignableAgentsUseStableIDTieBreak(t *testing.T) {

@@ -604,6 +604,7 @@ func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principa
 		ComponentID:              taskID,
 		AgentID:                  selected.AgentID,
 		RuntimeProvider:          binding.RuntimeProvider,
+		ModelID:                  selected.ModelID,
 		AgentInstruction:         selected.Instruction,
 		AllowExperimentalRuntime: runtime.RequiresExperimentalOptIn,
 		CreatedBy:                strings.TrimSpace(principal.PrincipalID),
