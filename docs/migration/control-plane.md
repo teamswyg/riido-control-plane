@@ -1381,6 +1381,33 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4855 — CodeDeploy activation ownership gate SSOT
+
+This slice records the final activation rule after the CodeDeploy ownership
+discussion.
+
+CodeDeploy blue/green topology can exist in `riido-infra`, but activation is
+still a `riido-control-plane` runtime artifact CD workflow mode. Operators wire
+the infra-provided stable application/deployment-group names into GitHub
+environment configuration out of band; the public workflow then registers the
+task-definition revision, creates/waits for CodeDeploy, and runs smoke in the
+same job.
+
+This slice does:
+
+- add `codedeploy_activation_gate` to the runtime CD ownership manifest
+- require the gate to keep `riido-control-plane` as canonical CD owner and
+  `riido-infra` as awareness/topology owner
+- define activation requirements without adding another public key-name list to
+  human-readable docs
+- tighten the public deny list around live CodeDeploy values, generated deploy
+  payloads, image/task-definition values, smoke payloads, workflow-run evidence,
+  and Terraform/operator evidence
+
+This slice does not add AWS topology, change Terraform, add deployment secrets,
+upload workflow artifacts, expose live environment values, edit generated
+client API shape, or move CD execution into `riido-infra`.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

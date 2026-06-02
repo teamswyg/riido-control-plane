@@ -471,6 +471,12 @@ RIID-4842 adds the ratchet: public key names are a managed sensitivity budget.
 The existing names can be documented only because operators need to configure
 them, and any new `RIIDO_AI_SERVER_*` name must be added to the runtime CD
 ownership manifest before public docs or workflows reference it.
+RIID-4855 keeps CodeDeploy activation on the same side of the boundary:
+topology and private evidence come from `riido-infra`, but the activation path
+is still a `riido-control-plane` workflow mode. Public docs may describe the
+operator/environment gate and stable categories, not live CodeDeploy values,
+generated deployment payloads, image/task-definition values, smoke payloads, or
+Terraform/operator evidence.
 
 ## Durable Operation Boundary
 

@@ -250,6 +250,17 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			PublicRepoShouldAvoid []string `json:"public_repo_should_avoid"`
 			InfraMustKnow         []string `json:"infra_must_know"`
 		} `json:"public_operational_detail_minimization"`
+		CodeDeployActivationGate struct {
+			RiidoTask              string   `json:"riido_task"`
+			CanonicalOwner         string   `json:"canonical_owner"`
+			InfraAwarenessOwner    string   `json:"infra_awareness_owner"`
+			Status                 string   `json:"status"`
+			Rule                   string   `json:"rule"`
+			ActivationRequirements []string `json:"activation_requirements"`
+			PublicRepoMayKeep      []string `json:"public_repo_may_keep"`
+			PublicRepoMustNotKeep  []string `json:"public_repo_must_not_keep"`
+			InfraMustKnow          []string `json:"infra_must_know"`
+		} `json:"codedeploy_activation_gate"`
 		InfraTopology struct {
 			RiidoTask      string   `json:"riido_task"`
 			Repo           string   `json:"repo"`
@@ -281,6 +292,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Hardening, "RIID-4844")
 	requireSliceContains(t, parsed.Hardening, "RIID-4845")
 	requireSliceContains(t, parsed.Hardening, "RIID-4853")
+	requireSliceContains(t, parsed.Hardening, "RIID-4855")
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
 		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
 	}
@@ -508,6 +520,29 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicOperationalDetailMinimization.PublicRepoShouldAvoid, "duplicating operational setup details in broad README, client-facing docs, generated-client docs, or PR prose when a link to the manifest is sufficient")
 	requireSliceContains(t, parsed.PublicOperationalDetailMinimization.InfraMustKnow, "the CD ownership remodel is settled: runtime artifact CD remains in riido-control-plane")
 	requireSliceContains(t, parsed.PublicOperationalDetailMinimization.InfraMustKnow, "tightening public operational disclosure is Terraform no-diff unless a future SSOT asks for topology, secret, IAM, network, persistence, or evidence tooling changes")
+	if parsed.CodeDeployActivationGate.RiidoTask != "RIID-4855" {
+		t.Fatalf("CodeDeploy activation gate work unit drifted: %#v", parsed.CodeDeployActivationGate)
+	}
+	if parsed.CodeDeployActivationGate.CanonicalOwner != "riido-control-plane" ||
+		parsed.CodeDeployActivationGate.InfraAwarenessOwner != "riido-infra" {
+		t.Fatalf("CodeDeploy activation gate ownership drifted: %#v", parsed.CodeDeployActivationGate)
+	}
+	if parsed.CodeDeployActivationGate.Status != "topology-ready-operator-environment-gated" {
+		t.Fatalf("CodeDeploy activation gate status drifted: %#v", parsed.CodeDeployActivationGate)
+	}
+	requireContains(t, parsed.CodeDeployActivationGate.Rule, "not an infra-owned deployment action")
+	requireContains(t, parsed.CodeDeployActivationGate.Rule, "operators map the infra-provided application/deployment-group names")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.ActivationRequirements, "riido-infra CodeDeploy topology work unit has been applied and reviewed outside public repositories")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.ActivationRequirements, "both optional CodeDeploy GitHub environment variables are configured together")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.ActivationRequirements, "the deploy workflow creates and waits for the CodeDeploy deployment in the same job")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.PublicRepoMayKeep, "stable activation key categories")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.PublicRepoMayKeep, "aggregate activation readiness or pass-fail status without live payload values")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.PublicRepoMustNotKeep, "environment-specific CodeDeploy application or deployment-group values")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.PublicRepoMustNotKeep, "generated CodeDeploy AppSpec or request JSON")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.PublicRepoMustNotKeep, "workflow run URL as deploy evidence")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.PublicRepoMustNotKeep, "Terraform plan, state, tfvars, apply logs, or raw operator evidence")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.InfraMustKnow, "activation does not move create/wait/smoke execution out of riido-control-plane")
+	requireSliceContains(t, parsed.CodeDeployActivationGate.InfraMustKnow, "public repos should not request convenience handoff payloads from infra or the deploy workflow")
 	for _, repoPath := range parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink {
 		body := mustRead(t, filepath.Join("..", "..", filepath.FromSlash(repoPath)))
 		for _, key := range expectedCDKeys {
@@ -528,6 +563,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, doc, "RIID-4845")
 	requireContains(t, doc, "Public Operational Detail Minimization")
 	requireContains(t, doc, "RIID-4853")
+	requireContains(t, doc, "RIID-4855")
+	requireContains(t, doc, "operator/environment gated")
 	requireContains(t, doc, "infra is the same ownership rule")
 	requireContains(t, doc, "Image values are deliberately not in that public export set")
 	requireContains(t, boundary, "RIID-4835")
@@ -547,6 +584,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, migration, "RIID-4844")
 	requireContains(t, migration, "RIID-4845")
 	requireContains(t, migration, "RIID-4853")
+	requireContains(t, migration, "RIID-4855")
 	requireNotContains(t, doc+"\n"+boundary+"\n"+integration, "public image digest")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")
