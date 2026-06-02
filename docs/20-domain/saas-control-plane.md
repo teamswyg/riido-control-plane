@@ -132,7 +132,7 @@ existing API server's camelCase response, composes `AssignRequest.prompt`, and
 then calls the assignment store. If lookup or composition fails, the HTTP
 handler returns `502` before a daemon can lease provider work.
 
-Fixture-only frontend tests may still use deterministic synthetic thread
+Development fixture responses may still use deterministic synthetic thread
 responses, but those responses are not evidence that a daemon assignment prompt
 exists.
 
@@ -347,37 +347,44 @@ public repository. It owns only these environment variables:
 - `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
+- `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
 - `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`
 - `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`
 - `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`
+- `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT`
 - `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE`
-- `RIIDO_AI_SERVER_DYNAMODB_ASSIGNMENT_TABLE`
-- `RIIDO_AI_SERVER_DYNAMODB_OUTBOX_TABLE`
-- `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT`
 - `RIIDO_AI_SERVER_AWS_REGION`
-- `RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS`
+- `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS`
+- `AWS_CONTAINER_CREDENTIALS_FULL_URI`
+- `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI`
+- `AWS_CONTAINER_AUTHORIZATION_TOKEN`
 
-Static-token JSON values use strict decoding, so unknown fields and trailing
-JSON are rejected. Static-token authorization may be combined with the external
-HTTP authorizer through the existing fallback authorizer rule: only
-unauthenticated results fall through to the next authorizer, while forbidden
-results stop evaluation.
+Static-token JSON values use strict decoding, so unknown fields and trailing JSON
+are rejected. Static-token authorization may be combined with the external HTTP
+authorizer through the existing fallback
+authorizer rule: only unauthenticated results fall through to the next
+authorizer, while forbidden results stop evaluation.
+
+The external authorizer API key is a server-to-server secret for the
+control-plane to authorizer hop. It is sent as
+`X-Riido-Control-Plane-Authorizer-Key`, never as a generated frontend token, and
+does not replace the request token supplied by the web or desktop webview
+client.
 
 `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` enables only the public-safe
 review account provisioning path. The environment value is a SHA-256 hash of an
 externally supplied review token; the raw token remains outside this
 repository.
 
-The AI Agent client API is backed by the development DynamoDB store described in
-[`ai-agent-client-api.md`](ai-agent-client-api.md). Static env agent bindings
-are not part of the current daemon assignment path; daemon-visible bindings are
-derived from persisted agents plus daemon runtime snapshots.
+`RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` enables the development AI Agent
+client API described in [`ai-agent-client-api.md`](ai-agent-client-api.md). The
+development API uses a DynamoDB snapshot item for durable state.
 
 The task-context variables configure the production server-to-server read from
 the existing Riido API server. The base URL, workspace id, team id, and
@@ -385,9 +392,9 @@ workspace API key must be set together. The API key is sent only as
 `X-Workspace-Api-Key`; it is not a browser/client token and must not be exposed
 to generated frontend clients.
 
-This boundary does not own legacy broad bearer-token compatibility,
-snapshot/outbox stores, durable operation save/claim wiring, DynamoDB,
-EventBridge, Terraform, AWS credentials, CloudWatch API wiring, Prometheus
+This boundary does not own legacy broad bearer-token compatibility, assignment
+snapshot/outbox stores, durable operation save/claim wiring, EventBridge,
+Terraform, AWS credentials, CloudWatch API wiring, Prometheus
 adapters, Docker image contracts, raw review token values, production secrets,
 or deployment evidence.
 

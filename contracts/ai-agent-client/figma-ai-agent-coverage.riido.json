@@ -9,7 +9,18 @@
     "teamswyg/riido-contracts#46",
     "teamswyg/riido-contracts#51",
     "teamswyg/riido-contracts#52",
-    "teamswyg/riido-contracts#54"
+    "teamswyg/riido-contracts#54",
+    "teamswyg/riido-contracts#55",
+    "teamswyg/riido-contracts#56",
+    "teamswyg/riido-contracts#57",
+    "teamswyg/riido-contracts#58",
+    "teamswyg/riido-contracts#60",
+    "teamswyg/riido-contracts#62",
+    "teamswyg/riido-contracts#63",
+    "teamswyg/riido-contracts#64",
+    "teamswyg/riido-contracts#65",
+    "teamswyg/riido-contracts#66",
+    "teamswyg/riido-contracts#67"
   ],
   "human_doc": "docs/30-architecture/figma-ai-agent-coverage.md",
   "related_manifests": [
@@ -43,12 +54,61 @@
       "authoritative_source": "Figma Plugin API figma.root.children after loaded-page inspection",
       "authoritative_result": ["129:5215", "42:3014", "0:1"],
       "rule": "metadata page-list output is supporting evidence only and must not remove expected_pages or non-UI inventories."
+    },
+    {
+      "id": "figma-headless-file-key-placeholder.v1",
+      "tool": "Figma Plugin API use_figma figma.fileKey",
+      "observed_at": "2026-06-02",
+      "observed_result": "A live use_figma root/category inspection for file MUOd9lctoEHASUStN3vUuK returned figma.fileKey=headless while the same invocation successfully read the AI Agent file pages and annotation categories.",
+      "authoritative_source": "User-provided Figma URL/tool input fileKey and this manifest's figma.file_key",
+      "authoritative_result": ["MUOd9lctoEHASUStN3vUuK", "v.1.22 AI Agent"],
+      "rule": "The use_figma runtime's figma.fileKey value is supporting evidence only and must not overwrite figma.file_key, expected_pages, or downstream projection source identity."
+    },
+    {
+      "id": "figma-onboarding-page-load-timeout.v1",
+      "tool": "Figma get_metadata nodeId=42:3014 and Figma Plugin API page load for 42:3014",
+      "observed_at": "2026-06-02",
+      "observed_result": "Current live reads of page 42:3014 Wireframe - 온보딩 can time out after 120s in get_metadata(nodeId=42:3014) and in use_figma scripts that attempt await figma.setCurrentPageAsync(page); direct getNodeByIdAsync reads for nodes 236:33845 and 236:33847 still returned the six onboarding riido.* API Generated annotations.",
+      "authoritative_source": "Previously captured loaded Figma Plugin API inventory for page 42:3014 plus registered node-id evidence in this manifest plus direct node lookup for 236:33845 and 236:33847",
+      "authoritative_result": ["42:3014", "child_count=83", "non_ui_top_level_inventory", "236:33845", "236:33847", "onboarding_api_generated_annotations=6"],
+      "rule": "a timeout is supporting evidence only and must not rewrite expected_pages, remove page 42:3014, remove onboarding inventory, or mark onboarding generated paths unresolved; direct registered-node lookup may be used as fallback evidence for onboarding API Generated annotations when full page traversal times out."
     }
   ],
   "coverage_policy": {
     "summary": "Figma is product/design evidence, not the durable SSOT. A Figma node is covered only when it points to an owning domain/API/infrastructure/client boundary and a deterministic follow-up rule.",
     "top_down": "When Figma changes product meaning, update the owning contracts policy or API DSL first, then regenerate IR/OpenAPI and downstream fixtures.",
     "bottom_up": "When implementation or harness work finds a contradiction, record the local finding, escalate the owning SSOT, then update this coverage manifest."
+  },
+  "api_generated_annotation_content_policy": {
+    "category_id": "700:0",
+    "category_label": "API Generated",
+    "label_format": [
+      "line_1: riido.* generated-client facade path",
+      "line_2: 종류: Query | Mutation | SSE Stream",
+      "line_3: 배경: Korean frontend consumption background"
+    ],
+    "rule": "Every riido.* Figma annotation must keep the facade generated-client path on the first line, preserve the operation kind, and include a Korean background sentence. The executable inventory below owns operation_kind/background; live Figma annotation text is handoff evidence and must not become a second API SSOT. operation_kind must match generated OpenAPI transport: text/event-stream responses are SSE Stream, non-stream GET operations are Query, and non-GET operations are Mutation. Each facade path in api_generated_annotation_inventory must keep a matching v2.* OpenAPI generated path in the same source coverage entry.",
+    "retired_categories": [
+      {
+        "category_id": "39:0",
+        "category_label": "클라이언트 전달",
+        "retirement_status": "unused_not_deleted",
+        "live_usage_count": 0,
+        "observed_at": "2026-06-02",
+        "tool_limitation": "Current Figma MCP getAnnotationCategoriesAsync returns annotation category data without callable remove/setLabel methods, so the unused category definition could not be deleted through this automation."
+      }
+    ],
+    "live_inspection": {
+      "observed_at": "2026-06-02",
+      "tool": "Figma Plugin API use_figma lightweight annotation traversal",
+      "page_counts": [
+        {"page_id": "129:5215", "page_name": "UI", "riido_annotation_count": 53, "api_generated_count": 53, "missing_operation_kind": 0, "missing_background": 0},
+        {"page_id": "42:3014", "page_name": "Wireframe - 온보딩", "riido_annotation_count": 6, "api_generated_count": 6, "missing_operation_kind": 0, "missing_background": 0},
+        {"page_id": "0:1", "page_name": "Wireframe", "riido_annotation_count": 0, "api_generated_count": 0, "missing_operation_kind": 0, "missing_background": 0}
+      ],
+      "total_riido_annotations": 59,
+      "total_api_generated_annotations": 59
+    }
   },
   "expected_pages": [
     {"node_id": "129:5215", "name": "UI", "child_count": 16},
@@ -573,30 +633,285 @@
       }
     }
   ],
-  "client_delivery_annotations": [
+  "api_generated_annotations": [
     {
       "node_id": "153:8545",
       "top_level_node_id": "153:15931",
       "coverage_entry_node_id": "153:15931",
-      "category_id": "39:0",
-      "category_label": "클라이언트 전달",
-      "figma_label": "riido.aiAgent.events.stream\n\n상세내용은 작업중입니다",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_label": "riido.aiAgent.events.stream\n종류: SSE Stream\n배경: threads 조회 결과에 active_stream이 있을 때만 연결해 진행 상태와 thread 갱신 이벤트를 받습니다.",
       "figma_generated_path": "riido.aiAgent.events.stream",
       "canonical_generated_path": "aiAgent.events.stream",
-      "resolution_status": "resolved_stale_handoff_copy",
-      "resolution": "The Figma handoff note '상세내용은 작업중입니다' is stale copy. The stream consumption hint is resolved by the task-thread coverage entry, the API DSL/OpenAPI generated path, and downstream generated-client comments."
+      "resolution_status": "resolved_consumption_hint",
+      "resolution": "The Figma handoff note now keeps the facade path on the first line, marks it as an SSE Stream, and explains that clients connect only when the task-thread cold collection returns an active_stream link."
     },
     {
       "node_id": "236:20768",
       "top_level_node_id": "153:15931",
       "coverage_entry_node_id": "153:15931",
-      "category_id": "39:0",
-      "category_label": "클라이언트 전달",
-      "figma_label": "riido.aiAgent.tasks.stop",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_label": "riido.aiAgent.tasks.stop\n종류: Mutation\n배경: 작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다.",
       "figma_generated_path": "riido.aiAgent.tasks.stop",
       "canonical_generated_path": "aiAgent.tasks.stop",
       "resolution_status": "resolved_consumption_hint",
-      "resolution": "The Figma handoff path is a frontend facade example. The durable generated path is aiAgent.tasks.stop and is covered by the task-thread coverage entry, API DSL/OpenAPI, and downstream generated-client comments."
+      "resolution": "The Figma handoff note keeps the facade path on the first line, marks it as a Mutation, and explains the daemon/provider stop handoff."
+    }
+  ],
+  "api_generated_annotation_inventory": [
+    {
+      "ui_area": "Participant dropdown / task details",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.tasks.assignableAgents",
+      "canonical_generated_path": "aiAgent.tasks.assignableAgents",
+      "operation_kind": "Query",
+      "background": "참여자 드롭다운에서 현재 task/subtask에 배정할 수 있는 Agent 목록을 조회합니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
+        {"page_id": "42:3014", "top_level_node_id": "236:33845", "coverage_entry_node_id": "153:12742", "node_ids": ["236:33845", "236:33847"]}
+      ]
+    },
+    {
+      "ui_area": "Participant dropdown / task details",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.tasks.assign",
+      "canonical_generated_path": "aiAgent.tasks.assign",
+      "operation_kind": "Mutation",
+      "background": "작업에 Agent를 참여자로 배정하고 daemon이 런타임으로 작업을 시작할 수 있는 서버 상태를 만듭니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
+        {"page_id": "42:3014", "top_level_node_id": "236:33845", "coverage_entry_node_id": "153:12742", "node_ids": ["236:33845", "236:33847"]}
+      ]
+    },
+    {
+      "ui_area": "Participant dropdown / task details",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.tasks.unassign",
+      "canonical_generated_path": "aiAgent.tasks.unassign",
+      "operation_kind": "Mutation",
+      "background": "참여자에서 Agent를 제거합니다. 진행 중이면 중지 요청/큐 해제 흐름으로 이어집니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
+        {"page_id": "42:3014", "top_level_node_id": "236:33845", "coverage_entry_node_id": "153:12742", "node_ids": ["236:33845", "236:33847"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.tasks.threads",
+      "canonical_generated_path": "aiAgent.tasks.threads",
+      "operation_kind": "Query",
+      "background": "작업의 완료/진행 중 Agent thread cold collection을 조회합니다. active_stream이 있으면 SSE로 이어집니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8592", "236:21379"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.tasks.threadMessages.create",
+      "canonical_generated_path": "aiAgent.tasks.threadMessages.create",
+      "operation_kind": "Mutation",
+      "background": "특정 thread_id에 다음 지시/답글을 추가하고 Agent 응답을 이어서 요청합니다.",
+      "annotation_count": 1,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8588"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.tasks.submitComment",
+      "canonical_generated_path": "aiAgent.tasks.submitComment",
+      "operation_kind": "Mutation",
+      "background": "호환용 댓글 제출 경로입니다. thread_id 없이 입력하면 서버가 적절한 thread 응답 흐름을 처리합니다.",
+      "annotation_count": 1,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8588"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.events.stream",
+      "canonical_generated_path": "aiAgent.events.stream",
+      "operation_kind": "SSE Stream",
+      "background": "threads 조회 결과에 active_stream이 있을 때만 연결해 진행 상태와 thread 갱신 이벤트를 받습니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8545", "236:21379"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.tasks.stop",
+      "canonical_generated_path": "aiAgent.tasks.stop",
+      "operation_kind": "Mutation",
+      "background": "작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다.",
+      "annotation_count": 1,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["236:20768"]}
+      ]
+    },
+    {
+      "ui_area": "Runtime and agent settings",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.devices.runtimes",
+      "canonical_generated_path": "aiAgent.devices.runtimes",
+      "operation_kind": "Query",
+      "background": "계정 소유 device에서 감지된 runtime 목록과 온라인/오프라인 상태를 조회합니다. 화면은 SaaS 값을 신뢰합니다.",
+      "annotation_count": 13,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10339", "160:10418", "559:34626", "559:34704"]},
+        {"page_id": "129:5215", "top_level_node_id": "435:60050", "coverage_entry_node_id": "435:60050", "node_ids": ["164:34470", "164:34476", "164:34483", "164:34496", "435:72699"]},
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["432:22231", "432:35651", "432:22617", "432:35707"]}
+      ]
+    },
+    {
+      "ui_area": "Runtime settings",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.agents.daemon.details",
+      "canonical_generated_path": "aiAgent.agents.daemon.details",
+      "operation_kind": "Query",
+      "background": "Agent에 연결된 daemon/runtime 상세와 제어 가능 상태를 SaaS 기준으로 조회합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10654", "559:34714"]}
+      ]
+    },
+    {
+      "ui_area": "Runtime settings",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.agents.daemon.stop",
+      "canonical_generated_path": "aiAgent.agents.daemon.stop",
+      "operation_kind": "Mutation",
+      "background": "SaaS에 daemon 중지 요청을 남깁니다. daemon은 요청을 읽은 뒤 스스로 종료합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:14712", "164:23904"]}
+      ]
+    },
+    {
+      "ui_area": "Runtime settings",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.agents.daemon.restart",
+      "canonical_generated_path": "aiAgent.agents.daemon.restart",
+      "operation_kind": "Mutation",
+      "background": "SaaS에 daemon 재시작 요청을 남깁니다. daemon은 polling으로 요청을 읽어 실행합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:16169", "164:23977"]}
+      ]
+    },
+    {
+      "ui_area": "Onboarding",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.onboarding.fixtures",
+      "canonical_generated_path": "aiAgent.onboarding.fixtures",
+      "operation_kind": "Query",
+      "background": "리도/영실/홍도/지원처럼 제품이 제공하는 초기값 목록을 조회합니다. template entity가 아니라 fixture입니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:30672", "164:30681", "164:30690", "164:30699"]}
+      ]
+    },
+    {
+      "ui_area": "Onboarding",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.onboarding.fixtures.createAgent",
+      "canonical_generated_path": "aiAgent.onboarding.fixtures.createAgent",
+      "operation_kind": "Mutation",
+      "background": "선택한 fixture 값을 기반으로 일반 Agent를 생성합니다. fixture 자체를 생성하는 기능은 아닙니다.",
+      "annotation_count": 1,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:33556"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings / direct setting",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.agents.create",
+      "canonical_generated_path": "aiAgent.agents.create",
+      "operation_kind": "Mutation",
+      "background": "직접 설정 화면에서 워크스페이스 안에 새 Agent를 생성합니다. 신규 v2 create는 workspace_id를 포함합니다.",
+      "annotation_count": 6,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["337:24013", "432:37349", "134:6584", "432:35493"]},
+        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:30708", "164:33556"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.bootstrap",
+      "canonical_generated_path": "aiAgent.bootstrap",
+      "operation_kind": "Query",
+      "background": "AI Agent 설정/온보딩 초기 화면에 필요한 agent 요약, 권한, 기본 상태를 조회합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["337:24013", "432:37349"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.agents.updateConfiguration",
+      "canonical_generated_path": "aiAgent.agents.updateConfiguration",
+      "operation_kind": "Mutation",
+      "background": "할당 작업이 없는 Agent의 이름, 썸네일, 설명, 지침, 런타임, 모델, 공개 범위를 저장합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["417:21803", "432:35544"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.agents.editability",
+      "canonical_generated_path": "aiAgent.agents.editability",
+      "operation_kind": "Query",
+      "background": "Agent를 수정할 수 있는지 먼저 조회합니다. 할당된 작업이 있으면 저장/수정 UI는 막혀야 합니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["417:21803", "432:35544", "432:38529", "432:38855"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings",
+      "category_id": "700:0",
+      "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.agents.delete",
+      "canonical_generated_path": "aiAgent.agents.delete",
+      "operation_kind": "Mutation",
+      "background": "Agent 삭제를 요청합니다. 진행/예약 중 작업은 서버 정책에 따라 중지 또는 큐 해제됩니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["432:37746", "432:38689"]}
+      ]
     }
   ],
   "entries": [

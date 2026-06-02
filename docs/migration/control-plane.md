@@ -419,6 +419,7 @@ This slice does:
 - parse strict `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON`
 - parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL`
 - parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
+- parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY`
 - parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
 - compose static-token and external HTTP authorizers through fallback authZ
 - add black-box health/cmd parser tests
@@ -429,6 +430,11 @@ snapshot stores, file outbox adapters, assignment operation durable save/claim
 wiring, DynamoDB/EventBridge adapters, Terraform, secret values, AWS adapters,
 CloudWatch/Prometheus adapters, Docker, review account seed data, dashboards,
 daemon consumers, or deployment evidence.
+
+The external authorizer API key extends the same authorizer hop for production
+integration with the existing Riido API server. It protects the server-to-server
+authorizer request while the original browser request token remains opaque to
+the control plane.
 
 ### RIID-4680 — store snapshot/file outbox migration
 
@@ -521,7 +527,8 @@ This slice does:
 - trigger deployment only from `v*` tags or explicit manual dispatch
 - use GitHub OIDC via the configured deploy-role secret
 - build the checked-in `riido_ai_server` container image contract
-- push an immutable ECR tag derived from the Git ref and commit SHA
+- push an immutable ECR tag derived from the Git ref, commit SHA, and workflow
+  run attempt
 - resolve the pushed image to an ECR digest
 - register a new ECS task-definition revision by changing only the configured
   container image
@@ -1232,16 +1239,17 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
-### RIID-4834 — Figma client-delivery annotation projection gate
+### RIID-4834 — Figma API Generated annotation projection gate
 
-This slice mirrors the contracts-owned Figma client-delivery annotation
+This slice mirrors the contracts-owned Figma `API Generated` annotation
 normalization.
 
 This slice does:
 
 - update the mirrored Figma AI Agent coverage manifest from `riido-contracts`
-- preserve `client_delivery_annotations` for Dev Mode category `39:0`
-  `클라이언트 전달`
+- preserve `api_generated_annotations` for Dev Mode category `700:0`
+  `API Generated`, matching the mirror field names to the current category
+  vocabulary
 - normalize Figma facade examples such as `riido.aiAgent.events.stream` and
   `riido.aiAgent.tasks.stop` to canonical generated paths
   `aiAgent.events.stream` and `aiAgent.tasks.stop`
@@ -1301,6 +1309,203 @@ This slice does:
   mirror and preserves the three authoritative page IDs
 - document that no-`nodeId` metadata output must not remove `expected_pages`,
   `non_ui_top_level_inventory`, or `legacy_non_ui_absorptions`
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
+### Figma onboarding timeout provenance mirror catch-up
+
+This slice consumes the contracts-owned provenance catch-up after the onboarding
+page load timeout limitation was added.
+
+`teamswyg/riido-contracts#60` changed executable Figma coverage meaning by
+adding `figma-onboarding-page-load-timeout.v1` to
+`supporting_tool_limitations`. The control-plane mirror must carry that entry
+both in the mirrored source coverage fixture and in local
+`source_contracts_manifest.stabilized_by`.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#60` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to expect the extended upstream provenance list
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
+### Figma API Generated annotation content policy mirror
+
+This slice consumes `teamswyg/riido-contracts#62`, which records the live Figma
+annotation content rule for generated-client handoff.
+
+The mirrored contracts coverage now carries
+`api_generated_annotation_content_policy`: every live `riido.*` Figma annotation
+belongs to `700:0` / `API Generated`, keeps the facade path first, includes
+`종류: Query | Mutation | SSE Stream`, and includes Korean `배경:` text. The live
+inspection counts remain 53 annotations on the UI page, 6 on onboarding, and 0
+on the legacy wireframe page, for 59 total generated handoff annotations.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#62` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to preserve the annotation content policy and
+  page-level live inspection totals
+- document that generated TypeScript comments still derive from OpenAPI and the
+  generated-client manifest, not from hard-coded Figma label strings
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
+### Figma retired client-delivery annotation category mirror
+
+This slice consumes `teamswyg/riido-contracts#63`, which records old Figma
+category `39:0` / `클라이언트 전달` as retired and unused.
+
+The control-plane mirror keeps that fact so generated-client delivery does not
+accidentally treat the old category as an active handoff category again. The
+current live usage count is 0. The category definition may still exist in Figma
+because the current Figma MCP exposes category data without callable `remove` or
+`setLabel` methods.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#63` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to preserve the retired category id, label,
+  `unused_not_deleted` status, zero usage count, and tool limitation
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
+### Figma onboarding direct-node fallback evidence mirror
+
+This slice consumes `teamswyg/riido-contracts#64`, which refines the onboarding
+page-load timeout limitation with direct registered-node fallback evidence.
+
+Full `42:3014` `Wireframe - 온보딩` traversal can still time out, but direct
+Figma Plugin API reads for `236:33845` and `236:33847` preserve the six
+onboarding `riido.*` `API Generated` annotations. Control-plane mirrors that
+fact so generated-client projection does not treat a full-page timeout as proof
+that onboarding generated paths disappeared.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#64` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to preserve `236:33845`, `236:33847`, and
+  `onboarding_api_generated_annotations=6` in the source limitation
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
+### Figma headless file-key placeholder limitation mirror
+
+This slice consumes `teamswyg/riido-contracts#65`, which records a Figma Plugin
+API runtime limitation: live `use_figma` inspection can return
+`figma.fileKey=headless` while still reading the real AI Agent file content.
+
+Control-plane mirrors that evidence so generated-client projection never treats
+the headless runtime placeholder as the contracts source identity. The
+authoritative source remains the mirrored contracts manifest's `figma.file_key`
+and the local `source_contracts_manifest` values.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#65` to
+  `source_contracts_manifest.stabilized_by`
+- add a local mirrored limitation that forbids replacing the upstream file
+  identity with `headless`
+- require the projection gate to preserve the source authoritative results
+  `MUOd9lctoEHASUStN3vUuK` and `v.1.22 AI Agent`
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
+### Figma API Generated operation-kind transport guard mirror
+
+This slice consumes `teamswyg/riido-contracts#66`, which tightens the contracts
+Figma API Generated annotation guard.
+
+The mirrored source policy now requires `operation_kind` to match generated
+OpenAPI transport: `text/event-stream` responses are `SSE Stream`, non-stream
+`GET` operations are `Query`, and non-`GET` operations are `Mutation`.
+Control-plane mirrors that source rule so generated-client projection cannot
+preserve a Figma annotation kind that contradicts the OpenAPI operation shape.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#66` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to preserve the transport-derived operation-kind
+  rule in the mirrored source policy and human projection doc
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
+### Figma onboarding page load timeout limitation mirror
+
+This slice mirrors the contracts-owned Figma onboarding page load timeout
+limitation into the control-plane projection gate.
+
+Current live reads of `node-id=42:3014` (`Wireframe - 온보딩`) can time out
+after 120s when using Figma `get_metadata(nodeId=42:3014)` or `use_figma`
+scripts that attempt `await figma.setCurrentPageAsync(page)`. Control-plane
+must not treat that timeout as proof that onboarding generated-client coverage
+disappeared.
+
+This slice does:
+
+- copy `figma-onboarding-page-load-timeout.v1` from the contracts Figma coverage
+  mirror
+- add a local `mirrored_supporting_tool_limitations` entry for the timeout
+- require the projection gate to keep page `42:3014`, non-UI inventory, and
+  onboarding generated paths covered despite the timeout
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
+### Figma API Generated provenance mirror catch-up
+
+This slice consumes the contracts-owned provenance catch-up after the API
+Generated annotation passes.
+
+`teamswyg/riido-contracts#56`, `#57`, and `#58` changed executable Figma
+coverage meaning: #56 registered the screen-level API Generated annotation
+inventory, #57 moved the Figma category to `700:0` / `API Generated`, and #58
+renamed the manifest fields to `api_generated_annotations` and
+`api_generated_annotation_inventory`. The control-plane mirror must carry those
+entries both in the mirrored source coverage fixture and in local
+`source_contracts_manifest.stabilized_by`.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#56`, `#57`, and `#58` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to expect the extended upstream provenance list
 
 This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
 change generated API shape, add runtime behavior, add deployment secrets,
@@ -1427,6 +1632,100 @@ artifacts, publish live URLs, image/task-definition values, CodeDeploy
 AppSpec/request JSON, deployment IDs, smoke payloads, Terraform evidence, or
 move CD execution into `riido-infra`.
 
+### Figma API Generated v2 counterpart mirror
+
+This slice consumes `teamswyg/riido-contracts#67`, which makes the Figma API
+Generated handoff guard preserve both the short facade path and the
+workspace-scoped v2 generated path.
+
+Control-plane still mirrors Figma labels such as `riido.aiAgent.tasks.stop`
+because those labels are searchable handoff text for frontend developers. The
+actual current API surface also exposes `riido.v2.aiAgent.tasks.stop`.
+Therefore each mirrored API Generated annotation/inventory item must prove that
+the canonical facade path and the `v2.*` counterpart both exist in OpenAPI, in
+the same source coverage entry, and in generated TypeScript comments.
+
+This slice does:
+
+- mirror the contracts Figma coverage manifest through
+  `teamswyg/riido-contracts#67`
+- append `teamswyg/riido-contracts#67` to
+  `source_contracts_manifest.stabilized_by`
+- require generated core and React clients to keep Korean comments for both the
+  facade path and the `riido.v2.*` access example
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change runtime behavior, add deployment secrets, expose live endpoint values,
+or move client UI ownership into this repository.
+
+### Figma coverage mirror strict decode guard
+
+This follow-up tightens the downstream Figma coverage mirror reader used by the
+generated-client projection gate.
+
+Control-plane keeps a copied contracts coverage manifest only to prove that the
+local OpenAPI/generated-client projection is consuming the upstream SSOT. A
+plain JSON unmarshal could silently ignore fields that contracts added to the
+manifest shape, which would let this repository keep passing while consuming
+only part of the upstream coverage record. The projection gate now decodes both
+the local projection manifest and the mirrored contracts coverage manifest with
+unknown-field and trailing-document rejection.
+
+This slice updates the mirrored source coverage test type to include the full
+contracts-owned fields that the current mirror carries, including `riido_task`,
+`human_doc`, `related_manifests`, `figma`, `coverage_policy`,
+`expected_top_level_nodes`, inspection authority/supporting tools, supporting
+tool limitation provenance, and entry ownership/direction fields.
+
+This slice does not edit API DSL/OpenAPI shape, generated client output,
+frontend delivery branches, runtime behavior, Figma annotations, deployment
+configuration, or live endpoint values.
+
+### Runtime CD ownership strict manifest decode guard
+
+This slice tightens the control-plane-owned runtime CD ownership SSOT. The
+deploy-policy test now decodes
+`docs/30-architecture/runtime-cd-ownership.riido.json` with unknown-field and
+trailing-document rejection, so the public CD ownership manifest cannot silently
+accept misspelled or unmodeled decision fields.
+
+This slice does not edit API DSL/OpenAPI shape, generated client output,
+frontend delivery branches, runtime behavior, Figma annotations, deployment
+configuration, Terraform topology, GitHub environment values, or live endpoint
+values.
+
+### RIID-4872 — AI Agent development persistence
+
+This slice promotes the AI Agent client surface from a throwaway in-memory mock
+runtime to a development server runtime with durable state.
+
+It adds:
+
+- `PersistentAIAgentClientStore`, a snapshot-saving wrapper around the
+  deterministic development store
+- `AIAgentClientSnapshot` with schema version
+  `riido-ai-agent-client-persistence.v2`
+- `DynamoDBAIAgentClientSnapshot`, a stdlib-only DynamoDB `PutItem`/`GetItem`
+  adapter that stores the development state as one `pk/sk` snapshot item
+- runtime env parsing for `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT`,
+  `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE`,
+  optional `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT`, AWS region configuration, and
+  ECS container credential endpoint variables
+- compatibility handling for the older
+  `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` flag as an alias for development mode
+- black-box tests proving created agents, task-thread events, and device
+  credentials survive reopening the store
+- DynamoDB fake-endpoint tests proving the snapshot item key and schema
+  metadata
+
+The snapshot stores only `device_secret` hashes, never one-time raw
+`device_secret` values. Development mode now fails during startup unless the
+DynamoDB snapshot table and signing credential path are configured.
+
+This slice does not create AWS tables, change Terraform topology, implement
+production single-table projections, rotate/revoke device credentials, alter the
+OpenAPI/generated client surface, or edit `riido-client`.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -1443,7 +1742,7 @@ go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration
 go test ./tools/containercontract -count=1
 go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
-go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
+go test ./cmd/riido_ai_server -run 'AIAgentClient|WebAllowedOrigins|ConfigFromEnv' -count=1
 go test ./tools/reactquerygen -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
@@ -1476,7 +1775,7 @@ Server black-box tests should cover:
 `riido-control-plane` may build an image and verify the executable image
 contract. After RIID-4807 it also owns tag-triggered testnet runtime artifact CD:
 immutable image push, ECS task-definition revision registration, ECS service
-stability wait, and live AI Agent mock smoke.
+stability wait, and live AI Agent development smoke.
 
 `riido-infra` still owns AWS topology and consumes immutable artifacts by:
 

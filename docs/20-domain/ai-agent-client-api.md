@@ -2,7 +2,7 @@
 
 > Riido task: RIID-4721 `[Server] AI Agent client-facing endpoint handlers`
 
-This file is the control-plane SSOT for the AI Agent client API
+This file is the control-plane SSOT for the development AI Agent client API
 implemented by `internal/riidoaiserver`.
 
 ## Contract Source
@@ -18,9 +18,8 @@ The contract projection is checked in under
 
 Canonical vocabulary, shared enum semantics, lifecycle/deprecation grammar, and
 generated-client metadata are owned by `riido-contracts`. This repository keeps
-the executable mirror under `contracts/ai-agent-client/` so the running
-development API, smoke tests, and generated frontend client can be verified in
-the same PR.
+the executable mirror under `contracts/ai-agent-client/` so the running development
+API, smoke tests, and generated frontend client can be verified in the same PR.
 
 Client-usability API changes can be proposed from `riido-control-plane`, but the
 canonical contract change must land in `riido-contracts` before this repository
@@ -69,8 +68,8 @@ Cross-repository React Query delivery to `riido-client` is owned by
 ## SSOT Dependency Direction
 
 This file is downstream of the canonical AI Agent policy in `riido-contracts`.
-It may repeat policy words only to explain local HTTP behavior, development
-fixture data, generator output, and black-box harness coverage.
+It may repeat policy words only to explain local HTTP behavior, seeded development data,
+generator output, and black-box harness coverage.
 
 For agent settings:
 
@@ -81,7 +80,7 @@ For agent settings:
   projects the catalog through `GET /v1/client/ai-agent/onboarding/fixtures`
   and its v2 workspace-scoped duplicate
   `GET /v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures`
-  and seeds deterministic onboarding fixtures for frontend development. Fixture
+  and seeds deterministic development fixtures for frontend development. Fixture
   records carry copyable profile fields, a safe `default_visibility`, and a
   `recommended_runtime_kind` hint. They do not carry a `model_id`, and they are
   not backend-managed template entities. Agents created from fixtures are
@@ -180,7 +179,7 @@ For agent settings:
   detected/selectable rows when their runtime records are online and detected,
   while OpenClaw/Cursor Agent can be rendered as non-detected disabled rows.
   `node-id=138-7389` maps fixture selection to
-	  `AgentOnboardingFixtureListResponse.fixtures`: the fixture catalog exposes
+  `AgentOnboardingFixtureListResponse.fixtures`: the development fixture catalog exposes
   the `리도`, `영실`, `홍도`, and `지원` onboarding fixtures in order, while
   `직접 설정`, disabled-next state before selection, row selection, and preview
   skeleton/popover rendering are client presentation. Each fixture also carries
@@ -189,7 +188,7 @@ For agent settings:
   still comes from the chosen runtime's `RuntimeRecord.models` catalog.
   This repository owns the protected fixture projection, fixture-based agent
   creation endpoint, protected runtime read-model projection, selected
-	  `runtime_id` validation, and black-box coverage. It does not own workspace
+  `runtime_id` validation, and development coverage. It does not own workspace
   selection, workspace list scrolling
   or the `새 워크스페이스` row shown in `node-id=164-30192`, runtime radio
   rendering, detected/non-detected Korean labels, row dimming, direct-setting
@@ -211,12 +210,20 @@ sub-DSL and generated output.
 
 ## Development Runtime
 
-The AI Agent client surface is backed by the development AI Agent client store.
-`cmd/riido_ai_server` opens that store from DynamoDB and fails startup when no
-AI Agent client table can be resolved. Local-only in-memory mode is not a normal
-runtime path. Test fixtures may still use deterministic in-memory stores, but
-the deployed development environment must persist agents, device credentials,
-daemon runtime snapshots, task threads, and client events.
+The development surface is enabled by
+`RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT=true`.
+When disabled, protected AI Agent client routes fail closed with `503` instead
+of returning seeded development data.
+
+Development runtime state is durable. `cmd/riido_ai_server` opens
+`DynamoDBAIAgentClientSnapshot` when development mode is enabled and requires
+`RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE`, an AWS region runtime
+configuration, and an ECS container credential endpoint supplied by the runtime.
+The snapshot item stores
+`AIAgentClientPersistenceSchemaVersion`
+(`riido-ai-agent-client-persistence.v2`) as JSON under a single DynamoDB
+`pk/sk`. This is the development persistence boundary, not the final production
+single-table projection.
 
 The development API implements:
 
@@ -274,7 +281,7 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents` creates a
   normal owned agent from a selected fixture and a complete
   `CreateAgentConfigurationRequest` body
-- the current deterministic fixture catalog returns the Figma `node-id=138-7389`
+- the current deterministic development catalog returns the Figma `node-id=138-7389`
   onboarding fixtures in order: `리도`, `영실`, `홍도`, `지원`
 - `직접 설정` is a client route into explicit agent creation, not a fifth
   `AgentOnboardingFixture`
@@ -299,7 +306,7 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `model_id` because the selected runtime default model is deterministic
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
-  agent record; binary image upload/storage is outside this API
+  agent record; binary image upload/storage is outside this development API
 - `description` is saved as optional client-authored one-line agent summary
   text and is rejected when it exceeds 160 characters; UI truncation/wrapping is
   a client concern and does not rewrite the stored value
@@ -311,7 +318,7 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - `updated_at` is a server-authored RFC3339 date-time on every
   `AgentClientRecord`; it is refreshed when editable agent configuration is
   saved and lets clients render update dates or absolute-time tooltips
-- delete returns forced assignment effects for queued/running tasks
+- delete returns forced assignment effects for queued/running development tasks
 - agent deletion uses the existing `DELETE /v1/client/ai-agent/agents/{agent_id}`
   command; if queued/running task threads are affected, the response increments
   `running_tasks_force_stopped` and the read model exposes
@@ -544,7 +551,7 @@ Selecting a fixture creates a normal agent through
 setting uses `POST /v1/client/ai-agent/agents` and is not represented as an
 extra fixture record.
 The resolved discussion evidence from `node-id=162-23468` / `node-id=162-23475`
-means the API keeps submitted duplicate names exactly and relies on
+means the development API keeps submitted duplicate names exactly and relies on
 `agent_id` plus normal lifecycle endpoints rather than fixture-specific state.
 The direct-setting expansion from `node-id=164-26969` maps those expanded
 `이름`, `설명`, and `지침` inputs to
@@ -587,13 +594,34 @@ Confirmed through the Figma plugin/Dev Mode annotations on 2026-05-29:
   deterministic agent response order; member ordering and pixel sizing remain
   client presentation behavior.
 
+## Desktop Device Enrollment Boundary
+
+Desktop device enrollment exists so the Electron main process can register an
+account-owned device and launch `riido-daemon` with a daemon-only credential.
+It is not a web/generated client feature.
+
+Current route:
+
+- `POST /v2/desktop/workspaces/{workspace_id}/devices/enroll`
+
+The request is authorized with `X-Riido-AI-Agent-Token` because enrollment
+starts from an already logged-in UserPrincipal. The response returns
+`device_id` and a one-time `device_secret`. After that, daemon polling and
+heartbeat use `X-Riido-Device-ID` and `X-Riido-Device-Secret`. The secret is not
+included in generated React Query output, browser/webview JavaScript, status
+responses, SSE events, or logs.
+
+`workspace_id` on this route is the selected workspace context, not device
+ownership. Devices/runtimes remain account-owned; agents remain
+workspace-owned.
+
 ## Boundary
 
-This repository owns the HTTP behavior, API sub-DSL projection, generated client
-drift gate, DynamoDB-backed development store behavior, and future
-generated-client delivery workflow. It does not own daemon runtime probing,
-Terraform state, live AWS evidence, final DNS naming, or direct edits to the
-target frontend repository.
+This repository owns the development HTTP behavior, API sub-DSL projection,
+generated client drift gate, DynamoDB snapshot request adapter, and future
+generated-client delivery workflow. It does not own final production
+single-table topology, daemon runtime probing, Terraform state, live AWS
+evidence, final DNS naming, or direct edits to the target frontend repository.
 
 ## Testnet Smoke
 

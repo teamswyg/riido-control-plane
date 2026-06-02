@@ -261,8 +261,8 @@ Generator requirements:
   into OpenAPI `x-riido-client`, not from generator-local operation-id switches
 
 `tools/reactquerygen` remains a small deterministic public fixture generator for
-the checked-in HTTP fixture surface. It is useful for drift tests, but it is not the
-cross-repository Orval delivery mechanism.
+the checked-in development surface. It is useful for drift tests, but it is not
+the cross-repository Orval delivery mechanism.
 
 ## Projection Placement
 

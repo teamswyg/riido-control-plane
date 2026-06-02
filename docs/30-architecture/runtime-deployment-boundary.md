@@ -50,7 +50,8 @@ The `deploy-ai-agent-testnet` workflow is allowed to:
 - run only from a `v*` tag push or explicit manual dispatch
 - assume the deploy role through GitHub OIDC
 - build the checked-in container contract image
-- push an immutable ECR tag derived from the Git ref and commit SHA
+- push an immutable ECR tag derived from the Git ref, commit SHA, and workflow
+  run attempt
 - resolve the pushed image to an ECR image digest
 - register a new ECS task-definition revision by replacing only the configured
   container image

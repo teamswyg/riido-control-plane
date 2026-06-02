@@ -25,6 +25,10 @@ coverage map, not only the primary `UI` page. Legacy non-UI Wireframe nodes
 that carry current product/API meaning are projected as absorptions, not as new
 endpoints. Each one points back to the current UI top-level node that already
 owns the generated-client surface.
+The projection gate decodes both the local projection manifest and this mirrored
+contracts coverage manifest with unknown-field and trailing-document rejection;
+control-plane may mirror the upstream SSOT, but it must not silently accept a
+shape that the contracts-owned manifest schema does not expose.
 
 The mirrored page registry keeps the contracts-owned inspection method:
 `figma.root.children` from the Figma Plugin API is the page registry authority,
@@ -42,13 +46,36 @@ turn that supporting metadata output into a generated-client decision: it must
 not remove `expected_pages`, drop `non_ui_top_level_inventory`, or delete
 `legacy_non_ui_absorptions`.
 
+The mirror also preserves `figma-headless-file-key-placeholder.v1`. A live
+`use_figma` root/category inspection for file `MUOd9lctoEHASUStN3vUuK` returned
+`figma.fileKey=headless`, even though the same invocation read the AI Agent pages
+and annotation categories. Control-plane must keep the contracts mirror's
+`figma.file_key` and local `source_contracts_manifest` identity from the
+contracts manifest and must not replace either with the headless runtime
+placeholder. The value `headless` is a headless runtime placeholder only.
+
+The mirror also preserves `figma-onboarding-page-load-timeout.v1`. Current live
+reads of `node-id=42:3014` (`Wireframe - 온보딩`) can time out after 120s when
+using Figma `get_metadata(nodeId=42:3014)` or `use_figma` scripts that attempt
+`await figma.setCurrentPageAsync(page)`. Direct registered-node lookup for
+`236:33845` and `236:33847` still preserves the six onboarding `riido.*` `API
+Generated` annotations. Control-plane must not treat that timeout as proof that
+onboarding generated-client coverage disappeared: it must not remove
+`expected_pages`, drop `non_ui_top_level_inventory`, remove onboarding generated
+paths, or mark onboarding generated paths unresolved.
+
 The local `source_contracts_manifest.stabilized_by` list mirrors the full
 upstream coverage provenance used by this projection:
 `teamswyg/riido-contracts#38`, `teamswyg/riido-contracts#39`,
 `teamswyg/riido-contracts#45`, `teamswyg/riido-contracts#46`,
-`teamswyg/riido-contracts#51`, `teamswyg/riido-contracts#52`, and
-`teamswyg/riido-contracts#54`. The
-projection gate treats that full upstream coverage provenance as part of the
+`teamswyg/riido-contracts#51`, `teamswyg/riido-contracts#52`,
+`teamswyg/riido-contracts#54`, `teamswyg/riido-contracts#55`,
+`teamswyg/riido-contracts#56`, `teamswyg/riido-contracts#57`,
+`teamswyg/riido-contracts#58`, `teamswyg/riido-contracts#60`,
+`teamswyg/riido-contracts#62`, `teamswyg/riido-contracts#63`,
+`teamswyg/riido-contracts#64`, `teamswyg/riido-contracts#65`,
+`teamswyg/riido-contracts#66`, and `teamswyg/riido-contracts#67`. The
+projection gate treats the full upstream coverage provenance as part of the
 mirror contract, not as PR-description trivia.
 
 After `teamswyg/riido-contracts#53`, the mirrored contracts coverage fixture
@@ -69,22 +96,84 @@ agent draft/configuration, runtime selection, then workspace selection, but the
 draft is client-local until final submit uses the existing fixture/direct create
 operations with selected `workspace_id` and `runtime_id`.
 
-The mirror also preserves contracts-owned `client_delivery_annotations`. Figma
-Dev Mode category `39:0` / `클라이언트 전달` may show frontend facade examples
-such as `riido.aiAgent.events.stream` or `riido.aiAgent.tasks.stop`. This repo
-does not treat the leading `riido.` variable name as a contracts generated path;
-the projection gate normalizes those examples to canonical generated paths such
-as `aiAgent.events.stream` and `aiAgent.tasks.stop`, then verifies that both the
-canonical path and the Korean generated-client access example appear in
-`web/generated/aiAgentClient.ts` and `web/generated/aiAgentClient.react.ts`.
-The stale Figma handoff copy `상세내용은 작업중입니다` on `node-id=153:8545`
-is therefore resolved by generated-client projection rather than by adding a
-separate endpoint.
+The mirror also preserves contracts-owned annotation evidence for Figma Dev
+Mode category `700:0` / `API Generated`. The mirrored manifest uses
+`api_generated_annotations` and `api_generated_annotation_inventory` so the
+field names match the current category authority. Those annotations may show
+frontend facade examples such as `riido.aiAgent.events.stream` or
+`riido.aiAgent.tasks.stop`. Current labels keep the facade path on the first
+line, then add Korean context for the operation kind and background:
 
-| Figma annotation node | Figma facade example | Canonical generated path |
-| --- | --- | --- |
-| `153:8545` | `riido.aiAgent.events.stream` | `aiAgent.events.stream` |
-| `236:20768` | `riido.aiAgent.tasks.stop` | `aiAgent.tasks.stop` |
+```text
+riido.aiAgent.tasks.stop
+종류: Mutation
+배경: 작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다.
+```
+
+This repo does not treat the leading `riido.` variable name as a contracts
+generated path; the projection gate normalizes those examples to canonical
+generated paths such as `aiAgent.events.stream` and `aiAgent.tasks.stop`, then
+verifies that both the canonical path and the Korean generated-client access
+example appear in `web/generated/aiAgentClient.ts` and
+`web/generated/aiAgentClient.react.ts`.
+
+`teamswyg/riido-contracts#62` records this as a live Figma annotation content
+policy. Control-plane mirrors it as generated-client handoff context: `riido.*`
+Figma labels must have a facade path, `종류: Query | Mutation | SSE Stream`, and
+Korean `배경:` text, while the generated TypeScript artifact still derives
+canonical paths from OpenAPI. The mirrored live inspection counts are 53
+`riido.*` annotations on `129:5215` `UI`, 6 on `42:3014` `Wireframe - 온보딩`,
+and 0 on `0:1` `Wireframe`, all with zero missing kind/background counts.
+`teamswyg/riido-contracts#66` tightens that mirror: the annotation
+`operation_kind` must match generated OpenAPI transport. `text/event-stream`
+responses are `SSE Stream`, non-stream `GET` operations are `Query`, and
+non-`GET` operations are `Mutation`.
+`teamswyg/riido-contracts#67` adds the v2 counterpart guard. Figma keeps
+frontend-searchable facade labels such as `riido.aiAgent.tasks.stop`, but each
+mirrored `api_generated_annotation_inventory` item must also keep the matching
+`v2.aiAgent.*` generated path in the same source coverage entry and in the
+generated TypeScript comments. The actual v2 client access example is
+`riido.v2.aiAgent.*`.
+
+`teamswyg/riido-contracts#63` records old category `39:0` / `클라이언트 전달` as
+retired. The mirrored live usage count is 0, so generated-client delivery must
+not point new handoff notes at that category. The category definition may still
+exist in Figma because the current Figma MCP returns category data without
+callable `remove` or `setLabel` methods.
+
+| Figma annotation node | Figma facade example | Kind | Canonical generated path | v2 counterpart |
+| --- | --- | --- | --- | --- |
+| `153:8545` | `riido.aiAgent.events.stream` | SSE Stream | `aiAgent.events.stream` | `v2.aiAgent.events.stream` |
+| `236:20768` | `riido.aiAgent.tasks.stop` | Mutation | `aiAgent.tasks.stop` | `v2.aiAgent.tasks.stop` |
+
+The broader screen-level Figma handoff pass also labels participant assignment,
+task-thread reply, runtime settings, onboarding fixture, direct create, edit,
+delete, and editability nodes with `Query`, `Mutation`, or `SSE Stream`
+background text. Contracts owns that full list in
+`api_generated_annotation_inventory`; control-plane mirrors it to prove every
+facade path below exists in OpenAPI and generated TypeScript comments.
+
+| UI area | Facade path | v2 counterpart | Kind | Background shown in Figma |
+| --- | --- | --- | --- | --- |
+| Participant dropdown / task details | `riido.aiAgent.tasks.assignableAgents` | `v2.aiAgent.tasks.assignableAgents` | Query | 참여자 드롭다운에서 현재 task/subtask에 배정할 수 있는 Agent 목록을 조회합니다. |
+| Participant dropdown / task details | `riido.aiAgent.tasks.assign` | `v2.aiAgent.tasks.assign` | Mutation | 작업에 Agent를 참여자로 배정하고 daemon이 런타임으로 작업을 시작할 수 있는 서버 상태를 만듭니다. |
+| Participant dropdown / task details | `riido.aiAgent.tasks.unassign` | `v2.aiAgent.tasks.unassign` | Mutation | 참여자에서 Agent를 제거합니다. 진행 중이면 중지 요청/큐 해제 흐름으로 이어집니다. |
+| Task thread | `riido.aiAgent.tasks.threads` | `v2.aiAgent.tasks.threads` | Query | 작업의 완료/진행 중 Agent thread cold collection을 조회합니다. active_stream이 있으면 SSE로 이어집니다. |
+| Task thread | `riido.aiAgent.tasks.threadMessages.create` | `v2.aiAgent.tasks.threadMessages.create` | Mutation | 특정 thread_id에 다음 지시/답글을 추가하고 Agent 응답을 이어서 요청합니다. |
+| Task thread | `riido.aiAgent.tasks.submitComment` | `v2.aiAgent.tasks.submitComment` | Mutation | 호환용 댓글 제출 경로입니다. thread_id 없이 입력하면 서버가 적절한 thread 응답 흐름을 처리합니다. |
+| Task thread | `riido.aiAgent.events.stream` | `v2.aiAgent.events.stream` | SSE Stream | threads 조회 결과에 active_stream이 있을 때만 연결해 진행 상태와 thread 갱신 이벤트를 받습니다. |
+| Task thread | `riido.aiAgent.tasks.stop` | `v2.aiAgent.tasks.stop` | Mutation | 작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다. |
+| Runtime and agent settings | `riido.aiAgent.devices.runtimes` | `v2.aiAgent.devices.runtimes` | Query | 계정 소유 device에서 감지된 runtime 목록과 온라인/오프라인 상태를 조회합니다. 화면은 SaaS 값을 신뢰합니다. |
+| Runtime settings | `riido.aiAgent.agents.daemon.details` | `v2.aiAgent.agents.daemon.details` | Query | Agent에 연결된 daemon/runtime 상세와 제어 가능 상태를 SaaS 기준으로 조회합니다. |
+| Runtime settings | `riido.aiAgent.agents.daemon.stop` | `v2.aiAgent.agents.daemon.stop` | Mutation | SaaS에 daemon 중지 요청을 남깁니다. daemon은 요청을 읽은 뒤 스스로 종료합니다. |
+| Runtime settings | `riido.aiAgent.agents.daemon.restart` | `v2.aiAgent.agents.daemon.restart` | Mutation | SaaS에 daemon 재시작 요청을 남깁니다. daemon은 polling으로 요청을 읽어 실행합니다. |
+| Onboarding | `riido.aiAgent.onboarding.fixtures` | `v2.aiAgent.onboarding.fixtures` | Query | 리도/영실/홍도/지원처럼 제품이 제공하는 초기값 목록을 조회합니다. template entity가 아니라 fixture입니다. |
+| Onboarding | `riido.aiAgent.onboarding.fixtures.createAgent` | `v2.aiAgent.onboarding.fixtures.createAgent` | Mutation | 선택한 fixture 값을 기반으로 일반 Agent를 생성합니다. fixture 자체를 생성하는 기능은 아닙니다. |
+| Agent settings / direct setting | `riido.aiAgent.agents.create` | `v2.aiAgent.agents.create` | Mutation | 직접 설정 화면에서 워크스페이스 안에 새 Agent를 생성합니다. 신규 v2 create는 workspace_id를 포함합니다. |
+| Agent settings | `riido.aiAgent.bootstrap` | `v2.aiAgent.bootstrap` | Query | AI Agent 설정/온보딩 초기 화면에 필요한 agent 요약, 권한, 기본 상태를 조회합니다. |
+| Agent settings | `riido.aiAgent.agents.updateConfiguration` | `v2.aiAgent.agents.updateConfiguration` | Mutation | 할당 작업이 없는 Agent의 이름, 썸네일, 설명, 지침, 런타임, 모델, 공개 범위를 저장합니다. |
+| Agent settings | `riido.aiAgent.agents.editability` | `v2.aiAgent.agents.editability` | Query | Agent를 수정할 수 있는지 먼저 조회합니다. 할당된 작업이 있으면 저장/수정 UI는 막혀야 합니다. |
+| Agent settings | `riido.aiAgent.agents.delete` | `v2.aiAgent.agents.delete` | Mutation | Agent 삭제를 요청합니다. 진행/예약 중 작업은 서버 정책에 따라 중지 또는 큐 해제됩니다. |
 
 The generator test reads both manifests and verifies that every required
 generated path exists in the upstream coverage mirror and in:
@@ -211,7 +300,7 @@ The test catches these drift classes:
   loaded non-UI top-level inventory;
 - the mirrored contracts coverage loses the Figma Plugin API inspection method
   that owns page registry and child-count evidence;
-- the mirrored contracts coverage loses `클라이언트 전달` annotation
+- the mirrored contracts coverage loses `API Generated` annotation
   normalization from `riido.*` facade examples to canonical generated paths;
 - generated TypeScript or React wrapper comments no longer carry the required
   generated path;

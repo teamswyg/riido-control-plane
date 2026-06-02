@@ -42,23 +42,22 @@ type AIAgentThreadProgressRecorder interface {
 	RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error)
 }
 
-const defaultAIAgentClientWorkspaceID = "workspace-development-riid"
+const defaultAIAgentClientWorkspaceID = "workspace-dev-riid"
 
 type DevelopmentAIAgentClientStore struct {
-	mu                sync.Mutex
-	workspaceID       string
-	persistence       AIAgentClientPersistence
-	devices           []DeviceRecord
-	daemons           map[string]DeviceDaemonRecord
-	deviceCredentials map[string]deviceCredentialRecord
-	nextDeviceID      int
-	nextDaemonCommand int
-	agents            map[string]AgentClientRecord
-	fixtures          []AgentOnboardingFixture
-	taskThreads       map[string][]AIAgentTaskThreadRecord
-	events            []ClientStreamEvent
-	subscribers       map[int]aiAgentClientSubscriber
-	nextSubscriberID  int
+	mu                      sync.Mutex
+	workspaceID             string
+	devices                 []DeviceRecord
+	deviceCredentials       map[string]deviceCredentialRecord
+	nextDeviceCredentialSeq int
+	daemons                 map[string]DeviceDaemonRecord
+	nextDaemonCommand       int
+	agents                  map[string]AgentClientRecord
+	fixtures                []AgentOnboardingFixture
+	taskThreads             map[string][]AIAgentTaskThreadRecord
+	events                  []ClientStreamEvent
+	subscribers             map[int]aiAgentClientSubscriber
+	nextSubscriberID        int
 }
 
 type aiAgentClientSubscriber struct {
@@ -66,17 +65,17 @@ type aiAgentClientSubscriber struct {
 	events    chan ClientStreamEvent
 }
 
-func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
+func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 	now := time.Date(2026, 5, 28, 6, 0, 0, 0, time.UTC)
 	device := DeviceRecord{
-		DeviceID:         "device-development-macbook",
+		DeviceID:         "device-dev-macbook",
 		OwnerPrincipalID: "user-1",
 		DisplayName:      "Development MacBook Pro",
 		DaemonLastSeenAt: now,
 		Runtimes: []RuntimeRecord{
 			{
-				RuntimeID:        "runtime-codex-development",
-				DeviceID:         "device-development-macbook",
+				RuntimeID:        "runtime-codex-dev",
+				DeviceID:         "device-dev-macbook",
 				Kind:             RuntimeKindCodex,
 				Availability:     RuntimeAvailabilityOnline,
 				DetectionState:   RuntimeDetectionStateDetected,
@@ -88,8 +87,8 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				},
 			},
 			{
-				RuntimeID:        "runtime-claude-code-development",
-				DeviceID:         "device-development-macbook",
+				RuntimeID:        "runtime-claude-code-dev",
+				DeviceID:         "device-dev-macbook",
 				Kind:             RuntimeKindClaudeCode,
 				Availability:     RuntimeAvailabilityOffline,
 				DetectionState:   RuntimeDetectionStateMissing,
@@ -105,8 +104,8 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				},
 			},
 			{
-				RuntimeID:        "runtime-cursor-development",
-				DeviceID:         "device-development-macbook",
+				RuntimeID:        "runtime-cursor-dev",
+				DeviceID:         "device-dev-macbook",
 				Kind:             RuntimeKindCursor,
 				Availability:     RuntimeAvailabilityOnline,
 				DetectionState:   RuntimeDetectionStateDetected,
@@ -124,7 +123,7 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 		DeviceID:          device.DeviceID,
 		OwnerPrincipalID:  device.OwnerPrincipalID,
 		DeviceDisplayName: device.DisplayName,
-		DaemonID:          "daemon-development-macbook",
+		DaemonID:          "daemon-dev-macbook",
 		Profile:           "desktop-api.riido.ai",
 		PID:               5111,
 		UptimeSeconds:     74 * 60,
@@ -189,11 +188,11 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 			OwnerPrincipalID:    "user-1",
 			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "Codex 리뷰어",
-			ProfileThumbnailURL: "https://cdn.riido.io/development-fixtures/ai-agents/codex-reviewer.png",
+			ProfileThumbnailURL: "https://cdn.riido.io/dev/ai-agents/codex-reviewer.png",
 			Description:         "코드 변경 위험을 먼저 보는 리뷰 에이전트",
 			Instruction:         "코드 변경의 위험과 검증 근거를 우선 확인합니다.",
 			Visibility:          AgentVisibilityPrivate,
-			RuntimeID:           "runtime-codex-development",
+			RuntimeID:           "runtime-codex-dev",
 			RuntimeKind:         RuntimeKindCodex,
 			ModelID:             "codex-default",
 			ModelLabel:          "Codex 기본 모델",
@@ -208,11 +207,11 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 			OwnerPrincipalID:    "user-1",
 			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "Claude 설계 보조",
-			ProfileThumbnailURL: "https://cdn.riido.io/development-fixtures/ai-agents/claude-designer.png",
+			ProfileThumbnailURL: "https://cdn.riido.io/dev/ai-agents/claude-designer.png",
 			Description:         "기획 의도를 구현 범위로 정리하는 설계 에이전트",
 			Instruction:         "기획 의도와 도메인 정책을 먼저 정리한 뒤 구현 범위를 제안합니다.",
 			Visibility:          AgentVisibilityPrivate,
-			RuntimeID:           "runtime-claude-code-development",
+			RuntimeID:           "runtime-claude-code-dev",
 			RuntimeKind:         RuntimeKindClaudeCode,
 			ModelID:             "claude-sonnect-4-6",
 			ModelLabel:          "Sonnect 4.6 (기본값)",
@@ -227,7 +226,7 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 			OwnerPrincipalID:    "user-2",
 			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "OpenClaw 공개 에이전트",
-			ProfileThumbnailURL: "https://cdn.riido.io/development-fixtures/ai-agents/openclaw-public.png",
+			ProfileThumbnailURL: "https://cdn.riido.io/dev/ai-agents/openclaw-public.png",
 			Description:         "공개 워크스페이스 반복 작업 에이전트",
 			Instruction:         "공개 워크스페이스에서 반복 가능한 보조 작업을 수행합니다.",
 			Visibility:          AgentVisibilityPublic,
@@ -246,7 +245,7 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 			OwnerPrincipalID:    "user-2",
 			WorkspaceID:         defaultAIAgentClientWorkspaceID,
 			Name:                "Cursor 비공개 에이전트",
-			ProfileThumbnailURL: "https://cdn.riido.io/development-fixtures/ai-agents/cursor-private.png",
+			ProfileThumbnailURL: "https://cdn.riido.io/dev/ai-agents/cursor-private.png",
 			Description:         "소유자 전용 Cursor 코드 탐색 에이전트",
 			Instruction:         "소유자 전용 Cursor 기반 코드 탐색을 수행합니다.",
 			Visibility:          AgentVisibilityPrivate,
@@ -267,8 +266,8 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				ThreadID:        "thread-task-1-claude-1",
 				TaskID:          "task-1",
 				AgentID:         "agent-owned-claude",
-				RunID:           "run-development-completed-1",
-				SourceCommentID: "comment-development-1",
+				RunID:           "run-dev-completed-1",
+				SourceCommentID: "comment-dev-1",
 				WorkStatus:      AgentWorkStatusCompleted,
 				AssignmentState: AgentAssignmentStateCompleted,
 				CommentKind:     AgentTaskCommentTaskCompleted,
@@ -283,8 +282,8 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				ThreadID:        "thread-task-1-codex-2",
 				TaskID:          "task-1",
 				AgentID:         "agent-owned-codex",
-				RunID:           "run-development-1",
-				SourceCommentID: "comment-development-2",
+				RunID:           "run-dev-1",
+				SourceCommentID: "comment-dev-2",
 				WorkStatus:      AgentWorkStatusRunning,
 				AssignmentState: AgentAssignmentStateRunning,
 				CommentKind:     AgentTaskCommentRuntimeProgress,
@@ -300,13 +299,54 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 	return &DevelopmentAIAgentClientStore{
 		workspaceID:       defaultAIAgentClientWorkspaceID,
 		devices:           []DeviceRecord{device, sharedDevice},
-		daemons:           map[string]DeviceDaemonRecord{device.DeviceID: daemon, sharedDevice.DeviceID: sharedDaemon},
 		deviceCredentials: map[string]deviceCredentialRecord{},
+		daemons:           map[string]DeviceDaemonRecord{device.DeviceID: daemon, sharedDevice.DeviceID: sharedDaemon},
 		nextDaemonCommand: 1,
 		agents:            agents,
-		fixtures:          defaultAgentOnboardingFixtures(),
-		taskThreads:       taskThreads,
-		subscribers:       map[int]aiAgentClientSubscriber{},
+		fixtures: []AgentOnboardingFixture{
+			{
+				FixtureID:              "riido_pm",
+				Name:                   "리도",
+				RoleLabel:              "PM Agent",
+				ProfileThumbnailURL:    "https://cdn.riido.io/dev/ai-agent-fixtures/riido-pm.png",
+				Description:            "문제 정의부터 우선순위, 출시 계획까지 정리합니다.",
+				Instruction:            "기능 요청을 문제, 목표, 성공 기준으로 재정의하고 PRD, 우선순위, 로드맵, 출시 계획을 구조화합니다. 아이디어는 가설로 다루며 불확실한 내용은 [확인 필요]로 표시합니다.",
+				DefaultVisibility:      AgentVisibilityPrivate,
+				RecommendedRuntimeKind: RuntimeKindCodex,
+			},
+			{
+				FixtureID:              "yeongsil_backend",
+				Name:                   "영실",
+				RoleLabel:              "Backend Agent",
+				ProfileThumbnailURL:    "https://cdn.riido.io/dev/ai-agent-fixtures/yeongsil-backend.png",
+				Description:            "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다.",
+				Instruction:            "요구사항을 API, 데이터 흐름, 저장 경계, 실패 처리 기준으로 나누고 안정적인 서버 구현 계획을 제안합니다.",
+				DefaultVisibility:      AgentVisibilityPrivate,
+				RecommendedRuntimeKind: RuntimeKindClaudeCode,
+			},
+			{
+				FixtureID:              "hongdo_frontend",
+				Name:                   "홍도",
+				RoleLabel:              "Frontend Agent",
+				ProfileThumbnailURL:    "https://cdn.riido.io/dev/ai-agent-fixtures/hongdo-frontend.png",
+				Description:            "사용자가 보는 화면을 구현하고, 성능과 접근성을 개선합니다.",
+				Instruction:            "화면 구조, 상태, 접근성, 성능을 함께 검토하고 사용자에게 자연스러운 프론트엔드 구현을 제안합니다.",
+				DefaultVisibility:      AgentVisibilityPrivate,
+				RecommendedRuntimeKind: RuntimeKindCursor,
+			},
+			{
+				FixtureID:              "jiwon_research",
+				Name:                   "지원",
+				RoleLabel:              "Research Agent",
+				ProfileThumbnailURL:    "https://cdn.riido.io/dev/ai-agent-fixtures/jiwon-research.png",
+				Description:            "시장과 경쟁사를 조사하고, 의사결정에 필요한 인사이트를 정리합니다.",
+				Instruction:            "시장, 경쟁사, 사용자 맥락을 조사하고 의사결정에 필요한 근거와 확인이 필요한 가정을 분리해 정리합니다.",
+				DefaultVisibility:      AgentVisibilityPrivate,
+				RecommendedRuntimeKind: RuntimeKindOpenClaw,
+			},
+		},
+		taskThreads: taskThreads,
+		subscribers: map[int]aiAgentClientSubscriber{},
 		events: []ClientStreamEvent{
 			{
 				Seq:       1,
@@ -335,73 +375,12 @@ func NewFixtureAIAgentClientStore() *DevelopmentAIAgentClientStore {
 					AgentID:         "agent-owned-codex",
 					TaskID:          "task-1",
 					ThreadID:        "thread-task-1-codex-2",
-					RunID:           "run-development-1",
+					RunID:           "run-dev-1",
 					WorkStatus:      AgentWorkStatusQueued,
 					AssignmentState: AgentAssignmentStateQueued,
 					CommentKind:     AgentTaskCommentQueuedByBusyAgent,
 				},
 			},
-		},
-	}
-}
-
-func newEmptyAIAgentClientStore(persistence AIAgentClientPersistence) *DevelopmentAIAgentClientStore {
-	return &DevelopmentAIAgentClientStore{
-		workspaceID:       defaultAIAgentClientWorkspaceID,
-		persistence:       persistence,
-		devices:           []DeviceRecord{},
-		daemons:           map[string]DeviceDaemonRecord{},
-		deviceCredentials: map[string]deviceCredentialRecord{},
-		nextDaemonCommand: 1,
-		agents:            map[string]AgentClientRecord{},
-		fixtures:          defaultAgentOnboardingFixtures(),
-		taskThreads:       map[string][]AIAgentTaskThreadRecord{},
-		subscribers:       map[int]aiAgentClientSubscriber{},
-		events:            []ClientStreamEvent{},
-	}
-}
-
-func defaultAgentOnboardingFixtures() []AgentOnboardingFixture {
-	return []AgentOnboardingFixture{
-		{
-			FixtureID:              "riido_pm",
-			Name:                   "리도",
-			RoleLabel:              "PM Agent",
-			ProfileThumbnailURL:    "https://cdn.riido.io/ai-agent-fixtures/riido-pm.png",
-			Description:            "문제 정의부터 우선순위, 출시 계획까지 정리합니다.",
-			Instruction:            "기능 요청을 문제, 목표, 성공 기준으로 재정의하고 PRD, 우선순위, 로드맵, 출시 계획을 구조화합니다. 아이디어는 가설로 다루며 불확실한 내용은 [확인 필요]로 표시합니다.",
-			DefaultVisibility:      AgentVisibilityPrivate,
-			RecommendedRuntimeKind: RuntimeKindCodex,
-		},
-		{
-			FixtureID:              "yeongsil_backend",
-			Name:                   "영실",
-			RoleLabel:              "Backend Agent",
-			ProfileThumbnailURL:    "https://cdn.riido.io/ai-agent-fixtures/yeongsil-backend.png",
-			Description:            "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다.",
-			Instruction:            "요구사항을 API, 데이터 흐름, 저장 경계, 실패 처리 기준으로 나누고 안정적인 서버 구현 계획을 제안합니다.",
-			DefaultVisibility:      AgentVisibilityPrivate,
-			RecommendedRuntimeKind: RuntimeKindClaudeCode,
-		},
-		{
-			FixtureID:              "hongdo_frontend",
-			Name:                   "홍도",
-			RoleLabel:              "Frontend Agent",
-			ProfileThumbnailURL:    "https://cdn.riido.io/ai-agent-fixtures/hongdo-frontend.png",
-			Description:            "사용자가 보는 화면을 구현하고, 성능과 접근성을 개선합니다.",
-			Instruction:            "화면 구조, 상태, 접근성, 성능을 함께 검토하고 사용자에게 자연스러운 프론트엔드 구현을 제안합니다.",
-			DefaultVisibility:      AgentVisibilityPrivate,
-			RecommendedRuntimeKind: RuntimeKindCursor,
-		},
-		{
-			FixtureID:              "jiwon_research",
-			Name:                   "지원",
-			RoleLabel:              "Research Agent",
-			ProfileThumbnailURL:    "https://cdn.riido.io/ai-agent-fixtures/jiwon-research.png",
-			Description:            "시장과 경쟁사를 조사하고, 의사결정에 필요한 인사이트를 정리합니다.",
-			Instruction:            "시장, 경쟁사, 사용자 맥락을 조사하고 의사결정에 필요한 근거와 확인이 필요한 가정을 분리해 정리합니다.",
-			DefaultVisibility:      AgentVisibilityPrivate,
-			RecommendedRuntimeKind: RuntimeKindOpenClaw,
 		},
 	}
 }
@@ -543,9 +522,6 @@ func (s *DevelopmentAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context
 			})
 		}
 	}
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return DeviceDaemonCommandResponse{}, err
-	}
 	return DeviceDaemonCommandResponse{
 		SchemaVersion: SchemaVersion,
 		CommandID:     commandID,
@@ -623,7 +599,7 @@ func (s *DevelopmentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, p
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
-		RunID:           "run-development-assignment-" + taskID + "-" + strconv.Itoa(len(s.taskThreads[taskID])+1),
+		RunID:           "run-dev-assignment-" + taskID + "-" + strconv.Itoa(len(s.taskThreads[taskID])+1),
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentAssignmentStarted,
@@ -642,9 +618,6 @@ func (s *DevelopmentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, p
 	s.agents[agent.AgentID] = agent
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.appendAgentTaskActionEvent(response)
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
 	return response, nil
 }
 
@@ -670,7 +643,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
-		RunID:           "run-development-unassign-" + taskID,
+		RunID:           "run-dev-unassign-" + taskID,
 		WorkStatus:      AgentWorkStatusIdle,
 		AssignmentState: AgentAssignmentStateStopped,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
@@ -691,9 +664,6 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	s.agents[agent.AgentID] = agent
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.appendAgentTaskActionEvent(response)
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
 	return response, nil
 }
 
@@ -723,7 +693,7 @@ func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Con
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
-		RunID:           "run-development-comment-" + taskID,
+		RunID:           "run-dev-comment-" + taskID,
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentRuntimeProgress,
@@ -738,9 +708,6 @@ func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Con
 	}
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
 	s.appendAgentTaskActionEvent(response)
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
 	return response, nil
 }
 
@@ -786,7 +753,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	}
 	threadWasActive := taskThreadHasActiveStream(thread)
 	if !threadWasActive {
-		response.RunID = "run-development-message-" + taskID + "-" + threadID
+		response.RunID = "run-dev-message-" + taskID + "-" + threadID
 	}
 	if !threadWasActive && (agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser || agent.WorkStatus == AgentWorkStatusQueued) {
 		response.WorkStatus = AgentWorkStatusQueued
@@ -796,9 +763,6 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	}
 	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID)
 	s.appendAgentTaskActionEvent(response)
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
 	return response, nil
 }
 
@@ -821,7 +785,7 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
-		RunID:           "run-development-stop-" + taskID,
+		RunID:           "run-dev-stop-" + taskID,
 		WorkStatus:      AgentWorkStatusIdle,
 		AssignmentState: AgentAssignmentStateStopped,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
@@ -836,9 +800,6 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.appendAgentTaskActionEvent(response)
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
 	return response, nil
 }
 
@@ -910,9 +871,6 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgent(ctx context.Context, princ
 	}
 	s.agents[agent.AgentID] = agent
 	markRuntimeHasAssignedAgentLocked(s.devices, runtimeID, true)
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return AgentClientRecordResponse{}, err
-	}
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }
 
@@ -996,9 +954,6 @@ func (s *DevelopmentAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.C
 	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
 	agent.UpdatedAt = time.Now().UTC()
 	s.agents[agent.AgentID] = agent
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return AgentClientRecordResponse{}, err
-	}
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }
 
@@ -1031,9 +986,6 @@ func (s *DevelopmentAIAgentClientStore) DeleteAIAgent(ctx context.Context, princ
 		AssignmentState: AgentAssignmentStateStopped,
 		CommentKind:     AgentTaskCommentStoppedByAgentDeleted,
 	})
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return DeleteAgentResponse{}, err
-	}
 	return DeleteAgentResponse{
 		SchemaVersion:            SchemaVersion,
 		AgentID:                  agent.AgentID,
@@ -1129,9 +1081,6 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 	}
 	s.appendThreadProgressLocked(event)
 	s.appendClientEventLocked(event.EventType, event)
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return AgentThreadProgressBatchResponse{}, err
-	}
 	return AgentThreadProgressBatchResponse{
 		SchemaVersion: SchemaVersion,
 		AcceptedLines: len(lines),

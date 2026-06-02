@@ -69,15 +69,21 @@ client 코드는 generated facade에서 `riido.v2.aiAgent.agents.create`처럼
 
 ## AI Agent development testnet
 
-AI Agent client API는 DynamoDB-backed development store를 사용합니다. 배포된
-development 환경도 agents, devices, daemon runtime snapshots, device
-credentials, task threads, client events를 영속 store에서 읽고 씁니다. 정적
-agent binding secret이나 local-only development switch를 정상 실행 경로로 사용하지
-않습니다.
+AI Agent client development API는 다음 env로 켭니다. development 서버는
+DynamoDB snapshot item을 영속 저장소로 사용하므로, 프로세스 재시작 이후에도
+agent/device credential/task thread 상태가 유지됩니다.
 
-현재 testnet smoke는 별도 GitHub Actions workflow가 담당합니다. smoke는
-health/ready와 generated read surface를 검증하고, 등록된 runtime이 있는 경우에
-한해 agent 생성/assignment mutation smoke를 추가로 수행합니다.
+```bash
+RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT=true
+RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE=<configured by riido-infra>
+```
+
+development API도 인증 없이 열리지 않습니다. request-token scope와
+owner/public/private visibility policy를 통과해야 합니다. AWS topology, table
+name 값, ECS task role, credential endpoint 값은 `riido-infra`와 GitHub
+environment/secret 경계에 둡니다.
+
+현재 testnet smoke는 별도 GitHub Actions workflow가 담당합니다.
 
 - workflow: `ai-agent-client-testnet-smoke`
 - deploy workflow: `deploy-ai-agent-testnet`
@@ -185,7 +191,7 @@ client repo에서 Orval을 직접 실행하지 않는 것이 원칙입니다.
 go test ./...
 go list -m all
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
-go test ./cmd/riido_ai_server -run 'AIAgentClientFixture|ConfigFromEnv' -count=1
+go test ./cmd/riido_ai_server -run 'AIAgentClient|ConfigFromEnv' -count=1
 go test ./tools/reactquerygen -count=1
 go run ./tools/reactquerygen -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json -out web/generated/aiAgentClient.ts
 go test ./tools/containercontract -count=1

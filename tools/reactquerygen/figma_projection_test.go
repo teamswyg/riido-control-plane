@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -59,6 +61,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	}
 	verifyMirroredFigmaInspectionMethod(t, sourceCoverage.InspectionMethod, docText)
 	verifyMirroredFigmaSupportingToolLimitations(t, manifest.MirroredSupportingToolLimitations, sourceCoverage.SupportingToolLimitations, manifest.SourceContractsManifest.StabilizedBy, docText)
+	verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t, sourceCoverage.APIGeneratedAnnotationContentPolicy, docText)
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164-50215")
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164:50215")
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "starter-agent")
@@ -87,7 +90,8 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	generatedHaystack := generatedPathHaystack(spec, generatedPaths)
 	sourceGeneratedPaths := sourceCoverageGeneratedPathsByNode(sourceCoverage)
 	verifyRuntimeEndpointLabelProjection(t, sourceCoverage, docText)
-	verifyFigmaClientDeliveryAnnotations(t, sourceCoverage.ClientDeliveryAnnotations, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
+	verifyFigmaAPIGeneratedAnnotations(t, sourceCoverage.APIGeneratedAnnotations, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
+	verifyFigmaAPIGeneratedAnnotationInventory(t, sourceCoverage.APIGeneratedAnnotationInventory, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
 	verifyLegacyNonUIAbsorptions(t, manifest.LegacyNonUIAbsorptions, sourceCoverage, docText, generatedPaths, string(core), string(react))
 	verifyNonUIPlanningAbsorptions(t, manifest.NonUIPlanningAbsorptions, sourceCoverage, docText, generatedPaths, string(core), string(react))
 
@@ -315,19 +319,26 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 	if len(projections) == 0 {
 		t.Fatalf("mirrored_supporting_tool_limitations must record consumed source tooling limits")
 	}
-	var projection figmaProjectionSupportingToolLimitation
+	var metadataProjection figmaProjectionSupportingToolLimitation
+	var headlessFileKeyProjection figmaProjectionSupportingToolLimitation
+	var onboardingTimeoutProjection figmaProjectionSupportingToolLimitation
 	for _, candidate := range projections {
 		if candidate.SourceID == "figma-metadata-page-list-underreports-pages.v1" {
-			projection = candidate
-			break
+			metadataProjection = candidate
+		}
+		if candidate.SourceID == "figma-headless-file-key-placeholder.v1" {
+			headlessFileKeyProjection = candidate
+		}
+		if candidate.SourceID == "figma-onboarding-page-load-timeout.v1" {
+			onboardingTimeoutProjection = candidate
 		}
 	}
-	if projection.SourceID == "" {
+	if metadataProjection.SourceID == "" {
 		t.Fatalf("mirrored_supporting_tool_limitations must include figma-metadata-page-list-underreports-pages.v1")
 	}
-	source, ok := sourceByID[projection.SourceID]
+	source, ok := sourceByID[metadataProjection.SourceID]
 	if !ok {
-		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", projection.SourceID)
+		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", metadataProjection.SourceID)
 	}
 	if !strings.Contains(source.Tool, "get_metadata") || !strings.Contains(source.ObservedResult, "only page 129:5215 UI") {
 		t.Fatalf("source supporting limit must preserve no-nodeId metadata under-report evidence: %+v", source)
@@ -335,11 +346,11 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 	if !hasString(stabilizedBy, "teamswyg/riido-contracts#52") {
 		t.Fatalf("source_contracts_manifest.stabilized_by must include contracts #52 for mirrored metadata limitation: %+v", stabilizedBy)
 	}
-	if strings.TrimSpace(projection.LocalScope) == "" || !strings.Contains(projection.LocalScope, "must not collapse") {
-		t.Fatalf("projection supporting limit must explain local scope: %+v", projection)
+	if strings.TrimSpace(metadataProjection.LocalScope) == "" || !strings.Contains(metadataProjection.LocalScope, "must not collapse") {
+		t.Fatalf("projection supporting limit must explain local scope: %+v", metadataProjection)
 	}
 	requiredPages := map[string]bool{"129:5215": false, "42:3014": false, "0:1": false}
-	for _, pageID := range projection.RequiredAuthoritativePages {
+	for _, pageID := range metadataProjection.RequiredAuthoritativePages {
 		if _, ok := requiredPages[pageID]; ok {
 			requiredPages[pageID] = true
 		}
@@ -353,13 +364,91 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 		}
 	}
 	for _, forbidden := range []string{"remove expected_pages", "remove non_ui_top_level_inventory", "remove legacy_non_ui_absorptions"} {
-		if !hasString(projection.ForbiddenProjectionEffects, forbidden) {
-			t.Fatalf("projection supporting limit must forbid %q: %+v", forbidden, projection.ForbiddenProjectionEffects)
+		if !hasString(metadataProjection.ForbiddenProjectionEffects, forbidden) {
+			t.Fatalf("projection supporting limit must forbid %q: %+v", forbidden, metadataProjection.ForbiddenProjectionEffects)
 		}
 	}
 	for _, needle := range []string{"figma-metadata-page-list-underreports-pages.v1", "get_metadata", "teamswyg/riido-contracts#52", "`129:5215`", "`42:3014`", "`0:1`", "`expected_pages`", "`non_ui_top_level_inventory`", "`legacy_non_ui_absorptions`"} {
 		if !strings.Contains(docText, needle) {
 			t.Fatalf("projection doc must mention mirrored supporting tool limitation with %q", needle)
+		}
+	}
+	if headlessFileKeyProjection.SourceID == "" {
+		t.Fatalf("mirrored_supporting_tool_limitations must include figma-headless-file-key-placeholder.v1")
+	}
+	headlessSource, ok := sourceByID[headlessFileKeyProjection.SourceID]
+	if !ok {
+		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", headlessFileKeyProjection.SourceID)
+	}
+	if !strings.Contains(headlessSource.Tool, "use_figma") ||
+		!strings.Contains(headlessSource.Tool, "figma.fileKey") ||
+		!strings.Contains(headlessSource.ObservedResult, "figma.fileKey=headless") ||
+		!strings.Contains(headlessSource.ObservedResult, "annotation categories") {
+		t.Fatalf("source supporting limit must preserve headless file-key evidence: %+v", headlessSource)
+	}
+	for _, result := range []string{"MUOd9lctoEHASUStN3vUuK", "v.1.22 AI Agent"} {
+		if !hasString(headlessSource.AuthoritativeResult, result) {
+			t.Fatalf("source headless file-key authoritative_result must contain %q: %+v", result, headlessSource.AuthoritativeResult)
+		}
+		if !hasString(headlessFileKeyProjection.RequiredAuthoritativeResults, result) {
+			t.Fatalf("headless file-key projection must require authoritative result %q: %+v", result, headlessFileKeyProjection.RequiredAuthoritativeResults)
+		}
+	}
+	if strings.TrimSpace(headlessFileKeyProjection.LocalScope) == "" ||
+		!strings.Contains(headlessFileKeyProjection.LocalScope, "figma.fileKey=headless") ||
+		!strings.Contains(headlessFileKeyProjection.LocalScope, "source identity") {
+		t.Fatalf("headless file-key projection must explain local scope: %+v", headlessFileKeyProjection)
+	}
+	for _, forbidden := range []string{"overwrite source_contracts_manifest.path", "overwrite mirrored figma.file_key", "replace upstream file identity with headless"} {
+		if !hasString(headlessFileKeyProjection.ForbiddenProjectionEffects, forbidden) {
+			t.Fatalf("headless file-key projection must forbid %q: %+v", forbidden, headlessFileKeyProjection.ForbiddenProjectionEffects)
+		}
+	}
+	for _, needle := range []string{"figma-headless-file-key-placeholder.v1", "`figma.fileKey=headless`", "`MUOd9lctoEHASUStN3vUuK`", "`figma.file_key`", "`source_contracts_manifest`", "headless runtime placeholder"} {
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must mention headless file-key limitation with %q", needle)
+		}
+	}
+	if onboardingTimeoutProjection.SourceID == "" {
+		t.Fatalf("mirrored_supporting_tool_limitations must include figma-onboarding-page-load-timeout.v1")
+	}
+	onboardingSource, ok := sourceByID[onboardingTimeoutProjection.SourceID]
+	if !ok {
+		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", onboardingTimeoutProjection.SourceID)
+	}
+	if !strings.Contains(onboardingSource.Tool, "42:3014") ||
+		!strings.Contains(onboardingSource.ObservedResult, "time out after 120s") ||
+		!strings.Contains(onboardingSource.ObservedResult, "Wireframe - 온보딩") ||
+		!strings.Contains(onboardingSource.ObservedResult, "236:33845") ||
+		!strings.Contains(onboardingSource.ObservedResult, "236:33847") {
+		t.Fatalf("source supporting limit must preserve onboarding load timeout evidence: %+v", onboardingSource)
+	}
+	if !hasString(onboardingSource.AuthoritativeResult, "42:3014") ||
+		!hasString(onboardingSource.AuthoritativeResult, "child_count=83") ||
+		!hasString(onboardingSource.AuthoritativeResult, "non_ui_top_level_inventory") ||
+		!hasString(onboardingSource.AuthoritativeResult, "236:33845") ||
+		!hasString(onboardingSource.AuthoritativeResult, "236:33847") ||
+		!hasString(onboardingSource.AuthoritativeResult, "onboarding_api_generated_annotations=6") {
+		t.Fatalf("source onboarding timeout authoritative_result is incomplete: %+v", onboardingSource.AuthoritativeResult)
+	}
+	if strings.TrimSpace(onboardingTimeoutProjection.LocalScope) == "" ||
+		!strings.Contains(onboardingTimeoutProjection.LocalScope, "must not treat") ||
+		!strings.Contains(onboardingTimeoutProjection.LocalScope, "42:3014") {
+		t.Fatalf("onboarding timeout projection must explain local scope: %+v", onboardingTimeoutProjection)
+	}
+	for _, pageID := range onboardingTimeoutProjection.RequiredAuthoritativePages {
+		if !hasString(onboardingSource.AuthoritativeResult, pageID) {
+			t.Fatalf("onboarding timeout projection page %q is absent from source authoritative_result: %+v", pageID, onboardingSource.AuthoritativeResult)
+		}
+	}
+	for _, forbidden := range []string{"remove expected_pages", "remove non_ui_top_level_inventory", "remove onboarding generated paths", "mark onboarding generated paths unresolved"} {
+		if !hasString(onboardingTimeoutProjection.ForbiddenProjectionEffects, forbidden) {
+			t.Fatalf("onboarding timeout projection must forbid %q: %+v", forbidden, onboardingTimeoutProjection.ForbiddenProjectionEffects)
+		}
+	}
+	for _, needle := range []string{"figma-onboarding-page-load-timeout.v1", "after 120s", "`Wireframe - 온보딩`", "`236:33845`", "`236:33847`", "six onboarding `riido.*` `API", "`non_ui_top_level_inventory`", "mark onboarding generated paths unresolved"} {
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must mention onboarding page load timeout with %q", needle)
 		}
 	}
 }
@@ -374,6 +463,17 @@ func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, p
 		"teamswyg/riido-contracts#51",
 		"teamswyg/riido-contracts#52",
 		"teamswyg/riido-contracts#54",
+		"teamswyg/riido-contracts#55",
+		"teamswyg/riido-contracts#56",
+		"teamswyg/riido-contracts#57",
+		"teamswyg/riido-contracts#58",
+		"teamswyg/riido-contracts#60",
+		"teamswyg/riido-contracts#62",
+		"teamswyg/riido-contracts#63",
+		"teamswyg/riido-contracts#64",
+		"teamswyg/riido-contracts#65",
+		"teamswyg/riido-contracts#66",
+		"teamswyg/riido-contracts#67",
 	}
 	if len(sourceStabilizedBy) != len(want) {
 		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
@@ -486,30 +586,33 @@ func assertNoStaleFigmaNodeReference(t *testing.T, root, staleNode string) {
 
 func loadFigmaProjectionManifest(t *testing.T, path string) figmaProjectionManifest {
 	t.Helper()
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("read projection manifest: %v", err)
-	}
 	var manifest figmaProjectionManifest
-	dec := json.NewDecoder(bytes.NewReader(data))
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(&manifest); err != nil {
-		t.Fatalf("decode projection manifest: %v", err)
-	}
+	decodeStrictJSON(t, path, &manifest)
 	return manifest
 }
 
 func loadFigmaSourceCoverageManifest(t *testing.T, path string) figmaSourceCoverageManifest {
 	t.Helper()
+	var manifest figmaSourceCoverageManifest
+	decodeStrictJSON(t, path, &manifest)
+	return manifest
+}
+
+func decodeStrictJSON(t *testing.T, path string, target any) {
+	t.Helper()
 	data, err := os.ReadFile(path)
 	if err != nil {
-		t.Fatalf("read source coverage manifest: %v", err)
+		t.Fatalf("read %s: %v", path, err)
 	}
-	var manifest figmaSourceCoverageManifest
-	if err := json.Unmarshal(data, &manifest); err != nil {
-		t.Fatalf("decode source coverage manifest: %v", err)
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(target); err != nil {
+		t.Fatalf("decode %s: %v", path, err)
 	}
-	return manifest
+	var trailing struct{}
+	if err := dec.Decode(&trailing); !errors.Is(err, io.EOF) {
+		t.Fatalf("decode %s: trailing JSON document: %v", path, err)
+	}
 }
 
 func sourceCoverageGeneratedPathsByNode(manifest figmaSourceCoverageManifest) map[string]map[string]bool {
@@ -579,36 +682,45 @@ func verifyFigmaProjectionEntry(t *testing.T, entry figmaProjectionEntry, source
 	}
 }
 
-func verifyFigmaClientDeliveryAnnotations(t *testing.T, annotations []figmaSourceClientDeliveryAnnotation, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
+func verifyFigmaAPIGeneratedAnnotations(t *testing.T, annotations []figmaSourceAPIGeneratedAnnotation, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
 	t.Helper()
 	if got, want := len(annotations), 2; got != want {
-		t.Fatalf("mirrored client_delivery_annotations = %d, want %d", got, want)
+		t.Fatalf("mirrored api_generated_annotations = %d, want %d", got, want)
 	}
 	seen := map[string]bool{}
 	for _, annotation := range annotations {
 		if seen[annotation.NodeID] {
-			t.Fatalf("duplicate mirrored client delivery annotation %q", annotation.NodeID)
+			t.Fatalf("duplicate mirrored API Generated annotation %q", annotation.NodeID)
 		}
 		seen[annotation.NodeID] = true
-		if annotation.CategoryID != "39:0" || annotation.CategoryLabel != "클라이언트 전달" {
-			t.Fatalf("mirrored client delivery annotation %q category drifted: %+v", annotation.NodeID, annotation)
+		if annotation.CategoryID != "700:0" || annotation.CategoryLabel != "API Generated" {
+			t.Fatalf("mirrored API Generated annotation %q category drifted: %+v", annotation.NodeID, annotation)
 		}
 		if !strings.HasPrefix(annotation.FigmaGeneratedPath, "riido.") {
-			t.Fatalf("mirrored client delivery annotation %q must preserve Figma facade path: %q", annotation.NodeID, annotation.FigmaGeneratedPath)
+			t.Fatalf("mirrored API Generated annotation %q must preserve Figma facade path: %q", annotation.NodeID, annotation.FigmaGeneratedPath)
 		}
 		canonical := strings.TrimPrefix(annotation.FigmaGeneratedPath, "riido.")
 		if annotation.CanonicalGeneratedPath != canonical {
-			t.Fatalf("mirrored client delivery annotation %q canonical path = %q, want %q", annotation.NodeID, annotation.CanonicalGeneratedPath, canonical)
+			t.Fatalf("mirrored API Generated annotation %q canonical path = %q, want %q", annotation.NodeID, annotation.CanonicalGeneratedPath, canonical)
 		}
 		if _, ok := generatedPaths[annotation.CanonicalGeneratedPath]; !ok {
-			t.Fatalf("mirrored client delivery annotation %q references unknown generated path %q", annotation.NodeID, annotation.CanonicalGeneratedPath)
+			t.Fatalf("mirrored API Generated annotation %q references unknown generated path %q", annotation.NodeID, annotation.CanonicalGeneratedPath)
+		}
+		v2Path := "v2." + annotation.CanonicalGeneratedPath
+		if _, ok := generatedPaths[v2Path]; !ok {
+			t.Fatalf("mirrored API Generated annotation %q must keep v2 generated path counterpart %q", annotation.NodeID, v2Path)
 		}
 		sourcePaths, ok := sourceGeneratedPaths[annotation.CoverageEntryNodeID]
 		if !ok || !sourcePaths[annotation.CanonicalGeneratedPath] {
-			t.Fatalf("mirrored client delivery annotation %q canonical path %q is not covered by source entry %q", annotation.NodeID, annotation.CanonicalGeneratedPath, annotation.CoverageEntryNodeID)
+			t.Fatalf("mirrored API Generated annotation %q canonical path %q is not covered by source entry %q", annotation.NodeID, annotation.CanonicalGeneratedPath, annotation.CoverageEntryNodeID)
+		}
+		if !sourcePaths[v2Path] {
+			t.Fatalf("mirrored API Generated annotation %q v2 path %q is not covered by source entry %q", annotation.NodeID, v2Path, annotation.CoverageEntryNodeID)
 		}
 		canonicalComment := "계약 generated path: `" + annotation.CanonicalGeneratedPath + "`"
 		accessComment := "접근 예시: `" + annotation.FigmaGeneratedPath + "`"
+		v2CanonicalComment := "계약 generated path: `" + v2Path + "`"
+		v2AccessComment := "접근 예시: `riido." + v2Path + "`"
 		for _, generated := range []struct {
 			name string
 			body string
@@ -617,25 +729,236 @@ func verifyFigmaClientDeliveryAnnotations(t *testing.T, annotations []figmaSourc
 			{name: "react", body: react},
 		} {
 			if !strings.Contains(generated.body, canonicalComment) {
-				t.Fatalf("%s generated client missing %q for mirrored client delivery annotation %q", generated.name, canonicalComment, annotation.NodeID)
+				t.Fatalf("%s generated client missing %q for mirrored API Generated annotation %q", generated.name, canonicalComment, annotation.NodeID)
 			}
 			if !strings.Contains(generated.body, accessComment) {
-				t.Fatalf("%s generated client missing %q for mirrored client delivery annotation %q", generated.name, accessComment, annotation.NodeID)
+				t.Fatalf("%s generated client missing %q for mirrored API Generated annotation %q", generated.name, accessComment, annotation.NodeID)
+			}
+			if !strings.Contains(generated.body, v2CanonicalComment) {
+				t.Fatalf("%s generated client missing %q for mirrored API Generated annotation %q", generated.name, v2CanonicalComment, annotation.NodeID)
+			}
+			if !strings.Contains(generated.body, v2AccessComment) {
+				t.Fatalf("%s generated client missing %q for mirrored API Generated annotation %q", generated.name, v2AccessComment, annotation.NodeID)
 			}
 		}
 		for _, needle := range []string{annotation.NodeID, annotation.FigmaGeneratedPath, annotation.CanonicalGeneratedPath, annotation.CategoryLabel} {
 			if !strings.Contains(docText, needle) {
-				t.Fatalf("projection doc must mention mirrored client delivery annotation %q", needle)
+				t.Fatalf("projection doc must mention mirrored API Generated annotation %q", needle)
 			}
+		}
+		if !docMentionsGeneratedPath(docText, v2Path) {
+			t.Fatalf("projection doc must mention mirrored API Generated annotation v2 counterpart %q", v2Path)
 		}
 		if strings.Contains(annotation.FigmaLabel, "작업중") {
 			if annotation.ResolutionStatus != "resolved_stale_handoff_copy" || !strings.Contains(annotation.Resolution, "stale") {
-				t.Fatalf("mirrored client delivery annotation %q stale copy is not resolved: %+v", annotation.NodeID, annotation)
+				t.Fatalf("mirrored API Generated annotation %q stale copy is not resolved: %+v", annotation.NodeID, annotation)
 			}
 			if !strings.Contains(docText, "상세내용은 작업중입니다") {
 				t.Fatalf("projection doc must mention stale Figma handoff copy for annotation %q", annotation.NodeID)
 			}
 		}
+	}
+}
+
+func verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t *testing.T, policy figmaSourceAPIGeneratedAnnotationContentRule, docText string) {
+	t.Helper()
+	if policy.CategoryID != "700:0" || policy.CategoryLabel != "API Generated" {
+		t.Fatalf("mirrored API Generated annotation content category drifted: %+v", policy)
+	}
+	if len(policy.LabelFormat) != 3 {
+		t.Fatalf("mirrored API Generated annotation label_format = %d entries, want 3", len(policy.LabelFormat))
+	}
+	for _, needle := range []string{"riido.*", "v2.", "source coverage entry", "종류", "Query", "Mutation", "SSE Stream", "배경", "text/event-stream", "non-stream GET", "non-GET"} {
+		if !strings.Contains(strings.Join(policy.LabelFormat, "\n")+"\n"+policy.Rule, needle) {
+			t.Fatalf("mirrored API Generated annotation content policy must mention %q: %+v", needle, policy)
+		}
+		docNeedle := needle
+		if needle == "non-stream GET" {
+			docNeedle = "non-stream `GET`"
+		}
+		if needle == "non-GET" {
+			docNeedle = "non-`GET`"
+		}
+		if !strings.Contains(docText, docNeedle) {
+			t.Fatalf("projection doc must mention mirrored API Generated annotation content policy %q", needle)
+		}
+	}
+	if !strings.Contains(policy.Rule, "must not become a second API SSOT") {
+		t.Fatalf("mirrored API Generated annotation content policy must prevent second SSOT drift: %q", policy.Rule)
+	}
+	verifyMirroredFigmaAPIGeneratedRetiredCategories(t, policy.RetiredCategories, docText)
+	scan := policy.LiveInspection
+	if scan.ObservedAt != "2026-06-02" || !strings.Contains(scan.Tool, "use_figma") {
+		t.Fatalf("mirrored API Generated annotation live inspection provenance drifted: %+v", scan)
+	}
+	expected := map[string]figmaSourceAPIGeneratedAnnotationLivePageCounter{
+		"129:5215": {
+			PageID:               "129:5215",
+			PageName:             "UI",
+			RiidoAnnotationCount: 53,
+			APIGeneratedCount:    53,
+		},
+		"42:3014": {
+			PageID:               "42:3014",
+			PageName:             "Wireframe - 온보딩",
+			RiidoAnnotationCount: 6,
+			APIGeneratedCount:    6,
+		},
+		"0:1": {
+			PageID:               "0:1",
+			PageName:             "Wireframe",
+			RiidoAnnotationCount: 0,
+			APIGeneratedCount:    0,
+		},
+	}
+	if len(scan.PageCounts) != len(expected) {
+		t.Fatalf("mirrored API Generated annotation page_counts = %d, want %d", len(scan.PageCounts), len(expected))
+	}
+	var totalRiido, totalAPIGenerated int
+	for _, page := range scan.PageCounts {
+		want, ok := expected[page.PageID]
+		if !ok {
+			t.Fatalf("unexpected mirrored API Generated annotation live page count: %+v", page)
+		}
+		if page.PageName != want.PageName || page.RiidoAnnotationCount != want.RiidoAnnotationCount || page.APIGeneratedCount != want.APIGeneratedCount {
+			t.Fatalf("mirrored API Generated annotation live page count for %s = %+v, want %+v", page.PageID, page, want)
+		}
+		if page.MissingOperationKind != 0 || page.MissingBackground != 0 {
+			t.Fatalf("mirrored API Generated annotation live page count has missing content: %+v", page)
+		}
+		totalRiido += page.RiidoAnnotationCount
+		totalAPIGenerated += page.APIGeneratedCount
+		for _, needle := range []string{page.PageID, page.PageName} {
+			if !strings.Contains(docText, needle) {
+				t.Fatalf("projection doc must mention mirrored API Generated annotation live page count %q", needle)
+			}
+		}
+	}
+	if scan.TotalRiidoAnnotations != totalRiido || scan.TotalAPIGeneratedAnnotations != totalAPIGenerated {
+		t.Fatalf("mirrored API Generated annotation live totals = riido:%d/api:%d, want riido:%d/api:%d", scan.TotalRiidoAnnotations, scan.TotalAPIGeneratedAnnotations, totalRiido, totalAPIGenerated)
+	}
+	if totalRiido != 59 || totalAPIGenerated != 59 {
+		t.Fatalf("mirrored API Generated annotation live totals = riido:%d/api:%d, want 59/59", totalRiido, totalAPIGenerated)
+	}
+}
+
+func verifyMirroredFigmaAPIGeneratedRetiredCategories(t *testing.T, categories []figmaSourceAPIGeneratedAnnotationRetiredCategory, docText string) {
+	t.Helper()
+	if len(categories) != 1 {
+		t.Fatalf("mirrored API Generated retired categories = %d, want 1", len(categories))
+	}
+	retired := categories[0]
+	if retired.CategoryID != "39:0" || retired.CategoryLabel != "클라이언트 전달" {
+		t.Fatalf("unexpected mirrored retired API Generated category: %+v", retired)
+	}
+	if retired.RetirementStatus != "unused_not_deleted" || retired.LiveUsageCount != 0 {
+		t.Fatalf("mirrored retired API Generated category must stay unused_not_deleted with zero live usage: %+v", retired)
+	}
+	if retired.ObservedAt != "2026-06-02" || !strings.Contains(retired.ToolLimitation, "remove/setLabel") {
+		t.Fatalf("mirrored retired API Generated category must record automation limitation: %+v", retired)
+	}
+	for _, needle := range []string{retired.CategoryID, retired.CategoryLabel, "retired", "0"} {
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must mention mirrored retired API Generated category %q", needle)
+		}
+	}
+}
+
+func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaSourceAPIGeneratedAnnotationGroup, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
+	t.Helper()
+	if got, want := len(inventory), 19; got != want {
+		t.Fatalf("mirrored api_generated_annotation_inventory = %d, want %d", got, want)
+	}
+	allowedKinds := map[string]bool{"Query": true, "Mutation": true, "SSE Stream": true}
+	seenPath := map[string]bool{}
+	totalAnnotations := 0
+	for _, group := range inventory {
+		if strings.TrimSpace(group.UIArea) == "" {
+			t.Fatalf("mirrored API Generated inventory group has empty ui_area: %+v", group)
+		}
+		if group.CategoryID != "700:0" || group.CategoryLabel != "API Generated" {
+			t.Fatalf("mirrored API Generated inventory group %q category drifted: %+v", group.FigmaGeneratedPath, group)
+		}
+		if !strings.HasPrefix(group.FigmaGeneratedPath, "riido.") {
+			t.Fatalf("mirrored API Generated inventory group must preserve Figma facade path: %q", group.FigmaGeneratedPath)
+		}
+		canonical := strings.TrimPrefix(group.FigmaGeneratedPath, "riido.")
+		if group.CanonicalGeneratedPath != canonical {
+			t.Fatalf("mirrored API Generated inventory group %q canonical path = %q, want %q", group.FigmaGeneratedPath, group.CanonicalGeneratedPath, canonical)
+		}
+		if seenPath[group.CanonicalGeneratedPath] {
+			t.Fatalf("duplicate mirrored API Generated inventory generated path %q", group.CanonicalGeneratedPath)
+		}
+		seenPath[group.CanonicalGeneratedPath] = true
+		if _, ok := generatedPaths[group.CanonicalGeneratedPath]; !ok {
+			t.Fatalf("mirrored API Generated inventory group references unknown generated path %q", group.CanonicalGeneratedPath)
+		}
+		v2Path := "v2." + group.CanonicalGeneratedPath
+		if _, ok := generatedPaths[v2Path]; !ok {
+			t.Fatalf("mirrored API Generated inventory group %q must keep v2 generated path counterpart %q", group.CanonicalGeneratedPath, v2Path)
+		}
+		if !allowedKinds[group.OperationKind] {
+			t.Fatalf("mirrored API Generated inventory group %q operation_kind = %q", group.CanonicalGeneratedPath, group.OperationKind)
+		}
+		if strings.TrimSpace(group.Background) == "" {
+			t.Fatalf("mirrored API Generated inventory group %q must preserve Korean background text", group.CanonicalGeneratedPath)
+		}
+		annotationCount := 0
+		for _, source := range group.Sources {
+			if strings.TrimSpace(source.PageID) == "" || strings.TrimSpace(source.TopLevelNodeID) == "" || strings.TrimSpace(source.CoverageEntryNodeID) == "" {
+				t.Fatalf("mirrored API Generated inventory group %q has invalid source: %+v", group.CanonicalGeneratedPath, source)
+			}
+			sourcePaths, ok := sourceGeneratedPaths[source.CoverageEntryNodeID]
+			if !ok || !sourcePaths[group.CanonicalGeneratedPath] {
+				t.Fatalf("mirrored API Generated inventory group %q canonical path is not covered by source entry %q", group.CanonicalGeneratedPath, source.CoverageEntryNodeID)
+			}
+			if !sourcePaths[v2Path] {
+				t.Fatalf("mirrored API Generated inventory group %q v2 path %q is not covered by source entry %q", group.CanonicalGeneratedPath, v2Path, source.CoverageEntryNodeID)
+			}
+			if len(source.NodeIDs) == 0 {
+				t.Fatalf("mirrored API Generated inventory group %q source %q must list node ids", group.CanonicalGeneratedPath, source.TopLevelNodeID)
+			}
+			annotationCount += len(source.NodeIDs)
+		}
+		if group.AnnotationCount != annotationCount {
+			t.Fatalf("mirrored API Generated inventory group %q annotation_count = %d, want node count %d", group.CanonicalGeneratedPath, group.AnnotationCount, annotationCount)
+		}
+		totalAnnotations += annotationCount
+		canonicalComment := "계약 generated path: `" + group.CanonicalGeneratedPath + "`"
+		accessComment := "접근 예시: `" + group.FigmaGeneratedPath + "`"
+		v2CanonicalComment := "계약 generated path: `" + v2Path + "`"
+		v2AccessComment := "접근 예시: `riido." + v2Path + "`"
+		for _, generated := range []struct {
+			name string
+			body string
+		}{
+			{name: "core", body: core},
+			{name: "react", body: react},
+		} {
+			if !strings.Contains(generated.body, canonicalComment) {
+				t.Fatalf("%s generated client missing %q for mirrored inventory path %q", generated.name, canonicalComment, group.CanonicalGeneratedPath)
+			}
+			if !strings.Contains(generated.body, accessComment) {
+				t.Fatalf("%s generated client missing %q for mirrored inventory path %q", generated.name, accessComment, group.CanonicalGeneratedPath)
+			}
+			if !strings.Contains(generated.body, v2CanonicalComment) {
+				t.Fatalf("%s generated client missing %q for mirrored inventory path %q", generated.name, v2CanonicalComment, group.CanonicalGeneratedPath)
+			}
+			if !strings.Contains(generated.body, v2AccessComment) {
+				t.Fatalf("%s generated client missing %q for mirrored inventory path %q", generated.name, v2AccessComment, group.CanonicalGeneratedPath)
+			}
+		}
+		for _, needle := range []string{group.UIArea, group.FigmaGeneratedPath, group.CanonicalGeneratedPath, group.OperationKind, group.Background} {
+			if !strings.Contains(docText, needle) {
+				t.Fatalf("projection doc must mention mirrored API Generated inventory %q", needle)
+			}
+		}
+		if !docMentionsGeneratedPath(docText, v2Path) {
+			t.Fatalf("projection doc must mention mirrored API Generated inventory v2 counterpart %q", v2Path)
+		}
+	}
+	if got, want := totalAnnotations, 59; got != want {
+		t.Fatalf("mirrored API Generated inventory node annotations = %d, want %d", got, want)
 	}
 }
 
@@ -671,6 +994,17 @@ func hasString(items []string, want string) bool {
 	return false
 }
 
+func docMentionsGeneratedPath(docText, generatedPath string) bool {
+	if strings.Contains(docText, generatedPath) {
+		return true
+	}
+	lastDot := strings.LastIndex(generatedPath, ".")
+	if lastDot < 0 {
+		return false
+	}
+	return strings.Contains(docText, generatedPath[:lastDot]+".*")
+}
+
 type figmaProjectionManifest struct {
 	SchemaVersion                     string                                    `json:"schema_version"`
 	ID                                string                                    `json:"id"`
@@ -698,10 +1032,11 @@ type figmaProjectionPolicy struct {
 }
 
 type figmaProjectionSupportingToolLimitation struct {
-	SourceID                   string   `json:"source_id"`
-	LocalScope                 string   `json:"local_scope"`
-	RequiredAuthoritativePages []string `json:"required_authoritative_pages"`
-	ForbiddenProjectionEffects []string `json:"forbidden_projection_effects"`
+	SourceID                     string   `json:"source_id"`
+	LocalScope                   string   `json:"local_scope"`
+	RequiredAuthoritativePages   []string `json:"required_authoritative_pages,omitempty"`
+	RequiredAuthoritativeResults []string `json:"required_authoritative_results,omitempty"`
+	ForbiddenProjectionEffects   []string `json:"forbidden_projection_effects"`
 }
 
 type figmaProjectionEntry struct {
@@ -736,17 +1071,40 @@ type figmaProjectionPlanningAbsorption struct {
 }
 
 type figmaSourceCoverageManifest struct {
-	SchemaVersion             string                                `json:"schema_version"`
-	ID                        string                                `json:"id"`
-	StabilizedBy              []string                              `json:"stabilized_by"`
-	InspectionMethod          figmaCoverageInspectionMethod         `json:"inspection_method"`
-	SupportingToolLimitations []figmaSourceSupportingToolLimitation `json:"supporting_tool_limitations"`
-	ExpectedPages             []figmaSourceCoveragePage             `json:"expected_pages"`
-	NonUITopLevelInventory    []figmaSourceCoverageInventory        `json:"non_ui_top_level_inventory"`
-	VerifiedEvidenceNodes     []figmaSourceCoverageNode             `json:"verified_evidence_nodes"`
-	NonUITopLevelNodes        []figmaSourceCoverageEntry            `json:"non_ui_top_level_nodes"`
-	ClientDeliveryAnnotations []figmaSourceClientDeliveryAnnotation `json:"client_delivery_annotations"`
-	Entries                   []figmaSourceCoverageEntry            `json:"entries"`
+	SchemaVersion                       string                                       `json:"schema_version"`
+	ID                                  string                                       `json:"id"`
+	RiidoTask                           string                                       `json:"riido_task"`
+	StabilizedBy                        []string                                     `json:"stabilized_by"`
+	HumanDoc                            string                                       `json:"human_doc"`
+	RelatedManifests                    []string                                     `json:"related_manifests"`
+	Figma                               figmaSourceCoverageSource                    `json:"figma"`
+	InspectionMethod                    figmaCoverageInspectionMethod                `json:"inspection_method"`
+	SupportingToolLimitations           []figmaSourceSupportingToolLimitation        `json:"supporting_tool_limitations"`
+	CoveragePolicy                      figmaSourceCoveragePolicy                    `json:"coverage_policy"`
+	APIGeneratedAnnotationContentPolicy figmaSourceAPIGeneratedAnnotationContentRule `json:"api_generated_annotation_content_policy"`
+	ExpectedPages                       []figmaSourceCoveragePage                    `json:"expected_pages"`
+	ExpectedTopLevelNodes               []figmaSourceCoverageNode                    `json:"expected_top_level_nodes"`
+	NonUITopLevelInventory              []figmaSourceCoverageInventory               `json:"non_ui_top_level_inventory"`
+	VerifiedEvidenceNodes               []figmaSourceCoverageNode                    `json:"verified_evidence_nodes"`
+	NonUITopLevelNodes                  []figmaSourceCoverageEntry                   `json:"non_ui_top_level_nodes"`
+	APIGeneratedAnnotations             []figmaSourceAPIGeneratedAnnotation          `json:"api_generated_annotations"`
+	APIGeneratedAnnotationInventory     []figmaSourceAPIGeneratedAnnotationGroup     `json:"api_generated_annotation_inventory"`
+	Entries                             []figmaSourceCoverageEntry                   `json:"entries"`
+}
+
+type figmaSourceCoverageSource struct {
+	FileKey          string `json:"file_key"`
+	FileName         string `json:"file_name"`
+	PageID           string `json:"page_id"`
+	PageName         string `json:"page_name"`
+	InspectedAt      string `json:"inspected_at"`
+	InspectionSource string `json:"inspection_source"`
+}
+
+type figmaSourceCoveragePolicy struct {
+	Summary  string `json:"summary"`
+	TopDown  string `json:"top_down"`
+	BottomUp string `json:"bottom_up"`
 }
 
 type figmaSourceCoveragePage struct {
@@ -766,31 +1124,80 @@ type figmaSourceCoverageNode struct {
 }
 
 type figmaCoverageInspectionMethod struct {
-	ID                           string `json:"id"`
-	PageRegistryExpression       string `json:"page_registry_expression"`
-	TopLevelChildCountExpression string `json:"top_level_child_count_expression"`
-	Rule                         string `json:"rule"`
+	ID                           string   `json:"id"`
+	Authority                    string   `json:"authority"`
+	PageRegistryExpression       string   `json:"page_registry_expression"`
+	TopLevelChildCountExpression string   `json:"top_level_child_count_expression"`
+	SupportingTools              []string `json:"supporting_tools"`
+	Rule                         string   `json:"rule"`
 }
 
 type figmaSourceSupportingToolLimitation struct {
 	ID                  string   `json:"id"`
 	Tool                string   `json:"tool"`
+	ObservedAt          string   `json:"observed_at"`
 	ObservedResult      string   `json:"observed_result"`
+	AuthoritativeSource string   `json:"authoritative_source"`
 	AuthoritativeResult []string `json:"authoritative_result"`
+	Rule                string   `json:"rule"`
+}
+
+type figmaSourceAPIGeneratedAnnotationContentRule struct {
+	CategoryID        string                                             `json:"category_id"`
+	CategoryLabel     string                                             `json:"category_label"`
+	LabelFormat       []string                                           `json:"label_format"`
+	Rule              string                                             `json:"rule"`
+	RetiredCategories []figmaSourceAPIGeneratedAnnotationRetiredCategory `json:"retired_categories"`
+	LiveInspection    figmaSourceAPIGeneratedAnnotationLiveScan          `json:"live_inspection"`
+}
+
+type figmaSourceAPIGeneratedAnnotationRetiredCategory struct {
+	CategoryID       string `json:"category_id"`
+	CategoryLabel    string `json:"category_label"`
+	RetirementStatus string `json:"retirement_status"`
+	LiveUsageCount   int    `json:"live_usage_count"`
+	ObservedAt       string `json:"observed_at"`
+	ToolLimitation   string `json:"tool_limitation"`
+}
+
+type figmaSourceAPIGeneratedAnnotationLiveScan struct {
+	ObservedAt                   string                                             `json:"observed_at"`
+	Tool                         string                                             `json:"tool"`
+	PageCounts                   []figmaSourceAPIGeneratedAnnotationLivePageCounter `json:"page_counts"`
+	TotalRiidoAnnotations        int                                                `json:"total_riido_annotations"`
+	TotalAPIGeneratedAnnotations int                                                `json:"total_api_generated_annotations"`
+}
+
+type figmaSourceAPIGeneratedAnnotationLivePageCounter struct {
+	PageID               string `json:"page_id"`
+	PageName             string `json:"page_name"`
+	RiidoAnnotationCount int    `json:"riido_annotation_count"`
+	APIGeneratedCount    int    `json:"api_generated_count"`
+	MissingOperationKind int    `json:"missing_operation_kind"`
+	MissingBackground    int    `json:"missing_background"`
 }
 
 type figmaSourceCoverageEntry struct {
-	PageID                   string   `json:"page_id,omitempty"`
-	NodeID                   string   `json:"node_id"`
-	Name                     string   `json:"name,omitempty"`
-	CoverageStatus           string   `json:"coverage_status,omitempty"`
-	EvidenceKind             string   `json:"evidence_kind,omitempty"`
-	AbsorbedByTopLevelNodeID string   `json:"absorbed_by_top_level_node_id,omitempty"`
-	GeneratedPaths           []string `json:"generated_paths,omitempty"`
-	CoveredFacts             []string `json:"covered_facts,omitempty"`
+	PageID                   string                       `json:"page_id,omitempty"`
+	NodeID                   string                       `json:"node_id"`
+	Name                     string                       `json:"name,omitempty"`
+	CoverageStatus           string                       `json:"coverage_status,omitempty"`
+	EvidenceKind             string                       `json:"evidence_kind,omitempty"`
+	AbsorbedByTopLevelNodeID string                       `json:"absorbed_by_top_level_node_id,omitempty"`
+	SSOTDocs                 []string                     `json:"ssot_docs,omitempty"`
+	OwnerRepos               []string                     `json:"owner_repos,omitempty"`
+	GeneratedPaths           []string                     `json:"generated_paths,omitempty"`
+	CoveredFacts             []string                     `json:"covered_facts,omitempty"`
+	DirectionLoop            figmaSourceCoverageDirection `json:"direction_loop,omitempty"`
+	Reason                   string                       `json:"reason,omitempty"`
 }
 
-type figmaSourceClientDeliveryAnnotation struct {
+type figmaSourceCoverageDirection struct {
+	TopDown  string `json:"top_down,omitempty"`
+	BottomUp string `json:"bottom_up,omitempty"`
+}
+
+type figmaSourceAPIGeneratedAnnotation struct {
 	NodeID                 string `json:"node_id"`
 	TopLevelNodeID         string `json:"top_level_node_id"`
 	CoverageEntryNodeID    string `json:"coverage_entry_node_id"`
@@ -801,4 +1208,23 @@ type figmaSourceClientDeliveryAnnotation struct {
 	CanonicalGeneratedPath string `json:"canonical_generated_path"`
 	ResolutionStatus       string `json:"resolution_status"`
 	Resolution             string `json:"resolution"`
+}
+
+type figmaSourceAPIGeneratedAnnotationGroup struct {
+	UIArea                 string                                    `json:"ui_area"`
+	CategoryID             string                                    `json:"category_id"`
+	CategoryLabel          string                                    `json:"category_label"`
+	FigmaGeneratedPath     string                                    `json:"figma_generated_path"`
+	CanonicalGeneratedPath string                                    `json:"canonical_generated_path"`
+	OperationKind          string                                    `json:"operation_kind"`
+	Background             string                                    `json:"background"`
+	AnnotationCount        int                                       `json:"annotation_count"`
+	Sources                []figmaSourceAPIGeneratedAnnotationSource `json:"sources"`
+}
+
+type figmaSourceAPIGeneratedAnnotationSource struct {
+	PageID              string   `json:"page_id"`
+	TopLevelNodeID      string   `json:"top_level_node_id"`
+	CoverageEntryNodeID string   `json:"coverage_entry_node_id"`
+	NodeIDs             []string `json:"node_ids"`
 }

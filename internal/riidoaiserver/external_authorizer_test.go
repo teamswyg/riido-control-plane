@@ -19,6 +19,9 @@ func TestExternalHTTPAuthorizerAllowsScopedRequest(t *testing.T) {
 		if got := r.Header.Get("Content-Type"); got != "application/json" {
 			t.Fatalf("content-type = %q", got)
 		}
+		if got := r.Header.Get(ExternalAuthorizerAPIKeyHeader); got != "internal-key" {
+			t.Fatalf("api key header = %q", got)
+		}
 		dec := json.NewDecoder(r.Body)
 		dec.DisallowUnknownFields()
 		if err := dec.Decode(&got); err != nil {
@@ -36,6 +39,7 @@ func TestExternalHTTPAuthorizerAllowsScopedRequest(t *testing.T) {
 	authorizer, err := NewExternalHTTPAuthorizer(ExternalHTTPAuthorizerConfig{
 		Endpoint: authorizerServer.URL,
 		Audience: "riido-api",
+		APIKey:   " internal-key ",
 	})
 	if err != nil {
 		t.Fatalf("NewExternalHTTPAuthorizer: %v", err)
@@ -141,6 +145,15 @@ func TestExternalHTTPAuthorizerRejectsUnsafeEndpoint(t *testing.T) {
 				t.Fatalf("expected endpoint %q to be rejected", endpoint)
 			}
 		})
+	}
+}
+
+func TestExternalHTTPAuthorizerRejectsUnsafeAPIKey(t *testing.T) {
+	if _, err := NewExternalHTTPAuthorizer(ExternalHTTPAuthorizerConfig{
+		Endpoint: "https://authz.example.com/check",
+		APIKey:   "key\nother: value",
+	}); err == nil {
+		t.Fatal("expected unsafe api key to be rejected")
 	}
 }
 

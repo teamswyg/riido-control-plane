@@ -55,7 +55,7 @@ func TestConfigFromEnvDefaultsToPublicHealthOnlyRuntime(t *testing.T) {
 	if config.MetricsLogInterval != 0 {
 		t.Fatalf("metrics interval should default disabled: %s", config.MetricsLogInterval)
 	}
-	if config.Authorizer != nil || config.AIAgentClientTable != "" || config.AssignmentTable != "" {
+	if config.Authorizer != nil {
 		t.Fatalf("optional config should be nil: %+v", config)
 	}
 }
@@ -87,26 +87,23 @@ func TestConfigFromEnvParsesWebAllowedOrigins(t *testing.T) {
 	}
 }
 
-func TestConfigFromEnvParsesDevelopmentDynamoDBConfig(t *testing.T) {
+func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	clearRiidoAIServerEnv(t)
-	t.Setenv(envAIAgentClientTable, "ai-agent-client")
-	t.Setenv(envDynamoDBAssignmentTable, "assignments")
-	t.Setenv(envDynamoDBOutboxTable, "outbox")
-	t.Setenv(envDynamoDBEndpoint, "http://localhost:8000")
+	t.Setenv(envAIAgentClientDev, "true")
+	t.Setenv(envAIAgentClientTable, "riido-ai-agent-development")
 	t.Setenv(envAWSRegion, "ap-northeast-2")
-	t.Setenv(envAssignmentActiveLease, "42")
+	t.Setenv(envAWSContainerCredentialsFullURI, "http://169.254.170.2/credentials")
 
 	config, err := configFromEnv()
 	if err != nil {
 		t.Fatalf("configFromEnv: %v", err)
 	}
-	if config.AIAgentClientTable != "ai-agent-client" ||
-		config.AssignmentTable != "assignments" ||
-		config.OutboxTable != "outbox" ||
-		config.DynamoDBEndpoint != "http://localhost:8000" ||
-		config.AWSRegion != "ap-northeast-2" ||
-		config.ActiveLease != 42*time.Second {
-		t.Fatalf("development DynamoDB config = %+v", config)
+	defer closeRuntimeConfig(config)
+	if !config.AIAgentClientDev {
+		t.Fatal("AI Agent client development flag should be enabled")
+	}
+	if config.AIAgentClientStore == nil {
+		t.Fatal("AI Agent client snapshot store should be configured")
 	}
 }
 
@@ -170,16 +167,25 @@ func TestConfigFromEnvRejectsPartialTaskContextConfig(t *testing.T) {
 	}
 }
 
-func TestConfigFromEnvUsesAssignmentTableAsAIAgentClientTableFallback(t *testing.T) {
+func TestConfigFromEnvRejectsAIAgentClientDevelopmentWithoutDynamoDBTable(t *testing.T) {
 	clearRiidoAIServerEnv(t)
-	t.Setenv(envDynamoDBAssignmentTable, "shared-development-table")
+	t.Setenv(envAIAgentClientDev, "true")
+	t.Setenv(envAWSRegion, "ap-northeast-2")
+	t.Setenv(envAWSContainerCredentialsFullURI, "http://169.254.170.2/credentials")
 
-	config, err := configFromEnv()
-	if err != nil {
-		t.Fatalf("configFromEnv: %v", err)
+	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envAIAgentClientTable) {
+		t.Fatalf("configFromEnv err=%v", err)
 	}
-	if config.AIAgentClientTable != "shared-development-table" {
-		t.Fatalf("AIAgentClientTable = %q", config.AIAgentClientTable)
+}
+
+func TestConfigFromEnvRejectsAIAgentClientDevelopmentWithoutCredentialEndpoint(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envAIAgentClientDev, "true")
+	t.Setenv(envAIAgentClientTable, "riido-ai-agent-development")
+	t.Setenv(envAWSRegion, "ap-northeast-2")
+
+	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envAWSContainerCredentialsFullURI) {
+		t.Fatalf("configFromEnv err=%v", err)
 	}
 }
 
@@ -232,6 +238,9 @@ func TestAuthorizerFromEnvFallsBackFromStaticToExternalOnlyWhenUnauthenticated(t
 	var externalCalls atomic.Int32
 	authorizerServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		externalCalls.Add(1)
+		if got := r.Header.Get(riidoaiserver.ExternalAuthorizerAPIKeyHeader); got != "internal-key" {
+			t.Fatalf("external authorizer api key header = %q", got)
+		}
 		var req struct {
 			SchemaVersion string `json:"schema_version"`
 			BearerToken   string `json:"bearer_token"`
@@ -262,6 +271,7 @@ func TestAuthorizerFromEnvFallsBackFromStaticToExternalOnlyWhenUnauthenticated(t
 
 	t.Setenv(envAuthzTokensJSON, `[{"principal_id":"static-user","token":"static-token","scopes":["metrics:read"]}]`)
 	t.Setenv(envExternalAuthzURL, authorizerServer.URL)
+	t.Setenv(envExternalAuthzAPIKey, "internal-key")
 	t.Setenv(envExternalAuthzTimeout, "1")
 	authorizer, err := authorizerFromEnv()
 	if err != nil {
@@ -295,6 +305,14 @@ func TestAuthorizerFromEnvFallsBackFromStaticToExternalOnlyWhenUnauthenticated(t
 	}
 	if got := externalCalls.Load(); got != 1 {
 		t.Fatalf("external should not run after forbidden static scope, calls=%d", got)
+	}
+}
+
+func TestAuthorizerFromEnvRejectsExternalAPIKeyWithoutEndpoint(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envExternalAuthzAPIKey, "internal-key")
+	if _, err := authorizerFromEnv(); err == nil {
+		t.Fatal("expected external api key without endpoint to fail")
 	}
 }
 
@@ -399,17 +417,19 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envReviewAccountTokenHash,
 		envMetricsLogInterval,
 		envWebAllowedOrigins,
+		envAIAgentClientDev,
 		envAIAgentClientTable,
-		envDynamoDBAssignmentTable,
-		envDynamoDBOutboxTable,
-		envDynamoDBEndpoint,
 		envAWSRegion,
-		envAssignmentActiveLease,
+		envDynamoDBEndpoint,
 		envTaskContextBaseURL,
 		envTaskContextWorkspaceID,
 		envTaskContextTeamID,
 		envTaskContextAPIKey,
 		envTaskContextTimeout,
+		envExternalAuthzAPIKey,
+		envAWSContainerCredentialsFullURI,
+		envAWSContainerCredentialsRelativeURI,
+		envAWSContainerAuthorizationToken,
 	} {
 		t.Setenv(key, "")
 	}

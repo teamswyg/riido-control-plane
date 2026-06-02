@@ -9,7 +9,7 @@ after the split from the former private monolith.
 
 | Context | Public owner | Responsibility |
 | --- | --- | --- |
-| C10 SaaS Control Plane | `internal/riidoaiserver` | assignment creation, polling, heartbeat, event append, SSE, metrics read model, health/ready routes, review seed provisioning, provider status sync/read, agent catalog RBAC, AI Agent client API, request authorization ports, browser frontend CORS transport |
+| C10 SaaS Control Plane | `internal/riidoaiserver` | assignment creation, polling, heartbeat, event append, SSE, metrics read model, health/ready routes, review seed provisioning, provider status sync/read, agent catalog RBAC, AI Agent client development API, request authorization ports, browser frontend CORS transport |
 | C10 Runtime Adapter | `cmd/riido_ai_server` | environment parsing, HTTP server startup/shutdown, optional stdout metrics publisher startup |
 | C10 Public AWS Adapter Facade | `awsadapters` | module-consumable aliases for stdlib-only DynamoDB/EventBridge adapter DTOs, constructors, and ports needed by private infra evidence tooling |
 | C10 Container Contract | `packaging/containers` and `tools/containercontract` | public executable image shape for the control-plane binary |

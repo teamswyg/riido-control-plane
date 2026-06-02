@@ -212,10 +212,9 @@ deploy mechanism, while still minimizing anything that helps reconstruct a live
 environment. New public key names, live examples, hostnames, AWS identifiers,
 image/task-definition values, generated CodeDeploy payloads, deployment IDs,
 smoke payloads, and raw operator evidence remain outside the public surface.
-The current non-CD exception is `RIIDO_AI_SERVER_ADDR`, the non-live container
-listen-address shape. It is not a deploy/smoke GitHub configuration key. AI
-Agent client runtime behavior is now selected by the configured development
-DynamoDB store, not by a local feature flag.
+The current non-CD runtime exceptions are listed in
+[`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json). They are
+container/runtime shape names, not deploy/smoke GitHub configuration keys.
 
 `riido-infra` still needs to know this rule because it owns topology, IAM, drift,
 and evidence. It consumes the stable key categories and source names, then wires
@@ -262,6 +261,15 @@ stable references: RIID-4854 absorbs the public minimization policy, RIID-4856
 absorbs the CodeDeploy activation gate, and RIID-4860 verifies those awareness
 work units locally. Those references do not create a public handoff channel for
 live deploy payloads.
+
+## Manifest Validation
+
+[`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json) is an
+executable SSOT, not an illustrative example. The deploy-policy test decodes the
+manifest as a single strict JSON document: unknown fields and trailing JSON
+documents are failures. A new CD ownership fact must therefore update the
+manifest schema expected by the test and the human-readable explanation in the
+same work unit.
 
 ## Drift Rule
 

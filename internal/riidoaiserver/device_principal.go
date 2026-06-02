@@ -72,8 +72,8 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.nextDeviceID++
-	deviceID := fmt.Sprintf("device-enrolled-%06d", s.nextDeviceID)
+	s.nextDeviceCredentialSeq++
+	deviceID := fmt.Sprintf("device-enrolled-%06d", s.nextDeviceCredentialSeq)
 	if s.deviceCredentials == nil {
 		s.deviceCredentials = map[string]deviceCredentialRecord{}
 	}
@@ -91,9 +91,6 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 		DisplayName:      displayName,
 		DaemonLastSeenAt: now,
 	})
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return EnrollDeviceResponse{}, err
-	}
 	return EnrollDeviceResponse{
 		SchemaVersion:    DeviceCredentialSchemaVersion,
 		DeviceID:         deviceID,
@@ -117,39 +114,20 @@ func (s *DevelopmentAIAgentClientStore) AuthorizeDeviceCredential(ctx context.Co
 	if req.Resource != AuthorizationResourceAgent {
 		return AuthorizationResult{}, ErrAuthorizationForbidden
 	}
-
 	s.mu.Lock()
 	record, ok := s.deviceCredentials[deviceID]
+	s.mu.Unlock()
 	if !ok {
-		s.mu.Unlock()
 		return AuthorizationResult{}, ErrAuthorizationUnauthenticated
 	}
 	got := sha256.Sum256([]byte(deviceSecret))
 	if subtle.ConstantTimeCompare(got[:], record.secretHash[:]) != 1 {
-		s.mu.Unlock()
 		return AuthorizationResult{}, ErrAuthorizationUnauthenticated
 	}
-	workspaceID := strings.TrimSpace(record.workspaceID)
-	if requestedWorkspaceID := strings.TrimSpace(req.WorkspaceID); requestedWorkspaceID != "" {
-		if workspaceID != "" && requestedWorkspaceID != workspaceID {
-			s.mu.Unlock()
-			return AuthorizationResult{}, ErrAuthorizationForbidden
-		}
-		workspaceID = requestedWorkspaceID
+	workspaceID := strings.TrimSpace(req.WorkspaceID)
+	if workspaceID == "" {
+		workspaceID = record.workspaceID
 	}
-	if agentID := strings.TrimSpace(req.AgentID); agentID != "" {
-		agent, ok := s.agents[agentID]
-		if !ok || s.agentWorkspaceID(agent) != workspaceID {
-			s.mu.Unlock()
-			return AuthorizationResult{}, ErrAuthorizationForbidden
-		}
-		binding, ok := s.agentRuntimeBindingLocked(agent)
-		if !ok || binding.DeviceID != deviceID {
-			s.mu.Unlock()
-			return AuthorizationResult{}, ErrAuthorizationForbidden
-		}
-	}
-	s.mu.Unlock()
 	return AuthorizationResult{
 		PrincipalID: record.ownerPrincipalID,
 		WorkspaceID: workspaceID,
@@ -159,9 +137,6 @@ func (s *DevelopmentAIAgentClientStore) AuthorizeDeviceCredential(ctx context.Co
 func (s *DevelopmentAIAgentClientStore) upsertEnrolledDeviceLocked(device DeviceRecord) {
 	for i := range s.devices {
 		if s.devices[i].DeviceID == device.DeviceID {
-			if len(s.devices[i].Runtimes) > 0 && len(device.Runtimes) == 0 {
-				device.Runtimes = copyRuntimes(s.devices[i].Runtimes)
-			}
 			s.devices[i] = device
 			return
 		}
@@ -175,12 +150,4 @@ func newDeviceSecret() (string, error) {
 		return "", fmt.Errorf("generate device secret: %w", err)
 	}
 	return "rdev_" + hex.EncodeToString(raw[:]), nil
-}
-
-func copyRuntimes(runtimes []RuntimeRecord) []RuntimeRecord {
-	out := make([]RuntimeRecord, 0, len(runtimes))
-	for _, runtime := range runtimes {
-		out = append(out, copyRuntime(runtime))
-	}
-	return out
 }

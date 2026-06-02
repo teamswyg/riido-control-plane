@@ -1,7 +1,10 @@
 package deploypolicy
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -74,7 +77,7 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_BASE_URL\"")
 	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_TOKEN\"")
 	requireContains(t, smokeWorkflow, "umask 077")
-	requireContains(t, smokeWorkflow, "trap 'rm -f \"$devices\"' EXIT")
+	requireContains(t, smokeWorkflow, "trap 'rm -f \"$replay\"' EXIT")
 	requireContains(t, clientAPI, "not from a manual")
 	requireContains(t, clientAPI, "The workflow masks both values")
 
@@ -146,9 +149,11 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		ID            string   `json:"id"`
 		RiidoTask     string   `json:"riido_task"`
 		Hardening     []string `json:"hardening_tasks"`
+		Supersedes    []string `json:"supersedes_tasks"`
 		Runtime       string   `json:"runtime_service"`
 		Current       struct {
 			ID            string   `json:"id"`
+			Status        string   `json:"status"`
 			CDOwner       string   `json:"cd_owner"`
 			TopologyOwner string   `json:"topology_owner"`
 			Workflow      string   `json:"workflow"`
@@ -159,12 +164,14 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			Status           string   `json:"status"`
 			CDOwner          string   `json:"cd_owner"`
 			TopologyOwner    string   `json:"topology_owner"`
+			Workflow         string   `json:"workflow"`
 			ActivationInputs []string `json:"activation_inputs"`
 			Allowed          []string `json:"allowed_actions"`
 			MustNotOwn       []string `json:"must_not_own"`
 		} `json:"optional_workflow_modes"`
 		Future []struct {
 			ID                 string   `json:"id"`
+			Status             string   `json:"status"`
 			CDOwner            string   `json:"cd_owner"`
 			TopologyOwner      string   `json:"topology_owner"`
 			ControlPlaneMayOwn []string `json:"control_plane_may_own"`
@@ -172,6 +179,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		} `json:"future_strategies"`
 		Redaction struct {
 			Workflows      []string `json:"public_repo_workflows"`
+			MayCommit      []string `json:"public_repo_may_commit"`
 			ShouldMinimize []string `json:"public_repo_should_minimize"`
 			MustNot        []string `json:"public_repo_must_not_commit_or_upload"`
 		} `json:"public_redaction_policy"`
@@ -273,9 +281,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			BottomUp string `json:"bottom_up"`
 		} `json:"dependency_direction"`
 	}
-	if err := json.Unmarshal([]byte(manifest), &parsed); err != nil {
-		t.Fatalf("decode runtime CD ownership manifest: %v", err)
-	}
+	decodeStrictJSONDocument(t, "runtime CD ownership manifest", manifest, &parsed)
 
 	if parsed.SchemaVersion != "riido-control-plane-runtime-cd-ownership.v1" {
 		t.Fatalf("unexpected schema version: %q", parsed.SchemaVersion)
@@ -355,6 +361,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	}
 	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/deploy-ai-agent-testnet.yml")
 	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/ai-agent-client-testnet-smoke.yml")
+	requireSliceContains(t, parsed.Redaction.MayCommit, "workflow file")
+	requireSliceContains(t, parsed.Redaction.MayCommit, "non-live behavior documentation")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "publish only stable configuration key names that operators must set")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "centralize required deploy key names in the workflow files and machine-readable ownership manifest instead of scattering environment-specific examples")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "keep exact deploy key-name lists out of human-readable public docs except the workflow files that consume them")
@@ -486,6 +494,9 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, parsed.PublicSensitiveSurfaceGuard.Rule, "sensitivity budget")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicInformation, "current stable RIIDO_AI_SERVER_* key names listed in public_config_key_minimization only in canonical machine-readable and workflow paths")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicInformation, "explicit non-CD runtime key exceptions listed in this guard")
+	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT", "not a deploy/smoke GitHub configuration key")
+	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE", "not a deploy/smoke GitHub configuration key")
+	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_DYNAMODB_ENDPOINT", "not a deploy/smoke GitHub configuration key")
 	requireNonCDRuntimeKey(t, parsed.PublicSensitiveSurfaceGuard.AllowedPublicNonCDRuntime, "RIIDO_AI_SERVER_ADDR", "not a deploy/smoke GitHub configuration key")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "README.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "docs/30-architecture/runtime-cd-ownership.md")
@@ -738,6 +749,21 @@ func mustRead(t *testing.T, path string) string {
 		t.Fatalf("read %s: %v", path, err)
 	}
 	return string(body)
+}
+
+func decodeStrictJSONDocument(t *testing.T, name, body string, dst any) {
+	t.Helper()
+
+	decoder := json.NewDecoder(bytes.NewReader([]byte(body)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(dst); err != nil {
+		t.Fatalf("decode %s: %v", name, err)
+	}
+
+	var trailing struct{}
+	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
+		t.Fatalf("%s must contain exactly one JSON document", name)
+	}
 }
 
 func requireContains(t *testing.T, body, want string) {

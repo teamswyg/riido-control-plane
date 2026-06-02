@@ -16,12 +16,14 @@ import (
 const (
 	ExternalAuthorizerRequestSchemaVersion  = "riido-external-authorizer-request.v1"
 	ExternalAuthorizerResponseSchemaVersion = "riido-external-authorizer-response.v1"
+	ExternalAuthorizerAPIKeyHeader          = "X-Riido-Control-Plane-Authorizer-Key"
 	DefaultExternalHTTPAuthorizerTimeout    = 2 * time.Second
 )
 
 type ExternalHTTPAuthorizerConfig struct {
 	Endpoint   string
 	Audience   string
+	APIKey     string
 	Timeout    time.Duration
 	HTTPClient *http.Client
 }
@@ -29,6 +31,7 @@ type ExternalHTTPAuthorizerConfig struct {
 type ExternalHTTPAuthorizer struct {
 	endpoint   string
 	audience   string
+	apiKey     string
 	timeout    time.Duration
 	httpClient *http.Client
 }
@@ -67,9 +70,14 @@ func NewExternalHTTPAuthorizer(config ExternalHTTPAuthorizerConfig) (*ExternalHT
 	if timeout < 0 {
 		return nil, errors.New("riidoaiserver: external authorizer timeout must be positive")
 	}
+	apiKey := strings.TrimSpace(config.APIKey)
+	if strings.ContainsAny(apiKey, "\r\n") {
+		return nil, errors.New("riidoaiserver: external authorizer api key must not contain newlines")
+	}
 	return &ExternalHTTPAuthorizer{
 		endpoint:   endpoint,
 		audience:   strings.TrimSpace(config.Audience),
+		apiKey:     apiKey,
 		timeout:    timeout,
 		httpClient: externalAuthorizerHTTPClient(config.HTTPClient),
 	}, nil
@@ -109,6 +117,9 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	}
 	httpReq.Header.Set("Accept", "application/json")
 	httpReq.Header.Set("Content-Type", "application/json")
+	if a.apiKey != "" {
+		httpReq.Header.Set(ExternalAuthorizerAPIKeyHeader, a.apiKey)
+	}
 
 	resp, err := a.httpClient.Do(httpReq)
 	if err != nil {

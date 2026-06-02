@@ -7,179 +7,206 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"sort"
 	"strings"
 	"time"
 )
 
-const (
-	aiAgentClientSnapshotPK = "AI_AGENT_CLIENT#development"
-	aiAgentClientSnapshotSK = "STATE"
-)
-
-type AIAgentClientPersistence interface {
+type AIAgentClientSnapshotStore interface {
 	LoadAIAgentClientSnapshot(ctx context.Context) (AIAgentClientSnapshot, bool, error)
 	SaveAIAgentClientSnapshot(ctx context.Context, snapshot AIAgentClientSnapshot) error
-	Close() error
-}
-
-type DevelopmentAIAgentClientStoreConfig struct {
-	Persistence AIAgentClientPersistence
 }
 
 type AIAgentClientSnapshot struct {
-	SchemaVersion     string                               `json:"schema_version"`
-	SavedAt           time.Time                            `json:"saved_at"`
-	WorkspaceID       string                               `json:"workspace_id,omitempty"`
-	Devices           []DeviceRecord                       `json:"devices"`
-	Daemons           []DeviceDaemonRecord                 `json:"daemons"`
-	DeviceCredentials []DeviceCredentialSnapshotRecord     `json:"device_credentials"`
-	NextDeviceID      int                                  `json:"next_device_id"`
-	NextDaemonCommand int                                  `json:"next_daemon_command"`
-	Agents            []AgentClientRecord                  `json:"agents"`
-	Fixtures          []AgentOnboardingFixture             `json:"fixtures"`
-	TaskThreads       map[string][]AIAgentTaskThreadRecord `json:"task_threads"`
-	Events            []AIAgentClientSnapshotEvent         `json:"events"`
+	SchemaVersion           string                                  `json:"schema_version"`
+	SavedAt                 time.Time                               `json:"saved_at"`
+	WorkspaceID             string                                  `json:"workspace_id"`
+	Devices                 []DeviceRecord                          `json:"devices"`
+	DeviceCredentials       []AIAgentClientDeviceCredentialSnapshot `json:"device_credentials"`
+	Daemons                 []DeviceDaemonRecord                    `json:"daemons"`
+	Agents                  []AgentClientRecord                     `json:"agents"`
+	Fixtures                []AgentOnboardingFixture                `json:"fixtures"`
+	TaskThreads             map[string][]AIAgentTaskThreadRecord    `json:"task_threads"`
+	Events                  []AIAgentClientEventSnapshot            `json:"events"`
+	NextDeviceCredentialSeq int                                     `json:"next_device_credential_seq"`
+	NextDaemonCommand       int                                     `json:"next_daemon_command"`
 }
 
-type DeviceCredentialSnapshotRecord struct {
+type AIAgentClientDeviceCredentialSnapshot struct {
 	DeviceID         string    `json:"device_id"`
-	SecretHashHex    string    `json:"secret_hash_hex"`
+	SecretHashSHA256 string    `json:"secret_hash_sha256"`
 	OwnerPrincipalID string    `json:"owner_principal_id"`
-	WorkspaceID      string    `json:"workspace_id,omitempty"`
+	WorkspaceID      string    `json:"workspace_id"`
 	DisplayName      string    `json:"display_name,omitempty"`
 	IssuedAt         time.Time `json:"issued_at"`
 }
 
-type AIAgentClientSnapshotEvent struct {
+type AIAgentClientEventSnapshot struct {
 	Seq       int64           `json:"seq"`
 	EventType string          `json:"event_type"`
 	Payload   json.RawMessage `json:"payload"`
 }
 
-func NewDevelopmentAIAgentClientStore(ctx context.Context, config DevelopmentAIAgentClientStoreConfig) (*DevelopmentAIAgentClientStore, error) {
+type PersistentAIAgentClientStore struct {
+	*DevelopmentAIAgentClientStore
+	snapshotStore AIAgentClientSnapshotStore
+}
+
+func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAgentClientStore, snapshotStore AIAgentClientSnapshotStore) (*PersistentAIAgentClientStore, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	store := newEmptyAIAgentClientStore(config.Persistence)
-	if config.Persistence == nil {
-		return store, nil
+	if base == nil {
+		base = NewDevelopmentAIAgentClientStore()
 	}
-	snapshot, ok, err := config.Persistence.LoadAIAgentClientSnapshot(ctx)
-	if err != nil {
+	if snapshotStore == nil {
+		return nil, errors.New("riidoaiserver: ai agent client snapshot store is required")
+	}
+	if snapshot, ok, err := snapshotStore.LoadAIAgentClientSnapshot(ctx); err != nil {
 		return nil, err
-	}
-	if ok {
-		if err := store.applySnapshot(snapshot); err != nil {
+	} else if ok {
+		if err := base.restoreSnapshot(snapshot); err != nil {
 			return nil, err
 		}
+		return &PersistentAIAgentClientStore{DevelopmentAIAgentClientStore: base, snapshotStore: snapshotStore}, nil
+	}
+	store := &PersistentAIAgentClientStore{DevelopmentAIAgentClientStore: base, snapshotStore: snapshotStore}
+	if err := store.saveSnapshot(ctx); err != nil {
+		return nil, err
 	}
 	return store, nil
 }
 
-func (s *DevelopmentAIAgentClientStore) Close() error {
-	if s == nil || s.persistence == nil {
+func (s *PersistentAIAgentClientStore) EnrollDeviceCredential(ctx context.Context, principal AuthorizationResult, workspaceID string, req EnrollDeviceRequest) (EnrollDeviceResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.EnrollDeviceCredential(ctx, principal, workspaceID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) CreateAIAgentFromOnboardingFixture(ctx context.Context, principal AuthorizationResult, fixtureID string, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.CreateAIAgentFromOnboardingFixture(ctx, principal, fixtureID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.ControlAIAgentDaemon(ctx, principal, agentID, action, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.AssignAIAgentTask(ctx, principal, taskID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.UnassignAIAgentTask(ctx, principal, taskID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.SubmitAIAgentTaskComment(ctx, principal, taskID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.CreateAIAgentTaskThreadMessage(ctx, principal, taskID, threadID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.StopAIAgentTask(ctx, principal, taskID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.CreateAIAgent(ctx, principal, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context, principal AuthorizationResult, agentID string, req UpdateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.UpdateAIAgentConfiguration(ctx, principal, agentID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal AuthorizationResult, agentID string) (DeleteAgentResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.DeleteAIAgent(ctx, principal, agentID)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.RecordAIAgentThreadProgress(ctx, agentID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
+	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
 	}
-	s.mu.Lock()
-	snapshot, err := snapshotFromAIAgentClientStoreLocked(s, time.Now().UTC())
-	s.mu.Unlock()
+	snapshot, err := s.DevelopmentAIAgentClientStore.snapshot(time.Now().UTC())
 	if err != nil {
 		return err
 	}
-	if err := s.persistence.SaveAIAgentClientSnapshot(context.Background(), snapshot); err != nil {
-		return err
-	}
-	return s.persistence.Close()
+	return s.snapshotStore.SaveAIAgentClientSnapshot(ctx, snapshot)
 }
 
-func (s *DevelopmentAIAgentClientStore) saveSnapshotLocked(ctx context.Context) error {
-	if s == nil || s.persistence == nil {
-		return nil
-	}
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	snapshot, err := snapshotFromAIAgentClientStoreLocked(s, time.Now().UTC())
-	if err != nil {
-		return err
-	}
-	return s.persistence.SaveAIAgentClientSnapshot(ctx, snapshot)
-}
-
-func (s *DevelopmentAIAgentClientStore) applySnapshot(snapshot AIAgentClientSnapshot) error {
-	if snapshot.SchemaVersion != AIAgentClientPersistenceSchemaVersion {
-		return fmt.Errorf("unsupported ai agent client snapshot schema_version %q", snapshot.SchemaVersion)
-	}
-	agents := make(map[string]AgentClientRecord, len(snapshot.Agents))
-	for _, agent := range snapshot.Agents {
-		agent.AgentID = strings.TrimSpace(agent.AgentID)
-		if agent.AgentID == "" {
-			return errors.New("ai agent client snapshot agent_id is required")
-		}
-		agents[agent.AgentID] = agent
-	}
-	daemons := make(map[string]DeviceDaemonRecord, len(snapshot.Daemons))
-	for _, daemon := range snapshot.Daemons {
-		daemon.DeviceID = strings.TrimSpace(daemon.DeviceID)
-		if daemon.DeviceID == "" {
-			return errors.New("ai agent client snapshot daemon.device_id is required")
-		}
-		daemons[daemon.DeviceID] = copyDeviceDaemon(daemon)
-	}
-	credentials := make(map[string]deviceCredentialRecord, len(snapshot.DeviceCredentials))
-	for _, credential := range snapshot.DeviceCredentials {
-		record, err := deviceCredentialRecordFromSnapshot(credential)
-		if err != nil {
-			return err
-		}
-		credentials[record.deviceID] = record
-	}
-	events := make([]ClientStreamEvent, 0, len(snapshot.Events))
-	for _, event := range snapshot.Events {
-		typed, err := clientStreamEventFromSnapshot(event)
-		if err != nil {
-			return err
-		}
-		events = append(events, typed)
-	}
-	fixtures := copyAgentOnboardingFixtures(snapshot.Fixtures)
-	if len(fixtures) == 0 {
-		fixtures = defaultAgentOnboardingFixtures()
-	}
+func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClientSnapshot, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.workspaceID = strings.TrimSpace(snapshot.WorkspaceID)
-	if s.workspaceID == "" {
-		s.workspaceID = defaultAIAgentClientWorkspaceID
+	credentials := make([]AIAgentClientDeviceCredentialSnapshot, 0, len(s.deviceCredentials))
+	for _, record := range s.deviceCredentials {
+		credentials = append(credentials, AIAgentClientDeviceCredentialSnapshot{
+			DeviceID:         record.deviceID,
+			SecretHashSHA256: hex.EncodeToString(record.secretHash[:]),
+			OwnerPrincipalID: record.ownerPrincipalID,
+			WorkspaceID:      record.workspaceID,
+			DisplayName:      record.displayName,
+			IssuedAt:         record.issuedAt,
+		})
 	}
-	s.devices = copyDevices(snapshot.Devices)
-	s.daemons = daemons
-	s.deviceCredentials = credentials
-	s.nextDeviceID = snapshot.NextDeviceID
-	s.nextDaemonCommand = snapshot.NextDaemonCommand
-	if s.nextDaemonCommand <= 0 {
-		s.nextDaemonCommand = 1
-	}
-	s.agents = agents
-	s.fixtures = fixtures
-	s.taskThreads = copyTaskThreads(snapshot.TaskThreads)
-	s.events = events
-	s.subscribers = map[int]aiAgentClientSubscriber{}
-	return nil
-}
-
-func snapshotFromAIAgentClientStoreLocked(s *DevelopmentAIAgentClientStore, savedAt time.Time) (AIAgentClientSnapshot, error) {
-	agents := make([]AgentClientRecord, 0, len(s.agents))
-	for _, agent := range s.agents {
-		agents = append(agents, agent)
-	}
-	sort.Slice(agents, func(i, j int) bool { return agents[i].AgentID < agents[j].AgentID })
+	sort.Slice(credentials, func(i, j int) bool { return credentials[i].DeviceID < credentials[j].DeviceID })
 
 	daemons := make([]DeviceDaemonRecord, 0, len(s.daemons))
 	for _, daemon := range s.daemons {
@@ -187,293 +214,165 @@ func snapshotFromAIAgentClientStoreLocked(s *DevelopmentAIAgentClientStore, save
 	}
 	sort.Slice(daemons, func(i, j int) bool { return daemons[i].DeviceID < daemons[j].DeviceID })
 
-	credentials := make([]DeviceCredentialSnapshotRecord, 0, len(s.deviceCredentials))
-	for _, credential := range s.deviceCredentials {
-		credentials = append(credentials, snapshotFromDeviceCredentialRecord(credential))
+	agents := make([]AgentClientRecord, 0, len(s.agents))
+	for _, agent := range s.agents {
+		agents = append(agents, agent)
 	}
-	sort.Slice(credentials, func(i, j int) bool { return credentials[i].DeviceID < credentials[j].DeviceID })
+	sort.Slice(agents, func(i, j int) bool { return agents[i].AgentID < agents[j].AgentID })
 
-	events := make([]AIAgentClientSnapshotEvent, 0, len(s.events))
-	for _, event := range s.events {
-		snapshotEvent, err := snapshotFromClientStreamEvent(event)
-		if err != nil {
-			return AIAgentClientSnapshot{}, err
+	taskThreads := make(map[string][]AIAgentTaskThreadRecord, len(s.taskThreads))
+	for taskID, threads := range s.taskThreads {
+		copied := make([]AIAgentTaskThreadRecord, len(threads))
+		for i, thread := range threads {
+			copied[i] = copyTaskThread(thread)
 		}
-		events = append(events, snapshotEvent)
+		taskThreads[taskID] = copied
 	}
-
+	events, err := snapshotEvents(s.events)
+	if err != nil {
+		return AIAgentClientSnapshot{}, err
+	}
 	return AIAgentClientSnapshot{
-		SchemaVersion:     AIAgentClientPersistenceSchemaVersion,
-		SavedAt:           savedAt.UTC(),
-		WorkspaceID:       s.workspaceID,
-		Devices:           copyDevices(s.devices),
-		Daemons:           daemons,
-		DeviceCredentials: credentials,
-		NextDeviceID:      s.nextDeviceID,
-		NextDaemonCommand: s.nextDaemonCommand,
-		Agents:            agents,
-		Fixtures:          copyAgentOnboardingFixtures(s.fixtures),
-		TaskThreads:       copyTaskThreads(s.taskThreads),
-		Events:            events,
+		SchemaVersion:           AIAgentClientPersistenceSchemaVersion,
+		SavedAt:                 savedAt.UTC(),
+		WorkspaceID:             s.workspaceID,
+		Devices:                 copyDevices(s.devices),
+		DeviceCredentials:       credentials,
+		Daemons:                 daemons,
+		Agents:                  agents,
+		Fixtures:                copyAgentOnboardingFixtures(s.fixtures),
+		TaskThreads:             taskThreads,
+		Events:                  events,
+		NextDeviceCredentialSeq: s.nextDeviceCredentialSeq,
+		NextDaemonCommand:       s.nextDaemonCommand,
 	}, nil
 }
 
-func snapshotFromDeviceCredentialRecord(record deviceCredentialRecord) DeviceCredentialSnapshotRecord {
-	return DeviceCredentialSnapshotRecord{
-		DeviceID:         record.deviceID,
-		SecretHashHex:    hex.EncodeToString(record.secretHash[:]),
-		OwnerPrincipalID: record.ownerPrincipalID,
-		WorkspaceID:      record.workspaceID,
-		DisplayName:      record.displayName,
-		IssuedAt:         record.issuedAt,
-	}
-}
-
-func deviceCredentialRecordFromSnapshot(snapshot DeviceCredentialSnapshotRecord) (deviceCredentialRecord, error) {
-	deviceID := strings.TrimSpace(snapshot.DeviceID)
-	if deviceID == "" {
-		return deviceCredentialRecord{}, errors.New("ai agent client snapshot device credential device_id is required")
-	}
-	rawHash, err := hex.DecodeString(strings.TrimSpace(snapshot.SecretHashHex))
-	if err != nil {
-		return deviceCredentialRecord{}, fmt.Errorf("decode device credential hash: %w", err)
-	}
-	if len(rawHash) != sha256.Size {
-		return deviceCredentialRecord{}, errors.New("device credential hash length is invalid")
-	}
-	var hash [sha256.Size]byte
-	copy(hash[:], rawHash)
-	return deviceCredentialRecord{
-		deviceID:         deviceID,
-		secretHash:       hash,
-		ownerPrincipalID: strings.TrimSpace(snapshot.OwnerPrincipalID),
-		workspaceID:      strings.TrimSpace(snapshot.WorkspaceID),
-		displayName:      strings.TrimSpace(snapshot.DisplayName),
-		issuedAt:         snapshot.IssuedAt,
-	}, nil
-}
-
-func snapshotFromClientStreamEvent(event ClientStreamEvent) (AIAgentClientSnapshotEvent, error) {
-	payload, err := json.Marshal(event.Payload)
-	if err != nil {
-		return AIAgentClientSnapshotEvent{}, err
-	}
-	return AIAgentClientSnapshotEvent{Seq: event.Seq, EventType: event.EventType, Payload: payload}, nil
-}
-
-func clientStreamEventFromSnapshot(event AIAgentClientSnapshotEvent) (ClientStreamEvent, error) {
-	var payload any
-	switch event.EventType {
-	case AgentClientEventDeviceRuntimeSnapshot:
-		var typed DeviceRuntimeSnapshotEvent
-		if err := json.Unmarshal(event.Payload, &typed); err != nil {
-			return ClientStreamEvent{}, err
-		}
-		payload = typed
-	case AgentClientEventDeviceDaemonStatus:
-		var typed DeviceDaemonStatusEvent
-		if err := json.Unmarshal(event.Payload, &typed); err != nil {
-			return ClientStreamEvent{}, err
-		}
-		payload = typed
-	case AgentClientEventEditabilityChanged:
-		var typed AgentEditabilityChangedEvent
-		if err := json.Unmarshal(event.Payload, &typed); err != nil {
-			return ClientStreamEvent{}, err
-		}
-		payload = typed
-	case AgentClientEventWorkStatusChanged:
-		var typed AgentWorkStatusChangedEvent
-		if err := json.Unmarshal(event.Payload, &typed); err != nil {
-			return ClientStreamEvent{}, err
-		}
-		payload = typed
-	case AgentClientEventThreadProgress:
-		var typed AgentThreadProgressEvent
-		if err := json.Unmarshal(event.Payload, &typed); err != nil {
-			return ClientStreamEvent{}, err
-		}
-		payload = typed
-	default:
-		return ClientStreamEvent{}, fmt.Errorf("unsupported ai agent client event_type %q", event.EventType)
-	}
-	return ClientStreamEvent{Seq: event.Seq, EventType: event.EventType, Payload: payload}, nil
-}
-
-func copyTaskThreads(in map[string][]AIAgentTaskThreadRecord) map[string][]AIAgentTaskThreadRecord {
-	out := make(map[string][]AIAgentTaskThreadRecord, len(in))
-	for taskID, threads := range in {
-		out[taskID] = copyTaskThreadRecords(threads)
-	}
-	return out
-}
-
-func copyTaskThreadRecords(in []AIAgentTaskThreadRecord) []AIAgentTaskThreadRecord {
-	out := make([]AIAgentTaskThreadRecord, 0, len(in))
-	for _, thread := range in {
-		out = append(out, copyTaskThread(thread))
-	}
-	return out
-}
-
-type DynamoDBAIAgentClientSnapshotConfig struct {
-	Region              string
-	TableName           string
-	Endpoint            string
-	HTTPClient          *http.Client
-	Now                 func() time.Time
-	CredentialsProvider AWSCredentialsProvider
-}
-
-type DynamoDBAIAgentClientSnapshot struct {
-	region              string
-	tableName           string
-	endpoint            string
-	endpointHost        string
-	httpClient          *http.Client
-	now                 func() time.Time
-	credentialsProvider AWSCredentialsProvider
-}
-
-func NewDynamoDBAIAgentClientSnapshot(config DynamoDBAIAgentClientSnapshotConfig) (*DynamoDBAIAgentClientSnapshot, error) {
-	region := strings.TrimSpace(config.Region)
-	if region == "" {
-		return nil, errors.New("riidoaiserver: DynamoDB AI Agent client snapshot region is required")
-	}
-	tableName := strings.TrimSpace(config.TableName)
-	if tableName == "" {
-		return nil, errors.New("riidoaiserver: DynamoDB AI Agent client snapshot table name is required")
-	}
-	if config.CredentialsProvider == nil {
-		return nil, errors.New("riidoaiserver: DynamoDB AI Agent client snapshot credentials provider is required")
-	}
-	endpoint, endpointHost, err := normalizeDynamoDBEndpoint(region, strings.TrimSpace(config.Endpoint))
-	if err != nil {
-		return nil, err
-	}
-	return &DynamoDBAIAgentClientSnapshot{
-		region:              region,
-		tableName:           tableName,
-		endpoint:            endpoint,
-		endpointHost:        endpointHost,
-		httpClient:          dynamoDBHTTPClient(config.HTTPClient),
-		now:                 dynamoDBClock(config.Now),
-		credentialsProvider: config.CredentialsProvider,
-	}, nil
-}
-
-func (s *DynamoDBAIAgentClientSnapshot) LoadAIAgentClientSnapshot(ctx context.Context) (AIAgentClientSnapshot, bool, error) {
-	if s == nil {
-		return AIAgentClientSnapshot{}, false, nil
-	}
-	credentials, err := cachedAWSCredentials(ctx, s.now, s.credentialsProvider, nil)
-	if err != nil {
-		return AIAgentClientSnapshot{}, false, err
-	}
-	payload, err := json.Marshal(struct {
-		TableName      string                       `json:"TableName"`
-		ConsistentRead bool                         `json:"ConsistentRead"`
-		Key            map[string]map[string]string `json:"Key"`
-	}{
-		TableName:      s.tableName,
-		ConsistentRead: true,
-		Key: map[string]map[string]string{
-			"pk": {"S": aiAgentClientSnapshotPK},
-			"sk": {"S": aiAgentClientSnapshotSK},
-		},
-	})
-	if err != nil {
-		return AIAgentClientSnapshot{}, false, err
-	}
-	body, err := doDynamoDBJSON(ctx, dynamoDBRequest{
-		endpoint:     s.endpoint,
-		endpointHost: s.endpointHost,
-		region:       s.region,
-		target:       dynamoDBGetItemTarget,
-		payload:      payload,
-		credentials:  credentials,
-		httpClient:   s.httpClient,
-		now:          s.now,
-	})
-	if err != nil {
-		return AIAgentClientSnapshot{}, false, fmt.Errorf("dynamodb load ai agent client snapshot: %w", err)
-	}
-	var response struct {
-		Item map[string]map[string]string `json:"Item"`
-	}
-	if err := json.Unmarshal(body, &response); err != nil {
-		return AIAgentClientSnapshot{}, false, fmt.Errorf("decode DynamoDB AI Agent client snapshot response: %w", err)
-	}
-	if len(response.Item) == 0 {
-		return AIAgentClientSnapshot{}, false, nil
-	}
-	rawSnapshot := response.Item["snapshot_json"]["S"]
-	if rawSnapshot == "" {
-		return AIAgentClientSnapshot{}, false, errors.New("decode DynamoDB AI Agent client snapshot response: snapshot_json is required")
-	}
-	var snapshot AIAgentClientSnapshot
-	dec := json.NewDecoder(strings.NewReader(rawSnapshot))
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(&snapshot); err != nil {
-		return AIAgentClientSnapshot{}, false, fmt.Errorf("decode AI Agent client snapshot json: %w", err)
-	}
-	var extra struct{}
-	if err := dec.Decode(&extra); err != io.EOF {
-		return AIAgentClientSnapshot{}, false, errors.New("decode AI Agent client snapshot json: trailing data")
-	}
-	return snapshot, true, nil
-}
-
-func (s *DynamoDBAIAgentClientSnapshot) SaveAIAgentClientSnapshot(ctx context.Context, snapshot AIAgentClientSnapshot) error {
-	if s == nil {
-		return nil
-	}
+func (s *DevelopmentAIAgentClientStore) restoreSnapshot(snapshot AIAgentClientSnapshot) error {
 	if snapshot.SchemaVersion != AIAgentClientPersistenceSchemaVersion {
 		return fmt.Errorf("unsupported ai agent client snapshot schema_version %q", snapshot.SchemaVersion)
 	}
-	if snapshot.SavedAt.IsZero() {
-		snapshot.SavedAt = s.now()
+	deviceCredentials := make(map[string]deviceCredentialRecord, len(snapshot.DeviceCredentials))
+	for _, record := range snapshot.DeviceCredentials {
+		deviceID := strings.TrimSpace(record.DeviceID)
+		if deviceID == "" {
+			return errors.New("ai agent client snapshot device credential device_id is required")
+		}
+		rawHash, err := hex.DecodeString(strings.TrimSpace(record.SecretHashSHA256))
+		if err != nil || len(rawHash) != sha256.Size {
+			return fmt.Errorf("ai agent client snapshot device credential %s secret_hash_sha256 is invalid", deviceID)
+		}
+		var hash [sha256.Size]byte
+		copy(hash[:], rawHash)
+		deviceCredentials[deviceID] = deviceCredentialRecord{
+			deviceID:         deviceID,
+			secretHash:       hash,
+			ownerPrincipalID: strings.TrimSpace(record.OwnerPrincipalID),
+			workspaceID:      strings.TrimSpace(record.WorkspaceID),
+			displayName:      strings.TrimSpace(record.DisplayName),
+			issuedAt:         record.IssuedAt,
+		}
 	}
-	credentials, err := cachedAWSCredentials(ctx, s.now, s.credentialsProvider, nil)
+	daemons := make(map[string]DeviceDaemonRecord, len(snapshot.Daemons))
+	for _, daemon := range snapshot.Daemons {
+		deviceID := strings.TrimSpace(daemon.DeviceID)
+		if deviceID == "" {
+			return errors.New("ai agent client snapshot daemon device_id is required")
+		}
+		daemons[deviceID] = copyDeviceDaemon(daemon)
+	}
+	agents := make(map[string]AgentClientRecord, len(snapshot.Agents))
+	for _, agent := range snapshot.Agents {
+		agentID := strings.TrimSpace(agent.AgentID)
+		if agentID == "" {
+			return errors.New("ai agent client snapshot agent_id is required")
+		}
+		agents[agentID] = agent
+	}
+	taskThreads := make(map[string][]AIAgentTaskThreadRecord, len(snapshot.TaskThreads))
+	for taskID, threads := range snapshot.TaskThreads {
+		taskID = strings.TrimSpace(taskID)
+		if taskID == "" {
+			return errors.New("ai agent client snapshot task thread task_id is required")
+		}
+		copied := make([]AIAgentTaskThreadRecord, len(threads))
+		for i, thread := range threads {
+			copied[i] = copyTaskThread(thread)
+		}
+		taskThreads[taskID] = copied
+	}
+	events, err := restoreSnapshotEvents(snapshot.Events)
 	if err != nil {
 		return err
 	}
-	snapshotJSON, err := json.Marshal(snapshot)
-	if err != nil {
-		return err
-	}
-	payload, err := json.Marshal(struct {
-		TableName string                       `json:"TableName"`
-		Item      map[string]map[string]string `json:"Item"`
-	}{
-		TableName: s.tableName,
-		Item: map[string]map[string]string{
-			"pk":             {"S": aiAgentClientSnapshotPK},
-			"sk":             {"S": aiAgentClientSnapshotSK},
-			"schema_version": {"S": AIAgentClientPersistenceSchemaVersion},
-			"snapshot_json":  {"S": string(snapshotJSON)},
-			"saved_at":       {"S": snapshot.SavedAt.UTC().Format(time.RFC3339Nano)},
-		},
-	})
-	if err != nil {
-		return err
-	}
-	_, err = doDynamoDBJSON(ctx, dynamoDBRequest{
-		endpoint:     s.endpoint,
-		endpointHost: s.endpointHost,
-		region:       s.region,
-		target:       dynamoDBPutItemTarget,
-		payload:      payload,
-		credentials:  credentials,
-		httpClient:   s.httpClient,
-		now:          s.now,
-	})
-	if err != nil {
-		return fmt.Errorf("dynamodb save ai agent client snapshot: %w", err)
-	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.workspaceID = strings.TrimSpace(snapshot.WorkspaceID)
+	s.devices = copyDevices(snapshot.Devices)
+	s.deviceCredentials = deviceCredentials
+	s.nextDeviceCredentialSeq = snapshot.NextDeviceCredentialSeq
+	s.daemons = daemons
+	s.nextDaemonCommand = snapshot.NextDaemonCommand
+	s.agents = agents
+	s.fixtures = copyAgentOnboardingFixtures(snapshot.Fixtures)
+	s.taskThreads = taskThreads
+	s.events = events
+	s.subscribers = map[int]aiAgentClientSubscriber{}
+	s.nextSubscriberID = 0
 	return nil
 }
 
-func (s *DynamoDBAIAgentClientSnapshot) Close() error {
-	return nil
+func snapshotEvents(events []ClientStreamEvent) ([]AIAgentClientEventSnapshot, error) {
+	out := make([]AIAgentClientEventSnapshot, 0, len(events))
+	for _, event := range events {
+		payload, err := json.Marshal(event.Payload)
+		if err != nil {
+			return nil, fmt.Errorf("snapshot ai agent client event %s: %w", event.EventType, err)
+		}
+		out = append(out, AIAgentClientEventSnapshot{
+			Seq:       event.Seq,
+			EventType: event.EventType,
+			Payload:   payload,
+		})
+	}
+	return out, nil
+}
+
+func restoreSnapshotEvents(events []AIAgentClientEventSnapshot) ([]ClientStreamEvent, error) {
+	out := make([]ClientStreamEvent, 0, len(events))
+	for _, event := range events {
+		payload, err := restoreSnapshotEventPayload(event.EventType, event.Payload)
+		if err != nil {
+			return nil, fmt.Errorf("restore ai agent client event %s: %w", event.EventType, err)
+		}
+		out = append(out, ClientStreamEvent{
+			Seq:       event.Seq,
+			EventType: event.EventType,
+			Payload:   payload,
+		})
+	}
+	return out, nil
+}
+
+func restoreSnapshotEventPayload(eventType string, raw json.RawMessage) (any, error) {
+	switch eventType {
+	case AgentClientEventDeviceRuntimeSnapshot:
+		var payload DeviceRuntimeSnapshotEvent
+		return payload, json.Unmarshal(raw, &payload)
+	case AgentClientEventDeviceDaemonStatus:
+		var payload DeviceDaemonStatusEvent
+		return payload, json.Unmarshal(raw, &payload)
+	case AgentClientEventEditabilityChanged:
+		var payload AgentEditabilityChangedEvent
+		return payload, json.Unmarshal(raw, &payload)
+	case AgentClientEventWorkStatusChanged:
+		var payload AgentWorkStatusChangedEvent
+		return payload, json.Unmarshal(raw, &payload)
+	case AgentClientEventThreadProgress:
+		var payload AgentThreadProgressEvent
+		return payload, json.Unmarshal(raw, &payload)
+	default:
+		var payload map[string]any
+		return payload, json.Unmarshal(raw, &payload)
+	}
 }

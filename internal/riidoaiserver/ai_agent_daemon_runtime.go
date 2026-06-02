@@ -103,9 +103,6 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		SchemaVersion: SchemaVersion,
 		Daemon:        copyDeviceDaemon(daemon),
 	})
-	if err := s.saveSnapshotLocked(ctx); err != nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, err
-	}
 	return DeviceRuntimeSnapshotSyncResponse{
 		SchemaVersion: SchemaVersion,
 		Device:        copyDevice(device),
