@@ -235,7 +235,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		}
 		taskThreads[taskID] = copied
 	}
-	events, err := snapshotEvents(s.events)
+	events, err := snapshotEvents(retainLatestClientReplayEvents(s.events))
 	if err != nil {
 		return AIAgentClientSnapshot{}, err
 	}

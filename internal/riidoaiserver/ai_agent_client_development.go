@@ -46,7 +46,10 @@ type AIAgentAssignmentEventRecorder interface {
 	RecordAIAgentAssignmentEvent(ctx context.Context, agentID string, req AgentEventRequest, event TaskEvent) error
 }
 
-const defaultAIAgentClientWorkspaceID = "workspace-dev-riid"
+const (
+	defaultAIAgentClientWorkspaceID = "workspace-dev-riid"
+	aiAgentClientReplayEventLimit   = 200
+)
 
 type DevelopmentAIAgentClientStore struct {
 	mu                      sync.Mutex
@@ -1634,11 +1637,12 @@ func (s *DevelopmentAIAgentClientStore) clientEventsForPrincipalLocked(principal
 
 func (s *DevelopmentAIAgentClientStore) appendClientEventLocked(eventType string, payload any) ClientStreamEvent {
 	event := ClientStreamEvent{
-		Seq:       int64(len(s.events) + 1),
+		Seq:       s.nextClientEventSeqLocked(),
 		EventType: eventType,
 		Payload:   payload,
 	}
 	s.events = append(s.events, event)
+	s.pruneClientReplayEventsLocked()
 	for _, subscriber := range s.subscribers {
 		visible, ok := clientEventForPrincipalLocked(s, subscriber.principal, event)
 		if !ok {
@@ -1650,6 +1654,29 @@ func (s *DevelopmentAIAgentClientStore) appendClientEventLocked(eventType string
 		}
 	}
 	return event
+}
+
+func (s *DevelopmentAIAgentClientStore) nextClientEventSeqLocked() int64 {
+	var maxSeq int64
+	for _, event := range s.events {
+		if event.Seq > maxSeq {
+			maxSeq = event.Seq
+		}
+	}
+	return maxSeq + 1
+}
+
+func (s *DevelopmentAIAgentClientStore) pruneClientReplayEventsLocked() {
+	s.events = retainLatestClientReplayEvents(s.events)
+}
+
+func retainLatestClientReplayEvents(events []ClientStreamEvent) []ClientStreamEvent {
+	if len(events) <= aiAgentClientReplayEventLimit {
+		return events
+	}
+	retained := make([]ClientStreamEvent, aiAgentClientReplayEventLimit)
+	copy(retained, events[len(events)-aiAgentClientReplayEventLimit:])
+	return retained
 }
 
 func clientEventForPrincipalLocked(s *DevelopmentAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) (ClientStreamEvent, bool) {
