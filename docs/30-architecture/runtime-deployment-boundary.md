@@ -173,5 +173,13 @@ smoke key-name lists stay in the machine-readable manifest and workflow files;
 docs like this boundary describe key categories, ownership, and the manifest
 location without repeating the list.
 
+RIID-4853 keeps the same CD ownership remodel and narrows the disclosure posture
+again. Public control-plane docs and workflows may describe only the smallest
+useful set of non-live CD facts needed for workflow wiring, review, and operator
+setup. `riido-infra` knows that policy because it owns topology and evidence,
+but infra still must not receive convenience public handoffs for image values,
+task-definition values, CodeDeploy generated payloads, deployment IDs, smoke
+payloads, Terraform plans/state/tfvars/apply logs, or raw evidence.
+
 PR descriptions and chat messages are not release SSOT. Any durable decision must
 land in a domain, architecture, ADR, migration, or infra evidence document.

@@ -241,6 +241,15 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			ForbiddenPublicInformation []string `json:"forbidden_public_information"`
 			InfraMustKnow              []string `json:"infra_must_know"`
 		} `json:"public_sensitive_surface_guard"`
+		PublicOperationalDetailMinimization struct {
+			RiidoTask             string   `json:"riido_task"`
+			CanonicalOwner        string   `json:"canonical_owner"`
+			InfraAwarenessOwner   string   `json:"infra_awareness_owner"`
+			Rule                  string   `json:"rule"`
+			PublicRepoMayKeep     []string `json:"public_repo_may_keep"`
+			PublicRepoShouldAvoid []string `json:"public_repo_should_avoid"`
+			InfraMustKnow         []string `json:"infra_must_know"`
+		} `json:"public_operational_detail_minimization"`
 		InfraTopology struct {
 			RiidoTask      string   `json:"riido_task"`
 			Repo           string   `json:"repo"`
@@ -271,6 +280,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Hardening, "RIID-4842")
 	requireSliceContains(t, parsed.Hardening, "RIID-4844")
 	requireSliceContains(t, parsed.Hardening, "RIID-4845")
+	requireSliceContains(t, parsed.Hardening, "RIID-4853")
 	if parsed.Current.CDOwner != "riido-control-plane" || parsed.Current.TopologyOwner != "riido-infra" {
 		t.Fatalf("current CD ownership drifted: %#v", parsed.Current)
 	}
@@ -364,6 +374,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4836-control-plane-cd-public-surface-redaction-scan.riido.json")
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json")
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4839-cd-public-config-key-minimization.riido.json")
+	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4854-control-plane-cd-public-minimization-awareness-no-diff.riido.json")
 	if parsed.InfraVisibility.Repo != "riido-infra" {
 		t.Fatalf("infra visibility repo drifted: %q", parsed.InfraVisibility.Repo)
 	}
@@ -482,6 +493,21 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "CD execution remains owned by riido-control-plane")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "infra consumes the stable key categories and source names only")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.InfraMustKnow, "human-readable public docs link to the manifest instead of repeating exact deploy/smoke key lists")
+	if parsed.PublicOperationalDetailMinimization.RiidoTask != "RIID-4853" {
+		t.Fatalf("public operational detail minimization work unit drifted: %#v", parsed.PublicOperationalDetailMinimization)
+	}
+	if parsed.PublicOperationalDetailMinimization.CanonicalOwner != "riido-control-plane" ||
+		parsed.PublicOperationalDetailMinimization.InfraAwarenessOwner != "riido-infra" {
+		t.Fatalf("public operational detail minimization ownership drifted: %#v", parsed.PublicOperationalDetailMinimization)
+	}
+	requireContains(t, parsed.PublicOperationalDetailMinimization.Rule, "smallest useful CD description")
+	requireContains(t, parsed.PublicOperationalDetailMinimization.Rule, "Stable non-secret operational details")
+	requireSliceContains(t, parsed.PublicOperationalDetailMinimization.PublicRepoMayKeep, "workflow names and trigger policy")
+	requireSliceContains(t, parsed.PublicOperationalDetailMinimization.PublicRepoMayKeep, "stable infra source names without values")
+	requireSliceContains(t, parsed.PublicOperationalDetailMinimization.PublicRepoShouldAvoid, "exact deploy or smoke key-name lists outside the machine-readable manifest and workflow files")
+	requireSliceContains(t, parsed.PublicOperationalDetailMinimization.PublicRepoShouldAvoid, "duplicating operational setup details in broad README, client-facing docs, generated-client docs, or PR prose when a link to the manifest is sufficient")
+	requireSliceContains(t, parsed.PublicOperationalDetailMinimization.InfraMustKnow, "the CD ownership remodel is settled: runtime artifact CD remains in riido-control-plane")
+	requireSliceContains(t, parsed.PublicOperationalDetailMinimization.InfraMustKnow, "tightening public operational disclosure is Terraform no-diff unless a future SSOT asks for topology, secret, IAM, network, persistence, or evidence tooling changes")
 	for _, repoPath := range parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink {
 		body := mustRead(t, filepath.Join("..", "..", filepath.FromSlash(repoPath)))
 		for _, key := range expectedCDKeys {
@@ -500,12 +526,15 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, doc, "RIID-4842")
 	requireContains(t, doc, "RIID-4844")
 	requireContains(t, doc, "RIID-4845")
+	requireContains(t, doc, "Public Operational Detail Minimization")
+	requireContains(t, doc, "RIID-4853")
 	requireContains(t, doc, "infra is the same ownership rule")
 	requireContains(t, doc, "Image values are deliberately not in that public export set")
 	requireContains(t, boundary, "RIID-4835")
 	requireContains(t, boundary, "RIID-4839")
 	requireContains(t, boundary, "RIID-4842")
 	requireContains(t, boundary, "RIID-4845")
+	requireContains(t, boundary, "RIID-4853")
 	requireContains(t, boundary, "aggregate deploy/smoke pass-fail status without live payload values")
 	requireContains(t, boundary, "are not public hand-off artifacts")
 	requireContains(t, readme, "RIID-4839")
@@ -517,6 +546,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireContains(t, migration, "RIID-4842")
 	requireContains(t, migration, "RIID-4844")
 	requireContains(t, migration, "RIID-4845")
+	requireContains(t, migration, "RIID-4853")
 	requireNotContains(t, doc+"\n"+boundary+"\n"+integration, "public image digest")
 	requireContains(t, parsed.DependencyDirection.TopDown, "control-plane")
 	requireContains(t, parsed.DependencyDirection.BottomUp, "Infra")

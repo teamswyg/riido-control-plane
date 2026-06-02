@@ -219,6 +219,30 @@ actually consume those names. Human-readable docs keep the repo usable for
 operators by describing categories, ownership, and the manifest location while
 making accidental key-name sprawl a deterministic test failure.
 
+## Public Operational Detail Minimization
+
+RIID-4853 records the settled CD remodel after the CodeDeploy discussion:
+runtime artifact CD execution and CodeDeploy create/wait/smoke stay in
+`riido-control-plane`; `riido-infra` owns topology, IAM, drift policy, and
+private/operator evidence. This is the same ownership rule as RIID-4825, but it
+adds a stricter public posture: even non-secret operational details should be
+public only when they are needed for workflow wiring, review, or operator setup.
+
+That means public docs may keep ownership, workflow, trigger, stable category,
+manifest-location, and non-live behavior descriptions. They should avoid
+duplicating environment-specific setup details, exact key lists outside the
+machine-readable manifest/workflow files, live host examples, image/task
+definition values, CodeDeploy payload examples, deployment IDs, smoke payloads,
+workflow run references, Terraform plans/state/tfvars/apply logs, raw evidence,
+or convenience handoff examples. When a link to the manifest is enough, broad
+README, client-facing docs, generated-client docs, and PR prose should link
+instead of restating the detail.
+
+`riido-infra` must know this rule so it can interpret topology and evidence
+requests, but the rule does not make infra the CD execution owner. Tightening
+public operational disclosure is Terraform no-diff unless a future SSOT asks for
+new topology, secret, IAM, network, persistence, or evidence tooling changes.
+
 ## Drift Rule
 
 Top-down changes start in this manifest or the runtime deployment boundary.
