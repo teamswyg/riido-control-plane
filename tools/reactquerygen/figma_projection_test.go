@@ -59,6 +59,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	}
 	verifyMirroredFigmaInspectionMethod(t, sourceCoverage.InspectionMethod, docText)
 	verifyMirroredFigmaSupportingToolLimitations(t, manifest.MirroredSupportingToolLimitations, sourceCoverage.SupportingToolLimitations, manifest.SourceContractsManifest.StabilizedBy, docText)
+	verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t, sourceCoverage.APIGeneratedAnnotationContentPolicy, docText)
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164-50215")
 	assertNoStaleFigmaNodeReference(t, filepath.Join("..", "..", "docs"), "164:50215")
 	assertNoStaleControlPlanePhrase(t, filepath.Join("..", "..", "docs"), "starter-agent")
@@ -420,6 +421,7 @@ func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, p
 		"teamswyg/riido-contracts#57",
 		"teamswyg/riido-contracts#58",
 		"teamswyg/riido-contracts#60",
+		"teamswyg/riido-contracts#62",
 	}
 	if len(sourceStabilizedBy) != len(want) {
 		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
@@ -685,6 +687,80 @@ func verifyFigmaAPIGeneratedAnnotations(t *testing.T, annotations []figmaSourceA
 	}
 }
 
+func verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t *testing.T, policy figmaSourceAPIGeneratedAnnotationContentRule, docText string) {
+	t.Helper()
+	if policy.CategoryID != "700:0" || policy.CategoryLabel != "API Generated" {
+		t.Fatalf("mirrored API Generated annotation content category drifted: %+v", policy)
+	}
+	if len(policy.LabelFormat) != 3 {
+		t.Fatalf("mirrored API Generated annotation label_format = %d entries, want 3", len(policy.LabelFormat))
+	}
+	for _, needle := range []string{"riido.*", "종류", "Query", "Mutation", "SSE Stream", "배경"} {
+		if !strings.Contains(strings.Join(policy.LabelFormat, "\n")+"\n"+policy.Rule, needle) {
+			t.Fatalf("mirrored API Generated annotation content policy must mention %q: %+v", needle, policy)
+		}
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must mention mirrored API Generated annotation content policy %q", needle)
+		}
+	}
+	if !strings.Contains(policy.Rule, "must not become a second API SSOT") {
+		t.Fatalf("mirrored API Generated annotation content policy must prevent second SSOT drift: %q", policy.Rule)
+	}
+	scan := policy.LiveInspection
+	if scan.ObservedAt != "2026-06-02" || !strings.Contains(scan.Tool, "use_figma") {
+		t.Fatalf("mirrored API Generated annotation live inspection provenance drifted: %+v", scan)
+	}
+	expected := map[string]figmaSourceAPIGeneratedAnnotationLivePageCounter{
+		"129:5215": {
+			PageID:               "129:5215",
+			PageName:             "UI",
+			RiidoAnnotationCount: 53,
+			APIGeneratedCount:    53,
+		},
+		"42:3014": {
+			PageID:               "42:3014",
+			PageName:             "Wireframe - 온보딩",
+			RiidoAnnotationCount: 6,
+			APIGeneratedCount:    6,
+		},
+		"0:1": {
+			PageID:               "0:1",
+			PageName:             "Wireframe",
+			RiidoAnnotationCount: 0,
+			APIGeneratedCount:    0,
+		},
+	}
+	if len(scan.PageCounts) != len(expected) {
+		t.Fatalf("mirrored API Generated annotation page_counts = %d, want %d", len(scan.PageCounts), len(expected))
+	}
+	var totalRiido, totalAPIGenerated int
+	for _, page := range scan.PageCounts {
+		want, ok := expected[page.PageID]
+		if !ok {
+			t.Fatalf("unexpected mirrored API Generated annotation live page count: %+v", page)
+		}
+		if page.PageName != want.PageName || page.RiidoAnnotationCount != want.RiidoAnnotationCount || page.APIGeneratedCount != want.APIGeneratedCount {
+			t.Fatalf("mirrored API Generated annotation live page count for %s = %+v, want %+v", page.PageID, page, want)
+		}
+		if page.MissingOperationKind != 0 || page.MissingBackground != 0 {
+			t.Fatalf("mirrored API Generated annotation live page count has missing content: %+v", page)
+		}
+		totalRiido += page.RiidoAnnotationCount
+		totalAPIGenerated += page.APIGeneratedCount
+		for _, needle := range []string{page.PageID, page.PageName} {
+			if !strings.Contains(docText, needle) {
+				t.Fatalf("projection doc must mention mirrored API Generated annotation live page count %q", needle)
+			}
+		}
+	}
+	if scan.TotalRiidoAnnotations != totalRiido || scan.TotalAPIGeneratedAnnotations != totalAPIGenerated {
+		t.Fatalf("mirrored API Generated annotation live totals = riido:%d/api:%d, want riido:%d/api:%d", scan.TotalRiidoAnnotations, scan.TotalAPIGeneratedAnnotations, totalRiido, totalAPIGenerated)
+	}
+	if totalRiido != 59 || totalAPIGenerated != 59 {
+		t.Fatalf("mirrored API Generated annotation live totals = riido:%d/api:%d, want 59/59", totalRiido, totalAPIGenerated)
+	}
+}
+
 func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaSourceAPIGeneratedAnnotationGroup, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
 	t.Helper()
 	if got, want := len(inventory), 19; got != want {
@@ -862,18 +938,19 @@ type figmaProjectionPlanningAbsorption struct {
 }
 
 type figmaSourceCoverageManifest struct {
-	SchemaVersion                   string                                   `json:"schema_version"`
-	ID                              string                                   `json:"id"`
-	StabilizedBy                    []string                                 `json:"stabilized_by"`
-	InspectionMethod                figmaCoverageInspectionMethod            `json:"inspection_method"`
-	SupportingToolLimitations       []figmaSourceSupportingToolLimitation    `json:"supporting_tool_limitations"`
-	ExpectedPages                   []figmaSourceCoveragePage                `json:"expected_pages"`
-	NonUITopLevelInventory          []figmaSourceCoverageInventory           `json:"non_ui_top_level_inventory"`
-	VerifiedEvidenceNodes           []figmaSourceCoverageNode                `json:"verified_evidence_nodes"`
-	NonUITopLevelNodes              []figmaSourceCoverageEntry               `json:"non_ui_top_level_nodes"`
-	APIGeneratedAnnotations         []figmaSourceAPIGeneratedAnnotation      `json:"api_generated_annotations"`
-	APIGeneratedAnnotationInventory []figmaSourceAPIGeneratedAnnotationGroup `json:"api_generated_annotation_inventory"`
-	Entries                         []figmaSourceCoverageEntry               `json:"entries"`
+	SchemaVersion                       string                                       `json:"schema_version"`
+	ID                                  string                                       `json:"id"`
+	StabilizedBy                        []string                                     `json:"stabilized_by"`
+	InspectionMethod                    figmaCoverageInspectionMethod                `json:"inspection_method"`
+	SupportingToolLimitations           []figmaSourceSupportingToolLimitation        `json:"supporting_tool_limitations"`
+	APIGeneratedAnnotationContentPolicy figmaSourceAPIGeneratedAnnotationContentRule `json:"api_generated_annotation_content_policy"`
+	ExpectedPages                       []figmaSourceCoveragePage                    `json:"expected_pages"`
+	NonUITopLevelInventory              []figmaSourceCoverageInventory               `json:"non_ui_top_level_inventory"`
+	VerifiedEvidenceNodes               []figmaSourceCoverageNode                    `json:"verified_evidence_nodes"`
+	NonUITopLevelNodes                  []figmaSourceCoverageEntry                   `json:"non_ui_top_level_nodes"`
+	APIGeneratedAnnotations             []figmaSourceAPIGeneratedAnnotation          `json:"api_generated_annotations"`
+	APIGeneratedAnnotationInventory     []figmaSourceAPIGeneratedAnnotationGroup     `json:"api_generated_annotation_inventory"`
+	Entries                             []figmaSourceCoverageEntry                   `json:"entries"`
 }
 
 type figmaSourceCoveragePage struct {
@@ -904,6 +981,31 @@ type figmaSourceSupportingToolLimitation struct {
 	Tool                string   `json:"tool"`
 	ObservedResult      string   `json:"observed_result"`
 	AuthoritativeResult []string `json:"authoritative_result"`
+}
+
+type figmaSourceAPIGeneratedAnnotationContentRule struct {
+	CategoryID     string                                    `json:"category_id"`
+	CategoryLabel  string                                    `json:"category_label"`
+	LabelFormat    []string                                  `json:"label_format"`
+	Rule           string                                    `json:"rule"`
+	LiveInspection figmaSourceAPIGeneratedAnnotationLiveScan `json:"live_inspection"`
+}
+
+type figmaSourceAPIGeneratedAnnotationLiveScan struct {
+	ObservedAt                   string                                             `json:"observed_at"`
+	Tool                         string                                             `json:"tool"`
+	PageCounts                   []figmaSourceAPIGeneratedAnnotationLivePageCounter `json:"page_counts"`
+	TotalRiidoAnnotations        int                                                `json:"total_riido_annotations"`
+	TotalAPIGeneratedAnnotations int                                                `json:"total_api_generated_annotations"`
+}
+
+type figmaSourceAPIGeneratedAnnotationLivePageCounter struct {
+	PageID               string `json:"page_id"`
+	PageName             string `json:"page_name"`
+	RiidoAnnotationCount int    `json:"riido_annotation_count"`
+	APIGeneratedCount    int    `json:"api_generated_count"`
+	MissingOperationKind int    `json:"missing_operation_kind"`
+	MissingBackground    int    `json:"missing_background"`
 }
 
 type figmaSourceCoverageEntry struct {

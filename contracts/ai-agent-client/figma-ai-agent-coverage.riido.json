@@ -14,7 +14,8 @@
     "teamswyg/riido-contracts#56",
     "teamswyg/riido-contracts#57",
     "teamswyg/riido-contracts#58",
-    "teamswyg/riido-contracts#60"
+    "teamswyg/riido-contracts#60",
+    "teamswyg/riido-contracts#62"
   ],
   "human_doc": "docs/30-architecture/figma-ai-agent-coverage.md",
   "related_manifests": [
@@ -63,6 +64,27 @@
     "summary": "Figma is product/design evidence, not the durable SSOT. A Figma node is covered only when it points to an owning domain/API/infrastructure/client boundary and a deterministic follow-up rule.",
     "top_down": "When Figma changes product meaning, update the owning contracts policy or API DSL first, then regenerate IR/OpenAPI and downstream fixtures.",
     "bottom_up": "When implementation or harness work finds a contradiction, record the local finding, escalate the owning SSOT, then update this coverage manifest."
+  },
+  "api_generated_annotation_content_policy": {
+    "category_id": "700:0",
+    "category_label": "API Generated",
+    "label_format": [
+      "line_1: riido.* generated-client facade path",
+      "line_2: 종류: Query | Mutation | SSE Stream",
+      "line_3: 배경: Korean frontend consumption background"
+    ],
+    "rule": "Every riido.* Figma annotation must keep the facade generated-client path on the first line, preserve the operation kind, and include a Korean background sentence. The executable inventory below owns operation_kind/background; live Figma annotation text is handoff evidence and must not become a second API SSOT.",
+    "live_inspection": {
+      "observed_at": "2026-06-02",
+      "tool": "Figma Plugin API use_figma lightweight annotation traversal",
+      "page_counts": [
+        {"page_id": "129:5215", "page_name": "UI", "riido_annotation_count": 53, "api_generated_count": 53, "missing_operation_kind": 0, "missing_background": 0},
+        {"page_id": "42:3014", "page_name": "Wireframe - 온보딩", "riido_annotation_count": 6, "api_generated_count": 6, "missing_operation_kind": 0, "missing_background": 0},
+        {"page_id": "0:1", "page_name": "Wireframe", "riido_annotation_count": 0, "api_generated_count": 0, "missing_operation_kind": 0, "missing_background": 0}
+      ],
+      "total_riido_annotations": 59,
+      "total_api_generated_annotations": 59
+    }
   },
   "expected_pages": [
     {"node_id": "129:5215", "name": "UI", "child_count": 16},
