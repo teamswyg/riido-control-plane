@@ -29,7 +29,7 @@
           "path": [
             "bootstrap"
           ],
-          "description": "AI Agent 화면 진입 시 필요한 초기 read model입니다. viewer가 볼 수 있는 agent와 device runtime snapshot을 제공합니다."
+          "description": "AI Agent 설정/온보딩 화면 진입 시 필요한 초기 read model입니다. agents[]는 settings/list 화면의 agent list이자 agent_id 출처이고, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다."
         },
         {
           "path": [
@@ -108,7 +108,7 @@
             "aiAgent",
             "bootstrap"
           ],
-          "description": "선택된 workspace의 AI Agent 화면 초기 read model입니다."
+          "description": "선택된 workspace의 AI Agent 설정/온보딩 초기 read model입니다. agents[]는 settings/list 화면의 agent list이자 agent_id 출처이고, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다."
         },
         {
           "path": [
@@ -965,7 +965,7 @@
       "name": "AgentClientRecord",
       "schema": {
         "name": "AgentClientRecord",
-        "description": "client 화면에 표시하는 agent 요약 record입니다.",
+        "description": "client 설정/목록/배정 화면에 전달되는 agent 요약 record입니다. agent_id는 bootstrap.agents[]와 tasks.assignableAgents.agents[]에서 client가 mutation에 넘기는 안정 식별자입니다.",
         "type": "object",
         "required": [
           "agent_id",
@@ -982,7 +982,8 @@
         "properties": [
           {
             "name": "agent_id",
-            "type": "string"
+            "type": "string",
+            "description": "client가 agent 상세/수정/삭제/배정 mutation에 전달하는 안정 식별자입니다. 설정/목록 화면에서는 bootstrap.agents[]에서 얻고, task 참여자 드롭다운에서는 tasks.assignableAgents.agents[]에서 얻습니다."
           },
           {
             "name": "owner_principal_id",
@@ -1060,7 +1061,7 @@
       "name": "AgentClientRecordV2",
       "schema": {
         "name": "AgentClientRecordV2",
-        "description": "v2 client 화면에 표시하는 workspace-scoped agent 요약 record입니다.",
+        "description": "v2 client 설정/목록/배정 화면에 전달되는 workspace-scoped agent 요약 record입니다. agent_id는 v2.aiAgent.bootstrap.agents[]와 v2.aiAgent.tasks.assignableAgents.agents[]에서 client가 mutation에 넘기는 안정 식별자입니다.",
         "type": "object",
         "required": [
           "agent_id",
@@ -1078,7 +1079,8 @@
         "properties": [
           {
             "name": "agent_id",
-            "type": "string"
+            "type": "string",
+            "description": "client가 workspace-scoped agent 상세/수정/삭제/배정 mutation에 전달하는 안정 식별자입니다. 설정/목록 화면에서는 v2.aiAgent.bootstrap.agents[]에서 얻고, task 참여자 드롭다운에서는 v2.aiAgent.tasks.assignableAgents.agents[]에서 얻습니다."
           },
           {
             "name": "owner_principal_id",
@@ -1161,7 +1163,7 @@
       "name": "AgentClientListResponse",
       "schema": {
         "name": "AgentClientListResponse",
-        "description": "task 또는 화면에서 표시할 agent 목록 응답입니다.",
+        "description": "task 참여자 드롭다운에서 표시할 agent 목록 응답입니다. bootstrap.agents[]와 달리 task_id 기준 권한/상태를 반영합니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -1175,6 +1177,7 @@
           {
             "name": "agents",
             "type": "array",
+            "description": "현재 task/subtask 참여자 드롭다운에서 배정 가능한 agent 목록입니다. 여기의 agent_id를 tasks.assign mutation에 전달합니다.",
             "items": {
               "ref": "AgentClientRecord"
             }
@@ -1186,7 +1189,7 @@
       "name": "AgentClientListResponseV2",
       "schema": {
         "name": "AgentClientListResponseV2",
-        "description": "v2 task 또는 화면에서 표시할 workspace-scoped agent 목록 응답입니다.",
+        "description": "v2 task 참여자 드롭다운에서 표시할 workspace-scoped agent 목록 응답입니다. v2.aiAgent.bootstrap.agents[]와 달리 workspace_id와 task_id 기준 권한/상태를 반영합니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -1200,6 +1203,7 @@
           {
             "name": "agents",
             "type": "array",
+            "description": "현재 workspace의 task/subtask 참여자 드롭다운에서 배정 가능한 agent 목록입니다. 여기의 agent_id를 v2.aiAgent.tasks.assign mutation에 전달합니다.",
             "items": {
               "ref": "AgentClientRecordV2"
             }
@@ -1340,7 +1344,7 @@
       "name": "ClientBootstrapResponse",
       "schema": {
         "name": "ClientBootstrapResponse",
-        "description": "AI Agent 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다.",
+        "description": "AI Agent 설정/온보딩 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다. agents[]는 settings/list 화면의 agent list이자 agent_id 출처입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -1365,6 +1369,7 @@
           {
             "name": "agents",
             "type": "array",
+            "description": "AI Agent 설정/목록 화면에서 출력할 visible agent 배열입니다. 이 배열의 agent_id는 agent 수정/삭제/daemon 상세 조회 같은 settings/list action의 입력으로 사용합니다. task 참여자 드롭다운에서 배정할 agent_id는 tasks.assignableAgents.agents[]를 우선 사용합니다.",
             "items": {
               "ref": "AgentClientRecord"
             }
@@ -1383,7 +1388,7 @@
       "name": "ClientBootstrapResponseV2",
       "schema": {
         "name": "ClientBootstrapResponseV2",
-        "description": "v2 AI Agent 화면 진입 시 선택된 workspace의 agent와 account-owned device runtime 초기 데이터입니다.",
+        "description": "v2 AI Agent 설정/온보딩 화면 진입 시 선택된 workspace의 agent와 account-owned device runtime 초기 데이터입니다. agents[]는 settings/list 화면의 workspace-visible agent list이자 agent_id 출처입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -1408,6 +1413,7 @@
           {
             "name": "agents",
             "type": "array",
+            "description": "선택된 workspace의 AI Agent 설정/목록 화면에서 출력할 visible agent 배열입니다. 이 배열의 agent_id는 agent 수정/삭제/daemon 상세 조회 같은 settings/list action의 입력으로 사용합니다. task 참여자 드롭다운에서 배정할 agent_id는 v2.aiAgent.tasks.assignableAgents.agents[]를 우선 사용합니다.",
             "items": {
               "ref": "AgentClientRecordV2"
             }
@@ -2220,7 +2226,7 @@
         "generated_path": "aiAgent.bootstrap",
         "cache_tag": "aiAgent.bootstrap"
       },
-      "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다",
+      "summary": "web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 bootstrap.agents[] agent list를 조회합니다",
       "auth": {
         "scheme": "apiKey",
         "header": "X-Riido-AI-Agent-Token",
@@ -3029,7 +3035,7 @@
         "generated_path": "v2.aiAgent.bootstrap",
         "cache_tag": "v2.aiAgent.bootstrap"
       },
-      "summary": "web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)",
+      "summary": "web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)",
       "auth": {
         "scheme": "apiKey",
         "header": "X-Riido-AI-Agent-Token",
@@ -3764,7 +3770,7 @@
       "name": "figma client bootstrap",
       "given": "a web or desktop webview client opens the v1.22 AI Agent surface",
       "when": "the client requests bootstrap data",
-      "then": "the response contains visible agents and authorized device/runtime read-model data required by the Figma onboarding, runtime setting, and agent setting screens"
+      "then": "the response contains bootstrap.agents[] for the agent settings/list UI and authorized device/runtime read-model data required by the Figma onboarding, runtime setting, and agent setting screens; clients read agent_id for settings/list actions from bootstrap.agents[]"
     },
     {
       "scenario_id": "getAIAgentClientBootstrap.figma-agent-list-timestamps",

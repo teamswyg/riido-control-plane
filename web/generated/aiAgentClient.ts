@@ -65,25 +65,34 @@ export interface AIAgentTaskThreadStreamLink {
 export type AgentAssignmentState = "queued" | "running" | "stopping" | "stopped" | "completed" | "failed" | "unassigned";
 
 /**
- * task 또는 화면에서 표시할 agent 목록 응답입니다.
+ * task 참여자 드롭다운에서 표시할 agent 목록 응답입니다. bootstrap.agents[]와 달리 task_id 기준 권한/상태를 반영합니다.
  */
 export interface AgentClientListResponse {
+  /**
+   * 현재 task/subtask 참여자 드롭다운에서 배정 가능한 agent 목록입니다. 여기의 agent_id를 tasks.assign mutation에 전달합니다.
+   */
   agents: AgentClientRecord[];
   schema_version: string;
 }
 
 /**
- * v2 task 또는 화면에서 표시할 workspace-scoped agent 목록 응답입니다.
+ * v2 task 참여자 드롭다운에서 표시할 workspace-scoped agent 목록 응답입니다. v2.aiAgent.bootstrap.agents[]와 달리 workspace_id와 task_id 기준 권한/상태를 반영합니다.
  */
 export interface AgentClientListResponseV2 {
+  /**
+   * 현재 workspace의 task/subtask 참여자 드롭다운에서 배정 가능한 agent 목록입니다. 여기의 agent_id를 v2.aiAgent.tasks.assign mutation에 전달합니다.
+   */
   agents: AgentClientRecordV2[];
   schema_version: string;
 }
 
 /**
- * client 화면에 표시하는 agent 요약 record입니다.
+ * client 설정/목록/배정 화면에 전달되는 agent 요약 record입니다. agent_id는 bootstrap.agents[]와 tasks.assignableAgents.agents[]에서 client가 mutation에 넘기는 안정 식별자입니다.
  */
 export interface AgentClientRecord {
+  /**
+   * client가 agent 상세/수정/삭제/배정 mutation에 전달하는 안정 식별자입니다. 설정/목록 화면에서는 bootstrap.agents[]에서 얻고, task 참여자 드롭다운에서는 tasks.assignableAgents.agents[]에서 얻습니다.
+   */
   agent_id: string;
   assigned_task_count: number;
   created_at: string;
@@ -120,9 +129,12 @@ export interface AgentClientRecordResponseV2 {
 }
 
 /**
- * v2 client 화면에 표시하는 workspace-scoped agent 요약 record입니다.
+ * v2 client 설정/목록/배정 화면에 전달되는 workspace-scoped agent 요약 record입니다. agent_id는 v2.aiAgent.bootstrap.agents[]와 v2.aiAgent.tasks.assignableAgents.agents[]에서 client가 mutation에 넘기는 안정 식별자입니다.
  */
 export interface AgentClientRecordV2 {
+  /**
+   * client가 workspace-scoped agent 상세/수정/삭제/배정 mutation에 전달하는 안정 식별자입니다. 설정/목록 화면에서는 v2.aiAgent.bootstrap.agents[]에서 얻고, task 참여자 드롭다운에서는 v2.aiAgent.tasks.assignableAgents.agents[]에서 얻습니다.
+   */
   agent_id: string;
   assigned_task_count: number;
   created_at: string;
@@ -284,9 +296,12 @@ export interface AssignAIAgentTaskRequest {
 }
 
 /**
- * AI Agent 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다.
+ * AI Agent 설정/온보딩 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다. agents[]는 settings/list 화면의 agent list이자 agent_id 출처입니다.
  */
 export interface ClientBootstrapResponse {
+  /**
+   * AI Agent 설정/목록 화면에서 출력할 visible agent 배열입니다. 이 배열의 agent_id는 agent 수정/삭제/daemon 상세 조회 같은 settings/list action의 입력으로 사용합니다. task 참여자 드롭다운에서 배정할 agent_id는 tasks.assignableAgents.agents[]를 우선 사용합니다.
+   */
   agents: AgentClientRecord[];
   client_kind: ClientKind;
   devices: DeviceRecord[];
@@ -295,9 +310,12 @@ export interface ClientBootstrapResponse {
 }
 
 /**
- * v2 AI Agent 화면 진입 시 선택된 workspace의 agent와 account-owned device runtime 초기 데이터입니다.
+ * v2 AI Agent 설정/온보딩 화면 진입 시 선택된 workspace의 agent와 account-owned device runtime 초기 데이터입니다. agents[]는 settings/list 화면의 workspace-visible agent list이자 agent_id 출처입니다.
  */
 export interface ClientBootstrapResponseV2 {
+  /**
+   * 선택된 workspace의 AI Agent 설정/목록 화면에서 출력할 visible agent 배열입니다. 이 배열의 agent_id는 agent 수정/삭제/daemon 상세 조회 같은 settings/list action의 입력으로 사용합니다. task 참여자 드롭다운에서 배정할 agent_id는 v2.aiAgent.tasks.assignableAgents.agents[]를 우선 사용합니다.
+   */
   agents: AgentClientRecordV2[];
   client_kind: ClientKind;
   devices: DeviceRecord[];
@@ -954,7 +972,7 @@ export function getAIAgentEditabilityQueryOptions(config: RiidoClientConfig, par
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 bootstrap.agents[] agent list를 조회합니다
  */
 export async function getAIAgentClientBootstrap(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<ClientBootstrapResponse> {
   const path = "/v1/client/ai-agent/bootstrap";
@@ -962,7 +980,7 @@ export async function getAIAgentClientBootstrap(config: RiidoClientConfig, optio
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 bootstrap.agents[] agent list를 조회합니다
  * cache tag: `aiAgent.bootstrap`
  * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
  */
@@ -971,7 +989,7 @@ export function getAIAgentClientBootstrapQueryKeyRoot(): readonly unknown[] {
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 bootstrap.agents[] agent list를 조회합니다
  * 이 호출에 사용하는 React Query 키입니다.
  */
 export function getAIAgentClientBootstrapQueryKey(): readonly unknown[] {
@@ -979,7 +997,7 @@ export function getAIAgentClientBootstrapQueryKey(): readonly unknown[] {
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 bootstrap.agents[] agent list를 조회합니다
  * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
  */
 export function getAIAgentClientBootstrapQueryOptions(config: RiidoClientConfig, options: RiidoQueryOptions<ClientBootstrapResponse> = {}) {
@@ -1837,7 +1855,7 @@ export function getAIAgentEditabilityV2QueryOptions(config: RiidoClientConfig, p
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)
  * 경로 파라미터입니다.
  */
 export interface GetAIAgentClientBootstrapV2PathParams {
@@ -1845,7 +1863,7 @@ export interface GetAIAgentClientBootstrapV2PathParams {
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)
  */
 export async function getAIAgentClientBootstrapV2(config: RiidoClientConfig, params: GetAIAgentClientBootstrapV2PathParams, options: RiidoRequestOptions = {}): Promise<ClientBootstrapResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/bootstrap`;
@@ -1853,7 +1871,7 @@ export async function getAIAgentClientBootstrapV2(config: RiidoClientConfig, par
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)
  * cache tag: `v2.aiAgent.bootstrap`
  * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
  */
@@ -1862,7 +1880,7 @@ export function getAIAgentClientBootstrapV2QueryKeyRoot(): readonly unknown[] {
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)
  * 이 호출에 사용하는 React Query 키입니다.
  */
 export function getAIAgentClientBootstrapV2QueryKey(params: GetAIAgentClientBootstrapV2PathParams): readonly unknown[] {
@@ -1870,7 +1888,7 @@ export function getAIAgentClientBootstrapV2QueryKey(params: GetAIAgentClientBoot
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)
  * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
  */
 export function getAIAgentClientBootstrapV2QueryOptions(config: RiidoClientConfig, params: GetAIAgentClientBootstrapV2PathParams, options: RiidoQueryOptions<ClientBootstrapResponseV2> = {}) {
@@ -2754,7 +2772,7 @@ export interface GetAIAgentEditabilityEndpoint {
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 bootstrap.agents[] agent list를 조회합니다
  * 계약 generated path: `aiAgent.bootstrap`
  * 검색용 generated 경로: `bootstrap`
  * 접근 예시: `riido.aiAgent.bootstrap`
@@ -3650,7 +3668,7 @@ export interface GetAIAgentEditabilityV2Endpoint {
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.bootstrap`
  * 검색용 generated 경로: `aiAgent.bootstrap`
  * 접근 예시: `riido.v2.aiAgent.bootstrap`
@@ -4396,7 +4414,7 @@ export interface RiidoAIAgentModule {
    */
   readonly agents: RiidoAIAgentAgentsNamespace;
   /**
-   * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
+   * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 bootstrap.agents[] agent list를 조회합니다
    * 계약 generated path: `aiAgent.bootstrap`
    * 검색용 generated 경로: `bootstrap`
    * 접근 예시: `riido.aiAgent.bootstrap`
@@ -4634,7 +4652,7 @@ export interface RiidoV2AIAgentNamespace {
    */
   readonly agents: RiidoV2AIAgentAgentsNamespace;
   /**
-   * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+   * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.bootstrap`
    * 검색용 generated 경로: `aiAgent.bootstrap`
    * 접근 예시: `riido.v2.aiAgent.bootstrap`

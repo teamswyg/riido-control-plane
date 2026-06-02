@@ -155,7 +155,7 @@ facade path below exists in OpenAPI and generated TypeScript comments.
 
 | UI area | Facade path | v2 counterpart | Kind | Background shown in Figma |
 | --- | --- | --- | --- | --- |
-| Participant dropdown / task details | `riido.aiAgent.tasks.assignableAgents` | `v2.aiAgent.tasks.assignableAgents` | Query | 참여자 드롭다운에서 현재 task/subtask에 배정할 수 있는 Agent 목록을 조회합니다. |
+| Participant dropdown / task details | `riido.aiAgent.tasks.assignableAgents` | `v2.aiAgent.tasks.assignableAgents` | Query | 참여자 드롭다운에서 현재 task/subtask에 배정할 수 있는 Agent 목록을 조회합니다. task 배정 mutation에 넘길 agent_id는 이 응답의 agents[]에서 얻습니다. |
 | Participant dropdown / task details | `riido.aiAgent.tasks.assign` | `v2.aiAgent.tasks.assign` | Mutation | 작업에 Agent를 참여자로 배정하고 daemon이 런타임으로 작업을 시작할 수 있는 서버 상태를 만듭니다. |
 | Participant dropdown / task details | `riido.aiAgent.tasks.unassign` | `v2.aiAgent.tasks.unassign` | Mutation | 참여자에서 Agent를 제거합니다. 진행 중이면 중지 요청/큐 해제 흐름으로 이어집니다. |
 | Task thread | `riido.aiAgent.tasks.threads` | `v2.aiAgent.tasks.threads` | Query | 작업의 완료/진행 중 Agent thread cold collection을 조회합니다. active_stream이 있으면 SSE로 이어집니다. |
@@ -170,7 +170,7 @@ facade path below exists in OpenAPI and generated TypeScript comments.
 | Onboarding | `riido.aiAgent.onboarding.fixtures` | `v2.aiAgent.onboarding.fixtures` | Query | 리도/영실/홍도/지원처럼 제품이 제공하는 초기값 목록을 조회합니다. template entity가 아니라 fixture입니다. |
 | Onboarding | `riido.aiAgent.onboarding.fixtures.createAgent` | `v2.aiAgent.onboarding.fixtures.createAgent` | Mutation | 선택한 fixture 값을 기반으로 일반 Agent를 생성합니다. fixture 자체를 생성하는 기능은 아닙니다. |
 | Agent settings / direct setting | `riido.aiAgent.agents.create` | `v2.aiAgent.agents.create` | Mutation | 직접 설정 화면에서 워크스페이스 안에 새 Agent를 생성합니다. 신규 v2 create는 workspace_id를 포함합니다. |
-| Agent settings | `riido.aiAgent.bootstrap` | `v2.aiAgent.bootstrap` | Query | AI Agent 설정/온보딩 초기 화면에 필요한 agent 요약, 권한, 기본 상태를 조회합니다. |
+| Agent settings | `riido.aiAgent.bootstrap` | `v2.aiAgent.bootstrap` | Query | AI Agent 설정/온보딩 초기 화면에 필요한 bootstrap.agents[]를 조회합니다. 설정/목록 화면의 agent list와 agent_id 출처이며, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다. |
 | Agent settings | `riido.aiAgent.agents.updateConfiguration` | `v2.aiAgent.agents.updateConfiguration` | Mutation | 할당 작업이 없는 Agent의 이름, 썸네일, 설명, 지침, 런타임, 모델, 공개 범위를 저장합니다. |
 | Agent settings | `riido.aiAgent.agents.editability` | `v2.aiAgent.agents.editability` | Query | Agent를 수정할 수 있는지 먼저 조회합니다. 할당된 작업이 있으면 저장/수정 UI는 막혀야 합니다. |
 | Agent settings | `riido.aiAgent.agents.delete` | `v2.aiAgent.agents.delete` | Mutation | Agent 삭제를 요청합니다. 진행/예약 중 작업은 서버 정책에 따라 중지 또는 큐 해제됩니다. |

@@ -667,7 +667,7 @@
       "figma_generated_path": "riido.aiAgent.tasks.assignableAgents",
       "canonical_generated_path": "aiAgent.tasks.assignableAgents",
       "operation_kind": "Query",
-      "background": "참여자 드롭다운에서 현재 task/subtask에 배정할 수 있는 Agent 목록을 조회합니다.",
+      "background": "참여자 드롭다운에서 현재 task/subtask에 배정할 수 있는 Agent 목록을 조회합니다. task 배정 mutation에 넘길 agent_id는 이 응답의 agents[]에서 얻습니다.",
       "annotation_count": 4,
       "sources": [
         {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
@@ -868,7 +868,7 @@
       "figma_generated_path": "riido.aiAgent.bootstrap",
       "canonical_generated_path": "aiAgent.bootstrap",
       "operation_kind": "Query",
-      "background": "AI Agent 설정/온보딩 초기 화면에 필요한 agent 요약, 권한, 기본 상태를 조회합니다.",
+      "background": "AI Agent 설정/온보딩 초기 화면에 필요한 bootstrap.agents[]를 조회합니다. 설정/목록 화면의 agent list와 agent_id 출처이며, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다.",
       "annotation_count": 2,
       "sources": [
         {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["337:24013", "432:37349"]}
@@ -1049,7 +1049,7 @@
         "fixture-created agents follow normal agent editability, RBAC, update, and delete rules"
       ],
       "direction_loop": {
-        "top_down": "A future onboarding fixture identity change updates ai-agent-policy and the API DSL before generated clients or server mocks change.",
+        "top_down": "A future onboarding fixture identity change updates ai-agent-policy and the API DSL before generated clients or HTTP test servers change.",
         "bottom_up": "If control-plane, infra, or client implementation finds fixture-created agents need special handling, it must first prove the normal-agent policy is wrong here."
       }
     },
