@@ -422,6 +422,7 @@ func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, p
 		"teamswyg/riido-contracts#58",
 		"teamswyg/riido-contracts#60",
 		"teamswyg/riido-contracts#62",
+		"teamswyg/riido-contracts#63",
 	}
 	if len(sourceStabilizedBy) != len(want) {
 		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
@@ -706,6 +707,7 @@ func verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t *testing.T, policy
 	if !strings.Contains(policy.Rule, "must not become a second API SSOT") {
 		t.Fatalf("mirrored API Generated annotation content policy must prevent second SSOT drift: %q", policy.Rule)
 	}
+	verifyMirroredFigmaAPIGeneratedRetiredCategories(t, policy.RetiredCategories, docText)
 	scan := policy.LiveInspection
 	if scan.ObservedAt != "2026-06-02" || !strings.Contains(scan.Tool, "use_figma") {
 		t.Fatalf("mirrored API Generated annotation live inspection provenance drifted: %+v", scan)
@@ -758,6 +760,28 @@ func verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t *testing.T, policy
 	}
 	if totalRiido != 59 || totalAPIGenerated != 59 {
 		t.Fatalf("mirrored API Generated annotation live totals = riido:%d/api:%d, want 59/59", totalRiido, totalAPIGenerated)
+	}
+}
+
+func verifyMirroredFigmaAPIGeneratedRetiredCategories(t *testing.T, categories []figmaSourceAPIGeneratedAnnotationRetiredCategory, docText string) {
+	t.Helper()
+	if len(categories) != 1 {
+		t.Fatalf("mirrored API Generated retired categories = %d, want 1", len(categories))
+	}
+	retired := categories[0]
+	if retired.CategoryID != "39:0" || retired.CategoryLabel != "클라이언트 전달" {
+		t.Fatalf("unexpected mirrored retired API Generated category: %+v", retired)
+	}
+	if retired.RetirementStatus != "unused_not_deleted" || retired.LiveUsageCount != 0 {
+		t.Fatalf("mirrored retired API Generated category must stay unused_not_deleted with zero live usage: %+v", retired)
+	}
+	if retired.ObservedAt != "2026-06-02" || !strings.Contains(retired.ToolLimitation, "remove/setLabel") {
+		t.Fatalf("mirrored retired API Generated category must record automation limitation: %+v", retired)
+	}
+	for _, needle := range []string{retired.CategoryID, retired.CategoryLabel, "retired", "0"} {
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must mention mirrored retired API Generated category %q", needle)
+		}
 	}
 }
 
@@ -984,11 +1008,21 @@ type figmaSourceSupportingToolLimitation struct {
 }
 
 type figmaSourceAPIGeneratedAnnotationContentRule struct {
-	CategoryID     string                                    `json:"category_id"`
-	CategoryLabel  string                                    `json:"category_label"`
-	LabelFormat    []string                                  `json:"label_format"`
-	Rule           string                                    `json:"rule"`
-	LiveInspection figmaSourceAPIGeneratedAnnotationLiveScan `json:"live_inspection"`
+	CategoryID        string                                             `json:"category_id"`
+	CategoryLabel     string                                             `json:"category_label"`
+	LabelFormat       []string                                           `json:"label_format"`
+	Rule              string                                             `json:"rule"`
+	RetiredCategories []figmaSourceAPIGeneratedAnnotationRetiredCategory `json:"retired_categories"`
+	LiveInspection    figmaSourceAPIGeneratedAnnotationLiveScan          `json:"live_inspection"`
+}
+
+type figmaSourceAPIGeneratedAnnotationRetiredCategory struct {
+	CategoryID       string `json:"category_id"`
+	CategoryLabel    string `json:"category_label"`
+	RetirementStatus string `json:"retirement_status"`
+	LiveUsageCount   int    `json:"live_usage_count"`
+	ObservedAt       string `json:"observed_at"`
+	ToolLimitation   string `json:"tool_limitation"`
 }
 
 type figmaSourceAPIGeneratedAnnotationLiveScan struct {
