@@ -124,9 +124,13 @@ func (s *DevelopmentAIAgentClientStore) AuthorizeDeviceCredential(ctx context.Co
 	if subtle.ConstantTimeCompare(got[:], record.secretHash[:]) != 1 {
 		return AuthorizationResult{}, ErrAuthorizationUnauthenticated
 	}
+	workspaceID := strings.TrimSpace(req.WorkspaceID)
+	if workspaceID == "" {
+		workspaceID = record.workspaceID
+	}
 	return AuthorizationResult{
 		PrincipalID: record.ownerPrincipalID,
-		WorkspaceID: strings.TrimSpace(req.WorkspaceID),
+		WorkspaceID: workspaceID,
 	}, nil
 }
 

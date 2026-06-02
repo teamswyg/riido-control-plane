@@ -179,6 +179,13 @@ func TestHTTPDesktopDeviceEnrollmentAndDaemonCredentialAuthorization(t *testing.
 	if device, ok := findDevice(devices.Devices, enrollment.DeviceID); !ok || device.OwnerPrincipalID != "user-1" {
 		t.Fatalf("enrolled device missing from devices response: %+v", devices.Devices)
 	}
+	devicePrincipal, err := aiAgentStore.AuthorizeDeviceCredential(context.Background(), enrollment.DeviceID, enrollment.DeviceSecret, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionPoll})
+	if err != nil {
+		t.Fatalf("AuthorizeDeviceCredential: %v", err)
+	}
+	if devicePrincipal.PrincipalID != "user-1" || devicePrincipal.WorkspaceID != "workspace-alpha" {
+		t.Fatalf("device principal = %+v", devicePrincipal)
+	}
 
 	pollReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-owned-codex/poll", strings.NewReader(`{"daemon_id":"daemon-enrolled","device_id":"`+enrollment.DeviceID+`","runtime_id":"runtime-codex-dev"}`))
 	pollReq.Header.Set(deviceIDHeader, enrollment.DeviceID)
