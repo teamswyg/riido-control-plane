@@ -9,7 +9,8 @@
     "teamswyg/riido-contracts#46",
     "teamswyg/riido-contracts#51",
     "teamswyg/riido-contracts#52",
-    "teamswyg/riido-contracts#54"
+    "teamswyg/riido-contracts#54",
+    "teamswyg/riido-contracts#55"
   ],
   "human_doc": "docs/30-architecture/figma-ai-agent-coverage.md",
   "related_manifests": [
@@ -597,6 +598,261 @@
       "canonical_generated_path": "aiAgent.tasks.stop",
       "resolution_status": "resolved_consumption_hint",
       "resolution": "The Figma handoff note keeps the facade path on the first line, marks it as a Mutation, and explains the daemon/provider stop handoff."
+    }
+  ],
+  "client_delivery_annotation_inventory": [
+    {
+      "ui_area": "Participant dropdown / task details",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.tasks.assignableAgents",
+      "canonical_generated_path": "aiAgent.tasks.assignableAgents",
+      "operation_kind": "Query",
+      "background": "참여자 드롭다운에서 현재 task/subtask에 배정할 수 있는 Agent 목록을 조회합니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
+        {"page_id": "42:3014", "top_level_node_id": "236:33845", "coverage_entry_node_id": "153:12742", "node_ids": ["236:33845", "236:33847"]}
+      ]
+    },
+    {
+      "ui_area": "Participant dropdown / task details",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.tasks.assign",
+      "canonical_generated_path": "aiAgent.tasks.assign",
+      "operation_kind": "Mutation",
+      "background": "작업에 Agent를 참여자로 배정하고 daemon이 런타임으로 작업을 시작할 수 있는 서버 상태를 만듭니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
+        {"page_id": "42:3014", "top_level_node_id": "236:33845", "coverage_entry_node_id": "153:12742", "node_ids": ["236:33845", "236:33847"]}
+      ]
+    },
+    {
+      "ui_area": "Participant dropdown / task details",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.tasks.unassign",
+      "canonical_generated_path": "aiAgent.tasks.unassign",
+      "operation_kind": "Mutation",
+      "background": "참여자에서 Agent를 제거합니다. 진행 중이면 중지 요청/큐 해제 흐름으로 이어집니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
+        {"page_id": "42:3014", "top_level_node_id": "236:33845", "coverage_entry_node_id": "153:12742", "node_ids": ["236:33845", "236:33847"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.tasks.threads",
+      "canonical_generated_path": "aiAgent.tasks.threads",
+      "operation_kind": "Query",
+      "background": "작업의 완료/진행 중 Agent thread cold collection을 조회합니다. active_stream이 있으면 SSE로 이어집니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8592", "236:21379"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.tasks.threadMessages.create",
+      "canonical_generated_path": "aiAgent.tasks.threadMessages.create",
+      "operation_kind": "Mutation",
+      "background": "특정 thread_id에 다음 지시/답글을 추가하고 Agent 응답을 이어서 요청합니다.",
+      "annotation_count": 1,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8588"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.tasks.submitComment",
+      "canonical_generated_path": "aiAgent.tasks.submitComment",
+      "operation_kind": "Mutation",
+      "background": "호환용 댓글 제출 경로입니다. thread_id 없이 입력하면 서버가 적절한 thread 응답 흐름을 처리합니다.",
+      "annotation_count": 1,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8588"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.events.stream",
+      "canonical_generated_path": "aiAgent.events.stream",
+      "operation_kind": "SSE Stream",
+      "background": "threads 조회 결과에 active_stream이 있을 때만 연결해 진행 상태와 thread 갱신 이벤트를 받습니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8545", "236:21379"]}
+      ]
+    },
+    {
+      "ui_area": "Task thread",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.tasks.stop",
+      "canonical_generated_path": "aiAgent.tasks.stop",
+      "operation_kind": "Mutation",
+      "background": "작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다.",
+      "annotation_count": 1,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["236:20768"]}
+      ]
+    },
+    {
+      "ui_area": "Runtime and agent settings",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.devices.runtimes",
+      "canonical_generated_path": "aiAgent.devices.runtimes",
+      "operation_kind": "Query",
+      "background": "계정 소유 device에서 감지된 runtime 목록과 온라인/오프라인 상태를 조회합니다. 화면은 SaaS 값을 신뢰합니다.",
+      "annotation_count": 13,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10339", "160:10418", "559:34626", "559:34704"]},
+        {"page_id": "129:5215", "top_level_node_id": "435:60050", "coverage_entry_node_id": "435:60050", "node_ids": ["164:34470", "164:34476", "164:34483", "164:34496", "435:72699"]},
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["432:22231", "432:35651", "432:22617", "432:35707"]}
+      ]
+    },
+    {
+      "ui_area": "Runtime settings",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.agents.daemon.details",
+      "canonical_generated_path": "aiAgent.agents.daemon.details",
+      "operation_kind": "Query",
+      "background": "Agent에 연결된 daemon/runtime 상세와 제어 가능 상태를 SaaS 기준으로 조회합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10654", "559:34714"]}
+      ]
+    },
+    {
+      "ui_area": "Runtime settings",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.agents.daemon.stop",
+      "canonical_generated_path": "aiAgent.agents.daemon.stop",
+      "operation_kind": "Mutation",
+      "background": "SaaS에 daemon 중지 요청을 남깁니다. daemon은 요청을 읽은 뒤 스스로 종료합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:14712", "164:23904"]}
+      ]
+    },
+    {
+      "ui_area": "Runtime settings",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.agents.daemon.restart",
+      "canonical_generated_path": "aiAgent.agents.daemon.restart",
+      "operation_kind": "Mutation",
+      "background": "SaaS에 daemon 재시작 요청을 남깁니다. daemon은 polling으로 요청을 읽어 실행합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:16169", "164:23977"]}
+      ]
+    },
+    {
+      "ui_area": "Onboarding",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.onboarding.fixtures",
+      "canonical_generated_path": "aiAgent.onboarding.fixtures",
+      "operation_kind": "Query",
+      "background": "리도/영실/홍도/지원처럼 제품이 제공하는 초기값 목록을 조회합니다. template entity가 아니라 fixture입니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:30672", "164:30681", "164:30690", "164:30699"]}
+      ]
+    },
+    {
+      "ui_area": "Onboarding",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.onboarding.fixtures.createAgent",
+      "canonical_generated_path": "aiAgent.onboarding.fixtures.createAgent",
+      "operation_kind": "Mutation",
+      "background": "선택한 fixture 값을 기반으로 일반 Agent를 생성합니다. fixture 자체를 생성하는 기능은 아닙니다.",
+      "annotation_count": 1,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:33556"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings / direct setting",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.agents.create",
+      "canonical_generated_path": "aiAgent.agents.create",
+      "operation_kind": "Mutation",
+      "background": "직접 설정 화면에서 워크스페이스 안에 새 Agent를 생성합니다. 신규 v2 create는 workspace_id를 포함합니다.",
+      "annotation_count": 6,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["337:24013", "432:37349", "134:6584", "432:35493"]},
+        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:30708", "164:33556"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.bootstrap",
+      "canonical_generated_path": "aiAgent.bootstrap",
+      "operation_kind": "Query",
+      "background": "AI Agent 설정/온보딩 초기 화면에 필요한 agent 요약, 권한, 기본 상태를 조회합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["337:24013", "432:37349"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.agents.updateConfiguration",
+      "canonical_generated_path": "aiAgent.agents.updateConfiguration",
+      "operation_kind": "Mutation",
+      "background": "할당 작업이 없는 Agent의 이름, 썸네일, 설명, 지침, 런타임, 모델, 공개 범위를 저장합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["417:21803", "432:35544"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.agents.editability",
+      "canonical_generated_path": "aiAgent.agents.editability",
+      "operation_kind": "Query",
+      "background": "Agent를 수정할 수 있는지 먼저 조회합니다. 할당된 작업이 있으면 저장/수정 UI는 막혀야 합니다.",
+      "annotation_count": 4,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["417:21803", "432:35544", "432:38529", "432:38855"]}
+      ]
+    },
+    {
+      "ui_area": "Agent settings",
+      "category_id": "39:0",
+      "category_label": "클라이언트 전달",
+      "figma_generated_path": "riido.aiAgent.agents.delete",
+      "canonical_generated_path": "aiAgent.agents.delete",
+      "operation_kind": "Mutation",
+      "background": "Agent 삭제를 요청합니다. 진행/예약 중 작업은 서버 정책에 따라 중지 또는 큐 해제됩니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["432:37746", "432:38689"]}
+      ]
     }
   ],
   "entries": [
