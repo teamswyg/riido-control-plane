@@ -387,10 +387,13 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json")
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4839-cd-public-config-key-minimization.riido.json")
 	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4854-control-plane-cd-public-minimization-awareness-no-diff.riido.json")
+	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4856-codedeploy-activation-gate-awareness-no-diff.riido.json")
+	requireSliceContains(t, parsed.Infra.Paths, "deploy/work-units/riid-4860-control-plane-cd-ownership-awareness-guard.riido.json")
 	if parsed.InfraVisibility.Repo != "riido-infra" {
 		t.Fatalf("infra visibility repo drifted: %q", parsed.InfraVisibility.Repo)
 	}
 	requireSliceContains(t, parsed.InfraVisibility.MustKnow, "riido-control-plane owns runtime artifact CD execution")
+	requireSliceContains(t, parsed.InfraVisibility.MustKnow, "infra-local awareness guards verify the no-diff boundary without consuming public workflow live payloads")
 	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "generated CodeDeploy AppSpec JSON")
 	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "image digests or image URIs")
 	requireSliceContains(t, parsed.InfraVisibility.MustNotFrom, "smoke replay temp files")

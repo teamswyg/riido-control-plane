@@ -257,6 +257,11 @@ instead of restating the detail.
 requests, but the rule does not make infra the CD execution owner. Tightening
 public operational disclosure is Terraform no-diff unless a future SSOT asks for
 new topology, secret, IAM, network, persistence, or evidence tooling changes.
+The infra-side no-diff awareness work units for this rule are deliberately
+stable references: RIID-4854 absorbs the public minimization policy, RIID-4856
+absorbs the CodeDeploy activation gate, and RIID-4860 verifies those awareness
+work units locally. Those references do not create a public handoff channel for
+live deploy payloads.
 
 ## Drift Rule
 

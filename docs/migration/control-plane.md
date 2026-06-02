@@ -1408,6 +1408,25 @@ This slice does not add AWS topology, change Terraform, add deployment secrets,
 upload workflow artifacts, expose live environment values, edit generated
 client API shape, or move CD execution into `riido-infra`.
 
+### RIID-4825 follow-up — infra awareness back-reference guard
+
+This follow-up keeps the settled CD ownership remodel readable from both sides
+without widening the public surface.
+
+The runtime CD ownership manifest already says `riido-control-plane` owns
+runtime artifact CD and CodeDeploy create/wait/smoke execution, while
+`riido-infra` owns topology, IAM, drift, and private/operator evidence. This
+follow-up adds the latest infra-side no-diff awareness work units to the
+manifest back-reference list so operators can trace the policy sequence:
+RIID-4854 public minimization awareness, RIID-4856 CodeDeploy activation gate
+awareness, and RIID-4860 infra-local awareness guard.
+
+This follow-up does not add AWS topology, change Terraform, add GitHub
+configuration keys, expose key values, export workflow payloads, upload
+artifacts, publish live URLs, image/task-definition values, CodeDeploy
+AppSpec/request JSON, deployment IDs, smoke payloads, Terraform evidence, or
+move CD execution into `riido-infra`.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
