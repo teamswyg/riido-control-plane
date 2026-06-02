@@ -71,20 +71,33 @@ operations with selected `workspace_id` and `runtime_id`.
 
 The mirror also preserves contracts-owned `client_delivery_annotations`. Figma
 Dev Mode category `39:0` / `클라이언트 전달` may show frontend facade examples
-such as `riido.aiAgent.events.stream` or `riido.aiAgent.tasks.stop`. This repo
-does not treat the leading `riido.` variable name as a contracts generated path;
-the projection gate normalizes those examples to canonical generated paths such
-as `aiAgent.events.stream` and `aiAgent.tasks.stop`, then verifies that both the
-canonical path and the Korean generated-client access example appear in
-`web/generated/aiAgentClient.ts` and `web/generated/aiAgentClient.react.ts`.
-The stale Figma handoff copy `상세내용은 작업중입니다` on `node-id=153:8545`
-is therefore resolved by generated-client projection rather than by adding a
-separate endpoint.
+such as `riido.aiAgent.events.stream` or `riido.aiAgent.tasks.stop`. Current
+handoff labels keep the facade path on the first line, then add Korean context
+for the operation kind and background:
 
-| Figma annotation node | Figma facade example | Canonical generated path |
-| --- | --- | --- |
-| `153:8545` | `riido.aiAgent.events.stream` | `aiAgent.events.stream` |
-| `236:20768` | `riido.aiAgent.tasks.stop` | `aiAgent.tasks.stop` |
+```text
+riido.aiAgent.tasks.stop
+종류: Mutation
+배경: 작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다.
+```
+
+This repo does not treat the leading `riido.` variable name as a contracts
+generated path; the projection gate normalizes those examples to canonical
+generated paths such as `aiAgent.events.stream` and `aiAgent.tasks.stop`, then
+verifies that both the canonical path and the Korean generated-client access
+example appear in `web/generated/aiAgentClient.ts` and
+`web/generated/aiAgentClient.react.ts`.
+
+| Figma annotation node | Figma facade example | Kind | Canonical generated path |
+| --- | --- | --- | --- |
+| `153:8545` | `riido.aiAgent.events.stream` | SSE Stream | `aiAgent.events.stream` |
+| `236:20768` | `riido.aiAgent.tasks.stop` | Mutation | `aiAgent.tasks.stop` |
+
+The broader screen-level Figma handoff pass also labels participant assignment,
+task-thread reply, runtime settings, onboarding fixture, direct create, edit,
+delete, and editability nodes with `Query`, `Mutation`, or `SSE Stream`
+background text. The generated-client projection still derives those operation
+kinds from OpenAPI/generated TypeScript, not from Figma annotation prose.
 
 The generator test reads both manifests and verifies that every required
 generated path exists in the upstream coverage mirror and in:
