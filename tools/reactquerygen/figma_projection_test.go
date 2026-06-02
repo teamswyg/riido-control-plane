@@ -37,6 +37,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 		sourceCoverage.ID != manifest.SourceContractsManifest.ID {
 		t.Fatalf("source coverage mirror = %s/%s, want %s/%s", sourceCoverage.SchemaVersion, sourceCoverage.ID, manifest.SourceContractsManifest.SchemaVersion, manifest.SourceContractsManifest.ID)
 	}
+	verifySourceContractsManifestProvenance(t, manifest.SourceContractsManifest.StabilizedBy, docPath)
 	if got, want := len(sourceCoverage.ExpectedPages), 3; got != want {
 		t.Fatalf("source coverage expected_pages = %d, want %d", got, want)
 	}
@@ -300,6 +301,40 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 		if !strings.Contains(docText, needle) {
 			t.Fatalf("projection doc must mention mirrored supporting tool limitation with %q", needle)
 		}
+	}
+}
+
+func verifySourceContractsManifestProvenance(t *testing.T, stabilizedBy []string, docPath string) {
+	t.Helper()
+	want := []string{
+		"teamswyg/riido-contracts#38",
+		"teamswyg/riido-contracts#39",
+		"teamswyg/riido-contracts#45",
+		"teamswyg/riido-contracts#46",
+		"teamswyg/riido-contracts#51",
+		"teamswyg/riido-contracts#52",
+	}
+	if len(stabilizedBy) != len(want) {
+		t.Fatalf("source_contracts_manifest.stabilized_by = %d entries, want %d: %+v", len(stabilizedBy), len(want), stabilizedBy)
+	}
+	for i := range want {
+		if stabilizedBy[i] != want[i] {
+			t.Fatalf("source_contracts_manifest.stabilized_by[%d] = %q, want %q; full list = %+v", i, stabilizedBy[i], want[i], stabilizedBy)
+		}
+	}
+	doc, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatalf("read projection doc for source provenance: %v", err)
+	}
+	docText := string(doc)
+	for _, pr := range want {
+		if !strings.Contains(docText, pr) {
+			t.Fatalf("projection doc must mention full upstream contracts provenance %q", pr)
+		}
+	}
+	if !strings.Contains(docText, "full upstream coverage provenance") ||
+		!strings.Contains(docText, "limitation-local provenance") {
+		t.Fatalf("projection doc must distinguish full upstream coverage provenance from limitation-local provenance")
 	}
 }
 
