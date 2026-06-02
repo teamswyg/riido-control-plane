@@ -46,15 +46,16 @@ const (
 )
 
 type runtimeConfig struct {
-	Addr               string
-	ShutdownTimeout    time.Duration
-	Authorizer         riidoaiserver.RequestAuthorizer
-	ReviewProvision    *riidoaiserver.ReviewAccountProvisioning
-	MetricsLogInterval time.Duration
-	WebAllowedOrigins  []string
-	AIAgentClientDev   bool
-	AIAgentClientStore riidoaiserver.AIAgentClientSnapshotStore
-	TaskContextReader  riidoaiserver.AIAgentTaskContextReader
+	Addr                     string
+	ShutdownTimeout          time.Duration
+	Authorizer               riidoaiserver.RequestAuthorizer
+	ReviewProvision          *riidoaiserver.ReviewAccountProvisioning
+	MetricsLogInterval       time.Duration
+	WebAllowedOrigins        []string
+	AIAgentClientDev         bool
+	AIAgentClientStore       riidoaiserver.AIAgentClientSnapshotStore
+	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
+	TaskContextReader        riidoaiserver.AIAgentTaskContextReader
 }
 
 func main() {
@@ -77,7 +78,13 @@ func run() error {
 			return fmt.Errorf("open AI Agent development store: %w", err)
 		}
 	}
-	store := riidoaiserver.NewStoreWithConfig(riidoaiserver.StoreConfig{AgentRegistry: riidoaiserver.NewCompositeAgentRegistry(agentRegistryFromAIAgentClient(aiAgentClient))})
+	store, err := riidoaiserver.OpenStoreWithConfig(context.Background(), riidoaiserver.StoreConfig{
+		AgentRegistry:  riidoaiserver.NewCompositeAgentRegistry(agentRegistryFromAIAgentClient(aiAgentClient)),
+		OperationStore: config.AssignmentOperationStore,
+	})
+	if err != nil {
+		return fmt.Errorf("open assignment store: %w", err)
+	}
 	defer store.Close()
 	if config.ReviewProvision != nil {
 		if err := store.ApplyReviewAccountProvisioning(context.Background(), *config.ReviewProvision); err != nil {
@@ -123,25 +130,33 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	assignmentOperationStore, err := assignmentOperationStoreFromEnv(aiAgentClientDev)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	taskContextReader, err := taskContextReaderFromEnv()
 	if err != nil {
 		return runtimeConfig{}, err
 	}
 	return runtimeConfig{
-		Addr:               getenvDefault(envAddr, ":8080"),
-		ShutdownTimeout:    shutdownTimeout,
-		Authorizer:         authorizer,
-		ReviewProvision:    reviewProvision,
-		MetricsLogInterval: metricsLogInterval,
-		WebAllowedOrigins:  webAllowedOrigins,
-		AIAgentClientDev:   aiAgentClientDev,
-		AIAgentClientStore: aiAgentClientStore,
-		TaskContextReader:  taskContextReader,
+		Addr:                     getenvDefault(envAddr, ":8080"),
+		ShutdownTimeout:          shutdownTimeout,
+		Authorizer:               authorizer,
+		ReviewProvision:          reviewProvision,
+		MetricsLogInterval:       metricsLogInterval,
+		WebAllowedOrigins:        webAllowedOrigins,
+		AIAgentClientDev:         aiAgentClientDev,
+		AIAgentClientStore:       aiAgentClientStore,
+		AssignmentOperationStore: assignmentOperationStore,
+		TaskContextReader:        taskContextReader,
 	}, nil
 }
 
 func closeRuntimeConfig(config runtimeConfig) {
 	if closer, ok := config.AIAgentClientStore.(interface{ Close() error }); ok {
+		_ = closer.Close()
+	}
+	if closer, ok := config.AssignmentOperationStore.(interface{ Close() error }); ok {
 		_ = closer.Close()
 	}
 }
@@ -270,6 +285,34 @@ func aiAgentClientSnapshotStoreFromEnv(enabled bool) (riidoaiserver.AIAgentClien
 	})
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", envAIAgentClientTable, err)
+	}
+	return store, nil
+}
+
+func assignmentOperationStoreFromEnv(enabled bool) (riidoaiserver.AssignmentOperationStore, error) {
+	if !enabled {
+		return nil, nil
+	}
+	tableName := strings.TrimSpace(os.Getenv(envAIAgentClientTable))
+	if tableName == "" {
+		return nil, fmt.Errorf("%s is required when %s is enabled", envAIAgentClientTable, envAIAgentClientDev)
+	}
+	region := strings.TrimSpace(os.Getenv(envAWSRegion))
+	if region == "" {
+		return nil, fmt.Errorf("%s is required when %s is enabled", envAWSRegion, envAIAgentClientDev)
+	}
+	provider, err := awsContainerCredentialsProviderFromEnv()
+	if err != nil {
+		return nil, err
+	}
+	store, err := riidoaiserver.NewDynamoDBAssignmentOperationStore(riidoaiserver.DynamoDBAssignmentOperationStoreConfig{
+		Region:              region,
+		TableName:           tableName,
+		Endpoint:            strings.TrimSpace(os.Getenv(envDynamoDBEndpoint)),
+		CredentialsProvider: provider,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%s assignment operation store: %w", envAIAgentClientTable, err)
 	}
 	return store, nil
 }

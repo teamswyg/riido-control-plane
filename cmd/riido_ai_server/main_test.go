@@ -105,6 +105,18 @@ func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	if config.AIAgentClientStore == nil {
 		t.Fatal("AI Agent client snapshot store should be configured")
 	}
+	if config.AssignmentOperationStore == nil {
+		t.Fatal("assignment operation store should be configured with the development DynamoDB table")
+	}
+	if _, ok := config.AssignmentOperationStore.(riidoaiserver.AssignmentOperationLoader); !ok {
+		t.Fatalf("assignment operation store should load operation journal, got %T", config.AssignmentOperationStore)
+	}
+	if _, ok := config.AssignmentOperationStore.(riidoaiserver.AssignmentClaimer); !ok {
+		t.Fatalf("assignment operation store should claim queued assignments, got %T", config.AssignmentOperationStore)
+	}
+	if _, ok := config.AssignmentOperationStore.(riidoaiserver.AssignmentActiveLeaseStore); !ok {
+		t.Fatalf("assignment operation store should persist active leases, got %T", config.AssignmentOperationStore)
+	}
 }
 
 func TestConfigFromEnvParsesTaskContextReader(t *testing.T) {
