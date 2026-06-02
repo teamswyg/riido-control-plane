@@ -316,19 +316,22 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 	if len(projections) == 0 {
 		t.Fatalf("mirrored_supporting_tool_limitations must record consumed source tooling limits")
 	}
-	var projection figmaProjectionSupportingToolLimitation
+	var metadataProjection figmaProjectionSupportingToolLimitation
+	var onboardingTimeoutProjection figmaProjectionSupportingToolLimitation
 	for _, candidate := range projections {
 		if candidate.SourceID == "figma-metadata-page-list-underreports-pages.v1" {
-			projection = candidate
-			break
+			metadataProjection = candidate
+		}
+		if candidate.SourceID == "figma-onboarding-page-load-timeout.v1" {
+			onboardingTimeoutProjection = candidate
 		}
 	}
-	if projection.SourceID == "" {
+	if metadataProjection.SourceID == "" {
 		t.Fatalf("mirrored_supporting_tool_limitations must include figma-metadata-page-list-underreports-pages.v1")
 	}
-	source, ok := sourceByID[projection.SourceID]
+	source, ok := sourceByID[metadataProjection.SourceID]
 	if !ok {
-		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", projection.SourceID)
+		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", metadataProjection.SourceID)
 	}
 	if !strings.Contains(source.Tool, "get_metadata") || !strings.Contains(source.ObservedResult, "only page 129:5215 UI") {
 		t.Fatalf("source supporting limit must preserve no-nodeId metadata under-report evidence: %+v", source)
@@ -336,11 +339,11 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 	if !hasString(stabilizedBy, "teamswyg/riido-contracts#52") {
 		t.Fatalf("source_contracts_manifest.stabilized_by must include contracts #52 for mirrored metadata limitation: %+v", stabilizedBy)
 	}
-	if strings.TrimSpace(projection.LocalScope) == "" || !strings.Contains(projection.LocalScope, "must not collapse") {
-		t.Fatalf("projection supporting limit must explain local scope: %+v", projection)
+	if strings.TrimSpace(metadataProjection.LocalScope) == "" || !strings.Contains(metadataProjection.LocalScope, "must not collapse") {
+		t.Fatalf("projection supporting limit must explain local scope: %+v", metadataProjection)
 	}
 	requiredPages := map[string]bool{"129:5215": false, "42:3014": false, "0:1": false}
-	for _, pageID := range projection.RequiredAuthoritativePages {
+	for _, pageID := range metadataProjection.RequiredAuthoritativePages {
 		if _, ok := requiredPages[pageID]; ok {
 			requiredPages[pageID] = true
 		}
@@ -354,13 +357,50 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 		}
 	}
 	for _, forbidden := range []string{"remove expected_pages", "remove non_ui_top_level_inventory", "remove legacy_non_ui_absorptions"} {
-		if !hasString(projection.ForbiddenProjectionEffects, forbidden) {
-			t.Fatalf("projection supporting limit must forbid %q: %+v", forbidden, projection.ForbiddenProjectionEffects)
+		if !hasString(metadataProjection.ForbiddenProjectionEffects, forbidden) {
+			t.Fatalf("projection supporting limit must forbid %q: %+v", forbidden, metadataProjection.ForbiddenProjectionEffects)
 		}
 	}
 	for _, needle := range []string{"figma-metadata-page-list-underreports-pages.v1", "get_metadata", "teamswyg/riido-contracts#52", "`129:5215`", "`42:3014`", "`0:1`", "`expected_pages`", "`non_ui_top_level_inventory`", "`legacy_non_ui_absorptions`"} {
 		if !strings.Contains(docText, needle) {
 			t.Fatalf("projection doc must mention mirrored supporting tool limitation with %q", needle)
+		}
+	}
+	if onboardingTimeoutProjection.SourceID == "" {
+		t.Fatalf("mirrored_supporting_tool_limitations must include figma-onboarding-page-load-timeout.v1")
+	}
+	onboardingSource, ok := sourceByID[onboardingTimeoutProjection.SourceID]
+	if !ok {
+		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", onboardingTimeoutProjection.SourceID)
+	}
+	if !strings.Contains(onboardingSource.Tool, "42:3014") ||
+		!strings.Contains(onboardingSource.ObservedResult, "timed out after 120s") ||
+		!strings.Contains(onboardingSource.ObservedResult, "Wireframe - 온보딩") {
+		t.Fatalf("source supporting limit must preserve onboarding load timeout evidence: %+v", onboardingSource)
+	}
+	if !hasString(onboardingSource.AuthoritativeResult, "42:3014") ||
+		!hasString(onboardingSource.AuthoritativeResult, "child_count=83") ||
+		!hasString(onboardingSource.AuthoritativeResult, "non_ui_top_level_inventory") {
+		t.Fatalf("source onboarding timeout authoritative_result is incomplete: %+v", onboardingSource.AuthoritativeResult)
+	}
+	if strings.TrimSpace(onboardingTimeoutProjection.LocalScope) == "" ||
+		!strings.Contains(onboardingTimeoutProjection.LocalScope, "must not treat") ||
+		!strings.Contains(onboardingTimeoutProjection.LocalScope, "42:3014") {
+		t.Fatalf("onboarding timeout projection must explain local scope: %+v", onboardingTimeoutProjection)
+	}
+	for _, pageID := range onboardingTimeoutProjection.RequiredAuthoritativePages {
+		if !hasString(onboardingSource.AuthoritativeResult, pageID) {
+			t.Fatalf("onboarding timeout projection page %q is absent from source authoritative_result: %+v", pageID, onboardingSource.AuthoritativeResult)
+		}
+	}
+	for _, forbidden := range []string{"remove expected_pages", "remove non_ui_top_level_inventory", "remove onboarding generated paths", "mark onboarding generated paths unresolved"} {
+		if !hasString(onboardingTimeoutProjection.ForbiddenProjectionEffects, forbidden) {
+			t.Fatalf("onboarding timeout projection must forbid %q: %+v", forbidden, onboardingTimeoutProjection.ForbiddenProjectionEffects)
+		}
+	}
+	for _, needle := range []string{"figma-onboarding-page-load-timeout.v1", "after 120s", "`Wireframe - 온보딩`", "`non_ui_top_level_inventory`", "mark onboarding generated paths unresolved"} {
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must mention onboarding page load timeout with %q", needle)
 		}
 	}
 }

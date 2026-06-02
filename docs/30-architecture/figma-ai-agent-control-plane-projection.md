@@ -42,6 +42,14 @@ turn that supporting metadata output into a generated-client decision: it must
 not remove `expected_pages`, drop `non_ui_top_level_inventory`, or delete
 `legacy_non_ui_absorptions`.
 
+The mirror also preserves `figma-onboarding-page-load-timeout.v1`. Current live
+reads of `node-id=42:3014` (`Wireframe - 온보딩`) can time out after 120s when
+using Figma `get_metadata(nodeId=42:3014)` or `use_figma` scripts that attempt
+`await figma.setCurrentPageAsync(page)`. Control-plane must not treat that
+timeout as proof that onboarding generated-client coverage disappeared: it must
+not remove `expected_pages`, drop `non_ui_top_level_inventory`, remove
+onboarding generated paths, or mark onboarding generated paths unresolved.
+
 The local `source_contracts_manifest.stabilized_by` list mirrors the full
 upstream coverage provenance used by this projection:
 `teamswyg/riido-contracts#38`, `teamswyg/riido-contracts#39`,

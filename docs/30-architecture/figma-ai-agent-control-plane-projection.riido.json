@@ -24,6 +24,17 @@
         "remove non_ui_top_level_inventory",
         "remove legacy_non_ui_absorptions"
       ]
+    },
+    {
+      "source_id": "figma-onboarding-page-load-timeout.v1",
+      "local_scope": "Control-plane must not treat a current live timeout for page 42:3014 as proof that onboarding generated-client coverage disappeared.",
+      "required_authoritative_pages": ["42:3014"],
+      "forbidden_projection_effects": [
+        "remove expected_pages",
+        "remove non_ui_top_level_inventory",
+        "remove onboarding generated paths",
+        "mark onboarding generated paths unresolved"
+      ]
     }
   ],
   "legacy_non_ui_absorptions": [

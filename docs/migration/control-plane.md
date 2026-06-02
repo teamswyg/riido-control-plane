@@ -1308,6 +1308,30 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### Figma onboarding page load timeout limitation mirror
+
+This slice mirrors the contracts-owned Figma onboarding page load timeout
+limitation into the control-plane projection gate.
+
+Current live reads of `node-id=42:3014` (`Wireframe - 온보딩`) can time out
+after 120s when using Figma `get_metadata(nodeId=42:3014)` or `use_figma`
+scripts that attempt `await figma.setCurrentPageAsync(page)`. Control-plane
+must not treat that timeout as proof that onboarding generated-client coverage
+disappeared.
+
+This slice does:
+
+- copy `figma-onboarding-page-load-timeout.v1` from the contracts Figma coverage
+  mirror
+- add a local `mirrored_supporting_tool_limitations` entry for the timeout
+- require the projection gate to keep page `42:3014`, non-UI inventory, and
+  onboarding generated paths covered despite the timeout
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ### Figma API Generated provenance mirror catch-up
 
 This slice consumes the contracts-owned provenance catch-up after the API
