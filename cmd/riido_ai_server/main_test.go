@@ -98,16 +98,40 @@ func TestConfigFromEnvParsesWebAllowedOrigins(t *testing.T) {
 	}
 }
 
-func TestConfigFromEnvParsesAIAgentClientMockFlag(t *testing.T) {
+func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	clearRiidoAIServerEnv(t)
-	t.Setenv(envAIAgentClientMock, "true")
+	t.Setenv(envAIAgentClientDev, "true")
+	t.Setenv(envAIAgentClientTable, "riido-ai-agent-development")
+	t.Setenv(envAWSRegion, "ap-northeast-2")
+	t.Setenv(envAWSContainerCredentialsFullURI, "http://169.254.170.2/credentials")
 
 	config, err := configFromEnv()
 	if err != nil {
 		t.Fatalf("configFromEnv: %v", err)
 	}
-	if !config.AIAgentClientMock {
-		t.Fatal("AI Agent client mock flag should be enabled")
+	defer closeRuntimeConfig(config)
+	if !config.AIAgentClientDev {
+		t.Fatal("AI Agent client development flag should be enabled")
+	}
+	if config.AIAgentClientStore == nil {
+		t.Fatal("AI Agent client snapshot store should be configured")
+	}
+}
+
+func TestConfigFromEnvKeepsLegacyAIAgentClientMockAlias(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envAIAgentClientMock, "true")
+	t.Setenv(envAIAgentClientTable, "riido-ai-agent-development")
+	t.Setenv(envAWSRegion, "ap-northeast-2")
+	t.Setenv(envAWSContainerCredentialsRelativeURI, "/v2/credentials")
+
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	defer closeRuntimeConfig(config)
+	if !config.AIAgentClientDev {
+		t.Fatal("legacy AI Agent client mock flag should enable development mode")
 	}
 }
 
@@ -176,6 +200,28 @@ func TestConfigFromEnvRejectsInvalidAIAgentClientMockFlag(t *testing.T) {
 	t.Setenv(envAIAgentClientMock, "sometimes")
 
 	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envAIAgentClientMock) {
+		t.Fatalf("configFromEnv err=%v", err)
+	}
+}
+
+func TestConfigFromEnvRejectsAIAgentClientDevelopmentWithoutDynamoDBTable(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envAIAgentClientDev, "true")
+	t.Setenv(envAWSRegion, "ap-northeast-2")
+	t.Setenv(envAWSContainerCredentialsFullURI, "http://169.254.170.2/credentials")
+
+	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envAIAgentClientTable) {
+		t.Fatalf("configFromEnv err=%v", err)
+	}
+}
+
+func TestConfigFromEnvRejectsAIAgentClientDevelopmentWithoutCredentialEndpoint(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envAIAgentClientDev, "true")
+	t.Setenv(envAIAgentClientTable, "riido-ai-agent-development")
+	t.Setenv(envAWSRegion, "ap-northeast-2")
+
+	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envAWSContainerCredentialsFullURI) {
 		t.Fatalf("configFromEnv err=%v", err)
 	}
 }
@@ -415,12 +461,20 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envReviewAccountTokenHash,
 		envMetricsLogInterval,
 		envWebAllowedOrigins,
+		envAIAgentClientDev,
 		envAIAgentClientMock,
+		envAIAgentClientTable,
+		envAWSRegion,
+		envDynamoDBEndpoint,
 		envTaskContextBaseURL,
 		envTaskContextWorkspaceID,
 		envTaskContextTeamID,
 		envTaskContextAPIKey,
 		envTaskContextTimeout,
+		envExternalAuthzAPIKey,
+		envAWSContainerCredentialsFullURI,
+		envAWSContainerCredentialsRelativeURI,
+		envAWSContainerAuthorizationToken,
 	} {
 		t.Setenv(key, "")
 	}

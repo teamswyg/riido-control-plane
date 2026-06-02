@@ -1693,6 +1693,38 @@ frontend delivery branches, runtime behavior, Figma annotations, deployment
 configuration, Terraform topology, GitHub environment values, or live endpoint
 values.
 
+### RIID-4872 — AI Agent development persistence
+
+This slice promotes the AI Agent client surface from a throwaway in-memory mock
+runtime to a development server runtime with durable state.
+
+It adds:
+
+- `PersistentAIAgentClientStore`, a snapshot-saving wrapper around the
+  deterministic development store
+- `AIAgentClientSnapshot` with schema version
+  `riido-ai-agent-client-persistence.v2`
+- `DynamoDBAIAgentClientSnapshot`, a stdlib-only DynamoDB `PutItem`/`GetItem`
+  adapter that stores the development state as one `pk/sk` snapshot item
+- runtime env parsing for `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT`,
+  `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE`,
+  optional `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT`, AWS region configuration, and
+  ECS container credential endpoint variables
+- compatibility handling for the older
+  `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` flag as an alias for development mode
+- black-box tests proving created agents, task-thread events, and device
+  credentials survive reopening the store
+- DynamoDB fake-endpoint tests proving the snapshot item key and schema
+  metadata
+
+The snapshot stores only `device_secret` hashes, never one-time raw
+`device_secret` values. Development mode now fails during startup unless the
+DynamoDB snapshot table and signing credential path are configured.
+
+This slice does not create AWS tables, change Terraform topology, implement
+production single-table projections, rotate/revoke device credentials, alter the
+OpenAPI/generated client surface, or edit `riido-client`.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -1709,7 +1741,7 @@ go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration
 go test ./tools/containercontract -count=1
 go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
-go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
+go test ./cmd/riido_ai_server -run 'AIAgentClient|WebAllowedOrigins|ConfigFromEnv' -count=1
 go test ./tools/reactquerygen -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
@@ -1742,7 +1774,7 @@ Server black-box tests should cover:
 `riido-control-plane` may build an image and verify the executable image
 contract. After RIID-4807 it also owns tag-triggered testnet runtime artifact CD:
 immutable image push, ECS task-definition revision registration, ECS service
-stability wait, and live AI Agent mock smoke.
+stability wait, and live AI Agent development smoke.
 
 `riido-infra` still owns AWS topology and consumes immutable artifacts by:
 

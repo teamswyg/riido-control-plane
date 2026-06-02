@@ -88,10 +88,10 @@ jobs:
             exit 1
           fi
 
-      - name: Test AI Agent mock API and command wiring
+      - name: Test AI Agent development API and command wiring
         run: |
           go test ./internal/riidoaiserver -run 'AIAgentClient|HTTPHealth|HTTPReady|WebFrontendCORS' -count=1
-          go test ./cmd/riido_ai_server -run 'AIAgentClientMock|ConfigFromEnv|WebAllowedOrigins' -count=1
+          go test ./cmd/riido_ai_server -run 'AIAgentClient|ConfigFromEnv|WebAllowedOrigins' -count=1
 
       - name: Verify container image contract
         run: |

@@ -11,11 +11,14 @@ import (
 )
 
 const aiAgentTokenHeader = "X-Riido-AI-Agent-Token"
+const deviceIDHeader = "X-Riido-Device-ID"
+const deviceSecretHeader = "X-Riido-Device-Secret"
 
 type ServerConfig struct {
 	Authorizer        RequestAuthorizer
 	AgentCatalogStore AgentCatalogStore
 	AIAgentClient     AIAgentClientStore
+	DeviceCredentials DeviceCredentialStore
 	Assignment        AssignmentStore
 	TaskContext       AIAgentTaskContextReader
 	ProviderStatus    ProviderStatusStore
@@ -30,6 +33,7 @@ type Server struct {
 	taskContext  AIAgentTaskContextReader
 	provider     ProviderStatusStore
 	providerRead ProviderStatusReader
+	devices      DeviceCredentialStore
 	config       ServerConfig
 }
 
@@ -55,6 +59,12 @@ func NewServer(config ServerConfig) Server {
 			providerRead = reader
 		}
 	}
+	devices := config.DeviceCredentials
+	if devices == nil {
+		if store, ok := config.AIAgentClient.(DeviceCredentialStore); ok {
+			devices = store
+		}
+	}
 	return Server{
 		assignment:   config.Assignment,
 		agentCatalog: agentCatalog,
@@ -62,6 +72,7 @@ func NewServer(config ServerConfig) Server {
 		taskContext:  config.TaskContext,
 		provider:     provider,
 		providerRead: providerRead,
+		devices:      devices,
 		config:       config,
 	}
 }
@@ -71,6 +82,7 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/healthz", s.handleHealth)
 	mux.HandleFunc("/readyz", s.handleReady)
 	mux.HandleFunc("/metrics", s.handleMetrics)
+	mux.HandleFunc("/v2/desktop/workspaces/", s.handleDesktopWorkspaceRoutes)
 	mux.HandleFunc("/v2/client/workspaces/", s.handleAIAgentClientWorkspaceRoutes)
 	mux.HandleFunc("/v1/client/ai-agent/bootstrap", s.handleAIAgentClientBootstrap)
 	mux.HandleFunc("/v1/client/ai-agent/devices", s.handleAIAgentClientDevices)
@@ -128,6 +140,44 @@ func (s Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, snapshot)
 }
 
+func (s Server) handleDesktopWorkspaceRoutes(w http.ResponseWriter, r *http.Request) {
+	workspaceID, suffix, ok := splitNestedResourcePath(r.URL.Path, "/v2/desktop/workspaces/")
+	if !ok || strings.TrimSpace(workspaceID) == "" {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	suffix = strings.Trim(suffix, "/")
+	switch {
+	case suffix == "devices/enroll" && r.Method == http.MethodPost:
+		s.handleDesktopDeviceEnroll(w, r, workspaceID)
+	default:
+		writeError(w, http.StatusNotFound, "not found")
+	}
+}
+
+func (s Server) handleDesktopDeviceEnroll(w http.ResponseWriter, r *http.Request, workspaceID string) {
+	if s.devices == nil {
+		writeError(w, http.StatusServiceUnavailable, "device credential store is not configured")
+		return
+	}
+	r = requestWithAIAgentWorkspaceIDAndPath(r, workspaceID, r.URL.Path)
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionCreate})
+	if !ok {
+		return
+	}
+	var req EnrollDeviceRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.devices.EnrollDeviceCredential(r.Context(), principal, workspaceID, req)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusCreated, response)
+}
+
 func (s Server) handleAIAgentClientWorkspaceRoutes(w http.ResponseWriter, r *http.Request) {
 	workspaceID, v1Path, ok := splitAIAgentClientWorkspacePath(r.URL.Path)
 	if !ok {
@@ -183,7 +233,7 @@ func (s Server) handleAgentCatalog(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) handleAIAgentClientBootstrap(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
 		return
 	}
 	if r.Method != http.MethodGet {
@@ -204,7 +254,7 @@ func (s Server) handleAIAgentClientBootstrap(w http.ResponseWriter, r *http.Requ
 
 func (s Server) handleAIAgentClientDevices(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
 		return
 	}
 	if r.Method != http.MethodGet {
@@ -225,7 +275,7 @@ func (s Server) handleAIAgentClientDevices(w http.ResponseWriter, r *http.Reques
 
 func (s Server) handleAIAgentClientOnboardingFixtures(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
 		return
 	}
 	if r.URL.Path == "/v1/client/ai-agent/onboarding/fixtures" || r.URL.Path == "/v1/client/ai-agent/onboarding/fixtures/" {
@@ -278,7 +328,7 @@ func (s Server) handleAIAgentClientCreateFromOnboardingFixture(w http.ResponseWr
 
 func (s Server) handleAIAgentClientDeviceRoutes(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
 		return
 	}
 	_, suffix, ok := splitAIAgentClientDevicePath(r.URL.Path)
@@ -341,7 +391,7 @@ func (s Server) handleAIAgentClientAgentDaemonControl(w http.ResponseWriter, r *
 
 func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
 		return
 	}
 	taskID, suffix, ok := splitNestedResourcePath(r.URL.Path, "/v1/client/ai-agent/tasks/")
@@ -494,7 +544,7 @@ func (s Server) handleAIAgentClientStopTask(w http.ResponseWriter, r *http.Reque
 
 func (s Server) handleAIAgentClientAgents(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
 		return
 	}
 	if r.URL.Path == "/v1/client/ai-agent/agents" || r.URL.Path == "/v1/client/ai-agent/agents/" {
@@ -591,7 +641,7 @@ func (s Server) handleAIAgentClientDelete(w http.ResponseWriter, r *http.Request
 
 func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client mock is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
 		return
 	}
 	if r.Method != http.MethodGet {
@@ -1103,6 +1153,14 @@ func (s Server) authorizeAIAgentClient(w http.ResponseWriter, r *http.Request, r
 }
 
 func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req AuthorizationRequest) (AuthorizationResult, bool) {
+	if req.Resource == AuthorizationResourceAgent {
+		if result, handled := s.authorizeDeviceCredential(w, r, req); handled {
+			if strings.TrimSpace(result.PrincipalID) == "" {
+				return AuthorizationResult{}, false
+			}
+			return result, true
+		}
+	}
 	if s.config.Authorizer == nil {
 		writeError(w, http.StatusServiceUnavailable, "scoped request authorizer is not configured")
 		return AuthorizationResult{}, false
@@ -1123,6 +1181,38 @@ func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req Aut
 			writeError(w, http.StatusServiceUnavailable, err.Error())
 		}
 		return AuthorizationResult{}, false
+	}
+	return result, true
+}
+
+func (s Server) authorizeDeviceCredential(w http.ResponseWriter, r *http.Request, req AuthorizationRequest) (AuthorizationResult, bool) {
+	deviceID := strings.TrimSpace(r.Header.Get(deviceIDHeader))
+	deviceSecret := strings.TrimSpace(r.Header.Get(deviceSecretHeader))
+	if deviceID == "" && deviceSecret == "" {
+		return AuthorizationResult{}, false
+	}
+	if deviceID == "" || deviceSecret == "" {
+		writeUnauthorized(w)
+		return AuthorizationResult{}, true
+	}
+	if s.devices == nil {
+		writeError(w, http.StatusServiceUnavailable, "device credential store is not configured")
+		return AuthorizationResult{}, true
+	}
+	if req.DeviceID == "" {
+		req.DeviceID = deviceID
+	}
+	result, err := s.devices.AuthorizeDeviceCredential(r.Context(), deviceID, deviceSecret, req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrAuthorizationForbidden):
+			writeError(w, http.StatusForbidden, "forbidden")
+		case errors.Is(err, ErrAuthorizationUnauthenticated):
+			writeUnauthorized(w)
+		default:
+			writeError(w, http.StatusServiceUnavailable, err.Error())
+		}
+		return AuthorizationResult{}, true
 	}
 	return result, true
 }

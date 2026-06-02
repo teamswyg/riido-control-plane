@@ -383,8 +383,20 @@
     ],
     "allowed_public_non_cd_runtime_keys": [
       {
+        "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT",
+        "reason": "development runtime feature flag documented for testnet/development API startup; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
         "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK",
-        "reason": "testnet mock runtime feature flag documented for disposable local/testnet configuration; it is not a deploy/smoke GitHub configuration key"
+        "reason": "deprecated compatibility alias for the development runtime feature flag; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE",
+        "reason": "development persistence table runtime key documented for ECS task configuration; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_DYNAMODB_ENDPOINT",
+        "reason": "optional fake-endpoint/local-development runtime override; it is not a deploy/smoke GitHub configuration key"
       },
       {
         "name": "RIIDO_AI_SERVER_ADDR",
