@@ -25,6 +25,10 @@ coverage map, not only the primary `UI` page. Legacy non-UI Wireframe nodes
 that carry current product/API meaning are projected as absorptions, not as new
 endpoints. Each one points back to the current UI top-level node that already
 owns the generated-client surface.
+The projection gate decodes both the local projection manifest and this mirrored
+contracts coverage manifest with unknown-field and trailing-document rejection;
+control-plane may mirror the upstream SSOT, but it must not silently accept a
+shape that the contracts-owned manifest schema does not expose.
 
 The mirrored page registry keeps the contracts-owned inspection method:
 `figma.root.children` from the Figma Plugin API is the page registry authority,

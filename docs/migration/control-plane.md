@@ -1651,6 +1651,29 @@ This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
 change runtime behavior, add deployment secrets, expose live endpoint values,
 or move client UI ownership into this repository.
 
+### Figma coverage mirror strict decode guard
+
+This follow-up tightens the downstream Figma coverage mirror reader used by the
+generated-client projection gate.
+
+Control-plane keeps a copied contracts coverage manifest only to prove that the
+local OpenAPI/generated-client projection is consuming the upstream SSOT. A
+plain JSON unmarshal could silently ignore fields that contracts added to the
+manifest shape, which would let this repository keep passing while consuming
+only part of the upstream coverage record. The projection gate now decodes both
+the local projection manifest and the mirrored contracts coverage manifest with
+unknown-field and trailing-document rejection.
+
+This slice updates the mirrored source coverage test type to include the full
+contracts-owned fields that the current mirror carries, including `riido_task`,
+`human_doc`, `related_manifests`, `figma`, `coverage_policy`,
+`expected_top_level_nodes`, inspection authority/supporting tools, supporting
+tool limitation provenance, and entry ownership/direction fields.
+
+This slice does not edit API DSL/OpenAPI shape, generated client output,
+frontend delivery branches, runtime behavior, Figma annotations, deployment
+configuration, or live endpoint values.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
