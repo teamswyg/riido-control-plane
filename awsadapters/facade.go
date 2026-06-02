@@ -3,9 +3,10 @@ package awsadapters
 import internal "github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 
 const (
-	SchemaVersion              = internal.SchemaVersion
-	StoreSnapshotSchemaVersion = internal.StoreSnapshotSchemaVersion
-	OutboxRecordSchemaVersion  = internal.OutboxRecordSchemaVersion
+	SchemaVersion                         = internal.SchemaVersion
+	StoreSnapshotSchemaVersion            = internal.StoreSnapshotSchemaVersion
+	OutboxRecordSchemaVersion             = internal.OutboxRecordSchemaVersion
+	AIAgentClientPersistenceSchemaVersion = internal.AIAgentClientPersistenceSchemaVersion
 
 	AssignmentQueued      = internal.AssignmentQueued
 	EventAssignmentQueued = internal.EventAssignmentQueued
@@ -30,6 +31,12 @@ type (
 	StoreSnapshotTask           = internal.StoreSnapshotTask
 	DynamoDBStoreSnapshotConfig = internal.DynamoDBStoreSnapshotConfig
 	DynamoDBStoreSnapshot       = internal.DynamoDBStoreSnapshot
+
+	AIAgentClientSnapshot                 = internal.AIAgentClientSnapshot
+	AIAgentClientDeviceCredentialSnapshot = internal.AIAgentClientDeviceCredentialSnapshot
+	AIAgentClientEventSnapshot            = internal.AIAgentClientEventSnapshot
+	DynamoDBAIAgentClientSnapshotConfig   = internal.DynamoDBAIAgentClientSnapshotConfig
+	DynamoDBAIAgentClientSnapshot         = internal.DynamoDBAIAgentClientSnapshot
 
 	AssignmentOperationRecord              = internal.AssignmentOperationRecord
 	AssignmentClaimResult                  = internal.AssignmentClaimResult
@@ -63,6 +70,7 @@ var (
 
 	NewDynamoDBOutbox                   = internal.NewDynamoDBOutbox
 	NewDynamoDBStoreSnapshot            = internal.NewDynamoDBStoreSnapshot
+	NewDynamoDBAIAgentClientSnapshot    = internal.NewDynamoDBAIAgentClientSnapshot
 	NewDynamoDBAssignmentOperationStore = internal.NewDynamoDBAssignmentOperationStore
 
 	LoadDynamoDBTableStreamARN = internal.LoadDynamoDBTableStreamARN

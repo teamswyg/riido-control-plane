@@ -12,7 +12,7 @@ operator/private infra validation.
 | module dependency boundary | `go list -m all` allowlist | none |
 | full backend behavior | `go test ./...` | none |
 | agent catalog RBAC and HTTP | focused `internal/riidoaiserver` black-box tests | none |
-| AI Agent client mock API | focused `internal/riidoaiserver` black-box tests over generated contract paths | none |
+| AI Agent client development API | focused `internal/riidoaiserver` black-box tests over generated contract paths and DynamoDB snapshot fake endpoints | none |
 | generated React Query client | `tools/reactquerygen` drift test from checked-in OpenAPI | none |
 | future `riido-client` generated delivery | tag-triggered control-plane workflow, target-path allowlist, generated manifest/history diff | GitHub API only after delivery secrets are configured |
 | request authorization | static tokens and `httptest` external authorizer tests | none |

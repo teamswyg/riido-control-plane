@@ -45,7 +45,7 @@ Scopes are endpoint-call gates only. Agent catalog reads and writes must still
 re-run the RBAC decision described in
 [`agent-catalog-rbac.md`](agent-catalog-rbac.md).
 
-The `ai_agent_client` mock API accepts these static scope families:
+The `ai_agent_client` development API accepts these static scope families:
 
 - `ai-agent:*`
 - `ai-agent:read`
@@ -59,7 +59,7 @@ The `ai_agent_client` mock API accepts these static scope families:
 - `task:{task_id}:comment` for task-thread AI Agent comment submit
 - `task:{task_id}:stop` or `task:{task_id}:write` for task-thread AI Agent stop
 
-Those scopes only gate HTTP access. The mock API still evaluates principal
+Those scopes only gate HTTP access. The development API still evaluates principal
 ownership/admin roles before returning private agents or accepting mutations.
 
 ## External Authorizer Contract
@@ -92,6 +92,36 @@ generated frontend API. For browser-originated AI Agent client requests,
 be present so the API server can evaluate the existing workspace membership
 model. Daemon/device routes continue to use daemon/device credentials and must
 not be authorized by a browser user JWT.
+
+## DevicePrincipal Transport
+
+Desktop-launched daemons are authorized as a DevicePrincipal, not as the browser
+or desktop-webview UserPrincipal. The canonical ownership and secret handling
+rules are in
+`riido-contracts/docs/20-domain/device-principal.md`.
+
+The desktop main process registers an account-owned device after an established
+UserPrincipal session exists:
+
+- `POST /v2/desktop/workspaces/{workspace_id}/devices/enroll`
+- input token: `X-Riido-AI-Agent-Token`
+- output credential: `device_id` plus one-time `device_secret`
+
+The `workspace_id` in the enrollment URL is the selected workspace context for
+authorization and audit. It does not make the device workspace-owned; devices
+and runtimes remain account-owned.
+
+Daemon polling, heartbeat, progress, provider-status sync, and SaaS command
+reads use:
+
+- `X-Riido-Device-ID`
+- `X-Riido-Device-Secret`
+
+Those headers are daemon/server transport headers. They are not generated
+frontend headers and must not be exposed through `riido-client`, browser
+storage, webview JavaScript, task-thread events, logs, or status responses. The
+server stores only a secret hash and returns the raw `device_secret` only in the
+enrollment response.
 
 The external authorizer hop may be protected by
 `X-Riido-Control-Plane-Authorizer-Key`. That header is server-to-server only and
@@ -168,7 +198,7 @@ RIID-4717 adds browser frontend CORS transport configuration over the existing
 public HTTP API without changing request-token authorization, RBAC, or endpoint
 payload contracts.
 
-RIID-4721 adds the request-token-protected AI Agent client mock API. It reuses
+RIID-4721 adds the request-token-protected AI Agent client development API. It reuses
 the same static/external authorizer port and keeps owner/public/private
 visibility checks inside the route handler/store boundary.
 
@@ -182,9 +212,12 @@ authorizer hop through `X-Riido-Control-Plane-Authorizer-Key`. This enables the
 existing Riido API server to validate existing user JWTs for web/desktop-webview
 requests without issuing a second browser token.
 
-Production daemon/device credentials, tenant claim mapping, JWKS/OIDC
-validation, and production request-token values remain separate migration
-units. Daemons must not reuse browser user JWTs.
+RIID-4869 adds the Desktop enrollment route and daemon DevicePrincipal header
+verification for the control-plane slice. RIID-4872 promotes device credential
+and AI Agent client state to the development DynamoDB snapshot store. Production
+tenant claim mapping, JWKS/OIDC validation, credential rotation/revocation, and
+production request-token values remain separate migration units. Daemons must
+not reuse browser user JWTs.
 
 Unresolved production identity mapping questions are tracked in
 [`../50-roadmap/open-questions.md`](../50-roadmap/open-questions.md).

@@ -30,12 +30,21 @@ const (
 	envReviewAccountTokenHash = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
 	envMetricsLogInterval     = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
 	envWebAllowedOrigins      = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
+	envAIAgentClientDev       = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
 	envAIAgentClientMock      = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK"
+	envAIAgentClientTable     = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE"
+	envAWSRegion              = "RIIDO_AI_SERVER_AWS_REGION"
+	envDynamoDBEndpoint       = "RIIDO_AI_SERVER_DYNAMODB_ENDPOINT"
 	envTaskContextBaseURL     = "RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL"
 	envTaskContextWorkspaceID = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID"
 	envTaskContextTeamID      = "RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID"
 	envTaskContextAPIKey      = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY"
 	envTaskContextTimeout     = "RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS"
+
+	envAWSContainerCredentialsFullURI     = "AWS_CONTAINER_CREDENTIALS_FULL_URI"
+	envAWSContainerCredentialsRelativeURI = "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+	envAWSContainerAuthorizationToken     = "AWS_CONTAINER_AUTHORIZATION_TOKEN"
+	awsECSCredentialsBaseURL              = "http://169.254.170.2"
 )
 
 type runtimeConfig struct {
@@ -46,7 +55,8 @@ type runtimeConfig struct {
 	ReviewProvision    *riidoaiserver.ReviewAccountProvisioning
 	MetricsLogInterval time.Duration
 	WebAllowedOrigins  []string
-	AIAgentClientMock  bool
+	AIAgentClientDev   bool
+	AIAgentClientStore riidoaiserver.AIAgentClientSnapshotStore
 	TaskContextReader  riidoaiserver.AIAgentTaskContextReader
 }
 
@@ -69,9 +79,13 @@ func run() error {
 			return fmt.Errorf("apply review account provisioning: %w", err)
 		}
 	}
+	defer closeRuntimeConfig(config)
 	var aiAgentClient riidoaiserver.AIAgentClientStore
-	if config.AIAgentClientMock {
-		aiAgentClient = riidoaiserver.NewMockAIAgentClientStore()
+	if config.AIAgentClientDev {
+		aiAgentClient, err = riidoaiserver.OpenPersistentAIAgentClientStore(context.Background(), riidoaiserver.NewDevelopmentAIAgentClientStore(), config.AIAgentClientStore)
+		if err != nil {
+			return fmt.Errorf("open AI Agent development store: %w", err)
+		}
 	}
 	server := &http.Server{
 		Addr:              config.Addr,
@@ -108,7 +122,11 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	aiAgentClientMock, err := envOptionalBool(envAIAgentClientMock)
+	aiAgentClientDev, err := aiAgentClientDevelopmentFromEnv()
+	if err != nil {
+		return runtimeConfig{}, err
+	}
+	aiAgentClientStore, err := aiAgentClientSnapshotStoreFromEnv(aiAgentClientDev)
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -124,9 +142,16 @@ func configFromEnv() (runtimeConfig, error) {
 		ReviewProvision:    reviewProvision,
 		MetricsLogInterval: metricsLogInterval,
 		WebAllowedOrigins:  webAllowedOrigins,
-		AIAgentClientMock:  aiAgentClientMock,
+		AIAgentClientDev:   aiAgentClientDev,
+		AIAgentClientStore: aiAgentClientStore,
 		TaskContextReader:  taskContextReader,
 	}, nil
+}
+
+func closeRuntimeConfig(config runtimeConfig) {
+	if closer, ok := config.AIAgentClientStore.(interface{ Close() error }); ok {
+		_ = closer.Close()
+	}
 }
 
 func serveUntilSignal(server *http.Server, shutdownTimeout time.Duration, backgroundErrCh ...<-chan error) error {
@@ -216,6 +241,66 @@ func envOptionalBool(key string) (bool, error) {
 	default:
 		return false, fmt.Errorf("%s must be a boolean", key)
 	}
+}
+
+func aiAgentClientDevelopmentFromEnv() (bool, error) {
+	development, err := envOptionalBool(envAIAgentClientDev)
+	if err != nil {
+		return false, err
+	}
+	legacyMock, err := envOptionalBool(envAIAgentClientMock)
+	if err != nil {
+		return false, err
+	}
+	return development || legacyMock, nil
+}
+
+func aiAgentClientSnapshotStoreFromEnv(enabled bool) (riidoaiserver.AIAgentClientSnapshotStore, error) {
+	if !enabled {
+		return nil, nil
+	}
+	tableName := strings.TrimSpace(os.Getenv(envAIAgentClientTable))
+	if tableName == "" {
+		return nil, fmt.Errorf("%s is required when %s is enabled", envAIAgentClientTable, envAIAgentClientDev)
+	}
+	region := strings.TrimSpace(os.Getenv(envAWSRegion))
+	if region == "" {
+		return nil, fmt.Errorf("%s is required when %s is enabled", envAWSRegion, envAIAgentClientDev)
+	}
+	provider, err := awsContainerCredentialsProviderFromEnv()
+	if err != nil {
+		return nil, err
+	}
+	store, err := riidoaiserver.NewDynamoDBAIAgentClientSnapshot(riidoaiserver.DynamoDBAIAgentClientSnapshotConfig{
+		Region:              region,
+		TableName:           tableName,
+		Endpoint:            strings.TrimSpace(os.Getenv(envDynamoDBEndpoint)),
+		CredentialsProvider: provider,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", envAIAgentClientTable, err)
+	}
+	return store, nil
+}
+
+func awsContainerCredentialsProviderFromEnv() (riidoaiserver.AWSCredentialsProvider, error) {
+	endpoint := strings.TrimSpace(os.Getenv(envAWSContainerCredentialsFullURI))
+	if endpoint == "" {
+		relativeURI := strings.TrimSpace(os.Getenv(envAWSContainerCredentialsRelativeURI))
+		if relativeURI != "" {
+			if !strings.HasPrefix(relativeURI, "/") {
+				return nil, fmt.Errorf("%s must start with /", envAWSContainerCredentialsRelativeURI)
+			}
+			endpoint = awsECSCredentialsBaseURL + relativeURI
+		}
+	}
+	if endpoint == "" {
+		return nil, fmt.Errorf("%s or %s is required when %s is enabled", envAWSContainerCredentialsFullURI, envAWSContainerCredentialsRelativeURI, envAIAgentClientDev)
+	}
+	return riidoaiserver.NewECSContainerCredentialsProvider(riidoaiserver.ECSContainerCredentialsProviderConfig{
+		Endpoint:           endpoint,
+		AuthorizationToken: strings.TrimSpace(os.Getenv(envAWSContainerAuthorizationToken)),
+	})
 }
 
 func webAllowedOriginsFromEnv() ([]string, error) {
