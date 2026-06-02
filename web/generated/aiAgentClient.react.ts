@@ -122,7 +122,7 @@ export interface GetAIAgentEditabilityReactEndpoint extends core.GetAIAgentEdita
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 bootstrap.agents[] agent list를 조회합니다
  * 계약 generated path: `aiAgent.bootstrap`
  * 검색용 generated 경로: `bootstrap`
  * 접근 예시: `riido.aiAgent.bootstrap`
@@ -402,7 +402,7 @@ export interface GetAIAgentEditabilityV2ReactEndpoint extends core.GetAIAgentEdi
 }
 
 /**
- * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+ * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.bootstrap`
  * 검색용 generated 경로: `aiAgent.bootstrap`
  * 접근 예시: `riido.v2.aiAgent.bootstrap`
@@ -782,7 +782,7 @@ export interface RiidoAIAgentReactModule {
    */
   readonly agents: RiidoAIAgentAgentsReactNamespace;
   /**
-   * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다
+   * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 bootstrap.agents[] agent list를 조회합니다
    * 계약 generated path: `aiAgent.bootstrap`
    * 검색용 generated 경로: `bootstrap`
    * 접근 예시: `riido.aiAgent.bootstrap`
@@ -1020,7 +1020,7 @@ export interface RiidoV2AIAgentReactNamespace {
    */
   readonly agents: RiidoV2AIAgentAgentsReactNamespace;
   /**
-   * web 또는 desktop webview client의 AI Agent 화면 초기 데이터를 조회합니다 (v2 workspace-scoped)
+   * web 또는 desktop webview client의 AI Agent 설정/온보딩 초기 데이터와 v2.aiAgent.bootstrap.agents[] agent list를 조회합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.bootstrap`
    * 검색용 generated 경로: `aiAgent.bootstrap`
    * 접근 예시: `riido.v2.aiAgent.bootstrap`

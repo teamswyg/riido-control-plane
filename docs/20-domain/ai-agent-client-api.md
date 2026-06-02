@@ -56,6 +56,17 @@ Generated TypeScript comments must include both the contract path
 frontend developers often know the generated facade route before they know the
 operation id or HTTP endpoint.
 
+Generated comments must also preserve the agent-list source distinction. For
+AI Agent settings and onboarding entry, `riido.aiAgent.bootstrap` and
+`riido.v2.aiAgent.bootstrap` return `agents[]`; that array is the settings/list
+agent list and the source of `agent_id` for settings actions such as edit,
+delete, and daemon detail. Task participant dropdowns must instead read
+`riido.aiAgent.tasks.assignableAgents` or
+`riido.v2.aiAgent.tasks.assignableAgents`, because that response is scoped by
+the current task/subtask and returns the `agent_id` that `tasks.assign` accepts.
+This distinction belongs in contracts DSL/OpenAPI/JSDoc, not only in Notion or
+Figma comments.
+
 The generated core client does not own screen composition or React hook policy.
 `riido-client` owns when hooks are called, when invalidation helpers run, retry
 policy, optimistic updates, token refresh, and global error UX. The generated
