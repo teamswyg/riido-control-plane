@@ -41,7 +41,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	if got, want := len(sourceCoverage.ExpectedPages), 3; got != want {
 		t.Fatalf("source coverage expected_pages = %d, want %d", got, want)
 	}
-	if got, want := len(sourceCoverage.NonUITopLevelNodes), 11; got != want {
+	if got, want := len(sourceCoverage.NonUITopLevelNodes), 12; got != want {
 		t.Fatalf("source coverage non_ui_top_level_nodes = %d, want %d", got, want)
 	}
 	verifyMirroredNonUITopLevelInventory(t, sourceCoverage)
@@ -89,6 +89,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	verifyRuntimeEndpointLabelProjection(t, sourceCoverage, docText)
 	verifyFigmaClientDeliveryAnnotations(t, sourceCoverage.ClientDeliveryAnnotations, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
 	verifyLegacyNonUIAbsorptions(t, manifest.LegacyNonUIAbsorptions, sourceCoverage, docText, generatedPaths, string(core), string(react))
+	verifyNonUIPlanningAbsorptions(t, manifest.NonUIPlanningAbsorptions, sourceCoverage, docText, generatedPaths, string(core), string(react))
 
 	if got, want := len(manifest.Entries), 16; got != want {
 		t.Fatalf("entries = %d, want %d", got, want)
@@ -177,6 +178,65 @@ func verifyLegacyNonUIAbsorptions(t *testing.T, absorptions []figmaProjectionLeg
 		for _, needle := range []string{absorption.NodeID, absorption.Name, absorption.AbsorbedByTopLevelNodeID} {
 			if !strings.Contains(docText, needle) {
 				t.Fatalf("projection doc must mention legacy absorption %q", needle)
+			}
+		}
+	}
+}
+
+func verifyNonUIPlanningAbsorptions(t *testing.T, absorptions []figmaProjectionPlanningAbsorption, sourceCoverage figmaSourceCoverageManifest, docText string, generatedPaths map[string]string, core, react string) {
+	t.Helper()
+	if got, want := len(absorptions), 1; got != want {
+		t.Fatalf("non_ui_planning_absorptions = %d, want %d", got, want)
+	}
+	sourceNonUI := map[string]figmaSourceCoverageEntry{}
+	for _, entry := range sourceCoverage.NonUITopLevelNodes {
+		sourceNonUI[entry.NodeID] = entry
+	}
+	seen := map[string]bool{}
+	for _, absorption := range absorptions {
+		if seen[absorption.NodeID] {
+			t.Fatalf("duplicate planning absorption node_id %q", absorption.NodeID)
+		}
+		seen[absorption.NodeID] = true
+		if absorption.ProjectionStatus != "absorbed_by_onboarding_generated_client" {
+			t.Fatalf("planning absorption %q projection_status = %q", absorption.NodeID, absorption.ProjectionStatus)
+		}
+		if strings.TrimSpace(absorption.LocalScope) == "" || strings.TrimSpace(absorption.NoNewEndpointReason) == "" {
+			t.Fatalf("planning absorption %q must explain local scope and no_new_endpoint_reason: %+v", absorption.NodeID, absorption)
+		}
+		source, ok := sourceNonUI[absorption.NodeID]
+		if !ok {
+			t.Fatalf("planning absorption %q is missing from mirrored contracts non_ui_top_level_nodes", absorption.NodeID)
+		}
+		if source.PageID != "42:3014" || source.CoverageStatus != "covered" || source.EvidenceKind != "figma_planning_section" {
+			t.Fatalf("planning absorption %q source coverage is not a covered planning section: %+v", absorption.NodeID, source)
+		}
+		if source.Name != absorption.Name {
+			t.Fatalf("planning absorption %q name = %q, source name = %q", absorption.NodeID, absorption.Name, source.Name)
+		}
+		if absorption.SourceCoverageStatus != source.CoverageStatus {
+			t.Fatalf("planning absorption %q source_coverage_status = %q, source = %q", absorption.NodeID, absorption.SourceCoverageStatus, source.CoverageStatus)
+		}
+		for _, path := range absorption.RequiredGeneratedPaths {
+			if !hasString(source.GeneratedPaths, path) {
+				t.Fatalf("planning absorption %q requires generated path %q absent from mirrored non-UI source coverage", absorption.NodeID, path)
+			}
+			if route, ok := generatedPaths[path]; !ok {
+				t.Fatalf("planning absorption %q requires unknown generated path %q", absorption.NodeID, path)
+			} else if strings.TrimSpace(route) == "" {
+				t.Fatalf("planning absorption %q generated path %q has empty route", absorption.NodeID, path)
+			}
+			requiredComment := "계약 generated path: `" + path + "`"
+			if !strings.Contains(core, requiredComment) {
+				t.Fatalf("core generated client missing %q for planning absorption %q", requiredComment, absorption.NodeID)
+			}
+			if !strings.Contains(react, requiredComment) {
+				t.Fatalf("react generated client missing %q for planning absorption %q", requiredComment, absorption.NodeID)
+			}
+		}
+		for _, needle := range []string{absorption.NodeID, absorption.Name, "client-local", "workspace-less create"} {
+			if !strings.Contains(docText, needle) {
+				t.Fatalf("projection doc must mention planning absorption boundary %q", needle)
 			}
 		}
 	}
@@ -313,6 +373,7 @@ func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, p
 		"teamswyg/riido-contracts#46",
 		"teamswyg/riido-contracts#51",
 		"teamswyg/riido-contracts#52",
+		"teamswyg/riido-contracts#54",
 	}
 	if len(sourceStabilizedBy) != len(want) {
 		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
@@ -618,6 +679,7 @@ type figmaProjectionManifest struct {
 	ProjectionPolicy                  figmaProjectionPolicy                     `json:"projection_policy"`
 	MirroredSupportingToolLimitations []figmaProjectionSupportingToolLimitation `json:"mirrored_supporting_tool_limitations"`
 	LegacyNonUIAbsorptions            []figmaProjectionLegacyAbsorption         `json:"legacy_non_ui_absorptions"`
+	NonUIPlanningAbsorptions          []figmaProjectionPlanningAbsorption       `json:"non_ui_planning_absorptions"`
 	Entries                           []figmaProjectionEntry                    `json:"entries"`
 }
 
@@ -661,6 +723,16 @@ type figmaProjectionLegacyAbsorption struct {
 	AbsorbedByTopLevelNodeID string   `json:"absorbed_by_top_level_node_id"`
 	LocalScope               string   `json:"local_scope"`
 	RequiredGeneratedPaths   []string `json:"required_generated_paths"`
+}
+
+type figmaProjectionPlanningAbsorption struct {
+	NodeID                 string   `json:"node_id"`
+	Name                   string   `json:"name"`
+	ProjectionStatus       string   `json:"projection_status"`
+	SourceCoverageStatus   string   `json:"source_coverage_status"`
+	LocalScope             string   `json:"local_scope"`
+	RequiredGeneratedPaths []string `json:"required_generated_paths"`
+	NoNewEndpointReason    string   `json:"no_new_endpoint_reason"`
 }
 
 type figmaSourceCoverageManifest struct {

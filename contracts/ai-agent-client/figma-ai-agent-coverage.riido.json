@@ -8,7 +8,8 @@
     "teamswyg/riido-contracts#45",
     "teamswyg/riido-contracts#46",
     "teamswyg/riido-contracts#51",
-    "teamswyg/riido-contracts#52"
+    "teamswyg/riido-contracts#52",
+    "teamswyg/riido-contracts#54"
   ],
   "human_doc": "docs/30-architecture/figma-ai-agent-coverage.md",
   "related_manifests": [
@@ -51,7 +52,7 @@
   },
   "expected_pages": [
     {"node_id": "129:5215", "name": "UI", "child_count": 16},
-    {"node_id": "42:3014", "name": "Wireframe - 온보딩", "child_count": 3},
+    {"node_id": "42:3014", "name": "Wireframe - 온보딩", "child_count": 83},
     {"node_id": "0:1", "name": "Wireframe", "child_count": 28}
   ],
   "expected_top_level_nodes": [
@@ -76,9 +77,89 @@
     {
       "page_id": "42:3014",
       "nodes": [
+        {"node_id": "43:3014", "name": "Onboarding on Rise (Web)"},
+        {"node_id": "43:3022", "name": "Onboarding on Cosmos (Web)"},
+        {"node_id": "41:3014", "name": "회원가입"},
+        {"node_id": "41:7094", "name": "회원가입"},
+        {"node_id": "41:6838", "name": "돌아가는 AI 보여주기"},
+        {"node_id": "137:6746", "name": "돌아가는 AI 보여주기"},
+        {"node_id": "138:7389", "name": "에이전트 선택"},
+        {"node_id": "149:2115", "name": "에이전트 선택"},
+        {"node_id": "149:3107", "name": "돌아가는 AI 보여주기"},
+        {"node_id": "149:4262", "name": "워크스페이스 선택-신규"},
+        {"node_id": "149:3657", "name": "돌아가는 AI 보여주기"},
+        {"node_id": "138:7469", "name": "인트로"},
+        {"node_id": "138:1807", "name": "워크스페이스 선택-신규"},
+        {"node_id": "138:2150", "name": "에이전트 선택"},
+        {"node_id": "138:2251", "name": "직접 설정"},
+        {"node_id": "138:1909", "name": "워크스페이스 선택-기존"},
+        {"node_id": "138:1968", "name": "새 워크스페이스"},
+        {"node_id": "137:6852", "name": "돌아가는 AI 보여주기"},
+        {"node_id": "136:2090", "name": "image 28"},
+        {"node_id": "41:7256", "name": "워크스페이스 선택"},
+        {"node_id": "135:1634", "name": "워크스페이스 선택"},
+        {"node_id": "41:7391", "name": "에이전트 세팅"},
+        {"node_id": "41:8030", "name": "에이전트 세팅"},
+        {"node_id": "41:6918", "name": "Riido"},
+        {"node_id": "135:1794", "name": "Riido"},
+        {"node_id": "41:3624", "name": "랜딩"},
+        {"node_id": "41:3016", "name": "데스크탑앱 유도"},
+        {"node_id": "41:5532", "name": "데스크탑앱 유도"},
+        {"node_id": "41:4890", "name": "데스크탑앱 유도"},
+        {"node_id": "41:5760", "name": "데스크탑앱 유도"},
+        {"node_id": "41:3253", "name": "멤버 초대"},
+        {"node_id": "41:6647", "name": "Group 5"},
+        {"node_id": "41:6660", "name": "약관 동의"},
+        {"node_id": "41:7096", "name": "약관 동의"},
+        {"node_id": "41:6711", "name": "이메일로 회원가입"},
+        {"node_id": "41:7120", "name": "이메일로 회원가입"},
+        {"node_id": "41:6800", "name": "Vector 1"},
+        {"node_id": "41:7154", "name": "Vector 3"},
+        {"node_id": "135:1863", "name": "Vector 5"},
+        {"node_id": "41:6803", "name": "Vector 2"},
+        {"node_id": "41:7155", "name": "Vector 4"},
+        {"node_id": "135:1864", "name": "Vector 6"},
+        {"node_id": "41:6802", "name": "구글로 회원가입 label"},
+        {"node_id": "41:7156", "name": "구글로 회원가입 label duplicate"},
+        {"node_id": "135:1865", "name": "구글로 회원가입 label duplicate 2"},
+        {"node_id": "41:6808", "name": "mac 사용자 label"},
+        {"node_id": "41:6810", "name": "windows 사용자 label"},
+        {"node_id": "41:6804", "name": "이메일로 회원가입 label"},
+        {"node_id": "41:7158", "name": "이메일로 회원가입 label duplicate"},
+        {"node_id": "135:1867", "name": "이메일로 회원가입 label duplicate 2"},
+        {"node_id": "41:6906", "name": "Frame 6349995"},
+        {"node_id": "135:1869", "name": "에이전트 만들어서 작업 시킬 수 있다"},
+        {"node_id": "136:2097", "name": "image 29"},
+        {"node_id": "138:7097", "name": "Rectangle 18371"},
+        {"node_id": "138:7098", "name": "logo"},
+        {"node_id": "138:7100", "name": "에이전트 선택"},
         {"node_id": "164:30657", "name": "데스크탑앱 온보딩"},
+        {"node_id": "177:26451", "name": "macOS"},
+        {"node_id": "182:27175", "name": "macOS"},
+        {"node_id": "182:27225", "name": "macOS"},
+        {"node_id": "182:27275", "name": "macOS"},
         {"node_id": "188:27707", "name": "macOS"},
-        {"node_id": "188:27708", "name": "windows"}
+        {"node_id": "188:27708", "name": "windows"},
+        {"node_id": "236:33433", "name": "작업"},
+        {"node_id": "236:33845", "name": "작업"},
+        {"node_id": "236:33924", "name": "작업"},
+        {"node_id": "236:34865", "name": "작업"},
+        {"node_id": "236:34250", "name": "작업"},
+        {"node_id": "247:35906", "name": "작업"},
+        {"node_id": "247:36247", "name": "Frame 6350452"},
+        {"node_id": "247:36327", "name": "Frame 6350453"},
+        {"node_id": "247:36405", "name": "Frame 6350454"},
+        {"node_id": "247:36590", "name": "Frame 6350455"},
+        {"node_id": "247:36759", "name": "Frame 6350456"},
+        {"node_id": "247:36931", "name": "Frame 6350457"},
+        {"node_id": "247:37245", "name": "image 30"},
+        {"node_id": "432:46849", "name": "Ex AI - 온보딩 순서 변경 메모"},
+        {"node_id": "432:46850", "name": "image 15"},
+        {"node_id": "432:46851", "name": "image 16"},
+        {"node_id": "435:73461", "name": "AI 설치 유도"},
+        {"node_id": "435:73931", "name": "AI 설치 유도"},
+        {"node_id": "435:74145", "name": "AI 설치 유도"},
+        {"node_id": "435:73696", "name": "AI 설치 유도"}
       ]
     },
     {
@@ -216,6 +297,37 @@
       "direction_loop": {
         "top_down": "A Windows product action needs a separate product/marketing or desktop SSOT before it becomes a generated API.",
         "bottom_up": "A Windows packaging or store-distribution finding stays outside AI Agent API unless it changes runtime liveness semantics."
+      }
+    },
+    {
+      "page_id": "42:3014",
+      "node_id": "432:46849",
+      "name": "Ex AI - 온보딩 순서 변경 메모",
+      "coverage_status": "covered",
+      "evidence_kind": "figma_planning_section",
+      "ssot_docs": [
+        "docs/20-domain/ai-agent-policy.md",
+        "docs/20-domain/api-contract-projection.md",
+        "docs/30-architecture/ssot-dependency-map.md",
+        "apicontract/fixtures/control-plane-ai-agent-client.dsl.riido.json"
+      ],
+      "owner_repos": ["riido-contracts", "riido-control-plane", "riido-daemon", "riido-client", "riido-desktop"],
+      "generated_paths": [
+        "aiAgent.onboarding.fixtures",
+        "aiAgent.onboarding.fixtures.createAgent",
+        "aiAgent.agents.create",
+        "v2.aiAgent.onboarding.fixtures",
+        "v2.aiAgent.onboarding.fixtures.createAgent",
+        "v2.aiAgent.agents.create"
+      ],
+      "covered_facts": [
+        "Figma revised the onboarding explanation order to agent creation, runtime selection, then workspace selection",
+        "the first step is a client-local onboarding draft/selection state, not a durable workspace-less Agent record",
+        "durable v2 fixture/direct create still happens only after the client has selected workspace_id and runtime_id for final submit"
+      ],
+      "direction_loop": {
+        "top_down": "A future onboarding order change updates ai-agent-policy and the API DSL before generated clients, control-plane, daemon, or desktop behavior changes.",
+        "bottom_up": "If client implementation needs a persisted draft or workspace-less create, it must escalate to contracts instead of overloading the final create routes."
       }
     },
     {

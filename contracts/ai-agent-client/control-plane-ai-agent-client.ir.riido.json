@@ -224,6 +224,7 @@
         "runtime_device: remains account-owned and is not created or owned by a workspace",
         "create: POST v2 agent commands require workspace_id in the URL path and stamp that value server-side; request bodies must not override it",
         "fixture_create: fixture selection creates a normal workspace-scoped agent and does not create an AgentTemplate entity",
+        "onboarding_draft_order: Figma node-id=432-46849 lets clients collect a local agent draft/configuration before runtime and workspace selection, but no durable v2 create occurs until workspace_id is in the URL and runtime_id is in the request",
         "read: v2 list/bootstrap/assignable operations return only agents visible within the requested workspace_id",
         "v1_compatibility: v1 routes remain present for existing UI tests, but the authoritative new client surface is v2"
       ]
@@ -364,6 +365,7 @@
         "fixture_create: selecting 리도/영실/홍도/지원 calls createAIAgentFromOnboardingFixture with fixture_id plus a complete CreateAgentConfigurationRequest body and creates a normal owned agent",
         "fixture_identity: fixture-created agents keep the submitted display name exactly, may share names with other agents, use agent_id as durable identity and tie-breaker, and remain editable/deletable through normal agent RBAC and editability rules",
         "no_template_entity: the control plane must not expose template create/update/delete APIs or persist AgentTemplate records for this onboarding flow",
+        "figma_432_46849: revised onboarding order is interpreted as client-local agent draft/configuration first, then runtime/workspace selection, while final fixture/direct create still requires selected workspace_id and runtime_id",
         "direct_setting: Figma node-id=164-26969 expands 직접 설정 into name, description, and instruction input fields that submit through createAIAgent",
         "direct_setting_row: 직접 설정 is client presentation, not an AgentOnboardingFixture record",
         "direct_setting_presentation: dimmed fixture rows, placeholder copy, row expansion, and scroll affordance are client presentation",
@@ -3087,7 +3089,8 @@
       },
       "scenario_ids": [
         "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation",
-        "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal"
+        "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal",
+        "createAIAgentFromOnboardingFixtureV2.onboarding-draft-order-does-not-bypass-workspace-scope"
       ]
     },
     {
@@ -3577,7 +3580,8 @@
         "ref": "AgentClientRecordResponseV2"
       },
       "scenario_ids": [
-        "createAIAgentV2.workspace-scoped-agent-creation"
+        "createAIAgentV2.workspace-scoped-agent-creation",
+        "createAIAgentV2.onboarding-direct-draft-finalizes-only-with-workspace-and-runtime"
       ]
     },
     {
@@ -4189,12 +4193,28 @@
       "then": "the response keeps the submitted display name, returns a distinct workspace-scoped agent_id, and uses the normal v2 update/delete/editability operations for later lifecycle changes"
     },
     {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.onboarding-draft-order-does-not-bypass-workspace-scope",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "onboarding draft order does not bypass workspace scope",
+      "given": "Figma node-id=432-46849 asks the client to let the user choose or configure an agent draft before runtime and workspace selection",
+      "when": "the client finalizes fixture creation",
+      "then": "riido.v2.aiAgent.onboarding.fixtures.createAgent still requires workspace_id in the URL path and runtime_id in the create request body before any durable agent is saved"
+    },
+    {
       "scenario_id": "createAIAgentV2.workspace-scoped-agent-creation",
       "operation_id": "createAIAgentV2",
       "name": "workspace-scoped agent creation",
       "given": "a viewer has selected workspace_id workspace-a through the existing Riido workspace surface",
       "when": "the client calls riido.v2.aiAgent.agents.create with workspace_id in the URL path",
       "then": "the server creates a normal agent stamped with workspace_id workspace-a and owner_principal_id from authorization while the request body cannot override workspace ownership"
+    },
+    {
+      "scenario_id": "createAIAgentV2.onboarding-direct-draft-finalizes-only-with-workspace-and-runtime",
+      "operation_id": "createAIAgentV2",
+      "name": "onboarding direct draft finalizes only with workspace and runtime",
+      "given": "Figma node-id=432-46849 lets the client collect direct agent configuration before runtime and workspace selection",
+      "when": "the client finalizes direct creation",
+      "then": "riido.v2.aiAgent.agents.create still requires workspace_id in the URL path and runtime_id in the create request body before any durable agent is saved"
     }
   ]
 }
