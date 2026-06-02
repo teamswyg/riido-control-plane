@@ -468,6 +468,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	taskID = strings.TrimSpace(taskID)
 	req.AgentID = strings.TrimSpace(req.AgentID)
 	req.RuntimeProvider = strings.TrimSpace(req.RuntimeProvider)
+	req.ModelID = strings.TrimSpace(req.ModelID)
 	req.Prompt = strings.TrimSpace(req.Prompt)
 	req.AgentInstruction = strings.TrimSpace(req.AgentInstruction)
 	if taskID == "" {
@@ -531,6 +532,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		ComponentID:              req.ComponentID,
 		AgentID:                  req.AgentID,
 		RuntimeProvider:          req.RuntimeProvider,
+		ModelID:                  req.ModelID,
 		Prompt:                   req.Prompt,
 		AgentInstruction:         req.AgentInstruction,
 		AllowExperimentalRuntime: req.AllowExperimentalRuntime,
