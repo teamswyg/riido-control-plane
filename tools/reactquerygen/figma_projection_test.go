@@ -866,7 +866,7 @@ func verifyMirroredFigmaAPIGeneratedRetiredCategories(t *testing.T, categories [
 
 func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaSourceAPIGeneratedAnnotationGroup, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
 	t.Helper()
-	if got, want := len(inventory), 19; got != want {
+	if got, want := len(inventory), 20; got != want {
 		t.Fatalf("mirrored api_generated_annotation_inventory = %d, want %d", got, want)
 	}
 	allowedKinds := map[string]bool{"Query": true, "Mutation": true, "SSE Stream": true}
@@ -957,7 +957,7 @@ func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaS
 			t.Fatalf("projection doc must mention mirrored API Generated inventory v2 counterpart %q", v2Path)
 		}
 	}
-	if got, want := totalAnnotations, 59; got != want {
+	if got, want := totalAnnotations, 61; got != want {
 		t.Fatalf("mirrored API Generated inventory node annotations = %d, want %d", got, want)
 	}
 }
