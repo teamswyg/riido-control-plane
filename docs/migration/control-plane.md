@@ -1726,6 +1726,25 @@ This slice does not create AWS tables, change Terraform topology, implement
 production single-table projections, rotate/revoke device credentials, alter the
 OpenAPI/generated client surface, or edit `riido-client`.
 
+### RIID-4881 — Generated assignment team/OpenAPI exclusion mirror
+
+This slice mirrors the upstream contracts decision that generated AI Agent
+assignment and DevicePrincipal polling must not depend on team/OpenAPI-key
+inputs.
+
+This slice does:
+
+- document that private task-context lookup may resolve a task's location from
+  `task_id`, but the resulting team value is transient lookup context
+- keep generated client requests, agent records, daemon polling, deployment
+  reasoning, and smoke-test acceptance free of `team_id`, `teamId`, OpenAPI
+  task-context paths, Open API keys, and `X-Workspace-Api-Key`
+- clarify that legacy Open API key task-context environment variables remain a
+  compatibility adapter outside the generated AI Agent assignment SSOT
+
+This slice does not edit endpoint shapes, generated OpenAPI, DynamoDB schema,
+Terraform topology, task-context HTTP implementation, or `riido-client`.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
