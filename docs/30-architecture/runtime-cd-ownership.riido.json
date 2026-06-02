@@ -387,10 +387,6 @@
         "reason": "development runtime feature flag documented for testnet/development API startup; it is not a deploy/smoke GitHub configuration key"
       },
       {
-        "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK",
-        "reason": "deprecated compatibility alias for the development runtime feature flag; it is not a deploy/smoke GitHub configuration key"
-      },
-      {
         "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE",
         "reason": "development persistence table runtime key documented for ECS task configuration; it is not a deploy/smoke GitHub configuration key"
       },

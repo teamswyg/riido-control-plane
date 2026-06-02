@@ -140,12 +140,40 @@ type RuntimeRecord struct {
 	Models           []RuntimeModelRecord  `json:"models"`
 }
 
+type RuntimeSnapshotRecord struct {
+	RuntimeID      string                `json:"runtime_id"`
+	Kind           RuntimeKind           `json:"kind"`
+	Availability   RuntimeAvailability   `json:"availability,omitempty"`
+	DetectionState RuntimeDetectionState `json:"detection_state,omitempty"`
+	Models         []RuntimeModelRecord  `json:"models,omitempty"`
+}
+
 type DeviceRecord struct {
 	DeviceID         string          `json:"device_id"`
 	OwnerPrincipalID string          `json:"owner_principal_id"`
 	DisplayName      string          `json:"display_name,omitempty"`
 	DaemonLastSeenAt time.Time       `json:"daemon_last_seen_at,omitempty"`
 	Runtimes         []RuntimeRecord `json:"runtimes"`
+}
+
+type DeviceRuntimeSnapshotSyncRequest struct {
+	DaemonID          string                  `json:"daemon_id"`
+	DeviceID          string                  `json:"device_id,omitempty"`
+	DeviceDisplayName string                  `json:"device_display_name,omitempty"`
+	Profile           string                  `json:"profile,omitempty"`
+	AppVersion        string                  `json:"app_version,omitempty"`
+	Runtimes          []RuntimeSnapshotRecord `json:"runtimes"`
+}
+
+type DeviceRuntimeSnapshotSyncResponse struct {
+	SchemaVersion string             `json:"schema_version"`
+	Device        DeviceRecord       `json:"device"`
+	Daemon        DeviceDaemonRecord `json:"daemon"`
+}
+
+type AgentRuntimeBindingListResponse struct {
+	SchemaVersion string                `json:"schema_version"`
+	Bindings      []AgentRuntimeBinding `json:"bindings"`
 }
 
 type DeviceDaemonRecord struct {

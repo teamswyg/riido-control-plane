@@ -21,7 +21,6 @@ import (
 const (
 	envAddr                   = "RIIDO_AI_SERVER_ADDR"
 	envShutdownTimeoutSeconds = "RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS"
-	envAgentBindingsJSON      = "RIIDO_AI_SERVER_AGENT_BINDINGS_JSON"
 	envAuthzTokensJSON        = "RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON"
 	envExternalAuthzURL       = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL"
 	envExternalAuthzAudience  = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE"
@@ -31,7 +30,6 @@ const (
 	envMetricsLogInterval     = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
 	envWebAllowedOrigins      = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
 	envAIAgentClientDev       = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
-	envAIAgentClientMock      = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK"
 	envAIAgentClientTable     = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE"
 	envAWSRegion              = "RIIDO_AI_SERVER_AWS_REGION"
 	envDynamoDBEndpoint       = "RIIDO_AI_SERVER_DYNAMODB_ENDPOINT"
@@ -50,7 +48,6 @@ const (
 type runtimeConfig struct {
 	Addr               string
 	ShutdownTimeout    time.Duration
-	AgentRegistry      riidoaiserver.AgentRegistry
 	Authorizer         riidoaiserver.RequestAuthorizer
 	ReviewProvision    *riidoaiserver.ReviewAccountProvisioning
 	MetricsLogInterval time.Duration
@@ -72,19 +69,19 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	store := riidoaiserver.NewStoreWithConfig(riidoaiserver.StoreConfig{AgentRegistry: config.AgentRegistry})
-	defer store.Close()
-	if config.ReviewProvision != nil {
-		if err := store.ApplyReviewAccountProvisioning(context.Background(), *config.ReviewProvision); err != nil {
-			return fmt.Errorf("apply review account provisioning: %w", err)
-		}
-	}
 	defer closeRuntimeConfig(config)
 	var aiAgentClient riidoaiserver.AIAgentClientStore
 	if config.AIAgentClientDev {
 		aiAgentClient, err = riidoaiserver.OpenPersistentAIAgentClientStore(context.Background(), riidoaiserver.NewDevelopmentAIAgentClientStore(), config.AIAgentClientStore)
 		if err != nil {
 			return fmt.Errorf("open AI Agent development store: %w", err)
+		}
+	}
+	store := riidoaiserver.NewStoreWithConfig(riidoaiserver.StoreConfig{AgentRegistry: riidoaiserver.NewCompositeAgentRegistry(agentRegistryFromAIAgentClient(aiAgentClient))})
+	defer store.Close()
+	if config.ReviewProvision != nil {
+		if err := store.ApplyReviewAccountProvisioning(context.Background(), *config.ReviewProvision); err != nil {
+			return fmt.Errorf("apply review account provisioning: %w", err)
 		}
 	}
 	server := &http.Server{
@@ -103,10 +100,6 @@ func configFromEnv() (runtimeConfig, error) {
 		return runtimeConfig{}, err
 	}
 	metricsLogInterval, err := envOptionalDurationSeconds(envMetricsLogInterval)
-	if err != nil {
-		return runtimeConfig{}, err
-	}
-	registry, err := agentRegistryFromEnv()
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -137,7 +130,6 @@ func configFromEnv() (runtimeConfig, error) {
 	return runtimeConfig{
 		Addr:               getenvDefault(envAddr, ":8080"),
 		ShutdownTimeout:    shutdownTimeout,
-		AgentRegistry:      registry,
 		Authorizer:         authorizer,
 		ReviewProvision:    reviewProvision,
 		MetricsLogInterval: metricsLogInterval,
@@ -152,6 +144,13 @@ func closeRuntimeConfig(config runtimeConfig) {
 	if closer, ok := config.AIAgentClientStore.(interface{ Close() error }); ok {
 		_ = closer.Close()
 	}
+}
+
+func agentRegistryFromAIAgentClient(client riidoaiserver.AIAgentClientStore) riidoaiserver.AgentRegistry {
+	if registry, ok := client.(riidoaiserver.AgentRegistry); ok {
+		return registry
+	}
+	return nil
 }
 
 func serveUntilSignal(server *http.Server, shutdownTimeout time.Duration, backgroundErrCh ...<-chan error) error {
@@ -244,15 +243,7 @@ func envOptionalBool(key string) (bool, error) {
 }
 
 func aiAgentClientDevelopmentFromEnv() (bool, error) {
-	development, err := envOptionalBool(envAIAgentClientDev)
-	if err != nil {
-		return false, err
-	}
-	legacyMock, err := envOptionalBool(envAIAgentClientMock)
-	if err != nil {
-		return false, err
-	}
-	return development || legacyMock, nil
+	return envOptionalBool(envAIAgentClientDev)
 }
 
 func aiAgentClientSnapshotStoreFromEnv(enabled bool) (riidoaiserver.AIAgentClientSnapshotStore, error) {
@@ -403,22 +394,6 @@ func stopMetricsPublisher(cancel context.CancelFunc, errCh <-chan error) {
 	if errCh != nil {
 		<-errCh
 	}
-}
-
-func agentRegistryFromEnv() (riidoaiserver.AgentRegistry, error) {
-	raw := strings.TrimSpace(os.Getenv(envAgentBindingsJSON))
-	if raw == "" {
-		return nil, nil
-	}
-	return parseAgentRegistryJSON(raw)
-}
-
-func parseAgentRegistryJSON(raw string) (*riidoaiserver.StaticAgentRegistry, error) {
-	var bindings []riidoaiserver.AgentRuntimeBinding
-	if err := strictDecodeJSON(raw, &bindings); err != nil {
-		return nil, fmt.Errorf("%s: %w", envAgentBindingsJSON, err)
-	}
-	return riidoaiserver.NewStaticAgentRegistry(bindings)
 }
 
 func authorizerFromEnv() (riidoaiserver.RequestAuthorizer, error) {

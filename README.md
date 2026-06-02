@@ -78,9 +78,6 @@ RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT=true
 RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE=<configured by riido-infra>
 ```
 
-기존 `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true`는 compatibility alias로만
-남아 있습니다. 새 설정과 문서는 development API를 canonical 이름으로 씁니다.
-
 development API도 인증 없이 열리지 않습니다. request-token scope와
 owner/public/private visibility policy를 통과해야 합니다. AWS topology, table
 name 값, ECS task role, credential endpoint 값은 `riido-infra`와 GitHub

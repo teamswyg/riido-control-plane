@@ -11,7 +11,6 @@ This file is the public Factor 12 configuration catalog for
 | --- | --- | --- | --- |
 | `RIIDO_AI_SERVER_ADDR` | `:8080` | `cmd/riido_ai_server` | HTTP listen address passed to `http.Server.Addr` |
 | `RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS` | `10` | `cmd/riido_ai_server` | graceful shutdown timeout after SIGINT/SIGTERM |
-| `RIIDO_AI_SERVER_AGENT_BINDINGS_JSON` | empty | `cmd/riido_ai_server` | strict JSON array of `AgentRuntimeBinding` records for static daemon/runtime binding validation |
 | `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON` | empty | `cmd/riido_ai_server` | strict JSON array of static token credentials for public-testable request authorization |
 | `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL` | empty | `cmd/riido_ai_server` | optional external HTTP authorizer endpoint |
 | `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE` | empty | `cmd/riido_ai_server` | optional audience forwarded to the external authorizer |
@@ -21,7 +20,6 @@ This file is the public Factor 12 configuration catalog for
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | disabled | `cmd/riido_ai_server` | positive integer interval for stdout CloudWatch EMF JSON Lines |
 | `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS` | empty | `cmd/riido_ai_server` | comma-separated exact `http://` or `https://` browser origins allowed to call the public HTTP API with CORS preflight support |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` | `false` | `cmd/riido_ai_server` | enables the development AI Agent client API backed by DynamoDB snapshot persistence |
-| `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` | `false` | `cmd/riido_ai_server` | deprecated compatibility alias for `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE` | empty | `cmd/riido_ai_server` | DynamoDB table name for the AI Agent client development snapshot item; required when development mode is enabled |
 | `RIIDO_AI_SERVER_AWS_REGION` | empty | `cmd/riido_ai_server` | AWS region used by stdlib-only DynamoDB request signing; required when development mode is enabled |
 | `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT` | AWS default for region | `cmd/riido_ai_server` | optional DynamoDB endpoint override for fake-endpoint tests or local development |
@@ -48,9 +46,7 @@ It does not enable unauthenticated access; all AI Agent client endpoints still
 require bearer scopes. When enabled, the server fails during startup unless the
 DynamoDB table, AWS region, and ECS credential endpoint configuration are
 available. The development store persists the whole AI Agent client read/write
-state as a schema-versioned DynamoDB snapshot item. `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK`
-is kept only so older deployment configuration fails forward into the same
-development mode.
+state as a schema-versioned DynamoDB snapshot item.
 
 The external authorizer API key is server-to-server authentication for the
 configured authorizer endpoint. It is not a generated frontend token. If set,

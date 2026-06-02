@@ -101,6 +101,14 @@ func (s *PersistentAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context,
 	return response, s.saveSnapshot(ctx)
 }
 
+func (s *PersistentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
 func (s *PersistentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
 	response, err := s.DevelopmentAIAgentClientStore.AssignAIAgentTask(ctx, principal, taskID, req)
 	if err != nil {

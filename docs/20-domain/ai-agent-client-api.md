@@ -225,10 +225,6 @@ The snapshot item stores
 `pk/sk`. This is the development persistence boundary, not the final production
 single-table projection.
 
-`RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK=true` remains a compatibility alias for
-older deployment configuration, but new docs and runtime setup use
-`RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT=true`.
-
 The development API implements:
 
 - `GET /v1/client/ai-agent/bootstrap`

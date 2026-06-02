@@ -27,14 +27,15 @@ type ServerConfig struct {
 }
 
 type Server struct {
-	assignment   AssignmentStore
-	agentCatalog AgentCatalogStore
-	aiAgent      AIAgentClientStore
-	taskContext  AIAgentTaskContextReader
-	provider     ProviderStatusStore
-	providerRead ProviderStatusReader
-	devices      DeviceCredentialStore
-	config       ServerConfig
+	assignment    AssignmentStore
+	agentCatalog  AgentCatalogStore
+	aiAgent       AIAgentClientStore
+	daemonRuntime AIAgentDaemonRuntimeStore
+	taskContext   AIAgentTaskContextReader
+	provider      ProviderStatusStore
+	providerRead  ProviderStatusReader
+	devices       DeviceCredentialStore
+	config        ServerConfig
 }
 
 type aiAgentWorkspaceIDContextKey struct{}
@@ -65,15 +66,20 @@ func NewServer(config ServerConfig) Server {
 			devices = store
 		}
 	}
+	var daemonRuntime AIAgentDaemonRuntimeStore
+	if store, ok := config.AIAgentClient.(AIAgentDaemonRuntimeStore); ok {
+		daemonRuntime = store
+	}
 	return Server{
-		assignment:   config.Assignment,
-		agentCatalog: agentCatalog,
-		aiAgent:      config.AIAgentClient,
-		taskContext:  config.TaskContext,
-		provider:     provider,
-		providerRead: providerRead,
-		devices:      devices,
-		config:       config,
+		assignment:    config.Assignment,
+		agentCatalog:  agentCatalog,
+		aiAgent:       config.AIAgentClient,
+		daemonRuntime: daemonRuntime,
+		taskContext:   config.TaskContext,
+		provider:      provider,
+		providerRead:  providerRead,
+		devices:       devices,
+		config:        config,
 	}
 }
 
@@ -93,6 +99,8 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/client/ai-agent/agents", s.handleAIAgentClientAgents)
 	mux.HandleFunc("/v1/client/ai-agent/agents/", s.handleAIAgentClientAgents)
 	mux.HandleFunc("/v1/client/ai-agent/events", s.handleAIAgentClientEvents)
+	mux.HandleFunc("/v1/daemon/runtime-snapshot", s.handleDaemonRuntimeSnapshot)
+	mux.HandleFunc("/v1/daemon/agent-bindings", s.handleDaemonAgentBindings)
 	mux.HandleFunc("/v1/agent-catalog", s.handleAgentCatalog)
 	mux.HandleFunc("/v1/agent-catalog/", s.handleAgentCatalog)
 	mux.HandleFunc("/v1/component-tasks/", s.handleComponentTasks)
@@ -178,6 +186,87 @@ func (s Server) handleDesktopDeviceEnroll(w http.ResponseWriter, r *http.Request
 	writeJSON(w, http.StatusCreated, response)
 }
 
+func (s Server) handleDaemonRuntimeSnapshot(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeMethodNotAllowed(w)
+		return
+	}
+	if s.daemonRuntime == nil {
+		writeError(w, http.StatusServiceUnavailable, "daemon runtime store is not configured")
+		return
+	}
+	deviceID := strings.TrimSpace(r.Header.Get(deviceIDHeader))
+	if deviceID == "" {
+		writeUnauthorized(w)
+		return
+	}
+	principal, ok := s.authorizeRequest(w, r, AuthorizationRequest{
+		Resource: AuthorizationResourceAgent,
+		Action:   AuthorizationActionProviderStatusWrite,
+		DeviceID: deviceID,
+	})
+	if !ok {
+		return
+	}
+	var req DeviceRuntimeSnapshotSyncRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	req.DeviceID = strings.TrimSpace(req.DeviceID)
+	if req.DeviceID == "" {
+		req.DeviceID = deviceID
+	}
+	if req.DeviceID != deviceID {
+		writeError(w, http.StatusForbidden, "forbidden")
+		return
+	}
+	response, err := s.daemonRuntime.SyncAIAgentDaemonRuntimeSnapshot(r.Context(), principal, req)
+	if err != nil {
+		if errors.Is(err, ErrAuthorizationForbidden) {
+			writeError(w, http.StatusForbidden, "forbidden")
+			return
+		}
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
+}
+
+func (s Server) handleDaemonAgentBindings(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeMethodNotAllowed(w)
+		return
+	}
+	if s.daemonRuntime == nil {
+		writeError(w, http.StatusServiceUnavailable, "daemon runtime store is not configured")
+		return
+	}
+	deviceID := strings.TrimSpace(r.Header.Get(deviceIDHeader))
+	if deviceID == "" {
+		writeUnauthorized(w)
+		return
+	}
+	principal, ok := s.authorizeRequest(w, r, AuthorizationRequest{
+		Resource: AuthorizationResourceAgent,
+		Action:   AuthorizationActionRead,
+		DeviceID: deviceID,
+	})
+	if !ok {
+		return
+	}
+	response, err := s.daemonRuntime.ListAIAgentDaemonAgentBindings(r.Context(), principal, deviceID)
+	if err != nil {
+		if errors.Is(err, ErrAuthorizationForbidden) {
+			writeError(w, http.StatusForbidden, "forbidden")
+			return
+		}
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
 func (s Server) handleAIAgentClientWorkspaceRoutes(w http.ResponseWriter, r *http.Request) {
 	workspaceID, v1Path, ok := splitAIAgentClientWorkspacePath(r.URL.Path)
 	if !ok {
@@ -233,7 +322,7 @@ func (s Server) handleAgentCatalog(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) handleAIAgentClientBootstrap(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client store is not configured")
 		return
 	}
 	if r.Method != http.MethodGet {
@@ -254,7 +343,7 @@ func (s Server) handleAIAgentClientBootstrap(w http.ResponseWriter, r *http.Requ
 
 func (s Server) handleAIAgentClientDevices(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client store is not configured")
 		return
 	}
 	if r.Method != http.MethodGet {
@@ -275,7 +364,7 @@ func (s Server) handleAIAgentClientDevices(w http.ResponseWriter, r *http.Reques
 
 func (s Server) handleAIAgentClientOnboardingFixtures(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client store is not configured")
 		return
 	}
 	if r.URL.Path == "/v1/client/ai-agent/onboarding/fixtures" || r.URL.Path == "/v1/client/ai-agent/onboarding/fixtures/" {
@@ -328,7 +417,7 @@ func (s Server) handleAIAgentClientCreateFromOnboardingFixture(w http.ResponseWr
 
 func (s Server) handleAIAgentClientDeviceRoutes(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client store is not configured")
 		return
 	}
 	_, suffix, ok := splitAIAgentClientDevicePath(r.URL.Path)
@@ -391,7 +480,7 @@ func (s Server) handleAIAgentClientAgentDaemonControl(w http.ResponseWriter, r *
 
 func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client store is not configured")
 		return
 	}
 	taskID, suffix, ok := splitNestedResourcePath(r.URL.Path, "/v1/client/ai-agent/tasks/")
@@ -544,7 +633,7 @@ func (s Server) handleAIAgentClientStopTask(w http.ResponseWriter, r *http.Reque
 
 func (s Server) handleAIAgentClientAgents(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client store is not configured")
 		return
 	}
 	if r.URL.Path == "/v1/client/ai-agent/agents" || r.URL.Path == "/v1/client/ai-agent/agents/" {
@@ -641,7 +730,7 @@ func (s Server) handleAIAgentClientDelete(w http.ResponseWriter, r *http.Request
 
 func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
-		writeError(w, http.StatusServiceUnavailable, "ai agent client development API is not configured")
+		writeError(w, http.StatusServiceUnavailable, "ai agent client store is not configured")
 		return
 	}
 	if r.Method != http.MethodGet {

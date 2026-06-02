@@ -344,7 +344,6 @@ public repository. It owns only these environment variables:
 
 - `RIIDO_AI_SERVER_ADDR`
 - `RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS`
-- `RIIDO_AI_SERVER_AGENT_BINDINGS_JSON`
 - `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
@@ -354,7 +353,6 @@ public repository. It owns only these environment variables:
 - `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`
 - `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`
 - `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT`
-- `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK`
 - `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE`
 - `RIIDO_AI_SERVER_AWS_REGION`
 - `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT`
@@ -367,9 +365,9 @@ public repository. It owns only these environment variables:
 - `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI`
 - `AWS_CONTAINER_AUTHORIZATION_TOKEN`
 
-The agent binding and static-token JSON values use strict decoding, so unknown
-fields and trailing JSON are rejected. Static-token authorization may be
-combined with the external HTTP authorizer through the existing fallback
+Static-token JSON values use strict decoding, so unknown fields and trailing JSON
+are rejected. Static-token authorization may be combined with the external HTTP
+authorizer through the existing fallback
 authorizer rule: only unauthenticated results fall through to the next
 authorizer, while forbidden results stop evaluation.
 
@@ -386,9 +384,7 @@ repository.
 
 `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` enables the development AI Agent
 client API described in [`ai-agent-client-api.md`](ai-agent-client-api.md). The
-development API uses a DynamoDB snapshot item for durable state. The deprecated
-`RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` variable is accepted only as a
-compatibility alias for the same development mode.
+development API uses a DynamoDB snapshot item for durable state.
 
 The task-context variables configure the production server-to-server read from
 the existing Riido API server. The base URL, workspace id, team id, and

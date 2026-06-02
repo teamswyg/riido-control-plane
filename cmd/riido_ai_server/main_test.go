@@ -16,17 +16,10 @@ import (
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
-func TestConfigFromEnvParsesAddressShutdownRegistryAndStaticAuthorizer(t *testing.T) {
+func TestConfigFromEnvParsesAddressShutdownAndStaticAuthorizer(t *testing.T) {
 	clearRiidoAIServerEnv(t)
 	t.Setenv(envAddr, ":9090")
 	t.Setenv(envShutdownTimeoutSeconds, "7")
-	t.Setenv(envAgentBindingsJSON, `[{
-		"agent_id":"agent-a",
-		"daemon_id":"daemon-a",
-		"device_id":"device-a",
-		"runtime_id":"runtime-a",
-		"runtime_provider":"codex"
-	}]`)
 	t.Setenv(envAuthzTokensJSON, `[{
 		"principal_id":"daemon:agent-a",
 		"token":"static-token",
@@ -39,10 +32,6 @@ func TestConfigFromEnvParsesAddressShutdownRegistryAndStaticAuthorizer(t *testin
 	}
 	if config.Addr != ":9090" || config.ShutdownTimeout != 7*time.Second {
 		t.Fatalf("config = %+v", config)
-	}
-	binding, ok := config.AgentRegistry.LookupAgent("agent-a")
-	if !ok || binding.RuntimeID != "runtime-a" || binding.RuntimeProvider != "codex" {
-		t.Fatalf("binding = %+v ok=%v", binding, ok)
 	}
 	if _, err := config.Authorizer.Authorize(context.Background(), "static-token", riidoaiserver.AuthorizationRequest{
 		Resource: riidoaiserver.AuthorizationResourceAgent,
@@ -66,7 +55,7 @@ func TestConfigFromEnvDefaultsToPublicHealthOnlyRuntime(t *testing.T) {
 	if config.MetricsLogInterval != 0 {
 		t.Fatalf("metrics interval should default disabled: %s", config.MetricsLogInterval)
 	}
-	if config.AgentRegistry != nil || config.Authorizer != nil {
+	if config.Authorizer != nil {
 		t.Fatalf("optional config should be nil: %+v", config)
 	}
 }
@@ -115,23 +104,6 @@ func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	}
 	if config.AIAgentClientStore == nil {
 		t.Fatal("AI Agent client snapshot store should be configured")
-	}
-}
-
-func TestConfigFromEnvKeepsLegacyAIAgentClientMockAlias(t *testing.T) {
-	clearRiidoAIServerEnv(t)
-	t.Setenv(envAIAgentClientMock, "true")
-	t.Setenv(envAIAgentClientTable, "riido-ai-agent-development")
-	t.Setenv(envAWSRegion, "ap-northeast-2")
-	t.Setenv(envAWSContainerCredentialsRelativeURI, "/v2/credentials")
-
-	config, err := configFromEnv()
-	if err != nil {
-		t.Fatalf("configFromEnv: %v", err)
-	}
-	defer closeRuntimeConfig(config)
-	if !config.AIAgentClientDev {
-		t.Fatal("legacy AI Agent client mock flag should enable development mode")
 	}
 }
 
@@ -195,15 +167,6 @@ func TestConfigFromEnvRejectsPartialTaskContextConfig(t *testing.T) {
 	}
 }
 
-func TestConfigFromEnvRejectsInvalidAIAgentClientMockFlag(t *testing.T) {
-	clearRiidoAIServerEnv(t)
-	t.Setenv(envAIAgentClientMock, "sometimes")
-
-	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envAIAgentClientMock) {
-		t.Fatalf("configFromEnv err=%v", err)
-	}
-}
-
 func TestConfigFromEnvRejectsAIAgentClientDevelopmentWithoutDynamoDBTable(t *testing.T) {
 	clearRiidoAIServerEnv(t)
 	t.Setenv(envAIAgentClientDev, "true")
@@ -261,12 +224,6 @@ func TestConfigFromEnvIncludesReviewAccountProvisioning(t *testing.T) {
 		Action:   riidoaiserver.AuthorizationActionRead,
 	}); err != nil {
 		t.Fatalf("review token should read catalog: %v", err)
-	}
-}
-
-func TestParseAgentRegistryJSONRejectsUnknownField(t *testing.T) {
-	if _, err := parseAgentRegistryJSON(`[{"agent_id":"agent-a","daemon_id":"daemon-a","runtime_id":"runtime-a","runtime_provider":"codex","extra":true}]`); err == nil {
-		t.Fatal("expected unknown field error")
 	}
 }
 
@@ -453,7 +410,6 @@ func clearRiidoAIServerEnv(t *testing.T) {
 	for _, key := range []string{
 		envAddr,
 		envShutdownTimeoutSeconds,
-		envAgentBindingsJSON,
 		envAuthzTokensJSON,
 		envExternalAuthzURL,
 		envExternalAuthzAudience,
@@ -462,7 +418,6 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envMetricsLogInterval,
 		envWebAllowedOrigins,
 		envAIAgentClientDev,
-		envAIAgentClientMock,
 		envAIAgentClientTable,
 		envAWSRegion,
 		envDynamoDBEndpoint,
