@@ -375,13 +375,18 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", onboardingTimeoutProjection.SourceID)
 	}
 	if !strings.Contains(onboardingSource.Tool, "42:3014") ||
-		!strings.Contains(onboardingSource.ObservedResult, "timed out after 120s") ||
-		!strings.Contains(onboardingSource.ObservedResult, "Wireframe - 온보딩") {
+		!strings.Contains(onboardingSource.ObservedResult, "time out after 120s") ||
+		!strings.Contains(onboardingSource.ObservedResult, "Wireframe - 온보딩") ||
+		!strings.Contains(onboardingSource.ObservedResult, "236:33845") ||
+		!strings.Contains(onboardingSource.ObservedResult, "236:33847") {
 		t.Fatalf("source supporting limit must preserve onboarding load timeout evidence: %+v", onboardingSource)
 	}
 	if !hasString(onboardingSource.AuthoritativeResult, "42:3014") ||
 		!hasString(onboardingSource.AuthoritativeResult, "child_count=83") ||
-		!hasString(onboardingSource.AuthoritativeResult, "non_ui_top_level_inventory") {
+		!hasString(onboardingSource.AuthoritativeResult, "non_ui_top_level_inventory") ||
+		!hasString(onboardingSource.AuthoritativeResult, "236:33845") ||
+		!hasString(onboardingSource.AuthoritativeResult, "236:33847") ||
+		!hasString(onboardingSource.AuthoritativeResult, "onboarding_api_generated_annotations=6") {
 		t.Fatalf("source onboarding timeout authoritative_result is incomplete: %+v", onboardingSource.AuthoritativeResult)
 	}
 	if strings.TrimSpace(onboardingTimeoutProjection.LocalScope) == "" ||
@@ -399,7 +404,7 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 			t.Fatalf("onboarding timeout projection must forbid %q: %+v", forbidden, onboardingTimeoutProjection.ForbiddenProjectionEffects)
 		}
 	}
-	for _, needle := range []string{"figma-onboarding-page-load-timeout.v1", "after 120s", "`Wireframe - 온보딩`", "`non_ui_top_level_inventory`", "mark onboarding generated paths unresolved"} {
+	for _, needle := range []string{"figma-onboarding-page-load-timeout.v1", "after 120s", "`Wireframe - 온보딩`", "`236:33845`", "`236:33847`", "six onboarding `riido.*` `API", "`non_ui_top_level_inventory`", "mark onboarding generated paths unresolved"} {
 		if !strings.Contains(docText, needle) {
 			t.Fatalf("projection doc must mention onboarding page load timeout with %q", needle)
 		}
@@ -423,6 +428,7 @@ func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, p
 		"teamswyg/riido-contracts#60",
 		"teamswyg/riido-contracts#62",
 		"teamswyg/riido-contracts#63",
+		"teamswyg/riido-contracts#64",
 	}
 	if len(sourceStabilizedBy) != len(want) {
 		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
