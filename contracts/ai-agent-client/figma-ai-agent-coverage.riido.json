@@ -574,7 +574,7 @@
       }
     }
   ],
-  "client_delivery_annotations": [
+  "api_generated_annotations": [
     {
       "node_id": "153:8545",
       "top_level_node_id": "153:15931",
@@ -600,7 +600,7 @@
       "resolution": "The Figma handoff note keeps the facade path on the first line, marks it as a Mutation, and explains the daemon/provider stop handoff."
     }
   ],
-  "client_delivery_annotation_inventory": [
+  "api_generated_annotation_inventory": [
     {
       "ui_area": "Participant dropdown / task details",
       "category_id": "700:0",

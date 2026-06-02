@@ -87,8 +87,8 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	generatedHaystack := generatedPathHaystack(spec, generatedPaths)
 	sourceGeneratedPaths := sourceCoverageGeneratedPathsByNode(sourceCoverage)
 	verifyRuntimeEndpointLabelProjection(t, sourceCoverage, docText)
-	verifyFigmaClientDeliveryAnnotations(t, sourceCoverage.ClientDeliveryAnnotations, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
-	verifyFigmaClientDeliveryAnnotationInventory(t, sourceCoverage.ClientDeliveryAnnotationInventory, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
+	verifyFigmaAPIGeneratedAnnotations(t, sourceCoverage.APIGeneratedAnnotations, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
+	verifyFigmaAPIGeneratedAnnotationInventory(t, sourceCoverage.APIGeneratedAnnotationInventory, docText, generatedPaths, sourceGeneratedPaths, string(core), string(react))
 	verifyLegacyNonUIAbsorptions(t, manifest.LegacyNonUIAbsorptions, sourceCoverage, docText, generatedPaths, string(core), string(react))
 	verifyNonUIPlanningAbsorptions(t, manifest.NonUIPlanningAbsorptions, sourceCoverage, docText, generatedPaths, string(core), string(react))
 
@@ -581,33 +581,33 @@ func verifyFigmaProjectionEntry(t *testing.T, entry figmaProjectionEntry, source
 	}
 }
 
-func verifyFigmaClientDeliveryAnnotations(t *testing.T, annotations []figmaSourceClientDeliveryAnnotation, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
+func verifyFigmaAPIGeneratedAnnotations(t *testing.T, annotations []figmaSourceAPIGeneratedAnnotation, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
 	t.Helper()
 	if got, want := len(annotations), 2; got != want {
-		t.Fatalf("mirrored client_delivery_annotations = %d, want %d", got, want)
+		t.Fatalf("mirrored api_generated_annotations = %d, want %d", got, want)
 	}
 	seen := map[string]bool{}
 	for _, annotation := range annotations {
 		if seen[annotation.NodeID] {
-			t.Fatalf("duplicate mirrored client delivery annotation %q", annotation.NodeID)
+			t.Fatalf("duplicate mirrored API Generated annotation %q", annotation.NodeID)
 		}
 		seen[annotation.NodeID] = true
 		if annotation.CategoryID != "700:0" || annotation.CategoryLabel != "API Generated" {
-			t.Fatalf("mirrored client delivery annotation %q category drifted: %+v", annotation.NodeID, annotation)
+			t.Fatalf("mirrored API Generated annotation %q category drifted: %+v", annotation.NodeID, annotation)
 		}
 		if !strings.HasPrefix(annotation.FigmaGeneratedPath, "riido.") {
-			t.Fatalf("mirrored client delivery annotation %q must preserve Figma facade path: %q", annotation.NodeID, annotation.FigmaGeneratedPath)
+			t.Fatalf("mirrored API Generated annotation %q must preserve Figma facade path: %q", annotation.NodeID, annotation.FigmaGeneratedPath)
 		}
 		canonical := strings.TrimPrefix(annotation.FigmaGeneratedPath, "riido.")
 		if annotation.CanonicalGeneratedPath != canonical {
-			t.Fatalf("mirrored client delivery annotation %q canonical path = %q, want %q", annotation.NodeID, annotation.CanonicalGeneratedPath, canonical)
+			t.Fatalf("mirrored API Generated annotation %q canonical path = %q, want %q", annotation.NodeID, annotation.CanonicalGeneratedPath, canonical)
 		}
 		if _, ok := generatedPaths[annotation.CanonicalGeneratedPath]; !ok {
-			t.Fatalf("mirrored client delivery annotation %q references unknown generated path %q", annotation.NodeID, annotation.CanonicalGeneratedPath)
+			t.Fatalf("mirrored API Generated annotation %q references unknown generated path %q", annotation.NodeID, annotation.CanonicalGeneratedPath)
 		}
 		sourcePaths, ok := sourceGeneratedPaths[annotation.CoverageEntryNodeID]
 		if !ok || !sourcePaths[annotation.CanonicalGeneratedPath] {
-			t.Fatalf("mirrored client delivery annotation %q canonical path %q is not covered by source entry %q", annotation.NodeID, annotation.CanonicalGeneratedPath, annotation.CoverageEntryNodeID)
+			t.Fatalf("mirrored API Generated annotation %q canonical path %q is not covered by source entry %q", annotation.NodeID, annotation.CanonicalGeneratedPath, annotation.CoverageEntryNodeID)
 		}
 		canonicalComment := "계약 generated path: `" + annotation.CanonicalGeneratedPath + "`"
 		accessComment := "접근 예시: `" + annotation.FigmaGeneratedPath + "`"
@@ -619,20 +619,20 @@ func verifyFigmaClientDeliveryAnnotations(t *testing.T, annotations []figmaSourc
 			{name: "react", body: react},
 		} {
 			if !strings.Contains(generated.body, canonicalComment) {
-				t.Fatalf("%s generated client missing %q for mirrored client delivery annotation %q", generated.name, canonicalComment, annotation.NodeID)
+				t.Fatalf("%s generated client missing %q for mirrored API Generated annotation %q", generated.name, canonicalComment, annotation.NodeID)
 			}
 			if !strings.Contains(generated.body, accessComment) {
-				t.Fatalf("%s generated client missing %q for mirrored client delivery annotation %q", generated.name, accessComment, annotation.NodeID)
+				t.Fatalf("%s generated client missing %q for mirrored API Generated annotation %q", generated.name, accessComment, annotation.NodeID)
 			}
 		}
 		for _, needle := range []string{annotation.NodeID, annotation.FigmaGeneratedPath, annotation.CanonicalGeneratedPath, annotation.CategoryLabel} {
 			if !strings.Contains(docText, needle) {
-				t.Fatalf("projection doc must mention mirrored client delivery annotation %q", needle)
+				t.Fatalf("projection doc must mention mirrored API Generated annotation %q", needle)
 			}
 		}
 		if strings.Contains(annotation.FigmaLabel, "작업중") {
 			if annotation.ResolutionStatus != "resolved_stale_handoff_copy" || !strings.Contains(annotation.Resolution, "stale") {
-				t.Fatalf("mirrored client delivery annotation %q stale copy is not resolved: %+v", annotation.NodeID, annotation)
+				t.Fatalf("mirrored API Generated annotation %q stale copy is not resolved: %+v", annotation.NodeID, annotation)
 			}
 			if !strings.Contains(docText, "상세내용은 작업중입니다") {
 				t.Fatalf("projection doc must mention stale Figma handoff copy for annotation %q", annotation.NodeID)
@@ -641,57 +641,57 @@ func verifyFigmaClientDeliveryAnnotations(t *testing.T, annotations []figmaSourc
 	}
 }
 
-func verifyFigmaClientDeliveryAnnotationInventory(t *testing.T, inventory []figmaSourceClientDeliveryAnnotationGroup, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
+func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaSourceAPIGeneratedAnnotationGroup, docText string, generatedPaths map[string]string, sourceGeneratedPaths map[string]map[string]bool, core, react string) {
 	t.Helper()
 	if got, want := len(inventory), 19; got != want {
-		t.Fatalf("mirrored client_delivery_annotation_inventory = %d, want %d", got, want)
+		t.Fatalf("mirrored api_generated_annotation_inventory = %d, want %d", got, want)
 	}
 	allowedKinds := map[string]bool{"Query": true, "Mutation": true, "SSE Stream": true}
 	seenPath := map[string]bool{}
 	totalAnnotations := 0
 	for _, group := range inventory {
 		if strings.TrimSpace(group.UIArea) == "" {
-			t.Fatalf("mirrored client delivery inventory group has empty ui_area: %+v", group)
+			t.Fatalf("mirrored API Generated inventory group has empty ui_area: %+v", group)
 		}
 		if group.CategoryID != "700:0" || group.CategoryLabel != "API Generated" {
-			t.Fatalf("mirrored client delivery inventory group %q category drifted: %+v", group.FigmaGeneratedPath, group)
+			t.Fatalf("mirrored API Generated inventory group %q category drifted: %+v", group.FigmaGeneratedPath, group)
 		}
 		if !strings.HasPrefix(group.FigmaGeneratedPath, "riido.") {
-			t.Fatalf("mirrored client delivery inventory group must preserve Figma facade path: %q", group.FigmaGeneratedPath)
+			t.Fatalf("mirrored API Generated inventory group must preserve Figma facade path: %q", group.FigmaGeneratedPath)
 		}
 		canonical := strings.TrimPrefix(group.FigmaGeneratedPath, "riido.")
 		if group.CanonicalGeneratedPath != canonical {
-			t.Fatalf("mirrored client delivery inventory group %q canonical path = %q, want %q", group.FigmaGeneratedPath, group.CanonicalGeneratedPath, canonical)
+			t.Fatalf("mirrored API Generated inventory group %q canonical path = %q, want %q", group.FigmaGeneratedPath, group.CanonicalGeneratedPath, canonical)
 		}
 		if seenPath[group.CanonicalGeneratedPath] {
-			t.Fatalf("duplicate mirrored client delivery inventory generated path %q", group.CanonicalGeneratedPath)
+			t.Fatalf("duplicate mirrored API Generated inventory generated path %q", group.CanonicalGeneratedPath)
 		}
 		seenPath[group.CanonicalGeneratedPath] = true
 		if _, ok := generatedPaths[group.CanonicalGeneratedPath]; !ok {
-			t.Fatalf("mirrored client delivery inventory group references unknown generated path %q", group.CanonicalGeneratedPath)
+			t.Fatalf("mirrored API Generated inventory group references unknown generated path %q", group.CanonicalGeneratedPath)
 		}
 		if !allowedKinds[group.OperationKind] {
-			t.Fatalf("mirrored client delivery inventory group %q operation_kind = %q", group.CanonicalGeneratedPath, group.OperationKind)
+			t.Fatalf("mirrored API Generated inventory group %q operation_kind = %q", group.CanonicalGeneratedPath, group.OperationKind)
 		}
 		if strings.TrimSpace(group.Background) == "" {
-			t.Fatalf("mirrored client delivery inventory group %q must preserve Korean background text", group.CanonicalGeneratedPath)
+			t.Fatalf("mirrored API Generated inventory group %q must preserve Korean background text", group.CanonicalGeneratedPath)
 		}
 		annotationCount := 0
 		for _, source := range group.Sources {
 			if strings.TrimSpace(source.PageID) == "" || strings.TrimSpace(source.TopLevelNodeID) == "" || strings.TrimSpace(source.CoverageEntryNodeID) == "" {
-				t.Fatalf("mirrored client delivery inventory group %q has invalid source: %+v", group.CanonicalGeneratedPath, source)
+				t.Fatalf("mirrored API Generated inventory group %q has invalid source: %+v", group.CanonicalGeneratedPath, source)
 			}
 			sourcePaths, ok := sourceGeneratedPaths[source.CoverageEntryNodeID]
 			if !ok || !sourcePaths[group.CanonicalGeneratedPath] {
-				t.Fatalf("mirrored client delivery inventory group %q canonical path is not covered by source entry %q", group.CanonicalGeneratedPath, source.CoverageEntryNodeID)
+				t.Fatalf("mirrored API Generated inventory group %q canonical path is not covered by source entry %q", group.CanonicalGeneratedPath, source.CoverageEntryNodeID)
 			}
 			if len(source.NodeIDs) == 0 {
-				t.Fatalf("mirrored client delivery inventory group %q source %q must list node ids", group.CanonicalGeneratedPath, source.TopLevelNodeID)
+				t.Fatalf("mirrored API Generated inventory group %q source %q must list node ids", group.CanonicalGeneratedPath, source.TopLevelNodeID)
 			}
 			annotationCount += len(source.NodeIDs)
 		}
 		if group.AnnotationCount != annotationCount {
-			t.Fatalf("mirrored client delivery inventory group %q annotation_count = %d, want node count %d", group.CanonicalGeneratedPath, group.AnnotationCount, annotationCount)
+			t.Fatalf("mirrored API Generated inventory group %q annotation_count = %d, want node count %d", group.CanonicalGeneratedPath, group.AnnotationCount, annotationCount)
 		}
 		totalAnnotations += annotationCount
 		canonicalComment := "계약 generated path: `" + group.CanonicalGeneratedPath + "`"
@@ -712,12 +712,12 @@ func verifyFigmaClientDeliveryAnnotationInventory(t *testing.T, inventory []figm
 		}
 		for _, needle := range []string{group.UIArea, group.FigmaGeneratedPath, group.CanonicalGeneratedPath, group.OperationKind, group.Background} {
 			if !strings.Contains(docText, needle) {
-				t.Fatalf("projection doc must mention mirrored client delivery inventory %q", needle)
+				t.Fatalf("projection doc must mention mirrored API Generated inventory %q", needle)
 			}
 		}
 	}
 	if got, want := totalAnnotations, 59; got != want {
-		t.Fatalf("mirrored client delivery inventory node annotations = %d, want %d", got, want)
+		t.Fatalf("mirrored API Generated inventory node annotations = %d, want %d", got, want)
 	}
 }
 
@@ -818,18 +818,18 @@ type figmaProjectionPlanningAbsorption struct {
 }
 
 type figmaSourceCoverageManifest struct {
-	SchemaVersion                     string                                     `json:"schema_version"`
-	ID                                string                                     `json:"id"`
-	StabilizedBy                      []string                                   `json:"stabilized_by"`
-	InspectionMethod                  figmaCoverageInspectionMethod              `json:"inspection_method"`
-	SupportingToolLimitations         []figmaSourceSupportingToolLimitation      `json:"supporting_tool_limitations"`
-	ExpectedPages                     []figmaSourceCoveragePage                  `json:"expected_pages"`
-	NonUITopLevelInventory            []figmaSourceCoverageInventory             `json:"non_ui_top_level_inventory"`
-	VerifiedEvidenceNodes             []figmaSourceCoverageNode                  `json:"verified_evidence_nodes"`
-	NonUITopLevelNodes                []figmaSourceCoverageEntry                 `json:"non_ui_top_level_nodes"`
-	ClientDeliveryAnnotations         []figmaSourceClientDeliveryAnnotation      `json:"client_delivery_annotations"`
-	ClientDeliveryAnnotationInventory []figmaSourceClientDeliveryAnnotationGroup `json:"client_delivery_annotation_inventory"`
-	Entries                           []figmaSourceCoverageEntry                 `json:"entries"`
+	SchemaVersion                   string                                   `json:"schema_version"`
+	ID                              string                                   `json:"id"`
+	StabilizedBy                    []string                                 `json:"stabilized_by"`
+	InspectionMethod                figmaCoverageInspectionMethod            `json:"inspection_method"`
+	SupportingToolLimitations       []figmaSourceSupportingToolLimitation    `json:"supporting_tool_limitations"`
+	ExpectedPages                   []figmaSourceCoveragePage                `json:"expected_pages"`
+	NonUITopLevelInventory          []figmaSourceCoverageInventory           `json:"non_ui_top_level_inventory"`
+	VerifiedEvidenceNodes           []figmaSourceCoverageNode                `json:"verified_evidence_nodes"`
+	NonUITopLevelNodes              []figmaSourceCoverageEntry               `json:"non_ui_top_level_nodes"`
+	APIGeneratedAnnotations         []figmaSourceAPIGeneratedAnnotation      `json:"api_generated_annotations"`
+	APIGeneratedAnnotationInventory []figmaSourceAPIGeneratedAnnotationGroup `json:"api_generated_annotation_inventory"`
+	Entries                         []figmaSourceCoverageEntry               `json:"entries"`
 }
 
 type figmaSourceCoveragePage struct {
@@ -873,7 +873,7 @@ type figmaSourceCoverageEntry struct {
 	CoveredFacts             []string `json:"covered_facts,omitempty"`
 }
 
-type figmaSourceClientDeliveryAnnotation struct {
+type figmaSourceAPIGeneratedAnnotation struct {
 	NodeID                 string `json:"node_id"`
 	TopLevelNodeID         string `json:"top_level_node_id"`
 	CoverageEntryNodeID    string `json:"coverage_entry_node_id"`
@@ -886,19 +886,19 @@ type figmaSourceClientDeliveryAnnotation struct {
 	Resolution             string `json:"resolution"`
 }
 
-type figmaSourceClientDeliveryAnnotationGroup struct {
-	UIArea                 string                                      `json:"ui_area"`
-	CategoryID             string                                      `json:"category_id"`
-	CategoryLabel          string                                      `json:"category_label"`
-	FigmaGeneratedPath     string                                      `json:"figma_generated_path"`
-	CanonicalGeneratedPath string                                      `json:"canonical_generated_path"`
-	OperationKind          string                                      `json:"operation_kind"`
-	Background             string                                      `json:"background"`
-	AnnotationCount        int                                         `json:"annotation_count"`
-	Sources                []figmaSourceClientDeliveryAnnotationSource `json:"sources"`
+type figmaSourceAPIGeneratedAnnotationGroup struct {
+	UIArea                 string                                    `json:"ui_area"`
+	CategoryID             string                                    `json:"category_id"`
+	CategoryLabel          string                                    `json:"category_label"`
+	FigmaGeneratedPath     string                                    `json:"figma_generated_path"`
+	CanonicalGeneratedPath string                                    `json:"canonical_generated_path"`
+	OperationKind          string                                    `json:"operation_kind"`
+	Background             string                                    `json:"background"`
+	AnnotationCount        int                                       `json:"annotation_count"`
+	Sources                []figmaSourceAPIGeneratedAnnotationSource `json:"sources"`
 }
 
-type figmaSourceClientDeliveryAnnotationSource struct {
+type figmaSourceAPIGeneratedAnnotationSource struct {
 	PageID              string   `json:"page_id"`
 	TopLevelNodeID      string   `json:"top_level_node_id"`
 	CoverageEntryNodeID string   `json:"coverage_entry_node_id"`
