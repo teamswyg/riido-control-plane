@@ -376,6 +376,9 @@ func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, p
 		"teamswyg/riido-contracts#52",
 		"teamswyg/riido-contracts#54",
 		"teamswyg/riido-contracts#55",
+		"teamswyg/riido-contracts#56",
+		"teamswyg/riido-contracts#57",
+		"teamswyg/riido-contracts#58",
 	}
 	if len(sourceStabilizedBy) != len(want) {
 		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
