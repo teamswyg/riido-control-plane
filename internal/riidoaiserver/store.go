@@ -526,18 +526,19 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 
 	state.nextAssignmentSeq++
 	assignment := Assignment{
-		ID:                    fmt.Sprintf("asn-%06d", state.nextAssignmentSeq),
-		TaskID:                taskID,
-		ComponentID:           req.ComponentID,
-		AgentID:               req.AgentID,
-		RuntimeProvider:       req.RuntimeProvider,
-		Prompt:                req.Prompt,
-		AgentInstruction:      req.AgentInstruction,
-		State:                 AssignmentQueued,
-		ReplacesAssignmentID:  replacesID,
-		BlockedByAssignmentID: blockedByID,
-		CreatedAt:             now,
-		UpdatedAt:             now,
+		ID:                       fmt.Sprintf("asn-%06d", state.nextAssignmentSeq),
+		TaskID:                   taskID,
+		ComponentID:              req.ComponentID,
+		AgentID:                  req.AgentID,
+		RuntimeProvider:          req.RuntimeProvider,
+		Prompt:                   req.Prompt,
+		AgentInstruction:         req.AgentInstruction,
+		AllowExperimentalRuntime: req.AllowExperimentalRuntime,
+		State:                    AssignmentQueued,
+		ReplacesAssignmentID:     replacesID,
+		BlockedByAssignmentID:    blockedByID,
+		CreatedAt:                now,
+		UpdatedAt:                now,
 	}
 	state.assignments[assignment.ID] = assignment
 	state.agentAssignments[assignment.AgentID] = append(state.agentAssignments[assignment.AgentID], assignment.ID)

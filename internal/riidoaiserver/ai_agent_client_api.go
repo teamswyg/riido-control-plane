@@ -129,23 +129,25 @@ const (
 )
 
 type RuntimeRecord struct {
-	RuntimeID        string                `json:"runtime_id"`
-	DeviceID         string                `json:"device_id"`
-	Kind             RuntimeKind           `json:"kind"`
-	Availability     RuntimeAvailability   `json:"availability"`
-	DetectionState   RuntimeDetectionState `json:"detection_state"`
-	OwnerPrincipalID string                `json:"owner_principal_id,omitempty"`
-	LastDetectedAt   time.Time             `json:"last_detected_at,omitempty"`
-	HasAssignedAgent bool                  `json:"has_assigned_agent"`
-	Models           []RuntimeModelRecord  `json:"models"`
+	RuntimeID                 string                `json:"runtime_id"`
+	DeviceID                  string                `json:"device_id"`
+	Kind                      RuntimeKind           `json:"kind"`
+	Availability              RuntimeAvailability   `json:"availability"`
+	DetectionState            RuntimeDetectionState `json:"detection_state"`
+	OwnerPrincipalID          string                `json:"owner_principal_id,omitempty"`
+	LastDetectedAt            time.Time             `json:"last_detected_at,omitempty"`
+	HasAssignedAgent          bool                  `json:"has_assigned_agent"`
+	RequiresExperimentalOptIn bool                  `json:"requires_experimental_opt_in"`
+	Models                    []RuntimeModelRecord  `json:"models"`
 }
 
 type RuntimeSnapshotRecord struct {
-	RuntimeID      string                `json:"runtime_id"`
-	Kind           RuntimeKind           `json:"kind"`
-	Availability   RuntimeAvailability   `json:"availability,omitempty"`
-	DetectionState RuntimeDetectionState `json:"detection_state,omitempty"`
-	Models         []RuntimeModelRecord  `json:"models,omitempty"`
+	RuntimeID                 string                `json:"runtime_id"`
+	Kind                      RuntimeKind           `json:"kind"`
+	Availability              RuntimeAvailability   `json:"availability,omitempty"`
+	DetectionState            RuntimeDetectionState `json:"detection_state,omitempty"`
+	RequiresExperimentalOptIn bool                  `json:"requires_experimental_opt_in,omitempty"`
+	Models                    []RuntimeModelRecord  `json:"models,omitempty"`
 }
 
 type DeviceRecord struct {

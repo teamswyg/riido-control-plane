@@ -14,6 +14,10 @@ type AgentRegistry interface {
 	LookupAgent(agentID string) (AgentRuntimeBinding, bool)
 }
 
+type AgentRuntimeFactRegistry interface {
+	LookupAgentRuntimeFact(agentID string) (AgentRuntimeBinding, RuntimeRecord, bool)
+}
+
 type compositeAgentRegistry struct {
 	registries []AgentRegistry
 }

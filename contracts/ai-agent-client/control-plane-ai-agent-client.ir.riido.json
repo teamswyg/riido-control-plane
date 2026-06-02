@@ -230,6 +230,24 @@
       ]
     },
     {
+      "policy_id": "device_principal_enrollment.v1",
+      "kind": "auth_boundary",
+      "description": "Desktop은 UserPrincipal session으로 account-owned device를 등록하고, daemon은 device_id와 device_secret으로 DevicePrincipal 인증을 수행합니다. workspace_id는 agent/API scope이며 device owner가 아닙니다.",
+      "rules": [
+        "principal: browser and desktop webview client requests use UserPrincipal authorization",
+        "principal: daemon SaaS polling, heartbeat, progress, and command reads use DevicePrincipal authorization",
+        "ownership: device and runtime belong to the account/user that registered the device, not to a workspace",
+        "ownership: agent belongs to a workspace and stores the creator as owner_principal_id",
+        "enrollment: Desktop registers the device only after an established UserPrincipal session exists",
+        "credential: control-plane returns device_secret only once at enrollment time and stores only a server-side hash",
+        "credential: Desktop stores the credential outside browser/webview JavaScript and injects it into daemon process environment",
+        "daemon_headers: daemon sends X-Riido-Device-ID and X-Riido-Device-Secret for SaaS device authentication",
+        "no_browser_jwt: daemon must not consume browser JWT or X-Riido-AI-Agent-Token as its long-lived credential",
+        "frontend_boundary: riido-client generated APIs must not receive device_secret in schemas, examples, comments, events, logs, or status responses",
+        "revocation_future: rotation and revocation are future DevicePrincipal lifecycle operations, not workspace create/list operations"
+      ]
+    },
+    {
       "policy_id": "agent_assignment_target_scope.v1",
       "kind": "target_scope",
       "description": "AI Agent assignment, AI-Agent-directed task-thread messages, task-thread reads, and task stop actions are generated only for Riido task and subtask surfaces.",
@@ -678,6 +696,7 @@
           "availability",
           "detection_state",
           "has_assigned_agent",
+          "requires_experimental_opt_in",
           "models"
         ],
         "properties": [
@@ -712,6 +731,10 @@
           },
           {
             "name": "has_assigned_agent",
+            "type": "boolean"
+          },
+          {
+            "name": "requires_experimental_opt_in",
             "type": "boolean"
           },
           {
@@ -1274,7 +1297,7 @@
           },
           {
             "name": "default_visibility",
-            "description": "fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. mock은 안전하게 private 값을 사용합니다.",
+            "description": "fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. 기본값은 안전하게 private 값을 사용합니다.",
             "ref": "AgentVisibility"
           },
           {

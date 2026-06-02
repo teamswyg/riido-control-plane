@@ -178,7 +178,7 @@ export interface AgentEditabilityResponse {
  */
 export interface AgentOnboardingFixture {
   /**
-   * fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. mock은 안전하게 private 값을 사용합니다.
+   * fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. 기본값은 안전하게 private 값을 사용합니다.
    */
   default_visibility: AgentVisibility;
   /**
@@ -492,6 +492,7 @@ export interface RuntimeRecord {
   last_detected_at?: string;
   models: RuntimeModelRecord[];
   owner_principal_id?: string;
+  requires_experimental_opt_in: boolean;
   runtime_id: string;
 }
 
