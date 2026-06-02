@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -584,30 +586,33 @@ func assertNoStaleFigmaNodeReference(t *testing.T, root, staleNode string) {
 
 func loadFigmaProjectionManifest(t *testing.T, path string) figmaProjectionManifest {
 	t.Helper()
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("read projection manifest: %v", err)
-	}
 	var manifest figmaProjectionManifest
-	dec := json.NewDecoder(bytes.NewReader(data))
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(&manifest); err != nil {
-		t.Fatalf("decode projection manifest: %v", err)
-	}
+	decodeStrictJSON(t, path, &manifest)
 	return manifest
 }
 
 func loadFigmaSourceCoverageManifest(t *testing.T, path string) figmaSourceCoverageManifest {
 	t.Helper()
+	var manifest figmaSourceCoverageManifest
+	decodeStrictJSON(t, path, &manifest)
+	return manifest
+}
+
+func decodeStrictJSON(t *testing.T, path string, target any) {
+	t.Helper()
 	data, err := os.ReadFile(path)
 	if err != nil {
-		t.Fatalf("read source coverage manifest: %v", err)
+		t.Fatalf("read %s: %v", path, err)
 	}
-	var manifest figmaSourceCoverageManifest
-	if err := json.Unmarshal(data, &manifest); err != nil {
-		t.Fatalf("decode source coverage manifest: %v", err)
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(target); err != nil {
+		t.Fatalf("decode %s: %v", path, err)
 	}
-	return manifest
+	var trailing struct{}
+	if err := dec.Decode(&trailing); !errors.Is(err, io.EOF) {
+		t.Fatalf("decode %s: trailing JSON document: %v", path, err)
+	}
 }
 
 func sourceCoverageGeneratedPathsByNode(manifest figmaSourceCoverageManifest) map[string]map[string]bool {
@@ -1068,17 +1073,38 @@ type figmaProjectionPlanningAbsorption struct {
 type figmaSourceCoverageManifest struct {
 	SchemaVersion                       string                                       `json:"schema_version"`
 	ID                                  string                                       `json:"id"`
+	RiidoTask                           string                                       `json:"riido_task"`
 	StabilizedBy                        []string                                     `json:"stabilized_by"`
+	HumanDoc                            string                                       `json:"human_doc"`
+	RelatedManifests                    []string                                     `json:"related_manifests"`
+	Figma                               figmaSourceCoverageSource                    `json:"figma"`
 	InspectionMethod                    figmaCoverageInspectionMethod                `json:"inspection_method"`
 	SupportingToolLimitations           []figmaSourceSupportingToolLimitation        `json:"supporting_tool_limitations"`
+	CoveragePolicy                      figmaSourceCoveragePolicy                    `json:"coverage_policy"`
 	APIGeneratedAnnotationContentPolicy figmaSourceAPIGeneratedAnnotationContentRule `json:"api_generated_annotation_content_policy"`
 	ExpectedPages                       []figmaSourceCoveragePage                    `json:"expected_pages"`
+	ExpectedTopLevelNodes               []figmaSourceCoverageNode                    `json:"expected_top_level_nodes"`
 	NonUITopLevelInventory              []figmaSourceCoverageInventory               `json:"non_ui_top_level_inventory"`
 	VerifiedEvidenceNodes               []figmaSourceCoverageNode                    `json:"verified_evidence_nodes"`
 	NonUITopLevelNodes                  []figmaSourceCoverageEntry                   `json:"non_ui_top_level_nodes"`
 	APIGeneratedAnnotations             []figmaSourceAPIGeneratedAnnotation          `json:"api_generated_annotations"`
 	APIGeneratedAnnotationInventory     []figmaSourceAPIGeneratedAnnotationGroup     `json:"api_generated_annotation_inventory"`
 	Entries                             []figmaSourceCoverageEntry                   `json:"entries"`
+}
+
+type figmaSourceCoverageSource struct {
+	FileKey          string `json:"file_key"`
+	FileName         string `json:"file_name"`
+	PageID           string `json:"page_id"`
+	PageName         string `json:"page_name"`
+	InspectedAt      string `json:"inspected_at"`
+	InspectionSource string `json:"inspection_source"`
+}
+
+type figmaSourceCoveragePolicy struct {
+	Summary  string `json:"summary"`
+	TopDown  string `json:"top_down"`
+	BottomUp string `json:"bottom_up"`
 }
 
 type figmaSourceCoveragePage struct {
@@ -1098,17 +1124,22 @@ type figmaSourceCoverageNode struct {
 }
 
 type figmaCoverageInspectionMethod struct {
-	ID                           string `json:"id"`
-	PageRegistryExpression       string `json:"page_registry_expression"`
-	TopLevelChildCountExpression string `json:"top_level_child_count_expression"`
-	Rule                         string `json:"rule"`
+	ID                           string   `json:"id"`
+	Authority                    string   `json:"authority"`
+	PageRegistryExpression       string   `json:"page_registry_expression"`
+	TopLevelChildCountExpression string   `json:"top_level_child_count_expression"`
+	SupportingTools              []string `json:"supporting_tools"`
+	Rule                         string   `json:"rule"`
 }
 
 type figmaSourceSupportingToolLimitation struct {
 	ID                  string   `json:"id"`
 	Tool                string   `json:"tool"`
+	ObservedAt          string   `json:"observed_at"`
 	ObservedResult      string   `json:"observed_result"`
+	AuthoritativeSource string   `json:"authoritative_source"`
 	AuthoritativeResult []string `json:"authoritative_result"`
+	Rule                string   `json:"rule"`
 }
 
 type figmaSourceAPIGeneratedAnnotationContentRule struct {
@@ -1147,14 +1178,23 @@ type figmaSourceAPIGeneratedAnnotationLivePageCounter struct {
 }
 
 type figmaSourceCoverageEntry struct {
-	PageID                   string   `json:"page_id,omitempty"`
-	NodeID                   string   `json:"node_id"`
-	Name                     string   `json:"name,omitempty"`
-	CoverageStatus           string   `json:"coverage_status,omitempty"`
-	EvidenceKind             string   `json:"evidence_kind,omitempty"`
-	AbsorbedByTopLevelNodeID string   `json:"absorbed_by_top_level_node_id,omitempty"`
-	GeneratedPaths           []string `json:"generated_paths,omitempty"`
-	CoveredFacts             []string `json:"covered_facts,omitempty"`
+	PageID                   string                       `json:"page_id,omitempty"`
+	NodeID                   string                       `json:"node_id"`
+	Name                     string                       `json:"name,omitempty"`
+	CoverageStatus           string                       `json:"coverage_status,omitempty"`
+	EvidenceKind             string                       `json:"evidence_kind,omitempty"`
+	AbsorbedByTopLevelNodeID string                       `json:"absorbed_by_top_level_node_id,omitempty"`
+	SSOTDocs                 []string                     `json:"ssot_docs,omitempty"`
+	OwnerRepos               []string                     `json:"owner_repos,omitempty"`
+	GeneratedPaths           []string                     `json:"generated_paths,omitempty"`
+	CoveredFacts             []string                     `json:"covered_facts,omitempty"`
+	DirectionLoop            figmaSourceCoverageDirection `json:"direction_loop,omitempty"`
+	Reason                   string                       `json:"reason,omitempty"`
+}
+
+type figmaSourceCoverageDirection struct {
+	TopDown  string `json:"top_down,omitempty"`
+	BottomUp string `json:"bottom_up,omitempty"`
 }
 
 type figmaSourceAPIGeneratedAnnotation struct {
