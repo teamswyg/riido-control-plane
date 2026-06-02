@@ -1278,7 +1278,8 @@
         },
         "x-riido-scenarios": [
           "assignAIAgentTask.participant-dropdown-assigns-agent",
-          "assignAIAgentTask.only-one-active-assigned-agent-per-task"
+          "assignAIAgentTask.only-one-active-assigned-agent-per-task",
+          "assignAIAgentTask.assignment-excludes-team-and-openapi-key"
         ]
       }
     },
@@ -2791,7 +2792,10 @@
             "v2.aiAgent.tasks.assignableAgents",
             "v2.aiAgent.tasks.threads"
           ]
-        }
+        },
+        "x-riido-scenarios": [
+          "assignAIAgentTaskV2.workspace-scoped-assignment-excludes-team-and-openapi-key"
+        ]
       }
     },
     "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/comments": {
@@ -3824,7 +3828,7 @@
         "type": "object"
       },
       "AssignAIAgentTaskRequest": {
-        "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다.",
+        "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.",
         "properties": {
           "agent_id": {
             "type": "string"

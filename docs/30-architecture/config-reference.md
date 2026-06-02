@@ -27,9 +27,9 @@ This file is the public Factor 12 configuration catalog for
 | `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI` | empty | AWS/ECS runtime | optional ECS relative credential endpoint; used with `http://169.254.170.2` when the full URI is absent |
 | `AWS_CONTAINER_AUTHORIZATION_TOKEN` | empty | AWS/ECS runtime | optional authorization token forwarded to the ECS credential endpoint |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL` | empty | `cmd/riido_ai_server` | existing Riido API server base URL used for server-to-server task context lookup |
-| `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID` | empty | `cmd/riido_ai_server` | workspace id used in the existing API server task context path |
-| `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID` | empty | `cmd/riido_ai_server` | team id used in the existing API server task context path |
-| `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY` | empty | `cmd/riido_ai_server` | existing API server Open API key sent as `X-Workspace-Api-Key`; secret, server-only |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID` | empty | `cmd/riido_ai_server` | legacy Open API task-context adapter input; outside generated AI Agent assignment |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID` | empty | `cmd/riido_ai_server` | legacy Open API task-context adapter input; outside generated AI Agent assignment |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY` | empty | `cmd/riido_ai_server` | legacy Open API task-context adapter key sent as `X-Workspace-Api-Key`; outside generated AI Agent assignment |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS` | task-context client default when unset | `cmd/riido_ai_server` | positive integer timeout override for task context lookup requests |
 
 All JSON env vars are decoded with unknown-field rejection and trailing-data
@@ -56,8 +56,9 @@ configured authorizer endpoint. It is not a generated frontend token. If set,
 through `X-Riido-Control-Plane-Authorizer-Key` on the control-plane to
 authorizer hop.
 
-The generated AI Agent assignment/auth path does not depend on `team_id` or an
-Open API workspace key. The task-context base URL can run by itself through the
+The generated AI Agent assignment/auth path does not depend on `team_id`,
+`teamId`, OpenAPI task-context paths, or Open API key transport such as
+`X-Workspace-Api-Key`. The task-context base URL can run by itself through the
 private JWT task-context reader. The workspace id, team id, and workspace API
 key are only the legacy Open API task-context reader group; if any one of that
 group is set, all three must be set. The workspace API key is never a generated

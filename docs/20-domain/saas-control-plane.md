@@ -140,16 +140,24 @@ repository selection rule. It does not own:
 > Riido task: RIID-4800 `server task context http client assignment prompt wiring`
 
 The production wiring path reads task context from the existing API server as a
-server-to-server call. The legacy Open API key reader remains available for
-automation surfaces that already own `workspace_id`, `team_id`, and
-`X-Workspace-Api-Key`, but browser/desktop-webview generated assignment must not
-depend on that key. For generated `tasks.assign`, control-plane uses the
-request's already-authorized user token, resolves the task's team location from
-`task_id` through the existing private component workspace lookup, reads the
-private component document, composes `AssignRequest.prompt`, and then calls the
-assignment store. The selected agent is not made team-aware; team resolution is
-only an internal task-context lookup detail. If lookup or composition fails, the
-HTTP handler fails before a daemon can lease provider work.
+server-to-server call. For browser/desktop-webview generated assignment,
+`team_id`, `teamId`, OpenAPI task-context paths, and Open API key transport such
+as `X-Workspace-Api-Key` are outside the problem entirely. They are not
+generated request fields, not agent fields, not daemon polling inputs, not
+deployment prerequisites, and not smoke-test acceptance criteria. For generated
+`tasks.assign`, control-plane uses the request's already-authorized user token,
+resolves the task's team location from `task_id` through the existing private
+component workspace lookup, reads the private component document, composes
+`AssignRequest.prompt`, and then calls the assignment store. The selected agent
+is not made team-aware; any team value observed during lookup is a transient
+API-server location result and must not be persisted into the agent or exposed
+to generated clients. If lookup or composition fails, the HTTP handler fails
+before a daemon can lease provider work.
+
+The legacy Open API key task-context reader is a separate compatibility adapter
+for automation surfaces outside the generated AI Agent assignment flow. It is
+not the SSOT for generated client behavior and must not be used to reason about,
+or validate, the daemon-facing assignment path.
 
 Development fixture responses may still use deterministic synthetic thread
 responses, but those responses are not evidence that a daemon assignment prompt
@@ -438,15 +446,14 @@ must share this durable boundary so an accepted generated assignment can be
 observed by a later daemon `poll` even when the HTTP requests land on different
 ECS tasks or after a deployment restart.
 
-The task-context variables configure the production server-to-server read from
-the existing Riido API server. Generated AI Agent assignment/auth does not use
-team id or Open API workspace key as a principal, route selector, or client
-credential. The private task-context reader uses the request bearer token and
-resolves task/team context internally. The workspace id, team id, and workspace
-API key are only the legacy Open API task-context reader group; when that group
-is used, all three must be set together. The API key is sent only as
-`X-Workspace-Api-Key`; it is not a browser/client token and must not be exposed
-to generated frontend clients.
+The generated AI Agent assignment path configures only the production
+server-to-server base URL for the existing Riido API server. `team_id`,
+`teamId`, OpenAPI task-context paths, and Open API key transport such as
+`X-Workspace-Api-Key` are not part of that problem; they must stay out of
+generated client requests, agent records, daemon polling, smoke criteria, and
+deployment reasoning for this flow. The legacy Open API key task-context
+environment variables remain a compatibility adapter outside the generated AI
+Agent assignment SSOT.
 
 This boundary does not own legacy broad bearer-token compatibility, assignment
 snapshot/outbox stores, durable operation save/claim wiring, EventBridge,
