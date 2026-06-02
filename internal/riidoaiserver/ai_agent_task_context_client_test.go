@@ -65,6 +65,118 @@ func TestAIAgentTaskContextClientRequestsOpenAPIEndpoint(t *testing.T) {
 	}
 }
 
+func TestAIAgentPrivateTaskContextClientResolvesTeamAndComponentWithBearer(t *testing.T) {
+	var gotWorkspacePath string
+	var gotDetailPath string
+	var gotAuthorization []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotAuthorization = append(gotAuthorization, r.Header.Get("Authorization"))
+		switch r.URL.Path {
+		case "/public/components/component-a/workspace":
+			gotWorkspacePath = r.URL.Path
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"id":            "component-a",
+				"componentType": "task",
+				"team": map[string]any{
+					"id":      "team-a",
+					"teamKey": "RIID",
+					"workspace": map[string]any{
+						"id": "workspace-a",
+					},
+				},
+			})
+		case "/teams/team-a/components/component-a":
+			gotDetailPath = r.URL.Path
+			if got := r.URL.Query().Get("getDocument"); got != "true" {
+				t.Fatalf("getDocument = %q", got)
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"id":            "component-a",
+				"componentType": "task",
+				"title":         "Implement JWT task context",
+				"keyNumber":     "RIID-4873",
+				"document": map[string]any{
+					"id":               "document-a",
+					"tiptapDocumentId": "doc-a",
+					"HTMLContent":      "<p>Use the private component document.</p>",
+				},
+				"milestone": map[string]any{
+					"id":            "milestone-a",
+					"componentType": "milestone",
+					"title":         "Control plane",
+					"keyNumber":     "RIID-4872",
+					"project": map[string]any{
+						"id":            "project-a",
+						"componentType": "project",
+						"title":         "AI Agent",
+						"keyNumber":     "RIID-4800",
+					},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	client, err := NewAIAgentPrivateTaskContextClient(AIAgentPrivateTaskContextClientConfig{BaseURL: server.URL})
+	if err != nil {
+		t.Fatalf("NewAIAgentPrivateTaskContextClient: %v", err)
+	}
+	contextSnapshot, err := client.GetAIAgentTaskContextForRequest(context.Background(), AIAgentTaskContextRequest{
+		ComponentID: "component-a",
+		WorkspaceID: "workspace-a",
+		BearerToken: "user-jwt",
+	})
+	if err != nil {
+		t.Fatalf("GetAIAgentTaskContextForRequest: %v", err)
+	}
+	if gotWorkspacePath != "/public/components/component-a/workspace" || gotDetailPath != "/teams/team-a/components/component-a" {
+		t.Fatalf("paths workspace=%q detail=%q", gotWorkspacePath, gotDetailPath)
+	}
+	for _, got := range gotAuthorization {
+		if got != "Bearer user-jwt" {
+			t.Fatalf("authorization header = %q", got)
+		}
+	}
+	if contextSnapshot.Component.Title != "Implement JWT task context" ||
+		contextSnapshot.Document.Content != "<p>Use the private component document.</p>" ||
+		contextSnapshot.Document.ContentFormat != "html" ||
+		contextSnapshot.Hierarchy.Project.Title != "AI Agent" ||
+		contextSnapshot.Hierarchy.Milestone.Title != "Control plane" ||
+		len(contextSnapshot.Repositories) != 0 {
+		t.Fatalf("context snapshot = %+v", contextSnapshot)
+	}
+}
+
+func TestAIAgentPrivateTaskContextClientRejectsWorkspaceMismatch(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"id":            "component-a",
+			"componentType": "task",
+			"team": map[string]any{
+				"id": "team-a",
+				"workspace": map[string]any{
+					"id": "workspace-other",
+				},
+			},
+		})
+	}))
+	defer server.Close()
+	client, err := NewAIAgentPrivateTaskContextClient(AIAgentPrivateTaskContextClientConfig{BaseURL: server.URL})
+	if err != nil {
+		t.Fatalf("NewAIAgentPrivateTaskContextClient: %v", err)
+	}
+	_, err = client.GetAIAgentTaskContextForRequest(context.Background(), AIAgentTaskContextRequest{
+		ComponentID: "component-a",
+		WorkspaceID: "workspace-a",
+		BearerToken: "user-jwt",
+	})
+	if err == nil || !strings.Contains(err.Error(), "workspace mismatch") {
+		t.Fatalf("GetAIAgentTaskContextForRequest err=%v", err)
+	}
+}
+
 func TestAIAgentTaskContextClientFailsClosedOnNon2xx(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "nope", http.StatusBadGateway)

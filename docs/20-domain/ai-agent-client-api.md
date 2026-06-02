@@ -119,8 +119,11 @@ For agent settings:
   device/runtime ownership account-scoped.
 - In production assignment wiring, the task-context read is server-to-server
   only. The generated client does not receive or send
-  `X-Workspace-Api-Key`; control-plane uses that key only when composing the
-  daemon-facing assignment prompt.
+  `X-Workspace-Api-Key`. For browser/desktop-webview generated assignment,
+  control-plane forwards the already-authorized user JWT to the existing Riido
+  API server, resolves the task's team location from `task_id`, and then reads
+  the private component document. The agent itself remains team-less; team
+  resolution is only an internal task-context lookup detail.
 - `riido-daemon` owns runtime consumption of `Assignment.agent_instruction`;
   this server doc does not define provider prompt placement.
 - `riido-infra` owns deployment/storage changes only when the API requires new

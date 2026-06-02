@@ -307,12 +307,25 @@ func taskContextReaderFromEnv() (riidoaiserver.AIAgentTaskContextReader, error) 
 	if baseURL == "" && workspaceID == "" && teamID == "" && apiKey == "" && timeoutRaw == "" {
 		return nil, nil
 	}
-	if baseURL == "" || workspaceID == "" || teamID == "" || apiKey == "" {
-		return nil, fmt.Errorf("%s, %s, %s, and %s must be set together", envTaskContextBaseURL, envTaskContextWorkspaceID, envTaskContextTeamID, envTaskContextAPIKey)
+	if baseURL == "" {
+		return nil, fmt.Errorf("%s is required when task context configuration is set", envTaskContextBaseURL)
 	}
 	timeout, err := envDurationSeconds(envTaskContextTimeout, 0)
 	if err != nil {
 		return nil, err
+	}
+	if workspaceID == "" && teamID == "" && apiKey == "" {
+		client, err := riidoaiserver.NewAIAgentPrivateTaskContextClient(riidoaiserver.AIAgentPrivateTaskContextClientConfig{
+			BaseURL: baseURL,
+			Timeout: timeout,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", envTaskContextBaseURL, err)
+		}
+		return client, nil
+	}
+	if workspaceID == "" || teamID == "" || apiKey == "" {
+		return nil, fmt.Errorf("%s, %s, and %s must be set together for OpenAPI task context; omit all three to use private JWT task context", envTaskContextWorkspaceID, envTaskContextTeamID, envTaskContextAPIKey)
 	}
 	client, err := riidoaiserver.NewAIAgentTaskContextClient(riidoaiserver.AIAgentTaskContextClientConfig{
 		BaseURL:         baseURL,
