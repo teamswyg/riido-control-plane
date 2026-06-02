@@ -2,7 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
-  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842", "RIID-4844", "RIID-4845", "RIID-4853"],
+  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842", "RIID-4844", "RIID-4845", "RIID-4853", "RIID-4855"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -62,6 +62,44 @@
       "task definition JSON",
       "CodeDeploy AppSpec JSON",
       "CodeDeploy deployment ID"
+    ]
+  },
+  "codedeploy_activation_gate": {
+    "riido_task": "RIID-4855",
+    "canonical_owner": "riido-control-plane",
+    "infra_awareness_owner": "riido-infra",
+    "status": "topology-ready-operator-environment-gated",
+    "rule": "CodeDeploy blue/green activation is a control-plane CD workflow mode, not an infra-owned deployment action. The mode may be enabled only after infra topology/evidence exists and operators map the infra-provided application/deployment-group names into GitHub environment configuration out of band.",
+    "activation_requirements": [
+      "riido-infra CodeDeploy topology work unit has been applied and reviewed outside public repositories",
+      "both optional CodeDeploy GitHub environment variables are configured together",
+      "the deploy workflow still registers the task-definition revision from the same immutable image value",
+      "the deploy workflow creates and waits for the CodeDeploy deployment in the same job",
+      "post-shift healthz readyz and v2 bootstrap smoke run after CodeDeploy success"
+    ],
+    "public_repo_may_keep": [
+      "the activation rule",
+      "stable activation key categories",
+      "stable infra source names without values",
+      "aggregate activation readiness or pass-fail status without live payload values"
+    ],
+    "public_repo_must_not_keep": [
+      "environment-specific CodeDeploy application or deployment-group values",
+      "CodeDeploy service role ARN",
+      "target group or listener ARN",
+      "task-definition ARN or JSON",
+      "generated CodeDeploy AppSpec or request JSON",
+      "CodeDeploy deployment ID",
+      "image URI or digest",
+      "smoke payloads or replay captures",
+      "workflow run URL as deploy evidence",
+      "Terraform plan, state, tfvars, apply logs, or raw operator evidence"
+    ],
+    "infra_must_know": [
+      "activation does not move create/wait/smoke execution out of riido-control-plane",
+      "infra owns topology, IAM, drift, and private/operator evidence before activation",
+      "infra may expose only stable source names and private evidence summaries to operators",
+      "public repos should not request convenience handoff payloads from infra or the deploy workflow"
     ]
   },
   "future_strategies": [

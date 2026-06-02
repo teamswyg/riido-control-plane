@@ -52,6 +52,18 @@ from infra outputs; service role ARNs, target group/listener ARNs,
 task-definition JSON, generated AppSpec JSON, deployment IDs, and smoke payloads
 must not become public workflow inputs or uploaded artifacts.
 
+RIID-4855 makes activation explicit. CodeDeploy blue/green is topology-ready,
+but still operator/environment gated: infra topology and private evidence must
+exist first, then operators map only the stable application/deployment-group
+names into GitHub environment configuration out of band. The public workflow
+does not become an infra workflow in that state. It still registers the
+task-definition revision from the immutable image, creates/waits for CodeDeploy,
+and runs post-shift smoke in the same job. Public docs may describe that gate
+and stable categories, but must not publish environment-specific CodeDeploy
+values, role/listener/target-group ARNs, task-definition values, generated
+AppSpec/request JSON, deployment IDs, image values, smoke payloads, workflow run
+URLs as evidence, or Terraform/operator evidence.
+
 ## Public Redaction
 
 Public repo docs and workflow files may contain only stable key names and
@@ -227,6 +239,9 @@ runtime artifact CD execution and CodeDeploy create/wait/smoke stay in
 private/operator evidence. This is the same ownership rule as RIID-4825, but it
 adds a stricter public posture: even non-secret operational details should be
 public only when they are needed for workflow wiring, review, or operator setup.
+RIID-4855 applies the same posture to CodeDeploy activation: the fact that
+topology exists is public-safe, while the activation values and live deployment
+evidence are not public hand-off material.
 
 That means public docs may keep ownership, workflow, trigger, stable category,
 manifest-location, and non-live behavior descriptions. They should avoid
