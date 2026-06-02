@@ -471,6 +471,7 @@ func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, p
 		"teamswyg/riido-contracts#64",
 		"teamswyg/riido-contracts#65",
 		"teamswyg/riido-contracts#66",
+		"teamswyg/riido-contracts#67",
 	}
 	if len(sourceStabilizedBy) != len(want) {
 		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
@@ -700,12 +701,21 @@ func verifyFigmaAPIGeneratedAnnotations(t *testing.T, annotations []figmaSourceA
 		if _, ok := generatedPaths[annotation.CanonicalGeneratedPath]; !ok {
 			t.Fatalf("mirrored API Generated annotation %q references unknown generated path %q", annotation.NodeID, annotation.CanonicalGeneratedPath)
 		}
+		v2Path := "v2." + annotation.CanonicalGeneratedPath
+		if _, ok := generatedPaths[v2Path]; !ok {
+			t.Fatalf("mirrored API Generated annotation %q must keep v2 generated path counterpart %q", annotation.NodeID, v2Path)
+		}
 		sourcePaths, ok := sourceGeneratedPaths[annotation.CoverageEntryNodeID]
 		if !ok || !sourcePaths[annotation.CanonicalGeneratedPath] {
 			t.Fatalf("mirrored API Generated annotation %q canonical path %q is not covered by source entry %q", annotation.NodeID, annotation.CanonicalGeneratedPath, annotation.CoverageEntryNodeID)
 		}
+		if !sourcePaths[v2Path] {
+			t.Fatalf("mirrored API Generated annotation %q v2 path %q is not covered by source entry %q", annotation.NodeID, v2Path, annotation.CoverageEntryNodeID)
+		}
 		canonicalComment := "계약 generated path: `" + annotation.CanonicalGeneratedPath + "`"
 		accessComment := "접근 예시: `" + annotation.FigmaGeneratedPath + "`"
+		v2CanonicalComment := "계약 generated path: `" + v2Path + "`"
+		v2AccessComment := "접근 예시: `riido." + v2Path + "`"
 		for _, generated := range []struct {
 			name string
 			body string
@@ -719,11 +729,20 @@ func verifyFigmaAPIGeneratedAnnotations(t *testing.T, annotations []figmaSourceA
 			if !strings.Contains(generated.body, accessComment) {
 				t.Fatalf("%s generated client missing %q for mirrored API Generated annotation %q", generated.name, accessComment, annotation.NodeID)
 			}
+			if !strings.Contains(generated.body, v2CanonicalComment) {
+				t.Fatalf("%s generated client missing %q for mirrored API Generated annotation %q", generated.name, v2CanonicalComment, annotation.NodeID)
+			}
+			if !strings.Contains(generated.body, v2AccessComment) {
+				t.Fatalf("%s generated client missing %q for mirrored API Generated annotation %q", generated.name, v2AccessComment, annotation.NodeID)
+			}
 		}
 		for _, needle := range []string{annotation.NodeID, annotation.FigmaGeneratedPath, annotation.CanonicalGeneratedPath, annotation.CategoryLabel} {
 			if !strings.Contains(docText, needle) {
 				t.Fatalf("projection doc must mention mirrored API Generated annotation %q", needle)
 			}
+		}
+		if !docMentionsGeneratedPath(docText, v2Path) {
+			t.Fatalf("projection doc must mention mirrored API Generated annotation v2 counterpart %q", v2Path)
 		}
 		if strings.Contains(annotation.FigmaLabel, "작업중") {
 			if annotation.ResolutionStatus != "resolved_stale_handoff_copy" || !strings.Contains(annotation.Resolution, "stale") {
@@ -744,7 +763,7 @@ func verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t *testing.T, policy
 	if len(policy.LabelFormat) != 3 {
 		t.Fatalf("mirrored API Generated annotation label_format = %d entries, want 3", len(policy.LabelFormat))
 	}
-	for _, needle := range []string{"riido.*", "종류", "Query", "Mutation", "SSE Stream", "배경", "text/event-stream", "non-stream GET", "non-GET"} {
+	for _, needle := range []string{"riido.*", "v2.", "source coverage entry", "종류", "Query", "Mutation", "SSE Stream", "배경", "text/event-stream", "non-stream GET", "non-GET"} {
 		if !strings.Contains(strings.Join(policy.LabelFormat, "\n")+"\n"+policy.Rule, needle) {
 			t.Fatalf("mirrored API Generated annotation content policy must mention %q: %+v", needle, policy)
 		}
@@ -869,6 +888,10 @@ func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaS
 		if _, ok := generatedPaths[group.CanonicalGeneratedPath]; !ok {
 			t.Fatalf("mirrored API Generated inventory group references unknown generated path %q", group.CanonicalGeneratedPath)
 		}
+		v2Path := "v2." + group.CanonicalGeneratedPath
+		if _, ok := generatedPaths[v2Path]; !ok {
+			t.Fatalf("mirrored API Generated inventory group %q must keep v2 generated path counterpart %q", group.CanonicalGeneratedPath, v2Path)
+		}
 		if !allowedKinds[group.OperationKind] {
 			t.Fatalf("mirrored API Generated inventory group %q operation_kind = %q", group.CanonicalGeneratedPath, group.OperationKind)
 		}
@@ -884,6 +907,9 @@ func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaS
 			if !ok || !sourcePaths[group.CanonicalGeneratedPath] {
 				t.Fatalf("mirrored API Generated inventory group %q canonical path is not covered by source entry %q", group.CanonicalGeneratedPath, source.CoverageEntryNodeID)
 			}
+			if !sourcePaths[v2Path] {
+				t.Fatalf("mirrored API Generated inventory group %q v2 path %q is not covered by source entry %q", group.CanonicalGeneratedPath, v2Path, source.CoverageEntryNodeID)
+			}
 			if len(source.NodeIDs) == 0 {
 				t.Fatalf("mirrored API Generated inventory group %q source %q must list node ids", group.CanonicalGeneratedPath, source.TopLevelNodeID)
 			}
@@ -895,6 +921,8 @@ func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaS
 		totalAnnotations += annotationCount
 		canonicalComment := "계약 generated path: `" + group.CanonicalGeneratedPath + "`"
 		accessComment := "접근 예시: `" + group.FigmaGeneratedPath + "`"
+		v2CanonicalComment := "계약 generated path: `" + v2Path + "`"
+		v2AccessComment := "접근 예시: `riido." + v2Path + "`"
 		for _, generated := range []struct {
 			name string
 			body string
@@ -908,11 +936,20 @@ func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaS
 			if !strings.Contains(generated.body, accessComment) {
 				t.Fatalf("%s generated client missing %q for mirrored inventory path %q", generated.name, accessComment, group.CanonicalGeneratedPath)
 			}
+			if !strings.Contains(generated.body, v2CanonicalComment) {
+				t.Fatalf("%s generated client missing %q for mirrored inventory path %q", generated.name, v2CanonicalComment, group.CanonicalGeneratedPath)
+			}
+			if !strings.Contains(generated.body, v2AccessComment) {
+				t.Fatalf("%s generated client missing %q for mirrored inventory path %q", generated.name, v2AccessComment, group.CanonicalGeneratedPath)
+			}
 		}
 		for _, needle := range []string{group.UIArea, group.FigmaGeneratedPath, group.CanonicalGeneratedPath, group.OperationKind, group.Background} {
 			if !strings.Contains(docText, needle) {
 				t.Fatalf("projection doc must mention mirrored API Generated inventory %q", needle)
 			}
+		}
+		if !docMentionsGeneratedPath(docText, v2Path) {
+			t.Fatalf("projection doc must mention mirrored API Generated inventory v2 counterpart %q", v2Path)
 		}
 	}
 	if got, want := totalAnnotations, 59; got != want {
@@ -950,6 +987,17 @@ func hasString(items []string, want string) bool {
 		}
 	}
 	return false
+}
+
+func docMentionsGeneratedPath(docText, generatedPath string) bool {
+	if strings.Contains(docText, generatedPath) {
+		return true
+	}
+	lastDot := strings.LastIndex(generatedPath, ".")
+	if lastDot < 0 {
+		return false
+	}
+	return strings.Contains(docText, generatedPath[:lastDot]+".*")
 }
 
 type figmaProjectionManifest struct {
