@@ -169,11 +169,12 @@ func TestDynamoDBAssignmentOperationStoreQueriesReplayableJournal(t *testing.T) 
 		KeyConditionExpression    string                       `json:"KeyConditionExpression"`
 		ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues"`
 		ScanIndexForward          bool                         `json:"ScanIndexForward"`
+		Limit                     int                          `json:"Limit"`
 	}
 	if err := json.Unmarshal(<-queryRequests, &payload); err != nil {
 		t.Fatalf("decode query payload: %v", err)
 	}
-	if payload.TableName != "assignments" || !payload.ConsistentRead || !payload.ScanIndexForward {
+	if payload.TableName != "assignments" || !payload.ConsistentRead || !payload.ScanIndexForward || payload.Limit != dynamoDBAssignmentQueryLimit {
 		t.Fatalf("query payload = %+v", payload)
 	}
 	if payload.KeyConditionExpression != "pk = :pk" {
@@ -281,11 +282,12 @@ func TestDynamoDBAssignmentOperationStoreQueriesAgentQueue(t *testing.T) {
 		KeyConditionExpression    string                       `json:"KeyConditionExpression"`
 		ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues"`
 		ScanIndexForward          bool                         `json:"ScanIndexForward"`
+		Limit                     int                          `json:"Limit"`
 	}
 	if err := json.Unmarshal(<-queryRequests, &payload); err != nil {
 		t.Fatalf("decode query payload: %v", err)
 	}
-	if payload.TableName != "assignments" || payload.IndexName != dynamoDBAssignmentQueueIndex || !payload.ScanIndexForward {
+	if payload.TableName != "assignments" || payload.IndexName != dynamoDBAssignmentQueueIndex || !payload.ScanIndexForward || payload.Limit != dynamoDBAssignmentQueryLimit {
 		t.Fatalf("query payload = %+v", payload)
 	}
 	if payload.KeyConditionExpression != "agent_id = :agent_id" {

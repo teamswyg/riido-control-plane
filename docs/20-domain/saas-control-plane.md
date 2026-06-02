@@ -359,6 +359,12 @@ use only fake endpoints, fake credentials, `httptest`, and deterministic local
 black-box scenarios. They may construct AWS JSON payloads and sign HTTP
 requests; they must not require live AWS credentials in pull-request CI.
 
+`DynamoDBAssignmentOperationStore` must page replay and queue `Query` calls with
+a small explicit `Limit` instead of asking DynamoDB for the largest possible
+page. Assignment operation records can contain task context and event payloads;
+bounded query pages keep the stdlib HTTP JSON reader from decoding truncated
+large responses during ECS startup replay.
+
 This boundary does not own AWS account ids, Terraform, IAM/VPC/ECS/EventBridge
 rule resources, Route53/ACM/WAF resources, tfvars, Terraform backend/state,
 live DynamoDB/EventBridge smoke evidence, stream-relay evidence artifacts,
