@@ -235,6 +235,9 @@ func TestAuthorizerFromEnvFallsBackFromStaticToExternalOnlyWhenUnauthenticated(t
 	var externalCalls atomic.Int32
 	authorizerServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		externalCalls.Add(1)
+		if got := r.Header.Get(riidoaiserver.ExternalAuthorizerAPIKeyHeader); got != "internal-key" {
+			t.Fatalf("external authorizer api key header = %q", got)
+		}
 		var req struct {
 			SchemaVersion string `json:"schema_version"`
 			BearerToken   string `json:"bearer_token"`
@@ -265,6 +268,7 @@ func TestAuthorizerFromEnvFallsBackFromStaticToExternalOnlyWhenUnauthenticated(t
 
 	t.Setenv(envAuthzTokensJSON, `[{"principal_id":"static-user","token":"static-token","scopes":["metrics:read"]}]`)
 	t.Setenv(envExternalAuthzURL, authorizerServer.URL)
+	t.Setenv(envExternalAuthzAPIKey, "internal-key")
 	t.Setenv(envExternalAuthzTimeout, "1")
 	authorizer, err := authorizerFromEnv()
 	if err != nil {
@@ -298,6 +302,14 @@ func TestAuthorizerFromEnvFallsBackFromStaticToExternalOnlyWhenUnauthenticated(t
 	}
 	if got := externalCalls.Load(); got != 1 {
 		t.Fatalf("external should not run after forbidden static scope, calls=%d", got)
+	}
+}
+
+func TestAuthorizerFromEnvRejectsExternalAPIKeyWithoutEndpoint(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envExternalAuthzAPIKey, "internal-key")
+	if _, err := authorizerFromEnv(); err == nil {
+		t.Fatal("expected external api key without endpoint to fail")
 	}
 }
 

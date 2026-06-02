@@ -25,6 +25,7 @@ const (
 	envAuthzTokensJSON        = "RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON"
 	envExternalAuthzURL       = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL"
 	envExternalAuthzAudience  = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE"
+	envExternalAuthzAPIKey    = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY"
 	envExternalAuthzTimeout   = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS"
 	envReviewAccountTokenHash = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
 	envMetricsLogInterval     = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
@@ -359,6 +360,7 @@ func authorizerFromEnvWithReview(reviewProvision *riidoaiserver.ReviewAccountPro
 		}
 		authorizers = append(authorizers, authorizer)
 	}
+	externalAuthzAPIKey := strings.TrimSpace(os.Getenv(envExternalAuthzAPIKey))
 	if endpoint := strings.TrimSpace(os.Getenv(envExternalAuthzURL)); endpoint != "" {
 		timeout, err := envDurationSeconds(envExternalAuthzTimeout, 0)
 		if err != nil {
@@ -367,12 +369,15 @@ func authorizerFromEnvWithReview(reviewProvision *riidoaiserver.ReviewAccountPro
 		authorizer, err := riidoaiserver.NewExternalHTTPAuthorizer(riidoaiserver.ExternalHTTPAuthorizerConfig{
 			Endpoint: endpoint,
 			Audience: strings.TrimSpace(os.Getenv(envExternalAuthzAudience)),
+			APIKey:   externalAuthzAPIKey,
 			Timeout:  timeout,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", envExternalAuthzURL, err)
 		}
 		authorizers = append(authorizers, authorizer)
+	} else if externalAuthzAPIKey != "" {
+		return nil, fmt.Errorf("%s requires %s", envExternalAuthzAPIKey, envExternalAuthzURL)
 	}
 	switch len(authorizers) {
 	case 0:

@@ -73,8 +73,31 @@ The request includes:
 - optional audience
 - resource
 - action
+- optional workspace ID
 - optional agent ID
 - optional task ID
+
+When the external authorizer is the existing Riido API server, the raw request
+token is the existing Riido user JWT supplied by the web or desktop webview
+client through `X-Riido-AI-Agent-Token`. The control plane still treats it as an
+opaque request token: it does not decode Riido JWT claims locally. The existing
+API server owns JWT verification, session/membership interpretation, and the
+mapping from workspace membership to the control-plane `principal_id` and
+optional `admin` role.
+
+The current internal API server authorizer endpoint is
+`POST /internal/control-plane/authorize`. That URL is deployment config, not a
+generated frontend API. For browser-originated AI Agent client requests,
+`request.resource` must remain `ai_agent_client` and `request.workspace_id` must
+be present so the API server can evaluate the existing workspace membership
+model. Daemon/device routes continue to use daemon/device credentials and must
+not be authorized by a browser user JWT.
+
+The external authorizer hop may be protected by
+`X-Riido-Control-Plane-Authorizer-Key`. That header is server-to-server only and
+is never part of the generated frontend API. A browser client that lacks a
+request token cannot be identified, so missing token input remains
+unauthenticated.
 
 The response must use `riido-external-authorizer-response.v1`.
 
@@ -154,8 +177,14 @@ transport header. `Authorization: Bearer ...` remains a compatibility input for
 non-generated/internal callers, but generated web and desktop-webview clients no
 longer use `token` or `Authorization` in their API wrapper.
 
-Production IdP rollout, tenant claim mapping, JWKS/OIDC validation, and
-production request-token values remain separate migration units.
+This slice adds optional server-to-server authentication for the external
+authorizer hop through `X-Riido-Control-Plane-Authorizer-Key`. This enables the
+existing Riido API server to validate existing user JWTs for web/desktop-webview
+requests without issuing a second browser token.
+
+Production daemon/device credentials, tenant claim mapping, JWKS/OIDC
+validation, and production request-token values remain separate migration
+units. Daemons must not reuse browser user JWTs.
 
 Unresolved production identity mapping questions are tracked in
 [`../50-roadmap/open-questions.md`](../50-roadmap/open-questions.md).

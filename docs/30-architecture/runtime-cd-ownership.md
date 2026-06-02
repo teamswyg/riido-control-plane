@@ -212,10 +212,9 @@ deploy mechanism, while still minimizing anything that helps reconstruct a live
 environment. New public key names, live examples, hostnames, AWS identifiers,
 image/task-definition values, generated CodeDeploy payloads, deployment IDs,
 smoke payloads, and raw operator evidence remain outside the public surface.
-The current non-CD exceptions are `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK`, a
-disposable testnet mock runtime flag, and `RIIDO_AI_SERVER_ADDR`, the
-non-live container listen-address shape. Neither one is a deploy/smoke GitHub
-configuration key.
+The current non-CD runtime exceptions are listed in
+[`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json). They are
+container/runtime shape names, not deploy/smoke GitHub configuration keys.
 
 `riido-infra` still needs to know this rule because it owns topology, IAM, drift,
 and evidence. It consumes the stable key categories and source names, then wires
