@@ -1331,6 +1331,33 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### Figma API Generated annotation content policy mirror
+
+This slice consumes `teamswyg/riido-contracts#62`, which records the live Figma
+annotation content rule for generated-client handoff.
+
+The mirrored contracts coverage now carries
+`api_generated_annotation_content_policy`: every live `riido.*` Figma annotation
+belongs to `700:0` / `API Generated`, keeps the facade path first, includes
+`종류: Query | Mutation | SSE Stream`, and includes Korean `배경:` text. The live
+inspection counts remain 53 annotations on the UI page, 6 on onboarding, and 0
+on the legacy wireframe page, for 59 total generated handoff annotations.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#62` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to preserve the annotation content policy and
+  page-level live inspection totals
+- document that generated TypeScript comments still derive from OpenAPI and the
+  generated-client manifest, not from hard-coded Figma label strings
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ### Figma onboarding page load timeout limitation mirror
 
 This slice mirrors the contracts-owned Figma onboarding page load timeout

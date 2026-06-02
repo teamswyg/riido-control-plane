@@ -56,8 +56,9 @@ upstream coverage provenance used by this projection:
 `teamswyg/riido-contracts#45`, `teamswyg/riido-contracts#46`,
 `teamswyg/riido-contracts#51`, `teamswyg/riido-contracts#52`,
 `teamswyg/riido-contracts#54`, `teamswyg/riido-contracts#55`,
-`teamswyg/riido-contracts#56`, `teamswyg/riido-contracts#57`, and
-`teamswyg/riido-contracts#58`, and `teamswyg/riido-contracts#60`. The
+`teamswyg/riido-contracts#56`, `teamswyg/riido-contracts#57`,
+`teamswyg/riido-contracts#58`, `teamswyg/riido-contracts#60`, and
+`teamswyg/riido-contracts#62`. The
 projection gate treats the full upstream coverage provenance as part of the
 mirror contract, not as PR-description trivia.
 
@@ -99,6 +100,14 @@ generated paths such as `aiAgent.events.stream` and `aiAgent.tasks.stop`, then
 verifies that both the canonical path and the Korean generated-client access
 example appear in `web/generated/aiAgentClient.ts` and
 `web/generated/aiAgentClient.react.ts`.
+
+`teamswyg/riido-contracts#62` records this as a live Figma annotation content
+policy. Control-plane mirrors it as generated-client handoff context: `riido.*`
+Figma labels must have a facade path, `종류: Query | Mutation | SSE Stream`, and
+Korean `배경:` text, while the generated TypeScript artifact still derives
+canonical paths from OpenAPI. The mirrored live inspection counts are 53
+`riido.*` annotations on `129:5215` `UI`, 6 on `42:3014` `Wireframe - 온보딩`,
+and 0 on `0:1` `Wireframe`, all with zero missing kind/background counts.
 
 | Figma annotation node | Figma facade example | Kind | Canonical generated path |
 | --- | --- | --- | --- |
