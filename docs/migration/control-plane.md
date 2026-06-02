@@ -1308,6 +1308,29 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### Figma onboarding timeout provenance mirror catch-up
+
+This slice consumes the contracts-owned provenance catch-up after the onboarding
+page load timeout limitation was added.
+
+`teamswyg/riido-contracts#60` changed executable Figma coverage meaning by
+adding `figma-onboarding-page-load-timeout.v1` to
+`supporting_tool_limitations`. The control-plane mirror must carry that entry
+both in the mirrored source coverage fixture and in local
+`source_contracts_manifest.stabilized_by`.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#60` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to expect the extended upstream provenance list
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ### Figma onboarding page load timeout limitation mirror
 
 This slice mirrors the contracts-owned Figma onboarding page load timeout
