@@ -72,7 +72,7 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		DaemonLastSeenAt: now,
 		Runtimes:         runtimes,
 	}
-	s.upsertDeviceRuntimeSnapshotLocked(device)
+	device = s.upsertDeviceRuntimeSnapshotLocked(device)
 	daemon := DeviceDaemonRecord{
 		DeviceID:          req.DeviceID,
 		OwnerPrincipalID:  principal.PrincipalID,
@@ -207,14 +207,34 @@ func (s *DevelopmentAIAgentClientStore) agentRuntimeBindingLocked(agent AgentCli
 	}), true
 }
 
-func (s *DevelopmentAIAgentClientStore) upsertDeviceRuntimeSnapshotLocked(device DeviceRecord) {
+func (s *DevelopmentAIAgentClientStore) upsertDeviceRuntimeSnapshotLocked(device DeviceRecord) DeviceRecord {
 	for i := range s.devices {
 		if s.devices[i].DeviceID == device.DeviceID {
-			s.devices[i] = copyDevice(device)
-			return
+			merged := copyDevice(s.devices[i])
+			merged.OwnerPrincipalID = device.OwnerPrincipalID
+			if device.DisplayName != "" {
+				merged.DisplayName = device.DisplayName
+			}
+			merged.DaemonLastSeenAt = device.DaemonLastSeenAt
+			runtimeIndexByID := make(map[string]int, len(merged.Runtimes))
+			for runtimeIndex, runtime := range merged.Runtimes {
+				runtimeIndexByID[runtime.RuntimeID] = runtimeIndex
+			}
+			for _, runtime := range device.Runtimes {
+				runtime = copyRuntime(runtime)
+				if runtimeIndex, ok := runtimeIndexByID[runtime.RuntimeID]; ok {
+					merged.Runtimes[runtimeIndex] = runtime
+					continue
+				}
+				runtimeIndexByID[runtime.RuntimeID] = len(merged.Runtimes)
+				merged.Runtimes = append(merged.Runtimes, runtime)
+			}
+			s.devices[i] = copyDevice(merged)
+			return copyDevice(merged)
 		}
 	}
 	s.devices = append(s.devices, copyDevice(device))
+	return copyDevice(device)
 }
 
 func (s *DevelopmentAIAgentClientStore) deviceRuntimeByRuntimeIDLocked(runtimeID string) (DeviceRecord, RuntimeRecord, bool) {

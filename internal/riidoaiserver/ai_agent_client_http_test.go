@@ -204,6 +204,90 @@ func TestHTTPDesktopDeviceEnrollmentAndDaemonCredentialAuthorization(t *testing.
 	if badPollResp.Code != http.StatusUnauthorized {
 		t.Fatalf("bad poll status=%d body=%s", badPollResp.Code, badPollResp.Body.String())
 	}
+
+	codexRuntimeID := enrollment.DeviceID + ":codex"
+	cursorRuntimeID := enrollment.DeviceID + ":cursor"
+	codexSnapshotReq := httptest.NewRequest(http.MethodPost, "/v1/daemon/runtime-snapshot", strings.NewReader(`{"daemon_id":"daemon-enrolled","runtimes":[{"runtime_id":"`+codexRuntimeID+`","kind":"codex"}]}`))
+	codexSnapshotReq.Header.Set(deviceIDHeader, enrollment.DeviceID)
+	codexSnapshotReq.Header.Set(deviceSecretHeader, enrollment.DeviceSecret)
+	codexSnapshotResp := httptest.NewRecorder()
+	server.ServeHTTP(codexSnapshotResp, codexSnapshotReq)
+	if codexSnapshotResp.Code != http.StatusAccepted {
+		t.Fatalf("codex snapshot status=%d body=%s", codexSnapshotResp.Code, codexSnapshotResp.Body.String())
+	}
+
+	createBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:       "enrolled codex",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  codexRuntimeID,
+	})
+	if err != nil {
+		t.Fatalf("marshal create body: %v", err)
+	}
+	createReq := httptest.NewRequest(http.MethodPost, "/v2/client/workspaces/workspace-alpha/ai-agent/agents", strings.NewReader(string(createBody)))
+	createReq.Header.Set(aiAgentTokenHeader, "ai-agent-token")
+	createResp := httptest.NewRecorder()
+	server.ServeHTTP(createResp, createReq)
+	if createResp.Code != http.StatusCreated {
+		t.Fatalf("create status=%d body=%s", createResp.Code, createResp.Body.String())
+	}
+	var created AgentClientRecordResponse
+	if err := json.Unmarshal(createResp.Body.Bytes(), &created); err != nil {
+		t.Fatalf("create json: %v", err)
+	}
+	if created.Agent.RuntimeID != codexRuntimeID || created.Agent.RuntimeKind != RuntimeKindCodex {
+		t.Fatalf("created agent = %+v", created.Agent)
+	}
+
+	cursorSnapshotReq := httptest.NewRequest(http.MethodPost, "/v1/daemon/runtime-snapshot", strings.NewReader(`{"daemon_id":"daemon-enrolled","runtimes":[{"runtime_id":"`+cursorRuntimeID+`","kind":"cursor"}]}`))
+	cursorSnapshotReq.Header.Set(deviceIDHeader, enrollment.DeviceID)
+	cursorSnapshotReq.Header.Set(deviceSecretHeader, enrollment.DeviceSecret)
+	cursorSnapshotResp := httptest.NewRecorder()
+	server.ServeHTTP(cursorSnapshotResp, cursorSnapshotReq)
+	if cursorSnapshotResp.Code != http.StatusAccepted {
+		t.Fatalf("cursor snapshot status=%d body=%s", cursorSnapshotResp.Code, cursorSnapshotResp.Body.String())
+	}
+
+	mergedDevicesReq := httptest.NewRequest(http.MethodGet, "/v2/client/workspaces/workspace-alpha/ai-agent/devices", nil)
+	mergedDevicesReq.Header.Set(aiAgentTokenHeader, "ai-agent-token")
+	mergedDevicesResp := httptest.NewRecorder()
+	server.ServeHTTP(mergedDevicesResp, mergedDevicesReq)
+	if mergedDevicesResp.Code != http.StatusOK {
+		t.Fatalf("merged devices status=%d body=%s", mergedDevicesResp.Code, mergedDevicesResp.Body.String())
+	}
+	var mergedDevices DeviceRuntimeListResponse
+	if err := json.Unmarshal(mergedDevicesResp.Body.Bytes(), &mergedDevices); err != nil {
+		t.Fatalf("merged devices json: %v", err)
+	}
+	mergedDevice, ok := findDevice(mergedDevices.Devices, enrollment.DeviceID)
+	if !ok {
+		t.Fatalf("merged enrolled device missing: %+v", mergedDevices.Devices)
+	}
+	if !runtimeHasAssignedAgent(mergedDevices.Devices, codexRuntimeID) {
+		t.Fatalf("codex runtime lost assigned-agent flag after cursor snapshot: %+v", mergedDevice.Runtimes)
+	}
+	if _, ok := findRuntime(mergedDevice.Runtimes, cursorRuntimeID); !ok {
+		t.Fatalf("cursor runtime missing after second snapshot: %+v", mergedDevice.Runtimes)
+	}
+
+	bindingsReq := httptest.NewRequest(http.MethodGet, "/v1/daemon/agent-bindings", nil)
+	bindingsReq.Header.Set(deviceIDHeader, enrollment.DeviceID)
+	bindingsReq.Header.Set(deviceSecretHeader, enrollment.DeviceSecret)
+	bindingsResp := httptest.NewRecorder()
+	server.ServeHTTP(bindingsResp, bindingsReq)
+	if bindingsResp.Code != http.StatusOK {
+		t.Fatalf("bindings status=%d body=%s", bindingsResp.Code, bindingsResp.Body.String())
+	}
+	var bindings AgentRuntimeBindingListResponse
+	if err := json.Unmarshal(bindingsResp.Body.Bytes(), &bindings); err != nil {
+		t.Fatalf("bindings json: %v", err)
+	}
+	if len(bindings.Bindings) != 1 ||
+		bindings.Bindings[0].AgentID != created.Agent.AgentID ||
+		bindings.Bindings[0].RuntimeID != codexRuntimeID ||
+		bindings.Bindings[0].RuntimeProvider != "codex" {
+		t.Fatalf("bindings after second runtime snapshot = %+v", bindings.Bindings)
+	}
 }
 
 func TestHTTPAIAgentClientDevelopmentV2WorkspaceScopedCreateAndThreadStream(t *testing.T) {
@@ -1415,6 +1499,15 @@ func findDevice(devices []DeviceRecord, id string) (DeviceRecord, bool) {
 		}
 	}
 	return DeviceRecord{}, false
+}
+
+func findRuntime(runtimes []RuntimeRecord, id string) (RuntimeRecord, bool) {
+	for _, runtime := range runtimes {
+		if runtime.RuntimeID == id {
+			return runtime, true
+		}
+	}
+	return RuntimeRecord{}, false
 }
 
 func runtimeHasAssignedAgent(devices []DeviceRecord, runtimeID string) bool {
