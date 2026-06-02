@@ -592,7 +592,7 @@ func verifyFigmaClientDeliveryAnnotations(t *testing.T, annotations []figmaSourc
 			t.Fatalf("duplicate mirrored client delivery annotation %q", annotation.NodeID)
 		}
 		seen[annotation.NodeID] = true
-		if annotation.CategoryID != "39:0" || annotation.CategoryLabel != "클라이언트 전달" {
+		if annotation.CategoryID != "700:0" || annotation.CategoryLabel != "API Generated" {
 			t.Fatalf("mirrored client delivery annotation %q category drifted: %+v", annotation.NodeID, annotation)
 		}
 		if !strings.HasPrefix(annotation.FigmaGeneratedPath, "riido.") {
@@ -653,7 +653,7 @@ func verifyFigmaClientDeliveryAnnotationInventory(t *testing.T, inventory []figm
 		if strings.TrimSpace(group.UIArea) == "" {
 			t.Fatalf("mirrored client delivery inventory group has empty ui_area: %+v", group)
 		}
-		if group.CategoryID != "39:0" || group.CategoryLabel != "클라이언트 전달" {
+		if group.CategoryID != "700:0" || group.CategoryLabel != "API Generated" {
 			t.Fatalf("mirrored client delivery inventory group %q category drifted: %+v", group.FigmaGeneratedPath, group)
 		}
 		if !strings.HasPrefix(group.FigmaGeneratedPath, "riido.") {

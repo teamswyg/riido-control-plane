@@ -1232,16 +1232,16 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
-### RIID-4834 — Figma client-delivery annotation projection gate
+### RIID-4834 — Figma API Generated annotation projection gate
 
-This slice mirrors the contracts-owned Figma client-delivery annotation
+This slice mirrors the contracts-owned Figma `API Generated` annotation
 normalization.
 
 This slice does:
 
 - update the mirrored Figma AI Agent coverage manifest from `riido-contracts`
-- preserve `client_delivery_annotations` for Dev Mode category `39:0`
-  `클라이언트 전달`
+- preserve `client_delivery_annotations` for Dev Mode category `700:0`
+  `API Generated`, retaining the legacy field name for manifest compatibility
 - normalize Figma facade examples such as `riido.aiAgent.events.stream` and
   `riido.aiAgent.tasks.stop` to canonical generated paths
   `aiAgent.events.stream` and `aiAgent.tasks.stop`

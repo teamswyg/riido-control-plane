@@ -69,11 +69,13 @@ agent draft/configuration, runtime selection, then workspace selection, but the
 draft is client-local until final submit uses the existing fixture/direct create
 operations with selected `workspace_id` and `runtime_id`.
 
-The mirror also preserves contracts-owned `client_delivery_annotations`. Figma
-Dev Mode category `39:0` / `클라이언트 전달` may show frontend facade examples
-such as `riido.aiAgent.events.stream` or `riido.aiAgent.tasks.stop`. Current
-handoff labels keep the facade path on the first line, then add Korean context
-for the operation kind and background:
+The mirror also preserves contracts-owned annotation evidence for Figma Dev
+Mode category `700:0` / `API Generated`. The mirrored manifest keeps the legacy
+`client_delivery_annotations` field name for compatibility, but the current
+category authority is `API Generated`. Those annotations may show frontend
+facade examples such as `riido.aiAgent.events.stream` or
+`riido.aiAgent.tasks.stop`. Current handoff labels keep the facade path on the
+first line, then add Korean context for the operation kind and background:
 
 ```text
 riido.aiAgent.tasks.stop
@@ -247,7 +249,7 @@ The test catches these drift classes:
   loaded non-UI top-level inventory;
 - the mirrored contracts coverage loses the Figma Plugin API inspection method
   that owns page registry and child-count evidence;
-- the mirrored contracts coverage loses `클라이언트 전달` annotation
+- the mirrored contracts coverage loses `API Generated` annotation
   normalization from `riido.*` facade examples to canonical generated paths;
 - generated TypeScript or React wrapper comments no longer carry the required
   generated path;
