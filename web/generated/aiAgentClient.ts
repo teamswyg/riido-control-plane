@@ -277,7 +277,7 @@ export interface AgentWorkStatusChangedEvent {
 }
 
 /**
- * task participant dropdown에서 agent를 배정하기 위한 요청입니다.
+ * task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.
  */
 export interface AssignAIAgentTaskRequest {
   agent_id: string;

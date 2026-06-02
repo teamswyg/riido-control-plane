@@ -116,6 +116,9 @@
       "description": "AI Agent assignment, AI-Agent-directed task-thread messages, task-thread reads, and task stop actions are generated only for Riido task and subtask surfaces.",
       "rules": [
         "target: task_id path parameters represent a Riido task or subtask id",
+        "assignment_context: generated assignment requests carry agent_id only; task_id comes from the URL path, and v2 workspace_id comes from the URL path",
+        "assignment_context: team_id, teamId, OpenAPI task-context paths, Open API keys, and X-Workspace-Api-Key are outside generated AI Agent assignment",
+        "assignment_context: control-plane may resolve a task's team location internally from task_id for private task-context reads, but that value must not become an agent field, generated request field, daemon input, deployment prerequisite, or smoke acceptance criterion",
         "non_target: projects, milestones, intakes, existing AI property filler, and mention surfaces must not reuse task assignment/message/comment/stop/thread operations",
         "client: non-target surfaces may hide, disable, or omit agent UI, but they must not call generated task-scoped AI Agent operations",
         "future: any non-task target surface requires a separate owning SSOT and a newly generated operation"
@@ -711,7 +714,7 @@
     },
     {
       "name": "AssignAIAgentTaskRequest",
-      "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다.",
+      "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.",
       "type": "object",
       "required": ["agent_id"],
       "properties": [
@@ -1231,6 +1234,12 @@
           "given": "task에 이미 active AI Agent assignment가 있습니다",
           "when": "client가 participant dropdown에서 다른 agent를 배정합니다",
           "then": "control-plane은 task당 active agent가 하나라는 invariant를 보존한 뒤 새 active thread를 노출합니다"
+        },
+        {
+          "name": "assignment excludes team and OpenAPI key",
+          "given": "the client knows the task_id from the current task route and selected a visible agent_id",
+          "when": "client calls riido.aiAgent.tasks.assign",
+          "then": "the request body carries agent_id only; team_id, teamId, OpenAPI task-context paths, Open API keys, and X-Workspace-Api-Key are not generated assignment inputs"
         }
       ]
     },
@@ -1928,7 +1937,15 @@
       "response": {
         "status": 202,
         "ref": "AIAgentTaskActionResponse"
-      }
+      },
+      "scenarios": [
+        {
+          "name": "workspace scoped assignment excludes team and OpenAPI key",
+          "given": "the client has workspace_id from the existing workspace route, task_id from the task route, and selected a visible agent_id",
+          "when": "client calls riido.v2.aiAgent.tasks.assign",
+          "then": "the URL scopes workspace_id and task_id while the request body carries agent_id only; team_id, teamId, OpenAPI task-context paths, Open API keys, and X-Workspace-Api-Key are not generated assignment inputs"
+        }
+      ]
     },
     {
       "operation_id": "unassignAIAgentTaskV2",
