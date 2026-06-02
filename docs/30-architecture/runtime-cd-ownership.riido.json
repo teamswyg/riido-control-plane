@@ -2,7 +2,7 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
-  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842", "RIID-4844", "RIID-4845"],
+  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842", "RIID-4844", "RIID-4845", "RIID-4853"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
@@ -154,7 +154,8 @@
       "deploy/work-units/riid-4837-cd-ownership-final-guard-public-surface-minimization.riido.json",
       "deploy/work-units/riid-4839-cd-public-config-key-minimization.riido.json",
       "deploy/work-units/riid-4844-cd-public-surface-minimal-exposure-ratchet.riido.json",
-      "deploy/work-units/riid-4845-cd-public-key-name-docs-minimization-ratchet.riido.json"
+      "deploy/work-units/riid-4845-cd-public-key-name-docs-minimization-ratchet.riido.json",
+      "deploy/work-units/riid-4854-control-plane-cd-public-minimization-awareness-no-diff.riido.json"
     ],
     "local_scope": "Infra owns topology, drift policy, IAM, and operator evidence. It does not own runtime artifact CD execution."
   },
@@ -367,6 +368,31 @@
       "infra consumes the stable key categories and source names only",
       "human-readable public docs link to the manifest instead of repeating exact deploy/smoke key lists",
       "infra must not ask public workflows to export live deployment payloads as convenience handoffs"
+    ]
+  },
+  "public_operational_detail_minimization": {
+    "riido_task": "RIID-4853",
+    "canonical_owner": "riido-control-plane",
+    "infra_awareness_owner": "riido-infra",
+    "rule": "Public repositories default to the smallest useful CD description. Stable non-secret operational details are public only when they are needed for workflow wiring, review, or operator setup; otherwise they stay in same-job runner temp files, GitHub environment configuration, AWS, or ignored private/operator evidence.",
+    "public_repo_may_keep": [
+      "CD owner and topology owner names",
+      "workflow names and trigger policy",
+      "stable key categories and the canonical manifest path",
+      "stable infra source names without values",
+      "non-live behavior descriptions",
+      "aggregate deploy or smoke pass-fail status without live payload values"
+    ],
+    "public_repo_should_avoid": [
+      "exact deploy or smoke key-name lists outside the machine-readable manifest and workflow files",
+      "environment-specific domains, clusters, services, applications, deployment groups, account IDs, ARNs, image values, task-definition values, CodeDeploy generated payloads, deployment IDs, smoke payloads, workflow run references, Terraform plans, state, tfvars, apply logs, raw evidence, or convenience handoff examples",
+      "duplicating operational setup details in broad README, client-facing docs, generated-client docs, or PR prose when a link to the manifest is sufficient"
+    ],
+    "infra_must_know": [
+      "the CD ownership remodel is settled: runtime artifact CD remains in riido-control-plane",
+      "infra owns topology, IAM, drift policy, and private/operator evidence interpretation",
+      "infra may know stable categories/source names but must not request public repos to expose convenience payloads",
+      "tightening public operational disclosure is Terraform no-diff unless a future SSOT asks for topology, secret, IAM, network, persistence, or evidence tooling changes"
     ]
   },
   "dependency_direction": {

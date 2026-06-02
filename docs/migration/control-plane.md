@@ -850,6 +850,30 @@ GitHub environment values, live deployment execution, release evidence files,
 uploaded workflow artifacts, generated deployment payload handoffs, or workflow
 key names.
 
+### RIID-4853 — CD ownership settled public minimization guard
+
+This slice records the settled CodeDeploy/CD remodel: runtime artifact CD
+execution, CodeDeploy create/wait/smoke, and public workflow redaction stay in
+`riido-control-plane`; `riido-infra` owns topology, IAM, drift policy, and
+private/operator evidence interpretation. It narrows the public posture one
+more time: even stable non-secret operational details are public only when they
+are needed for workflow wiring, review, or operator setup.
+
+Changed:
+
+- add RIID-4853 to `runtime-cd-ownership.riido.json` hardening tasks
+- add `public_operational_detail_minimization` as the canonical public
+  disclosure posture for CD ownership
+- link the expected infra awareness work unit so infra knows the SSOT without
+  taking CD execution ownership
+- update runtime CD ownership and deployment-boundary prose to tell broad public
+  docs to link to the manifest when restating operational detail is unnecessary
+
+This slice does not create or modify AWS resources, Terraform topology,
+GitHub environment values, live deployment execution, release evidence files,
+uploaded workflow artifacts, generated deployment payload handoffs, workflow
+key names, or production traffic shifting.
+
 ### RIID-4671 — provider status contract migration
 
 This slice moves the provider status sync/read contract into the public
