@@ -1308,6 +1308,31 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### Figma API Generated provenance mirror catch-up
+
+This slice consumes the contracts-owned provenance catch-up after the API
+Generated annotation passes.
+
+`teamswyg/riido-contracts#56`, `#57`, and `#58` changed executable Figma
+coverage meaning: #56 registered the screen-level API Generated annotation
+inventory, #57 moved the Figma category to `700:0` / `API Generated`, and #58
+renamed the manifest fields to `api_generated_annotations` and
+`api_generated_annotation_inventory`. The control-plane mirror must carry those
+entries both in the mirrored source coverage fixture and in local
+`source_contracts_manifest.stabilized_by`.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#56`, `#57`, and `#58` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to expect the extended upstream provenance list
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ### RIID-4841 — Figma coverage upstream provenance guard
 
 This slice closes the provenance gap left after RIID-4840.

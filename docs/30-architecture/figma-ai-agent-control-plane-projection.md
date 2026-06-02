@@ -47,9 +47,10 @@ upstream coverage provenance used by this projection:
 `teamswyg/riido-contracts#38`, `teamswyg/riido-contracts#39`,
 `teamswyg/riido-contracts#45`, `teamswyg/riido-contracts#46`,
 `teamswyg/riido-contracts#51`, `teamswyg/riido-contracts#52`,
-`teamswyg/riido-contracts#54`, and `teamswyg/riido-contracts#55`. The
-projection gate treats that full upstream coverage provenance as part of the
-mirror contract, not as PR-description trivia.
+`teamswyg/riido-contracts#54`, `teamswyg/riido-contracts#55`,
+`teamswyg/riido-contracts#56`, `teamswyg/riido-contracts#57`, and
+`teamswyg/riido-contracts#58`. The projection gate treats the full upstream coverage provenance
+as part of the mirror contract, not as PR-description trivia.
 
 After `teamswyg/riido-contracts#53`, the mirrored contracts coverage fixture
 also carries top-level `stabilized_by`. The projection gate compares that source
