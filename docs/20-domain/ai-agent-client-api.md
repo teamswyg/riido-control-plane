@@ -185,6 +185,14 @@ For agent settings:
   name/version/status, attached-agent records, daemon detail labels, and daemon
   command acceptance. It does not own the agent hover popover, daemon stop modal
   layout, or restart animation rendering.
+- The device/runtime read model is a merged view of daemon runtime snapshots,
+  not a last-write-wins replacement of a device. A daemon can report Codex,
+  Claude Code, OpenClaw, and Cursor runtime actors as separate snapshot batches.
+  `riido.aiAgent.devices.runtimes` and bootstrap must continue to expose the
+  previously reported assigned runtime after another runtime on the same device
+  reports later. Missing-runtime removal policy still follows the existing rule:
+  an assigned runtime remains visible as offline, while an unassigned missing
+  runtime can disappear from the read model.
 - Figma onboarding annotations (`node-id=42-3014`) confirm the bootstrap and
   device/runtime consumption context. `node-id=137-6746` maps runtime selection
   to `GET /v1/client/ai-agent/devices`: Claude Code/Codex can be rendered as

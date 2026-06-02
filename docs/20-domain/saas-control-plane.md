@@ -150,6 +150,23 @@ client-facing task-thread row. A successful generated assignment response must
 therefore be observable by the owning daemon as a later `poll` `start` or
 `active` action.
 
+## Daemon Runtime Snapshot Boundary
+
+`POST /v1/daemon/runtime-snapshot` is a daemon-owned runtime batch upsert into
+the SaaS read model. It is not a full replacement of every runtime previously
+seen on the device. The customer-PC daemon may detect and report provider
+runtime actors independently, so Codex, Claude Code, OpenClaw, and Cursor
+snapshot batches can arrive at different times for the same `device_id` and
+`daemon_id`.
+
+The control plane merges incoming runtime records by `runtime_id`, updates the
+matching runtime's availability, detection state, model catalog, and assigned
+agent flag, and preserves other runtimes on the same device. This is required
+for daemon `agent-bindings` polling: a later Cursor snapshot must not erase an
+already assigned Codex runtime before the Codex actor can poll and claim its
+work. Explicit daemon stop/offline handling remains the path that marks the
+device's known runtimes offline together.
+
 The control-plane-local DTO surface is:
 
 - `Health`
