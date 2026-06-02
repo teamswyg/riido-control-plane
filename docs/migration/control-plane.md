@@ -1240,8 +1240,9 @@ normalization.
 This slice does:
 
 - update the mirrored Figma AI Agent coverage manifest from `riido-contracts`
-- preserve `client_delivery_annotations` for Dev Mode category `700:0`
-  `API Generated`, retaining the legacy field name for manifest compatibility
+- preserve `api_generated_annotations` for Dev Mode category `700:0`
+  `API Generated`, matching the mirror field names to the current category
+  vocabulary
 - normalize Figma facade examples such as `riido.aiAgent.events.stream` and
   `riido.aiAgent.tasks.stop` to canonical generated paths
   `aiAgent.events.stream` and `aiAgent.tasks.stop`

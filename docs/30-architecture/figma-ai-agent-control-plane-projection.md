@@ -70,12 +70,12 @@ draft is client-local until final submit uses the existing fixture/direct create
 operations with selected `workspace_id` and `runtime_id`.
 
 The mirror also preserves contracts-owned annotation evidence for Figma Dev
-Mode category `700:0` / `API Generated`. The mirrored manifest keeps the legacy
-`client_delivery_annotations` field name for compatibility, but the current
-category authority is `API Generated`. Those annotations may show frontend
-facade examples such as `riido.aiAgent.events.stream` or
-`riido.aiAgent.tasks.stop`. Current handoff labels keep the facade path on the
-first line, then add Korean context for the operation kind and background:
+Mode category `700:0` / `API Generated`. The mirrored manifest uses
+`api_generated_annotations` and `api_generated_annotation_inventory` so the
+field names match the current category authority. Those annotations may show
+frontend facade examples such as `riido.aiAgent.events.stream` or
+`riido.aiAgent.tasks.stop`. Current labels keep the facade path on the first
+line, then add Korean context for the operation kind and background:
 
 ```text
 riido.aiAgent.tasks.stop
@@ -99,7 +99,7 @@ The broader screen-level Figma handoff pass also labels participant assignment,
 task-thread reply, runtime settings, onboarding fixture, direct create, edit,
 delete, and editability nodes with `Query`, `Mutation`, or `SSE Stream`
 background text. Contracts owns that full list in
-`client_delivery_annotation_inventory`; control-plane mirrors it to prove every
+`api_generated_annotation_inventory`; control-plane mirrors it to prove every
 facade path below exists in OpenAPI and generated TypeScript comments.
 
 | UI area | Facade path | Kind | Background shown in Figma |
