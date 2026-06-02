@@ -371,6 +371,10 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   client concern
 - daemon progress ingest accepts parsed `<riido_log>...<end>` batches through
   `POST /v1/agents/{agent_id}/thread-progress`
+- daemon standard assignment events on `POST /v1/agents/{agent_id}/events`
+  also update the same client task-thread read model. `riido_log` appends
+  progress lines, while terminal assignment states clear `active_stream` so
+  generated clients do not keep reconnecting to completed work.
 - client task-thread progress is streamed as the typed
   `agent_thread_progress` event with `thread_id` on
   `GET /v1/client/ai-agent/events` and the v2 duplicate

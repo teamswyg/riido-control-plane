@@ -1173,6 +1173,9 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if recorder, ok := s.aiAgent.(AIAgentAssignmentEventRecorder); ok {
+		_ = recorder.RecordAIAgentAssignmentEvent(r.Context(), agentID, req, response.Event)
+	}
 	writeJSON(w, http.StatusOK, response)
 }
 

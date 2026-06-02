@@ -62,7 +62,10 @@ private JWT task-context reader. The workspace id, team id, and workspace API
 key are only the legacy Open API task-context reader group; if any one of that
 group is set, all three must be set. The workspace API key is never a generated
 client token; frontend clients should continue using the AI Agent SaaS bearer
-header defined in the generated API surface.
+header defined in the generated API surface. Daemon poll/heartbeat/event and
+client assignment/thread projection bugs must be debugged through the
+device-principal and assignment-store path, not through this legacy Open API
+configuration group.
 
 ## Non-Config Facts
 
