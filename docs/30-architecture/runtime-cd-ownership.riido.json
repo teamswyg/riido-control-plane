@@ -193,7 +193,9 @@
       "deploy/work-units/riid-4839-cd-public-config-key-minimization.riido.json",
       "deploy/work-units/riid-4844-cd-public-surface-minimal-exposure-ratchet.riido.json",
       "deploy/work-units/riid-4845-cd-public-key-name-docs-minimization-ratchet.riido.json",
-      "deploy/work-units/riid-4854-control-plane-cd-public-minimization-awareness-no-diff.riido.json"
+      "deploy/work-units/riid-4854-control-plane-cd-public-minimization-awareness-no-diff.riido.json",
+      "deploy/work-units/riid-4856-codedeploy-activation-gate-awareness-no-diff.riido.json",
+      "deploy/work-units/riid-4860-control-plane-cd-ownership-awareness-guard.riido.json"
     ],
     "local_scope": "Infra owns topology, drift policy, IAM, and operator evidence. It does not own runtime artifact CD execution."
   },
@@ -203,7 +205,8 @@
       "riido-control-plane owns runtime artifact CD execution",
       "infra owns topology, IAM, drift, and operator evidence",
       "control-plane workflow consumes only stable deployment target names from infra outputs",
-      "public redaction changes are Terraform no-diff unless they require new AWS topology"
+      "public redaction changes are Terraform no-diff unless they require new AWS topology",
+      "infra-local awareness guards verify the no-diff boundary without consuming public workflow live payloads"
     ],
     "must_not_receive_from_public_workflow": [
       "CodeDeploy deployment IDs",
