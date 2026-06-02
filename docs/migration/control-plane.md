@@ -1625,6 +1625,32 @@ artifacts, publish live URLs, image/task-definition values, CodeDeploy
 AppSpec/request JSON, deployment IDs, smoke payloads, Terraform evidence, or
 move CD execution into `riido-infra`.
 
+### Figma API Generated v2 counterpart mirror
+
+This slice consumes `teamswyg/riido-contracts#67`, which makes the Figma API
+Generated handoff guard preserve both the short facade path and the
+workspace-scoped v2 generated path.
+
+Control-plane still mirrors Figma labels such as `riido.aiAgent.tasks.stop`
+because those labels are searchable handoff text for frontend developers. The
+actual current API surface also exposes `riido.v2.aiAgent.tasks.stop`.
+Therefore each mirrored API Generated annotation/inventory item must prove that
+the canonical facade path and the `v2.*` counterpart both exist in OpenAPI, in
+the same source coverage entry, and in generated TypeScript comments.
+
+This slice does:
+
+- mirror the contracts Figma coverage manifest through
+  `teamswyg/riido-contracts#67`
+- append `teamswyg/riido-contracts#67` to
+  `source_contracts_manifest.stabilized_by`
+- require generated core and React clients to keep Korean comments for both the
+  facade path and the `riido.v2.*` access example
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change runtime behavior, add deployment secrets, expose live endpoint values,
+or move client UI ownership into this repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
