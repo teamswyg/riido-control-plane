@@ -15,6 +15,7 @@ This file is the public Factor 12 configuration catalog for
 | `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON` | empty | `cmd/riido_ai_server` | strict JSON array of static token credentials for public-testable request authorization |
 | `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL` | empty | `cmd/riido_ai_server` | optional external HTTP authorizer endpoint |
 | `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE` | empty | `cmd/riido_ai_server` | optional audience forwarded to the external authorizer |
+| `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY` | empty | `cmd/riido_ai_server` | optional server-to-server key sent to the external authorizer as `X-Riido-Control-Plane-Authorizer-Key` |
 | `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS` | authorizer default when unset | `cmd/riido_ai_server` | positive integer timeout override for external authorizer requests |
 | `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` | empty | `cmd/riido_ai_server` | enables public-safe review/demo seed provisioning using only a token hash |
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | disabled | `cmd/riido_ai_server` | positive integer interval for stdout CloudWatch EMF JSON Lines |
@@ -38,6 +39,12 @@ still requires the bearer-token authorization rules owned by
 `RIIDO_AI_SERVER_AI_AGENT_CLIENT_MOCK` is a temporary testnet/review switch. It
 does not enable unauthenticated access; all AI Agent client endpoints still
 require bearer scopes.
+
+The external authorizer API key is server-to-server authentication for the
+configured authorizer endpoint. It is not a generated frontend token. If set,
+`RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL` must also be set, and the value is sent only
+through `X-Riido-Control-Plane-Authorizer-Key` on the control-plane to
+authorizer hop.
 
 The task-context base URL, workspace id, team id, and workspace API key must be
 set together. If only part of the group is set, the server fails during startup.

@@ -348,6 +348,7 @@ public repository. It owns only these environment variables:
 - `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
+- `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY`
 - `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
 - `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256`
 - `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS`
@@ -364,6 +365,12 @@ fields and trailing JSON are rejected. Static-token authorization may be
 combined with the external HTTP authorizer through the existing fallback
 authorizer rule: only unauthenticated results fall through to the next
 authorizer, while forbidden results stop evaluation.
+
+The external authorizer API key is a server-to-server secret for the
+control-plane to authorizer hop. It is sent as
+`X-Riido-Control-Plane-Authorizer-Key`, never as a generated frontend token, and
+does not replace the request token supplied by the web or desktop webview
+client.
 
 `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` enables only the public-safe
 review account provisioning path. The environment value is a SHA-256 hash of an

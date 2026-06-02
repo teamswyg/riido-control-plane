@@ -419,6 +419,7 @@ This slice does:
 - parse strict `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON`
 - parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL`
 - parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE`
+- parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY`
 - parse `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
 - compose static-token and external HTTP authorizers through fallback authZ
 - add black-box health/cmd parser tests
@@ -429,6 +430,11 @@ snapshot stores, file outbox adapters, assignment operation durable save/claim
 wiring, DynamoDB/EventBridge adapters, Terraform, secret values, AWS adapters,
 CloudWatch/Prometheus adapters, Docker, review account seed data, dashboards,
 daemon consumers, or deployment evidence.
+
+The external authorizer API key extends the same authorizer hop for production
+integration with the existing Riido API server. It protects the server-to-server
+authorizer request while the original browser request token remains opaque to
+the control plane.
 
 ### RIID-4680 — store snapshot/file outbox migration
 
