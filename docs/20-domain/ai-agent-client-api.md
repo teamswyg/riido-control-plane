@@ -100,6 +100,11 @@ For agent settings:
   `Assignment.agent_instruction` when a task assignment is created. That value is
   an assignment-time snapshot, so later agent edits do not mutate queued or
   running assignments.
+- Generated `riido.aiAgent.tasks.assign` is both a client read-model mutation
+  and a daemon-facing assignment enqueue. The handler must write the immutable
+  `AssignRequest` into the assignment polling store before it projects the
+  task-thread row, so a successful client assignment can be leased by the
+  owning daemon through `/v1/agents/{agent_id}/poll`.
 - `riido-control-plane` also owns the provider-neutral assignment prompt
   composer. Client-facing assignment requests keep only `agent_id`; task title,
   document markdown, branch name, hierarchy, and repository candidates are read
@@ -148,6 +153,10 @@ For agent settings:
   `comment_kind=assignment_started` unless the agent is busy; unassign maps
   participant removal to `stopped_by_user_request`. Hiding stopped rows remains
   client presentation.
+- A successful `tasks.assign` response means the daemon-facing assignment queue
+  also accepted the work. If task-context lookup, prompt composition, runtime
+  binding lookup, or assignment-store validation fails, the handler must fail
+  before projecting a running task-thread row.
 - `riido.aiAgent.tasks.assign` intentionally does not accept task body, branch
   name, repository, or instruction fields. Those values are server-owned
   assignment snapshots, so frontend code cannot accidentally diverge from the

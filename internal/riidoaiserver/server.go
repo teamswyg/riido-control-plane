@@ -527,6 +527,14 @@ func (s Server) handleAIAgentClientTaskAssignableAgents(w http.ResponseWriter, r
 }
 
 func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Request, taskID string) {
+	if s.assignment == nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
+		return
+	}
+	if s.taskContext == nil {
+		writeError(w, http.StatusServiceUnavailable, "task context reader is not configured")
+		return
+	}
 	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionAssign, TaskID: taskID})
 	if !ok {
 		return
@@ -536,12 +544,62 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	assignmentReq, err := s.assignRequestFromAIAgentClientTask(r.Context(), principal, taskID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	if _, err := s.assignment.AssignTask(r.Context(), taskID, assignmentReq); err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
 	response, err := s.aiAgent.AssignAIAgentTask(r.Context(), principal, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusAccepted, response)
+}
+
+func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AssignRequest, error) {
+	taskID = strings.TrimSpace(taskID)
+	req.AgentID = strings.TrimSpace(req.AgentID)
+	if taskID == "" {
+		return AssignRequest{}, errors.New("task_id is required")
+	}
+	if req.AgentID == "" {
+		return AssignRequest{}, errors.New("agent_id is required")
+	}
+	agents, err := s.aiAgent.ListAIAgentTaskAssignableAgents(ctx, principal, taskID)
+	if err != nil {
+		return AssignRequest{}, err
+	}
+	var selected AgentClientRecord
+	for _, agent := range agents.Agents {
+		if agent.AgentID == req.AgentID {
+			selected = agent
+			break
+		}
+	}
+	if selected.AgentID == "" {
+		return AssignRequest{}, ErrAIAgentNotFound
+	}
+	registry, ok := s.aiAgent.(AgentRegistry)
+	if !ok {
+		return AssignRequest{}, errors.New("ai agent runtime registry is not configured")
+	}
+	binding, ok := registry.LookupAgent(selected.AgentID)
+	if !ok {
+		return AssignRequest{}, errors.New("ai agent runtime binding is not configured")
+	}
+	assignmentReq := AssignRequest{
+		ComponentID:      taskID,
+		AgentID:          selected.AgentID,
+		RuntimeProvider:  binding.RuntimeProvider,
+		AgentInstruction: selected.Instruction,
+		CreatedBy:        strings.TrimSpace(principal.PrincipalID),
+	}
+	return s.assignRequestWithTaskContextPrompt(ctx, taskID, assignmentReq)
 }
 
 func (s Server) handleAIAgentClientUnassignTask(w http.ResponseWriter, r *http.Request, taskID string) {

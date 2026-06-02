@@ -136,6 +136,17 @@ Development fixture responses may still use deterministic synthetic thread
 responses, but those responses are not evidence that a daemon assignment prompt
 exists.
 
+The generated AI Agent client assignment path is not allowed to stop at the
+client read model. `POST
+/v1/client/ai-agent/tasks/{task_id}/assignment` and its v2 workspace-scoped
+alias first resolve the visible agent, load the agent runtime binding from the
+AI Agent client registry, compose the provider-neutral task prompt through the
+same task-context reader, and enqueue the resulting `AssignRequest` into the
+assignment store. Only after that succeeds may the handler project the
+client-facing task-thread row. A successful generated assignment response must
+therefore be observable by the owning daemon as a later `poll` `start` or
+`active` action.
+
 The control-plane-local DTO surface is:
 
 - `Health`
