@@ -111,7 +111,9 @@ jobs:
           umask 077
           ref_name="${GITHUB_REF_NAME:-manual}"
           safe_ref="$(printf '%s' "$ref_name" | tr -c 'A-Za-z0-9_.-' '-')"
-          image_tag="${safe_ref}-${GITHUB_SHA:0:12}"
+          run_attempt="${GITHUB_RUN_ATTEMPT:-1}"
+          safe_attempt="$(printf '%s' "$run_attempt" | tr -c '0-9' '-')"
+          image_tag="${safe_ref}-${GITHUB_SHA:0:12}-attempt${safe_attempt}"
           if [ "$image_tag" = "latest" ] || [[ "$image_tag" == latest-* ]]; then
             echo "image tag must not be latest"
             exit 1

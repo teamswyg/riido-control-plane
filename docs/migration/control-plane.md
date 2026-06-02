@@ -527,7 +527,8 @@ This slice does:
 - trigger deployment only from `v*` tags or explicit manual dispatch
 - use GitHub OIDC via the configured deploy-role secret
 - build the checked-in `riido_ai_server` container image contract
-- push an immutable ECR tag derived from the Git ref and commit SHA
+- push an immutable ECR tag derived from the Git ref, commit SHA, and workflow
+  run attempt
 - resolve the pushed image to an ECR digest
 - register a new ECS task-definition revision by changing only the configured
   container image
