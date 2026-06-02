@@ -1674,6 +1674,19 @@ This slice does not edit API DSL/OpenAPI shape, generated client output,
 frontend delivery branches, runtime behavior, Figma annotations, deployment
 configuration, or live endpoint values.
 
+### Runtime CD ownership strict manifest decode guard
+
+This slice tightens the control-plane-owned runtime CD ownership SSOT. The
+deploy-policy test now decodes
+`docs/30-architecture/runtime-cd-ownership.riido.json` with unknown-field and
+trailing-document rejection, so the public CD ownership manifest cannot silently
+accept misspelled or unmodeled decision fields.
+
+This slice does not edit API DSL/OpenAPI shape, generated client output,
+frontend delivery branches, runtime behavior, Figma annotations, deployment
+configuration, Terraform topology, GitHub environment values, or live endpoint
+values.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

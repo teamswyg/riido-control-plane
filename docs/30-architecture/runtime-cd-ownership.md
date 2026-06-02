@@ -263,6 +263,15 @@ absorbs the CodeDeploy activation gate, and RIID-4860 verifies those awareness
 work units locally. Those references do not create a public handoff channel for
 live deploy payloads.
 
+## Manifest Validation
+
+[`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json) is an
+executable SSOT, not an illustrative example. The deploy-policy test decodes the
+manifest as a single strict JSON document: unknown fields and trailing JSON
+documents are failures. A new CD ownership fact must therefore update the
+manifest schema expected by the test and the human-readable explanation in the
+same work unit.
+
 ## Drift Rule
 
 Top-down changes start in this manifest or the runtime deployment boundary.
