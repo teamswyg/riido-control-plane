@@ -1332,6 +1332,31 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4850 — Figma coverage provenance mirror source field sync
+
+This slice consumes the contracts-owned provenance field introduced by
+`teamswyg/riido-contracts#53`.
+
+RIID-4848 made the local projection manifest require the full upstream coverage
+history, but that list still lived only in the local projection manifest. After
+contracts added top-level `stabilized_by` to the canonical Figma coverage
+manifest, the control-plane mirror must copy that field and compare it with
+local `source_contracts_manifest.stabilized_by`.
+
+This slice does:
+
+- add top-level `stabilized_by` to the mirrored contracts coverage fixture under
+  `contracts/ai-agent-client/figma-ai-agent-coverage.riido.json`
+- require the projection gate to fail when the mirrored source coverage
+  `stabilized_by` and local `source_contracts_manifest.stabilized_by` diverge
+- document that control-plane now mirrors the contracts field instead of
+  preserving upstream history from local memory
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

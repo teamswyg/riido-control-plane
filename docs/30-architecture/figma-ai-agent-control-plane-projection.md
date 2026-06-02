@@ -50,6 +50,11 @@ upstream coverage provenance used by this projection:
 projection gate treats that full upstream coverage provenance as part of the
 mirror contract, not as PR-description trivia.
 
+After `teamswyg/riido-contracts#53`, the mirrored contracts coverage fixture
+also carries top-level `stabilized_by`. The projection gate compares that source
+field with local `source_contracts_manifest.stabilized_by` so control-plane
+does not preserve upstream history from local memory alone.
+
 That is separate from limitation-local provenance. The specific
 `figma-metadata-page-list-underreports-pages.v1` limitation entered the
 upstream contracts coverage in `teamswyg/riido-contracts#52`, so #52 remains

@@ -37,7 +37,7 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 		sourceCoverage.ID != manifest.SourceContractsManifest.ID {
 		t.Fatalf("source coverage mirror = %s/%s, want %s/%s", sourceCoverage.SchemaVersion, sourceCoverage.ID, manifest.SourceContractsManifest.SchemaVersion, manifest.SourceContractsManifest.ID)
 	}
-	verifySourceContractsManifestProvenance(t, manifest.SourceContractsManifest.StabilizedBy, docPath)
+	verifySourceContractsManifestProvenance(t, sourceCoverage.StabilizedBy, manifest.SourceContractsManifest.StabilizedBy, docPath)
 	if got, want := len(sourceCoverage.ExpectedPages), 3; got != want {
 		t.Fatalf("source coverage expected_pages = %d, want %d", got, want)
 	}
@@ -304,7 +304,7 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 	}
 }
 
-func verifySourceContractsManifestProvenance(t *testing.T, stabilizedBy []string, docPath string) {
+func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, projectionStabilizedBy []string, docPath string) {
 	t.Helper()
 	want := []string{
 		"teamswyg/riido-contracts#38",
@@ -314,12 +314,20 @@ func verifySourceContractsManifestProvenance(t *testing.T, stabilizedBy []string
 		"teamswyg/riido-contracts#51",
 		"teamswyg/riido-contracts#52",
 	}
-	if len(stabilizedBy) != len(want) {
-		t.Fatalf("source_contracts_manifest.stabilized_by = %d entries, want %d: %+v", len(stabilizedBy), len(want), stabilizedBy)
+	if len(sourceStabilizedBy) != len(want) {
+		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
 	}
 	for i := range want {
-		if stabilizedBy[i] != want[i] {
-			t.Fatalf("source_contracts_manifest.stabilized_by[%d] = %q, want %q; full list = %+v", i, stabilizedBy[i], want[i], stabilizedBy)
+		if sourceStabilizedBy[i] != want[i] {
+			t.Fatalf("mirrored source coverage stabilized_by[%d] = %q, want %q; full list = %+v", i, sourceStabilizedBy[i], want[i], sourceStabilizedBy)
+		}
+	}
+	if len(projectionStabilizedBy) != len(sourceStabilizedBy) {
+		t.Fatalf("source_contracts_manifest.stabilized_by = %d entries, mirrored source has %d: projection=%+v source=%+v", len(projectionStabilizedBy), len(sourceStabilizedBy), projectionStabilizedBy, sourceStabilizedBy)
+	}
+	for i := range sourceStabilizedBy {
+		if projectionStabilizedBy[i] != sourceStabilizedBy[i] {
+			t.Fatalf("source_contracts_manifest.stabilized_by[%d] = %q, mirrored source stabilized_by[%d] = %q; projection=%+v source=%+v", i, projectionStabilizedBy[i], i, sourceStabilizedBy[i], projectionStabilizedBy, sourceStabilizedBy)
 		}
 	}
 	doc, err := os.ReadFile(docPath)
@@ -658,6 +666,7 @@ type figmaProjectionLegacyAbsorption struct {
 type figmaSourceCoverageManifest struct {
 	SchemaVersion             string                                `json:"schema_version"`
 	ID                        string                                `json:"id"`
+	StabilizedBy              []string                              `json:"stabilized_by"`
 	InspectionMethod          figmaCoverageInspectionMethod         `json:"inspection_method"`
 	SupportingToolLimitations []figmaSourceSupportingToolLimitation `json:"supporting_tool_limitations"`
 	ExpectedPages             []figmaSourceCoveragePage             `json:"expected_pages"`
