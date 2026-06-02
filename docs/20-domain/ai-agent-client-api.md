@@ -235,15 +235,25 @@ The development surface is enabled by
 When disabled, protected AI Agent client routes fail closed with `503` instead
 of returning seeded development data.
 
-Development runtime state is durable. `cmd/riido_ai_server` opens
-`DynamoDBAIAgentClientSnapshot` when development mode is enabled and requires
+Development runtime state is durable. `cmd/riido_ai_server` opens both
+`DynamoDBAIAgentClientSnapshot` and `DynamoDBAssignmentOperationStore` when
+development mode is enabled and requires
 `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE`, an AWS region runtime
 configuration, and an ECS container credential endpoint supplied by the runtime.
 The snapshot item stores
 `AIAgentClientPersistenceSchemaVersion`
 (`riido-ai-agent-client-persistence.v2`) as JSON under a single DynamoDB
-`pk/sk`. This is the development persistence boundary, not the final production
-single-table projection.
+`pk/sk`. The assignment operation store writes the generated assignment journal,
+agent queue projection, and active lease records in the same table. This is the
+development persistence boundary, not the final production single-table
+projection.
+
+Generated `tasks.assign`, `tasks.unassign`, `tasks.threadMessages.create`, and
+daemon poll/heartbeat/event flows must not require a team id or Open API
+workspace key. Those values are legacy task-context reader configuration only
+and are outside the AI Agent assignment/auth problem. In the generated client
+flow, the request's bearer token is the authority source and task/team lookup is
+resolved inside the control plane.
 
 The development API implements:
 

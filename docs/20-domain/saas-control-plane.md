@@ -415,11 +415,20 @@ repository.
 
 `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` enables the development AI Agent
 client API described in [`ai-agent-client-api.md`](ai-agent-client-api.md). The
-development API uses a DynamoDB snapshot item for durable state.
+development API uses a DynamoDB snapshot item for AI Agent client read/write
+state and a DynamoDB assignment operation journal/queue for generated
+assignment-to-daemon polling. Client thread projection and daemon work leasing
+must share this durable boundary so an accepted generated assignment can be
+observed by a later daemon `poll` even when the HTTP requests land on different
+ECS tasks or after a deployment restart.
 
 The task-context variables configure the production server-to-server read from
-the existing Riido API server. The base URL, workspace id, team id, and
-workspace API key must be set together. The API key is sent only as
+the existing Riido API server. Generated AI Agent assignment/auth does not use
+team id or Open API workspace key as a principal, route selector, or client
+credential. The private task-context reader uses the request bearer token and
+resolves task/team context internally. The workspace id, team id, and workspace
+API key are only the legacy Open API task-context reader group; when that group
+is used, all three must be set together. The API key is sent only as
 `X-Workspace-Api-Key`; it is not a browser/client token and must not be exposed
 to generated frontend clients.
 
