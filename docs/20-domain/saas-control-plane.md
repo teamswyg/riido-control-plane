@@ -153,6 +153,11 @@ is not made team-aware; any team value observed during lookup is a transient
 API-server location result and must not be persisted into the agent or exposed
 to generated clients. If lookup or composition fails, the HTTP handler fails
 before a daemon can lease provider work.
+The task-location lookup result is not an identity bridge. Device enrollment,
+daemon polling, generated assignment acceptance, and staging E2E verification
+must still use UserPrincipal/DevicePrincipal plus workspace-scoped agent facts,
+never `team_id`, `teamId`, OpenAPI task-context paths, Open API keys, or
+`X-Workspace-Api-Key`.
 
 The legacy Open API key task-context reader is a separate compatibility adapter
 for automation surfaces outside the generated AI Agent assignment flow. It is
@@ -453,7 +458,9 @@ server-to-server base URL for the existing Riido API server. `team_id`,
 generated client requests, agent records, daemon polling, smoke criteria, and
 deployment reasoning for this flow. The legacy Open API key task-context
 environment variables remain a compatibility adapter outside the generated AI
-Agent assignment SSOT.
+Agent assignment SSOT; when both paths are present, generated assignment
+behavior is judged only by the private user-token task context and
+DevicePrincipal assignment boundary.
 
 This boundary does not own legacy broad bearer-token compatibility, assignment
 snapshot/outbox stores, durable operation save/claim wiring, EventBridge,
