@@ -18,7 +18,8 @@
     "teamswyg/riido-contracts#62",
     "teamswyg/riido-contracts#63",
     "teamswyg/riido-contracts#64",
-    "teamswyg/riido-contracts#65"
+    "teamswyg/riido-contracts#65",
+    "teamswyg/riido-contracts#66"
   ],
   "human_doc": "docs/30-architecture/figma-ai-agent-coverage.md",
   "related_manifests": [
@@ -85,7 +86,7 @@
       "line_2: 종류: Query | Mutation | SSE Stream",
       "line_3: 배경: Korean frontend consumption background"
     ],
-    "rule": "Every riido.* Figma annotation must keep the facade generated-client path on the first line, preserve the operation kind, and include a Korean background sentence. The executable inventory below owns operation_kind/background; live Figma annotation text is handoff evidence and must not become a second API SSOT.",
+    "rule": "Every riido.* Figma annotation must keep the facade generated-client path on the first line, preserve the operation kind, and include a Korean background sentence. The executable inventory below owns operation_kind/background; live Figma annotation text is handoff evidence and must not become a second API SSOT. operation_kind must match generated OpenAPI transport: text/event-stream responses are SSE Stream, non-stream GET operations are Query, and non-GET operations are Mutation.",
     "retired_categories": [
       {
         "category_id": "39:0",
