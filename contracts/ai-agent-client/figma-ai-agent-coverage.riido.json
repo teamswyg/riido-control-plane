@@ -47,6 +47,15 @@
       "authoritative_source": "Figma Plugin API figma.root.children after loaded-page inspection",
       "authoritative_result": ["129:5215", "42:3014", "0:1"],
       "rule": "metadata page-list output is supporting evidence only and must not remove expected_pages or non-UI inventories."
+    },
+    {
+      "id": "figma-onboarding-page-load-timeout.v1",
+      "tool": "Figma get_metadata nodeId=42:3014 and Figma Plugin API page load for 42:3014",
+      "observed_at": "2026-06-02",
+      "observed_result": "Current live reads of page 42:3014 Wireframe - 온보딩 timed out after 120s in get_metadata(nodeId=42:3014) and in use_figma scripts that attempted await figma.setCurrentPageAsync(page).",
+      "authoritative_source": "Previously captured loaded Figma Plugin API inventory for page 42:3014 plus registered node-id evidence in this manifest",
+      "authoritative_result": ["42:3014", "child_count=83", "non_ui_top_level_inventory"],
+      "rule": "a timeout is supporting evidence only and must not rewrite expected_pages, remove page 42:3014, remove onboarding inventory, or mark onboarding generated paths unresolved."
     }
   ],
   "coverage_policy": {
