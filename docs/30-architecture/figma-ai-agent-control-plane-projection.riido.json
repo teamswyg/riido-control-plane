@@ -7,7 +7,7 @@
     "path": "docs/30-architecture/figma-ai-agent-coverage.riido.json",
     "schema_version": "riido-figma-ai-agent-coverage.v1",
     "id": "figma-v1-22-ai-agent-ui-coverage",
-    "stabilized_by": ["teamswyg/riido-contracts#38", "teamswyg/riido-contracts#39", "teamswyg/riido-contracts#45", "teamswyg/riido-contracts#46", "teamswyg/riido-contracts#51", "teamswyg/riido-contracts#52", "teamswyg/riido-contracts#54"]
+    "stabilized_by": ["teamswyg/riido-contracts#38", "teamswyg/riido-contracts#39", "teamswyg/riido-contracts#45", "teamswyg/riido-contracts#46", "teamswyg/riido-contracts#51", "teamswyg/riido-contracts#52", "teamswyg/riido-contracts#54", "teamswyg/riido-contracts#55"]
   },
   "projection_policy": {
     "summary": "Control-plane does not own the Figma top-level coverage SSOT. It only projects the coverage entries that require HTTP/SSE/OpenAPI/generated-client behavior.",

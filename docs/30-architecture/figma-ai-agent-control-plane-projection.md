@@ -46,8 +46,8 @@ The local `source_contracts_manifest.stabilized_by` list mirrors the full
 upstream coverage provenance used by this projection:
 `teamswyg/riido-contracts#38`, `teamswyg/riido-contracts#39`,
 `teamswyg/riido-contracts#45`, `teamswyg/riido-contracts#46`,
-`teamswyg/riido-contracts#51`, `teamswyg/riido-contracts#52`, and
-`teamswyg/riido-contracts#54`. The
+`teamswyg/riido-contracts#51`, `teamswyg/riido-contracts#52`,
+`teamswyg/riido-contracts#54`, and `teamswyg/riido-contracts#55`. The
 projection gate treats that full upstream coverage provenance as part of the
 mirror contract, not as PR-description trivia.
 
@@ -96,8 +96,31 @@ example appear in `web/generated/aiAgentClient.ts` and
 The broader screen-level Figma handoff pass also labels participant assignment,
 task-thread reply, runtime settings, onboarding fixture, direct create, edit,
 delete, and editability nodes with `Query`, `Mutation`, or `SSE Stream`
-background text. The generated-client projection still derives those operation
-kinds from OpenAPI/generated TypeScript, not from Figma annotation prose.
+background text. Contracts owns that full list in
+`client_delivery_annotation_inventory`; control-plane mirrors it to prove every
+facade path below exists in OpenAPI and generated TypeScript comments.
+
+| UI area | Facade path | Kind | Background shown in Figma |
+| --- | --- | --- | --- |
+| Participant dropdown / task details | `riido.aiAgent.tasks.assignableAgents` | Query | 참여자 드롭다운에서 현재 task/subtask에 배정할 수 있는 Agent 목록을 조회합니다. |
+| Participant dropdown / task details | `riido.aiAgent.tasks.assign` | Mutation | 작업에 Agent를 참여자로 배정하고 daemon이 런타임으로 작업을 시작할 수 있는 서버 상태를 만듭니다. |
+| Participant dropdown / task details | `riido.aiAgent.tasks.unassign` | Mutation | 참여자에서 Agent를 제거합니다. 진행 중이면 중지 요청/큐 해제 흐름으로 이어집니다. |
+| Task thread | `riido.aiAgent.tasks.threads` | Query | 작업의 완료/진행 중 Agent thread cold collection을 조회합니다. active_stream이 있으면 SSE로 이어집니다. |
+| Task thread | `riido.aiAgent.tasks.threadMessages.create` | Mutation | 특정 thread_id에 다음 지시/답글을 추가하고 Agent 응답을 이어서 요청합니다. |
+| Task thread | `riido.aiAgent.tasks.submitComment` | Mutation | 호환용 댓글 제출 경로입니다. thread_id 없이 입력하면 서버가 적절한 thread 응답 흐름을 처리합니다. |
+| Task thread | `riido.aiAgent.events.stream` | SSE Stream | threads 조회 결과에 active_stream이 있을 때만 연결해 진행 상태와 thread 갱신 이벤트를 받습니다. |
+| Task thread | `riido.aiAgent.tasks.stop` | Mutation | 작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다. |
+| Runtime and agent settings | `riido.aiAgent.devices.runtimes` | Query | 계정 소유 device에서 감지된 runtime 목록과 온라인/오프라인 상태를 조회합니다. 화면은 SaaS 값을 신뢰합니다. |
+| Runtime settings | `riido.aiAgent.agents.daemon.details` | Query | Agent에 연결된 daemon/runtime 상세와 제어 가능 상태를 SaaS 기준으로 조회합니다. |
+| Runtime settings | `riido.aiAgent.agents.daemon.stop` | Mutation | SaaS에 daemon 중지 요청을 남깁니다. daemon은 요청을 읽은 뒤 스스로 종료합니다. |
+| Runtime settings | `riido.aiAgent.agents.daemon.restart` | Mutation | SaaS에 daemon 재시작 요청을 남깁니다. daemon은 polling으로 요청을 읽어 실행합니다. |
+| Onboarding | `riido.aiAgent.onboarding.fixtures` | Query | 리도/영실/홍도/지원처럼 제품이 제공하는 초기값 목록을 조회합니다. template entity가 아니라 fixture입니다. |
+| Onboarding | `riido.aiAgent.onboarding.fixtures.createAgent` | Mutation | 선택한 fixture 값을 기반으로 일반 Agent를 생성합니다. fixture 자체를 생성하는 기능은 아닙니다. |
+| Agent settings / direct setting | `riido.aiAgent.agents.create` | Mutation | 직접 설정 화면에서 워크스페이스 안에 새 Agent를 생성합니다. 신규 v2 create는 workspace_id를 포함합니다. |
+| Agent settings | `riido.aiAgent.bootstrap` | Query | AI Agent 설정/온보딩 초기 화면에 필요한 agent 요약, 권한, 기본 상태를 조회합니다. |
+| Agent settings | `riido.aiAgent.agents.updateConfiguration` | Mutation | 할당 작업이 없는 Agent의 이름, 썸네일, 설명, 지침, 런타임, 모델, 공개 범위를 저장합니다. |
+| Agent settings | `riido.aiAgent.agents.editability` | Query | Agent를 수정할 수 있는지 먼저 조회합니다. 할당된 작업이 있으면 저장/수정 UI는 막혀야 합니다. |
+| Agent settings | `riido.aiAgent.agents.delete` | Mutation | Agent 삭제를 요청합니다. 진행/예약 중 작업은 서버 정책에 따라 중지 또는 큐 해제됩니다. |
 
 The generator test reads both manifests and verifies that every required
 generated path exists in the upstream coverage mirror and in:
