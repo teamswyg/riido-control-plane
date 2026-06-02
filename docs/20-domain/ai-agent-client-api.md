@@ -247,8 +247,13 @@ configuration, and an ECS container credential endpoint supplied by the runtime.
 The snapshot item stores
 `AIAgentClientPersistenceSchemaVersion`
 (`riido-ai-agent-client-persistence.v2`) as JSON under a single DynamoDB
-`pk/sk`. The assignment operation store writes the generated assignment journal,
-agent queue projection, and active lease records in the same table. This is the
+`pk/sk`. Task thread cold collections, device credentials, daemon/device
+projection, agent configuration, and onboarding fixtures are durable in that
+snapshot. The generated client event stream is not an audit log; the snapshot
+stores only the newest 200 replay events so the development projection stays
+inside DynamoDB's single-item limit while still supporting recent SSE reconnects.
+The assignment operation store writes the generated assignment journal, agent
+queue projection, and active lease records in the same table. This is the
 development persistence boundary, not the final production single-table
 projection.
 

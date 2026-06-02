@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestPersistentAIAgentClientStoreRestoresDevelopmentState(t *testing.T) {
@@ -73,6 +74,62 @@ func TestPersistentAIAgentClientStoreRestoresDevelopmentState(t *testing.T) {
 	}
 	if !foundTypedWorkStatus {
 		t.Fatalf("reopened events should restore typed work-status payloads: %+v", events)
+	}
+}
+
+func TestAIAgentClientSnapshotRetainsRecentReplayEvents(t *testing.T) {
+	store := NewDevelopmentAIAgentClientStore()
+	store.mu.Lock()
+	store.events = nil
+	for i := 1; i <= aiAgentClientReplayEventLimit+25; i++ {
+		store.events = append(store.events, ClientStreamEvent{
+			Seq:       int64(i),
+			EventType: AgentClientEventWorkStatusChanged,
+			Payload: AgentWorkStatusChangedEvent{
+				EventType:       AgentClientEventWorkStatusChanged,
+				SchemaVersion:   SchemaVersion,
+				AgentID:         "agent-owned-codex",
+				TaskID:          "task-replay",
+				ThreadID:        "thread-replay",
+				RunID:           "run-replay",
+				WorkStatus:      AgentWorkStatusRunning,
+				AssignmentState: AgentAssignmentStateRunning,
+				CommentKind:     AgentTaskCommentRuntimeProgress,
+			},
+		})
+	}
+	store.mu.Unlock()
+
+	snapshot, err := store.snapshot(time.Date(2026, 6, 3, 1, 2, 3, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("snapshot: %v", err)
+	}
+	if len(snapshot.Events) != aiAgentClientReplayEventLimit {
+		t.Fatalf("snapshot retained %d events, want %d", len(snapshot.Events), aiAgentClientReplayEventLimit)
+	}
+	if snapshot.Events[0].Seq != 26 || snapshot.Events[len(snapshot.Events)-1].Seq != int64(aiAgentClientReplayEventLimit+25) {
+		t.Fatalf("snapshot retained seq range %d..%d", snapshot.Events[0].Seq, snapshot.Events[len(snapshot.Events)-1].Seq)
+	}
+
+	reopened := NewDevelopmentAIAgentClientStore()
+	if err := reopened.restoreSnapshot(snapshot); err != nil {
+		t.Fatalf("restoreSnapshot: %v", err)
+	}
+	reopened.mu.Lock()
+	event := reopened.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
+		EventType:       AgentClientEventWorkStatusChanged,
+		SchemaVersion:   SchemaVersion,
+		AgentID:         "agent-owned-codex",
+		TaskID:          "task-replay",
+		ThreadID:        "thread-replay",
+		RunID:           "run-replay",
+		WorkStatus:      AgentWorkStatusCompleted,
+		AssignmentState: AgentAssignmentStateCompleted,
+		CommentKind:     AgentTaskCommentTaskCompleted,
+	})
+	reopened.mu.Unlock()
+	if event.Seq != int64(aiAgentClientReplayEventLimit+26) {
+		t.Fatalf("next replay event seq = %d, want %d", event.Seq, aiAgentClientReplayEventLimit+26)
 	}
 }
 

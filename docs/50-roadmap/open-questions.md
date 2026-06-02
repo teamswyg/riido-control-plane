@@ -8,7 +8,7 @@ instead of redefining these questions.
 | ID | Area | Question | Current working stance |
 | --- | --- | --- | --- |
 | Q-CP-001 | AWS adapter dependency | Should public control-plane ever adopt an external AWS SDK? | No. Stdlib-only adapters remain until an ADR accepts the dependency. |
-| Q-CP-002 | Agent catalog / AI Agent development durability | Should final production persistence use assignment operation journals, separate catalog journals, or a DynamoDB single-table projection? | AI Agent client development state now uses a durable DynamoDB snapshot item. Final production projection, agent catalog durability, and rotation/revocation topology remain future slices. |
+| Q-CP-002 | Agent catalog / AI Agent development durability | Should final production persistence use assignment operation journals, separate catalog journals, or a DynamoDB single-table projection? | AI Agent client development state now uses a durable DynamoDB snapshot item plus bounded recent client stream replay events. Full production projection, agent catalog durability, and rotation/revocation topology remain future slices. |
 | Q-CP-003 | Production identity | Which IdP/JWKS claim mapping becomes the production authorizer contract? | External authorizer port is stable; tenant claim mapping remains outside public defaults. |
 | Q-CP-004 | Metrics export | Should stdout EMF remain the only public metrics publisher, or should Prometheus/OpenTelemetry become a contract? | Stdout EMF is the only public publisher. Dashboards and exporters stay infra-owned. |
 | Q-CP-005 | Stream relay runtime | Should DynamoDB stream relay run in `cmd/riido_ai_server` or as a separate worker process? | Adapter core is public; runtime topology is infra/deployment-owned until decided. |
