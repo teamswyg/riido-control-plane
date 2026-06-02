@@ -470,6 +470,7 @@ func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, p
 		"teamswyg/riido-contracts#63",
 		"teamswyg/riido-contracts#64",
 		"teamswyg/riido-contracts#65",
+		"teamswyg/riido-contracts#66",
 	}
 	if len(sourceStabilizedBy) != len(want) {
 		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
@@ -743,11 +744,18 @@ func verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t *testing.T, policy
 	if len(policy.LabelFormat) != 3 {
 		t.Fatalf("mirrored API Generated annotation label_format = %d entries, want 3", len(policy.LabelFormat))
 	}
-	for _, needle := range []string{"riido.*", "종류", "Query", "Mutation", "SSE Stream", "배경"} {
+	for _, needle := range []string{"riido.*", "종류", "Query", "Mutation", "SSE Stream", "배경", "text/event-stream", "non-stream GET", "non-GET"} {
 		if !strings.Contains(strings.Join(policy.LabelFormat, "\n")+"\n"+policy.Rule, needle) {
 			t.Fatalf("mirrored API Generated annotation content policy must mention %q: %+v", needle, policy)
 		}
-		if !strings.Contains(docText, needle) {
+		docNeedle := needle
+		if needle == "non-stream GET" {
+			docNeedle = "non-stream `GET`"
+		}
+		if needle == "non-GET" {
+			docNeedle = "non-`GET`"
+		}
+		if !strings.Contains(docText, docNeedle) {
 			t.Fatalf("projection doc must mention mirrored API Generated annotation content policy %q", needle)
 		}
 	}

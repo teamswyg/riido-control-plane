@@ -1432,6 +1432,30 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### Figma API Generated operation-kind transport guard mirror
+
+This slice consumes `teamswyg/riido-contracts#66`, which tightens the contracts
+Figma API Generated annotation guard.
+
+The mirrored source policy now requires `operation_kind` to match generated
+OpenAPI transport: `text/event-stream` responses are `SSE Stream`, non-stream
+`GET` operations are `Query`, and non-`GET` operations are `Mutation`.
+Control-plane mirrors that source rule so generated-client projection cannot
+preserve a Figma annotation kind that contradicts the OpenAPI operation shape.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#66` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to preserve the transport-derived operation-kind
+  rule in the mirrored source policy and human projection doc
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ### Figma onboarding page load timeout limitation mirror
 
 This slice mirrors the contracts-owned Figma onboarding page load timeout
