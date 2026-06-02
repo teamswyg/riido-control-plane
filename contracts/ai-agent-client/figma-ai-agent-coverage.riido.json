@@ -812,6 +812,19 @@
       "ui_area": "Runtime settings",
       "category_id": "700:0",
       "category_label": "API Generated",
+      "figma_generated_path": "riido.aiAgent.agents.daemon.start",
+      "canonical_generated_path": "aiAgent.agents.daemon.start",
+      "operation_kind": "Mutation",
+      "background": "stopped/offline 상태의 daemon에 시작 요청을 남깁니다. daemon 실행 트리거는 desktop이 담당하고, SaaS는 시작 요청 상태와 runtime projection을 제공합니다.",
+      "annotation_count": 2,
+      "sources": [
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["129:17433", "164:23586"]}
+      ]
+    },
+    {
+      "ui_area": "Runtime settings",
+      "category_id": "700:0",
+      "category_label": "API Generated",
       "figma_generated_path": "riido.aiAgent.agents.daemon.restart",
       "canonical_generated_path": "aiAgent.agents.daemon.restart",
       "operation_kind": "Mutation",

@@ -165,6 +165,7 @@ facade path below exists in OpenAPI and generated TypeScript comments.
 | Task thread | `riido.aiAgent.tasks.stop` | `v2.aiAgent.tasks.stop` | Mutation | 작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다. |
 | Runtime and agent settings | `riido.aiAgent.devices.runtimes` | `v2.aiAgent.devices.runtimes` | Query | 계정 소유 device에서 감지된 runtime 목록과 온라인/오프라인 상태를 조회합니다. 화면은 SaaS 값을 신뢰합니다. |
 | Runtime settings | `riido.aiAgent.agents.daemon.details` | `v2.aiAgent.agents.daemon.details` | Query | Agent에 연결된 daemon/runtime 상세와 제어 가능 상태를 SaaS 기준으로 조회합니다. |
+| Runtime settings | `riido.aiAgent.agents.daemon.start` | `v2.aiAgent.agents.daemon.start` | Mutation | stopped/offline 상태의 daemon에 시작 요청을 남깁니다. daemon 실행 트리거는 desktop이 담당하고, SaaS는 시작 요청 상태와 runtime projection을 제공합니다. |
 | Runtime settings | `riido.aiAgent.agents.daemon.stop` | `v2.aiAgent.agents.daemon.stop` | Mutation | SaaS에 daemon 중지 요청을 남깁니다. daemon은 요청을 읽은 뒤 스스로 종료합니다. |
 | Runtime settings | `riido.aiAgent.agents.daemon.restart` | `v2.aiAgent.agents.daemon.restart` | Mutation | SaaS에 daemon 재시작 요청을 남깁니다. daemon은 polling으로 요청을 읽어 실행합니다. |
 | Onboarding | `riido.aiAgent.onboarding.fixtures` | `v2.aiAgent.onboarding.fixtures` | Query | 리도/영실/홍도/지원처럼 제품이 제공하는 초기값 목록을 조회합니다. template entity가 아니라 fixture입니다. |
