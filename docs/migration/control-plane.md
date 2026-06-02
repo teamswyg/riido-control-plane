@@ -1382,6 +1382,30 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### Figma onboarding direct-node fallback evidence mirror
+
+This slice consumes `teamswyg/riido-contracts#64`, which refines the onboarding
+page-load timeout limitation with direct registered-node fallback evidence.
+
+Full `42:3014` `Wireframe - 온보딩` traversal can still time out, but direct
+Figma Plugin API reads for `236:33845` and `236:33847` preserve the six
+onboarding `riido.*` `API Generated` annotations. Control-plane mirrors that
+fact so generated-client projection does not treat a full-page timeout as proof
+that onboarding generated paths disappeared.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#64` to
+  `source_contracts_manifest.stabilized_by`
+- require the projection gate to preserve `236:33845`, `236:33847`, and
+  `onboarding_api_generated_annotations=6` in the source limitation
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ### Figma onboarding page load timeout limitation mirror
 
 This slice mirrors the contracts-owned Figma onboarding page load timeout

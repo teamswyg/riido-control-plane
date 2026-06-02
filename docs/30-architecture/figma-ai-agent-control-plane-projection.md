@@ -45,10 +45,12 @@ not remove `expected_pages`, drop `non_ui_top_level_inventory`, or delete
 The mirror also preserves `figma-onboarding-page-load-timeout.v1`. Current live
 reads of `node-id=42:3014` (`Wireframe - 온보딩`) can time out after 120s when
 using Figma `get_metadata(nodeId=42:3014)` or `use_figma` scripts that attempt
-`await figma.setCurrentPageAsync(page)`. Control-plane must not treat that
-timeout as proof that onboarding generated-client coverage disappeared: it must
-not remove `expected_pages`, drop `non_ui_top_level_inventory`, remove
-onboarding generated paths, or mark onboarding generated paths unresolved.
+`await figma.setCurrentPageAsync(page)`. Direct registered-node lookup for
+`236:33845` and `236:33847` still preserves the six onboarding `riido.*` `API
+Generated` annotations. Control-plane must not treat that timeout as proof that
+onboarding generated-client coverage disappeared: it must not remove
+`expected_pages`, drop `non_ui_top_level_inventory`, remove onboarding generated
+paths, or mark onboarding generated paths unresolved.
 
 The local `source_contracts_manifest.stabilized_by` list mirrors the full
 upstream coverage provenance used by this projection:
@@ -57,8 +59,9 @@ upstream coverage provenance used by this projection:
 `teamswyg/riido-contracts#51`, `teamswyg/riido-contracts#52`,
 `teamswyg/riido-contracts#54`, `teamswyg/riido-contracts#55`,
 `teamswyg/riido-contracts#56`, `teamswyg/riido-contracts#57`,
-`teamswyg/riido-contracts#58`, `teamswyg/riido-contracts#60`, and
-`teamswyg/riido-contracts#62`, and `teamswyg/riido-contracts#63`. The
+`teamswyg/riido-contracts#58`, `teamswyg/riido-contracts#60`,
+`teamswyg/riido-contracts#62`, `teamswyg/riido-contracts#63`, and
+`teamswyg/riido-contracts#64`. The
 projection gate treats the full upstream coverage provenance as part of the
 mirror contract, not as PR-description trivia.
 

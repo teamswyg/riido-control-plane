@@ -16,7 +16,8 @@
     "teamswyg/riido-contracts#58",
     "teamswyg/riido-contracts#60",
     "teamswyg/riido-contracts#62",
-    "teamswyg/riido-contracts#63"
+    "teamswyg/riido-contracts#63",
+    "teamswyg/riido-contracts#64"
   ],
   "human_doc": "docs/30-architecture/figma-ai-agent-coverage.md",
   "related_manifests": [
@@ -55,10 +56,10 @@
       "id": "figma-onboarding-page-load-timeout.v1",
       "tool": "Figma get_metadata nodeId=42:3014 and Figma Plugin API page load for 42:3014",
       "observed_at": "2026-06-02",
-      "observed_result": "Current live reads of page 42:3014 Wireframe - 온보딩 timed out after 120s in get_metadata(nodeId=42:3014) and in use_figma scripts that attempted await figma.setCurrentPageAsync(page).",
-      "authoritative_source": "Previously captured loaded Figma Plugin API inventory for page 42:3014 plus registered node-id evidence in this manifest",
-      "authoritative_result": ["42:3014", "child_count=83", "non_ui_top_level_inventory"],
-      "rule": "a timeout is supporting evidence only and must not rewrite expected_pages, remove page 42:3014, remove onboarding inventory, or mark onboarding generated paths unresolved."
+      "observed_result": "Current live reads of page 42:3014 Wireframe - 온보딩 can time out after 120s in get_metadata(nodeId=42:3014) and in use_figma scripts that attempt await figma.setCurrentPageAsync(page); direct getNodeByIdAsync reads for nodes 236:33845 and 236:33847 still returned the six onboarding riido.* API Generated annotations.",
+      "authoritative_source": "Previously captured loaded Figma Plugin API inventory for page 42:3014 plus registered node-id evidence in this manifest plus direct node lookup for 236:33845 and 236:33847",
+      "authoritative_result": ["42:3014", "child_count=83", "non_ui_top_level_inventory", "236:33845", "236:33847", "onboarding_api_generated_annotations=6"],
+      "rule": "a timeout is supporting evidence only and must not rewrite expected_pages, remove page 42:3014, remove onboarding inventory, or mark onboarding generated paths unresolved; direct registered-node lookup may be used as fallback evidence for onboarding API Generated annotations when full page traversal times out."
     }
   ],
   "coverage_policy": {
