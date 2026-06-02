@@ -318,10 +318,14 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 		t.Fatalf("mirrored_supporting_tool_limitations must record consumed source tooling limits")
 	}
 	var metadataProjection figmaProjectionSupportingToolLimitation
+	var headlessFileKeyProjection figmaProjectionSupportingToolLimitation
 	var onboardingTimeoutProjection figmaProjectionSupportingToolLimitation
 	for _, candidate := range projections {
 		if candidate.SourceID == "figma-metadata-page-list-underreports-pages.v1" {
 			metadataProjection = candidate
+		}
+		if candidate.SourceID == "figma-headless-file-key-placeholder.v1" {
+			headlessFileKeyProjection = candidate
 		}
 		if candidate.SourceID == "figma-onboarding-page-load-timeout.v1" {
 			onboardingTimeoutProjection = candidate
@@ -365,6 +369,42 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 	for _, needle := range []string{"figma-metadata-page-list-underreports-pages.v1", "get_metadata", "teamswyg/riido-contracts#52", "`129:5215`", "`42:3014`", "`0:1`", "`expected_pages`", "`non_ui_top_level_inventory`", "`legacy_non_ui_absorptions`"} {
 		if !strings.Contains(docText, needle) {
 			t.Fatalf("projection doc must mention mirrored supporting tool limitation with %q", needle)
+		}
+	}
+	if headlessFileKeyProjection.SourceID == "" {
+		t.Fatalf("mirrored_supporting_tool_limitations must include figma-headless-file-key-placeholder.v1")
+	}
+	headlessSource, ok := sourceByID[headlessFileKeyProjection.SourceID]
+	if !ok {
+		t.Fatalf("projection supporting limit %q is missing from mirrored contracts coverage", headlessFileKeyProjection.SourceID)
+	}
+	if !strings.Contains(headlessSource.Tool, "use_figma") ||
+		!strings.Contains(headlessSource.Tool, "figma.fileKey") ||
+		!strings.Contains(headlessSource.ObservedResult, "figma.fileKey=headless") ||
+		!strings.Contains(headlessSource.ObservedResult, "annotation categories") {
+		t.Fatalf("source supporting limit must preserve headless file-key evidence: %+v", headlessSource)
+	}
+	for _, result := range []string{"MUOd9lctoEHASUStN3vUuK", "v.1.22 AI Agent"} {
+		if !hasString(headlessSource.AuthoritativeResult, result) {
+			t.Fatalf("source headless file-key authoritative_result must contain %q: %+v", result, headlessSource.AuthoritativeResult)
+		}
+		if !hasString(headlessFileKeyProjection.RequiredAuthoritativeResults, result) {
+			t.Fatalf("headless file-key projection must require authoritative result %q: %+v", result, headlessFileKeyProjection.RequiredAuthoritativeResults)
+		}
+	}
+	if strings.TrimSpace(headlessFileKeyProjection.LocalScope) == "" ||
+		!strings.Contains(headlessFileKeyProjection.LocalScope, "figma.fileKey=headless") ||
+		!strings.Contains(headlessFileKeyProjection.LocalScope, "source identity") {
+		t.Fatalf("headless file-key projection must explain local scope: %+v", headlessFileKeyProjection)
+	}
+	for _, forbidden := range []string{"overwrite source_contracts_manifest.path", "overwrite mirrored figma.file_key", "replace upstream file identity with headless"} {
+		if !hasString(headlessFileKeyProjection.ForbiddenProjectionEffects, forbidden) {
+			t.Fatalf("headless file-key projection must forbid %q: %+v", forbidden, headlessFileKeyProjection.ForbiddenProjectionEffects)
+		}
+	}
+	for _, needle := range []string{"figma-headless-file-key-placeholder.v1", "`figma.fileKey=headless`", "`MUOd9lctoEHASUStN3vUuK`", "`figma.file_key`", "`source_contracts_manifest`", "headless runtime placeholder"} {
+		if !strings.Contains(docText, needle) {
+			t.Fatalf("projection doc must mention headless file-key limitation with %q", needle)
 		}
 	}
 	if onboardingTimeoutProjection.SourceID == "" {
@@ -429,6 +469,7 @@ func verifySourceContractsManifestProvenance(t *testing.T, sourceStabilizedBy, p
 		"teamswyg/riido-contracts#62",
 		"teamswyg/riido-contracts#63",
 		"teamswyg/riido-contracts#64",
+		"teamswyg/riido-contracts#65",
 	}
 	if len(sourceStabilizedBy) != len(want) {
 		t.Fatalf("mirrored source coverage stabilized_by = %d entries, want %d: %+v", len(sourceStabilizedBy), len(want), sourceStabilizedBy)
@@ -930,10 +971,11 @@ type figmaProjectionPolicy struct {
 }
 
 type figmaProjectionSupportingToolLimitation struct {
-	SourceID                   string   `json:"source_id"`
-	LocalScope                 string   `json:"local_scope"`
-	RequiredAuthoritativePages []string `json:"required_authoritative_pages"`
-	ForbiddenProjectionEffects []string `json:"forbidden_projection_effects"`
+	SourceID                     string   `json:"source_id"`
+	LocalScope                   string   `json:"local_scope"`
+	RequiredAuthoritativePages   []string `json:"required_authoritative_pages,omitempty"`
+	RequiredAuthoritativeResults []string `json:"required_authoritative_results,omitempty"`
+	ForbiddenProjectionEffects   []string `json:"forbidden_projection_effects"`
 }
 
 type figmaProjectionEntry struct {

@@ -1406,6 +1406,32 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### Figma headless file-key placeholder limitation mirror
+
+This slice consumes `teamswyg/riido-contracts#65`, which records a Figma Plugin
+API runtime limitation: live `use_figma` inspection can return
+`figma.fileKey=headless` while still reading the real AI Agent file content.
+
+Control-plane mirrors that evidence so generated-client projection never treats
+the headless runtime placeholder as the contracts source identity. The
+authoritative source remains the mirrored contracts manifest's `figma.file_key`
+and the local `source_contracts_manifest` values.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- append `teamswyg/riido-contracts#65` to
+  `source_contracts_manifest.stabilized_by`
+- add a local mirrored limitation that forbids replacing the upstream file
+  identity with `headless`
+- require the projection gate to preserve the source authoritative results
+  `MUOd9lctoEHASUStN3vUuK` and `v.1.22 AI Agent`
+
+This slice does not edit `teamswyg/riido-client` or `teamswyg/riido-desktop`,
+change generated API shape, add runtime behavior, add deployment secrets,
+introduce live endpoint examples, or move client UI ownership into this
+repository.
+
 ### Figma onboarding page load timeout limitation mirror
 
 This slice mirrors the contracts-owned Figma onboarding page load timeout
