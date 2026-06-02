@@ -16,6 +16,7 @@ const (
 	dynamoDBAssignmentProjectionSK = "STATE"
 	dynamoDBAgentActiveSK          = "ACTIVE"
 	dynamoDBAssignmentQueueIndex   = "agent_queue"
+	dynamoDBAssignmentQueryLimit   = 50
 )
 
 type DynamoDBAssignmentOperationStoreConfig struct {
@@ -1104,6 +1105,7 @@ func (s *DynamoDBAssignmentOperationStore) queryPayload(exclusiveStartKey map[st
 		ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues"`
 		ExclusiveStartKey         map[string]map[string]string `json:"ExclusiveStartKey,omitempty"`
 		ScanIndexForward          bool                         `json:"ScanIndexForward"`
+		Limit                     int                          `json:"Limit"`
 	}{
 		TableName:              s.tableName,
 		ConsistentRead:         true,
@@ -1113,6 +1115,7 @@ func (s *DynamoDBAssignmentOperationStore) queryPayload(exclusiveStartKey map[st
 		},
 		ExclusiveStartKey: exclusiveStartKey,
 		ScanIndexForward:  true,
+		Limit:             dynamoDBAssignmentQueryLimit,
 	}
 	return json.Marshal(payload)
 }
@@ -1125,6 +1128,7 @@ func (s *DynamoDBAssignmentOperationStore) agentQueueQueryPayload(agentID string
 		ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues"`
 		ExclusiveStartKey         map[string]map[string]string `json:"ExclusiveStartKey,omitempty"`
 		ScanIndexForward          bool                         `json:"ScanIndexForward"`
+		Limit                     int                          `json:"Limit"`
 	}{
 		TableName:              s.tableName,
 		IndexName:              dynamoDBAssignmentQueueIndex,
@@ -1134,6 +1138,7 @@ func (s *DynamoDBAssignmentOperationStore) agentQueueQueryPayload(agentID string
 		},
 		ExclusiveStartKey: exclusiveStartKey,
 		ScanIndexForward:  true,
+		Limit:             dynamoDBAssignmentQueryLimit,
 	}
 	return json.Marshal(payload)
 }
