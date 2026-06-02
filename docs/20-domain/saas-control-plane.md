@@ -123,14 +123,17 @@ repository selection rule. It does not own:
 
 > Riido task: RIID-4800 `server task context http client assignment prompt wiring`
 
-The production wiring path uses the existing API server's Open API task context
-endpoint as a server-to-server read. When `POST
-/v1/component-tasks/{task_id}/assignment` receives an empty
-`AssignRequest.prompt` and a task-context reader is configured, control-plane
-looks up the context by `component_id` or the path `task_id`, decodes the
-existing API server's camelCase response, composes `AssignRequest.prompt`, and
-then calls the assignment store. If lookup or composition fails, the HTTP
-handler returns `502` before a daemon can lease provider work.
+The production wiring path reads task context from the existing API server as a
+server-to-server call. The legacy Open API key reader remains available for
+automation surfaces that already own `workspace_id`, `team_id`, and
+`X-Workspace-Api-Key`, but browser/desktop-webview generated assignment must not
+depend on that key. For generated `tasks.assign`, control-plane uses the
+request's already-authorized user token, resolves the task's team location from
+`task_id` through the existing private component workspace lookup, reads the
+private component document, composes `AssignRequest.prompt`, and then calls the
+assignment store. The selected agent is not made team-aware; team resolution is
+only an internal task-context lookup detail. If lookup or composition fails, the
+HTTP handler fails before a daemon can lease provider work.
 
 Development fixture responses may still use deterministic synthetic thread
 responses, but those responses are not evidence that a daemon assignment prompt

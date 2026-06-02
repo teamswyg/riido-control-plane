@@ -219,3 +219,27 @@ func (r *assignmentHTTPTaskContextReader) GetAIAgentTaskContext(ctx context.Cont
 	}
 	return r.contextSnapshot, nil
 }
+
+type assignmentHTTPRequestTaskContextReader struct {
+	contextSnapshot AIAgentTaskContext
+	err             error
+	requests        []AIAgentTaskContextRequest
+}
+
+func (r *assignmentHTTPRequestTaskContextReader) GetAIAgentTaskContext(ctx context.Context, componentID string) (AIAgentTaskContext, error) {
+	if err := ctx.Err(); err != nil {
+		return AIAgentTaskContext{}, err
+	}
+	return r.contextSnapshot, r.err
+}
+
+func (r *assignmentHTTPRequestTaskContextReader) GetAIAgentTaskContextForRequest(ctx context.Context, req AIAgentTaskContextRequest) (AIAgentTaskContext, error) {
+	if err := ctx.Err(); err != nil {
+		return AIAgentTaskContext{}, err
+	}
+	r.requests = append(r.requests, req)
+	if r.err != nil {
+		return AIAgentTaskContext{}, r.err
+	}
+	return r.contextSnapshot, nil
+}

@@ -158,11 +158,85 @@ func TestConfigFromEnvParsesTaskContextReader(t *testing.T) {
 	}
 }
 
+func TestConfigFromEnvParsesPrivateTaskContextReader(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	var gotPaths []string
+	var gotAuthorization []string
+	taskContextServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPaths = append(gotPaths, r.URL.String())
+		gotAuthorization = append(gotAuthorization, r.Header.Get("Authorization"))
+		switch r.URL.Path {
+		case "/public/components/component-a/workspace":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"id":            "component-a",
+				"componentType": "task",
+				"team": map[string]any{
+					"id": "team-a",
+					"workspace": map[string]any{
+						"id": "workspace-a",
+					},
+				},
+			})
+		case "/teams/team-a/components/component-a":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"id":            "component-a",
+				"componentType": "task",
+				"title":         "Private task context from existing API server",
+				"keyNumber":     "RIID-4873",
+				"document": map[string]any{
+					"id":               "document-a",
+					"tiptapDocumentId": "doc-a",
+					"HTMLContent":      "<p>Existing API server private document.</p>",
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer taskContextServer.Close()
+
+	t.Setenv(envTaskContextBaseURL, taskContextServer.URL)
+	t.Setenv(envTaskContextTimeout, "1")
+
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	if config.TaskContextReader == nil {
+		t.Fatal("task context reader missing")
+	}
+	requestReader, ok := config.TaskContextReader.(riidoaiserver.AIAgentTaskContextRequestReader)
+	if !ok {
+		t.Fatalf("task context reader should support request-scoped JWT")
+	}
+	contextSnapshot, err := requestReader.GetAIAgentTaskContextForRequest(context.Background(), riidoaiserver.AIAgentTaskContextRequest{
+		ComponentID: "component-a",
+		WorkspaceID: "workspace-a",
+		BearerToken: "user-jwt",
+	})
+	if err != nil {
+		t.Fatalf("GetAIAgentTaskContextForRequest: %v", err)
+	}
+	if !reflect.DeepEqual(gotPaths, []string{"/public/components/component-a/workspace", "/teams/team-a/components/component-a?getDocument=true"}) {
+		t.Fatalf("task context paths = %v", gotPaths)
+	}
+	for _, got := range gotAuthorization {
+		if got != "Bearer user-jwt" {
+			t.Fatalf("authorization = %q", got)
+		}
+	}
+	if contextSnapshot.Component.Title != "Private task context from existing API server" ||
+		contextSnapshot.Document.Content != "<p>Existing API server private document.</p>" {
+		t.Fatalf("task context snapshot = %+v", contextSnapshot)
+	}
+}
+
 func TestConfigFromEnvRejectsPartialTaskContextConfig(t *testing.T) {
 	clearRiidoAIServerEnv(t)
 	t.Setenv(envTaskContextBaseURL, "https://api.riido.io")
+	t.Setenv(envTaskContextWorkspaceID, "workspace-a")
 
-	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envTaskContextWorkspaceID) {
+	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), "OpenAPI task context") {
 		t.Fatalf("configFromEnv err=%v", err)
 	}
 }

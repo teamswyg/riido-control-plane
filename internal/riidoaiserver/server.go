@@ -531,20 +531,17 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
 		return
 	}
-	if s.taskContext == nil {
-		writeError(w, http.StatusServiceUnavailable, "task context reader is not configured")
-		return
-	}
 	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionAssign, TaskID: taskID})
 	if !ok {
 		return
 	}
+	bearerToken, _ := requestToken(r)
 	var req AssignAIAgentTaskRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	assignmentReq, err := s.assignRequestFromAIAgentClientTask(r.Context(), principal, taskID, req)
+	assignmentReq, err := s.assignRequestFromAIAgentClientTask(r.Context(), principal, bearerToken, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
@@ -561,7 +558,7 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 	writeJSON(w, http.StatusAccepted, response)
 }
 
-func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AssignRequest, error) {
+func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principal AuthorizationResult, bearerToken, taskID string, req AssignAIAgentTaskRequest) (AssignRequest, error) {
 	taskID = strings.TrimSpace(taskID)
 	req.AgentID = strings.TrimSpace(req.AgentID)
 	if taskID == "" {
@@ -599,7 +596,11 @@ func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principa
 		AgentInstruction: selected.Instruction,
 		CreatedBy:        strings.TrimSpace(principal.PrincipalID),
 	}
-	return s.assignRequestWithTaskContextPrompt(ctx, taskID, assignmentReq)
+	return s.assignRequestWithTaskContextPromptForClient(ctx, taskID, assignmentReq, AIAgentTaskContextRequest{
+		ComponentID: taskID,
+		WorkspaceID: principal.WorkspaceID,
+		BearerToken: bearerToken,
+	})
 }
 
 func (s Server) handleAIAgentClientUnassignTask(w http.ResponseWriter, r *http.Request, taskID string) {
@@ -1054,6 +1055,36 @@ func (s Server) assignRequestWithTaskContextPrompt(ctx context.Context, taskID s
 	if err != nil {
 		return AssignRequest{}, err
 	}
+	return composeAssignRequestWithTaskContext(taskID, componentID, req, contextSnapshot)
+}
+
+func (s Server) assignRequestWithTaskContextPromptForClient(ctx context.Context, taskID string, req AssignRequest, contextReq AIAgentTaskContextRequest) (AssignRequest, error) {
+	componentID := strings.TrimSpace(req.ComponentID)
+	if componentID == "" {
+		componentID = strings.TrimSpace(taskID)
+	}
+	contextReq.ComponentID = strings.TrimSpace(contextReq.ComponentID)
+	if contextReq.ComponentID == "" {
+		contextReq.ComponentID = componentID
+	}
+	contextSnapshot, err := s.getAIAgentTaskContextForRequest(ctx, contextReq)
+	if err != nil {
+		return AssignRequest{}, err
+	}
+	return composeAssignRequestWithTaskContext(taskID, componentID, req, contextSnapshot)
+}
+
+func (s Server) getAIAgentTaskContextForRequest(ctx context.Context, req AIAgentTaskContextRequest) (AIAgentTaskContext, error) {
+	if s.taskContext == nil {
+		return AIAgentTaskContext{}, errors.New("task context reader is not configured")
+	}
+	if reader, ok := s.taskContext.(AIAgentTaskContextRequestReader); ok {
+		return reader.GetAIAgentTaskContextForRequest(ctx, req)
+	}
+	return s.taskContext.GetAIAgentTaskContext(ctx, req.ComponentID)
+}
+
+func composeAssignRequestWithTaskContext(taskID, componentID string, req AssignRequest, contextSnapshot AIAgentTaskContext) (AssignRequest, error) {
 	composed, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
 		TaskID:  taskID,
 		Context: contextSnapshot,
