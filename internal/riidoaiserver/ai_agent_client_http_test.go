@@ -210,7 +210,7 @@ func TestHTTPAIAgentClientDevelopmentV2WorkspaceScopedCreateAndThreadStream(t *t
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "owner-token",
-		Scopes:      []string{"ai-agent:*"},
+		Scopes:      []string{"ai-agent:*", "agent:*:poll"},
 	}})
 
 	body, err := json.Marshal(CreateAgentConfigurationRequest{
@@ -267,6 +267,37 @@ func TestHTTPAIAgentClientDevelopmentV2WorkspaceScopedCreateAndThreadStream(t *t
 	server.ServeHTTP(assignResp, assignReq)
 	if assignResp.Code != http.StatusAccepted {
 		t.Fatalf("v2 assign status=%d body=%s", assignResp.Code, assignResp.Body.String())
+	}
+	var assigned AIAgentTaskActionResponse
+	if err := json.Unmarshal(assignResp.Body.Bytes(), &assigned); err != nil {
+		t.Fatalf("v2 assign json: %v", err)
+	}
+	if assigned.AgentID != created.Agent.AgentID || assigned.ThreadID == "" {
+		t.Fatalf("v2 assign response = %+v", assigned)
+	}
+
+	pollReq := httptest.NewRequest(http.MethodPost, "/v1/agents/"+created.Agent.AgentID+"/poll", strings.NewReader(`{"daemon_id":"daemon-dev-macbook","device_id":"device-dev-macbook","runtime_id":"runtime-cursor-dev"}`))
+	pollReq.Header.Set("Authorization", "Bearer owner-token")
+	pollResp := httptest.NewRecorder()
+	server.ServeHTTP(pollResp, pollReq)
+	if pollResp.Code != http.StatusOK {
+		t.Fatalf("v2 assignment poll status=%d body=%s", pollResp.Code, pollResp.Body.String())
+	}
+	var poll PollResponse
+	if err := json.Unmarshal(pollResp.Body.Bytes(), &poll); err != nil {
+		t.Fatalf("v2 assignment poll json: %v", err)
+	}
+	if poll.Action != PollStart || poll.Assignment == nil ||
+		poll.Assignment.TaskID != "task-v2" ||
+		poll.Assignment.ComponentID != "task-v2" ||
+		poll.Assignment.AgentID != created.Agent.AgentID ||
+		poll.Assignment.RuntimeProvider != "cursor" ||
+		poll.Assignment.AgentInstruction != created.Agent.Instruction ||
+		!strings.Contains(poll.Assignment.Prompt, "branch_name: RIID-4800-server-task-context-http-client-assignment-prompt-wiring") {
+		if poll.Assignment != nil {
+			t.Fatalf("v2 assignment poll action=%s assignment=%+v", poll.Action, *poll.Assignment)
+		}
+		t.Fatalf("v2 assignment poll = %+v", poll)
 	}
 
 	threadsReq := httptest.NewRequest(http.MethodGet, "/v2/client/workspaces/workspace-a/ai-agent/tasks/task-v2/threads", nil)
@@ -1249,7 +1280,17 @@ func newAIAgentClientHTTPTestServer(t *testing.T, credentials []StaticTokenCrede
 	if err != nil {
 		t.Fatalf("NewStaticTokenAuthorizer: %v", err)
 	}
-	return NewServer(ServerConfig{AIAgentClient: NewDevelopmentAIAgentClientStore(), Authorizer: authorizer}).Handler()
+	aiAgentStore := NewDevelopmentAIAgentClientStore()
+	assignmentStore := NewStoreWithConfig(StoreConfig{AgentRegistry: aiAgentStore})
+	t.Cleanup(func() {
+		assignmentStore.Close()
+	})
+	return NewServer(ServerConfig{
+		AIAgentClient: aiAgentStore,
+		Assignment:    assignmentStore,
+		TaskContext:   &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()},
+		Authorizer:    authorizer,
+	}).Handler()
 }
 
 func aiAgentClientHTTPAuthorizer(t *testing.T, scopes []string, principalID string) RequestAuthorizer {
