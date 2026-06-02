@@ -581,20 +581,32 @@ func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principa
 	if selected.AgentID == "" {
 		return AssignRequest{}, ErrAIAgentNotFound
 	}
-	registry, ok := s.aiAgent.(AgentRegistry)
-	if !ok {
-		return AssignRequest{}, errors.New("ai agent runtime registry is not configured")
-	}
-	binding, ok := registry.LookupAgent(selected.AgentID)
-	if !ok {
-		return AssignRequest{}, errors.New("ai agent runtime binding is not configured")
+	var binding AgentRuntimeBinding
+	var runtime RuntimeRecord
+	if factRegistry, ok := s.aiAgent.(AgentRuntimeFactRegistry); ok {
+		var found bool
+		binding, runtime, found = factRegistry.LookupAgentRuntimeFact(selected.AgentID)
+		if !found {
+			return AssignRequest{}, errors.New("ai agent runtime binding is not configured")
+		}
+	} else {
+		registry, ok := s.aiAgent.(AgentRegistry)
+		if !ok {
+			return AssignRequest{}, errors.New("ai agent runtime registry is not configured")
+		}
+		var found bool
+		binding, found = registry.LookupAgent(selected.AgentID)
+		if !found {
+			return AssignRequest{}, errors.New("ai agent runtime binding is not configured")
+		}
 	}
 	assignmentReq := AssignRequest{
-		ComponentID:      taskID,
-		AgentID:          selected.AgentID,
-		RuntimeProvider:  binding.RuntimeProvider,
-		AgentInstruction: selected.Instruction,
-		CreatedBy:        strings.TrimSpace(principal.PrincipalID),
+		ComponentID:              taskID,
+		AgentID:                  selected.AgentID,
+		RuntimeProvider:          binding.RuntimeProvider,
+		AgentInstruction:         selected.Instruction,
+		AllowExperimentalRuntime: runtime.RequiresExperimentalOptIn,
+		CreatedBy:                strings.TrimSpace(principal.PrincipalID),
 	}
 	return s.assignRequestWithTaskContextPromptForClient(ctx, taskID, assignmentReq, AIAgentTaskContextRequest{
 		ComponentID: taskID,

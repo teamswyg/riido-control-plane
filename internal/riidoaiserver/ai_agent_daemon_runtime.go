@@ -177,6 +177,31 @@ func (s *DevelopmentAIAgentClientStore) LookupAgent(agentID string) (AgentRuntim
 	return s.agentRuntimeBindingLocked(agent)
 }
 
+func (s *DevelopmentAIAgentClientStore) LookupAgentRuntimeFact(agentID string) (AgentRuntimeBinding, RuntimeRecord, bool) {
+	if s == nil {
+		return AgentRuntimeBinding{}, RuntimeRecord{}, false
+	}
+	agentID = strings.TrimSpace(agentID)
+	if agentID == "" {
+		return AgentRuntimeBinding{}, RuntimeRecord{}, false
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	agent, ok := s.agents[agentID]
+	if !ok {
+		return AgentRuntimeBinding{}, RuntimeRecord{}, false
+	}
+	binding, ok := s.agentRuntimeBindingLocked(agent)
+	if !ok {
+		return AgentRuntimeBinding{}, RuntimeRecord{}, false
+	}
+	_, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
+	if !ok {
+		return AgentRuntimeBinding{}, RuntimeRecord{}, false
+	}
+	return binding, copyRuntime(runtime), true
+}
+
 func (s *DevelopmentAIAgentClientStore) agentRuntimeBindingLocked(agent AgentClientRecord) (AgentRuntimeBinding, bool) {
 	agent.AgentID = strings.TrimSpace(agent.AgentID)
 	agent.RuntimeID = strings.TrimSpace(agent.RuntimeID)
@@ -297,14 +322,15 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID string, in []Run
 			return nil, fmt.Errorf("runtimes[%d].detection_state is invalid", i)
 		}
 		out = append(out, RuntimeRecord{
-			RuntimeID:        runtime.RuntimeID,
-			DeviceID:         deviceID,
-			Kind:             runtime.Kind,
-			Availability:     runtime.Availability,
-			DetectionState:   runtime.DetectionState,
-			OwnerPrincipalID: ownerPrincipalID,
-			LastDetectedAt:   now,
-			Models:           normalizeRuntimeModels(runtime.Kind, runtime.Models),
+			RuntimeID:                 runtime.RuntimeID,
+			DeviceID:                  deviceID,
+			Kind:                      runtime.Kind,
+			Availability:              runtime.Availability,
+			DetectionState:            runtime.DetectionState,
+			OwnerPrincipalID:          ownerPrincipalID,
+			LastDetectedAt:            now,
+			RequiresExperimentalOptIn: runtime.RequiresExperimentalOptIn,
+			Models:                    normalizeRuntimeModels(runtime.Kind, runtime.Models),
 		})
 	}
 	return out, nil

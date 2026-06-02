@@ -619,6 +619,13 @@ agent records. Figma required-control annotations for the save button are
 therefore UI validation state, not a breaking change to the generated request
 schema.
 
+`RuntimeRecord.requires_experimental_opt_in` is a daemon-reported runtime fact.
+Clients may display or inspect it, but they do not send an opt-in flag when
+assigning an agent to a task. When the selected runtime requires experimental
+opt-in, control-plane snapshots that fact into
+`Assignment.allow_experimental_runtime=true` before the assignment enters the
+daemon polling store.
+
 Confirmed through the Figma plugin/Dev Mode annotations on 2026-05-29:
 
 - `node-id=153-12742`: task participant dropdown. The annotation says members

@@ -207,7 +207,7 @@ func TestHTTPDesktopDeviceEnrollmentAndDaemonCredentialAuthorization(t *testing.
 
 	codexRuntimeID := enrollment.DeviceID + ":codex"
 	cursorRuntimeID := enrollment.DeviceID + ":cursor"
-	codexSnapshotReq := httptest.NewRequest(http.MethodPost, "/v1/daemon/runtime-snapshot", strings.NewReader(`{"daemon_id":"daemon-enrolled","runtimes":[{"runtime_id":"`+codexRuntimeID+`","kind":"codex"}]}`))
+	codexSnapshotReq := httptest.NewRequest(http.MethodPost, "/v1/daemon/runtime-snapshot", strings.NewReader(`{"daemon_id":"daemon-enrolled","runtimes":[{"runtime_id":"`+codexRuntimeID+`","kind":"codex","requires_experimental_opt_in":true}]}`))
 	codexSnapshotReq.Header.Set(deviceIDHeader, enrollment.DeviceID)
 	codexSnapshotReq.Header.Set(deviceSecretHeader, enrollment.DeviceSecret)
 	codexSnapshotResp := httptest.NewRecorder()
@@ -265,6 +265,10 @@ func TestHTTPDesktopDeviceEnrollmentAndDaemonCredentialAuthorization(t *testing.
 	}
 	if !runtimeHasAssignedAgent(mergedDevices.Devices, codexRuntimeID) {
 		t.Fatalf("codex runtime lost assigned-agent flag after cursor snapshot: %+v", mergedDevice.Runtimes)
+	}
+	codexRuntime, ok := findRuntime(mergedDevice.Runtimes, codexRuntimeID)
+	if !ok || !codexRuntime.RequiresExperimentalOptIn {
+		t.Fatalf("codex runtime opt-in fact missing after second snapshot: %+v", mergedDevice.Runtimes)
 	}
 	if _, ok := findRuntime(mergedDevice.Runtimes, cursorRuntimeID); !ok {
 		t.Fatalf("cursor runtime missing after second snapshot: %+v", mergedDevice.Runtimes)
@@ -428,6 +432,7 @@ func TestHTTPAIAgentClientAssignUsesRequestScopedTaskContext(t *testing.T) {
 		t.Fatalf("NewStaticTokenAuthorizer: %v", err)
 	}
 	aiAgentStore := NewDevelopmentAIAgentClientStore()
+	aiAgentStore.devices[0].Runtimes[0].RequiresExperimentalOptIn = true
 	assignmentStore := NewStoreWithConfig(StoreConfig{AgentRegistry: aiAgentStore})
 	t.Cleanup(func() { assignmentStore.Close() })
 	taskContext := &assignmentHTTPRequestTaskContextReader{
@@ -490,6 +495,9 @@ func TestHTTPAIAgentClientAssignUsesRequestScopedTaskContext(t *testing.T) {
 	if !strings.Contains(pollOut.Assignment.Prompt, "private JWT component body") ||
 		!strings.Contains(pollOut.Assignment.Prompt, "JWT로 task context 조회") {
 		t.Fatalf("assignment prompt = %s", pollOut.Assignment.Prompt)
+	}
+	if !pollOut.Assignment.AllowExperimentalRuntime {
+		t.Fatalf("assignment experimental opt-in = false, assignment=%+v", *pollOut.Assignment)
 	}
 }
 

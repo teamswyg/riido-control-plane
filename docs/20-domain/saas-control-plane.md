@@ -82,6 +82,13 @@ value, enforces the 1000-character contract limit, persists it with the
 assignment, and returns it in poll/heartbeat/event responses. Provider-specific
 placement belongs to `riido-daemon`, not this repository.
 
+`AssignRequest.allow_experimental_runtime` and
+`Assignment.allow_experimental_runtime` are assignment-created snapshots derived
+from the selected runtime's `RuntimeRecord.requires_experimental_opt_in` fact.
+The control plane derives this at assignment creation time; daemon execution
+must consume the snapshot instead of inferring opt-in from provider names or
+environment variables.
+
 Runtime progress intended for the client task thread is ingested as bounded
 daemon batches on `POST /v1/agents/{agent_id}/thread-progress`. The endpoint
 stores each accepted line as an assignment `riido_log` task event and, when the

@@ -3603,7 +3603,7 @@
         "properties": {
           "default_visibility": {
             "$ref": "#/components/schemas/AgentVisibility",
-            "description": "fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. mock은 안전하게 private 값을 사용합니다."
+            "description": "fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. 기본값은 안전하게 private 값을 사용합니다."
           },
           "description": {
             "description": "에이전트 설명 기본값입니다. 최대 160자입니다.",
@@ -4362,6 +4362,9 @@
           "owner_principal_id": {
             "type": "string"
           },
+          "requires_experimental_opt_in": {
+            "type": "boolean"
+          },
           "runtime_id": {
             "type": "string"
           }
@@ -4373,6 +4376,7 @@
           "availability",
           "detection_state",
           "has_assigned_agent",
+          "requires_experimental_opt_in",
           "models"
         ],
         "type": "object"
