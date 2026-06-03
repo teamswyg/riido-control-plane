@@ -609,6 +609,34 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	}
 }
 
+func TestGeneratedClientDeliveryTokenBoundary(t *testing.T) {
+	workflow := mustRead(t, "../../.github/workflows/generated-client-delivery.yml")
+	clientDelivery := mustRead(t, "../../docs/30-architecture/api-client-delivery.md")
+	migration := mustRead(t, "../../docs/migration/control-plane.md")
+
+	requireContains(t, workflow, "actions/create-github-app-token@v1")
+	requireContains(t, workflow, "RIIDO_CLIENT_DELIVERY_APP_ID")
+	requireContains(t, workflow, "RIIDO_CLIENT_DELIVERY_PRIVATE_KEY")
+	requireContains(t, workflow, "RIIDO_CLIENT_DELIVERY_TOKEN")
+	requireContains(t, workflow, "Generated client delivery needs cross-repository write permission")
+	requireContains(t, workflow, "github.event.inputs.create_pr == 'true'")
+	requireContains(t, workflow, "target_branch must be the Riido work branchName")
+	requireContains(t, workflow, "grep -Eq '^[A-Z][A-Z0-9]*-[0-9]+-.+'")
+
+	requireNotContains(t, workflow, "RIIDO_CLIENT_DELIVERY_TOKEN is required to open or update teamswyg/riido-client PRs.")
+	requireNotContains(t, workflow, "react-query-")
+
+	requireContains(t, clientDelivery, "create_pr=false")
+	requireContains(t, clientDelivery, "requiring `riido-client` write credentials")
+	requireContains(t, clientDelivery, "This failure is intentional only for `create_pr=true`")
+	requireContains(t, clientDelivery, "Riido `branchName`")
+	requireContains(t, clientDelivery, "secret gates")
+	requireContains(t, migration, "RIID-4899")
+	requireContains(t, migration, "legacy delivery workflow")
+	requireContains(t, migration, "raw `RIIDO_CLIENT_DELIVERY_TOKEN`")
+	requireContains(t, migration, "synthesize `react-query-*` branch names")
+}
+
 func TestRuntimeCDPublicSurfaceScanContract(t *testing.T) {
 	manifest := mustRead(t, "../../docs/30-architecture/runtime-cd-ownership.riido.json")
 	var parsed struct {

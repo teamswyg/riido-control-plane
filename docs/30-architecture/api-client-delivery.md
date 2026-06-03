@@ -203,14 +203,21 @@ fields such as `x-riido-lifecycle`, `x-riido-replacement`, and
 ## Release Trigger
 
 Generated-client delivery is handled by
-`.github/workflows/generated-client-delivery.yml`. The package job can be run
-manually to produce a reviewable artifact. Delivery to `riido-client` is allowed
-from three reviewed sources:
+`.github/workflows/generated-client-delivery.yml`. The current executable
+trigger is `workflow_dispatch` so an operator can choose between package-only
+review evidence and an actual cross-repository PR handoff. The package job can
+be run manually with `create_pr=false` to produce a reviewable artifact without
+requiring `riido-client` write credentials.
+
+Delivery to `riido-client` is allowed from reviewed sources only when the same
+Riido `branchName` and secret gates are preserved:
 
 - a `riido-control-plane` Git tag that represents an API release
-- an explicit manual workflow dispatch with `create_pr=true`
+- an explicit manual workflow dispatch with `create_pr=true` (the current
+  enabled delivery path)
 - a `main` push that changes the AI Agent client OpenAPI/DSL/IR projection or
-  the generated-client delivery generators/workflow
+  the generated-client delivery generators/workflow, after a future automation
+  slice wires it through the same branchName and credential checks
 
 The contracts SSOT defines generated client delivery PRs as review handoffs.
 This workflow may open or update a `riido-client` PR, but it must not auto-merge
@@ -492,6 +499,8 @@ current workflow accepts that temporary token as
 `RIIDO_CLIENT_DELIVERY_TOKEN`. If neither the GitHub App secrets nor this
 fallback token are configured, the delivery job must fail before checking out
 `riido-client` and explain that cross-repository write permission is missing.
+This failure is intentional only for `create_pr=true`; `create_pr=false` must
+still build and upload the package artifact without cross-repository secrets.
 
 The workflow must not require npm publish tokens, cloud credentials, Terraform
 state, customer data, or production request tokens.
