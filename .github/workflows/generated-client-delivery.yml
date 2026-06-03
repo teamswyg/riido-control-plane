@@ -140,13 +140,13 @@ jobs:
           pnpm exec prettier --write \
             src/generated/react-query/riido-control-plane/aiAgentClient.ts \
             src/generated/react-query/riido-control-plane/aiAgentClient.react.ts
-          go run ../control-plane/tools/generatedclienthandoff \
-            -openapi ../control-plane/contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json \
-            -dsl ../control-plane/contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json \
-            -ir ../control-plane/contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json \
-            -core src/generated/react-query/riido-control-plane/aiAgentClient.ts \
-            -react src/generated/react-query/riido-control-plane/aiAgentClient.react.ts \
-            -out src/generated/react-query/riido-control-plane \
+          go -C ../control-plane run ./tools/generatedclienthandoff \
+            -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json \
+            -dsl contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json \
+            -ir contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json \
+            -core ../riido-client/src/generated/react-query/riido-control-plane/aiAgentClient.ts \
+            -react ../riido-client/src/generated/react-query/riido-control-plane/aiAgentClient.react.ts \
+            -out ../riido-client/src/generated/react-query/riido-control-plane \
             -pr-body ../dist/PR_BODY.generated.md \
             -source-ref "$SOURCE_REF" \
             -source-commit "$SOURCE_COMMIT" \
