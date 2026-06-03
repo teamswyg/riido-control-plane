@@ -395,6 +395,10 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   client concern
 - daemon progress ingest accepts parsed `<riido_log>...<end>` batches through
   `POST /v1/agents/{agent_id}/thread-progress`
+- if that daemon progress ingest omits `thread_id`, the control-plane must
+  attach the batch to the current active thread for the same `(task_id,
+  agent_id)` instead of creating a second visible thread from the assignment
+  run id. The assignment response thread remains the client-facing thread id.
 - daemon standard assignment events on `POST /v1/agents/{agent_id}/events`
   also update the same client task-thread read model. `riido_log` appends
   progress lines, while terminal assignment states clear `active_stream` so
