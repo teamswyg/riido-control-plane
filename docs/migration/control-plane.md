@@ -1762,7 +1762,9 @@ This slice does:
   React Query client
 - add `.github/workflows/generated-client-delivery.yml` so control-plane can
   package generated artifacts and open or update a draft `riido-client` PR
-  without auto-merging it
+  without auto-merging it from API release tags, explicit manual dispatches, or
+  path-filtered `main` pushes that change the AI Agent client contract/generator
+  boundary
 - guard the client handoff so only
   `src/generated/react-query/riido-control-plane/**` can be changed in the
   target branch, and so no-diff runs stop before creating or refreshing a PR

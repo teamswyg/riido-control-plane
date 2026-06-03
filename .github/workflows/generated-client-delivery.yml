@@ -14,8 +14,15 @@ on:
         default: ""
         type: string
   push:
+    branches:
+      - main
     tags:
       - "v*"
+    paths:
+      - ".github/workflows/generated-client-delivery.yml"
+      - "contracts/ai-agent-client/**"
+      - "tools/generatedclienthandoff/**"
+      - "tools/reactquerygen/**"
 
 permissions:
   contents: read

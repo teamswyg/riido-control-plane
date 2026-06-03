@@ -204,18 +204,24 @@ fields such as `x-riido-lifecycle`, `x-riido-replacement`, and
 
 Generated-client delivery is handled by
 `.github/workflows/generated-client-delivery.yml`. The package job can be run
-manually to produce a reviewable artifact, and delivery to `riido-client` is
-allowed only from a `riido-control-plane` Git tag that represents an API release
-or an explicit manual workflow dispatch with `create_pr=true`.
+manually to produce a reviewable artifact. Delivery to `riido-client` is allowed
+from three reviewed sources:
 
-Regular pushes to `main` may validate local drift, but they must not push a
-branch to `riido-client`. This keeps frequent server development from creating
-client churn and CI cost.
+- a `riido-control-plane` Git tag that represents an API release
+- an explicit manual workflow dispatch with `create_pr=true`
+- a `main` push that changes the AI Agent client OpenAPI/DSL/IR projection or
+  the generated-client delivery generators/workflow
 
 The contracts SSOT defines generated client delivery PRs as review handoffs.
 This workflow may open or update a `riido-client` PR, but it must not auto-merge
 that PR. `riido-client` owns the final generated-code review, application
 integration, and merge decision.
+
+`main` delivery is path-filtered to the generated-client contract and generator
+boundary. It must not run for unrelated server, docs-only, infra, or provider
+execution changes. If those filtered changes do not produce a generated diff
+against `riido-client` `main`, the workflow stops without creating or refreshing
+a client PR.
 
 ## Target Branch
 
