@@ -468,10 +468,19 @@ Prefer a GitHub App installed only where needed. Required secrets live in
 - `RIIDO_CLIENT_DELIVERY_APP_ID`
 - `RIIDO_CLIENT_DELIVERY_PRIVATE_KEY`
 
+The delivery workflow creates a short-lived installation token from those two
+secrets and uses it only for `teamswyg/riido-client` checkout, branch push, and
+PR create/update. The GitHub App must be installed on `teamswyg/riido-client`
+and needs repository metadata read, contents read/write, and pull-request
+read/write permissions. The generated-client package artifact can still be built
+without these secrets; only the cross-repository PR delivery job requires them.
+
 If a fine-grained token is used temporarily, it must be scoped to the target
 repository and limited to contents and pull-request write permissions. The
 current workflow accepts that temporary token as
-`RIIDO_CLIENT_DELIVERY_TOKEN`.
+`RIIDO_CLIENT_DELIVERY_TOKEN`. If neither the GitHub App secrets nor this
+fallback token are configured, the delivery job must fail before checking out
+`riido-client` and explain that cross-repository write permission is missing.
 
 The workflow must not require npm publish tokens, cloud credentials, Terraform
 state, customer data, or production request tokens.
