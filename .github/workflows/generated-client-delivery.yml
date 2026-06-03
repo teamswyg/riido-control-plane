@@ -88,17 +88,43 @@ jobs:
     if: github.event.inputs.create_pr == 'true'
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.RIIDO_CLIENT_DELIVERY_TOKEN }}
+      RIIDO_CLIENT_DELIVERY_APP_ID: ${{ secrets.RIIDO_CLIENT_DELIVERY_APP_ID }}
+      RIIDO_CLIENT_DELIVERY_PRIVATE_KEY: ${{ secrets.RIIDO_CLIENT_DELIVERY_PRIVATE_KEY }}
       TARGET_BRANCH: ${{ needs.package.outputs.target_branch }}
       SOURCE_COMMIT: ${{ needs.package.outputs.source_commit }}
       SOURCE_REF: ${{ needs.package.outputs.source_ref }}
     steps:
-      - name: Require delivery token
+      - name: Create GitHub App delivery token
+        id: app-token
+        if: env.RIIDO_CLIENT_DELIVERY_APP_ID != '' && env.RIIDO_CLIENT_DELIVERY_PRIVATE_KEY != ''
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RIIDO_CLIENT_DELIVERY_APP_ID }}
+          private-key: ${{ secrets.RIIDO_CLIENT_DELIVERY_PRIVATE_KEY }}
+          owner: teamswyg
+          repositories: riido-client
+      - name: Resolve delivery token
+        id: delivery-token
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          FALLBACK_TOKEN: ${{ secrets.RIIDO_CLIENT_DELIVERY_TOKEN }}
         run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "RIIDO_CLIENT_DELIVERY_TOKEN is required to open or update teamswyg/riido-client PRs."
-            exit 1
+          if [ -n "$APP_TOKEN" ]; then
+            echo "::add-mask::$APP_TOKEN"
+            echo "source=github-app" >> "$GITHUB_OUTPUT"
+            echo "token=$APP_TOKEN" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          if [ -n "$FALLBACK_TOKEN" ]; then
+            echo "::add-mask::$FALLBACK_TOKEN"
+            echo "source=fine-grained-token" >> "$GITHUB_OUTPUT"
+            echo "token=$FALLBACK_TOKEN" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Generated client delivery needs cross-repository write permission for teamswyg/riido-client."
+          echo "Configure RIIDO_CLIENT_DELIVERY_APP_ID and RIIDO_CLIENT_DELIVERY_PRIVATE_KEY in teamswyg/riido-control-plane."
+          echo "A temporary RIIDO_CLIENT_DELIVERY_TOKEN secret is accepted only as a fallback."
+          exit 1
       - name: Checkout control-plane source
         uses: actions/checkout@v4
         with:
@@ -116,7 +142,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: teamswyg/riido-client
-          token: ${{ secrets.RIIDO_CLIENT_DELIVERY_TOKEN }}
+          token: ${{ steps.delivery-token.outputs.token }}
           path: riido-client
           ref: main
       - name: Enable pnpm
@@ -180,6 +206,8 @@ jobs:
       - name: Open or update riido-client PR
         if: steps.apply.outputs.changed == 'true'
         working-directory: riido-client
+        env:
+          GH_TOKEN: ${{ steps.delivery-token.outputs.token }}
         run: |
           title="Deliver control-plane React Query client ${{ needs.package.outputs.short_sha }}"
           body_file="../dist/PR_BODY.generated.md"
