@@ -57,12 +57,16 @@ placeholder. The value `headless` is a headless runtime placeholder only.
 The mirror also preserves `figma-onboarding-page-load-timeout.v1`. Current live
 reads of `node-id=42:3014` (`Wireframe - 온보딩`) can time out after 120s when
 using Figma `get_metadata(nodeId=42:3014)` or `use_figma` scripts that attempt
-`await figma.setCurrentPageAsync(page)`. Direct registered-node lookup for
-`236:33845` and `236:33847` still preserves the six onboarding `riido.*` `API
-Generated` annotations. Control-plane must not treat that timeout as proof that
-onboarding generated-client coverage disappeared: it must not remove
+full inventory traversal after `await figma.setCurrentPageAsync(page)`. RIID-4900
+live annotation traversal counted `child_count=84` for that page, while the
+known `non_ui_top_level_inventory` still identifies 83 top-level nodes because
+the extra top-level node identity is unresolved. Direct registered-node lookup
+for `236:33845` and `236:33847` still preserves the six onboarding `riido.*` `API Generated` annotations. Control-plane must not treat that timeout as proof
+that onboarding generated-client coverage disappeared: it must not remove
 `expected_pages`, drop `non_ui_top_level_inventory`, remove onboarding generated
-paths, or mark onboarding generated paths unresolved.
+paths, or mark onboarding generated paths unresolved. Control-plane also must
+not redefine the Figma top-level identity; the `child_count=84` /
+`known_inventory_count=83` split remains contracts-owned evidence.
 
 The local `source_contracts_manifest.stabilized_by` list mirrors the full
 upstream coverage provenance used by this projection:

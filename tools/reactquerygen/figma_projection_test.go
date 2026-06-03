@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -424,7 +425,9 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 		t.Fatalf("source supporting limit must preserve onboarding load timeout evidence: %+v", onboardingSource)
 	}
 	if !hasString(onboardingSource.AuthoritativeResult, "42:3014") ||
-		!hasString(onboardingSource.AuthoritativeResult, "child_count=83") ||
+		!hasString(onboardingSource.AuthoritativeResult, "child_count=84") ||
+		!hasString(onboardingSource.AuthoritativeResult, "known_inventory_count=83") ||
+		!hasString(onboardingSource.AuthoritativeResult, "unresolved_extra_top_level_node=1") ||
 		!hasString(onboardingSource.AuthoritativeResult, "non_ui_top_level_inventory") ||
 		!hasString(onboardingSource.AuthoritativeResult, "236:33845") ||
 		!hasString(onboardingSource.AuthoritativeResult, "236:33847") ||
@@ -433,7 +436,9 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 	}
 	if strings.TrimSpace(onboardingTimeoutProjection.LocalScope) == "" ||
 		!strings.Contains(onboardingTimeoutProjection.LocalScope, "must not treat") ||
-		!strings.Contains(onboardingTimeoutProjection.LocalScope, "42:3014") {
+		!strings.Contains(onboardingTimeoutProjection.LocalScope, "42:3014") ||
+		!strings.Contains(onboardingTimeoutProjection.LocalScope, "child_count=84") ||
+		!strings.Contains(onboardingTimeoutProjection.LocalScope, "known_inventory_count=83") {
 		t.Fatalf("onboarding timeout projection must explain local scope: %+v", onboardingTimeoutProjection)
 	}
 	for _, pageID := range onboardingTimeoutProjection.RequiredAuthoritativePages {
@@ -441,12 +446,20 @@ func verifyMirroredFigmaSupportingToolLimitations(t *testing.T, projections []fi
 			t.Fatalf("onboarding timeout projection page %q is absent from source authoritative_result: %+v", pageID, onboardingSource.AuthoritativeResult)
 		}
 	}
+	for _, result := range []string{"child_count=84", "known_inventory_count=83", "unresolved_extra_top_level_node=1", "onboarding_api_generated_annotations=6"} {
+		if !hasString(onboardingSource.AuthoritativeResult, result) {
+			t.Fatalf("onboarding timeout source must preserve authoritative result %q: %+v", result, onboardingSource.AuthoritativeResult)
+		}
+		if !hasString(onboardingTimeoutProjection.RequiredAuthoritativeResults, result) {
+			t.Fatalf("onboarding timeout projection must require authoritative result %q: %+v", result, onboardingTimeoutProjection.RequiredAuthoritativeResults)
+		}
+	}
 	for _, forbidden := range []string{"remove expected_pages", "remove non_ui_top_level_inventory", "remove onboarding generated paths", "mark onboarding generated paths unresolved"} {
 		if !hasString(onboardingTimeoutProjection.ForbiddenProjectionEffects, forbidden) {
 			t.Fatalf("onboarding timeout projection must forbid %q: %+v", forbidden, onboardingTimeoutProjection.ForbiddenProjectionEffects)
 		}
 	}
-	for _, needle := range []string{"figma-onboarding-page-load-timeout.v1", "after 120s", "`Wireframe - 온보딩`", "`236:33845`", "`236:33847`", "six onboarding `riido.*` `API", "`non_ui_top_level_inventory`", "mark onboarding generated paths unresolved"} {
+	for _, needle := range []string{"figma-onboarding-page-load-timeout.v1", "after 120s", "`Wireframe - 온보딩`", "`236:33845`", "`236:33847`", "six onboarding `riido.*` `API", "`non_ui_top_level_inventory`", "mark onboarding generated paths unresolved", "`child_count=84`", "`known_inventory_count=83`"} {
 		if !strings.Contains(docText, needle) {
 			t.Fatalf("projection doc must mention onboarding page load timeout with %q", needle)
 		}
@@ -522,13 +535,37 @@ func verifyMirroredNonUITopLevelInventory(t *testing.T, sourceCoverage figmaSour
 			t.Fatalf("non-UI inventory references unknown page %q", inventory.PageID)
 		}
 		if got, want := len(inventory.Nodes), page.ChildCount; got != want {
-			t.Fatalf("non-UI inventory page %q nodes = %d, want loaded child_count %d", inventory.PageID, got, want)
+			if !sourceFigmaNonUIInventoryDriftDocumented(sourceCoverage.SupportingToolLimitations, inventory.PageID, got, want) {
+				t.Fatalf("non-UI inventory page %q nodes = %d, want loaded child_count %d", inventory.PageID, got, want)
+			}
 		}
 	}
 	wireframe := pages["0:1"]
 	if wireframe.ChildCount != 28 {
 		t.Fatalf("Wireframe page loaded child_count = %d, want 28", wireframe.ChildCount)
 	}
+}
+
+func sourceFigmaNonUIInventoryDriftDocumented(limitations []figmaSourceSupportingToolLimitation, pageID string, knownInventoryCount, childCount int) bool {
+	for _, limitation := range limitations {
+		if limitation.ID != "figma-onboarding-page-load-timeout.v1" {
+			continue
+		}
+		if !hasString(limitation.AuthoritativeResult, pageID) {
+			continue
+		}
+		if !hasString(limitation.AuthoritativeResult, "child_count="+strconv.Itoa(childCount)) {
+			continue
+		}
+		if !hasString(limitation.AuthoritativeResult, "known_inventory_count="+strconv.Itoa(knownInventoryCount)) {
+			continue
+		}
+		if !hasString(limitation.AuthoritativeResult, "unresolved_extra_top_level_node="+strconv.Itoa(childCount-knownInventoryCount)) {
+			continue
+		}
+		return strings.Contains(strings.ToLower(limitation.Rule), "known_inventory_count may lag expected_pages.child_count")
+	}
+	return false
 }
 
 func assertNoStaleControlPlanePhrase(t *testing.T, root, phrase string) {
