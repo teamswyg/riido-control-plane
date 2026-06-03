@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -45,19 +46,20 @@ type operationRow struct {
 }
 
 type config struct {
-	OpenAPI      string
-	DSL          string
-	IR           string
-	Core         string
-	React        string
-	Out          string
-	PRBody       string
-	SourceRepo   string
-	SourceRef    string
-	SourceCommit string
-	TargetRepo   string
-	TargetBranch string
-	GeneratedAt  string
+	OpenAPI          string
+	DSL              string
+	IR               string
+	Core             string
+	React            string
+	Out              string
+	PRBody           string
+	PreviousManifest string
+	SourceRepo       string
+	SourceRef        string
+	SourceCommit     string
+	TargetRepo       string
+	TargetBranch     string
+	GeneratedAt      string
 }
 
 func main() {
@@ -69,6 +71,7 @@ func main() {
 	flag.StringVar(&cfg.React, "react", "", "generated React TypeScript path")
 	flag.StringVar(&cfg.Out, "out", "", "output directory")
 	flag.StringVar(&cfg.PRBody, "pr-body", "", "optional generated PR body path")
+	flag.StringVar(&cfg.PreviousManifest, "previous-manifest", "", "optional previous generated contract manifest path")
 	flag.StringVar(&cfg.SourceRepo, "source-repo", "teamswyg/riido-control-plane", "source repository")
 	flag.StringVar(&cfg.SourceRef, "source-ref", "", "source ref or tag")
 	flag.StringVar(&cfg.SourceCommit, "source-commit", "", "source commit SHA")
@@ -103,6 +106,10 @@ func run(cfg config) error {
 	if err != nil {
 		return err
 	}
+	previous, err := readPreviousManifest(cfg.PreviousManifest)
+	if err != nil {
+		return err
+	}
 	hashes, err := fileHashes(map[string]string{
 		"openapi": cfg.OpenAPI,
 		"dsl":     cfg.DSL,
@@ -129,7 +136,7 @@ func run(cfg config) error {
 		}
 	}
 	if strings.TrimSpace(cfg.PRBody) != "" {
-		if err := os.WriteFile(cfg.PRBody, []byte(prBody(cfg, hashes, ops)), 0o644); err != nil {
+		if err := os.WriteFile(cfg.PRBody, []byte(prBody(cfg, hashes, ops, previous)), 0o644); err != nil {
 			return fmt.Errorf("write pr body: %w", err)
 		}
 	}
@@ -181,6 +188,58 @@ func fileHashes(paths map[string]string) (map[string]string, error) {
 		out[name] = hex.EncodeToString(sum[:])
 	}
 	return out, nil
+}
+
+type previousManifest struct {
+	Available    bool
+	SourceCommit string
+	Operations   []operationRow
+}
+
+func readPreviousManifest(path string) (previousManifest, error) {
+	if strings.TrimSpace(path) == "" {
+		return previousManifest{}, nil
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return previousManifest{}, nil
+		}
+		return previousManifest{}, fmt.Errorf("read previous manifest: %w", err)
+	}
+	body := string(data)
+	if strings.TrimSpace(body) == "" {
+		return previousManifest{}, nil
+	}
+	manifest := previousManifest{Available: true}
+	if match := regexp.MustCompile(`sourceCommit:\s*'([^']*)'`).FindStringSubmatch(body); len(match) == 2 {
+		manifest.SourceCommit = tsUnescape(match[1])
+	}
+	opPattern := regexp.MustCompile(`(?s)\{\s*generatedPath:\s*'([^']*)',\s*operationId:\s*'([^']*)',\s*method:\s*'([^']*)',\s*path:\s*'([^']*)',\s*deprecated:\s*(true|false)([^}]*)\}`)
+	for _, match := range opPattern.FindAllStringSubmatch(body, -1) {
+		op := operationRow{
+			GeneratedPath: tsUnescape(match[1]),
+			OperationID:   tsUnescape(match[2]),
+			Method:        tsUnescape(match[3]),
+			Path:          tsUnescape(match[4]),
+			Deprecated:    match[5] == "true",
+		}
+		extra := match[6]
+		if lifecycle := regexp.MustCompile(`lifecycle:\s*'([^']*)'`).FindStringSubmatch(extra); len(lifecycle) == 2 {
+			op.Lifecycle = tsUnescape(lifecycle[1])
+		}
+		if replacement := regexp.MustCompile(`replacement:\s*'([^']*)'`).FindStringSubmatch(extra); len(replacement) == 2 {
+			op.Replacement = tsUnescape(replacement[1])
+		}
+		if horizon := regexp.MustCompile(`removalHorizon:\s*'([^']*)'`).FindStringSubmatch(extra); len(horizon) == 2 {
+			op.RemovalHorizon = tsUnescape(horizon[1])
+		}
+		manifest.Operations = append(manifest.Operations, op)
+	}
+	sort.Slice(manifest.Operations, func(i, j int) bool {
+		return manifest.Operations[i].GeneratedPath < manifest.Operations[j].GeneratedPath
+	})
+	return manifest, nil
 }
 
 func readme(cfg config, hashes map[string]string, ops []operationRow) string {
@@ -291,13 +350,29 @@ func contractManifest(cfg config, hashes map[string]string, ops []operationRow) 
 	return b.String()
 }
 
-func prBody(cfg config, hashes map[string]string, ops []operationRow) string {
+func prBody(cfg config, hashes map[string]string, ops []operationRow, previous previousManifest) string {
 	var b strings.Builder
 	b.WriteString("## 변경사항\n\n")
 	fmt.Fprintf(&b, "- `%s` `%s` 기준으로 control-plane React Query generated client를 갱신했습니다.\n", cfg.SourceRepo, cfg.SourceCommit)
 	fmt.Fprintf(&b, "- OpenAPI SHA256: `%s`\n", hashes["openapi"])
 	fmt.Fprintf(&b, "- generated operation 수: `%d`\n", len(ops))
 	b.WriteString("- 변경 대상은 `src/generated/react-query/riido-control-plane/**` generated artifact입니다.\n\n")
+	b.WriteString("## 변경 요약\n\n")
+	for _, line := range changeSummaryLines(previous, ops) {
+		fmt.Fprintf(&b, "- %s\n", line)
+	}
+	if detail := changeSummaryDetails(previous, ops); len(detail) > 0 {
+		b.WriteString("\n")
+		for _, section := range detail {
+			fmt.Fprintf(&b, "### %s\n\n", section.Title)
+			for _, line := range section.Lines {
+				fmt.Fprintf(&b, "- %s\n", line)
+			}
+			b.WriteString("\n")
+		}
+	} else {
+		b.WriteString("\n")
+	}
 	b.WriteString("## SSOT 기반 결정사항\n\n")
 	for _, line := range ssotDecisionLines() {
 		fmt.Fprintf(&b, "- %s\n", line)
@@ -322,6 +397,115 @@ func prBody(cfg config, hashes map[string]string, ops []operationRow) string {
 	b.WriteString("## 참고\n\n")
 	b.WriteString("이 PR은 generated handoff입니다. control-plane workflow가 PR을 열거나 갱신하지만 자동 merge하지 않습니다.\n")
 	return b.String()
+}
+
+type changeSection struct {
+	Title string
+	Lines []string
+}
+
+func changeSummaryLines(previous previousManifest, current []operationRow) []string {
+	if !previous.Available {
+		return []string{
+			"이전 generated manifest를 찾지 못해 전체 operation 목록을 기준으로 전달합니다.",
+			"자동화는 client checkout의 기존 `contractManifest.generated.ts`가 있을 때 이전/현재 generated path diff를 계산합니다.",
+		}
+	}
+	added, removed, changed := operationDiff(previous.Operations, current)
+	lines := []string{
+		fmt.Sprintf("이전 operation 수: `%d`, 현재 operation 수: `%d`", len(previous.Operations), len(current)),
+		fmt.Sprintf("추가 `%d`, 제거 `%d`, 변경 `%d`", len(added), len(removed), len(changed)),
+	}
+	if strings.TrimSpace(previous.SourceCommit) != "" {
+		lines = append(lines, fmt.Sprintf("이전 source commit: `%s`", previous.SourceCommit))
+	}
+	if len(added) == 0 && len(removed) == 0 && len(changed) == 0 {
+		lines = append(lines, "API surface diff는 없습니다. source commit, manifest, PR body metadata만 최신 기준으로 갱신될 수 있습니다.")
+	}
+	return lines
+}
+
+func changeSummaryDetails(previous previousManifest, current []operationRow) []changeSection {
+	if !previous.Available {
+		return nil
+	}
+	added, removed, changed := operationDiff(previous.Operations, current)
+	var sections []changeSection
+	if len(added) > 0 {
+		sections = append(sections, changeSection{Title: "추가된 generated paths", Lines: added})
+	}
+	if len(removed) > 0 {
+		sections = append(sections, changeSection{Title: "제거된 generated paths", Lines: removed})
+	}
+	if len(changed) > 0 {
+		sections = append(sections, changeSection{Title: "변경된 generated paths", Lines: changed})
+	}
+	return sections
+}
+
+func operationDiff(previous, current []operationRow) (added, removed, changed []string) {
+	previousByPath := map[string]operationRow{}
+	currentByPath := map[string]operationRow{}
+	for _, op := range previous {
+		previousByPath[op.GeneratedPath] = op
+	}
+	for _, op := range current {
+		currentByPath[op.GeneratedPath] = op
+		if before, ok := previousByPath[op.GeneratedPath]; !ok {
+			added = append(added, describeOperation(op))
+		} else if operationSignature(before) != operationSignature(op) {
+			changed = append(changed, describeChangedOperation(before, op))
+		}
+	}
+	for _, op := range previous {
+		if _, ok := currentByPath[op.GeneratedPath]; !ok {
+			removed = append(removed, describeOperation(op))
+		}
+	}
+	sort.Strings(added)
+	sort.Strings(removed)
+	sort.Strings(changed)
+	return added, removed, changed
+}
+
+func operationSignature(op operationRow) string {
+	parts := []string{
+		op.Method,
+		op.Path,
+		op.OperationID,
+		fmt.Sprintf("%t", op.Deprecated),
+		op.Lifecycle,
+		op.Replacement,
+		op.RemovalHorizon,
+	}
+	return strings.Join(parts, "\x00")
+}
+
+func describeOperation(op operationRow) string {
+	return fmt.Sprintf("`%s` -> `%s %s` (`%s`, lifecycle: `%s`)", op.GeneratedPath, op.Method, op.Path, op.OperationID, lifecycleLabel(op))
+}
+
+func describeChangedOperation(before, after operationRow) string {
+	var parts []string
+	if before.Method != after.Method || before.Path != after.Path {
+		parts = append(parts, fmt.Sprintf("HTTP `%s %s` -> `%s %s`", before.Method, before.Path, after.Method, after.Path))
+	}
+	if before.OperationID != after.OperationID {
+		parts = append(parts, fmt.Sprintf("operationId `%s` -> `%s`", before.OperationID, after.OperationID))
+	}
+	if before.Deprecated != after.Deprecated {
+		parts = append(parts, fmt.Sprintf("deprecated `%t` -> `%t`", before.Deprecated, after.Deprecated))
+	}
+	if lifecycleLabel(before) != lifecycleLabel(after) {
+		parts = append(parts, fmt.Sprintf("lifecycle `%s` -> `%s`", lifecycleLabel(before), lifecycleLabel(after)))
+	}
+	if before.Replacement != after.Replacement {
+		parts = append(parts, fmt.Sprintf("replacement `%s` -> `%s`", before.Replacement, after.Replacement))
+	}
+	if before.RemovalHorizon != after.RemovalHorizon {
+		parts = append(parts, fmt.Sprintf("removal horizon `%s` -> `%s`", before.RemovalHorizon, after.RemovalHorizon))
+	}
+	return fmt.Sprintf("`%s`: %s", after.GeneratedPath, strings.Join(parts, ", "))
 }
 
 func ssotDecisionLines() []string {
@@ -391,4 +575,8 @@ func lifecycleNotes(ops []operationRow) []string {
 
 func ts(s string) string {
 	return strings.ReplaceAll(s, "'", "\\'")
+}
+
+func tsUnescape(s string) string {
+	return strings.ReplaceAll(s, "\\'", "'")
 }

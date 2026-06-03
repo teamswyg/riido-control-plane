@@ -1770,6 +1770,9 @@ This slice does:
   target branch, and so no-diff runs stop before creating or refreshing a PR
 - normalize generated files with `riido-client`'s pinned Prettier setup before
   regenerating manifest hashes and PR body for the final client branch
+- preserve the previous `contractManifest.generated.ts` from `riido-client`
+  `main` and include added/removed/changed/no-surface-diff generated operation
+  summary in the generated client PR body
 - run the target branch generated-path Prettier check and `pnpm run type-check`
   before opening or updating the client PR
 - extend the AI Agent client CI workflow to test both `tools/reactquerygen` and

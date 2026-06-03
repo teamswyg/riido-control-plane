@@ -351,21 +351,31 @@ client PR body. The PR body must include:
 
 - changed source commit/ref and OpenAPI digest
 - generated operation count and generated path list
+- previous `contractManifest.generated.ts` versus current generated operation
+  diff: added paths, removed paths, changed HTTP/operation/lifecycle entries, or
+  an explicit no-API-surface-diff note
 - SSOT decisions that affect frontend usage
 - verification commands used by the workflow
 
 The PR body is generated from the same OpenAPI/DSL/IR inputs as the delivered
-files so the review text cannot drift from the generated artifact.
+files and, during cross-repository delivery, from the target branch's previous
+generated contract manifest. This keeps the review text from drifting from the
+generated artifact while giving frontend reviewers a real change summary instead
+of only a full endpoint inventory.
 
 When the workflow writes into `riido-client`, it must apply the target
 repository's pinned Prettier configuration before finalizing the handoff. The
 core and React generated files are formatted first, then
 `tools/generatedclienthandoff` is run again against those formatted files so the
 manifest hashes and PR body describe the exact files that land in the client
-branch. The remaining generated README/history/manifest/barrel files are then
-formatted under the same target-repository Prettier policy. The delivery job
-then runs a generated-path Prettier check and the target repository's
-`pnpm run type-check` before it commits and opens or updates the PR.
+branch. Before replacing the generated directory, the workflow preserves the
+previous `contractManifest.generated.ts` and passes it back to the handoff tool;
+the resulting PR body must therefore tell reviewers whether this delivery adds,
+removes, changes, or merely re-stamps generated API metadata. The remaining
+generated README/history/manifest/barrel files are then formatted under the same
+target-repository Prettier policy. The delivery job then runs a generated-path
+Prettier check and the target repository's `pnpm run type-check` before it
+commits and opens or updates the PR.
 
 ## Generated Client Facade
 

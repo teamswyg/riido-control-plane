@@ -141,6 +141,12 @@ jobs:
         working-directory: riido-client
         run: |
           git checkout -B "$TARGET_BRANCH" origin/main
+          previous_manifest="$RUNNER_TEMP/riido-control-plane-previous-contract-manifest.generated.ts"
+          previous_manifest_args=()
+          if [ -f src/generated/react-query/riido-control-plane/contractManifest.generated.ts ]; then
+            cp src/generated/react-query/riido-control-plane/contractManifest.generated.ts "$previous_manifest"
+            previous_manifest_args=(-previous-manifest "$previous_manifest")
+          fi
           rm -rf src/generated/react-query/riido-control-plane
           mkdir -p src/generated/react-query
           cp -R ../dist/src/generated/react-query/riido-control-plane src/generated/react-query/
@@ -155,6 +161,7 @@ jobs:
             -react ../riido-client/src/generated/react-query/riido-control-plane/aiAgentClient.react.ts \
             -out ../riido-client/src/generated/react-query/riido-control-plane \
             -pr-body ../dist/PR_BODY.generated.md \
+            "${previous_manifest_args[@]}" \
             -source-ref "$SOURCE_REF" \
             -source-commit "$SOURCE_COMMIT" \
             -target-branch "$TARGET_BRANCH"
