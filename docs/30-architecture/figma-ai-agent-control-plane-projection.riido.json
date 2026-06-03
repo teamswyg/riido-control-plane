@@ -37,8 +37,9 @@
     },
     {
       "source_id": "figma-onboarding-page-load-timeout.v1",
-      "local_scope": "Control-plane must not treat a current live timeout for page 42:3014 as proof that onboarding generated-client coverage disappeared.",
+      "local_scope": "Control-plane must not treat a current live timeout for page 42:3014 as proof that onboarding generated-client coverage disappeared, and must preserve the contracts-owned child_count=84 / known_inventory_count=83 split without redefining Figma top-level identity.",
       "required_authoritative_pages": ["42:3014"],
+      "required_authoritative_results": ["child_count=84", "known_inventory_count=83", "unresolved_extra_top_level_node=1", "onboarding_api_generated_annotations=6"],
       "forbidden_projection_effects": [
         "remove expected_pages",
         "remove non_ui_top_level_inventory",

@@ -1489,6 +1489,28 @@ change generated API shape, add runtime behavior, add deployment secrets,
 introduce live endpoint examples, or move client UI ownership into this
 repository.
 
+### RIID-4900 — Figma API Generated handoff refresh mirror
+
+This slice mirrors the latest contracts-owned Figma handoff audit.
+
+The live `API Generated` annotation coverage did not add or remove generated
+paths. All 90 `riido.*` annotations remain in the `API Generated` category with
+operation kind and background handoff text. The mirrored source change is only
+the page `42:3014` count split: `child_count=84`,
+`known_inventory_count=83`, and `unresolved_extra_top_level_node=1`.
+
+This slice does:
+
+- copy the updated contracts Figma coverage mirror
+- require the local projection limitation to preserve `child_count=84`,
+  `known_inventory_count=83`, and `unresolved_extra_top_level_node=1`
+- keep onboarding generated paths and API Generated annotation coverage
+  unchanged
+
+This slice does not edit `teamswyg/riido-client`, change OpenAPI, change
+handlers, change authorization, change daemon runtime behavior, add Terraform,
+or deploy AWS resources.
+
 ### Figma API Generated provenance mirror catch-up
 
 This slice consumes the contracts-owned provenance catch-up after the API
