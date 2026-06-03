@@ -325,6 +325,17 @@ fields for facade structure, searchable generated comments, root query keys, and
 invalidation helpers. If the metadata is missing, has a mismatched
 `generated_path`, or references an unknown cache tag, generation fails.
 
+The local generated endpoint smoke gate is documented in
+[`ai-agent-generated-endpoint-smoke-matrix.md`](ai-agent-generated-endpoint-smoke-matrix.md).
+The matrix file
+`contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json`
+must list every OpenAPI operation with `x-riido-client.generated_path` exactly
+once and name the HTTP smoke test that exercises it. This matrix does not own
+endpoint shape; it is executable evidence that generated facade paths such as
+`riido.v2.aiAgent.tasks.threadMessages.create` and
+`riido.v2.aiAgent.agents.daemon.stop` still map to live control-plane handlers
+before client delivery.
+
 This keeps SSOT ownership layered instead of duplicated:
 
 - `riido-contracts` owns canonical vocabulary, policy grammar, enum/sum-type
