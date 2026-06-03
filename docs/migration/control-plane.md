@@ -1784,6 +1784,33 @@ This slice does not edit handwritten `riido-client` application code, merge a
 client PR, change endpoint payload shapes, introduce npm/Orval delivery, add
 delivery secrets, or change daemon provider execution behavior.
 
+### RIID-4899 — generated client delivery token CI gate clarification
+
+This slice absorbs the 2026-06-03 generated-client-delivery failures that came
+from the legacy delivery workflow before the GitHub App token boundary was
+introduced. Those failed runs required a raw `RIIDO_CLIENT_DELIVERY_TOKEN` and
+also synthesized `react-query-*` target branches. Both behaviors are outside
+the current SSOT.
+
+This slice does:
+
+- keep `generated-client-delivery.yml` as a package-first manual workflow:
+  `create_pr=false` builds and uploads the generated-client handoff artifact
+  without requiring cross-repository write credentials
+- keep `create_pr=true` as the only currently enabled `riido-client` PR handoff
+  path; it must resolve a short-lived GitHub App installation token first, with
+  `RIIDO_CLIENT_DELIVERY_TOKEN` accepted only as a temporary fallback
+- keep the missing-credential failure scoped to the delivery job, before
+  checkout of `teamswyg/riido-client`
+- keep the target branch as the Riido task `branchName`; the workflow must not
+  synthesize `react-query-*` branch names
+- add a regression gate so the old raw-token-only error string and synthetic
+  branch naming cannot silently return
+
+This slice does not configure repository secrets, open or update a
+`riido-client` PR, edit `teamswyg/riido-client`, or change AI Agent endpoint
+shape.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
