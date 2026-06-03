@@ -182,8 +182,8 @@ client를 다시 생성해야 합니다. canonical vocabulary나 비즈니스 �
 
 `riido-client`로 React Query 코드를 전달하는 cross-repo workflow는
 [`docs/30-architecture/api-client-delivery.md`](docs/30-architecture/api-client-delivery.md)의
-tag-triggered delivery 정책을 따라야 합니다. 이 레포의 workflow 산출물만 신뢰하고
-client repo에서 Orval을 직접 실행하지 않는 것이 원칙입니다.
+Riido work `branchName` delivery 정책을 따라야 합니다. 이 레포의 workflow 산출물만
+신뢰하고 client repo에서 Orval을 직접 실행하지 않는 것이 원칙입니다.
 
 ## 검증
 
