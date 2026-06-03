@@ -569,7 +569,7 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Conte
 		TaskID:        taskID,
 		Threads:       threads,
 	}
-	for i := range threads {
+	for i := len(threads) - 1; i >= 0; i-- {
 		if !taskThreadHasActiveStream(threads[i]) {
 			continue
 		}
@@ -1057,14 +1057,21 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 	if req.RunID == "" {
 		req.RunID = "run-" + req.AssignmentID
 	}
+	generatedThreadID := false
 	if req.ThreadID == "" {
 		req.ThreadID = threadIDForRun(req.TaskID, agentID, req.RunID)
+		generatedThreadID = true
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	agent, ok := s.agents[agentID]
 	if !ok {
 		return AgentThreadProgressBatchResponse{}, ErrAIAgentNotFound
+	}
+	if active, ok := s.activeTaskThreadForAgentLocked(req.TaskID, agentID); ok &&
+		active.ThreadID != req.ThreadID &&
+		generatedThreadID {
+		req.ThreadID = active.ThreadID
 	}
 	agent.WorkStatus = AgentWorkStatusRunning
 	agent.Editability = AgentEditabilityBlockedAssignedTasks
@@ -1339,12 +1346,19 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		Message:         strings.TrimSpace(message),
 	}
 	switch state {
-	case AssignmentQueued, AssignmentLeased, AssignmentReady:
+	case AssignmentQueued, AssignmentLeased:
 		response.WorkStatus = AgentWorkStatusQueued
 		response.AssignmentState = AgentAssignmentStateQueued
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
 		if response.Message == "" {
 			response.Message = "agent assignment is queued"
+		}
+	case AssignmentReady:
+		response.WorkStatus = AgentWorkStatusRunning
+		response.AssignmentState = AgentAssignmentStateRunning
+		response.CommentKind = AgentTaskCommentAssignmentStarted
+		if response.Message == "" {
+			response.Message = "agent assignment was accepted by runtime"
 		}
 	case AssignmentRunning:
 		response.WorkStatus = AgentWorkStatusRunning

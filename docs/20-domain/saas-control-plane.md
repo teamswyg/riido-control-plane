@@ -98,6 +98,10 @@ AI Agent client event store is configured, fans out the same batch as
 The daemon's standard assignment event path,
 `POST /v1/agents/{agent_id}/events`, is also part of the client task-thread
 projection. `riido_log` events append to the generated client's thread lines.
+The daemon's parsed progress batch path, `POST /v1/agents/{agent_id}/thread-progress`,
+may omit `thread_id`; in that case the batch is reconciled to the active
+client-facing thread for the same `(task_id, agent_id)` rather than materializing
+a second thread from the assignment run id.
 `completed`, `failed`, and `cancelled` assignment states close the thread's
 `active_stream` read-model state so a completed historical thread remains a
 cold collection row instead of a live stream candidate. This projection is

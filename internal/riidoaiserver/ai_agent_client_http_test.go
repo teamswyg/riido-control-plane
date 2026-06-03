@@ -1443,6 +1443,35 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		t.Fatalf("poll response = %+v", poll)
 	}
 
+	readyBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","state":"ready","event_type":"assignment_ready","message":"runtime accepted assignment"}`
+	readyReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-public-openclaw/events", strings.NewReader(readyBody))
+	readyReq.Header.Set("Authorization", "Bearer daemon-token")
+	readyResp := httptest.NewRecorder()
+	handler.ServeHTTP(readyResp, readyReq)
+	if readyResp.Code != http.StatusOK {
+		t.Fatalf("ready event status=%d body=%s", readyResp.Code, readyResp.Body.String())
+	}
+
+	readyThreadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-new/threads", nil)
+	readyThreadsReq.Header.Set("Authorization", "Bearer user-token")
+	readyThreadsResp := httptest.NewRecorder()
+	handler.ServeHTTP(readyThreadsResp, readyThreadsReq)
+	if readyThreadsResp.Code != http.StatusOK {
+		t.Fatalf("ready threads status=%d body=%s", readyThreadsResp.Code, readyThreadsResp.Body.String())
+	}
+	var readyThreads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(readyThreadsResp.Body.Bytes(), &readyThreads); err != nil {
+		t.Fatalf("ready threads json: %v", err)
+	}
+	if len(readyThreads.Threads) != 1 ||
+		readyThreads.ActiveStream == nil ||
+		readyThreads.ActiveStream.ThreadID != assigned.ThreadID ||
+		readyThreads.Threads[0].WorkStatus != AgentWorkStatusRunning ||
+		readyThreads.Threads[0].AssignmentState != AgentAssignmentStateRunning ||
+		readyThreads.Threads[0].CommentKind != AgentTaskCommentAssignmentStarted {
+		t.Fatalf("threads after ready event = %+v", readyThreads)
+	}
+
 	logBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","state":"running","event_type":"riido_log","message":"팀 프로젝트 수집 중 - 진행 상태를 조회 중.","metadata":{"thread_progress_seq":"1"}}`
 	logReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-public-openclaw/events", strings.NewReader(logBody))
 	logReq.Header.Set("Authorization", "Bearer daemon-token")
@@ -1469,6 +1498,42 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		len(threads.Threads[0].Lines) != 1 ||
 		threads.Threads[0].Lines[0].Message != "팀 프로젝트 수집 중 - 진행 상태를 조회 중." {
 		t.Fatalf("threads after log event = %+v", threads)
+	}
+
+	progressBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","run_id":"` + poll.Assignment.ID + `","lines":[{"seq":2,"message":"파일 생성 중 - 산출물을 작성 중."}]}`
+	progressReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-public-openclaw/thread-progress", strings.NewReader(progressBody))
+	progressReq.Header.Set("Authorization", "Bearer daemon-token")
+	progressResp := httptest.NewRecorder()
+	handler.ServeHTTP(progressResp, progressReq)
+	if progressResp.Code != http.StatusAccepted {
+		t.Fatalf("progress event status=%d body=%s", progressResp.Code, progressResp.Body.String())
+	}
+	var progress AgentThreadProgressBatchResponse
+	if err := json.Unmarshal(progressResp.Body.Bytes(), &progress); err != nil {
+		t.Fatalf("progress json: %v", err)
+	}
+	if progress.Event.ThreadID != assigned.ThreadID || progress.Event.RunID != poll.Assignment.ID {
+		t.Fatalf("thread-progress should reconcile to assignment thread: assigned=%+v progress=%+v", assigned, progress.Event)
+	}
+
+	progressThreadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-new/threads", nil)
+	progressThreadsReq.Header.Set("Authorization", "Bearer user-token")
+	progressThreadsResp := httptest.NewRecorder()
+	handler.ServeHTTP(progressThreadsResp, progressThreadsReq)
+	if progressThreadsResp.Code != http.StatusOK {
+		t.Fatalf("progress threads status=%d body=%s", progressThreadsResp.Code, progressThreadsResp.Body.String())
+	}
+	var progressThreads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(progressThreadsResp.Body.Bytes(), &progressThreads); err != nil {
+		t.Fatalf("progress threads json: %v", err)
+	}
+	if len(progressThreads.Threads) != 1 ||
+		progressThreads.ActiveStream == nil ||
+		progressThreads.ActiveStream.ThreadID != assigned.ThreadID ||
+		progressThreads.Threads[0].ThreadID != assigned.ThreadID ||
+		progressThreads.Threads[0].RunID != poll.Assignment.ID ||
+		len(progressThreads.Threads[0].Lines) != 2 {
+		t.Fatalf("threads after thread-progress = %+v", progressThreads)
 	}
 
 	completedBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","state":"completed","event_type":"assignment_completed","message":"작업 완료"}`
@@ -1498,7 +1563,7 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		completedThreads.Threads[0].CommentKind != AgentTaskCommentTaskCompleted ||
 		completedThreads.Threads[0].Message != "작업 완료" ||
 		completedThreads.Threads[0].CompletedAt.IsZero() ||
-		len(completedThreads.Threads[0].Lines) != 1 {
+		len(completedThreads.Threads[0].Lines) != 2 {
 		t.Fatalf("completed threads = %+v", completedThreads)
 	}
 

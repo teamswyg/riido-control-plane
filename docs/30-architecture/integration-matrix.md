@@ -14,7 +14,7 @@ operator/private infra validation.
 | agent catalog RBAC and HTTP | focused `internal/riidoaiserver` black-box tests | none |
 | AI Agent client development API | focused `internal/riidoaiserver` black-box tests over generated contract paths and DynamoDB snapshot fake endpoints | none |
 | generated React Query client | `tools/reactquerygen` drift test from checked-in OpenAPI | none |
-| future `riido-client` generated delivery | tag-triggered control-plane workflow, target-path allowlist, generated manifest/history diff | GitHub API only after delivery secrets are configured |
+| `riido-client` generated delivery | tag/manual-dispatch/path-filtered-main control-plane workflow, target-path allowlist, previous-manifest generated operation diff in PR body, generated manifest/history/PR-body regeneration, no-diff no-PR guard | GitHub API only after delivery secrets are configured |
 | request authorization | static tokens and `httptest` external authorizer tests | none |
 | assignment polling/heartbeat/events | in-memory store and HTTP tests | none |
 | SSE | `httptest` streaming tests | none |
@@ -62,6 +62,7 @@ go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
 go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
 go test ./tools/reactquerygen -count=1
+go test ./tools/generatedclienthandoff -count=1
 git diff --check
 go test ./tools/containercontract -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -

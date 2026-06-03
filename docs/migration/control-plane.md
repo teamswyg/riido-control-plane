@@ -1117,9 +1117,9 @@ This slice does:
   `contractManifest.generated.ts` artifacts to preserve lifecycle/deprecation
   context for frontend developers
 
-This slice does not edit `teamswyg/riido-client`, run Orval in the client
-repository, configure delivery secrets, publish npm packages, or implement the
-cross-repository delivery workflow.
+This slice does not edit `teamswyg/riido-client`, run control-plane codegen in
+the client repository, configure delivery secrets, publish npm packages, or
+implement the cross-repository delivery workflow.
 
 ### RIID-4826 — riido-client/riido-desktop consumer boundary wording
 
@@ -1745,6 +1745,43 @@ This slice does:
 This slice does not edit endpoint shapes, generated OpenAPI, DynamoDB schema,
 Terraform topology, task-context HTTP implementation, or `riido-client`.
 
+### A-22 — assignment ready read model and generated-client delivery automation
+
+This slice closes two frontend-handoff gaps found while testing the development
+AI Agent flow.
+
+This slice does:
+
+- map daemon assignment `ready` events to the task-thread client read model as
+  `comment_kind=assignment_started`, `assignment_state=running`, and
+  `work_status=running`
+- keep busy-agent queue presentation reserved for actual queued/busy assignment
+  cases instead of reusing it for daemon/runtime handoff
+- add `tools/generatedclienthandoff` so generated README, history, manifest,
+  barrels, and PR body are produced from the same OpenAPI/DSL/IR inputs as the
+  React Query client
+- add `.github/workflows/generated-client-delivery.yml` so control-plane can
+  package generated artifacts and open or update a draft `riido-client` PR
+  without auto-merging it from API release tags, explicit manual dispatches, or
+  path-filtered `main` pushes that change the AI Agent client contract/generator
+  boundary
+- guard the client handoff so only
+  `src/generated/react-query/riido-control-plane/**` can be changed in the
+  target branch, and so no-diff runs stop before creating or refreshing a PR
+- normalize generated files with `riido-client`'s pinned Prettier setup before
+  regenerating manifest hashes and PR body for the final client branch
+- preserve the previous `contractManifest.generated.ts` from `riido-client`
+  `main` and include added/removed/changed/no-surface-diff generated operation
+  summary in the generated client PR body
+- run the target branch generated-path Prettier check and `pnpm run type-check`
+  before opening or updating the client PR
+- extend the AI Agent client CI workflow to test both `tools/reactquerygen` and
+  `tools/generatedclienthandoff`
+
+This slice does not edit handwritten `riido-client` application code, merge a
+client PR, change endpoint payload shapes, introduce npm/Orval delivery, add
+delivery secrets, or change daemon provider execution behavior.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
@@ -1763,6 +1800,7 @@ go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
 go test ./cmd/riido_ai_server -run 'AIAgentClient|WebAllowedOrigins|ConfigFromEnv' -count=1
 go test ./tools/reactquerygen -count=1
+go test ./tools/generatedclienthandoff -count=1
 go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local .
 ```

@@ -1220,9 +1220,6 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 	if req.RunID == "" {
 		req.RunID = "run-" + req.AssignmentID
 	}
-	if req.ThreadID == "" {
-		req.ThreadID = threadIDForRun(req.TaskID, agentID, req.RunID)
-	}
 	lines := normalizeProgressLines(req.Lines)
 	if len(lines) == 0 {
 		writeError(w, http.StatusBadRequest, "lines are required")
@@ -1255,6 +1252,9 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 		}
 		writeJSON(w, http.StatusAccepted, response)
 		return
+	}
+	if req.ThreadID == "" {
+		req.ThreadID = threadIDForRun(req.TaskID, agentID, req.RunID)
 	}
 	writeJSON(w, http.StatusAccepted, AgentThreadProgressBatchResponse{
 		SchemaVersion: SchemaVersion,

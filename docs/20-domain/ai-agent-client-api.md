@@ -381,6 +381,10 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - busy-agent enqueue responses use `comment_kind=queued_by_busy_agent`,
   `assignment_state=queued`, and `work_status=queued`; user-facing Korean copy
   is client presentation over those typed fields
+- assignment `ready` events mean the daemon/runtime has accepted the work and
+  must surface as `comment_kind=assignment_started`,
+  `assignment_state=running`, and `work_status=running`; they must not reuse
+  `queued_by_busy_agent`
 - task-thread stop actions return `stopped_by_user_request`
 - task-thread status updates use typed `AgentTaskCommentKind` values
 - task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
@@ -391,6 +395,10 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   client concern
 - daemon progress ingest accepts parsed `<riido_log>...<end>` batches through
   `POST /v1/agents/{agent_id}/thread-progress`
+- if that daemon progress ingest omits `thread_id`, the control-plane must
+  attach the batch to the current active thread for the same `(task_id,
+  agent_id)` instead of creating a second visible thread from the assignment
+  run id. The assignment response thread remains the client-facing thread id.
 - daemon standard assignment events on `POST /v1/agents/{agent_id}/events`
   also update the same client task-thread read model. `riido_log` appends
   progress lines, while terminal assignment states clear `active_stream` so

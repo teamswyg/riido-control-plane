@@ -1,0 +1,211 @@
+name: generated-client-delivery
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_pr:
+        description: "Open or update the riido-client generated-client PR"
+        required: true
+        default: false
+        type: boolean
+      target_branch:
+        description: "Optional riido-client branch name. Defaults to react-query-{ref}-{shortsha}."
+        required: false
+        default: ""
+        type: string
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+    paths:
+      - ".github/workflows/generated-client-delivery.yml"
+      - "contracts/ai-agent-client/**"
+      - "tools/generatedclienthandoff/**"
+      - "tools/reactquerygen/**"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    outputs:
+      source_commit: ${{ steps.meta.outputs.source_commit }}
+      source_ref: ${{ steps.meta.outputs.source_ref }}
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+      target_branch: ${{ steps.meta.outputs.target_branch }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Compute delivery metadata
+        id: meta
+        run: |
+          source_commit="$(git rev-parse HEAD)"
+          short_sha="$(git rev-parse --short=7 HEAD)"
+          source_ref="${GITHUB_REF_NAME}"
+          target_branch="${{ github.event.inputs.target_branch }}"
+          if [ -z "$target_branch" ]; then
+            if [ -n "$source_ref" ]; then
+              safe_ref="$(printf '%s' "$source_ref" | tr -c 'A-Za-z0-9._-' '-')"
+              target_branch="react-query-${safe_ref}-${short_sha}"
+            else
+              target_branch="react-query-${short_sha}"
+            fi
+          fi
+          {
+            echo "source_commit=$source_commit"
+            echo "source_ref=$source_ref"
+            echo "short_sha=$short_sha"
+            echo "target_branch=$target_branch"
+          } >> "$GITHUB_OUTPUT"
+      - name: Test generated client generators
+        run: |
+          go test ./tools/reactquerygen -count=1
+          go test ./tools/generatedclienthandoff -count=1
+      - name: Build generated client handoff artifact
+        run: |
+          out="dist/src/generated/react-query/riido-control-plane"
+          mkdir -p "$out"
+          go run ./tools/reactquerygen \
+            -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json \
+            -out "$out/aiAgentClient.ts"
+          go run ./tools/generatedclienthandoff \
+            -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json \
+            -dsl contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json \
+            -ir contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json \
+            -core "$out/aiAgentClient.ts" \
+            -react "$out/aiAgentClient.react.ts" \
+            -out "$out" \
+            -pr-body dist/PR_BODY.generated.md \
+            -source-ref "${{ steps.meta.outputs.source_ref }}" \
+            -source-commit "${{ steps.meta.outputs.source_commit }}" \
+            -target-branch "${{ steps.meta.outputs.target_branch }}"
+      - name: Upload generated client handoff artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: riido-control-plane-generated-client
+          path: dist
+
+  deliver:
+    needs: package
+    if: github.event_name == 'push' || github.event.inputs.create_pr == 'true'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.RIIDO_CLIENT_DELIVERY_TOKEN }}
+      TARGET_BRANCH: ${{ needs.package.outputs.target_branch }}
+      SOURCE_COMMIT: ${{ needs.package.outputs.source_commit }}
+      SOURCE_REF: ${{ needs.package.outputs.source_ref }}
+    steps:
+      - name: Require delivery token
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "RIIDO_CLIENT_DELIVERY_TOKEN is required to open or update teamswyg/riido-client PRs."
+            exit 1
+          fi
+      - name: Checkout control-plane source
+        uses: actions/checkout@v4
+        with:
+          path: control-plane
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: control-plane/go.mod
+          cache: false
+      - name: Download generated client handoff artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: riido-control-plane-generated-client
+          path: dist
+      - name: Checkout riido-client
+        uses: actions/checkout@v4
+        with:
+          repository: teamswyg/riido-client
+          token: ${{ secrets.RIIDO_CLIENT_DELIVERY_TOKEN }}
+          path: riido-client
+          ref: main
+      - name: Enable pnpm
+        run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: riido-client/.nvmrc
+          cache: pnpm
+          cache-dependency-path: riido-client/pnpm-lock.yaml
+      - name: Install riido-client formatter dependencies
+        working-directory: riido-client
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Apply generated files
+        id: apply
+        working-directory: riido-client
+        run: |
+          git checkout -B "$TARGET_BRANCH" origin/main
+          previous_manifest="$RUNNER_TEMP/riido-control-plane-previous-contract-manifest.generated.ts"
+          previous_manifest_args=()
+          if [ -f src/generated/react-query/riido-control-plane/contractManifest.generated.ts ]; then
+            cp src/generated/react-query/riido-control-plane/contractManifest.generated.ts "$previous_manifest"
+            previous_manifest_args=(-previous-manifest "$previous_manifest")
+          fi
+          rm -rf src/generated/react-query/riido-control-plane
+          mkdir -p src/generated/react-query
+          cp -R ../dist/src/generated/react-query/riido-control-plane src/generated/react-query/
+          pnpm exec prettier --write \
+            src/generated/react-query/riido-control-plane/aiAgentClient.ts \
+            src/generated/react-query/riido-control-plane/aiAgentClient.react.ts
+          go -C ../control-plane run ./tools/generatedclienthandoff \
+            -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json \
+            -dsl contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json \
+            -ir contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json \
+            -core ../riido-client/src/generated/react-query/riido-control-plane/aiAgentClient.ts \
+            -react ../riido-client/src/generated/react-query/riido-control-plane/aiAgentClient.react.ts \
+            -out ../riido-client/src/generated/react-query/riido-control-plane \
+            -pr-body ../dist/PR_BODY.generated.md \
+            "${previous_manifest_args[@]}" \
+            -source-ref "$SOURCE_REF" \
+            -source-commit "$SOURCE_COMMIT" \
+            -target-branch "$TARGET_BRANCH"
+          pnpm exec prettier --write src/generated/react-query/riido-control-plane
+          pnpm exec prettier --check src/generated/react-query/riido-control-plane
+          pnpm run type-check
+          git add src/generated/react-query/riido-control-plane
+          if git diff --cached --quiet; then
+            echo "No generated client changes to deliver."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          bad_paths="$(git diff --cached --name-only | awk '$0 !~ /^src\\/generated\\/react-query\\/riido-control-plane\\// { print }')"
+          if [ -n "$bad_paths" ]; then
+            printf 'Refusing to deliver non-generated paths:\\n%s\\n' "$bad_paths"
+            exit 1
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          git config user.name "riido-control-plane-bot"
+          git config user.email "riido-control-plane-bot@users.noreply.github.com"
+          git commit -m "Deliver control-plane React Query client ${{ needs.package.outputs.short_sha }}"
+          git push --force-with-lease origin "$TARGET_BRANCH"
+      - name: Open or update riido-client PR
+        if: steps.apply.outputs.changed == 'true'
+        working-directory: riido-client
+        run: |
+          title="Deliver control-plane React Query client ${{ needs.package.outputs.short_sha }}"
+          body_file="../dist/PR_BODY.generated.md"
+          existing="$(gh pr list \
+            --repo teamswyg/riido-client \
+            --head "$TARGET_BRANCH" \
+            --json number \
+            --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" \
+              --repo teamswyg/riido-client \
+              --title "$title" \
+              --body-file "$body_file"
+          else
+            gh pr create \
+              --repo teamswyg/riido-client \
+              --base main \
+              --head "$TARGET_BRANCH" \
+              --title "$title" \
+              --body-file "$body_file" \
+              --draft
+          fi
