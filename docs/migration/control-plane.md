@@ -1766,6 +1766,8 @@ This slice does:
 - guard the client handoff so only
   `src/generated/react-query/riido-control-plane/**` can be changed in the
   target branch, and so no-diff runs stop before creating or refreshing a PR
+- normalize generated files with `riido-client`'s pinned Prettier setup before
+  regenerating manifest hashes and PR body for the final client branch
 - extend the AI Agent client CI workflow to test both `tools/reactquerygen` and
   `tools/generatedclienthandoff`
 

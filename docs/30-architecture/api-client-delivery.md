@@ -260,6 +260,8 @@ Generator requirements:
   module boundary
 - generate the client PR body from the same OpenAPI/DSL/IR inputs as the
   delivered TypeScript artifacts
+- normalize the target branch with `riido-client`'s pinned Prettier setup before
+  the final manifest and PR body are written
 - keep the generated output deterministic enough for reviewable diffs
 - emit client-facing comments and notes in Korean, except for stable code
   identifiers, endpoint paths, enum literal values, package names, and repository
@@ -346,6 +348,14 @@ client PR body. The PR body must include:
 
 The PR body is generated from the same OpenAPI/DSL/IR inputs as the delivered
 files so the review text cannot drift from the generated artifact.
+
+When the workflow writes into `riido-client`, it must apply the target
+repository's pinned Prettier configuration before finalizing the handoff. The
+core and React generated files are formatted first, then
+`tools/generatedclienthandoff` is run again against those formatted files so the
+manifest hashes and PR body describe the exact files that land in the client
+branch. The remaining generated README/history/manifest/barrel files are then
+formatted under the same target-repository Prettier policy.
 
 ## Generated Client Facade
 

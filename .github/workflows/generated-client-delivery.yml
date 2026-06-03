@@ -90,6 +90,8 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.RIIDO_CLIENT_DELIVERY_TOKEN }}
       TARGET_BRANCH: ${{ needs.package.outputs.target_branch }}
+      SOURCE_COMMIT: ${{ needs.package.outputs.source_commit }}
+      SOURCE_REF: ${{ needs.package.outputs.source_ref }}
     steps:
       - name: Require delivery token
         run: |
@@ -97,6 +99,14 @@ jobs:
             echo "RIIDO_CLIENT_DELIVERY_TOKEN is required to open or update teamswyg/riido-client PRs."
             exit 1
           fi
+      - name: Checkout control-plane source
+        uses: actions/checkout@v4
+        with:
+          path: control-plane
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: control-plane/go.mod
+          cache: false
       - name: Download generated client handoff artifact
         uses: actions/download-artifact@v4
         with:
@@ -109,6 +119,16 @@ jobs:
           token: ${{ secrets.RIIDO_CLIENT_DELIVERY_TOKEN }}
           path: riido-client
           ref: main
+      - name: Enable pnpm
+        run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: riido-client/.nvmrc
+          cache: pnpm
+          cache-dependency-path: riido-client/pnpm-lock.yaml
+      - name: Install riido-client formatter dependencies
+        working-directory: riido-client
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Apply generated files
         id: apply
         working-directory: riido-client
@@ -117,6 +137,21 @@ jobs:
           rm -rf src/generated/react-query/riido-control-plane
           mkdir -p src/generated/react-query
           cp -R ../dist/src/generated/react-query/riido-control-plane src/generated/react-query/
+          pnpm exec prettier --write \
+            src/generated/react-query/riido-control-plane/aiAgentClient.ts \
+            src/generated/react-query/riido-control-plane/aiAgentClient.react.ts
+          go run ../control-plane/tools/generatedclienthandoff \
+            -openapi ../control-plane/contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json \
+            -dsl ../control-plane/contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json \
+            -ir ../control-plane/contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json \
+            -core src/generated/react-query/riido-control-plane/aiAgentClient.ts \
+            -react src/generated/react-query/riido-control-plane/aiAgentClient.react.ts \
+            -out src/generated/react-query/riido-control-plane \
+            -pr-body ../dist/PR_BODY.generated.md \
+            -source-ref "$SOURCE_REF" \
+            -source-commit "$SOURCE_COMMIT" \
+            -target-branch "$TARGET_BRANCH"
+          pnpm exec prettier --write src/generated/react-query/riido-control-plane
           git add src/generated/react-query/riido-control-plane
           if git diff --cached --quiet; then
             echo "No generated client changes to deliver."
