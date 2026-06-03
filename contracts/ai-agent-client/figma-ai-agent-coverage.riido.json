@@ -100,14 +100,14 @@
     ],
     "live_inspection": {
       "observed_at": "2026-06-03",
-      "tool": "Figma Plugin API use_figma annotation traversal using node.annotations and categoryId",
+      "tool": "Figma Plugin API use_figma annotation traversal using node.annotations and categoryId; RIID-4898 split the daemon control label into separate generated mutation paths",
       "page_counts": [
-        {"page_id": "129:5215", "page_name": "UI", "riido_annotation_count": 56, "api_generated_count": 56, "missing_operation_kind": 0, "missing_background": 0},
+        {"page_id": "129:5215", "page_name": "UI", "riido_annotation_count": 84, "api_generated_count": 84, "missing_operation_kind": 0, "missing_background": 0},
         {"page_id": "42:3014", "page_name": "Wireframe - 온보딩", "riido_annotation_count": 6, "api_generated_count": 6, "missing_operation_kind": 0, "missing_background": 0},
         {"page_id": "0:1", "page_name": "Wireframe", "riido_annotation_count": 0, "api_generated_count": 0, "missing_operation_kind": 0, "missing_background": 0}
       ],
-      "total_riido_annotations": 62,
-      "total_api_generated_annotations": 62
+      "total_riido_annotations": 90,
+      "total_api_generated_annotations": 90
     }
   },
   "expected_pages": [
@@ -668,9 +668,9 @@
       "canonical_generated_path": "aiAgent.tasks.assignableAgents",
       "operation_kind": "Query",
       "background": "참여자 드롭다운에서 현재 task/subtask에 배정할 수 있는 Agent 목록을 조회합니다. task 배정 mutation에 넘길 agent_id는 이 응답의 agents[]에서 얻습니다.",
-      "annotation_count": 4,
+      "annotation_count": 5,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
+        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["153:8342", "227:16920", "227:17993"]},
         {"page_id": "42:3014", "top_level_node_id": "236:33845", "coverage_entry_node_id": "153:12742", "node_ids": ["236:33845", "236:33847"]}
       ]
     },
@@ -682,9 +682,9 @@
       "canonical_generated_path": "aiAgent.tasks.assign",
       "operation_kind": "Mutation",
       "background": "작업에 Agent를 참여자로 배정하고 daemon이 런타임으로 작업을 시작할 수 있는 서버 상태를 만듭니다.",
-      "annotation_count": 4,
+      "annotation_count": 5,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
+        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["153:8342", "227:16920", "227:17993"]},
         {"page_id": "42:3014", "top_level_node_id": "236:33845", "coverage_entry_node_id": "153:12742", "node_ids": ["236:33845", "236:33847"]}
       ]
     },
@@ -696,9 +696,9 @@
       "canonical_generated_path": "aiAgent.tasks.unassign",
       "operation_kind": "Mutation",
       "background": "참여자에서 Agent를 제거합니다. 진행 중이면 중지 요청/큐 해제 흐름으로 이어집니다.",
-      "annotation_count": 4,
+      "annotation_count": 5,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["227:16920", "227:17993"]},
+        {"page_id": "129:5215", "top_level_node_id": "153:12742", "coverage_entry_node_id": "153:12742", "node_ids": ["153:8342", "227:16920", "227:17993"]},
         {"page_id": "42:3014", "top_level_node_id": "236:33845", "coverage_entry_node_id": "153:12742", "node_ids": ["236:33845", "236:33847"]}
       ]
     },
@@ -710,9 +710,9 @@
       "canonical_generated_path": "aiAgent.tasks.threads",
       "operation_kind": "Query",
       "background": "작업의 완료/진행 중 Agent thread cold collection을 조회합니다. active_stream이 있으면 SSE로 이어집니다.",
-      "annotation_count": 2,
+      "annotation_count": 3,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8592", "236:21379"]}
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8518", "153:8592", "236:21379"]}
       ]
     },
     {
@@ -723,9 +723,9 @@
       "canonical_generated_path": "aiAgent.tasks.threadMessages.create",
       "operation_kind": "Mutation",
       "background": "특정 thread_id에 다음 지시/답글을 추가하고 Agent 응답을 이어서 요청합니다.",
-      "annotation_count": 1,
+      "annotation_count": 2,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8588"]}
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8518", "153:8588"]}
       ]
     },
     {
@@ -749,9 +749,9 @@
       "canonical_generated_path": "aiAgent.events.stream",
       "operation_kind": "SSE Stream",
       "background": "threads 조회 결과에 active_stream이 있을 때만 연결해 진행 상태와 thread 갱신 이벤트를 받습니다.",
-      "annotation_count": 2,
+      "annotation_count": 3,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8545", "236:21379"]}
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8518", "153:8545", "236:21379"]}
       ]
     },
     {
@@ -762,9 +762,9 @@
       "canonical_generated_path": "aiAgent.tasks.stop",
       "operation_kind": "Mutation",
       "background": "작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다.",
-      "annotation_count": 1,
+      "annotation_count": 2,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["236:20768"]}
+        {"page_id": "129:5215", "top_level_node_id": "153:15931", "coverage_entry_node_id": "153:15931", "node_ids": ["153:8518", "236:20768"]}
       ]
     },
     {
@@ -775,11 +775,11 @@
       "canonical_generated_path": "aiAgent.devices.runtimes",
       "operation_kind": "Query",
       "background": "계정 소유 device에서 감지된 runtime 목록과 온라인/오프라인 상태를 조회합니다. 화면은 SaaS 값을 신뢰합니다.",
-      "annotation_count": 13,
+      "annotation_count": 17,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10339", "160:10418", "559:34626", "559:34704"]},
-        {"page_id": "129:5215", "top_level_node_id": "435:60050", "coverage_entry_node_id": "435:60050", "node_ids": ["164:34470", "164:34476", "164:34483", "164:34496", "435:72699"]},
-        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["432:22231", "432:35651", "432:22617", "432:35707"]}
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10339", "160:10418", "559:34626", "559:34704", "129:17616"]},
+        {"page_id": "129:5215", "top_level_node_id": "435:60050", "coverage_entry_node_id": "435:60050", "node_ids": ["164:34459", "164:34470", "164:34476", "164:34483", "164:34496", "435:72699"]},
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["134:6542", "417:21753", "432:22231", "432:35651", "432:22617", "432:35707"]}
       ]
     },
     {
@@ -790,9 +790,9 @@
       "canonical_generated_path": "aiAgent.agents.daemon.details",
       "operation_kind": "Query",
       "background": "Agent에 연결된 daemon/runtime 상세와 제어 가능 상태를 SaaS 기준으로 조회합니다.",
-      "annotation_count": 2,
+      "annotation_count": 3,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10654", "559:34714"]}
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10654", "559:34714", "129:17616"]}
       ]
     },
     {
@@ -803,9 +803,9 @@
       "canonical_generated_path": "aiAgent.agents.daemon.stop",
       "operation_kind": "Mutation",
       "background": "SaaS에 daemon 중지 요청을 남깁니다. daemon은 요청을 읽은 뒤 스스로 종료합니다.",
-      "annotation_count": 2,
+      "annotation_count": 3,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:14712", "164:23904"]}
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:14712", "164:23904", "129:17616"]}
       ]
     },
     {
@@ -816,9 +816,9 @@
       "canonical_generated_path": "aiAgent.agents.daemon.start",
       "operation_kind": "Mutation",
       "background": "stopped/offline 상태의 daemon에 시작 요청을 남깁니다. daemon 실행 트리거는 desktop이 담당하고, SaaS는 시작 요청 상태와 runtime projection을 제공합니다.",
-      "annotation_count": 2,
+      "annotation_count": 3,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["129:17433", "164:23586"]}
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["129:17433", "164:23586", "129:17616"]}
       ]
     },
     {
@@ -829,9 +829,9 @@
       "canonical_generated_path": "aiAgent.agents.daemon.restart",
       "operation_kind": "Mutation",
       "background": "SaaS에 daemon 재시작 요청을 남깁니다. daemon은 polling으로 요청을 읽어 실행합니다.",
-      "annotation_count": 2,
+      "annotation_count": 3,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:16169", "164:23977"]}
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:16169", "164:23977", "129:17616"]}
       ]
     },
     {
@@ -842,9 +842,9 @@
       "canonical_generated_path": "aiAgent.onboarding.fixtures",
       "operation_kind": "Query",
       "background": "리도/영실/홍도/지원처럼 제품이 제공하는 초기값 목록을 조회합니다. template entity가 아니라 fixture입니다.",
-      "annotation_count": 4,
+      "annotation_count": 5,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:30672", "164:30681", "164:30690", "164:30699"]}
+        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:30661", "164:30672", "164:30681", "164:30690", "164:30699"]}
       ]
     },
     {
@@ -855,9 +855,9 @@
       "canonical_generated_path": "aiAgent.onboarding.fixtures.createAgent",
       "operation_kind": "Mutation",
       "background": "선택한 fixture 값을 기반으로 일반 Agent를 생성합니다. fixture 자체를 생성하는 기능은 아닙니다.",
-      "annotation_count": 1,
+      "annotation_count": 3,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:33556"]}
+        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:30661", "164:33536", "164:33556"]}
       ]
     },
     {
@@ -868,10 +868,10 @@
       "canonical_generated_path": "aiAgent.agents.create",
       "operation_kind": "Mutation",
       "background": "직접 설정 화면에서 워크스페이스 안에 새 Agent를 생성합니다. 신규 v2 create는 workspace_id를 포함합니다.",
-      "annotation_count": 6,
+      "annotation_count": 10,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["337:24013", "432:37349", "134:6584", "432:35493"]},
-        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:30708", "164:33556"]}
+        {"page_id": "129:5215", "top_level_node_id": "164:30658", "coverage_entry_node_id": "164:30658", "node_ids": ["164:30661", "164:30708", "164:33536", "164:33556"]},
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["134:6542", "134:6584", "432:35493", "337:24001", "337:24013", "432:37349"]}
       ]
     },
     {
@@ -882,10 +882,10 @@
       "canonical_generated_path": "aiAgent.bootstrap",
       "operation_kind": "Query",
       "background": "AI Agent 설정/온보딩 초기 화면에 필요한 bootstrap.agents[]를 조회합니다. 설정/목록 화면의 agent list와 agent_id 출처이며, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다.",
-      "annotation_count": 3,
+      "annotation_count": 5,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10335"]},
-        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["337:24013", "432:37349"]}
+        {"page_id": "129:5215", "top_level_node_id": "162:23090", "coverage_entry_node_id": "162:23090", "node_ids": ["160:10335", "129:17616"]},
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["337:24001", "337:24013", "432:37349"]}
       ]
     },
     {
@@ -896,9 +896,9 @@
       "canonical_generated_path": "aiAgent.agents.updateConfiguration",
       "operation_kind": "Mutation",
       "background": "할당 작업이 없는 Agent의 이름, 썸네일, 설명, 지침, 런타임, 모델, 공개 범위를 저장합니다.",
-      "annotation_count": 2,
+      "annotation_count": 3,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["417:21803", "432:35544"]}
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["417:21753", "417:21803", "432:35544"]}
       ]
     },
     {
@@ -909,9 +909,9 @@
       "canonical_generated_path": "aiAgent.agents.editability",
       "operation_kind": "Query",
       "background": "Agent를 수정할 수 있는지 먼저 조회합니다. 할당된 작업이 있으면 저장/수정 UI는 막혀야 합니다.",
-      "annotation_count": 4,
+      "annotation_count": 6,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["417:21803", "432:35544", "432:38529", "432:38855"]}
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["417:21753", "417:21803", "432:35544", "337:24001", "432:38529", "432:38855"]}
       ]
     },
     {
@@ -922,9 +922,9 @@
       "canonical_generated_path": "aiAgent.agents.delete",
       "operation_kind": "Mutation",
       "background": "Agent 삭제를 요청합니다. 진행/예약 중 작업은 서버 정책에 따라 중지 또는 큐 해제됩니다.",
-      "annotation_count": 2,
+      "annotation_count": 3,
       "sources": [
-        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["432:37746", "432:38689"]}
+        {"page_id": "129:5215", "top_level_node_id": "432:37336", "coverage_entry_node_id": "432:37336", "node_ids": ["337:24001", "432:37746", "432:38689"]}
       ]
     }
   ],
