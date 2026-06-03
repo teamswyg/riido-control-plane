@@ -124,9 +124,12 @@ policy. Control-plane mirrors it as generated-client handoff context:
 `riido.v2.aiAgent.*` Figma labels must have a facade path,
 `종류: Query | Mutation | SSE Stream`, and Korean `배경:` text, while the
 generated TypeScript artifact still derives canonical paths from OpenAPI. The
-mirrored 2026-06-03 live inspection counts are 56 `riido.*` annotations on
+mirrored 2026-06-03 live inspection counts are 84 `riido.*` annotations on
 `129:5215` `UI`, 6 on `42:3014` `Wireframe - 온보딩`,
 and 0 on `0:1` `Wireframe`, all with zero missing kind/background counts.
+RIID-4898 split the former bundled daemon control label into separate
+`riido.v2.aiAgent.agents.daemon.start`, `restart`, and `stop` Mutation
+annotations so Figma search matches generated-client facade paths exactly.
 `teamswyg/riido-contracts#66` tightens that mirror: the annotation
 `operation_kind` must match generated OpenAPI transport. `text/event-stream`
 responses are `SSE Stream`, non-stream `GET` operations are `Query`, and
