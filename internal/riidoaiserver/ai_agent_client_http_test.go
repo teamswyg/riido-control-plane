@@ -1443,6 +1443,35 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		t.Fatalf("poll response = %+v", poll)
 	}
 
+	readyBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","state":"ready","event_type":"assignment_ready","message":"runtime accepted assignment"}`
+	readyReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-public-openclaw/events", strings.NewReader(readyBody))
+	readyReq.Header.Set("Authorization", "Bearer daemon-token")
+	readyResp := httptest.NewRecorder()
+	handler.ServeHTTP(readyResp, readyReq)
+	if readyResp.Code != http.StatusOK {
+		t.Fatalf("ready event status=%d body=%s", readyResp.Code, readyResp.Body.String())
+	}
+
+	readyThreadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-new/threads", nil)
+	readyThreadsReq.Header.Set("Authorization", "Bearer user-token")
+	readyThreadsResp := httptest.NewRecorder()
+	handler.ServeHTTP(readyThreadsResp, readyThreadsReq)
+	if readyThreadsResp.Code != http.StatusOK {
+		t.Fatalf("ready threads status=%d body=%s", readyThreadsResp.Code, readyThreadsResp.Body.String())
+	}
+	var readyThreads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(readyThreadsResp.Body.Bytes(), &readyThreads); err != nil {
+		t.Fatalf("ready threads json: %v", err)
+	}
+	if len(readyThreads.Threads) != 1 ||
+		readyThreads.ActiveStream == nil ||
+		readyThreads.ActiveStream.ThreadID != assigned.ThreadID ||
+		readyThreads.Threads[0].WorkStatus != AgentWorkStatusRunning ||
+		readyThreads.Threads[0].AssignmentState != AgentAssignmentStateRunning ||
+		readyThreads.Threads[0].CommentKind != AgentTaskCommentAssignmentStarted {
+		t.Fatalf("threads after ready event = %+v", readyThreads)
+	}
+
 	logBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","state":"running","event_type":"riido_log","message":"팀 프로젝트 수집 중 - 진행 상태를 조회 중.","metadata":{"thread_progress_seq":"1"}}`
 	logReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-public-openclaw/events", strings.NewReader(logBody))
 	logReq.Header.Set("Authorization", "Bearer daemon-token")

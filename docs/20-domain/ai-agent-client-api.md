@@ -381,6 +381,10 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - busy-agent enqueue responses use `comment_kind=queued_by_busy_agent`,
   `assignment_state=queued`, and `work_status=queued`; user-facing Korean copy
   is client presentation over those typed fields
+- assignment `ready` events mean the daemon/runtime has accepted the work and
+  must surface as `comment_kind=assignment_started`,
+  `assignment_state=running`, and `work_status=running`; they must not reuse
+  `queued_by_busy_agent`
 - task-thread stop actions return `stopped_by_user_request`
 - task-thread status updates use typed `AgentTaskCommentKind` values
 - task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`

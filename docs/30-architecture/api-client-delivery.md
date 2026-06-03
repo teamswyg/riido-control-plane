@@ -11,9 +11,10 @@ as generated React Query code to `riido-client`.
 frontend module while keeping API shape, lifecycle metadata, and generated code
 traceable to one source of truth.
 
-The target client repository is not edited by this slice. This document defines
-the future delivery boundary and the checks that must exist before a workflow is
-allowed to open a generated-client PR.
+The target client application code is not edited by this slice. This document
+defines the current generated-client delivery boundary and the checks that must
+pass before a workflow is allowed to open or update a generated-client PR in
+`riido-client`.
 
 ## Ownership
 
@@ -21,7 +22,7 @@ allowed to open a generated-client PR.
 | --- | --- | --- |
 | `riido-contracts` | canonical Riido vocabulary, domain policy grammar, shared enum and sum-type semantics, lifecycle/deprecation grammar | control-plane handler behavior, client repository branches |
 | `riido-control-plane` | AI Agent client API sub-DSL, HTTP/SSE implementation, OpenAPI projection handoff, generated-client delivery workflow, release manifest | canonical business authority that changes non-API domain meaning |
-| `riido-client` | consuming generated React Query code and reporting API usability feedback | OpenAPI SSOT, Orval execution, generated-code edits |
+| `riido-client` | consuming generated React Query code and reporting API usability feedback | OpenAPI SSOT, control-plane codegen execution, generated-code hand edits |
 
 The AI Agent client API sub-DSL is not a random generated artifact. It is the
 control-plane-owned API surface language that imports canonical terms from
@@ -99,6 +100,10 @@ on cold read, that `events.stream` can carry the typed queued status, and that
 `tasks.stop` is the visible stop/cancel affordance. It must not hard-code the
 Korean display copy, timestamp wording, avatar, or comment-row layout as a
 generated API fact.
+This busy-agent row is not the daemon handoff state. When the daemon reports
+assignment `ready`, the client read model must expose the thread as
+started/running with `comment_kind=assignment_started`, not
+`queued_by_busy_agent`.
 
 Figma stopped-by-deleted-agent screen (`node-id=227-19354`) is generated-client
 composition context for `riido.aiAgent.agents.delete`,
@@ -197,8 +202,11 @@ fields such as `x-riido-lifecycle`, `x-riido-replacement`, and
 
 ## Release Trigger
 
-Generated-client delivery is allowed only from a `riido-control-plane` Git tag
-that represents an API release, for example `v1.20.2`.
+Generated-client delivery is handled by
+`.github/workflows/generated-client-delivery.yml`. The package job can be run
+manually to produce a reviewable artifact, and delivery to `riido-client` is
+allowed only from a `riido-control-plane` Git tag that represents an API release
+or an explicit manual workflow dispatch with `create_pr=true`.
 
 Regular pushes to `main` may validate local drift, but they must not push a
 branch to `riido-client`. This keeps frequent server development from creating
@@ -211,17 +219,19 @@ integration, and merge decision.
 
 ## Target Branch
 
-The future workflow creates a branch in `teamswyg/riido-client` from its current
-`main`:
+The workflow creates or updates a branch in `teamswyg/riido-client` from its
+current `main`. By default the branch name includes the source ref and short
+source SHA; manual dispatch may provide an explicit `target_branch`:
 
 ```text
-react-query-{tag}-{shortsha}
+react-query-{source-ref}-{shortsha}
 ```
 
 Examples:
 
 ```text
 react-query-v1.20.2-a1b2c3d
+react-query-main-a1b2c3d
 ```
 
 The branch must contain generated files only under this allowlist:
@@ -231,21 +241,25 @@ src/generated/react-query/riido-control-plane/**
 ```
 
 After generation, the workflow must fail if `git diff --name-only` contains any
-path outside that allowlist. This prevents Orval config drift, package metadata
-drift, or unrelated client edits from riding along with generated API delivery.
+path outside that allowlist. This prevents generator config drift, package
+metadata drift, or unrelated client edits from riding along with generated API
+delivery. If the generated files are identical to `riido-client` `main`, the
+workflow must stop without creating or refreshing a client PR.
 
 ## Generator Boundary
 
 Only the control-plane workflow output is trusted. `riido-client` consumes the
-generated files but does not run Orval as part of normal development.
+generated files but does not run control-plane codegen as part of normal
+development.
 
 Generator requirements:
 
-- pin the Orval package version in the control-plane generator workspace
-- commit the lockfile for that generator workspace
-- run with frozen lockfile semantics
-- avoid `npx` or floating package installs
-- disable or audit install scripts where the package manager supports it
+- run `tools/reactquerygen` and `tools/generatedclienthandoff` from the
+  control-plane Go module
+- keep the generator dependency-free except for the repository's approved Go
+  module boundary
+- generate the client PR body from the same OpenAPI/DSL/IR inputs as the
+  delivered TypeScript artifacts
 - keep the generated output deterministic enough for reviewable diffs
 - emit client-facing comments and notes in Korean, except for stable code
   identifiers, endpoint paths, enum literal values, package names, and repository
@@ -260,9 +274,10 @@ Generator requirements:
 - derive the facade module and namespace from DSL/IR client metadata projected
   into OpenAPI `x-riido-client`, not from generator-local operation-id switches
 
-`tools/reactquerygen` remains a small deterministic public fixture generator for
-the checked-in development surface. It is useful for drift tests, but it is not
-the cross-repository Orval delivery mechanism.
+`tools/reactquerygen` is the deterministic OpenAPI-to-TypeScript generator for
+both the checked-in development surface and the cross-repository handoff. The
+handoff wrapper `tools/generatedclienthandoff` adds the generated README,
+history, manifest, barrels, and PR body from the same OpenAPI/DSL/IR inputs.
 
 ## Projection Placement
 
@@ -318,6 +333,19 @@ The client branch should receive:
 - `apiHistory.generated.ts`
 - `contractManifest.generated.ts`
 - `README.generated.md`
+- `index.ts`
+- `react.ts`
+
+The same generated handoff step also writes `PR_BODY.generated.md` for the
+client PR body. The PR body must include:
+
+- changed source commit/ref and OpenAPI digest
+- generated operation count and generated path list
+- SSOT decisions that affect frontend usage
+- verification commands used by the workflow
+
+The PR body is generated from the same OpenAPI/DSL/IR inputs as the delivered
+files so the review text cannot drift from the generated artifact.
 
 ## Generated Client Facade
 
@@ -407,7 +435,9 @@ Prefer a GitHub App installed only where needed. Required secrets live in
 - `RIIDO_CLIENT_DELIVERY_PRIVATE_KEY`
 
 If a fine-grained token is used temporarily, it must be scoped to the target
-repository and limited to contents and pull-request write permissions.
+repository and limited to contents and pull-request write permissions. The
+current workflow accepts that temporary token as
+`RIIDO_CLIENT_DELIVERY_TOKEN`.
 
 The workflow must not require npm publish tokens, cloud credentials, Terraform
 state, customer data, or production request tokens.
@@ -420,10 +450,12 @@ state, customer data, or production request tokens.
 - Generated-client delivery opens or updates a client PR only; it never
   auto-merges the client PR.
 - Target `riido-client` branch naming and generated path allowlist are defined.
-- Orval is a pinned control-plane generator dependency when the workflow is
-  implemented.
+- `tools/reactquerygen` and `tools/generatedclienthandoff` produce the delivered
+  TypeScript, manifest, history, README, barrels, and PR body from the same
+  OpenAPI/DSL/IR source.
 - Generated history and manifest artifacts carry lifecycle/deprecation
-  information from DSL/IR through the client handoff.
+  information from DSL/IR/OpenAPI through the client handoff when that metadata
+  is present.
 - Client-facing generated comments and notes are Korean-first and preserve
   OpenAPI descriptions in JSDoc.
 - Generated JSDoc includes searchable generated paths, including the
