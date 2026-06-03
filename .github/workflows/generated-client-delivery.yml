@@ -152,6 +152,8 @@ jobs:
             -source-commit "$SOURCE_COMMIT" \
             -target-branch "$TARGET_BRANCH"
           pnpm exec prettier --write src/generated/react-query/riido-control-plane
+          pnpm exec prettier --check src/generated/react-query/riido-control-plane
+          pnpm run type-check
           git add src/generated/react-query/riido-control-plane
           if git diff --cached --quiet; then
             echo "No generated client changes to deliver."

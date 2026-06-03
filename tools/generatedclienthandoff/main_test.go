@@ -45,6 +45,7 @@ func TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody(t *testing.T
 	assertFileContains(t, filepath.Join(out, "README.generated.md"), "X-Riido-AI-Agent-Token")
 	assertFileContains(t, prBodyPath, "SSOT 기반 결정사항")
 	assertFileContains(t, prBodyPath, "team_id")
+	assertFileContains(t, prBodyPath, "pnpm run type-check")
 }
 
 func assertFileContains(t *testing.T, path, want string) {

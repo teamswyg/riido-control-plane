@@ -262,6 +262,8 @@ Generator requirements:
   delivered TypeScript artifacts
 - normalize the target branch with `riido-client`'s pinned Prettier setup before
   the final manifest and PR body are written
+- run target-repository generated-path Prettier check and `pnpm run type-check`
+  before the PR is opened or updated
 - keep the generated output deterministic enough for reviewable diffs
 - emit client-facing comments and notes in Korean, except for stable code
   identifiers, endpoint paths, enum literal values, package names, and repository
@@ -355,7 +357,9 @@ core and React generated files are formatted first, then
 `tools/generatedclienthandoff` is run again against those formatted files so the
 manifest hashes and PR body describe the exact files that land in the client
 branch. The remaining generated README/history/manifest/barrel files are then
-formatted under the same target-repository Prettier policy.
+formatted under the same target-repository Prettier policy. The delivery job
+then runs a generated-path Prettier check and the target repository's
+`pnpm run type-check` before it commits and opens or updates the PR.
 
 ## Generated Client Facade
 
