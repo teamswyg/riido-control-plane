@@ -217,28 +217,32 @@ This workflow may open or update a `riido-client` PR, but it must not auto-merge
 that PR. `riido-client` owns the final generated-code review, application
 integration, and merge decision.
 
-`main` delivery is path-filtered to the generated-client contract and generator
-boundary. It must not run for unrelated server, docs-only, infra, or provider
-execution changes. If those filtered changes do not produce a generated diff
-against `riido-client` `main`, the workflow stops without creating or refreshing
-a client PR.
+Generated-client delivery is a Riido work unit. Before a delivery PR is opened
+or refreshed in `riido-client`, the operator or automation must create the Riido
+task and pass the returned `branchName` as the workflow `target_branch`. The
+workflow must not synthesize helper branch names such as `react-query-*`.
 
 ## Target Branch
 
 The workflow creates or updates a branch in `teamswyg/riido-client` from its
-current `main`. By default the branch name includes the source ref and short
-source SHA; manual dispatch may provide an explicit `target_branch`:
+current `main`. The branch name is the Riido task response `branchName` and is
+passed explicitly through workflow dispatch:
 
 ```text
-react-query-{source-ref}-{shortsha}
+{RIIDO_TASK_KEY}-{Riido task title slug}
 ```
 
 Examples:
 
 ```text
-react-query-v1.20.2-a1b2c3d
-react-query-main-a1b2c3d
+A-60-AI-Agent-generated-client-handoff-최신화-및-자동-PR-검토
+RIID-4865-클라이언트-온보딩-워크플로우-개선
 ```
+
+`target_branch` must match the Riido branchName format
+`^[A-Z][A-Z0-9]*-[0-9]+-.+` and must not contain `/`. The delivery generator
+and workflow both reject non-Riido names so a generated client handoff cannot
+silently drift away from the work-unit SSOT.
 
 The branch must contain generated files only under this allowlist:
 
@@ -476,10 +480,12 @@ state, customer data, or production request tokens.
 
 - `riido-control-plane` docs name the API sub-DSL owner and canonical contract
   escalation path.
-- Release delivery is tag-triggered, not main-push-triggered.
+- Generated-client delivery is workflow-dispatched with the Riido work
+  `branchName`; the workflow must not invent a synthetic delivery branch.
 - Generated-client delivery opens or updates a client PR only; it never
   auto-merges the client PR.
-- Target `riido-client` branch naming and generated path allowlist are defined.
+- Target `riido-client` Riido branchName validation and generated path allowlist
+  are defined.
 - `tools/reactquerygen` and `tools/generatedclienthandoff` produce the delivered
   TypeScript, manifest, history, README, barrels, and PR body from the same
   OpenAPI/DSL/IR source.

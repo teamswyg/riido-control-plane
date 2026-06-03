@@ -21,7 +21,7 @@ func TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody(t *testing.T
 		PRBody:       prBodyPath,
 		SourceCommit: "0123456789abcdef",
 		SourceRef:    "v0.0.99",
-		TargetBranch: "react-query-v0.0.99-0123456",
+		TargetBranch: "A-60-AI-Agent-generated-client-handoff-test",
 		GeneratedAt:  "2026-06-03",
 	})
 	if err != nil {
@@ -76,7 +76,7 @@ func TestGeneratedClientHandoffPRBodyIncludesPreviousManifestDiff(t *testing.T) 
 		PreviousManifest: previousManifestPath,
 		SourceCommit:     "0123456789abcdef",
 		SourceRef:        "v0.0.99",
-		TargetBranch:     "react-query-v0.0.99-0123456",
+		TargetBranch:     "A-60-AI-Agent-generated-client-handoff-test",
 		GeneratedAt:      "2026-06-03",
 	})
 	if err != nil {
@@ -90,6 +90,29 @@ func TestGeneratedClientHandoffPRBodyIncludesPreviousManifestDiff(t *testing.T) 
 	assertFileContains(t, prBodyPath, "변경된 generated paths")
 	assertFileContains(t, prBodyPath, "`aiAgent.bootstrap`")
 	assertFileContains(t, prBodyPath, "getAIAgentClientBootstrapOld")
+}
+
+func TestGeneratedClientHandoffRejectsNonRiidoWorkBranch(t *testing.T) {
+	root := filepath.Join("..", "..")
+	out := t.TempDir()
+	err := run(config{
+		OpenAPI:      filepath.Join(root, "contracts", "ai-agent-client", "control-plane-ai-agent-client.openapi.json"),
+		DSL:          filepath.Join(root, "contracts", "ai-agent-client", "control-plane-ai-agent-client.dsl.riido.json"),
+		IR:           filepath.Join(root, "contracts", "ai-agent-client", "control-plane-ai-agent-client.ir.riido.json"),
+		Core:         filepath.Join(root, "web", "generated", "aiAgentClient.ts"),
+		React:        filepath.Join(root, "web", "generated", "aiAgentClient.react.ts"),
+		Out:          out,
+		SourceCommit: "0123456789abcdef",
+		SourceRef:    "v0.0.99",
+		TargetBranch: "react-query-v0.0.99-0123456",
+		GeneratedAt:  "2026-06-03",
+	})
+	if err == nil {
+		t.Fatal("run accepted non-Riido target branch")
+	}
+	if !strings.Contains(err.Error(), "Riido work branchName") {
+		t.Fatalf("error = %q, want Riido work branchName guidance", err.Error())
+	}
 }
 
 func assertFileContains(t *testing.T, path, want string) {

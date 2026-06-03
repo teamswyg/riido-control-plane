@@ -96,6 +96,9 @@ func run(cfg config) error {
 	if strings.TrimSpace(cfg.TargetBranch) == "" {
 		return errors.New("target-branch is required")
 	}
+	if err := validateTargetBranch(cfg.TargetBranch); err != nil {
+		return err
+	}
 	if strings.TrimSpace(cfg.SourceRef) == "" {
 		cfg.SourceRef = cfg.SourceCommit
 	}
@@ -139,6 +142,22 @@ func run(cfg config) error {
 		if err := os.WriteFile(cfg.PRBody, []byte(prBody(cfg, hashes, ops, previous)), 0o644); err != nil {
 			return fmt.Errorf("write pr body: %w", err)
 		}
+	}
+	return nil
+}
+
+var riidoWorkBranchPattern = regexp.MustCompile(`^[A-Z][A-Z0-9]*-[0-9]+-.+`)
+
+func validateTargetBranch(branch string) error {
+	trimmed := strings.TrimSpace(branch)
+	if trimmed != branch {
+		return errors.New("target-branch must not have leading or trailing whitespace")
+	}
+	if strings.Contains(trimmed, "/") {
+		return fmt.Errorf("target-branch %q must be a Riido work branchName without path separators", trimmed)
+	}
+	if !riidoWorkBranchPattern.MatchString(trimmed) {
+		return fmt.Errorf("target-branch %q must be the Riido work branchName, for example A-60-AI-Agent-generated-client-handoff", trimmed)
 	}
 	return nil
 }

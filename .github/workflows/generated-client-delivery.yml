@@ -9,20 +9,9 @@ on:
         default: false
         type: boolean
       target_branch:
-        description: "Optional riido-client branch name. Defaults to react-query-{ref}-{shortsha}."
-        required: false
-        default: ""
+        description: "Required Riido work branchName for the riido-client generated-client PR."
+        required: true
         type: string
-  push:
-    branches:
-      - main
-    tags:
-      - "v*"
-    paths:
-      - ".github/workflows/generated-client-delivery.yml"
-      - "contracts/ai-agent-client/**"
-      - "tools/generatedclienthandoff/**"
-      - "tools/reactquerygen/**"
 
 permissions:
   contents: read
@@ -49,12 +38,16 @@ jobs:
           source_ref="${GITHUB_REF_NAME}"
           target_branch="${{ github.event.inputs.target_branch }}"
           if [ -z "$target_branch" ]; then
-            if [ -n "$source_ref" ]; then
-              safe_ref="$(printf '%s' "$source_ref" | tr -c 'A-Za-z0-9._-' '-')"
-              target_branch="react-query-${safe_ref}-${short_sha}"
-            else
-              target_branch="react-query-${short_sha}"
-            fi
+            echo "target_branch must be the Riido work branchName returned by the Riido task."
+            exit 1
+          fi
+          if printf '%s' "$target_branch" | grep -q '/'; then
+            echo "target_branch must not contain path separators: $target_branch"
+            exit 1
+          fi
+          if ! printf '%s' "$target_branch" | grep -Eq '^[A-Z][A-Z0-9]*-[0-9]+-.+'; then
+            echo "target_branch must be the Riido work branchName, for example A-60-AI-Agent-generated-client-handoff"
+            exit 1
           fi
           {
             echo "source_commit=$source_commit"
@@ -92,7 +85,7 @@ jobs:
 
   deliver:
     needs: package
-    if: github.event_name == 'push' || github.event.inputs.create_pr == 'true'
+    if: github.event.inputs.create_pr == 'true'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.RIIDO_CLIENT_DELIVERY_TOKEN }}

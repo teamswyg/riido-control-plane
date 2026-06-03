@@ -1110,7 +1110,9 @@ This slice does:
 - require business-meaning changes to escalate from control-plane to
   `riido-contracts`
 - require generated-client delivery to run only from API release tags
-- define the target client branch shape `react-query-{tag}-{shortsha}`
+- define the target client branch shape. This slice originally used
+  `react-query-{tag}-{shortsha}`; A-60 supersedes that historical shape with the
+  Riido task response `branchName`.
 - define the target generated path allowlist
   `src/generated/react-query/riido-control-plane/**`
 - require generated `apiHistory.generated.ts` and
