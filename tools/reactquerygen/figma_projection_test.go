@@ -699,7 +699,7 @@ func verifyFigmaAPIGeneratedAnnotations(t *testing.T, annotations []figmaSourceA
 		if !strings.HasPrefix(annotation.FigmaGeneratedPath, "riido.") {
 			t.Fatalf("mirrored API Generated annotation %q must preserve Figma facade path: %q", annotation.NodeID, annotation.FigmaGeneratedPath)
 		}
-		canonical := strings.TrimPrefix(annotation.FigmaGeneratedPath, "riido.")
+		canonical := canonicalPathFromFigmaFacade(annotation.FigmaGeneratedPath)
 		if annotation.CanonicalGeneratedPath != canonical {
 			t.Fatalf("mirrored API Generated annotation %q canonical path = %q, want %q", annotation.NodeID, annotation.CanonicalGeneratedPath, canonical)
 		}
@@ -788,15 +788,15 @@ func verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t *testing.T, policy
 	}
 	verifyMirroredFigmaAPIGeneratedRetiredCategories(t, policy.RetiredCategories, docText)
 	scan := policy.LiveInspection
-	if scan.ObservedAt != "2026-06-02" || !strings.Contains(scan.Tool, "use_figma") {
+	if scan.ObservedAt != "2026-06-03" || !strings.Contains(scan.Tool, "use_figma") || !strings.Contains(scan.Tool, "categoryId") {
 		t.Fatalf("mirrored API Generated annotation live inspection provenance drifted: %+v", scan)
 	}
 	expected := map[string]figmaSourceAPIGeneratedAnnotationLivePageCounter{
 		"129:5215": {
 			PageID:               "129:5215",
 			PageName:             "UI",
-			RiidoAnnotationCount: 53,
-			APIGeneratedCount:    53,
+			RiidoAnnotationCount: 56,
+			APIGeneratedCount:    56,
 		},
 		"42:3014": {
 			PageID:               "42:3014",
@@ -837,8 +837,8 @@ func verifyMirroredFigmaAPIGeneratedAnnotationContentPolicy(t *testing.T, policy
 	if scan.TotalRiidoAnnotations != totalRiido || scan.TotalAPIGeneratedAnnotations != totalAPIGenerated {
 		t.Fatalf("mirrored API Generated annotation live totals = riido:%d/api:%d, want riido:%d/api:%d", scan.TotalRiidoAnnotations, scan.TotalAPIGeneratedAnnotations, totalRiido, totalAPIGenerated)
 	}
-	if totalRiido != 59 || totalAPIGenerated != 59 {
-		t.Fatalf("mirrored API Generated annotation live totals = riido:%d/api:%d, want 59/59", totalRiido, totalAPIGenerated)
+	if totalRiido != 62 || totalAPIGenerated != 62 {
+		t.Fatalf("mirrored API Generated annotation live totals = riido:%d/api:%d, want 62/62", totalRiido, totalAPIGenerated)
 	}
 }
 
@@ -854,7 +854,7 @@ func verifyMirroredFigmaAPIGeneratedRetiredCategories(t *testing.T, categories [
 	if retired.RetirementStatus != "unused_not_deleted" || retired.LiveUsageCount != 0 {
 		t.Fatalf("mirrored retired API Generated category must stay unused_not_deleted with zero live usage: %+v", retired)
 	}
-	if retired.ObservedAt != "2026-06-02" || !strings.Contains(retired.ToolLimitation, "remove/setLabel") {
+	if retired.ObservedAt != "2026-06-03" || !strings.Contains(retired.ToolLimitation, "design owner") {
 		t.Fatalf("mirrored retired API Generated category must record automation limitation: %+v", retired)
 	}
 	for _, needle := range []string{retired.CategoryID, retired.CategoryLabel, "retired", "0"} {
@@ -882,7 +882,7 @@ func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaS
 		if !strings.HasPrefix(group.FigmaGeneratedPath, "riido.") {
 			t.Fatalf("mirrored API Generated inventory group must preserve Figma facade path: %q", group.FigmaGeneratedPath)
 		}
-		canonical := strings.TrimPrefix(group.FigmaGeneratedPath, "riido.")
+		canonical := canonicalPathFromFigmaFacade(group.FigmaGeneratedPath)
 		if group.CanonicalGeneratedPath != canonical {
 			t.Fatalf("mirrored API Generated inventory group %q canonical path = %q, want %q", group.FigmaGeneratedPath, group.CanonicalGeneratedPath, canonical)
 		}
@@ -957,9 +957,15 @@ func verifyFigmaAPIGeneratedAnnotationInventory(t *testing.T, inventory []figmaS
 			t.Fatalf("projection doc must mention mirrored API Generated inventory v2 counterpart %q", v2Path)
 		}
 	}
-	if got, want := totalAnnotations, 61; got != want {
+	if got, want := totalAnnotations, 62; got != want {
 		t.Fatalf("mirrored API Generated inventory node annotations = %d, want %d", got, want)
 	}
+}
+
+func canonicalPathFromFigmaFacade(path string) string {
+	out := strings.TrimPrefix(path, "riido.")
+	out = strings.TrimPrefix(out, "v2.")
+	return out
 }
 
 func generatedPathsByOperation(spec openAPISpec) map[string]string {
