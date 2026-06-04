@@ -1885,6 +1885,28 @@ go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
 go test ./tools/reactquerygen -count=1
 ```
 
+### RIID-4917 — assignment status SSE dedupe for provider heartbeats
+
+This slice absorbs the 2026-06-05 development Codex smoke evidence where one
+Go Hello World assignment completed successfully, but the SSE stream emitted
+hundreds of repeated `agent_work_status_changed` events while the assignment
+remained `(running, running, runtime_progress)`.
+
+This slice does:
+
+- keep `agent_thread_progress` as the live text/progress event for daemon
+  `riido_log` batches
+- fan out `agent_work_status_changed` only when daemon/provider assignment
+  events change `(work_status, assignment_state, comment_kind)`
+- preserve terminal status events such as completed, failed, stopped, queued,
+  and the first transition from assignment-started into runtime-progress
+- add a regression test that duplicate running assignment events do not grow the
+  client event stream, while a later completed event still does
+
+This slice does not change endpoint shape, generated OpenAPI, daemon polling,
+frontend code, assignment replacement behavior, or the v2 multi-agent
+`thread-stream-subscription` contract.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
