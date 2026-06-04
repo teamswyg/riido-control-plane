@@ -1303,10 +1303,20 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	}
 
 	if strings.TrimSpace(event.Type) == EventRiidoLog && message != "" {
+		messageCode, messageKey, messageArgs := progressLineMetadata(event.Metadata)
+		if rendered, key, ok := renderProgressMessage(messageCode, messageArgs); ok {
+			message = rendered
+			if messageKey == "" {
+				messageKey = key
+			}
+		}
 		line := AgentThreadProgressLine{
-			Seq:        s.nextThreadProgressSeqLocked(thread.TaskID, thread.ThreadID, event.Metadata),
-			Message:    message,
-			ObservedAt: event.At,
+			Seq:         s.nextThreadProgressSeqLocked(thread.TaskID, thread.ThreadID, event.Metadata),
+			Message:     message,
+			MessageCode: messageCode,
+			MessageKey:  messageKey,
+			MessageArgs: messageArgs,
+			ObservedAt:  event.At,
 		}
 		if line.ObservedAt.IsZero() {
 			line.ObservedAt = time.Now().UTC()
@@ -1905,14 +1915,14 @@ func eventDeviceRecord(payload any) (DeviceRecord, bool) {
 func normalizeProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLine {
 	out := make([]AgentThreadProgressLine, 0, len(lines))
 	for _, line := range lines {
-		line.Message = strings.TrimSpace(line.Message)
-		if line.Message == "" {
+		normalized, ok := normalizeProgressLine(line)
+		if !ok {
 			continue
 		}
-		if line.Seq <= 0 {
-			line.Seq = len(out) + 1
+		if normalized.Seq <= 0 {
+			normalized.Seq = len(out) + 1
 		}
-		out = append(out, line)
+		out = append(out, normalized)
 	}
 	return out
 }

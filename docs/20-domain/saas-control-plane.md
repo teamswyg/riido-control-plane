@@ -93,7 +93,11 @@ Runtime progress intended for the client task thread is ingested as bounded
 daemon batches on `POST /v1/agents/{agent_id}/thread-progress`. The endpoint
 stores each accepted line as an assignment `riido_log` task event and, when the
 AI Agent client event store is configured, fans out the same batch as
-`agent_thread_progress` on the client SSE surface.
+`agent_thread_progress` on the client SSE surface. Structured daemon payloads
+may include `message_code` and `message_args` from the upstream
+`riido-contracts/progressmessage` catalog; control-plane renders those fields
+to the existing public `message` string before SSE delivery. Legacy raw
+`message` input remains accepted for compatibility.
 
 The daemon's standard assignment event path,
 `POST /v1/agents/{agent_id}/events`, is also part of the client task-thread

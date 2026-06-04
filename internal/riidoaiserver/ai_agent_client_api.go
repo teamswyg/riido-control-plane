@@ -1,6 +1,9 @@
 package riidoaiserver
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 const AIAgentClientContractID = "control-plane-ai-agent-client-api.v2"
 const AIAgentClientPersistenceSchemaVersion = "riido-ai-agent-client-persistence.v2"
@@ -449,9 +452,46 @@ type AgentWorkStatusChangedEvent struct {
 }
 
 type AgentThreadProgressLine struct {
-	Seq        int       `json:"seq"`
-	Message    string    `json:"message"`
-	ObservedAt time.Time `json:"observed_at,omitempty"`
+	Seq         int               `json:"seq"`
+	Message     string            `json:"message"`
+	MessageCode int               `json:"message_code,omitempty"`
+	MessageKey  string            `json:"message_key,omitempty"`
+	MessageArgs map[string]string `json:"message_args,omitempty"`
+	ObservedAt  time.Time         `json:"observed_at,omitempty"`
+}
+
+func (line *AgentThreadProgressLine) UnmarshalJSON(data []byte) error {
+	var wire struct {
+		Seq         int               `json:"seq"`
+		Message     string            `json:"message"`
+		MessageCode int               `json:"message_code,omitempty"`
+		MessageKey  string            `json:"message_key,omitempty"`
+		MessageArgs map[string]string `json:"message_args,omitempty"`
+		ObservedAt  time.Time         `json:"observed_at,omitempty"`
+	}
+	if err := json.Unmarshal(data, &wire); err != nil {
+		return err
+	}
+	line.Seq = wire.Seq
+	line.Message = wire.Message
+	line.MessageCode = wire.MessageCode
+	line.MessageKey = wire.MessageKey
+	line.MessageArgs = wire.MessageArgs
+	line.ObservedAt = wire.ObservedAt
+	return nil
+}
+
+func (line AgentThreadProgressLine) MarshalJSON() ([]byte, error) {
+	wire := struct {
+		Seq        int       `json:"seq"`
+		Message    string    `json:"message"`
+		ObservedAt time.Time `json:"observed_at,omitempty"`
+	}{
+		Seq:        line.Seq,
+		Message:    line.Message,
+		ObservedAt: line.ObservedAt,
+	}
+	return json.Marshal(wire)
 }
 
 type AgentThreadProgressEvent struct {

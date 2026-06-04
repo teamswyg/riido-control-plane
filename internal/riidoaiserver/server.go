@@ -1371,6 +1371,7 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 	for _, line := range lines {
 		metadata := copyStringMap(req.Metadata)
 		metadata["thread_progress_seq"] = fmt.Sprint(line.Seq)
+		metadata = addProgressLineMetadata(metadata, line)
 		if _, err := s.assignment.RecordAgentEvent(r.Context(), agentID, AgentEventRequest{
 			AssignmentID: req.AssignmentID,
 			TaskID:       req.TaskID,
