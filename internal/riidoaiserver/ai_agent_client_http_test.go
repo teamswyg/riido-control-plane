@@ -1639,6 +1639,59 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		t.Fatalf("completed threads = %+v", completedThreads)
 	}
 
+	followupBody := `{"body":"README.md를 추가하고 실행 방법을 정리해 주세요.","source_message_id":"message-followup-1"}`
+	followupReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/tasks/task-new/threads/"+assigned.ThreadID+"/messages", strings.NewReader(followupBody))
+	followupReq.Header.Set("Authorization", "Bearer user-token")
+	followupResp := httptest.NewRecorder()
+	handler.ServeHTTP(followupResp, followupReq)
+	if followupResp.Code != http.StatusAccepted {
+		t.Fatalf("followup status=%d body=%s", followupResp.Code, followupResp.Body.String())
+	}
+	var followup AIAgentTaskActionResponse
+	if err := json.Unmarshal(followupResp.Body.Bytes(), &followup); err != nil {
+		t.Fatalf("followup json: %v", err)
+	}
+	if followup.ThreadID != assigned.ThreadID ||
+		followup.AgentID != assigned.AgentID ||
+		followup.WorkStatus != AgentWorkStatusRunning ||
+		followup.AssignmentState != AgentAssignmentStateRunning ||
+		followup.CommentKind != AgentTaskCommentRuntimeProgress {
+		t.Fatalf("followup response = %+v", followup)
+	}
+	followupPoll, err := assignmentStore.PollAgent(ctx, "agent-public-openclaw", PollRequest{
+		DaemonID:  "daemon-shared-studio",
+		DeviceID:  "device-shared-studio",
+		RuntimeID: "runtime-openclaw-shared",
+	})
+	if err != nil {
+		t.Fatalf("PollAgent followup: %v", err)
+	}
+	if followupPoll.Assignment == nil ||
+		followupPoll.Assignment.AgentID != assigned.AgentID ||
+		!strings.Contains(followupPoll.Assignment.Prompt, "README.md를 추가하고 실행 방법을 정리해 주세요.") ||
+		!strings.Contains(followupPoll.Assignment.Prompt, "## Follow-up Thread Message") ||
+		!strings.Contains(followupPoll.Assignment.Prompt, assigned.ThreadID) {
+		t.Fatalf("followup poll assignment = %+v", followupPoll.Assignment)
+	}
+	followupThreadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-new/threads", nil)
+	followupThreadsReq.Header.Set("Authorization", "Bearer user-token")
+	followupThreadsResp := httptest.NewRecorder()
+	handler.ServeHTTP(followupThreadsResp, followupThreadsReq)
+	if followupThreadsResp.Code != http.StatusOK {
+		t.Fatalf("followup threads status=%d body=%s", followupThreadsResp.Code, followupThreadsResp.Body.String())
+	}
+	var followupThreads AIAgentTaskThreadCollectionResponse
+	if err := json.Unmarshal(followupThreadsResp.Body.Bytes(), &followupThreads); err != nil {
+		t.Fatalf("followup threads json: %v", err)
+	}
+	if followupThreads.ActiveStream == nil ||
+		followupThreads.ActiveStream.ThreadID != assigned.ThreadID ||
+		len(followupThreads.Threads) != 1 ||
+		followupThreads.Threads[0].ThreadID != assigned.ThreadID ||
+		followupThreads.Threads[0].SourceMessageID != "message-followup-1" {
+		t.Fatalf("followup threads = %+v", followupThreads)
+	}
+
 	eventsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/events?replay=1", nil)
 	eventsReq.Header.Set("Authorization", "Bearer user-token")
 	eventsResp := httptest.NewRecorder()

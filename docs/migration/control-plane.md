@@ -1900,15 +1900,22 @@ This slice does:
   events change `(work_status, assignment_state, comment_kind)`
 - strip internal `<riido_log>...<end>` transport blocks from client-visible
   terminal task-thread `message` while keeping rendered progress in `lines[]`
+- enqueue a real assignment when a viewer sends a follow-up message to a
+  completed AI Agent task thread; the assignment prompt includes a
+  `## Follow-up Thread Message` section and daemon progress continues to update
+  the same client-facing `thread_id`
 - preserve terminal status events such as completed, failed, stopped, queued,
   and the first transition from assignment-started into runtime-progress
-- add a regression test that duplicate running assignment events do not grow the
-  client event stream, while a later completed event still does and does not
-  expose raw progress transport in the cold thread message
+- add regression tests that duplicate running assignment events do not grow the
+  client event stream, a later completed event still does without exposing raw
+  progress transport in the cold thread message, and a completed-thread
+  follow-up becomes pollable daemon work instead of a read-model-only state
 
-This slice does not change endpoint shape, generated OpenAPI, daemon polling,
-frontend code, assignment replacement behavior, or the v2 multi-agent
-`thread-stream-subscription` contract.
+This slice does not change endpoint shape, generated OpenAPI, frontend code,
+assignment replacement behavior, or the v2 multi-agent
+`thread-stream-subscription` contract. It does intentionally change daemon
+polling behavior for completed-thread follow-up messages from no-op/read-model
+only to a queued assignment.
 
 ## Validation Gates
 
