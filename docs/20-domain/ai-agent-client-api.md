@@ -406,6 +406,22 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
   to render historical AI Agent thread rows; `active_stream` is present only
   when the screen should also connect to the client event stream
+- v1 `tasks.assignment` and the v2 compatibility duplicate
+  `v2.aiAgent.tasks.assign` keep the existing demo behavior: assigning a
+  different agent to the same task stops/replaces the previous active task
+  thread and returns at most one `active_stream`
+- new multi-agent task assignment is additive and v2-only:
+  `POST /v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments`
+  maps to generated path `riido.v2.aiAgent.tasks.agentAssignments.create`
+- additive unassign/stop target a specific path `agent_id`; clients use
+  `riido.v2.aiAgent.tasks.agentAssignments.delete` or
+  `riido.v2.aiAgent.tasks.agentAssignments.stop` so one agent can be stopped
+  without selecting another active agent implicitly
+- for multi-agent active tasks, clients call
+  `riido.v2.aiAgent.tasks.threadStreamSubscription` after or alongside the cold
+  thread collection. The response returns one shared SSE stream handoff and
+  `active_thread_filters[]` with `(agent_id, thread_id, run_id)` per active
+  thread. If the filter array is empty, the client should not open the stream.
 - task-thread messages created while the viewer was on another screen are still
   returned by the later cold collection; scroll/focus presentation remains a
   client concern

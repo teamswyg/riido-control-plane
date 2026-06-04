@@ -206,6 +206,32 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+assignmentTaskID+"/threads/"+assigned.ThreadID+"/messages", token, `{"body":"v2 next instruction","source_message_id":"smoke-v2-message"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodDelete, base+"/tasks/"+assignmentTaskID+"/assignment", token, `{"agent_id":"agent-public-openclaw","reason":"smoke unassign"}`, http.StatusAccepted)
 
+	multiAgentBody := aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{
+		Name:       "v2 smoke multi agent",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  "runtime-cursor-dev",
+		ModelID:    stringPtr("cursor-auto"),
+	})
+	multiCreatedBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/agents", token, multiAgentBody, http.StatusCreated)
+	var multiCreated AgentClientRecordResponse
+	aiAgentSmokeDecode(t, multiCreatedBytes, &multiCreated)
+	multiTaskID := "task-v2-generated-multi"
+	firstMultiBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+multiTaskID+"/agent-assignments", token, `{"agent_id":"agent-public-openclaw"}`, http.StatusAccepted)
+	var firstMulti AIAgentTaskActionResponse
+	aiAgentSmokeDecode(t, firstMultiBytes, &firstMulti)
+	secondMultiBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+multiTaskID+"/agent-assignments", token, `{"agent_id":"`+multiCreated.Agent.AgentID+`"}`, http.StatusAccepted)
+	var secondMulti AIAgentTaskActionResponse
+	aiAgentSmokeDecode(t, secondMultiBytes, &secondMulti)
+	subscriptionBytes := aiAgentSmokeRequest(t, server, http.MethodGet, base+"/tasks/"+multiTaskID+"/thread-stream-subscription", token, "", http.StatusOK)
+	var subscription AIAgentTaskThreadStreamSubscriptionResponse
+	aiAgentSmokeDecode(t, subscriptionBytes, &subscription)
+	if subscription.Stream.Href != base+"/events" || len(subscription.ActiveThreadFilters) != 2 {
+		t.Fatalf("v2 thread stream subscription = %+v", subscription)
+	}
+	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+multiTaskID+"/agent-assignments/"+firstMulti.AgentID+"/stop", token, "", http.StatusAccepted)
+	aiAgentSmokeRequest(t, server, http.MethodDelete, base+"/tasks/"+multiTaskID+"/agent-assignments/"+secondMulti.AgentID, token, "", http.StatusAccepted)
+	aiAgentSmokeRequest(t, server, http.MethodDelete, base+"/agents/"+multiCreated.Agent.AgentID, token, "", http.StatusOK)
+
 	commentTaskID := "task-v2-generated-comment"
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+commentTaskID+"/comments", token, `{"agent_id":"agent-owned-claude","body":"v2 compatibility comment","source_comment_id":"smoke-v2-comment"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+commentTaskID+"/stop", token, `{"agent_id":"agent-owned-claude","reason":"smoke stop"}`, http.StatusAccepted)

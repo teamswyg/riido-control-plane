@@ -10,10 +10,14 @@ on:
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/agent_registry.go"
+      - "internal/riidoaiserver/ai_agent_client_api.go"
+      - "internal/riidoaiserver/ai_agent_client_development.go"
+      - "internal/riidoaiserver/ai_agent_client_multi_agent_test.go"
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/assignment_contract_gen.go"
       - "internal/riidoaiserver/provider_status.go"
       - "internal/riidoaiserver/provider_status_port.go"
+      - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_actor_test.go"
       - "internal/riidoaiserver/store_port.go"
@@ -27,10 +31,14 @@ on:
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/agent_registry.go"
+      - "internal/riidoaiserver/ai_agent_client_api.go"
+      - "internal/riidoaiserver/ai_agent_client_development.go"
+      - "internal/riidoaiserver/ai_agent_client_multi_agent_test.go"
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/assignment_contract_gen.go"
       - "internal/riidoaiserver/provider_status.go"
       - "internal/riidoaiserver/provider_status_port.go"
+      - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_actor_test.go"
       - "internal/riidoaiserver/store_port.go"
@@ -61,5 +69,5 @@ jobs:
             printf 'Disallowed store actor imports:\n%s\n' "$disallowed"
             exit 1
           fi
-      - name: Test assignment store actor
-        run: go test ./internal/riidoaiserver -run 'StoreActor|AssignmentStore' -count=1
+      - name: Test assignment store actor and client assignment domain
+        run: go test ./internal/riidoaiserver -run 'StoreActor|AssignmentStore|AIAgentClient.*Assignment|AIAgentClient.*ThreadStream' -count=1

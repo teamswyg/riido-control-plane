@@ -24,10 +24,14 @@ type AIAgentClientStore interface {
 	ListWorkspaceAssignedAgentProfiles(ctx context.Context, principal AuthorizationResult) (AssignedAgentProfileMapResponse, error)
 	ListAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error)
 	AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
+	CreateAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
 	UnassignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
+	DeleteAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error)
 	SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error)
 	CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error)
 	StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
+	StopAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error)
+	GetAIAgentTaskThreadStreamSubscription(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadStreamSubscriptionResponse, error)
 	CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error)
 	GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error)
 	UpdateAIAgentConfiguration(ctx context.Context, principal AuthorizationResult, agentID string, req UpdateAgentConfigurationRequest) (AgentClientRecordResponse, error)
@@ -636,6 +640,14 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Conte
 }
 
 func (s *DevelopmentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+	return s.assignAIAgentTask(ctx, principal, taskID, req, true)
+}
+
+func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+	return s.assignAIAgentTask(ctx, principal, taskID, req, false)
+}
+
+func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest, stopExistingTaskThreads bool) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
@@ -656,7 +668,9 @@ func (s *DevelopmentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, p
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
 		return actionResponseFromThread(thread), nil
 	}
-	s.markTaskActiveThreadsStoppedLocked(taskID, AgentTaskCommentStoppedByUserRequest, "agent assignment was replaced by a participant change")
+	if stopExistingTaskThreads {
+		s.markTaskActiveThreadsStoppedLocked(taskID, AgentTaskCommentStoppedByUserRequest, "agent assignment was replaced by a participant change")
+	}
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
@@ -727,6 +741,13 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
+}
+
+func (s *DevelopmentAIAgentClientStore) DeleteAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error) {
+	return s.UnassignAIAgentTask(ctx, principal, taskID, UnassignAIAgentTaskRequest{
+		AgentID: agentID,
+		Reason:  req.Reason,
+	})
 }
 
 func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error) {
@@ -863,6 +884,64 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
+}
+
+func (s *DevelopmentAIAgentClientStore) StopAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error) {
+	response, err := s.StopAIAgentTask(ctx, principal, taskID, StopAIAgentTaskRequest{
+		AgentID: agentID,
+		Reason:  req.Reason,
+	})
+	if err != nil {
+		return response, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	agent := s.agents[response.AgentID]
+	if agent.AgentID != "" {
+		if agent.AssignedTaskCount > 0 {
+			agent.AssignedTaskCount--
+		}
+		agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
+		if agent.AssignedTaskCount == 0 {
+			agent.WorkStatus = AgentWorkStatusIdle
+		}
+		s.agents[agent.AgentID] = agent
+	}
+	return response, nil
+}
+
+func (s *DevelopmentAIAgentClientStore) GetAIAgentTaskThreadStreamSubscription(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadStreamSubscriptionResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return AIAgentTaskThreadStreamSubscriptionResponse{}, err
+	}
+	taskID = strings.TrimSpace(taskID)
+	if taskID == "" {
+		return AIAgentTaskThreadStreamSubscriptionResponse{}, errors.New("task_id is required")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	threads := s.visibleTaskThreadsLocked(principal, taskID)
+	filters := make([]AIAgentTaskThreadStreamTarget, 0, len(threads))
+	for _, thread := range threads {
+		if !taskThreadHasActiveStream(thread) {
+			continue
+		}
+		filters = append(filters, AIAgentTaskThreadStreamTarget{
+			AgentID:  thread.AgentID,
+			ThreadID: thread.ThreadID,
+			RunID:    thread.RunID,
+		})
+	}
+	return AIAgentTaskThreadStreamSubscriptionResponse{
+		SchemaVersion: SchemaVersion,
+		TaskID:        taskID,
+		Stream: AIAgentTaskEventStreamLink{
+			Rel:       "agent_thread_progress_stream",
+			Href:      aiAgentClientEventStreamHref(strings.TrimSpace(principal.WorkspaceID)),
+			EventType: AgentClientEventThreadProgress,
+		},
+		ActiveThreadFilters: filters,
+	}, nil
 }
 
 func (s *DevelopmentAIAgentClientStore) CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
@@ -2151,18 +2230,22 @@ func taskThreadHasActiveStream(thread AIAgentTaskThreadRecord) bool {
 }
 
 func activeStreamLinkForThread(thread AIAgentTaskThreadRecord, workspaceID string) AIAgentTaskThreadStreamLink {
-	href := "/v1/client/ai-agent/events"
-	if workspaceID != "" {
-		href = "/v2/client/workspaces/" + url.PathEscape(workspaceID) + "/ai-agent/events"
-	}
 	return AIAgentTaskThreadStreamLink{
 		Rel:       "agent_thread_progress_stream",
-		Href:      href,
+		Href:      aiAgentClientEventStreamHref(workspaceID),
 		EventType: AgentClientEventThreadProgress,
 		TaskID:    thread.TaskID,
 		ThreadID:  thread.ThreadID,
 		RunID:     thread.RunID,
 	}
+}
+
+func aiAgentClientEventStreamHref(workspaceID string) string {
+	workspaceID = strings.TrimSpace(workspaceID)
+	if workspaceID == "" {
+		return "/v1/client/ai-agent/events"
+	}
+	return "/v2/client/workspaces/" + url.PathEscape(workspaceID) + "/ai-agent/events"
 }
 
 func threadIDForRun(taskID, agentID, runID string) string {

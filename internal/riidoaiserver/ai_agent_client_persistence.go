@@ -117,8 +117,24 @@ func (s *PersistentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, pr
 	return response, s.saveSnapshot(ctx)
 }
 
+func (s *PersistentAIAgentClientStore) CreateAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.CreateAIAgentTaskAgentAssignment(ctx, principal, taskID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
 func (s *PersistentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
 	response, err := s.DevelopmentAIAgentClientStore.UnassignAIAgentTask(ctx, principal, taskID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) DeleteAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.DeleteAIAgentTaskAgentAssignment(ctx, principal, taskID, agentID, req)
 	if err != nil {
 		return response, err
 	}
@@ -147,6 +163,18 @@ func (s *PersistentAIAgentClientStore) StopAIAgentTask(ctx context.Context, prin
 		return response, err
 	}
 	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) StopAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error) {
+	response, err := s.DevelopmentAIAgentClientStore.StopAIAgentTaskAgentAssignment(ctx, principal, taskID, agentID, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
+func (s *PersistentAIAgentClientStore) GetAIAgentTaskThreadStreamSubscription(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadStreamSubscriptionResponse, error) {
+	return s.DevelopmentAIAgentClientStore.GetAIAgentTaskThreadStreamSubscription(ctx, principal, taskID)
 }
 
 func (s *PersistentAIAgentClientStore) CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {

@@ -166,9 +166,25 @@
           "path": [
             "aiAgent",
             "tasks",
+            "agentAssignments"
+          ],
+          "description": "선택된 workspace의 task에 여러 AI Agent를 병렬로 배정/해제/중지하는 additive assignment namespace입니다. v1/v2 tasks.assignment 호환 경로는 기존 단일 active 시연 흐름을 유지합니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
             "threadMessages"
           ],
           "description": "선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "threadStreamSubscription"
+          ],
+          "description": "선택된 workspace의 task에서 활성 thread filter 목록과 공통 SSE stream handoff를 조회하는 namespace입니다."
         }
       ]
     }
@@ -332,7 +348,7 @@
       "kind": "telemetry",
       "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
       "rules": [
-        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
+        "daemon: parse only explicit runtime progress markers such as <riido_log>...<end>",
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
@@ -2313,6 +2329,101 @@
           }
         ]
       }
+    },
+    {
+      "name": "AIAgentTaskEventStreamLink",
+      "schema": {
+        "name": "AIAgentTaskEventStreamLink",
+        "description": "활성 thread filter들과 함께 사용하는 공통 client SSE stream handoff link입니다.",
+        "type": "object",
+        "required": [
+          "rel",
+          "href",
+          "event_type"
+        ],
+        "properties": [
+          {
+            "name": "rel",
+            "type": "string",
+            "enum": [
+              "agent_thread_progress_stream"
+            ]
+          },
+          {
+            "name": "href",
+            "type": "string"
+          },
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "agent_thread_progress"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadStreamTarget",
+      "schema": {
+        "name": "AIAgentTaskThreadStreamTarget",
+        "description": "공통 SSE stream에서 client가 적용할 활성 task thread filter입니다.",
+        "type": "object",
+        "required": [
+          "agent_id",
+          "thread_id",
+          "run_id"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "thread_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadStreamSubscriptionResponse",
+      "schema": {
+        "name": "AIAgentTaskThreadStreamSubscriptionResponse",
+        "description": "task 내 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 handoff 응답입니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "task_id",
+          "stream",
+          "active_thread_filters"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "stream",
+            "ref": "AIAgentTaskEventStreamLink"
+          },
+          {
+            "name": "active_thread_filters",
+            "type": "array",
+            "items": {
+              "ref": "AIAgentTaskThreadStreamTarget"
+            }
+          }
+        ]
+      }
     }
   ],
   "operations": [
@@ -3905,6 +4016,172 @@
         "ref": "ClientStreamEvent",
         "content_type": "text/event-stream"
       }
+    },
+    {
+      "operation_id": "createAIAgentTaskAgentAssignmentV2",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments",
+      "resource": "agent",
+      "action": "assign",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "agentAssignments",
+          "create"
+        ],
+        "generated_path": "v2.aiAgent.tasks.agentAssignments.create",
+        "invalidates": [
+          "v2.aiAgent.bootstrap",
+          "v2.aiAgent.tasks.assignableAgents",
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.threadStreamSubscription"
+        ]
+      },
+      "summary": "task에 AI agent를 additive 방식으로 배정합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "request": {
+        "ref": "AssignAIAgentTaskRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenario_ids": [
+        "createAIAgentTaskAgentAssignmentV2.additive-task-assignment-keeps-existing-active-agents"
+      ]
+    },
+    {
+      "operation_id": "deleteAIAgentTaskAgentAssignmentV2",
+      "kind": "command",
+      "method": "DELETE",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}",
+      "resource": "agent",
+      "action": "stop",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "agentAssignments",
+          "delete"
+        ],
+        "generated_path": "v2.aiAgent.tasks.agentAssignments.delete",
+        "invalidates": [
+          "v2.aiAgent.bootstrap",
+          "v2.aiAgent.tasks.assignableAgents",
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.threadStreamSubscription"
+        ]
+      },
+      "summary": "task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenario_ids": [
+        "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment"
+      ]
+    },
+    {
+      "operation_id": "stopAIAgentTaskAgentAssignmentV2",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop",
+      "resource": "agent",
+      "action": "stop",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "agentAssignments",
+          "stop"
+        ],
+        "generated_path": "v2.aiAgent.tasks.agentAssignments.stop",
+        "invalidates": [
+          "v2.aiAgent.bootstrap",
+          "v2.aiAgent.tasks.assignableAgents",
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.threadStreamSubscription"
+        ]
+      },
+      "summary": "task의 특정 AI agent 작업을 agent_id 기준으로 중단합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenario_ids": [
+        "stopAIAgentTaskAgentAssignmentV2.path-agent-id-selects-stopped-assignment"
+      ]
+    },
+    {
+      "operation_id": "getAIAgentTaskThreadStreamSubscriptionV2",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/thread-stream-subscription",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "threadStreamSubscription"
+        ],
+        "generated_path": "v2.aiAgent.tasks.threadStreamSubscription",
+        "cache_tag": "v2.aiAgent.tasks.threadStreamSubscription"
+      },
+      "summary": "task의 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 filter handoff를 조회합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ]
+      },
+      "rbac_policy": "task_thread_cold_collection.v1",
+      "response": {
+        "status": 200,
+        "ref": "AIAgentTaskThreadStreamSubscriptionResponse"
+      },
+      "scenario_ids": [
+        "getAIAgentTaskThreadStreamSubscriptionV2.multi-active-task-threads-use-filters",
+        "getAIAgentTaskThreadStreamSubscriptionV2.cold-task-returns-empty-filters"
+      ]
     }
   ],
   "scenarios": [

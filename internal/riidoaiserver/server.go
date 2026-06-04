@@ -497,8 +497,26 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 		s.handleAIAgentClientAssignTask(w, r, taskID)
 	case suffix == "assignment" && r.Method == http.MethodDelete:
 		s.handleAIAgentClientUnassignTask(w, r, taskID)
+	case suffix == "agent-assignments" && r.Method == http.MethodPost:
+		s.handleAIAgentClientCreateTaskAgentAssignment(w, r, taskID)
+	case strings.HasPrefix(suffix, "agent-assignments/") && strings.HasSuffix(suffix, "/stop") && r.Method == http.MethodPost:
+		agentID, ok := agentAssignmentStopSuffixAgentID(suffix)
+		if !ok {
+			writeError(w, http.StatusNotFound, "not found")
+			return
+		}
+		s.handleAIAgentClientStopTaskAgentAssignment(w, r, taskID, agentID)
+	case strings.HasPrefix(suffix, "agent-assignments/") && r.Method == http.MethodDelete:
+		agentID, ok := agentAssignmentSuffixAgentID(suffix)
+		if !ok {
+			writeError(w, http.StatusNotFound, "not found")
+			return
+		}
+		s.handleAIAgentClientDeleteTaskAgentAssignment(w, r, taskID, agentID)
 	case suffix == "threads" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskThreads(w, r, taskID)
+	case suffix == "thread-stream-subscription" && r.Method == http.MethodGet:
+		s.handleAIAgentClientTaskThreadStreamSubscription(w, r, taskID)
 	case suffix == "comments" && r.Method == http.MethodPost:
 		s.handleAIAgentClientSubmitTaskComment(w, r, taskID)
 	case strings.HasPrefix(suffix, "threads/") && strings.HasSuffix(suffix, "/messages") && r.Method == http.MethodPost:
@@ -574,6 +592,42 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		return
 	}
 	response, err := s.aiAgent.AssignAIAgentTask(r.Context(), principal, taskID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
+}
+
+func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWriter, r *http.Request, taskID string) {
+	if aiAgentWorkspaceIDFromRequest(r) == "" {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	if s.assignment == nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
+		return
+	}
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionAssign, TaskID: taskID})
+	if !ok {
+		return
+	}
+	bearerToken, _ := requestToken(r)
+	var req AssignAIAgentTaskRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	assignmentReq, err := s.assignRequestFromAIAgentClientTask(r.Context(), principal, bearerToken, taskID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	if _, err := s.assignment.AssignTaskAdditive(r.Context(), taskID, assignmentReq); err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	response, err := s.aiAgent.CreateAIAgentTaskAgentAssignment(r.Context(), principal, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
@@ -657,12 +711,53 @@ func (s Server) handleAIAgentClientUnassignTask(w http.ResponseWriter, r *http.R
 	writeJSON(w, http.StatusAccepted, response)
 }
 
+func (s Server) handleAIAgentClientDeleteTaskAgentAssignment(w http.ResponseWriter, r *http.Request, taskID, agentID string) {
+	if aiAgentWorkspaceIDFromRequest(r) == "" {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStop, TaskID: taskID})
+	if !ok {
+		return
+	}
+	var req AgentAssignmentActionRequest
+	if r.Body != nil && r.ContentLength != 0 {
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+	response, err := s.aiAgent.DeleteAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
+}
+
 func (s Server) handleAIAgentClientTaskThreads(w http.ResponseWriter, r *http.Request, taskID string) {
 	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead, TaskID: taskID})
 	if !ok {
 		return
 	}
 	response, err := s.aiAgent.ListAIAgentTaskThreads(r.Context(), principal, taskID)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s Server) handleAIAgentClientTaskThreadStreamSubscription(w http.ResponseWriter, r *http.Request, taskID string) {
+	if aiAgentWorkspaceIDFromRequest(r) == "" {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead, TaskID: taskID})
+	if !ok {
+		return
+	}
+	response, err := s.aiAgent.GetAIAgentTaskThreadStreamSubscription(r.Context(), principal, taskID)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
@@ -719,6 +814,30 @@ func (s Server) handleAIAgentClientStopTask(w http.ResponseWriter, r *http.Reque
 		}
 	}
 	response, err := s.aiAgent.StopAIAgentTask(r.Context(), principal, taskID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, response)
+}
+
+func (s Server) handleAIAgentClientStopTaskAgentAssignment(w http.ResponseWriter, r *http.Request, taskID, agentID string) {
+	if aiAgentWorkspaceIDFromRequest(r) == "" {
+		writeError(w, http.StatusNotFound, "not found")
+		return
+	}
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStop, TaskID: taskID})
+	if !ok {
+		return
+	}
+	var req AgentAssignmentActionRequest
+	if r.Body != nil && r.ContentLength != 0 {
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+	response, err := s.aiAgent.StopAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
@@ -1525,6 +1644,22 @@ func splitNestedResourcePath(path, prefix string) (string, string, bool) {
 func threadMessageSuffixThreadID(suffix string) (string, bool) {
 	parts := strings.Split(strings.Trim(suffix, "/"), "/")
 	if len(parts) != 3 || parts[0] != "threads" || strings.TrimSpace(parts[1]) == "" || parts[2] != "messages" {
+		return "", false
+	}
+	return parts[1], true
+}
+
+func agentAssignmentSuffixAgentID(suffix string) (string, bool) {
+	parts := strings.Split(strings.Trim(suffix, "/"), "/")
+	if len(parts) != 2 || parts[0] != "agent-assignments" || strings.TrimSpace(parts[1]) == "" {
+		return "", false
+	}
+	return parts[1], true
+}
+
+func agentAssignmentStopSuffixAgentID(suffix string) (string, bool) {
+	parts := strings.Split(strings.Trim(suffix, "/"), "/")
+	if len(parts) != 3 || parts[0] != "agent-assignments" || strings.TrimSpace(parts[1]) == "" || parts[2] != "stop" {
 		return "", false
 	}
 	return parts[1], true

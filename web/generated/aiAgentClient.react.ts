@@ -486,6 +486,48 @@ export interface ListWorkspaceAssignedAgentProfilesV2ReactEndpoint extends core.
 }
 
 /**
+ * task에 AI agent를 additive 방식으로 배정합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.create`
+ * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.create`
+ * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.create`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface CreateAIAgentTaskAgentAssignmentV2ReactEndpoint extends core.CreateAIAgentTaskAgentAssignmentV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CreateAIAgentTaskAgentAssignmentV2MutationVariables>) => UseMutationResult<core.AIAgentTaskActionResponse, Error, core.CreateAIAgentTaskAgentAssignmentV2MutationVariables>;
+}
+
+/**
+ * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
+ * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
+ * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface DeleteAIAgentTaskAgentAssignmentV2ReactEndpoint extends core.DeleteAIAgentTaskAgentAssignmentV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.DeleteAIAgentTaskAgentAssignmentV2MutationVariables>) => UseMutationResult<core.AIAgentTaskActionResponse, Error, core.DeleteAIAgentTaskAgentAssignmentV2MutationVariables>;
+}
+
+/**
+ * task의 특정 AI agent 작업을 agent_id 기준으로 중단합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.stop`
+ * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.stop`
+ * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.stop`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface StopAIAgentTaskAgentAssignmentV2ReactEndpoint extends core.StopAIAgentTaskAgentAssignmentV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.StopAIAgentTaskAgentAssignmentV2MutationVariables>) => UseMutationResult<core.AIAgentTaskActionResponse, Error, core.StopAIAgentTaskAgentAssignmentV2MutationVariables>;
+}
+
+/**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.assignableAgents`
  * 검색용 generated 경로: `aiAgent.tasks.assignableAgents`
@@ -553,6 +595,20 @@ export interface StopAIAgentTaskV2ReactEndpoint extends core.StopAIAgentTaskV2En
    * React Query useMutation hook입니다.
    */
   readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.StopAIAgentTaskV2MutationVariables>) => UseMutationResult<core.AIAgentTaskActionResponse, Error, core.StopAIAgentTaskV2MutationVariables>;
+}
+
+/**
+ * task의 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 filter handoff를 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.threadStreamSubscription`
+ * 검색용 generated 경로: `aiAgent.tasks.threadStreamSubscription`
+ * 접근 예시: `riido.v2.aiAgent.tasks.threadStreamSubscription`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAIAgentTaskThreadStreamSubscriptionV2ReactEndpoint extends core.GetAIAgentTaskThreadStreamSubscriptionV2Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAIAgentTaskThreadStreamSubscriptionV2PathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadStreamSubscriptionResponse>) => UseQueryResult<core.AIAgentTaskThreadStreamSubscriptionResponse, Error>;
 }
 
 /**
@@ -954,6 +1010,36 @@ export interface RiidoV2AIAgentOnboardingReactNamespace {
 }
 
 /**
+ * 선택된 workspace의 task에 여러 AI Agent를 병렬로 배정/해제/중지하는 additive assignment namespace입니다. v1/v2 tasks.assignment 호환 경로는 기존 단일 active 시연 흐름을 유지합니다.
+ */
+export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
+  /**
+   * task에 AI agent를 additive 방식으로 배정합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.create`
+   * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.create`
+   * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.create`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.threadStreamSubscription`
+   */
+  readonly create: CreateAIAgentTaskAgentAssignmentV2ReactEndpoint;
+  /**
+   * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
+   * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
+   * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.threadStreamSubscription`
+   */
+  readonly delete: DeleteAIAgentTaskAgentAssignmentV2ReactEndpoint;
+  /**
+   * task의 특정 AI agent 작업을 agent_id 기준으로 중단합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.stop`
+   * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.stop`
+   * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.stop`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.threadStreamSubscription`
+   */
+  readonly stop: StopAIAgentTaskAgentAssignmentV2ReactEndpoint;
+}
+
+/**
  * 선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다.
  */
 export interface RiidoV2AIAgentTasksThreadMessagesReactNamespace {
@@ -971,6 +1057,10 @@ export interface RiidoV2AIAgentTasksThreadMessagesReactNamespace {
  * 선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
  */
 export interface RiidoV2AIAgentTasksReactNamespace {
+  /**
+   * 선택된 workspace의 task에 여러 AI Agent를 병렬로 배정/해제/중지하는 additive assignment namespace입니다. v1/v2 tasks.assignment 호환 경로는 기존 단일 active 시연 흐름을 유지합니다.
+   */
+  readonly agentAssignments: RiidoV2AIAgentTasksAgentAssignmentsReactNamespace;
   /**
    * task participant dropdown에서 AI agent를 배정합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.assign`
@@ -1015,6 +1105,14 @@ export interface RiidoV2AIAgentTasksReactNamespace {
    * 선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다.
    */
   readonly threadMessages: RiidoV2AIAgentTasksThreadMessagesReactNamespace;
+  /**
+   * task의 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 filter handoff를 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.threadStreamSubscription`
+   * 검색용 generated 경로: `aiAgent.tasks.threadStreamSubscription`
+   * 접근 예시: `riido.v2.aiAgent.tasks.threadStreamSubscription`
+   * cache tag: `v2.aiAgent.tasks.threadStreamSubscription`
+   */
+  readonly threadStreamSubscription: GetAIAgentTaskThreadStreamSubscriptionV2ReactEndpoint;
   /**
    * active stream link가 있을 때만 이어서 연결할 수 있도록 AI Agent task thread 목록을 조회합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.threads`
@@ -1261,6 +1359,20 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
             },
           },
           tasks: {
+            agentAssignments: {
+              create: {
+                ...coreClient.v2.aiAgent.tasks.agentAssignments.create,
+                useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CreateAIAgentTaskAgentAssignmentV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.CreateAIAgentTaskAgentAssignmentV2MutationVariables>(coreClient.v2.aiAgent.tasks.agentAssignments.create.mutation(options)),
+              },
+              delete: {
+                ...coreClient.v2.aiAgent.tasks.agentAssignments.delete,
+                useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.DeleteAIAgentTaskAgentAssignmentV2MutationVariables>(coreClient.v2.aiAgent.tasks.agentAssignments.delete.mutation(options)),
+              },
+              stop: {
+                ...coreClient.v2.aiAgent.tasks.agentAssignments.stop,
+                useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.StopAIAgentTaskAgentAssignmentV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.StopAIAgentTaskAgentAssignmentV2MutationVariables>(coreClient.v2.aiAgent.tasks.agentAssignments.stop.mutation(options)),
+              },
+            },
             assign: {
               ...coreClient.v2.aiAgent.tasks.assign,
               useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.AssignAIAgentTaskV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.AssignAIAgentTaskV2MutationVariables>(coreClient.v2.aiAgent.tasks.assign.mutation(options)),
@@ -1286,6 +1398,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
                 ...coreClient.v2.aiAgent.tasks.threadMessages.create,
                 useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CreateAIAgentTaskThreadMessageV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.CreateAIAgentTaskThreadMessageV2MutationVariables>(coreClient.v2.aiAgent.tasks.threadMessages.create.mutation(options)),
               },
+            },
+            threadStreamSubscription: {
+              ...coreClient.v2.aiAgent.tasks.threadStreamSubscription,
+              useQuery: (params: core.GetAIAgentTaskThreadStreamSubscriptionV2PathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadStreamSubscriptionResponse>) => useQuery<core.AIAgentTaskThreadStreamSubscriptionResponse, Error>(coreClient.v2.aiAgent.tasks.threadStreamSubscription.query(params, options)),
             },
             threads: {
               ...coreClient.v2.aiAgent.tasks.threads,
