@@ -269,6 +269,15 @@ queue projection, and active lease records in the same table. This is the
 development persistence boundary, not the final production single-table
 projection.
 
+The deterministic seed devices `device-dev-macbook` and `device-shared-studio`
+belong only to the static fixture principals used by local/generated API tests
+(`user-1`, `user-2`, and static admin principals). External-authorized
+development workspaces are not mock/review accounts; their device/runtime
+collections must be projected from desktop enrollment and daemon runtime sync
+only. This keeps the development environment aligned with the desktop
+DevicePrincipal flow while preserving deterministic fixture coverage for
+generated API tests.
+
 Generated `tasks.assign`, `tasks.unassign`, `tasks.threadMessages.create`, and
 daemon poll/heartbeat/event flows must not require a team id or Open API
 workspace key. Those values are legacy task-context reader configuration only
