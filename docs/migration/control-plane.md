@@ -1973,6 +1973,25 @@ This slice does:
 This slice does not change generated endpoint paths, add frontend filtering
 requirements, or alter terminal completed/failed message handling.
 
+### RIID-4917 — cold task-thread message strips persisted progress transport
+
+Live development verification found an older completed Codex task-thread whose
+persisted representative `message` contained internal
+`<riido_log>{"code":...}<end>` progress transport blocks before the final
+human-readable completion copy. That violates the AI Agent client API SSOT:
+progress transport is internal to daemon/control-plane and must not be a
+frontend filtering responsibility.
+
+This slice makes the development client read model sanitize task-thread
+`message` at the client-facing copy boundary. The persisted record is left
+unchanged, but `ListAIAgentTaskThreads` / thread-message action responses can
+only expose stripped public copy. If stripping removes all text, the read model
+falls back to the latest rendered progress line or a status-specific generic
+message.
+
+This slice does not change endpoint paths, generated client shape, SSE event
+types, progress catalog ids, or frontend behavior.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

@@ -2308,11 +2308,37 @@ func copyDeviceDaemon(daemon DeviceDaemonRecord) DeviceDaemonRecord {
 
 func copyTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
 	thread.Lines = copyProgressLines(thread.Lines)
+	thread.Message = clientVisibleTaskThreadMessage(thread)
 	return thread
 }
 
 func copyProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLine {
 	return append([]AgentThreadProgressLine(nil), lines...)
+}
+
+func clientVisibleTaskThreadMessage(thread AIAgentTaskThreadRecord) string {
+	if message := stripRiidoLogBlocks(thread.Message); message != "" {
+		return message
+	}
+	for i := len(thread.Lines) - 1; i >= 0; i-- {
+		if message := strings.TrimSpace(thread.Lines[i].Message); message != "" {
+			return message
+		}
+	}
+	switch thread.CommentKind {
+	case AgentTaskCommentTaskCompleted:
+		return "agent work completed"
+	case AgentTaskCommentTaskFailed:
+		return "agent work failed"
+	case AgentTaskCommentStoppedByUserRequest, AgentTaskCommentStoppedByAgentDeleted:
+		return "agent work was stopped"
+	case AgentTaskCommentQueuedByBusyAgent:
+		return "agent assignment is queued"
+	case AgentTaskCommentAssignmentStarted, AgentTaskCommentRuntimeProgress:
+		return "agent work is running"
+	default:
+		return ""
+	}
 }
 
 func copyAgentOnboardingFixtures(fixtures []AgentOnboardingFixture) []AgentOnboardingFixture {
