@@ -2055,10 +2055,13 @@ func editabilityForAssignedTasks(count int) AgentEditability {
 
 func filterDevicesForPrincipal(devices []DeviceRecord, principal AuthorizationResult) []DeviceRecord {
 	if aiAgentIsAdmin(principal) {
-		return copyDevices(devices)
+		return copyVisibleSeedDevices(devices, principal)
 	}
 	var out []DeviceRecord
 	for _, device := range devices {
+		if deviceHiddenSeedForPrincipal(device, principal) {
+			continue
+		}
 		if device.OwnerPrincipalID == principal.PrincipalID {
 			out = append(out, copyDevice(device))
 		}
@@ -2068,7 +2071,7 @@ func filterDevicesForPrincipal(devices []DeviceRecord, principal AuthorizationRe
 
 func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal AuthorizationResult) []DeviceRecord {
 	if aiAgentIsAdmin(principal) {
-		return copyDevices(s.devices)
+		return copyVisibleSeedDevices(s.devices, principal)
 	}
 	visibleRuntimeIDs := map[string]struct{}{}
 	for _, agent := range s.agents {
@@ -2079,6 +2082,9 @@ func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal Authoriza
 	}
 	out := make([]DeviceRecord, 0, len(s.devices))
 	for _, device := range s.devices {
+		if deviceHiddenSeedForPrincipal(device, principal) {
+			continue
+		}
 		if device.OwnerPrincipalID == principal.PrincipalID {
 			out = append(out, copyDevice(device))
 			continue
@@ -2098,6 +2104,9 @@ func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal Authoriza
 }
 
 func (s *DevelopmentAIAgentClientStore) visibleDeviceRecordLocked(principal AuthorizationResult, device DeviceRecord) (DeviceRecord, bool) {
+	if deviceHiddenSeedForPrincipal(device, principal) {
+		return DeviceRecord{}, false
+	}
 	if aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID {
 		return copyDevice(device), true
 	}
@@ -2115,6 +2124,9 @@ func (s *DevelopmentAIAgentClientStore) visibleDeviceRecordLocked(principal Auth
 }
 
 func (s *DevelopmentAIAgentClientStore) deviceVisibleToPrincipalLocked(principal AuthorizationResult, device DeviceRecord) bool {
+	if deviceHiddenSeedForPrincipal(device, principal) {
+		return false
+	}
 	if aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID {
 		return true
 	}
@@ -2137,6 +2149,39 @@ func (s *DevelopmentAIAgentClientStore) daemonVisibleToPrincipalLocked(principal
 		return s.deviceVisibleToPrincipalLocked(principal, device)
 	}
 	return false
+}
+
+func copyVisibleSeedDevices(devices []DeviceRecord, principal AuthorizationResult) []DeviceRecord {
+	out := make([]DeviceRecord, 0, len(devices))
+	for _, device := range devices {
+		if deviceHiddenSeedForPrincipal(device, principal) {
+			continue
+		}
+		out = append(out, copyDevice(device))
+	}
+	return out
+}
+
+func deviceHiddenSeedForPrincipal(device DeviceRecord, principal AuthorizationResult) bool {
+	return isDevelopmentSeedDevice(device) && !isDevelopmentFixturePrincipal(principal)
+}
+
+func isDevelopmentSeedDevice(device DeviceRecord) bool {
+	switch strings.TrimSpace(device.DeviceID) {
+	case "device-dev-macbook", "device-shared-studio":
+		return true
+	default:
+		return false
+	}
+}
+
+func isDevelopmentFixturePrincipal(principal AuthorizationResult) bool {
+	switch strings.TrimSpace(principal.PrincipalID) {
+	case "user-1", "user-2", "admin-1", "admin-user":
+		return true
+	default:
+		return false
+	}
 }
 
 func (s *DevelopmentAIAgentClientStore) runtimeVisibleThroughAgentLocked(principal AuthorizationResult, runtimeID string) bool {

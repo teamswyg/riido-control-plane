@@ -1917,6 +1917,16 @@ assignment replacement behavior, or the v2 multi-agent
 polling behavior for completed-thread follow-up messages from no-op/read-model
 only to a queued assignment.
 
+### RIID-4917 — development seed device visibility boundary
+
+This slice keeps deterministic AI Agent client seed devices for static
+fixture/generated API tests, but prevents those seed devices from leaking into
+external-authorized development workspaces. Real development workspaces now see
+device/runtime rows from desktop enrollment plus daemon runtime sync only. This
+preserves the existing static fixture behavior while treating
+the development AI API host as a real persistent development environment rather
+than a mixed mock surface.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
