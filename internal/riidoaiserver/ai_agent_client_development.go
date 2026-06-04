@@ -21,6 +21,7 @@ type AIAgentClientStore interface {
 	GetAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string) (DeviceDaemonDetailResponse, error)
 	ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error)
 	ListAIAgentTaskAssignableAgents(ctx context.Context, principal AuthorizationResult, taskID string) (AgentClientListResponse, error)
+	ListWorkspaceAssignedAgentProfiles(ctx context.Context, principal AuthorizationResult) (AssignedAgentProfileMapResponse, error)
 	ListAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error)
 	AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
 	UnassignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error)
@@ -50,6 +51,13 @@ const (
 	defaultAIAgentClientWorkspaceID = "workspace-dev-riid"
 	aiAgentClientReplayEventLimit   = 200
 )
+
+var aiAgentOnboardingFixtureTmpColors = map[string]string{
+	"riido_pm":         "#C9A452",
+	"yeongsil_backend": "#6AA437",
+	"hongdo_frontend":  "#B87EAD",
+	"jiwon_research":   "#2F84DE",
+}
 
 type DevelopmentAIAgentClientStore struct {
 	mu                      sync.Mutex
@@ -316,6 +324,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				Name:                   "리도",
 				RoleLabel:              "PM Agent",
 				ProfileThumbnailURL:    "https://cdn.riido.io/dev/ai-agent-fixtures/riido-pm.png",
+				TmpColor:               aiAgentOnboardingFixtureTmpColors["riido_pm"],
 				Description:            "문제 정의부터 우선순위, 출시 계획까지 정리합니다.",
 				Instruction:            "기능 요청을 문제, 목표, 성공 기준으로 재정의하고 PRD, 우선순위, 로드맵, 출시 계획을 구조화합니다. 아이디어는 가설로 다루며 불확실한 내용은 [확인 필요]로 표시합니다.",
 				DefaultVisibility:      AgentVisibilityPrivate,
@@ -326,6 +335,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				Name:                   "영실",
 				RoleLabel:              "Backend Agent",
 				ProfileThumbnailURL:    "https://cdn.riido.io/dev/ai-agent-fixtures/yeongsil-backend.png",
+				TmpColor:               aiAgentOnboardingFixtureTmpColors["yeongsil_backend"],
 				Description:            "서버 구조를 설계하고, API와 데이터 흐름을 안정적으로 구현합니다.",
 				Instruction:            "요구사항을 API, 데이터 흐름, 저장 경계, 실패 처리 기준으로 나누고 안정적인 서버 구현 계획을 제안합니다.",
 				DefaultVisibility:      AgentVisibilityPrivate,
@@ -336,6 +346,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				Name:                   "홍도",
 				RoleLabel:              "Frontend Agent",
 				ProfileThumbnailURL:    "https://cdn.riido.io/dev/ai-agent-fixtures/hongdo-frontend.png",
+				TmpColor:               aiAgentOnboardingFixtureTmpColors["hongdo_frontend"],
 				Description:            "사용자가 보는 화면을 구현하고, 성능과 접근성을 개선합니다.",
 				Instruction:            "화면 구조, 상태, 접근성, 성능을 함께 검토하고 사용자에게 자연스러운 프론트엔드 구현을 제안합니다.",
 				DefaultVisibility:      AgentVisibilityPrivate,
@@ -346,6 +357,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				Name:                   "지원",
 				RoleLabel:              "Research Agent",
 				ProfileThumbnailURL:    "https://cdn.riido.io/dev/ai-agent-fixtures/jiwon-research.png",
+				TmpColor:               aiAgentOnboardingFixtureTmpColors["jiwon_research"],
 				Description:            "시장과 경쟁사를 조사하고, 의사결정에 필요한 인사이트를 정리합니다.",
 				Instruction:            "시장, 경쟁사, 사용자 맥락을 조사하고 의사결정에 필요한 근거와 확인이 필요한 가정을 분리해 정리합니다.",
 				DefaultVisibility:      AgentVisibilityPrivate,
@@ -413,6 +425,7 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentOnboardingFixtures(ctx contex
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.ensureOnboardingFixtureColorsLocked()
 	return AgentOnboardingFixtureListResponse{
 		SchemaVersion: SchemaVersion,
 		Fixtures:      copyAgentOnboardingFixtures(s.fixtures),
@@ -428,12 +441,13 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentFromOnboardingFixture(ctx c
 		return AgentClientRecordResponse{}, errors.New("fixture_id is required")
 	}
 	s.mu.Lock()
-	_, ok := s.findOnboardingFixtureLocked(fixtureID)
+	s.ensureOnboardingFixtureColorsLocked()
+	fixture, ok := s.findOnboardingFixtureLocked(fixtureID)
 	s.mu.Unlock()
 	if !ok {
 		return AgentClientRecordResponse{}, ErrAIAgentNotFound
 	}
-	return s.CreateAIAgent(ctx, principal, req)
+	return s.createAIAgent(ctx, principal, req, fixture.TmpColor)
 }
 
 func (s *DevelopmentAIAgentClientStore) ListAIAgentDevices(ctx context.Context, principal AuthorizationResult) (DeviceRuntimeListResponse, error) {
@@ -551,6 +565,47 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskAssignableAgents(ctx cont
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return AgentClientListResponse{SchemaVersion: SchemaVersion, Agents: s.visibleAgents(principal)}, nil
+}
+
+func (s *DevelopmentAIAgentClientStore) ListWorkspaceAssignedAgentProfiles(ctx context.Context, principal AuthorizationResult) (AssignedAgentProfileMapResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return AssignedAgentProfileMapResponse{}, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	profiles := make(map[string]AssignedAgentProfile)
+	taskIDs := make([]string, 0, len(s.taskThreads))
+	for taskID := range s.taskThreads {
+		taskIDs = append(taskIDs, taskID)
+	}
+	sort.Strings(taskIDs)
+	for _, taskID := range taskIDs {
+		threads := s.taskThreads[taskID]
+		for i := len(threads) - 1; i >= 0; i-- {
+			thread := threads[i]
+			if !taskThreadHasActiveStream(thread) {
+				continue
+			}
+			agent, ok := s.agents[thread.AgentID]
+			if !ok || !s.aiAgentVisibleTo(principal, agent) {
+				continue
+			}
+			componentID := strings.TrimSpace(thread.TaskID)
+			if componentID == "" {
+				componentID = strings.TrimSpace(taskID)
+			}
+			if componentID == "" {
+				continue
+			}
+			profiles[componentID] = assignedAgentProfileFromAgent(agent)
+			break
+		}
+	}
+	return AssignedAgentProfileMapResponse{
+		SchemaVersion:         SchemaVersion,
+		WorkspaceID:           s.workspaceScope(principal),
+		AssignedAgentProfiles: profiles,
+	}, nil
 }
 
 func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error) {
@@ -811,6 +866,10 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 }
 
 func (s *DevelopmentAIAgentClientStore) CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
+	return s.createAIAgent(ctx, principal, req, "")
+}
+
+func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest, tmpColor string) (AgentClientRecordResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentClientRecordResponse{}, err
 	}
@@ -863,6 +922,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgent(ctx context.Context, princ
 		IsOwnedByViewer:     true,
 		Name:                name,
 		ProfileThumbnailURL: thumbnailURL,
+		TmpColor:            strings.TrimSpace(tmpColor),
 		Description:         description,
 		Instruction:         instruction,
 		Visibility:          req.Visibility,
@@ -1242,6 +1302,17 @@ func (s *DevelopmentAIAgentClientStore) findOnboardingFixtureLocked(fixtureID st
 	return AgentOnboardingFixture{}, false
 }
 
+func (s *DevelopmentAIAgentClientStore) ensureOnboardingFixtureColorsLocked() {
+	for i := range s.fixtures {
+		if strings.TrimSpace(s.fixtures[i].TmpColor) != "" {
+			continue
+		}
+		if color := aiAgentOnboardingFixtureTmpColors[s.fixtures[i].FixtureID]; color != "" {
+			s.fixtures[i].TmpColor = color
+		}
+	}
+}
+
 func (s *DevelopmentAIAgentClientStore) visibleAgents(principal AuthorizationResult) []AgentClientRecord {
 	agents := make([]AgentClientRecord, 0, len(s.agents))
 	for _, agent := range s.agents {
@@ -1330,6 +1401,13 @@ func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionR
 		AssignmentState: thread.AssignmentState,
 		CommentKind:     thread.CommentKind,
 		Message:         thread.Message,
+	}
+}
+
+func assignedAgentProfileFromAgent(agent AgentClientRecord) AssignedAgentProfile {
+	return AssignedAgentProfile{
+		AvatarURL: strings.TrimSpace(agent.ProfileThumbnailURL),
+		TmpColor:  strings.TrimSpace(agent.TmpColor),
 	}
 }
 

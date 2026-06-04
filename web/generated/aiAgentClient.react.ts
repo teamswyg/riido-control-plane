@@ -472,6 +472,20 @@ export interface CreateAIAgentFromOnboardingFixtureV2ReactEndpoint extends core.
 }
 
 /**
+ * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.assignedAgentProfiles`
+ * 검색용 generated 경로: `aiAgent.tasks.assignedAgentProfiles`
+ * 접근 예시: `riido.v2.aiAgent.tasks.assignedAgentProfiles`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface ListWorkspaceAssignedAgentProfilesV2ReactEndpoint extends core.ListWorkspaceAssignedAgentProfilesV2Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.ListWorkspaceAssignedAgentProfilesV2PathParams, options?: core.RiidoQueryOptions<core.AssignedAgentProfileMapResponse>) => UseQueryResult<core.AssignedAgentProfileMapResponse, Error>;
+}
+
+/**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.assignableAgents`
  * 검색용 generated 경로: `aiAgent.tasks.assignableAgents`
@@ -866,7 +880,7 @@ export interface RiidoV2AIAgentAgentsReactNamespace {
    * 계약 generated path: `v2.aiAgent.agents.delete`
    * 검색용 generated 경로: `aiAgent.agents.delete`
    * 접근 예시: `riido.v2.aiAgent.agents.delete`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.devices.runtimes`, `v2.aiAgent.agents.editability`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.devices.runtimes`, `v2.aiAgent.agents.editability`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly delete: DeleteAIAgentV2ReactEndpoint;
   /**
@@ -962,7 +976,7 @@ export interface RiidoV2AIAgentTasksReactNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.assign`
    * 검색용 generated 경로: `aiAgent.tasks.assign`
    * 접근 예시: `riido.v2.aiAgent.tasks.assign`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly assign: AssignAIAgentTaskV2ReactEndpoint;
   /**
@@ -973,6 +987,14 @@ export interface RiidoV2AIAgentTasksReactNamespace {
    * cache tag: `v2.aiAgent.tasks.assignableAgents`
    */
   readonly assignableAgents: ListAIAgentTaskAssignableAgentsV2ReactEndpoint;
+  /**
+   * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.assignedAgentProfiles`
+   * 검색용 generated 경로: `aiAgent.tasks.assignedAgentProfiles`
+   * 접근 예시: `riido.v2.aiAgent.tasks.assignedAgentProfiles`
+   * cache tag: `v2.aiAgent.tasks.assignedAgentProfiles`
+   */
+  readonly assignedAgentProfiles: ListWorkspaceAssignedAgentProfilesV2ReactEndpoint;
   /**
    * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.stop`
@@ -986,7 +1008,7 @@ export interface RiidoV2AIAgentTasksReactNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.submitComment`
    * 검색용 generated 경로: `aiAgent.tasks.submitComment`
    * 접근 예시: `riido.v2.aiAgent.tasks.submitComment`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly submitComment: SubmitAIAgentTaskCommentV2ReactEndpoint;
   /**
@@ -1006,7 +1028,7 @@ export interface RiidoV2AIAgentTasksReactNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.unassign`
    * 검색용 generated 경로: `aiAgent.tasks.unassign`
    * 접근 예시: `riido.v2.aiAgent.tasks.unassign`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly unassign: UnassignAIAgentTaskV2ReactEndpoint;
 }
@@ -1246,6 +1268,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
             assignableAgents: {
               ...coreClient.v2.aiAgent.tasks.assignableAgents,
               useQuery: (params: core.ListAIAgentTaskAssignableAgentsV2PathParams, options?: core.RiidoQueryOptions<core.AgentClientListResponseV2>) => useQuery<core.AgentClientListResponseV2, Error>(coreClient.v2.aiAgent.tasks.assignableAgents.query(params, options)),
+            },
+            assignedAgentProfiles: {
+              ...coreClient.v2.aiAgent.tasks.assignedAgentProfiles,
+              useQuery: (params: core.ListWorkspaceAssignedAgentProfilesV2PathParams, options?: core.RiidoQueryOptions<core.AssignedAgentProfileMapResponse>) => useQuery<core.AssignedAgentProfileMapResponse, Error>(coreClient.v2.aiAgent.tasks.assignedAgentProfiles.query(params, options)),
             },
             stop: {
               ...coreClient.v2.aiAgent.tasks.stop,

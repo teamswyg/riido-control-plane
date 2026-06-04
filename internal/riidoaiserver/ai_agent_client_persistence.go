@@ -322,6 +322,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshot(snapshot AIAgentClientSn
 	s.nextDaemonCommand = snapshot.NextDaemonCommand
 	s.agents = agents
 	s.fixtures = copyAgentOnboardingFixtures(snapshot.Fixtures)
+	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
 	s.events = events
 	s.subscribers = map[int]aiAgentClientSubscriber{}

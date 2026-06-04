@@ -1833,6 +1833,27 @@ This slice does not configure repository secrets, open or update a
 `riido-client` PR, edit `teamswyg/riido-client`, or change AI Agent endpoint
 shape.
 
+### RIID-4902 — Workspace assigned-agent profile map execution
+
+This slice executes the contracts-owned assigned-agent profile read model in the
+control plane.
+
+This slice does:
+
+- mirror the updated AI Agent client contract fixture from `riido-contracts`
+- expose `GET /v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles`
+- generate `riido.v2.aiAgent.tasks.assignedAgentProfiles` and searchable
+  generated comments
+- preserve onboarding fixture `tmp_color` values on fixture-created agents
+- return active queued/running/stopping assignments as a component_id keyed
+  `assigned_agent_profiles` map
+- extend the local generator so typed OpenAPI `additionalProperties.$ref` becomes
+  `Record<string, AssignedAgentProfile>` instead of `Record<string, unknown>`
+
+This slice does not add a v1 compatibility route, change participant dropdown
+selection, change task-thread history, change daemon polling, or edit
+`teamswyg/riido-client`.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

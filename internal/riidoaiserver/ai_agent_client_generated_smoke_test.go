@@ -130,6 +130,7 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodDelete, base+"/agents/"+created.Agent.AgentID, token, "", http.StatusOK)
 
 	assignmentTaskID := "task-v2-generated-smoke"
+	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/tasks/assigned-agent-profiles", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/tasks/"+assignmentTaskID+"/assignable-agents", token, "", http.StatusOK)
 	assignBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+assignmentTaskID+"/assignment", token, `{"agent_id":"agent-public-openclaw"}`, http.StatusAccepted)
 	var assigned AIAgentTaskActionResponse
@@ -143,6 +144,7 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	if threads.ActiveStream == nil || threads.ActiveStream.Href != base+"/events" {
 		t.Fatalf("v2 active stream = %+v", threads.ActiveStream)
 	}
+	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/tasks/assigned-agent-profiles", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+assignmentTaskID+"/threads/"+assigned.ThreadID+"/messages", token, `{"body":"v2 next instruction","source_message_id":"smoke-v2-message"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodDelete, base+"/tasks/"+assignmentTaskID+"/assignment", token, `{"agent_id":"agent-public-openclaw","reason":"smoke unassign"}`, http.StatusAccepted)
 

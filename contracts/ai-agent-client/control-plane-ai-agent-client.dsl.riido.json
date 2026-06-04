@@ -37,6 +37,7 @@
         {"path": ["aiAgent", "onboarding"], "description": "선택된 workspace에서 빠른 agent 생성을 돕는 onboarding fixture namespace입니다."},
         {"path": ["aiAgent", "onboarding", "fixtures"], "description": "서버 제공 fixture 목록과 fixture 기반 agent 생성 진입점입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다."},
         {"path": ["aiAgent", "tasks"], "description": "선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다."},
+        {"path": ["aiAgent", "tasks", "assignedAgentProfiles"], "description": "workspace의 현재 AI Agent assignment를 component_id key 해시맵으로 읽어 task/card 목록에서 agent avatar fallback을 표시하는 query namespace입니다."},
         {"path": ["aiAgent", "tasks", "threadMessages"], "description": "선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다."}
       ]
     }
@@ -116,6 +117,7 @@
       "description": "AI Agent assignment, AI-Agent-directed task-thread messages, task-thread reads, and task stop actions are generated only for Riido task and subtask surfaces.",
       "rules": [
         "target: task_id path parameters represent a Riido task or subtask id",
+        "read_model: v2 assignedAgentProfiles returns current active task/subtask assignment presentation keyed by the actual component_id string",
         "assignment_context: generated assignment requests carry agent_id only; task_id comes from the URL path, and v2 workspace_id comes from the URL path",
         "assignment_context: team_id, teamId, OpenAPI task-context paths, Open API keys, and X-Workspace-Api-Key are outside generated AI Agent assignment",
         "assignment_context: control-plane may resolve a task's team location internally from task_id for private task-context reads, but that value must not become an agent field, generated request field, daemon input, deployment prerequisite, or smoke acceptance criterion",
@@ -208,6 +210,20 @@
       ]
     },
     {
+      "policy_id": "workspace_assigned_agent_profile_map.v1",
+      "kind": "read_model",
+      "description": "Workspace task/card 목록은 workspace_id 하나로 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다.",
+      "rules": [
+        "server: include only currently active queued/running/stopping AI Agent assignments in the workspace map",
+        "server: omit completed, stopped, failed, unassigned, and historical-only task threads from the map",
+        "server: use the actual Riido component_id/task_id string as the map key without renaming it to a literal component_id field",
+        "server: because a task/subtask can have only one active AI Agent assignment, each component_id maps to one AssignedAgentProfile value",
+        "profile: avatar_url is copied from the assigned agent's profile_thumbnail_url when present",
+        "profile: tmp_color is the fixture-provided avatar fallback color copied into fixture-created agents; direct-created agents may omit it",
+        "client: use this query for list/card avatar hints, not for participant dropdown candidate selection or task-thread history"
+      ]
+    },
+    {
       "policy_id": "task_thread_next_instruction.v1",
       "kind": "command",
       "description": "Figma가 댓글 상호작용으로 표현한 입력은 정식으로 task-thread message이며, 사용자가 해당 thread에 다음 작업 지시를 남기는 command입니다.",
@@ -227,6 +243,7 @@
       "description": "Agent profile presentation fields and server-authored creation/update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
       "rules": [
         "profile_thumbnail_url: optional HTTPS image URL string; binary upload is outside this contract",
+        "tmp_color: optional fixture-provided avatar fallback color preserved on fixture-created agents for list/card presentation; clients still own final rendering precedence",
         "description: optional client-authored one-line summary with a maximum of 160 characters; empty string is allowed; client UI owns truncation and wrapping",
         "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
         "created_at: server-authored RFC3339 date-time stamped when the agent is created; used by clients for list creation dates and absolute-time tooltips",
@@ -243,9 +260,10 @@
       "description": "AI Agent onboarding fixtures are product-provided initial configuration records for fast agent creation. They are not backend-managed template entities, and selecting one creates a normal agent.",
       "rules": [
         "fixture_query: return a stable ordered fixture catalog through onboarding.fixtures so frontend clients do not hard-code fixture names, descriptions, or instructions",
-        "fixture: carry name, role_label, description, profile_thumbnail_url, instruction, default_visibility, and recommended_runtime_kind as copyable/default agent configuration values",
+        "fixture: carry name, role_label, description, profile_thumbnail_url, tmp_color, instruction, default_visibility, and recommended_runtime_kind as copyable/default agent configuration values",
         "model: AgentOnboardingFixture does not own model_id; model defaults are derived from the selected runtime model catalog until a separate model recommendation policy is promoted",
         "figma_138_7389: current onboarding fixture rows are 리도, 영실, 홍도, and 지원 in fixture response order",
+        "figma_fixture_colors: onboarding avatar fallback colors are 리도 #C9A452, 영실 #6AA437, 홍도 #B87EAD, 지원 #2F84DE",
         "fixture_create: selecting 리도/영실/홍도/지원 calls createAIAgentFromOnboardingFixture with fixture_id plus a complete CreateAgentConfigurationRequest body and creates a normal owned agent",
         "fixture_identity: fixture-created agents keep the submitted display name exactly, may share names with other agents, use agent_id as durable identity and tie-breaker, and remain editable/deletable through normal agent RBAC and editability rules",
         "no_template_entity: the control plane must not expose template create/update/delete APIs or persist AgentTemplate records for this onboarding flow",
@@ -516,6 +534,7 @@
         {"name": "is_owned_by_viewer", "type": "boolean"},
         {"name": "name", "type": "string"},
         {"name": "profile_thumbnail_url", "type": "string", "format": "uri"},
+        {"name": "tmp_color", "type": "string", "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."},
         {"name": "description", "type": "string", "max_length": 160},
         {"name": "instruction", "type": "string", "max_length": 1000},
         {"name": "visibility", "ref": "AgentVisibility"},
@@ -542,6 +561,7 @@
         {"name": "is_owned_by_viewer", "type": "boolean"},
         {"name": "name", "type": "string"},
         {"name": "profile_thumbnail_url", "type": "string", "format": "uri"},
+        {"name": "tmp_color", "type": "string", "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."},
         {"name": "description", "type": "string", "max_length": 160},
         {"name": "instruction", "type": "string", "max_length": 1000},
         {"name": "visibility", "ref": "AgentVisibility"},
@@ -577,6 +597,26 @@
       ]
     },
     {
+      "name": "AssignedAgentProfile",
+      "description": "workspace task/card 목록에서 현재 배정된 AI Agent를 표시하기 위한 최소 profile 값입니다.",
+      "type": "object",
+      "properties": [
+        {"name": "avatar_url", "type": "string", "format": "uri", "description": "agent profile_thumbnail_url에서 파생된 표시용 이미지 URL입니다."},
+        {"name": "tmp_color", "type": "string", "description": "fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452."}
+      ]
+    },
+    {
+      "name": "AssignedAgentProfileMapResponse",
+      "description": "workspace 안에서 현재 AI Agent가 배정된 task/subtask component_id를 key로 하는 profile 표시용 해시맵 응답입니다.",
+      "type": "object",
+      "required": ["schema_version", "workspace_id", "assigned_agent_profiles"],
+      "properties": [
+        {"name": "schema_version", "type": "string"},
+        {"name": "workspace_id", "type": "string"},
+        {"name": "assigned_agent_profiles", "type": "object", "description": "실제 Riido component_id/task_id 문자열을 key로 사용합니다. 예: {\"23958923859\":{\"avatar_url\":\"https://...\",\"tmp_color\":\"#C9A452\"}}", "additional_properties_ref": "AssignedAgentProfile"}
+      ]
+    },
+    {
       "name": "AgentClientRecordResponse",
       "description": "단일 agent 변경 후 최신 agent record를 반환하는 응답입니다.",
       "type": "object",
@@ -606,6 +646,7 @@
         {"name": "name", "type": "string", "description": "에이전트 생성 폼에 복사할 기본 이름입니다."},
         {"name": "role_label", "type": "string", "description": "fixture 목록에 보조로 표시할 역할 라벨입니다."},
         {"name": "profile_thumbnail_url", "type": "string", "format": "uri", "description": "에이전트 프로필 이미지로 복사할 HTTPS 썸네일 URL입니다."},
+        {"name": "tmp_color", "type": "string", "description": "피그마 온보딩 avatar swatch에서 온 fixture fallback color입니다. 생성된 agent에는 표시 보조값으로 복사될 수 있습니다."},
         {"name": "description", "type": "string", "max_length": 160, "description": "에이전트 설명 기본값입니다. 최대 160자입니다."},
         {"name": "instruction", "type": "string", "max_length": 1000, "description": "에이전트 지침 기본값입니다. 최대 1000자입니다."},
         {"name": "default_visibility", "ref": "AgentVisibility", "description": "fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. 기본값은 안전하게 private 값을 사용합니다."},
@@ -1869,6 +1910,50 @@
       }
     },
     {
+      "operation_id": "listWorkspaceAssignedAgentProfilesV2",
+      "kind": "query",
+      "summary": "workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "assignedAgentProfiles"
+        ],
+        "cache_tag": "v2.aiAgent.tasks.assignedAgentProfiles"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read"
+        ]
+      },
+      "rbac_policy": "workspace_assigned_agent_profile_map.v1",
+      "response": {
+        "status": 200,
+        "ref": "AssignedAgentProfileMapResponse"
+      },
+      "scenarios": [
+        {
+          "name": "component id keyed assigned profile map",
+          "given": "a workspace task list contains several component ids and only some currently have queued/running/stopping AI Agent assignments",
+          "when": "the client calls riido.v2.aiAgent.tasks.assignedAgentProfiles with workspace_id",
+          "then": "assigned_agent_profiles is keyed by the exact component_id/task_id string and each value contains avatar_url and/or tmp_color for list/card presentation"
+        },
+        {
+          "name": "historical threads are omitted",
+          "given": "a task has completed, stopped, failed, unassigned, or historical-only AI Agent threads",
+          "when": "the client reads the workspace assigned profile map",
+          "then": "that component_id is omitted so the task/card list does not show an active assigned-agent avatar from history"
+        }
+      ]
+    },
+    {
       "operation_id": "listAIAgentTaskAssignableAgentsV2",
       "kind": "query",
       "summary": "task participant dropdown에서 할당 가능한 agent 목록을 조회합니다 (v2 workspace-scoped)",
@@ -1917,7 +2002,8 @@
         "invalidates": [
           "v2.aiAgent.bootstrap",
           "v2.aiAgent.tasks.assignableAgents",
-          "v2.aiAgent.tasks.threads"
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles"
         ]
       },
       "auth": {
@@ -1965,7 +2051,8 @@
         "invalidates": [
           "v2.aiAgent.bootstrap",
           "v2.aiAgent.tasks.assignableAgents",
-          "v2.aiAgent.tasks.threads"
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles"
         ]
       },
       "auth": {
@@ -2036,7 +2123,8 @@
         "invalidates": [
           "v2.aiAgent.bootstrap",
           "v2.aiAgent.tasks.assignableAgents",
-          "v2.aiAgent.tasks.threads"
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles"
         ]
       },
       "auth": {
@@ -2278,7 +2366,8 @@
           "v2.aiAgent.devices.runtimes",
           "v2.aiAgent.agents.editability",
           "v2.aiAgent.tasks.assignableAgents",
-          "v2.aiAgent.tasks.threads"
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles"
         ]
       },
       "auth": {

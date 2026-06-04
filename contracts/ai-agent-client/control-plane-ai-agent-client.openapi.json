@@ -160,6 +160,14 @@
           "path": [
             "aiAgent",
             "tasks",
+            "assignedAgentProfiles"
+          ],
+          "description": "workspace의 현재 AI Agent assignment를 component_id key 해시맵으로 읽어 task/card 목록에서 agent avatar fallback을 표시하는 query namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
             "threadMessages"
           ],
           "description": "선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다."
@@ -1747,7 +1755,8 @@
             "v2.aiAgent.devices.runtimes",
             "v2.aiAgent.agents.editability",
             "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads"
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         }
       },
@@ -2557,6 +2566,71 @@
         ]
       }
     },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles": {
+      "get": {
+        "operationId": "listWorkspaceAssignedAgentProfilesV2",
+        "summary": "workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignedAgentProfileMapResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read"
+        ],
+        "x-riido-rbac-policy": "workspace_assigned_agent_profile_map.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "assignedAgentProfiles"
+          ],
+          "generated_path": "v2.aiAgent.tasks.assignedAgentProfiles",
+          "cache_tag": "v2.aiAgent.tasks.assignedAgentProfiles"
+        },
+        "x-riido-scenarios": [
+          "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
+          "listWorkspaceAssignedAgentProfilesV2.historical-threads-are-omitted"
+        ]
+      }
+    },
     "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignable-agents": {
       "get": {
         "operationId": "listAIAgentTaskAssignableAgentsV2",
@@ -2707,7 +2781,8 @@
           "invalidates": [
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads"
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         }
       },
@@ -2790,7 +2865,8 @@
           "invalidates": [
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads"
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         },
         "x-riido-scenarios": [
@@ -2877,7 +2953,8 @@
           "invalidates": [
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads"
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         }
       }
@@ -3404,6 +3481,10 @@
           "runtime_kind": {
             "$ref": "#/components/schemas/RuntimeKind"
           },
+          "tmp_color": {
+            "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다.",
+            "type": "string"
+          },
           "updated_at": {
             "format": "date-time",
             "type": "string"
@@ -3510,6 +3591,10 @@
           },
           "runtime_kind": {
             "$ref": "#/components/schemas/RuntimeKind"
+          },
+          "tmp_color": {
+            "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다.",
+            "type": "string"
           },
           "updated_at": {
             "format": "date-time",
@@ -3642,6 +3727,10 @@
           },
           "role_label": {
             "description": "fixture 목록에 보조로 표시할 역할 라벨입니다.",
+            "type": "string"
+          },
+          "tmp_color": {
+            "description": "피그마 온보딩 avatar swatch에서 온 fixture fallback color입니다. 생성된 agent에는 표시 보조값으로 복사될 수 있습니다.",
             "type": "string"
           }
         },
@@ -3840,6 +3929,45 @@
         },
         "required": [
           "agent_id"
+        ],
+        "type": "object"
+      },
+      "AssignedAgentProfile": {
+        "description": "workspace task/card 목록에서 현재 배정된 AI Agent를 표시하기 위한 최소 profile 값입니다.",
+        "properties": {
+          "avatar_url": {
+            "description": "agent profile_thumbnail_url에서 파생된 표시용 이미지 URL입니다.",
+            "format": "uri",
+            "type": "string"
+          },
+          "tmp_color": {
+            "description": "fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AssignedAgentProfileMapResponse": {
+        "description": "workspace 안에서 현재 AI Agent가 배정된 task/subtask component_id를 key로 하는 profile 표시용 해시맵 응답입니다.",
+        "properties": {
+          "assigned_agent_profiles": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AssignedAgentProfile"
+            },
+            "description": "실제 Riido component_id/task_id 문자열을 key로 사용합니다. 예: {\"23958923859\":{\"avatar_url\":\"https://...\",\"tmp_color\":\"#C9A452\"}}",
+            "type": "object"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "workspace_id",
+          "assigned_agent_profiles"
         ],
         "type": "object"
       },
