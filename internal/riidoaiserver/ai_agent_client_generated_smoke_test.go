@@ -24,29 +24,57 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV1(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/onboarding/fixtures", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/devices", token, "", http.StatusOK)
 
+	createThumbnailURL := "https://cdn.riido.io/dev/ai-agents/v1-generated-smoke.png"
+	createDescription := "v1 generated endpoint smoke"
+	createInstruction := "v1 generated endpoint smoke instruction"
 	createBody := aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{
-		Name:        "v1 smoke direct agent",
-		Description: stringPtr("v1 generated endpoint smoke"),
-		Instruction: stringPtr("v1 generated endpoint smoke instruction"),
-		Visibility:  AgentVisibilityPrivate,
-		RuntimeID:   "runtime-cursor-dev",
-		ModelID:     stringPtr("cursor-fast"),
+		Name:                "v1 smoke direct agent",
+		ProfileThumbnailURL: &createThumbnailURL,
+		Description:         &createDescription,
+		Instruction:         &createInstruction,
+		Visibility:          AgentVisibilityPrivate,
+		RuntimeID:           "runtime-cursor-dev",
+		ModelID:             stringPtr("cursor-fast"),
 	})
 	createdBytes := aiAgentSmokeRequest(t, server, http.MethodPost, "/v1/client/ai-agent/agents", token, createBody, http.StatusCreated)
 	var created AgentClientRecordResponse
 	aiAgentSmokeDecode(t, createdBytes, &created)
-	if created.Agent.AgentID == "" {
-		t.Fatalf("created v1 agent id is empty: %+v", created.Agent)
+	if created.Agent.AgentID == "" ||
+		created.Agent.ProfileThumbnailURL != createThumbnailURL ||
+		created.Agent.Description != createDescription ||
+		created.Agent.Instruction != createInstruction ||
+		created.Agent.RuntimeID != "runtime-cursor-dev" ||
+		created.Agent.ModelID != "cursor-fast" ||
+		created.Agent.ModelLabel != "Cursor Fast" ||
+		created.Agent.Visibility != AgentVisibilityPrivate {
+		t.Fatalf("created v1 agent = %+v", created.Agent)
 	}
 
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/agents/"+created.Agent.AgentID+"/editability", token, "", http.StatusOK)
+	patchThumbnailURL := "https://cdn.riido.io/dev/ai-agents/v1-generated-smoke-patched.png"
+	patchDescription := "v1 generated endpoint smoke patched"
+	patchInstruction := "v1 generated endpoint smoke patched instruction"
 	patchBody := aiAgentSmokeJSON(t, UpdateAgentConfigurationRequest{
-		Name:       "v1 smoke patched agent",
-		Visibility: AgentVisibilityPublic,
-		RuntimeID:  "runtime-cursor-dev",
-		ModelID:    stringPtr("cursor-auto"),
+		Name:                "v1 smoke patched agent",
+		ProfileThumbnailURL: &patchThumbnailURL,
+		Description:         &patchDescription,
+		Instruction:         &patchInstruction,
+		Visibility:          AgentVisibilityPublic,
+		RuntimeID:           "runtime-cursor-dev",
+		ModelID:             stringPtr("cursor-auto"),
 	})
-	aiAgentSmokeRequest(t, server, http.MethodPatch, "/v1/client/ai-agent/agents/"+created.Agent.AgentID, token, patchBody, http.StatusOK)
+	patchedBytes := aiAgentSmokeRequest(t, server, http.MethodPatch, "/v1/client/ai-agent/agents/"+created.Agent.AgentID, token, patchBody, http.StatusOK)
+	var patched AgentClientRecordResponse
+	aiAgentSmokeDecode(t, patchedBytes, &patched)
+	if patched.Agent.Name != "v1 smoke patched agent" ||
+		patched.Agent.ProfileThumbnailURL != patchThumbnailURL ||
+		patched.Agent.Description != patchDescription ||
+		patched.Agent.Instruction != patchInstruction ||
+		patched.Agent.RuntimeID != "runtime-cursor-dev" ||
+		patched.Agent.ModelID != "cursor-auto" ||
+		patched.Agent.Visibility != AgentVisibilityPublic {
+		t.Fatalf("patched v1 agent = %+v", patched.Agent)
+	}
 	aiAgentSmokeRequest(t, server, http.MethodDelete, "/v1/client/ai-agent/agents/"+created.Agent.AgentID, token, "", http.StatusOK)
 
 	fixtureCreateBody := aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{
@@ -104,29 +132,59 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	})
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/onboarding/fixtures/hongdo_frontend/agents", token, fixtureCreateBody, http.StatusCreated)
 
+	createThumbnailURL := "https://cdn.riido.io/dev/ai-agents/v2-generated-smoke.png"
+	createDescription := "v2 generated endpoint smoke"
+	createInstruction := "v2 generated endpoint smoke instruction"
 	createBody := aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{
-		Name:        "v2 smoke direct agent",
-		Description: stringPtr("v2 generated endpoint smoke"),
-		Instruction: stringPtr("v2 generated endpoint smoke instruction"),
-		Visibility:  AgentVisibilityPrivate,
-		RuntimeID:   "runtime-cursor-dev",
-		ModelID:     stringPtr("cursor-fast"),
+		Name:                "v2 smoke direct agent",
+		ProfileThumbnailURL: &createThumbnailURL,
+		Description:         &createDescription,
+		Instruction:         &createInstruction,
+		Visibility:          AgentVisibilityPrivate,
+		RuntimeID:           "runtime-cursor-dev",
+		ModelID:             stringPtr("cursor-fast"),
 	})
 	createdBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/agents", token, createBody, http.StatusCreated)
 	var created AgentClientRecordResponse
 	aiAgentSmokeDecode(t, createdBytes, &created)
-	if created.Agent.AgentID == "" || created.Agent.WorkspaceID != "workspace-dev-riid" {
+	if created.Agent.AgentID == "" ||
+		created.Agent.WorkspaceID != "workspace-dev-riid" ||
+		created.Agent.ProfileThumbnailURL != createThumbnailURL ||
+		created.Agent.Description != createDescription ||
+		created.Agent.Instruction != createInstruction ||
+		created.Agent.RuntimeID != "runtime-cursor-dev" ||
+		created.Agent.ModelID != "cursor-fast" ||
+		created.Agent.ModelLabel != "Cursor Fast" ||
+		created.Agent.Visibility != AgentVisibilityPrivate {
 		t.Fatalf("created v2 agent = %+v", created.Agent)
 	}
 
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/agents/"+created.Agent.AgentID+"/editability", token, "", http.StatusOK)
+	patchThumbnailURL := "https://cdn.riido.io/dev/ai-agents/v2-generated-smoke-patched.png"
+	patchDescription := "v2 generated endpoint smoke patched"
+	patchInstruction := "v2 generated endpoint smoke patched instruction"
 	patchBody := aiAgentSmokeJSON(t, UpdateAgentConfigurationRequest{
-		Name:       "v2 smoke patched agent",
-		Visibility: AgentVisibilityPublic,
-		RuntimeID:  "runtime-cursor-dev",
-		ModelID:    stringPtr("cursor-auto"),
+		Name:                "v2 smoke patched agent",
+		ProfileThumbnailURL: &patchThumbnailURL,
+		Description:         &patchDescription,
+		Instruction:         &patchInstruction,
+		Visibility:          AgentVisibilityPublic,
+		RuntimeID:           "runtime-cursor-dev",
+		ModelID:             stringPtr("cursor-auto"),
 	})
-	aiAgentSmokeRequest(t, server, http.MethodPatch, base+"/agents/"+created.Agent.AgentID, token, patchBody, http.StatusOK)
+	patchedBytes := aiAgentSmokeRequest(t, server, http.MethodPatch, base+"/agents/"+created.Agent.AgentID, token, patchBody, http.StatusOK)
+	var patched AgentClientRecordResponse
+	aiAgentSmokeDecode(t, patchedBytes, &patched)
+	if patched.Agent.Name != "v2 smoke patched agent" ||
+		patched.Agent.WorkspaceID != "workspace-dev-riid" ||
+		patched.Agent.ProfileThumbnailURL != patchThumbnailURL ||
+		patched.Agent.Description != patchDescription ||
+		patched.Agent.Instruction != patchInstruction ||
+		patched.Agent.RuntimeID != "runtime-cursor-dev" ||
+		patched.Agent.ModelID != "cursor-auto" ||
+		patched.Agent.Visibility != AgentVisibilityPublic {
+		t.Fatalf("patched v2 agent = %+v", patched.Agent)
+	}
 	aiAgentSmokeRequest(t, server, http.MethodDelete, base+"/agents/"+created.Agent.AgentID, token, "", http.StatusOK)
 
 	assignmentTaskID := "task-v2-generated-smoke"
