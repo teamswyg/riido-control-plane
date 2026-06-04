@@ -693,6 +693,71 @@ func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principa
 	})
 }
 
+func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, bearerToken, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AssignRequest, error) {
+	taskID = strings.TrimSpace(taskID)
+	threadID = strings.TrimSpace(threadID)
+	req.Body = strings.TrimSpace(req.Body)
+	if taskID == "" {
+		return AssignRequest{}, errors.New("task_id is required")
+	}
+	if threadID == "" {
+		return AssignRequest{}, errors.New("thread_id is required")
+	}
+	if req.Body == "" {
+		return AssignRequest{}, errors.New("body is required")
+	}
+	threads, err := s.aiAgent.ListAIAgentTaskThreads(ctx, principal, taskID)
+	if err != nil {
+		return AssignRequest{}, err
+	}
+	if threads.ActiveStream != nil && threads.ActiveStream.ThreadID != threadID {
+		return AssignRequest{}, ErrAIAgentTaskThreadConflict
+	}
+	var selectedThread AIAgentTaskThreadRecord
+	for _, thread := range threads.Threads {
+		if thread.ThreadID == threadID {
+			selectedThread = thread
+			break
+		}
+	}
+	if selectedThread.ThreadID == "" {
+		return AssignRequest{}, ErrAIAgentNotFound
+	}
+	assignmentReq, err := s.assignRequestFromAIAgentClientTask(ctx, principal, bearerToken, taskID, AssignAIAgentTaskRequest{
+		AgentID: selectedThread.AgentID,
+	})
+	if err != nil {
+		return AssignRequest{}, err
+	}
+	assignmentReq.Prompt = appendAIAgentTaskThreadMessagePrompt(assignmentReq.Prompt, selectedThread, req)
+	return assignmentReq, nil
+}
+
+func appendAIAgentTaskThreadMessagePrompt(prompt string, thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest) string {
+	var b strings.Builder
+	b.WriteString(strings.TrimSpace(prompt))
+	b.WriteString("\n\n## Follow-up Thread Message\n")
+	b.WriteString("- thread_id: ")
+	b.WriteString(strings.TrimSpace(thread.ThreadID))
+	b.WriteString("\n- previous_run_id: ")
+	b.WriteString(strings.TrimSpace(thread.RunID))
+	b.WriteString("\n- previous_work_status: ")
+	b.WriteString(string(thread.WorkStatus))
+	b.WriteString("\n- previous_assignment_state: ")
+	b.WriteString(string(thread.AssignmentState))
+	if sourceMessageID := strings.TrimSpace(req.SourceMessageID); sourceMessageID != "" {
+		b.WriteString("\n- source_message_id: ")
+		b.WriteString(sourceMessageID)
+	}
+	if previousMessage := strings.TrimSpace(thread.Message); previousMessage != "" {
+		b.WriteString("\n\n### Previous Thread Message\n")
+		b.WriteString(previousMessage)
+	}
+	b.WriteString("\n\n### New User Instruction\n")
+	b.WriteString(strings.TrimSpace(req.Body))
+	return strings.TrimSpace(b.String())
+}
+
 func (s Server) handleAIAgentClientUnassignTask(w http.ResponseWriter, r *http.Request, taskID string) {
 	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStop, TaskID: taskID})
 	if !ok {
@@ -784,13 +849,27 @@ func (s Server) handleAIAgentClientSubmitTaskComment(w http.ResponseWriter, r *h
 }
 
 func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter, r *http.Request, taskID, threadID string) {
+	if s.assignment == nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
+		return
+	}
 	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionCreate, TaskID: taskID})
 	if !ok {
 		return
 	}
+	bearerToken, _ := requestToken(r)
 	var req CreateAIAgentTaskThreadMessageRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	assignmentReq, err := s.assignRequestFromAIAgentTaskThreadMessage(r.Context(), principal, bearerToken, taskID, threadID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	if _, err := s.assignment.AssignTask(r.Context(), taskID, assignmentReq); err != nil {
+		writeAIAgentClientError(w, err)
 		return
 	}
 	response, err := s.aiAgent.CreateAIAgentTaskThreadMessage(r.Context(), principal, taskID, threadID, req)

@@ -394,6 +394,12 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   for Figma/task surfaces that still submit a generic comment-like action with
   `agent_id`; new client code should target a known `thread_id` through
   `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`
+- task-thread messages are not a read-model-only append. When a viewer sends a
+  message to a completed AI Agent thread, the control-plane must create a new
+  assignment for that thread's `agent_id`, append the user's message to the
+  assignment prompt under `## Follow-up Thread Message`, and keep the existing
+  client-facing `thread_id` active so daemon progress updates continue in the
+  same visible thread.
 - busy-agent enqueue responses use `comment_kind=queued_by_busy_agent`,
   `assignment_state=queued`, and `work_status=queued`; user-facing Korean copy
   is client presentation over those typed fields
