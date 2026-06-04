@@ -11,7 +11,7 @@ import (
 const AssignmentOperationSchemaVersion = "riido-ai-server-assignment-operation.v1"
 const AssignmentProjectionSchemaVersion = "riido-ai-server-assignment-projection.v1"
 const AssignmentAgentActiveSchemaVersion = "riido-ai-server-agent-active-assignment.v1"
-const DefaultAssignmentActiveLeaseSeconds = 300
+const DefaultAssignmentActiveLeaseSeconds = 20
 
 type AssignmentOperationType string
 

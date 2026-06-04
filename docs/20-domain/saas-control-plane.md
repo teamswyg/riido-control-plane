@@ -266,6 +266,14 @@ the stdlib-only runtime behavior that can be verified without AWS credentials:
 - durable active-assignment lease reads and heartbeat refreshes when the
   configured operation store implements the lease/projection ports
 
+Active daemon/runtime work is fenced by heartbeat. A running daemon refreshes
+the active assignment every 5 seconds through `/heartbeat`; the control plane
+treats 20 seconds without a refresh as a stale active lease. Poll and heartbeat
+both enforce the same rule: stale active assignments are failed first, their
+active lease is released by the operation store, and later queued work for that
+agent can then be claimed. Heartbeat must not revive a lease that has already
+passed the stale deadline.
+
 This actor does not own HTTP assignment routes, SSE fan-out,
 DynamoDB/EventBridge adapter payload construction, Terraform, AWS credentials,
 or deployment evidence.
