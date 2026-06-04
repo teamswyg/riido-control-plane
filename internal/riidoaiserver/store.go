@@ -301,8 +301,15 @@ type heartbeatCmd struct {
 }
 
 type heartbeatResult struct {
-	response AgentHeartbeatResponse
-	err      error
+	response  AgentHeartbeatResponse
+	mutations []heartbeatMutation
+	err       error
+}
+
+type heartbeatMutation struct {
+	assignment    Assignment
+	operationType AssignmentOperationType
+	events        []TaskEvent
 }
 
 type providerStatusCmd struct {
@@ -401,8 +408,19 @@ func (s *Store) loop(state storeState) {
 			}
 			msg.reply <- eventResult{response: response, err: err}
 		case heartbeatCmd:
-			response, err := s.handleHeartbeat(&state, msg.agentID, msg.req)
-			msg.reply <- heartbeatResult{response: response, err: err}
+			response, mutations, err := s.handleHeartbeat(&state, msg.agentID, msg.req)
+			if err == nil && len(mutations) > 0 {
+				for _, mutation := range mutations {
+					err = s.saveOperation(&state, mutation.operationType, mutation.assignment, mutation.events)
+					if err != nil {
+						break
+					}
+				}
+				if err == nil {
+					err = s.saveSnapshot(&state)
+				}
+			}
+			msg.reply <- heartbeatResult{response: response, mutations: mutations, err: err}
 		case providerStatusCmd:
 			response, err := s.handleProviderStatusSync(&state, msg.agentID, msg.req)
 			msg.reply <- providerStatusResult{response: response, err: err}
@@ -757,42 +775,57 @@ func (s *Store) failStaleAssignment(state *storeState, assignment Assignment) As
 	return assignment
 }
 
-func (s *Store) handleHeartbeat(state *storeState, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, error) {
+func (s *Store) handleHeartbeat(state *storeState, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, []heartbeatMutation, error) {
 	agentID = strings.TrimSpace(agentID)
 	if agentID == "" {
-		return AgentHeartbeatResponse{}, errors.New("agent_id is required")
+		return AgentHeartbeatResponse{}, nil, errors.New("agent_id is required")
 	}
 	if err := validateDaemonBinding(s.agentRegistry, agentID, PollRequest{DaemonID: req.DaemonID, DeviceID: req.DeviceID, RuntimeID: req.RuntimeID}); err != nil {
-		return AgentHeartbeatResponse{}, err
+		return AgentHeartbeatResponse{}, nil, err
 	}
 	assignmentIDs := heartbeatAssignmentIDs(state, agentID, req)
 	response := AgentHeartbeatResponse{SchemaVersion: SchemaVersion}
 	if len(assignmentIDs) == 0 {
-		return response, nil
+		return response, nil, nil
 	}
 	now := s.now()
+	var mutations []heartbeatMutation
 	leaseStore, _ := s.operationStore.(AssignmentActiveLeaseStore)
 	for _, assignmentID := range assignmentIDs {
 		assignment, ok := state.assignments[assignmentID]
 		if !ok {
-			return AgentHeartbeatResponse{}, fmt.Errorf("assignment %s not found", assignmentID)
+			return AgentHeartbeatResponse{}, nil, fmt.Errorf("assignment %s not found", assignmentID)
 		}
 		if assignment.AgentID != agentID {
-			return AgentHeartbeatResponse{}, fmt.Errorf("assignment %s belongs to agent %s", assignmentID, assignment.AgentID)
+			return AgentHeartbeatResponse{}, nil, fmt.Errorf("assignment %s belongs to agent %s", assignmentID, assignment.AgentID)
 		}
 		if !assignmentHoldsActiveLease(assignment.State) {
 			continue
 		}
+		expired, err := s.assignmentActiveLeaseExpired(state, assignment, now)
+		if err != nil {
+			return AgentHeartbeatResponse{}, nil, err
+		}
+		if expired {
+			beforeEventSeq := state.nextEventSeq
+			stale := s.failStaleAssignment(state, assignment)
+			mutations = append(mutations, heartbeatMutation{
+				assignment:    stale,
+				operationType: AssignmentOperationAgentEvent,
+				events:        eventsAfterSeq(state, beforeEventSeq),
+			})
+			continue
+		}
 		if leaseStore != nil {
 			if err := leaseStore.RefreshAgentActiveAssignment(context.Background(), assignment, now); err != nil {
-				return AgentHeartbeatResponse{}, err
+				return AgentHeartbeatResponse{}, nil, err
 			}
 		}
 		assignment.UpdatedAt = now
 		state.assignments[assignment.ID] = assignment
 		response.RefreshedAssignments = append(response.RefreshedAssignments, assignment)
 	}
-	return response, nil
+	return response, mutations, nil
 }
 
 func heartbeatAssignmentIDs(state *storeState, agentID string, req AgentHeartbeatRequest) []string {

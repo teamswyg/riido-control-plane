@@ -30,7 +30,7 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 		t.Fatalf("assignment = %+v", assignment)
 	}
 
-	now = now.Add(time.Minute)
+	now = now.Add(5 * time.Second)
 	poll, err := store.PollAgent(ctx, "agent-1", daemonPollRequest())
 	if err != nil {
 		t.Fatalf("PollAgent start: %v", err)
@@ -45,7 +45,7 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 		t.Fatalf("agent_instruction = %q", poll.Assignment.AgentInstruction)
 	}
 
-	now = now.Add(time.Minute)
+	now = now.Add(5 * time.Second)
 	heartbeat, err := store.HeartbeatAgent(ctx, "agent-1", AgentHeartbeatRequest{
 		DaemonID:            "daemon-1",
 		RuntimeID:           "runtime-1",
@@ -58,7 +58,7 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 		t.Fatalf("heartbeat = %+v", heartbeat)
 	}
 
-	now = now.Add(time.Minute)
+	now = now.Add(5 * time.Second)
 	running, err := store.RecordAgentEvent(ctx, "agent-1", AgentEventRequest{
 		AssignmentID: poll.Assignment.ID,
 		DaemonID:     "daemon-1",
@@ -74,7 +74,7 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 		t.Fatalf("running event = %+v", running)
 	}
 
-	now = now.Add(time.Minute)
+	now = now.Add(5 * time.Second)
 	completed, err := store.RecordAgentEvent(ctx, "agent-1", AgentEventRequest{
 		AssignmentID: poll.Assignment.ID,
 		DaemonID:     "daemon-1",
@@ -141,7 +141,7 @@ func TestStoreActorReassignmentCancelsPreviousAndBlocksNewAgent(t *testing.T) {
 		t.Fatalf("PollAgent first: %v", err)
 	}
 
-	now = now.Add(time.Minute)
+	now = now.Add(5 * time.Second)
 	second, err := store.AssignTask(ctx, "task-a", AssignRequest{
 		ComponentID:     "component-a",
 		AgentID:         "agent-2",
@@ -213,7 +213,7 @@ func TestStoreActorAdditiveAssignmentKeepsExistingAgentActive(t *testing.T) {
 		t.Fatalf("first poll = %+v", firstPoll)
 	}
 
-	now = now.Add(time.Minute)
+	now = now.Add(5 * time.Second)
 	second, err := store.AssignTaskAdditive(ctx, "task-a", AssignRequest{
 		ComponentID:     "component-a",
 		AgentID:         "agent-2",

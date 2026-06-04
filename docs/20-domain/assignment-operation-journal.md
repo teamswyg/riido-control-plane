@@ -84,8 +84,14 @@ The public schema constants are:
 - `AssignmentAgentActiveSchemaVersion`
 - `DefaultAssignmentActiveLeaseSeconds`
 
-The string values live in code and must match this document's ownership. A
-future adapter migration may add wire-level fixtures, but this slice keeps the
+The string values live in code and must match this document's ownership. The
+default active-assignment lease is 20 seconds. This matches the shared
+assignment polling contract: daemon heartbeats should arrive every 5 seconds,
+and a 20 second gap means the active daemon/runtime lease is stale. A stale
+lease is failed before later queued work for the same agent can be claimed, and
+heartbeat must not refresh an already-stale lease.
+
+A future adapter migration may add wire-level fixtures, but this slice keeps the
 contract in the package where only the control plane consumes it.
 
 ## Migration State

@@ -254,6 +254,67 @@ func TestHeartbeatAgentRefreshesDurableActiveLease(t *testing.T) {
 	}
 }
 
+func TestHeartbeatAgentFailsStaleActiveLeaseBeforeRefresh(t *testing.T) {
+	now := time.Date(2026, 5, 28, 1, 2, 3, 0, time.UTC)
+	operations := &runtimeFakeActiveLeaseOperationStore{}
+	store := NewStoreWithConfig(StoreConfig{
+		Now:            func() time.Time { return now },
+		OperationStore: operations,
+	})
+	defer store.Close()
+	ctx := context.Background()
+
+	first, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-1",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "first",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask first: %v", err)
+	}
+	if _, err := store.AssignTask(ctx, "task-b", AssignRequest{
+		ComponentID:     "component-1",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "second",
+	}); err != nil {
+		t.Fatalf("AssignTask second: %v", err)
+	}
+	poll, err := store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent start: %v", err)
+	}
+	if poll.Action != PollStart || poll.Assignment == nil || poll.Assignment.ID != first.ID {
+		t.Fatalf("poll start = %+v", poll)
+	}
+
+	now = now.Add(time.Duration(DefaultAssignmentActiveLeaseSeconds)*time.Second + time.Second)
+	heartbeat, err := store.HeartbeatAgent(ctx, "agent-1", AgentHeartbeatRequest{
+		DaemonID:            "daemon-1",
+		RuntimeID:           "runtime-1",
+		ActiveAssignmentIDs: []string{first.ID},
+	})
+	if err != nil {
+		t.Fatalf("HeartbeatAgent stale: %v", err)
+	}
+	if len(heartbeat.RefreshedAssignments) != 0 || len(operations.refreshes) != 0 {
+		t.Fatalf("stale heartbeat must not refresh active lease: heartbeat=%+v refreshes=%+v", heartbeat, operations.refreshes)
+	}
+	last := operations.records[len(operations.records)-1]
+	if last.OperationType != AssignmentOperationAgentEvent || last.Assignment.ID != first.ID || last.Assignment.State != AssignmentFailed {
+		t.Fatalf("stale heartbeat operation = %+v", last)
+	}
+
+	poll, err = store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent second: %v", err)
+	}
+	if poll.Action != PollStart || poll.Assignment == nil || poll.Assignment.TaskID != "task-b" {
+		t.Fatalf("poll second = %+v", poll)
+	}
+}
+
 func TestPollAgentFailsStaleActiveAssignmentBeforeNextClaim(t *testing.T) {
 	now := time.Date(2026, 5, 28, 1, 2, 3, 0, time.UTC)
 	operations := &runtimeFakeActiveLeaseOperationStore{}
