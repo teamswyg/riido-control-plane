@@ -217,10 +217,11 @@ For agent settings:
   `AgentOnboardingFixtureListResponse.fixtures`: the development fixture catalog exposes
   the `리도`, `영실`, `홍도`, and `지원` onboarding fixtures in order, while
   `직접 설정`, disabled-next state before selection, row selection, and preview
-  skeleton/popover rendering are client presentation. Each fixture also carries
-  `default_visibility` and `recommended_runtime_kind` so clients can prefill the
-  create form without making fixture copy a frontend SSOT. The selected model
-  still comes from the chosen runtime's `RuntimeRecord.models` catalog.
+	  skeleton/popover rendering are client presentation. Each fixture also carries
+	  `default_visibility`, `recommended_runtime_kind`, and fixture `tmp_color` so
+	  clients can prefill the create form and avatar fallback without making fixture
+	  copy or color a frontend SSOT. The selected model still comes from the chosen
+	  runtime's `RuntimeRecord.models` catalog.
   This repository owns the protected fixture projection, fixture-based agent
   creation endpoint, protected runtime read-model projection, selected
   `runtime_id` validation, and development coverage. It does not own workspace
@@ -304,6 +305,15 @@ selected `workspace_id` on v2 agent records and use v2 generated paths such as
 `riido.v2.aiAgent.bootstrap`, `riido.v2.aiAgent.agents.create`, and
 `riido.v2.aiAgent.tasks.threads`.
 
+The v2 surface also adds
+`GET /v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles`
+as `riido.v2.aiAgent.tasks.assignedAgentProfiles`. It returns a workspace
+read-model map keyed by the actual component/task id string. Values contain only
+`avatar_url` and/or `tmp_color` so task/card lists can render assigned-agent
+avatar hints without querying every task thread. It includes only active
+queued/running/stopping assignments and does not replace
+`tasks.assignableAgents` or `tasks.threads`.
+
 The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 `replay=1`, it keeps the connection open as a client event stream.
 
@@ -333,6 +343,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `CreateAgentConfigurationRequest` body
 - the current deterministic development catalog returns the Figma `node-id=138-7389`
   onboarding fixtures in order: `리도`, `영실`, `홍도`, `지원`
+- fixture rows carry fallback avatar colors from Figma onboarding:
+  `#C9A452`, `#6AA437`, `#B87EAD`, and `#2F84DE` in fixture order; fixture-created
+  agents preserve that value as optional `tmp_color`
 - `직접 설정` is a client route into explicit agent creation, not a fifth
   `AgentOnboardingFixture`
 - runtime selection uses ordinary device/runtime records; SaaS validates the
@@ -357,6 +370,9 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
   agent record; binary image upload/storage is outside this development API
+- `tmp_color` is saved as an optional fixture-provided avatar fallback color on
+  fixture-created agents; direct-created agents can omit it and client rendering
+  precedence remains client-owned
 - `description` is saved as optional client-authored one-line agent summary
   text and is rejected when it exceeds 160 characters; UI truncation/wrapping is
   a client concern and does not rewrite the stored value

@@ -215,6 +215,12 @@
       "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
     },
     {
+      "generated_path": "v2.aiAgent.tasks.assignedAgentProfiles",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles",
+      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+    },
+    {
       "generated_path": "v2.aiAgent.tasks.stop",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/stop",

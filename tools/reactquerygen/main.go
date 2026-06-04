@@ -70,15 +70,16 @@ type mediaValue struct {
 }
 
 type schema struct {
-	Ref         string            `json:"$ref"`
-	Type        string            `json:"type"`
-	Description string            `json:"description"`
-	Format      string            `json:"format"`
-	Enum        []string          `json:"enum"`
-	Required    []string          `json:"required"`
-	Properties  map[string]schema `json:"properties"`
-	Items       *schema           `json:"items"`
-	OneOf       []schema          `json:"oneOf"`
+	Ref                  string            `json:"$ref"`
+	Type                 string            `json:"type"`
+	Description          string            `json:"description"`
+	Format               string            `json:"format"`
+	Enum                 []string          `json:"enum"`
+	Required             []string          `json:"required"`
+	Properties           map[string]schema `json:"properties"`
+	Items                *schema           `json:"items"`
+	OneOf                []schema          `json:"oneOf"`
+	AdditionalProperties json.RawMessage   `json:"additionalProperties"`
 }
 
 type routeOperation struct {
@@ -1242,6 +1243,9 @@ func schemaType(s schema, topLevel bool) string {
 	case "integer", "number":
 		return "number"
 	case "object":
+		if valueType, ok := additionalPropertiesType(s.AdditionalProperties); ok {
+			return "Record<string, " + valueType + ">"
+		}
 		if topLevel {
 			return "Record<string, unknown>"
 		}
@@ -1251,6 +1255,24 @@ func schemaType(s schema, topLevel bool) string {
 	default:
 		return "unknown"
 	}
+}
+
+func additionalPropertiesType(raw json.RawMessage) (string, bool) {
+	if len(raw) == 0 {
+		return "", false
+	}
+	var allowed bool
+	if err := json.Unmarshal(raw, &allowed); err == nil {
+		if allowed {
+			return "unknown", true
+		}
+		return "", false
+	}
+	var nested schema
+	if err := json.Unmarshal(raw, &nested); err != nil {
+		return "unknown", true
+	}
+	return schemaType(nested, true), true
 }
 
 func refName(ref string) string {

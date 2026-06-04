@@ -223,6 +223,7 @@ type AgentClientRecord struct {
 	IsOwnedByViewer     bool             `json:"is_owned_by_viewer"`
 	Name                string           `json:"name"`
 	ProfileThumbnailURL string           `json:"profile_thumbnail_url,omitempty"`
+	TmpColor            string           `json:"tmp_color,omitempty"`
 	Description         string           `json:"description,omitempty"`
 	Instruction         string           `json:"instruction,omitempty"`
 	Visibility          AgentVisibility  `json:"visibility"`
@@ -252,6 +253,7 @@ type AgentOnboardingFixture struct {
 	Name                   string          `json:"name"`
 	RoleLabel              string          `json:"role_label,omitempty"`
 	ProfileThumbnailURL    string          `json:"profile_thumbnail_url,omitempty"`
+	TmpColor               string          `json:"tmp_color,omitempty"`
 	Description            string          `json:"description"`
 	Instruction            string          `json:"instruction"`
 	DefaultVisibility      AgentVisibility `json:"default_visibility"`
@@ -261,6 +263,17 @@ type AgentOnboardingFixture struct {
 type AgentOnboardingFixtureListResponse struct {
 	SchemaVersion string                   `json:"schema_version"`
 	Fixtures      []AgentOnboardingFixture `json:"fixtures"`
+}
+
+type AssignedAgentProfile struct {
+	AvatarURL string `json:"avatar_url,omitempty"`
+	TmpColor  string `json:"tmp_color,omitempty"`
+}
+
+type AssignedAgentProfileMapResponse struct {
+	SchemaVersion         string                          `json:"schema_version"`
+	WorkspaceID           string                          `json:"workspace_id"`
+	AssignedAgentProfiles map[string]AssignedAgentProfile `json:"assigned_agent_profiles"`
 }
 
 type ClientBootstrapResponse struct {
