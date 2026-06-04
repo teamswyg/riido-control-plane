@@ -108,6 +108,39 @@ cold collection row instead of a live stream candidate. This projection is
 derived from the assignment/device principal boundary; it does not use team id
 or an Open API workspace key.
 
+## Multi-Agent Task Expansion Boundary
+
+> Riido task: RIID-4913 `CONTROL PLANE MULTI AGENT TASK EXPANSION SSOT REGRESSION TESTS`
+
+Existing participant assignment routes remain compatibility/demo routes. The
+store method behind those routes keeps the previous replacement handoff: when a
+different agent is assigned to the same task, the current task assignment is
+marked cancelling and the new assignment is blocked until the old assignment is
+terminal.
+
+New multi-agent task work is additive and must use the v2
+`agent-assignments` routes. The additive store path preserves the same
+validation gates as compatibility assignment: task id, agent id, runtime
+provider, prompt, agent/runtime binding, store-safe provider routing,
+experimental runtime snapshot, and assignment-created agent instruction
+snapshot. It differs only in task-level replacement behavior: another agent's
+active assignment on the same task is not cancelled.
+
+The concurrency invariant is therefore:
+
+- an agent is still globally polled through its own assignment queue and can
+  actively execute at most one assignment at a time
+- one task may have multiple active agents only through the additive v2
+  `agent-assignments` routes
+- legacy `tasks.threads.active_stream` remains a singular handoff for UI
+  compatibility and targets the latest visible active thread
+- multi-agent clients must read
+  `riido.v2.aiAgent.tasks.threadStreamSubscription`, then apply
+  `active_thread_filters[]` to the shared client SSE stream
+- stop/removal for multi-agent tasks must carry the target `agent_id` in the
+  path through `riido.v2.aiAgent.tasks.agentAssignments.stop` or
+  `riido.v2.aiAgent.tasks.agentAssignments.delete`
+
 ## Assignment Prompt Composer Boundary
 
 > Riido task: RIID-4799 `contracts server assignment prompt composer ssot`

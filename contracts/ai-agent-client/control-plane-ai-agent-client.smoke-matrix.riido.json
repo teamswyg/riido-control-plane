@@ -203,6 +203,24 @@
       "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
     },
     {
+      "generated_path": "v2.aiAgent.tasks.agentAssignments.create",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments",
+      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+    },
+    {
+      "generated_path": "v2.aiAgent.tasks.agentAssignments.delete",
+      "method": "DELETE",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}",
+      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+    },
+    {
+      "generated_path": "v2.aiAgent.tasks.agentAssignments.stop",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop",
+      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+    },
+    {
       "generated_path": "v2.aiAgent.tasks.assign",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignment",
@@ -236,6 +254,12 @@
       "generated_path": "v2.aiAgent.tasks.threadMessages.create",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages",
+      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+    },
+    {
+      "generated_path": "v2.aiAgent.tasks.threadStreamSubscription",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/thread-stream-subscription",
       "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
     },
     {

@@ -1854,6 +1854,37 @@ This slice does not add a v1 compatibility route, change participant dropdown
 selection, change task-thread history, change daemon polling, or edit
 `teamswyg/riido-client`.
 
+### RIID-4913 — multi-agent task expansion SSOT regression tests
+
+Riido task:
+`RIID-4913-CONTROL-PLANE-MULTI-AGENT-TASK-EXPANSION-SSOT-REGRESSION-TESTS`.
+
+Scope:
+
+- keep existing v1/v2 `tasks.assignment`, `tasks.stop`, and
+  `tasks.threads.active_stream` behavior intact for the current demo/client
+  compatibility surface
+- add v2-only additive task assignment generated paths:
+  `riido.v2.aiAgent.tasks.agentAssignments.create`,
+  `riido.v2.aiAgent.tasks.agentAssignments.delete`, and
+  `riido.v2.aiAgent.tasks.agentAssignments.stop`
+- add `riido.v2.aiAgent.tasks.threadStreamSubscription` so clients can receive
+  one shared SSE stream handoff plus explicit active thread filters
+- keep the daemon/actor invariant that an agent polls its own queue and can
+  actively execute at most one assignment at a time
+- allow one task to have multiple active agents only through the additive v2
+  routes, not through the legacy/demo `tasks.assignment` route
+- update the assignment-store GitHub Action to run both store actor and client
+  assignment-domain regression tests when the relevant domain files change
+
+Validation gates:
+
+```bash
+go test ./internal/riidoaiserver -run 'StoreActor|AssignmentStore|AIAgentClient.*Assignment|AIAgentClient.*ThreadStream' -count=1
+go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
+go test ./tools/reactquerygen -count=1
+```
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

@@ -333,6 +333,10 @@ type UnassignAIAgentTaskRequest struct {
 	Reason  string `json:"reason,omitempty"`
 }
 
+type AgentAssignmentActionRequest struct {
+	Reason string `json:"reason,omitempty"`
+}
+
 type SubmitAIAgentTaskCommentRequest struct {
 	AgentID         string `json:"agent_id"`
 	Body            string `json:"body"`
@@ -370,6 +374,18 @@ type AIAgentTaskThreadStreamLink struct {
 	RunID     string `json:"run_id"`
 }
 
+type AIAgentTaskEventStreamLink struct {
+	Rel       string `json:"rel"`
+	Href      string `json:"href"`
+	EventType string `json:"event_type"`
+}
+
+type AIAgentTaskThreadStreamTarget struct {
+	AgentID  string `json:"agent_id"`
+	ThreadID string `json:"thread_id"`
+	RunID    string `json:"run_id"`
+}
+
 type AIAgentTaskThreadRecord struct {
 	ThreadID        string                    `json:"thread_id"`
 	TaskID          string                    `json:"task_id"`
@@ -391,6 +407,13 @@ type AIAgentTaskThreadCollectionResponse struct {
 	TaskID        string                       `json:"task_id"`
 	Threads       []AIAgentTaskThreadRecord    `json:"threads"`
 	ActiveStream  *AIAgentTaskThreadStreamLink `json:"active_stream,omitempty"`
+}
+
+type AIAgentTaskThreadStreamSubscriptionResponse struct {
+	SchemaVersion       string                          `json:"schema_version"`
+	TaskID              string                          `json:"task_id"`
+	Stream              AIAgentTaskEventStreamLink      `json:"stream"`
+	ActiveThreadFilters []AIAgentTaskThreadStreamTarget `json:"active_thread_filters"`
 }
 
 type DeviceRuntimeSnapshotEvent struct {

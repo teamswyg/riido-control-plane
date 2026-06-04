@@ -11,34 +11,180 @@
       "module": "aiAgent",
       "description": "AI Agent client API module입니다. 화면 구성을 소유하지 않고, client가 화면을 구성할 때 필요한 API 의미, 정책, lifecycle, cache 관계를 제공합니다.",
       "namespaces": [
-        {"path": ["agents"], "description": "agent 설정과 mutation을 다루는 namespace입니다. agent 이름은 중복될 수 있고 assigned task가 있으면 수정할 수 없습니다."},
-        {"path": ["agents", "daemon"], "description": "agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다."},
-        {"path": ["bootstrap"], "description": "AI Agent 설정/온보딩 화면 진입 시 필요한 초기 read model입니다. agents[]는 settings/list 화면의 agent list이자 agent_id 출처이고, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다."},
-        {"path": ["devices"], "description": "device와 runtime 상태를 다루는 namespace입니다."},
-        {"path": ["devices", "runtimes"], "description": "권한이 확인된 principal의 device runtime 목록입니다. assigned agent가 있는 runtime은 삭제되어도 offline 상태로 유지됩니다."},
-        {"path": ["events"], "description": "client가 SSE로 수신하는 상태 변경 stream namespace입니다."},
-        {"path": ["onboarding"], "description": "AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다."},
-        {"path": ["onboarding", "fixtures"], "description": "리도, 영실, 홍도, 지원처럼 제품이 제공하는 고정 onboarding fixture 목록과 fixture 기반 agent 생성 진입점입니다."},
-        {"path": ["tasks"], "description": "task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다."},
-        {"path": ["tasks", "threadMessages"], "description": "task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다."}
+        {
+          "path": [
+            "agents"
+          ],
+          "description": "agent 설정과 mutation을 다루는 namespace입니다. agent 이름은 중복될 수 있고 assigned task가 있으면 수정할 수 없습니다."
+        },
+        {
+          "path": [
+            "agents",
+            "daemon"
+          ],
+          "description": "agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "bootstrap"
+          ],
+          "description": "AI Agent 설정/온보딩 화면 진입 시 필요한 초기 read model입니다. agents[]는 settings/list 화면의 agent list이자 agent_id 출처이고, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다."
+        },
+        {
+          "path": [
+            "devices"
+          ],
+          "description": "device와 runtime 상태를 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "devices",
+            "runtimes"
+          ],
+          "description": "권한이 확인된 principal의 device runtime 목록입니다. assigned agent가 있는 runtime은 삭제되어도 offline 상태로 유지됩니다."
+        },
+        {
+          "path": [
+            "events"
+          ],
+          "description": "client가 SSE로 수신하는 상태 변경 stream namespace입니다."
+        },
+        {
+          "path": [
+            "onboarding"
+          ],
+          "description": "AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다."
+        },
+        {
+          "path": [
+            "onboarding",
+            "fixtures"
+          ],
+          "description": "리도, 영실, 홍도, 지원처럼 제품이 제공하는 고정 onboarding fixture 목록과 fixture 기반 agent 생성 진입점입니다."
+        },
+        {
+          "path": [
+            "tasks"
+          ],
+          "description": "task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "tasks",
+            "threadMessages"
+          ],
+          "description": "task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다."
+        }
       ]
     },
     {
       "module": "v2",
       "description": "v2 client API module입니다. workspace-scoped AI Agent API를 riido.v2.aiAgent.* 경로로 제공합니다. v1은 UI 테스트 호환 표면으로 유지됩니다.",
       "namespaces": [
-        {"path": ["aiAgent"], "description": "workspace_id path parameter로 범위가 정해지는 AI Agent v2 namespace입니다."},
-        {"path": ["aiAgent", "agents"], "description": "workspace 안에 생성되는 agent 설정과 mutation을 다루는 v2 namespace입니다."},
-        {"path": ["aiAgent", "agents", "daemon"], "description": "workspace-scoped agent 권한을 통해 daemon 상세와 제어 command를 다루는 v2 namespace입니다."},
-        {"path": ["aiAgent", "bootstrap"], "description": "선택된 workspace의 AI Agent 설정/온보딩 초기 read model입니다. agents[]는 settings/list 화면의 agent list이자 agent_id 출처이고, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다."},
-        {"path": ["aiAgent", "devices"], "description": "account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다."},
-        {"path": ["aiAgent", "devices", "runtimes"], "description": "선택된 workspace에서 viewer가 볼 수 있는 device runtime 목록입니다."},
-        {"path": ["aiAgent", "events"], "description": "선택된 workspace 범위로 client가 수신하는 SSE stream namespace입니다."},
-        {"path": ["aiAgent", "onboarding"], "description": "선택된 workspace에서 빠른 agent 생성을 돕는 onboarding fixture namespace입니다."},
-        {"path": ["aiAgent", "onboarding", "fixtures"], "description": "서버 제공 fixture 목록과 fixture 기반 agent 생성 진입점입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다."},
-        {"path": ["aiAgent", "tasks"], "description": "선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다."},
-        {"path": ["aiAgent", "tasks", "assignedAgentProfiles"], "description": "workspace의 현재 AI Agent assignment를 component_id key 해시맵으로 읽어 task/card 목록에서 agent avatar fallback을 표시하는 query namespace입니다."},
-        {"path": ["aiAgent", "tasks", "threadMessages"], "description": "선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다."}
+        {
+          "path": [
+            "aiAgent"
+          ],
+          "description": "workspace_id path parameter로 범위가 정해지는 AI Agent v2 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "agents"
+          ],
+          "description": "workspace 안에 생성되는 agent 설정과 mutation을 다루는 v2 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "agents",
+            "daemon"
+          ],
+          "description": "workspace-scoped agent 권한을 통해 daemon 상세와 제어 command를 다루는 v2 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "bootstrap"
+          ],
+          "description": "선택된 workspace의 AI Agent 설정/온보딩 초기 read model입니다. agents[]는 settings/list 화면의 agent list이자 agent_id 출처이고, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "devices"
+          ],
+          "description": "account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "devices",
+            "runtimes"
+          ],
+          "description": "선택된 workspace에서 viewer가 볼 수 있는 device runtime 목록입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "events"
+          ],
+          "description": "선택된 workspace 범위로 client가 수신하는 SSE stream namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "onboarding"
+          ],
+          "description": "선택된 workspace에서 빠른 agent 생성을 돕는 onboarding fixture namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "onboarding",
+            "fixtures"
+          ],
+          "description": "서버 제공 fixture 목록과 fixture 기반 agent 생성 진입점입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks"
+          ],
+          "description": "선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "assignedAgentProfiles"
+          ],
+          "description": "workspace의 현재 AI Agent assignment를 component_id key 해시맵으로 읽어 task/card 목록에서 agent avatar fallback을 표시하는 query namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "agentAssignments"
+          ],
+          "description": "선택된 workspace의 task에 여러 AI Agent를 병렬로 배정/해제/중지하는 additive assignment namespace입니다. v1/v2 tasks.assignment 호환 경로는 기존 단일 active 시연 흐름을 유지합니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "threadMessages"
+          ],
+          "description": "선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "threadStreamSubscription"
+          ],
+          "description": "선택된 workspace의 task에서 활성 thread filter 목록과 공통 SSE stream handoff를 조회하는 namespace입니다."
+        }
       ]
     }
   ],
@@ -49,13 +195,26 @@
       "visibility": [
         {
           "name": "public",
-          "read": ["admin", "owner", "user"],
-          "write": ["admin", "owner"]
+          "read": [
+            "admin",
+            "owner",
+            "user"
+          ],
+          "write": [
+            "admin",
+            "owner"
+          ]
         },
         {
           "name": "private",
-          "read": ["admin", "owner"],
-          "write": ["admin", "owner"]
+          "read": [
+            "admin",
+            "owner"
+          ],
+          "write": [
+            "admin",
+            "owner"
+          ]
         }
       ]
     },
@@ -284,8 +443,14 @@
       "type": "string",
       "description": "agent의 workspace 공개 범위입니다.",
       "values": [
-        {"value": "public", "description": "non-admin workspace 사용자에게도 보입니다."},
-        {"value": "private", "description": "admin과 owner에게만 보입니다."}
+        {
+          "value": "public",
+          "description": "non-admin workspace 사용자에게도 보입니다."
+        },
+        {
+          "value": "private",
+          "description": "admin과 owner에게만 보입니다."
+        }
       ]
     },
     {
@@ -293,10 +458,18 @@
       "type": "string",
       "description": "device에 설치되어 device owner가 제어하는 runtime입니다.",
       "values": [
-        {"value": "codex"},
-        {"value": "claude_code"},
-        {"value": "cursor"},
-        {"value": "openclaw"}
+        {
+          "value": "codex"
+        },
+        {
+          "value": "claude_code"
+        },
+        {
+          "value": "cursor"
+        },
+        {
+          "value": "openclaw"
+        }
       ]
     },
     {
@@ -304,8 +477,12 @@
       "type": "string",
       "description": "client에 노출되는 runtime online/offline 상태입니다.",
       "values": [
-        {"value": "online"},
-        {"value": "offline"}
+        {
+          "value": "online"
+        },
+        {
+          "value": "offline"
+        }
       ]
     },
     {
@@ -313,9 +490,15 @@
       "type": "string",
       "description": "actor state reduction 전에 데몬이 감지한 runtime 상태입니다.",
       "values": [
-        {"value": "detected"},
-        {"value": "missing"},
-        {"value": "error"}
+        {
+          "value": "detected"
+        },
+        {
+          "value": "missing"
+        },
+        {
+          "value": "error"
+        }
       ]
     },
     {
@@ -323,8 +506,12 @@
       "type": "string",
       "description": "runtime 설정 화면에서 표시하는 desktop local daemon online/offline 상태입니다.",
       "values": [
-        {"value": "online"},
-        {"value": "offline"}
+        {
+          "value": "online"
+        },
+        {
+          "value": "offline"
+        }
       ]
     },
     {
@@ -332,9 +519,15 @@
       "type": "string",
       "description": "SaaS가 desktop local daemon에 전달할 수 있는 제어 command 종류입니다.",
       "values": [
-        {"value": "start"},
-        {"value": "restart"},
-        {"value": "stop"}
+        {
+          "value": "start"
+        },
+        {
+          "value": "restart"
+        },
+        {
+          "value": "stop"
+        }
       ]
     },
     {
@@ -342,11 +535,21 @@
       "type": "string",
       "description": "daemon command가 접수된 뒤 client가 버튼/상태를 표시할 때 사용하는 제어 상태입니다.",
       "values": [
-        {"value": "idle"},
-        {"value": "starting"},
-        {"value": "restarting"},
-        {"value": "stopping"},
-        {"value": "failed"}
+        {
+          "value": "idle"
+        },
+        {
+          "value": "starting"
+        },
+        {
+          "value": "restarting"
+        },
+        {
+          "value": "stopping"
+        },
+        {
+          "value": "failed"
+        }
       ]
     },
     {
@@ -354,8 +557,12 @@
       "type": "string",
       "description": "agent를 현재 수정할 수 있는지 나타냅니다.",
       "values": [
-        {"value": "editable"},
-        {"value": "blocked_assigned_tasks"}
+        {
+          "value": "editable"
+        },
+        {
+          "value": "blocked_assigned_tasks"
+        }
       ]
     },
     {
@@ -363,13 +570,27 @@
       "type": "string",
       "description": "runtime output과 task assignment state에서 파생된 client 표시용 agent 작업 상태입니다.",
       "values": [
-        {"value": "idle"},
-        {"value": "queued"},
-        {"value": "running"},
-        {"value": "waiting_for_user"},
-        {"value": "completed"},
-        {"value": "failed"},
-        {"value": "offline"}
+        {
+          "value": "idle"
+        },
+        {
+          "value": "queued"
+        },
+        {
+          "value": "running"
+        },
+        {
+          "value": "waiting_for_user"
+        },
+        {
+          "value": "completed"
+        },
+        {
+          "value": "failed"
+        },
+        {
+          "value": "offline"
+        }
       ]
     },
     {
@@ -377,13 +598,27 @@
       "type": "string",
       "description": "agent 삭제와 runtime lifecycle에 의해 변경되는 task assignment 상태입니다.",
       "values": [
-        {"value": "queued"},
-        {"value": "running"},
-        {"value": "stopping"},
-        {"value": "stopped"},
-        {"value": "completed"},
-        {"value": "failed"},
-        {"value": "unassigned"}
+        {
+          "value": "queued"
+        },
+        {
+          "value": "running"
+        },
+        {
+          "value": "stopping"
+        },
+        {
+          "value": "stopped"
+        },
+        {
+          "value": "completed"
+        },
+        {
+          "value": "failed"
+        },
+        {
+          "value": "unassigned"
+        }
       ]
     },
     {
@@ -391,13 +626,34 @@
       "type": "string",
       "description": "task thread에 기록되는 AI Agent 상태 update 종류입니다. 기존 comment 필드명은 호환명입니다.",
       "values": [
-        {"value": "queued_by_busy_agent", "description": "선택된 agent가 이미 작업 중이어서 assignment가 queue에 대기합니다."},
-        {"value": "assignment_started", "description": "task participant 배정으로 첫 agent-authored thread row가 생성되었습니다."},
-        {"value": "stopped_by_agent_deleted", "description": "agent 삭제로 인해 할당된 작업이 중단되었습니다."},
-        {"value": "stopped_by_user_request", "description": "명시적인 사용자 요청으로 할당된 작업이 중단되었습니다."},
-        {"value": "runtime_progress", "description": "runtime output에서 진행 상태 update가 생성되었습니다."},
-        {"value": "task_completed", "description": "runtime output에서 작업 완료 update가 생성되었습니다."},
-        {"value": "task_failed", "description": "runtime 또는 validation에서 실패 update가 생성되었습니다."}
+        {
+          "value": "queued_by_busy_agent",
+          "description": "선택된 agent가 이미 작업 중이어서 assignment가 queue에 대기합니다."
+        },
+        {
+          "value": "assignment_started",
+          "description": "task participant 배정으로 첫 agent-authored thread row가 생성되었습니다."
+        },
+        {
+          "value": "stopped_by_agent_deleted",
+          "description": "agent 삭제로 인해 할당된 작업이 중단되었습니다."
+        },
+        {
+          "value": "stopped_by_user_request",
+          "description": "명시적인 사용자 요청으로 할당된 작업이 중단되었습니다."
+        },
+        {
+          "value": "runtime_progress",
+          "description": "runtime output에서 진행 상태 update가 생성되었습니다."
+        },
+        {
+          "value": "task_completed",
+          "description": "runtime output에서 작업 완료 update가 생성되었습니다."
+        },
+        {
+          "value": "task_failed",
+          "description": "runtime 또는 validation에서 실패 update가 생성되었습니다."
+        }
       ]
     },
     {
@@ -405,8 +661,12 @@
       "type": "string",
       "description": "AI Agent control-plane surface를 소비하는 client 종류입니다.",
       "values": [
-        {"value": "web"},
-        {"value": "desktop_webview"}
+        {
+          "value": "web"
+        },
+        {
+          "value": "desktop_webview"
+        }
       ]
     }
   ],
@@ -416,11 +676,26 @@
       "discriminator": "event_type",
       "description": "web과 desktop webview client가 소비하는 SSE event union입니다.",
       "variants": [
-        {"kind": "device_runtime_snapshot", "schema": "DeviceRuntimeSnapshotEvent"},
-        {"kind": "device_daemon_status_changed", "schema": "DeviceDaemonStatusEvent"},
-        {"kind": "agent_editability_changed", "schema": "AgentEditabilityChangedEvent"},
-        {"kind": "agent_work_status_changed", "schema": "AgentWorkStatusChangedEvent"},
-        {"kind": "agent_thread_progress", "schema": "AgentThreadProgressEvent"}
+        {
+          "kind": "device_runtime_snapshot",
+          "schema": "DeviceRuntimeSnapshotEvent"
+        },
+        {
+          "kind": "device_daemon_status_changed",
+          "schema": "DeviceDaemonStatusEvent"
+        },
+        {
+          "kind": "agent_editability_changed",
+          "schema": "AgentEditabilityChangedEvent"
+        },
+        {
+          "kind": "agent_work_status_changed",
+          "schema": "AgentWorkStatusChangedEvent"
+        },
+        {
+          "kind": "agent_thread_progress",
+          "schema": "AgentThreadProgressEvent"
+        }
       ]
     }
   ],
@@ -429,75 +704,220 @@
       "name": "RuntimeModelRecord",
       "description": "runtime이 제공하는 model 후보 record입니다. model_id는 runtime 범위 안에서만 의미가 있는 opaque identifier입니다.",
       "type": "object",
-      "required": ["model_id", "label", "is_default"],
+      "required": [
+        "model_id",
+        "label",
+        "is_default"
+      ],
       "properties": [
-        {"name": "model_id", "type": "string"},
-        {"name": "label", "type": "string"},
-        {"name": "is_default", "type": "boolean"}
+        {
+          "name": "model_id",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        },
+        {
+          "name": "is_default",
+          "type": "boolean"
+        }
       ]
     },
     {
       "name": "RuntimeRecord",
       "description": "device에 설치되었거나 assignment 정책상 offline으로 유지되는 runtime record입니다.",
       "type": "object",
-      "required": ["runtime_id", "device_id", "kind", "availability", "detection_state", "has_assigned_agent", "requires_experimental_opt_in", "models"],
+      "required": [
+        "runtime_id",
+        "device_id",
+        "kind",
+        "availability",
+        "detection_state",
+        "has_assigned_agent",
+        "requires_experimental_opt_in",
+        "models"
+      ],
       "properties": [
-        {"name": "runtime_id", "type": "string"},
-        {"name": "device_id", "type": "string"},
-        {"name": "kind", "ref": "RuntimeKind"},
-        {"name": "availability", "ref": "RuntimeAvailability"},
-        {"name": "detection_state", "ref": "RuntimeDetectionState"},
-        {"name": "owner_principal_id", "type": "string"},
-        {"name": "last_detected_at", "type": "string", "format": "date-time"},
-        {"name": "has_assigned_agent", "type": "boolean"},
-        {"name": "requires_experimental_opt_in", "type": "boolean"},
-        {"name": "models", "type": "array", "items": {"ref": "RuntimeModelRecord"}}
+        {
+          "name": "runtime_id",
+          "type": "string"
+        },
+        {
+          "name": "device_id",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "ref": "RuntimeKind"
+        },
+        {
+          "name": "availability",
+          "ref": "RuntimeAvailability"
+        },
+        {
+          "name": "detection_state",
+          "ref": "RuntimeDetectionState"
+        },
+        {
+          "name": "owner_principal_id",
+          "type": "string"
+        },
+        {
+          "name": "last_detected_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "has_assigned_agent",
+          "type": "boolean"
+        },
+        {
+          "name": "requires_experimental_opt_in",
+          "type": "boolean"
+        },
+        {
+          "name": "models",
+          "type": "array",
+          "items": {
+            "ref": "RuntimeModelRecord"
+          }
+        }
       ]
     },
     {
       "name": "DeviceRecord",
       "description": "데몬이 연결된 device와 해당 device에서 감지된 runtime 목록입니다.",
       "type": "object",
-      "required": ["device_id", "owner_principal_id", "runtimes"],
+      "required": [
+        "device_id",
+        "owner_principal_id",
+        "runtimes"
+      ],
       "properties": [
-        {"name": "device_id", "type": "string"},
-        {"name": "owner_principal_id", "type": "string"},
-        {"name": "display_name", "type": "string"},
-        {"name": "daemon_last_seen_at", "type": "string", "format": "date-time"},
-        {"name": "runtimes", "type": "array", "items": {"ref": "RuntimeRecord"}}
+        {
+          "name": "device_id",
+          "type": "string"
+        },
+        {
+          "name": "owner_principal_id",
+          "type": "string"
+        },
+        {
+          "name": "display_name",
+          "type": "string"
+        },
+        {
+          "name": "daemon_last_seen_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "runtimes",
+          "type": "array",
+          "items": {
+            "ref": "RuntimeRecord"
+          }
+        }
       ]
     },
     {
       "name": "DeviceDaemonRecord",
       "description": "runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세 표시와 제어 버튼 상태를 구성하는 read model입니다.",
       "type": "object",
-      "required": ["device_id", "owner_principal_id", "availability", "control_state", "supported_actions"],
+      "required": [
+        "device_id",
+        "owner_principal_id",
+        "availability",
+        "control_state",
+        "supported_actions"
+      ],
       "properties": [
-        {"name": "device_id", "type": "string"},
-        {"name": "owner_principal_id", "type": "string"},
-        {"name": "device_display_name", "type": "string"},
-        {"name": "daemon_id", "type": "string"},
-        {"name": "profile", "type": "string"},
-        {"name": "pid", "type": "integer"},
-        {"name": "uptime_seconds", "type": "integer"},
-        {"name": "started_at", "type": "string", "format": "date-time"},
-        {"name": "last_seen_at", "type": "string", "format": "date-time"},
-        {"name": "availability", "ref": "DaemonAvailability"},
-        {"name": "control_state", "ref": "DaemonControlState"},
-        {"name": "supported_actions", "type": "array", "items": {"ref": "DaemonControlAction"}},
-        {"name": "last_command_id", "type": "string"},
-        {"name": "last_command_action", "ref": "DaemonControlAction"},
-        {"name": "last_command_requested_at", "type": "string", "format": "date-time"}
+        {
+          "name": "device_id",
+          "type": "string"
+        },
+        {
+          "name": "owner_principal_id",
+          "type": "string"
+        },
+        {
+          "name": "device_display_name",
+          "type": "string"
+        },
+        {
+          "name": "daemon_id",
+          "type": "string"
+        },
+        {
+          "name": "profile",
+          "type": "string"
+        },
+        {
+          "name": "pid",
+          "type": "integer"
+        },
+        {
+          "name": "uptime_seconds",
+          "type": "integer"
+        },
+        {
+          "name": "started_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "last_seen_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "availability",
+          "ref": "DaemonAvailability"
+        },
+        {
+          "name": "control_state",
+          "ref": "DaemonControlState"
+        },
+        {
+          "name": "supported_actions",
+          "type": "array",
+          "items": {
+            "ref": "DaemonControlAction"
+          }
+        },
+        {
+          "name": "last_command_id",
+          "type": "string"
+        },
+        {
+          "name": "last_command_action",
+          "ref": "DaemonControlAction"
+        },
+        {
+          "name": "last_command_requested_at",
+          "type": "string",
+          "format": "date-time"
+        }
       ]
     },
     {
       "name": "DeviceDaemonDetailResponse",
       "description": "runtime 설정 화면의 agent-bound daemon 상세 row와 상세 패널을 위한 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "daemon"],
+      "required": [
+        "schema_version",
+        "daemon"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "daemon", "ref": "DeviceDaemonRecord"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "daemon",
+          "ref": "DeviceDaemonRecord"
+        }
       ]
     },
     {
@@ -505,96 +925,308 @@
       "description": "agent 권한으로 접근 가능한 daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.",
       "type": "object",
       "properties": [
-        {"name": "reason", "type": "string"}
+        {
+          "name": "reason",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "DeviceDaemonCommandResponse",
       "description": "daemon command가 SaaS에 접수된 뒤 client가 즉시 버튼과 runtime offline 상태를 갱신할 수 있도록 반환하는 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "command_id", "device_id", "action", "availability", "control_state", "accepted_at", "message"],
+      "required": [
+        "schema_version",
+        "command_id",
+        "device_id",
+        "action",
+        "availability",
+        "control_state",
+        "accepted_at",
+        "message"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "command_id", "type": "string"},
-        {"name": "device_id", "type": "string"},
-        {"name": "action", "ref": "DaemonControlAction"},
-        {"name": "availability", "ref": "DaemonAvailability"},
-        {"name": "control_state", "ref": "DaemonControlState"},
-        {"name": "accepted_at", "type": "string", "format": "date-time"},
-        {"name": "message", "type": "string"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "command_id",
+          "type": "string"
+        },
+        {
+          "name": "device_id",
+          "type": "string"
+        },
+        {
+          "name": "action",
+          "ref": "DaemonControlAction"
+        },
+        {
+          "name": "availability",
+          "ref": "DaemonAvailability"
+        },
+        {
+          "name": "control_state",
+          "ref": "DaemonControlState"
+        },
+        {
+          "name": "accepted_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "AgentClientRecord",
       "description": "client 설정/목록/배정 화면에 전달되는 agent 요약 record입니다. agent_id는 bootstrap.agents[]와 tasks.assignableAgents.agents[]에서 client가 mutation에 넘기는 안정 식별자입니다.",
       "type": "object",
-      "required": ["agent_id", "owner_principal_id", "is_owned_by_viewer", "name", "visibility", "work_status", "editability", "assigned_task_count", "created_at", "updated_at"],
+      "required": [
+        "agent_id",
+        "owner_principal_id",
+        "is_owned_by_viewer",
+        "name",
+        "visibility",
+        "work_status",
+        "editability",
+        "assigned_task_count",
+        "created_at",
+        "updated_at"
+      ],
       "properties": [
-        {"name": "agent_id", "type": "string", "description": "client가 agent 상세/수정/삭제/배정 mutation에 전달하는 안정 식별자입니다. 설정/목록 화면에서는 bootstrap.agents[]에서 얻고, task 참여자 드롭다운에서는 tasks.assignableAgents.agents[]에서 얻습니다."},
-        {"name": "owner_principal_id", "type": "string"},
-        {"name": "is_owned_by_viewer", "type": "boolean"},
-        {"name": "name", "type": "string"},
-        {"name": "profile_thumbnail_url", "type": "string", "format": "uri"},
-        {"name": "tmp_color", "type": "string", "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."},
-        {"name": "description", "type": "string", "max_length": 160},
-        {"name": "instruction", "type": "string", "max_length": 1000},
-        {"name": "visibility", "ref": "AgentVisibility"},
-        {"name": "runtime_id", "type": "string"},
-        {"name": "runtime_kind", "ref": "RuntimeKind"},
-        {"name": "model_id", "type": "string"},
-        {"name": "model_label", "type": "string"},
-        {"name": "work_status", "ref": "AgentWorkStatus"},
-        {"name": "editability", "ref": "AgentEditability"},
-        {"name": "assigned_task_count", "type": "integer"},
-        {"name": "created_at", "type": "string", "format": "date-time"},
-        {"name": "updated_at", "type": "string", "format": "date-time"}
+        {
+          "name": "agent_id",
+          "type": "string",
+          "description": "client가 agent 상세/수정/삭제/배정 mutation에 전달하는 안정 식별자입니다. 설정/목록 화면에서는 bootstrap.agents[]에서 얻고, task 참여자 드롭다운에서는 tasks.assignableAgents.agents[]에서 얻습니다."
+        },
+        {
+          "name": "owner_principal_id",
+          "type": "string"
+        },
+        {
+          "name": "is_owned_by_viewer",
+          "type": "boolean"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "profile_thumbnail_url",
+          "type": "string",
+          "format": "uri"
+        },
+        {
+          "name": "tmp_color",
+          "type": "string",
+          "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "max_length": 160
+        },
+        {
+          "name": "instruction",
+          "type": "string",
+          "max_length": 1000
+        },
+        {
+          "name": "visibility",
+          "ref": "AgentVisibility"
+        },
+        {
+          "name": "runtime_id",
+          "type": "string"
+        },
+        {
+          "name": "runtime_kind",
+          "ref": "RuntimeKind"
+        },
+        {
+          "name": "model_id",
+          "type": "string"
+        },
+        {
+          "name": "model_label",
+          "type": "string"
+        },
+        {
+          "name": "work_status",
+          "ref": "AgentWorkStatus"
+        },
+        {
+          "name": "editability",
+          "ref": "AgentEditability"
+        },
+        {
+          "name": "assigned_task_count",
+          "type": "integer"
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "format": "date-time"
+        }
       ]
     },
     {
       "name": "AgentClientRecordV2",
       "description": "v2 client 설정/목록/배정 화면에 전달되는 workspace-scoped agent 요약 record입니다. agent_id는 v2.aiAgent.bootstrap.agents[]와 v2.aiAgent.tasks.assignableAgents.agents[]에서 client가 mutation에 넘기는 안정 식별자입니다.",
       "type": "object",
-      "required": ["agent_id", "owner_principal_id", "workspace_id", "is_owned_by_viewer", "name", "visibility", "work_status", "editability", "assigned_task_count", "created_at", "updated_at"],
+      "required": [
+        "agent_id",
+        "owner_principal_id",
+        "workspace_id",
+        "is_owned_by_viewer",
+        "name",
+        "visibility",
+        "work_status",
+        "editability",
+        "assigned_task_count",
+        "created_at",
+        "updated_at"
+      ],
       "properties": [
-        {"name": "agent_id", "type": "string", "description": "client가 workspace-scoped agent 상세/수정/삭제/배정 mutation에 전달하는 안정 식별자입니다. 설정/목록 화면에서는 v2.aiAgent.bootstrap.agents[]에서 얻고, task 참여자 드롭다운에서는 v2.aiAgent.tasks.assignableAgents.agents[]에서 얻습니다."},
-        {"name": "owner_principal_id", "type": "string"},
-        {"name": "workspace_id", "type": "string", "description": "agent가 소속된 workspace id입니다. v2에서는 URL path의 workspace_id로 서버가 stamp합니다."},
-        {"name": "is_owned_by_viewer", "type": "boolean"},
-        {"name": "name", "type": "string"},
-        {"name": "profile_thumbnail_url", "type": "string", "format": "uri"},
-        {"name": "tmp_color", "type": "string", "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."},
-        {"name": "description", "type": "string", "max_length": 160},
-        {"name": "instruction", "type": "string", "max_length": 1000},
-        {"name": "visibility", "ref": "AgentVisibility"},
-        {"name": "runtime_id", "type": "string"},
-        {"name": "runtime_kind", "ref": "RuntimeKind"},
-        {"name": "model_id", "type": "string"},
-        {"name": "model_label", "type": "string"},
-        {"name": "work_status", "ref": "AgentWorkStatus"},
-        {"name": "editability", "ref": "AgentEditability"},
-        {"name": "assigned_task_count", "type": "integer"},
-        {"name": "created_at", "type": "string", "format": "date-time"},
-        {"name": "updated_at", "type": "string", "format": "date-time"}
+        {
+          "name": "agent_id",
+          "type": "string",
+          "description": "client가 workspace-scoped agent 상세/수정/삭제/배정 mutation에 전달하는 안정 식별자입니다. 설정/목록 화면에서는 v2.aiAgent.bootstrap.agents[]에서 얻고, task 참여자 드롭다운에서는 v2.aiAgent.tasks.assignableAgents.agents[]에서 얻습니다."
+        },
+        {
+          "name": "owner_principal_id",
+          "type": "string"
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "description": "agent가 소속된 workspace id입니다. v2에서는 URL path의 workspace_id로 서버가 stamp합니다."
+        },
+        {
+          "name": "is_owned_by_viewer",
+          "type": "boolean"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "profile_thumbnail_url",
+          "type": "string",
+          "format": "uri"
+        },
+        {
+          "name": "tmp_color",
+          "type": "string",
+          "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "max_length": 160
+        },
+        {
+          "name": "instruction",
+          "type": "string",
+          "max_length": 1000
+        },
+        {
+          "name": "visibility",
+          "ref": "AgentVisibility"
+        },
+        {
+          "name": "runtime_id",
+          "type": "string"
+        },
+        {
+          "name": "runtime_kind",
+          "ref": "RuntimeKind"
+        },
+        {
+          "name": "model_id",
+          "type": "string"
+        },
+        {
+          "name": "model_label",
+          "type": "string"
+        },
+        {
+          "name": "work_status",
+          "ref": "AgentWorkStatus"
+        },
+        {
+          "name": "editability",
+          "ref": "AgentEditability"
+        },
+        {
+          "name": "assigned_task_count",
+          "type": "integer"
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "format": "date-time"
+        }
       ]
     },
     {
       "name": "AgentClientListResponse",
       "description": "task 참여자 드롭다운에서 표시할 agent 목록 응답입니다. bootstrap.agents[]와 달리 task_id 기준 권한/상태를 반영합니다.",
       "type": "object",
-      "required": ["schema_version", "agents"],
+      "required": [
+        "schema_version",
+        "agents"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "agents", "type": "array", "description": "현재 task/subtask 참여자 드롭다운에서 배정 가능한 agent 목록입니다. 여기의 agent_id를 tasks.assign mutation에 전달합니다.", "items": {"ref": "AgentClientRecord"}}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agents",
+          "type": "array",
+          "description": "현재 task/subtask 참여자 드롭다운에서 배정 가능한 agent 목록입니다. 여기의 agent_id를 tasks.assign mutation에 전달합니다.",
+          "items": {
+            "ref": "AgentClientRecord"
+          }
+        }
       ]
     },
     {
       "name": "AgentClientListResponseV2",
       "description": "v2 task 참여자 드롭다운에서 표시할 workspace-scoped agent 목록 응답입니다. v2.aiAgent.bootstrap.agents[]와 달리 workspace_id와 task_id 기준 권한/상태를 반영합니다.",
       "type": "object",
-      "required": ["schema_version", "agents"],
+      "required": [
+        "schema_version",
+        "agents"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "agents", "type": "array", "description": "현재 workspace의 task/subtask 참여자 드롭다운에서 배정 가능한 agent 목록입니다. 여기의 agent_id를 v2.aiAgent.tasks.assign mutation에 전달합니다.", "items": {"ref": "AgentClientRecordV2"}}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agents",
+          "type": "array",
+          "description": "현재 workspace의 task/subtask 참여자 드롭다운에서 배정 가능한 agent 목록입니다. 여기의 agent_id를 v2.aiAgent.tasks.assign mutation에 전달합니다.",
+          "items": {
+            "ref": "AgentClientRecordV2"
+          }
+        }
       ]
     },
     {
@@ -602,130 +1234,352 @@
       "description": "workspace task/card 목록에서 현재 배정된 AI Agent를 표시하기 위한 최소 profile 값입니다.",
       "type": "object",
       "properties": [
-        {"name": "avatar_url", "type": "string", "format": "uri", "description": "agent profile_thumbnail_url에서 파생된 표시용 이미지 URL입니다."},
-        {"name": "tmp_color", "type": "string", "description": "fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452."}
+        {
+          "name": "avatar_url",
+          "type": "string",
+          "format": "uri",
+          "description": "agent profile_thumbnail_url에서 파생된 표시용 이미지 URL입니다."
+        },
+        {
+          "name": "tmp_color",
+          "type": "string",
+          "description": "fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452."
+        }
       ]
     },
     {
       "name": "AssignedAgentProfileMapResponse",
       "description": "workspace 안에서 현재 AI Agent가 배정된 task/subtask component_id를 key로 하는 profile 표시용 해시맵 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "workspace_id", "assigned_agent_profiles"],
+      "required": [
+        "schema_version",
+        "workspace_id",
+        "assigned_agent_profiles"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "workspace_id", "type": "string"},
-        {"name": "assigned_agent_profiles", "type": "object", "description": "실제 Riido component_id/task_id 문자열을 key로 사용합니다. 예: {\"23958923859\":{\"avatar_url\":\"https://...\",\"tmp_color\":\"#C9A452\"}}", "additional_properties_ref": "AssignedAgentProfile"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "workspace_id",
+          "type": "string"
+        },
+        {
+          "name": "assigned_agent_profiles",
+          "type": "object",
+          "description": "실제 Riido component_id/task_id 문자열을 key로 사용합니다. 예: {\"23958923859\":{\"avatar_url\":\"https://...\",\"tmp_color\":\"#C9A452\"}}",
+          "additional_properties_ref": "AssignedAgentProfile"
+        }
       ]
     },
     {
       "name": "AgentClientRecordResponse",
       "description": "단일 agent 변경 후 최신 agent record를 반환하는 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "agent"],
+      "required": [
+        "schema_version",
+        "agent"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "agent", "ref": "AgentClientRecord"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent",
+          "ref": "AgentClientRecord"
+        }
       ]
     },
     {
       "name": "AgentClientRecordResponseV2",
       "description": "v2 단일 agent 변경 후 최신 workspace-scoped agent record를 반환하는 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "agent"],
+      "required": [
+        "schema_version",
+        "agent"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "agent", "ref": "AgentClientRecordV2"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent",
+          "ref": "AgentClientRecordV2"
+        }
       ]
     },
     {
       "name": "AgentOnboardingFixture",
       "description": "AI Agent 온보딩에서 선택할 수 있는 서버 제공 fixture입니다. 템플릿 엔티티가 아니라 agent 생성 폼에 복사할 고정 초기값입니다.",
       "type": "object",
-      "required": ["fixture_id", "name", "description", "instruction", "default_visibility"],
+      "required": [
+        "fixture_id",
+        "name",
+        "description",
+        "instruction",
+        "default_visibility"
+      ],
       "properties": [
-        {"name": "fixture_id", "type": "string", "description": "fixture를 안정적으로 구분하는 ID입니다. 직접 설정 행은 포함되지 않습니다."},
-        {"name": "name", "type": "string", "description": "에이전트 생성 폼에 복사할 기본 이름입니다."},
-        {"name": "role_label", "type": "string", "description": "fixture 목록에 보조로 표시할 역할 라벨입니다."},
-        {"name": "profile_thumbnail_url", "type": "string", "format": "uri", "description": "에이전트 프로필 이미지로 복사할 HTTPS 썸네일 URL입니다."},
-        {"name": "tmp_color", "type": "string", "description": "피그마 온보딩 avatar swatch에서 온 fixture fallback color입니다. 생성된 agent에는 표시 보조값으로 복사될 수 있습니다."},
-        {"name": "description", "type": "string", "max_length": 160, "description": "에이전트 설명 기본값입니다. 최대 160자입니다."},
-        {"name": "instruction", "type": "string", "max_length": 1000, "description": "에이전트 지침 기본값입니다. 최대 1000자입니다."},
-        {"name": "default_visibility", "ref": "AgentVisibility", "description": "fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. 기본값은 안전하게 private 값을 사용합니다."},
-        {"name": "recommended_runtime_kind", "ref": "RuntimeKind", "description": "fixture에 권장하는 런타임 종류입니다. 선택 가능 여부는 devices.runtimes로 다시 판단합니다."}
+        {
+          "name": "fixture_id",
+          "type": "string",
+          "description": "fixture를 안정적으로 구분하는 ID입니다. 직접 설정 행은 포함되지 않습니다."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "에이전트 생성 폼에 복사할 기본 이름입니다."
+        },
+        {
+          "name": "role_label",
+          "type": "string",
+          "description": "fixture 목록에 보조로 표시할 역할 라벨입니다."
+        },
+        {
+          "name": "profile_thumbnail_url",
+          "type": "string",
+          "format": "uri",
+          "description": "에이전트 프로필 이미지로 복사할 HTTPS 썸네일 URL입니다."
+        },
+        {
+          "name": "tmp_color",
+          "type": "string",
+          "description": "피그마 온보딩 avatar swatch에서 온 fixture fallback color입니다. 생성된 agent에는 표시 보조값으로 복사될 수 있습니다."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "max_length": 160,
+          "description": "에이전트 설명 기본값입니다. 최대 160자입니다."
+        },
+        {
+          "name": "instruction",
+          "type": "string",
+          "max_length": 1000,
+          "description": "에이전트 지침 기본값입니다. 최대 1000자입니다."
+        },
+        {
+          "name": "default_visibility",
+          "ref": "AgentVisibility",
+          "description": "fixture 선택 시 생성 폼에 미리 채울 공개 범위입니다. 기본값은 안전하게 private 값을 사용합니다."
+        },
+        {
+          "name": "recommended_runtime_kind",
+          "ref": "RuntimeKind",
+          "description": "fixture에 권장하는 런타임 종류입니다. 선택 가능 여부는 devices.runtimes로 다시 판단합니다."
+        }
       ]
     },
     {
       "name": "AgentOnboardingFixtureListResponse",
       "description": "온보딩 화면에서 사용할 서버 제공 fixture 목록 응답입니다. 직접 설정은 포함하지 않습니다.",
       "type": "object",
-      "required": ["schema_version", "fixtures"],
+      "required": [
+        "schema_version",
+        "fixtures"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "fixtures", "type": "array", "items": {"ref": "AgentOnboardingFixture"}}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "fixtures",
+          "type": "array",
+          "items": {
+            "ref": "AgentOnboardingFixture"
+          }
+        }
       ]
     },
     {
       "name": "ClientBootstrapResponse",
       "description": "AI Agent 설정/온보딩 화면 진입 시 필요한 agent와 device runtime 초기 데이터입니다. agents[]는 settings/list 화면의 agent list이자 agent_id 출처입니다.",
       "type": "object",
-      "required": ["schema_version", "client_kind", "workspace_id", "agents", "devices"],
+      "required": [
+        "schema_version",
+        "client_kind",
+        "workspace_id",
+        "agents",
+        "devices"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "client_kind", "ref": "ClientKind"},
-        {"name": "workspace_id", "type": "string"},
-        {"name": "agents", "type": "array", "description": "AI Agent 설정/목록 화면에서 출력할 visible agent 배열입니다. 이 배열의 agent_id는 agent 수정/삭제/daemon 상세 조회 같은 settings/list action의 입력으로 사용합니다. task 참여자 드롭다운에서 배정할 agent_id는 tasks.assignableAgents.agents[]를 우선 사용합니다.", "items": {"ref": "AgentClientRecord"}},
-        {"name": "devices", "type": "array", "items": {"ref": "DeviceRecord"}}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "client_kind",
+          "ref": "ClientKind"
+        },
+        {
+          "name": "workspace_id",
+          "type": "string"
+        },
+        {
+          "name": "agents",
+          "type": "array",
+          "description": "AI Agent 설정/목록 화면에서 출력할 visible agent 배열입니다. 이 배열의 agent_id는 agent 수정/삭제/daemon 상세 조회 같은 settings/list action의 입력으로 사용합니다. task 참여자 드롭다운에서 배정할 agent_id는 tasks.assignableAgents.agents[]를 우선 사용합니다.",
+          "items": {
+            "ref": "AgentClientRecord"
+          }
+        },
+        {
+          "name": "devices",
+          "type": "array",
+          "items": {
+            "ref": "DeviceRecord"
+          }
+        }
       ]
     },
     {
       "name": "ClientBootstrapResponseV2",
       "description": "v2 AI Agent 설정/온보딩 화면 진입 시 선택된 workspace의 agent와 account-owned device runtime 초기 데이터입니다. agents[]는 settings/list 화면의 workspace-visible agent list이자 agent_id 출처입니다.",
       "type": "object",
-      "required": ["schema_version", "client_kind", "workspace_id", "agents", "devices"],
+      "required": [
+        "schema_version",
+        "client_kind",
+        "workspace_id",
+        "agents",
+        "devices"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "client_kind", "ref": "ClientKind"},
-        {"name": "workspace_id", "type": "string"},
-        {"name": "agents", "type": "array", "description": "선택된 workspace의 AI Agent 설정/목록 화면에서 출력할 visible agent 배열입니다. 이 배열의 agent_id는 agent 수정/삭제/daemon 상세 조회 같은 settings/list action의 입력으로 사용합니다. task 참여자 드롭다운에서 배정할 agent_id는 v2.aiAgent.tasks.assignableAgents.agents[]를 우선 사용합니다.", "items": {"ref": "AgentClientRecordV2"}},
-        {"name": "devices", "type": "array", "items": {"ref": "DeviceRecord"}}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "client_kind",
+          "ref": "ClientKind"
+        },
+        {
+          "name": "workspace_id",
+          "type": "string"
+        },
+        {
+          "name": "agents",
+          "type": "array",
+          "description": "선택된 workspace의 AI Agent 설정/목록 화면에서 출력할 visible agent 배열입니다. 이 배열의 agent_id는 agent 수정/삭제/daemon 상세 조회 같은 settings/list action의 입력으로 사용합니다. task 참여자 드롭다운에서 배정할 agent_id는 v2.aiAgent.tasks.assignableAgents.agents[]를 우선 사용합니다.",
+          "items": {
+            "ref": "AgentClientRecordV2"
+          }
+        },
+        {
+          "name": "devices",
+          "type": "array",
+          "items": {
+            "ref": "DeviceRecord"
+          }
+        }
       ]
     },
     {
       "name": "DeviceRuntimeListResponse",
       "description": "권한이 있는 principal이 볼 수 있는 device runtime 목록 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "devices"],
+      "required": [
+        "schema_version",
+        "devices"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "devices", "type": "array", "items": {"ref": "DeviceRecord"}}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "devices",
+          "type": "array",
+          "items": {
+            "ref": "DeviceRecord"
+          }
+        }
       ]
     },
     {
       "name": "AgentEditabilityResponse",
       "description": "agent 수정 가능 여부와 차단 사유를 알려주는 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "agent_id", "editability", "assigned_task_count"],
+      "required": [
+        "schema_version",
+        "agent_id",
+        "editability",
+        "assigned_task_count"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "agent_id", "type": "string"},
-        {"name": "editability", "ref": "AgentEditability"},
-        {"name": "assigned_task_count", "type": "integer"},
-        {"name": "reason", "type": "string"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "editability",
+          "ref": "AgentEditability"
+        },
+        {
+          "name": "assigned_task_count",
+          "type": "integer"
+        },
+        {
+          "name": "reason",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "CreateAgentConfigurationRequest",
       "description": "Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.",
       "type": "object",
-      "required": ["name", "visibility", "runtime_id"],
+      "required": [
+        "name",
+        "visibility",
+        "runtime_id"
+      ],
       "properties": [
-        {"name": "name", "type": "string", "description": "agent 추가 화면의 이름 입력값입니다."},
-        {"name": "profile_thumbnail_url", "type": "string", "format": "uri", "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다."},
-        {"name": "description", "type": "string", "max_length": 160, "description": "agent 추가 화면의 설명 입력값입니다."},
-        {"name": "instruction", "type": "string", "max_length": 1000, "description": "agent 추가 화면의 지침 textarea 입력값입니다."},
-        {"name": "visibility", "ref": "AgentVisibility", "description": "agent 공개 범위 radio 입력값입니다."},
-        {"name": "runtime_id", "type": "string", "description": "agent가 사용할 런타임 dropdown 선택값입니다."},
-        {"name": "model_id", "type": "string", "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."}
+        {
+          "name": "name",
+          "type": "string",
+          "description": "agent 추가 화면의 이름 입력값입니다."
+        },
+        {
+          "name": "profile_thumbnail_url",
+          "type": "string",
+          "format": "uri",
+          "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "max_length": 160,
+          "description": "agent 추가 화면의 설명 입력값입니다."
+        },
+        {
+          "name": "instruction",
+          "type": "string",
+          "max_length": 1000,
+          "description": "agent 추가 화면의 지침 textarea 입력값입니다."
+        },
+        {
+          "name": "visibility",
+          "ref": "AgentVisibility",
+          "description": "agent 공개 범위 radio 입력값입니다."
+        },
+        {
+          "name": "runtime_id",
+          "type": "string",
+          "description": "agent가 사용할 런타임 dropdown 선택값입니다."
+        },
+        {
+          "name": "model_id",
+          "type": "string",
+          "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."
+        }
       ]
     },
     {
@@ -733,65 +1587,146 @@
       "description": "Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다.",
       "type": "object",
       "properties": [
-        {"name": "name", "type": "string", "description": "agent 설정 화면의 이름 입력값입니다."},
-        {"name": "profile_thumbnail_url", "type": "string", "format": "uri", "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다."},
-        {"name": "description", "type": "string", "max_length": 160, "description": "agent 설정 화면의 설명 입력값입니다."},
-        {"name": "instruction", "type": "string", "max_length": 1000, "description": "agent 설정 화면의 지침 textarea 입력값입니다."},
-        {"name": "visibility", "ref": "AgentVisibility", "description": "agent 공개 범위 radio 입력값입니다."},
-        {"name": "runtime_id", "type": "string", "description": "agent가 사용할 런타임 dropdown 선택값입니다."},
-        {"name": "model_id", "type": "string", "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."}
+        {
+          "name": "name",
+          "type": "string",
+          "description": "agent 설정 화면의 이름 입력값입니다."
+        },
+        {
+          "name": "profile_thumbnail_url",
+          "type": "string",
+          "format": "uri",
+          "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "max_length": 160,
+          "description": "agent 설정 화면의 설명 입력값입니다."
+        },
+        {
+          "name": "instruction",
+          "type": "string",
+          "max_length": 1000,
+          "description": "agent 설정 화면의 지침 textarea 입력값입니다."
+        },
+        {
+          "name": "visibility",
+          "ref": "AgentVisibility",
+          "description": "agent 공개 범위 radio 입력값입니다."
+        },
+        {
+          "name": "runtime_id",
+          "type": "string",
+          "description": "agent가 사용할 런타임 dropdown 선택값입니다."
+        },
+        {
+          "name": "model_id",
+          "type": "string",
+          "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."
+        }
       ]
     },
     {
       "name": "DeleteAgentResponse",
       "description": "agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "agent_id", "queued_tasks_unassigned", "running_tasks_force_stopped"],
+      "required": [
+        "schema_version",
+        "agent_id",
+        "queued_tasks_unassigned",
+        "running_tasks_force_stopped"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "agent_id", "type": "string"},
-        {"name": "queued_tasks_unassigned", "type": "integer"},
-        {"name": "running_tasks_force_stopped", "type": "integer"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "queued_tasks_unassigned",
+          "type": "integer"
+        },
+        {
+          "name": "running_tasks_force_stopped",
+          "type": "integer"
+        }
       ]
     },
     {
       "name": "AssignAIAgentTaskRequest",
       "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.",
       "type": "object",
-      "required": ["agent_id"],
+      "required": [
+        "agent_id"
+      ],
       "properties": [
-        {"name": "agent_id", "type": "string"}
+        {
+          "name": "agent_id",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "UnassignAIAgentTaskRequest",
       "description": "task participant에서 agent를 제거하며 active/queued 작업을 중단하기 위한 요청입니다.",
       "type": "object",
-      "required": ["agent_id"],
+      "required": [
+        "agent_id"
+      ],
       "properties": [
-        {"name": "agent_id", "type": "string"},
-        {"name": "reason", "type": "string"}
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "reason",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "SubmitAIAgentTaskCommentRequest",
       "description": "호환 task comment route로 agent에게 메시지를 전달하기 위한 요청입니다. 정식 command는 CreateAIAgentTaskThreadMessageRequest를 사용합니다.",
       "type": "object",
-      "required": ["agent_id", "body"],
+      "required": [
+        "agent_id",
+        "body"
+      ],
       "properties": [
-        {"name": "agent_id", "type": "string"},
-        {"name": "body", "type": "string"},
-        {"name": "source_comment_id", "type": "string"}
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "source_comment_id",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "CreateAIAgentTaskThreadMessageRequest",
       "description": "task thread에 사용자의 다음 작업 지시 메시지를 남기는 정식 요청입니다. thread_id가 target agent를 결정하므로 agent_id를 받지 않습니다.",
       "type": "object",
-      "required": ["body"],
+      "required": [
+        "body"
+      ],
       "properties": [
-        {"name": "body", "type": "string"},
-        {"name": "source_message_id", "type": "string"}
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "source_message_id",
+          "type": "string"
+        }
       ]
     },
     {
@@ -799,165 +1734,565 @@
       "description": "task thread에서 agent 작업을 중단하기 위한 요청입니다.",
       "type": "object",
       "properties": [
-        {"name": "agent_id", "type": "string"},
-        {"name": "reason", "type": "string"}
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "reason",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "AIAgentTaskActionResponse",
       "description": "task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "task_id", "agent_id", "thread_id", "run_id", "work_status", "assignment_state", "comment_kind", "message"],
+      "required": [
+        "schema_version",
+        "task_id",
+        "agent_id",
+        "thread_id",
+        "run_id",
+        "work_status",
+        "assignment_state",
+        "comment_kind",
+        "message"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "task_id", "type": "string"},
-        {"name": "agent_id", "type": "string"},
-        {"name": "thread_id", "type": "string"},
-        {"name": "run_id", "type": "string"},
-        {"name": "work_status", "ref": "AgentWorkStatus"},
-        {"name": "assignment_state", "ref": "AgentAssignmentState"},
-        {"name": "comment_kind", "ref": "AgentTaskCommentKind"},
-        {"name": "message", "type": "string"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "work_status",
+          "ref": "AgentWorkStatus"
+        },
+        {
+          "name": "assignment_state",
+          "ref": "AgentAssignmentState"
+        },
+        {
+          "name": "comment_kind",
+          "ref": "AgentTaskCommentKind"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "DeviceRuntimeSnapshotEvent",
       "description": "device runtime 감지 결과가 갱신되었음을 알리는 SSE event입니다.",
       "type": "object",
-      "required": ["event_type", "schema_version", "device"],
+      "required": [
+        "event_type",
+        "schema_version",
+        "device"
+      ],
       "properties": [
-        {"name": "event_type", "type": "string", "enum": ["device_runtime_snapshot"]},
-        {"name": "schema_version", "type": "string"},
-        {"name": "device", "ref": "DeviceRecord"}
+        {
+          "name": "event_type",
+          "type": "string",
+          "enum": [
+            "device_runtime_snapshot"
+          ]
+        },
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "device",
+          "ref": "DeviceRecord"
+        }
       ]
     },
     {
       "name": "DeviceDaemonStatusEvent",
       "description": "agent 권한으로 접근 가능한 daemon 상세/제어 상태가 변경되었음을 client SSE로 전달하는 event입니다.",
       "type": "object",
-      "required": ["event_type", "schema_version", "daemon"],
+      "required": [
+        "event_type",
+        "schema_version",
+        "daemon"
+      ],
       "properties": [
-        {"name": "event_type", "type": "string", "enum": ["device_daemon_status_changed"]},
-        {"name": "schema_version", "type": "string"},
-        {"name": "daemon", "ref": "DeviceDaemonRecord"}
+        {
+          "name": "event_type",
+          "type": "string",
+          "enum": [
+            "device_daemon_status_changed"
+          ]
+        },
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "daemon",
+          "ref": "DeviceDaemonRecord"
+        }
       ]
     },
     {
       "name": "AgentEditabilityChangedEvent",
       "description": "agent 수정 가능 여부 변경을 전달하는 SSE event입니다.",
       "type": "object",
-      "required": ["event_type", "schema_version", "agent_id", "editability"],
+      "required": [
+        "event_type",
+        "schema_version",
+        "agent_id",
+        "editability"
+      ],
       "properties": [
-        {"name": "event_type", "type": "string", "enum": ["agent_editability_changed"]},
-        {"name": "schema_version", "type": "string"},
-        {"name": "agent_id", "type": "string"},
-        {"name": "editability", "ref": "AgentEditability"},
-        {"name": "assigned_task_count", "type": "integer"}
+        {
+          "name": "event_type",
+          "type": "string",
+          "enum": [
+            "agent_editability_changed"
+          ]
+        },
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "editability",
+          "ref": "AgentEditability"
+        },
+        {
+          "name": "assigned_task_count",
+          "type": "integer"
+        }
       ]
     },
     {
       "name": "AgentWorkStatusChangedEvent",
       "description": "agent 작업 상태와 task thread 상태 변경을 전달하는 SSE event입니다.",
       "type": "object",
-      "required": ["event_type", "schema_version", "agent_id", "work_status"],
+      "required": [
+        "event_type",
+        "schema_version",
+        "agent_id",
+        "work_status"
+      ],
       "properties": [
-        {"name": "event_type", "type": "string", "enum": ["agent_work_status_changed"]},
-        {"name": "schema_version", "type": "string"},
-        {"name": "agent_id", "type": "string"},
-        {"name": "task_id", "type": "string"},
-        {"name": "thread_id", "type": "string"},
-        {"name": "run_id", "type": "string"},
-        {"name": "work_status", "ref": "AgentWorkStatus"},
-        {"name": "assignment_state", "ref": "AgentAssignmentState"},
-        {"name": "comment_kind", "ref": "AgentTaskCommentKind"}
+        {
+          "name": "event_type",
+          "type": "string",
+          "enum": [
+            "agent_work_status_changed"
+          ]
+        },
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "work_status",
+          "ref": "AgentWorkStatus"
+        },
+        {
+          "name": "assignment_state",
+          "ref": "AgentAssignmentState"
+        },
+        {
+          "name": "comment_kind",
+          "ref": "AgentTaskCommentKind"
+        }
       ]
     },
     {
       "name": "AgentThreadProgressLine",
       "description": "daemon이 batch로 보고한 runtime 진행 메시지 한 줄입니다.",
       "type": "object",
-      "required": ["seq", "message"],
+      "required": [
+        "seq",
+        "message"
+      ],
       "properties": [
-        {"name": "seq", "type": "integer"},
-        {"name": "message", "type": "string"},
-        {"name": "observed_at", "type": "string", "format": "date-time"}
+        {
+          "name": "seq",
+          "type": "integer"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "observed_at",
+          "type": "string",
+          "format": "date-time"
+        }
       ]
     },
     {
       "name": "AgentThreadProgressEvent",
       "description": "활성 task thread에 추가된 AI Agent 진행 상태를 client SSE로 전달하는 event입니다.",
       "type": "object",
-      "required": ["event_type", "schema_version", "agent_id", "task_id", "thread_id", "run_id", "work_status", "assignment_state", "comment_kind", "lines"],
+      "required": [
+        "event_type",
+        "schema_version",
+        "agent_id",
+        "task_id",
+        "thread_id",
+        "run_id",
+        "work_status",
+        "assignment_state",
+        "comment_kind",
+        "lines"
+      ],
       "properties": [
-        {"name": "event_type", "type": "string", "enum": ["agent_thread_progress"]},
-        {"name": "schema_version", "type": "string"},
-        {"name": "agent_id", "type": "string"},
-        {"name": "task_id", "type": "string"},
-        {"name": "thread_id", "type": "string"},
-        {"name": "run_id", "type": "string"},
-        {"name": "work_status", "ref": "AgentWorkStatus"},
-        {"name": "assignment_state", "ref": "AgentAssignmentState"},
-        {"name": "comment_kind", "ref": "AgentTaskCommentKind"},
-        {"name": "batch_started_at", "type": "string", "format": "date-time"},
-        {"name": "batch_ended_at", "type": "string", "format": "date-time"},
-        {"name": "lines", "type": "array", "items": {"ref": "AgentThreadProgressLine"}}
+        {
+          "name": "event_type",
+          "type": "string",
+          "enum": [
+            "agent_thread_progress"
+          ]
+        },
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "work_status",
+          "ref": "AgentWorkStatus"
+        },
+        {
+          "name": "assignment_state",
+          "ref": "AgentAssignmentState"
+        },
+        {
+          "name": "comment_kind",
+          "ref": "AgentTaskCommentKind"
+        },
+        {
+          "name": "batch_started_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "batch_ended_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "lines",
+          "type": "array",
+          "items": {
+            "ref": "AgentThreadProgressLine"
+          }
+        }
       ]
     },
     {
       "name": "AIAgentTaskThreadStreamLink",
       "description": "활성 task thread가 있을 때 client가 연결할 SSE stream handoff link입니다.",
       "type": "object",
-      "required": ["rel", "href", "event_type", "task_id", "thread_id", "run_id"],
+      "required": [
+        "rel",
+        "href",
+        "event_type",
+        "task_id",
+        "thread_id",
+        "run_id"
+      ],
       "properties": [
-        {"name": "rel", "type": "string", "enum": ["agent_thread_progress_stream"]},
-        {"name": "href", "type": "string"},
-        {"name": "event_type", "type": "string", "enum": ["agent_thread_progress"]},
-        {"name": "task_id", "type": "string"},
-        {"name": "thread_id", "type": "string"},
-        {"name": "run_id", "type": "string"}
+        {
+          "name": "rel",
+          "type": "string",
+          "enum": [
+            "agent_thread_progress_stream"
+          ]
+        },
+        {
+          "name": "href",
+          "type": "string"
+        },
+        {
+          "name": "event_type",
+          "type": "string",
+          "enum": [
+            "agent_thread_progress"
+          ]
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "AIAgentTaskThreadRecord",
       "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
       "type": "object",
-      "required": ["thread_id", "task_id", "agent_id", "run_id", "work_status", "assignment_state", "comment_kind", "message", "lines"],
+      "required": [
+        "thread_id",
+        "task_id",
+        "agent_id",
+        "run_id",
+        "work_status",
+        "assignment_state",
+        "comment_kind",
+        "message",
+        "lines"
+      ],
       "properties": [
-        {"name": "thread_id", "type": "string"},
-        {"name": "task_id", "type": "string"},
-        {"name": "agent_id", "type": "string"},
-        {"name": "run_id", "type": "string"},
-        {"name": "source_comment_id", "type": "string"},
-        {"name": "source_message_id", "type": "string"},
-        {"name": "work_status", "ref": "AgentWorkStatus"},
-        {"name": "assignment_state", "ref": "AgentAssignmentState"},
-        {"name": "comment_kind", "ref": "AgentTaskCommentKind"},
-        {"name": "message", "type": "string"},
-        {"name": "started_at", "type": "string", "format": "date-time"},
-        {"name": "completed_at", "type": "string", "format": "date-time"},
-        {"name": "lines", "type": "array", "items": {"ref": "AgentThreadProgressLine"}}
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "source_comment_id",
+          "type": "string"
+        },
+        {
+          "name": "source_message_id",
+          "type": "string"
+        },
+        {
+          "name": "work_status",
+          "ref": "AgentWorkStatus"
+        },
+        {
+          "name": "assignment_state",
+          "ref": "AgentAssignmentState"
+        },
+        {
+          "name": "comment_kind",
+          "ref": "AgentTaskCommentKind"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "started_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "completed_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "lines",
+          "type": "array",
+          "items": {
+            "ref": "AgentThreadProgressLine"
+          }
+        }
       ]
     },
     {
       "name": "AIAgentTaskThreadCollectionResponse",
       "description": "task 화면 진입 시 먼저 읽는 AI Agent thread cold collection 응답입니다.",
       "type": "object",
-      "required": ["schema_version", "task_id", "threads"],
+      "required": [
+        "schema_version",
+        "task_id",
+        "threads"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "task_id", "type": "string"},
-        {"name": "threads", "type": "array", "items": {"ref": "AIAgentTaskThreadRecord"}},
-        {"name": "active_stream", "ref": "AIAgentTaskThreadStreamLink"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "threads",
+          "type": "array",
+          "items": {
+            "ref": "AIAgentTaskThreadRecord"
+          }
+        },
+        {
+          "name": "active_stream",
+          "ref": "AIAgentTaskThreadStreamLink"
+        }
       ]
     },
     {
       "name": "ErrorEnvelope",
       "description": "control-plane API 오류 응답 envelope입니다.",
       "type": "object",
-      "required": ["schema_version", "error"],
+      "required": [
+        "schema_version",
+        "error"
+      ],
       "properties": [
-        {"name": "schema_version", "type": "string"},
-        {"name": "error", "type": "string"}
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "error",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "AIAgentTaskEventStreamLink",
+      "description": "활성 thread filter들과 함께 사용하는 공통 client SSE stream handoff link입니다.",
+      "type": "object",
+      "required": [
+        "rel",
+        "href",
+        "event_type"
+      ],
+      "properties": [
+        {
+          "name": "rel",
+          "type": "string",
+          "enum": [
+            "agent_thread_progress_stream"
+          ]
+        },
+        {
+          "name": "href",
+          "type": "string"
+        },
+        {
+          "name": "event_type",
+          "type": "string",
+          "enum": [
+            "agent_thread_progress"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadStreamTarget",
+      "description": "공통 SSE stream에서 client가 적용할 활성 task thread filter입니다.",
+      "type": "object",
+      "required": [
+        "agent_id",
+        "thread_id",
+        "run_id"
+      ],
+      "properties": [
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadStreamSubscriptionResponse",
+      "description": "task 내 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 handoff 응답입니다.",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "task_id",
+        "stream",
+        "active_thread_filters"
+      ],
+      "properties": [
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "stream",
+          "ref": "AIAgentTaskEventStreamLink"
+        },
+        {
+          "name": "active_thread_filters",
+          "type": "array",
+          "items": {
+            "ref": "AIAgentTaskThreadStreamTarget"
+          }
+        }
       ]
     }
   ],
@@ -970,10 +2305,25 @@
       "path": "/v1/client/ai-agent/bootstrap",
       "resource": "agent",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["bootstrap"], "cache_tag": "aiAgent.bootstrap"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "bootstrap"
+        ],
+        "cache_tag": "aiAgent.bootstrap"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read"
+        ]
+      },
       "rbac_policy": "ai_agent_rbac.v1",
-      "response": {"status": 200, "ref": "ClientBootstrapResponse"},
+      "response": {
+        "status": 200,
+        "ref": "ClientBootstrapResponse"
+      },
       "scenarios": [
         {
           "name": "figma client bootstrap",
@@ -1009,10 +2359,26 @@
       "path": "/v1/client/ai-agent/onboarding/fixtures",
       "resource": "agent",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["onboarding", "fixtures"], "cache_tag": "aiAgent.onboarding.fixtures"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "onboarding",
+          "fixtures"
+        ],
+        "cache_tag": "aiAgent.onboarding.fixtures"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read"
+        ]
+      },
       "rbac_policy": "agent_onboarding_fixtures.v1",
-      "response": {"status": 200, "ref": "AgentOnboardingFixtureListResponse"},
+      "response": {
+        "status": 200,
+        "ref": "AgentOnboardingFixtureListResponse"
+      },
       "scenarios": [
         {
           "name": "figma onboarding fixture selection initial state",
@@ -1036,11 +2402,36 @@
       "path": "/v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents",
       "resource": "agent",
       "action": "create",
-      "client": {"module": "aiAgent", "facade_path": ["onboarding", "fixtures", "createAgent"], "invalidates": ["aiAgent.bootstrap", "aiAgent.devices.runtimes", "aiAgent.tasks.assignableAgents"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:write", "ai-agent:create"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "onboarding",
+          "fixtures",
+          "createAgent"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.devices.runtimes",
+          "aiAgent.tasks.assignableAgents"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ]
+      },
       "rbac_policy": "agent_onboarding_fixtures.v1",
-      "request": {"ref": "CreateAgentConfigurationRequest", "required": true},
-      "response": {"status": 201, "ref": "AgentClientRecordResponse"},
+      "request": {
+        "ref": "CreateAgentConfigurationRequest",
+        "required": true
+      },
+      "response": {
+        "status": 201,
+        "ref": "AgentClientRecordResponse"
+      },
       "scenarios": [
         {
           "name": "fixture creates normal agent",
@@ -1070,10 +2461,26 @@
       "path": "/v1/client/ai-agent/devices",
       "resource": "device",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "runtimes"], "cache_tag": "aiAgent.devices.runtimes"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "runtimes"
+        ],
+        "cache_tag": "aiAgent.devices.runtimes"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "response": {"status": 200, "ref": "DeviceRuntimeListResponse"},
+      "response": {
+        "status": 200,
+        "ref": "DeviceRuntimeListResponse"
+      },
       "scenarios": [
         {
           "name": "missing runtime with assigned agent is offline",
@@ -1127,10 +2534,28 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}/daemon",
       "resource": "agent",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["agents", "daemon", "details"], "cache_tag": "aiAgent.agents.daemon"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:agent:read", "ai-agent:agent:{agent_id}:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "daemon",
+          "details"
+        ],
+        "cache_tag": "aiAgent.agents.daemon"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "response": {"status": 200, "ref": "DeviceDaemonDetailResponse"},
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonDetailResponse"
+      },
       "scenarios": [
         {
           "name": "figma runtime settings daemon details",
@@ -1160,11 +2585,34 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}/daemon/start",
       "resource": "agent",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["agents", "daemon", "start"], "invalidates": ["aiAgent.agents.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:agent:control", "ai-agent:agent:{agent_id}:control"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "daemon",
+          "start"
+        ],
+        "invalidates": [
+          "aiAgent.agents.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:control",
+          "ai-agent:agent:{agent_id}:control"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "request": {"ref": "ControlDeviceDaemonRequest"},
-      "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
       "scenarios": [
         {
           "name": "figma runtime settings daemon start",
@@ -1182,11 +2630,34 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}/daemon/restart",
       "resource": "agent",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["agents", "daemon", "restart"], "invalidates": ["aiAgent.agents.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:agent:control", "ai-agent:agent:{agent_id}:control"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "daemon",
+          "restart"
+        ],
+        "invalidates": [
+          "aiAgent.agents.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:control",
+          "ai-agent:agent:{agent_id}:control"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "request": {"ref": "ControlDeviceDaemonRequest"},
-      "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
       "scenarios": [
         {
           "name": "figma runtime settings daemon restart",
@@ -1204,11 +2675,34 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}/daemon/stop",
       "resource": "agent",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["agents", "daemon", "stop"], "invalidates": ["aiAgent.agents.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:agent:control", "ai-agent:agent:{agent_id}:control"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "daemon",
+          "stop"
+        ],
+        "invalidates": [
+          "aiAgent.agents.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:control",
+          "ai-agent:agent:{agent_id}:control"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "request": {"ref": "ControlDeviceDaemonRequest"},
-      "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
       "scenarios": [
         {
           "name": "figma runtime settings daemon stop",
@@ -1226,10 +2720,27 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignable-agents",
       "resource": "agent",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["tasks", "assignableAgents"], "cache_tag": "aiAgent.tasks.assignableAgents"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:read", "task:{task_id}:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "assignableAgents"
+        ],
+        "cache_tag": "aiAgent.tasks.assignableAgents"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ]
+      },
       "rbac_policy": "ai_agent_rbac.v1",
-      "response": {"status": 200, "ref": "AgentClientListResponse"},
+      "response": {
+        "status": 200,
+        "ref": "AgentClientListResponse"
+      },
       "scenarios": [
         {
           "name": "participant dropdown visible agents",
@@ -1259,11 +2770,36 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignment",
       "resource": "agent",
       "action": "assign",
-      "client": {"module": "aiAgent", "facade_path": ["tasks", "assign"], "invalidates": ["aiAgent.bootstrap", "aiAgent.tasks.assignableAgents", "aiAgent.tasks.threads"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:write", "task:{task_id}:assign", "task:{task_id}:write"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "assign"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents",
+          "aiAgent.tasks.threads"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ]
+      },
       "rbac_policy": "api_codegen_safety.v1",
-      "request": {"ref": "AssignAIAgentTaskRequest", "required": true},
-      "response": {"status": 202, "ref": "AIAgentTaskActionResponse"},
+      "request": {
+        "ref": "AssignAIAgentTaskRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
       "scenarios": [
         {
           "name": "participant dropdown assigns agent",
@@ -1293,11 +2829,36 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignment",
       "resource": "agent",
       "action": "stop",
-      "client": {"module": "aiAgent", "facade_path": ["tasks", "unassign"], "invalidates": ["aiAgent.bootstrap", "aiAgent.tasks.assignableAgents", "aiAgent.tasks.threads"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:write", "task:{task_id}:stop", "task:{task_id}:write"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "unassign"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents",
+          "aiAgent.tasks.threads"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ]
+      },
       "rbac_policy": "api_codegen_safety.v1",
-      "request": {"ref": "UnassignAIAgentTaskRequest", "required": true},
-      "response": {"status": 202, "ref": "AIAgentTaskActionResponse"},
+      "request": {
+        "ref": "UnassignAIAgentTaskRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
       "scenarios": [
         {
           "name": "participant removal stops agent work",
@@ -1315,10 +2876,27 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/threads",
       "resource": "agent",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["tasks", "threads"], "cache_tag": "aiAgent.tasks.threads"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:read", "task:{task_id}:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "threads"
+        ],
+        "cache_tag": "aiAgent.tasks.threads"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ]
+      },
       "rbac_policy": "task_thread_cold_collection.v1",
-      "response": {"status": 200, "ref": "AIAgentTaskThreadCollectionResponse"},
+      "response": {
+        "status": 200,
+        "ref": "AIAgentTaskThreadCollectionResponse"
+      },
       "scenarios": [
         {
           "name": "completed task does not open stream",
@@ -1354,11 +2932,35 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/comments",
       "resource": "agent",
       "action": "create",
-      "client": {"module": "aiAgent", "facade_path": ["tasks", "submitComment"], "invalidates": ["aiAgent.bootstrap", "aiAgent.tasks.assignableAgents", "aiAgent.tasks.threads"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:write", "task:{task_id}:comment"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "submitComment"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents",
+          "aiAgent.tasks.threads"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:comment"
+        ]
+      },
       "rbac_policy": "api_codegen_safety.v1",
-      "request": {"ref": "SubmitAIAgentTaskCommentRequest", "required": true},
-      "response": {"status": 202, "ref": "AIAgentTaskActionResponse"},
+      "request": {
+        "ref": "SubmitAIAgentTaskCommentRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
       "scenarios": [
         {
           "name": "legacy comment route routes to running agent",
@@ -1382,11 +2984,35 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages",
       "resource": "agent",
       "action": "create",
-      "client": {"module": "aiAgent", "facade_path": ["tasks", "threadMessages", "create"], "invalidates": ["aiAgent.bootstrap", "aiAgent.tasks.assignableAgents", "aiAgent.tasks.threads"]},
-      "auth": {"scheme": "bearer", "scopes": ["ai-agent:write", "task:{task_id}:comment"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "threadMessages",
+          "create"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents",
+          "aiAgent.tasks.threads"
+        ]
+      },
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:comment"
+        ]
+      },
       "rbac_policy": "task_thread_next_instruction.v1",
-      "request": {"ref": "CreateAIAgentTaskThreadMessageRequest", "required": true},
-      "response": {"status": 202, "ref": "AIAgentTaskActionResponse"},
+      "request": {
+        "ref": "CreateAIAgentTaskThreadMessageRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
       "scenarios": [
         {
           "name": "active thread next instruction",
@@ -1416,11 +3042,35 @@
       "path": "/v1/client/ai-agent/tasks/{task_id}/stop",
       "resource": "agent",
       "action": "stop",
-      "client": {"module": "aiAgent", "facade_path": ["tasks", "stop"], "invalidates": ["aiAgent.bootstrap", "aiAgent.tasks.assignableAgents", "aiAgent.tasks.threads"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:write", "task:{task_id}:stop", "task:{task_id}:write"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "tasks",
+          "stop"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.tasks.assignableAgents",
+          "aiAgent.tasks.threads"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ]
+      },
       "rbac_policy": "api_codegen_safety.v1",
-      "request": {"ref": "StopAIAgentTaskRequest"},
-      "response": {"status": 202, "ref": "AIAgentTaskActionResponse"},
+      "request": {
+        "ref": "StopAIAgentTaskRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
       "scenarios": [
         {
           "name": "task stop emits thread status",
@@ -1438,11 +3088,35 @@
       "path": "/v1/client/ai-agent/agents",
       "resource": "agent",
       "action": "create",
-      "client": {"module": "aiAgent", "facade_path": ["agents", "create"], "invalidates": ["aiAgent.bootstrap", "aiAgent.devices.runtimes", "aiAgent.tasks.assignableAgents"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:write", "ai-agent:create"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "create"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.devices.runtimes",
+          "aiAgent.tasks.assignableAgents"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ]
+      },
       "rbac_policy": "agent_mutation_safety.v1",
-      "request": {"ref": "CreateAgentConfigurationRequest", "required": true},
-      "response": {"status": 201, "ref": "AgentClientRecordResponse"},
+      "request": {
+        "ref": "CreateAgentConfigurationRequest",
+        "required": true
+      },
+      "response": {
+        "status": 201,
+        "ref": "AgentClientRecordResponse"
+      },
       "scenarios": [
         {
           "name": "agent add screen creates owned agent",
@@ -1478,10 +3152,27 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}/editability",
       "resource": "agent",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["agents", "editability"], "cache_tag": "aiAgent.agents.editability"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:read", "ai-agent:{agent_id}:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "editability"
+        ],
+        "cache_tag": "aiAgent.agents.editability"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read",
+          "ai-agent:{agent_id}:read"
+        ]
+      },
       "rbac_policy": "agent_mutation_safety.v1",
-      "response": {"status": 200, "ref": "AgentEditabilityResponse"},
+      "response": {
+        "status": 200,
+        "ref": "AgentEditabilityResponse"
+      },
       "scenarios": [
         {
           "name": "assigned agent blocks editing",
@@ -1499,11 +3190,35 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}",
       "resource": "agent",
       "action": "update",
-      "client": {"module": "aiAgent", "facade_path": ["agents", "updateConfiguration"], "invalidates": ["aiAgent.bootstrap", "aiAgent.agents.editability", "aiAgent.tasks.assignableAgents"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:write", "ai-agent:{agent_id}:update"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "updateConfiguration"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.agents.editability",
+          "aiAgent.tasks.assignableAgents"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:{agent_id}:update"
+        ]
+      },
       "rbac_policy": "agent_mutation_safety.v1",
-      "request": {"ref": "UpdateAgentConfigurationRequest", "required": true},
-      "response": {"status": 200, "ref": "AgentClientRecordResponse"},
+      "request": {
+        "ref": "UpdateAgentConfigurationRequest",
+        "required": true
+      },
+      "response": {
+        "status": 200,
+        "ref": "AgentClientRecordResponse"
+      },
       "scenarios": [
         {
           "name": "agent name is not unique",
@@ -1557,10 +3272,33 @@
       "path": "/v1/client/ai-agent/agents/{agent_id}",
       "resource": "agent",
       "action": "delete",
-      "client": {"module": "aiAgent", "facade_path": ["agents", "delete"], "invalidates": ["aiAgent.bootstrap", "aiAgent.devices.runtimes", "aiAgent.agents.editability", "aiAgent.tasks.assignableAgents", "aiAgent.tasks.threads"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:write", "ai-agent:{agent_id}:delete"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "delete"
+        ],
+        "invalidates": [
+          "aiAgent.bootstrap",
+          "aiAgent.devices.runtimes",
+          "aiAgent.agents.editability",
+          "aiAgent.tasks.assignableAgents",
+          "aiAgent.tasks.threads"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:{agent_id}:delete"
+        ]
+      },
       "rbac_policy": "agent_mutation_safety.v1",
-      "response": {"status": 200, "ref": "DeleteAgentResponse"},
+      "response": {
+        "status": 200,
+        "ref": "DeleteAgentResponse"
+      },
       "scenarios": [
         {
           "name": "delete unassigns and stops",
@@ -1584,10 +3322,27 @@
       "path": "/v1/client/ai-agent/events",
       "resource": "agent",
       "action": "stream",
-      "client": {"module": "aiAgent", "facade_path": ["events", "stream"], "cache_tag": "aiAgent.events.stream"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:stream"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "events",
+          "stream"
+        ],
+        "cache_tag": "aiAgent.events.stream"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:stream"
+        ]
+      },
       "rbac_policy": "api_codegen_safety.v1",
-      "response": {"status": 200, "ref": "ClientStreamEvent", "content_type": "text/event-stream"},
+      "response": {
+        "status": 200,
+        "ref": "ClientStreamEvent",
+        "content_type": "text/event-stream"
+      },
       "scenarios": [
         {
           "name": "editability updates before mutation",
@@ -2415,6 +4170,193 @@
         "ref": "ClientStreamEvent",
         "content_type": "text/event-stream"
       }
+    },
+    {
+      "operation_id": "createAIAgentTaskAgentAssignmentV2",
+      "kind": "command",
+      "summary": "task에 AI agent를 additive 방식으로 배정합니다 (v2 workspace-scoped)",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments",
+      "resource": "agent",
+      "action": "assign",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "agentAssignments",
+          "create"
+        ],
+        "invalidates": [
+          "v2.aiAgent.bootstrap",
+          "v2.aiAgent.tasks.assignableAgents",
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.threadStreamSubscription"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "request": {
+        "ref": "AssignAIAgentTaskRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenarios": [
+        {
+          "name": "additive task assignment keeps existing active agents",
+          "given": "a task already has an active AI Agent assignment and another visible agent is selected",
+          "when": "client calls riido.v2.aiAgent.tasks.agentAssignments.create",
+          "then": "control-plane keeps existing active task threads and creates or returns the selected agent's task thread"
+        }
+      ]
+    },
+    {
+      "operation_id": "deleteAIAgentTaskAgentAssignmentV2",
+      "kind": "command",
+      "summary": "task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)",
+      "method": "DELETE",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}",
+      "resource": "agent",
+      "action": "stop",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "agentAssignments",
+          "delete"
+        ],
+        "invalidates": [
+          "v2.aiAgent.bootstrap",
+          "v2.aiAgent.tasks.assignableAgents",
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.threadStreamSubscription"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenarios": [
+        {
+          "name": "path agent id selects removed assignment",
+          "given": "a task has multiple active AI Agent threads",
+          "when": "client removes one agent through riido.v2.aiAgent.tasks.agentAssignments.delete",
+          "then": "only the path agent_id target is stopped and other active thread filters remain active"
+        }
+      ]
+    },
+    {
+      "operation_id": "stopAIAgentTaskAgentAssignmentV2",
+      "kind": "command",
+      "summary": "task의 특정 AI agent 작업을 agent_id 기준으로 중단합니다 (v2 workspace-scoped)",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop",
+      "resource": "agent",
+      "action": "stop",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "agentAssignments",
+          "stop"
+        ],
+        "invalidates": [
+          "v2.aiAgent.bootstrap",
+          "v2.aiAgent.tasks.assignableAgents",
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.threadStreamSubscription"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenarios": [
+        {
+          "name": "path agent id selects stopped assignment",
+          "given": "a task has multiple active AI Agent threads",
+          "when": "client stops one agent through riido.v2.aiAgent.tasks.agentAssignments.stop",
+          "then": "only the path agent_id target is stopped and other active thread filters remain active"
+        }
+      ]
+    },
+    {
+      "operation_id": "getAIAgentTaskThreadStreamSubscriptionV2",
+      "kind": "query",
+      "summary": "task의 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 filter handoff를 조회합니다 (v2 workspace-scoped)",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/thread-stream-subscription",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "threadStreamSubscription"
+        ],
+        "cache_tag": "v2.aiAgent.tasks.threadStreamSubscription"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ]
+      },
+      "rbac_policy": "task_thread_cold_collection.v1",
+      "response": {
+        "status": 200,
+        "ref": "AIAgentTaskThreadStreamSubscriptionResponse"
+      },
+      "scenarios": [
+        {
+          "name": "multi active task threads use filters",
+          "given": "a task has two or more visible active AI Agent task threads",
+          "when": "client calls riido.v2.aiAgent.tasks.threadStreamSubscription",
+          "then": "the response contains one stream href and one active_thread_filters item per active thread"
+        },
+        {
+          "name": "cold task returns empty filters",
+          "given": "a task has no active AI Agent task thread",
+          "when": "client calls riido.v2.aiAgent.tasks.threadStreamSubscription",
+          "then": "the response keeps the stream handoff shape but returns an empty active_thread_filters array"
+        }
+      ]
     }
   ]
 }

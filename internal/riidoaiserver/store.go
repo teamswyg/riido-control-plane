@@ -132,6 +132,19 @@ func (s *Store) AssignTask(ctx context.Context, taskID string, req AssignRequest
 	}
 }
 
+func (s *Store) AssignTaskAdditive(ctx context.Context, taskID string, req AssignRequest) (Assignment, error) {
+	reply := make(chan assignResult, 1)
+	if err := s.send(ctx, assignCmd{taskID: taskID, req: req, allowConcurrentTaskAgents: true, reply: reply}); err != nil {
+		return Assignment{}, err
+	}
+	select {
+	case res := <-reply:
+		return res.assignment, res.err
+	case <-ctx.Done():
+		return Assignment{}, ctx.Err()
+	}
+}
+
 func (s *Store) PollAgent(ctx context.Context, agentID string, req PollRequest) (PollResponse, error) {
 	reply := make(chan pollResult, 1)
 	if err := s.send(ctx, pollCmd{agentID: agentID, req: req, reply: reply}); err != nil {
@@ -245,9 +258,10 @@ func (s *Store) send(ctx context.Context, cmd any) error {
 }
 
 type assignCmd struct {
-	taskID string
-	req    AssignRequest
-	reply  chan assignResult
+	taskID                    string
+	req                       AssignRequest
+	allowConcurrentTaskAgents bool
+	reply                     chan assignResult
 }
 
 type assignResult struct {
@@ -350,7 +364,7 @@ func (s *Store) loop(state storeState) {
 		switch msg := cmd.(type) {
 		case assignCmd:
 			beforeEventSeq := state.nextEventSeq
-			assignment, err := s.handleAssign(&state, msg.taskID, msg.req)
+			assignment, err := s.handleAssign(&state, msg.taskID, msg.req, msg.allowConcurrentTaskAgents)
 			if err == nil {
 				err = s.saveOperation(&state, AssignmentOperationAssignTask, assignment, eventsAfterSeq(&state, beforeEventSeq))
 			}
@@ -464,7 +478,7 @@ func (s *Store) saveOperation(state *storeState, operationType AssignmentOperati
 	})
 }
 
-func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest) (Assignment, error) {
+func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest, allowConcurrentTaskAgents bool) (Assignment, error) {
 	taskID = strings.TrimSpace(taskID)
 	req.AgentID = strings.TrimSpace(req.AgentID)
 	req.RuntimeProvider = strings.TrimSpace(req.RuntimeProvider)
@@ -508,9 +522,18 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		task = taskRecord{id: taskID, componentID: req.ComponentID}
 	}
 
+	if allowConcurrentTaskAgents {
+		for _, assignmentID := range state.agentAssignments[req.AgentID] {
+			current := state.assignments[assignmentID]
+			if current.TaskID == taskID && !isTerminal(current.State) {
+				return current, nil
+			}
+		}
+	}
+
 	replacesID := ""
 	blockedByID := ""
-	if task.currentAssignmentID != "" {
+	if !allowConcurrentTaskAgents && task.currentAssignmentID != "" {
 		current := state.assignments[task.currentAssignmentID]
 		if !isTerminal(current.State) {
 			if current.AgentID == req.AgentID {

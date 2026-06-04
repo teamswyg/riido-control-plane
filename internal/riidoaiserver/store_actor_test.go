@@ -190,6 +190,59 @@ func TestStoreActorReassignmentCancelsPreviousAndBlocksNewAgent(t *testing.T) {
 	}
 }
 
+func TestStoreActorAdditiveAssignmentKeepsExistingAgentActive(t *testing.T) {
+	ctx := context.Background()
+	now := time.Date(2026, 6, 4, 12, 0, 0, 0, time.UTC)
+	store := NewStoreWithClock(func() time.Time { return now })
+	defer store.Close()
+
+	first, err := store.AssignTaskAdditive(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "first",
+	})
+	if err != nil {
+		t.Fatalf("AssignTaskAdditive first: %v", err)
+	}
+	firstPoll, err := store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent first: %v", err)
+	}
+	if firstPoll.Action != PollStart || firstPoll.Assignment == nil || firstPoll.Assignment.ID != first.ID {
+		t.Fatalf("first poll = %+v", firstPoll)
+	}
+
+	now = now.Add(time.Minute)
+	second, err := store.AssignTaskAdditive(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-2",
+		RuntimeProvider: "codex",
+		Prompt:          "second",
+	})
+	if err != nil {
+		t.Fatalf("AssignTaskAdditive second: %v", err)
+	}
+	if second.ReplacesAssignmentID != "" || second.BlockedByAssignmentID != "" {
+		t.Fatalf("additive assignment must not replace/block existing assignment: %+v", second)
+	}
+
+	firstPoll, err = store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent first active: %v", err)
+	}
+	if firstPoll.Action != PollActive || firstPoll.Assignment == nil || firstPoll.Assignment.ID != first.ID {
+		t.Fatalf("first active poll = %+v", firstPoll)
+	}
+	secondPoll, err := store.PollAgent(ctx, "agent-2", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent second: %v", err)
+	}
+	if secondPoll.Action != PollStart || secondPoll.Assignment == nil || secondPoll.Assignment.ID != second.ID {
+		t.Fatalf("second poll = %+v", secondPoll)
+	}
+}
+
 func TestStoreActorRejectsStoreUnsafeProviderStatus(t *testing.T) {
 	ctx := context.Background()
 	store := NewStore()
