@@ -1898,10 +1898,13 @@ This slice does:
   `riido_log` batches
 - fan out `agent_work_status_changed` only when daemon/provider assignment
   events change `(work_status, assignment_state, comment_kind)`
+- strip internal `<riido_log>...<end>` transport blocks from client-visible
+  terminal task-thread `message` while keeping rendered progress in `lines[]`
 - preserve terminal status events such as completed, failed, stopped, queued,
   and the first transition from assignment-started into runtime-progress
 - add a regression test that duplicate running assignment events do not grow the
-  client event stream, while a later completed event still does
+  client event stream, while a later completed event still does and does not
+  expose raw progress transport in the cold thread message
 
 This slice does not change endpoint shape, generated OpenAPI, daemon polling,
 frontend code, assignment replacement behavior, or the v2 multi-agent

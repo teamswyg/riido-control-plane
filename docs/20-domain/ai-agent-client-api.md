@@ -438,6 +438,11 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   also update the same client task-thread read model. `riido_log` appends
   progress lines, while terminal assignment states clear `active_stream` so
   generated clients do not keep reconnecting to completed work.
+- assignment event messages can contain provider-internal `<riido_log>...<end>`
+  blocks when the daemon forwards a terminal provider response. Those blocks are
+  internal progress transport and must be stripped from client-visible
+  task-thread `message`; the rendered progress remains available through
+  `lines[]` and `agent_thread_progress`.
 - client task-thread progress is streamed as the typed
   `agent_thread_progress` event with `thread_id` on
   `GET /v1/client/ai-agent/events` and the v2 duplicate

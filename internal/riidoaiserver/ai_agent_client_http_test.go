@@ -1720,7 +1720,7 @@ func TestDevelopmentAIAgentClientStoreSuppressesDuplicateAssignmentStatusFanout(
 	completedEvent := runningEvent
 	completedEvent.Type = EventAssignmentCompleted
 	completedEvent.State = AssignmentCompleted
-	completedEvent.Message = "작업 완료"
+	completedEvent.Message = `<riido_log>{"code":1104,"args":{"label":"verify","summary":"passed"}}<end>작업 완료`
 	completedEvent.At = time.Now().UTC()
 	if err := store.RecordAIAgentAssignmentEvent(context.Background(), assigned.AgentID, AgentEventRequest{}, completedEvent); err != nil {
 		t.Fatalf("completed RecordAIAgentAssignmentEvent: %v", err)
@@ -1728,6 +1728,13 @@ func TestDevelopmentAIAgentClientStoreSuppressesDuplicateAssignmentStatusFanout(
 	afterCompleted := countWorkStatusChangedEventsForTask(t, store, principal, "task-dedupe")
 	if afterCompleted != afterFirstRunning+1 {
 		t.Fatalf("completed event count = %d, want %d", afterCompleted, afterFirstRunning+1)
+	}
+	threads, err := store.ListAIAgentTaskThreads(context.Background(), principal, "task-dedupe")
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	if len(threads.Threads) != 1 || threads.Threads[0].Message != "작업 완료" {
+		t.Fatalf("completed thread message = %+v", threads.Threads)
 	}
 }
 
