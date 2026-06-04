@@ -143,6 +143,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	migration := mustRead(t, "../../docs/migration/control-plane.md")
 	deployWorkflow := mustRead(t, "../../.github/workflows/deploy-ai-agent-testnet.yml")
 	smokeWorkflow := mustRead(t, "../../.github/workflows/ai-agent-client-testnet-smoke.yml")
+	developmentDeployWorkflow := mustRead(t, "../../.github/workflows/deploy-ai-agent-development.yml")
+	developmentSmokeWorkflow := mustRead(t, "../../.github/workflows/ai-agent-client-development-smoke.yml")
 
 	var parsed struct {
 		SchemaVersion string   `json:"schema_version"`
@@ -159,6 +161,18 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			Workflow      string   `json:"workflow"`
 			Allowed       []string `json:"allowed_actions"`
 		} `json:"current_strategy"`
+		DeploymentEnvironments []struct {
+			ID                     string `json:"id"`
+			Status                 string `json:"status"`
+			GitHubEnvironment      string `json:"github_environment"`
+			DeployWorkflow         string `json:"deploy_workflow"`
+			SmokeWorkflow          string `json:"smoke_workflow"`
+			CDOwner                string `json:"cd_owner"`
+			TopologyOwner          string `json:"topology_owner"`
+			TokenSecretKey         string `json:"token_secret_key"`
+			BaseURLVariableKey     string `json:"base_url_variable_key"`
+			WorkspaceIDVariableKey string `json:"workspace_id_variable_key"`
+		} `json:"deployment_environments"`
 		OptionalModes []struct {
 			ID               string   `json:"id"`
 			Status           string   `json:"status"`
@@ -361,6 +375,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	}
 	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/deploy-ai-agent-testnet.yml")
 	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/ai-agent-client-testnet-smoke.yml")
+	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/deploy-ai-agent-development.yml")
+	requireSliceContains(t, parsed.Redaction.Workflows, ".github/workflows/ai-agent-client-development-smoke.yml")
 	requireSliceContains(t, parsed.Redaction.MayCommit, "workflow file")
 	requireSliceContains(t, parsed.Redaction.MayCommit, "non-live behavior documentation")
 	requireSliceContains(t, parsed.Redaction.ShouldMinimize, "publish only stable configuration key names that operators must set")
@@ -431,6 +447,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		t.Fatalf("public surface scan ownership drifted: %#v", parsed.PublicSurfaceScan)
 	}
 	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, ".github/workflows/deploy-ai-agent-testnet.yml")
+	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, ".github/workflows/deploy-ai-agent-development.yml")
 	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, "docs/30-architecture/api-client-delivery.md")
 	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, "docs/30-architecture/runtime-cd-ownership.md")
 	requireSliceContains(t, parsed.PublicSurfaceScan.ScopePaths, "web/generated/aiAgentClient.react.ts")
@@ -450,6 +467,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	expectedSecrets := []string{
 		"RIIDO_AI_SERVER_DEPLOY_ROLE_ARN",
 		"RIIDO_AI_SERVER_TESTNET_TOKEN",
+		"RIIDO_AI_SERVER_DEVELOPMENT_TOKEN",
 	}
 	expectedRequiredVars := []string{
 		"RIIDO_AI_SERVER_AWS_REGION",
@@ -458,13 +476,17 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		"RIIDO_AI_SERVER_ECS_SERVICE",
 		"RIIDO_AI_SERVER_ECS_CONTAINER_NAME",
 		"RIIDO_AI_SERVER_TESTNET_BASE_URL",
+		"RIIDO_AI_SERVER_DEVELOPMENT_BASE_URL",
 	}
 	expectedOptionalVars := []string{
 		"RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID",
+		"RIIDO_AI_SERVER_DEVELOPMENT_WORKSPACE_ID",
 		"RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION",
 		"RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP",
 	}
 	expectedCDKeys := append(append([]string{}, expectedSecrets...), append(expectedRequiredVars, expectedOptionalVars...)...)
+	requireDeploymentEnvironment(t, parsed.DeploymentEnvironments, "testnet", "ai-agent-testnet", ".github/workflows/deploy-ai-agent-testnet.yml", ".github/workflows/ai-agent-client-testnet-smoke.yml", "RIIDO_AI_SERVER_TESTNET_TOKEN", "RIIDO_AI_SERVER_TESTNET_BASE_URL", "RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID")
+	requireDeploymentEnvironment(t, parsed.DeploymentEnvironments, "development", "ai-agent-development", ".github/workflows/deploy-ai-agent-development.yml", ".github/workflows/ai-agent-client-development-smoke.yml", "RIIDO_AI_SERVER_DEVELOPMENT_TOKEN", "RIIDO_AI_SERVER_DEVELOPMENT_BASE_URL", "RIIDO_AI_SERVER_DEVELOPMENT_WORKSPACE_ID")
 	requireStringSetExact(t, parsed.PublicConfigKeyMinimization.RequiredSecretKeys, expectedSecrets)
 	requireStringSetExact(t, parsed.PublicConfigKeyMinimization.RequiredVariableKeys, expectedRequiredVars)
 	requireStringSetExact(t, parsed.PublicConfigKeyMinimization.OptionalVariableKeys, expectedOptionalVars)
@@ -474,13 +496,20 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "container_name")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "codedeploy_application_name")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "codedeploy_deployment_group_name")
+	requireSliceContains(t, parsed.PublicConfigKeyMinimization.StableInfraSourceNames, "operator-provided-development-base-url")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMayReference, "required or optional key categories")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMayReference, "the machine-readable manifest path that contains the exact key list")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMustNotRef, "exact deploy or smoke key-name lists outside the machine-readable manifest and workflow files")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMustNotRef, "environment-specific example values")
 	requireSliceContains(t, parsed.PublicConfigKeyMinimization.PublicDocsMustNotRef, "live hosts")
-	requireStringSetExact(t, collectGitHubConfigRefs(deployWorkflow+"\n"+smokeWorkflow, "secrets"), expectedSecrets)
-	requireStringSetExact(t, collectGitHubConfigRefs(deployWorkflow+"\n"+smokeWorkflow, "vars"), append(expectedRequiredVars, expectedOptionalVars...))
+	allRuntimeWorkflows := strings.Join([]string{
+		deployWorkflow,
+		smokeWorkflow,
+		developmentDeployWorkflow,
+		developmentSmokeWorkflow,
+	}, "\n")
+	requireStringSetExact(t, collectGitHubConfigRefs(allRuntimeWorkflows, "secrets"), expectedSecrets)
+	requireStringSetExact(t, collectGitHubConfigRefs(allRuntimeWorkflows, "vars"), append(expectedRequiredVars, expectedOptionalVars...))
 	if parsed.PublicSensitiveSurfaceGuard.RiidoTask != "RIID-4842" {
 		t.Fatalf("public sensitive surface guard work unit drifted: %#v", parsed.PublicSensitiveSurfaceGuard)
 	}
@@ -501,12 +530,14 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "README.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, "docs/30-architecture/runtime-cd-ownership.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, ".github/workflows/deploy-ai-agent-testnet.yml")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.KeyNameScopePaths, ".github/workflows/deploy-ai-agent-development.yml")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, "docs/30-architecture/runtime-cd-ownership.riido.json")
 	if stringSliceContains(parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, "docs/30-architecture/runtime-cd-ownership.md") ||
 		stringSliceContains(parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, "docs/30-architecture/runtime-deployment-boundary.md") {
 		t.Fatalf("human-readable docs must not be canonical exact CD key-list paths: %#v", parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths)
 	}
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, ".github/workflows/deploy-ai-agent-testnet.yml")
+	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.CanonicalCDKeyListPaths, ".github/workflows/deploy-ai-agent-development.yml")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "README.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "docs/20-domain/ai-agent-client-api.md")
 	requireSliceContains(t, parsed.PublicSensitiveSurfaceGuard.BroadSummaryDocsMustLink, "docs/30-architecture/runtime-deployment-boundary.md")
@@ -720,6 +751,8 @@ func TestRuntimeCDPublicSurfaceScanContract(t *testing.T) {
 	for _, workflowPath := range []string{
 		".github/workflows/deploy-ai-agent-testnet.yml",
 		".github/workflows/ai-agent-client-testnet-smoke.yml",
+		".github/workflows/deploy-ai-agent-development.yml",
+		".github/workflows/ai-agent-client-development-smoke.yml",
 	} {
 		body := mustRead(t, filepath.Join("..", "..", filepath.FromSlash(workflowPath)))
 		for _, forbidden := range parsed.PublicSurfaceScan.WorkflowForbiddenMechanism {
@@ -853,6 +886,38 @@ func requireNonCDRuntimeKey(t *testing.T, keys []struct {
 		}
 	}
 	t.Fatalf("missing non-CD runtime key %q in %#v", wantName, keys)
+}
+
+func requireDeploymentEnvironment(t *testing.T, environments []struct {
+	ID                     string `json:"id"`
+	Status                 string `json:"status"`
+	GitHubEnvironment      string `json:"github_environment"`
+	DeployWorkflow         string `json:"deploy_workflow"`
+	SmokeWorkflow          string `json:"smoke_workflow"`
+	CDOwner                string `json:"cd_owner"`
+	TopologyOwner          string `json:"topology_owner"`
+	TokenSecretKey         string `json:"token_secret_key"`
+	BaseURLVariableKey     string `json:"base_url_variable_key"`
+	WorkspaceIDVariableKey string `json:"workspace_id_variable_key"`
+}, id, githubEnvironment, deployWorkflow, smokeWorkflow, tokenSecretKey, baseURLVariableKey, workspaceIDVariableKey string) {
+	t.Helper()
+	for _, environment := range environments {
+		if environment.ID != id {
+			continue
+		}
+		if environment.GitHubEnvironment != githubEnvironment ||
+			environment.DeployWorkflow != deployWorkflow ||
+			environment.SmokeWorkflow != smokeWorkflow ||
+			environment.CDOwner != "riido-control-plane" ||
+			environment.TopologyOwner != "riido-infra" ||
+			environment.TokenSecretKey != tokenSecretKey ||
+			environment.BaseURLVariableKey != baseURLVariableKey ||
+			environment.WorkspaceIDVariableKey != workspaceIDVariableKey {
+			t.Fatalf("deployment environment %q drifted: %#v", id, environment)
+		}
+		return
+	}
+	t.Fatalf("missing deployment environment %q in %#v", id, environments)
 }
 
 func stringSliceContains(items []string, want string) bool {

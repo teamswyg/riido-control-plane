@@ -83,12 +83,14 @@ owner/public/private visibility policy를 통과해야 합니다. AWS topology, 
 name 값, ECS task role, credential endpoint 값은 `riido-infra`와 GitHub
 environment/secret 경계에 둡니다.
 
-현재 testnet smoke는 별도 GitHub Actions workflow가 담당합니다.
+현재 testnet/development smoke는 별도 GitHub Actions workflow가 담당합니다.
 
 - workflow: `ai-agent-client-testnet-smoke`
+- workflow: `ai-agent-client-development-smoke`
 - deploy workflow: `deploy-ai-agent-testnet`
+- deploy workflow: `deploy-ai-agent-development`
 
-`deploy-ai-agent-testnet`은 `v*` tag push 또는 수동 dispatch에서만 실행합니다.
+deploy workflow는 `v*` tag push 또는 수동 dispatch에서만 실행합니다.
 이 workflow는 GitHub OIDC로 deploy role을 assume하고, image tag를 Git ref와
 commit SHA에서 만들며, ECR image digest를 ECS task definition revision에
 명시합니다. `latest` tag를 배포 기준으로 쓰지 않습니다.

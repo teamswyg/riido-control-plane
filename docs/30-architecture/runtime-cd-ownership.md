@@ -31,9 +31,10 @@ That means this repository owns the workflow that:
 
 ## Current And Future Strategies
 
-The current testnet default strategy is ECS rolling deployment by registering a
-new task definition revision and updating the ECS service. That execution
-remains in the `deploy-ai-agent-testnet` workflow.
+The current testnet and development default strategy is ECS rolling deployment
+by registering a new task definition revision and updating the ECS service. That
+execution remains in the environment-specific deploy workflow listed in the
+machine-readable ownership manifest.
 
 The same workflow also has a topology-gated CodeDeploy mode. When the optional
 CodeDeploy application/deployment-group GitHub environment keys listed in the
