@@ -453,6 +453,11 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   also update the same client task-thread read model. `riido_log` appends
   progress lines, while terminal assignment states clear `active_stream` so
   generated clients do not keep reconnecting to completed work.
+- non-`riido_log` daemon/provider events for active states (`queued`,
+  `leased`, `ready`, `running`, `cancelling`) are lifecycle heartbeats, not
+  client copy. They must not overwrite the task-thread representative
+  `message`; the visible in-progress copy is owned by rendered progress
+  `lines[]` and terminal assignment messages.
 - assignment event messages can contain provider-internal `<riido_log>...<end>`
   blocks when the daemon forwards a terminal provider response. Those blocks are
   internal progress transport and must be stripped from client-visible
