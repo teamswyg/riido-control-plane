@@ -1927,6 +1927,29 @@ preserves the existing static fixture behavior while treating
 the development AI API host as a real persistent development environment rather
 than a mixed mock surface.
 
+### RIID-4917 — public progress stream renders structured payload fallback
+
+This slice closes a live development finding where a runtime progress line could
+reach the client event stream as raw JSON-shaped text such as
+`{"code":1102,"args":{"count":1}}`. The shared progress-message SSOT already
+requires fixed, translated, integer-coded progress messages to be rendered
+before public SSE delivery, so the control-plane now treats a bare JSON progress
+payload in `message` as a defensive fallback input and renders it into the same
+Korean `message` string shape the frontend already consumes.
+
+This slice does:
+
+- parse bare JSON progress payloads during `AgentThreadProgressLine`
+  normalization when `message_code` is absent
+- accept primitive JSON arg values, including numeric `count`, and normalize
+  them into `message_args`
+- keep daemon-provided `message_code` / `message_key` / `message_args`
+  precedence when they are already present
+- preserve existing public client shape and generated endpoint paths
+
+This slice does not add new SSE event variants, change frontend behavior,
+change the progress catalog, or require generated-client updates.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
