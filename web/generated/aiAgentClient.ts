@@ -387,15 +387,36 @@ export interface CreateAIAgentTaskThreadMessageRequest {
 }
 
 /**
- * agent 이름, 공개 범위, runtime, model, profile field를 저장하기 위한 생성 요청입니다.
+ * Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.
  */
 export interface CreateAgentConfigurationRequest {
+  /**
+   * agent 추가 화면의 설명 입력값입니다.
+   */
   description?: string;
+  /**
+   * agent 추가 화면의 지침 textarea 입력값입니다.
+   */
   instruction?: string;
+  /**
+   * 선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다.
+   */
   model_id?: string;
+  /**
+   * agent 추가 화면의 이름 입력값입니다.
+   */
   name: string;
+  /**
+   * agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.
+   */
   profile_thumbnail_url?: string;
+  /**
+   * agent가 사용할 런타임 dropdown 선택값입니다.
+   */
   runtime_id: string;
+  /**
+   * agent 공개 범위 radio 입력값입니다.
+   */
   visibility: AgentVisibility;
 }
 
@@ -578,15 +599,36 @@ export interface UnassignAIAgentTaskRequest {
 }
 
 /**
- * agent 이름, 공개 범위, runtime 연결을 수정하기 위한 요청입니다.
+ * Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다.
  */
 export interface UpdateAgentConfigurationRequest {
+  /**
+   * agent 설정 화면의 설명 입력값입니다.
+   */
   description?: string;
+  /**
+   * agent 설정 화면의 지침 textarea 입력값입니다.
+   */
   instruction?: string;
+  /**
+   * 선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다.
+   */
   model_id?: string;
+  /**
+   * agent 설정 화면의 이름 입력값입니다.
+   */
   name?: string;
+  /**
+   * agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.
+   */
   profile_thumbnail_url?: string;
+  /**
+   * agent가 사용할 런타임 dropdown 선택값입니다.
+   */
   runtime_id?: string;
+  /**
+   * agent 공개 범위 radio 입력값입니다.
+   */
   visibility?: AgentVisibility;
 }
 

@@ -394,6 +394,7 @@
         "updated_at: server-authored RFC3339 date-time refreshed when editable agent configuration is saved; used by clients for list update dates and absolute-time tooltips",
         "model_id: optional runtime-scoped model selection; omitted create/update values resolve to the selected runtime default",
         "required_form_controls: Figma node-id=417-21803 / 432-35544 says name, runtime, model, and visibility are required controls; profile_thumbnail_url, description, and instruction remain optional values",
+        "agent_add_screen_field_set: Figma agent add/settings screen fields map to CreateAgentConfigurationRequest.name, profile_thumbnail_url, description, runtime_id, model_id, visibility, and instruction; model options come from RuntimeRecord.models and profile image binary upload/storage stays outside this endpoint",
         "create: client-facing agent creation stores the same profile fields, binds an authorized selectable runtime_id from the device/runtime read model, stamps owner_principal_id from authorization, and returns created_at and updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
@@ -1583,7 +1584,7 @@
       "name": "CreateAgentConfigurationRequest",
       "schema": {
         "name": "CreateAgentConfigurationRequest",
-        "description": "agent 이름, 공개 범위, runtime, model, profile field를 저장하기 위한 생성 요청입니다.",
+        "description": "Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.",
         "type": "object",
         "required": [
           "name",
@@ -1593,34 +1594,41 @@
         "properties": [
           {
             "name": "name",
-            "type": "string"
+            "type": "string",
+            "description": "agent 추가 화면의 이름 입력값입니다."
           },
           {
             "name": "profile_thumbnail_url",
             "type": "string",
+            "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.",
             "format": "uri"
           },
           {
             "name": "description",
             "type": "string",
+            "description": "agent 추가 화면의 설명 입력값입니다.",
             "max_length": 160
           },
           {
             "name": "instruction",
             "type": "string",
+            "description": "agent 추가 화면의 지침 textarea 입력값입니다.",
             "max_length": 1000
           },
           {
             "name": "visibility",
+            "description": "agent 공개 범위 radio 입력값입니다.",
             "ref": "AgentVisibility"
           },
           {
             "name": "runtime_id",
-            "type": "string"
+            "type": "string",
+            "description": "agent가 사용할 런타임 dropdown 선택값입니다."
           },
           {
             "name": "model_id",
-            "type": "string"
+            "type": "string",
+            "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."
           }
         ]
       }
@@ -1629,39 +1637,46 @@
       "name": "UpdateAgentConfigurationRequest",
       "schema": {
         "name": "UpdateAgentConfigurationRequest",
-        "description": "agent 이름, 공개 범위, runtime 연결을 수정하기 위한 요청입니다.",
+        "description": "Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다.",
         "type": "object",
         "properties": [
           {
             "name": "name",
-            "type": "string"
+            "type": "string",
+            "description": "agent 설정 화면의 이름 입력값입니다."
           },
           {
             "name": "profile_thumbnail_url",
             "type": "string",
+            "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.",
             "format": "uri"
           },
           {
             "name": "description",
             "type": "string",
+            "description": "agent 설정 화면의 설명 입력값입니다.",
             "max_length": 160
           },
           {
             "name": "instruction",
             "type": "string",
+            "description": "agent 설정 화면의 지침 textarea 입력값입니다.",
             "max_length": 1000
           },
           {
             "name": "visibility",
+            "description": "agent 공개 범위 radio 입력값입니다.",
             "ref": "AgentVisibility"
           },
           {
             "name": "runtime_id",
-            "type": "string"
+            "type": "string",
+            "description": "agent가 사용할 런타임 dropdown 선택값입니다."
           },
           {
             "name": "model_id",
-            "type": "string"
+            "type": "string",
+            "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."
           }
         ]
       }
@@ -4209,9 +4224,9 @@
       "scenario_id": "createAIAgent.agent-add-screen-creates-owned-agent",
       "operation_id": "createAIAgent",
       "name": "agent add screen creates owned agent",
-      "given": "the Figma agent-add screen submits name, visibility, runtime_id, and optional profile fields",
+      "given": "the Figma agent-add screen submits profile photo URL, name, description, runtime_id, model_id, visibility, and instruction",
       "when": "an authorized client creates an agent",
-      "then": "the response contains a new owned agent with zero assigned tasks, editable status, server-authored created_at and updated_at, and the runtime kind derived from the selected runtime_id"
+      "then": "the response contains a new owned agent with the submitted profile fields, selected runtime/model, zero assigned tasks, editable status, server-authored created_at and updated_at, and the runtime kind derived from runtime_id"
     },
     {
       "scenario_id": "createAIAgent.onboarding-direct-setting-creates-explicit-configuration",
@@ -4401,9 +4416,9 @@
       "scenario_id": "createAIAgentV2.workspace-scoped-agent-creation",
       "operation_id": "createAIAgentV2",
       "name": "workspace-scoped agent creation",
-      "given": "a viewer has selected workspace_id workspace-a through the existing Riido workspace surface",
+      "given": "a viewer has selected workspace_id workspace-a through the existing Riido workspace surface and the Figma agent-add screen submits profile photo URL, name, description, runtime_id, model_id, visibility, and instruction",
       "when": "the client calls riido.v2.aiAgent.agents.create with workspace_id in the URL path",
-      "then": "the server creates a normal agent stamped with workspace_id workspace-a and owner_principal_id from authorization while the request body cannot override workspace ownership"
+      "then": "the server creates a normal agent stamped with workspace_id workspace-a, owner_principal_id from authorization, the submitted profile/runtime/model fields, and no request-body override for workspace ownership"
     },
     {
       "scenario_id": "createAIAgentV2.onboarding-direct-draft-finalizes-only-with-workspace-and-runtime",
