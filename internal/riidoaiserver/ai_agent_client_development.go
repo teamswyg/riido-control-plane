@@ -1301,6 +1301,8 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 		}
 		s.taskThreads[taskID] = append(s.taskThreads[taskID], thread)
 	}
+	hadThread := ok
+	previousThread := thread
 
 	if strings.TrimSpace(event.Type) == EventRiidoLog && message != "" {
 		messageCode, messageKey, messageArgs := progressLineMetadata(event.Metadata)
@@ -1348,6 +1350,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 
 	response := assignmentEventActionResponse(thread, state, message)
 	s.upsertTaskThreadFromActionLocked(response, "")
+	shouldFanoutStatus := shouldFanoutAgentTaskActionEvent(hadThread, previousThread, response)
 	if !taskThreadHasActiveStream(AIAgentTaskThreadRecord{AssignmentState: response.AssignmentState}) && agent.AssignedTaskCount > 0 {
 		agent.AssignedTaskCount--
 	}
@@ -1360,7 +1363,9 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 		}
 	}
 	s.agents[agentID] = agent
-	s.appendAgentTaskActionEvent(response)
+	if shouldFanoutStatus {
+		s.appendAgentTaskActionEvent(response)
+	}
 	return nil
 }
 
@@ -1568,6 +1573,15 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		}
 	}
 	return response
+}
+
+func shouldFanoutAgentTaskActionEvent(hadThread bool, previous AIAgentTaskThreadRecord, response AIAgentTaskActionResponse) bool {
+	if !hadThread {
+		return true
+	}
+	return previous.WorkStatus != response.WorkStatus ||
+		previous.AssignmentState != response.AssignmentState ||
+		previous.CommentKind != response.CommentKind
 }
 
 func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAgentTaskActionResponse, sourceCommentID string) {

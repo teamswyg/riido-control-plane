@@ -442,6 +442,12 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `agent_thread_progress` event with `thread_id` on
   `GET /v1/client/ai-agent/events` and the v2 duplicate
   `GET /v2/client/workspaces/{workspace_id}/ai-agent/events`
+- repeated daemon/provider assignment events that keep the same
+  `(work_status, assignment_state, comment_kind)` must not be fanned out as new
+  `agent_work_status_changed` events. The client status stream is a state
+  transition surface; live text/progress belongs to `agent_thread_progress`.
+  This keeps SSE volume bounded for long-running providers while preserving
+  terminal transitions such as completed, failed, stopped, or queued.
 - runtime settings consume `GET /v1/client/ai-agent/devices`,
   `GET /v1/client/ai-agent/agents/{agent_id}/daemon`, daemon command
   endpoints, `device_runtime_snapshot`, and `device_daemon_status_changed`
