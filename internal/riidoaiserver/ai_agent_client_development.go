@@ -1515,7 +1515,7 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentRuntimeProgress,
-		Message:         strings.TrimSpace(message),
+		Message:         stripRiidoLogBlocks(message),
 	}
 	switch state {
 	case AssignmentQueued, AssignmentLeased:
@@ -1573,6 +1573,24 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		}
 	}
 	return response
+}
+
+func stripRiidoLogBlocks(message string) string {
+	message = strings.TrimSpace(message)
+	const start = "<riido_log>"
+	const end = "<end>"
+	for {
+		startIndex := strings.Index(message, start)
+		if startIndex < 0 {
+			return strings.TrimSpace(message)
+		}
+		endOffset := strings.Index(message[startIndex+len(start):], end)
+		if endOffset < 0 {
+			return strings.TrimSpace(message)
+		}
+		endIndex := startIndex + len(start) + endOffset + len(end)
+		message = message[:startIndex] + message[endIndex:]
+	}
 }
 
 func shouldFanoutAgentTaskActionEvent(hadThread bool, previous AIAgentTaskThreadRecord, response AIAgentTaskActionResponse) bool {
