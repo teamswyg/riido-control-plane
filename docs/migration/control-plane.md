@@ -1950,6 +1950,29 @@ This slice does:
 This slice does not add new SSE event variants, change frontend behavior,
 change the progress catalog, or require generated-client updates.
 
+### RIID-4917 — active provider heartbeat does not own task-thread copy
+
+Live development verification with daemon `v0.0.10` showed that Codex could
+complete a follow-up Rust Hello World assignment and emit fixed rendered
+progress `lines[]`, while an active provider heartbeat briefly overwrote the
+cold task-thread representative `message` with provider-internal text such as
+`codex unknown notification: item/started` or a JSON warning log. That conflicts
+with the AI Agent client API SSOT: active non-`riido_log` daemon/provider events
+are lifecycle heartbeats, not client copy.
+
+This slice does:
+
+- preserve the existing task-thread representative `message` for active
+  non-`riido_log` assignment events
+- keep rendered progress `lines[]` as the owner of visible in-progress copy
+- keep terminal assignment messages visible, with `<riido_log>...<end>` blocks
+  stripped as before
+- add a store regression test proving provider heartbeat/log events do not
+  replace a rendered progress message
+
+This slice does not change generated endpoint paths, add frontend filtering
+requirements, or alter terminal completed/failed message handling.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

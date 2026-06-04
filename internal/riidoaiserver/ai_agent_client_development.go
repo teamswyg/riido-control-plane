@@ -1284,6 +1284,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	thread, ok := s.activeTaskThreadForAgentLocked(taskID, agentID)
 	if !ok {
 		runID := "run-" + assignmentID
+		threadMessage := assignmentEventVisibleThreadMessage(state, strings.TrimSpace(event.Type), message, "")
 		thread = AIAgentTaskThreadRecord{
 			ThreadID:        threadIDForRun(taskID, agentID, runID),
 			TaskID:          taskID,
@@ -1292,7 +1293,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 			WorkStatus:      AgentWorkStatusRunning,
 			AssignmentState: AgentAssignmentStateRunning,
 			CommentKind:     AgentTaskCommentRuntimeProgress,
-			Message:         message,
+			Message:         threadMessage,
 			StartedAt:       event.At,
 			Lines:           []AgentThreadProgressLine{},
 		}
@@ -1348,7 +1349,8 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 		return nil
 	}
 
-	response := assignmentEventActionResponse(thread, state, message)
+	responseMessage := assignmentEventVisibleThreadMessage(state, strings.TrimSpace(event.Type), message, previousThread.Message)
+	response := assignmentEventActionResponse(thread, state, responseMessage)
 	s.upsertTaskThreadFromActionLocked(response, "")
 	shouldFanoutStatus := shouldFanoutAgentTaskActionEvent(hadThread, previousThread, response)
 	if !taskThreadHasActiveStream(AIAgentTaskThreadRecord{AssignmentState: response.AssignmentState}) && agent.AssignedTaskCount > 0 {
@@ -1573,6 +1575,16 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		}
 	}
 	return response
+}
+
+func assignmentEventVisibleThreadMessage(state AssignmentState, eventType, message, previous string) string {
+	switch state {
+	case AssignmentQueued, AssignmentLeased, AssignmentReady, AssignmentRunning, AssignmentCancelling:
+		if strings.TrimSpace(eventType) != EventRiidoLog {
+			return strings.TrimSpace(previous)
+		}
+	}
+	return strings.TrimSpace(message)
 }
 
 func stripRiidoLogBlocks(message string) string {
