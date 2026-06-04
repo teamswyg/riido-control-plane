@@ -425,8 +425,11 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
 - task-thread messages created while the viewer was on another screen are still
   returned by the later cold collection; scroll/focus presentation remains a
   client concern
-- daemon progress ingest accepts parsed `<riido_log>...<end>` batches through
-  `POST /v1/agents/{agent_id}/thread-progress`
+- daemon progress ingest accepts parsed
+  `<riido_log>{"code":...,"args":{...}}<end>` batches through
+  `POST /v1/agents/{agent_id}/thread-progress`; `message_code` /
+  `message_args` are internal daemon/control-plane projection fields and are
+  rendered to the existing frontend-facing `message` string before SSE fanout
 - if that daemon progress ingest omits `thread_id`, the control-plane must
   attach the batch to the current active thread for the same `(task_id,
   agent_id)` instead of creating a second visible thread from the assignment
