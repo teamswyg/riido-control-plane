@@ -2060,9 +2060,10 @@ This slice does:
 - expose assignment projection reads through the public assignment store actor,
   delegating to the durable operation store in deployed environments
 - repair visible active AI Agent client task-thread rows from the durable
-  assignment projection before generated thread reads, stream subscription
-  reads, workspace assigned-profile reads, generated assignment creation, and
-  completed-thread follow-up assignment creation
+  assignment projection before generated bootstrap reads, generated thread
+  reads, stream subscription reads, workspace assigned-profile reads,
+  generated assignment creation, and completed-thread follow-up assignment
+  creation
 - add a black-box HTTP regression where the durable assignment store receives a
   terminal event but the client read model misses the fan-out; the next thread
   read closes `active_stream`
