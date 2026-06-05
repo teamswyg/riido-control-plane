@@ -2412,14 +2412,14 @@ func TestDevelopmentAIAgentClientStoreThreadProgressFanout(t *testing.T) {
 		AssignmentID: "asn-1",
 		TaskID:       "task-1",
 		RunID:        "run-1",
-		Lines:        []AgentThreadProgressLine{{Seq: 1, Message: "웹 검색 실행 중"}},
+		Lines:        []AgentThreadProgressLine{{Seq: 1, Message: "검증 실행 중 - /tmp/riido-runtime/log.txt"}},
 	}); err != nil {
 		t.Fatalf("RecordAIAgentThreadProgress: %v", err)
 	}
 	select {
 	case event := <-events:
 		progress, ok := event.Payload.(AgentThreadProgressEvent)
-		if !ok || progress.EventType != AgentClientEventThreadProgress || progress.Lines[0].Message != "웹 검색 실행 중" {
+		if !ok || progress.EventType != AgentClientEventThreadProgress || progress.Lines[0].Message != "검증 실행 중 - 로컬 파일" {
 			t.Fatalf("fanout event = %+v", event)
 		}
 	case <-time.After(time.Second):
@@ -2612,6 +2612,9 @@ func TestDevelopmentAIAgentClientStoreHidesLocalRuntimePathsFromClientThreadMess
 	}
 	if !strings.Contains(message, "`rustc -o 로컬 파일`") {
 		t.Fatalf("thread message should preserve inline-code backticks around sanitized local path: %q", message)
+	}
+	if got := threads.Threads[0].Lines[0].Message; got != "검증 완료 - 로컬 파일" {
+		t.Fatalf("thread progress line should hide local runtime path: %q", got)
 	}
 }
 

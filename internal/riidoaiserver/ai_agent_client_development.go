@@ -1949,15 +1949,17 @@ func stripRiidoLogBlocks(message string) string {
 }
 
 var (
-	clientVisibleMarkdownLocalLinkPattern = regexp.MustCompile(`\[([^\]]+)\]\(\s*<?(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^)>]*>?\s*\)`)
-	clientVisibleAngleLocalPathPattern    = regexp.MustCompile(`<(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^>]+>`)
-	clientVisibleLocalPathPattern         = regexp.MustCompile("(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^\\s<>)\\]\"'`]+")
+	clientVisibleMarkdownLocalLinkPattern           = regexp.MustCompile(`\[([^\]]+)\]\(\s*<?(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^)>]*>?\s*\)`)
+	clientVisibleAngleLocalPathPattern              = regexp.MustCompile(`<(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^>]+>`)
+	clientVisibleApplicationSupportLocalPathPattern = regexp.MustCompile("(?:file://)?/Users/[^\\s<>)\\]\"'`]+/Library/Application Support/[^\\s<>)\\]\"'`]+")
+	clientVisibleLocalPathPattern                   = regexp.MustCompile("(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^\\s<>)\\]\"'`]+")
 )
 
 func clientVisibleTaskThreadText(message string) string {
 	message = stripRiidoLogBlocks(message)
 	message = clientVisibleMarkdownLocalLinkPattern.ReplaceAllString(message, "$1")
 	message = clientVisibleAngleLocalPathPattern.ReplaceAllString(message, "로컬 파일")
+	message = clientVisibleApplicationSupportLocalPathPattern.ReplaceAllString(message, "로컬 파일")
 	message = clientVisibleLocalPathPattern.ReplaceAllString(message, "로컬 파일")
 	message = restoreClientVisibleInlineCode(message)
 	return strings.TrimSpace(message)
@@ -2322,6 +2324,10 @@ func clientEventForPrincipalLocked(s *DevelopmentAIAgentClientStore, principal A
 		deviceEvent.Device = device
 		event.Payload = deviceEvent
 		return event, true
+	}
+	if progressEvent, ok := event.Payload.(AgentThreadProgressEvent); ok {
+		progressEvent.Lines = copyClientVisibleProgressLines(progressEvent.Lines)
+		event.Payload = progressEvent
 	}
 	if !clientEventVisibleToLocked(s, principal, event) {
 		return ClientStreamEvent{}, false
@@ -2799,13 +2805,21 @@ func deviceRuntimeSnapshotStale(lastSeenAt time.Time, now time.Time) bool {
 }
 
 func copyTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
-	thread.Lines = copyProgressLines(thread.Lines)
+	thread.Lines = copyClientVisibleProgressLines(thread.Lines)
 	thread.Message = clientVisibleTaskThreadMessage(thread)
 	return thread
 }
 
 func copyProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLine {
 	return append([]AgentThreadProgressLine(nil), lines...)
+}
+
+func copyClientVisibleProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLine {
+	out := copyProgressLines(lines)
+	for i := range out {
+		out[i].Message = clientVisibleTaskThreadText(out[i].Message)
+	}
+	return out
 }
 
 func clientVisibleTaskThreadMessage(thread AIAgentTaskThreadRecord) string {
