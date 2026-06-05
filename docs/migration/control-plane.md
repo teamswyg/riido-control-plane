@@ -2063,10 +2063,15 @@ This slice does:
   assignment projection before generated bootstrap reads, generated thread
   reads, stream subscription reads, workspace assigned-profile reads,
   generated assignment creation, and completed-thread follow-up assignment
-  creation
+  creation. This includes terminal projection repair and non-terminal queued
+  projection repair when the client read model eagerly marked a task as running
+  before daemon poll/lease.
 - add a black-box HTTP regression where the durable assignment store receives a
   terminal event but the client read model misses the fan-out; the next thread
   read closes `active_stream`
+- add a black-box HTTP regression where the durable assignment projection is
+  still `queued` but the client read model is eager-running; the next bootstrap
+  read projects the agent/thread as queued without changing frontend calls
 
 This slice keeps the frontend call pattern unchanged. `assignment_id` is an
 additive generated field, not a new client input. Historical task-thread rows

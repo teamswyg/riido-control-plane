@@ -467,9 +467,11 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `assignment_id` when the server has accepted durable daemon work. This value
   is a server-projected trace key, not a client input requirement. The durable
   assignment projection is the truth source; if client task-thread fanout misses
-  a terminal assignment event, the next generated bootstrap/thread/profile read
-  repairs `active_stream` from that projection before projecting
-  `work_status`, `assigned_task_count`, and stream links.
+  a terminal assignment event, or if the client read model eagerly projected a
+  task as running before the daemon poll moved the durable assignment out of
+  `queued`, the next generated bootstrap/thread/profile read repairs
+  `active_stream` from that projection before projecting `work_status`,
+  `assigned_task_count`, and stream links.
 - non-`riido_log` daemon/provider events for active states (`queued`,
   `leased`, `ready`, `running`, `cancelling`) are lifecycle heartbeats, not
   client copy. They must not overwrite the task-thread representative
