@@ -53,6 +53,12 @@ jobs:
             | jq -e '.schema_version == "riido-ai-server.v1" and (.agents | length) > 0 and (.devices | length) > 0' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/devices" \
             | jq -e '.schema_version == "riido-ai-server.v1" and (.devices | length) > 0' >/dev/null
+          device_id="$(
+            curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/devices" \
+              | jq -re '.devices[0].device_id'
+          )"
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/devices/$device_id/daemon" \
+            | jq -e --arg device_id "$device_id" '.schema_version == "riido-ai-server.v1" and .daemon.device_id == $device_id and (.daemon.supported_actions | length) >= 1' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/agents/agent-owned-codex/daemon" \
             | jq -e '.schema_version == "riido-ai-server.v1" and .daemon.device_id == "device-dev-macbook" and (.daemon.supported_actions | length) > 0' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/assignable-agents" \
@@ -94,6 +100,12 @@ jobs:
 
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/bootstrap" \
             | jq -e --arg workspace_id "$workspace_id" '.schema_version == "riido-ai-server.v1" and .workspace_id == $workspace_id and (.devices | length) > 0' >/dev/null
+          device_id_v2="$(
+            curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices" \
+              | jq -re '.devices[0].device_id'
+          )"
+          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices/$device_id_v2/daemon" \
+            | jq -e --arg device_id "$device_id_v2" '.schema_version == "riido-ai-server.v1" and .daemon.device_id == $device_id and (.daemon.supported_actions | length) >= 1' >/dev/null
           created_v2_agent="$(
             curl_json \
               -H "$auth_header" \

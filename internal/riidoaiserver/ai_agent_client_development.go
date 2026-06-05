@@ -2557,17 +2557,41 @@ func (s *DevelopmentAIAgentClientStore) deviceDaemonForAgentAccessLocked(princip
 }
 
 func (s *DevelopmentAIAgentClientStore) deviceDaemonForOwnerLocked(principal AuthorizationResult, deviceID string) (DeviceDaemonRecord, bool) {
+	if daemon, ok := s.daemons[deviceID]; ok && daemon.OwnerPrincipalID == principal.PrincipalID {
+		return projectDeviceDaemonLiveness(daemon, time.Now().UTC()), true
+	}
 	for _, device := range s.devices {
 		if device.DeviceID != deviceID || device.OwnerPrincipalID != principal.PrincipalID {
 			continue
 		}
 		daemon, ok := s.daemons[deviceID]
 		if !ok {
-			return DeviceDaemonRecord{}, false
+			return projectDeviceDaemonLiveness(deviceDaemonFromDeviceReadModel(device), time.Now().UTC()), true
 		}
 		return projectDeviceDaemonLiveness(daemon, time.Now().UTC()), true
 	}
 	return DeviceDaemonRecord{}, false
+}
+
+func deviceDaemonFromDeviceReadModel(device DeviceRecord) DeviceDaemonRecord {
+	daemon := DeviceDaemonRecord{
+		DeviceID:          device.DeviceID,
+		OwnerPrincipalID:  device.OwnerPrincipalID,
+		DeviceDisplayName: device.DisplayName,
+		LastSeenAt:        device.DaemonLastSeenAt,
+		Availability:      DaemonAvailabilityOffline,
+		ControlState:      DaemonControlStateIdle,
+		SupportedActions:  []DaemonControlAction{DaemonControlActionStart},
+	}
+	for _, runtime := range device.Runtimes {
+		if runtime.Availability != RuntimeAvailabilityOnline {
+			continue
+		}
+		daemon.Availability = DaemonAvailabilityOnline
+		daemon.SupportedActions = []DaemonControlAction{DaemonControlActionRestart, DaemonControlActionStop}
+		return daemon
+	}
+	return daemon
 }
 
 func (s *DevelopmentAIAgentClientStore) deviceByRuntimeIDLocked(runtimeID string) (DeviceRecord, bool) {
