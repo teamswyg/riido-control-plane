@@ -148,7 +148,15 @@ func (s *DevelopmentAIAgentClientStore) AuthorizeDeviceCredential(ctx context.Co
 func (s *DevelopmentAIAgentClientStore) upsertEnrolledDeviceLocked(device DeviceRecord) {
 	for i := range s.devices {
 		if s.devices[i].DeviceID == device.DeviceID {
-			s.devices[i] = device
+			merged := copyDevice(s.devices[i])
+			merged.OwnerPrincipalID = device.OwnerPrincipalID
+			if device.DisplayName != "" {
+				merged.DisplayName = device.DisplayName
+			}
+			if !device.DaemonLastSeenAt.IsZero() {
+				merged.DaemonLastSeenAt = device.DaemonLastSeenAt
+			}
+			s.devices[i] = merged
 			return
 		}
 	}

@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -132,6 +133,68 @@ func TestPersistentAIAgentClientStoreReloadsDeviceCredentialAcrossProcesses(t *t
 	}
 	if detail.Daemon.Profile != "development" || detail.Daemon.PID != 4321 || detail.Daemon.UptimeSeconds != 321 || !detail.Daemon.StartedAt.Equal(startedAt) {
 		t.Fatalf("daemon detail facts after reload = %+v", detail.Daemon)
+	}
+}
+
+func TestPersistentAIAgentClientStorePreservesRuntimeSnapshotWhenDeviceSecretRotates(t *testing.T) {
+	ctx := context.Background()
+	snapshots := &memoryAIAgentClientSnapshotStore{}
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-dev"}
+	writer, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("open writer: %v", err)
+	}
+	reader, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("open stale reader: %v", err)
+	}
+
+	enrollment, err := writer.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{DisplayName: "Development Mac"})
+	if err != nil {
+		t.Fatalf("EnrollDeviceCredential: %v", err)
+	}
+	if _, err := writer.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, DeviceRuntimeSnapshotSyncRequest{
+		DaemonID:          "daemon-a",
+		DeviceID:          enrollment.DeviceID,
+		DeviceDisplayName: "Development Mac",
+		Runtimes: []RuntimeSnapshotRecord{{
+			RuntimeID: "daemon-a:codex",
+			Kind:      RuntimeKindCodex,
+		}},
+	}); err != nil {
+		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot: %v", err)
+	}
+
+	rotated, err := writer.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{
+		DeviceID:    enrollment.DeviceID,
+		DisplayName: "Development Mac",
+	})
+	if err != nil {
+		t.Fatalf("EnrollDeviceCredential rotate: %v", err)
+	}
+	if rotated.DeviceID != enrollment.DeviceID || rotated.DeviceSecret == enrollment.DeviceSecret {
+		t.Fatalf("rotated enrollment = %+v original=%+v", rotated, enrollment)
+	}
+	if _, err := reader.AuthorizeDeviceCredential(ctx, enrollment.DeviceID, enrollment.DeviceSecret, AuthorizationRequest{Resource: AuthorizationResourceAgent}); !errors.Is(err, ErrAuthorizationUnauthenticated) {
+		t.Fatalf("old device secret must be rejected after rotation, err=%v", err)
+	}
+	if _, err := reader.AuthorizeDeviceCredential(ctx, rotated.DeviceID, rotated.DeviceSecret, AuthorizationRequest{Resource: AuthorizationResourceAgent}); err != nil {
+		t.Fatalf("rotated device secret should authorize: %v", err)
+	}
+
+	devices, err := reader.ListAIAgentDevices(ctx, principal)
+	if err != nil {
+		t.Fatalf("ListAIAgentDevices: %v", err)
+	}
+	if got := countRuntimeOccurrences(devices.Devices, "daemon-a:codex"); got != 1 {
+		t.Fatalf("runtime occurrences after credential rotation = %d, want 1; devices=%+v", got, devices.Devices)
+	}
+	detail, err := reader.GetAIAgentDeviceDaemon(ctx, principal, rotated.DeviceID)
+	if err != nil {
+		t.Fatalf("GetAIAgentDeviceDaemon: %v", err)
+	}
+	if detail.Daemon.DaemonID != "daemon-a" {
+		t.Fatalf("daemon detail lost after credential rotation = %+v", detail.Daemon)
 	}
 }
 
