@@ -348,6 +348,10 @@ func (s Server) handleAIAgentClientBootstrap(w http.ResponseWriter, r *http.Requ
 	if !ok {
 		return
 	}
+	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, ""); err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
+		return
+	}
 	response, err := s.aiAgent.BootstrapAIAgentClient(r.Context(), principal, ClientKind(strings.TrimSpace(r.URL.Query().Get("client_kind"))))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
