@@ -195,8 +195,12 @@ func (s *DevelopmentAIAgentClientStore) LookupAgentRuntimeFact(agentID string) (
 	if !ok {
 		return AgentRuntimeBinding{}, RuntimeRecord{}, false
 	}
-	_, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
+	device, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
 	if !ok {
+		return AgentRuntimeBinding{}, RuntimeRecord{}, false
+	}
+	projected := projectDeviceRuntimeLiveness(device, time.Now().UTC())
+	if runtime, ok = runtimeByID(projected.Runtimes, agent.RuntimeID); !ok || !runtimeAvailableForBinding(runtime) {
 		return AgentRuntimeBinding{}, RuntimeRecord{}, false
 	}
 	return binding, copyRuntime(runtime), true
@@ -212,8 +216,17 @@ func (s *DevelopmentAIAgentClientStore) agentRuntimeBindingLocked(agent AgentCli
 	if !ok {
 		return AgentRuntimeBinding{}, false
 	}
+	now := time.Now().UTC()
+	device = projectDeviceRuntimeLiveness(device, now)
+	if runtime, ok = runtimeByID(device.Runtimes, agent.RuntimeID); !ok || !runtimeAvailableForBinding(runtime) {
+		return AgentRuntimeBinding{}, false
+	}
 	daemon, ok := s.daemons[device.DeviceID]
 	if !ok || strings.TrimSpace(daemon.DaemonID) == "" {
+		return AgentRuntimeBinding{}, false
+	}
+	daemon = projectDeviceDaemonLiveness(daemon, now)
+	if daemon.Availability != DaemonAvailabilityOnline {
 		return AgentRuntimeBinding{}, false
 	}
 	provider := runtimeProviderForAIAgentRuntime(agent.RuntimeKind)
@@ -230,6 +243,20 @@ func (s *DevelopmentAIAgentClientStore) agentRuntimeBindingLocked(agent AgentCli
 		RuntimeID:       runtime.RuntimeID,
 		RuntimeProvider: provider,
 	}), true
+}
+
+func runtimeByID(runtimes []RuntimeRecord, runtimeID string) (RuntimeRecord, bool) {
+	runtimeID = strings.TrimSpace(runtimeID)
+	for _, runtime := range runtimes {
+		if strings.TrimSpace(runtime.RuntimeID) == runtimeID {
+			return copyRuntime(runtime), true
+		}
+	}
+	return RuntimeRecord{}, false
+}
+
+func runtimeAvailableForBinding(runtime RuntimeRecord) bool {
+	return runtime.Availability == RuntimeAvailabilityOnline && runtime.DetectionState == RuntimeDetectionStateDetected
 }
 
 func (s *DevelopmentAIAgentClientStore) upsertDeviceRuntimeSnapshotLocked(device DeviceRecord) DeviceRecord {

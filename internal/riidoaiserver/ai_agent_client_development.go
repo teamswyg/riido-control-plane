@@ -2082,8 +2082,13 @@ func filterDevicesForPrincipal(devices []DeviceRecord, principal AuthorizationRe
 }
 
 func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal AuthorizationResult) []DeviceRecord {
+	now := time.Now().UTC()
 	if aiAgentIsAdmin(principal) {
-		return copyVisibleSeedDevices(s.devices, principal)
+		devices := copyVisibleSeedDevices(s.devices, principal)
+		for i := range devices {
+			devices[i] = projectDeviceRuntimeLiveness(devices[i], now)
+		}
+		return devices
 	}
 	visibleRuntimeIDs := map[string]struct{}{}
 	for _, agent := range s.agents {
@@ -2097,6 +2102,7 @@ func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal Authoriza
 		if deviceHiddenSeedForPrincipal(device, principal) {
 			continue
 		}
+		device = projectDeviceRuntimeLiveness(device, now)
 		if device.OwnerPrincipalID == principal.PrincipalID {
 			out = append(out, copyDevice(device))
 			continue
@@ -2119,6 +2125,7 @@ func (s *DevelopmentAIAgentClientStore) visibleDeviceRecordLocked(principal Auth
 	if deviceHiddenSeedForPrincipal(device, principal) {
 		return DeviceRecord{}, false
 	}
+	device = projectDeviceRuntimeLiveness(device, time.Now().UTC())
 	if aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID {
 		return copyDevice(device), true
 	}
@@ -2218,7 +2225,7 @@ func (s *DevelopmentAIAgentClientStore) deviceDaemonForAgentAccessLocked(princip
 	if !ok {
 		return AgentClientRecord{}, DeviceDaemonRecord{}, false
 	}
-	return agent, copyDeviceDaemon(daemon), true
+	return agent, projectDeviceDaemonLiveness(daemon, time.Now().UTC()), true
 }
 
 func (s *DevelopmentAIAgentClientStore) deviceDaemonForOwnerLocked(principal AuthorizationResult, deviceID string) (DeviceDaemonRecord, bool) {
@@ -2230,7 +2237,7 @@ func (s *DevelopmentAIAgentClientStore) deviceDaemonForOwnerLocked(principal Aut
 		if !ok {
 			return DeviceDaemonRecord{}, false
 		}
-		return copyDeviceDaemon(daemon), true
+		return projectDeviceDaemonLiveness(daemon, time.Now().UTC()), true
 	}
 	return DeviceDaemonRecord{}, false
 }
@@ -2304,6 +2311,44 @@ func copyRuntime(runtime RuntimeRecord) RuntimeRecord {
 func copyDeviceDaemon(daemon DeviceDaemonRecord) DeviceDaemonRecord {
 	daemon.SupportedActions = append([]DaemonControlAction(nil), daemon.SupportedActions...)
 	return daemon
+}
+
+func projectDeviceRuntimeLiveness(device DeviceRecord, now time.Time) DeviceRecord {
+	device = copyDevice(device)
+	if isDevelopmentSeedDevice(device) {
+		return device
+	}
+	if !deviceRuntimeSnapshotStale(device.DaemonLastSeenAt, now) {
+		return device
+	}
+	for i := range device.Runtimes {
+		device.Runtimes[i].Availability = RuntimeAvailabilityOffline
+		device.Runtimes[i].DetectionState = RuntimeDetectionStateMissing
+	}
+	return device
+}
+
+func projectDeviceDaemonLiveness(daemon DeviceDaemonRecord, now time.Time) DeviceDaemonRecord {
+	daemon = copyDeviceDaemon(daemon)
+	if isDevelopmentSeedDevice(DeviceRecord{DeviceID: daemon.DeviceID}) {
+		return daemon
+	}
+	if !deviceRuntimeSnapshotStale(daemon.LastSeenAt, now) {
+		return daemon
+	}
+	daemon.Availability = DaemonAvailabilityOffline
+	daemon.ControlState = DaemonControlStateIdle
+	daemon.SupportedActions = []DaemonControlAction{DaemonControlActionStart}
+	daemon.PID = 0
+	daemon.UptimeSeconds = 0
+	return daemon
+}
+
+func deviceRuntimeSnapshotStale(lastSeenAt time.Time, now time.Time) bool {
+	if lastSeenAt.IsZero() {
+		return false
+	}
+	return now.UTC().Sub(lastSeenAt.UTC()) > AIAgentDeviceRuntimeSnapshotStaleAfter
 }
 
 func copyTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
