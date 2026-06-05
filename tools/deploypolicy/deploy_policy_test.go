@@ -47,6 +47,9 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "echo \"::add-mask::${!name}\"")
 	requireContains(t, workflow, "if [ \"$image_tag\" = \"latest\" ]")
 	requireContains(t, workflow, "workflow_dispatch")
+	requireContains(t, workflow, "deployment_target")
+	requireContains(t, workflow, "ai-agent-development")
+	requireContains(t, workflow, "testnet|development")
 	requireContains(t, workflow, "tags:")
 	requireContains(t, workflow, "- \"v*\"")
 	requireContains(t, workflow, "TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}")
@@ -305,6 +308,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	if parsed.Current.Workflow != ".github/workflows/deploy-ai-agent-testnet.yml" {
 		t.Fatalf("workflow drifted: %q", parsed.Current.Workflow)
 	}
+	requireContains(t, parsed.Current.Status, "development")
+	requireSliceContains(t, parsed.Current.Allowed, "select the configured testnet or development GitHub environment for manual dispatch without accepting live URL inputs")
 	if len(parsed.Current.Allowed) < 5 {
 		t.Fatalf("current CD allowed actions are underspecified: %#v", parsed.Current.Allowed)
 	}

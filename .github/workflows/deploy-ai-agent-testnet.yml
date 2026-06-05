@@ -5,6 +5,15 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: "Configured AI Agent deploy target"
+        required: false
+        default: testnet
+        type: choice
+        options:
+          - testnet
+          - development
 
 concurrency:
   group: deploy-ai-agent-testnet
@@ -18,8 +27,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: ai-agent-testnet
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'development' && 'ai-agent-development' || 'ai-agent-testnet' }}
     env:
+      DEPLOYMENT_TARGET: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'testnet' }}
       AWS_REGION: ${{ vars.RIIDO_AI_SERVER_AWS_REGION }}
       ECR_REPOSITORY: ${{ vars.RIIDO_AI_SERVER_ECR_REPOSITORY }}
       ECS_CLUSTER: ${{ vars.RIIDO_AI_SERVER_ECS_CLUSTER }}
@@ -41,6 +51,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          case "${DEPLOYMENT_TARGET:-testnet}" in
+            testnet|development) ;;
+            *)
+              echo "unsupported deployment target"
+              exit 1
+              ;;
+          esac
           required=(
             AWS_REGION
             ECR_REPOSITORY
