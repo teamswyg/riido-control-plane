@@ -175,6 +175,35 @@ func TestAIAgentClientStaleTerminalAgentCountDoesNotQueueNextAssignment(t *testi
 	}
 }
 
+func TestAIAgentClientDeviceDaemonResolvesThroughOwnedAgentRuntime(t *testing.T) {
+	ctx := context.Background()
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
+
+	store.mu.Lock()
+	for index := range store.devices {
+		if store.devices[index].DeviceID != "device-dev-macbook" {
+			continue
+		}
+		store.devices[index].OwnerPrincipalID = "device-owner-projection-lag"
+		for runtimeIndex := range store.devices[index].Runtimes {
+			store.devices[index].Runtimes[runtimeIndex].OwnerPrincipalID = "device-owner-projection-lag"
+		}
+	}
+	daemon := store.daemons["device-dev-macbook"]
+	daemon.OwnerPrincipalID = "device-owner-projection-lag"
+	store.daemons["device-dev-macbook"] = daemon
+	store.mu.Unlock()
+
+	detail, err := store.GetAIAgentDeviceDaemon(ctx, principal, "device-dev-macbook")
+	if err != nil {
+		t.Fatalf("GetAIAgentDeviceDaemon through owned agent runtime: %v", err)
+	}
+	if detail.Daemon.DeviceID != "device-dev-macbook" || detail.Daemon.DaemonID != "daemon-dev-macbook" {
+		t.Fatalf("device daemon detail = %+v", detail.Daemon)
+	}
+}
+
 func hasThreadFilter(filters []AIAgentTaskThreadStreamTarget, agentID, threadID, runID string) bool {
 	for _, filter := range filters {
 		if filter.AgentID == agentID && filter.ThreadID == threadID && filter.RunID == runID {
