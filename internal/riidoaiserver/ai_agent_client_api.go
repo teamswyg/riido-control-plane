@@ -329,7 +329,8 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
-	AgentID string `json:"agent_id"`
+	AgentID      string `json:"agent_id"`
+	AssignmentID string `json:"-"`
 }
 
 type UnassignAIAgentTaskRequest struct {
@@ -350,6 +351,7 @@ type SubmitAIAgentTaskCommentRequest struct {
 type CreateAIAgentTaskThreadMessageRequest struct {
 	Body            string `json:"body"`
 	SourceMessageID string `json:"source_message_id,omitempty"`
+	AssignmentID    string `json:"-"`
 }
 
 type StopAIAgentTaskRequest struct {
@@ -360,6 +362,7 @@ type StopAIAgentTaskRequest struct {
 type AIAgentTaskActionResponse struct {
 	SchemaVersion   string               `json:"schema_version"`
 	TaskID          string               `json:"task_id"`
+	AssignmentID    string               `json:"assignment_id,omitempty"`
 	AgentID         string               `json:"agent_id"`
 	ThreadID        string               `json:"thread_id"`
 	RunID           string               `json:"run_id"`
@@ -393,6 +396,7 @@ type AIAgentTaskThreadStreamTarget struct {
 type AIAgentTaskThreadRecord struct {
 	ThreadID        string                    `json:"thread_id"`
 	TaskID          string                    `json:"task_id"`
+	AssignmentID    string                    `json:"assignment_id,omitempty"`
 	AgentID         string                    `json:"agent_id"`
 	RunID           string                    `json:"run_id"`
 	SourceCommentID string                    `json:"source_comment_id,omitempty"`
@@ -445,6 +449,7 @@ type AgentWorkStatusChangedEvent struct {
 	SchemaVersion   string               `json:"schema_version"`
 	AgentID         string               `json:"agent_id"`
 	TaskID          string               `json:"task_id,omitempty"`
+	AssignmentID    string               `json:"assignment_id,omitempty"`
 	ThreadID        string               `json:"thread_id,omitempty"`
 	RunID           string               `json:"run_id,omitempty"`
 	WorkStatus      AgentWorkStatus      `json:"work_status"`
@@ -500,6 +505,7 @@ type AgentThreadProgressEvent struct {
 	SchemaVersion   string                    `json:"schema_version"`
 	AgentID         string                    `json:"agent_id"`
 	TaskID          string                    `json:"task_id"`
+	AssignmentID    string                    `json:"assignment_id,omitempty"`
 	ThreadID        string                    `json:"thread_id"`
 	RunID           string                    `json:"run_id"`
 	WorkStatus      AgentWorkStatus           `json:"work_status"`

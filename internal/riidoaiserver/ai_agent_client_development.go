@@ -51,6 +51,10 @@ type AIAgentAssignmentEventRecorder interface {
 	RecordAIAgentAssignmentEvent(ctx context.Context, agentID string, req AgentEventRequest, event TaskEvent) error
 }
 
+type AIAgentTaskThreadProjectionReconciler interface {
+	ReconcileAIAgentActiveThreadProjections(ctx context.Context, principal AuthorizationResult, taskID string, reader AssignmentProjectionReader) (bool, error)
+}
+
 const (
 	defaultAIAgentClientWorkspaceID = "workspace-dev-riid"
 	aiAgentClientReplayEventLimit   = 200
@@ -639,6 +643,36 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Conte
 	return response, nil
 }
 
+func (s *DevelopmentAIAgentClientStore) ReconcileAIAgentActiveThreadProjections(ctx context.Context, principal AuthorizationResult, taskID string, reader AssignmentProjectionReader) (bool, error) {
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	if reader == nil {
+		return false, nil
+	}
+	taskID = strings.TrimSpace(taskID)
+	candidates := s.reconcilableActiveTaskThreadProjectionCandidates(principal, taskID)
+	changed := false
+	for _, thread := range candidates {
+		if err := ctx.Err(); err != nil {
+			return changed, err
+		}
+		projection, ok, err := reader.LoadAssignmentProjection(ctx, thread.AssignmentID)
+		if err != nil {
+			return changed, err
+		}
+		if !ok ||
+			!assignmentProjectionMatchesTaskThread(thread, projection) ||
+			!assignmentStateIsTerminal(projection.Assignment.State) {
+			continue
+		}
+		if s.applyTerminalAssignmentProjectionToTaskThread(thread, projection) {
+			changed = true
+		}
+	}
+	return changed, nil
+}
+
 func (s *DevelopmentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
 	return s.assignAIAgentTask(ctx, principal, taskID, req, true)
 }
@@ -653,6 +687,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	}
 	taskID = strings.TrimSpace(taskID)
 	req.AgentID = strings.TrimSpace(req.AgentID)
+	req.AssignmentID = strings.TrimSpace(req.AssignmentID)
 	if taskID == "" {
 		return AIAgentTaskActionResponse{}, errors.New("task_id is required")
 	}
@@ -674,6 +709,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
+		AssignmentID:    req.AssignmentID,
 		AgentID:         agent.AgentID,
 		RunID:           "run-dev-assignment-" + taskID + "-" + strconv.Itoa(len(s.taskThreads[taskID])+1),
 		WorkStatus:      AgentWorkStatusRunning,
@@ -826,6 +862,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
+		AssignmentID:    thread.AssignmentID,
 		AgentID:         agent.AgentID,
 		ThreadID:        threadID,
 		RunID:           thread.RunID,
@@ -837,6 +874,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	threadWasActive := taskThreadHasActiveStream(thread)
 	if !threadWasActive {
 		response.RunID = "run-dev-message-" + taskID + "-" + threadID
+		response.AssignmentID = strings.TrimSpace(req.AssignmentID)
 	}
 	if !threadWasActive && (agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser || agent.WorkStatus == AgentWorkStatusQueued) {
 		response.WorkStatus = AgentWorkStatusQueued
@@ -1207,6 +1245,13 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 	if !ok {
 		return AgentThreadProgressBatchResponse{}, ErrAIAgentNotFound
 	}
+	if thread, ok := s.taskThreadForAssignmentLocked(req.TaskID, agentID, req.AssignmentID); ok {
+		req.ThreadID = thread.ThreadID
+		if req.RunID == "" {
+			req.RunID = thread.RunID
+		}
+		generatedThreadID = false
+	}
 	if active, ok := s.activeTaskThreadForAgentLocked(req.TaskID, agentID); ok &&
 		active.ThreadID != req.ThreadID &&
 		generatedThreadID {
@@ -1223,6 +1268,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 		SchemaVersion:   SchemaVersion,
 		AgentID:         agentID,
 		TaskID:          req.TaskID,
+		AssignmentID:    req.AssignmentID,
 		ThreadID:        req.ThreadID,
 		RunID:           req.RunID,
 		WorkStatus:      AgentWorkStatusRunning,
@@ -1281,13 +1327,17 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	if !ok {
 		return ErrAIAgentNotFound
 	}
-	thread, ok := s.activeTaskThreadForAgentLocked(taskID, agentID)
+	thread, ok := s.taskThreadForAssignmentLocked(taskID, agentID, assignmentID)
+	if !ok {
+		thread, ok = s.activeTaskThreadForAgentLocked(taskID, agentID)
+	}
 	if !ok {
 		runID := "run-" + assignmentID
 		threadMessage := assignmentEventVisibleThreadMessage(state, strings.TrimSpace(event.Type), message, "")
 		thread = AIAgentTaskThreadRecord{
 			ThreadID:        threadIDForRun(taskID, agentID, runID),
 			TaskID:          taskID,
+			AssignmentID:    assignmentID,
 			AgentID:         agentID,
 			RunID:           runID,
 			WorkStatus:      AgentWorkStatusRunning,
@@ -1329,6 +1379,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 			SchemaVersion:   SchemaVersion,
 			AgentID:         agentID,
 			TaskID:          thread.TaskID,
+			AssignmentID:    assignmentID,
 			ThreadID:        thread.ThreadID,
 			RunID:           thread.RunID,
 			WorkStatus:      AgentWorkStatusRunning,
@@ -1351,6 +1402,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 
 	responseMessage := assignmentEventVisibleThreadMessage(state, strings.TrimSpace(event.Type), message, previousThread.Message)
 	response := assignmentEventActionResponse(thread, state, responseMessage)
+	response.AssignmentID = assignmentID
 	s.upsertTaskThreadFromActionLocked(response, "")
 	shouldFanoutStatus := shouldFanoutAgentTaskActionEvent(hadThread, previousThread, response)
 	if !taskThreadHasActiveStream(AIAgentTaskThreadRecord{AssignmentState: response.AssignmentState}) && agent.AssignedTaskCount > 0 {
@@ -1450,6 +1502,34 @@ func (s *DevelopmentAIAgentClientStore) visibleTaskThreadsLocked(principal Autho
 	return out
 }
 
+func (s *DevelopmentAIAgentClientStore) reconcilableActiveTaskThreadProjectionCandidates(principal AuthorizationResult, taskID string) []AIAgentTaskThreadRecord {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	taskIDs := []string{}
+	if taskID != "" {
+		taskIDs = []string{taskID}
+	} else {
+		for id := range s.taskThreads {
+			taskIDs = append(taskIDs, id)
+		}
+		sort.Strings(taskIDs)
+	}
+	out := []AIAgentTaskThreadRecord{}
+	for _, id := range taskIDs {
+		for _, thread := range s.taskThreads[id] {
+			if !taskThreadHasActiveStream(thread) || strings.TrimSpace(thread.AssignmentID) == "" {
+				continue
+			}
+			agent, ok := s.agents[thread.AgentID]
+			if !ok || !s.aiAgentVisibleTo(principal, agent) {
+				continue
+			}
+			out = append(out, copyTaskThread(thread))
+		}
+	}
+	return out
+}
+
 func (s *DevelopmentAIAgentClientStore) visibleTaskThreadLocked(principal AuthorizationResult, taskID, threadID string) (AIAgentTaskThreadRecord, bool) {
 	for _, thread := range s.taskThreads[taskID] {
 		if thread.ThreadID != threadID {
@@ -1486,10 +1566,26 @@ func (s *DevelopmentAIAgentClientStore) activeTaskThreadForAgentLocked(taskID, a
 	return AIAgentTaskThreadRecord{}, false
 }
 
+func (s *DevelopmentAIAgentClientStore) taskThreadForAssignmentLocked(taskID, agentID, assignmentID string) (AIAgentTaskThreadRecord, bool) {
+	assignmentID = strings.TrimSpace(assignmentID)
+	if assignmentID == "" {
+		return AIAgentTaskThreadRecord{}, false
+	}
+	threads := s.taskThreads[taskID]
+	for i := len(threads) - 1; i >= 0; i-- {
+		thread := threads[i]
+		if thread.AgentID == agentID && thread.AssignmentID == assignmentID {
+			return copyTaskThread(thread), true
+		}
+	}
+	return AIAgentTaskThreadRecord{}, false
+}
+
 func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionResponse {
 	return AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          thread.TaskID,
+		AssignmentID:    thread.AssignmentID,
 		AgentID:         thread.AgentID,
 		ThreadID:        thread.ThreadID,
 		RunID:           thread.RunID,
@@ -1498,6 +1594,74 @@ func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionR
 		CommentKind:     thread.CommentKind,
 		Message:         thread.Message,
 	}
+}
+
+func assignmentProjectionMatchesTaskThread(thread AIAgentTaskThreadRecord, projection AssignmentProjection) bool {
+	assignment := projection.Assignment
+	if strings.TrimSpace(assignment.ID) == "" ||
+		strings.TrimSpace(assignment.ID) != strings.TrimSpace(thread.AssignmentID) ||
+		strings.TrimSpace(assignment.AgentID) != strings.TrimSpace(thread.AgentID) {
+		return false
+	}
+	taskID := strings.TrimSpace(thread.TaskID)
+	if taskID == "" {
+		return true
+	}
+	return strings.TrimSpace(assignment.TaskID) == taskID ||
+		strings.TrimSpace(assignment.ComponentID) == taskID
+}
+
+func assignmentStateIsTerminal(state AssignmentState) bool {
+	switch state {
+	case AssignmentCancelled, AssignmentCompleted, AssignmentFailed:
+		return true
+	default:
+		return false
+	}
+}
+
+func (s *DevelopmentAIAgentClientStore) applyTerminalAssignmentProjectionToTaskThread(thread AIAgentTaskThreadRecord, projection AssignmentProjection) bool {
+	completedAt := projection.Assignment.UpdatedAt
+	if completedAt.IsZero() {
+		completedAt = time.Now().UTC()
+	} else {
+		completedAt = completedAt.UTC()
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	threads := s.taskThreads[thread.TaskID]
+	for i := range threads {
+		if threads[i].ThreadID != thread.ThreadID ||
+			strings.TrimSpace(threads[i].AssignmentID) != strings.TrimSpace(thread.AssignmentID) ||
+			!taskThreadHasActiveStream(threads[i]) {
+			continue
+		}
+		previous := threads[i]
+		response := assignmentEventActionResponse(threads[i], projection.Assignment.State, "")
+		response.AssignmentID = projection.Assignment.ID
+		threads[i].AssignmentID = response.AssignmentID
+		threads[i].WorkStatus = response.WorkStatus
+		threads[i].AssignmentState = response.AssignmentState
+		threads[i].CommentKind = response.CommentKind
+		threads[i].Message = response.Message
+		threads[i].CompletedAt = completedAt
+		s.taskThreads[thread.TaskID] = threads
+
+		agent := s.agents[response.AgentID]
+		if agent.AgentID != "" {
+			if agent.AssignedTaskCount > 0 {
+				agent.AssignedTaskCount--
+			}
+			agent.WorkStatus = response.WorkStatus
+			agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
+			s.agents[agent.AgentID] = agent
+		}
+		if shouldFanoutAgentTaskActionEvent(true, previous, response) {
+			s.appendAgentTaskActionEvent(response)
+		}
+		return true
+	}
+	return false
 }
 
 func assignedAgentProfileFromAgent(agent AgentClientRecord) AssignedAgentProfile {
@@ -1511,6 +1675,7 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          thread.TaskID,
+		AssignmentID:    thread.AssignmentID,
 		AgentID:         thread.AgentID,
 		ThreadID:        thread.ThreadID,
 		RunID:           thread.RunID,
@@ -1619,6 +1784,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 	thread := AIAgentTaskThreadRecord{
 		ThreadID:        response.ThreadID,
 		TaskID:          response.TaskID,
+		AssignmentID:    response.AssignmentID,
 		AgentID:         response.AgentID,
 		RunID:           response.RunID,
 		SourceCommentID: strings.TrimSpace(sourceCommentID),
@@ -1638,6 +1804,9 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 			continue
 		}
 		threads[i].WorkStatus = response.WorkStatus
+		if strings.TrimSpace(response.AssignmentID) != "" {
+			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
+		}
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
@@ -1661,6 +1830,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 	thread := AIAgentTaskThreadRecord{
 		ThreadID:        response.ThreadID,
 		TaskID:          response.TaskID,
+		AssignmentID:    response.AssignmentID,
 		AgentID:         response.AgentID,
 		RunID:           response.RunID,
 		SourceMessageID: strings.TrimSpace(sourceMessageID),
@@ -1680,6 +1850,9 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 			continue
 		}
 		threads[i].RunID = response.RunID
+		if strings.TrimSpace(response.AssignmentID) != "" {
+			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
+		}
 		threads[i].WorkStatus = response.WorkStatus
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].CommentKind = response.CommentKind
@@ -1709,6 +1882,9 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 			continue
 		}
 		threads[i].RunID = event.RunID
+		if strings.TrimSpace(event.AssignmentID) != "" {
+			threads[i].AssignmentID = strings.TrimSpace(event.AssignmentID)
+		}
 		threads[i].WorkStatus = event.WorkStatus
 		threads[i].AssignmentState = event.AssignmentState
 		threads[i].CommentKind = event.CommentKind
@@ -1726,6 +1902,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 	s.taskThreads[event.TaskID] = append(threads, AIAgentTaskThreadRecord{
 		ThreadID:        event.ThreadID,
 		TaskID:          event.TaskID,
+		AssignmentID:    event.AssignmentID,
 		AgentID:         event.AgentID,
 		RunID:           event.RunID,
 		WorkStatus:      event.WorkStatus,
@@ -1840,6 +2017,7 @@ func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAg
 		SchemaVersion:   SchemaVersion,
 		AgentID:         response.AgentID,
 		TaskID:          response.TaskID,
+		AssignmentID:    response.AssignmentID,
 		ThreadID:        response.ThreadID,
 		RunID:           response.RunID,
 		WorkStatus:      response.WorkStatus,
