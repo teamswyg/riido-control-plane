@@ -111,6 +111,12 @@ The `workspace_id` in the enrollment URL is the selected workspace context for
 authorization and audit. It does not make the device workspace-owned; devices
 and runtimes remain account-owned.
 
+When Desktop already has a local `device_id`, enrollment may send that
+`device_id` again. If it belongs to the same user/workspace, control-plane keeps
+the device principal stable and rotates only the one-time `device_secret`.
+Stale credential recovery must not create a new device principal by accident,
+because agent/runtime bindings are keyed through the device/runtime read model.
+
 Daemon polling, heartbeat, progress, provider-status sync, and SaaS command
 reads use:
 
@@ -122,6 +128,12 @@ frontend headers and must not be exposed through `riido-client`, browser
 storage, webview JavaScript, task-thread events, logs, or status responses. The
 server stores only a secret hash and returns the raw `device_secret` only in the
 enrollment response.
+
+A daemon runtime snapshot also treats `runtime_id` as a unique live runtime
+identity. If the same `runtime_id` is reported by a different device, the
+runtime moves to the latest reporting device and is removed from the previous
+device projection. This keeps daemon `agent-bindings` deterministic and avoids
+binding an agent to a stale device row.
 
 The external authorizer hop may be protected by
 `X-Riido-Control-Plane-Authorizer-Key`. That header is server-to-server only and

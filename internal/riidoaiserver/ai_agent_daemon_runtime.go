@@ -233,6 +233,27 @@ func (s *DevelopmentAIAgentClientStore) agentRuntimeBindingLocked(agent AgentCli
 }
 
 func (s *DevelopmentAIAgentClientStore) upsertDeviceRuntimeSnapshotLocked(device DeviceRecord) DeviceRecord {
+	incomingRuntimeIDs := make(map[string]struct{}, len(device.Runtimes))
+	for _, runtime := range device.Runtimes {
+		if runtimeID := strings.TrimSpace(runtime.RuntimeID); runtimeID != "" {
+			incomingRuntimeIDs[runtimeID] = struct{}{}
+		}
+	}
+	if len(incomingRuntimeIDs) > 0 {
+		for deviceIndex := range s.devices {
+			if s.devices[deviceIndex].DeviceID == device.DeviceID {
+				continue
+			}
+			filtered := s.devices[deviceIndex].Runtimes[:0]
+			for _, runtime := range s.devices[deviceIndex].Runtimes {
+				if _, moving := incomingRuntimeIDs[strings.TrimSpace(runtime.RuntimeID)]; moving {
+					continue
+				}
+				filtered = append(filtered, runtime)
+			}
+			s.devices[deviceIndex].Runtimes = filtered
+		}
+	}
 	for i := range s.devices {
 		if s.devices[i].DeviceID == device.DeviceID {
 			merged := copyDevice(s.devices[i])

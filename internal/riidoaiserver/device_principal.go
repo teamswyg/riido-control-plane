@@ -15,6 +15,7 @@ import (
 const DeviceCredentialSchemaVersion = "riido-device-credential.v1"
 
 type EnrollDeviceRequest struct {
+	DeviceID    string `json:"device_id,omitempty"`
 	DisplayName string `json:"display_name,omitempty"`
 	Platform    string `json:"platform,omitempty"`
 	AppVersion  string `json:"app_version,omitempty"`
@@ -72,8 +73,18 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.nextDeviceCredentialSeq++
-	deviceID := fmt.Sprintf("device-enrolled-%06d", s.nextDeviceCredentialSeq)
+	deviceID := strings.TrimSpace(req.DeviceID)
+	if deviceID != "" {
+		existing, ok := s.deviceCredentials[deviceID]
+		if !ok ||
+			existing.ownerPrincipalID != principal.PrincipalID ||
+			existing.workspaceID != workspaceID {
+			return EnrollDeviceResponse{}, ErrAuthorizationForbidden
+		}
+	} else {
+		s.nextDeviceCredentialSeq++
+		deviceID = fmt.Sprintf("device-enrolled-%06d", s.nextDeviceCredentialSeq)
+	}
 	if s.deviceCredentials == nil {
 		s.deviceCredentials = map[string]deviceCredentialRecord{}
 	}

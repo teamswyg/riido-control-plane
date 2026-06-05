@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -236,6 +237,30 @@ func TestHTTPDesktopDeviceEnrollmentAndDaemonCredentialAuthorization(t *testing.
 		enrollment.DisplayName != "JY MacBook" {
 		t.Fatalf("enrollment = %+v", enrollment)
 	}
+	firstDeviceSecret := enrollment.DeviceSecret
+
+	rotateReq := httptest.NewRequest(http.MethodPost, "/v2/desktop/workspaces/workspace-alpha/devices/enroll", strings.NewReader(`{"device_id":"`+enrollment.DeviceID+`","display_name":"JY MacBook","platform":"darwin","app_version":"0.0.1"}`))
+	rotateReq.Header.Set(aiAgentTokenHeader, "ai-agent-token")
+	rotateResp := httptest.NewRecorder()
+	server.ServeHTTP(rotateResp, rotateReq)
+	if rotateResp.Code != http.StatusCreated {
+		t.Fatalf("rotate status=%d body=%s", rotateResp.Code, rotateResp.Body.String())
+	}
+	var rotated EnrollDeviceResponse
+	if err := json.Unmarshal(rotateResp.Body.Bytes(), &rotated); err != nil {
+		t.Fatalf("rotate json: %v", err)
+	}
+	if rotated.DeviceID != enrollment.DeviceID ||
+		rotated.DeviceSecret == "" ||
+		rotated.DeviceSecret == firstDeviceSecret ||
+		rotated.OwnerPrincipalID != enrollment.OwnerPrincipalID ||
+		rotated.WorkspaceID != enrollment.WorkspaceID {
+		t.Fatalf("rotated enrollment = %+v original=%+v", rotated, enrollment)
+	}
+	if _, err := aiAgentStore.AuthorizeDeviceCredential(context.Background(), enrollment.DeviceID, firstDeviceSecret, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionPoll}); !errors.Is(err, ErrAuthorizationUnauthenticated) {
+		t.Fatalf("old rotated device secret must be rejected, got %v", err)
+	}
+	enrollment = rotated
 
 	devicesReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/devices", nil)
 	devicesReq.Header.Set(aiAgentTokenHeader, "ai-agent-token")
@@ -363,6 +388,72 @@ func TestHTTPDesktopDeviceEnrollmentAndDaemonCredentialAuthorization(t *testing.
 		bindings.Bindings[0].RuntimeID != codexRuntimeID ||
 		bindings.Bindings[0].RuntimeProvider != "codex" {
 		t.Fatalf("bindings after second runtime snapshot = %+v", bindings.Bindings)
+	}
+
+	replacementReq := httptest.NewRequest(http.MethodPost, "/v2/desktop/workspaces/workspace-alpha/devices/enroll", strings.NewReader(`{"display_name":"Replacement Mac","platform":"darwin","app_version":"0.0.2"}`))
+	replacementReq.Header.Set(aiAgentTokenHeader, "ai-agent-token")
+	replacementResp := httptest.NewRecorder()
+	server.ServeHTTP(replacementResp, replacementReq)
+	if replacementResp.Code != http.StatusCreated {
+		t.Fatalf("replacement enroll status=%d body=%s", replacementResp.Code, replacementResp.Body.String())
+	}
+	var replacement EnrollDeviceResponse
+	if err := json.Unmarshal(replacementResp.Body.Bytes(), &replacement); err != nil {
+		t.Fatalf("replacement json: %v", err)
+	}
+	if replacement.DeviceID == "" || replacement.DeviceID == enrollment.DeviceID {
+		t.Fatalf("replacement enrollment = %+v", replacement)
+	}
+	moveSnapshotReq := httptest.NewRequest(http.MethodPost, "/v1/daemon/runtime-snapshot", strings.NewReader(`{"daemon_id":"daemon-replacement","runtimes":[{"runtime_id":"`+codexRuntimeID+`","kind":"codex","requires_experimental_opt_in":true}]}`))
+	moveSnapshotReq.Header.Set(deviceIDHeader, replacement.DeviceID)
+	moveSnapshotReq.Header.Set(deviceSecretHeader, replacement.DeviceSecret)
+	moveSnapshotResp := httptest.NewRecorder()
+	server.ServeHTTP(moveSnapshotResp, moveSnapshotReq)
+	if moveSnapshotResp.Code != http.StatusAccepted {
+		t.Fatalf("move snapshot status=%d body=%s", moveSnapshotResp.Code, moveSnapshotResp.Body.String())
+	}
+	afterMoveDevicesReq := httptest.NewRequest(http.MethodGet, "/v2/client/workspaces/workspace-alpha/ai-agent/devices", nil)
+	afterMoveDevicesReq.Header.Set(aiAgentTokenHeader, "ai-agent-token")
+	afterMoveDevicesResp := httptest.NewRecorder()
+	server.ServeHTTP(afterMoveDevicesResp, afterMoveDevicesReq)
+	if afterMoveDevicesResp.Code != http.StatusOK {
+		t.Fatalf("after move devices status=%d body=%s", afterMoveDevicesResp.Code, afterMoveDevicesResp.Body.String())
+	}
+	var afterMoveDevices DeviceRuntimeListResponse
+	if err := json.Unmarshal(afterMoveDevicesResp.Body.Bytes(), &afterMoveDevices); err != nil {
+		t.Fatalf("after move devices json: %v", err)
+	}
+	originalAfterMove, ok := findDevice(afterMoveDevices.Devices, enrollment.DeviceID)
+	if !ok {
+		t.Fatalf("original device missing after move: %+v", afterMoveDevices.Devices)
+	}
+	if _, ok := findRuntime(originalAfterMove.Runtimes, codexRuntimeID); ok {
+		t.Fatalf("moved runtime must be removed from original device: %+v", originalAfterMove.Runtimes)
+	}
+	replacementAfterMove, ok := findDevice(afterMoveDevices.Devices, replacement.DeviceID)
+	if !ok {
+		t.Fatalf("replacement device missing after move: %+v", afterMoveDevices.Devices)
+	}
+	if _, ok := findRuntime(replacementAfterMove.Runtimes, codexRuntimeID); !ok {
+		t.Fatalf("moved runtime missing from replacement device: %+v", replacementAfterMove.Runtimes)
+	}
+	replacementBindingsReq := httptest.NewRequest(http.MethodGet, "/v1/daemon/agent-bindings", nil)
+	replacementBindingsReq.Header.Set(deviceIDHeader, replacement.DeviceID)
+	replacementBindingsReq.Header.Set(deviceSecretHeader, replacement.DeviceSecret)
+	replacementBindingsResp := httptest.NewRecorder()
+	server.ServeHTTP(replacementBindingsResp, replacementBindingsReq)
+	if replacementBindingsResp.Code != http.StatusOK {
+		t.Fatalf("replacement bindings status=%d body=%s", replacementBindingsResp.Code, replacementBindingsResp.Body.String())
+	}
+	var replacementBindings AgentRuntimeBindingListResponse
+	if err := json.Unmarshal(replacementBindingsResp.Body.Bytes(), &replacementBindings); err != nil {
+		t.Fatalf("replacement bindings json: %v", err)
+	}
+	if len(replacementBindings.Bindings) != 1 ||
+		replacementBindings.Bindings[0].AgentID != created.Agent.AgentID ||
+		replacementBindings.Bindings[0].DeviceID != replacement.DeviceID ||
+		replacementBindings.Bindings[0].RuntimeID != codexRuntimeID {
+		t.Fatalf("replacement bindings = %+v", replacementBindings.Bindings)
 	}
 }
 
