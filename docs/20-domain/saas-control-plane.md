@@ -268,11 +268,18 @@ the stdlib-only runtime behavior that can be verified without AWS credentials:
 
 Active daemon/runtime work is fenced by heartbeat. A running daemon refreshes
 the active assignment every 5 seconds through `/heartbeat`; the control plane
-treats 20 seconds without a refresh as a stale active lease. Poll and heartbeat
-both enforce the same rule: stale active assignments are failed first, their
-active lease is released by the operation store, and later queued work for that
-agent can then be claimed. Heartbeat must not revive a lease that has already
-passed the stale deadline.
+treats the configured active-lease duration as the stale deadline. The public
+domain default is 20 seconds, and deployed long-running provider environments
+may raise the value through `RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS`.
+That one configured duration must be applied to both the in-memory store actor
+and the durable DynamoDB active-lease adapter; otherwise a Codex/Claude/Cursor
+run can continue locally while the durable lease expires first. Poll and
+heartbeat both enforce the same rule: stale active assignments are failed first,
+their active lease is released by the operation store, and later queued work for
+that agent can then be claimed. Heartbeat must not revive a lease that has
+already passed the stale deadline. When heartbeat creates a stale terminal event
+such as `assignment_failed`, the AI Agent client read-model must receive the
+same event so generated thread queries stop advertising an active stream.
 
 This actor does not own HTTP assignment routes, SSE fan-out,
 DynamoDB/EventBridge adapter payload construction, Terraform, AWS credentials,

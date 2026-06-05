@@ -13,6 +13,10 @@ type AssignmentStore interface {
 	Close()
 }
 
+type AssignmentHeartbeatEventStore interface {
+	HeartbeatAgentWithEvents(ctx context.Context, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, []TaskEvent, error)
+}
+
 type MetricsReader interface {
 	Metrics(ctx context.Context) (MetricsSnapshot, error)
 }
