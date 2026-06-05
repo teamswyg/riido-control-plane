@@ -761,10 +761,10 @@ func (s *DevelopmentAIAgentClientStore) ReconcileAIAgentActiveThreadProjections(
 		}
 		if !ok ||
 			!assignmentProjectionMatchesTaskThread(thread, projection) ||
-			!assignmentStateIsTerminal(projection.Assignment.State) {
+			!assignmentStateCanRepairTaskThread(projection.Assignment.State) {
 			continue
 		}
-		if s.applyTerminalAssignmentProjectionToTaskThread(thread, projection) {
+		if s.applyAssignmentProjectionToTaskThread(thread, projection) {
 			changed = true
 		}
 	}
@@ -861,6 +861,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	}
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
 		response.ThreadID = thread.ThreadID
+		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
 	} else {
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
@@ -996,7 +997,7 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	agent, ok := s.agentForTaskStop(principal, req.AgentID)
+	agent, ok := s.agentForTaskStopLocked(principal, taskID, req.AgentID)
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
@@ -1012,6 +1013,7 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	}
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
 		response.ThreadID = thread.ThreadID
+		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
 	} else {
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
@@ -1768,13 +1770,17 @@ func assignmentStateIsTerminal(state AssignmentState) bool {
 	}
 }
 
-func (s *DevelopmentAIAgentClientStore) applyTerminalAssignmentProjectionToTaskThread(thread AIAgentTaskThreadRecord, projection AssignmentProjection) bool {
-	completedAt := projection.Assignment.UpdatedAt
-	if completedAt.IsZero() {
-		completedAt = time.Now().UTC()
-	} else {
-		completedAt = completedAt.UTC()
+func assignmentStateCanRepairTaskThread(state AssignmentState) bool {
+	switch state {
+	case AssignmentQueued, AssignmentLeased, AssignmentReady, AssignmentRunning, AssignmentCancelling,
+		AssignmentCancelled, AssignmentCompleted, AssignmentFailed:
+		return true
+	default:
+		return false
 	}
+}
+
+func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(thread AIAgentTaskThreadRecord, projection AssignmentProjection) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	threads := s.taskThreads[thread.TaskID]
@@ -1787,21 +1793,44 @@ func (s *DevelopmentAIAgentClientStore) applyTerminalAssignmentProjectionToTaskT
 		previous := threads[i]
 		response := assignmentEventActionResponse(threads[i], projection.Assignment.State, "")
 		response.AssignmentID = projection.Assignment.ID
+		if previous.AssignmentID == response.AssignmentID &&
+			previous.WorkStatus == response.WorkStatus &&
+			previous.AssignmentState == response.AssignmentState &&
+			previous.CommentKind == response.CommentKind {
+			return false
+		}
 		threads[i].AssignmentID = response.AssignmentID
 		threads[i].WorkStatus = response.WorkStatus
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
-		threads[i].CompletedAt = completedAt
+		if assignmentStateIsTerminal(projection.Assignment.State) {
+			completedAt := projection.Assignment.UpdatedAt
+			if completedAt.IsZero() {
+				completedAt = time.Now().UTC()
+			} else {
+				completedAt = completedAt.UTC()
+			}
+			threads[i].CompletedAt = completedAt
+		} else {
+			threads[i].CompletedAt = time.Time{}
+		}
 		s.taskThreads[thread.TaskID] = threads
 
 		agent := s.agents[response.AgentID]
 		if agent.AgentID != "" {
-			if agent.AssignedTaskCount > 0 {
+			if taskThreadHasActiveStream(AIAgentTaskThreadRecord{AssignmentState: response.AssignmentState}) {
+				if agent.AssignedTaskCount == 0 {
+					agent.AssignedTaskCount = 1
+				}
+			} else if agent.AssignedTaskCount > 0 {
 				agent.AssignedTaskCount--
 			}
 			agent.WorkStatus = response.WorkStatus
 			agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
+			if taskThreadHasActiveStream(AIAgentTaskThreadRecord{AssignmentState: response.AssignmentState}) {
+				agent.Editability = AgentEditabilityBlockedAssignedTasks
+			}
 			s.agents[agent.AgentID] = agent
 		}
 		if shouldFanoutAgentTaskActionEvent(true, previous, response) {
@@ -2149,16 +2178,15 @@ func (s *DevelopmentAIAgentClientStore) agentForMutation(principal Authorization
 	return agent, true
 }
 
-func (s *DevelopmentAIAgentClientStore) agentForTaskStop(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) agentForTaskStopLocked(principal AuthorizationResult, taskID, agentID string) (AgentClientRecord, bool) {
 	if strings.TrimSpace(agentID) != "" {
 		return s.visibleAgent(principal, agentID)
 	}
-	for _, agent := range s.visibleAgents(principal) {
-		if agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser {
-			return agent, true
-		}
+	thread, ok := s.activeTaskThreadLocked(taskID)
+	if !ok {
+		return AgentClientRecord{}, false
 	}
-	return AgentClientRecord{}, false
+	return s.visibleAgent(principal, thread.AgentID)
 }
 
 func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {

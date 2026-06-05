@@ -96,6 +96,25 @@ func (s Server) reconcileAIAgentTaskThreadProjections(ctx context.Context, princ
 	return err
 }
 
+func (s Server) cancelAIAgentAssignmentFromAction(ctx context.Context, response AIAgentTaskActionResponse, reason string) error {
+	canceller, ok := s.assignment.(AssignmentCancellationStore)
+	if !ok {
+		return nil
+	}
+	taskID := strings.TrimSpace(response.TaskID)
+	agentID := strings.TrimSpace(response.AgentID)
+	assignmentID := strings.TrimSpace(response.AssignmentID)
+	if taskID == "" || agentID == "" || assignmentID == "" {
+		return nil
+	}
+	_, err := canceller.CancelAssignment(ctx, taskID, CancelAssignmentRequest{
+		AgentID:      agentID,
+		AssignmentID: assignmentID,
+		Reason:       strings.TrimSpace(reason),
+	})
+	return err
+}
+
 func (s Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", s.handleHealth)
@@ -858,6 +877,10 @@ func (s Server) handleAIAgentClientUnassignTask(w http.ResponseWriter, r *http.R
 		writeAIAgentClientError(w, err)
 		return
 	}
+	if err := s.cancelAIAgentAssignmentFromAction(r.Context(), response, req.Reason); err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
 	writeJSON(w, http.StatusAccepted, response)
 }
 
@@ -879,6 +902,10 @@ func (s Server) handleAIAgentClientDeleteTaskAgentAssignment(w http.ResponseWrit
 	}
 	response, err := s.aiAgent.DeleteAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
 	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	if err := s.cancelAIAgentAssignmentFromAction(r.Context(), response, req.Reason); err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
@@ -992,6 +1019,10 @@ func (s Server) handleAIAgentClientStopTask(w http.ResponseWriter, r *http.Reque
 		writeAIAgentClientError(w, err)
 		return
 	}
+	if err := s.cancelAIAgentAssignmentFromAction(r.Context(), response, req.Reason); err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
 	writeJSON(w, http.StatusAccepted, response)
 }
 
@@ -1013,6 +1044,10 @@ func (s Server) handleAIAgentClientStopTaskAgentAssignment(w http.ResponseWriter
 	}
 	response, err := s.aiAgent.StopAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
 	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	if err := s.cancelAIAgentAssignmentFromAction(r.Context(), response, req.Reason); err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}

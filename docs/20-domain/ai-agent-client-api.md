@@ -426,6 +426,14 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `assignment_state=running`, and `work_status=running`; they must not reuse
   `queued_by_busy_agent`
 - task-thread stop actions return `stopped_by_user_request`
+- task-thread stop and participant-removal actions are generated client
+  commands and daemon-facing cancellation commands at the same time. After the
+  AI Agent client read model is projected as stopped, the handler must also
+  write a durable assignment cancellation intent for the same `assignment_id`
+  when one exists. Queued assignments move directly to `cancelled`; leased,
+  ready, or running assignments move to `cancelling` so the owning daemon sees
+  `PollCancel` on its next poll and can confirm the terminal `cancelled` event.
+  The frontend does not call a second endpoint for this.
 - task-thread status updates use typed `AgentTaskCommentKind` values
 - task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
   to render historical AI Agent thread rows; `active_stream` is present only
@@ -467,9 +475,11 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `assignment_id` when the server has accepted durable daemon work. This value
   is a server-projected trace key, not a client input requirement. The durable
   assignment projection is the truth source; if client task-thread fanout misses
-  a terminal assignment event, the next generated bootstrap/thread/profile read
-  repairs `active_stream` from that projection before projecting
-  `work_status`, `assigned_task_count`, and stream links.
+  a terminal assignment event, or if the client read model eagerly projected a
+  task as running before the daemon poll moved the durable assignment out of
+  `queued`, the next generated bootstrap/thread/profile read repairs
+  `active_stream` from that projection before projecting `work_status`,
+  `assigned_task_count`, and stream links.
 - non-`riido_log` daemon/provider events for active states (`queued`,
   `leased`, `ready`, `running`, `cancelling`) are lifecycle heartbeats, not
   client copy. They must not overwrite the task-thread representative
@@ -577,7 +587,8 @@ Task participant selection is not inferred from generic comments. The generated
 assignment command returns an `AIAgentTaskActionResponse` so the task screen can
 show the first agent-authored row immediately. If the user removes the agent from
 participants while it is queued or running, `tasks.unassign` returns the same
-response shape with `stopped_by_user_request`. The server keeps the stopped
+response shape with `stopped_by_user_request` and writes the corresponding
+assignment cancellation intent for daemon polling. The server keeps the stopped
 thread in the cold collection; the client decides whether that stopped content is
 rendered or hidden.
 
