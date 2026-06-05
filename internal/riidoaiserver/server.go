@@ -83,6 +83,19 @@ func NewServer(config ServerConfig) Server {
 	}
 }
 
+func (s Server) reconcileAIAgentTaskThreadProjections(ctx context.Context, principal AuthorizationResult, taskID string) error {
+	reader, ok := s.assignment.(AssignmentProjectionReader)
+	if !ok {
+		return nil
+	}
+	reconciler, ok := s.aiAgent.(AIAgentTaskThreadProjectionReconciler)
+	if !ok {
+		return nil
+	}
+	_, err := reconciler.ReconcileAIAgentActiveThreadProjections(ctx, principal, taskID, reader)
+	return err
+}
+
 func (s Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", s.handleHealth)
@@ -559,6 +572,10 @@ func (s Server) handleAIAgentClientWorkspaceAssignedAgentProfiles(w http.Respons
 	if !ok {
 		return
 	}
+	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, ""); err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
+		return
+	}
 	response, err := s.aiAgent.ListWorkspaceAssignedAgentProfiles(r.Context(), principal)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
@@ -582,15 +599,21 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, ""); err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
+		return
+	}
 	assignmentReq, err := s.assignRequestFromAIAgentClientTask(r.Context(), principal, bearerToken, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
-	if _, err := s.assignment.AssignTask(r.Context(), taskID, assignmentReq); err != nil {
+	assignment, err := s.assignment.AssignTask(r.Context(), taskID, assignmentReq)
+	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
+	req.AssignmentID = assignment.ID
 	response, err := s.aiAgent.AssignAIAgentTask(r.Context(), principal, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
@@ -618,15 +641,21 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, ""); err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
+		return
+	}
 	assignmentReq, err := s.assignRequestFromAIAgentClientTask(r.Context(), principal, bearerToken, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
-	if _, err := s.assignment.AssignTaskAdditive(r.Context(), taskID, assignmentReq); err != nil {
+	assignment, err := s.assignment.AssignTaskAdditive(r.Context(), taskID, assignmentReq)
+	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
+	req.AssignmentID = assignment.ID
 	response, err := s.aiAgent.CreateAIAgentTaskAgentAssignment(r.Context(), principal, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
@@ -705,6 +734,9 @@ func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, p
 	}
 	if req.Body == "" {
 		return AssignRequest{}, errors.New("body is required")
+	}
+	if err := s.reconcileAIAgentTaskThreadProjections(ctx, principal, taskID); err != nil {
+		return AssignRequest{}, err
 	}
 	threads, err := s.aiAgent.ListAIAgentTaskThreads(ctx, principal, taskID)
 	if err != nil {
@@ -805,6 +837,10 @@ func (s Server) handleAIAgentClientTaskThreads(w http.ResponseWriter, r *http.Re
 	if !ok {
 		return
 	}
+	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
+		return
+	}
 	response, err := s.aiAgent.ListAIAgentTaskThreads(r.Context(), principal, taskID)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
@@ -820,6 +856,10 @@ func (s Server) handleAIAgentClientTaskThreadStreamSubscription(w http.ResponseW
 	}
 	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead, TaskID: taskID})
 	if !ok {
+		return
+	}
+	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
 		return
 	}
 	response, err := s.aiAgent.GetAIAgentTaskThreadStreamSubscription(r.Context(), principal, taskID)
@@ -868,10 +908,12 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 		writeAIAgentClientError(w, err)
 		return
 	}
-	if _, err := s.assignment.AssignTask(r.Context(), taskID, assignmentReq); err != nil {
+	assignment, err := s.assignment.AssignTask(r.Context(), taskID, assignmentReq)
+	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
+	req.AssignmentID = assignment.ID
 	response, err := s.aiAgent.CreateAIAgentTaskThreadMessage(r.Context(), principal, taskID, threadID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)

@@ -258,6 +258,29 @@ func (s *Store) Metrics(ctx context.Context) (MetricsSnapshot, error) {
 	}
 }
 
+func (s *Store) LoadAssignmentProjection(ctx context.Context, assignmentID string) (AssignmentProjection, bool, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	assignmentID = strings.TrimSpace(assignmentID)
+	if assignmentID == "" {
+		return AssignmentProjection{}, false, errors.New("assignment_id is required")
+	}
+	if reader, ok := s.operationStore.(AssignmentProjectionReader); ok {
+		return reader.LoadAssignmentProjection(ctx, assignmentID)
+	}
+	reply := make(chan assignmentProjectionResult, 1)
+	if err := s.send(ctx, assignmentProjectionCmd{assignmentID: assignmentID, reply: reply}); err != nil {
+		return AssignmentProjection{}, false, err
+	}
+	select {
+	case res := <-reply:
+		return res.projection, res.found, res.err
+	case <-ctx.Done():
+		return AssignmentProjection{}, false, ctx.Err()
+	}
+}
+
 func (s *Store) send(ctx context.Context, cmd any) error {
 	select {
 	case s.commands <- cmd:
@@ -373,6 +396,17 @@ type metricsResult struct {
 	err      error
 }
 
+type assignmentProjectionCmd struct {
+	assignmentID string
+	reply        chan assignmentProjectionResult
+}
+
+type assignmentProjectionResult struct {
+	projection AssignmentProjection
+	found      bool
+	err        error
+}
+
 type closeCmd struct {
 	reply chan struct{}
 }
@@ -461,6 +495,9 @@ func (s *Store) loop(state storeState) {
 			msg.reply <- struct{}{}
 		case metricsCmd:
 			msg.reply <- metricsResult{snapshot: s.handleMetrics(&state)}
+		case assignmentProjectionCmd:
+			projection, found, err := handleLoadAssignmentProjection(&state, msg.assignmentID)
+			msg.reply <- assignmentProjectionResult{projection: projection, found: found, err: err}
 		case closeCmd:
 			_ = s.saveSnapshot(&state)
 			if s.outbox != nil {
@@ -1093,6 +1130,24 @@ func applyAssignmentProjectionToState(state *storeState, projection AssignmentPr
 	if projection.LastEventSeq > state.nextEventSeq {
 		state.nextEventSeq = projection.LastEventSeq
 	}
+}
+
+func handleLoadAssignmentProjection(state *storeState, assignmentID string) (AssignmentProjection, bool, error) {
+	assignmentID = strings.TrimSpace(assignmentID)
+	if assignmentID == "" {
+		return AssignmentProjection{}, false, errors.New("assignment_id is required")
+	}
+	assignment, ok := state.assignments[assignmentID]
+	if !ok {
+		return AssignmentProjection{}, false, nil
+	}
+	lastEventSeq := int64(0)
+	for _, event := range state.events[assignment.TaskID] {
+		if event.AssignmentID == assignmentID && event.Seq > lastEventSeq {
+			lastEventSeq = event.Seq
+		}
+	}
+	return AssignmentProjection{Assignment: assignment, LastEventSeq: lastEventSeq}, true, nil
 }
 
 func assignmentIDInAgentQueue(ids []string, id string) bool {

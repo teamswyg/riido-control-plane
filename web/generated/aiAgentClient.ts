@@ -8,6 +8,7 @@ import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@/lib/rea
  */
 export interface AIAgentTaskActionResponse {
   agent_id: string;
+  assignment_id?: string;
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
   message: string;
@@ -42,6 +43,7 @@ export interface AIAgentTaskThreadCollectionResponse {
  */
 export interface AIAgentTaskThreadRecord {
   agent_id: string;
+  assignment_id?: string;
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
   completed_at?: string;
@@ -281,6 +283,7 @@ export type AgentTaskCommentKind = "queued_by_busy_agent" | "assignment_started"
  */
 export interface AgentThreadProgressEvent {
   agent_id: string;
+  assignment_id?: string;
   assignment_state: AgentAssignmentState;
   batch_ended_at?: string;
   batch_started_at?: string;
@@ -318,6 +321,7 @@ export type AgentWorkStatus = "idle" | "queued" | "running" | "waiting_for_user"
  */
 export interface AgentWorkStatusChangedEvent {
   agent_id: string;
+  assignment_id?: string;
   assignment_state?: AgentAssignmentState;
   comment_kind?: AgentTaskCommentKind;
   event_type: "agent_work_status_changed";

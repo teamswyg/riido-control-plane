@@ -1859,6 +1859,10 @@
             "type": "string"
           },
           {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
             "name": "agent_id",
             "type": "string"
           },
@@ -2021,6 +2025,10 @@
             "type": "string"
           },
           {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
             "name": "thread_id",
             "type": "string"
           },
@@ -2106,6 +2114,10 @@
           },
           {
             "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
             "type": "string"
           },
           {
@@ -2220,6 +2232,10 @@
           },
           {
             "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
             "type": "string"
           },
           {

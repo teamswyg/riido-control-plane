@@ -106,6 +106,17 @@ The daemon's parsed progress batch path, `POST /v1/agents/{agent_id}/thread-prog
 may omit `thread_id`; in that case the batch is reconciled to the active
 client-facing thread for the same `(task_id, agent_id)` rather than materializing
 a second thread from the assignment run id.
+Client-facing task-thread rows, action responses, work-status SSE events, and
+thread-progress SSE events carry the durable `assignment_id` when the handler
+has accepted a real assignment. The assignment operation projection is the
+truth source; the AI Agent client task-thread model is a derived read model.
+Before serving generated task-thread collection, thread-stream subscription,
+workspace assigned-profile, or new generated assignment requests, the adapter
+may reconcile visible active task threads against the durable assignment
+projection. If the durable projection is terminal, the client read model must
+close `active_stream` even when the original daemon event fan-out was missed.
+Legacy task-thread rows created before `assignment_id` was projected are not
+deterministically repairable from the client read model alone.
 `completed`, `failed`, and `cancelled` assignment states close the thread's
 `active_stream` read-model state so a completed historical thread remains a
 cold collection row instead of a live stream candidate. This projection is
@@ -280,6 +291,10 @@ that agent can then be claimed. Heartbeat must not revive a lease that has
 already passed the stale deadline. When heartbeat creates a stale terminal event
 such as `assignment_failed`, the AI Agent client read-model must receive the
 same event so generated thread queries stop advertising an active stream.
+If that event delivery is missed, the generated-client read path must repair the
+derived task-thread read model from the durable assignment projection keyed by
+`assignment_id`. Durable assignment projection therefore sits above AI Agent
+client thread projection in the control-plane dependency direction.
 
 This actor does not own HTTP assignment routes, SSE fan-out,
 DynamoDB/EventBridge adapter payload construction, Terraform, AWS credentials,

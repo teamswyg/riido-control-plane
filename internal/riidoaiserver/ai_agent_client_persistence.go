@@ -184,6 +184,17 @@ func (s *PersistentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Contex
 	return s.DevelopmentAIAgentClientStore.ListAIAgentTaskThreads(ctx, principal, taskID)
 }
 
+func (s *PersistentAIAgentClientStore) ReconcileAIAgentActiveThreadProjections(ctx context.Context, principal AuthorizationResult, taskID string, reader AssignmentProjectionReader) (bool, error) {
+	if err := s.reloadSnapshot(ctx); err != nil {
+		return false, err
+	}
+	changed, err := s.DevelopmentAIAgentClientStore.ReconcileAIAgentActiveThreadProjections(ctx, principal, taskID, reader)
+	if err != nil || !changed {
+		return changed, err
+	}
+	return changed, s.saveSnapshot(ctx)
+}
+
 func (s *PersistentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return AIAgentTaskActionResponse{}, err

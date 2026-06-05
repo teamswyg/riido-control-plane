@@ -2041,6 +2041,44 @@ This slice does:
 This slice does not change generated frontend response shapes, daemon
 heartbeats, provider launch permissions, or the assignment transition contract.
 
+### RIID-4917 — assignment projection read-repair for client threads
+
+Follow-up development verification confirmed the active-lease fix by completing
+a new Codex Hello World assignment. It also exposed an older client task-thread
+row that still advertised `active_stream` even though the durable assignment
+projection had already moved to `failed`. The missed terminal event made the
+frontend-facing read model look busier than the assignment store truth.
+
+This slice does:
+
+- preserve the accepted durable `assignment_id` on generated assignment action
+  responses, task-thread rows, work-status SSE events, and thread-progress SSE
+  events
+- make daemon assignment events prefer `assignment_id` when selecting the
+  client-facing thread to update, falling back to the active `(task_id,
+  agent_id)` thread only for compatibility
+- expose assignment projection reads through the public assignment store actor,
+  delegating to the durable operation store in deployed environments
+- repair visible active AI Agent client task-thread rows from the durable
+  assignment projection before generated thread reads, stream subscription
+  reads, workspace assigned-profile reads, generated assignment creation, and
+  completed-thread follow-up assignment creation
+- add a black-box HTTP regression where the durable assignment store receives a
+  terminal event but the client read model misses the fan-out; the next thread
+  read closes `active_stream`
+
+This slice keeps the frontend call pattern unchanged. `assignment_id` is an
+additive generated field, not a new client input. Historical task-thread rows
+created before `assignment_id` was projected may require operator cleanup
+because the client read model alone cannot prove which durable assignment owns
+them.
+
+The provider execution permission direction remains outside this control-plane
+slice. Control-plane must not silently downgrade or reinterpret provider launch
+permissions such as Codex `danger-full-access`; provider adapters and daemon
+harness policy own that envelope, while control-plane owns assignment,
+heartbeat, projection, and client-visible repair behavior.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

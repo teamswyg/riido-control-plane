@@ -3571,6 +3571,9 @@
           "agent_id": {
             "type": "string"
           },
+          "assignment_id": {
+            "type": "string"
+          },
           "assignment_state": {
             "$ref": "#/components/schemas/AgentAssignmentState"
           },
@@ -3639,6 +3642,9 @@
         "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
         "properties": {
           "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
             "type": "string"
           },
           "assignment_state": {
@@ -4137,6 +4143,9 @@
           "agent_id": {
             "type": "string"
           },
+          "assignment_id": {
+            "type": "string"
+          },
           "assignment_state": {
             "$ref": "#/components/schemas/AgentAssignmentState"
           },
@@ -4238,6 +4247,9 @@
         "description": "agent 작업 상태와 task thread 상태 변경을 전달하는 SSE event입니다.",
         "properties": {
           "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
             "type": "string"
           },
           "assignment_state": {
