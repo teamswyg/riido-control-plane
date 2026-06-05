@@ -2567,6 +2567,95 @@ func TestDevelopmentAIAgentClientStoreStripsPersistedRiidoLogBlocksFromThreadMes
 	}
 }
 
+func TestDevelopmentAIAgentClientStoreHidesLocalRuntimePathsFromClientThreadMessage(t *testing.T) {
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1"}
+
+	store.mu.Lock()
+	store.taskThreads["task-local-path-copy"] = []AIAgentTaskThreadRecord{{
+		ThreadID:        "thread-local-path-copy",
+		TaskID:          "task-local-path-copy",
+		AgentID:         "agent-owned-codex",
+		RunID:           "run-local-path-copy",
+		WorkStatus:      AgentWorkStatusCompleted,
+		AssignmentState: AgentAssignmentStateCompleted,
+		CommentKind:     AgentTaskCommentTaskCompleted,
+		Message: "Go 예제는 [go/hello.go](</Users/teddy/Library/Application Support/riido/runtime/go/hello.go>)에, " +
+			"Rust 예제는 [rust/hello.rs](/tmp/riido-smoke/rust/hello.rs)에 작성했습니다. " +
+			"실행 산출물은 /tmp/riido-smoke/bin/hello 입니다.",
+		StartedAt:   time.Now().UTC().Add(-time.Minute),
+		CompletedAt: time.Now().UTC(),
+		Lines: []AgentThreadProgressLine{{
+			Seq:     1,
+			Message: "검증 완료 - /Users/teddy/Library/Application Support/riido/runtime/log.txt",
+		}},
+	}}
+	store.mu.Unlock()
+
+	threads, err := store.ListAIAgentTaskThreads(context.Background(), principal, "task-local-path-copy")
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	if len(threads.Threads) != 1 {
+		t.Fatalf("threads = %+v", threads.Threads)
+	}
+	message := threads.Threads[0].Message
+	for _, leaked := range []string{"/Users/", "/tmp/", "file://"} {
+		if strings.Contains(message, leaked) {
+			t.Fatalf("thread message leaked local runtime path marker %q: %q", leaked, message)
+		}
+	}
+	for _, want := range []string{"go/hello.go", "rust/hello.rs", "로컬 파일"} {
+		if !strings.Contains(message, want) {
+			t.Fatalf("thread message = %q, want to contain %q", message, want)
+		}
+	}
+}
+
+func TestDevelopmentAIAgentClientStoreHidesLocalRuntimePathsFromAssignmentActionResponse(t *testing.T) {
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1"}
+	assigned, err := store.AssignAIAgentTask(context.Background(), principal, "task-local-path-action", AssignAIAgentTaskRequest{
+		AgentID:      "agent-owned-codex",
+		AssignmentID: "asn-local-path-action",
+	})
+	if err != nil {
+		t.Fatalf("AssignAIAgentTask: %v", err)
+	}
+
+	completedEvent := TaskEvent{
+		TaskID:       "task-local-path-action",
+		AssignmentID: assigned.AssignmentID,
+		AgentID:      assigned.AgentID,
+		Type:         EventAssignmentCompleted,
+		State:        AssignmentCompleted,
+		Message:      "완료했습니다. 결과: [go/hello.go](</Users/teddy/riido/go/hello.go>), 로그: /tmp/riido-action/log.txt",
+		At:           time.Now().UTC(),
+	}
+	if err := store.RecordAIAgentAssignmentEvent(context.Background(), assigned.AgentID, AgentEventRequest{}, completedEvent); err != nil {
+		t.Fatalf("RecordAIAgentAssignmentEvent: %v", err)
+	}
+
+	threads, err := store.ListAIAgentTaskThreads(context.Background(), principal, "task-local-path-action")
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	if len(threads.Threads) != 1 {
+		t.Fatalf("threads = %+v", threads.Threads)
+	}
+	message := actionResponseFromThread(threads.Threads[0]).Message
+	for _, leaked := range []string{"/Users/", "/tmp/", "file://"} {
+		if strings.Contains(message, leaked) {
+			t.Fatalf("action response leaked local runtime path marker %q: %q", leaked, message)
+		}
+	}
+	for _, want := range []string{"go/hello.go", "로컬 파일"} {
+		if !strings.Contains(message, want) {
+			t.Fatalf("action message = %q, want to contain %q", message, want)
+		}
+	}
+}
+
 func countWorkStatusChangedEventsForTask(t *testing.T, store *DevelopmentAIAgentClientStore, principal AuthorizationResult, taskID string) int {
 	t.Helper()
 	events, err := store.AIAgentClientEvents(context.Background(), principal)

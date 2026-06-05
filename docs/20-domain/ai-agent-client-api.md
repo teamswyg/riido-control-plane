@@ -490,6 +490,12 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   internal progress transport and must be stripped from client-visible
   task-thread `message`; the rendered progress remains available through
   `lines[]` and `agent_thread_progress`.
+- assignment event messages can also contain daemon/runtime-local absolute file
+  paths such as macOS workspace paths or temporary smoke-test paths. Those paths
+  are runtime evidence, not frontend copy. Generated client-facing task-thread
+  representative `message` values and assignment action responses must hide the
+  absolute path while preserving useful labels such as `go/hello.go` and a
+  generic local-file marker.
 - client task-thread progress is streamed as the typed
   `agent_thread_progress` event with `thread_id` on
   `GET /v1/client/ai-agent/events` and the v2 duplicate

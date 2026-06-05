@@ -1996,6 +1996,28 @@ message.
 This slice does not change endpoint paths, generated client shape, SSE event
 types, progress catalog ids, or frontend behavior.
 
+### RIID-4917 — client task-thread copy hides daemon local paths
+
+Live development verification of the Codex Hello World scenario showed a
+completed client task-thread whose representative `message` preserved markdown
+links to daemon-local paths under `/Users/...` and `/tmp/...`. The frontend demo
+screen can avoid rendering those paths, but the generated client response itself
+is the safer boundary: local runtime paths are execution evidence, not public UI
+copy.
+
+This slice keeps endpoint paths and response schemas unchanged while sanitizing
+client-facing task-thread copy at the development read-model boundary:
+
+- markdown links to local files keep their human label, for example
+  `go/hello.go`, and drop the absolute local URL/path
+- raw local absolute paths are replaced with a generic local-file marker
+- persisted daemon/provider evidence can remain unchanged; generated
+  `ListAIAgentTaskThreads` rows and assignment action responses expose only the
+  sanitized public message
+
+This slice does not change generated TypeScript names, frontend inputs, SSE
+event types, or daemon payload contracts.
+
 ### RIID-4917 — device/runtime stale liveness projection
 
 This slice closes a live development finding where old desktop-enrolled daemon
