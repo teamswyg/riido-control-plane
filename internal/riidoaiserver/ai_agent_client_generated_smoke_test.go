@@ -109,6 +109,11 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV1(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodPost, "/v1/client/ai-agent/agents/agent-public-openclaw/daemon/restart", token, `{"reason":"smoke restart"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, "/v1/client/ai-agent/agents/agent-public-openclaw/daemon/stop", token, `{"reason":"smoke stop"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, "/v1/client/ai-agent/agents/agent-public-openclaw/daemon/start", token, `{"reason":"smoke start"}`, http.StatusAccepted)
+
+	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/devices/device-dev-macbook/daemon", token, "", http.StatusOK)
+	aiAgentSmokeRequest(t, server, http.MethodPost, "/v1/client/ai-agent/devices/device-dev-macbook/daemon/restart", token, `{"reason":"smoke restart"}`, http.StatusAccepted)
+	aiAgentSmokeRequest(t, server, http.MethodPost, "/v1/client/ai-agent/devices/device-dev-macbook/daemon/stop", token, `{"reason":"smoke stop"}`, http.StatusAccepted)
+	aiAgentSmokeRequest(t, server, http.MethodPost, "/v1/client/ai-agent/devices/device-dev-macbook/daemon/start", token, `{"reason":"smoke start"}`, http.StatusAccepted)
 }
 
 func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
@@ -244,6 +249,11 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/agents/agent-owned-codex/daemon/restart", token, `{"reason":"smoke restart"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/agents/agent-owned-codex/daemon/stop", token, `{"reason":"smoke stop"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/agents/agent-owned-codex/daemon/start", token, `{"reason":"smoke start"}`, http.StatusAccepted)
+
+	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/devices/device-dev-macbook/daemon", token, "", http.StatusOK)
+	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/restart", token, `{"reason":"smoke restart"}`, http.StatusAccepted)
+	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/stop", token, `{"reason":"smoke stop"}`, http.StatusAccepted)
+	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/start", token, `{"reason":"smoke start"}`, http.StatusAccepted)
 }
 
 func TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI(t *testing.T) {

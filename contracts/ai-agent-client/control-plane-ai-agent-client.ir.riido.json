@@ -314,7 +314,7 @@
         "daemon_control_private_agent: private agent는 같은 workspace admin 또는 owner만 해당 agent에 연결된 daemon/runtime을 통해 작업 실행과 daemon 제어 요청을 할 수 있습니다",
         "daemon_stop_effect: daemon stop이 accepted되면 해당 device의 runtimes는 client에 offline으로 노출되어야 합니다",
         "client: runtime-settings empty and install-card states are composed from device/runtime read-model data without changing liveness semantics",
-        "client: runtime-settings current-device and other-device groups are composed from DeviceRecord values; daemon detail/actions are read through agents.daemon generated endpoints with an agent_id",
+        "client: runtime-settings current-device and other-device groups are composed from DeviceRecord values; the 내 기기 daemon row reads and controls daemon state through devices.daemon generated endpoints with device_id, while explicit selected-agent access still uses agents.daemon generated endpoints with agent_id",
         "client: provider install-card hover, Windows app waitlist copy, and marketing-consent presentation are downstream client/product facts until a separate owning SSOT adds a generated operation"
       ]
     },
@@ -348,7 +348,7 @@
       "kind": "telemetry",
       "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
       "rules": [
-        "daemon: parse only explicit runtime progress markers such as <riido_log>...<end>",
+        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
@@ -918,7 +918,7 @@
       "name": "DeviceDaemonDetailResponse",
       "schema": {
         "name": "DeviceDaemonDetailResponse",
-        "description": "runtime 설정 화면의 agent-bound daemon 상세 row와 상세 패널을 위한 응답입니다.",
+        "description": "runtime 설정 화면의 device-bound 내 기기 daemon 상세와 agent-bound 선택 Agent daemon 상세가 공유하는 응답입니다.",
         "type": "object",
         "required": [
           "schema_version",
@@ -2757,6 +2757,164 @@
       ]
     },
     {
+      "operation_id": "getAIAgentDeviceDaemon",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "details"
+        ],
+        "generated_path": "aiAgent.devices.daemon.details",
+        "cache_tag": "aiAgent.devices.daemon"
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 상세를 조회합니다",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonDetailResponse"
+      },
+      "scenario_ids": [
+        "getAIAgentDeviceDaemon.figma-my-device-daemon-details"
+      ]
+    },
+    {
+      "operation_id": "startAIAgentDeviceDaemon",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/start",
+      "resource": "device",
+      "action": "control",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "start"
+        ],
+        "generated_path": "aiAgent.devices.daemon.start",
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 시작을 요청합니다",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
+      "scenario_ids": [
+        "startAIAgentDeviceDaemon.figma-my-device-daemon-start"
+      ]
+    },
+    {
+      "operation_id": "restartAIAgentDeviceDaemon",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/restart",
+      "resource": "device",
+      "action": "control",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "restart"
+        ],
+        "generated_path": "aiAgent.devices.daemon.restart",
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 재시작을 요청합니다",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
+      "scenario_ids": [
+        "restartAIAgentDeviceDaemon.figma-my-device-daemon-restart"
+      ]
+    },
+    {
+      "operation_id": "stopAIAgentDeviceDaemon",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/stop",
+      "resource": "device",
+      "action": "control",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "stop"
+        ],
+        "generated_path": "aiAgent.devices.daemon.stop",
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 중지를 요청합니다",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
+      "scenario_ids": [
+        "stopAIAgentDeviceDaemon.figma-my-device-daemon-stop"
+      ]
+    },
+    {
       "operation_id": "listAIAgentTaskAssignableAgents",
       "kind": "query",
       "method": "GET",
@@ -3528,6 +3686,156 @@
         "scopes": [
           "ai-agent:agent:control",
           "ai-agent:agent:{agent_id}:control"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      }
+    },
+    {
+      "operation_id": "getAIAgentDeviceDaemonV2",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "devices",
+          "daemon",
+          "details"
+        ],
+        "generated_path": "v2.aiAgent.devices.daemon.details",
+        "cache_tag": "v2.aiAgent.devices.daemon"
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 상세를 조회합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonDetailResponse"
+      }
+    },
+    {
+      "operation_id": "startAIAgentDeviceDaemonV2",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/start",
+      "resource": "device",
+      "action": "control",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "devices",
+          "daemon",
+          "start"
+        ],
+        "generated_path": "v2.aiAgent.devices.daemon.start",
+        "invalidates": [
+          "v2.aiAgent.devices.daemon",
+          "v2.aiAgent.devices.runtimes"
+        ]
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 시작을 요청합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      }
+    },
+    {
+      "operation_id": "restartAIAgentDeviceDaemonV2",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/restart",
+      "resource": "device",
+      "action": "control",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "devices",
+          "daemon",
+          "restart"
+        ],
+        "generated_path": "v2.aiAgent.devices.daemon.restart",
+        "invalidates": [
+          "v2.aiAgent.devices.daemon",
+          "v2.aiAgent.devices.runtimes"
+        ]
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 재시작을 요청합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      }
+    },
+    {
+      "operation_id": "stopAIAgentDeviceDaemonV2",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/stop",
+      "resource": "device",
+      "action": "control",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "devices",
+          "daemon",
+          "stop"
+        ],
+        "generated_path": "v2.aiAgent.devices.daemon.stop",
+        "invalidates": [
+          "v2.aiAgent.devices.daemon",
+          "v2.aiAgent.devices.runtimes"
+        ]
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 중지를 요청합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
         ]
       },
       "rbac_policy": "runtime_liveness.v1",
@@ -4378,6 +4686,38 @@
       "then": "the response accepts a stop daemon command, exposes stopping/offline state, and the following runtime read model shows that device's runtimes offline"
     },
     {
+      "scenario_id": "getAIAgentDeviceDaemon.figma-my-device-daemon-details",
+      "operation_id": "getAIAgentDeviceDaemon",
+      "name": "figma my device daemon details",
+      "given": "the Figma runtime settings current-device daemon row is composed from a device row returned by devices.runtimes",
+      "when": "the device owner opens the 내 기기 daemon detail area",
+      "then": "the response is addressed by device_id and does not require the client to choose an arbitrary agent_id"
+    },
+    {
+      "scenario_id": "startAIAgentDeviceDaemon.figma-my-device-daemon-start",
+      "operation_id": "startAIAgentDeviceDaemon",
+      "name": "figma my device daemon start",
+      "given": "the Figma runtime settings current-device daemon row is offline and shows 시작",
+      "when": "the device owner requests start for that device_id",
+      "then": "the response accepts the start command and invalidates the device daemon detail plus runtime read model"
+    },
+    {
+      "scenario_id": "restartAIAgentDeviceDaemon.figma-my-device-daemon-restart",
+      "operation_id": "restartAIAgentDeviceDaemon",
+      "name": "figma my device daemon restart",
+      "given": "the Figma runtime settings current-device daemon row is online and shows 재시작",
+      "when": "the device owner requests restart for that device_id",
+      "then": "the response exposes restarting control_state so the client can show the pending button state"
+    },
+    {
+      "scenario_id": "stopAIAgentDeviceDaemon.figma-my-device-daemon-stop",
+      "operation_id": "stopAIAgentDeviceDaemon",
+      "name": "figma my device daemon stop",
+      "given": "the Figma runtime settings stop modal says local runtimes become offline",
+      "when": "the device owner confirms stop for that device_id",
+      "then": "the response accepts a stop daemon command and the following runtime read model shows that device's runtimes offline"
+    },
+    {
       "scenario_id": "listAIAgentTaskAssignableAgents.participant-dropdown-visible-agents",
       "operation_id": "listAIAgentTaskAssignableAgents",
       "name": "participant dropdown visible agents",
@@ -4720,6 +5060,46 @@
       "given": "Figma node-id=432-46849 lets the client collect direct agent configuration before runtime and workspace selection",
       "when": "the client finalizes direct creation",
       "then": "riido.v2.aiAgent.agents.create still requires workspace_id in the URL path and runtime_id in the create request body before any durable agent is saved"
+    },
+    {
+      "scenario_id": "createAIAgentTaskAgentAssignmentV2.additive-task-assignment-keeps-existing-active-agents",
+      "operation_id": "createAIAgentTaskAgentAssignmentV2",
+      "name": "additive task assignment keeps existing active agents",
+      "given": "a task already has an active AI Agent assignment and another visible agent is selected",
+      "when": "client calls riido.v2.aiAgent.tasks.agentAssignments.create",
+      "then": "control-plane keeps existing active task threads and creates or returns the selected agent's task thread"
+    },
+    {
+      "scenario_id": "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment",
+      "operation_id": "deleteAIAgentTaskAgentAssignmentV2",
+      "name": "path agent id selects removed assignment",
+      "given": "a task has multiple active AI Agent threads",
+      "when": "client removes one agent through riido.v2.aiAgent.tasks.agentAssignments.delete",
+      "then": "only the path agent_id target is stopped and other active thread filters remain active"
+    },
+    {
+      "scenario_id": "stopAIAgentTaskAgentAssignmentV2.path-agent-id-selects-stopped-assignment",
+      "operation_id": "stopAIAgentTaskAgentAssignmentV2",
+      "name": "path agent id selects stopped assignment",
+      "given": "a task has multiple active AI Agent threads",
+      "when": "client stops one agent through riido.v2.aiAgent.tasks.agentAssignments.stop",
+      "then": "only the path agent_id target is stopped and other active thread filters remain active"
+    },
+    {
+      "scenario_id": "getAIAgentTaskThreadStreamSubscriptionV2.multi-active-task-threads-use-filters",
+      "operation_id": "getAIAgentTaskThreadStreamSubscriptionV2",
+      "name": "multi active task threads use filters",
+      "given": "a task has two or more visible active AI Agent task threads",
+      "when": "client calls riido.v2.aiAgent.tasks.threadStreamSubscription",
+      "then": "the response contains one stream href and one active_thread_filters item per active thread"
+    },
+    {
+      "scenario_id": "getAIAgentTaskThreadStreamSubscriptionV2.cold-task-returns-empty-filters",
+      "operation_id": "getAIAgentTaskThreadStreamSubscriptionV2",
+      "name": "cold task returns empty filters",
+      "given": "a task has no active AI Agent task thread",
+      "when": "client calls riido.v2.aiAgent.tasks.threadStreamSubscription",
+      "then": "the response keeps the stream handoff shape but returns an empty active_thread_filters array"
     }
   ]
 }

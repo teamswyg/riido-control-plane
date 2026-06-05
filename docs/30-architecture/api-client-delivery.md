@@ -131,13 +131,15 @@ but generated code must not provide a misleading fallback path.
 
 Figma runtime settings annotations (`node-id=162-23090`) are generated-client
 consumption context for `listAIAgentDeviceRuntimes`,
-`getAIAgentDaemon`, `startAIAgentDaemon`,
-`restartAIAgentDaemon`, `stopAIAgentDaemon`,
+`getAIAgentDeviceDaemon`, `startAIAgentDeviceDaemon`,
+`restartAIAgentDeviceDaemon`, `stopAIAgentDeviceDaemon`,
+and the existing agent-bound `getAIAgentDaemon`/daemon command helpers,
 `device_runtime_snapshot`, and `device_daemon_status_changed`. The delivery
 artifact may document that these generated pieces feed the runtime settings
 route, `내 기기`/`다른 기기` grouping, runtime name/version/status rows,
-attached-agent avatar rows, agent-bound daemon detail labels, and
-agent-bound daemon start/restart/stop buttons. It must not turn the agent
+attached-agent avatar rows, device-bound `내 기기` daemon detail labels,
+device-bound daemon buttons, and agent-bound indirect daemon access where an
+agent is explicitly selected. It must not turn the agent
 hover popover, daemon stop modal layout, or restart animation rendering into
 server-owned presentation logic.
 

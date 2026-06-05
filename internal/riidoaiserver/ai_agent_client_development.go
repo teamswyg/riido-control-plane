@@ -20,6 +20,8 @@ type AIAgentClientStore interface {
 	ListAIAgentDevices(ctx context.Context, principal AuthorizationResult) (DeviceRuntimeListResponse, error)
 	GetAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string) (DeviceDaemonDetailResponse, error)
 	ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error)
+	GetAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string) (DeviceDaemonDetailResponse, error)
+	ControlAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error)
 	ListAIAgentTaskAssignableAgents(ctx context.Context, principal AuthorizationResult, taskID string) (AgentClientListResponse, error)
 	ListWorkspaceAssignedAgentProfiles(ctx context.Context, principal AuthorizationResult) (AssignedAgentProfileMapResponse, error)
 	ListAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error)
@@ -560,6 +562,102 @@ func (s *DevelopmentAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context
 		ControlState:  daemon.ControlState,
 		AcceptedAt:    now,
 		Message:       message + " for agent " + agent.AgentID,
+	}, nil
+}
+
+func (s *DevelopmentAIAgentClientStore) GetAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string) (DeviceDaemonDetailResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return DeviceDaemonDetailResponse{}, err
+	}
+	deviceID = strings.TrimSpace(deviceID)
+	if deviceID == "" {
+		return DeviceDaemonDetailResponse{}, errors.New("device_id is required")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	daemon, ok := s.deviceDaemonForOwnerLocked(principal, deviceID)
+	if !ok {
+		return DeviceDaemonDetailResponse{}, ErrAIAgentNotFound
+	}
+	return DeviceDaemonDetailResponse{SchemaVersion: SchemaVersion, Daemon: copyDeviceDaemon(daemon)}, nil
+}
+
+func (s *DevelopmentAIAgentClientStore) ControlAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return DeviceDaemonCommandResponse{}, err
+	}
+	deviceID = strings.TrimSpace(deviceID)
+	if deviceID == "" {
+		return DeviceDaemonCommandResponse{}, errors.New("device_id is required")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	daemon, ok := s.deviceDaemonForOwnerLocked(principal, deviceID)
+	if !ok {
+		return DeviceDaemonCommandResponse{}, ErrAIAgentNotFound
+	}
+	if !daemonSupportsAction(daemon, action) {
+		return DeviceDaemonCommandResponse{}, errors.New("daemon action is not supported in the current state")
+	}
+	now := time.Now().UTC()
+	commandID := "daemon-command-" + strconv.Itoa(s.nextDaemonCommand)
+	s.nextDaemonCommand++
+	daemon.LastCommandID = commandID
+	daemon.LastCommandAction = action
+	daemon.LastCommandRequestedAt = now
+	daemon.LastSeenAt = now
+	message := "daemon command accepted"
+	switch action {
+	case DaemonControlActionStart:
+		daemon.Availability = DaemonAvailabilityOnline
+		daemon.ControlState = DaemonControlStateStarting
+		daemon.StartedAt = now
+		daemon.PID = 5111
+		daemon.UptimeSeconds = 0
+		daemon.SupportedActions = []DaemonControlAction{DaemonControlActionRestart, DaemonControlActionStop}
+		message = "daemon start command accepted"
+	case DaemonControlActionRestart:
+		daemon.Availability = DaemonAvailabilityOnline
+		daemon.ControlState = DaemonControlStateRestarting
+		daemon.StartedAt = now
+		daemon.UptimeSeconds = 0
+		daemon.SupportedActions = []DaemonControlAction{DaemonControlActionStop}
+		message = "daemon restart command accepted"
+	case DaemonControlActionStop:
+		daemon.Availability = DaemonAvailabilityOffline
+		daemon.ControlState = DaemonControlStateStopping
+		daemon.PID = 0
+		daemon.UptimeSeconds = 0
+		daemon.SupportedActions = []DaemonControlAction{DaemonControlActionStart}
+		s.markDeviceRuntimesOfflineLocked(daemon.DeviceID, now)
+		message = "daemon stop command accepted"
+	default:
+		return DeviceDaemonCommandResponse{}, errors.New("unsupported daemon action")
+	}
+	s.daemons[daemon.DeviceID] = daemon
+	s.appendClientEventLocked(AgentClientEventDeviceDaemonStatus, DeviceDaemonStatusEvent{
+		EventType:     AgentClientEventDeviceDaemonStatus,
+		SchemaVersion: SchemaVersion,
+		Daemon:        copyDeviceDaemon(daemon),
+	})
+	if action == DaemonControlActionStop {
+		if device, ok := s.deviceByIDLocked(daemon.DeviceID); ok {
+			s.appendClientEventLocked(AgentClientEventDeviceRuntimeSnapshot, DeviceRuntimeSnapshotEvent{
+				EventType:     AgentClientEventDeviceRuntimeSnapshot,
+				SchemaVersion: SchemaVersion,
+				Device:        device,
+			})
+		}
+	}
+	return DeviceDaemonCommandResponse{
+		SchemaVersion: SchemaVersion,
+		CommandID:     commandID,
+		DeviceID:      daemon.DeviceID,
+		Action:        action,
+		Availability:  daemon.Availability,
+		ControlState:  daemon.ControlState,
+		AcceptedAt:    now,
+		Message:       message + " for device " + daemon.DeviceID,
 	}, nil
 }
 
@@ -1438,6 +1536,8 @@ func (s *DevelopmentAIAgentClientStore) visibleAgent(principal AuthorizationResu
 	if !ok || !s.aiAgentVisibleTo(principal, agent) {
 		return AgentClientRecord{}, false
 	}
+	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
+	s.agents[agent.AgentID] = agent
 	return s.agentForPrincipal(agent, principal), true
 }
 
@@ -1467,6 +1567,8 @@ func (s *DevelopmentAIAgentClientStore) visibleAgents(principal AuthorizationRes
 		if !s.aiAgentVisibleTo(principal, agent) {
 			continue
 		}
+		agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
+		s.agents[agent.AgentID] = agent
 		agents = append(agents, s.agentForPrincipal(agent, principal))
 	}
 	sort.SliceStable(agents, func(i, j int) bool {
@@ -1479,6 +1581,52 @@ func (s *DevelopmentAIAgentClientStore) visibleAgents(principal AuthorizationRes
 		return agents[i].AgentID < agents[j].AgentID
 	})
 	return agents
+}
+
+func (s *DevelopmentAIAgentClientStore) projectAgentWorkStatusFromThreadsLocked(agent AgentClientRecord) AgentClientRecord {
+	activeCount := 0
+	var latest AIAgentTaskThreadRecord
+	hasLatest := false
+	for _, threads := range s.taskThreads {
+		for _, thread := range threads {
+			if thread.AgentID != agent.AgentID || !taskThreadHasActiveStream(thread) {
+				continue
+			}
+			activeCount++
+			if !hasLatest ||
+				thread.StartedAt.After(latest.StartedAt) ||
+				(thread.StartedAt.Equal(latest.StartedAt) && thread.ThreadID > latest.ThreadID) {
+				latest = thread
+				hasLatest = true
+			}
+		}
+	}
+	agent.AssignedTaskCount = activeCount
+	agent.Editability = editabilityForAssignedTasks(activeCount)
+	if activeCount == 0 {
+		switch agent.WorkStatus {
+		case AgentWorkStatusQueued, AgentWorkStatusRunning, AgentWorkStatusWaitingForUser:
+			agent.WorkStatus = AgentWorkStatusIdle
+		}
+		return agent
+	}
+	agent.WorkStatus = projectedAgentWorkStatusFromActiveThread(latest)
+	return agent
+}
+
+func projectedAgentWorkStatusFromActiveThread(thread AIAgentTaskThreadRecord) AgentWorkStatus {
+	switch thread.WorkStatus {
+	case AgentWorkStatusQueued, AgentWorkStatusRunning, AgentWorkStatusWaitingForUser:
+		return thread.WorkStatus
+	}
+	switch thread.AssignmentState {
+	case AgentAssignmentStateQueued:
+		return AgentWorkStatusQueued
+	case AgentAssignmentStateRunning, AgentAssignmentStateStopping:
+		return AgentWorkStatusRunning
+	default:
+		return AgentWorkStatusRunning
+	}
 }
 
 func (s *DevelopmentAIAgentClientStore) visibleAgentIDs(principal AuthorizationResult) map[string]struct{} {
@@ -1996,6 +2144,8 @@ func (s *DevelopmentAIAgentClientStore) agentForMutation(principal Authorization
 	if !ok || !s.aiAgentMutableBy(principal, agent) {
 		return AgentClientRecord{}, false
 	}
+	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
+	s.agents[agent.AgentID] = agent
 	return agent, true
 }
 

@@ -8,271 +8,425 @@
       "generated_path": "aiAgent.agents.create",
       "method": "POST",
       "path": "/v1/client/ai-agent/agents",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.agents.daemon.details",
       "method": "GET",
       "path": "/v1/client/ai-agent/agents/{agent_id}/daemon",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.agents.daemon.restart",
       "method": "POST",
       "path": "/v1/client/ai-agent/agents/{agent_id}/daemon/restart",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.agents.daemon.start",
       "method": "POST",
       "path": "/v1/client/ai-agent/agents/{agent_id}/daemon/start",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.agents.daemon.stop",
       "method": "POST",
       "path": "/v1/client/ai-agent/agents/{agent_id}/daemon/stop",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.agents.delete",
       "method": "DELETE",
       "path": "/v1/client/ai-agent/agents/{agent_id}",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.agents.editability",
       "method": "GET",
       "path": "/v1/client/ai-agent/agents/{agent_id}/editability",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.agents.updateConfiguration",
       "method": "PATCH",
       "path": "/v1/client/ai-agent/agents/{agent_id}",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.bootstrap",
       "method": "GET",
       "path": "/v1/client/ai-agent/bootstrap",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
+    },
+    {
+      "generated_path": "aiAgent.devices.daemon.details",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
+    },
+    {
+      "generated_path": "aiAgent.devices.daemon.restart",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/restart",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
+    },
+    {
+      "generated_path": "aiAgent.devices.daemon.start",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/start",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
+    },
+    {
+      "generated_path": "aiAgent.devices.daemon.stop",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemon/stop",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.devices.runtimes",
       "method": "GET",
       "path": "/v1/client/ai-agent/devices",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.events.stream",
       "method": "GET",
       "path": "/v1/client/ai-agent/events",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.onboarding.fixtures",
       "method": "GET",
       "path": "/v1/client/ai-agent/onboarding/fixtures",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.onboarding.fixtures.createAgent",
       "method": "POST",
       "path": "/v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.tasks.assign",
       "method": "POST",
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignment",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.tasks.assignableAgents",
       "method": "GET",
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignable-agents",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.tasks.stop",
       "method": "POST",
       "path": "/v1/client/ai-agent/tasks/{task_id}/stop",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.tasks.submitComment",
       "method": "POST",
       "path": "/v1/client/ai-agent/tasks/{task_id}/comments",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.tasks.threadMessages.create",
       "method": "POST",
       "path": "/v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.tasks.threads",
       "method": "GET",
       "path": "/v1/client/ai-agent/tasks/{task_id}/threads",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "aiAgent.tasks.unassign",
       "method": "DELETE",
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignment",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.agents.create",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.agents.daemon.details",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.agents.daemon.restart",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon/restart",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.agents.daemon.start",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon/start",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.agents.daemon.stop",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon/stop",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.agents.delete",
       "method": "DELETE",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.agents.editability",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/editability",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.agents.updateConfiguration",
       "method": "PATCH",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.bootstrap",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/bootstrap",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
+      "generated_path": "v2.aiAgent.devices.daemon.details",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
+      "generated_path": "v2.aiAgent.devices.daemon.restart",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/restart",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
+      "generated_path": "v2.aiAgent.devices.daemon.start",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/start",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
+      "generated_path": "v2.aiAgent.devices.daemon.stop",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/stop",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.devices.runtimes",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.events.stream",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/events",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.onboarding.fixtures",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.onboarding.fixtures.createAgent",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures/{fixture_id}/agents",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.agentAssignments.create",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.agentAssignments.delete",
       "method": "DELETE",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.agentAssignments.stop",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.assign",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignment",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.assignableAgents",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignable-agents",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.assignedAgentProfiles",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.stop",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/stop",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.submitComment",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/comments",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.threadMessages.create",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.threadStreamSubscription",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/thread-stream-subscription",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.threads",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     },
     {
       "generated_path": "v2.aiAgent.tasks.unassign",
       "method": "DELETE",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignment",
-      "evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV2"]
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
     }
   ]
 }

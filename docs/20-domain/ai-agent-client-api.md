@@ -193,8 +193,9 @@ For agent settings:
   new generated operation before the server accepts them.
 - Figma runtime settings annotations (`node-id=162-23090`) confirm the
   `devices` and `agents.daemon` API consumption context. This repository owns
-  the protected device/runtime read model, agent-bound daemon detail,
-  start/restart/stop command requests, `device_runtime_snapshot` and
+  the protected device/runtime read model, device-bound daemon detail and
+  start/restart/stop command requests for `내 기기`, agent-bound daemon detail
+  and commands for explicit selected-agent access, `device_runtime_snapshot` and
   `device_daemon_status_changed` event shapes, generated DTOs, and black-box
   tests for current-device and other-device grouping, runtime
   name/version/status, attached-agent records, daemon detail labels, and daemon
@@ -638,14 +639,18 @@ and renders truncation, max height, and scrollbars.
 
 `node-id=162-23090` maps to `GET /v1/client/ai-agent/devices`, the generated
 `listAIAgentDeviceRuntimes` query, and the generated
-`riido.aiAgent.agents.daemon.details/start/restart/stop` endpoints. The device
-response is the source for visible device/runtime rows, runtime
+`riido.aiAgent.devices.daemon.details/start/restart/stop` endpoints for the
+current viewer's own device. The device response is the source for visible device/runtime rows, runtime
 name/version/status, and attached-agent records used by the `내 기기` and
-`다른 기기` groups. The daemon detail endpoint is the source for agent-accessible
-daemon labels such as status, uptime, PID, daemon ID, profile, and device name.
-Daemon start/restart/stop are SaaS command requests authorized through the
-agent's visibility/access policy; the daemon later reads and executes accepted
-commands locally. A stop command makes affected runtimes client-visible as
+`다른 기기` groups. The device-bound daemon detail endpoint is the source for
+`내 기기` daemon labels such as status, uptime, PID, daemon ID, profile, and
+device name; it takes `device_id` from the devices response and never asks the
+client to choose an arbitrary `agent_id`. The existing
+`riido.aiAgent.agents.daemon.details/start/restart/stop` endpoints remain
+agent-bound: they are used when the client intentionally controls or reads the
+daemon through a selected agent and its public/private access policy. Daemon
+start/restart/stop are SaaS command requests; the daemon later reads and
+executes accepted commands locally. A stop command makes affected runtimes client-visible as
 offline through the runtime read model. The agent hover
 popover, stop modal layout, and restart animation are still client presentation.
 

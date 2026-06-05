@@ -438,12 +438,12 @@
       ],
       "covered_facts": [
         "expanded legacy runtime wireframe is absorbed by the current UI runtime settings section",
-        "daemon facts on a runtime settings surface are reached only through agent-bound daemon detail policy",
+        "내 기기 daemon facts on a runtime settings surface are reached through device-bound daemon detail policy, while explicit selected-agent daemon access remains agent-bound",
         "legacy runtime frame variants do not create route forks"
       ],
       "direction_loop": {
         "top_down": "A revived runtime-detail rule from this legacy frame updates the current runtime settings policy/API entry first.",
-        "bottom_up": "Implementation evidence about daemon detail stays on the agent-bound daemon contract unless product changes the current UI section."
+        "bottom_up": "Implementation evidence about 내 기기 daemon detail stays on the device-bound daemon contract; selected-agent daemon detail stays on the agent-bound daemon contract unless product changes the current UI section."
       }
     },
     {
@@ -601,7 +601,7 @@
       ],
       "covered_facts": [
         "legacy runtime detail wireframe is absorbed by the current UI runtime settings section",
-        "runtime detail is read from the device/runtime model and agent-bound daemon detail projection",
+        "runtime detail is read from the device/runtime model, device-bound 내 기기 daemon detail projection, and agent-bound selected-agent daemon detail projection",
         "runtime detail rendering does not create a standalone runtime-detail operation"
       ],
       "direction_loop": {
