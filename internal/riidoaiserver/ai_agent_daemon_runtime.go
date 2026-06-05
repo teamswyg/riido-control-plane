@@ -27,6 +27,12 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 	req.DeviceID = strings.TrimSpace(req.DeviceID)
 	req.DeviceDisplayName = strings.TrimSpace(req.DeviceDisplayName)
 	req.Profile = strings.TrimSpace(req.Profile)
+	if req.PID < 0 {
+		req.PID = 0
+	}
+	if req.UptimeSeconds < 0 {
+		req.UptimeSeconds = 0
+	}
 	if principal.PrincipalID == "" {
 		return DeviceRuntimeSnapshotSyncResponse{}, errors.New("principal_id is required")
 	}
@@ -41,6 +47,13 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		return DeviceRuntimeSnapshotSyncResponse{}, err
 	}
 	now := time.Now().UTC()
+	startedAt := req.StartedAt
+	if !startedAt.IsZero() {
+		startedAt = startedAt.UTC()
+	}
+	if startedAt.IsZero() && req.UptimeSeconds > 0 {
+		startedAt = now.Add(-time.Duration(req.UptimeSeconds) * time.Second)
+	}
 	displayName := req.DeviceDisplayName
 	if displayName == "" {
 		displayName = "Riido Desktop"
@@ -79,15 +92,24 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		DeviceDisplayName: displayName,
 		DaemonID:          req.DaemonID,
 		Profile:           req.Profile,
+		PID:               req.PID,
+		UptimeSeconds:     req.UptimeSeconds,
+		StartedAt:         startedAt,
 		LastSeenAt:        now,
 		Availability:      DaemonAvailabilityOnline,
 		ControlState:      DaemonControlStateIdle,
 		SupportedActions:  []DaemonControlAction{DaemonControlActionRestart, DaemonControlActionStop},
 	}
 	if existing, ok := s.daemons[req.DeviceID]; ok {
-		daemon.PID = existing.PID
-		daemon.UptimeSeconds = existing.UptimeSeconds
-		daemon.StartedAt = existing.StartedAt
+		if daemon.PID == 0 {
+			daemon.PID = existing.PID
+		}
+		if daemon.UptimeSeconds == 0 {
+			daemon.UptimeSeconds = existing.UptimeSeconds
+		}
+		if daemon.StartedAt.IsZero() {
+			daemon.StartedAt = existing.StartedAt
+		}
 		if daemon.Profile == "" {
 			daemon.Profile = existing.Profile
 		}
