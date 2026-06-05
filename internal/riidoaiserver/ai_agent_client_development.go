@@ -861,6 +861,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	}
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
 		response.ThreadID = thread.ThreadID
+		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
 	} else {
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
@@ -996,7 +997,7 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	agent, ok := s.agentForTaskStop(principal, req.AgentID)
+	agent, ok := s.agentForTaskStopLocked(principal, taskID, req.AgentID)
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
@@ -1012,6 +1013,7 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	}
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
 		response.ThreadID = thread.ThreadID
+		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
 	} else {
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
@@ -2176,16 +2178,15 @@ func (s *DevelopmentAIAgentClientStore) agentForMutation(principal Authorization
 	return agent, true
 }
 
-func (s *DevelopmentAIAgentClientStore) agentForTaskStop(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) agentForTaskStopLocked(principal AuthorizationResult, taskID, agentID string) (AgentClientRecord, bool) {
 	if strings.TrimSpace(agentID) != "" {
 		return s.visibleAgent(principal, agentID)
 	}
-	for _, agent := range s.visibleAgents(principal) {
-		if agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser {
-			return agent, true
-		}
+	thread, ok := s.activeTaskThreadLocked(taskID)
+	if !ok {
+		return AgentClientRecord{}, false
 	}
-	return AgentClientRecord{}, false
+	return s.visibleAgent(principal, thread.AgentID)
 }
 
 func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {

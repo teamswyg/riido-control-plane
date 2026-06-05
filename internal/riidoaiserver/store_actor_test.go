@@ -242,6 +242,93 @@ func TestStoreActorReassignmentCancelsQueuedPreviousWithoutBlockingNewAgent(t *t
 	}
 }
 
+func TestStoreActorClientStopCancelsActiveAssignmentForDaemonPoll(t *testing.T) {
+	ctx := context.Background()
+	now := time.Date(2026, 6, 5, 13, 0, 0, 0, time.UTC)
+	store := NewStoreWithClock(func() time.Time { return now })
+	defer store.Close()
+
+	assignment, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "first",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask: %v", err)
+	}
+	pollStart, err := store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent start: %v", err)
+	}
+	if pollStart.Action != PollStart || pollStart.Assignment == nil || pollStart.Assignment.ID != assignment.ID {
+		t.Fatalf("poll start = %+v", pollStart)
+	}
+
+	now = now.Add(time.Second)
+	cancelled, err := store.CancelAssignment(ctx, "task-a", CancelAssignmentRequest{
+		AgentID:      "agent-1",
+		AssignmentID: assignment.ID,
+		Reason:       "user requested stop",
+	})
+	if err != nil {
+		t.Fatalf("CancelAssignment: %v", err)
+	}
+	if cancelled.State != AssignmentCancelling {
+		t.Fatalf("cancelled assignment = %+v", cancelled)
+	}
+	projection, ok, err := store.LoadAssignmentProjection(ctx, assignment.ID)
+	if err != nil {
+		t.Fatalf("LoadAssignmentProjection: %v", err)
+	}
+	if !ok || projection.Assignment.State != AssignmentCancelling {
+		t.Fatalf("projection after cancel = %+v ok=%v", projection, ok)
+	}
+
+	pollCancel, err := store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent cancel: %v", err)
+	}
+	if pollCancel.Action != PollCancel || pollCancel.Assignment == nil || pollCancel.Assignment.ID != assignment.ID {
+		t.Fatalf("poll cancel = %+v", pollCancel)
+	}
+}
+
+func TestStoreActorClientStopCancelsQueuedAssignmentImmediately(t *testing.T) {
+	ctx := context.Background()
+	now := time.Date(2026, 6, 5, 14, 0, 0, 0, time.UTC)
+	store := NewStoreWithClock(func() time.Time { return now })
+	defer store.Close()
+
+	assignment, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "first",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask: %v", err)
+	}
+	cancelled, err := store.CancelAssignment(ctx, "task-a", CancelAssignmentRequest{
+		AgentID:      "agent-1",
+		AssignmentID: assignment.ID,
+		Reason:       "user requested stop",
+	})
+	if err != nil {
+		t.Fatalf("CancelAssignment: %v", err)
+	}
+	if cancelled.State != AssignmentCancelled {
+		t.Fatalf("cancelled queued assignment = %+v", cancelled)
+	}
+	poll, err := store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent: %v", err)
+	}
+	if poll.Action != PollNone {
+		t.Fatalf("poll after queued cancel = %+v", poll)
+	}
+}
+
 func TestStoreActorReassigningSameBlockedQueuedAssignmentRepairsQueuedBlocker(t *testing.T) {
 	ctx := context.Background()
 	base := time.Date(2026, 6, 5, 12, 0, 0, 0, time.UTC)

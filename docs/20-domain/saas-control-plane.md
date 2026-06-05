@@ -272,6 +272,8 @@ the stdlib-only runtime behavior that can be verified without AWS credentials:
 
 - `AssignmentStore` command serialization through one actor goroutine
 - assignment creation and reassignment cancellation handoff
+- client-requested assignment cancellation intent used by generated stop and
+  participant-removal commands
 - daemon poll actions (`none`, `start`, `active`, `cancel`)
 - heartbeat-based active assignment timestamp refresh
 - agent event transition validation and task event append

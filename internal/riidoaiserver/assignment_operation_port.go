@@ -19,6 +19,7 @@ const (
 	AssignmentOperationAssignTask AssignmentOperationType = "assign_task"
 	AssignmentOperationPollStart  AssignmentOperationType = "poll_start"
 	AssignmentOperationAgentEvent AssignmentOperationType = "agent_event"
+	AssignmentOperationClientStop AssignmentOperationType = "client_stop"
 )
 
 type AssignmentOperationStore interface {
@@ -146,6 +147,8 @@ func assignmentOperationID(operationType AssignmentOperationType, assignment Ass
 		return fmt.Sprintf("poll-start:%s:%s:%d", assignment.ID, assignment.LeaseToken, lastSeq)
 	case AssignmentOperationAgentEvent:
 		return fmt.Sprintf("agent-event:%s:%d", assignment.ID, lastSeq)
+	case AssignmentOperationClientStop:
+		return fmt.Sprintf("client-stop:%s:%d", assignment.ID, lastSeq)
 	default:
 		return fmt.Sprintf("%s:%s:%d", operationType, assignment.ID, lastSeq)
 	}

@@ -426,6 +426,14 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `assignment_state=running`, and `work_status=running`; they must not reuse
   `queued_by_busy_agent`
 - task-thread stop actions return `stopped_by_user_request`
+- task-thread stop and participant-removal actions are generated client
+  commands and daemon-facing cancellation commands at the same time. After the
+  AI Agent client read model is projected as stopped, the handler must also
+  write a durable assignment cancellation intent for the same `assignment_id`
+  when one exists. Queued assignments move directly to `cancelled`; leased,
+  ready, or running assignments move to `cancelling` so the owning daemon sees
+  `PollCancel` on its next poll and can confirm the terminal `cancelled` event.
+  The frontend does not call a second endpoint for this.
 - task-thread status updates use typed `AgentTaskCommentKind` values
 - task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
   to render historical AI Agent thread rows; `active_stream` is present only
@@ -579,7 +587,8 @@ Task participant selection is not inferred from generic comments. The generated
 assignment command returns an `AIAgentTaskActionResponse` so the task screen can
 show the first agent-authored row immediately. If the user removes the agent from
 participants while it is queued or running, `tasks.unassign` returns the same
-response shape with `stopped_by_user_request`. The server keeps the stopped
+response shape with `stopped_by_user_request` and writes the corresponding
+assignment cancellation intent for daemon polling. The server keeps the stopped
 thread in the cold collection; the client decides whether that stopped content is
 rendered or hidden.
 

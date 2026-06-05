@@ -13,6 +13,10 @@ type AssignmentStore interface {
 	Close()
 }
 
+type AssignmentCancellationStore interface {
+	CancelAssignment(ctx context.Context, taskID string, req CancelAssignmentRequest) (Assignment, error)
+}
+
 type AssignmentHeartbeatEventStore interface {
 	HeartbeatAgentWithEvents(ctx context.Context, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, []TaskEvent, error)
 }

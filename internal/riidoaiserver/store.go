@@ -145,6 +145,19 @@ func (s *Store) AssignTaskAdditive(ctx context.Context, taskID string, req Assig
 	}
 }
 
+func (s *Store) CancelAssignment(ctx context.Context, taskID string, req CancelAssignmentRequest) (Assignment, error) {
+	reply := make(chan cancelAssignmentResult, 1)
+	if err := s.send(ctx, cancelAssignmentCmd{taskID: taskID, req: req, reply: reply}); err != nil {
+		return Assignment{}, err
+	}
+	select {
+	case res := <-reply:
+		return res.assignment, res.err
+	case <-ctx.Done():
+		return Assignment{}, ctx.Err()
+	}
+}
+
 func (s *Store) PollAgent(ctx context.Context, agentID string, req PollRequest) (PollResponse, error) {
 	reply := make(chan pollResult, 1)
 	if err := s.send(ctx, pollCmd{agentID: agentID, req: req, reply: reply}); err != nil {
@@ -304,6 +317,23 @@ type assignResult struct {
 	err        error
 }
 
+type CancelAssignmentRequest struct {
+	AgentID      string
+	AssignmentID string
+	Reason       string
+}
+
+type cancelAssignmentCmd struct {
+	taskID string
+	req    CancelAssignmentRequest
+	reply  chan cancelAssignmentResult
+}
+
+type cancelAssignmentResult struct {
+	assignment Assignment
+	err        error
+}
+
 type pollCmd struct {
 	agentID string
 	req     PollRequest
@@ -425,6 +455,16 @@ func (s *Store) loop(state storeState) {
 				err = s.saveSnapshot(&state)
 			}
 			msg.reply <- assignResult{assignment: assignment, err: err}
+		case cancelAssignmentCmd:
+			beforeEventSeq := state.nextEventSeq
+			assignment, err := s.handleCancelAssignment(&state, msg.taskID, msg.req)
+			if err == nil {
+				err = s.saveOperation(&state, AssignmentOperationClientStop, assignment, eventsAfterSeq(&state, beforeEventSeq))
+				if err == nil {
+					err = s.saveSnapshot(&state)
+				}
+			}
+			msg.reply <- cancelAssignmentResult{assignment: assignment, err: err}
 		case pollCmd:
 			beforeEventSeq := state.nextEventSeq
 			response, operationAlreadySaved, mutatedAssignment, mutationOperationType, err := s.handlePoll(&state, msg.agentID, msg.req)
@@ -647,6 +687,58 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	task.componentID = req.ComponentID
 	state.tasks[taskID] = task
 	s.appendEvent(state, taskID, assignment.ID, assignment.AgentID, EventAssignmentQueued, assignment.State, "", nil, now)
+	return assignment, nil
+}
+
+func (s *Store) handleCancelAssignment(state *storeState, taskID string, req CancelAssignmentRequest) (Assignment, error) {
+	taskID = strings.TrimSpace(taskID)
+	req.AgentID = strings.TrimSpace(req.AgentID)
+	req.AssignmentID = strings.TrimSpace(req.AssignmentID)
+	req.Reason = strings.TrimSpace(req.Reason)
+	if taskID == "" {
+		return Assignment{}, errors.New("task_id is required")
+	}
+	if req.AgentID == "" {
+		return Assignment{}, errors.New("agent_id is required")
+	}
+	assignment, ok := state.assignmentForClientStop(taskID, req)
+	if !ok {
+		if req.AssignmentID != "" {
+			return Assignment{}, fmt.Errorf("assignment %s not found", req.AssignmentID)
+		}
+		return Assignment{}, fmt.Errorf("active assignment for task %s and agent %s not found", taskID, req.AgentID)
+	}
+	if assignment.TaskID != taskID {
+		return Assignment{}, fmt.Errorf("assignment %s belongs to task %s", assignment.ID, assignment.TaskID)
+	}
+	if assignment.AgentID != req.AgentID {
+		return Assignment{}, fmt.Errorf("assignment %s belongs to agent %s", assignment.ID, assignment.AgentID)
+	}
+	if isTerminal(assignment.State) || assignment.State == AssignmentCancelling {
+		return assignment, nil
+	}
+
+	nextState := AssignmentCancelling
+	eventType := EventAssignmentCancelling
+	message := req.Reason
+	if message == "" {
+		message = "assignment cancellation requested by client"
+	}
+	if assignment.State == AssignmentQueued {
+		nextState = AssignmentCancelled
+		eventType = EventAssignmentCancelled
+		if req.Reason == "" {
+			message = "queued assignment was cancelled by client"
+		}
+	}
+	if !canTransitionAssignment(assignment.State, nextState) {
+		return Assignment{}, fmt.Errorf("invalid assignment transition %s -> %s", assignment.State, nextState)
+	}
+	now := s.now()
+	assignment.State = nextState
+	assignment.UpdatedAt = now
+	state.assignments[assignment.ID] = assignment
+	s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, eventType, assignment.State, message, map[string]string{"source": "client_stop"}, now)
 	return assignment, nil
 }
 
@@ -1292,6 +1384,22 @@ func assignmentBlockerCleared(state *storeState, assignment Assignment) bool {
 	}
 	blocker := state.assignments[assignment.BlockedByAssignmentID]
 	return isTerminal(blocker.State)
+}
+
+func (state *storeState) assignmentForClientStop(taskID string, req CancelAssignmentRequest) (Assignment, bool) {
+	if req.AssignmentID != "" {
+		assignment := state.assignments[req.AssignmentID]
+		return assignment, assignment.ID != ""
+	}
+	assignmentIDs := state.agentAssignments[req.AgentID]
+	for i := len(assignmentIDs) - 1; i >= 0; i-- {
+		assignment := state.assignments[assignmentIDs[i]]
+		if assignment.TaskID != taskID || isTerminal(assignment.State) {
+			continue
+		}
+		return assignment, true
+	}
+	return Assignment{}, false
 }
 
 func copyAssignment(a Assignment) *Assignment {

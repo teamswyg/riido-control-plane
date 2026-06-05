@@ -66,6 +66,9 @@ func TestAssignmentOperationIDAndJSONShape(t *testing.T) {
 	if got, want := assignmentOperationID(AssignmentOperationAgentEvent, record.Assignment, record.Events), "agent-event:asn-000042:7"; got != want {
 		t.Fatalf("agent-event operation id = %q, want %q", got, want)
 	}
+	if got, want := assignmentOperationID(AssignmentOperationClientStop, record.Assignment, record.Events), "client-stop:asn-000042:7"; got != want {
+		t.Fatalf("client-stop operation id = %q, want %q", got, want)
+	}
 	if got, want := assignmentOperationID(AssignmentOperationType("custom"), record.Assignment, nil), "custom:asn-000042:0"; got != want {
 		t.Fatalf("custom operation id = %q, want %q", got, want)
 	}
