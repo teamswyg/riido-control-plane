@@ -648,10 +648,14 @@ device name; it takes `device_id` from the devices response and never asks the
 client to choose an arbitrary `agent_id`. The existing
 `riido.aiAgent.agents.daemon.details/start/restart/stop` endpoints remain
 agent-bound: they are used when the client intentionally controls or reads the
-daemon through a selected agent and its public/private access policy. Daemon
-start/restart/stop are SaaS command requests; the daemon later reads and
-executes accepted commands locally. A stop command makes affected runtimes client-visible as
-offline through the runtime read model. The agent hover
+daemon through a selected agent and its public/private access policy. When a
+persisted device/daemon owner projection is not enough to resolve a viewer-owned
+device, control-plane may recover the same decision through a viewer-owned agent
+runtime attached to that `device_id`; the client contract still remains
+device-bound and does not add an `agent_id` parameter. Daemon start/restart/stop
+are SaaS command requests; the daemon later reads and executes accepted commands
+locally. A stop command makes affected runtimes client-visible as offline
+through the runtime read model. The agent hover
 popover, stop modal layout, and restart animation are still client presentation.
 
 `node-id=275-22731` also maps to `GET /v1/client/ai-agent/devices`. The server
