@@ -135,6 +135,14 @@ runtime moves to the latest reporting device and is removed from the previous
 device projection. This keeps daemon `agent-bindings` deterministic and avoids
 binding an agent to a stale device row.
 
+Workspace admin authorization does not expose every device persisted in the
+control-plane snapshot. AI Agent device/runtime reads remain scoped to the
+current workspace: viewer-owned devices, same-workspace device credentials
+allowed by admin RBAC, and device runtime rows exposed through a visible
+workspace agent access path. A device enrolled for another workspace must stay
+hidden from generated client bootstrap/devices responses and from replayed SSE
+device events.
+
 Development persistence uses the DynamoDB AI Agent client snapshot as the
 durable authorization/projection SSOT. ECS task memory is a reloadable cache, so
 device credential authorization and daemon `agent-bindings` reads must reload

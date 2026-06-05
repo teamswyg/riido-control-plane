@@ -2498,13 +2498,6 @@ func filterDevicesForPrincipal(devices []DeviceRecord, principal AuthorizationRe
 
 func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal AuthorizationResult) []DeviceRecord {
 	now := time.Now().UTC()
-	if aiAgentIsAdmin(principal) {
-		devices := copyVisibleSeedDevices(s.devices, principal)
-		for i := range devices {
-			devices[i] = projectDeviceRuntimeLiveness(devices[i], now)
-		}
-		return devices
-	}
 	visibleRuntimeIDs := map[string]struct{}{}
 	for _, agent := range s.agents {
 		if !s.aiAgentVisibleTo(principal, agent) || agent.RuntimeID == "" {
@@ -2519,6 +2512,10 @@ func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal Authoriza
 		}
 		device = projectDeviceRuntimeLiveness(device, now)
 		if device.OwnerPrincipalID == principal.PrincipalID {
+			out = append(out, copyDevice(device))
+			continue
+		}
+		if s.deviceWorkspaceVisibleByAdminLocked(principal, device.DeviceID) {
 			out = append(out, copyDevice(device))
 			continue
 		}
@@ -2541,7 +2538,10 @@ func (s *DevelopmentAIAgentClientStore) visibleDeviceRecordLocked(principal Auth
 		return DeviceRecord{}, false
 	}
 	device = projectDeviceRuntimeLiveness(device, time.Now().UTC())
-	if aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID {
+	if device.OwnerPrincipalID == principal.PrincipalID {
+		return copyDevice(device), true
+	}
+	if s.deviceWorkspaceVisibleByAdminLocked(principal, device.DeviceID) {
 		return copyDevice(device), true
 	}
 	filtered := device
@@ -2561,7 +2561,10 @@ func (s *DevelopmentAIAgentClientStore) deviceVisibleToPrincipalLocked(principal
 	if deviceHiddenSeedForPrincipal(device, principal) {
 		return false
 	}
-	if aiAgentIsAdmin(principal) || device.OwnerPrincipalID == principal.PrincipalID {
+	if device.OwnerPrincipalID == principal.PrincipalID {
+		return true
+	}
+	if s.deviceWorkspaceVisibleByAdminLocked(principal, device.DeviceID) {
 		return true
 	}
 	for _, runtime := range device.Runtimes {
@@ -2572,8 +2575,24 @@ func (s *DevelopmentAIAgentClientStore) deviceVisibleToPrincipalLocked(principal
 	return false
 }
 
+func (s *DevelopmentAIAgentClientStore) deviceWorkspaceVisibleByAdminLocked(principal AuthorizationResult, deviceID string) bool {
+	if !aiAgentIsAdmin(principal) {
+		return false
+	}
+	deviceID = strings.TrimSpace(deviceID)
+	if deviceID == "" {
+		return false
+	}
+	for _, record := range s.deviceCredentials {
+		if record.deviceID == deviceID && record.workspaceID == s.workspaceScope(principal) {
+			return true
+		}
+	}
+	return isDevelopmentFixturePrincipal(principal) && isDevelopmentSeedDevice(DeviceRecord{DeviceID: deviceID})
+}
+
 func (s *DevelopmentAIAgentClientStore) daemonVisibleToPrincipalLocked(principal AuthorizationResult, daemon DeviceDaemonRecord) bool {
-	if aiAgentIsAdmin(principal) || daemon.OwnerPrincipalID == principal.PrincipalID {
+	if daemon.OwnerPrincipalID == principal.PrincipalID {
 		return true
 	}
 	for _, device := range s.devices {
