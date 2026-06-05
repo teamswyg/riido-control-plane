@@ -419,7 +419,7 @@ func (s *Store) loop(state storeState) {
 			beforeEventSeq := state.nextEventSeq
 			assignment, err := s.handleAssign(&state, msg.taskID, msg.req, msg.allowConcurrentTaskAgents)
 			if err == nil {
-				err = s.saveOperation(&state, AssignmentOperationAssignTask, assignment, eventsAfterSeq(&state, beforeEventSeq))
+				err = s.saveAssignmentMutationOperations(&state, AssignmentOperationAssignTask, assignment, eventsAfterSeq(&state, beforeEventSeq))
 			}
 			if err == nil {
 				err = s.saveSnapshot(&state)
@@ -593,6 +593,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		for _, assignmentID := range state.agentAssignments[req.AgentID] {
 			current := state.assignments[assignmentID]
 			if current.TaskID == taskID && !isTerminal(current.State) {
+				s.cancelQueuedBlockerForAssignment(state, &current, now)
 				return current, nil
 			}
 		}
@@ -604,14 +605,22 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		current := state.assignments[task.currentAssignmentID]
 		if !isTerminal(current.State) {
 			if current.AgentID == req.AgentID {
+				s.cancelQueuedBlockerForAssignment(state, &current, now)
 				return current, nil
 			}
-			current.State = AssignmentCancelling
-			current.UpdatedAt = now
-			state.assignments[current.ID] = current
-			s.appendEvent(state, current.TaskID, current.ID, current.AgentID, EventAssignmentCancelling, current.State, "task reassigned to another agent", nil, now)
 			replacesID = current.ID
-			blockedByID = current.ID
+			if current.State == AssignmentQueued {
+				current.State = AssignmentCancelled
+				current.UpdatedAt = now
+				state.assignments[current.ID] = current
+				s.appendEvent(state, current.TaskID, current.ID, current.AgentID, EventAssignmentCancelled, current.State, "queued assignment was replaced before daemon lease", nil, now)
+			} else {
+				current.State = AssignmentCancelling
+				current.UpdatedAt = now
+				state.assignments[current.ID] = current
+				s.appendEvent(state, current.TaskID, current.ID, current.AgentID, EventAssignmentCancelling, current.State, "task reassigned to another agent", nil, now)
+				blockedByID = current.ID
+			}
 		}
 	}
 
@@ -639,6 +648,59 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	state.tasks[taskID] = task
 	s.appendEvent(state, taskID, assignment.ID, assignment.AgentID, EventAssignmentQueued, assignment.State, "", nil, now)
 	return assignment, nil
+}
+
+func (s *Store) saveAssignmentMutationOperations(state *storeState, primaryType AssignmentOperationType, primary Assignment, events []TaskEvent) error {
+	if len(events) == 0 {
+		return nil
+	}
+	eventsByAssignment := map[string][]TaskEvent{}
+	var assignmentIDs []string
+	for _, event := range events {
+		assignmentID := strings.TrimSpace(event.AssignmentID)
+		if assignmentID == "" {
+			continue
+		}
+		if _, ok := eventsByAssignment[assignmentID]; !ok {
+			assignmentIDs = append(assignmentIDs, assignmentID)
+		}
+		eventsByAssignment[assignmentID] = append(eventsByAssignment[assignmentID], event)
+	}
+	for _, assignmentID := range assignmentIDs {
+		assignment := state.assignments[assignmentID]
+		if assignment.ID == "" {
+			return fmt.Errorf("assignment %s not found for mutation events", assignmentID)
+		}
+		operationType := AssignmentOperationAgentEvent
+		if assignmentID == primary.ID {
+			operationType = primaryType
+			assignment = primary
+		}
+		if err := s.saveOperation(state, operationType, assignment, eventsByAssignment[assignmentID]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Store) cancelQueuedBlockerForAssignment(state *storeState, assignment *Assignment, now time.Time) bool {
+	if assignment == nil || strings.TrimSpace(assignment.BlockedByAssignmentID) == "" {
+		return false
+	}
+	blocker := state.assignments[assignment.BlockedByAssignmentID]
+	if blocker.ID == "" || blocker.State != AssignmentQueued {
+		return false
+	}
+	blocker.State = AssignmentCancelled
+	blocker.UpdatedAt = now
+	state.assignments[blocker.ID] = blocker
+	s.appendEvent(state, blocker.TaskID, blocker.ID, blocker.AgentID, EventAssignmentCancelled, blocker.State, "queued blocker was cancelled before daemon lease", nil, now)
+
+	assignment.BlockedByAssignmentID = ""
+	assignment.UpdatedAt = now
+	state.assignments[assignment.ID] = *assignment
+	s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentQueued, assignment.State, "queued blocker cleared before daemon lease", nil, now)
+	return true
 }
 
 func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest) (PollResponse, bool, *Assignment, AssignmentOperationType, error) {

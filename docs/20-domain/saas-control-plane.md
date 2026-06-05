@@ -133,6 +133,13 @@ different agent is assigned to the same task, the current task assignment is
 marked cancelling and the new assignment is blocked until the old assignment is
 terminal.
 
+Queued assignments are the exception because no daemon/runtime has leased them
+yet. Replacing a queued assignment closes the previous assignment as
+`cancelled` immediately, and the new assignment must remain pollable without a
+blocker. If a historical queued blocker already exists on a still-queued current
+assignment, a same-agent reassignment repairs that blocker by cancelling the
+unleased blocker and clearing `blocked_by_assignment_id` before daemon polling.
+
 New multi-agent task work is additive and must use the v2
 `agent-assignments` routes. The additive store path preserves the same
 validation gates as compatibility assignment: task id, agent id, runtime
@@ -276,6 +283,12 @@ the stdlib-only runtime behavior that can be verified without AWS credentials:
   assignment mutations
 - durable active-assignment lease reads and heartbeat refreshes when the
   configured operation store implements the lease/projection ports
+
+When one assignment mutation changes more than one assignment, such as
+replacement cancelling the previous assignment while queuing the new one, each
+assignment's durable projection must be saved separately. A new assignment
+operation must not be the only durable write for the previous assignment's
+terminal or cancelling event.
 
 Active daemon/runtime work is fenced by heartbeat. A running daemon refreshes
 the active assignment every 5 seconds through `/heartbeat`; the control plane

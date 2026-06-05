@@ -2091,6 +2091,31 @@ them, so `riido.aiAgent.devices.daemon.details` can render the Figma runtime
 settings row without calling the local daemon or changing the generated client
 response shape.
 
+### RIID-4917 — queued assignment blocker repair
+
+Live development verification found a task thread that rendered as running while
+daemon polling returned `none`. DynamoDB showed the pollable assignment was
+still `queued`, but it carried `blocked_by_assignment_id` pointing at an older
+queued assignment. Because that older assignment had never been leased by a
+daemon, no daemon could receive or acknowledge a cancellation, so the new
+assignment remained blocked forever.
+
+This slice does:
+
+- close replaced `queued` assignments as `cancelled` immediately because no
+  provider process has started yet
+- repair historical queued blockers when the same agent is reassigned to the
+  still-queued current assignment
+- save durable assignment-operation projections per changed assignment, so a
+  replacement mutation records both the previous assignment's terminal/cancelling
+  state and the new assignment's queued state
+- keep generated client request/response shapes and daemon polling endpoints
+  unchanged
+
+This slice does not change active/leased replacement handoff. Once a daemon has
+leased work, the previous assignment still moves through `cancelling` and the new
+assignment remains blocked until the active assignment is terminal.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
