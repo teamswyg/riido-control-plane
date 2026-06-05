@@ -264,6 +264,14 @@ projection, agent configuration, and onboarding fixtures are durable in that
 snapshot. The generated client event stream is not an audit log; the snapshot
 stores only the newest 200 replay events so the development projection stays
 inside DynamoDB's single-item limit while still supporting recent SSE reconnects.
+Because the development API may run behind an ALB with more than one ECS task,
+the DynamoDB snapshot is the durable SSOT and each task's in-memory store is
+only a reloadable cache. Client reads, device credential authorization, daemon
+agent-binding reads, daemon runtime snapshots, and AI Agent mutations must
+reload the latest snapshot before evaluating state. Runtime snapshot writes
+then save the merged projection back to the same snapshot. This keeps Desktop,
+daemon, and web requests consistent when the ALB routes related requests to
+different tasks.
 The assignment operation store writes the generated assignment journal, agent
 queue projection, and active lease records in the same table. This is the
 development persistence boundary, not the final production single-table
@@ -753,6 +761,12 @@ device for stale credential recovery. Runtime snapshots likewise keep
 `runtime_id` single-owned: if the same runtime is later reported by another
 device, it moves to the latest reporting device so `agent-bindings` and
 generated client read models do not point at stale device rows.
+
+In development persistence, this single-owner runtime move is evaluated against
+the latest DynamoDB snapshot, not only the current ECS task memory. Otherwise a
+daemon could sync on one task while the web-generated devices query or
+`agent-bindings` poll lands on another task and observes stale device/runtime
+projection.
 
 `workspace_id` on this route is the selected workspace context, not device
 ownership. Devices/runtimes remain account-owned; agents remain

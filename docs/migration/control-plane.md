@@ -1741,6 +1741,10 @@ It adds:
   credentials survive reopening the store
 - DynamoDB fake-endpoint tests proving the snapshot item key and schema
   metadata
+- reload-before-read/write behavior for the persistent AI Agent client store so
+  development ALB/ECS task memory never becomes a second SSOT for device
+  credentials, runtime ownership, daemon `agent-bindings`, or generated client
+  read models
 
 The snapshot stores only `device_secret` hashes, never one-time raw
 `device_secret` values. Development mode now fails during startup unless the

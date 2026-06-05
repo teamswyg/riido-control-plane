@@ -77,6 +77,107 @@ func TestPersistentAIAgentClientStoreRestoresDevelopmentState(t *testing.T) {
 	}
 }
 
+func TestPersistentAIAgentClientStoreReloadsDeviceCredentialAcrossProcesses(t *testing.T) {
+	ctx := context.Background()
+	snapshots := &memoryAIAgentClientSnapshotStore{}
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-dev"}
+	writer, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("open writer: %v", err)
+	}
+	reader, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("open stale reader: %v", err)
+	}
+
+	enrollment, err := writer.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{DisplayName: "Development Mac"})
+	if err != nil {
+		t.Fatalf("EnrollDeviceCredential: %v", err)
+	}
+	if _, err := writer.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, DeviceRuntimeSnapshotSyncRequest{
+		DaemonID:          "daemon-a",
+		DeviceID:          enrollment.DeviceID,
+		DeviceDisplayName: "Development Mac",
+		Runtimes: []RuntimeSnapshotRecord{{
+			RuntimeID: "daemon-a:codex",
+			Kind:      RuntimeKindCodex,
+			Models:    []RuntimeModelRecord{{ModelID: "gpt-5.5", Label: "GPT-5.5", IsDefault: true}},
+		}},
+	}); err != nil {
+		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot: %v", err)
+	}
+
+	devicePrincipal, err := reader.AuthorizeDeviceCredential(ctx, enrollment.DeviceID, enrollment.DeviceSecret, AuthorizationRequest{Resource: AuthorizationResourceAgent})
+	if err != nil {
+		t.Fatalf("stale reader should reload device credential: %v", err)
+	}
+	if devicePrincipal.PrincipalID != principal.PrincipalID || devicePrincipal.WorkspaceID != principal.WorkspaceID {
+		t.Fatalf("device principal = %+v", devicePrincipal)
+	}
+	devices, err := reader.ListAIAgentDevices(ctx, principal)
+	if err != nil {
+		t.Fatalf("ListAIAgentDevices: %v", err)
+	}
+	if got := countRuntimeOccurrences(devices.Devices, "daemon-a:codex"); got != 1 {
+		t.Fatalf("runtime occurrences after reload = %d, want 1; devices=%+v", got, devices.Devices)
+	}
+}
+
+func TestPersistentAIAgentClientStoreReloadsMovedRuntimeAcrossProcesses(t *testing.T) {
+	ctx := context.Background()
+	snapshots := &memoryAIAgentClientSnapshotStore{}
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-dev"}
+	writer, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("open writer: %v", err)
+	}
+
+	firstEnrollment, err := writer.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{DisplayName: "Old Mac"})
+	if err != nil {
+		t.Fatalf("EnrollDeviceCredential first: %v", err)
+	}
+	if _, err := writer.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, DeviceRuntimeSnapshotSyncRequest{
+		DaemonID: "daemon-local",
+		DeviceID: firstEnrollment.DeviceID,
+		Runtimes: []RuntimeSnapshotRecord{{
+			RuntimeID: "daemon-local:codex",
+			Kind:      RuntimeKindCodex,
+		}},
+	}); err != nil {
+		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot first: %v", err)
+	}
+
+	reader, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("open stale reader: %v", err)
+	}
+	secondEnrollment, err := writer.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{DisplayName: "Replacement Mac"})
+	if err != nil {
+		t.Fatalf("EnrollDeviceCredential replacement: %v", err)
+	}
+	if _, err := writer.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, DeviceRuntimeSnapshotSyncRequest{
+		DaemonID: "daemon-local",
+		DeviceID: secondEnrollment.DeviceID,
+		Runtimes: []RuntimeSnapshotRecord{{
+			RuntimeID: "daemon-local:codex",
+			Kind:      RuntimeKindCodex,
+		}},
+	}); err != nil {
+		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot replacement: %v", err)
+	}
+
+	devices, err := reader.ListAIAgentDevices(ctx, principal)
+	if err != nil {
+		t.Fatalf("ListAIAgentDevices: %v", err)
+	}
+	if got := countRuntimeOccurrences(devices.Devices, "daemon-local:codex"); got != 1 {
+		t.Fatalf("runtime occurrences after move reload = %d, want 1; devices=%+v", got, devices.Devices)
+	}
+	if deviceID := deviceIDForRuntime(devices.Devices, "daemon-local:codex"); deviceID != secondEnrollment.DeviceID {
+		t.Fatalf("runtime owner device = %q, want %q; devices=%+v", deviceID, secondEnrollment.DeviceID, devices.Devices)
+	}
+}
+
 func TestAIAgentClientSnapshotRetainsRecentReplayEvents(t *testing.T) {
 	store := NewDevelopmentAIAgentClientStore()
 	store.mu.Lock()
@@ -131,6 +232,29 @@ func TestAIAgentClientSnapshotRetainsRecentReplayEvents(t *testing.T) {
 	if event.Seq != int64(aiAgentClientReplayEventLimit+26) {
 		t.Fatalf("next replay event seq = %d, want %d", event.Seq, aiAgentClientReplayEventLimit+26)
 	}
+}
+
+func countRuntimeOccurrences(devices []DeviceRecord, runtimeID string) int {
+	count := 0
+	for _, device := range devices {
+		for _, runtime := range device.Runtimes {
+			if runtime.RuntimeID == runtimeID {
+				count++
+			}
+		}
+	}
+	return count
+}
+
+func deviceIDForRuntime(devices []DeviceRecord, runtimeID string) string {
+	for _, device := range devices {
+		for _, runtime := range device.Runtimes {
+			if runtime.RuntimeID == runtimeID {
+				return device.DeviceID
+			}
+		}
+	}
+	return ""
 }
 
 type memoryAIAgentClientSnapshotStore struct {

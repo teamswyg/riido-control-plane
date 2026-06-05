@@ -135,6 +135,14 @@ runtime moves to the latest reporting device and is removed from the previous
 device projection. This keeps daemon `agent-bindings` deterministic and avoids
 binding an agent to a stale device row.
 
+Development persistence uses the DynamoDB AI Agent client snapshot as the
+durable authorization/projection SSOT. ECS task memory is a reloadable cache, so
+device credential authorization and daemon `agent-bindings` reads must reload
+the latest snapshot before deciding whether a daemon belongs to the user or
+which device owns a runtime. This prevents a valid Desktop-enrolled daemon from
+receiving a false 401 or a stale binding when ALB routes related requests to
+different tasks.
+
 The external authorizer hop may be protected by
 `X-Riido-Control-Plane-Authorizer-Key`. That header is server-to-server only and
 is never part of the generated frontend API. A browser client that lacks a
