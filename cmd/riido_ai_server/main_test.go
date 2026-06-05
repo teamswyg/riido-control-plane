@@ -93,6 +93,7 @@ func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	t.Setenv(envAIAgentClientTable, "riido-ai-agent-development")
 	t.Setenv(envAWSRegion, "ap-northeast-2")
 	t.Setenv(envAWSContainerCredentialsFullURI, "http://169.254.170.2/credentials")
+	t.Setenv(envAssignmentActiveLease, "300")
 
 	config, err := configFromEnv()
 	if err != nil {
@@ -101,6 +102,9 @@ func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	defer closeRuntimeConfig(config)
 	if !config.AIAgentClientDev {
 		t.Fatal("AI Agent client development flag should be enabled")
+	}
+	if config.AssignmentActiveLease != 5*time.Minute {
+		t.Fatalf("assignment active lease = %s, want 5m", config.AssignmentActiveLease)
 	}
 	if config.AIAgentClientStore == nil {
 		t.Fatal("AI Agent client snapshot store should be configured")
@@ -503,6 +507,7 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envReviewAccountTokenHash,
 		envMetricsLogInterval,
 		envWebAllowedOrigins,
+		envAssignmentActiveLease,
 		envAIAgentClientDev,
 		envAIAgentClientTable,
 		envAWSRegion,

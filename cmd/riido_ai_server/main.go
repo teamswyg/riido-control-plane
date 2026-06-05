@@ -29,6 +29,7 @@ const (
 	envReviewAccountTokenHash = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
 	envMetricsLogInterval     = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
 	envWebAllowedOrigins      = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
+	envAssignmentActiveLease  = "RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS"
 	envAIAgentClientDev       = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
 	envAIAgentClientTable     = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE"
 	envAWSRegion              = "RIIDO_AI_SERVER_AWS_REGION"
@@ -52,6 +53,7 @@ type runtimeConfig struct {
 	ReviewProvision          *riidoaiserver.ReviewAccountProvisioning
 	MetricsLogInterval       time.Duration
 	WebAllowedOrigins        []string
+	AssignmentActiveLease    time.Duration
 	AIAgentClientDev         bool
 	AIAgentClientStore       riidoaiserver.AIAgentClientSnapshotStore
 	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
@@ -79,8 +81,9 @@ func run() error {
 		}
 	}
 	store, err := riidoaiserver.OpenStoreWithConfig(context.Background(), riidoaiserver.StoreConfig{
-		AgentRegistry:  riidoaiserver.NewCompositeAgentRegistry(agentRegistryFromAIAgentClient(aiAgentClient)),
-		OperationStore: config.AssignmentOperationStore,
+		AgentRegistry:       riidoaiserver.NewCompositeAgentRegistry(agentRegistryFromAIAgentClient(aiAgentClient)),
+		ActiveLeaseDuration: config.AssignmentActiveLease,
+		OperationStore:      config.AssignmentOperationStore,
 	})
 	if err != nil {
 		return fmt.Errorf("open assignment store: %w", err)
@@ -110,6 +113,10 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	assignmentActiveLease, err := envOptionalDurationSeconds(envAssignmentActiveLease)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	reviewProvision, err := reviewAccountProvisioningFromEnv()
 	if err != nil {
 		return runtimeConfig{}, err
@@ -130,7 +137,7 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	assignmentOperationStore, err := assignmentOperationStoreFromEnv(aiAgentClientDev)
+	assignmentOperationStore, err := assignmentOperationStoreFromEnv(aiAgentClientDev, assignmentActiveLease)
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -145,6 +152,7 @@ func configFromEnv() (runtimeConfig, error) {
 		ReviewProvision:          reviewProvision,
 		MetricsLogInterval:       metricsLogInterval,
 		WebAllowedOrigins:        webAllowedOrigins,
+		AssignmentActiveLease:    assignmentActiveLease,
 		AIAgentClientDev:         aiAgentClientDev,
 		AIAgentClientStore:       aiAgentClientStore,
 		AssignmentOperationStore: assignmentOperationStore,
@@ -289,7 +297,7 @@ func aiAgentClientSnapshotStoreFromEnv(enabled bool) (riidoaiserver.AIAgentClien
 	return store, nil
 }
 
-func assignmentOperationStoreFromEnv(enabled bool) (riidoaiserver.AssignmentOperationStore, error) {
+func assignmentOperationStoreFromEnv(enabled bool, activeLeaseDuration time.Duration) (riidoaiserver.AssignmentOperationStore, error) {
 	if !enabled {
 		return nil, nil
 	}
@@ -309,6 +317,7 @@ func assignmentOperationStoreFromEnv(enabled bool) (riidoaiserver.AssignmentOper
 		Region:              region,
 		TableName:           tableName,
 		Endpoint:            strings.TrimSpace(os.Getenv(envDynamoDBEndpoint)),
+		ActiveLeaseDuration: activeLeaseDuration,
 		CredentialsProvider: provider,
 	})
 	if err != nil {

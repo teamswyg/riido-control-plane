@@ -2015,6 +2015,32 @@ This slice does:
 This slice does not delete historical device/runtime records, change frontend
 generated code, alter assignment SSE shape, or change Desktop enrollment.
 
+### RIID-4917 — active assignment lease env wiring and stale thread closure
+
+Live development verification with a Codex `danger-full-access` runtime found a
+split-brain between the local daemon and SaaS assignment state. The daemon
+completed the run and appended `RunReportedDone`, but the control-plane
+assignment journal failed the assignment first with
+`assignment_failed / active assignment lease expired`. The deployed ECS task had
+`RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS=300`, but the public runtime
+did not pass that value into either the store actor or the DynamoDB active lease
+adapter, so the adapter defaulted to 20 seconds.
+
+This slice does:
+
+- parse `RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS` as one positive
+  duration owned by `cmd/riido_ai_server`
+- pass the same configured duration into `StoreConfig.ActiveLeaseDuration` and
+  `DynamoDBAssignmentOperationStoreConfig.ActiveLeaseDuration`
+- expose heartbeat-created terminal task events from the assignment store to the
+  HTTP adapter
+- forward stale heartbeat terminal events to the AI Agent client read-model so
+  generated thread queries stop returning an active stream after
+  `assignment_failed`
+
+This slice does not change generated frontend response shapes, daemon
+heartbeats, provider launch permissions, or the assignment transition contract.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:
