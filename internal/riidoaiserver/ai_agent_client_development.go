@@ -1951,7 +1951,7 @@ func stripRiidoLogBlocks(message string) string {
 var (
 	clientVisibleMarkdownLocalLinkPattern = regexp.MustCompile(`\[([^\]]+)\]\(\s*<?(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^)>]*>?\s*\)`)
 	clientVisibleAngleLocalPathPattern    = regexp.MustCompile(`<(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^>]+>`)
-	clientVisibleLocalPathPattern         = regexp.MustCompile(`(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^\s<>)\]"']+`)
+	clientVisibleLocalPathPattern         = regexp.MustCompile("(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^\\s<>)\\]\"'`]+")
 )
 
 func clientVisibleTaskThreadText(message string) string {
