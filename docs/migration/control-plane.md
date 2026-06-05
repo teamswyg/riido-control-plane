@@ -2018,6 +2018,26 @@ client-facing task-thread copy at the development read-model boundary:
 This slice does not change generated TypeScript names, frontend inputs, SSE
 event types, or daemon payload contracts.
 
+### RIID-4917 — deploy workflow can target development environment
+
+Live verification after deploying the client task-thread copy fix showed that
+`deploy-ai-agent-testnet` successfully updated its configured testnet target,
+but the configured development AI API host still returned the previous runtime artifact.
+Infra already owns a separate `riido-ai-server-development` topology and
+GitHub environment, while the public runtime CD workflow was still hard-coded to
+`ai-agent-testnet`.
+
+This slice keeps the existing workflow and stable CD key names, but allows
+manual dispatch to select either `testnet` or `development`. Tag pushes continue
+to use testnet. The workflow still reads live URL, token, ECR, ECS, and optional
+CodeDeploy values only from the selected GitHub environment; it does not accept
+live URLs or AWS identifiers as dispatch inputs.
+
+This slice does not change endpoint paths, generated client shape, runtime
+container shape, or infra topology. It closes the deployment-target mismatch so
+development frontend/desktop validation can receive the same control-plane
+artifact that passed the public repo checks.
+
 ### RIID-4917 — device/runtime stale liveness projection
 
 This slice closes a live development finding where old desktop-enrolled daemon

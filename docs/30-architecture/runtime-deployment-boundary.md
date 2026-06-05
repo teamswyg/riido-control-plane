@@ -48,6 +48,9 @@ descriptions, git identifiers, and aggregate status only.
 The `deploy-ai-agent-testnet` workflow is allowed to:
 
 - run only from a `v*` tag push or explicit manual dispatch
+- use the testnet GitHub environment for tag pushes
+- use an explicit manual-dispatch target to select only the configured testnet
+  or development GitHub environment
 - assume the deploy role through GitHub OIDC
 - build the checked-in container contract image
 - push an immutable ECR tag derived from the Git ref, commit SHA, and workflow
@@ -59,7 +62,10 @@ The `deploy-ai-agent-testnet` workflow is allowed to:
 - wait for ECS service stability
 - smoke `healthz`, `readyz`, and the v2 workspace-scoped AI Agent bootstrap API
 
-The workflow must not commit or print unmasked AWS account values, raw token
+The workflow must not accept live URLs, AWS identifiers, task-definition values,
+or smoke tokens as manual-dispatch inputs. Environment selection only chooses
+which preconfigured GitHub environment supplies the same stable variable/secret
+names. The workflow must not commit or print unmasked AWS account values, raw token
 values, Terraform state, plan output, production secret payloads, task
 definition JSON, task-definition ARNs, image digests, live workflow run URLs,
 workflow_dispatch URL inputs, GitHub step outputs that carry live deployment
