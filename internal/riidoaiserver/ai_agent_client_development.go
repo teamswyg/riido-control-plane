@@ -1959,7 +1959,45 @@ func clientVisibleTaskThreadText(message string) string {
 	message = clientVisibleMarkdownLocalLinkPattern.ReplaceAllString(message, "$1")
 	message = clientVisibleAngleLocalPathPattern.ReplaceAllString(message, "로컬 파일")
 	message = clientVisibleLocalPathPattern.ReplaceAllString(message, "로컬 파일")
+	message = restoreClientVisibleInlineCode(message)
 	return strings.TrimSpace(message)
+}
+
+func restoreClientVisibleInlineCode(message string) string {
+	if strings.Count(message, "`")%2 == 0 || !strings.Contains(message, "로컬 파일") {
+		return message
+	}
+	segments := strings.Split(message, "`")
+	for i := 1; i < len(segments); i += 2 {
+		segments[i] = closeInlineCodeAfterLocalFileBeforeKoreanProse(segments[i])
+	}
+	return strings.Join(segments, "`")
+}
+
+func closeInlineCodeAfterLocalFileBeforeKoreanProse(segment string) string {
+	const placeholder = "로컬 파일"
+	index := strings.LastIndex(segment, placeholder)
+	if index < 0 {
+		return segment
+	}
+	afterIndex := index + len(placeholder)
+	after := segment[afterIndex:]
+	if after == "" || !unicode.IsSpace([]rune(after)[0]) {
+		return segment
+	}
+	trimmed := strings.TrimLeftFunc(after, unicode.IsSpace)
+	if trimmed == "" {
+		return segment
+	}
+	first, _ := utf8.DecodeRuneInString(trimmed)
+	if !isHangulRune(first) {
+		return segment
+	}
+	return segment[:afterIndex] + "`" + after
+}
+
+func isHangulRune(r rune) bool {
+	return (r >= 0xAC00 && r <= 0xD7A3) || (r >= 0x3130 && r <= 0x318F)
 }
 
 func shouldFanoutAgentTaskActionEvent(hadThread bool, previous AIAgentTaskThreadRecord, response AIAgentTaskActionResponse) bool {
