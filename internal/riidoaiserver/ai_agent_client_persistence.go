@@ -145,6 +145,24 @@ func (s *PersistentAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context,
 	return response, s.saveSnapshot(ctx)
 }
 
+func (s *PersistentAIAgentClientStore) GetAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string) (DeviceDaemonDetailResponse, error) {
+	if err := s.reloadSnapshot(ctx); err != nil {
+		return DeviceDaemonDetailResponse{}, err
+	}
+	return s.DevelopmentAIAgentClientStore.GetAIAgentDeviceDaemon(ctx, principal, deviceID)
+}
+
+func (s *PersistentAIAgentClientStore) ControlAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
+	if err := s.reloadSnapshot(ctx); err != nil {
+		return DeviceDaemonCommandResponse{}, err
+	}
+	response, err := s.DevelopmentAIAgentClientStore.ControlAIAgentDeviceDaemon(ctx, principal, deviceID, action, req)
+	if err != nil {
+		return response, err
+	}
+	return response, s.saveSnapshot(ctx)
+}
+
 func (s *PersistentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error) {
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return DeviceRuntimeSnapshotSyncResponse{}, err

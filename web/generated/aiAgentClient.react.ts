@@ -150,6 +150,62 @@ export interface ListAIAgentDeviceRuntimesReactEndpoint extends core.ListAIAgent
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 상세를 조회합니다
+ * 계약 generated path: `aiAgent.devices.daemon.details`
+ * 검색용 generated 경로: `devices.daemon.details`
+ * 접근 예시: `riido.aiAgent.devices.daemon.details`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAIAgentDeviceDaemonReactEndpoint extends core.GetAIAgentDeviceDaemonEndpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAIAgentDeviceDaemonPathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonDetailResponse>) => UseQueryResult<core.DeviceDaemonDetailResponse, Error>;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 재시작을 요청합니다
+ * 계약 generated path: `aiAgent.devices.daemon.restart`
+ * 검색용 generated 경로: `devices.daemon.restart`
+ * 접근 예시: `riido.aiAgent.devices.daemon.restart`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface RestartAIAgentDeviceDaemonReactEndpoint extends core.RestartAIAgentDeviceDaemonEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.RestartAIAgentDeviceDaemonMutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.RestartAIAgentDeviceDaemonMutationVariables>;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 시작을 요청합니다
+ * 계약 generated path: `aiAgent.devices.daemon.start`
+ * 검색용 generated 경로: `devices.daemon.start`
+ * 접근 예시: `riido.aiAgent.devices.daemon.start`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface StartAIAgentDeviceDaemonReactEndpoint extends core.StartAIAgentDeviceDaemonEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StartAIAgentDeviceDaemonMutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.StartAIAgentDeviceDaemonMutationVariables>;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 중지를 요청합니다
+ * 계약 generated path: `aiAgent.devices.daemon.stop`
+ * 검색용 generated 경로: `devices.daemon.stop`
+ * 접근 예시: `riido.aiAgent.devices.daemon.stop`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface StopAIAgentDeviceDaemonReactEndpoint extends core.StopAIAgentDeviceDaemonEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDeviceDaemonMutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDeviceDaemonMutationVariables>;
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * 계약 generated path: `aiAgent.events.stream`
  * 검색용 generated 경로: `events.stream`
@@ -427,6 +483,62 @@ export interface ListAIAgentDeviceRuntimesV2ReactEndpoint extends core.ListAIAge
    * React Query useQuery hook입니다.
    */
   readonly useQuery: (params: core.ListAIAgentDeviceRuntimesV2PathParams, options?: core.RiidoQueryOptions<core.DeviceRuntimeListResponse>) => UseQueryResult<core.DeviceRuntimeListResponse, Error>;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 상세를 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.devices.daemon.details`
+ * 검색용 generated 경로: `aiAgent.devices.daemon.details`
+ * 접근 예시: `riido.v2.aiAgent.devices.daemon.details`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAIAgentDeviceDaemonV2ReactEndpoint extends core.GetAIAgentDeviceDaemonV2Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAIAgentDeviceDaemonV2PathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonDetailResponse>) => UseQueryResult<core.DeviceDaemonDetailResponse, Error>;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 재시작을 요청합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.devices.daemon.restart`
+ * 검색용 generated 경로: `aiAgent.devices.daemon.restart`
+ * 접근 예시: `riido.v2.aiAgent.devices.daemon.restart`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface RestartAIAgentDeviceDaemonV2ReactEndpoint extends core.RestartAIAgentDeviceDaemonV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.RestartAIAgentDeviceDaemonV2MutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.RestartAIAgentDeviceDaemonV2MutationVariables>;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 시작을 요청합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.devices.daemon.start`
+ * 검색용 generated 경로: `aiAgent.devices.daemon.start`
+ * 접근 예시: `riido.v2.aiAgent.devices.daemon.start`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface StartAIAgentDeviceDaemonV2ReactEndpoint extends core.StartAIAgentDeviceDaemonV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StartAIAgentDeviceDaemonV2MutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.StartAIAgentDeviceDaemonV2MutationVariables>;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 중지를 요청합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.devices.daemon.stop`
+ * 검색용 generated 경로: `aiAgent.devices.daemon.stop`
+ * 접근 예시: `riido.v2.aiAgent.devices.daemon.stop`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface StopAIAgentDeviceDaemonV2ReactEndpoint extends core.StopAIAgentDeviceDaemonV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDeviceDaemonV2MutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDeviceDaemonV2MutationVariables>;
 }
 
 /**
@@ -720,9 +832,51 @@ export interface RiidoAIAgentAgentsReactNamespace {
 }
 
 /**
+ * aiAgent.devices.daemon namespace입니다.
+ */
+export interface RiidoAIAgentDevicesDaemonReactNamespace {
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 상세를 조회합니다
+   * 계약 generated path: `aiAgent.devices.daemon.details`
+   * 검색용 generated 경로: `devices.daemon.details`
+   * 접근 예시: `riido.aiAgent.devices.daemon.details`
+   * cache tag: `aiAgent.devices.daemon`
+   */
+  readonly details: GetAIAgentDeviceDaemonReactEndpoint;
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 재시작을 요청합니다
+   * 계약 generated path: `aiAgent.devices.daemon.restart`
+   * 검색용 generated 경로: `devices.daemon.restart`
+   * 접근 예시: `riido.aiAgent.devices.daemon.restart`
+   * invalidates: `aiAgent.devices.daemon`, `aiAgent.devices.runtimes`
+   */
+  readonly restart: RestartAIAgentDeviceDaemonReactEndpoint;
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 시작을 요청합니다
+   * 계약 generated path: `aiAgent.devices.daemon.start`
+   * 검색용 generated 경로: `devices.daemon.start`
+   * 접근 예시: `riido.aiAgent.devices.daemon.start`
+   * invalidates: `aiAgent.devices.daemon`, `aiAgent.devices.runtimes`
+   */
+  readonly start: StartAIAgentDeviceDaemonReactEndpoint;
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 중지를 요청합니다
+   * 계약 generated path: `aiAgent.devices.daemon.stop`
+   * 검색용 generated 경로: `devices.daemon.stop`
+   * 접근 예시: `riido.aiAgent.devices.daemon.stop`
+   * invalidates: `aiAgent.devices.daemon`, `aiAgent.devices.runtimes`
+   */
+  readonly stop: StopAIAgentDeviceDaemonReactEndpoint;
+}
+
+/**
  * device와 runtime 상태를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentDevicesReactNamespace {
+  /**
+   * aiAgent.devices.daemon namespace입니다.
+   */
+  readonly daemon: RiidoAIAgentDevicesDaemonReactNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다
    * 계약 generated path: `aiAgent.devices.runtimes`
@@ -958,9 +1112,51 @@ export interface RiidoV2AIAgentAgentsReactNamespace {
 }
 
 /**
+ * v2.aiAgent.devices.daemon namespace입니다.
+ */
+export interface RiidoV2AIAgentDevicesDaemonReactNamespace {
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 상세를 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.devices.daemon.details`
+   * 검색용 generated 경로: `aiAgent.devices.daemon.details`
+   * 접근 예시: `riido.v2.aiAgent.devices.daemon.details`
+   * cache tag: `v2.aiAgent.devices.daemon`
+   */
+  readonly details: GetAIAgentDeviceDaemonV2ReactEndpoint;
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 재시작을 요청합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.devices.daemon.restart`
+   * 검색용 generated 경로: `aiAgent.devices.daemon.restart`
+   * 접근 예시: `riido.v2.aiAgent.devices.daemon.restart`
+   * invalidates: `v2.aiAgent.devices.daemon`, `v2.aiAgent.devices.runtimes`
+   */
+  readonly restart: RestartAIAgentDeviceDaemonV2ReactEndpoint;
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 시작을 요청합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.devices.daemon.start`
+   * 검색용 generated 경로: `aiAgent.devices.daemon.start`
+   * 접근 예시: `riido.v2.aiAgent.devices.daemon.start`
+   * invalidates: `v2.aiAgent.devices.daemon`, `v2.aiAgent.devices.runtimes`
+   */
+  readonly start: StartAIAgentDeviceDaemonV2ReactEndpoint;
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 중지를 요청합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.devices.daemon.stop`
+   * 검색용 generated 경로: `aiAgent.devices.daemon.stop`
+   * 접근 예시: `riido.v2.aiAgent.devices.daemon.stop`
+   * invalidates: `v2.aiAgent.devices.daemon`, `v2.aiAgent.devices.runtimes`
+   */
+  readonly stop: StopAIAgentDeviceDaemonV2ReactEndpoint;
+}
+
+/**
  * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
  */
 export interface RiidoV2AIAgentDevicesReactNamespace {
+  /**
+   * v2.aiAgent.devices.daemon namespace입니다.
+   */
+  readonly daemon: RiidoV2AIAgentDevicesDaemonReactNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.devices.runtimes`
@@ -1240,6 +1436,24 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
           useQuery: (options?: core.RiidoQueryOptions<core.ClientBootstrapResponse>) => useQuery<core.ClientBootstrapResponse, Error>(coreClient.aiAgent.bootstrap.query(options)),
         },
         devices: {
+          daemon: {
+            details: {
+              ...coreClient.aiAgent.devices.daemon.details,
+              useQuery: (params: core.GetAIAgentDeviceDaemonPathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonDetailResponse>) => useQuery<core.DeviceDaemonDetailResponse, Error>(coreClient.aiAgent.devices.daemon.details.query(params, options)),
+            },
+            restart: {
+              ...coreClient.aiAgent.devices.daemon.restart,
+              useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.RestartAIAgentDeviceDaemonMutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.RestartAIAgentDeviceDaemonMutationVariables>(coreClient.aiAgent.devices.daemon.restart.mutation(options)),
+            },
+            start: {
+              ...coreClient.aiAgent.devices.daemon.start,
+              useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StartAIAgentDeviceDaemonMutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StartAIAgentDeviceDaemonMutationVariables>(coreClient.aiAgent.devices.daemon.start.mutation(options)),
+            },
+            stop: {
+              ...coreClient.aiAgent.devices.daemon.stop,
+              useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDeviceDaemonMutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDeviceDaemonMutationVariables>(coreClient.aiAgent.devices.daemon.stop.mutation(options)),
+            },
+          },
           runtimes: {
             ...coreClient.aiAgent.devices.runtimes,
             useQuery: (options?: core.RiidoQueryOptions<core.DeviceRuntimeListResponse>) => useQuery<core.DeviceRuntimeListResponse, Error>(coreClient.aiAgent.devices.runtimes.query(options)),
@@ -1337,6 +1551,24 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
             useQuery: (params: core.GetAIAgentClientBootstrapV2PathParams, options?: core.RiidoQueryOptions<core.ClientBootstrapResponseV2>) => useQuery<core.ClientBootstrapResponseV2, Error>(coreClient.v2.aiAgent.bootstrap.query(params, options)),
           },
           devices: {
+            daemon: {
+              details: {
+                ...coreClient.v2.aiAgent.devices.daemon.details,
+                useQuery: (params: core.GetAIAgentDeviceDaemonV2PathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonDetailResponse>) => useQuery<core.DeviceDaemonDetailResponse, Error>(coreClient.v2.aiAgent.devices.daemon.details.query(params, options)),
+              },
+              restart: {
+                ...coreClient.v2.aiAgent.devices.daemon.restart,
+                useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.RestartAIAgentDeviceDaemonV2MutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.RestartAIAgentDeviceDaemonV2MutationVariables>(coreClient.v2.aiAgent.devices.daemon.restart.mutation(options)),
+              },
+              start: {
+                ...coreClient.v2.aiAgent.devices.daemon.start,
+                useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StartAIAgentDeviceDaemonV2MutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StartAIAgentDeviceDaemonV2MutationVariables>(coreClient.v2.aiAgent.devices.daemon.start.mutation(options)),
+              },
+              stop: {
+                ...coreClient.v2.aiAgent.devices.daemon.stop,
+                useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDeviceDaemonV2MutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDeviceDaemonV2MutationVariables>(coreClient.v2.aiAgent.devices.daemon.stop.mutation(options)),
+              },
+            },
             runtimes: {
               ...coreClient.v2.aiAgent.devices.runtimes,
               useQuery: (params: core.ListAIAgentDeviceRuntimesV2PathParams, options?: core.RiidoQueryOptions<core.DeviceRuntimeListResponse>) => useQuery<core.DeviceRuntimeListResponse, Error>(coreClient.v2.aiAgent.devices.runtimes.query(params, options)),

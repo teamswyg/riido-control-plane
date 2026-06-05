@@ -132,8 +132,10 @@ mirrored 2026-06-03 live inspection counts are 84 `riido.*` annotations on
 `129:5215` `UI`, 6 on `42:3014` `Wireframe - 온보딩`,
 and 0 on `0:1` `Wireframe`, all with zero missing kind/background counts.
 RIID-4898 split the former bundled daemon control label into separate
-`riido.v2.aiAgent.agents.daemon.start`, `restart`, and `stop` Mutation
-annotations so Figma search matches generated-client facade paths exactly.
+device-bound `riido.v2.aiAgent.devices.daemon.start`, `restart`, and `stop`
+Mutation annotations for `내 기기`, while preserving agent-bound
+`riido.v2.aiAgent.agents.daemon.start`, `restart`, and `stop` for explicit
+agent-mediated daemon access. Figma search matches generated-client facade paths exactly.
 `teamswyg/riido-contracts#66` tightens that mirror: the annotation
 `operation_kind` must match generated OpenAPI transport. `text/event-stream`
 responses are `SSE Stream`, non-stream `GET` operations are `Query`, and
@@ -175,12 +177,25 @@ facade path below exists in OpenAPI and generated TypeScript comments.
 | Task thread | `riido.v2.aiAgent.events.stream` | `v2.aiAgent.events.stream` | SSE Stream | threads 조회 결과에 active_stream이 있을 때만 연결해 진행 상태와 thread 갱신 이벤트를 받습니다. |
 | Task thread | `riido.v2.aiAgent.tasks.stop` | `v2.aiAgent.tasks.stop` | Mutation | 작업 중인 Agent에게 중지 요청을 보냅니다. daemon은 이 요청을 읽어 provider 실행을 강제 중지합니다. |
 | Runtime and agent settings | `riido.v2.aiAgent.devices.runtimes` | `v2.aiAgent.devices.runtimes` | Query | 계정 소유 device에서 감지된 runtime 목록과 온라인/오프라인 상태를 조회합니다. 화면은 SaaS 값을 신뢰합니다. |
-| Runtime settings | `riido.v2.aiAgent.agents.daemon.details` | `v2.aiAgent.agents.daemon.details` | Query | Agent에 연결된 daemon/runtime 상세와 제어 가능 상태를 SaaS 기준으로 조회합니다. |
-| Runtime settings | `riido.v2.aiAgent.agents.daemon.start` | `v2.aiAgent.agents.daemon.start` | Mutation | stopped/offline 상태의 daemon에 시작 요청을 남깁니다. daemon 실행 트리거는 desktop이 담당하고, SaaS는 시작 요청 상태와 runtime projection을 제공합니다. |
-| Runtime settings | `riido.v2.aiAgent.agents.daemon.stop` | `v2.aiAgent.agents.daemon.stop` | Mutation | SaaS에 daemon 중지 요청을 남깁니다. daemon은 요청을 읽은 뒤 스스로 종료합니다. |
-| Runtime settings | `riido.v2.aiAgent.agents.daemon.restart` | `v2.aiAgent.agents.daemon.restart` | Mutation | SaaS에 daemon 재시작 요청을 남깁니다. daemon은 polling으로 요청을 읽어 실행합니다. |
+| Runtime settings - 내 기기 daemon | `riido.v2.aiAgent.devices.daemon.details` | `v2.aiAgent.devices.daemon.details` | Query | `devices.runtimes`에서 받은 `device_id`로 현재 사용자 본인의 daemon 상세와 제어 가능 상태를 조회합니다. 아무 Agent id를 고르지 않습니다. |
+| Runtime settings - 내 기기 daemon | `riido.v2.aiAgent.devices.daemon.start` | `v2.aiAgent.devices.daemon.start` | Mutation | `device_id` 기준으로 stopped/offline 상태의 본인 daemon에 시작 요청을 남깁니다. |
+| Runtime settings - 내 기기 daemon | `riido.v2.aiAgent.devices.daemon.stop` | `v2.aiAgent.devices.daemon.stop` | Mutation | `device_id` 기준으로 본인 daemon 중지 요청을 남깁니다. daemon은 요청을 읽은 뒤 스스로 종료합니다. |
+| Runtime settings - 내 기기 daemon | `riido.v2.aiAgent.devices.daemon.restart` | `v2.aiAgent.devices.daemon.restart` | Mutation | `device_id` 기준으로 본인 daemon 재시작 요청을 남깁니다. daemon은 polling으로 요청을 읽어 실행합니다. |
+| Runtime settings - Agent 경유 daemon | `riido.v2.aiAgent.agents.daemon.details` | `v2.aiAgent.agents.daemon.details` | Query | 명시적으로 선택한 Agent에 연결된 daemon/runtime 상세를 Agent public/private 접근 정책 기준으로 조회합니다. |
+| Runtime settings - Agent 경유 daemon | `riido.v2.aiAgent.agents.daemon.start` | `v2.aiAgent.agents.daemon.start` | Mutation | 명시적으로 선택한 Agent 권한으로 daemon 시작 요청을 남깁니다. |
+| Runtime settings - Agent 경유 daemon | `riido.v2.aiAgent.agents.daemon.stop` | `v2.aiAgent.agents.daemon.stop` | Mutation | 명시적으로 선택한 Agent 권한으로 daemon 중지 요청을 남깁니다. |
+| Runtime settings - Agent 경유 daemon | `riido.v2.aiAgent.agents.daemon.restart` | `v2.aiAgent.agents.daemon.restart` | Mutation | 명시적으로 선택한 Agent 권한으로 daemon 재시작 요청을 남깁니다. |
 | Onboarding | `riido.v2.aiAgent.onboarding.fixtures` | `v2.aiAgent.onboarding.fixtures` | Query | 리도/영실/홍도/지원처럼 제품이 제공하는 초기값 목록을 조회합니다. template entity가 아니라 fixture입니다. |
 | Onboarding | `riido.v2.aiAgent.onboarding.fixtures.createAgent` | `v2.aiAgent.onboarding.fixtures.createAgent` | Mutation | 선택한 fixture 값을 기반으로 일반 Agent를 생성합니다. fixture 자체를 생성하는 기능은 아닙니다. |
+
+기존 Figma inventory 문구인 “Agent에 연결된 daemon/runtime 상세와 제어 가능 상태를 SaaS 기준으로 조회합니다.”는 `riido.v2.aiAgent.agents.daemon.details`
+의 agent-bound 의미로 유지됩니다. `내 기기` daemon 영역은 새
+`riido.v2.aiAgent.devices.daemon.details`를 사용합니다.
+기존 agent-bound stop 문구인 “SaaS에 daemon 중지 요청을 남깁니다. daemon은 요청을 읽은 뒤 스스로 종료합니다.”도 `riido.v2.aiAgent.agents.daemon.stop`
+의 의미로 유지됩니다.
+기존 agent-bound start 문구인 “stopped/offline 상태의 daemon에 시작 요청을 남깁니다. daemon 실행 트리거는 desktop이 담당하고, SaaS는 시작 요청 상태와 runtime projection을 제공합니다.”는 `riido.v2.aiAgent.agents.daemon.start`
+의 의미로 유지됩니다. 기존 agent-bound restart 문구인 “SaaS에 daemon 재시작 요청을 남깁니다. daemon은 polling으로 요청을 읽어 실행합니다.”는 `riido.v2.aiAgent.agents.daemon.restart`
+의 의미로 유지됩니다.
 | Agent settings / direct setting | `riido.v2.aiAgent.agents.create` | `v2.aiAgent.agents.create` | Mutation | 직접 설정 화면에서 워크스페이스 안에 새 Agent를 생성합니다. 신규 v2 create는 workspace_id를 포함합니다. |
 | Agent settings | `riido.v2.aiAgent.bootstrap` | `v2.aiAgent.bootstrap` | Query | AI Agent 설정/온보딩 초기 화면에 필요한 bootstrap.agents[]를 조회합니다. 설정/목록 화면의 agent list와 agent_id 출처이며, task 참여자 드롭다운은 tasks.assignableAgents를 사용합니다. |
 | Agent settings | `riido.v2.aiAgent.agents.updateConfiguration` | `v2.aiAgent.agents.updateConfiguration` | Mutation | 할당 작업이 없는 Agent의 이름, 썸네일, 설명, 지침, 런타임, 모델, 공개 범위를 저장합니다. |
@@ -244,12 +259,12 @@ generated paths from the current UI section named in the last column.
 | Legacy Figma node | Section | Absorbed by current UI node | Control-plane projection |
 | --- | --- | --- | --- |
 | `13:3789` | 런타임 | `162:23090` 런타임 설정페이지 | `aiAgent.devices.runtimes`, `v2.aiAgent.devices.runtimes` |
-| `86:9988` | 런타임 | `162:23090` 런타임 설정페이지 | device/runtime read plus agent-bound daemon detail |
+| `86:9988` | 런타임 | `162:23090` 런타임 설정페이지 | device/runtime read plus device-bound `내 기기` daemon detail and agent-bound daemon detail |
 | `17:3551` | 에이전트 | `432:37336` 에이전트 설정페이지 | bootstrap, agent lifecycle, editability, and runtime candidate paths |
 | `17:4231` | 에이전트 수정 | `432:37336` 에이전트 설정페이지 | `agents.updateConfiguration`, `agents.editability`, and runtime candidate paths |
 | `84:9846` | 에이전트 추가 | `432:37336` 에이전트 설정페이지 | direct `agents.create`, bootstrap, and runtime candidate paths |
-| `17:2871` | 데몬 상세 | `162:23090` 런타임 설정페이지 | agent-bound daemon detail/start/restart/stop and event stream paths |
-| `17:3111` | 런타임 상세 | `162:23090` 런타임 설정페이지 | device/runtime read plus agent-bound daemon detail |
+| `17:2871` | 데몬 상세 | `162:23090` 런타임 설정페이지 | device-bound daemon detail/start/restart/stop for `내 기기`, agent-bound daemon detail/start/restart/stop for selected-agent access, and event stream paths |
+| `17:3111` | 런타임 상세 | `162:23090` 런타임 설정페이지 | device/runtime read plus device-bound and agent-bound daemon detail |
 
 ## Non-UI Planning Absorptions
 
@@ -285,8 +300,11 @@ owns and does not create extra HTTP/SSE endpoints for planning notes.
   without suffixing, appear through `tasks.assignableAgents`, and use normal
   `agents.updateConfiguration`, `agents.delete`, and `agents.editability`
   lifecycle paths.
-- Daemon detail uses `aiAgent.agents.daemon.details`; `aiAgent.agents.daemon` is
-  a cache tag / namespace, not the operation generated path.
+- The runtime settings `내 기기` daemon row uses
+  `aiAgent.devices.daemon.details`; `aiAgent.devices.daemon` is the cache tag /
+  namespace for device-bound daemon detail and commands. Agent-bound daemon
+  detail still uses `aiAgent.agents.daemon.details` when an agent is explicitly
+  selected.
 - Agent configuration update uses `aiAgent.agents.updateConfiguration`, matching
   the OpenAPI `x-riido-client.generated_path`.
 - Figma planning node `432:46849` changes onboarding order, but the first

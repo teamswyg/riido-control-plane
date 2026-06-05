@@ -892,6 +892,302 @@
         ]
       }
     },
+    "/v1/client/ai-agent/devices/{device_id}/daemon": {
+      "get": {
+        "operationId": "getAIAgentDeviceDaemon",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 상세를 조회합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonDetailResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "devices",
+            "daemon",
+            "details"
+          ],
+          "generated_path": "aiAgent.devices.daemon.details",
+          "cache_tag": "aiAgent.devices.daemon"
+        },
+        "x-riido-scenarios": [
+          "getAIAgentDeviceDaemon.figma-my-device-daemon-details"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/devices/{device_id}/daemon/restart": {
+      "post": {
+        "operationId": "restartAIAgentDeviceDaemon",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 재시작을 요청합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "devices",
+            "daemon",
+            "restart"
+          ],
+          "generated_path": "aiAgent.devices.daemon.restart",
+          "invalidates": [
+            "aiAgent.devices.daemon",
+            "aiAgent.devices.runtimes"
+          ]
+        },
+        "x-riido-scenarios": [
+          "restartAIAgentDeviceDaemon.figma-my-device-daemon-restart"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/devices/{device_id}/daemon/start": {
+      "post": {
+        "operationId": "startAIAgentDeviceDaemon",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 시작을 요청합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "devices",
+            "daemon",
+            "start"
+          ],
+          "generated_path": "aiAgent.devices.daemon.start",
+          "invalidates": [
+            "aiAgent.devices.daemon",
+            "aiAgent.devices.runtimes"
+          ]
+        },
+        "x-riido-scenarios": [
+          "startAIAgentDeviceDaemon.figma-my-device-daemon-start"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/devices/{device_id}/daemon/stop": {
+      "post": {
+        "operationId": "stopAIAgentDeviceDaemon",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 중지를 요청합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "devices",
+            "daemon",
+            "stop"
+          ],
+          "generated_path": "aiAgent.devices.daemon.stop",
+          "invalidates": [
+            "aiAgent.devices.daemon",
+            "aiAgent.devices.runtimes"
+          ]
+        },
+        "x-riido-scenarios": [
+          "stopAIAgentDeviceDaemon.figma-my-device-daemon-stop"
+        ]
+      }
+    },
     "/v1/client/ai-agent/events": {
       "get": {
         "operationId": "streamAIAgentClientEvents",
@@ -2370,6 +2666,326 @@
         }
       }
     },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon": {
+      "get": {
+        "operationId": "getAIAgentDeviceDaemonV2",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 상세를 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonDetailResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "devices",
+            "daemon",
+            "details"
+          ],
+          "generated_path": "v2.aiAgent.devices.daemon.details",
+          "cache_tag": "v2.aiAgent.devices.daemon"
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/restart": {
+      "post": {
+        "operationId": "restartAIAgentDeviceDaemonV2",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 재시작을 요청합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "devices",
+            "daemon",
+            "restart"
+          ],
+          "generated_path": "v2.aiAgent.devices.daemon.restart",
+          "invalidates": [
+            "v2.aiAgent.devices.daemon",
+            "v2.aiAgent.devices.runtimes"
+          ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/start": {
+      "post": {
+        "operationId": "startAIAgentDeviceDaemonV2",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 시작을 요청합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "devices",
+            "daemon",
+            "start"
+          ],
+          "generated_path": "v2.aiAgent.devices.daemon.start",
+          "invalidates": [
+            "v2.aiAgent.devices.daemon",
+            "v2.aiAgent.devices.runtimes"
+          ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/stop": {
+      "post": {
+        "operationId": "stopAIAgentDeviceDaemonV2",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 중지를 요청합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlDeviceDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonCommandResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "devices",
+            "daemon",
+            "stop"
+          ],
+          "generated_path": "v2.aiAgent.devices.daemon.stop",
+          "invalidates": [
+            "v2.aiAgent.devices.daemon",
+            "v2.aiAgent.devices.runtimes"
+          ]
+        }
+      }
+    },
     "/v2/client/workspaces/{workspace_id}/ai-agent/events": {
       "get": {
         "operationId": "streamAIAgentClientEventsV2",
@@ -2644,6 +3260,272 @@
         "x-riido-scenarios": [
           "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
           "listWorkspaceAssignedAgentProfilesV2.historical-threads-are-omitted"
+        ]
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments": {
+      "post": {
+        "operationId": "createAIAgentTaskAgentAssignmentV2",
+        "summary": "task에 AI agent를 additive 방식으로 배정합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignAIAgentTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "agentAssignments",
+            "create"
+          ],
+          "generated_path": "v2.aiAgent.tasks.agentAssignments.create",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.threadStreamSubscription"
+          ]
+        },
+        "x-riido-scenarios": [
+          "createAIAgentTaskAgentAssignmentV2.additive-task-assignment-keeps-existing-active-agents"
+        ]
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}": {
+      "delete": {
+        "operationId": "deleteAIAgentTaskAgentAssignmentV2",
+        "summary": "task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "agentAssignments",
+            "delete"
+          ],
+          "generated_path": "v2.aiAgent.tasks.agentAssignments.delete",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.threadStreamSubscription"
+          ]
+        },
+        "x-riido-scenarios": [
+          "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment"
+        ]
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop": {
+      "post": {
+        "operationId": "stopAIAgentTaskAgentAssignmentV2",
+        "summary": "task의 특정 AI agent 작업을 agent_id 기준으로 중단합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:stop",
+          "task:{task_id}:write"
+        ],
+        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "agentAssignments",
+            "stop"
+          ],
+          "generated_path": "v2.aiAgent.tasks.agentAssignments.stop",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.threadStreamSubscription"
+          ]
+        },
+        "x-riido-scenarios": [
+          "stopAIAgentTaskAgentAssignmentV2.path-agent-id-selects-stopped-assignment"
         ]
       }
     },
@@ -3059,6 +3941,80 @@
         }
       }
     },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/thread-stream-subscription": {
+      "get": {
+        "operationId": "getAIAgentTaskThreadStreamSubscriptionV2",
+        "summary": "task의 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 filter handoff를 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadStreamSubscriptionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "task_thread_cold_collection.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "threadStreamSubscription"
+          ],
+          "generated_path": "v2.aiAgent.tasks.threadStreamSubscription",
+          "cache_tag": "v2.aiAgent.tasks.threadStreamSubscription"
+        },
+        "x-riido-scenarios": [
+          "getAIAgentTaskThreadStreamSubscriptionV2.multi-active-task-threads-use-filters",
+          "getAIAgentTaskThreadStreamSubscriptionV2.cold-task-returns-empty-filters"
+        ]
+      }
+    },
     "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads": {
       "get": {
         "operationId": "listAIAgentTaskThreadsV2",
@@ -3221,346 +4177,6 @@
           ]
         }
       }
-    },
-    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments": {
-      "post": {
-        "operationId": "createAIAgentTaskAgentAssignmentV2",
-        "summary": "task에 AI agent를 additive 방식으로 배정합니다 (v2 workspace-scoped)",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "task_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "workspace_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssignAIAgentTaskRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "riidoAIAgentToken": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:write",
-          "task:{task_id}:assign",
-          "task:{task_id}:write"
-        ],
-        "x-riido-rbac-policy": "api_codegen_safety.v1",
-        "x-riido-operation-kind": "command",
-        "x-riido-client": {
-          "module": "v2",
-          "facade_path": [
-            "aiAgent",
-            "tasks",
-            "agentAssignments",
-            "create"
-          ],
-          "generated_path": "v2.aiAgent.tasks.agentAssignments.create",
-          "invalidates": [
-            "v2.aiAgent.bootstrap",
-            "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads",
-            "v2.aiAgent.tasks.threadStreamSubscription"
-          ]
-        },
-        "x-riido-scenarios": [
-          "createAIAgentTaskAgentAssignmentV2.additive-task-assignment-keeps-existing-active-agents"
-        ]
-      }
-    },
-    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}": {
-      "delete": {
-        "operationId": "deleteAIAgentTaskAgentAssignmentV2",
-        "summary": "task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "agent_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "task_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "workspace_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "Accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "riidoAIAgentToken": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:write",
-          "task:{task_id}:stop",
-          "task:{task_id}:write"
-        ],
-        "x-riido-rbac-policy": "api_codegen_safety.v1",
-        "x-riido-operation-kind": "command",
-        "x-riido-client": {
-          "module": "v2",
-          "facade_path": [
-            "aiAgent",
-            "tasks",
-            "agentAssignments",
-            "delete"
-          ],
-          "generated_path": "v2.aiAgent.tasks.agentAssignments.delete",
-          "invalidates": [
-            "v2.aiAgent.bootstrap",
-            "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads",
-            "v2.aiAgent.tasks.threadStreamSubscription"
-          ]
-        },
-        "x-riido-scenarios": [
-          "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment"
-        ]
-      }
-    },
-    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop": {
-      "post": {
-        "operationId": "stopAIAgentTaskAgentAssignmentV2",
-        "summary": "task의 특정 AI agent 작업을 agent_id 기준으로 중단합니다 (v2 workspace-scoped)",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "agent_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "task_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "workspace_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "Accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "riidoAIAgentToken": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:write",
-          "task:{task_id}:stop",
-          "task:{task_id}:write"
-        ],
-        "x-riido-rbac-policy": "api_codegen_safety.v1",
-        "x-riido-operation-kind": "command",
-        "x-riido-client": {
-          "module": "v2",
-          "facade_path": [
-            "aiAgent",
-            "tasks",
-            "agentAssignments",
-            "stop"
-          ],
-          "generated_path": "v2.aiAgent.tasks.agentAssignments.stop",
-          "invalidates": [
-            "v2.aiAgent.bootstrap",
-            "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads",
-            "v2.aiAgent.tasks.threadStreamSubscription"
-          ]
-        },
-        "x-riido-scenarios": [
-          "stopAIAgentTaskAgentAssignmentV2.path-agent-id-selects-stopped-assignment"
-        ]
-      }
-    },
-    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/thread-stream-subscription": {
-      "get": {
-        "operationId": "getAIAgentTaskThreadStreamSubscriptionV2",
-        "summary": "task의 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 filter handoff를 조회합니다 (v2 workspace-scoped)",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "task_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "workspace_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AIAgentTaskThreadStreamSubscriptionResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "riidoAIAgentToken": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:read",
-          "task:{task_id}:read"
-        ],
-        "x-riido-rbac-policy": "task_thread_cold_collection.v1",
-        "x-riido-operation-kind": "query",
-        "x-riido-client": {
-          "module": "v2",
-          "facade_path": [
-            "aiAgent",
-            "tasks",
-            "threadStreamSubscription"
-          ],
-          "generated_path": "v2.aiAgent.tasks.threadStreamSubscription",
-          "cache_tag": "v2.aiAgent.tasks.threadStreamSubscription"
-        },
-        "x-riido-scenarios": [
-          "getAIAgentTaskThreadStreamSubscriptionV2.multi-active-task-threads-use-filters",
-          "getAIAgentTaskThreadStreamSubscriptionV2.cold-task-returns-empty-filters"
-        ]
-      }
     }
   },
   "components": {
@@ -3609,6 +4225,32 @@
           "assignment_state",
           "comment_kind",
           "message"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskEventStreamLink": {
+        "description": "활성 thread filter들과 함께 사용하는 공통 client SSE stream handoff link입니다.",
+        "properties": {
+          "event_type": {
+            "enum": [
+              "agent_thread_progress"
+            ],
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "rel": {
+            "enum": [
+              "agent_thread_progress_stream"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "rel",
+          "href",
+          "event_type"
         ],
         "type": "object"
       },
@@ -3735,6 +4377,53 @@
           "href",
           "event_type",
           "task_id",
+          "thread_id",
+          "run_id"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadStreamSubscriptionResponse": {
+        "description": "task 내 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 handoff 응답입니다.",
+        "properties": {
+          "active_thread_filters": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadStreamTarget"
+            },
+            "type": "array"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "stream": {
+            "$ref": "#/components/schemas/AIAgentTaskEventStreamLink"
+          },
+          "task_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "task_id",
+          "stream",
+          "active_thread_filters"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadStreamTarget": {
+        "description": "공통 SSE stream에서 client가 적용할 활성 task thread filter입니다.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
           "thread_id",
           "run_id"
         ],
@@ -4607,7 +5296,7 @@
         "type": "object"
       },
       "DeviceDaemonDetailResponse": {
-        "description": "runtime 설정 화면의 agent-bound daemon 상세 row와 상세 패널을 위한 응답입니다.",
+        "description": "runtime 설정 화면의 device-bound 내 기기 daemon 상세와 agent-bound 선택 Agent daemon 상세가 공유하는 응답입니다.",
         "properties": {
           "daemon": {
             "$ref": "#/components/schemas/DeviceDaemonRecord"
@@ -4975,79 +5664,6 @@
             "description": "agent 공개 범위 radio 입력값입니다."
           }
         },
-        "type": "object"
-      },
-      "AIAgentTaskEventStreamLink": {
-        "description": "활성 thread filter들과 함께 사용하는 공통 client SSE stream handoff link입니다.",
-        "properties": {
-          "event_type": {
-            "enum": [
-              "agent_thread_progress"
-            ],
-            "type": "string"
-          },
-          "href": {
-            "type": "string"
-          },
-          "rel": {
-            "enum": [
-              "agent_thread_progress_stream"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "rel",
-          "href",
-          "event_type"
-        ],
-        "type": "object"
-      },
-      "AIAgentTaskThreadStreamSubscriptionResponse": {
-        "description": "task 내 여러 active AI Agent thread를 하나의 SSE stream으로 구독하기 위한 handoff 응답입니다.",
-        "properties": {
-          "active_thread_filters": {
-            "items": {
-              "$ref": "#/components/schemas/AIAgentTaskThreadStreamTarget"
-            },
-            "type": "array"
-          },
-          "schema_version": {
-            "type": "string"
-          },
-          "stream": {
-            "$ref": "#/components/schemas/AIAgentTaskEventStreamLink"
-          },
-          "task_id": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "schema_version",
-          "task_id",
-          "stream",
-          "active_thread_filters"
-        ],
-        "type": "object"
-      },
-      "AIAgentTaskThreadStreamTarget": {
-        "description": "공통 SSE stream에서 client가 적용할 활성 task thread filter입니다.",
-        "properties": {
-          "agent_id": {
-            "type": "string"
-          },
-          "run_id": {
-            "type": "string"
-          },
-          "thread_id": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "agent_id",
-          "thread_id",
-          "run_id"
-        ],
         "type": "object"
       }
     },

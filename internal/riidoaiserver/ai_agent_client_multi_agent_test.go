@@ -123,6 +123,58 @@ func TestAIAgentClientLegacyAssignStillStopsExistingTaskThreads(t *testing.T) {
 	}
 }
 
+func TestAIAgentClientStaleTerminalAgentCountDoesNotQueueNextAssignment(t *testing.T) {
+	ctx := context.Background()
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
+
+	created, err := store.CreateAIAgent(ctx, principal, CreateAgentConfigurationRequest{
+		Name:       "stale terminal count agent",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  "runtime-cursor-dev",
+		ModelID:    stringPtr("cursor-auto"),
+	})
+	if err != nil {
+		t.Fatalf("CreateAIAgent: %v", err)
+	}
+
+	store.mu.Lock()
+	agent := store.agents[created.Agent.AgentID]
+	agent.WorkStatus = AgentWorkStatusCompleted
+	agent.AssignedTaskCount = 1
+	agent.Editability = AgentEditabilityBlockedAssignedTasks
+	store.agents[agent.AgentID] = agent
+	store.taskThreads["task-stale-completed"] = []AIAgentTaskThreadRecord{{
+		ThreadID:        "thread-stale-completed",
+		TaskID:          "task-stale-completed",
+		AssignmentID:    "asn-stale-completed",
+		AgentID:         agent.AgentID,
+		RunID:           "run-stale-completed",
+		WorkStatus:      AgentWorkStatusCompleted,
+		AssignmentState: AgentAssignmentStateCompleted,
+		CommentKind:     AgentTaskCommentTaskCompleted,
+		Message:         "agent work completed",
+	}}
+	store.mu.Unlock()
+
+	bootstrap, err := store.BootstrapAIAgentClient(ctx, principal, ClientKindWeb)
+	if err != nil {
+		t.Fatalf("BootstrapAIAgentClient: %v", err)
+	}
+	projected := agentByID(bootstrap.Agents, agent.AgentID)
+	if projected.AssignedTaskCount != 0 || projected.Editability != AgentEditabilityEditable {
+		t.Fatalf("stale terminal count should be projected editable: %+v", projected)
+	}
+
+	assigned, err := store.AssignAIAgentTask(ctx, principal, "task-after-stale", AssignAIAgentTaskRequest{AgentID: agent.AgentID})
+	if err != nil {
+		t.Fatalf("AssignAIAgentTask after stale terminal count: %v", err)
+	}
+	if assigned.WorkStatus == AgentWorkStatusQueued || assigned.AssignmentState == AgentAssignmentStateQueued {
+		t.Fatalf("next assignment should start instead of queueing: %+v", assigned)
+	}
+}
+
 func hasThreadFilter(filters []AIAgentTaskThreadStreamTarget, agentID, threadID, runID string) bool {
 	for _, filter := range filters {
 		if filter.AgentID == agentID && filter.ThreadID == threadID && filter.RunID == runID {
