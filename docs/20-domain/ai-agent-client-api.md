@@ -774,7 +774,10 @@ responses, SSE events, or logs.
 If Desktop already has a local `device_id`, it can send that `device_id` in the
 enrollment request to rotate only the secret. Control-plane must keep the
 DevicePrincipal stable for the same user/workspace instead of minting a new
-device for stale credential recovery. Runtime snapshots likewise keep
+device for stale credential recovery. Secret rotation must not clear daemon
+runtime projection, daemon detail facts, or any runtime records previously
+reported by `POST /v1/daemon/runtime-snapshot`; those facts are owned by the
+daemon runtime snapshot boundary, not by enrollment. Runtime snapshots likewise keep
 `runtime_id` single-owned: if the same runtime is later reported by another
 device, it moves to the latest reporting device so `agent-bindings` and
 generated client read models do not point at stale device rows.

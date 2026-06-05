@@ -190,6 +190,112 @@ func TestStoreActorReassignmentCancelsPreviousAndBlocksNewAgent(t *testing.T) {
 	}
 }
 
+func TestStoreActorReassignmentCancelsQueuedPreviousWithoutBlockingNewAgent(t *testing.T) {
+	ctx := context.Background()
+	now := time.Date(2026, 6, 5, 11, 0, 0, 0, time.UTC)
+	store := NewStoreWithClock(func() time.Time { return now })
+	defer store.Close()
+
+	first, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "first",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask first: %v", err)
+	}
+
+	now = now.Add(time.Second)
+	second, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-2",
+		RuntimeProvider: "codex",
+		Prompt:          "second",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask second: %v", err)
+	}
+	if second.ReplacesAssignmentID != first.ID || second.BlockedByAssignmentID != "" {
+		t.Fatalf("second assignment should replace without blocker: %+v", second)
+	}
+	firstProjection, ok, err := store.LoadAssignmentProjection(ctx, first.ID)
+	if err != nil {
+		t.Fatalf("LoadAssignmentProjection first: %v", err)
+	}
+	if !ok || firstProjection.Assignment.State != AssignmentCancelled {
+		t.Fatalf("first projection = %+v ok=%v", firstProjection, ok)
+	}
+	secondPoll, err := store.PollAgent(ctx, "agent-2", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent second: %v", err)
+	}
+	if secondPoll.Action != PollStart || secondPoll.Assignment == nil || secondPoll.Assignment.ID != second.ID {
+		t.Fatalf("second poll = %+v", secondPoll)
+	}
+	firstPoll, err := store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent first: %v", err)
+	}
+	if firstPoll.Action != PollNone {
+		t.Fatalf("first poll after queued cancellation = %+v", firstPoll)
+	}
+}
+
+func TestStoreActorReassigningSameBlockedQueuedAssignmentRepairsQueuedBlocker(t *testing.T) {
+	ctx := context.Background()
+	base := time.Date(2026, 6, 5, 12, 0, 0, 0, time.UTC)
+	blocker := replayOperationRecord("task-a", "asn-000020", "agent-old", AssignmentQueued, 1, base)
+	current := replayOperationRecord("task-a", "asn-000027", "agent-new", AssignmentQueued, 2, base.Add(time.Second))
+	current.Assignment.BlockedByAssignmentID = blocker.Assignment.ID
+	current.Assignment.ReplacesAssignmentID = blocker.Assignment.ID
+	current.OperationID = assignmentOperationID(current.OperationType, current.Assignment, current.Events)
+	operations := &runtimeFakeAssignmentOperationStore{records: []AssignmentOperationRecord{blocker, current}}
+	now := base.Add(2 * time.Second)
+	store, err := OpenStoreWithConfig(ctx, StoreConfig{
+		Now:            func() time.Time { return now },
+		OperationStore: operations,
+	})
+	if err != nil {
+		t.Fatalf("OpenStoreWithConfig: %v", err)
+	}
+	defer store.Close()
+
+	reassigned, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-new",
+		RuntimeProvider: "codex",
+		Prompt:          "second",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask same blocked current: %v", err)
+	}
+	if reassigned.ID != current.Assignment.ID || reassigned.BlockedByAssignmentID != "" {
+		t.Fatalf("reassigned current = %+v", reassigned)
+	}
+	blockerProjection, ok, err := store.LoadAssignmentProjection(ctx, blocker.Assignment.ID)
+	if err != nil {
+		t.Fatalf("LoadAssignmentProjection blocker: %v", err)
+	}
+	if !ok || blockerProjection.Assignment.State != AssignmentCancelled {
+		t.Fatalf("blocker projection = %+v ok=%v", blockerProjection, ok)
+	}
+	currentProjection, ok, err := store.LoadAssignmentProjection(ctx, current.Assignment.ID)
+	if err != nil {
+		t.Fatalf("LoadAssignmentProjection current: %v", err)
+	}
+	if !ok || currentProjection.Assignment.BlockedByAssignmentID != "" {
+		t.Fatalf("current projection = %+v ok=%v", currentProjection, ok)
+	}
+	poll, err := store.PollAgent(ctx, "agent-new", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent new: %v", err)
+	}
+	if poll.Action != PollStart || poll.Assignment == nil || poll.Assignment.ID != current.Assignment.ID {
+		t.Fatalf("poll after blocker repair = %+v", poll)
+	}
+}
+
 func TestStoreActorAdditiveAssignmentKeepsExistingAgentActive(t *testing.T) {
 	ctx := context.Background()
 	now := time.Date(2026, 6, 4, 12, 0, 0, 0, time.UTC)
