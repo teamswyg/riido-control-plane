@@ -2080,6 +2080,17 @@ permissions such as Codex `danger-full-access`; provider adapters and daemon
 harness policy own that envelope, while control-plane owns assignment,
 heartbeat, projection, and client-visible repair behavior.
 
+### RIID-4917 — Runtime Snapshot Daemon Detail Facts
+
+Real desktop-launched daemons refresh device/runtime liveness through
+`POST /v1/daemon/runtime-snapshot`. The request is also the authoritative
+source for daemon-detail process facts that already exist in the client read
+model: profile, PID, started-at, and uptime. Control-plane stores those values
+on `DeviceDaemonRecord` and preserves existing values only when a snapshot omits
+them, so `riido.aiAgent.devices.daemon.details` can render the Figma runtime
+settings row without calling the local daemon or changing the generated client
+response shape.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

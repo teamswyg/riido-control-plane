@@ -94,10 +94,15 @@ func TestPersistentAIAgentClientStoreReloadsDeviceCredentialAcrossProcesses(t *t
 	if err != nil {
 		t.Fatalf("EnrollDeviceCredential: %v", err)
 	}
+	startedAt := time.Now().Add(-321 * time.Second).UTC()
 	if _, err := writer.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, DeviceRuntimeSnapshotSyncRequest{
 		DaemonID:          "daemon-a",
 		DeviceID:          enrollment.DeviceID,
 		DeviceDisplayName: "Development Mac",
+		Profile:           "development",
+		PID:               4321,
+		UptimeSeconds:     321,
+		StartedAt:         startedAt,
 		Runtimes: []RuntimeSnapshotRecord{{
 			RuntimeID: "daemon-a:codex",
 			Kind:      RuntimeKindCodex,
@@ -120,6 +125,13 @@ func TestPersistentAIAgentClientStoreReloadsDeviceCredentialAcrossProcesses(t *t
 	}
 	if got := countRuntimeOccurrences(devices.Devices, "daemon-a:codex"); got != 1 {
 		t.Fatalf("runtime occurrences after reload = %d, want 1; devices=%+v", got, devices.Devices)
+	}
+	detail, err := reader.GetAIAgentDeviceDaemon(ctx, principal, enrollment.DeviceID)
+	if err != nil {
+		t.Fatalf("GetAIAgentDeviceDaemon: %v", err)
+	}
+	if detail.Daemon.Profile != "development" || detail.Daemon.PID != 4321 || detail.Daemon.UptimeSeconds != 321 || !detail.Daemon.StartedAt.Equal(startedAt) {
+		t.Fatalf("daemon detail facts after reload = %+v", detail.Daemon)
 	}
 }
 
