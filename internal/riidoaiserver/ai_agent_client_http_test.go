@@ -531,6 +531,10 @@ func TestHTTPAIAgentClientExternalWorkspaceHidesDevelopmentSeedDevices(t *testin
 		Token:       "external-token",
 		Scopes:      []string{"ai-agent:*", "agent:*:poll"},
 		Roles:       []AgentCatalogRole{AgentCatalogRoleAdmin},
+	}, {
+		PrincipalID: "other-user",
+		Token:       "other-token",
+		Scopes:      []string{"ai-agent:*", "agent:*:poll"},
 	}})
 
 	enrollReq := httptest.NewRequest(http.MethodPost, "/v2/desktop/workspaces/workspace-real/devices/enroll", strings.NewReader(`{"display_name":"Real Mac","platform":"darwin","app_version":"0.0.0"}`))
@@ -543,6 +547,18 @@ func TestHTTPAIAgentClientExternalWorkspaceHidesDevelopmentSeedDevices(t *testin
 	var enrollment EnrollDeviceResponse
 	if err := json.Unmarshal(enrollResp.Body.Bytes(), &enrollment); err != nil {
 		t.Fatalf("enroll json: %v", err)
+	}
+
+	otherEnrollReq := httptest.NewRequest(http.MethodPost, "/v2/desktop/workspaces/workspace-other/devices/enroll", strings.NewReader(`{"display_name":"Other Mac","platform":"darwin","app_version":"0.0.0"}`))
+	otherEnrollReq.Header.Set(aiAgentTokenHeader, "other-token")
+	otherEnrollResp := httptest.NewRecorder()
+	server.ServeHTTP(otherEnrollResp, otherEnrollReq)
+	if otherEnrollResp.Code != http.StatusCreated {
+		t.Fatalf("other enroll status=%d body=%s", otherEnrollResp.Code, otherEnrollResp.Body.String())
+	}
+	var otherEnrollment EnrollDeviceResponse
+	if err := json.Unmarshal(otherEnrollResp.Body.Bytes(), &otherEnrollment); err != nil {
+		t.Fatalf("other enroll json: %v", err)
 	}
 
 	syncBody := `{"daemon_id":"daemon-real","runtimes":[{"runtime_id":"agentd-real:codex","kind":"codex","availability":"online","detection_state":"detected","models":[{"model_id":"gpt-5.5","label":"gpt-5.5","is_default":true}]}]}`
@@ -574,6 +590,9 @@ func TestHTTPAIAgentClientExternalWorkspaceHidesDevelopmentSeedDevices(t *testin
 	}
 	if _, ok := findDevice(devices.Devices, "device-shared-studio"); ok {
 		t.Fatalf("external workspace leaked device-shared-studio: %+v", devices.Devices)
+	}
+	if _, ok := findDevice(devices.Devices, otherEnrollment.DeviceID); ok {
+		t.Fatalf("external workspace leaked other enrolled device: %+v", devices.Devices)
 	}
 	realDevice, ok := findDevice(devices.Devices, enrollment.DeviceID)
 	if !ok || realDevice.OwnerPrincipalID != "external-admin" || len(realDevice.Runtimes) != 1 || realDevice.Runtimes[0].RuntimeID != "agentd-real:codex" {
