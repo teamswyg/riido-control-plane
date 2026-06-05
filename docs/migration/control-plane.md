@@ -1996,6 +1996,25 @@ message.
 This slice does not change endpoint paths, generated client shape, SSE event
 types, progress catalog ids, or frontend behavior.
 
+### RIID-4917 — device/runtime stale liveness projection
+
+This slice closes a live development finding where old desktop-enrolled daemon
+devices kept showing client-visible runtimes as `online/detected` even after no
+runtime snapshot had refreshed for far longer than the contract stale window.
+
+This slice does:
+
+- project non-seed device daemon detail as `offline` / `idle` / start-only when
+  its latest runtime snapshot is older than 20 seconds
+- project stale runtime rows as `offline` / `missing` in the existing
+  device/runtime read response
+- exclude stale runtimes from newly derived `AgentRuntimeBinding` so a daemon
+  cannot keep claiming work through an unrefreshed runtime
+- keep the existing generated route and response shape unchanged
+
+This slice does not delete historical device/runtime records, change frontend
+generated code, alter assignment SSE shape, or change Desktop enrollment.
+
 ## Validation Gates
 
 Required before a control-plane migration PR is mergeable:

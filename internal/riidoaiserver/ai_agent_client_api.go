@@ -10,6 +10,7 @@ const AIAgentClientPersistenceSchemaVersion = "riido-ai-agent-client-persistence
 
 const AgentInstructionMaxCharacters = 1000
 const AgentDescriptionMaxCharacters = 160
+const AIAgentDeviceRuntimeSnapshotStaleAfter = 20 * time.Second
 
 const (
 	AgentClientEventDeviceRuntimeSnapshot = "device_runtime_snapshot"

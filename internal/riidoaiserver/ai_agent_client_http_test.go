@@ -390,6 +390,74 @@ func TestHTTPDesktopDeviceEnrollmentAndDaemonCredentialAuthorization(t *testing.
 		t.Fatalf("bindings after second runtime snapshot = %+v", bindings.Bindings)
 	}
 
+	staleAt := time.Now().UTC().Add(-AIAgentDeviceRuntimeSnapshotStaleAfter - time.Second)
+	aiAgentStore.mu.Lock()
+	for deviceIndex := range aiAgentStore.devices {
+		if aiAgentStore.devices[deviceIndex].DeviceID == enrollment.DeviceID {
+			aiAgentStore.devices[deviceIndex].DaemonLastSeenAt = staleAt
+			break
+		}
+	}
+	if daemon, ok := aiAgentStore.daemons[enrollment.DeviceID]; ok {
+		daemon.LastSeenAt = staleAt
+		aiAgentStore.daemons[enrollment.DeviceID] = daemon
+	}
+	aiAgentStore.mu.Unlock()
+
+	staleDevicesReq := httptest.NewRequest(http.MethodGet, "/v2/client/workspaces/workspace-alpha/ai-agent/devices", nil)
+	staleDevicesReq.Header.Set(aiAgentTokenHeader, "ai-agent-token")
+	staleDevicesResp := httptest.NewRecorder()
+	server.ServeHTTP(staleDevicesResp, staleDevicesReq)
+	if staleDevicesResp.Code != http.StatusOK {
+		t.Fatalf("stale devices status=%d body=%s", staleDevicesResp.Code, staleDevicesResp.Body.String())
+	}
+	var staleDevices DeviceRuntimeListResponse
+	if err := json.Unmarshal(staleDevicesResp.Body.Bytes(), &staleDevices); err != nil {
+		t.Fatalf("stale devices json: %v", err)
+	}
+	staleDevice, ok := findDevice(staleDevices.Devices, enrollment.DeviceID)
+	if !ok {
+		t.Fatalf("stale device missing: %+v", staleDevices.Devices)
+	}
+	staleCodex, ok := findRuntime(staleDevice.Runtimes, codexRuntimeID)
+	if !ok || staleCodex.Availability != RuntimeAvailabilityOffline || staleCodex.DetectionState != RuntimeDetectionStateMissing {
+		t.Fatalf("stale codex runtime should project offline/missing: %+v", staleDevice.Runtimes)
+	}
+
+	staleDaemonReq := httptest.NewRequest(http.MethodGet, "/v2/client/workspaces/workspace-alpha/ai-agent/agents/"+created.Agent.AgentID+"/daemon", nil)
+	staleDaemonReq.Header.Set(aiAgentTokenHeader, "ai-agent-token")
+	staleDaemonResp := httptest.NewRecorder()
+	server.ServeHTTP(staleDaemonResp, staleDaemonReq)
+	if staleDaemonResp.Code != http.StatusOK {
+		t.Fatalf("stale daemon detail status=%d body=%s", staleDaemonResp.Code, staleDaemonResp.Body.String())
+	}
+	var staleDaemon DeviceDaemonDetailResponse
+	if err := json.Unmarshal(staleDaemonResp.Body.Bytes(), &staleDaemon); err != nil {
+		t.Fatalf("stale daemon json: %v", err)
+	}
+	if staleDaemon.Daemon.Availability != DaemonAvailabilityOffline ||
+		staleDaemon.Daemon.ControlState != DaemonControlStateIdle ||
+		!daemonSupportsAction(staleDaemon.Daemon, DaemonControlActionStart) ||
+		daemonSupportsAction(staleDaemon.Daemon, DaemonControlActionStop) {
+		t.Fatalf("stale daemon should project offline/start-only: %+v", staleDaemon.Daemon)
+	}
+
+	staleBindingsReq := httptest.NewRequest(http.MethodGet, "/v1/daemon/agent-bindings", nil)
+	staleBindingsReq.Header.Set(deviceIDHeader, enrollment.DeviceID)
+	staleBindingsReq.Header.Set(deviceSecretHeader, enrollment.DeviceSecret)
+	staleBindingsResp := httptest.NewRecorder()
+	server.ServeHTTP(staleBindingsResp, staleBindingsReq)
+	if staleBindingsResp.Code != http.StatusOK {
+		t.Fatalf("stale bindings status=%d body=%s", staleBindingsResp.Code, staleBindingsResp.Body.String())
+	}
+	var staleBindings AgentRuntimeBindingListResponse
+	if err := json.Unmarshal(staleBindingsResp.Body.Bytes(), &staleBindings); err != nil {
+		t.Fatalf("stale bindings json: %v", err)
+	}
+	if len(staleBindings.Bindings) != 0 {
+		t.Fatalf("stale runtime must be excluded from daemon bindings: %+v", staleBindings.Bindings)
+	}
+
 	replacementReq := httptest.NewRequest(http.MethodPost, "/v2/desktop/workspaces/workspace-alpha/devices/enroll", strings.NewReader(`{"display_name":"Replacement Mac","platform":"darwin","app_version":"0.0.2"}`))
 	replacementReq.Header.Set(aiAgentTokenHeader, "ai-agent-token")
 	replacementResp := httptest.NewRecorder()
