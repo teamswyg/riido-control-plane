@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -1742,7 +1743,7 @@ func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionR
 		WorkStatus:      thread.WorkStatus,
 		AssignmentState: thread.AssignmentState,
 		CommentKind:     thread.CommentKind,
-		Message:         thread.Message,
+		Message:         clientVisibleTaskThreadMessage(thread),
 	}
 }
 
@@ -1859,7 +1860,7 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentRuntimeProgress,
-		Message:         stripRiidoLogBlocks(message),
+		Message:         clientVisibleTaskThreadText(message),
 	}
 	switch state {
 	case AssignmentQueued, AssignmentLeased:
@@ -1945,6 +1946,20 @@ func stripRiidoLogBlocks(message string) string {
 		endIndex := startIndex + len(start) + endOffset + len(end)
 		message = message[:startIndex] + message[endIndex:]
 	}
+}
+
+var (
+	clientVisibleMarkdownLocalLinkPattern = regexp.MustCompile(`\[([^\]]+)\]\(\s*<?(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^)>]*>?\s*\)`)
+	clientVisibleAngleLocalPathPattern    = regexp.MustCompile(`<(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^>]+>`)
+	clientVisibleLocalPathPattern         = regexp.MustCompile(`(?:file://)?(?:/Users|/private/var|/var/folders|/tmp)/[^\s<>)\]"']+`)
+)
+
+func clientVisibleTaskThreadText(message string) string {
+	message = stripRiidoLogBlocks(message)
+	message = clientVisibleMarkdownLocalLinkPattern.ReplaceAllString(message, "$1")
+	message = clientVisibleAngleLocalPathPattern.ReplaceAllString(message, "로컬 파일")
+	message = clientVisibleLocalPathPattern.ReplaceAllString(message, "로컬 파일")
+	return strings.TrimSpace(message)
 }
 
 func shouldFanoutAgentTaskActionEvent(hadThread bool, previous AIAgentTaskThreadRecord, response AIAgentTaskActionResponse) bool {
@@ -2756,11 +2771,11 @@ func copyProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLin
 }
 
 func clientVisibleTaskThreadMessage(thread AIAgentTaskThreadRecord) string {
-	if message := stripRiidoLogBlocks(thread.Message); message != "" {
+	if message := clientVisibleTaskThreadText(thread.Message); message != "" {
 		return message
 	}
 	for i := len(thread.Lines) - 1; i >= 0; i-- {
-		if message := strings.TrimSpace(thread.Lines[i].Message); message != "" {
+		if message := clientVisibleTaskThreadText(thread.Lines[i].Message); message != "" {
 			return message
 		}
 	}
