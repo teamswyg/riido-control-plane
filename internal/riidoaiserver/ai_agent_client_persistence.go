@@ -34,6 +34,7 @@ type AIAgentClientSnapshot struct {
 
 type AIAgentClientDeviceCredentialSnapshot struct {
 	DeviceID         string    `json:"device_id"`
+	MachineID        string    `json:"machine_id,omitempty"`
 	SecretHashSHA256 string    `json:"secret_hash_sha256"`
 	OwnerPrincipalID string    `json:"owner_principal_id"`
 	WorkspaceID      string    `json:"workspace_id"`
@@ -412,6 +413,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 	for _, record := range s.deviceCredentials {
 		credentials = append(credentials, AIAgentClientDeviceCredentialSnapshot{
 			DeviceID:         record.deviceID,
+			MachineID:        record.machineID,
 			SecretHashSHA256: hex.EncodeToString(record.secretHash[:]),
 			OwnerPrincipalID: record.ownerPrincipalID,
 			WorkspaceID:      record.workspaceID,
@@ -487,6 +489,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		copy(hash[:], rawHash)
 		deviceCredentials[deviceID] = deviceCredentialRecord{
 			deviceID:         deviceID,
+			machineID:        strings.TrimSpace(record.MachineID),
 			secretHash:       hash,
 			ownerPrincipalID: strings.TrimSpace(record.OwnerPrincipalID),
 			workspaceID:      strings.TrimSpace(record.WorkspaceID),
@@ -531,7 +534,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	subscribers := s.subscribers
 	nextSubscriberID := s.nextSubscriberID
 	s.workspaceID = strings.TrimSpace(snapshot.WorkspaceID)
-	s.devices = copyDevices(snapshot.Devices)
+	s.devices = pruneLegacyRuntimeRecords(copyDevices(snapshot.Devices))
 	s.deviceCredentials = deviceCredentials
 	s.nextDeviceCredentialSeq = snapshot.NextDeviceCredentialSeq
 	s.daemons = daemons

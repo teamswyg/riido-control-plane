@@ -28,6 +28,32 @@ This slice does not own:
 - environment parsing in `cmd/riido_ai_server`
 - AWS, DynamoDB, EventBridge, Terraform, or production secret wiring
 
+## Device Identity (one device per machine)
+
+A physical machine maps to exactly **one** device row, regardless of how many
+workspaces it enrolls in. The control-plane does not mint a device per
+(principal, workspace); instead device enrollment is idempotent per
+(principal, machine):
+
+- The desktop sends `machine_id` (the daemon's stable machine UUID, shared via
+  the daemon `daemon.id` file) on `EnrollDeviceRequest`.
+- When `machine_id` is present, the `DeviceID` is derived deterministically from
+  `(principal, machine_id)` (`deviceIDForMachine`), so a re-enroll from any
+  workspace converges on the same device row instead of creating
+  `device-enrolled-NNNN` duplicates. The `DeviceID` is not a secret — the
+  rotating device secret remains the auth factor. Callers without `machine_id`
+  keep the legacy per-workspace behavior.
+- Re-enroll must not wipe runtimes already reported for the device row
+  (`upsertEnrolledDeviceLocked` merges; it preserves existing runtimes).
+- Legacy globally-colliding runtime IDs minted under the hardcoded
+  `agentd-local` daemon id are pruned from device rows on snapshot restore
+  (`pruneLegacyRuntimeRecords`); they predate per-machine UUIDs and are stale.
+
+Invariant: **number of installed daemons (machines) == number of device rows**
+for a principal. Devices are visible to their owning principal across that
+principal's workspaces (device listing is principal-scoped), so one machine's
+detected runtimes show in every workspace without per-workspace duplication.
+
 ## Binding Record
 
 `AgentRuntimeBinding` contains:
