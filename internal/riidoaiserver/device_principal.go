@@ -15,7 +15,12 @@ import (
 const DeviceCredentialSchemaVersion = "riido-device-credential.v1"
 
 type EnrollDeviceRequest struct {
-	DeviceID    string `json:"device_id,omitempty"`
+	DeviceID string `json:"device_id,omitempty"`
+	// MachineID is a value unique and stable to the physical device (the daemon's
+	// persistent machine UUID). When present, the DeviceID is derived
+	// deterministically from (principal, machine) so the same machine resolves to
+	// exactly one device row regardless of how many workspaces it enrolls in.
+	MachineID   string `json:"machine_id,omitempty"`
 	DisplayName string `json:"display_name,omitempty"`
 	Platform    string `json:"platform,omitempty"`
 	AppVersion  string `json:"app_version,omitempty"`
@@ -38,11 +43,23 @@ type DeviceCredentialStore interface {
 
 type deviceCredentialRecord struct {
 	deviceID         string
+	machineID        string
 	secretHash       [sha256.Size]byte
 	ownerPrincipalID string
 	workspaceID      string
 	displayName      string
 	issuedAt         time.Time
+}
+
+// deviceIDForMachine derives a stable, machine-scoped DeviceID from the owning
+// principal and the device's unique machine id. The same (principal, machine)
+// always maps to the same DeviceID, so a re-enroll from any workspace converges
+// on one device row instead of minting a fresh device-enrolled-NNNN per
+// workspace. The DeviceID is not a secret; the rotating device secret is the
+// auth factor.
+func deviceIDForMachine(principalID, machineID string) string {
+	sum := sha256.Sum256([]byte(strings.TrimSpace(principalID) + "\x00" + strings.TrimSpace(machineID)))
+	return "dev_" + hex.EncodeToString(sum[:16])
 }
 
 func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Context, principal AuthorizationResult, workspaceID string, req EnrollDeviceRequest) (EnrollDeviceResponse, error) {
@@ -71,25 +88,39 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 	hash := sha256.Sum256([]byte(secret))
 	now := time.Now().UTC()
 
+	machineID := strings.TrimSpace(req.MachineID)
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	deviceID := strings.TrimSpace(req.DeviceID)
-	if deviceID != "" {
+	if s.deviceCredentials == nil {
+		s.deviceCredentials = map[string]deviceCredentialRecord{}
+	}
+	var deviceID string
+	switch {
+	case machineID != "":
+		// One device per (principal, machine). Derive a stable DeviceID and reuse
+		// the existing row across workspaces; only the owner may re-enroll it.
+		deviceID = deviceIDForMachine(principal.PrincipalID, machineID)
+		if existing, ok := s.deviceCredentials[deviceID]; ok && existing.ownerPrincipalID != principal.PrincipalID {
+			return EnrollDeviceResponse{}, ErrAuthorizationForbidden
+		}
+	case strings.TrimSpace(req.DeviceID) != "":
+		// Legacy reuse path: a caller without machine_id may reuse a prior DeviceID
+		// only within the same (principal, workspace) it was issued for.
+		deviceID = strings.TrimSpace(req.DeviceID)
 		existing, ok := s.deviceCredentials[deviceID]
 		if !ok ||
 			existing.ownerPrincipalID != principal.PrincipalID ||
 			existing.workspaceID != workspaceID {
 			return EnrollDeviceResponse{}, ErrAuthorizationForbidden
 		}
-	} else {
+	default:
 		s.nextDeviceCredentialSeq++
 		deviceID = fmt.Sprintf("device-enrolled-%06d", s.nextDeviceCredentialSeq)
 	}
-	if s.deviceCredentials == nil {
-		s.deviceCredentials = map[string]deviceCredentialRecord{}
-	}
 	s.deviceCredentials[deviceID] = deviceCredentialRecord{
 		deviceID:         deviceID,
+		machineID:        machineID,
 		secretHash:       hash,
 		ownerPrincipalID: principal.PrincipalID,
 		workspaceID:      workspaceID,
@@ -111,6 +142,33 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 		DisplayName:      displayName,
 		IssuedAt:         now,
 	}, nil
+}
+
+// legacyDaemonIDPrefix is the hardcoded daemon id used before per-machine UUIDs.
+// Runtime IDs minted under it (agentd-local:<provider>) were identical on every
+// machine, so the control-plane's move-to-last-reporter rule shuffled them
+// between device rows and left devices showing no runtimes. They are pure stale
+// residue and must not survive into the per-machine model.
+const legacyDaemonIDPrefix = "agentd-local:"
+
+// pruneLegacyRuntimeRecords drops legacy globally-colliding runtime records from
+// restored device rows. Device rows themselves are preserved (they may simply be
+// offline); only the unusable legacy runtimes are removed.
+func pruneLegacyRuntimeRecords(devices []DeviceRecord) []DeviceRecord {
+	for i := range devices {
+		if len(devices[i].Runtimes) == 0 {
+			continue
+		}
+		kept := devices[i].Runtimes[:0]
+		for _, runtime := range devices[i].Runtimes {
+			if strings.HasPrefix(strings.TrimSpace(runtime.RuntimeID), legacyDaemonIDPrefix) {
+				continue
+			}
+			kept = append(kept, runtime)
+		}
+		devices[i].Runtimes = kept
+	}
+	return devices
 }
 
 func (s *DevelopmentAIAgentClientStore) AuthorizeDeviceCredential(ctx context.Context, deviceID, deviceSecret string, req AuthorizationRequest) (AuthorizationResult, error) {
@@ -148,6 +206,8 @@ func (s *DevelopmentAIAgentClientStore) AuthorizeDeviceCredential(ctx context.Co
 func (s *DevelopmentAIAgentClientStore) upsertEnrolledDeviceLocked(device DeviceRecord) {
 	for i := range s.devices {
 		if s.devices[i].DeviceID == device.DeviceID {
+			// Re-enroll (idempotent machine path) must not wipe runtimes already
+			// detected for this device — only refresh ownership/name/last-seen.
 			merged := copyDevice(s.devices[i])
 			merged.OwnerPrincipalID = device.OwnerPrincipalID
 			if device.DisplayName != "" {
@@ -160,7 +220,7 @@ func (s *DevelopmentAIAgentClientStore) upsertEnrolledDeviceLocked(device Device
 			return
 		}
 	}
-	s.devices = append(s.devices, device)
+	s.devices = append(s.devices, copyDevice(device))
 }
 
 func newDeviceSecret() (string, error) {
