@@ -4,10 +4,58 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 )
+
+// The AI Agent client snapshot is one DynamoDB item (400 KB hard limit). Progress
+// lines and threads accumulate per run; uncapped they eventually make every
+// client-projection write fail with a ValidationException. snapshot() must bound
+// both, keeping the most recent lines/threads.
+func TestSnapshotBoundsThreadLinesAndThreadCount(t *testing.T) {
+	store := NewDevelopmentAIAgentClientStore()
+
+	manyLines := make([]AgentThreadProgressLine, aiAgentClientThreadProgressLineLimit+500)
+	for i := range manyLines {
+		manyLines[i] = AgentThreadProgressLine{Seq: i + 1, Message: "line"}
+	}
+	threads := make([]AIAgentTaskThreadRecord, aiAgentClientThreadsPerTaskLimit+25)
+	for i := range threads {
+		threads[i] = AIAgentTaskThreadRecord{
+			ThreadID: "thread-" + strconv.Itoa(i),
+			TaskID:   "task-cap",
+			RunID:    "run-" + strconv.Itoa(i),
+			Lines:    append([]AgentThreadProgressLine(nil), manyLines...),
+		}
+	}
+	store.mu.Lock()
+	store.taskThreads["task-cap"] = threads
+	store.mu.Unlock()
+
+	snap, err := store.snapshot(time.Now().UTC())
+	if err != nil {
+		t.Fatalf("snapshot: %v", err)
+	}
+	got := snap.TaskThreads["task-cap"]
+	if len(got) != aiAgentClientThreadsPerTaskLimit {
+		t.Fatalf("threads not capped: got %d want %d", len(got), aiAgentClientThreadsPerTaskLimit)
+	}
+	// Most recent threads (tail) are kept.
+	if want := "thread-" + strconv.Itoa(len(threads)-1); got[len(got)-1].ThreadID != want {
+		t.Fatalf("did not keep most recent thread: got %q want %q", got[len(got)-1].ThreadID, want)
+	}
+	for _, th := range got {
+		if len(th.Lines) != aiAgentClientThreadProgressLineLimit {
+			t.Fatalf("lines not capped: got %d want %d", len(th.Lines), aiAgentClientThreadProgressLineLimit)
+		}
+		// Latest lines (tail) are kept.
+		if th.Lines[len(th.Lines)-1].Seq != len(manyLines) {
+			t.Fatalf("did not keep latest line: last seq %d want %d", th.Lines[len(th.Lines)-1].Seq, len(manyLines))
+		}
+	}
+}
 
 func TestPersistentAIAgentClientStoreRestoresDevelopmentState(t *testing.T) {
 	ctx := context.Background()

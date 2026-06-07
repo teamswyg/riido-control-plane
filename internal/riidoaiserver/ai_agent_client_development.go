@@ -61,6 +61,13 @@ type AIAgentTaskThreadProjectionReconciler interface {
 const (
 	defaultAIAgentClientWorkspaceID = "workspace-dev-riid"
 	aiAgentClientReplayEventLimit   = 200
+	// Max progress lines persisted per task thread in the snapshot. The live SSE
+	// stream is unaffected; this only bounds the replayable/persisted tail so the
+	// single snapshot item stays under DynamoDB's 400 KB limit.
+	aiAgentClientThreadProgressLineLimit = 200
+	// Max threads persisted per task in the snapshot (most recent kept). Bounds
+	// snapshot growth from accumulated runs across long-lived tasks.
+	aiAgentClientThreadsPerTaskLimit = 50
 )
 
 var aiAgentOnboardingFixtureTmpColors = map[string]string{
@@ -2312,6 +2319,20 @@ func retainLatestClientReplayEvents(events []ClientStreamEvent) []ClientStreamEv
 	}
 	retained := make([]ClientStreamEvent, aiAgentClientReplayEventLimit)
 	copy(retained, events[len(events)-aiAgentClientReplayEventLimit:])
+	return retained
+}
+
+// retainLatestThreadProgressLines bounds the progress lines persisted per task
+// thread. Lines accumulate per run and are serialized into the single AI Agent
+// client snapshot DynamoDB item (400 KB hard limit); left uncapped they
+// eventually make every client-projection write fail. Only the latest lines are
+// kept for replay — live SSE subscribers still receive every line in real time.
+func retainLatestThreadProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLine {
+	if len(lines) <= aiAgentClientThreadProgressLineLimit {
+		return lines
+	}
+	retained := make([]AgentThreadProgressLine, aiAgentClientThreadProgressLineLimit)
+	copy(retained, lines[len(lines)-aiAgentClientThreadProgressLineLimit:])
 	return retained
 }
 
