@@ -51,14 +51,13 @@ type deviceCredentialRecord struct {
 	issuedAt         time.Time
 }
 
-// deviceIDForMachine derives a stable, machine-scoped DeviceID from the owning
-// principal and the device's unique machine id. The same (principal, machine)
-// always maps to the same DeviceID, so a re-enroll from any workspace converges
-// on one device row instead of minting a fresh device-enrolled-NNNN per
-// workspace. The DeviceID is not a secret; the rotating device secret is the
-// auth factor.
-func deviceIDForMachine(principalID, machineID string) string {
-	sum := sha256.Sum256([]byte(strings.TrimSpace(principalID) + "\x00" + strings.TrimSpace(machineID)))
+// deviceIDForMachine derives a stable DeviceID from the device's unique machine
+// id ALONE — not the principal. One physical machine maps to exactly one device
+// row, shared across the accounts/workspaces it connects to (a device is an
+// entity of the machine, not of an account). The DeviceID is not a secret; the
+// rotating device secret is the auth factor.
+func deviceIDForMachine(machineID string) string {
+	sum := sha256.Sum256([]byte(strings.TrimSpace(machineID)))
 	return "dev_" + hex.EncodeToString(sum[:16])
 }
 
@@ -98,9 +97,12 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 	var deviceID string
 	switch {
 	case machineID != "":
-		// One device per (principal, machine). Derive a stable DeviceID and reuse
-		// the existing row across workspaces; only the owner may re-enroll it.
-		deviceID = deviceIDForMachine(principal.PrincipalID, machineID)
+		// One device per machine, shared across the workspaces it connects to.
+		// Derive the DeviceID from the machine alone so every enrollment of this
+		// machine resolves to the same device row. Only the first enrolling
+		// principal holds the daemon credential; other accounts gain visibility
+		// through workspace connection, not by re-enrolling.
+		deviceID = deviceIDForMachine(machineID)
 		if existing, ok := s.deviceCredentials[deviceID]; ok && existing.ownerPrincipalID != principal.PrincipalID {
 			return EnrollDeviceResponse{}, ErrAuthorizationForbidden
 		}
@@ -128,10 +130,11 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 		issuedAt:         now,
 	}
 	s.upsertEnrolledDeviceLocked(DeviceRecord{
-		DeviceID:         deviceID,
-		OwnerPrincipalID: principal.PrincipalID,
-		DisplayName:      displayName,
-		DaemonLastSeenAt: now,
+		DeviceID:              deviceID,
+		OwnerPrincipalID:      principal.PrincipalID,
+		DisplayName:           displayName,
+		DaemonLastSeenAt:      now,
+		ConnectedWorkspaceIDs: []string{workspaceID},
 	})
 	return EnrollDeviceResponse{
 		SchemaVersion:    DeviceCredentialSchemaVersion,
@@ -215,6 +218,9 @@ func (s *DevelopmentAIAgentClientStore) upsertEnrolledDeviceLocked(device Device
 			}
 			if !device.DaemonLastSeenAt.IsZero() {
 				merged.DaemonLastSeenAt = device.DaemonLastSeenAt
+			}
+			for _, ws := range device.ConnectedWorkspaceIDs {
+				merged.ConnectedWorkspaceIDs = addConnectedWorkspace(merged.ConnectedWorkspaceIDs, ws)
 			}
 			s.devices[i] = merged
 			return

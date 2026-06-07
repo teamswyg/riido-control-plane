@@ -85,6 +85,11 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		DaemonLastSeenAt: now,
 		Runtimes:         runtimes,
 	}
+	// Connect this device to the workspace the daemon is reporting from, so every
+	// member of that workspace sees the device (workspace-connection visibility).
+	if ws := strings.TrimSpace(principal.WorkspaceID); ws != "" {
+		device.ConnectedWorkspaceIDs = []string{ws}
+	}
 	device = s.upsertDeviceRuntimeSnapshotLocked(device)
 	daemon := DeviceDaemonRecord{
 		DeviceID:          req.DeviceID,
@@ -311,6 +316,9 @@ func (s *DevelopmentAIAgentClientStore) upsertDeviceRuntimeSnapshotLocked(device
 				merged.DisplayName = device.DisplayName
 			}
 			merged.DaemonLastSeenAt = device.DaemonLastSeenAt
+			for _, ws := range device.ConnectedWorkspaceIDs {
+				merged.ConnectedWorkspaceIDs = addConnectedWorkspace(merged.ConnectedWorkspaceIDs, ws)
+			}
 			runtimeIndexByID := make(map[string]int, len(merged.Runtimes))
 			for runtimeIndex, runtime := range merged.Runtimes {
 				runtimeIndexByID[runtime.RuntimeID] = runtimeIndex

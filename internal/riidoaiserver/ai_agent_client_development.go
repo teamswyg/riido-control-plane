@@ -2515,6 +2515,12 @@ func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal Authoriza
 			out = append(out, copyDevice(device))
 			continue
 		}
+		// A device is visible to every member of any workspace it is connected to.
+		// `devices` for a workspace returns all devices connected to that workspace.
+		if deviceConnectedToWorkspace(device, principal.WorkspaceID) {
+			out = append(out, copyDevice(device))
+			continue
+		}
 		if s.deviceWorkspaceVisibleByAdminLocked(principal, device.DeviceID) {
 			out = append(out, copyDevice(device))
 			continue
@@ -2772,7 +2778,39 @@ func copyDevice(device DeviceRecord) DeviceRecord {
 		runtimes[i] = copyRuntime(runtime)
 	}
 	device.Runtimes = runtimes
+	device.ConnectedWorkspaceIDs = append([]string(nil), device.ConnectedWorkspaceIDs...)
 	return device
+}
+
+// addConnectedWorkspace adds workspaceID to the device's connected-workspace set
+// (idempotent). A device is visible to members of every workspace it is
+// connected to.
+func addConnectedWorkspace(connected []string, workspaceID string) []string {
+	workspaceID = strings.TrimSpace(workspaceID)
+	if workspaceID == "" {
+		return connected
+	}
+	for _, existing := range connected {
+		if existing == workspaceID {
+			return connected
+		}
+	}
+	return append(connected, workspaceID)
+}
+
+// deviceConnectedToWorkspace reports whether the device is connected to the given
+// workspace (i.e. visible to that workspace's members).
+func deviceConnectedToWorkspace(device DeviceRecord, workspaceID string) bool {
+	workspaceID = strings.TrimSpace(workspaceID)
+	if workspaceID == "" {
+		return false
+	}
+	for _, ws := range device.ConnectedWorkspaceIDs {
+		if ws == workspaceID {
+			return true
+		}
+	}
+	return false
 }
 
 func copyRuntime(runtime RuntimeRecord) RuntimeRecord {
