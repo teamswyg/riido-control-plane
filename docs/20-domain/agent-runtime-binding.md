@@ -62,9 +62,15 @@ Device visibility is **workspace-connection scoped**, not owner scoped:
   account/workspace-independent path: the desktop queries the **local daemon**
   (`riido daemon status`) directly, not the server device list.
 
-This slice implements **visibility only**. Assigning/executing agents on a
-connected device from another workspace (requiring the daemon to poll multiple
-workspaces) is out of scope here.
+Assigning/executing agents on a connected device from another workspace follows
+the same workspace-connection model. The daemon authenticates with a single
+device credential (its enroll workspace), but `GET /v1/daemon/agent-bindings`
+returns bindings for agents in **every workspace the device is connected to**
+(`DeviceRecord.ConnectedWorkspaceIDs`), not only the credential's enroll
+workspace. The `binding.device_id` guard still restricts the result to agents
+bound to **this** device's runtimes. Without this, an agent assigned from another
+connected workspace is never surfaced to the daemon, so the daemon never polls it
+and its assignment stays `queued` forever.
 
 ## Binding Record
 

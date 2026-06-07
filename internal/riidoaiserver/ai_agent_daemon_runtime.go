@@ -214,8 +214,16 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx conte
 		return AgentRuntimeBindingListResponse{}, ErrAuthorizationForbidden
 	}
 	bindings := make([]AgentRuntimeBinding, 0, len(s.agents))
+	scope := s.workspaceScope(principal)
 	for _, agent := range s.agents {
-		if s.agentWorkspaceID(agent) != s.workspaceScope(principal) {
+		// A physical machine connects to many workspaces under one device
+		// credential, so surface bindings for agents in ANY workspace this device
+		// is connected to — not just the credential's enroll workspace. Otherwise
+		// an agent assigned from another connected workspace is never polled and
+		// its assignment stays queued forever. The binding.DeviceID guard below
+		// still restricts the result to agents bound to THIS device's runtimes.
+		agentWS := s.agentWorkspaceID(agent)
+		if agentWS != scope && !deviceConnectedToWorkspace(device, agentWS) {
 			continue
 		}
 		binding, ok := s.agentRuntimeBindingLocked(agent)

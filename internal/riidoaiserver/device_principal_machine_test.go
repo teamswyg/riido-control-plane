@@ -162,6 +162,77 @@ func TestConnectAIAgentDeviceMakesDeviceVisibleInOtherWorkspace(t *testing.T) {
 	}
 }
 
+// The daemon learns which agents to poll from /v1/daemon/agent-bindings. Because
+// one physical machine serves many workspaces under a single device credential,
+// the bindings must include agents created in ANY workspace the device is
+// connected to — not only the credential's enroll workspace. Otherwise an agent
+// assigned from another connected workspace is never polled and its assignment is
+// stuck "queued" forever.
+func TestDaemonAgentBindingsIncludeAgentsFromOtherConnectedWorkspaces(t *testing.T) {
+	ctx := context.Background()
+	store := NewDevelopmentAIAgentClientStore()
+	const machine = "machine-binding-multi"
+	const wsA = "workspace-a"
+	const wsB = "workspace-b"
+	const owner = "owner-user"
+
+	enroll, err := store.EnrollDeviceCredential(ctx,
+		AuthorizationResult{PrincipalID: owner, WorkspaceID: wsA}, wsA,
+		EnrollDeviceRequest{MachineID: machine, DisplayName: "Multi Mac"})
+	if err != nil {
+		t.Fatalf("enroll: %v", err)
+	}
+	runtimeID := machine + ":claude"
+	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx,
+		AuthorizationResult{PrincipalID: owner, WorkspaceID: wsA},
+		DeviceRuntimeSnapshotSyncRequest{
+			DaemonID: machine,
+			DeviceID: enroll.DeviceID,
+			Runtimes: []RuntimeSnapshotRecord{{
+				RuntimeID:      runtimeID,
+				Kind:           RuntimeKindClaudeCode,
+				Availability:   RuntimeAvailabilityOnline,
+				DetectionState: RuntimeDetectionStateDetected,
+			}},
+		}); err != nil {
+		t.Fatalf("sync: %v", err)
+	}
+
+	// Connect the machine to workspace B and create an agent there bound to the
+	// device's runtime — an agent whose workspace differs from the credential's.
+	if _, err := store.ConnectAIAgentDevice(ctx,
+		AuthorizationResult{PrincipalID: owner, WorkspaceID: wsB}, machine); err != nil {
+		t.Fatalf("connect wsB: %v", err)
+	}
+	created, err := store.createAIAgent(ctx,
+		AuthorizationResult{PrincipalID: owner, WorkspaceID: wsB},
+		CreateAgentConfigurationRequest{Name: "B Agent", RuntimeID: runtimeID, Visibility: AgentVisibilityPrivate}, "")
+	if err != nil {
+		t.Fatalf("create agent in wsB: %v", err)
+	}
+
+	// The daemon authenticates with the device credential (enroll workspace wsA, no
+	// explicit workspace). Its bindings must still include the wsB agent.
+	bindings, err := store.ListAIAgentDaemonAgentBindings(ctx,
+		AuthorizationResult{PrincipalID: owner}, enroll.DeviceID)
+	if err != nil {
+		t.Fatalf("list bindings: %v", err)
+	}
+	var found *AgentRuntimeBinding
+	for i := range bindings.Bindings {
+		if bindings.Bindings[i].AgentID == created.Agent.AgentID {
+			found = &bindings.Bindings[i]
+			break
+		}
+	}
+	if found == nil {
+		t.Fatalf("agent in connected workspace %s missing from daemon bindings: %+v", wsB, bindings.Bindings)
+	}
+	if found.RuntimeID != runtimeID || found.DeviceID != enroll.DeviceID {
+		t.Fatalf("binding has wrong runtime/device: %+v", *found)
+	}
+}
+
 func containsDeviceID(devices []DeviceRecord, deviceID string) bool {
 	for _, d := range devices {
 		if d.DeviceID == deviceID {
