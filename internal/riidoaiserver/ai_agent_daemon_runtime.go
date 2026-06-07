@@ -12,6 +12,52 @@ import (
 type AIAgentDaemonRuntimeStore interface {
 	SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error)
 	ListAIAgentDaemonAgentBindings(ctx context.Context, principal AuthorizationResult, deviceID string) (AgentRuntimeBindingListResponse, error)
+	ConnectAIAgentDevice(ctx context.Context, principal AuthorizationResult, machineID string) (DeviceRecord, error)
+}
+
+// ConnectAIAgentDevice connects the machine's device to the principal's
+// workspace, so every member of that workspace can see the device and its
+// runtimes. It is authorized by the user's token (proving workspace membership)
+// and identifies the device by machine id (the same key the daemon enrolls
+// under) — it does NOT issue or rotate the device secret, so a running daemon is
+// unaffected. The device runtimes themselves are reported by the daemon; this
+// only adds the workspace to the shared device row's connected set.
+func (s *DevelopmentAIAgentClientStore) ConnectAIAgentDevice(ctx context.Context, principal AuthorizationResult, machineID string) (DeviceRecord, error) {
+	if err := ctx.Err(); err != nil {
+		return DeviceRecord{}, err
+	}
+	principal.PrincipalID = strings.TrimSpace(principal.PrincipalID)
+	principal.WorkspaceID = strings.TrimSpace(principal.WorkspaceID)
+	machineID = strings.TrimSpace(machineID)
+	if principal.PrincipalID == "" {
+		return DeviceRecord{}, errors.New("principal_id is required")
+	}
+	if principal.WorkspaceID == "" {
+		return DeviceRecord{}, errors.New("workspace_id is required")
+	}
+	if machineID == "" {
+		return DeviceRecord{}, errors.New("machine_id is required")
+	}
+	deviceID := deviceIDForMachine(machineID)
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.devices {
+		if s.devices[i].DeviceID == deviceID {
+			s.devices[i].ConnectedWorkspaceIDs = addConnectedWorkspace(s.devices[i].ConnectedWorkspaceIDs, principal.WorkspaceID)
+			return copyDevice(s.devices[i]), nil
+		}
+	}
+	// The machine has not enrolled/reported yet; create a minimal connected row.
+	// Runtimes fill in when the daemon reports its snapshot.
+	device := DeviceRecord{
+		DeviceID:              deviceID,
+		OwnerPrincipalID:      principal.PrincipalID,
+		DaemonLastSeenAt:      time.Now().UTC(),
+		ConnectedWorkspaceIDs: []string{principal.WorkspaceID},
+	}
+	s.devices = append(s.devices, device)
+	return copyDevice(device), nil
 }
 
 func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error) {
