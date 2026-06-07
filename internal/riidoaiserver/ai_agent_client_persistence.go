@@ -448,9 +448,21 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 
 	taskThreads := make(map[string][]AIAgentTaskThreadRecord, len(s.taskThreads))
 	for taskID, threads := range s.taskThreads {
-		copied := make([]AIAgentTaskThreadRecord, len(threads))
-		for i, thread := range threads {
+		// Keep only the most recent threads per task (the tail is chronological),
+		// then cap each thread's progress lines. Both bounds keep the single
+		// AI Agent client snapshot DynamoDB item under its 400 KB hard limit;
+		// uncapped, accumulated runs/lines eventually make EVERY client write
+		// (device heartbeat, thread progress, assignment events) fail with a
+		// DynamoDB ValidationException, freezing the projection. The live SSE
+		// stream is unaffected — it delivers every line in real time.
+		retainedThreads := threads
+		if len(retainedThreads) > aiAgentClientThreadsPerTaskLimit {
+			retainedThreads = retainedThreads[len(retainedThreads)-aiAgentClientThreadsPerTaskLimit:]
+		}
+		copied := make([]AIAgentTaskThreadRecord, len(retainedThreads))
+		for i, thread := range retainedThreads {
 			copied[i] = copyTaskThread(thread)
+			copied[i].Lines = retainLatestThreadProgressLines(copied[i].Lines)
 		}
 		taskThreads[taskID] = copied
 	}
