@@ -1,7 +1,10 @@
 package riidoaiserver
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -215,11 +218,20 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 	if len(response.Item) == 0 {
 		return AIAgentClientSnapshot{}, false, nil
 	}
-	rawSnapshot := response.Item["snapshot_json"]["S"]
-	if rawSnapshot == "" {
-		return AIAgentClientSnapshot{}, false, errors.New("decode DynamoDB AI Agent client snapshot response: snapshot_json is required")
+	var snapshotReader io.Reader
+	if gzipped := response.Item["snapshot_gzip"]["S"]; gzipped != "" {
+		raw, err := gunzipBase64(gzipped)
+		if err != nil {
+			return AIAgentClientSnapshot{}, false, fmt.Errorf("decode DynamoDB AI Agent client snapshot gzip: %w", err)
+		}
+		snapshotReader = bytes.NewReader(raw)
+	} else if rawSnapshot := response.Item["snapshot_json"]["S"]; rawSnapshot != "" {
+		// Legacy items written before gzip compression.
+		snapshotReader = strings.NewReader(rawSnapshot)
+	} else {
+		return AIAgentClientSnapshot{}, false, errors.New("decode DynamoDB AI Agent client snapshot response: snapshot_gzip or snapshot_json is required")
 	}
-	snapshot, err := decodeAIAgentClientSnapshot(strings.NewReader(rawSnapshot))
+	snapshot, err := decodeAIAgentClientSnapshot(snapshotReader)
 	if err != nil {
 		return AIAgentClientSnapshot{}, false, fmt.Errorf("decode DynamoDB AI Agent client snapshot json: %w", err)
 	}
@@ -240,6 +252,14 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 	if err != nil {
 		return err
 	}
+	// The snapshot is one DynamoDB item (400 KB hard limit). The replay event log
+	// embeds full device records, so the raw JSON grows well past the limit and
+	// every write starts failing. gzip is highly effective on this repetitive
+	// JSON, keeping the item small. Load handles both gzip and legacy plain JSON.
+	snapshotGzip, err := gzipBase64(snapshotJSON)
+	if err != nil {
+		return err
+	}
 	payload, err := json.Marshal(struct {
 		TableName string                       `json:"TableName"`
 		Item      map[string]map[string]string `json:"Item"`
@@ -249,7 +269,7 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 			"pk":                         {"S": dynamoDBAIAgentClientSnapshotPK},
 			"sk":                         {"S": dynamoDBAIAgentClientSnapshotSK},
 			"schema_version":             {"S": AIAgentClientPersistenceSchemaVersion},
-			"snapshot_json":              {"S": string(snapshotJSON)},
+			"snapshot_gzip":              {"S": snapshotGzip},
 			"saved_at":                   {"S": snapshot.SavedAt.UTC().Format(time.RFC3339Nano)},
 			"next_device_credential_seq": {"N": fmt.Sprintf("%d", snapshot.NextDeviceCredentialSeq)},
 			"next_daemon_command":        {"N": fmt.Sprintf("%d", snapshot.NextDaemonCommand)},
@@ -272,6 +292,34 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 		return fmt.Errorf("dynamodb save AI Agent client snapshot: %w", err)
 	}
 	return nil
+}
+
+// gzipBase64 gzip-compresses b and returns a base64 (std) string suitable for a
+// DynamoDB string attribute.
+func gzipBase64(b []byte) (string, error) {
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	if _, err := gz.Write(b); err != nil {
+		return "", err
+	}
+	if err := gz.Close(); err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
+}
+
+// gunzipBase64 reverses gzipBase64.
+func gunzipBase64(s string) ([]byte, error) {
+	compressed, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return nil, err
+	}
+	gz, err := gzip.NewReader(bytes.NewReader(compressed))
+	if err != nil {
+		return nil, err
+	}
+	defer gz.Close()
+	return io.ReadAll(gz)
 }
 
 func decodeAIAgentClientSnapshot(r io.Reader) (AIAgentClientSnapshot, error) {
