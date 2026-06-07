@@ -182,6 +182,17 @@ func (s *PersistentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx contex
 	return s.DevelopmentAIAgentClientStore.ListAIAgentDaemonAgentBindings(ctx, principal, deviceID)
 }
 
+func (s *PersistentAIAgentClientStore) ConnectAIAgentDevice(ctx context.Context, principal AuthorizationResult, machineID string) (DeviceRecord, error) {
+	if err := s.reloadSnapshot(ctx); err != nil {
+		return DeviceRecord{}, err
+	}
+	device, err := s.DevelopmentAIAgentClientStore.ConnectAIAgentDevice(ctx, principal, machineID)
+	if err != nil {
+		return device, err
+	}
+	return device, s.saveSnapshot(ctx)
+}
+
 func (s *PersistentAIAgentClientStore) ListAIAgentTaskAssignableAgents(ctx context.Context, principal AuthorizationResult, taskID string) (AgentClientListResponse, error) {
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return AgentClientListResponse{}, err

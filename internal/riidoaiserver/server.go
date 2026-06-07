@@ -190,9 +190,52 @@ func (s Server) handleDesktopWorkspaceRoutes(w http.ResponseWriter, r *http.Requ
 	switch {
 	case suffix == "devices/enroll" && r.Method == http.MethodPost:
 		s.handleDesktopDeviceEnroll(w, r, workspaceID)
+	case suffix == "devices/connect" && r.Method == http.MethodPost:
+		s.handleDesktopDeviceConnect(w, r, workspaceID)
 	default:
 		writeError(w, http.StatusNotFound, "not found")
 	}
+}
+
+// handleDesktopDeviceConnect connects the caller's machine device to this
+// workspace so every member of the workspace can see the device and its
+// runtimes. Authorized by the user token (workspace membership); identifies the
+// device by machine_id. Does not issue/rotate the device secret.
+func (s Server) handleDesktopDeviceConnect(w http.ResponseWriter, r *http.Request, workspaceID string) {
+	if s.daemonRuntime == nil {
+		writeError(w, http.StatusServiceUnavailable, "daemon runtime store is not configured")
+		return
+	}
+	r = requestWithAIAgentWorkspaceIDAndPath(r, workspaceID, r.URL.Path)
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDeviceRead})
+	if !ok {
+		return
+	}
+	var req struct {
+		MachineID string `json:"machine_id"`
+	}
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if strings.TrimSpace(req.MachineID) == "" {
+		writeError(w, http.StatusBadRequest, "machine_id is required")
+		return
+	}
+	device, err := s.daemonRuntime.ConnectAIAgentDevice(r.Context(), principal, req.MachineID)
+	if err != nil {
+		if errors.Is(err, ErrAuthorizationForbidden) {
+			writeError(w, http.StatusForbidden, "forbidden")
+			return
+		}
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"schema_version":          SchemaVersion,
+		"device_id":               device.DeviceID,
+		"connected_workspace_ids": device.ConnectedWorkspaceIDs,
+	})
 }
 
 func (s Server) handleDesktopDeviceEnroll(w http.ResponseWriter, r *http.Request, workspaceID string) {

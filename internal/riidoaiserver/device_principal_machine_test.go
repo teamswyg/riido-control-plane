@@ -95,6 +95,73 @@ func TestDeviceVisibleToConnectedWorkspaceMembers(t *testing.T) {
 	}
 }
 
+// ConnectAIAgentDevice connects the machine's (shared) device to another
+// workspace, so that workspace's members see the device with its runtimes —
+// without re-enrolling or rotating the device secret.
+func TestConnectAIAgentDeviceMakesDeviceVisibleInOtherWorkspace(t *testing.T) {
+	ctx := context.Background()
+	store := NewDevelopmentAIAgentClientStore()
+	const machine = "machine-uuid-multi"
+	const wsA = "workspace-a"
+	const wsB = "workspace-b"
+
+	// jack-style owner enrolls + reports runtimes in workspace A.
+	enroll, err := store.EnrollDeviceCredential(ctx,
+		AuthorizationResult{PrincipalID: "owner-user", WorkspaceID: wsA}, wsA,
+		EnrollDeviceRequest{MachineID: machine, DisplayName: "Multi Mac"})
+	if err != nil {
+		t.Fatalf("enroll: %v", err)
+	}
+	const runtimeID = machine + ":claude"
+	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx,
+		AuthorizationResult{PrincipalID: "owner-user", WorkspaceID: wsA},
+		DeviceRuntimeSnapshotSyncRequest{
+			DaemonID: machine,
+			DeviceID: enroll.DeviceID,
+			Runtimes: []RuntimeSnapshotRecord{{
+				RuntimeID:      runtimeID,
+				Kind:           RuntimeKindClaudeCode,
+				Availability:   RuntimeAvailabilityOnline,
+				DetectionState: RuntimeDetectionStateDetected,
+			}},
+		}); err != nil {
+		t.Fatalf("sync: %v", err)
+	}
+
+	// A different account, in workspace B, is not a member of A and does not see
+	// the device yet.
+	before, err := store.ListAIAgentDevices(ctx, AuthorizationResult{PrincipalID: "other-user", WorkspaceID: wsB})
+	if err != nil {
+		t.Fatalf("list before connect: %v", err)
+	}
+	if containsDeviceID(before.Devices, enroll.DeviceID) {
+		t.Fatalf("device unexpectedly visible in %s before connect", wsB)
+	}
+
+	// Connecting the machine to workspace B (by machine_id) makes it visible to B.
+	if _, err := store.ConnectAIAgentDevice(ctx,
+		AuthorizationResult{PrincipalID: "other-user", WorkspaceID: wsB}, machine); err != nil {
+		t.Fatalf("connect: %v", err)
+	}
+	after, err := store.ListAIAgentDevices(ctx, AuthorizationResult{PrincipalID: "other-user", WorkspaceID: wsB})
+	if err != nil {
+		t.Fatalf("list after connect: %v", err)
+	}
+	var mine *DeviceRecord
+	for i := range after.Devices {
+		if after.Devices[i].DeviceID == enroll.DeviceID {
+			mine = &after.Devices[i]
+			break
+		}
+	}
+	if mine == nil {
+		t.Fatalf("device %q not visible in %s after connect", enroll.DeviceID, wsB)
+	}
+	if len(mine.Runtimes) != 1 || mine.Runtimes[0].RuntimeID != runtimeID {
+		t.Fatalf("connected device missing owner-reported runtimes: %+v", mine.Runtimes)
+	}
+}
+
 func containsDeviceID(devices []DeviceRecord, deviceID string) bool {
 	for _, d := range devices {
 		if d.DeviceID == deviceID {
