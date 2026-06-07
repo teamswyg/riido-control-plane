@@ -28,31 +28,43 @@ This slice does not own:
 - environment parsing in `cmd/riido_ai_server`
 - AWS, DynamoDB, EventBridge, Terraform, or production secret wiring
 
-## Device Identity (one device per machine)
+## Device Identity & Visibility (machine device, workspace-connection scoped)
 
-A physical machine maps to exactly **one** device row, regardless of how many
-workspaces it enrolls in. The control-plane does not mint a device per
-(principal, workspace); instead device enrollment is idempotent per
-(principal, machine):
+A device is an entity of the **physical machine**, not of an account. One machine
+maps to exactly **one** device row, shared across the accounts and workspaces it
+connects to.
 
 - The desktop sends `machine_id` (the daemon's stable machine UUID, shared via
   the daemon `daemon.id` file) on `EnrollDeviceRequest`.
-- When `machine_id` is present, the `DeviceID` is derived deterministically from
-  `(principal, machine_id)` (`deviceIDForMachine`), so a re-enroll from any
-  workspace converges on the same device row instead of creating
-  `device-enrolled-NNNN` duplicates. The `DeviceID` is not a secret — the
-  rotating device secret remains the auth factor. Callers without `machine_id`
-  keep the legacy per-workspace behavior.
-- Re-enroll must not wipe runtimes already reported for the device row
-  (`upsertEnrolledDeviceLocked` merges; it preserves existing runtimes).
+- The `DeviceID` is derived from **`machine_id` alone** (`deviceIDForMachine`), so
+  every enrollment / snapshot of a machine resolves to the same device row.
+  The `DeviceID` is not a secret — the rotating device secret is the auth factor.
+  Callers without `machine_id` keep the legacy per-workspace behavior.
+- A device tracks the set of workspaces it is connected to
+  (`DeviceRecord.ConnectedWorkspaceIDs`). It **connects** to a workspace when it
+  enrolls or reports a runtime snapshot in that workspace (auto-connect).
+- Re-enroll/re-snapshot must not wipe runtimes already reported; the connected
+  workspace set is unioned, not replaced.
 - Legacy globally-colliding runtime IDs minted under the hardcoded
-  `agentd-local` daemon id are pruned from device rows on snapshot restore
+  `agentd-local` daemon id are pruned on snapshot restore
   (`pruneLegacyRuntimeRecords`); they predate per-machine UUIDs and are stale.
 
-Invariant: **number of installed daemons (machines) == number of device rows**
-for a principal. Devices are visible to their owning principal across that
-principal's workspaces (device listing is principal-scoped), so one machine's
-detected runtimes show in every workspace without per-workspace duplication.
+### Visibility
+
+Device visibility is **workspace-connection scoped**, not owner scoped:
+
+- A device is visible to **every member of any workspace it is connected to**.
+  `GET .../workspaces/{ws}/ai-agent/devices` returns **all devices connected to
+  `{ws}`** (`deviceConnectedToWorkspace` in `visibleDevicesLocked`).
+- Isolation holds at the **workspace boundary**: a device is not visible in
+  workspaces it is not connected to, nor to non-members.
+- "This machine's own runtimes" (e.g. onboarding) is a separate,
+  account/workspace-independent path: the desktop queries the **local daemon**
+  (`riido daemon status`) directly, not the server device list.
+
+This slice implements **visibility only**. Assigning/executing agents on a
+connected device from another workspace (requiring the daemon to poll multiple
+workspaces) is out of scope here.
 
 ## Binding Record
 

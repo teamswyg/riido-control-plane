@@ -45,6 +45,65 @@ func TestEnrollDeviceCredentialIsIdempotentPerMachine(t *testing.T) {
 	}
 }
 
+// A device is visible to every member of any workspace it is connected to
+// (workspace-connection scoped), and NOT to unconnected workspaces (isolation).
+func TestDeviceVisibleToConnectedWorkspaceMembers(t *testing.T) {
+	ctx := context.Background()
+	store := NewDevelopmentAIAgentClientStore()
+	const machine = "machine-uuid-shared"
+	const ws = "workspace-shared"
+
+	enroll, err := store.EnrollDeviceCredential(ctx,
+		AuthorizationResult{PrincipalID: "owner-user", WorkspaceID: ws}, ws,
+		EnrollDeviceRequest{MachineID: machine, DisplayName: "Shared Mac"})
+	if err != nil {
+		t.Fatalf("enroll: %v", err)
+	}
+	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx,
+		AuthorizationResult{PrincipalID: "owner-user", WorkspaceID: ws},
+		DeviceRuntimeSnapshotSyncRequest{
+			DaemonID: machine,
+			DeviceID: enroll.DeviceID,
+			Runtimes: []RuntimeSnapshotRecord{{
+				RuntimeID:      machine + ":claude",
+				Kind:           RuntimeKindClaudeCode,
+				Availability:   RuntimeAvailabilityOnline,
+				DetectionState: RuntimeDetectionStateDetected,
+			}},
+		}); err != nil {
+		t.Fatalf("sync: %v", err)
+	}
+
+	// A DIFFERENT account that is a member of the connected workspace sees it.
+	asMember, err := store.ListAIAgentDevices(ctx,
+		AuthorizationResult{PrincipalID: "other-user", WorkspaceID: ws})
+	if err != nil {
+		t.Fatalf("list as member: %v", err)
+	}
+	if !containsDeviceID(asMember.Devices, enroll.DeviceID) {
+		t.Fatalf("device %q not visible to member of connected workspace %q", enroll.DeviceID, ws)
+	}
+
+	// The same account in an unconnected workspace must NOT see it.
+	asOther, err := store.ListAIAgentDevices(ctx,
+		AuthorizationResult{PrincipalID: "other-user", WorkspaceID: "workspace-unconnected"})
+	if err != nil {
+		t.Fatalf("list unconnected ws: %v", err)
+	}
+	if containsDeviceID(asOther.Devices, enroll.DeviceID) {
+		t.Fatalf("device %q leaked into unconnected workspace", enroll.DeviceID)
+	}
+}
+
+func containsDeviceID(devices []DeviceRecord, deviceID string) bool {
+	for _, d := range devices {
+		if d.DeviceID == deviceID {
+			return true
+		}
+	}
+	return false
+}
+
 // Stale legacy runtimes (agentd-local:*) minted before per-machine UUIDs must be
 // dropped on restore; real per-machine runtimes are kept.
 func TestPruneLegacyRuntimeRecordsDropsAgentdLocal(t *testing.T) {

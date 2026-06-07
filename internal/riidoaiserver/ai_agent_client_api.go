@@ -155,11 +155,17 @@ type RuntimeSnapshotRecord struct {
 }
 
 type DeviceRecord struct {
-	DeviceID         string          `json:"device_id"`
-	OwnerPrincipalID string          `json:"owner_principal_id"`
-	DisplayName      string          `json:"display_name,omitempty"`
-	DaemonLastSeenAt time.Time       `json:"daemon_last_seen_at,omitempty"`
-	Runtimes         []RuntimeRecord `json:"runtimes"`
+	DeviceID         string    `json:"device_id"`
+	OwnerPrincipalID string    `json:"owner_principal_id"`
+	DisplayName      string    `json:"display_name,omitempty"`
+	DaemonLastSeenAt time.Time `json:"daemon_last_seen_at,omitempty"`
+	// ConnectedWorkspaceIDs is the set of workspaces this (machine) device is
+	// connected to. The device is visible to every member of any workspace it is
+	// connected to — visibility is workspace-connection scoped, not owner scoped.
+	// A device connects to a workspace when it enrolls or reports a runtime
+	// snapshot in that workspace.
+	ConnectedWorkspaceIDs []string        `json:"connected_workspace_ids,omitempty"`
+	Runtimes              []RuntimeRecord `json:"runtimes"`
 }
 
 type DeviceRuntimeSnapshotSyncRequest struct {
