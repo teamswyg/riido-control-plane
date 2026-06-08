@@ -136,7 +136,9 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 	if ws := strings.TrimSpace(principal.WorkspaceID); ws != "" {
 		device.ConnectedWorkspaceIDs = []string{ws}
 	}
+	previousDevice, previousDeviceOK := s.deviceByIDLocked(req.DeviceID)
 	device = s.upsertDeviceRuntimeSnapshotLocked(device)
+	previousDaemon, previousDaemonOK := s.daemons[req.DeviceID]
 	daemon := DeviceDaemonRecord{
 		DeviceID:          req.DeviceID,
 		OwnerPrincipalID:  principal.PrincipalID,
@@ -166,16 +168,24 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		}
 	}
 	s.daemons[req.DeviceID] = daemon
-	s.appendClientEventLocked(AgentClientEventDeviceRuntimeSnapshot, DeviceRuntimeSnapshotEvent{
-		EventType:     AgentClientEventDeviceRuntimeSnapshot,
-		SchemaVersion: SchemaVersion,
-		Device:        copyDevice(device),
-	})
-	s.appendClientEventLocked(AgentClientEventDeviceDaemonStatus, DeviceDaemonStatusEvent{
-		EventType:     AgentClientEventDeviceDaemonStatus,
-		SchemaVersion: SchemaVersion,
-		Daemon:        copyDeviceDaemon(daemon),
-	})
+	// Only emit client stream events when something a viewer cares about actually
+	// changed (runtimes, availability, connected workspaces, daemon status). A
+	// plain liveness heartbeat (only last_seen_at/uptime advanced) is suppressed
+	// so the SSE stream isn't flooded with identical snapshots every ~5s.
+	if deviceRuntimeSnapshotChangedForEvent(previousDevice, previousDeviceOK, device) {
+		s.appendClientEventLocked(AgentClientEventDeviceRuntimeSnapshot, DeviceRuntimeSnapshotEvent{
+			EventType:     AgentClientEventDeviceRuntimeSnapshot,
+			SchemaVersion: SchemaVersion,
+			Device:        copyDevice(device),
+		})
+	}
+	if daemonStatusChangedForEvent(previousDaemon, previousDaemonOK, daemon) {
+		s.appendClientEventLocked(AgentClientEventDeviceDaemonStatus, DeviceDaemonStatusEvent{
+			EventType:     AgentClientEventDeviceDaemonStatus,
+			SchemaVersion: SchemaVersion,
+			Daemon:        copyDeviceDaemon(daemon),
+		})
+	}
 	return DeviceRuntimeSnapshotSyncResponse{
 		SchemaVersion: SchemaVersion,
 		Device:        copyDevice(device),
@@ -324,6 +334,99 @@ func (s *DevelopmentAIAgentClientStore) agentRuntimeBindingLocked(agent AgentCli
 		RuntimeID:       runtime.RuntimeID,
 		RuntimeProvider: provider,
 	}), true
+}
+
+// deviceRuntimeSnapshotChangedForEvent reports whether anything a client cares
+// about changed between the previously stored device and the new one. Volatile
+// liveness fields (DaemonLastSeenAt, per-runtime LastDetectedAt) are ignored so
+// a plain heartbeat does not emit a redundant snapshot event.
+func deviceRuntimeSnapshotChangedForEvent(prev DeviceRecord, prevOK bool, next DeviceRecord) bool {
+	if !prevOK {
+		return true
+	}
+	if prev.OwnerPrincipalID != next.OwnerPrincipalID || prev.DisplayName != next.DisplayName {
+		return true
+	}
+	if !equalStringSetIgnoreOrder(prev.ConnectedWorkspaceIDs, next.ConnectedWorkspaceIDs) {
+		return true
+	}
+	if len(prev.Runtimes) != len(next.Runtimes) {
+		return true
+	}
+	prevByID := make(map[string]RuntimeRecord, len(prev.Runtimes))
+	for _, rt := range prev.Runtimes {
+		prevByID[rt.RuntimeID] = rt
+	}
+	for _, rt := range next.Runtimes {
+		p, ok := prevByID[rt.RuntimeID]
+		if !ok {
+			return true
+		}
+		if p.Kind != rt.Kind ||
+			p.Availability != rt.Availability ||
+			p.DetectionState != rt.DetectionState ||
+			p.HasAssignedAgent != rt.HasAssignedAgent ||
+			p.RequiresExperimentalOptIn != rt.RequiresExperimentalOptIn ||
+			!equalRuntimeModelRecords(p.Models, rt.Models) {
+			return true
+		}
+	}
+	return false
+}
+
+// daemonStatusChangedForEvent ignores LastSeenAt/UptimeSeconds/StartedAt (which
+// advance every heartbeat) and reports only meaningful daemon status changes.
+func daemonStatusChangedForEvent(prev DeviceDaemonRecord, prevOK bool, next DeviceDaemonRecord) bool {
+	if !prevOK {
+		return true
+	}
+	if prev.Availability != next.Availability ||
+		prev.ControlState != next.ControlState ||
+		prev.Profile != next.Profile ||
+		prev.PID != next.PID ||
+		prev.DaemonID != next.DaemonID ||
+		prev.DeviceDisplayName != next.DeviceDisplayName ||
+		prev.OwnerPrincipalID != next.OwnerPrincipalID {
+		return true
+	}
+	if len(prev.SupportedActions) != len(next.SupportedActions) {
+		return true
+	}
+	for i := range prev.SupportedActions {
+		if prev.SupportedActions[i] != next.SupportedActions[i] {
+			return true
+		}
+	}
+	return false
+}
+
+func equalRuntimeModelRecords(a, b []RuntimeModelRecord) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func equalStringSetIgnoreOrder(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	seen := make(map[string]int, len(a))
+	for _, v := range a {
+		seen[v]++
+	}
+	for _, v := range b {
+		if seen[v] == 0 {
+			return false
+		}
+		seen[v]--
+	}
+	return true
 }
 
 func runtimeByID(runtimes []RuntimeRecord, runtimeID string) (RuntimeRecord, bool) {
