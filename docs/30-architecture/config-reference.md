@@ -20,6 +20,8 @@ This file is the public Factor 12 configuration catalog for
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | disabled | `cmd/riido_ai_server` | positive integer interval for stdout CloudWatch EMF JSON Lines |
 | `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS` | empty | `cmd/riido_ai_server` | comma-separated exact `http://` or `https://` browser origins allowed to call the public HTTP API with CORS preflight support |
 | `RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS` | store default (`20`) | `cmd/riido_ai_server` | optional active assignment lease duration shared by the store actor and DynamoDB active-lease adapter |
+| `RIIDO_AI_SERVER_LONGPOLL_MAX_HOLD_SECONDS` | `25` | `cmd/riido_ai_server` | max time a daemon claim poll (`PollRequest.wait_ms`) is held open; must stay under the ALB idle timeout. See [`../20-domain/saas-control-plane.md`](../20-domain/saas-control-plane.md) |
+| `RIIDO_AI_SERVER_LONGPOLL_TICK_SECONDS` | `2` | `cmd/riido_ai_server` | fallback re-evaluation interval during a held poll; bounds cross-instance assignment discovery latency |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` | `false` | `cmd/riido_ai_server` | enables the development AI Agent client API backed by DynamoDB snapshot and assignment-operation persistence |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE` | empty | `cmd/riido_ai_server` | DynamoDB table name for the AI Agent client development snapshot item and assignment operation journal/queue; required when development mode is enabled |
 | `RIIDO_AI_SERVER_AWS_REGION` | empty | `cmd/riido_ai_server` | AWS region used by stdlib-only DynamoDB request signing; required when development mode is enabled |

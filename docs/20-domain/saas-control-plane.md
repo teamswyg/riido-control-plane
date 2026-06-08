@@ -89,6 +89,46 @@ The control plane derives this at assignment creation time; daemon execution
 must consume the snapshot instead of inferring opt-in from provider names or
 environment variables.
 
+### Long-poll claim (daemon poll hold)
+
+`PollRequest.wait_ms` (owned by `riido-contracts/assignment`) lets a daemon ask
+the control plane to HOLD its `POST /v1/agents/{agent_id}/poll` open until a
+queued assignment is available for the agent or a server budget elapses, instead
+of returning `action=none` immediately. This removes the daemon's idle-poll
+discovery latency without increasing steady-state request volume.
+
+Server behavior:
+
+- The poll handler clamps `wait_ms` to `RIIDO_AI_SERVER_LONGPOLL_MAX_HOLD_SECONDS`
+  (default 25s) and holds the request. It returns immediately when work is
+  already queued; otherwise it registers a per-agent waiter, re-checks once to
+  close the lost-wakeup window, then waits.
+- The waiter is woken the instant an assignment becomes claimable for the agent
+  (queued create, queued-blocker clear, or cancel). Wakes are fired from the
+  store's queued-producing transitions, mirroring the per-task SSE subscriber
+  fan-out. The wait loop runs off the store actor goroutine, so
+  assign/heartbeat/poll commands keep flowing while requests are held.
+- Because an assignment may be created on another control-plane instance (the
+  in-memory waiter signal is per-instance while DynamoDB is the durable SSOT), a
+  fallback re-evaluation runs every `RIIDO_AI_SERVER_LONGPOLL_TICK_SECONDS`
+  (default 2s) that re-checks the durable `agent_queue` source. Cross-instance
+  discovery latency is bounded by the tick; same-instance discovery is
+  near-instant.
+- On timeout the handler returns the usual `200 {action:"none"}` (not 204 — the
+  daemon decodes the JSON body), and the daemon re-polls.
+- `wait_ms=0`/absent preserves the legacy point-in-time poll. A store that does
+  not implement the long-poll capability transparently degrades to that path.
+
+Deployment guardrail: the hold budget MUST stay under the ALB idle timeout (60s
+default) and the `http.Server` write/idle timeouts. This server intentionally
+sets only `ReadHeaderTimeout`; never introduce a global `WriteTimeout` or
+`IdleTimeout` shorter than the long-poll budget — it would 504 held polls and
+also break the existing client SSE streams. Use per-handler deadlines instead.
+
+A held poll counts as exactly one `poll_requests_total` increment (the internal
+re-evaluations during the hold are not counted), so the metric still reflects
+daemon poll requests.
+
 Runtime progress intended for the client task thread is ingested as bounded
 daemon batches on `POST /v1/agents/{agent_id}/thread-progress`. The endpoint
 stores each accepted line as an assignment `riido_log` task event and, when the
@@ -139,6 +179,26 @@ yet. Replacing a queued assignment closes the previous assignment as
 blocker. If a historical queued blocker already exists on a still-queued current
 assignment, a same-agent reassignment repairs that blocker by cancelling the
 unleased blocker and clearing `blocked_by_assignment_id` before daemon polling.
+
+A queued assignment must not depend forever on the old agent polling when it is
+blocked by a non-terminal previous assignment. During queue claim, the store must
+inspect `blocked_by_assignment_id` before skipping the queued candidate. If the
+blocker is already terminal, the candidate is claimable. If the blocker is
+queued, it is an unleased historical blocker and is cancelled before the current
+candidate is claimed. If the blocker holds an active/cancelling lease and that
+lease is stale, the blocker is failed with an assignment event that explains the
+repair, then the current queued candidate becomes claimable. The repair event
+must include enough metadata to debug the queue chain without exposing prompts,
+bearer tokens, device secrets, or provider environment values.
+
+This repair is part of the assignment store lifecycle, not the AI Agent client
+read model. The client may render `queued` as active/working, but the durable
+assignment projection must eventually move either the blocker or the queued
+candidate to a terminal/leased state without requiring a stale daemon/runtime to
+poll again. While a thread remains queued behind a blocker, the client thread
+record should expose `queue_diagnostics` with `blocked_by_assignment_id`,
+`blocker_state`, `blocker_agent_id`, and `blocker_runtime_provider` when those
+values are available from assignment projections.
 
 New multi-agent task work is additive and must use the v2
 `agent-assignments` routes. The additive store path preserves the same

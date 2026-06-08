@@ -39,6 +39,8 @@ const (
 	envTaskContextTeamID      = "RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID"
 	envTaskContextAPIKey      = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY"
 	envTaskContextTimeout     = "RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS"
+	envLongPollMaxHoldSeconds = "RIIDO_AI_SERVER_LONGPOLL_MAX_HOLD_SECONDS"
+	envLongPollTickSeconds    = "RIIDO_AI_SERVER_LONGPOLL_TICK_SECONDS"
 
 	envAWSContainerCredentialsFullURI     = "AWS_CONTAINER_CREDENTIALS_FULL_URI"
 	envAWSContainerCredentialsRelativeURI = "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
@@ -54,6 +56,8 @@ type runtimeConfig struct {
 	MetricsLogInterval       time.Duration
 	WebAllowedOrigins        []string
 	AssignmentActiveLease    time.Duration
+	LongPollMaxHold          time.Duration
+	LongPollTick             time.Duration
 	AIAgentClientDev         bool
 	AIAgentClientStore       riidoaiserver.AIAgentClientSnapshotStore
 	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
@@ -96,7 +100,7 @@ func run() error {
 	}
 	server := &http.Server{
 		Addr:              config.Addr,
-		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, TaskContext: config.TaskContextReader, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins}).Handler(),
+		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, TaskContext: config.TaskContextReader, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins, LongPollMaxHold: config.LongPollMaxHold, LongPollTick: config.LongPollTick}).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	metricsCancel, metricsErrCh := startMetricsPublisher(store, config.MetricsLogInterval, os.Stdout)
@@ -114,6 +118,14 @@ func configFromEnv() (runtimeConfig, error) {
 		return runtimeConfig{}, err
 	}
 	assignmentActiveLease, err := envOptionalDurationSeconds(envAssignmentActiveLease)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
+	longPollMaxHold, err := envDurationSeconds(envLongPollMaxHoldSeconds, 25*time.Second)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
+	longPollTick, err := envDurationSeconds(envLongPollTickSeconds, 2*time.Second)
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -153,6 +165,8 @@ func configFromEnv() (runtimeConfig, error) {
 		MetricsLogInterval:       metricsLogInterval,
 		WebAllowedOrigins:        webAllowedOrigins,
 		AssignmentActiveLease:    assignmentActiveLease,
+		LongPollMaxHold:          longPollMaxHold,
+		LongPollTick:             longPollTick,
 		AIAgentClientDev:         aiAgentClientDev,
 		AIAgentClientStore:       aiAgentClientStore,
 		AssignmentOperationStore: assignmentOperationStore,

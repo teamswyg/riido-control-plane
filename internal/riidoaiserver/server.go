@@ -29,6 +29,14 @@ type ServerConfig struct {
 	ProviderStatus    ProviderStatusStore
 	ProviderRead      ProviderStatusReader
 	WebAllowedOrigins []string
+	// LongPollMaxHold caps how long a daemon claim poll (PollRequest.WaitMs) may
+	// be held open. Zero applies the default (25s). Must stay well under the ALB
+	// idle timeout (60s default) and the http.Server write/idle timeouts (unset).
+	LongPollMaxHold time.Duration
+	// LongPollTick is the fallback re-evaluation interval during a held poll. It
+	// bounds cross-instance discovery latency (an assignment queued on another
+	// control-plane instance). Zero applies the default (2s).
+	LongPollTick time.Duration
 }
 
 type Server struct {
@@ -47,6 +55,12 @@ type aiAgentWorkspaceIDContextKey struct{}
 
 func NewServer(config ServerConfig) Server {
 	config.WebAllowedOrigins = normalizeWebAllowedOrigins(config.WebAllowedOrigins)
+	if config.LongPollMaxHold <= 0 {
+		config.LongPollMaxHold = 25 * time.Second
+	}
+	if config.LongPollTick <= 0 {
+		config.LongPollTick = 2 * time.Second
+	}
 	agentCatalog := config.AgentCatalogStore
 	if agentCatalog == nil {
 		if store, ok := config.Assignment.(AgentCatalogStore); ok {
@@ -1572,7 +1586,17 @@ func (s Server) handleAgentPoll(w http.ResponseWriter, r *http.Request, agentID 
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	response, err := s.assignment.PollAgent(r.Context(), agentID, req)
+	var response PollResponse
+	var err error
+	if longPoll, ok := s.assignment.(AssignmentLongPollStore); ok && req.WaitMs > 0 {
+		hold := time.Duration(req.WaitMs) * time.Millisecond
+		if max := s.config.LongPollMaxHold; max > 0 && hold > max {
+			hold = max
+		}
+		response, err = longPoll.WaitForAssignment(r.Context(), agentID, req, hold, s.config.LongPollTick)
+	} else {
+		response, err = s.assignment.PollAgent(r.Context(), agentID, req)
+	}
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return

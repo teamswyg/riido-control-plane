@@ -772,7 +772,11 @@ func (s *DevelopmentAIAgentClientStore) ReconcileAIAgentActiveThreadProjections(
 			!assignmentStateCanRepairTaskThread(projection.Assignment.State) {
 			continue
 		}
-		if s.applyAssignmentProjectionToTaskThread(thread, projection) {
+		diagnostics, err := queueDiagnosticsFromAssignmentProjection(ctx, reader, projection)
+		if err != nil {
+			return changed, err
+		}
+		if s.applyAssignmentProjectionToTaskThread(thread, projection, diagnostics) {
 			changed = true
 		}
 	}
@@ -868,6 +872,10 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		Message:         "agent work was stopped by task participant removal",
 	}
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
+		response.ThreadID = thread.ThreadID
+		response.AssignmentID = thread.AssignmentID
+		response.RunID = thread.RunID
+	} else if thread, ok := s.latestTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
 		response.ThreadID = thread.ThreadID
 		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
@@ -1020,6 +1028,10 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 		Message:         "agent work was stopped by user request",
 	}
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
+		response.ThreadID = thread.ThreadID
+		response.AssignmentID = thread.AssignmentID
+		response.RunID = thread.RunID
+	} else if thread, ok := s.latestTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
 		response.ThreadID = thread.ThreadID
 		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
@@ -1353,10 +1365,16 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 	if !ok {
 		return AgentThreadProgressBatchResponse{}, ErrAIAgentNotFound
 	}
-	if thread, ok := s.taskThreadForAssignmentLocked(req.TaskID, agentID, req.AssignmentID); ok {
-		req.ThreadID = thread.ThreadID
+	if existing, found := s.taskThreadForAssignmentLocked(req.TaskID, agentID, req.AssignmentID); found {
+		// Terminal/stop fence (C2): once the thread is stopping/stopped/terminal,
+		// a late runtime-progress batch must not re-activate it. Drop it as an
+		// accepted no-op (0 lines) so the daemon does not retry or error.
+		if !agentAssignmentStateAcceptsRuntimeProgress(existing.AssignmentState) {
+			return AgentThreadProgressBatchResponse{SchemaVersion: SchemaVersion, AcceptedLines: 0}, nil
+		}
+		req.ThreadID = existing.ThreadID
 		if req.RunID == "" {
-			req.RunID = thread.RunID
+			req.RunID = existing.RunID
 		}
 		generatedThreadID = false
 	}
@@ -1464,6 +1482,13 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	previousThread := thread
 
 	if strings.TrimSpace(event.Type) == EventRiidoLog && message != "" {
+		// Terminal/stop fence (C2): a late runtime-progress log for a thread the
+		// user already stopped (or that reached a terminal state) must not
+		// re-activate it. Drop it. A brand-new thread (hadThread == false) was
+		// just created above in the running state and always accepts progress.
+		if hadThread && !agentAssignmentStateAcceptsRuntimeProgress(previousThread.AssignmentState) {
+			return nil
+		}
 		messageCode, messageKey, messageArgs := progressLineMetadata(event.Metadata)
 		if rendered, key, ok := renderProgressMessage(messageCode, messageArgs); ok {
 			message = rendered
@@ -1724,6 +1749,17 @@ func (s *DevelopmentAIAgentClientStore) activeTaskThreadForAgentLocked(taskID, a
 	return AIAgentTaskThreadRecord{}, false
 }
 
+func (s *DevelopmentAIAgentClientStore) latestTaskThreadForAgentLocked(taskID, agentID string) (AIAgentTaskThreadRecord, bool) {
+	threads := s.taskThreads[taskID]
+	for i := len(threads) - 1; i >= 0; i-- {
+		thread := threads[i]
+		if thread.AgentID == agentID {
+			return copyTaskThread(thread), true
+		}
+	}
+	return AIAgentTaskThreadRecord{}, false
+}
+
 func (s *DevelopmentAIAgentClientStore) taskThreadForAssignmentLocked(taskID, agentID, assignmentID string) (AIAgentTaskThreadRecord, bool) {
 	assignmentID = strings.TrimSpace(assignmentID)
 	if assignmentID == "" {
@@ -1788,7 +1824,31 @@ func assignmentStateCanRepairTaskThread(state AssignmentState) bool {
 	}
 }
 
-func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(thread AIAgentTaskThreadRecord, projection AssignmentProjection) bool {
+func queueDiagnosticsFromAssignmentProjection(ctx context.Context, reader AssignmentProjectionReader, projection AssignmentProjection) (*AIAgentTaskThreadQueueDiagnostics, error) {
+	assignment := projection.Assignment
+	blockedByID := strings.TrimSpace(assignment.BlockedByAssignmentID)
+	if assignment.State != AssignmentQueued || blockedByID == "" {
+		return nil, nil
+	}
+	diagnostics := &AIAgentTaskThreadQueueDiagnostics{
+		Reason:                "blocked_by_assignment",
+		BlockedByAssignmentID: blockedByID,
+	}
+	blocker, ok, err := reader.LoadAssignmentProjection(ctx, blockedByID)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return diagnostics, nil
+	}
+	diagnostics.BlockerAgentID = blocker.Assignment.AgentID
+	diagnostics.BlockerRuntimeProvider = blocker.Assignment.RuntimeProvider
+	diagnostics.BlockerState = blocker.Assignment.State
+	diagnostics.BlockerUpdatedAt = blocker.Assignment.UpdatedAt
+	return diagnostics, nil
+}
+
+func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(thread AIAgentTaskThreadRecord, projection AssignmentProjection, diagnostics *AIAgentTaskThreadQueueDiagnostics) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	threads := s.taskThreads[thread.TaskID]
@@ -1804,12 +1864,14 @@ func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(th
 		if previous.AssignmentID == response.AssignmentID &&
 			previous.WorkStatus == response.WorkStatus &&
 			previous.AssignmentState == response.AssignmentState &&
-			previous.CommentKind == response.CommentKind {
+			previous.CommentKind == response.CommentKind &&
+			queueDiagnosticsEqual(previous.QueueDiagnostics, diagnostics) {
 			return false
 		}
 		threads[i].AssignmentID = response.AssignmentID
 		threads[i].WorkStatus = response.WorkStatus
 		threads[i].AssignmentState = response.AssignmentState
+		threads[i].QueueDiagnostics = copyQueueDiagnostics(diagnostics)
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
 		if assignmentStateIsTerminal(projection.Assignment.State) {
@@ -2047,6 +2109,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
 		}
 		threads[i].AssignmentState = response.AssignmentState
+		threads[i].QueueDiagnostics = nil
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
 		if sourceCommentID != "" {
@@ -2120,12 +2183,19 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		if threads[i].ThreadID != event.ThreadID {
 			continue
 		}
+		// Terminal/stop fence (C2), defense in depth: never let a runtime-progress
+		// event re-activate a thread the user stopped or that already finished,
+		// regardless of which ingestion path called us.
+		if !agentAssignmentStateAcceptsRuntimeProgress(threads[i].AssignmentState) {
+			return
+		}
 		threads[i].RunID = event.RunID
 		if strings.TrimSpace(event.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(event.AssignmentID)
 		}
 		threads[i].WorkStatus = event.WorkStatus
 		threads[i].AssignmentState = event.AssignmentState
+		threads[i].QueueDiagnostics = nil
 		threads[i].CommentKind = event.CommentKind
 		if len(event.Lines) > 0 {
 			threads[i].Message = event.Lines[len(event.Lines)-1].Message
@@ -2931,7 +3001,28 @@ func deviceRuntimeSnapshotStale(lastSeenAt time.Time, now time.Time) bool {
 func copyTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
 	thread.Lines = copyClientVisibleProgressLines(thread.Lines)
 	thread.Message = clientVisibleTaskThreadMessage(thread)
+	thread.QueueDiagnostics = copyQueueDiagnostics(thread.QueueDiagnostics)
 	return thread
+}
+
+func copyQueueDiagnostics(in *AIAgentTaskThreadQueueDiagnostics) *AIAgentTaskThreadQueueDiagnostics {
+	if in == nil {
+		return nil
+	}
+	out := *in
+	return &out
+}
+
+func queueDiagnosticsEqual(a, b *AIAgentTaskThreadQueueDiagnostics) bool {
+	if a == nil || b == nil {
+		return a == nil && b == nil
+	}
+	return a.Reason == b.Reason &&
+		a.BlockedByAssignmentID == b.BlockedByAssignmentID &&
+		a.BlockerAgentID == b.BlockerAgentID &&
+		a.BlockerRuntimeProvider == b.BlockerRuntimeProvider &&
+		a.BlockerState == b.BlockerState &&
+		a.BlockerUpdatedAt.Equal(b.BlockerUpdatedAt)
 }
 
 func copyProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLine {
@@ -2978,6 +3069,23 @@ func copyAgentOnboardingFixtures(fixtures []AgentOnboardingFixture) []AgentOnboa
 func taskThreadHasActiveStream(thread AIAgentTaskThreadRecord) bool {
 	switch thread.AssignmentState {
 	case AgentAssignmentStateQueued, AgentAssignmentStateRunning, AgentAssignmentStateStopping:
+		return true
+	default:
+		return false
+	}
+}
+
+// agentAssignmentStateAcceptsRuntimeProgress reports whether a thread in this
+// state may be advanced by an incoming runtime-progress event (a `riido_log`
+// on /events, or a /thread-progress batch). Only genuinely active states accept
+// progress; once a thread is stopping/stopped/terminal, late progress — e.g. an
+// in-flight log that raced a user Stop — must NOT re-activate it (flip it back
+// to running, re-open the SSE active_stream, or re-arm the agent). This is the
+// control-plane read-model terminal/stop fence (C2). Note `stopping` is
+// excluded: a stop in progress must not be reverted to running by late progress.
+func agentAssignmentStateAcceptsRuntimeProgress(state AgentAssignmentState) bool {
+	switch state {
+	case AgentAssignmentStateQueued, AgentAssignmentStateRunning:
 		return true
 	default:
 		return false

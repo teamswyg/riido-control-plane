@@ -14,9 +14,11 @@ type storeState struct {
 	agentCatalog            map[string]AgentCatalogRecord
 	events                  map[string][]TaskEvent
 	subscribers             map[string]map[int64]chan TaskEvent
+	agentWaiters            map[string]map[int64]chan struct{}
 	nextAssignmentSeq       int64
 	nextEventSeq            int64
 	nextSubscriberSeq       int64
+	nextAgentWaiterSeq      int64
 	pollRequestsTotal       int64
 	pollActionsTotal        map[PollAction]int64
 	agentEventsTotal        int64
@@ -41,6 +43,7 @@ func newStoreState() storeState {
 		agentCatalog:     map[string]AgentCatalogRecord{},
 		events:           map[string][]TaskEvent{},
 		subscribers:      map[string]map[int64]chan TaskEvent{},
+		agentWaiters:     map[string]map[int64]chan struct{}{},
 		pollActionsTotal: map[PollAction]int64{},
 	}
 }

@@ -402,21 +402,31 @@ type AIAgentTaskThreadStreamTarget struct {
 	RunID    string `json:"run_id"`
 }
 
+type AIAgentTaskThreadQueueDiagnostics struct {
+	Reason                 string          `json:"reason,omitempty"`
+	BlockedByAssignmentID  string          `json:"blocked_by_assignment_id,omitempty"`
+	BlockerAgentID         string          `json:"blocker_agent_id,omitempty"`
+	BlockerRuntimeProvider string          `json:"blocker_runtime_provider,omitempty"`
+	BlockerState           AssignmentState `json:"blocker_state,omitempty"`
+	BlockerUpdatedAt       time.Time       `json:"blocker_updated_at,omitempty"`
+}
+
 type AIAgentTaskThreadRecord struct {
-	ThreadID        string                    `json:"thread_id"`
-	TaskID          string                    `json:"task_id"`
-	AssignmentID    string                    `json:"assignment_id,omitempty"`
-	AgentID         string                    `json:"agent_id"`
-	RunID           string                    `json:"run_id"`
-	SourceCommentID string                    `json:"source_comment_id,omitempty"`
-	SourceMessageID string                    `json:"source_message_id,omitempty"`
-	WorkStatus      AgentWorkStatus           `json:"work_status"`
-	AssignmentState AgentAssignmentState      `json:"assignment_state"`
-	CommentKind     AgentTaskCommentKind      `json:"comment_kind"`
-	Message         string                    `json:"message"`
-	StartedAt       time.Time                 `json:"started_at,omitempty"`
-	CompletedAt     time.Time                 `json:"completed_at,omitempty"`
-	Lines           []AgentThreadProgressLine `json:"lines"`
+	ThreadID         string                             `json:"thread_id"`
+	TaskID           string                             `json:"task_id"`
+	AssignmentID     string                             `json:"assignment_id,omitempty"`
+	AgentID          string                             `json:"agent_id"`
+	RunID            string                             `json:"run_id"`
+	SourceCommentID  string                             `json:"source_comment_id,omitempty"`
+	SourceMessageID  string                             `json:"source_message_id,omitempty"`
+	WorkStatus       AgentWorkStatus                    `json:"work_status"`
+	AssignmentState  AgentAssignmentState               `json:"assignment_state"`
+	QueueDiagnostics *AIAgentTaskThreadQueueDiagnostics `json:"queue_diagnostics,omitempty"`
+	CommentKind      AgentTaskCommentKind               `json:"comment_kind"`
+	Message          string                             `json:"message"`
+	StartedAt        time.Time                          `json:"started_at,omitempty"`
+	CompletedAt      time.Time                          `json:"completed_at,omitempty"`
+	Lines            []AgentThreadProgressLine          `json:"lines"`
 }
 
 type AIAgentTaskThreadCollectionResponse struct {

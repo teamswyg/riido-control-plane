@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"testing"
+	"time"
 )
 
 func TestAIAgentClientAdditiveAssignmentsExposeActiveThreadFilters(t *testing.T) {
@@ -121,6 +122,81 @@ func TestAIAgentClientLegacyAssignStillStopsExistingTaskThreads(t *testing.T) {
 			t.Fatalf("legacy first thread should have been stopped: %+v", thread)
 		}
 	}
+}
+
+func TestAIAgentClientThreadProjectionExposesQueueDiagnostics(t *testing.T) {
+	ctx := context.Background()
+	now := time.Date(2026, 6, 9, 5, 0, 0, 0, time.UTC)
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
+
+	assigned, err := store.AssignAIAgentTask(ctx, principal, "task-queue-diagnostics", AssignAIAgentTaskRequest{
+		AgentID:      "agent-public-openclaw",
+		AssignmentID: "asn-current",
+	})
+	if err != nil {
+		t.Fatalf("AssignAIAgentTask: %v", err)
+	}
+	reader := mapAssignmentProjectionReader{projections: map[string]AssignmentProjection{
+		assigned.AssignmentID: {
+			Assignment: Assignment{
+				ID:                    assigned.AssignmentID,
+				TaskID:                "task-queue-diagnostics",
+				AgentID:               assigned.AgentID,
+				RuntimeProvider:       "openclaw",
+				State:                 AssignmentQueued,
+				BlockedByAssignmentID: "asn-blocker",
+				CreatedAt:             now.Add(-time.Minute),
+				UpdatedAt:             now.Add(-time.Minute),
+			},
+			LastEventSeq: 7,
+		},
+		"asn-blocker": {
+			Assignment: Assignment{
+				ID:              "asn-blocker",
+				TaskID:          "task-queue-diagnostics",
+				AgentID:         "agent-old",
+				RuntimeProvider: "codex",
+				State:           AssignmentCancelling,
+				CreatedAt:       now.Add(-2 * time.Minute),
+				UpdatedAt:       now.Add(-30 * time.Second),
+			},
+			LastEventSeq: 6,
+		},
+	}}
+	changed, err := store.ReconcileAIAgentActiveThreadProjections(ctx, principal, "task-queue-diagnostics", reader)
+	if err != nil {
+		t.Fatalf("ReconcileAIAgentActiveThreadProjections: %v", err)
+	}
+	if !changed {
+		t.Fatal("expected queued projection diagnostics to update thread")
+	}
+	threads, err := store.ListAIAgentTaskThreads(ctx, principal, "task-queue-diagnostics")
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	if len(threads.Threads) != 1 {
+		t.Fatalf("threads = %+v", threads)
+	}
+	diagnostics := threads.Threads[0].QueueDiagnostics
+	if diagnostics == nil ||
+		diagnostics.Reason != "blocked_by_assignment" ||
+		diagnostics.BlockedByAssignmentID != "asn-blocker" ||
+		diagnostics.BlockerAgentID != "agent-old" ||
+		diagnostics.BlockerRuntimeProvider != "codex" ||
+		diagnostics.BlockerState != AssignmentCancelling ||
+		!diagnostics.BlockerUpdatedAt.Equal(now.Add(-30*time.Second)) {
+		t.Fatalf("queue diagnostics = %+v", diagnostics)
+	}
+}
+
+type mapAssignmentProjectionReader struct {
+	projections map[string]AssignmentProjection
+}
+
+func (r mapAssignmentProjectionReader) LoadAssignmentProjection(_ context.Context, assignmentID string) (AssignmentProjection, bool, error) {
+	projection, ok := r.projections[assignmentID]
+	return projection, ok, nil
 }
 
 func TestAIAgentClientStaleTerminalAgentCountDoesNotQueueNextAssignment(t *testing.T) {

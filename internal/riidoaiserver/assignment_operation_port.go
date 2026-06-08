@@ -76,6 +76,7 @@ type AssignmentClaimResult struct {
 	Claimed    bool
 	Assignment Assignment
 	Operation  AssignmentOperationRecord
+	Operations []AssignmentOperationRecord
 }
 
 type AssignmentOperationRecord struct {

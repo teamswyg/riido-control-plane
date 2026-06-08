@@ -1,6 +1,9 @@
 package riidoaiserver
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type AssignmentStore interface {
 	AssignTask(ctx context.Context, taskID string, req AssignRequest) (Assignment, error)
@@ -19,6 +22,14 @@ type AssignmentCancellationStore interface {
 
 type AssignmentHeartbeatEventStore interface {
 	HeartbeatAgentWithEvents(ctx context.Context, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, []TaskEvent, error)
+}
+
+// AssignmentLongPollStore is the optional long-poll claim capability. A store
+// that implements it lets the poll handler hold a request (PollRequest.WaitMs)
+// until work is available or the budget elapses. A store that does not implement
+// it transparently degrades to the point-in-time PollAgent path.
+type AssignmentLongPollStore interface {
+	WaitForAssignment(ctx context.Context, agentID string, req PollRequest, hold, tick time.Duration) (PollResponse, error)
 }
 
 type MetricsReader interface {

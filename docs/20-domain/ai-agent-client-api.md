@@ -171,6 +171,13 @@ For agent settings:
   `comment_kind=assignment_started` unless the agent is busy; unassign maps
   participant removal to `stopped_by_user_request`. Hiding stopped rows remains
   client presentation.
+- Participant selection is not equivalent to "latest task-thread has
+  `agent_id`". Terminal task threads (`failed`, `stopped`, `completed`,
+  `unassigned`) remain visible as history, but clients must not render them as
+  checked AI Agent participants. Explicit unassign/stop actions target the
+  latest thread for that agent when no active stream exists, so a failed
+  historical run is updated in place instead of creating a synthetic stopped
+  row without the original `assignment_id`.
 - A successful `tasks.assign` response means the daemon-facing assignment queue
   also accepted the work. If task-context lookup, prompt composition, runtime
   binding lookup, or assignment-store validation fails, the handler must fail
@@ -434,6 +441,17 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   ready, or running assignments move to `cancelling` so the owning daemon sees
   `PollCancel` on its next poll and can confirm the terminal `cancelled` event.
   The frontend does not call a second endpoint for this.
+- once a task thread is stopped or terminal, a late runtime-progress event must
+  not re-activate it. The read model fences ingestion: a `riido_log` on
+  `/events` or a `/thread-progress` batch only advances a thread whose
+  `assignment_state` is `queued` or `running`. For any other state
+  (`stopping` / `stopped` / `completed` / `failed`) the late progress is dropped
+  — it does not flip the thread back to `running`, re-open `active_stream`, or
+  re-arm the agent. `stopping` is intentionally excluded so a stop in progress
+  cannot be reverted by an in-flight log that raced the user's Stop. This guards
+  against the race where a daemon log is already on the wire when Stop is
+  applied; the daemon-side session terminal guard does not cover it because the
+  client read model is a separate projection.
 - task-thread status updates use typed `AgentTaskCommentKind` values
 - task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
   to render historical AI Agent thread rows; `active_stream` is present only

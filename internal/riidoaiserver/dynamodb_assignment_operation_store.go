@@ -421,41 +421,52 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 		if assignment.State != AssignmentQueued {
 			continue
 		}
+		var repairs []dynamoDBAssignmentClaimRepair
+		var activeCondition *dynamoDBTransactWriteConditionCheckAction
+		clearMessage := ""
+		clearMetadata := map[string]string(nil)
 		if assignment.BlockedByAssignmentID != "" {
 			blocker, ok, err := s.loadAssignmentProjection(ctx, assignment.BlockedByAssignmentID, credentials)
 			if err != nil {
 				return AssignmentClaimResult{}, err
 			}
-			if !ok || !isTerminal(blocker.Assignment.State) {
+			clearMetadata = map[string]string{"blocked_by_assignment_id": assignment.BlockedByAssignmentID}
+			switch {
+			case !ok:
+				clearMessage = "missing blocker cleared before daemon lease"
+			case isTerminal(blocker.Assignment.State):
+				clearMessage = "terminal blocker cleared before daemon lease"
+			case blocker.Assignment.State == AssignmentQueued:
+				repairs = append(repairs, dynamoDBAssignmentClaimRepair{
+					Operation:            dynamoDBCancelQueuedBlockerOperation(blocker, assignment.ID, at),
+					ExpectedState:        AssignmentQueued,
+					ExpectedLastEventSeq: blocker.LastEventSeq,
+				})
+				clearMessage = "queued blocker cleared before daemon lease"
+			case assignmentHoldsActiveLease(blocker.Assignment.State):
+				stale, condition, err := s.staleBlockerLeaseCondition(ctx, blocker.Assignment, at, credentials)
+				if err != nil {
+					return AssignmentClaimResult{}, err
+				}
+				if !stale {
+					continue
+				}
+				activeCondition = condition
+				repairs = append(repairs, dynamoDBAssignmentClaimRepair{
+					Operation:            dynamoDBFailStaleBlockerOperation(blocker, assignment.ID, at),
+					ExpectedState:        blocker.Assignment.State,
+					ExpectedLastEventSeq: blocker.LastEventSeq,
+				})
+				clearMessage = "stale blocker cleared before daemon lease"
+			default:
 				continue
 			}
 		}
-		claimed := assignment
-		claimed.State = AssignmentLeased
-		claimed.LeaseToken = fmt.Sprintf("%s:%d", claimed.ID, at.UnixNano())
-		claimed.UpdatedAt = at
-		event := TaskEvent{
-			Seq:          candidate.LastEventSeq + 1,
-			TaskID:       claimed.TaskID,
-			AssignmentID: claimed.ID,
-			AgentID:      claimed.AgentID,
-			Type:         EventAssignmentLeased,
-			State:        AssignmentLeased,
-			Metadata:     map[string]string{"lease_token": claimed.LeaseToken},
-			At:           at,
-		}
-		operation := AssignmentOperationRecord{
-			SchemaVersion: AssignmentOperationSchemaVersion,
-			OperationID:   assignmentOperationID(AssignmentOperationPollStart, claimed, []TaskEvent{event}),
-			OperationType: AssignmentOperationPollStart,
-			TaskID:        claimed.TaskID,
-			AssignmentID:  claimed.ID,
-			AgentID:       claimed.AgentID,
-			Assignment:    claimed,
-			Events:        []TaskEvent{event},
-			RecordedAt:    at,
-		}
+		operation := dynamoDBClaimAssignmentOperation(assignment, candidate.LastEventSeq, at, clearMessage, clearMetadata)
 		payload, err := s.claimTransactionPayload(operation, candidate.LastEventSeq)
+		if len(repairs) > 0 || activeCondition != nil {
+			payload, err = s.claimRepairTransactionPayload(operation, candidate.LastEventSeq, repairs, activeCondition)
+		}
 		if err != nil {
 			return AssignmentClaimResult{}, err
 		}
@@ -470,7 +481,12 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 			now:          s.now,
 		})
 		if err == nil {
-			return AssignmentClaimResult{Claimed: true, Assignment: claimed, Operation: operation}, nil
+			operations := make([]AssignmentOperationRecord, 0, len(repairs)+1)
+			for _, repair := range repairs {
+				operations = append(operations, repair.Operation)
+			}
+			operations = append(operations, operation)
+			return AssignmentClaimResult{Claimed: true, Assignment: operation.Assignment, Operation: operation, Operations: operations}, nil
 		}
 		if isDynamoDBTransactionContention(err) {
 			continue
@@ -478,6 +494,174 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 		return AssignmentClaimResult{}, fmt.Errorf("dynamodb claim assignment: %w", err)
 	}
 	return AssignmentClaimResult{}, nil
+}
+
+type dynamoDBAssignmentClaimRepair struct {
+	Operation            AssignmentOperationRecord
+	ExpectedState        AssignmentState
+	ExpectedLastEventSeq int64
+}
+
+func dynamoDBClaimAssignmentOperation(assignment Assignment, lastEventSeq int64, at time.Time, clearMessage string, clearMetadata map[string]string) AssignmentOperationRecord {
+	claimed := assignment
+	events := []TaskEvent{}
+	nextSeq := lastEventSeq
+	blockedByID := strings.TrimSpace(claimed.BlockedByAssignmentID)
+	if strings.TrimSpace(clearMessage) != "" && blockedByID != "" {
+		nextSeq++
+		metadata := map[string]string{"blocked_by_assignment_id": blockedByID}
+		for key, value := range clearMetadata {
+			key = strings.TrimSpace(key)
+			value = strings.TrimSpace(value)
+			if key != "" && value != "" {
+				metadata[key] = value
+			}
+		}
+		events = append(events, TaskEvent{
+			Seq:          nextSeq,
+			TaskID:       claimed.TaskID,
+			AssignmentID: claimed.ID,
+			AgentID:      claimed.AgentID,
+			Type:         EventAssignmentQueued,
+			State:        AssignmentQueued,
+			Message:      clearMessage,
+			Metadata:     metadata,
+			At:           at,
+		})
+		claimed.BlockedByAssignmentID = ""
+		claimed.UpdatedAt = at
+	}
+	claimed.State = AssignmentLeased
+	claimed.LeaseToken = fmt.Sprintf("%s:%d", claimed.ID, at.UnixNano())
+	claimed.UpdatedAt = at
+	nextSeq++
+	events = append(events, TaskEvent{
+		Seq:          nextSeq,
+		TaskID:       claimed.TaskID,
+		AssignmentID: claimed.ID,
+		AgentID:      claimed.AgentID,
+		Type:         EventAssignmentLeased,
+		State:        AssignmentLeased,
+		Metadata:     map[string]string{"lease_token": claimed.LeaseToken},
+		At:           at,
+	})
+	return AssignmentOperationRecord{
+		SchemaVersion: AssignmentOperationSchemaVersion,
+		OperationID:   assignmentOperationID(AssignmentOperationPollStart, claimed, events),
+		OperationType: AssignmentOperationPollStart,
+		TaskID:        claimed.TaskID,
+		AssignmentID:  claimed.ID,
+		AgentID:       claimed.AgentID,
+		Assignment:    claimed,
+		Events:        events,
+		RecordedAt:    at,
+	}
+}
+
+func dynamoDBCancelQueuedBlockerOperation(blocker assignmentProjectionRecord, blockedAssignmentID string, at time.Time) AssignmentOperationRecord {
+	assignment := blocker.Assignment
+	assignment.State = AssignmentCancelled
+	assignment.UpdatedAt = at
+	events := []TaskEvent{{
+		Seq:          blocker.LastEventSeq + 1,
+		TaskID:       assignment.TaskID,
+		AssignmentID: assignment.ID,
+		AgentID:      assignment.AgentID,
+		Type:         EventAssignmentCancelled,
+		State:        AssignmentCancelled,
+		Message:      "queued blocker was cancelled before queued assignment claim",
+		Metadata:     map[string]string{"blocked_assignment_id": blockedAssignmentID},
+		At:           at,
+	}}
+	return AssignmentOperationRecord{
+		SchemaVersion: AssignmentOperationSchemaVersion,
+		OperationID:   assignmentOperationID(AssignmentOperationAgentEvent, assignment, events),
+		OperationType: AssignmentOperationAgentEvent,
+		TaskID:        assignment.TaskID,
+		AssignmentID:  assignment.ID,
+		AgentID:       assignment.AgentID,
+		Assignment:    assignment,
+		Events:        events,
+		RecordedAt:    at,
+	}
+}
+
+func dynamoDBFailStaleBlockerOperation(blocker assignmentProjectionRecord, blockedAssignmentID string, at time.Time) AssignmentOperationRecord {
+	assignment := blocker.Assignment
+	assignment.State = AssignmentFailed
+	assignment.UpdatedAt = at
+	metadata := map[string]string{"blocked_assignment_id": blockedAssignmentID}
+	if assignment.LeaseToken != "" {
+		metadata["lease_token"] = assignment.LeaseToken
+	}
+	events := []TaskEvent{{
+		Seq:          blocker.LastEventSeq + 1,
+		TaskID:       assignment.TaskID,
+		AssignmentID: assignment.ID,
+		AgentID:      assignment.AgentID,
+		Type:         EventAssignmentFailed,
+		State:        AssignmentFailed,
+		Message:      "blocked queued assignment repaired after stale blocker lease expired",
+		Metadata:     metadata,
+		At:           at,
+	}}
+	return AssignmentOperationRecord{
+		SchemaVersion: AssignmentOperationSchemaVersion,
+		OperationID:   assignmentOperationID(AssignmentOperationAgentEvent, assignment, events),
+		OperationType: AssignmentOperationAgentEvent,
+		TaskID:        assignment.TaskID,
+		AssignmentID:  assignment.ID,
+		AgentID:       assignment.AgentID,
+		Assignment:    assignment,
+		Events:        events,
+		RecordedAt:    at,
+	}
+}
+
+func (s *DynamoDBAssignmentOperationStore) staleBlockerLeaseCondition(ctx context.Context, blocker Assignment, at time.Time, credentials AWSCredentials) (bool, *dynamoDBTransactWriteConditionCheckAction, error) {
+	if !assignmentHoldsActiveLease(blocker.State) {
+		return false, nil, nil
+	}
+	key := map[string]map[string]string{
+		"pk": {"S": dynamoDBAgentActivePK(blocker.AgentID)},
+		"sk": {"S": dynamoDBAgentActiveSK},
+	}
+	lease, exists, err := s.loadAgentActiveAssignment(ctx, blocker.AgentID, credentials)
+	if err != nil {
+		return false, nil, err
+	}
+	if !exists {
+		return true, &dynamoDBTransactWriteConditionCheckAction{
+			TableName:           s.tableName,
+			Key:                 key,
+			ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
+		}, nil
+	}
+	if lease.ActiveAssignmentID != blocker.ID {
+		return true, &dynamoDBTransactWriteConditionCheckAction{
+			TableName:           s.tableName,
+			Key:                 key,
+			ConditionExpression: "active_assignment_id <> :blocked_assignment_id",
+			ExpressionAttributeValues: map[string]map[string]string{
+				":blocked_assignment_id": {"S": blocker.ID},
+			},
+		}, nil
+	}
+	if !lease.Expired(at) {
+		return false, nil, nil
+	}
+	return true, &dynamoDBTransactWriteConditionCheckAction{
+		TableName: s.tableName,
+		Key:       key,
+		ConditionExpression: "active_assignment_id = :blocked_assignment_id AND " +
+			"((attribute_exists(lease_expires_unix_ms) AND lease_expires_unix_ms <= :claim_started_unix_ms) OR " +
+			"(attribute_not_exists(lease_expires_unix_ms) AND lease_expires_at <= :claim_started_at))",
+		ExpressionAttributeValues: map[string]map[string]string{
+			":blocked_assignment_id": {"S": blocker.ID},
+			":claim_started_unix_ms": {"N": strconv.FormatInt(at.UTC().UnixMilli(), 10)},
+			":claim_started_at":      {"S": at.UTC().Format(time.RFC3339Nano)},
+		},
+	}, nil
 }
 
 func (s *DynamoDBAssignmentOperationStore) loadAgentQueue(ctx context.Context, agentID string, credentials AWSCredentials) ([]Assignment, error) {
@@ -1071,6 +1255,74 @@ func (s *DynamoDBAssignmentOperationStore) claimTransactionPayload(record Assign
 	return json.Marshal(payload)
 }
 
+func (s *DynamoDBAssignmentOperationStore) claimRepairTransactionPayload(record AssignmentOperationRecord, expectedLastEventSeq int64, repairs []dynamoDBAssignmentClaimRepair, activeCondition *dynamoDBTransactWriteConditionCheckAction) ([]byte, error) {
+	items := []dynamoDBTransactWriteItem{}
+	if activeCondition != nil {
+		items = append(items, dynamoDBTransactWriteItem{ConditionCheck: activeCondition})
+	}
+	for _, repair := range repairs {
+		projectionItem, err := assignmentProjectionDynamoDBItem(repair.Operation)
+		if err != nil {
+			return nil, err
+		}
+		operationItem, err := assignmentOperationDynamoDBItem(repair.Operation)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{
+			TableName:           s.tableName,
+			ConditionExpression: "assignment_state = :expected_state AND last_event_seq = :expected_last_event_seq",
+			ExpressionAttributeValues: map[string]map[string]string{
+				":expected_state":          {"S": string(repair.ExpectedState)},
+				":expected_last_event_seq": {"N": strconv.FormatInt(repair.ExpectedLastEventSeq, 10)},
+			},
+			Item: projectionItem,
+		}})
+		items = append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{
+			TableName:           s.tableName,
+			ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
+			Item:                operationItem,
+		}})
+	}
+	projectionItem, err := assignmentProjectionDynamoDBItem(record)
+	if err != nil {
+		return nil, err
+	}
+	operationItem, err := assignmentOperationDynamoDBItem(record)
+	if err != nil {
+		return nil, err
+	}
+	items = append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{
+		TableName:           s.tableName,
+		ConditionExpression: "assignment_state = :queued AND agent_id = :agent_id AND last_event_seq = :expected_last_event_seq",
+		ExpressionAttributeValues: map[string]map[string]string{
+			":queued":                  {"S": string(AssignmentQueued)},
+			":agent_id":                {"S": record.AgentID},
+			":expected_last_event_seq": {"N": strconv.FormatInt(expectedLastEventSeq, 10)},
+		},
+		Item: projectionItem,
+	}})
+	items = append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{
+		TableName:           s.tableName,
+		ConditionExpression: "(attribute_not_exists(pk) AND attribute_not_exists(sk)) OR lease_expires_unix_ms <= :claim_started_unix_ms",
+		ExpressionAttributeValues: map[string]map[string]string{
+			":claim_started_unix_ms": {"N": strconv.FormatInt(record.RecordedAt.UTC().UnixMilli(), 10)},
+		},
+		Item: s.agentActiveAssignmentDynamoDBItem(record),
+	}})
+	items = append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{
+		TableName:           s.tableName,
+		ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
+		Item:                operationItem,
+	}})
+	payload := struct {
+		TransactItems []dynamoDBTransactWriteItem `json:"TransactItems"`
+	}{
+		TransactItems: items,
+	}
+	return json.Marshal(payload)
+}
+
 type dynamoDBTransactWritePut struct {
 	Put struct {
 		TableName                 string                       `json:"TableName"`
@@ -1078,6 +1330,25 @@ type dynamoDBTransactWritePut struct {
 		ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues,omitempty"`
 		Item                      map[string]map[string]string `json:"Item"`
 	} `json:"Put"`
+}
+
+type dynamoDBTransactWriteItem struct {
+	Put            *dynamoDBTransactWritePutAction            `json:"Put,omitempty"`
+	ConditionCheck *dynamoDBTransactWriteConditionCheckAction `json:"ConditionCheck,omitempty"`
+}
+
+type dynamoDBTransactWritePutAction struct {
+	TableName                 string                       `json:"TableName"`
+	ConditionExpression       string                       `json:"ConditionExpression"`
+	ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues,omitempty"`
+	Item                      map[string]map[string]string `json:"Item"`
+}
+
+type dynamoDBTransactWriteConditionCheckAction struct {
+	TableName                 string                       `json:"TableName"`
+	Key                       map[string]map[string]string `json:"Key"`
+	ConditionExpression       string                       `json:"ConditionExpression"`
+	ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues,omitempty"`
 }
 
 func isDynamoDBTransactionContention(err error) bool {

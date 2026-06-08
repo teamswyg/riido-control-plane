@@ -159,8 +159,16 @@ func (s *Store) CancelAssignment(ctx context.Context, taskID string, req CancelA
 }
 
 func (s *Store) PollAgent(ctx context.Context, agentID string, req PollRequest) (PollResponse, error) {
+	return s.pollAgent(ctx, agentID, req, true)
+}
+
+// pollAgent runs a single point-in-time evaluation. count records whether this
+// evaluation should be tallied as a daemon poll request (true for a real
+// short-poll or a long-poll's first evaluation; false for the internal
+// re-evaluations a long-poll performs while held).
+func (s *Store) pollAgent(ctx context.Context, agentID string, req PollRequest, count bool) (PollResponse, error) {
 	reply := make(chan pollResult, 1)
-	if err := s.send(ctx, pollCmd{agentID: agentID, req: req, reply: reply}); err != nil {
+	if err := s.send(ctx, pollCmd{agentID: agentID, req: req, countRequest: count, reply: reply}); err != nil {
 		return PollResponse{}, err
 	}
 	select {
@@ -258,6 +266,89 @@ func (s *Store) SubscribeTask(ctx context.Context, taskID string) ([]TaskEvent, 
 	}
 }
 
+// WaitForAssignment is the long-poll claim. It returns immediately when work is
+// already available for the agent; otherwise it registers a per-agent waiter and
+// blocks until a queued assignment is signalled, a cross-instance re-poll tick
+// finds one (covers assignments queued on another control-plane instance), the
+// hold budget elapses (returns action=none, like a normal empty poll), or ctx is
+// cancelled (client disconnect / shutdown).
+//
+// The wait loop runs entirely on the caller's goroutine — never on the store
+// actor loop — so the actor keeps servicing assign/heartbeat/poll commands while
+// a request is held.
+func (s *Store) WaitForAssignment(ctx context.Context, agentID string, req PollRequest, hold, tick time.Duration) (PollResponse, error) {
+	// First evaluation is the one that counts as a daemon poll request and
+	// short-circuits when work is already queued.
+	resp, err := s.PollAgent(ctx, agentID, req)
+	if err != nil || resp.Action != PollNone {
+		return resp, err
+	}
+	if hold <= 0 {
+		return resp, nil
+	}
+
+	signal, release, err := s.registerWaiter(ctx, agentID)
+	if err != nil {
+		return PollResponse{}, err
+	}
+	defer release()
+
+	// Re-evaluate AFTER registering so an assignment queued between the first
+	// evaluation and registration is not missed: registration runs on the actor
+	// goroutine, so any signal fired after it is guaranteed to reach this waiter,
+	// and anything queued before it is caught here. This closes the lost-wakeup
+	// window. Internal re-evaluations pass count=false so they do not inflate the
+	// daemon-poll-request metric.
+	resp, err = s.pollAgent(ctx, agentID, req, false)
+	if err != nil || resp.Action != PollNone {
+		return resp, err
+	}
+
+	if tick <= 0 || tick > hold {
+		tick = hold
+	}
+	deadline := time.NewTimer(hold)
+	defer deadline.Stop()
+	ticker := time.NewTicker(tick)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-signal:
+			if resp, err = s.pollAgent(ctx, agentID, req, false); err != nil || resp.Action != PollNone {
+				return resp, err
+			}
+		case <-ticker.C:
+			if resp, err = s.pollAgent(ctx, agentID, req, false); err != nil || resp.Action != PollNone {
+				return resp, err
+			}
+		case <-deadline.C:
+			return PollResponse{SchemaVersion: SchemaVersion, Action: PollNone}, nil
+		case <-ctx.Done():
+			return PollResponse{}, ctx.Err()
+		}
+	}
+}
+
+func (s *Store) registerWaiter(ctx context.Context, agentID string) (<-chan struct{}, func(), error) {
+	reply := make(chan registerWaiterResult, 1)
+	if err := s.send(ctx, registerWaiterCmd{agentID: agentID, reply: reply}); err != nil {
+		return nil, nil, err
+	}
+	select {
+	case res := <-reply:
+		release := func() {
+			done := make(chan struct{}, 1)
+			if err := s.send(context.Background(), unregisterWaiterCmd{agentID: agentID, id: res.id, reply: done}); err != nil {
+				return
+			}
+			<-done
+		}
+		return res.ch, release, nil
+	case <-ctx.Done():
+		return nil, nil, ctx.Err()
+	}
+}
+
 func (s *Store) Metrics(ctx context.Context) (MetricsSnapshot, error) {
 	reply := make(chan metricsResult, 1)
 	if err := s.send(ctx, metricsCmd{reply: reply}); err != nil {
@@ -337,7 +428,11 @@ type cancelAssignmentResult struct {
 type pollCmd struct {
 	agentID string
 	req     PollRequest
-	reply   chan pollResult
+	// countRequest increments pollRequestsTotal for this evaluation. A daemon
+	// long-poll counts exactly once (its first evaluation) so the metric still
+	// means "daemon poll requests", not internal re-evaluations during a hold.
+	countRequest bool
+	reply        chan pollResult
 }
 
 type pollResult struct {
@@ -417,6 +512,25 @@ type unsubscribeCmd struct {
 	reply  chan struct{}
 }
 
+// registerWaiterCmd / unregisterWaiterCmd implement per-agent long-poll waiters,
+// mirroring the per-task subscriber pub/sub. A waiter is a buffered (cap 1)
+// signal channel woken when an assignment becomes claimable for the agent.
+type registerWaiterCmd struct {
+	agentID string
+	reply   chan registerWaiterResult
+}
+
+type registerWaiterResult struct {
+	ch chan struct{}
+	id int64
+}
+
+type unregisterWaiterCmd struct {
+	agentID string
+	id      int64
+	reply   chan struct{}
+}
+
 type metricsCmd struct {
 	reply chan metricsResult
 }
@@ -467,7 +581,7 @@ func (s *Store) loop(state storeState) {
 			msg.reply <- cancelAssignmentResult{assignment: assignment, err: err}
 		case pollCmd:
 			beforeEventSeq := state.nextEventSeq
-			response, operationAlreadySaved, mutatedAssignment, mutationOperationType, err := s.handlePoll(&state, msg.agentID, msg.req)
+			response, operationAlreadySaved, mutatedAssignment, mutationOperationType, err := s.handlePoll(&state, msg.agentID, msg.req, msg.countRequest)
 			if err == nil && mutatedAssignment != nil {
 				err = s.saveOperation(&state, mutationOperationType, *mutatedAssignment, eventsAfterSeq(&state, beforeEventSeq))
 				if err == nil {
@@ -476,7 +590,7 @@ func (s *Store) loop(state storeState) {
 			}
 			if err == nil && mutatedAssignment == nil && response.Action == PollStart {
 				if !operationAlreadySaved {
-					err = s.saveOperation(&state, AssignmentOperationPollStart, *response.Assignment, eventsAfterSeq(&state, beforeEventSeq))
+					err = s.saveAssignmentMutationOperations(&state, AssignmentOperationPollStart, *response.Assignment, eventsAfterSeq(&state, beforeEventSeq))
 				}
 				if err == nil {
 					err = s.saveSnapshot(&state)
@@ -532,6 +646,12 @@ func (s *Store) loop(state storeState) {
 			msg.reply <- subscribeResult{history: history, events: events, subID: subID, err: err}
 		case unsubscribeCmd:
 			s.handleUnsubscribe(&state, msg.taskID, msg.subID)
+			msg.reply <- struct{}{}
+		case registerWaiterCmd:
+			ch, id := s.handleRegisterWaiter(&state, msg.agentID)
+			msg.reply <- registerWaiterResult{ch: ch, id: id}
+		case unregisterWaiterCmd:
+			s.handleUnregisterWaiter(&state, msg.agentID, msg.id)
 			msg.reply <- struct{}{}
 		case metricsCmd:
 			msg.reply <- metricsResult{snapshot: s.handleMetrics(&state)}
@@ -687,6 +807,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	task.componentID = req.ComponentID
 	state.tasks[taskID] = task
 	s.appendEvent(state, taskID, assignment.ID, assignment.AgentID, EventAssignmentQueued, assignment.State, "", nil, now)
+	s.signalAgentWaiters(state, assignment.AgentID)
 	return assignment, nil
 }
 
@@ -739,6 +860,9 @@ func (s *Store) handleCancelAssignment(state *storeState, taskID string, req Can
 	assignment.UpdatedAt = now
 	state.assignments[assignment.ID] = assignment
 	s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, eventType, assignment.State, message, map[string]string{"source": "client_stop"}, now)
+	// Wake a daemon parked on a long-poll so it observes the cancel (PollCancel)
+	// within the hold instead of waiting for the budget to elapse.
+	s.signalAgentWaiters(state, assignment.AgentID)
 	return assignment, nil
 }
 
@@ -792,10 +916,11 @@ func (s *Store) cancelQueuedBlockerForAssignment(state *storeState, assignment *
 	assignment.UpdatedAt = now
 	state.assignments[assignment.ID] = *assignment
 	s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentQueued, assignment.State, "queued blocker cleared before daemon lease", nil, now)
+	s.signalAgentWaiters(state, assignment.AgentID)
 	return true
 }
 
-func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest) (PollResponse, bool, *Assignment, AssignmentOperationType, error) {
+func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, count bool) (PollResponse, bool, *Assignment, AssignmentOperationType, error) {
 	agentID = strings.TrimSpace(agentID)
 	if agentID == "" {
 		return PollResponse{}, false, nil, "", errors.New("agent_id is required")
@@ -803,7 +928,9 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest) (
 	if err := validateDaemonBinding(s.agentRegistry, agentID, req); err != nil {
 		return PollResponse{}, false, nil, "", err
 	}
-	state.pollRequestsTotal++
+	if count {
+		state.pollRequestsTotal++
+	}
 	response := PollResponse{SchemaVersion: SchemaVersion, Action: PollNone}
 	assignIDs := state.agentAssignments[agentID]
 	for _, id := range assignIDs {
@@ -881,10 +1008,17 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest) (
 	}
 	for _, id := range assignIDs {
 		assignment := state.assignments[id]
-		if assignment.State != AssignmentQueued || !assignmentBlockerCleared(state, assignment) {
+		if assignment.State != AssignmentQueued {
+			continue
+		}
+		if err := s.repairQueuedAssignmentBlockerForClaim(state, &assignment); err != nil {
+			return PollResponse{}, false, nil, "", err
+		}
+		if !assignmentBlockerCleared(state, assignment) {
 			continue
 		}
 		now := s.now()
+		assignment.BlockedByAssignmentID = ""
 		assignment.State = AssignmentLeased
 		assignment.LeaseToken = fmt.Sprintf("%s:%d", assignment.ID, now.UnixNano())
 		assignment.UpdatedAt = now
@@ -970,12 +1104,76 @@ func (s *Store) assignmentActiveLeaseExpired(state *storeState, assignment Assig
 }
 
 func (s *Store) failStaleAssignment(state *storeState, assignment Assignment) Assignment {
+	return s.failStaleAssignmentWithMessage(state, assignment, "active assignment lease expired", nil)
+}
+
+func (s *Store) failStaleAssignmentWithMessage(state *storeState, assignment Assignment, message string, metadata map[string]string) Assignment {
 	now := s.now()
 	assignment.State = AssignmentFailed
 	assignment.UpdatedAt = now
 	state.assignments[assignment.ID] = assignment
-	s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentFailed, assignment.State, "active assignment lease expired", map[string]string{"lease_token": assignment.LeaseToken}, now)
+	eventMetadata := map[string]string{"lease_token": assignment.LeaseToken}
+	for key, value := range metadata {
+		key = strings.TrimSpace(key)
+		value = strings.TrimSpace(value)
+		if key != "" && value != "" {
+			eventMetadata[key] = value
+		}
+	}
+	s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentFailed, assignment.State, message, eventMetadata, now)
 	return assignment
+}
+
+func (s *Store) repairQueuedAssignmentBlockerForClaim(state *storeState, assignment *Assignment) error {
+	if assignment == nil || assignment.State != AssignmentQueued || strings.TrimSpace(assignment.BlockedByAssignmentID) == "" {
+		return nil
+	}
+	blocker := state.assignments[assignment.BlockedByAssignmentID]
+	if blocker.ID == "" {
+		blockedByID := assignment.BlockedByAssignmentID
+		now := s.now()
+		assignment.BlockedByAssignmentID = ""
+		assignment.UpdatedAt = now
+		state.assignments[assignment.ID] = *assignment
+		s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentQueued, assignment.State, "missing blocker cleared before daemon lease", map[string]string{"blocked_by_assignment_id": blockedByID}, now)
+		s.signalAgentWaiters(state, assignment.AgentID)
+		return nil
+	}
+	if isTerminal(blocker.State) {
+		return nil
+	}
+	now := s.now()
+	if blocker.State == AssignmentQueued {
+		blocker.State = AssignmentCancelled
+		blocker.UpdatedAt = now
+		state.assignments[blocker.ID] = blocker
+		s.appendEvent(state, blocker.TaskID, blocker.ID, blocker.AgentID, EventAssignmentCancelled, blocker.State, "queued blocker was cancelled before queued assignment claim", map[string]string{"blocked_assignment_id": assignment.ID}, now)
+		assignment.BlockedByAssignmentID = ""
+		assignment.UpdatedAt = now
+		state.assignments[assignment.ID] = *assignment
+		s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentQueued, assignment.State, "queued blocker cleared before daemon lease", map[string]string{"blocked_by_assignment_id": blocker.ID}, now)
+		s.signalAgentWaiters(state, assignment.AgentID)
+		return nil
+	}
+	if !assignmentHoldsActiveLease(blocker.State) {
+		return nil
+	}
+	expired, err := s.assignmentActiveLeaseExpired(state, blocker, now)
+	if err != nil {
+		return err
+	}
+	if !expired {
+		return nil
+	}
+	stale := s.failStaleAssignmentWithMessage(state, blocker, "blocked queued assignment repaired after stale blocker lease expired", map[string]string{
+		"blocked_assignment_id": assignment.ID,
+	})
+	assignment.BlockedByAssignmentID = ""
+	assignment.UpdatedAt = stale.UpdatedAt
+	state.assignments[assignment.ID] = *assignment
+	s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentQueued, assignment.State, "stale blocker cleared before daemon lease", map[string]string{"blocked_by_assignment_id": stale.ID}, stale.UpdatedAt)
+	s.signalAgentWaiters(state, assignment.AgentID)
+	return nil
 }
 
 func (s *Store) handleHeartbeat(state *storeState, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, []heartbeatMutation, error) {
@@ -1177,6 +1375,45 @@ func (s *Store) handleUnsubscribe(state *storeState, taskID string, subID int64)
 	}
 }
 
+// handleRegisterWaiter / handleUnregisterWaiter / signalAgentWaiters run only on
+// the actor goroutine, so all access to state.agentWaiters is serialized and
+// signal sends never race a register/unregister. The signal channel is buffered
+// (cap 1) so a wake between two waiter selects is never lost; we never close it
+// (the waiting goroutine only receives), so a stray late signal cannot panic.
+func (s *Store) handleRegisterWaiter(state *storeState, agentID string) (chan struct{}, int64) {
+	state.nextAgentWaiterSeq++
+	id := state.nextAgentWaiterSeq
+	ch := make(chan struct{}, 1)
+	if state.agentWaiters[agentID] == nil {
+		state.agentWaiters[agentID] = map[int64]chan struct{}{}
+	}
+	state.agentWaiters[agentID][id] = ch
+	return ch, id
+}
+
+func (s *Store) handleUnregisterWaiter(state *storeState, agentID string, id int64) {
+	waiters := state.agentWaiters[agentID]
+	if waiters == nil {
+		return
+	}
+	delete(waiters, id)
+	if len(waiters) == 0 {
+		delete(state.agentWaiters, agentID)
+	}
+}
+
+// signalAgentWaiters wakes every long-poll parked on agentID. It is a one-shot,
+// non-blocking broadcast: a waiter whose buffer is already full is left as-is
+// (it will re-evaluate anyway). Called from the queued-producing transitions.
+func (s *Store) signalAgentWaiters(state *storeState, agentID string) {
+	for _, ch := range state.agentWaiters[agentID] {
+		select {
+		case ch <- struct{}{}:
+		default:
+		}
+	}
+}
+
 func (s *Store) handleMetrics(state *storeState) MetricsSnapshot {
 	assignmentsByState := map[AssignmentState]int{}
 	for _, assignment := range state.assignments {
@@ -1253,9 +1490,25 @@ func (s *Store) applyClaimedAssignment(state *storeState, claim AssignmentClaimR
 	if claim.Operation.Assignment != claim.Assignment {
 		return errors.New("claimed assignment operation assignment mismatch")
 	}
-	applyAssignmentToState(state, claim.Assignment)
-	for _, event := range claim.Operation.Events {
-		s.appendRecordedEvent(state, event)
+	operations := claim.Operations
+	if len(operations) == 0 {
+		operations = []AssignmentOperationRecord{claim.Operation}
+	}
+	sawPrimary := false
+	for _, operation := range operations {
+		if err := validateAssignmentOperationRecord(operation); err != nil {
+			return err
+		}
+		if operation.OperationID == claim.Operation.OperationID {
+			sawPrimary = true
+		}
+		applyAssignmentToState(state, operation.Assignment)
+		for _, event := range operation.Events {
+			s.appendRecordedEvent(state, event)
+		}
+	}
+	if !sawPrimary {
+		return errors.New("claimed assignment operations missing primary claim operation")
 	}
 	return nil
 }

@@ -383,6 +383,116 @@ func TestStoreActorReassigningSameBlockedQueuedAssignmentRepairsQueuedBlocker(t 
 	}
 }
 
+func TestStoreActorPollRepairsStaleBlockedQueuedAssignment(t *testing.T) {
+	ctx := context.Background()
+	now := time.Date(2026, 6, 9, 4, 0, 0, 0, time.UTC)
+	operations := &runtimeFakeActiveLeaseOperationStore{}
+	store := NewStoreWithConfig(StoreConfig{
+		Now:                 func() time.Time { return now },
+		ActiveLeaseDuration: time.Minute,
+		OperationStore:      operations,
+	})
+	defer store.Close()
+
+	first, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-old",
+		RuntimeProvider: "codex",
+		Prompt:          "first",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask first: %v", err)
+	}
+	firstPoll, err := store.PollAgent(ctx, "agent-old", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent first: %v", err)
+	}
+	if firstPoll.Action != PollStart || firstPoll.Assignment == nil || firstPoll.Assignment.ID != first.ID {
+		t.Fatalf("first poll = %+v", firstPoll)
+	}
+	operations.activeFound = true
+	operations.activeLease = AssignmentActiveLease{
+		AgentID:            "agent-old",
+		ActiveAssignmentID: first.ID,
+		LeaseToken:         firstPoll.Assignment.LeaseToken,
+		HeartbeatAt:        now,
+		LeaseExpiresAt:     now.Add(time.Minute),
+		LeaseExpiresUnixMS: now.Add(time.Minute).UnixMilli(),
+	}
+
+	now = now.Add(10 * time.Second)
+	second, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-new",
+		RuntimeProvider: "codex",
+		Prompt:          "second",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask second: %v", err)
+	}
+	if second.ReplacesAssignmentID != first.ID || second.BlockedByAssignmentID != first.ID {
+		t.Fatalf("second assignment = %+v", second)
+	}
+
+	beforeExpiry, err := store.PollAgent(ctx, "agent-new", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent new before expiry: %v", err)
+	}
+	if beforeExpiry.Action != PollNone {
+		t.Fatalf("new assignment should stay blocked before lease expiry: %+v", beforeExpiry)
+	}
+
+	now = now.Add(2 * time.Minute)
+	repairedPoll, err := store.PollAgent(ctx, "agent-new", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent new after stale blocker: %v", err)
+	}
+	if repairedPoll.Action != PollStart ||
+		repairedPoll.Assignment == nil ||
+		repairedPoll.Assignment.ID != second.ID ||
+		repairedPoll.Assignment.BlockedByAssignmentID != "" {
+		t.Fatalf("new assignment should start after stale blocker repair: %+v", repairedPoll)
+	}
+
+	oldPollAfterRepair, err := store.PollAgent(ctx, "agent-old", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent old after repair: %v", err)
+	}
+	if oldPollAfterRepair.Action != PollNone {
+		t.Fatalf("old assignment should not stay active after stale blocker repair: %+v", oldPollAfterRepair)
+	}
+
+	var sawRepairEvent bool
+	var sawFailedBlocker bool
+	var sawLeasedCurrent bool
+	for _, record := range operations.records {
+		if record.Assignment.ID == first.ID && record.Assignment.State == AssignmentFailed {
+			sawFailedBlocker = true
+		}
+		if record.Assignment.ID == second.ID &&
+			record.Assignment.State == AssignmentLeased &&
+			record.Assignment.BlockedByAssignmentID == "" {
+			sawLeasedCurrent = true
+		}
+		for _, event := range record.Events {
+			if event.AssignmentID == first.ID &&
+				event.Type == EventAssignmentFailed &&
+				strings.Contains(event.Message, "blocked queued assignment") {
+				sawRepairEvent = true
+			}
+		}
+	}
+	if !sawRepairEvent {
+		t.Fatalf("missing stale blocker repair event: %+v", operations.records)
+	}
+	if !sawFailedBlocker {
+		t.Fatalf("missing failed blocker operation: %+v", operations.records)
+	}
+	if !sawLeasedCurrent {
+		t.Fatalf("missing leased current operation with cleared blocker: %+v", operations.records)
+	}
+}
+
 func TestStoreActorAdditiveAssignmentKeepsExistingAgentActive(t *testing.T) {
 	ctx := context.Background()
 	now := time.Date(2026, 6, 4, 12, 0, 0, 0, time.UTC)
