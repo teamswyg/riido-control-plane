@@ -701,7 +701,8 @@ func TestHTTPAIAgentClientDevelopmentV2WorkspaceScopedCreateAndThreadStream(t *t
 		poll.Assignment.ComponentID != "task-v2" ||
 		poll.Assignment.AgentID != created.Agent.AgentID ||
 		poll.Assignment.RuntimeProvider != "cursor" ||
-		poll.Assignment.AgentInstruction != created.Agent.Instruction ||
+		!strings.Contains(poll.Assignment.AgentInstruction, created.Agent.Instruction) ||
+		!strings.Contains(poll.Assignment.AgentInstruction, "한국어") ||
 		!strings.Contains(poll.Assignment.Prompt, "branch_name: RIID-4800-server-task-context-http-client-assignment-prompt-wiring") {
 		if poll.Assignment != nil {
 			t.Fatalf("v2 assignment poll action=%s assignment=%+v", poll.Action, *poll.Assignment)
