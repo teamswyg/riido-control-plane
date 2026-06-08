@@ -8,11 +8,16 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const aiAgentTokenHeader = "X-Riido-AI-Agent-Token"
 const deviceIDHeader = "X-Riido-Device-ID"
 const deviceSecretHeader = "X-Riido-Device-Secret"
+
+// sseKeepaliveInterval is how often an idle SSE stream emits a comment line to
+// keep the connection alive through ALB/proxy idle timeouts.
+const sseKeepaliveInterval = 15 * time.Second
 
 type ServerConfig struct {
 	Authorizer        RequestAuthorizer
@@ -1262,6 +1267,8 @@ func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request
 	if r.URL.Query().Get("replay") == "1" {
 		return
 	}
+	keepalive := time.NewTicker(sseKeepaliveInterval)
+	defer keepalive.Stop()
 	for {
 		select {
 		case event, ok := <-live:
@@ -1269,6 +1276,15 @@ func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request
 				return
 			}
 			if err := writeAIAgentClientSSE(w, event); err != nil {
+				return
+			}
+			if flusher, ok := w.(http.Flusher); ok {
+				flusher.Flush()
+			}
+		case <-keepalive.C:
+			// Periodic SSE comment keeps the connection alive through idle gaps so
+			// ALB/proxy idle timeouts don't drop the stream (choppy reconnects).
+			if _, err := io.WriteString(w, ": keepalive\n\n"); err != nil {
 				return
 			}
 			if flusher, ok := w.(http.Flusher); ok {
@@ -2090,6 +2106,8 @@ func (s Server) streamTaskEvents(w http.ResponseWriter, r *http.Request, taskID 
 	if r.URL.Query().Get("replay") == "1" {
 		return
 	}
+	keepalive := time.NewTicker(sseKeepaliveInterval)
+	defer keepalive.Stop()
 	for {
 		select {
 		case event, ok := <-events:
@@ -2097,6 +2115,13 @@ func (s Server) streamTaskEvents(w http.ResponseWriter, r *http.Request, taskID 
 				return
 			}
 			if err := writeSSE(w, event); err != nil {
+				return
+			}
+			if flusher != nil {
+				flusher.Flush()
+			}
+		case <-keepalive.C:
+			if _, err := io.WriteString(w, ": keepalive\n\n"); err != nil {
 				return
 			}
 			if flusher != nil {
