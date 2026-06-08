@@ -2532,6 +2532,7 @@ func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal Authoriza
 			continue
 		}
 		device = projectDeviceRuntimeLiveness(device, now)
+		device.Runtimes = dedupeRuntimesByKindForDisplay(device.Runtimes)
 		if device.OwnerPrincipalID == principal.PrincipalID {
 			out = append(out, copyDevice(device))
 			continue
@@ -2565,6 +2566,7 @@ func (s *DevelopmentAIAgentClientStore) visibleDeviceRecordLocked(principal Auth
 		return DeviceRecord{}, false
 	}
 	device = projectDeviceRuntimeLiveness(device, time.Now().UTC())
+	device.Runtimes = dedupeRuntimesByKindForDisplay(device.Runtimes)
 	if device.OwnerPrincipalID == principal.PrincipalID {
 		return copyDevice(device), true
 	}
@@ -2842,6 +2844,50 @@ func copyRuntime(runtime RuntimeRecord) RuntimeRecord {
 func copyDeviceDaemon(daemon DeviceDaemonRecord) DeviceDaemonRecord {
 	daemon.SupportedActions = append([]DaemonControlAction(nil), daemon.SupportedActions...)
 	return daemon
+}
+
+// dedupeRuntimesByKindForDisplay collapses runtimes to one per kind for the
+// client-facing device list. A machine has one runtime per provider, but stale
+// rows from older daemon builds (legacy/changed runtime IDs of the same kind)
+// accumulate in the stored device and would otherwise render as duplicate
+// "Claude Code"/"Codex"/... entries. The freshest live runtime wins (online +
+// detected, then assigned-agent, then most recently detected). This is a
+// display projection only — stored data and the binding/poll path are untouched.
+func dedupeRuntimesByKindForDisplay(runtimes []RuntimeRecord) []RuntimeRecord {
+	if len(runtimes) <= 1 {
+		return runtimes
+	}
+	indexByKind := make(map[RuntimeKind]int, len(runtimes))
+	out := make([]RuntimeRecord, 0, len(runtimes))
+	for _, runtime := range runtimes {
+		if runtime.Kind == "" {
+			out = append(out, runtime)
+			continue
+		}
+		if idx, ok := indexByKind[runtime.Kind]; ok {
+			if preferRuntimeForDisplay(runtime, out[idx]) {
+				out[idx] = runtime
+			}
+			continue
+		}
+		indexByKind[runtime.Kind] = len(out)
+		out = append(out, runtime)
+	}
+	return out
+}
+
+func preferRuntimeForDisplay(candidate, current RuntimeRecord) bool {
+	candidateLive := candidate.Availability == RuntimeAvailabilityOnline &&
+		candidate.DetectionState == RuntimeDetectionStateDetected
+	currentLive := current.Availability == RuntimeAvailabilityOnline &&
+		current.DetectionState == RuntimeDetectionStateDetected
+	if candidateLive != currentLive {
+		return candidateLive
+	}
+	if candidate.HasAssignedAgent != current.HasAssignedAgent {
+		return candidate.HasAssignedAgent
+	}
+	return candidate.LastDetectedAt.After(current.LastDetectedAt)
 }
 
 func projectDeviceRuntimeLiveness(device DeviceRecord, now time.Time) DeviceRecord {
