@@ -733,7 +733,7 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, ""); err != nil {
+	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
 		writeError(w, http.StatusBadGateway, err.Error())
 		return
 	}
@@ -775,7 +775,7 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, ""); err != nil {
+	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
 		writeError(w, http.StatusBadGateway, err.Error())
 		return
 	}
