@@ -493,6 +493,16 @@ func doDynamoDBJSON(ctx context.Context, request dynamoDBRequest) ([]byte, error
 	})
 }
 
+// maxAWSJSONResponseBytes bounds how much of an AWS JSON (DynamoDB) HTTP
+// response body we buffer. DynamoDB caps a single Query/Scan response at 1 MB
+// of item data, which—once wrapped in attribute-type JSON—serializes to well
+// over 1 MiB (observed ~1.5 MiB for a full assignment-journal page). The
+// previous 1 MiB cap silently truncated such pages via io.LimitReader,
+// yielding "unexpected end of JSON input" on decode and crashing assignment
+// store rehydrate at startup. 16 MiB leaves ample headroom above any single
+// DynamoDB response while keeping per-call buffering bounded.
+const maxAWSJSONResponseBytes = 16 << 20
+
 func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, request.endpoint, bytes.NewReader(request.payload))
 	if err != nil {
@@ -509,9 +519,14 @@ func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	body, readErr := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	// Read one byte past the cap so a response that would overflow is detected
+	// and reported, rather than silently truncated into invalid JSON.
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxAWSJSONResponseBytes+1))
 	if readErr != nil {
 		return nil, readErr
+	}
+	if int64(len(body)) > maxAWSJSONResponseBytes {
+		return nil, fmt.Errorf("aws %s response exceeds %d bytes (possible truncation)", request.service, maxAWSJSONResponseBytes)
 	}
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, awsJSONAPIError{service: request.service, statusCode: resp.StatusCode, body: body}

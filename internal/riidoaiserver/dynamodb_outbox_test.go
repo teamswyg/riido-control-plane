@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -220,5 +221,56 @@ func assertDynamoDBNumber(t *testing.T, item map[string]map[string]string, key, 
 	t.Helper()
 	if item[key]["N"] != want {
 		t.Fatalf("%s.N = %q", key, item[key]["N"])
+	}
+}
+
+func newDoAWSJSONTestRequest(server *httptest.Server) awsJSONRequest {
+	return awsJSONRequest{
+		endpoint:     server.URL,
+		endpointHost: strings.TrimPrefix(server.URL, "http://"),
+		region:       "ap-northeast-2",
+		service:      dynamoDBService,
+		target:       dynamoDBQueryTarget,
+		contentType:  dynamoDBJSONContentType,
+		payload:      []byte(`{}`),
+		credentials:  AWSCredentials{AccessKeyID: "AKIDEXAMPLE", SecretAccessKey: "SECRET"},
+		httpClient:   server.Client(),
+		now:          func() time.Time { return time.Unix(0, 0).UTC() },
+	}
+}
+
+// Regression: the assignment journal grew to query pages whose JSON exceeds
+// 1 MiB. The previous io.LimitReader(resp.Body, 1<<20) silently truncated such
+// responses, producing "unexpected end of JSON input" on decode and crashing
+// assignment-store rehydrate at startup. doAWSJSON must read the full body.
+func TestDoAWSJSONReadsResponseLargerThanLegacyOneMiBCap(t *testing.T) {
+	const bodySize = (1 << 20) + (512 << 10) // 1.5 MiB, above the old 1 MiB cap
+	payload := bytes.Repeat([]byte("a"), bodySize)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", dynamoDBJSONContentType)
+		_, _ = w.Write(payload)
+	}))
+	defer server.Close()
+
+	body, err := doAWSJSON(context.Background(), newDoAWSJSONTestRequest(server))
+	if err != nil {
+		t.Fatalf("doAWSJSON: %v", err)
+	}
+	if len(body) != bodySize {
+		t.Fatalf("response truncated: got %d bytes, want %d", len(body), bodySize)
+	}
+}
+
+func TestDoAWSJSONRejectsResponseAboveMaxBytes(t *testing.T) {
+	payload := bytes.Repeat([]byte("a"), maxAWSJSONResponseBytes+1024)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write(payload)
+	}))
+	defer server.Close()
+
+	if _, err := doAWSJSON(context.Background(), newDoAWSJSONTestRequest(server)); err == nil {
+		t.Fatal("expected error for oversized response, got nil")
+	} else if !strings.Contains(err.Error(), "exceeds") {
+		t.Fatalf("expected truncation/exceeds error, got: %v", err)
 	}
 }
