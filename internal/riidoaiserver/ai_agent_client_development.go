@@ -89,6 +89,7 @@ type DevelopmentAIAgentClientStore struct {
 	fixtures                []AgentOnboardingFixture
 	taskThreads             map[string][]AIAgentTaskThreadRecord
 	events                  []ClientStreamEvent
+	nextClientEventSeq      int64
 	subscribers             map[int]aiAgentClientSubscriber
 	nextSubscriberID        int
 }
@@ -2434,13 +2435,23 @@ func (s *DevelopmentAIAgentClientStore) appendClientEventLocked(eventType string
 }
 
 func (s *DevelopmentAIAgentClientStore) nextClientEventSeqLocked() int64 {
+	// Persisted counter (next_client_event_seq) kept WITH the events (not core),
+	// so the seq stays monotonic across reloads even after the bounded event list
+	// is pruned, and event appends never have to touch core. The max(events)
+	// guard keeps it correct when the persisted counter is missing/stale (legacy
+	// snapshot or a fresh store).
 	var maxSeq int64
 	for _, event := range s.events {
 		if event.Seq > maxSeq {
 			maxSeq = event.Seq
 		}
 	}
-	return maxSeq + 1
+	if s.nextClientEventSeq <= maxSeq {
+		s.nextClientEventSeq = maxSeq + 1
+	}
+	seq := s.nextClientEventSeq
+	s.nextClientEventSeq++
+	return seq
 }
 
 func (s *DevelopmentAIAgentClientStore) pruneClientReplayEventsLocked() {

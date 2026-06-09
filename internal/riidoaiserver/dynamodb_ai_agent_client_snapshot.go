@@ -44,9 +44,24 @@ type dynamoDBAIAgentClientSnapshotCommand struct {
 	ctx      context.Context
 	load     bool
 	save     *AIAgentClientSnapshot
+	raw      *dynamoDBRawOp
 	close    bool
 	loadDone chan dynamoDBAIAgentClientSnapshotLoadResult
+	rawDone  chan dynamoDBRawResult
 	errDone  chan error
+}
+
+// dynamoDBRawOp is a generic single DynamoDB call (GetItem/PutItem/Query/
+// TransactWriteItems) routed through the same serial loop() goroutine, so the
+// per-collection split methods (core/events/threads) reuse one I/O path.
+type dynamoDBRawOp struct {
+	target  string
+	payload []byte
+}
+
+type dynamoDBRawResult struct {
+	body []byte
+	err  error
 }
 
 type dynamoDBAIAgentClientSnapshotLoadResult struct {
@@ -165,6 +180,20 @@ func (s *DynamoDBAIAgentClientSnapshot) loop() {
 			} else {
 				cmd.errDone <- err
 			}
+			continue
+		}
+		if cmd.raw != nil {
+			body, err := doDynamoDBJSON(cmd.ctx, dynamoDBRequest{
+				endpoint:     s.endpoint,
+				endpointHost: s.endpointHost,
+				region:       s.region,
+				target:       cmd.raw.target,
+				payload:      cmd.raw.payload,
+				credentials:  credentials,
+				httpClient:   s.httpClient,
+				now:          s.now,
+			})
+			cmd.rawDone <- dynamoDBRawResult{body: body, err: err}
 			continue
 		}
 		if cmd.load {

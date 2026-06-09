@@ -30,6 +30,7 @@ type AIAgentClientSnapshot struct {
 	Events                  []AIAgentClientEventSnapshot            `json:"events"`
 	NextDeviceCredentialSeq int                                     `json:"next_device_credential_seq"`
 	NextDaemonCommand       int                                     `json:"next_daemon_command"`
+	NextClientEventSeq      int64                                   `json:"next_client_event_seq,omitempty"`
 }
 
 type AIAgentClientDeviceCredentialSnapshot struct {
@@ -483,6 +484,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		Events:                  events,
 		NextDeviceCredentialSeq: s.nextDeviceCredentialSeq,
 		NextDaemonCommand:       s.nextDaemonCommand,
+		NextClientEventSeq:      s.nextClientEventSeq,
 	}, nil
 }
 
@@ -567,6 +569,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
 	s.events = events
+	s.nextClientEventSeq = snapshot.NextClientEventSeq
 	if preserveSubscribers {
 		s.subscribers = subscribers
 		s.nextSubscriberID = nextSubscriberID
