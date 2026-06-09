@@ -64,15 +64,39 @@ func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAg
 	if snapshotStore == nil {
 		return nil, errors.New("riidoaiserver: ai agent client snapshot store is required")
 	}
+	store := &PersistentAIAgentClientStore{DevelopmentAIAgentClientStore: base, snapshotStore: snapshotStore}
+	if split, ok := store.splitStore(); ok {
+		// Split layout: load the three items if already migrated; otherwise seed
+		// in-memory from the legacy combined item (or the store's seeded
+		// defaults) and write the split items atomically (one-shot migration).
+		// The legacy `#snapshot` item is left in place for rollback safety.
+		migrated, err := store.reloadAllSplit(ctx, split)
+		if err != nil {
+			return nil, err
+		}
+		if migrated {
+			return store, nil
+		}
+		if snapshot, ok, err := snapshotStore.LoadAIAgentClientSnapshot(ctx); err != nil {
+			return nil, err
+		} else if ok {
+			if err := base.restoreSnapshot(snapshot); err != nil {
+				return nil, err
+			}
+		}
+		if err := store.saveAllSplit(ctx, split); err != nil {
+			return nil, err
+		}
+		return store, nil
+	}
 	if snapshot, ok, err := snapshotStore.LoadAIAgentClientSnapshot(ctx); err != nil {
 		return nil, err
 	} else if ok {
 		if err := base.restoreSnapshot(snapshot); err != nil {
 			return nil, err
 		}
-		return &PersistentAIAgentClientStore{DevelopmentAIAgentClientStore: base, snapshotStore: snapshotStore}, nil
+		return store, nil
 	}
-	store := &PersistentAIAgentClientStore{DevelopmentAIAgentClientStore: base, snapshotStore: snapshotStore}
 	if err := store.saveSnapshot(ctx); err != nil {
 		return nil, err
 	}
@@ -165,15 +189,42 @@ func (s *PersistentAIAgentClientStore) ControlAIAgentDeviceDaemon(ctx context.Co
 	return response, s.saveSnapshot(ctx)
 }
 
+// SyncAIAgentDaemonRuntimeSnapshot is the daemon hot path (called on every
+// heartbeat). With a split store it reads/writes ONLY the small core item, never
+// the heavy events/threads items — the fix for the daemon registration timeout.
+// A plain heartbeat persists just core; only when the dev op appends a client
+// event (detected via the event-seq delta — rare, on real state change) does it
+// also persist events (core+events atomically).
 func (s *PersistentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error) {
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, err
+	split, ok := s.splitStore()
+	if !ok {
+		// Legacy combined store: original full reload/save path.
+		if err := s.reloadSnapshot(ctx); err != nil {
+			return DeviceRuntimeSnapshotSyncResponse{}, err
+		}
+		response, err := s.DevelopmentAIAgentClientStore.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
+		if err != nil {
+			return response, err
+		}
+		return response, s.saveSnapshot(ctx)
 	}
+	if migrated, err := s.reloadCoreSplit(ctx, split); err != nil {
+		return DeviceRuntimeSnapshotSyncResponse{}, err
+	} else if !migrated {
+		// Not migrated yet (boot race): fall back to a full reload once.
+		if _, err := s.reloadAllSplit(ctx, split); err != nil {
+			return DeviceRuntimeSnapshotSyncResponse{}, err
+		}
+	}
+	before := s.DevelopmentAIAgentClientStore.CurrentClientEventSeq()
 	response, err := s.DevelopmentAIAgentClientStore.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
 	if err != nil {
 		return response, err
 	}
-	return response, s.saveSnapshot(ctx)
+	if s.DevelopmentAIAgentClientStore.CurrentClientEventSeq() != before {
+		return response, s.saveCoreEventsSplit(ctx, split)
+	}
+	return response, s.saveCoreSplit(ctx, split)
 }
 
 func (s *PersistentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx context.Context, principal AuthorizationResult, deviceID string) (AgentRuntimeBindingListResponse, error) {
@@ -400,6 +451,17 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
 	}
+	if split, ok := s.splitStore(); ok {
+		migrated, err := s.reloadAllSplit(ctx, split)
+		if err != nil {
+			return err
+		}
+		if migrated {
+			return nil
+		}
+		// Not migrated yet (fresh store / Open hasn't migrated): fall through to
+		// the legacy combined item so a racing reload still sees current state.
+	}
 	snapshot, ok, err := s.snapshotStore.LoadAIAgentClientSnapshot(ctx)
 	if err != nil || !ok {
 		return err
@@ -410,6 +472,9 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
+	}
+	if split, ok := s.splitStore(); ok {
+		return s.saveAllSplit(ctx, split)
 	}
 	snapshot, err := s.DevelopmentAIAgentClientStore.snapshot(time.Now().UTC())
 	if err != nil {

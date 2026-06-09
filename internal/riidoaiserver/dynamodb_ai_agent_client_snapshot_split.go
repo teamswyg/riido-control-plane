@@ -68,6 +68,9 @@ type AIAgentClientSplitSnapshotStore interface {
 	// WriteSplitAtomic writes core+events+threads in one transaction (migration
 	// and any cross-collection mutation). Atomic: no half-written split.
 	WriteSplitAtomic(ctx context.Context, core AIAgentClientCoreSnapshot, events AIAgentClientEventsSnapshot, threads AIAgentClientThreadsSnapshot) error
+	// WriteCoreEvents writes core+events atomically (the Sync-on-change path:
+	// device update + appended event, without rewriting the threads item).
+	WriteCoreEvents(ctx context.Context, core AIAgentClientCoreSnapshot, events AIAgentClientEventsSnapshot) error
 }
 
 // splitFromCombined projects a combined snapshot into the three sub-snapshots.
@@ -277,6 +280,39 @@ func (s *DynamoDBAIAgentClientSnapshot) SaveThreads(ctx context.Context, th AIAg
 	return s.putGzipItem(ctx, dynamoDBAIAgentClientThreadsPK, b)
 }
 
+type splitGzipEntry struct {
+	pk        string
+	jsonBytes []byte
+}
+
+func (s *DynamoDBAIAgentClientSnapshot) transactPutGzip(ctx context.Context, entries []splitGzipEntry) error {
+	type txPut struct {
+		Put struct {
+			TableName string                       `json:"TableName"`
+			Item      map[string]map[string]string `json:"Item"`
+		} `json:"Put"`
+	}
+	items := make([]txPut, len(entries))
+	for i, e := range entries {
+		attrs, err := s.gzipItemAttrs(e.pk, e.jsonBytes)
+		if err != nil {
+			return err
+		}
+		items[i].Put.TableName = s.tableName
+		items[i].Put.Item = attrs
+	}
+	payload, err := json.Marshal(struct {
+		TransactItems []txPut `json:"TransactItems"`
+	}{TransactItems: items})
+	if err != nil {
+		return err
+	}
+	if _, err := s.do(ctx, dynamoDBTransactWriteTarget, payload); err != nil {
+		return fmt.Errorf("dynamodb transact-write (%d items): %w", len(entries), err)
+	}
+	return nil
+}
+
 func (s *DynamoDBAIAgentClientSnapshot) WriteSplitAtomic(ctx context.Context, core AIAgentClientCoreSnapshot, ev AIAgentClientEventsSnapshot, th AIAgentClientThreadsSnapshot) error {
 	core.SchemaVersion = AIAgentClientPersistenceSchemaVersion
 	ev.SchemaVersion = AIAgentClientPersistenceSchemaVersion
@@ -293,37 +329,26 @@ func (s *DynamoDBAIAgentClientSnapshot) WriteSplitAtomic(ctx context.Context, co
 	if err != nil {
 		return err
 	}
-	coreAttrs, err := s.gzipItemAttrs(dynamoDBAIAgentClientCorePK, coreJSON)
+	return s.transactPutGzip(ctx, []splitGzipEntry{
+		{pk: dynamoDBAIAgentClientCorePK, jsonBytes: coreJSON},
+		{pk: dynamoDBAIAgentClientEventsPK, jsonBytes: evJSON},
+		{pk: dynamoDBAIAgentClientThreadsPK, jsonBytes: thJSON},
+	})
+}
+
+func (s *DynamoDBAIAgentClientSnapshot) WriteCoreEvents(ctx context.Context, core AIAgentClientCoreSnapshot, ev AIAgentClientEventsSnapshot) error {
+	core.SchemaVersion = AIAgentClientPersistenceSchemaVersion
+	ev.SchemaVersion = AIAgentClientPersistenceSchemaVersion
+	coreJSON, err := json.Marshal(core)
 	if err != nil {
 		return err
 	}
-	evAttrs, err := s.gzipItemAttrs(dynamoDBAIAgentClientEventsPK, evJSON)
+	evJSON, err := json.Marshal(ev)
 	if err != nil {
 		return err
 	}
-	thAttrs, err := s.gzipItemAttrs(dynamoDBAIAgentClientThreadsPK, thJSON)
-	if err != nil {
-		return err
-	}
-	type txPut struct {
-		Put struct {
-			TableName string                       `json:"TableName"`
-			Item      map[string]map[string]string `json:"Item"`
-		} `json:"Put"`
-	}
-	items := make([]txPut, 3)
-	for i, attrs := range []map[string]map[string]string{coreAttrs, evAttrs, thAttrs} {
-		items[i].Put.TableName = s.tableName
-		items[i].Put.Item = attrs
-	}
-	payload, err := json.Marshal(struct {
-		TransactItems []txPut `json:"TransactItems"`
-	}{TransactItems: items})
-	if err != nil {
-		return err
-	}
-	if _, err := s.do(ctx, dynamoDBTransactWriteTarget, payload); err != nil {
-		return fmt.Errorf("dynamodb transact-write split: %w", err)
-	}
-	return nil
+	return s.transactPutGzip(ctx, []splitGzipEntry{
+		{pk: dynamoDBAIAgentClientCorePK, jsonBytes: coreJSON},
+		{pk: dynamoDBAIAgentClientEventsPK, jsonBytes: evJSON},
+	})
 }
