@@ -83,7 +83,7 @@ func (s *memorySplitAIAgentClientSnapshotStore) resetCounts() {
 	s.coreSaves, s.eventsSaves, s.threadsSaves = 0, 0, 0
 }
 
-func TestSplitStoreMigratesLegacyAndRoundTrips(t *testing.T) {
+func TestAIAgentClientSplitStoreMigratesLegacyAndRoundTrips(t *testing.T) {
 	ctx := context.Background()
 	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-dev"}
 
@@ -138,7 +138,7 @@ func TestSplitStoreMigratesLegacyAndRoundTrips(t *testing.T) {
 	}
 }
 
-func TestSplitSyncWritesCoreOnlyOnHeartbeat(t *testing.T) {
+func TestAIAgentClientSplitSyncWritesCoreOnlyOnHeartbeat(t *testing.T) {
 	ctx := context.Background()
 	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-dev"}
 	split := &memorySplitAIAgentClientSnapshotStore{}
