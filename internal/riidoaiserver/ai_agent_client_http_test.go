@@ -2236,6 +2236,7 @@ func TestHTTPTaskThreadListRepairsStaleReadModelFromAssignmentProjection(t *test
 		threads.Threads[0].AssignmentID != assigned.AssignmentID ||
 		threads.Threads[0].AssignmentState != AgentAssignmentStateFailed ||
 		threads.Threads[0].CommentKind != AgentTaskCommentTaskFailed ||
+		!strings.Contains(threads.Threads[0].Message, "provider process exited before client read-model update") ||
 		threads.Threads[0].CompletedAt.IsZero() {
 		t.Fatalf("threads after projection repair = %+v", threads)
 	}
@@ -2500,6 +2501,48 @@ func TestDevelopmentAIAgentClientStoreSuppressesDuplicateAssignmentStatusFanout(
 	}
 	if len(threads.Threads) != 1 || threads.Threads[0].Message != "작업 완료" {
 		t.Fatalf("completed thread message = %+v", threads.Threads)
+	}
+}
+
+func TestDevelopmentAIAgentClientStoreRecordsProviderSessionPinnedWithoutStatusFanout(t *testing.T) {
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1"}
+	assigned, err := store.AssignAIAgentTask(context.Background(), principal, "task-session-pin", AssignAIAgentTaskRequest{
+		AgentID: "agent-owned-codex",
+	})
+	if err != nil {
+		t.Fatalf("AssignAIAgentTask: %v", err)
+	}
+	baseCount := countWorkStatusChangedEventsForTask(t, store, principal, "task-session-pin")
+	if err := store.RecordAIAgentAssignmentEvent(context.Background(), assigned.AgentID, AgentEventRequest{
+		RuntimeProvider:   "codex",
+		ModelID:           "codex-default",
+		ProviderSessionID: "th-1",
+	}, TaskEvent{
+		TaskID:       "task-session-pin",
+		AssignmentID: "asn-session-pin",
+		AgentID:      assigned.AgentID,
+		Type:         EventProviderSessionPinned,
+		State:        AssignmentRunning,
+		Metadata:     map[string]string{assignmentMetadataProviderSessionID: "th-1"},
+		At:           time.Now().UTC(),
+	}); err != nil {
+		t.Fatalf("RecordAIAgentAssignmentEvent: %v", err)
+	}
+	afterPin := countWorkStatusChangedEventsForTask(t, store, principal, "task-session-pin")
+	if afterPin != baseCount {
+		t.Fatalf("session pin fanout count = %d, want unchanged %d", afterPin, baseCount)
+	}
+	threads, err := store.ListAIAgentTaskThreads(context.Background(), principal, "task-session-pin")
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	if len(threads.Threads) != 1 {
+		t.Fatalf("threads = %+v", threads.Threads)
+	}
+	thread := threads.Threads[0]
+	if thread.AssignmentID != "asn-session-pin" || thread.ProviderSessionID != "th-1" || thread.RuntimeProvider != "codex" || thread.ModelID != "codex-default" {
+		t.Fatalf("thread runtime context = %+v", thread)
 	}
 }
 

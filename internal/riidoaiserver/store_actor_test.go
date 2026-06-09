@@ -105,6 +105,47 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 	}
 }
 
+func TestStoreActorPersistsProviderSessionID(t *testing.T) {
+	ctx := context.Background()
+	now := time.Date(2026, 6, 9, 11, 0, 0, 0, time.UTC)
+	store := NewStoreWithClock(func() time.Time { return now })
+	defer store.Close()
+
+	assignment, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		ModelID:         "codex-default",
+		Prompt:          "ship it",
+		ResumeSessionID: "th-prev",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask: %v", err)
+	}
+	if assignment.ResumeSessionID != "th-prev" {
+		t.Fatalf("resume_session_id = %q, want %q", assignment.ResumeSessionID, "th-prev")
+	}
+
+	now = now.Add(time.Second)
+	pinned, err := store.RecordAgentEvent(ctx, "agent-1", AgentEventRequest{
+		AssignmentID:      assignment.ID,
+		TaskID:            assignment.TaskID,
+		DaemonID:          "daemon-1",
+		RuntimeID:         "runtime-1",
+		EventType:         EventProviderSessionPinned,
+		ProviderSessionID: "th-current",
+	})
+	if err != nil {
+		t.Fatalf("RecordAgentEvent session pinned: %v", err)
+	}
+	if pinned.Assignment == nil || pinned.Assignment.ProviderSessionID != "th-current" {
+		t.Fatalf("provider session assignment = %+v", pinned.Assignment)
+	}
+	if got := pinned.Event.Metadata[assignmentMetadataProviderSessionID]; got != "th-current" {
+		t.Fatalf("provider session event metadata = %+v", pinned.Event.Metadata)
+	}
+}
+
 func TestStoreActorRejectsLongAgentInstruction(t *testing.T) {
 	ctx := context.Background()
 	store := NewStore()

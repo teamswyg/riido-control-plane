@@ -95,6 +95,7 @@ type dynamoDBAssignmentProjectionResult struct {
 type assignmentProjectionRecord struct {
 	Assignment   Assignment
 	LastEventSeq int64
+	LastEvent    TaskEvent
 }
 
 func NewDynamoDBAssignmentOperationStore(config DynamoDBAssignmentOperationStoreConfig) (*DynamoDBAssignmentOperationStore, error) {
@@ -1123,6 +1124,19 @@ func assignmentProjectionDynamoDBItem(record AssignmentOperationRecord) (map[str
 		"last_event_seq":     {"N": strconv.FormatInt(lastEventSeq, 10)},
 		"assignment_json":    {"S": string(assignmentJSON)},
 	}
+	if lastEvent, ok := assignmentOperationLastEvent(record); ok {
+		lastEventJSON, err := json.Marshal(lastEvent)
+		if err != nil {
+			return nil, err
+		}
+		item["last_event_json"] = map[string]string{"S": string(lastEventJSON)}
+		if strings.TrimSpace(lastEvent.Type) != "" {
+			item["last_event_type"] = map[string]string{"S": lastEvent.Type}
+		}
+		if strings.TrimSpace(lastEvent.Message) != "" {
+			item["last_event_message"] = map[string]string{"S": lastEvent.Message}
+		}
+	}
 	if record.Assignment.LeaseToken != "" {
 		item["lease_token"] = map[string]string{"S": record.Assignment.LeaseToken}
 	}
@@ -1462,7 +1476,13 @@ func assignmentProjectionFromDynamoDBItem(item map[string]map[string]string) (as
 	if err != nil {
 		return assignmentProjectionRecord{}, fmt.Errorf("decode assignment projection last_event_seq: %w", err)
 	}
-	return assignmentProjectionRecord{Assignment: assignment, LastEventSeq: lastEventSeq}, nil
+	var lastEvent TaskEvent
+	if raw := strings.TrimSpace(dynamoDBStringValue(item, "last_event_json")); raw != "" {
+		if err := json.Unmarshal([]byte(raw), &lastEvent); err != nil {
+			return assignmentProjectionRecord{}, fmt.Errorf("decode assignment projection last_event_json: %w", err)
+		}
+	}
+	return assignmentProjectionRecord{Assignment: assignment, LastEventSeq: lastEventSeq, LastEvent: lastEvent}, nil
 }
 
 func agentActiveAssignmentFromDynamoDBItem(item map[string]map[string]string) (AssignmentActiveLease, error) {

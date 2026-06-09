@@ -712,6 +712,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	req.ModelID = strings.TrimSpace(req.ModelID)
 	req.Prompt = strings.TrimSpace(req.Prompt)
 	req.AgentInstruction = strings.TrimSpace(req.AgentInstruction)
+	req.ResumeSessionID = strings.TrimSpace(req.ResumeSessionID)
 	if taskID == "" {
 		return Assignment{}, errors.New("task_id is required")
 	}
@@ -795,6 +796,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		Prompt:                   req.Prompt,
 		AgentInstruction:         req.AgentInstruction,
 		AllowExperimentalRuntime: req.AllowExperimentalRuntime,
+		ResumeSessionID:          req.ResumeSessionID,
 		State:                    AssignmentQueued,
 		ReplacesAssignmentID:     replacesID,
 		BlockedByAssignmentID:    blockedByID,
@@ -1291,6 +1293,13 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 		assignment.UpdatedAt = now
 		state.assignments[assignment.ID] = assignment
 	}
+	providerSessionID := providerSessionIDFromAgentEventRequest(req)
+	if providerSessionID != "" {
+		assignment.ProviderSessionID = providerSessionID
+		assignment.UpdatedAt = now
+		state.assignments[assignment.ID] = assignment
+		req.Metadata = metadataWithProviderSessionID(req.Metadata, providerSessionID)
+	}
 	eventType := strings.TrimSpace(req.EventType)
 	if eventType == "" {
 		if req.State != "" {
@@ -1549,12 +1558,14 @@ func handleLoadAssignmentProjection(state *storeState, assignmentID string) (Ass
 		return AssignmentProjection{}, false, nil
 	}
 	lastEventSeq := int64(0)
+	var lastEvent TaskEvent
 	for _, event := range state.events[assignment.TaskID] {
 		if event.AssignmentID == assignmentID && event.Seq > lastEventSeq {
 			lastEventSeq = event.Seq
+			lastEvent = event
 		}
 	}
-	return AssignmentProjection{Assignment: assignment, LastEventSeq: lastEventSeq}, true, nil
+	return AssignmentProjection{Assignment: assignment, LastEventSeq: lastEventSeq, LastEvent: lastEvent}, true, nil
 }
 
 func assignmentIDInAgentQueue(ids []string, id string) bool {

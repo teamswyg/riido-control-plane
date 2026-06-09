@@ -150,6 +150,14 @@ Client-facing task-thread rows, action responses, work-status SSE events, and
 thread-progress SSE events carry the durable `assignment_id` when the handler
 has accepted a real assignment. The assignment operation projection is the
 truth source; the AI Agent client task-thread model is a derived read model.
+Provider-native session continuity follows the same direction: daemon
+`provider_session_pinned` events update `Assignment.provider_session_id`, the
+client task-thread read model copies that id with its runtime provider/model
+context, and a follow-up thread message may stamp
+`AssignRequest.resume_session_id` only when it targets the same task thread,
+agent, runtime provider, and compatible model. A different task thread, agent,
+provider, or incompatible model must start with an empty `resume_session_id`
+instead of trying to clear or reuse the previous provider context.
 Before serving generated task-thread collection, thread-stream subscription,
 workspace assigned-profile, or new generated assignment requests, the adapter
 may reconcile visible active task threads against the durable assignment

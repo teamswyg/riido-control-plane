@@ -919,7 +919,26 @@ func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, p
 		return AssignRequest{}, err
 	}
 	assignmentReq.Prompt = appendAIAgentTaskThreadMessagePrompt(assignmentReq.Prompt, selectedThread, req)
+	assignmentReq = assignRequestWithThreadResumeSession(assignmentReq, selectedThread)
 	return assignmentReq, nil
+}
+
+func assignRequestWithThreadResumeSession(req AssignRequest, thread AIAgentTaskThreadRecord) AssignRequest {
+	providerSessionID := strings.TrimSpace(thread.ProviderSessionID)
+	if providerSessionID == "" {
+		return req
+	}
+	if strings.TrimSpace(thread.AgentID) == "" || strings.TrimSpace(thread.AgentID) != strings.TrimSpace(req.AgentID) {
+		return req
+	}
+	if strings.TrimSpace(thread.RuntimeProvider) == "" || strings.TrimSpace(thread.RuntimeProvider) != strings.TrimSpace(req.RuntimeProvider) {
+		return req
+	}
+	if strings.TrimSpace(thread.ModelID) != strings.TrimSpace(req.ModelID) {
+		return req
+	}
+	req.ResumeSessionID = providerSessionID
+	return req
 }
 
 func appendAIAgentTaskThreadMessagePrompt(prompt string, thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest) string {
@@ -1666,7 +1685,7 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 		return
 	}
 	if recorder, ok := s.aiAgent.(AIAgentAssignmentEventRecorder); ok {
-		_ = recorder.RecordAIAgentAssignmentEvent(r.Context(), agentID, req, response.Event)
+		_ = recorder.RecordAIAgentAssignmentEvent(r.Context(), agentID, enrichAgentEventRequestWithAssignment(req, response.Assignment), response.Event)
 	}
 	writeJSON(w, http.StatusOK, response)
 }

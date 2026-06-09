@@ -178,6 +178,12 @@ For agent settings:
   latest thread for that agent when no active stream exists, so a failed
   historical run is updated in place instead of creating a synthetic stopped
   row without the original `assignment_id`.
+- Once a client action has projected a task thread as stopped/terminal, later
+  provider noise for the same assignment (`provider_log`, rate-limit updates,
+  heartbeat-style lifecycle notifications, or `cancelling` replay) must not
+  move that read-model row back to `stopping`/`running` or replace the
+  user-visible stopped message. A terminal assignment event may close a thread
+  that is still active, but stopped history is a fence.
 - A successful `tasks.assign` response means the daemon-facing assignment queue
   also accepted the work. If task-context lookup, prompt composition, runtime
   binding lookup, or assignment-store validation fails, the handler must fail

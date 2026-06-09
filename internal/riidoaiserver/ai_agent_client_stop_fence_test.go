@@ -179,6 +179,59 @@ func TestUnassignTerminalFailedThreadUpdatesOriginalThread(t *testing.T) {
 	}
 }
 
+func TestStoppedThreadIgnoresLateProviderLogAndCancellingReplay(t *testing.T) {
+	ctx := context.Background()
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
+
+	assigned, err := store.AssignAIAgentTask(ctx, principal, "task-late-provider-log", AssignAIAgentTaskRequest{
+		AgentID:      "agent-owned-codex",
+		AssignmentID: "asn-late-provider-log",
+	})
+	if err != nil {
+		t.Fatalf("AssignAIAgentTask: %v", err)
+	}
+	stopped, err := store.StopAIAgentTask(ctx, principal, assigned.TaskID, StopAIAgentTaskRequest{
+		AgentID: assigned.AgentID,
+		Reason:  "participant_removed",
+	})
+	if err != nil {
+		t.Fatalf("StopAIAgentTask: %v", err)
+	}
+	if stopped.ThreadID != assigned.ThreadID || stopped.AssignmentState != AgentAssignmentStateStopped {
+		t.Fatalf("stopped response = %+v, assigned=%+v", stopped, assigned)
+	}
+
+	if err := store.RecordAIAgentAssignmentEvent(ctx, assigned.AgentID, AgentEventRequest{}, TaskEvent{
+		TaskID:       assigned.TaskID,
+		AssignmentID: assigned.AssignmentID,
+		AgentID:      assigned.AgentID,
+		Type:         EventProviderLog,
+		State:        AssignmentCancelling,
+		Message:      "codex rate limits updated",
+		At:           time.Now().UTC(),
+	}); err != nil {
+		t.Fatalf("late provider log: %v", err)
+	}
+
+	threads, err := store.ListAIAgentTaskThreads(ctx, principal, assigned.TaskID)
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	if threads.ActiveStream != nil {
+		t.Fatalf("late provider log must not reopen active_stream: %+v", threads.ActiveStream)
+	}
+	if len(threads.Threads) != 1 {
+		t.Fatalf("threads = %+v", threads.Threads)
+	}
+	thread := threads.Threads[0]
+	if thread.AssignmentState != AgentAssignmentStateStopped ||
+		thread.WorkStatus != AgentWorkStatusIdle ||
+		thread.Message != stopped.Message {
+		t.Fatalf("late provider log reactivated or rewrote stopped thread: stopped=%+v thread=%+v", stopped, thread)
+	}
+}
+
 func lastThread(t *testing.T, store *DevelopmentAIAgentClientStore, taskID string) AIAgentTaskThreadRecord {
 	t.Helper()
 	threads := store.taskThreads[taskID]

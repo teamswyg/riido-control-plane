@@ -111,7 +111,15 @@ func TestDynamoDBAssignmentOperationStoreWritesPutItem(t *testing.T) {
 	assertDynamoDBString(t, projectionPayload.Item, "assignment_id", "asn-000001")
 	assertDynamoDBString(t, projectionPayload.Item, "assignment_state", string(AssignmentLeased))
 	assertDynamoDBNumber(t, projectionPayload.Item, "last_event_seq", "2")
+	assertDynamoDBString(t, projectionPayload.Item, "last_event_type", EventAssignmentLeased)
 	assertDynamoDBNumber(t, projectionPayload.ExpressionAttributeValues, ":last_event_seq", "2")
+	var lastEvent TaskEvent
+	if err := json.Unmarshal([]byte(projectionPayload.Item["last_event_json"]["S"]), &lastEvent); err != nil {
+		t.Fatalf("decode last_event_json: %v", err)
+	}
+	if lastEvent.AssignmentID != "asn-000001" || lastEvent.Seq != 2 || lastEvent.Type != EventAssignmentLeased {
+		t.Fatalf("last_event_json = %+v", lastEvent)
+	}
 	if _, ok := projectionPayload.Item["agent_id"]; ok {
 		t.Fatalf("leased assignment projection must not remain in agent queue: %+v", projectionPayload.Item["agent_id"])
 	}
@@ -352,6 +360,40 @@ func TestDynamoDBAssignmentOperationStoreLoadsAssignmentProjection(t *testing.T)
 	}
 	assertDynamoDBString(t, payload.Key, "pk", "ASSIGNMENT#asn-000001")
 	assertDynamoDBString(t, payload.Key, "sk", dynamoDBAssignmentProjectionSK)
+}
+
+func TestDynamoDBAssignmentOperationStoreLoadsProjectionLastEvent(t *testing.T) {
+	fixedNow := time.Date(2026, 5, 26, 1, 2, 3, 0, time.UTC)
+	assignment := sampleAssignmentOperationRecord(fixedNow).Assignment
+	assignment.State = AssignmentFailed
+	item := sampleAssignmentProjectionDynamoDBItem(t, assignment, 8)
+	lastEvent := TaskEvent{
+		Seq:          8,
+		TaskID:       assignment.TaskID,
+		AssignmentID: assignment.ID,
+		AgentID:      assignment.AgentID,
+		Type:         EventAssignmentFailed,
+		State:        AssignmentFailed,
+		Message:      "codex turn/start rpc error: model unavailable",
+		At:           fixedNow,
+	}
+	lastEventJSON, err := json.Marshal(lastEvent)
+	if err != nil {
+		t.Fatalf("marshal last event: %v", err)
+	}
+	item["last_event_json"] = map[string]string{"S": string(lastEventJSON)}
+	item["last_event_type"] = map[string]string{"S": lastEvent.Type}
+	item["last_event_message"] = map[string]string{"S": lastEvent.Message}
+
+	projection, err := assignmentProjectionFromDynamoDBItem(item)
+	if err != nil {
+		t.Fatalf("assignmentProjectionFromDynamoDBItem: %v", err)
+	}
+	if projection.LastEventSeq != 8 ||
+		projection.LastEvent.Type != EventAssignmentFailed ||
+		projection.LastEvent.Message != "codex turn/start rpc error: model unavailable" {
+		t.Fatalf("projection = %+v", projection)
+	}
 }
 
 func TestDynamoDBAssignmentOperationStoreClaimsQueuedAssignmentWithTransaction(t *testing.T) {

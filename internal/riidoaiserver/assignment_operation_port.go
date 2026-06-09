@@ -51,6 +51,7 @@ type AssignmentProjectionReader interface {
 type AssignmentProjection struct {
 	Assignment   Assignment
 	LastEventSeq int64
+	LastEvent    TaskEvent
 }
 
 type AssignmentActiveLease struct {
@@ -156,10 +157,18 @@ func assignmentOperationID(operationType AssignmentOperationType, assignment Ass
 }
 
 func assignmentOperationLastEventSeq(record AssignmentOperationRecord) int64 {
-	if len(record.Events) == 0 {
+	event, ok := assignmentOperationLastEvent(record)
+	if !ok {
 		return 0
 	}
-	return record.Events[len(record.Events)-1].Seq
+	return event.Seq
+}
+
+func assignmentOperationLastEvent(record AssignmentOperationRecord) (TaskEvent, bool) {
+	if len(record.Events) == 0 {
+		return TaskEvent{}, false
+	}
+	return record.Events[len(record.Events)-1], true
 }
 
 func assignmentSequence(id string) int64 {
