@@ -430,6 +430,27 @@ type AIAgentTaskThreadRecord struct {
 	StartedAt         time.Time                          `json:"started_at,omitempty"`
 	CompletedAt       time.Time                          `json:"completed_at,omitempty"`
 	Lines             []AgentThreadProgressLine          `json:"lines"`
+	// Messages is append-only conversation history (user + assistant turns).
+	// It is hydrated onto the read response from the separate taskThreadMessages
+	// collection and is NOT persisted on the thread record (empty in storage).
+	Messages []AIAgentTaskThreadMessageRecord `json:"messages,omitempty"`
+}
+
+// AIAgentTaskThreadMessageRecord is one preserved turn in a thread's
+// conversation history. It mirrors the riido-contracts
+// AIAgentTaskThreadMessageRecord schema. Distinct from the transient progress
+// Lines and the status-only scalar Message: this survives follow-ups and agent
+// replacement.
+type AIAgentTaskThreadMessageRecord struct {
+	MessageID       string    `json:"message_id"`
+	ThreadID        string    `json:"thread_id"`
+	Role            string    `json:"role"`
+	AuthorType      string    `json:"author_type"`
+	AgentID         string    `json:"agent_id,omitempty"`
+	Body            string    `json:"body"`
+	SourceMessageID string    `json:"source_message_id,omitempty"`
+	RunID           string    `json:"run_id,omitempty"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 type AIAgentTaskThreadCollectionResponse struct {
@@ -510,13 +531,19 @@ func (line *AgentThreadProgressLine) UnmarshalJSON(data []byte) error {
 }
 
 func (line AgentThreadProgressLine) MarshalJSON() ([]byte, error) {
+	// message_key is preserved on the wire (per contract) so the client can
+	// identify structured lines — notably "assistant.partial", the live-streaming
+	// assistant body. message_code/message_args stay server-internal: the server
+	// renders them into the human-readable message.
 	wire := struct {
 		Seq        int       `json:"seq"`
 		Message    string    `json:"message"`
+		MessageKey string    `json:"message_key,omitempty"`
 		ObservedAt time.Time `json:"observed_at,omitempty"`
 	}{
 		Seq:        line.Seq,
 		Message:    line.Message,
+		MessageKey: line.MessageKey,
 		ObservedAt: line.ObservedAt,
 	}
 	return json.Marshal(wire)

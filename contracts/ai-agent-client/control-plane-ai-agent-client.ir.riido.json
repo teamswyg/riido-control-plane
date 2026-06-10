@@ -2074,6 +2074,10 @@
             "name": "observed_at",
             "type": "string",
             "format": "date-time"
+          },
+          {
+            "name": "message_key",
+            "type": "string"
           }
         ]
       }
@@ -2209,6 +2213,61 @@
       }
     },
     {
+      "name": "AIAgentTaskThreadMessageRecord",
+      "schema": {
+        "name": "AIAgentTaskThreadMessageRecord",
+        "description": "thread 대화 히스토리의 메시지 한 건입니다 (append-only). 진행 상태 문구(thread.message)와 분리되어 보존되는 user/assistant 발화이며, 조회 시 thread.messages 로 hydrate 됩니다.",
+        "type": "object",
+        "required": [
+          "message_id",
+          "thread_id",
+          "role",
+          "author_type",
+          "body",
+          "created_at"
+        ],
+        "properties": [
+          {
+            "name": "message_id",
+            "type": "string"
+          },
+          {
+            "name": "thread_id",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "author_type",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "source_message_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "format": "date-time"
+          }
+        ]
+      }
+    },
+    {
       "name": "AIAgentTaskThreadRecord",
       "schema": {
         "name": "AIAgentTaskThreadRecord",
@@ -2285,6 +2344,13 @@
             "type": "array",
             "items": {
               "ref": "AgentThreadProgressLine"
+            }
+          },
+          {
+            "name": "messages",
+            "type": "array",
+            "items": {
+              "ref": "AIAgentTaskThreadMessageRecord"
             }
           }
         ]

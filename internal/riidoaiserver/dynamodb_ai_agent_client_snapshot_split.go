@@ -49,9 +49,10 @@ type AIAgentClientEventsSnapshot struct {
 
 // AIAgentClientThreadsSnapshot is all task threads as one item.
 type AIAgentClientThreadsSnapshot struct {
-	SchemaVersion string                               `json:"schema_version"`
-	SavedAt       time.Time                            `json:"saved_at"`
-	TaskThreads   map[string][]AIAgentTaskThreadRecord `json:"task_threads"`
+	SchemaVersion      string                                      `json:"schema_version"`
+	SavedAt            time.Time                                   `json:"saved_at"`
+	TaskThreads        map[string][]AIAgentTaskThreadRecord        `json:"task_threads"`
+	TaskThreadMessages map[string][]AIAgentTaskThreadMessageRecord `json:"task_thread_messages,omitempty"`
 }
 
 // AIAgentClientSplitSnapshotStore is the optional per-collection interface. A
@@ -94,9 +95,10 @@ func splitFromCombined(s AIAgentClientSnapshot) (AIAgentClientCoreSnapshot, AIAg
 		NextClientEventSeq: s.NextClientEventSeq,
 	}
 	threads := AIAgentClientThreadsSnapshot{
-		SchemaVersion: AIAgentClientPersistenceSchemaVersion,
-		SavedAt:       s.SavedAt,
-		TaskThreads:   s.TaskThreads,
+		SchemaVersion:      AIAgentClientPersistenceSchemaVersion,
+		SavedAt:            s.SavedAt,
+		TaskThreads:        s.TaskThreads,
+		TaskThreadMessages: s.TaskThreadMessages,
 	}
 	return core, events, threads
 }
@@ -114,6 +116,7 @@ func combinedFromSplit(core AIAgentClientCoreSnapshot, events AIAgentClientEvent
 		Agents:                  core.Agents,
 		Fixtures:                core.Fixtures,
 		TaskThreads:             threads.TaskThreads,
+		TaskThreadMessages:      threads.TaskThreadMessages,
 		Events:                  events.Events,
 		NextDeviceCredentialSeq: core.NextDeviceCredentialSeq,
 		NextDaemonCommand:       core.NextDaemonCommand,

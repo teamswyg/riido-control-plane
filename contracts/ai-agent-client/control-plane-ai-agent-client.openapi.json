@@ -4280,6 +4280,48 @@
         ],
         "type": "object"
       },
+      "AIAgentTaskThreadMessageRecord": {
+        "description": "thread 대화 히스토리의 메시지 한 건입니다 (append-only). 진행 상태 문구(thread.message)와 분리되어 보존되는 user/assistant 발화이며, 조회 시 thread.messages 로 hydrate 됩니다.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "author_type": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "message_id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "source_message_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message_id",
+          "thread_id",
+          "role",
+          "author_type",
+          "body",
+          "created_at"
+        ],
+        "type": "object"
+      },
       "AIAgentTaskThreadRecord": {
         "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
         "properties": {
@@ -4307,6 +4349,12 @@
           },
           "message": {
             "type": "string"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadMessageRecord"
+            },
+            "type": "array"
           },
           "run_id": {
             "type": "string"
@@ -4895,6 +4943,9 @@
         "description": "daemon이 batch로 보고한 runtime 진행 메시지 한 줄입니다.",
         "properties": {
           "message": {
+            "type": "string"
+          },
+          "message_key": {
             "type": "string"
           },
           "observed_at": {

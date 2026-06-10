@@ -18,19 +18,20 @@ type AIAgentClientSnapshotStore interface {
 }
 
 type AIAgentClientSnapshot struct {
-	SchemaVersion           string                                  `json:"schema_version"`
-	SavedAt                 time.Time                               `json:"saved_at"`
-	WorkspaceID             string                                  `json:"workspace_id"`
-	Devices                 []DeviceRecord                          `json:"devices"`
-	DeviceCredentials       []AIAgentClientDeviceCredentialSnapshot `json:"device_credentials"`
-	Daemons                 []DeviceDaemonRecord                    `json:"daemons"`
-	Agents                  []AgentClientRecord                     `json:"agents"`
-	Fixtures                []AgentOnboardingFixture                `json:"fixtures"`
-	TaskThreads             map[string][]AIAgentTaskThreadRecord    `json:"task_threads"`
-	Events                  []AIAgentClientEventSnapshot            `json:"events"`
-	NextDeviceCredentialSeq int                                     `json:"next_device_credential_seq"`
-	NextDaemonCommand       int                                     `json:"next_daemon_command"`
-	NextClientEventSeq      int64                                   `json:"next_client_event_seq,omitempty"`
+	SchemaVersion           string                                      `json:"schema_version"`
+	SavedAt                 time.Time                                   `json:"saved_at"`
+	WorkspaceID             string                                      `json:"workspace_id"`
+	Devices                 []DeviceRecord                              `json:"devices"`
+	DeviceCredentials       []AIAgentClientDeviceCredentialSnapshot     `json:"device_credentials"`
+	Daemons                 []DeviceDaemonRecord                        `json:"daemons"`
+	Agents                  []AgentClientRecord                         `json:"agents"`
+	Fixtures                []AgentOnboardingFixture                    `json:"fixtures"`
+	TaskThreads             map[string][]AIAgentTaskThreadRecord        `json:"task_threads"`
+	TaskThreadMessages      map[string][]AIAgentTaskThreadMessageRecord `json:"task_thread_messages,omitempty"`
+	Events                  []AIAgentClientEventSnapshot                `json:"events"`
+	NextDeviceCredentialSeq int                                         `json:"next_device_credential_seq"`
+	NextDaemonCommand       int                                         `json:"next_daemon_command"`
+	NextClientEventSeq      int64                                       `json:"next_client_event_seq,omitempty"`
 }
 
 type AIAgentClientDeviceCredentialSnapshot struct {
@@ -532,6 +533,15 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		}
 		taskThreads[taskID] = copied
 	}
+	taskThreadMessages := make(map[string][]AIAgentTaskThreadMessageRecord, len(s.taskThreadMessages))
+	for threadID, messages := range s.taskThreadMessages {
+		// Bound history per thread for the same 400 KB item budget as task threads.
+		retained := messages
+		if len(retained) > aiAgentClientThreadMessagesPerThreadLimit {
+			retained = retained[len(retained)-aiAgentClientThreadMessagesPerThreadLimit:]
+		}
+		taskThreadMessages[threadID] = append([]AIAgentTaskThreadMessageRecord(nil), retained...)
+	}
 	events, err := snapshotEvents(retainLatestClientReplayEvents(s.events))
 	if err != nil {
 		return AIAgentClientSnapshot{}, err
@@ -546,6 +556,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		Agents:                  agents,
 		Fixtures:                copyAgentOnboardingFixtures(s.fixtures),
 		TaskThreads:             taskThreads,
+		TaskThreadMessages:      taskThreadMessages,
 		Events:                  events,
 		NextDeviceCredentialSeq: s.nextDeviceCredentialSeq,
 		NextDaemonCommand:       s.nextDaemonCommand,
@@ -615,6 +626,14 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		}
 		taskThreads[taskID] = copied
 	}
+	taskThreadMessages := make(map[string][]AIAgentTaskThreadMessageRecord, len(snapshot.TaskThreadMessages))
+	for threadID, messages := range snapshot.TaskThreadMessages {
+		threadID = strings.TrimSpace(threadID)
+		if threadID == "" {
+			continue
+		}
+		taskThreadMessages[threadID] = append([]AIAgentTaskThreadMessageRecord(nil), messages...)
+	}
 	events, err := restoreSnapshotEvents(snapshot.Events)
 	if err != nil {
 		return err
@@ -633,6 +652,8 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.fixtures = copyAgentOnboardingFixtures(snapshot.Fixtures)
 	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
+	s.taskThreadMessages = taskThreadMessages
+	s.taskThreadRunBodies = map[string]threadRunBody{}
 	s.events = events
 	s.nextClientEventSeq = snapshot.NextClientEventSeq
 	if preserveSubscribers {

@@ -2,6 +2,18 @@
 
 > Target: `riido-control-plane`, `riido-client`
 > Status: root-cause review + fix plan
+>
+> **UPDATE 2026-06-10 — implementation plan moved.** The root-cause analysis
+> below is accurate, but the "Fast Fix Plan" (inline `Messages[]`) is
+> **superseded** by the locked decisions in
+> [`ai-agent-thread-message-history-fix-plan-2026-06-10.md`](ai-agent-thread-message-history-fix-plan-2026-06-10.md):
+> a **separate `thread_messages` collection** hydrated onto `thread.messages`, not
+> an inline field. **Correction:** `assistant.partial` is **dead today**, not
+> "supported" — the daemon never tags body deltas and
+> `AgentThreadProgressLine.MarshalJSON` drops `message_key` on the wire, so
+> repairing the live stream needs daemon tagging **and** a MarshalJSON change. The
+> "Evidence for `assistant.partial` support" lines below (api.go:482/486) only
+> point at a generic optional field.
 
 ## Summary
 
@@ -129,7 +141,7 @@ Evidence:
 There is no regression test asserting that previous agent responses survive a
 follow-up or agent replacement.
 
-## Fast Fix Plan
+## Fast Fix Plan (SUPERSEDED — see ai-agent-thread-message-history-fix-plan-2026-06-10.md; kept for history)
 
 The fastest durable fix is to add append-only message history to the
 control-plane read model and archive the current assistant response before any

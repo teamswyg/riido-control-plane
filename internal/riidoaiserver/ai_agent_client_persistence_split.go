@@ -77,7 +77,8 @@ func (s *DevelopmentAIAgentClientStore) restoreCorePreservingRest(core AIAgentCl
 	s.agents = agents
 	s.fixtures = copyAgentOnboardingFixtures(core.Fixtures)
 	s.ensureOnboardingFixtureColorsLocked()
-	// taskThreads, events, nextClientEventSeq, subscribers/nextSubscriberID: preserved.
+	// taskThreads, taskThreadMessages, taskThreadRunBodies, events,
+	// nextClientEventSeq, subscribers/nextSubscriberID: preserved.
 	return nil
 }
 

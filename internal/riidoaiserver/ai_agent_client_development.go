@@ -88,6 +88,8 @@ type DevelopmentAIAgentClientStore struct {
 	agents                  map[string]AgentClientRecord
 	fixtures                []AgentOnboardingFixture
 	taskThreads             map[string][]AIAgentTaskThreadRecord
+	taskThreadMessages      map[string][]AIAgentTaskThreadMessageRecord
+	taskThreadRunBodies     map[string]threadRunBody
 	events                  []ClientStreamEvent
 	nextClientEventSeq      int64
 	subscribers             map[int]aiAgentClientSubscriber
@@ -383,8 +385,10 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				RecommendedRuntimeKind: RuntimeKindOpenClaw,
 			},
 		},
-		taskThreads: taskThreads,
-		subscribers: map[int]aiAgentClientSubscriber{},
+		taskThreads:         taskThreads,
+		taskThreadMessages:  map[string][]AIAgentTaskThreadMessageRecord{},
+		taskThreadRunBodies: map[string]threadRunBody{},
+		subscribers:         map[int]aiAgentClientSubscriber{},
 		events: []ClientStreamEvent{
 			{
 				Seq:       1,
@@ -998,6 +1002,12 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
 		response.Message = "agent is busy; task thread message was queued"
 	}
+	now := time.Now().UTC()
+	// Preserve the prior assistant answer, then record this user follow-up turn,
+	// before the upsert overwrites the thread's status Message in place. Both
+	// archives are idempotent.
+	s.archiveThreadAssistantMessageLocked(thread, now)
+	s.archiveThreadUserMessageLocked(thread, req.Body, req.SourceMessageID, now)
 	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID)
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
@@ -1700,7 +1710,12 @@ func (s *DevelopmentAIAgentClientStore) visibleTaskThreadsLocked(principal Autho
 		if !ok || !s.aiAgentVisibleTo(principal, agent) {
 			continue
 		}
-		out = append(out, copyTaskThread(thread))
+		copied := copyTaskThread(thread)
+		// Hydrate the append-only conversation history from the separate
+		// taskThreadMessages collection onto the read response (not persisted on
+		// the record).
+		copied.Messages = s.hydrateThreadMessagesLocked(thread.ThreadID)
+		out = append(out, copied)
 	}
 	return out
 }
@@ -2169,6 +2184,12 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		if threads[i].ThreadID != response.ThreadID {
 			continue
 		}
+		// When this action ends the run (completed/failed/cancelled/stopped),
+		// preserve the assistant answer before the terminal status overwrites
+		// thread.Message. Idempotent per run.
+		if !taskThreadHasActiveStream(thread) {
+			s.archiveThreadAssistantMessageLocked(threads[i], now)
+		}
 		threads[i].WorkStatus = response.WorkStatus
 		if strings.TrimSpace(response.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
@@ -2216,6 +2237,9 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 		if threads[i].ThreadID != response.ThreadID {
 			continue
 		}
+		// Preserve the prior assistant answer before this follow-up overwrites the
+		// thread's status Message / run fields in place (idempotent per run).
+		s.archiveThreadAssistantMessageLocked(threads[i], now)
 		threads[i].RunID = response.RunID
 		if strings.TrimSpace(response.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
@@ -2266,6 +2290,13 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 			threads[i].Message = event.Lines[len(event.Lines)-1].Message
 		}
 		threads[i].Lines = append(threads[i].Lines, copyProgressLines(event.Lines)...)
+		// Accumulate the current run's assistant body from streamed
+		// assistant.partial deltas so a completed run can be archived verbatim.
+		for _, line := range event.Lines {
+			if line.MessageKey == aiAgentClientAssistantPartialKey {
+				s.accumulateAssistantRunBodyLocked(event.ThreadID, event.RunID, line.Message)
+			}
+		}
 		s.taskThreads[event.TaskID] = threads
 		return
 	}
@@ -2286,6 +2317,13 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		StartedAt:       now,
 		Lines:           copyProgressLines(event.Lines),
 	})
+	// Accumulate the first run's assistant body deltas on the creating event too,
+	// so the opening chunk is not lost from the archived answer.
+	for _, line := range event.Lines {
+		if line.MessageKey == aiAgentClientAssistantPartialKey {
+			s.accumulateAssistantRunBodyLocked(event.ThreadID, event.RunID, line.Message)
+		}
+	}
 }
 
 func (s *DevelopmentAIAgentClientStore) nextThreadProgressSeqLocked(taskID, threadID string, metadata map[string]string) int {
@@ -2311,6 +2349,7 @@ func (s *DevelopmentAIAgentClientStore) markTaskActiveThreadsStoppedLocked(taskI
 		if !taskThreadHasActiveStream(threads[i]) {
 			continue
 		}
+		s.archiveThreadAssistantMessageLocked(threads[i], now)
 		threads[i].WorkStatus = AgentWorkStatusIdle
 		threads[i].AssignmentState = AgentAssignmentStateStopped
 		threads[i].CommentKind = kind
@@ -2335,6 +2374,7 @@ func (s *DevelopmentAIAgentClientStore) markAgentTaskThreadsStoppedLocked(agentI
 			if threads[i].AgentID != agentID || !taskThreadHasActiveStream(threads[i]) {
 				continue
 			}
+			s.archiveThreadAssistantMessageLocked(threads[i], now)
 			threads[i].WorkStatus = AgentWorkStatusOffline
 			threads[i].AssignmentState = AgentAssignmentStateStopped
 			threads[i].CommentKind = kind
@@ -2352,6 +2392,7 @@ func (s *DevelopmentAIAgentClientStore) markTaskAgentThreadsStoppedLocked(taskID
 		if threads[i].AgentID != agentID || !taskThreadHasActiveStream(threads[i]) {
 			continue
 		}
+		s.archiveThreadAssistantMessageLocked(threads[i], now)
 		threads[i].WorkStatus = AgentWorkStatusIdle
 		threads[i].AssignmentState = AgentAssignmentStateStopped
 		threads[i].CommentKind = kind
