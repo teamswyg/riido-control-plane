@@ -89,7 +89,6 @@ type DevelopmentAIAgentClientStore struct {
 	fixtures                []AgentOnboardingFixture
 	taskThreads             map[string][]AIAgentTaskThreadRecord
 	taskThreadMessages      map[string][]AIAgentTaskThreadMessageRecord
-	taskThreadRunBodies     map[string]threadRunBody
 	events                  []ClientStreamEvent
 	nextClientEventSeq      int64
 	subscribers             map[int]aiAgentClientSubscriber
@@ -385,10 +384,9 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				RecommendedRuntimeKind: RuntimeKindOpenClaw,
 			},
 		},
-		taskThreads:         taskThreads,
-		taskThreadMessages:  map[string][]AIAgentTaskThreadMessageRecord{},
-		taskThreadRunBodies: map[string]threadRunBody{},
-		subscribers:         map[int]aiAgentClientSubscriber{},
+		taskThreads:        taskThreads,
+		taskThreadMessages: map[string][]AIAgentTaskThreadMessageRecord{},
+		subscribers:        map[int]aiAgentClientSubscriber{},
 		events: []ClientStreamEvent{
 			{
 				Seq:       1,
@@ -2237,9 +2235,12 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 		if threads[i].ThreadID != response.ThreadID {
 			continue
 		}
-		// Preserve the prior assistant answer before this follow-up overwrites the
-		// thread's status Message / run fields in place (idempotent per run).
+		// Preserve the prior assistant answer, then start the new run with a fresh
+		// progress tail: the assistant.partial lines are the answer-body source, so
+		// clearing them here keeps the next archived turn from concatenating the
+		// previous run's answer (cross-run bleed).
 		s.archiveThreadAssistantMessageLocked(threads[i], now)
+		threads[i].Lines = nil
 		threads[i].RunID = response.RunID
 		if strings.TrimSpace(response.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
@@ -2290,13 +2291,6 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 			threads[i].Message = event.Lines[len(event.Lines)-1].Message
 		}
 		threads[i].Lines = append(threads[i].Lines, copyProgressLines(event.Lines)...)
-		// Accumulate the current run's assistant body from streamed
-		// assistant.partial deltas so a completed run can be archived verbatim.
-		for _, line := range event.Lines {
-			if line.MessageKey == aiAgentClientAssistantPartialKey {
-				s.accumulateAssistantRunBodyLocked(event.ThreadID, event.RunID, line.Message)
-			}
-		}
 		s.taskThreads[event.TaskID] = threads
 		return
 	}
@@ -2317,13 +2311,6 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		StartedAt:       now,
 		Lines:           copyProgressLines(event.Lines),
 	})
-	// Accumulate the first run's assistant body deltas on the creating event too,
-	// so the opening chunk is not lost from the archived answer.
-	for _, line := range event.Lines {
-		if line.MessageKey == aiAgentClientAssistantPartialKey {
-			s.accumulateAssistantRunBodyLocked(event.ThreadID, event.RunID, line.Message)
-		}
-	}
 }
 
 func (s *DevelopmentAIAgentClientStore) nextThreadProgressSeqLocked(taskID, threadID string, metadata map[string]string) int {

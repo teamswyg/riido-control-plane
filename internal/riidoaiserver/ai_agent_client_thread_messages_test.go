@@ -211,6 +211,38 @@ func TestHTTPThreadMessageHistoryOverWire(t *testing.T) {
 	if !gotUser {
 		t.Fatalf("user follow-up turn missing: %+v", thread2.Messages)
 	}
+
+	// Cross-run bleed regression: a SECOND run on the same thread must archive only
+	// its own answer, not concatenated with the first run's answer (the progress
+	// Lines accumulate per thread; the follow-up clears them so each run's answer
+	// is isolated).
+	poll2, err := assignmentStore.PollAgent(ctx, "agent-public-openclaw", PollRequest{DaemonID: "daemon-shared-studio", DeviceID: "device-shared-studio", RuntimeID: "runtime-openclaw-shared"})
+	if err != nil || poll2.Assignment == nil {
+		t.Fatalf("PollAgent run2: %v %+v", err, poll2)
+	}
+	aid2 := poll2.Assignment.ID
+	base2 := `"assignment_id":"` + aid2 + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared"`
+	do(http.MethodPost, "/v1/agents/agent-public-openclaw/thread-progress", "daemon-token", `{`+base2+`,"run_id":"`+aid2+`","lines":[{"seq":1,"message":"Second run distinct answer.","message_key":"assistant.partial"}]}`, http.StatusAccepted)
+	do(http.MethodPost, "/v1/agents/agent-public-openclaw/events", "daemon-token", `{`+base2+`,"state":"completed","event_type":"assignment_completed","message":"작업 완료"}`, http.StatusOK)
+
+	final, finalBody := getThreads()
+	finalThread, _ := findThreadByID(final, assigned.ThreadID)
+	t.Logf("after run2: messages=%s", mustJSON(finalThread.Messages))
+	if !hasAssistantBody(finalThread.Messages, "Here is the full answer.") {
+		t.Fatalf("run1 answer lost after run2: %s", finalBody)
+	}
+	var run2OK bool
+	for _, m := range finalThread.Messages {
+		if m.Role == "assistant" && strings.Contains(m.Body, "Second run distinct answer.") {
+			run2OK = true
+			if strings.Contains(m.Body, "Here is the full answer.") {
+				t.Fatalf("cross-run bleed: run2 message embeds run1 answer: %q", m.Body)
+			}
+		}
+	}
+	if !run2OK {
+		t.Fatalf("run2 answer not archived as its own message: %s", finalBody)
+	}
 }
 
 // TestAIAgentTaskThreadHistoryIdempotentAndDurable asserts a duplicate follow-up

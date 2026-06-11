@@ -16,45 +16,16 @@ const aiAgentClientAssistantPartialKey = "assistant.partial"
 // Older turns beyond this bound are dropped (cursor pagination is future work).
 const aiAgentClientThreadMessagesPerThreadLimit = 50
 
-// threadRunBody accumulates the current run's assistant body from streamed
-// assistant.partial deltas. It is transient (never persisted): a completed run's
-// body is archived into taskThreadMessages at completion, and THAT is persisted.
-type threadRunBody struct {
-	runID string
-	body  string
-}
-
-// accumulateAssistantRunBodyLocked appends one streamed assistant delta to the
-// current run's body buffer for a thread, resetting when the run changes. The
-// thread.Lines feed accumulates across runs, so this per-run buffer is what lets
-// archiving capture exactly one run's answer.
-func (s *DevelopmentAIAgentClientStore) accumulateAssistantRunBodyLocked(threadID, runID, delta string) {
-	threadID = strings.TrimSpace(threadID)
-	if threadID == "" || delta == "" {
-		return
-	}
-	if s.taskThreadRunBodies == nil {
-		s.taskThreadRunBodies = map[string]threadRunBody{}
-	}
-	current := s.taskThreadRunBodies[threadID]
-	if current.runID != runID {
-		current = threadRunBody{runID: runID}
-	}
-	current.body += delta
-	s.taskThreadRunBodies[threadID] = current
-}
-
-// assistantRunBodyLocked returns the best available assistant answer body for a
-// thread's current run: the live run accumulator, else the concatenated
-// assistant.partial progress lines, else the scalar status Message.
+// assistantRunBodyLocked returns the current run's assistant answer body by
+// concatenating this thread's assistant.partial progress lines. The progress
+// Lines are reset when a new run starts on the thread (see the follow-up path in
+// upsertTaskThreadMessageFromActionLocked), so the assistant.partial lines here
+// belong only to the current run — concatenating them reconstructs exactly that
+// run's answer without bleeding across runs. Falls back to the scalar status
+// Message when no body lines are present (e.g. a daemon that does not tag
+// assistant.partial). Lines are persisted, so this survives reload-per-op,
+// unlike a transient in-memory accumulator.
 func (s *DevelopmentAIAgentClientStore) assistantRunBodyLocked(thread AIAgentTaskThreadRecord) string {
-	threadID := strings.TrimSpace(thread.ThreadID)
-	runID := strings.TrimSpace(thread.RunID)
-	if buf, ok := s.taskThreadRunBodies[threadID]; ok && buf.runID == runID {
-		if body := clientVisibleTaskThreadText(buf.body); body != "" {
-			return body
-		}
-	}
 	var b strings.Builder
 	for _, line := range thread.Lines {
 		if line.MessageKey == aiAgentClientAssistantPartialKey {
