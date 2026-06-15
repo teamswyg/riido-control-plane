@@ -419,7 +419,7 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 	}
 	for _, candidate := range queue {
 		assignment := candidate.Assignment
-		if assignment.State != AssignmentQueued {
+		if assignment.State.Code() != AssignmentStateCodeQueued {
 			continue
 		}
 		var repairs []dynamoDBAssignmentClaimRepair
@@ -437,7 +437,7 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 				clearMessage = "missing blocker cleared before daemon lease"
 			case isTerminal(blocker.Assignment.State):
 				clearMessage = "terminal blocker cleared before daemon lease"
-			case blocker.Assignment.State == AssignmentQueued:
+			case blocker.Assignment.State.Code() == AssignmentStateCodeQueued:
 				repairs = append(repairs, dynamoDBAssignmentClaimRepair{
 					Operation:            dynamoDBCancelQueuedBlockerOperation(blocker, assignment.ID, at),
 					ExpectedState:        AssignmentQueued,
@@ -1139,7 +1139,7 @@ func assignmentProjectionDynamoDBItem(record AssignmentOperationRecord) (map[str
 	if record.Assignment.BlockedByAssignmentID != "" {
 		item["blocked_by_assignment_id"] = map[string]string{"S": record.Assignment.BlockedByAssignmentID}
 	}
-	if record.Assignment.State == AssignmentQueued {
+	if record.Assignment.State.Code() == AssignmentStateCodeQueued {
 		item["agent_id"] = map[string]string{"S": record.Assignment.AgentID}
 		item["assignment_sort"] = map[string]string{"S": assignmentQueueSort(record.Assignment)}
 	}
