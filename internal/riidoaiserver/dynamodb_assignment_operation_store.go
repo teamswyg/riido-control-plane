@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -828,6 +829,9 @@ func (s *DynamoDBAssignmentOperationStore) load(ctx context.Context, credentials
 		})
 		if err != nil {
 			return nil, fmt.Errorf("dynamodb query assignment operations: %w", err)
+		}
+		if len(bytes.TrimSpace(body)) == 0 {
+			body = []byte(`{}`)
 		}
 		var response struct {
 			Items            []map[string]map[string]string `json:"Items"`
