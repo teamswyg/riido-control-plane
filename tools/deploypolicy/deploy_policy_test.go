@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -777,7 +778,8 @@ func collectRiidoAIServerKeyLiterals(body string) []string {
 
 func collectNonCDRuntimeKeyNames(keys []struct {
 	Name string `json:"name"`
-}) []string {
+},
+) []string {
 	names := make([]string, 0, len(keys))
 	for _, key := range keys {
 		names = append(names, key.Name)
@@ -825,10 +827,8 @@ func requireNotContains(t *testing.T, body, want string) {
 
 func requireSliceContains(t *testing.T, items []string, want string) {
 	t.Helper()
-	for _, item := range items {
-		if item == want {
-			return
-		}
+	if slices.Contains(items, want) {
+		return
 	}
 	t.Fatalf("missing %q in %#v", want, items)
 }
@@ -859,7 +859,8 @@ func requireStringSetExact(t *testing.T, got, want []string) {
 func requireNonCDRuntimeKey(t *testing.T, keys []struct {
 	Name   string `json:"name"`
 	Reason string `json:"reason"`
-}, wantName, wantReason string) {
+}, wantName, wantReason string,
+) {
 	t.Helper()
 	for _, key := range keys {
 		if key.Name == wantName {
@@ -871,10 +872,5 @@ func requireNonCDRuntimeKey(t *testing.T, keys []struct {
 }
 
 func stringSliceContains(items []string, want string) bool {
-	for _, item := range items {
-		if item == want {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(items, want)
 }

@@ -403,14 +403,14 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 	if err != nil || !ok {
 		return err
 	}
-	return s.DevelopmentAIAgentClientStore.restoreSnapshotPreservingSubscribers(snapshot)
+	return s.restoreSnapshotPreservingSubscribers(snapshot)
 }
 
 func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
 	}
-	snapshot, err := s.DevelopmentAIAgentClientStore.snapshot(time.Now().UTC())
+	snapshot, err := s.snapshot(time.Now().UTC())
 	if err != nil {
 		return err
 	}

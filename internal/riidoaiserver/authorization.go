@@ -292,6 +292,7 @@ func authorizationScopeCandidates(req AuthorizationRequest) []string {
 			if req.AgentID != "" {
 				candidates = append(candidates, "ai-agent:"+req.AgentID+":delete")
 			}
+		default:
 		}
 		return candidates
 	case AuthorizationResourceMetrics:

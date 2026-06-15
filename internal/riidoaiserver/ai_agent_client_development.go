@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/url"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -523,7 +524,7 @@ func (s *DevelopmentAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context
 	daemon.LastCommandAction = action
 	daemon.LastCommandRequestedAt = now
 	daemon.LastSeenAt = now
-	message := "daemon command accepted"
+	var message string
 	switch action {
 	case DaemonControlActionStart:
 		daemon.Availability = DaemonAvailabilityOnline
@@ -619,7 +620,7 @@ func (s *DevelopmentAIAgentClientStore) ControlAIAgentDeviceDaemon(ctx context.C
 	daemon.LastCommandAction = action
 	daemon.LastCommandRequestedAt = now
 	daemon.LastSeenAt = now
-	message := "daemon command accepted"
+	var message string
 	switch action {
 	case DaemonControlActionStart:
 		daemon.Availability = DaemonAvailabilityOnline
@@ -700,8 +701,7 @@ func (s *DevelopmentAIAgentClientStore) ListWorkspaceAssignedAgentProfiles(ctx c
 	sort.Strings(taskIDs)
 	for _, taskID := range taskIDs {
 		threads := s.taskThreads[taskID]
-		for i := len(threads) - 1; i >= 0; i-- {
-			thread := threads[i]
+		for _, thread := range slices.Backward(threads) {
 			if !taskThreadHasActiveStream(thread) {
 				continue
 			}
@@ -743,11 +743,11 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Conte
 		TaskID:        taskID,
 		Threads:       threads,
 	}
-	for i := len(threads) - 1; i >= 0; i-- {
-		if !taskThreadHasActiveStream(threads[i]) {
+	for _, thread := range slices.Backward(threads) {
+		if !taskThreadHasActiveStream(thread) {
 			continue
 		}
-		link := activeStreamLinkForThread(threads[i], strings.TrimSpace(principal.WorkspaceID))
+		link := activeStreamLinkForThread(thread, strings.TrimSpace(principal.WorkspaceID))
 		response.ActiveStream = &link
 		break
 	}
@@ -1282,6 +1282,7 @@ func (s *DevelopmentAIAgentClientStore) DeleteAIAgent(ctx context.Context, princ
 		queued = agent.AssignedTaskCount
 	case AgentWorkStatusRunning, AgentWorkStatusWaitingForUser:
 		running = agent.AssignedTaskCount
+	default:
 	}
 	delete(s.agents, agent.AgentID)
 	s.markAgentTaskThreadsStoppedLocked(agent.AgentID, AgentTaskCommentStoppedByAgentDeleted, "에이전트가 삭제되어 진행 중이던 작업이 중지됐어요.")
@@ -1647,6 +1648,7 @@ func (s *DevelopmentAIAgentClientStore) projectAgentWorkStatusFromThreadsLocked(
 		switch agent.WorkStatus {
 		case AgentWorkStatusQueued, AgentWorkStatusRunning, AgentWorkStatusWaitingForUser:
 			agent.WorkStatus = AgentWorkStatusIdle
+		default:
 		}
 		return agent
 	}
@@ -1658,6 +1660,7 @@ func projectedAgentWorkStatusFromActiveThread(thread AIAgentTaskThreadRecord) Ag
 	switch thread.WorkStatus {
 	case AgentWorkStatusQueued, AgentWorkStatusRunning, AgentWorkStatusWaitingForUser:
 		return thread.WorkStatus
+	default:
 	}
 	switch thread.AssignmentState {
 	case AgentAssignmentStateQueued:
@@ -1667,14 +1670,6 @@ func projectedAgentWorkStatusFromActiveThread(thread AIAgentTaskThreadRecord) Ag
 	default:
 		return AgentWorkStatusRunning
 	}
-}
-
-func (s *DevelopmentAIAgentClientStore) visibleAgentIDs(principal AuthorizationResult) map[string]struct{} {
-	out := map[string]struct{}{}
-	for _, agent := range s.visibleAgents(principal) {
-		out[agent.AgentID] = struct{}{}
-	}
-	return out
 }
 
 func (s *DevelopmentAIAgentClientStore) visibleTaskThreadsLocked(principal AuthorizationResult, taskID string) []AIAgentTaskThreadRecord {
@@ -1734,8 +1729,7 @@ func (s *DevelopmentAIAgentClientStore) visibleTaskThreadLocked(principal Author
 
 func (s *DevelopmentAIAgentClientStore) activeTaskThreadLocked(taskID string) (AIAgentTaskThreadRecord, bool) {
 	threads := s.taskThreads[taskID]
-	for i := len(threads) - 1; i >= 0; i-- {
-		thread := threads[i]
+	for _, thread := range slices.Backward(threads) {
 		if taskThreadHasActiveStream(thread) {
 			return copyTaskThread(thread), true
 		}
@@ -1745,8 +1739,7 @@ func (s *DevelopmentAIAgentClientStore) activeTaskThreadLocked(taskID string) (A
 
 func (s *DevelopmentAIAgentClientStore) activeTaskThreadForAgentLocked(taskID, agentID string) (AIAgentTaskThreadRecord, bool) {
 	threads := s.taskThreads[taskID]
-	for i := len(threads) - 1; i >= 0; i-- {
-		thread := threads[i]
+	for _, thread := range slices.Backward(threads) {
 		if thread.AgentID == agentID && taskThreadHasActiveStream(thread) {
 			return copyTaskThread(thread), true
 		}
@@ -1756,8 +1749,7 @@ func (s *DevelopmentAIAgentClientStore) activeTaskThreadForAgentLocked(taskID, a
 
 func (s *DevelopmentAIAgentClientStore) latestTaskThreadForAgentLocked(taskID, agentID string) (AIAgentTaskThreadRecord, bool) {
 	threads := s.taskThreads[taskID]
-	for i := len(threads) - 1; i >= 0; i-- {
-		thread := threads[i]
+	for _, thread := range slices.Backward(threads) {
 		if thread.AgentID == agentID {
 			return copyTaskThread(thread), true
 		}
@@ -1771,8 +1763,7 @@ func (s *DevelopmentAIAgentClientStore) taskThreadForAssignmentLocked(taskID, ag
 		return AIAgentTaskThreadRecord{}, false
 	}
 	threads := s.taskThreads[taskID]
-	for i := len(threads) - 1; i >= 0; i-- {
-		thread := threads[i]
+	for _, thread := range slices.Backward(threads) {
 		if thread.AgentID == agentID && thread.AssignmentID == assignmentID {
 			return copyTaskThread(thread), true
 		}
@@ -1989,6 +1980,7 @@ func assignmentEventVisibleThreadMessage(state AssignmentState, eventType, messa
 		if strings.TrimSpace(eventType) != EventRiidoLog {
 			return strings.TrimSpace(previous)
 		}
+	default:
 	}
 	return strings.TrimSpace(message)
 }
@@ -2541,12 +2533,7 @@ func (s *DevelopmentAIAgentClientStore) aiAgentMutableBy(principal Authorization
 }
 
 func aiAgentIsAdmin(principal AuthorizationResult) bool {
-	for _, role := range principal.Roles {
-		if role == AgentCatalogRoleAdmin {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(principal.Roles, AgentCatalogRoleAdmin)
 }
 
 func normalizeClientKind(kind ClientKind) ClientKind {
@@ -2563,22 +2550,6 @@ func editabilityForAssignedTasks(count int) AgentEditability {
 		return AgentEditabilityBlockedAssignedTasks
 	}
 	return AgentEditabilityEditable
-}
-
-func filterDevicesForPrincipal(devices []DeviceRecord, principal AuthorizationResult) []DeviceRecord {
-	if aiAgentIsAdmin(principal) {
-		return copyVisibleSeedDevices(devices, principal)
-	}
-	var out []DeviceRecord
-	for _, device := range devices {
-		if deviceHiddenSeedForPrincipal(device, principal) {
-			continue
-		}
-		if device.OwnerPrincipalID == principal.PrincipalID {
-			out = append(out, copyDevice(device))
-		}
-	}
-	return out
 }
 
 func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal AuthorizationResult) []DeviceRecord {
@@ -2695,17 +2666,6 @@ func (s *DevelopmentAIAgentClientStore) daemonVisibleToPrincipalLocked(principal
 		return s.deviceVisibleToPrincipalLocked(principal, device)
 	}
 	return false
-}
-
-func copyVisibleSeedDevices(devices []DeviceRecord, principal AuthorizationResult) []DeviceRecord {
-	out := make([]DeviceRecord, 0, len(devices))
-	for _, device := range devices {
-		if deviceHiddenSeedForPrincipal(device, principal) {
-			continue
-		}
-		out = append(out, copyDevice(device))
-	}
-	return out
 }
 
 func deviceHiddenSeedForPrincipal(device DeviceRecord, principal AuthorizationResult) bool {
@@ -2843,12 +2803,7 @@ func (s *DevelopmentAIAgentClientStore) markDeviceRuntimesOfflineLocked(deviceID
 }
 
 func daemonSupportsAction(daemon DeviceDaemonRecord, action DaemonControlAction) bool {
-	for _, supported := range daemon.SupportedActions {
-		if supported == action {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(daemon.SupportedActions, action)
 }
 
 func copyDevices(devices []DeviceRecord) []DeviceRecord {
@@ -2877,10 +2832,8 @@ func addConnectedWorkspace(connected []string, workspaceID string) []string {
 	if workspaceID == "" {
 		return connected
 	}
-	for _, existing := range connected {
-		if existing == workspaceID {
-			return connected
-		}
+	if slices.Contains(connected, workspaceID) {
+		return connected
 	}
 	return append(connected, workspaceID)
 }
@@ -2892,12 +2845,7 @@ func deviceConnectedToWorkspace(device DeviceRecord, workspaceID string) bool {
 	if workspaceID == "" {
 		return false
 	}
-	for _, ws := range device.ConnectedWorkspaceIDs {
-		if ws == workspaceID {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(device.ConnectedWorkspaceIDs, workspaceID)
 }
 
 func copyRuntime(runtime RuntimeRecord) RuntimeRecord {
@@ -2985,7 +2933,7 @@ func projectDeviceDaemonLiveness(daemon DeviceDaemonRecord, now time.Time) Devic
 	return daemon
 }
 
-func deviceRuntimeSnapshotStale(lastSeenAt time.Time, now time.Time) bool {
+func deviceRuntimeSnapshotStale(lastSeenAt, now time.Time) bool {
 	if lastSeenAt.IsZero() {
 		return false
 	}
@@ -3035,8 +2983,8 @@ func clientVisibleTaskThreadMessage(thread AIAgentTaskThreadRecord) string {
 	if message := clientVisibleTaskThreadText(thread.Message); message != "" {
 		return message
 	}
-	for i := len(thread.Lines) - 1; i >= 0; i-- {
-		if message := clientVisibleTaskThreadText(thread.Lines[i].Message); message != "" {
+	for _, v := range slices.Backward(thread.Lines) {
+		if message := clientVisibleTaskThreadText(v.Message); message != "" {
 			return message
 		}
 	}
@@ -3107,28 +3055,6 @@ func aiAgentClientEventStreamHref(workspaceID string) string {
 
 func threadIDForRun(taskID, agentID, runID string) string {
 	return "thread-" + slugAIAgentIDComponent(taskID+"-"+agentID+"-"+runID)
-}
-
-func runtimeKindByID(devices []DeviceRecord, runtimeID string) (RuntimeKind, bool) {
-	for _, device := range devices {
-		for _, runtime := range device.Runtimes {
-			if runtime.RuntimeID == runtimeID {
-				return runtime.Kind, true
-			}
-		}
-	}
-	return "", false
-}
-
-func runtimeKindByIDForPrincipal(devices []DeviceRecord, principal AuthorizationResult, runtimeID string) (RuntimeKind, bool) {
-	for _, device := range filterDevicesForPrincipal(devices, principal) {
-		for _, runtime := range device.Runtimes {
-			if runtime.RuntimeID == runtimeID {
-				return runtime.Kind, true
-			}
-		}
-	}
-	return "", false
 }
 
 func runtimeSelectionFromDevices(devices []DeviceRecord, runtimeID string, requestedModelID *string) (RuntimeKind, RuntimeModelRecord, bool) {

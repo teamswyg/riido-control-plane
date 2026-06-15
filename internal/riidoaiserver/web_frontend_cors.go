@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"net/http"
+	"slices"
 	"strings"
 )
 
@@ -69,12 +70,7 @@ func normalizeWebAllowedOrigins(origins []string) []string {
 }
 
 func (s Server) webOriginAllowed(origin string) bool {
-	for _, allowed := range s.config.WebAllowedOrigins {
-		if origin == allowed {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(s.config.WebAllowedOrigins, origin)
 }
 
 func isCORSPreflight(r *http.Request) bool {
@@ -102,7 +98,7 @@ func webCORSMethodAllowed(method string) bool {
 }
 
 func webCORSHeadersAllowed(raw string) bool {
-	for _, header := range strings.Split(raw, ",") {
+	for header := range strings.SplitSeq(raw, ",") {
 		header = strings.ToLower(strings.TrimSpace(header))
 		if header == "" {
 			continue
@@ -117,7 +113,7 @@ func webCORSHeadersAllowed(raw string) bool {
 func addVaryHeader(header http.Header, value string) {
 	existing := header.Values("Vary")
 	for _, field := range existing {
-		for _, part := range strings.Split(field, ",") {
+		for part := range strings.SplitSeq(field, ",") {
 			if strings.EqualFold(strings.TrimSpace(part), value) {
 				return
 			}

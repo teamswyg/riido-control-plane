@@ -193,7 +193,8 @@ func (s *S3AIAgentProfileThumbnailUploadService) postPolicy(credentials AWSCrede
 	policy := base64.StdEncoding.EncodeToString(policyJSON)
 	signingKey := awsV4SigningKey(credentials.SecretAccessKey, dateScope, s.region, agentProfileThumbnailUploadService)
 	signature := hex.EncodeToString(hmacSHA256(signingKey, policy))
-	fields = append(fields,
+	fields = append(
+		fields,
 		AgentProfileThumbnailUploadFormField{Name: "policy", Value: policy},
 		AgentProfileThumbnailUploadFormField{Name: "x-amz-signature", Value: signature},
 	)

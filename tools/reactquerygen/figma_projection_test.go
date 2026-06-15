@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -1029,12 +1030,7 @@ func generatedPathHaystack(spec openAPISpec, generatedPaths map[string]string) s
 }
 
 func hasString(items []string, want string) bool {
-	for _, item := range items {
-		if item == want {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(items, want)
 }
 
 func docMentionsGeneratedPath(docText, generatedPath string) bool {

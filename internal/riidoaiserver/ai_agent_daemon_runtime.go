@@ -288,12 +288,13 @@ func (s *DevelopmentAIAgentClientStore) LookupAgentRuntimeFact(agentID string) (
 	if !ok {
 		return AgentRuntimeBinding{}, RuntimeRecord{}, false
 	}
-	device, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
+	device, _, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
 	if !ok {
 		return AgentRuntimeBinding{}, RuntimeRecord{}, false
 	}
 	projected := projectDeviceRuntimeLiveness(device, time.Now().UTC())
-	if runtime, ok = runtimeByID(projected.Runtimes, agent.RuntimeID); !ok || !runtimeAvailableForBinding(runtime) {
+	runtime, ok := runtimeByID(projected.Runtimes, agent.RuntimeID)
+	if !ok || !runtimeAvailableForBinding(runtime) {
 		return AgentRuntimeBinding{}, RuntimeRecord{}, false
 	}
 	return binding, copyRuntime(runtime), true
@@ -305,13 +306,14 @@ func (s *DevelopmentAIAgentClientStore) agentRuntimeBindingLocked(agent AgentCli
 	if agent.AgentID == "" || agent.RuntimeID == "" {
 		return AgentRuntimeBinding{}, false
 	}
-	device, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
+	device, _, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
 	if !ok {
 		return AgentRuntimeBinding{}, false
 	}
 	now := time.Now().UTC()
 	device = projectDeviceRuntimeLiveness(device, now)
-	if runtime, ok = runtimeByID(device.Runtimes, agent.RuntimeID); !ok || !runtimeAvailableForBinding(runtime) {
+	runtime, ok := runtimeByID(device.Runtimes, agent.RuntimeID)
+	if !ok || !runtimeAvailableForBinding(runtime) {
 		return AgentRuntimeBinding{}, false
 	}
 	daemon, ok := s.daemons[device.DeviceID]

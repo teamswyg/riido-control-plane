@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -268,7 +270,7 @@ func (s *Store) SubscribeTask(ctx context.Context, taskID string) ([]TaskEvent, 
 
 // WaitForAssignment is the long-poll claim. It returns immediately when work is
 // already available for the agent; otherwise it registers a per-agent waiter and
-// blocks until a queued assignment is signalled, a cross-instance re-poll tick
+// blocks until a queued assignment is signaled, a cross-instance re-poll tick
 // finds one (covers assignments queued on another control-plane instance), the
 // hold budget elapses (returns action=none, like a normal empty poll), or ctx is
 // cancelled (client disconnect / shutdown).
@@ -1420,9 +1422,7 @@ func (s *Store) handleMetrics(state *storeState) MetricsSnapshot {
 		assignmentsByState[assignment.State]++
 	}
 	pollActions := make(map[PollAction]int64, len(state.pollActionsTotal))
-	for action, count := range state.pollActionsTotal {
-		pollActions[action] = count
-	}
+	maps.Copy(pollActions, state.pollActionsTotal)
 	return MetricsSnapshot{
 		SchemaVersion:                       MetricsSchemaVersion,
 		GeneratedAt:                         s.now(),
@@ -1558,12 +1558,7 @@ func handleLoadAssignmentProjection(state *storeState, assignmentID string) (Ass
 }
 
 func assignmentIDInAgentQueue(ids []string, id string) bool {
-	for _, current := range ids {
-		if current == id {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(ids, id)
 }
 
 func (s *Store) appendRecordedEvent(state *storeState, event TaskEvent) {
@@ -1646,8 +1641,8 @@ func (state *storeState) assignmentForClientStop(taskID string, req CancelAssign
 		return assignment, assignment.ID != ""
 	}
 	assignmentIDs := state.agentAssignments[req.AgentID]
-	for i := len(assignmentIDs) - 1; i >= 0; i-- {
-		assignment := state.assignments[assignmentIDs[i]]
+	for _, assignmentID := range slices.Backward(assignmentIDs) {
+		assignment := state.assignments[assignmentID]
 		if assignment.TaskID != taskID || isTerminal(assignment.State) {
 			continue
 		}
@@ -1666,9 +1661,7 @@ func cloneMetadata(in map[string]string) map[string]string {
 		return nil
 	}
 	out := make(map[string]string, len(in))
-	for k, v := range in {
-		out[k] = v
-	}
+	maps.Copy(out, in)
 	return out
 }
 
@@ -1713,6 +1706,8 @@ func countSubscribers(state *storeState) int {
 	return total
 }
 
-var _ AssignmentStore = (*Store)(nil)
-var _ ProviderStatusStore = (*Store)(nil)
-var _ ProviderStatusReader = (*Store)(nil)
+var (
+	_ AssignmentStore      = (*Store)(nil)
+	_ ProviderStatusStore  = (*Store)(nil)
+	_ ProviderStatusReader = (*Store)(nil)
+)

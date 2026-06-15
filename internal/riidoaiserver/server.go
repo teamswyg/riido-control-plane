@@ -6,14 +6,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"strings"
 	"time"
 )
 
-const aiAgentTokenHeader = "X-Riido-AI-Agent-Token"
-const deviceIDHeader = "X-Riido-Device-ID"
-const deviceSecretHeader = "X-Riido-Device-Secret"
+const (
+	aiAgentTokenHeader = "X-Riido-Ai-Agent-Token"
+	deviceIDHeader     = "X-Riido-Device-Id"
+	deviceSecretHeader = "X-Riido-Device-Secret"
+)
 
 // sseKeepaliveInterval is how often an idle SSE stream emits a comment line to
 // keep the connection alive through ALB/proxy idle timeouts.
@@ -1622,8 +1625,8 @@ func (s Server) handleAgentPoll(w http.ResponseWriter, r *http.Request, agentID 
 	var err error
 	if longPoll, ok := s.assignment.(AssignmentLongPollStore); ok && req.WaitMs > 0 {
 		hold := time.Duration(req.WaitMs) * time.Millisecond
-		if max := s.config.LongPollMaxHold; max > 0 && hold > max {
-			hold = max
+		if maxHold := s.config.LongPollMaxHold; maxHold > 0 && hold > maxHold {
+			hold = maxHold
 		}
 		response, err = longPoll.WaitForAssignment(r.Context(), agentID, req, hold, s.config.LongPollTick)
 	} else {
@@ -2099,7 +2102,9 @@ func decodeJSON(r *http.Request, out any) error {
 func writeJSON(w http.ResponseWriter, status int, value any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(value)
+	if err := json.NewEncoder(w).Encode(value); err != nil {
+		return
+	}
 }
 
 func writeError(w http.ResponseWriter, status int, message string) {
@@ -2120,9 +2125,7 @@ func writeUnauthorized(w http.ResponseWriter) {
 
 func copyStringMap(in map[string]string) map[string]string {
 	out := make(map[string]string, len(in)+1)
-	for k, v := range in {
-		out[k] = v
-	}
+	maps.Copy(out, in)
 	return out
 }
 

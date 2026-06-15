@@ -322,7 +322,8 @@ func writeTypes(b *strings.Builder, schemas map[string]schema) {
 func writeCoreRuntime(b *strings.Builder) {
 	writeJSDoc(b, "앱에서 사용하는 fetch 구현을 주입하기 위한 타입입니다.")
 	b.WriteString("export type RiidoFetcher = typeof fetch;\n\n")
-	writeJSDoc(b,
+	writeJSDoc(
+		b,
 		"control-plane 호출에 필요한 기본 설정입니다.",
 		"`baseUrl`은 예: `https://<control-plane-host>`처럼 마지막 슬래시 없이 전달해도 됩니다.",
 		"`aiAgentToken`은 기존 Riido 앱 로그인 토큰과 구분되는 AI Agent SaaS 전용 토큰입니다.",
@@ -395,7 +396,8 @@ func writeOperation(b *strings.Builder, op routeOperation) error {
 }
 
 func writeQueryOperation(b *strings.Builder, info operationInfo) {
-	writeJSDoc(b,
+	writeJSDoc(
+		b,
 		operationSummary(info.Route),
 		fmt.Sprintf("cache tag: `%s`", info.Route.Op.Client.CacheTag),
 		"이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.",
@@ -412,7 +414,8 @@ func writeQueryOperation(b *strings.Builder, info operationInfo) {
 	writeJSDoc(b, operationSummary(info.Route), "useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.")
 	fmt.Fprintf(b, "export function %s(%s) {\n", queryOptionsFunctionName(info.Name), queryOptionsSignature(info, true))
 	b.WriteString("  const { signal, ...queryOptions } = options;\n")
-	fmt.Fprintf(b, "  return {\n    ...queryOptions,\n    queryKey: %s(%s),\n    queryFn: () => %s(%s),\n  };\n",
+	fmt.Fprintf(
+		b, "  return {\n    ...queryOptions,\n    queryKey: %s(%s),\n    queryFn: () => %s(%s),\n  };\n",
 		queryKeyFunctionName(info.Name),
 		strings.Join(queryKeyCallArgs(info.PathParams, info.RequestType), ", "),
 		info.Name,
@@ -503,7 +506,8 @@ func writeCoreEndpointInterfaces(b *strings.Builder, ops []routeOperation) error
 }
 
 func writeCoreQueryEndpointInterface(b *strings.Builder, info operationInfo) {
-	writeJSDoc(b, append(operationGeneratedPathCommentLines(info.Route),
+	writeJSDoc(b, append(
+		operationGeneratedPathCommentLines(info.Route),
 		fmt.Sprintf("cache tag: `%s`", info.Route.Op.Client.CacheTag),
 	)...)
 	fmt.Fprintf(b, "export interface %s {\n", endpointInterfaceName(info.Name))
@@ -527,7 +531,8 @@ func writeCoreQueryEndpointInterface(b *strings.Builder, info operationInfo) {
 }
 
 func writeCoreMutationEndpointInterface(b *strings.Builder, info operationInfo, cacheTargets map[string]routeOperation) {
-	writeJSDoc(b, append(operationGeneratedPathCommentLines(info.Route),
+	writeJSDoc(b, append(
+		operationGeneratedPathCommentLines(info.Route),
 		"자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.",
 	)...)
 	fmt.Fprintf(b, "export interface %s {\n", endpointInterfaceName(info.Name))
@@ -610,7 +615,7 @@ func writeNamespaceInterface(b *strings.Builder, module string, path []string, n
 			fmt.Fprintf(b, "  readonly %s: %s;\n", quoteProperty(name), operationEndpointType(info.Name, react))
 			continue
 		}
-		childPath := append(path, name)
+		childPath := append(append([]string(nil), path...), name)
 		desc := descriptions[namespaceKey(module, childPath)]
 		if desc == "" {
 			if child.Op != nil {
@@ -650,7 +655,8 @@ func writeFacade(b *strings.Builder, ops []routeOperation) error {
 		return err
 	}
 	cacheTargets := queryOperationByCacheTag(ops)
-	writeJSDoc(b,
+	writeJSDoc(
+		b,
 		"control-plane API를 DSL client metadata의 module/namespace별로 묶은 config-bound facade입니다.",
 		"React QueryClient를 대체하지 않고 request, query/queryOptions, mutation/mutationOptions와 명시적 cache helper만 제공합니다.",
 	)
@@ -715,7 +721,8 @@ func writeReactFacade(b *strings.Builder, ops []routeOperation) error {
 	if err != nil {
 		return err
 	}
-	writeJSDoc(b,
+	writeJSDoc(
+		b,
 		"control-plane API facade에 React Query hook을 얹은 client 전용 wrapper입니다.",
 		"hook은 반드시 `@/lib/react-query`를 통과하므로 riido-client의 workspace/demo 정책을 우회하지 않습니다.",
 	)
@@ -734,7 +741,7 @@ func writeReactFacade(b *strings.Builder, ops []routeOperation) error {
 func writeReactFacadeChildren(b *strings.Builder, node *facadeNode, path []string, indent string) {
 	for _, name := range sortedNodeNames(node) {
 		child := node.Children[name]
-		nextPath := append(path, name)
+		nextPath := append(append([]string(nil), path...), name)
 		fmt.Fprintf(b, "%s%s: {\n", indent, quoteProperty(name))
 		if child.Op != nil {
 			writeReactFacadeOperation(b, *child.Op, nextPath, indent+"  ")
@@ -749,7 +756,8 @@ func writeReactFacadeOperation(b *strings.Builder, op routeOperation, path []str
 	accessor := "coreClient." + strings.Join(path, ".")
 	fmt.Fprintf(b, "%s...%s,\n", indent, accessor)
 	if strings.EqualFold(op.Method, "GET") {
-		fmt.Fprintf(b, "%suseQuery: (%s) => useQuery<%s, Error>(%s.query(%s)),\n",
+		fmt.Fprintf(
+			b, "%suseQuery: (%s) => useQuery<%s, Error>(%s.query(%s)),\n",
 			indent,
 			reactQueryHookSignature(info),
 			reactType(info.ResponseType),
@@ -759,7 +767,8 @@ func writeReactFacadeOperation(b *strings.Builder, op routeOperation, path []str
 		return
 	}
 	info.MutationVariables = mutationVariableTypeName(info.Name, info.PathParams, info.RequestType)
-	fmt.Fprintf(b, "%suseMutation: (options: core.RiidoMutationOptions<%s, %s> = {}) => useMutation<%s, Error, %s>(%s.mutation(options)),\n",
+	fmt.Fprintf(
+		b, "%suseMutation: (options: core.RiidoMutationOptions<%s, %s> = {}) => useMutation<%s, Error, %s>(%s.mutation(options)),\n",
 		indent,
 		reactType(info.ResponseType),
 		reactType(info.MutationVariables),
@@ -1159,7 +1168,7 @@ func queryKeyTail(params []string, requestType string) string {
 	return ", " + strings.Join(parts, ", ")
 }
 
-func invalidationPropertyName(cacheTag string, module string) string {
+func invalidationPropertyName(cacheTag, module string) string {
 	prefix := module + "."
 	trimmed := strings.TrimPrefix(cacheTag, prefix)
 	parts := strings.Split(trimmed, ".")

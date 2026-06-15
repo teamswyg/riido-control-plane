@@ -523,10 +523,6 @@ func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
 	return body, nil
 }
 
-func signDynamoDBRequest(req *http.Request, payload []byte, region string, credentials AWSCredentials, now time.Time, target string) {
-	signAWSJSONRequest(req, payload, region, dynamoDBService, credentials, now, target, dynamoDBJSONContentType)
-}
-
 func signAWSJSONRequest(req *http.Request, payload []byte, region, service string, credentials AWSCredentials, now time.Time, target, contentType string) {
 	amzDate := now.UTC().Format("20060102T150405Z")
 	dateScope := now.UTC().Format("20060102")

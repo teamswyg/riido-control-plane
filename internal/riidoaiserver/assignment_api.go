@@ -8,15 +8,17 @@ import (
 
 const MetricsSchemaVersion = "riido-ai-server-metrics.v1"
 
-type AssignRequest = assignmentcontract.AssignRequest
-type Assignment = assignmentcontract.Assignment
-type PollRequest = assignmentcontract.PollRequest
-type AgentHeartbeatRequest = assignmentcontract.AgentHeartbeatRequest
-type PollResponse = assignmentcontract.PollResponse
-type AgentHeartbeatResponse = assignmentcontract.AgentHeartbeatResponse
-type AgentEventRequest = assignmentcontract.AgentEventRequest
-type AgentEventResponse = assignmentcontract.AgentEventResponse
-type TaskEvent = assignmentcontract.TaskEvent
+type (
+	AssignRequest          = assignmentcontract.AssignRequest
+	Assignment             = assignmentcontract.Assignment
+	PollRequest            = assignmentcontract.PollRequest
+	AgentHeartbeatRequest  = assignmentcontract.AgentHeartbeatRequest
+	PollResponse           = assignmentcontract.PollResponse
+	AgentHeartbeatResponse = assignmentcontract.AgentHeartbeatResponse
+	AgentEventRequest      = assignmentcontract.AgentEventRequest
+	AgentEventResponse     = assignmentcontract.AgentEventResponse
+	TaskEvent              = assignmentcontract.TaskEvent
+)
 
 type Health struct {
 	SchemaVersion string `json:"schema_version"`
