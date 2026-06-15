@@ -29,6 +29,7 @@ const (
 	dynamoDBUpdateItemTarget      = "DynamoDB_20120810.UpdateItem"
 	dynamoDBService               = "dynamodb"
 	defaultDynamoDBRequestTimeout = 10 * time.Second
+	awsJSONResponseBodyLimit      = 16 << 20
 )
 
 type AWSCredentials struct {
@@ -509,9 +510,12 @@ func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	body, readErr := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, awsJSONResponseBodyLimit+1))
 	if readErr != nil {
 		return nil, readErr
+	}
+	if len(body) > awsJSONResponseBodyLimit {
+		return nil, fmt.Errorf("%s response body exceeds %d bytes", request.service, awsJSONResponseBodyLimit)
 	}
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, awsJSONAPIError{service: request.service, statusCode: resp.StatusCode, body: body}
