@@ -1811,28 +1811,17 @@ func assignmentProjectionMatchesTaskThread(thread AIAgentTaskThreadRecord, proje
 }
 
 func assignmentStateIsTerminal(state AssignmentState) bool {
-	switch state {
-	case AssignmentCancelled, AssignmentCompleted, AssignmentFailed:
-		return true
-	default:
-		return false
-	}
+	return state.Code().IsTerminal()
 }
 
 func assignmentStateCanRepairTaskThread(state AssignmentState) bool {
-	switch state {
-	case AssignmentQueued, AssignmentLeased, AssignmentReady, AssignmentRunning, AssignmentCancelling,
-		AssignmentCancelled, AssignmentCompleted, AssignmentFailed:
-		return true
-	default:
-		return false
-	}
+	return state.Code().IsKnown()
 }
 
 func queueDiagnosticsFromAssignmentProjection(ctx context.Context, reader AssignmentProjectionReader, projection AssignmentProjection) (*AIAgentTaskThreadQueueDiagnostics, error) {
 	assignment := projection.Assignment
 	blockedByID := strings.TrimSpace(assignment.BlockedByAssignmentID)
-	if assignment.State != AssignmentQueued || blockedByID == "" {
+	if assignment.State.Code() != AssignmentStateCodeQueued || blockedByID == "" {
 		return nil, nil
 	}
 	diagnostics := &AIAgentTaskThreadQueueDiagnostics{
@@ -1936,50 +1925,50 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		CommentKind:     AgentTaskCommentRuntimeProgress,
 		Message:         clientVisibleTaskThreadText(message),
 	}
-	switch state {
-	case AssignmentQueued, AssignmentLeased:
+	switch state.Code() {
+	case AssignmentStateCodeQueued, AssignmentStateCodeLeased:
 		response.WorkStatus = AgentWorkStatusQueued
 		response.AssignmentState = AgentAssignmentStateQueued
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
 		if response.Message == "" {
 			response.Message = "agent assignment is queued"
 		}
-	case AssignmentReady:
+	case AssignmentStateCodeReady:
 		response.WorkStatus = AgentWorkStatusRunning
 		response.AssignmentState = AgentAssignmentStateRunning
 		response.CommentKind = AgentTaskCommentAssignmentStarted
 		if response.Message == "" {
 			response.Message = "agent assignment was accepted by runtime"
 		}
-	case AssignmentRunning:
+	case AssignmentStateCodeRunning:
 		response.WorkStatus = AgentWorkStatusRunning
 		response.AssignmentState = AgentAssignmentStateRunning
 		response.CommentKind = AgentTaskCommentRuntimeProgress
 		if response.Message == "" {
 			response.Message = "agent work is running"
 		}
-	case AssignmentCancelling:
+	case AssignmentStateCodeCancelling:
 		response.WorkStatus = AgentWorkStatusRunning
 		response.AssignmentState = AgentAssignmentStateStopping
 		response.CommentKind = AgentTaskCommentStoppedByUserRequest
 		if response.Message == "" {
 			response.Message = "agent work is stopping"
 		}
-	case AssignmentCancelled:
+	case AssignmentStateCodeCancelled:
 		response.WorkStatus = AgentWorkStatusIdle
 		response.AssignmentState = AgentAssignmentStateStopped
 		response.CommentKind = AgentTaskCommentStoppedByUserRequest
 		if response.Message == "" {
 			response.Message = "agent work was stopped"
 		}
-	case AssignmentCompleted:
+	case AssignmentStateCodeCompleted:
 		response.WorkStatus = AgentWorkStatusCompleted
 		response.AssignmentState = AgentAssignmentStateCompleted
 		response.CommentKind = AgentTaskCommentTaskCompleted
 		if response.Message == "" {
 			response.Message = "agent work completed"
 		}
-	case AssignmentFailed:
+	case AssignmentStateCodeFailed:
 		response.WorkStatus = AgentWorkStatusFailed
 		response.AssignmentState = AgentAssignmentStateFailed
 		response.CommentKind = AgentTaskCommentTaskFailed
@@ -1995,8 +1984,8 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 }
 
 func assignmentEventVisibleThreadMessage(state AssignmentState, eventType, message, previous string) string {
-	switch state {
-	case AssignmentQueued, AssignmentLeased, AssignmentReady, AssignmentRunning, AssignmentCancelling:
+	switch state.Code() {
+	case AssignmentStateCodeQueued, AssignmentStateCodeLeased, AssignmentStateCodeReady, AssignmentStateCodeRunning, AssignmentStateCodeCancelling:
 		if strings.TrimSpace(eventType) != EventRiidoLog {
 			return strings.TrimSpace(previous)
 		}

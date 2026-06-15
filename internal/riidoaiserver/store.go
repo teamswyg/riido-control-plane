@@ -769,7 +769,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 				return current, nil
 			}
 			replacesID = current.ID
-			if current.State == AssignmentQueued {
+			if current.State.Code() == AssignmentStateCodeQueued {
 				current.State = AssignmentCancelled
 				current.UpdatedAt = now
 				state.assignments[current.ID] = current
@@ -835,7 +835,7 @@ func (s *Store) handleCancelAssignment(state *storeState, taskID string, req Can
 	if assignment.AgentID != req.AgentID {
 		return Assignment{}, fmt.Errorf("assignment %s belongs to agent %s", assignment.ID, assignment.AgentID)
 	}
-	if isTerminal(assignment.State) || assignment.State == AssignmentCancelling {
+	if isTerminal(assignment.State) || assignment.State.Code() == AssignmentStateCodeCancelling {
 		return assignment, nil
 	}
 
@@ -845,7 +845,7 @@ func (s *Store) handleCancelAssignment(state *storeState, taskID string, req Can
 	if message == "" {
 		message = "assignment cancellation requested by client"
 	}
-	if assignment.State == AssignmentQueued {
+	if assignment.State.Code() == AssignmentStateCodeQueued {
 		nextState = AssignmentCancelled
 		eventType = EventAssignmentCancelled
 		if req.Reason == "" {
@@ -904,7 +904,7 @@ func (s *Store) cancelQueuedBlockerForAssignment(state *storeState, assignment *
 		return false
 	}
 	blocker := state.assignments[assignment.BlockedByAssignmentID]
-	if blocker.ID == "" || blocker.State != AssignmentQueued {
+	if blocker.ID == "" || blocker.State.Code() != AssignmentStateCodeQueued {
 		return false
 	}
 	blocker.State = AssignmentCancelled
@@ -935,7 +935,7 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 	assignIDs := state.agentAssignments[agentID]
 	for _, id := range assignIDs {
 		assignment := state.assignments[id]
-		if assignment.State == AssignmentCancelling {
+		if assignment.State.Code() == AssignmentStateCodeCancelling {
 			expired, err := s.assignmentActiveLeaseExpired(state, assignment, s.now())
 			if err != nil {
 				return PollResponse{}, false, nil, "", err
@@ -961,7 +961,7 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 	}
 	if ok {
 		switch {
-		case durableAssignment.State == AssignmentCancelling:
+		case durableAssignment.State.Code() == AssignmentStateCodeCancelling:
 			response.Action = PollCancel
 			response.Assignment = copyAssignment(durableAssignment)
 			state.pollActionsTotal[response.Action]++
@@ -1008,7 +1008,7 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 	}
 	for _, id := range assignIDs {
 		assignment := state.assignments[id]
-		if assignment.State != AssignmentQueued {
+		if assignment.State.Code() != AssignmentStateCodeQueued {
 			continue
 		}
 		if err := s.repairQueuedAssignmentBlockerForClaim(state, &assignment); err != nil {
@@ -1125,7 +1125,7 @@ func (s *Store) failStaleAssignmentWithMessage(state *storeState, assignment Ass
 }
 
 func (s *Store) repairQueuedAssignmentBlockerForClaim(state *storeState, assignment *Assignment) error {
-	if assignment == nil || assignment.State != AssignmentQueued || strings.TrimSpace(assignment.BlockedByAssignmentID) == "" {
+	if assignment == nil || assignment.State.Code() != AssignmentStateCodeQueued || strings.TrimSpace(assignment.BlockedByAssignmentID) == "" {
 		return nil
 	}
 	blocker := state.assignments[assignment.BlockedByAssignmentID]
@@ -1143,7 +1143,7 @@ func (s *Store) repairQueuedAssignmentBlockerForClaim(state *storeState, assignm
 		return nil
 	}
 	now := s.now()
-	if blocker.State == AssignmentQueued {
+	if blocker.State.Code() == AssignmentStateCodeQueued {
 		blocker.State = AssignmentCancelled
 		blocker.UpdatedAt = now
 		state.assignments[blocker.ID] = blocker
@@ -1628,7 +1628,8 @@ func recordEventAppendLatency(state *storeState, duration time.Duration) {
 }
 
 func assignmentHoldsActiveLease(state AssignmentState) bool {
-	return isAgentActive(state) || state == AssignmentCancelling
+	code := state.Code()
+	return code.IsAgentActive() || code == AssignmentStateCodeCancelling
 }
 
 func assignmentBlockerCleared(state *storeState, assignment Assignment) bool {
