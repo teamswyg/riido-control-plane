@@ -23,6 +23,15 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV1(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/bootstrap", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/onboarding/fixtures", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/devices", token, "", http.StatusOK)
+	profileUploadBytes := aiAgentSmokeRequest(t, server, http.MethodPost, "/v1/client/ai-agent/profile-thumbnails/uploads", token, `{"content_type":"image/png","content_length_bytes":1024}`, http.StatusCreated)
+	var profileUpload AgentProfileThumbnailUploadResponse
+	aiAgentSmokeDecode(t, profileUploadBytes, &profileUpload)
+	if profileUpload.Method != http.MethodPost ||
+		profileUpload.FormFileField != "file" ||
+		!strings.HasPrefix(profileUpload.ProfileThumbnailURL, "https://cdn.example.test/thumbnail/ai/profile/") ||
+		!strings.HasSuffix(profileUpload.ProfileThumbnailURL, ".png") {
+		t.Fatalf("v1 profile thumbnail upload intent = %+v", profileUpload)
+	}
 
 	createThumbnailURL := "https://cdn.riido.io/dev/ai-agents/v1-generated-smoke.png"
 	createDescription := "v1 generated endpoint smoke"
@@ -128,6 +137,15 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/bootstrap", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/onboarding/fixtures", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/devices", token, "", http.StatusOK)
+	profileUploadBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/profile-thumbnails/uploads", token, `{"content_type":"image/jpeg","content_length_bytes":2048}`, http.StatusCreated)
+	var profileUpload AgentProfileThumbnailUploadResponse
+	aiAgentSmokeDecode(t, profileUploadBytes, &profileUpload)
+	if profileUpload.Method != http.MethodPost ||
+		profileUpload.FormFileField != "file" ||
+		!strings.HasPrefix(profileUpload.ProfileThumbnailURL, "https://cdn.example.test/thumbnail/ai/profile/") ||
+		!strings.HasSuffix(profileUpload.ProfileThumbnailURL, ".jpg") {
+		t.Fatalf("v2 profile thumbnail upload intent = %+v", profileUpload)
+	}
 
 	fixtureCreateBody := aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{
 		Name:       "v2 smoke fixture agent",

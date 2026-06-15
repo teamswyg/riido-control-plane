@@ -401,7 +401,7 @@
       "kind": "profile",
       "description": "Agent profile presentation fields and server-authored creation/update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
       "rules": [
-        "profile_thumbnail_url: optional HTTPS image URL string; binary upload is outside this contract",
+        "profile_thumbnail_url: optional HTTPS image URL string; profile image binary transfer uses the dedicated profile thumbnail upload-intent endpoint and deployment-owned media storage",
         "tmp_color: optional fixture-provided avatar fallback color preserved on fixture-created agents for list/card presentation; clients still own final rendering precedence",
         "description: optional client-authored one-line summary with a maximum of 160 characters; empty string is allowed; client UI owns truncation and wrapping",
         "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
@@ -409,7 +409,7 @@
         "updated_at: server-authored RFC3339 date-time refreshed when editable agent configuration is saved; used by clients for list update dates and absolute-time tooltips",
         "model_id: optional runtime-scoped model selection; omitted create/update values resolve to the selected runtime default",
         "required_form_controls: Figma node-id=417-21803 / 432-35544 says name, runtime, model, and visibility are required controls; profile_thumbnail_url, description, and instruction remain optional values",
-        "agent_add_screen_field_set: Figma agent add/settings screen fields map to CreateAgentConfigurationRequest.name, profile_thumbnail_url, description, runtime_id, model_id, visibility, and instruction; model options come from RuntimeRecord.models and profile image binary upload/storage stays outside this endpoint",
+        "agent_add_screen_field_set: Figma agent add/settings screen fields map to CreateAgentConfigurationRequest.name, profile_thumbnail_url, description, runtime_id, model_id, visibility, and instruction; model options come from RuntimeRecord.models and profile image upload uses createAIAgentProfileThumbnailUpload before saving profile_thumbnail_url",
         "create: client-facing agent creation stores the same profile fields, binds an authorized selectable runtime_id from the device/runtime read model, stamps owner_principal_id from authorization, and returns created_at and updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
@@ -758,6 +758,11 @@
         {
           "name": "detection_state",
           "ref": "RuntimeDetectionState"
+        },
+        {
+          "name": "provider_version",
+          "type": "string",
+          "description": "provider runtime이 자기 신고한 version 문자열입니다. UI 표시용 raw signal이며 capability/scheduling 분기 조건으로 사용하지 않습니다."
         },
         {
           "name": "owner_principal_id",
@@ -1533,8 +1538,112 @@
       ]
     },
     {
+      "name": "AgentProfileThumbnailUploadFormField",
+      "description": "브라우저가 S3 POST upload form에 그대로 포함해야 하는 name/value field입니다.",
+      "type": "object",
+      "required": [
+        "name",
+        "value"
+      ],
+      "properties": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "CreateAgentProfileThumbnailUploadRequest",
+      "description": "agent 프로필 썸네일 파일을 기존 CDN/S3 media path로 업로드하기 위한 one-time upload intent 요청입니다.",
+      "type": "object",
+      "required": [
+        "content_type",
+        "content_length_bytes"
+      ],
+      "properties": [
+        {
+          "name": "content_type",
+          "type": "string",
+          "description": "업로드할 이미지 MIME type입니다. 지원 값은 image/png, image/jpeg, image/webp입니다."
+        },
+        {
+          "name": "content_length_bytes",
+          "type": "integer",
+          "description": "업로드할 파일 크기입니다. 서버가 허용 범위를 S3 POST policy에 고정합니다."
+        },
+        {
+          "name": "file_name",
+          "type": "string",
+          "description": "클라이언트가 선택한 원본 파일명입니다. object key나 public URL에는 사용하지 않습니다."
+        }
+      ]
+    },
+    {
+      "name": "AgentProfileThumbnailUploadResponse",
+      "description": "agent 프로필 썸네일 S3 POST upload intent입니다. 클라이언트는 form_fields와 file field를 upload_url로 전송하고, 저장 요청에는 profile_thumbnail_url만 전달합니다.",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "method",
+        "upload_url",
+        "form_file_field",
+        "form_fields",
+        "profile_thumbnail_url",
+        "expires_at",
+        "max_content_length_bytes"
+      ],
+      "properties": [
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "method",
+          "type": "string",
+          "description": "S3 upload에 사용할 HTTP method입니다. 현재 POST입니다."
+        },
+        {
+          "name": "upload_url",
+          "type": "string",
+          "format": "uri",
+          "description": "브라우저가 multipart/form-data POST를 보낼 S3 endpoint입니다."
+        },
+        {
+          "name": "form_file_field",
+          "type": "string",
+          "description": "파일 binary를 담을 multipart field name입니다. 현재 file입니다."
+        },
+        {
+          "name": "form_fields",
+          "type": "array",
+          "items": {
+            "ref": "AgentProfileThumbnailUploadFormField"
+          }
+        },
+        {
+          "name": "profile_thumbnail_url",
+          "type": "string",
+          "format": "uri",
+          "description": "업로드 성공 후 agent create/update 요청의 profile_thumbnail_url에 저장할 CDN URL입니다."
+        },
+        {
+          "name": "expires_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "max_content_length_bytes",
+          "type": "integer"
+        }
+      ]
+    },
+    {
       "name": "CreateAgentConfigurationRequest",
-      "description": "Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.",
+      "description": "Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다. 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.",
       "type": "object",
       "required": [
         "name",
@@ -1551,7 +1660,7 @@
           "name": "profile_thumbnail_url",
           "type": "string",
           "format": "uri",
-          "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다."
+          "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다."
         },
         {
           "name": "description",
@@ -1584,7 +1693,7 @@
     },
     {
       "name": "UpdateAgentConfigurationRequest",
-      "description": "Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다.",
+      "description": "Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다. 새 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다.",
       "type": "object",
       "properties": [
         {
@@ -1596,7 +1705,7 @@
           "name": "profile_thumbnail_url",
           "type": "string",
           "format": "uri",
-          "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다."
+          "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다."
         },
         {
           "name": "description",
@@ -3184,6 +3293,54 @@
       ]
     },
     {
+      "operation_id": "createAIAgentProfileThumbnailUpload",
+      "kind": "command",
+      "summary": "AI agent 프로필 썸네일 업로드 intent를 발급합니다",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/profile-thumbnails/uploads",
+      "resource": "agent",
+      "action": "create",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "profileThumbnails",
+          "uploads",
+          "create"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ]
+      },
+      "rbac_policy": "agent_profile_thumbnail_upload.v1",
+      "request": {
+        "ref": "CreateAgentProfileThumbnailUploadRequest",
+        "required": true
+      },
+      "response": {
+        "status": 201,
+        "ref": "AgentProfileThumbnailUploadResponse"
+      },
+      "scenarios": [
+        {
+          "name": "profile image upload precedes agent save",
+          "given": "the Figma agent add/edit screen AvatarInput receives a local image file",
+          "when": "the client requests an upload intent with image content type and size",
+          "then": "the API returns one-time S3 POST form fields plus a CDN profile_thumbnail_url that the client can save through createAIAgent or updateAIAgentConfiguration"
+        },
+        {
+          "name": "media storage stays deployment-owned",
+          "given": "production uses an existing CDN and S3 media bucket path",
+          "when": "the upload intent is created",
+          "then": "the public contract exposes only the upload intent and resulting profile_thumbnail_url while bucket, IAM, and lifecycle details stay in infra/operator configuration"
+        }
+      ]
+    },
+    {
       "operation_id": "createAIAgent",
       "kind": "command",
       "summary": "Figma agent 추가 화면에서 AI agent 설정을 생성합니다",
@@ -4227,6 +4384,49 @@
         "status": 202,
         "ref": "AIAgentTaskActionResponse"
       }
+    },
+    {
+      "operation_id": "createAIAgentProfileThumbnailUploadV2",
+      "kind": "command",
+      "summary": "AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/profile-thumbnails/uploads",
+      "resource": "agent",
+      "action": "create",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "profileThumbnails",
+          "uploads",
+          "create"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ]
+      },
+      "rbac_policy": "agent_profile_thumbnail_upload.v1",
+      "request": {
+        "ref": "CreateAgentProfileThumbnailUploadRequest",
+        "required": true
+      },
+      "response": {
+        "status": 201,
+        "ref": "AgentProfileThumbnailUploadResponse"
+      },
+      "scenarios": [
+        {
+          "name": "workspace-scoped profile image upload precedes agent save",
+          "given": "the v2 workspace-scoped Figma agent add/edit screen AvatarInput receives a local image file",
+          "when": "the client calls riido.v2.aiAgent.profileThumbnails.uploads.create",
+          "then": "the API returns one-time S3 POST form fields plus a CDN profile_thumbnail_url that the client can save through v2 agent create/update"
+        }
+      ]
     },
     {
       "operation_id": "createAIAgentV2",

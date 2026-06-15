@@ -568,6 +568,12 @@ public repository. It owns only these environment variables:
 - `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE`
 - `RIIDO_AI_SERVER_AWS_REGION`
 - `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT`
+- `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_BUCKET`
+- `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_PREFIX`
+- `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_CDN_BASE_URL`
+- `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_MAX_BYTES`
+- `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_UPLOAD_EXPIRES_SECONDS`
+- `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_S3_ENDPOINT`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID`
 - `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID`
@@ -602,6 +608,15 @@ assignment-to-daemon polling. Client thread projection and daemon work leasing
 must share this durable boundary so an accepted generated assignment can be
 observed by a later daemon `poll` even when the HTTP requests land on different
 ECS tasks or after a deployment restart.
+
+Profile thumbnail upload env vars enable the AI Agent client upload-intent
+endpoint. The control-plane signs direct S3 POST form fields and returns the CDN
+URL that clients save as `profile_thumbnail_url`; it does not proxy image bytes
+or expose bucket values/credentials in generated frontend responses.
+
+The runtime deploy smoke issues a tiny upload-intent request after the service
+is stable. It validates only the response shape and CDN URL contract, then drops
+the signed POST payload instead of logging or storing it as deployment evidence.
 
 The generated AI Agent assignment path configures only the production
 server-to-server base URL for the existing Riido API server. `team_id`,

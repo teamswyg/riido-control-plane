@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 )
 
 type AIAgentDaemonRuntimeStore interface {
@@ -365,6 +367,7 @@ func deviceRuntimeSnapshotChangedForEvent(prev DeviceRecord, prevOK bool, next D
 		if p.Kind != rt.Kind ||
 			p.Availability != rt.Availability ||
 			p.DetectionState != rt.DetectionState ||
+			p.ProviderVersion != rt.ProviderVersion ||
 			p.HasAssignedAgent != rt.HasAssignedAgent ||
 			p.RequiresExperimentalOptIn != rt.RequiresExperimentalOptIn ||
 			!equalRuntimeModelRecords(p.Models, rt.Models) {
@@ -556,12 +559,17 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID string, in []Run
 			runtime.DetectionState != RuntimeDetectionStateError {
 			return nil, fmt.Errorf("runtimes[%d].detection_state is invalid", i)
 		}
+		providerVersion, err := normalizeRuntimeProviderVersion(runtime.ProviderVersion)
+		if err != nil {
+			return nil, fmt.Errorf("runtimes[%d].provider_version: %w", i, err)
+		}
 		out = append(out, RuntimeRecord{
 			RuntimeID:                 runtime.RuntimeID,
 			DeviceID:                  deviceID,
 			Kind:                      runtime.Kind,
 			Availability:              runtime.Availability,
 			DetectionState:            runtime.DetectionState,
+			ProviderVersion:           providerVersion,
 			OwnerPrincipalID:          ownerPrincipalID,
 			LastDetectedAt:            now,
 			RequiresExperimentalOptIn: runtime.RequiresExperimentalOptIn,
@@ -569,6 +577,22 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID string, in []Run
 		})
 	}
 	return out, nil
+}
+
+func normalizeRuntimeProviderVersion(value string) (string, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return "", nil
+	}
+	if utf8.RuneCountInString(value) > 128 {
+		return "", errors.New("must be 128 characters or fewer")
+	}
+	for _, r := range value {
+		if unicode.IsControl(r) {
+			return "", errors.New("must not contain control characters")
+		}
+	}
+	return value, nil
 }
 
 func normalizeRuntimeKind(kind RuntimeKind) RuntimeKind {

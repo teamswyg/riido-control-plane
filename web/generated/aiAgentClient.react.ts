@@ -248,6 +248,20 @@ export interface CreateAIAgentFromOnboardingFixtureReactEndpoint extends core.Cr
 }
 
 /**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ * 계약 generated path: `aiAgent.profileThumbnails.uploads.create`
+ * 검색용 generated 경로: `profileThumbnails.uploads.create`
+ * 접근 예시: `riido.aiAgent.profileThumbnails.uploads.create`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadReactEndpoint extends core.CreateAIAgentProfileThumbnailUploadEndpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AgentProfileThumbnailUploadResponse, core.CreateAIAgentProfileThumbnailUploadMutationVariables>) => UseMutationResult<core.AgentProfileThumbnailUploadResponse, Error, core.CreateAIAgentProfileThumbnailUploadMutationVariables>;
+}
+
+/**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다
  * 계약 generated path: `aiAgent.tasks.assignableAgents`
  * 검색용 generated 경로: `tasks.assignableAgents`
@@ -581,6 +595,20 @@ export interface CreateAIAgentFromOnboardingFixtureV2ReactEndpoint extends core.
    * React Query useMutation hook입니다.
    */
   readonly useMutation: (options?: core.RiidoMutationOptions<core.AgentClientRecordResponseV2, core.CreateAIAgentFromOnboardingFixtureV2MutationVariables>) => UseMutationResult<core.AgentClientRecordResponseV2, Error, core.CreateAIAgentFromOnboardingFixtureV2MutationVariables>;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.profileThumbnails.uploads.create`
+ * 검색용 generated 경로: `aiAgent.profileThumbnails.uploads.create`
+ * 접근 예시: `riido.v2.aiAgent.profileThumbnails.uploads.create`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadV2ReactEndpoint extends core.CreateAIAgentProfileThumbnailUploadV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AgentProfileThumbnailUploadResponse, core.CreateAIAgentProfileThumbnailUploadV2MutationVariables>) => UseMutationResult<core.AgentProfileThumbnailUploadResponse, Error, core.CreateAIAgentProfileThumbnailUploadV2MutationVariables>;
 }
 
 /**
@@ -926,6 +954,29 @@ export interface RiidoAIAgentOnboardingReactNamespace {
 }
 
 /**
+ * aiAgent.profileThumbnails.uploads namespace입니다.
+ */
+export interface RiidoAIAgentProfileThumbnailsUploadsReactNamespace {
+  /**
+   * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+   * 계약 generated path: `aiAgent.profileThumbnails.uploads.create`
+   * 검색용 generated 경로: `profileThumbnails.uploads.create`
+   * 접근 예시: `riido.aiAgent.profileThumbnails.uploads.create`
+   */
+  readonly create: CreateAIAgentProfileThumbnailUploadReactEndpoint;
+}
+
+/**
+ * aiAgent.profileThumbnails namespace입니다.
+ */
+export interface RiidoAIAgentProfileThumbnailsReactNamespace {
+  /**
+   * aiAgent.profileThumbnails.uploads namespace입니다.
+   */
+  readonly uploads: RiidoAIAgentProfileThumbnailsUploadsReactNamespace;
+}
+
+/**
  * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
  */
 export interface RiidoAIAgentTasksThreadMessagesReactNamespace {
@@ -1025,6 +1076,10 @@ export interface RiidoAIAgentReactModule {
    * AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
    */
   readonly onboarding: RiidoAIAgentOnboardingReactNamespace;
+  /**
+   * aiAgent.profileThumbnails namespace입니다.
+   */
+  readonly profileThumbnails: RiidoAIAgentProfileThumbnailsReactNamespace;
   /**
    * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -1206,6 +1261,29 @@ export interface RiidoV2AIAgentOnboardingReactNamespace {
 }
 
 /**
+ * v2.aiAgent.profileThumbnails.uploads namespace입니다.
+ */
+export interface RiidoV2AIAgentProfileThumbnailsUploadsReactNamespace {
+  /**
+   * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.profileThumbnails.uploads.create`
+   * 검색용 generated 경로: `aiAgent.profileThumbnails.uploads.create`
+   * 접근 예시: `riido.v2.aiAgent.profileThumbnails.uploads.create`
+   */
+  readonly create: CreateAIAgentProfileThumbnailUploadV2ReactEndpoint;
+}
+
+/**
+ * v2.aiAgent.profileThumbnails namespace입니다.
+ */
+export interface RiidoV2AIAgentProfileThumbnailsReactNamespace {
+  /**
+   * v2.aiAgent.profileThumbnails.uploads namespace입니다.
+   */
+  readonly uploads: RiidoV2AIAgentProfileThumbnailsUploadsReactNamespace;
+}
+
+/**
  * 선택된 workspace의 task에 여러 AI Agent를 병렬로 배정/해제/중지하는 additive assignment namespace입니다. v1/v2 tasks.assignment 호환 경로는 기존 단일 active 시연 흐름을 유지합니다.
  */
 export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
@@ -1356,6 +1434,10 @@ export interface RiidoV2AIAgentReactNamespace {
    */
   readonly onboarding: RiidoV2AIAgentOnboardingReactNamespace;
   /**
+   * v2.aiAgent.profileThumbnails namespace입니다.
+   */
+  readonly profileThumbnails: RiidoV2AIAgentProfileThumbnailsReactNamespace;
+  /**
    * 선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
   readonly tasks: RiidoV2AIAgentTasksReactNamespace;
@@ -1475,6 +1557,14 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
             },
           },
         },
+        profileThumbnails: {
+          uploads: {
+            create: {
+              ...coreClient.aiAgent.profileThumbnails.uploads.create,
+              useMutation: (options: core.RiidoMutationOptions<core.AgentProfileThumbnailUploadResponse, core.CreateAIAgentProfileThumbnailUploadMutationVariables> = {}) => useMutation<core.AgentProfileThumbnailUploadResponse, Error, core.CreateAIAgentProfileThumbnailUploadMutationVariables>(coreClient.aiAgent.profileThumbnails.uploads.create.mutation(options)),
+            },
+          },
+        },
         tasks: {
           assign: {
             ...coreClient.aiAgent.tasks.assign,
@@ -1587,6 +1677,14 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
               createAgent: {
                 ...coreClient.v2.aiAgent.onboarding.fixtures.createAgent,
                 useMutation: (options: core.RiidoMutationOptions<core.AgentClientRecordResponseV2, core.CreateAIAgentFromOnboardingFixtureV2MutationVariables> = {}) => useMutation<core.AgentClientRecordResponseV2, Error, core.CreateAIAgentFromOnboardingFixtureV2MutationVariables>(coreClient.v2.aiAgent.onboarding.fixtures.createAgent.mutation(options)),
+              },
+            },
+          },
+          profileThumbnails: {
+            uploads: {
+              create: {
+                ...coreClient.v2.aiAgent.profileThumbnails.uploads.create,
+                useMutation: (options: core.RiidoMutationOptions<core.AgentProfileThumbnailUploadResponse, core.CreateAIAgentProfileThumbnailUploadV2MutationVariables> = {}) => useMutation<core.AgentProfileThumbnailUploadResponse, Error, core.CreateAIAgentProfileThumbnailUploadV2MutationVariables>(coreClient.v2.aiAgent.profileThumbnails.uploads.create.mutation(options)),
               },
             },
           },

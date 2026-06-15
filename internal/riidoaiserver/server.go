@@ -20,15 +20,16 @@ const deviceSecretHeader = "X-Riido-Device-Secret"
 const sseKeepaliveInterval = 15 * time.Second
 
 type ServerConfig struct {
-	Authorizer        RequestAuthorizer
-	AgentCatalogStore AgentCatalogStore
-	AIAgentClient     AIAgentClientStore
-	DeviceCredentials DeviceCredentialStore
-	Assignment        AssignmentStore
-	TaskContext       AIAgentTaskContextReader
-	ProviderStatus    ProviderStatusStore
-	ProviderRead      ProviderStatusReader
-	WebAllowedOrigins []string
+	Authorizer               RequestAuthorizer
+	AgentCatalogStore        AgentCatalogStore
+	AIAgentClient            AIAgentClientStore
+	AIAgentProfileThumbnails AIAgentProfileThumbnailUploadService
+	DeviceCredentials        DeviceCredentialStore
+	Assignment               AssignmentStore
+	TaskContext              AIAgentTaskContextReader
+	ProviderStatus           ProviderStatusStore
+	ProviderRead             ProviderStatusReader
+	WebAllowedOrigins        []string
 	// LongPollMaxHold caps how long a daemon claim poll (PollRequest.WaitMs) may
 	// be held open. Zero applies the default (25s). Must stay well under the ALB
 	// idle timeout (60s default) and the http.Server write/idle timeouts (unset).
@@ -40,15 +41,16 @@ type ServerConfig struct {
 }
 
 type Server struct {
-	assignment    AssignmentStore
-	agentCatalog  AgentCatalogStore
-	aiAgent       AIAgentClientStore
-	daemonRuntime AIAgentDaemonRuntimeStore
-	taskContext   AIAgentTaskContextReader
-	provider      ProviderStatusStore
-	providerRead  ProviderStatusReader
-	devices       DeviceCredentialStore
-	config        ServerConfig
+	assignment               AssignmentStore
+	agentCatalog             AgentCatalogStore
+	aiAgent                  AIAgentClientStore
+	aiAgentProfileThumbnails AIAgentProfileThumbnailUploadService
+	daemonRuntime            AIAgentDaemonRuntimeStore
+	taskContext              AIAgentTaskContextReader
+	provider                 ProviderStatusStore
+	providerRead             ProviderStatusReader
+	devices                  DeviceCredentialStore
+	config                   ServerConfig
 }
 
 type aiAgentWorkspaceIDContextKey struct{}
@@ -90,15 +92,16 @@ func NewServer(config ServerConfig) Server {
 		daemonRuntime = store
 	}
 	return Server{
-		assignment:    config.Assignment,
-		agentCatalog:  agentCatalog,
-		aiAgent:       config.AIAgentClient,
-		daemonRuntime: daemonRuntime,
-		taskContext:   config.TaskContext,
-		provider:      provider,
-		providerRead:  providerRead,
-		devices:       devices,
-		config:        config,
+		assignment:               config.Assignment,
+		agentCatalog:             agentCatalog,
+		aiAgent:                  config.AIAgentClient,
+		aiAgentProfileThumbnails: config.AIAgentProfileThumbnails,
+		daemonRuntime:            daemonRuntime,
+		taskContext:              config.TaskContext,
+		provider:                 provider,
+		providerRead:             providerRead,
+		devices:                  devices,
+		config:                   config,
 	}
 }
 
@@ -146,6 +149,7 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/client/ai-agent/devices/", s.handleAIAgentClientDeviceRoutes)
 	mux.HandleFunc("/v1/client/ai-agent/onboarding/fixtures", s.handleAIAgentClientOnboardingFixtures)
 	mux.HandleFunc("/v1/client/ai-agent/onboarding/fixtures/", s.handleAIAgentClientOnboardingFixtures)
+	mux.HandleFunc("/v1/client/ai-agent/profile-thumbnails/uploads", s.handleAIAgentClientProfileThumbnailUpload)
 	mux.HandleFunc("/v1/client/ai-agent/tasks/", s.handleAIAgentClientTasks)
 	mux.HandleFunc("/v1/client/ai-agent/agents", s.handleAIAgentClientAgents)
 	mux.HandleFunc("/v1/client/ai-agent/agents/", s.handleAIAgentClientAgents)
@@ -377,6 +381,8 @@ func (s Server) handleAIAgentClientWorkspaceRoutes(w http.ResponseWriter, r *htt
 		s.handleAIAgentClientDeviceRoutes(w, r)
 	case v1Path == "/v1/client/ai-agent/onboarding/fixtures" || strings.HasPrefix(v1Path, "/v1/client/ai-agent/onboarding/fixtures/"):
 		s.handleAIAgentClientOnboardingFixtures(w, r)
+	case v1Path == "/v1/client/ai-agent/profile-thumbnails/uploads":
+		s.handleAIAgentClientProfileThumbnailUpload(w, r)
 	case v1Path == "/v1/client/ai-agent/tasks/assigned-agent-profiles":
 		s.handleAIAgentClientWorkspaceAssignedAgentProfiles(w, r)
 	case strings.HasPrefix(v1Path, "/v1/client/ai-agent/tasks/"):
@@ -508,6 +514,32 @@ func (s Server) handleAIAgentClientCreateFromOnboardingFixture(w http.ResponseWr
 		return
 	}
 	response, err := s.aiAgent.CreateAIAgentFromOnboardingFixture(r.Context(), principal, fixtureID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, response)
+}
+
+func (s Server) handleAIAgentClientProfileThumbnailUpload(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeMethodNotAllowed(w)
+		return
+	}
+	if s.aiAgentProfileThumbnails == nil {
+		writeError(w, http.StatusServiceUnavailable, "profile thumbnail upload service is not configured")
+		return
+	}
+	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionCreate})
+	if !ok {
+		return
+	}
+	var req CreateAgentProfileThumbnailUploadRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response, err := s.aiAgentProfileThumbnails.CreateAIAgentProfileThumbnailUpload(r.Context(), principal, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return

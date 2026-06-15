@@ -64,6 +64,11 @@ values, role/listener/target-group ARNs, task-definition values, generated
 AppSpec/request JSON, deployment IDs, image values, smoke payloads, workflow run
 URLs as evidence, or Terraform/operator evidence.
 
+RIID-4964 adds one deploy-time smoke expectation for the AI Agent profile
+thumbnail upload-intent endpoint. The workflow requests an upload intent and
+checks only the non-secret response shape; it does not upload image bytes,
+publish form fields, or retain the signed POST payload as evidence.
+
 ## Public Redaction
 
 Public repo docs and workflow files may contain only stable key names and

@@ -334,6 +334,12 @@ jobs:
           )"
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices/$device_id/daemon" \
             | jq -e --arg device_id "$device_id" '.schema_version == "riido-ai-server.v1" and .daemon.device_id == $device_id and (.daemon.supported_actions | length) >= 1' >/dev/null
+          curl_json \
+            -H "$auth_header" \
+            -H "Content-Type: application/json" \
+            -d '{"content_type":"image/png","content_length_bytes":1024}' \
+            "$base_url/v2/client/workspaces/$workspace_id/ai-agent/profile-thumbnails/uploads" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .method == "POST" and .form_file_field == "file" and (.upload_url | length) > 0 and (.profile_thumbnail_url | startswith("https://")) and (.form_fields | length) >= 6 and .max_content_length_bytes >= 1024' >/dev/null
 
       - name: Cleanup live handoff files
         if: always()

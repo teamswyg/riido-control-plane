@@ -49,6 +49,12 @@ jobs:
             | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ok"' >/dev/null
           curl_json "$base_url/readyz" \
             | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ready"' >/dev/null
+          curl_json \
+            -H "$auth_header" \
+            -H "Content-Type: application/json" \
+            -d '{"content_type":"image/png","content_length_bytes":1024}' \
+            "$base_url/v1/client/ai-agent/profile-thumbnails/uploads" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .method == "POST" and .form_file_field == "file" and (.upload_url | length) > 0 and (.profile_thumbnail_url | startswith("https://")) and (.form_fields | length) >= 6 and .max_content_length_bytes >= 1024' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/bootstrap" \
             | jq -e '.schema_version == "riido-ai-server.v1" and (.agents | length) > 0 and (.devices | length) > 0' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/devices" \
@@ -100,6 +106,12 @@ jobs:
 
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/bootstrap" \
             | jq -e --arg workspace_id "$workspace_id" '.schema_version == "riido-ai-server.v1" and .workspace_id == $workspace_id and (.devices | length) > 0' >/dev/null
+          curl_json \
+            -H "$auth_header" \
+            -H "Content-Type: application/json" \
+            -d '{"content_type":"image/jpeg","content_length_bytes":2048}' \
+            "$base_url/v2/client/workspaces/$workspace_id/ai-agent/profile-thumbnails/uploads" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .method == "POST" and .form_file_field == "file" and (.upload_url | length) > 0 and (.profile_thumbnail_url | startswith("https://")) and (.form_fields | length) >= 6 and .max_content_length_bytes >= 2048' >/dev/null
           device_id_v2="$(
             curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices" \
               | jq -re '.devices[0].device_id'

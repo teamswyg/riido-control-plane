@@ -141,6 +141,14 @@
       ]
     },
     {
+      "generated_path": "aiAgent.profileThumbnails.uploads.create",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/profile-thumbnails/uploads",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
+    },
+    {
       "generated_path": "aiAgent.tasks.assign",
       "method": "POST",
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignment",
@@ -328,6 +336,14 @@
       "generated_path": "v2.aiAgent.onboarding.fixtures.createAgent",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures/{fixture_id}/agents",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
+      "generated_path": "v2.aiAgent.profileThumbnails.uploads.create",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/profile-thumbnails/uploads",
       "evidence_tests": [
         "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
       ]
