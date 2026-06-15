@@ -231,9 +231,9 @@ func readSSEMessage(t *testing.T, reader *bufio.Reader) string {
 
 func sseData(t *testing.T, message string) []byte {
 	t.Helper()
-	for _, line := range strings.Split(message, "\n") {
-		if strings.HasPrefix(line, "data: ") {
-			return []byte(strings.TrimPrefix(line, "data: "))
+	for line := range strings.SplitSeq(message, "\n") {
+		if after, ok := strings.CutPrefix(line, "data: "); ok {
+			return []byte(after)
 		}
 	}
 	t.Fatalf("SSE message missing data line: %q", message)

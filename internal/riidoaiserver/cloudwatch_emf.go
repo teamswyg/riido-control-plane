@@ -9,8 +9,10 @@ import (
 	"time"
 )
 
-const defaultCloudWatchNamespace = "Riido/RiidoAIServer"
-const defaultCloudWatchServiceName = "riido_ai_server"
+const (
+	defaultCloudWatchNamespace   = "Riido/RiidoAIServer"
+	defaultCloudWatchServiceName = "riido_ai_server"
+)
 
 type CloudWatchEMFConfig struct {
 	Namespace   string

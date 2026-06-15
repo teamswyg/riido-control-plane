@@ -35,7 +35,7 @@ func TestWaitForAssignmentReturnsImmediatelyWhenQueued(t *testing.T) {
 }
 
 // No work, then an assignment is created during the hold -> the waiter is
-// signalled and returns start well before the budget elapses.
+// signaled and returns start well before the budget elapses.
 func TestWaitForAssignmentWakesOnAssign(t *testing.T) {
 	store := NewStore()
 	defer store.Close()

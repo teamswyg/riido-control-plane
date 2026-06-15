@@ -356,17 +356,18 @@ func (s *DynamoDBAssignmentOperationStore) loop() {
 		}
 		credentials, err := cachedAWSCredentials(cmd.ctx, s.now, s.credentialsProvider, &cachedCredentials)
 		if err != nil {
-			if cmd.load {
+			switch {
+			case cmd.load:
 				cmd.loadReply <- dynamoDBAssignmentOperationLoadResult{err: err}
-			} else if cmd.queue {
+			case cmd.queue:
 				cmd.queueReply <- dynamoDBAssignmentQueueResult{err: err}
-			} else if cmd.claim {
+			case cmd.claim:
 				cmd.claimReply <- dynamoDBAssignmentClaimResult{err: err}
-			} else if cmd.active {
+			case cmd.active:
 				cmd.activeReply <- dynamoDBAssignmentActiveLeaseResult{err: err}
-			} else if cmd.projection {
+			case cmd.projection:
 				cmd.projectionReply <- dynamoDBAssignmentProjectionResult{err: err}
-			} else {
+			default:
 				cmd.reply <- err
 			}
 			continue
@@ -1537,9 +1538,11 @@ func assignmentOperationSortKey(record AssignmentOperationRecord) string {
 	return record.RecordedAt.UTC().Format("20060102T150405.000000000Z") + "#" + fmt.Sprintf("%020d", assignmentOperationLastEventSeq(record)) + "#" + record.OperationID
 }
 
-var _ AssignmentOperationStore = (*DynamoDBAssignmentOperationStore)(nil)
-var _ AssignmentOperationLoader = (*DynamoDBAssignmentOperationStore)(nil)
-var _ AssignmentQueueReader = (*DynamoDBAssignmentOperationStore)(nil)
-var _ AssignmentClaimer = (*DynamoDBAssignmentOperationStore)(nil)
-var _ AssignmentActiveLeaseStore = (*DynamoDBAssignmentOperationStore)(nil)
-var _ AssignmentProjectionReader = (*DynamoDBAssignmentOperationStore)(nil)
+var (
+	_ AssignmentOperationStore   = (*DynamoDBAssignmentOperationStore)(nil)
+	_ AssignmentOperationLoader  = (*DynamoDBAssignmentOperationStore)(nil)
+	_ AssignmentQueueReader      = (*DynamoDBAssignmentOperationStore)(nil)
+	_ AssignmentClaimer          = (*DynamoDBAssignmentOperationStore)(nil)
+	_ AssignmentActiveLeaseStore = (*DynamoDBAssignmentOperationStore)(nil)
+	_ AssignmentProjectionReader = (*DynamoDBAssignmentOperationStore)(nil)
+)

@@ -8,10 +8,12 @@ import (
 	"time"
 )
 
-const AssignmentOperationSchemaVersion = "riido-ai-server-assignment-operation.v1"
-const AssignmentProjectionSchemaVersion = "riido-ai-server-assignment-projection.v1"
-const AssignmentAgentActiveSchemaVersion = "riido-ai-server-agent-active-assignment.v1"
-const DefaultAssignmentActiveLeaseSeconds = 20
+const (
+	AssignmentOperationSchemaVersion    = "riido-ai-server-assignment-operation.v1"
+	AssignmentProjectionSchemaVersion   = "riido-ai-server-assignment-projection.v1"
+	AssignmentAgentActiveSchemaVersion  = "riido-ai-server-agent-active-assignment.v1"
+	DefaultAssignmentActiveLeaseSeconds = 20
+)
 
 type AssignmentOperationType string
 

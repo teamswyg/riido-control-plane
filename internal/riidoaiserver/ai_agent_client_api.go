@@ -5,12 +5,16 @@ import (
 	"time"
 )
 
-const AIAgentClientContractID = "control-plane-ai-agent-client-api.v2"
-const AIAgentClientPersistenceSchemaVersion = "riido-ai-agent-client-persistence.v2"
+const (
+	AIAgentClientContractID               = "control-plane-ai-agent-client-api.v2"
+	AIAgentClientPersistenceSchemaVersion = "riido-ai-agent-client-persistence.v2"
+)
 
-const AgentInstructionMaxCharacters = 1000
-const AgentDescriptionMaxCharacters = 160
-const AIAgentDeviceRuntimeSnapshotStaleAfter = 20 * time.Second
+const (
+	AgentInstructionMaxCharacters          = 1000
+	AgentDescriptionMaxCharacters          = 160
+	AIAgentDeviceRuntimeSnapshotStaleAfter = 20 * time.Second
+)
 
 const (
 	AgentClientEventDeviceRuntimeSnapshot = "device_runtime_snapshot"

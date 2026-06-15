@@ -16,8 +16,10 @@ import (
 	"strings"
 )
 
-const contractSchemaVersion = "riido-container-image-contract.v1"
-const checkSchemaVersion = "riido-container-image-contract-check.v1"
+const (
+	contractSchemaVersion = "riido-container-image-contract.v1"
+	checkSchemaVersion    = "riido-container-image-contract-check.v1"
+)
 
 type imageContract struct {
 	SchemaVersion           string        `json:"schema_version"`
@@ -478,8 +480,8 @@ func parseCopy(rest string) copyInstruction {
 	var out copyInstruction
 	var positional []string
 	for _, part := range parts {
-		if strings.HasPrefix(part, "--from=") {
-			out.From = strings.TrimPrefix(part, "--from=")
+		if after, ok := strings.CutPrefix(part, "--from="); ok {
+			out.From = after
 			continue
 		}
 		if strings.HasPrefix(part, "--") {
@@ -496,7 +498,7 @@ func parseCopy(rest string) copyInstruction {
 
 func parseExposedPorts(rest string) []int {
 	var out []int
-	for _, part := range strings.Fields(rest) {
+	for part := range strings.FieldsSeq(rest) {
 		portPart, _, _ := strings.Cut(part, "/")
 		port, err := strconv.Atoi(portPart)
 		if err == nil {

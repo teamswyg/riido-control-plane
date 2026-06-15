@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"regexp"
 	"strconv"
 	"strings"
@@ -163,9 +164,7 @@ func normalizeProgressArgsForCode(code int, args map[string]string) map[string]s
 		return args
 	}
 	out := make(map[string]string, len(args))
-	for key, value := range args {
-		out[key] = value
-	}
+	maps.Copy(out, args)
 	out["label"] = normalized
 	return out
 }

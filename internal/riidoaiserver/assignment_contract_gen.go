@@ -4,8 +4,10 @@ import assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 
 const SchemaVersion = assignmentcontract.SchemaVersion
 
-type AssignmentState = assignmentcontract.AssignmentState
-type AssignmentStateCode = assignmentcontract.AssignmentStateCode
+type (
+	AssignmentState     = assignmentcontract.AssignmentState
+	AssignmentStateCode = assignmentcontract.AssignmentStateCode
+)
 
 const (
 	AssignmentQueued     = assignmentcontract.AssignmentQueued
