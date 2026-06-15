@@ -26,6 +26,12 @@ This file is the public Factor 12 configuration catalog for
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE` | empty | `cmd/riido_ai_server` | DynamoDB table name for the AI Agent client development snapshot item and assignment operation journal/queue; required when development mode is enabled |
 | `RIIDO_AI_SERVER_AWS_REGION` | empty | `cmd/riido_ai_server` | AWS region used by stdlib-only DynamoDB request signing; required when development mode is enabled |
 | `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT` | AWS default for region | `cmd/riido_ai_server` | optional DynamoDB endpoint override for fake-endpoint tests or local development |
+| `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_BUCKET` | empty | `cmd/riido_ai_server` | existing deployment-owned S3 bucket used to sign AI Agent profile thumbnail POST upload intents; required with the CDN base URL to enable the endpoint |
+| `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_PREFIX` | `thumbnail/ai/profile/` | `cmd/riido_ai_server` | object key prefix used when issuing AI Agent profile thumbnail upload intents |
+| `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_CDN_BASE_URL` | empty | `cmd/riido_ai_server` | HTTPS CDN base URL returned to clients as the saved `profile_thumbnail_url`; required with the bucket to enable the endpoint |
+| `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_MAX_BYTES` | `5242880` | `cmd/riido_ai_server` | positive maximum image size accepted by the upload-intent policy |
+| `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_UPLOAD_EXPIRES_SECONDS` | `300` | `cmd/riido_ai_server` | positive lifetime for the one-time S3 POST upload intent |
+| `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_S3_ENDPOINT` | AWS bucket endpoint for region | `cmd/riido_ai_server` | optional S3-compatible endpoint override for tests; production should use the regional S3 endpoint |
 | `AWS_CONTAINER_CREDENTIALS_FULL_URI` | empty | AWS/ECS runtime | optional ECS credential endpoint used to sign DynamoDB requests |
 | `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI` | empty | AWS/ECS runtime | optional ECS relative credential endpoint; used with `http://169.254.170.2` when the full URI is absent |
 | `AWS_CONTAINER_AUTHORIZATION_TOKEN` | empty | AWS/ECS runtime | optional authorization token forwarded to the ECS credential endpoint |
@@ -52,6 +58,13 @@ available. The development store persists the whole AI Agent client read/write
 state as a schema-versioned DynamoDB snapshot item and persists assignment
 operations in the same table so generated assignment requests and daemon poll
 requests can cross ECS instance or restart boundaries.
+
+Profile thumbnail upload intents are optional and fail closed. If any profile
+thumbnail upload env var is set, the bucket, CDN base URL, AWS region, and ECS
+credential endpoint must be present. The endpoint returns signed S3 POST form
+fields plus the CDN URL that clients save as `profile_thumbnail_url`; the server
+does not proxy image bytes and public docs must not include bucket values,
+account IDs, credentials, or live upload evidence.
 
 The external authorizer API key is server-to-server authentication for the
 configured authorizer endpoint. It is not a generated frontend token. If set,

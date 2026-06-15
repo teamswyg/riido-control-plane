@@ -19,28 +19,34 @@ import (
 )
 
 const (
-	envAddr                   = "RIIDO_AI_SERVER_ADDR"
-	envShutdownTimeoutSeconds = "RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS"
-	envAuthzTokensJSON        = "RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON"
-	envExternalAuthzURL       = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL"
-	envExternalAuthzAudience  = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE"
-	envExternalAuthzAPIKey    = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY"
-	envExternalAuthzTimeout   = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS"
-	envReviewAccountTokenHash = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
-	envMetricsLogInterval     = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
-	envWebAllowedOrigins      = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
-	envAssignmentActiveLease  = "RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS"
-	envAIAgentClientDev       = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
-	envAIAgentClientTable     = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE"
-	envAWSRegion              = "RIIDO_AI_SERVER_AWS_REGION"
-	envDynamoDBEndpoint       = "RIIDO_AI_SERVER_DYNAMODB_ENDPOINT"
-	envTaskContextBaseURL     = "RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL"
-	envTaskContextWorkspaceID = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID"
-	envTaskContextTeamID      = "RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID"
-	envTaskContextAPIKey      = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY"
-	envTaskContextTimeout     = "RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS"
-	envLongPollMaxHoldSeconds = "RIIDO_AI_SERVER_LONGPOLL_MAX_HOLD_SECONDS"
-	envLongPollTickSeconds    = "RIIDO_AI_SERVER_LONGPOLL_TICK_SECONDS"
+	envAddr                            = "RIIDO_AI_SERVER_ADDR"
+	envShutdownTimeoutSeconds          = "RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS"
+	envAuthzTokensJSON                 = "RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON"
+	envExternalAuthzURL                = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL"
+	envExternalAuthzAudience           = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE"
+	envExternalAuthzAPIKey             = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY"
+	envExternalAuthzTimeout            = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS"
+	envReviewAccountTokenHash          = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
+	envMetricsLogInterval              = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
+	envWebAllowedOrigins               = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
+	envAssignmentActiveLease           = "RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS"
+	envAIAgentClientDev                = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
+	envAIAgentClientTable              = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE"
+	envAWSRegion                       = "RIIDO_AI_SERVER_AWS_REGION"
+	envDynamoDBEndpoint                = "RIIDO_AI_SERVER_DYNAMODB_ENDPOINT"
+	envAgentProfileThumbnailBucket     = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_BUCKET"
+	envAgentProfileThumbnailPrefix     = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_PREFIX"
+	envAgentProfileThumbnailCDNBase    = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_CDN_BASE_URL"
+	envAgentProfileThumbnailMaxBytes   = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_MAX_BYTES"
+	envAgentProfileThumbnailExpires    = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_UPLOAD_EXPIRES_SECONDS"
+	envAgentProfileThumbnailS3Endpoint = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_S3_ENDPOINT"
+	envTaskContextBaseURL              = "RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL"
+	envTaskContextWorkspaceID          = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID"
+	envTaskContextTeamID               = "RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID"
+	envTaskContextAPIKey               = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY"
+	envTaskContextTimeout              = "RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS"
+	envLongPollMaxHoldSeconds          = "RIIDO_AI_SERVER_LONGPOLL_MAX_HOLD_SECONDS"
+	envLongPollTickSeconds             = "RIIDO_AI_SERVER_LONGPOLL_TICK_SECONDS"
 
 	envAWSContainerCredentialsFullURI     = "AWS_CONTAINER_CREDENTIALS_FULL_URI"
 	envAWSContainerCredentialsRelativeURI = "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
@@ -60,6 +66,7 @@ type runtimeConfig struct {
 	LongPollTick             time.Duration
 	AIAgentClientDev         bool
 	AIAgentClientStore       riidoaiserver.AIAgentClientSnapshotStore
+	AIAgentProfileThumbnails riidoaiserver.AIAgentProfileThumbnailUploadService
 	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
 	TaskContextReader        riidoaiserver.AIAgentTaskContextReader
 }
@@ -100,7 +107,7 @@ func run() error {
 	}
 	server := &http.Server{
 		Addr:              config.Addr,
-		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, TaskContext: config.TaskContextReader, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins, LongPollMaxHold: config.LongPollMaxHold, LongPollTick: config.LongPollTick}).Handler(),
+		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, AIAgentProfileThumbnails: config.AIAgentProfileThumbnails, TaskContext: config.TaskContextReader, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins, LongPollMaxHold: config.LongPollMaxHold, LongPollTick: config.LongPollTick}).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	metricsCancel, metricsErrCh := startMetricsPublisher(store, config.MetricsLogInterval, os.Stdout)
@@ -153,6 +160,10 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	profileThumbnails, err := agentProfileThumbnailUploadServiceFromEnv()
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	taskContextReader, err := taskContextReaderFromEnv()
 	if err != nil {
 		return runtimeConfig{}, err
@@ -169,6 +180,7 @@ func configFromEnv() (runtimeConfig, error) {
 		LongPollTick:             longPollTick,
 		AIAgentClientDev:         aiAgentClientDev,
 		AIAgentClientStore:       aiAgentClientStore,
+		AIAgentProfileThumbnails: profileThumbnails,
 		AssignmentOperationStore: assignmentOperationStore,
 		TaskContextReader:        taskContextReader,
 	}, nil
@@ -340,7 +352,59 @@ func assignmentOperationStoreFromEnv(enabled bool, activeLeaseDuration time.Dura
 	return store, nil
 }
 
+func agentProfileThumbnailUploadServiceFromEnv() (riidoaiserver.AIAgentProfileThumbnailUploadService, error) {
+	bucket := strings.TrimSpace(os.Getenv(envAgentProfileThumbnailBucket))
+	prefix := strings.TrimSpace(os.Getenv(envAgentProfileThumbnailPrefix))
+	cdnBaseURL := strings.TrimSpace(os.Getenv(envAgentProfileThumbnailCDNBase))
+	maxBytesRaw := strings.TrimSpace(os.Getenv(envAgentProfileThumbnailMaxBytes))
+	expiresRaw := strings.TrimSpace(os.Getenv(envAgentProfileThumbnailExpires))
+	endpoint := strings.TrimSpace(os.Getenv(envAgentProfileThumbnailS3Endpoint))
+	if bucket == "" && prefix == "" && cdnBaseURL == "" && maxBytesRaw == "" && expiresRaw == "" && endpoint == "" {
+		return nil, nil
+	}
+	if bucket == "" {
+		return nil, fmt.Errorf("%s is required when profile thumbnail upload is configured", envAgentProfileThumbnailBucket)
+	}
+	if cdnBaseURL == "" {
+		return nil, fmt.Errorf("%s is required when profile thumbnail upload is configured", envAgentProfileThumbnailCDNBase)
+	}
+	region := strings.TrimSpace(os.Getenv(envAWSRegion))
+	if region == "" {
+		return nil, fmt.Errorf("%s is required when profile thumbnail upload is configured", envAWSRegion)
+	}
+	maxBytes, err := envOptionalPositiveInt64(envAgentProfileThumbnailMaxBytes)
+	if err != nil {
+		return nil, err
+	}
+	expires, err := envOptionalDurationSeconds(envAgentProfileThumbnailExpires)
+	if err != nil {
+		return nil, err
+	}
+	provider, err := awsContainerCredentialsProviderFromEnvFor("profile thumbnail upload")
+	if err != nil {
+		return nil, err
+	}
+	service, err := riidoaiserver.NewS3AIAgentProfileThumbnailUploadService(riidoaiserver.S3AIAgentProfileThumbnailUploadConfig{
+		Region:                region,
+		Bucket:                bucket,
+		Prefix:                prefix,
+		CDNBaseURL:            cdnBaseURL,
+		UploadEndpoint:        endpoint,
+		MaxContentLengthBytes: maxBytes,
+		Expires:               expires,
+		CredentialsProvider:   provider,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("profile thumbnail upload: %w", err)
+	}
+	return service, nil
+}
+
 func awsContainerCredentialsProviderFromEnv() (riidoaiserver.AWSCredentialsProvider, error) {
+	return awsContainerCredentialsProviderFromEnvFor(envAIAgentClientDev)
+}
+
+func awsContainerCredentialsProviderFromEnvFor(feature string) (riidoaiserver.AWSCredentialsProvider, error) {
 	endpoint := strings.TrimSpace(os.Getenv(envAWSContainerCredentialsFullURI))
 	if endpoint == "" {
 		relativeURI := strings.TrimSpace(os.Getenv(envAWSContainerCredentialsRelativeURI))
@@ -352,12 +416,24 @@ func awsContainerCredentialsProviderFromEnv() (riidoaiserver.AWSCredentialsProvi
 		}
 	}
 	if endpoint == "" {
-		return nil, fmt.Errorf("%s or %s is required when %s is enabled", envAWSContainerCredentialsFullURI, envAWSContainerCredentialsRelativeURI, envAIAgentClientDev)
+		return nil, fmt.Errorf("%s or %s is required when %s is configured", envAWSContainerCredentialsFullURI, envAWSContainerCredentialsRelativeURI, feature)
 	}
 	return riidoaiserver.NewECSContainerCredentialsProvider(riidoaiserver.ECSContainerCredentialsProviderConfig{
 		Endpoint:           endpoint,
 		AuthorizationToken: strings.TrimSpace(os.Getenv(envAWSContainerAuthorizationToken)),
 	})
+}
+
+func envOptionalPositiveInt64(key string) (int64, error) {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return 0, nil
+	}
+	value, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil || value <= 0 {
+		return 0, fmt.Errorf("%s must be a positive integer", key)
+	}
+	return value, nil
 }
 
 func webAllowedOriginsFromEnv() ([]string, error) {

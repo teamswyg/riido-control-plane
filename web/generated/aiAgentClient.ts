@@ -274,6 +274,40 @@ export interface AgentOnboardingFixtureListResponse {
 }
 
 /**
+ * 브라우저가 S3 POST upload form에 그대로 포함해야 하는 name/value field입니다.
+ */
+export interface AgentProfileThumbnailUploadFormField {
+  name: string;
+  value: string;
+}
+
+/**
+ * agent 프로필 썸네일 S3 POST upload intent입니다. 클라이언트는 form_fields와 file field를 upload_url로 전송하고, 저장 요청에는 profile_thumbnail_url만 전달합니다.
+ */
+export interface AgentProfileThumbnailUploadResponse {
+  expires_at: string;
+  form_fields: AgentProfileThumbnailUploadFormField[];
+  /**
+   * 파일 binary를 담을 multipart field name입니다. 현재 file입니다.
+   */
+  form_file_field: string;
+  max_content_length_bytes: number;
+  /**
+   * S3 upload에 사용할 HTTP method입니다. 현재 POST입니다.
+   */
+  method: string;
+  /**
+   * 업로드 성공 후 agent create/update 요청의 profile_thumbnail_url에 저장할 CDN URL입니다.
+   */
+  profile_thumbnail_url: string;
+  schema_version: string;
+  /**
+   * 브라우저가 multipart/form-data POST를 보낼 S3 endpoint입니다.
+   */
+  upload_url: string;
+}
+
+/**
  * task thread에 기록되는 AI Agent 상태 update 종류입니다. 기존 comment 필드명은 호환명입니다.
  */
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "assignment_started" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
@@ -419,7 +453,7 @@ export interface CreateAIAgentTaskThreadMessageRequest {
 }
 
 /**
- * Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.
+ * Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다. 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.
  */
 export interface CreateAgentConfigurationRequest {
   /**
@@ -439,7 +473,7 @@ export interface CreateAgentConfigurationRequest {
    */
   name: string;
   /**
-   * agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.
+   * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
   profile_thumbnail_url?: string;
   /**
@@ -450,6 +484,24 @@ export interface CreateAgentConfigurationRequest {
    * agent 공개 범위 radio 입력값입니다.
    */
   visibility: AgentVisibility;
+}
+
+/**
+ * agent 프로필 썸네일 파일을 기존 CDN/S3 media path로 업로드하기 위한 one-time upload intent 요청입니다.
+ */
+export interface CreateAgentProfileThumbnailUploadRequest {
+  /**
+   * 업로드할 파일 크기입니다. 서버가 허용 범위를 S3 POST policy에 고정합니다.
+   */
+  content_length_bytes: number;
+  /**
+   * 업로드할 이미지 MIME type입니다. 지원 값은 image/png, image/jpeg, image/webp입니다.
+   */
+  content_type: string;
+  /**
+   * 클라이언트가 선택한 원본 파일명입니다. object key나 public URL에는 사용하지 않습니다.
+   */
+  file_name?: string;
 }
 
 /**
@@ -601,6 +653,10 @@ export interface RuntimeRecord {
   last_detected_at?: string;
   models: RuntimeModelRecord[];
   owner_principal_id?: string;
+  /**
+   * provider runtime이 자기 신고한 version 문자열입니다. UI 표시용 raw signal이며 capability/scheduling 분기 조건으로 사용하지 않습니다.
+   */
+  provider_version?: string;
   requires_experimental_opt_in: boolean;
   runtime_id: string;
 }
@@ -631,7 +687,7 @@ export interface UnassignAIAgentTaskRequest {
 }
 
 /**
- * Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다.
+ * Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다. 새 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다.
  */
 export interface UpdateAgentConfigurationRequest {
   /**
@@ -651,7 +707,7 @@ export interface UpdateAgentConfigurationRequest {
    */
   name?: string;
   /**
-   * agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.
+   * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
   profile_thumbnail_url?: string;
   /**
@@ -1458,6 +1514,42 @@ export function createAIAgentFromOnboardingFixtureMutationOptions(config: RiidoC
     ...options,
     mutationKey: createAIAgentFromOnboardingFixtureMutationKey(),
     mutationFn: (variables: CreateAIAgentFromOnboardingFixtureMutationVariables) => createAIAgentFromOnboardingFixture(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ */
+export async function createAIAgentProfileThumbnailUpload(config: RiidoClientConfig, body: CreateAgentProfileThumbnailUploadRequest, options: RiidoRequestOptions = {}): Promise<AgentProfileThumbnailUploadResponse> {
+  const path = "/v1/client/ai-agent/profile-thumbnails/uploads";
+  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadMutationVariables {
+  body: CreateAgentProfileThumbnailUploadRequest;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentProfileThumbnailUploadMutationKey(): readonly unknown[] {
+  return ["createAIAgentProfileThumbnailUpload"] as const;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentProfileThumbnailUploadMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentProfileThumbnailUploadMutationKey(),
+    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadMutationVariables) => createAIAgentProfileThumbnailUpload(config, variables.body, {}),
   };
 }
 
@@ -2559,6 +2651,51 @@ export function createAIAgentFromOnboardingFixtureV2MutationOptions(config: Riid
     ...options,
     mutationKey: createAIAgentFromOnboardingFixtureV2MutationKey(),
     mutationFn: (variables: CreateAIAgentFromOnboardingFixtureV2MutationVariables) => createAIAgentFromOnboardingFixtureV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadV2PathParams {
+  workspace_id: string;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ */
+export async function createAIAgentProfileThumbnailUploadV2(config: RiidoClientConfig, params: CreateAIAgentProfileThumbnailUploadV2PathParams, body: CreateAgentProfileThumbnailUploadRequest, options: RiidoRequestOptions = {}): Promise<AgentProfileThumbnailUploadResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/profile-thumbnails/uploads`;
+  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadV2MutationVariables {
+  params: CreateAIAgentProfileThumbnailUploadV2PathParams;
+  body: CreateAgentProfileThumbnailUploadRequest;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentProfileThumbnailUploadV2MutationKey(): readonly unknown[] {
+  return ["createAIAgentProfileThumbnailUploadV2"] as const;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentProfileThumbnailUploadV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentProfileThumbnailUploadV2MutationKey(),
+    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadV2MutationVariables) => createAIAgentProfileThumbnailUploadV2(config, variables.params, variables.body, {}),
   };
 }
 
@@ -3867,6 +4004,37 @@ export interface CreateAIAgentFromOnboardingFixtureEndpoint {
 }
 
 /**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ * 계약 generated path: `aiAgent.profileThumbnails.uploads.create`
+ * 검색용 generated 경로: `profileThumbnails.uploads.create`
+ * 접근 예시: `riido.aiAgent.profileThumbnails.uploads.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (body: CreateAgentProfileThumbnailUploadRequest, options?: RiidoRequestOptions) => Promise<AgentProfileThumbnailUploadResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables>) => ReturnType<typeof createAIAgentProfileThumbnailUploadMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables>) => ReturnType<typeof createAIAgentProfileThumbnailUploadMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+  };
+}
+
+/**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다
  * 계약 generated path: `aiAgent.tasks.assignableAgents`
  * 검색용 generated 경로: `tasks.assignableAgents`
@@ -4938,6 +5106,37 @@ export interface CreateAIAgentFromOnboardingFixtureV2Endpoint {
 }
 
 /**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.profileThumbnails.uploads.create`
+ * 검색용 generated 경로: `aiAgent.profileThumbnails.uploads.create`
+ * 접근 예시: `riido.v2.aiAgent.profileThumbnails.uploads.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: CreateAIAgentProfileThumbnailUploadV2PathParams, body: CreateAgentProfileThumbnailUploadRequest, options?: RiidoRequestOptions) => Promise<AgentProfileThumbnailUploadResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables>) => ReturnType<typeof createAIAgentProfileThumbnailUploadV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables>) => ReturnType<typeof createAIAgentProfileThumbnailUploadV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+  };
+}
+
+/**
  * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.assignedAgentProfiles`
  * 검색용 generated 경로: `aiAgent.tasks.assignedAgentProfiles`
@@ -5680,6 +5879,29 @@ export interface RiidoAIAgentOnboardingNamespace {
 }
 
 /**
+ * aiAgent.profileThumbnails.uploads namespace입니다.
+ */
+export interface RiidoAIAgentProfileThumbnailsUploadsNamespace {
+  /**
+   * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+   * 계약 generated path: `aiAgent.profileThumbnails.uploads.create`
+   * 검색용 generated 경로: `profileThumbnails.uploads.create`
+   * 접근 예시: `riido.aiAgent.profileThumbnails.uploads.create`
+   */
+  readonly create: CreateAIAgentProfileThumbnailUploadEndpoint;
+}
+
+/**
+ * aiAgent.profileThumbnails namespace입니다.
+ */
+export interface RiidoAIAgentProfileThumbnailsNamespace {
+  /**
+   * aiAgent.profileThumbnails.uploads namespace입니다.
+   */
+  readonly uploads: RiidoAIAgentProfileThumbnailsUploadsNamespace;
+}
+
+/**
  * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
  */
 export interface RiidoAIAgentTasksThreadMessagesNamespace {
@@ -5779,6 +6001,10 @@ export interface RiidoAIAgentModule {
    * AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
    */
   readonly onboarding: RiidoAIAgentOnboardingNamespace;
+  /**
+   * aiAgent.profileThumbnails namespace입니다.
+   */
+  readonly profileThumbnails: RiidoAIAgentProfileThumbnailsNamespace;
   /**
    * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -5960,6 +6186,29 @@ export interface RiidoV2AIAgentOnboardingNamespace {
 }
 
 /**
+ * v2.aiAgent.profileThumbnails.uploads namespace입니다.
+ */
+export interface RiidoV2AIAgentProfileThumbnailsUploadsNamespace {
+  /**
+   * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.profileThumbnails.uploads.create`
+   * 검색용 generated 경로: `aiAgent.profileThumbnails.uploads.create`
+   * 접근 예시: `riido.v2.aiAgent.profileThumbnails.uploads.create`
+   */
+  readonly create: CreateAIAgentProfileThumbnailUploadV2Endpoint;
+}
+
+/**
+ * v2.aiAgent.profileThumbnails namespace입니다.
+ */
+export interface RiidoV2AIAgentProfileThumbnailsNamespace {
+  /**
+   * v2.aiAgent.profileThumbnails.uploads namespace입니다.
+   */
+  readonly uploads: RiidoV2AIAgentProfileThumbnailsUploadsNamespace;
+}
+
+/**
  * 선택된 workspace의 task에 여러 AI Agent를 병렬로 배정/해제/중지하는 additive assignment namespace입니다. v1/v2 tasks.assignment 호환 경로는 기존 단일 active 시연 흐름을 유지합니다.
  */
 export interface RiidoV2AIAgentTasksAgentAssignmentsNamespace {
@@ -6109,6 +6358,10 @@ export interface RiidoV2AIAgentNamespace {
    * 선택된 workspace에서 빠른 agent 생성을 돕는 onboarding fixture namespace입니다.
    */
   readonly onboarding: RiidoV2AIAgentOnboardingNamespace;
+  /**
+   * v2.aiAgent.profileThumbnails namespace입니다.
+   */
+  readonly profileThumbnails: RiidoV2AIAgentProfileThumbnailsNamespace;
   /**
    * 선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -6340,6 +6593,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
               tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
               all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() })]),
+            },
+          },
+        },
+      },
+      profileThumbnails: {
+        uploads: {
+          create: {
+            request: (body: CreateAgentProfileThumbnailUploadRequest, options?: RiidoRequestOptions) => createAIAgentProfileThumbnailUpload(config, body, options),
+            mutationKey: createAIAgentProfileThumbnailUploadMutationKey,
+            mutation: (options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables> = {}) => createAIAgentProfileThumbnailUploadMutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables> = {}) => createAIAgentProfileThumbnailUploadMutationOptions(config, options),
+            invalidates: {
             },
           },
         },
@@ -6626,6 +6891,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 aiAgentDevicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
                 aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
                 all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() })]),
+              },
+            },
+          },
+        },
+        profileThumbnails: {
+          uploads: {
+            create: {
+              request: (params: CreateAIAgentProfileThumbnailUploadV2PathParams, body: CreateAgentProfileThumbnailUploadRequest, options?: RiidoRequestOptions) => createAIAgentProfileThumbnailUploadV2(config, params, body, options),
+              mutationKey: createAIAgentProfileThumbnailUploadV2MutationKey,
+              mutation: (options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables> = {}) => createAIAgentProfileThumbnailUploadV2MutationOptions(config, options),
+              mutationOptions: (options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables> = {}) => createAIAgentProfileThumbnailUploadV2MutationOptions(config, options),
+              invalidates: {
               },
             },
           },

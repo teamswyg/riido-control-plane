@@ -138,6 +138,7 @@ type RuntimeRecord struct {
 	Kind                      RuntimeKind           `json:"kind"`
 	Availability              RuntimeAvailability   `json:"availability"`
 	DetectionState            RuntimeDetectionState `json:"detection_state"`
+	ProviderVersion           string                `json:"provider_version,omitempty"`
 	OwnerPrincipalID          string                `json:"owner_principal_id,omitempty"`
 	LastDetectedAt            time.Time             `json:"last_detected_at,omitempty"`
 	HasAssignedAgent          bool                  `json:"has_assigned_agent"`
@@ -150,6 +151,7 @@ type RuntimeSnapshotRecord struct {
 	Kind                      RuntimeKind           `json:"kind"`
 	Availability              RuntimeAvailability   `json:"availability,omitempty"`
 	DetectionState            RuntimeDetectionState `json:"detection_state,omitempty"`
+	ProviderVersion           string                `json:"provider_version,omitempty"`
 	RequiresExperimentalOptIn bool                  `json:"requires_experimental_opt_in,omitempty"`
 	Models                    []RuntimeModelRecord  `json:"models,omitempty"`
 }
@@ -308,6 +310,28 @@ type AgentEditabilityResponse struct {
 	Editability       AgentEditability `json:"editability"`
 	AssignedTaskCount int              `json:"assigned_task_count"`
 	Reason            string           `json:"reason,omitempty"`
+}
+
+type AgentProfileThumbnailUploadFormField struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type CreateAgentProfileThumbnailUploadRequest struct {
+	ContentType        string `json:"content_type"`
+	ContentLengthBytes int64  `json:"content_length_bytes"`
+	FileName           string `json:"file_name,omitempty"`
+}
+
+type AgentProfileThumbnailUploadResponse struct {
+	SchemaVersion         string                                 `json:"schema_version"`
+	Method                string                                 `json:"method"`
+	UploadURL             string                                 `json:"upload_url"`
+	FormFileField         string                                 `json:"form_file_field"`
+	FormFields            []AgentProfileThumbnailUploadFormField `json:"form_fields"`
+	ProfileThumbnailURL   string                                 `json:"profile_thumbnail_url"`
+	ExpiresAt             time.Time                              `json:"expires_at"`
+	MaxContentLengthBytes int64                                  `json:"max_content_length_bytes"`
 }
 
 type CreateAgentConfigurationRequest struct {

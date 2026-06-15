@@ -85,8 +85,9 @@ generator output, and black-box harness coverage.
 For agent settings:
 
 - `riido-contracts` owns the meaning of `profile_thumbnail_url` and
-  `description` and `instruction`, including URL-only thumbnail policy, the 160
-  character description limit, and the 1000 character instruction limit.
+  `description` and `instruction`, including the profile thumbnail upload-intent
+  flow, the saved URL value, the 160 character description limit, and the 1000
+  character instruction limit.
 - `riido-contracts` owns onboarding fixture catalog semantics. This repository
   projects the catalog through `GET /v1/client/ai-agent/onboarding/fixtures`
   and its v2 workspace-scoped duplicate
@@ -394,7 +395,8 @@ The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
   `model_id` because the selected runtime default model is deterministic
 - editing is blocked while `assigned_task_count` is greater than zero
 - `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
-  agent record; binary image upload/storage is outside this development API
+  agent record; image binary transfer uses the dedicated profile thumbnail
+  upload-intent endpoint, while bucket/CDN/IAM details remain deployment config
 - `tmp_color` is saved as an optional fixture-provided avatar fallback color on
   fixture-created agents; direct-created agents can omit it and client rendering
   precedence remains client-owned
@@ -779,6 +781,11 @@ assigning an agent to a task. When the selected runtime requires experimental
 opt-in, control-plane snapshots that fact into
 `Assignment.allow_experimental_runtime=true` before the assignment enters the
 daemon polling store.
+
+`RuntimeRecord.provider_version` is also daemon-reported, but it is a display
+and diagnostics field only. Control-plane stores/projects the raw provider
+version string for runtime settings and does not use it for model selection,
+scheduling eligibility, assignment branching, or compatibility gates.
 
 Confirmed through the Figma plugin/Dev Mode annotations on 2026-05-29:
 

@@ -1379,6 +1379,71 @@
         ]
       }
     },
+    "/v1/client/ai-agent/profile-thumbnails/uploads": {
+      "post": {
+        "operationId": "createAIAgentProfileThumbnailUpload",
+        "summary": "AI agent 프로필 썸네일 업로드 intent를 발급합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentProfileThumbnailUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentProfileThumbnailUploadResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ],
+        "x-riido-rbac-policy": "agent_profile_thumbnail_upload.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "profileThumbnails",
+            "uploads",
+            "create"
+          ],
+          "generated_path": "aiAgent.profileThumbnails.uploads.create"
+        },
+        "x-riido-scenarios": [
+          "createAIAgentProfileThumbnailUpload.profile-image-upload-precedes-agent-save",
+          "createAIAgentProfileThumbnailUpload.media-storage-stays-deployment-owned"
+        ]
+      }
+    },
     "/v1/client/ai-agent/tasks/{task_id}/assignable-agents": {
       "get": {
         "operationId": "listAIAgentTaskAssignableAgents",
@@ -3198,6 +3263,81 @@
         ]
       }
     },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/profile-thumbnails/uploads": {
+      "post": {
+        "operationId": "createAIAgentProfileThumbnailUploadV2",
+        "summary": "AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentProfileThumbnailUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentProfileThumbnailUploadResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ],
+        "x-riido-rbac-policy": "agent_profile_thumbnail_upload.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "profileThumbnails",
+            "uploads",
+            "create"
+          ],
+          "generated_path": "v2.aiAgent.profileThumbnails.uploads.create"
+        },
+        "x-riido-scenarios": [
+          "createAIAgentProfileThumbnailUploadV2.workspace-scoped-profile-image-upload-precedes-agent-save"
+        ]
+      }
+    },
     "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles": {
       "get": {
         "operationId": "listWorkspaceAssignedAgentProfilesV2",
@@ -4813,6 +4953,72 @@
         ],
         "type": "object"
       },
+      "AgentProfileThumbnailUploadFormField": {
+        "description": "브라우저가 S3 POST upload form에 그대로 포함해야 하는 name/value field입니다.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
+        "type": "object"
+      },
+      "AgentProfileThumbnailUploadResponse": {
+        "description": "agent 프로필 썸네일 S3 POST upload intent입니다. 클라이언트는 form_fields와 file field를 upload_url로 전송하고, 저장 요청에는 profile_thumbnail_url만 전달합니다.",
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "form_fields": {
+            "items": {
+              "$ref": "#/components/schemas/AgentProfileThumbnailUploadFormField"
+            },
+            "type": "array"
+          },
+          "form_file_field": {
+            "description": "파일 binary를 담을 multipart field name입니다. 현재 file입니다.",
+            "type": "string"
+          },
+          "max_content_length_bytes": {
+            "type": "integer"
+          },
+          "method": {
+            "description": "S3 upload에 사용할 HTTP method입니다. 현재 POST입니다.",
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "description": "업로드 성공 후 agent create/update 요청의 profile_thumbnail_url에 저장할 CDN URL입니다.",
+            "format": "uri",
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "upload_url": {
+            "description": "브라우저가 multipart/form-data POST를 보낼 S3 endpoint입니다.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "method",
+          "upload_url",
+          "form_file_field",
+          "form_fields",
+          "profile_thumbnail_url",
+          "expires_at",
+          "max_content_length_bytes"
+        ],
+        "type": "object"
+      },
       "AgentTaskCommentKind": {
         "description": "task thread에 기록되는 AI Agent 상태 update 종류입니다. 기존 comment 필드명은 호환명입니다.",
         "enum": [
@@ -5161,7 +5367,7 @@
         "type": "object"
       },
       "CreateAgentConfigurationRequest": {
-        "description": "Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.",
+        "description": "Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다. 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.",
         "properties": {
           "description": {
             "description": "agent 추가 화면의 설명 입력값입니다.",
@@ -5182,7 +5388,7 @@
             "type": "string"
           },
           "profile_thumbnail_url": {
-            "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.",
+            "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.",
             "format": "uri",
             "type": "string"
           },
@@ -5199,6 +5405,28 @@
           "name",
           "visibility",
           "runtime_id"
+        ],
+        "type": "object"
+      },
+      "CreateAgentProfileThumbnailUploadRequest": {
+        "description": "agent 프로필 썸네일 파일을 기존 CDN/S3 media path로 업로드하기 위한 one-time upload intent 요청입니다.",
+        "properties": {
+          "content_length_bytes": {
+            "description": "업로드할 파일 크기입니다. 서버가 허용 범위를 S3 POST policy에 고정합니다.",
+            "type": "integer"
+          },
+          "content_type": {
+            "description": "업로드할 이미지 MIME type입니다. 지원 값은 image/png, image/jpeg, image/webp입니다.",
+            "type": "string"
+          },
+          "file_name": {
+            "description": "클라이언트가 선택한 원본 파일명입니다. object key나 public URL에는 사용하지 않습니다.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content_type",
+          "content_length_bytes"
         ],
         "type": "object"
       },
@@ -5564,6 +5792,10 @@
           "owner_principal_id": {
             "type": "string"
           },
+          "provider_version": {
+            "description": "provider runtime이 자기 신고한 version 문자열입니다. UI 표시용 raw signal이며 capability/scheduling 분기 조건으로 사용하지 않습니다.",
+            "type": "string"
+          },
           "requires_experimental_opt_in": {
             "type": "boolean"
           },
@@ -5630,7 +5862,7 @@
         "type": "object"
       },
       "UpdateAgentConfigurationRequest": {
-        "description": "Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다.",
+        "description": "Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다. 새 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다.",
         "properties": {
           "description": {
             "description": "agent 설정 화면의 설명 입력값입니다.",
@@ -5651,7 +5883,7 @@
             "type": "string"
           },
           "profile_thumbnail_url": {
-            "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.",
+            "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.",
             "format": "uri",
             "type": "string"
           },

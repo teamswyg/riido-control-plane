@@ -19,7 +19,7 @@
       "register ECS task-definition revision",
       "update ECS service",
       "wait for ECS service stability",
-      "run healthz readyz and v2 bootstrap smoke"
+      "run healthz readyz v2 bootstrap and profile thumbnail upload-intent smoke"
     ]
   },
   "optional_workflow_modes": [
@@ -38,7 +38,7 @@
         "create CodeDeploy AppSpec content in same-job runner temp files",
         "create a CodeDeploy deployment from infra-provided application and deployment group names",
         "wait for CodeDeploy deployment success",
-        "run healthz readyz and v2 bootstrap smoke after the deployment succeeds"
+        "run healthz readyz v2 bootstrap and profile thumbnail upload-intent smoke after the deployment succeeds"
       ],
       "must_not_own": [
         "CodeDeploy application or deployment group topology",
@@ -76,7 +76,7 @@
       "both optional CodeDeploy GitHub environment variables are configured together",
       "the deploy workflow still registers the task-definition revision from the same immutable image value",
       "the deploy workflow creates and waits for the CodeDeploy deployment in the same job",
-      "post-shift healthz readyz and v2 bootstrap smoke run after CodeDeploy success"
+      "post-shift healthz readyz v2 bootstrap and profile thumbnail upload-intent smoke run after CodeDeploy success"
     ],
     "public_repo_may_keep": [
       "the activation rule",
@@ -112,7 +112,7 @@
       "control_plane_may_own": [
         "create CodeDeploy deployment from the same-job immutable image value and infra-provided deployment target",
         "wait for CodeDeploy deployment completion",
-        "run healthz readyz and v2 bootstrap smoke after traffic shift",
+        "run healthz readyz v2 bootstrap and profile thumbnail upload-intent smoke after traffic shift",
         "tighten public workflow redaction without changing AWS topology"
       ],
       "infra_must_own": [
@@ -394,6 +394,30 @@
       {
         "name": "RIIDO_AI_SERVER_DYNAMODB_ENDPOINT",
         "reason": "optional fake-endpoint/local-development runtime override; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_BUCKET",
+        "reason": "profile thumbnail upload-intent runtime source name mapped by infra/operator configuration; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_PREFIX",
+        "reason": "profile thumbnail upload-intent object-prefix runtime source name; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_CDN_BASE_URL",
+        "reason": "profile thumbnail saved-URL base runtime source name mapped by infra/operator configuration; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_MAX_BYTES",
+        "reason": "profile thumbnail upload-intent size limit runtime source name; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_UPLOAD_EXPIRES_SECONDS",
+        "reason": "profile thumbnail upload-intent expiry runtime source name; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_S3_ENDPOINT",
+        "reason": "profile thumbnail upload-intent endpoint override for tests or compatible S3 endpoints; it is not a deploy/smoke GitHub configuration key"
       },
       {
         "name": "RIIDO_AI_SERVER_ADDR",
