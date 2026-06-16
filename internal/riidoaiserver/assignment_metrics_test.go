@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestHTTPMetricsReturnsAssignmentSnapshot(t *testing.T) {
@@ -60,6 +61,19 @@ func TestHTTPMetricsReturnsAssignmentSnapshot(t *testing.T) {
 	}
 	if snapshot.StoreOperationCallsTotal != 5 || len(snapshot.StoreOperations) != 5 {
 		t.Fatalf("metrics store operations = %+v", snapshot.StoreOperations)
+	}
+}
+
+func TestRecordEventAppendLatencyCountsSubMillisecondSamples(t *testing.T) {
+	state := newStoreState()
+
+	recordEventAppendLatency(&state, time.Nanosecond)
+
+	if state.eventAppendLatency.samplesTotal != 1 ||
+		state.eventAppendLatency.totalMilliseconds != 1 ||
+		state.eventAppendLatency.maxMilliseconds != 1 ||
+		state.eventAppendLatency.lastMilliseconds != 1 {
+		t.Fatalf("event append latency = %+v", state.eventAppendLatency)
 	}
 }
 

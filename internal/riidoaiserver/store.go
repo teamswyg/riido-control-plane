@@ -1778,10 +1778,7 @@ func (s *Store) appendTaskEventToOutbox(state *storeState, event TaskEvent) {
 }
 
 func recordEventAppendLatency(state *storeState, duration time.Duration) {
-	if duration < 0 {
-		duration = 0
-	}
-	milliseconds := duration.Milliseconds()
+	milliseconds := durationMilliseconds(duration)
 	state.eventAppendLatency.samplesTotal++
 	state.eventAppendLatency.totalMilliseconds += milliseconds
 	state.eventAppendLatency.lastMilliseconds = milliseconds
