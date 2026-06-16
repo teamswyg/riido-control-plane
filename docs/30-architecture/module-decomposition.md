@@ -36,6 +36,13 @@ operation journals, and stream relay publishing. Adapters call these ports:
 The module deliberately keeps public behavior black-box testable with
 `httptest`, fake AWS endpoints, fake credentials, and local JSON fixtures.
 
+AI Agent client persistence remains a single durable snapshot until the
+measurement gate in
+[`ai-agent-snapshot-cqrs-gate.md`](ai-agent-snapshot-cqrs-gate.md) proves that a
+micro-CQRS split is needed. A split, if accepted, stays inside
+`internal/riidoaiserver` and targets the AI Agent client snapshot only; it does
+not imply a Store-wide CQRS migration.
+
 Generated React Query delivery to `riido-client` is an architecture boundary,
 not a package responsibility. The delivery rules, tag trigger, target branch
 shape, allowlisted output path, and Orval supply-chain boundary are owned by

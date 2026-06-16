@@ -559,6 +559,16 @@ client snapshot reads/writes use `riido.store.operation` values
 distinguish monolithic snapshot traffic from assignment queue/projection
 traffic without exposing item identity.
 
+The Store-wide CQS/CQRS boundary is not accepted yet. AI Agent client snapshot
+persistence is the only current CQRS candidate because `runtime-snapshot` and
+`agent-bindings` traces both classify their DynamoDB traffic as AI Agent
+snapshot load/save operations, while assignment polling appears as
+`store_poll_assignment`. The follow-up rule is defined in
+[`../30-architecture/ai-agent-snapshot-cqrs-gate.md`](../30-architecture/ai-agent-snapshot-cqrs-gate.md):
+after 24 hours of post-cadence metrics, split only the AI Agent snapshot if
+read/write capacity and trace samples still show the monolithic snapshot as the
+dominant Store cost.
+
 This boundary does not own AWS account ids, Terraform, IAM/VPC/ECS/EventBridge
 rule resources, Route53/ACM/WAF resources, tfvars, Terraform backend/state,
 live DynamoDB/EventBridge smoke evidence, stream-relay evidence artifacts,
