@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/teamswyg/riido-contracts/hostintegration"
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 	"github.com/teamswyg/riido-contracts/provider/capability"
 )
 
@@ -102,6 +103,50 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 	}
 	if metrics.AgentEventsTotal != 2 || metrics.TaskEventsTotal != 4 {
 		t.Fatalf("metrics events = %+v", metrics)
+	}
+}
+
+func TestStoreDeduplicatesThreadProgressSeqEvents(t *testing.T) {
+	ctx := context.Background()
+	operations := &runtimeFakeAssignmentOperationStore{}
+	store := NewStoreWithConfig(StoreConfig{OperationStore: operations})
+	defer store.Close()
+
+	assignment, err := store.AssignTask(ctx, "task-progress-dedupe", AssignRequest{
+		ComponentID:     "component-progress-dedupe",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "run once",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask: %v", err)
+	}
+	if _, err := store.PollAgent(ctx, "agent-1", daemonPollRequest()); err != nil {
+		t.Fatalf("PollAgent: %v", err)
+	}
+	req := AgentEventRequest{
+		AssignmentID: assignment.ID,
+		TaskID:       assignment.TaskID,
+		State:        AssignmentRunning,
+		EventType:    EventRiidoLog,
+		Message:      "working",
+		Metadata:     map[string]string{metadatakeys.ThreadProgressSeq.String(): "7"},
+	}
+	first, err := store.RecordAgentEvent(ctx, "agent-1", req)
+	if err != nil {
+		t.Fatalf("RecordAgentEvent first: %v", err)
+	}
+	operationCount := len(operations.records)
+	req.Message = "working duplicate"
+	second, err := store.RecordAgentEvent(ctx, "agent-1", req)
+	if err != nil {
+		t.Fatalf("RecordAgentEvent duplicate: %v", err)
+	}
+	if second.Event.Seq != first.Event.Seq || second.Event.Message != first.Event.Message {
+		t.Fatalf("duplicate progress event should return first event: first=%+v second=%+v", first.Event, second.Event)
+	}
+	if len(operations.records) != operationCount {
+		t.Fatalf("duplicate progress event persisted operation: got %d want %d", len(operations.records), operationCount)
 	}
 }
 
