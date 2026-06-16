@@ -1392,6 +1392,28 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 		generatedThreadID {
 		req.ThreadID = active.ThreadID
 	}
+	if existing, ok := s.taskThreadByIDLocked(req.TaskID, req.ThreadID); ok &&
+		strings.TrimSpace(existing.AssignmentID) == req.AssignmentID {
+		lines = filterUnseenProgressLines(existing.Lines, lines)
+		if len(lines) == 0 {
+			return AgentThreadProgressBatchResponse{
+				SchemaVersion: SchemaVersion,
+				AcceptedLines: 0,
+				Event: AgentThreadProgressEvent{
+					EventType:       AgentClientEventThreadProgress,
+					SchemaVersion:   SchemaVersion,
+					AgentID:         agentID,
+					TaskID:          req.TaskID,
+					AssignmentID:    req.AssignmentID,
+					ThreadID:        req.ThreadID,
+					RunID:           req.RunID,
+					WorkStatus:      AgentWorkStatusRunning,
+					AssignmentState: AgentAssignmentStateRunning,
+					CommentKind:     AgentTaskCommentRuntimeProgress,
+				},
+			}, nil
+		}
+	}
 	agent.WorkStatus = AgentWorkStatusRunning
 	agent.Editability = AgentEditabilityBlockedAssignedTasks
 	if agent.AssignedTaskCount == 0 {
@@ -1515,6 +1537,9 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 		}
 		if line.ObservedAt.IsZero() {
 			line.ObservedAt = time.Now().UTC()
+		}
+		if existing, ok := s.taskThreadByIDLocked(thread.TaskID, thread.ThreadID); ok && progressLineSeqSeen(existing.Lines, line.Seq) {
+			return nil
 		}
 		progressEvent := AgentThreadProgressEvent{
 			EventType:       AgentClientEventThreadProgress,
@@ -1726,6 +1751,19 @@ func (s *DevelopmentAIAgentClientStore) visibleTaskThreadLocked(principal Author
 			return AIAgentTaskThreadRecord{}, false
 		}
 		return copyTaskThread(thread), true
+	}
+	return AIAgentTaskThreadRecord{}, false
+}
+
+func (s *DevelopmentAIAgentClientStore) taskThreadByIDLocked(taskID, threadID string) (AIAgentTaskThreadRecord, bool) {
+	threadID = strings.TrimSpace(threadID)
+	if threadID == "" {
+		return AIAgentTaskThreadRecord{}, false
+	}
+	for _, thread := range s.taskThreads[taskID] {
+		if thread.ThreadID == threadID {
+			return copyTaskThread(thread), true
+		}
 	}
 	return AIAgentTaskThreadRecord{}, false
 }
@@ -2226,6 +2264,41 @@ func (s *DevelopmentAIAgentClientStore) nextThreadProgressSeqLocked(taskID, thre
 		return len(threads[i].Lines) + 1
 	}
 	return 1
+}
+
+func filterUnseenProgressLines(existing, incoming []AgentThreadProgressLine) []AgentThreadProgressLine {
+	if len(existing) == 0 || len(incoming) == 0 {
+		return incoming
+	}
+	seen := make(map[int]struct{}, len(existing))
+	for _, line := range existing {
+		if line.Seq > 0 {
+			seen[line.Seq] = struct{}{}
+		}
+	}
+	out := incoming[:0]
+	for _, line := range incoming {
+		if line.Seq > 0 {
+			if _, ok := seen[line.Seq]; ok {
+				continue
+			}
+			seen[line.Seq] = struct{}{}
+		}
+		out = append(out, line)
+	}
+	return out
+}
+
+func progressLineSeqSeen(lines []AgentThreadProgressLine, seq int) bool {
+	if seq <= 0 {
+		return false
+	}
+	for _, line := range lines {
+		if line.Seq == seq {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *DevelopmentAIAgentClientStore) markTaskActiveThreadsStoppedLocked(taskID string, kind AgentTaskCommentKind, message string) {

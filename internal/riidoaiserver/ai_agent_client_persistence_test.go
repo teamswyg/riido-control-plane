@@ -422,6 +422,60 @@ func TestPersistentAIAgentClientStoreSavesMeaningfulRuntimeSnapshotChangeImmedia
 	}
 }
 
+func TestPersistentAIAgentClientStoreDeduplicatesThreadProgressSeq(t *testing.T) {
+	ctx := context.Background()
+	snapshots := &memoryAIAgentClientSnapshotStore{}
+	principal := AuthorizationResult{PrincipalID: "user-1"}
+	store, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("OpenPersistentAIAgentClientStore: %v", err)
+	}
+	assigned, err := store.AssignAIAgentTask(ctx, principal, "task-progress-dedupe", AssignAIAgentTaskRequest{
+		AgentID:      "agent-owned-codex",
+		AssignmentID: "asn-progress-dedupe",
+	})
+	if err != nil {
+		t.Fatalf("AssignAIAgentTask: %v", err)
+	}
+	first, err := store.RecordAIAgentThreadProgress(ctx, assigned.AgentID, AgentThreadProgressBatchRequest{
+		TaskID:       assigned.TaskID,
+		AssignmentID: assigned.AssignmentID,
+		ThreadID:     assigned.ThreadID,
+		RunID:        assigned.RunID,
+		Lines:        []AgentThreadProgressLine{{Seq: 1, Message: "working"}},
+	})
+	if err != nil {
+		t.Fatalf("RecordAIAgentThreadProgress first: %v", err)
+	}
+	if first.AcceptedLines != 1 {
+		t.Fatalf("first accepted lines = %d, want 1", first.AcceptedLines)
+	}
+	savesAfterFirst := snapshots.saves
+	duplicate, err := store.RecordAIAgentThreadProgress(ctx, assigned.AgentID, AgentThreadProgressBatchRequest{
+		TaskID:       assigned.TaskID,
+		AssignmentID: assigned.AssignmentID,
+		ThreadID:     assigned.ThreadID,
+		RunID:        assigned.RunID,
+		Lines:        []AgentThreadProgressLine{{Seq: 1, Message: "working duplicate"}},
+	})
+	if err != nil {
+		t.Fatalf("RecordAIAgentThreadProgress duplicate: %v", err)
+	}
+	if duplicate.AcceptedLines != 0 {
+		t.Fatalf("duplicate accepted lines = %d, want 0", duplicate.AcceptedLines)
+	}
+	if snapshots.saves != savesAfterFirst {
+		t.Fatalf("duplicate progress should not save snapshot: saves=%d want %d", snapshots.saves, savesAfterFirst)
+	}
+	threads, err := store.ListAIAgentTaskThreads(ctx, principal, assigned.TaskID)
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	if len(threads.Threads) != 1 || len(threads.Threads[0].Lines) != 1 || threads.Threads[0].Lines[0].Message != "working" {
+		t.Fatalf("threads after duplicate progress = %+v", threads.Threads)
+	}
+}
+
 func TestAIAgentClientSnapshotRetainsRecentReplayEvents(t *testing.T) {
 	store := NewDevelopmentAIAgentClientStore()
 	store.mu.Lock()

@@ -404,6 +404,9 @@ func (s *PersistentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.C
 	if err != nil {
 		return response, err
 	}
+	if response.AcceptedLines == 0 {
+		return response, nil
+	}
 	return response, s.saveSnapshot(ctx)
 }
 

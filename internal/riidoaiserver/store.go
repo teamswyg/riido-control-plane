@@ -677,7 +677,7 @@ func (s *Store) loop(state storeState) {
 		case eventCmd:
 			beforeEventSeq := state.nextEventSeq
 			response, err := s.handleEvent(&state, msg.agentID, msg.req)
-			if err == nil {
+			if err == nil && state.nextEventSeq != beforeEventSeq {
 				err = s.saveOperation(&state, AssignmentOperationAgentEvent, *response.Assignment, eventsAfterSeq(&state, beforeEventSeq))
 				if err == nil {
 					err = s.saveSnapshot(&state)
@@ -1422,12 +1422,41 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 			eventType = EventRiidoLog
 		}
 	}
+	if !assignmentChanged {
+		if existing, ok := duplicateThreadProgressEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, eventType, req.Metadata); ok {
+			return AgentEventResponse{
+				SchemaVersion: SchemaVersion,
+				Assignment:    copyAssignment(assignment),
+				Event:         existing,
+			}, nil
+		}
+	}
 	event := s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, eventType, assignment.State, req.Message, req.Metadata, now)
 	return AgentEventResponse{
 		SchemaVersion: SchemaVersion,
 		Assignment:    copyAssignment(assignment),
 		Event:         event,
 	}, nil
+}
+
+func duplicateThreadProgressEvent(state *storeState, taskID, assignmentID, agentID, eventType string, metadata map[string]string) (TaskEvent, bool) {
+	if eventType != EventRiidoLog {
+		return TaskEvent{}, false
+	}
+	seq := strings.TrimSpace(metadata[metadatakeys.ThreadProgressSeq.String()])
+	if seq == "" {
+		return TaskEvent{}, false
+	}
+	for _, event := range slices.Backward(state.events[taskID]) {
+		if event.AssignmentID != assignmentID ||
+			event.AgentID != agentID ||
+			event.Type != EventRiidoLog ||
+			strings.TrimSpace(event.Metadata[metadatakeys.ThreadProgressSeq.String()]) != seq {
+			continue
+		}
+		return event, true
+	}
+	return TaskEvent{}, false
 }
 
 func (s *Store) handleProviderStatusSync(state *storeState, agentID string, req ProviderStatusSyncRequest) (ProviderStatusSyncResponse, error) {
