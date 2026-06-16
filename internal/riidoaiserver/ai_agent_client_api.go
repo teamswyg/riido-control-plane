@@ -373,12 +373,14 @@ type AssignAIAgentTaskRequest struct {
 }
 
 type UnassignAIAgentTaskRequest struct {
-	AgentID string `json:"agent_id"`
-	Reason  string `json:"reason,omitempty"`
+	AgentID      string `json:"agent_id"`
+	AssignmentID string `json:"assignment_id,omitempty"`
+	Reason       string `json:"reason,omitempty"`
 }
 
 type AgentAssignmentActionRequest struct {
-	Reason string `json:"reason,omitempty"`
+	AssignmentID string `json:"assignment_id,omitempty"`
+	Reason       string `json:"reason,omitempty"`
 }
 
 type SubmitAIAgentTaskCommentRequest struct {
@@ -394,8 +396,9 @@ type CreateAIAgentTaskThreadMessageRequest struct {
 }
 
 type StopAIAgentTaskRequest struct {
-	AgentID string `json:"agent_id,omitempty"`
-	Reason  string `json:"reason,omitempty"`
+	AgentID      string `json:"agent_id,omitempty"`
+	AssignmentID string `json:"assignment_id,omitempty"`
+	Reason       string `json:"reason,omitempty"`
 }
 
 type AIAgentTaskActionResponse struct {

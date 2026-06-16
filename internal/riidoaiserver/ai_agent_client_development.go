@@ -867,6 +867,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	}
 	taskID = strings.TrimSpace(taskID)
 	req.AgentID = strings.TrimSpace(req.AgentID)
+	req.AssignmentID = strings.TrimSpace(req.AssignmentID)
 	if taskID == "" {
 		return AIAgentTaskActionResponse{}, errors.New("task_id is required")
 	}
@@ -889,33 +890,32 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
 		Message:         "agent work was stopped by task participant removal",
 	}
-	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
+	if thread, ok := s.taskThreadForStopTargetLocked(taskID, agent.AgentID, req.AssignmentID); ok {
 		response.ThreadID = thread.ThreadID
 		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
-	} else if thread, ok := s.latestTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
-		response.ThreadID = thread.ThreadID
-		response.AssignmentID = thread.AssignmentID
-		response.RunID = thread.RunID
+	} else if req.AssignmentID != "" {
+		return AIAgentTaskActionResponse{}, errors.New("assignment_id does not belong to task agent")
 	} else {
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
 	}
-	s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
-	agent.WorkStatus = AgentWorkStatusIdle
-	if agent.AssignedTaskCount > 0 {
-		agent.AssignedTaskCount--
+	if req.AssignmentID != "" {
+		s.markTaskAgentAssignmentThreadStoppedLocked(taskID, agent.AgentID, req.AssignmentID, AgentTaskCommentStoppedByUserRequest, response.Message)
+	} else {
+		s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
 	}
-	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
-	s.agents[agent.AgentID] = agent
 	s.upsertTaskThreadFromActionLocked(response, "")
+	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
+	s.agents[agent.AgentID] = agent
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
 }
 
 func (s *DevelopmentAIAgentClientStore) DeleteAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error) {
 	return s.UnassignAIAgentTask(ctx, principal, taskID, UnassignAIAgentTaskRequest{
-		AgentID: agentID,
-		Reason:  req.Reason,
+		AgentID:      agentID,
+		AssignmentID: strings.TrimSpace(req.AssignmentID),
+		Reason:       req.Reason,
 	})
 }
 
@@ -1026,12 +1026,13 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	}
 	taskID = strings.TrimSpace(taskID)
 	req.AgentID = strings.TrimSpace(req.AgentID)
+	req.AssignmentID = strings.TrimSpace(req.AssignmentID)
 	if taskID == "" {
 		return AIAgentTaskActionResponse{}, errors.New("task_id is required")
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	agent, ok := s.agentForTaskStopLocked(principal, taskID, req.AgentID)
+	agent, ok := s.agentForTaskStopLocked(principal, taskID, req.AgentID, req.AssignmentID)
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
@@ -1045,43 +1046,35 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
 		Message:         "agent work was stopped by user request",
 	}
-	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
+	if thread, ok := s.taskThreadForStopTargetLocked(taskID, agent.AgentID, req.AssignmentID); ok {
 		response.ThreadID = thread.ThreadID
 		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
-	} else if thread, ok := s.latestTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
-		response.ThreadID = thread.ThreadID
-		response.AssignmentID = thread.AssignmentID
-		response.RunID = thread.RunID
+	} else if req.AssignmentID != "" {
+		return AIAgentTaskActionResponse{}, errors.New("assignment_id does not belong to task agent")
 	} else {
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
 	}
-	s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
+	if req.AssignmentID != "" {
+		s.markTaskAgentAssignmentThreadStoppedLocked(taskID, agent.AgentID, req.AssignmentID, AgentTaskCommentStoppedByUserRequest, response.Message)
+	} else {
+		s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
+	}
 	s.upsertTaskThreadFromActionLocked(response, "")
+	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
+	s.agents[agent.AgentID] = agent
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
 }
 
 func (s *DevelopmentAIAgentClientStore) StopAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error) {
 	response, err := s.StopAIAgentTask(ctx, principal, taskID, StopAIAgentTaskRequest{
-		AgentID: agentID,
-		Reason:  req.Reason,
+		AgentID:      agentID,
+		AssignmentID: strings.TrimSpace(req.AssignmentID),
+		Reason:       req.Reason,
 	})
 	if err != nil {
 		return response, err
-	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	agent := s.agents[response.AgentID]
-	if agent.AgentID != "" {
-		if agent.AssignedTaskCount > 0 {
-			agent.AssignedTaskCount--
-		}
-		agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
-		if agent.AssignedTaskCount == 0 {
-			agent.WorkStatus = AgentWorkStatusIdle
-		}
-		s.agents[agent.AgentID] = agent
 	}
 	return response, nil
 }
@@ -1822,6 +1815,33 @@ func (s *DevelopmentAIAgentClientStore) taskThreadForAssignmentLocked(taskID, ag
 	return AIAgentTaskThreadRecord{}, false
 }
 
+func (s *DevelopmentAIAgentClientStore) taskThreadForAssignmentAnyAgentLocked(taskID, assignmentID string) (AIAgentTaskThreadRecord, bool) {
+	assignmentID = strings.TrimSpace(assignmentID)
+	if assignmentID == "" {
+		return AIAgentTaskThreadRecord{}, false
+	}
+	threads := s.taskThreads[taskID]
+	for _, thread := range slices.Backward(threads) {
+		if thread.AssignmentID == assignmentID {
+			return copyTaskThread(thread), true
+		}
+	}
+	return AIAgentTaskThreadRecord{}, false
+}
+
+func (s *DevelopmentAIAgentClientStore) taskThreadForStopTargetLocked(taskID, agentID, assignmentID string) (AIAgentTaskThreadRecord, bool) {
+	if thread, ok := s.taskThreadForAssignmentLocked(taskID, agentID, assignmentID); ok {
+		return thread, true
+	}
+	if strings.TrimSpace(assignmentID) != "" {
+		return AIAgentTaskThreadRecord{}, false
+	}
+	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agentID); ok {
+		return thread, true
+	}
+	return s.latestTaskThreadForAgentLocked(taskID, agentID)
+}
+
 func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionResponse {
 	return AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
@@ -2368,6 +2388,26 @@ func (s *DevelopmentAIAgentClientStore) markTaskAgentThreadsStoppedLocked(taskID
 	s.taskThreads[taskID] = threads
 }
 
+func (s *DevelopmentAIAgentClientStore) markTaskAgentAssignmentThreadStoppedLocked(taskID, agentID, assignmentID string, kind AgentTaskCommentKind, message string) {
+	assignmentID = strings.TrimSpace(assignmentID)
+	if assignmentID == "" {
+		return
+	}
+	now := time.Now().UTC()
+	threads := s.taskThreads[taskID]
+	for i := range threads {
+		if threads[i].AgentID != agentID || threads[i].AssignmentID != assignmentID || !taskThreadHasActiveStream(threads[i]) {
+			continue
+		}
+		threads[i].WorkStatus = AgentWorkStatusIdle
+		threads[i].AssignmentState = AgentAssignmentStateStopped
+		threads[i].CommentKind = kind
+		threads[i].Message = message
+		threads[i].CompletedAt = now
+	}
+	s.taskThreads[taskID] = threads
+}
+
 func (s *DevelopmentAIAgentClientStore) agentForMutation(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {
 	agentID = strings.TrimSpace(agentID)
 	if agentID == "" {
@@ -2382,9 +2422,12 @@ func (s *DevelopmentAIAgentClientStore) agentForMutation(principal Authorization
 	return agent, true
 }
 
-func (s *DevelopmentAIAgentClientStore) agentForTaskStopLocked(principal AuthorizationResult, taskID, agentID string) (AgentClientRecord, bool) {
+func (s *DevelopmentAIAgentClientStore) agentForTaskStopLocked(principal AuthorizationResult, taskID, agentID, assignmentID string) (AgentClientRecord, bool) {
 	if strings.TrimSpace(agentID) != "" {
 		return s.visibleAgent(principal, agentID)
+	}
+	if thread, ok := s.taskThreadForAssignmentAnyAgentLocked(taskID, assignmentID); ok {
+		return s.visibleAgent(principal, thread.AgentID)
 	}
 	thread, ok := s.activeTaskThreadLocked(taskID)
 	if !ok {
