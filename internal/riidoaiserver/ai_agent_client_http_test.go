@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 func TestHTTPAIAgentClientDevelopmentBootstrapAndAssignableAgents(t *testing.T) {
@@ -1892,7 +1894,7 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		t.Fatalf("threads after ready event = %+v", readyThreads)
 	}
 
-	logBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","state":"running","event_type":"riido_log","message":"팀 프로젝트 수집 중 - 진행 상태를 조회 중.","metadata":{"thread_progress_seq":"1"}}`
+	logBody := `{"assignment_id":"` + poll.Assignment.ID + `","task_id":"task-new","daemon_id":"daemon-shared-studio","device_id":"device-shared-studio","runtime_id":"runtime-openclaw-shared","state":"running","event_type":"riido_log","message":"팀 프로젝트 수집 중 - 진행 상태를 조회 중.","metadata":{"` + metadatakeys.ThreadProgressSeq.String() + `":"1"}}`
 	logReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-public-openclaw/events", strings.NewReader(logBody))
 	logReq.Header.Set("Authorization", "Bearer daemon-token")
 	logResp := httptest.NewRecorder()
