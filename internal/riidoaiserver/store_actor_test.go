@@ -222,6 +222,15 @@ func TestStoreActorPersistsResumeAndProviderSessionIDs(t *testing.T) {
 	if len(heartbeat.RefreshedAssignments) != 1 || heartbeat.RefreshedAssignments[0].ProviderSessionID != "sess-current" {
 		t.Fatalf("heartbeat did not return provider_session_id: %+v", heartbeat.RefreshedAssignments)
 	}
+
+	now = now.Add(time.Second)
+	active, err := store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent active: %v", err)
+	}
+	if active.Action != PollActive || active.Assignment == nil || active.Assignment.ProviderSessionID != "sess-current" {
+		t.Fatalf("active poll did not preserve provider_session_id: %+v", active.Assignment)
+	}
 }
 
 func TestStoreActorRejectsLongAgentInstruction(t *testing.T) {
