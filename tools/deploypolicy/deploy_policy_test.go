@@ -62,6 +62,9 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "CODEDEPLOY_DEPLOYMENT_GROUP: ${{ vars.RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP }}")
 	requireContains(t, workflow, "profile-thumbnails/uploads")
 	requireContains(t, workflow, "profile_thumbnail_url")
+	requireContains(t, workflow, `(.devices | type) == "array"`)
+	requireContains(t, workflow, `(.devices[0].device_id // "")`)
+	requireContains(t, workflow, `if [ -n "$device_id" ]`)
 	requireContains(t, smokeWorkflow, "profile-thumbnails/uploads")
 	requireContains(t, smokeWorkflow, "profile_thumbnail_url")
 	requireContains(t, workflow, "printf '%s' \"$image_uri\" > \"$RUNNER_TEMP/riido-image-uri\"")
@@ -104,6 +107,7 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 		"task-definition.current.json\" >>",
 		"appspec.json\" >>",
 		"deployment-id\" >>",
+		"(.devices | length) >= 1",
 	} {
 		if strings.Contains(workflow, forbidden) {
 			t.Fatalf("deploy workflow must not contain %q", forbidden)
