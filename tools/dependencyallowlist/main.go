@@ -13,7 +13,13 @@ import (
 	"strings"
 )
 
-const schemaVersion = "riido-go-dependency-allowlist.v1"
+const schemaVersion = "riido-go-dependency-allowlist.v2"
+
+var allowedLayers = map[string]struct{}{
+	"cloud":         {},
+	"contract":      {},
+	"observability": {},
+}
 
 type contract struct {
 	SchemaVersion        string          `json:"schema_version"`
@@ -24,8 +30,9 @@ type contract struct {
 
 type allowedModule struct {
 	Path     string `json:"path"`
-	Category string `json:"category"`
+	Layer    string `json:"layer"`
 	Owner    string `json:"owner"`
+	Approved bool   `json:"approved"`
 	Reason   string `json:"reason"`
 }
 
@@ -98,8 +105,14 @@ func loadContract(path string) (contract, error) {
 		if strings.TrimSpace(module.Path) == "" {
 			return contract{}, fmt.Errorf("allowed_direct_modules[%d].path is required", i)
 		}
-		if strings.TrimSpace(module.Category) == "" || strings.TrimSpace(module.Owner) == "" || strings.TrimSpace(module.Reason) == "" {
-			return contract{}, fmt.Errorf("allowed_direct_modules[%d] must include category, owner, and reason", i)
+		if strings.TrimSpace(module.Layer) == "" || strings.TrimSpace(module.Owner) == "" || strings.TrimSpace(module.Reason) == "" {
+			return contract{}, fmt.Errorf("allowed_direct_modules[%d] must include layer, owner, and reason", i)
+		}
+		if _, ok := allowedLayers[module.Layer]; !ok {
+			return contract{}, fmt.Errorf("allowed_direct_modules[%d].layer %q is not in vocabulary: %s", i, module.Layer, formatAllowedLayers())
+		}
+		if !module.Approved {
+			return contract{}, fmt.Errorf("allowed_direct_modules[%d].approved must be true for %q", i, module.Path)
 		}
 		if _, ok := seen[module.Path]; ok {
 			return contract{}, fmt.Errorf("duplicate allowed direct module %q", module.Path)
@@ -185,4 +198,13 @@ func formatModules(modules []goModule) string {
 		lines = append(lines, line)
 	}
 	return strings.Join(lines, "\n")
+}
+
+func formatAllowedLayers() string {
+	layers := make([]string, 0, len(allowedLayers))
+	for layer := range allowedLayers {
+		layers = append(layers, layer)
+	}
+	sort.Strings(layers)
+	return strings.Join(layers, ", ")
 }

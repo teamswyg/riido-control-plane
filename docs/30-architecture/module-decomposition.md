@@ -47,6 +47,8 @@ Allowed:
 
 - standard library
 - `github.com/teamswyg/riido-contracts` tagged releases
+- platform dependencies explicitly approved in the dependency allowlist for a
+  narrow layer such as `observability` or `cloud`
 - package-local test helpers
 
 Forbidden without a new ADR:
@@ -63,7 +65,10 @@ Direct Go module dependencies must be declared in
 and pass `go run ./tools/dependencyallowlist -contract
 dependency_allowlist.riido.json`. Transitive dependencies are accepted through
 the approved direct dependency graph and must not become direct dependencies
-without a new allowlist entry.
+without a new allowlist entry. Each allowlist entry must carry an owner, an
+approved layer from the contract vocabulary, an explicit approval flag, and a
+reason so the dependency policy stays reviewable instead of becoming a CI
+escape hatch.
 
 ## Runtime Boundaries
 
