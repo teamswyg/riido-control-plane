@@ -29,6 +29,8 @@ This file is the public Factor 12 configuration catalog for
 | `RIIDO_AI_SERVER_LONGPOLL_TICK_SECONDS` | `2` | `cmd/riido_ai_server` | fallback re-evaluation interval during a held poll; bounds cross-instance assignment discovery latency |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` | `false` | `cmd/riido_ai_server` | enables the development AI Agent client API backed by DynamoDB snapshot and assignment-operation persistence |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE` | empty | `cmd/riido_ai_server` | DynamoDB table name for the AI Agent client development snapshot item and assignment operation journal/queue; required when development mode is enabled |
+| `RIIDO_AI_SERVER_AI_AGENT_CLIENT_SNAPSHOT_RELOAD_SECONDS` | store default (`15`) | `cmd/riido_ai_server` | optional AI Agent client snapshot cache reload cadence; keep below the device runtime stale window unless the deployment is single-task |
+| `RIIDO_AI_SERVER_AI_AGENT_CLIENT_HEARTBEAT_SNAPSHOT_SAVE_SECONDS` | store default (`15`) | `cmd/riido_ai_server` | optional no-change daemon heartbeat snapshot save cadence; bounds DynamoDB writes while preserving liveness projection freshness |
 | `RIIDO_AI_SERVER_AWS_REGION` | empty | `cmd/riido_ai_server` | AWS region used by stdlib-only DynamoDB request signing; required when development mode is enabled |
 | `RIIDO_AI_SERVER_DYNAMODB_ENDPOINT` | AWS default for region | `cmd/riido_ai_server` | optional DynamoDB endpoint override for fake-endpoint tests or local development |
 | `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_BUCKET` | empty | `cmd/riido_ai_server` | existing deployment-owned S3 bucket used to sign AI Agent profile thumbnail POST upload intents; required with the CDN base URL to enable the endpoint |
@@ -63,6 +65,11 @@ available. The development store persists the whole AI Agent client read/write
 state as a schema-versioned DynamoDB snapshot item and persists assignment
 operations in the same table so generated assignment requests and daemon poll
 requests can cross ECS instance or restart boundaries.
+Snapshot reload and no-change heartbeat save use a 15 second default cadence.
+Those intervals intentionally stay below the 20 second daemon-runtime stale
+projection window while reducing repeated reads/writes of the same snapshot
+item; deployments can override them with the two AI Agent client snapshot
+cadence env vars above.
 
 `RIIDO_AI_SERVER_PPROF_ADDR` enables `/debug/pprof/` on a separate HTTP server.
 Because pprof can expose heap, goroutine, stack, and CPU profile details, this

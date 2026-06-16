@@ -281,6 +281,10 @@ reload the latest snapshot before evaluating state. Runtime snapshot writes
 then save the merged projection back to the same snapshot. This keeps Desktop,
 daemon, and web requests consistent when the ALB routes related requests to
 different tasks.
+The default reload and no-change heartbeat save cadence is 15 seconds. This is
+below `AIAgentDeviceRuntimeSnapshotStaleAfter` (20 seconds), so a second ECS
+task can still observe liveness before the projection is considered stale while
+reducing repeated DynamoDB reads/writes of the same snapshot item.
 The assignment operation store writes the generated assignment journal, agent
 queue projection, and active lease records in the same table. This is the
 development persistence boundary, not the final production single-table

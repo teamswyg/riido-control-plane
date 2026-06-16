@@ -37,6 +37,8 @@ const (
 	envAssignmentActiveLease           = "RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS"
 	envAIAgentClientDev                = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
 	envAIAgentClientTable              = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE"
+	envAIAgentClientSnapshotReload     = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_SNAPSHOT_RELOAD_SECONDS"
+	envAIAgentClientHeartbeatSave      = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_HEARTBEAT_SNAPSHOT_SAVE_SECONDS"
 	envDynamoDBOutboxTable             = "RIIDO_AI_SERVER_DYNAMODB_OUTBOX_TABLE"
 	envAWSRegion                       = "RIIDO_AI_SERVER_AWS_REGION"
 	envDynamoDBEndpoint                = "RIIDO_AI_SERVER_DYNAMODB_ENDPOINT"
@@ -75,6 +77,8 @@ type runtimeConfig struct {
 	AIAgentClientDev         bool
 	AIAgentClientStore       riidoaiserver.AIAgentClientSnapshotStore
 	AIAgentClientMetrics     *riidoaiserver.AIAgentClientPersistenceMetrics
+	AIAgentSnapshotReload    time.Duration
+	AIAgentHeartbeatSave     time.Duration
 	AIAgentProfileThumbnails riidoaiserver.AIAgentProfileThumbnailUploadService
 	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
 	AssignmentOutbox         riidoaiserver.EventSink
@@ -101,10 +105,14 @@ func run() error {
 	defer closeRuntimeConfig(config)
 	var aiAgentClient riidoaiserver.AIAgentClientStore
 	if config.AIAgentClientDev {
-		aiAgentClient, err = riidoaiserver.OpenPersistentAIAgentClientStore(context.Background(), riidoaiserver.NewDevelopmentAIAgentClientStore(), config.AIAgentClientStore)
+		persistentClient, err := riidoaiserver.OpenPersistentAIAgentClientStore(context.Background(), riidoaiserver.NewDevelopmentAIAgentClientStore(), config.AIAgentClientStore)
 		if err != nil {
 			return fmt.Errorf("open AI Agent development store: %w", err)
 		}
+		if err := persistentClient.ConfigureSnapshotCadence(config.AIAgentSnapshotReload, config.AIAgentHeartbeatSave); err != nil {
+			return fmt.Errorf("configure AI Agent development snapshot cadence: %w", err)
+		}
+		aiAgentClient = persistentClient
 	}
 	store, err := riidoaiserver.OpenStoreWithConfig(context.Background(), riidoaiserver.StoreConfig{
 		AgentRegistry:       riidoaiserver.NewCompositeAgentRegistry(agentRegistryFromAIAgentClient(aiAgentClient)),
@@ -183,6 +191,14 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	aiAgentSnapshotReload, err := envOptionalDurationSeconds(envAIAgentClientSnapshotReload)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
+	aiAgentHeartbeatSave, err := envOptionalDurationSeconds(envAIAgentClientHeartbeatSave)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	assignmentOperationStore, err := assignmentOperationStoreFromEnv(aiAgentClientDev, assignmentActiveLease)
 	if err != nil {
 		return runtimeConfig{}, err
@@ -214,6 +230,8 @@ func configFromEnv() (runtimeConfig, error) {
 		AIAgentClientDev:         aiAgentClientDev,
 		AIAgentClientStore:       aiAgentClientStore,
 		AIAgentClientMetrics:     aiAgentClientMetrics,
+		AIAgentSnapshotReload:    aiAgentSnapshotReload,
+		AIAgentHeartbeatSave:     aiAgentHeartbeatSave,
 		AIAgentProfileThumbnails: profileThumbnails,
 		AssignmentOperationStore: assignmentOperationStore,
 		AssignmentOutbox:         assignmentOutbox,
