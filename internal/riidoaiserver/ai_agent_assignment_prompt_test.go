@@ -126,6 +126,26 @@ func TestComposeAIAgentAssignmentPromptFallsBackWithoutRepository(t *testing.T) 
 	}
 }
 
+func TestComposeAIAgentAssignmentPromptWithoutTaskContext(t *testing.T) {
+	prompt, err := ComposeAIAgentAssignmentPromptWithoutTaskContext("task-smoke", "")
+	if err != nil {
+		t.Fatalf("compose prompt without task context: %v", err)
+	}
+	for _, want := range []string{
+		"- task_id: task-smoke",
+		"- component_id: task-smoke",
+		"- title: task-smoke",
+		"Task context was not available when this assignment was created.",
+	} {
+		if !strings.Contains(prompt.Prompt, want) {
+			t.Fatalf("prompt missing %q:\n%s", want, prompt.Prompt)
+		}
+	}
+	if prompt.HasRepository {
+		t.Fatalf("fallback prompt should not select repository: %+v", prompt.SelectedRepository)
+	}
+}
+
 func TestComposeAIAgentAssignmentPromptRejectsEmptyContext(t *testing.T) {
 	_, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{TaskID: "task-3"})
 	if err == nil || !strings.Contains(err.Error(), "title or document content") {
