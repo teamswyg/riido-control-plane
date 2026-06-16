@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 func withHTTPTracing(next http.Handler, recorder TraceRecorder) http.Handler {
@@ -20,14 +22,17 @@ func withHTTPTracing(next http.Handler, recorder TraceRecorder) http.Handler {
 			Name: "HTTP " + r.Method + " " + route,
 			Kind: TraceSpanKindServer,
 			Attributes: []TraceAttribute{
-				{Key: "http.request.method", Value: r.Method},
-				{Key: "http.route", Value: route},
-				{Key: "riido.trace.surface", Value: "control_plane_http"},
+				StringTraceAttribute(metadatakeys.HTTPRequestMethod.String(), r.Method),
+				StringTraceAttribute(metadatakeys.HTTPRoute.String(), route),
+				StringTraceAttribute(metadatakeys.RiidoTraceSurface.String(), "control_plane_http"),
 			},
 		})
 		recorderResponse := &httpStatusRecorder{ResponseWriter: w, statusCode: http.StatusOK}
 		next.ServeHTTP(recorderResponse, r.WithContext(WithTraceRecorder(ctx, recorder)))
-		span.SetAttributes(TraceAttribute{Key: "http.response.status_code", Value: strconv.Itoa(recorderResponse.statusCode)})
+		span.SetAttributes(
+			Int64TraceAttribute(metadatakeys.HTTPResponseStatusCode.String(), int64(recorderResponse.statusCode)),
+			Int64TraceAttribute(metadatakeys.HTTPStatusCode.String(), int64(recorderResponse.statusCode)),
+		)
 		if recorderResponse.statusCode >= 500 {
 			span.RecordError(httpStatusTraceError(recorderResponse.statusCode))
 		}

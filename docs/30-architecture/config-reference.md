@@ -87,7 +87,13 @@ instead of linking directly to AWS X-Ray SDKs. Trace coverage is intentionally
 small: allowlisted HTTP route patterns, Store operations, and stdlib AWS JSON
 client calls. Trace attributes must use route patterns and operation names only;
 do not add task ids, agent ids, table names, prompts, credentials, raw document
-content, or user-provided text to span names or attributes.
+content, or user-provided text to span names or attributes. Trace metadata keys
+come from the shared `riido-contracts/metadatakeys` vocabulary. Store intent is
+reported as `riido.store.operation` values such as
+`store_poll_assignment`, `store_append_event`,
+`ai_agent_client_snapshot_load`, and `ai_agent_client_snapshot_save`; these
+values identify the operation class without exposing DynamoDB keys or item
+contents.
 
 Profile thumbnail upload intents are optional and fail closed. If any profile
 thumbnail upload env var is set, the bucket, CDN base URL, AWS region, and ECS

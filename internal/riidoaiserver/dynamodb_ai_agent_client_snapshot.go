@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 const (
@@ -213,6 +215,9 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 		credentials:  credentials,
 		httpClient:   s.httpClient,
 		now:          s.now,
+		traceAttrs: []TraceAttribute{
+			StringTraceAttribute(metadatakeys.RiidoStoreOperation.String(), AIAgentClientSnapshotLoad.String()),
+		},
 	})
 	if err != nil {
 		return AIAgentClientSnapshot{}, false, fmt.Errorf("dynamodb load AI Agent client snapshot: %w", err)
@@ -303,6 +308,9 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 		credentials:  credentials,
 		httpClient:   s.httpClient,
 		now:          s.now,
+		traceAttrs: []TraceAttribute{
+			StringTraceAttribute(metadatakeys.RiidoStoreOperation.String(), AIAgentClientSnapshotSave.String()),
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("dynamodb save AI Agent client snapshot: %w", err)

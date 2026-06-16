@@ -548,6 +548,17 @@ page. Assignment operation records can contain task context and event payloads;
 bounded query pages keep the stdlib HTTP JSON reader from decoding truncated
 large responses during ECS startup replay.
 
+When tracing is enabled, these adapters may add low-cardinality operation
+vocabulary to spans. The allowed shared metadata keys come from
+`riido-contracts/metadatakeys`; examples are `aws.operation`,
+`riido.trace.surface`, and `riido.store.operation`. DynamoDB table names, PK/SK
+values, assignment ids, agent ids, prompts, profile URLs, payload documents,
+credentials, account ids, and ARNs must not be attached to spans. AI Agent
+client snapshot reads/writes use `riido.store.operation` values
+`ai_agent_client_snapshot_load` and `ai_agent_client_snapshot_save` so X-Ray can
+distinguish monolithic snapshot traffic from assignment queue/projection
+traffic without exposing item identity.
+
 This boundary does not own AWS account ids, Terraform, IAM/VPC/ECS/EventBridge
 rule resources, Route53/ACM/WAF resources, tfvars, Terraform backend/state,
 live DynamoDB/EventBridge smoke evidence, stream-relay evidence artifacts,
