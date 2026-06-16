@@ -897,8 +897,8 @@ func normalizeAssignmentWorktree(worktree *AssignmentWorktree) *AssignmentWorktr
 		return nil
 	}
 	out := &AssignmentWorktree{
-		RepositoryFullName: strings.TrimSpace(worktree.RepositoryFullName),
-		RepositoryURL:      strings.TrimSpace(worktree.RepositoryURL),
+		RepositoryFullName: safeAIAgentRepositoryFullName(worktree.RepositoryFullName),
+		RepositoryURL:      safeAIAgentRepositoryURL(worktree.RepositoryURL),
 		BranchName:         strings.TrimSpace(worktree.BranchName),
 		IsPrivate:          worktree.IsPrivate,
 		Source:             strings.TrimSpace(worktree.Source),

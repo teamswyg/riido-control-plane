@@ -1641,8 +1641,8 @@ func composeAssignRequestWithoutTaskContext(taskID, componentID string, req Assi
 
 func assignmentWorktreeFromTaskContext(contextSnapshot AIAgentTaskContext, repository AIAgentTaskContextRepository) *AssignmentWorktree {
 	worktree := &AssignmentWorktree{
-		RepositoryFullName: strings.TrimSpace(repository.FullName),
-		RepositoryURL:      strings.TrimSpace(repository.RepositoryURL),
+		RepositoryFullName: safeAIAgentRepositoryFullName(repository.FullName),
+		RepositoryURL:      safeAIAgentRepositoryURL(repository.RepositoryURL),
 		BranchName:         strings.TrimSpace(contextSnapshot.Component.BranchName),
 		IsPrivate:          repository.IsPrivate,
 		Source:             strings.TrimSpace(repository.Source),

@@ -1786,6 +1786,18 @@ in-flight state can rebuild a resume-capable task request.
 This slice does not change API wire shape, DynamoDB item layout, assignment
 state names, or deployment topology.
 
+### RIID-4964 — Assignment worktree URL hardening
+
+The task-context composer and assignment store now project repository identity
+only when it is a safe public GitHub repository identifier: `{owner}/{repo}` and
+`https://github.com/{owner}/{repo}` with no userinfo, query string, fragment, or
+extra path segments. If the upstream task context supplies a tokenized or
+otherwise unsafe value, the control plane omits that field from both the prompt
+and assignment worktree DTO.
+
+This slice does not add private clone credentials, secret references, new
+DynamoDB fields, or client API fields.
+
 ### RIID-4881 — Generated assignment team/OpenAPI exclusion mirror
 
 This slice mirrors the upstream contracts decision that generated AI Agent
