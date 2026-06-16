@@ -1,6 +1,8 @@
 package riidoaiserver
 
 import (
+	"context"
+	"errors"
 	"sort"
 	"strings"
 	"sync"
@@ -93,7 +95,7 @@ func (m *StoreOperationMetrics) ObserveStoreOperation(obs StoreOperationObservat
 	m.pruneLocked(observedAt)
 	bucket := m.bucketLocked(bucketStart)
 	bucket.callsTotal++
-	if obs.Err != nil {
+	if storeOperationFailed(obs.Err) {
 		bucket.errorsTotal++
 	}
 	bucket.latency.observe(elapsedMS)
@@ -105,7 +107,7 @@ func (m *StoreOperationMetrics) ObserveStoreOperation(obs StoreOperationObservat
 	metric := state.metric
 	metric.Operation = operation
 	metric.CallsTotal++
-	if obs.Err != nil {
+	if storeOperationFailed(obs.Err) {
 		metric.ErrorsTotal++
 	}
 	metric.LatencySamplesTotal++
@@ -119,6 +121,10 @@ func (m *StoreOperationMetrics) ObserveStoreOperation(obs StoreOperationObservat
 		state.lastObservedAt = observedAt
 	}
 	bucket.byOperation[operation] = state
+}
+
+func storeOperationFailed(err error) bool {
+	return err != nil && !errors.Is(err, context.Canceled)
 }
 
 func (m *StoreOperationMetrics) ApplyToMetricsSnapshot(snapshot MetricsSnapshot) MetricsSnapshot {
