@@ -7,12 +7,12 @@
   "runtime_service": "riido_ai_server",
   "current_strategy": {
     "id": "ecs-rolling-task-definition-revision",
-    "status": "active-testnet-and-development-manual-dispatch",
+    "status": "active-development-testnet-production-manual-dispatch",
     "cd_owner": "riido-control-plane",
     "topology_owner": "riido-infra",
     "workflow": ".github/workflows/deploy-ai-agent-testnet.yml",
     "allowed_actions": [
-      "select the configured testnet or development GitHub environment for manual dispatch without accepting live URL inputs",
+      "select the configured development, testnet, or production GitHub environment for manual dispatch without accepting live URL inputs",
       "build checked-in container contract",
       "push immutable ECR image tag",
       "resolve image digest",

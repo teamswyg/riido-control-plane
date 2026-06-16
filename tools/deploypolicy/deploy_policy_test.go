@@ -50,10 +50,13 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "workflow_dispatch")
 	requireContains(t, workflow, "deployment_target")
 	requireContains(t, workflow, "ai-agent-development")
-	requireContains(t, workflow, "testnet|development")
+	requireContains(t, workflow, "ai-agent-production")
+	requireContains(t, workflow, "testnet|development|production")
 	requireContains(t, workflow, "tags:")
 	requireContains(t, workflow, "- \"v*\"")
 	requireContains(t, workflow, "TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}")
+	requireContains(t, workflow, "SMOKE_TOKEN_CONFIGURED: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN != '' }}")
+	requireContains(t, workflow, "if [ \"${SMOKE_TOKEN_CONFIGURED:-false}\" != \"true\" ]")
 	requireContains(t, workflow, "CODEDEPLOY_APPLICATION: ${{ vars.RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION }}")
 	requireContains(t, workflow, "CODEDEPLOY_DEPLOYMENT_GROUP: ${{ vars.RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP }}")
 	requireContains(t, workflow, "profile-thumbnails/uploads")
@@ -314,7 +317,8 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 		t.Fatalf("workflow drifted: %q", parsed.Current.Workflow)
 	}
 	requireContains(t, parsed.Current.Status, "development")
-	requireSliceContains(t, parsed.Current.Allowed, "select the configured testnet or development GitHub environment for manual dispatch without accepting live URL inputs")
+	requireContains(t, parsed.Current.Status, "production")
+	requireSliceContains(t, parsed.Current.Allowed, "select the configured development, testnet, or production GitHub environment for manual dispatch without accepting live URL inputs")
 	if len(parsed.Current.Allowed) < 5 {
 		t.Fatalf("current CD allowed actions are underspecified: %#v", parsed.Current.Allowed)
 	}

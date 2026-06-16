@@ -41,9 +41,10 @@ image deploys preserve that live shape.
 
 ## Current And Future Strategies
 
-The current testnet default strategy is ECS rolling deployment by registering a
-new task definition revision and updating the ECS service. That execution
-remains in the `deploy-ai-agent-testnet` workflow.
+The current default strategy is ECS rolling deployment by registering a new task
+definition revision and updating the selected ECS service. Manual dispatch may
+select only the configured development, testnet, or production GitHub
+environment. That execution remains in the `deploy-ai-agent-testnet` workflow.
 
 The same workflow also has a topology-gated CodeDeploy mode. When the optional
 CodeDeploy application/deployment-group GitHub environment keys listed in the

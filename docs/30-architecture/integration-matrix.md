@@ -23,7 +23,7 @@ operator/private infra validation.
 | DynamoDB/EventBridge adapters | fake endpoint HTTP tests with fake credentials | no live AWS |
 | `awsadapters` facade | compile and usage tests | none |
 | container image contract | `tools/containercontract` and optional local Docker build | Docker only for image build check |
-| AI Agent testnet runtime CD | tag-triggered `deploy-ai-agent-testnet` workflow: build, ECR push, ECS service wait, live smoke | GitHub OIDC, masked AWS account boundary, configured testnet secrets, no live URL dispatch input, no live-value step output, same-job temp handoff cleanup |
+| AI Agent runtime CD | tag-triggered or manually selected `deploy-ai-agent-testnet` workflow: build, ECR push, ECS service wait, live smoke | GitHub OIDC, masked AWS account boundary, configured environment secrets, no live URL dispatch input, no live-value step output, same-job temp handoff cleanup |
 | infra-output-gated CodeDeploy runtime CD | same workflow creates/waits/smokes CodeDeploy deployment only after infra supplies topology evidence and both CodeDeploy variables are configured from infra outputs | GitHub OIDC, masked deployment target config, same-job temp AppSpec/request files with traps, no service-role/target-group/listener ARN input, no uploaded deployment artifacts or live-value step output |
 
 Public PR checks must not require AWS credentials, Terraform state, ECR access,

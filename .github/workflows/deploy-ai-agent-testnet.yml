@@ -14,6 +14,7 @@ on:
         options:
           - testnet
           - development
+          - production
 
 concurrency:
   group: deploy-ai-agent-testnet
@@ -27,7 +28,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'development' && 'ai-agent-development' || 'ai-agent-testnet' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'development' && 'ai-agent-development' || github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'production' && 'ai-agent-production' || 'ai-agent-testnet' }}
     env:
       DEPLOYMENT_TARGET: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'testnet' }}
       AWS_REGION: ${{ vars.RIIDO_AI_SERVER_AWS_REGION }}
@@ -39,6 +40,7 @@ jobs:
       CODEDEPLOY_DEPLOYMENT_GROUP: ${{ vars.RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP }}
       TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
       TESTNET_WORKSPACE_ID: ${{ vars.RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID }}
+      SMOKE_TOKEN_CONFIGURED: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -52,7 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           case "${DEPLOYMENT_TARGET:-testnet}" in
-            testnet|development) ;;
+            testnet|development|production) ;;
             *)
               echo "unsupported deployment target"
               exit 1
@@ -72,6 +74,10 @@ jobs:
               exit 1
             fi
           done
+          if [ "${SMOKE_TOKEN_CONFIGURED:-false}" != "true" ]; then
+            echo "RIIDO_AI_SERVER_TESTNET_TOKEN is required"
+            exit 1
+          fi
 
           redacted=(
             AWS_REGION
