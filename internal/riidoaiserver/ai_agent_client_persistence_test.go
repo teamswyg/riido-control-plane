@@ -126,6 +126,29 @@ func TestPersistentAIAgentClientStoreRestoresDevelopmentState(t *testing.T) {
 	}
 }
 
+func TestPersistentAIAgentClientStoreConfiguresSnapshotCadence(t *testing.T) {
+	ctx := context.Background()
+	store, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), &memoryAIAgentClientSnapshotStore{})
+	if err != nil {
+		t.Fatalf("OpenPersistentAIAgentClientStore: %v", err)
+	}
+	if store.snapshotReloadInterval != defaultAIAgentClientSnapshotReloadInterval {
+		t.Fatalf("default reload interval = %s, want %s", store.snapshotReloadInterval, defaultAIAgentClientSnapshotReloadInterval)
+	}
+	if store.snapshotHeartbeatSaveInterval != defaultAIAgentClientHeartbeatSnapshotSaveInterval {
+		t.Fatalf("default heartbeat save interval = %s, want %s", store.snapshotHeartbeatSaveInterval, defaultAIAgentClientHeartbeatSnapshotSaveInterval)
+	}
+	if err := store.ConfigureSnapshotCadence(17*time.Second, 19*time.Second); err != nil {
+		t.Fatalf("ConfigureSnapshotCadence: %v", err)
+	}
+	if store.snapshotReloadInterval != 17*time.Second {
+		t.Fatalf("reload interval = %s, want 17s", store.snapshotReloadInterval)
+	}
+	if store.snapshotHeartbeatSaveInterval != 19*time.Second {
+		t.Fatalf("heartbeat save interval = %s, want 19s", store.snapshotHeartbeatSaveInterval)
+	}
+}
+
 func TestPersistentAIAgentClientStoreReloadsDeviceCredentialAcrossProcesses(t *testing.T) {
 	ctx := context.Background()
 	snapshots := &memoryAIAgentClientSnapshotStore{}

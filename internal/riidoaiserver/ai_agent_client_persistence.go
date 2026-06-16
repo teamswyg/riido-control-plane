@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	defaultAIAgentClientSnapshotReloadInterval        = 5 * time.Second
-	defaultAIAgentClientHeartbeatSnapshotSaveInterval = 10 * time.Second
+	defaultAIAgentClientSnapshotReloadInterval        = 15 * time.Second
+	defaultAIAgentClientHeartbeatSnapshotSaveInterval = 15 * time.Second
 )
 
 type AIAgentClientSnapshotStore interface {
@@ -95,6 +95,27 @@ func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAg
 		return nil, err
 	}
 	return store, nil
+}
+
+func (s *PersistentAIAgentClientStore) ConfigureSnapshotCadence(reloadInterval, heartbeatSaveInterval time.Duration) error {
+	if s == nil {
+		return nil
+	}
+	if reloadInterval < 0 {
+		return errors.New("riidoaiserver: AI Agent client snapshot reload interval must not be negative")
+	}
+	if heartbeatSaveInterval < 0 {
+		return errors.New("riidoaiserver: AI Agent client heartbeat snapshot save interval must not be negative")
+	}
+	s.snapshotReloadMu.Lock()
+	defer s.snapshotReloadMu.Unlock()
+	if reloadInterval > 0 {
+		s.snapshotReloadInterval = reloadInterval
+	}
+	if heartbeatSaveInterval > 0 {
+		s.snapshotHeartbeatSaveInterval = heartbeatSaveInterval
+	}
+	return nil
 }
 
 func (s *PersistentAIAgentClientStore) EnrollDeviceCredential(ctx context.Context, principal AuthorizationResult, workspaceID string, req EnrollDeviceRequest) (EnrollDeviceResponse, error) {

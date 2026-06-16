@@ -151,6 +151,8 @@ func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	t.Setenv(envAWSRegion, "ap-northeast-2")
 	t.Setenv(envAWSContainerCredentialsFullURI, "http://169.254.170.2/credentials")
 	t.Setenv(envAssignmentActiveLease, "300")
+	t.Setenv(envAIAgentClientSnapshotReload, "17")
+	t.Setenv(envAIAgentClientHeartbeatSave, "19")
 
 	config, err := configFromEnv()
 	if err != nil {
@@ -162,6 +164,12 @@ func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	}
 	if config.AssignmentActiveLease != 5*time.Minute {
 		t.Fatalf("assignment active lease = %s, want 5m", config.AssignmentActiveLease)
+	}
+	if config.AIAgentSnapshotReload != 17*time.Second {
+		t.Fatalf("AI Agent snapshot reload = %s, want 17s", config.AIAgentSnapshotReload)
+	}
+	if config.AIAgentHeartbeatSave != 19*time.Second {
+		t.Fatalf("AI Agent heartbeat snapshot save = %s, want 19s", config.AIAgentHeartbeatSave)
 	}
 	if config.AIAgentClientStore == nil {
 		t.Fatal("AI Agent client snapshot store should be configured")

@@ -45,6 +45,11 @@ signals against the pre-change baseline:
 - X-Ray route/store-operation samples for `runtime-snapshot`, `agent-bindings`,
   and `poll`
 
+The current cadence hardening keeps the monolithic model but moves the default
+snapshot reload and no-change heartbeat save intervals to 15 seconds. This
+stays below the 20 second daemon-runtime stale projection window while reducing
+the repeated same-item reads/writes observed in development.
+
 If read/write request units drop by at least 50% and snapshot operations no
 longer dominate sampled Store traces, keep the monolithic snapshot and revisit
 only when the API surface or data volume changes.
@@ -83,4 +88,3 @@ profile URLs, or payload documents into trace attributes or public docs.
 - Do not add a new public API contract merely to expose persistence internals.
 - Do not encode live AWS account details, trace ids, log excerpts, or raw
   operator evidence in the public repository.
-
