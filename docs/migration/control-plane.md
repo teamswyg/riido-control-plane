@@ -1776,6 +1776,16 @@ This slice does:
 This slice does not split the DynamoDB item, add tables, change public API
 contracts, or publish live AWS trace/log evidence.
 
+### RIID-4964 — Active assignment provider-session recovery evidence
+
+The assignment store already persists `provider_session_id` learned through the
+daemon event path. This slice adds focused evidence that an active poll payload
+also preserves that pinned provider session so a daemon that lost local
+in-flight state can rebuild a resume-capable task request.
+
+This slice does not change API wire shape, DynamoDB item layout, assignment
+state names, or deployment topology.
+
 ### RIID-4881 — Generated assignment team/OpenAPI exclusion mirror
 
 This slice mirrors the upstream contracts decision that generated AI Agent
