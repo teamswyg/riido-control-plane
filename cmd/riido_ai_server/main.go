@@ -28,6 +28,7 @@ const (
 	envExternalAuthzTimeout            = "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS"
 	envReviewAccountTokenHash          = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
 	envMetricsLogInterval              = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
+	envPprofAddr                       = "RIIDO_AI_SERVER_PPROF_ADDR"
 	envWebAllowedOrigins               = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
 	envAssignmentActiveLease           = "RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS"
 	envAIAgentClientDev                = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
@@ -60,6 +61,7 @@ type runtimeConfig struct {
 	Authorizer               riidoaiserver.RequestAuthorizer
 	ReviewProvision          *riidoaiserver.ReviewAccountProvisioning
 	MetricsLogInterval       time.Duration
+	PprofAddr                string
 	WebAllowedOrigins        []string
 	AssignmentActiveLease    time.Duration
 	LongPollMaxHold          time.Duration
@@ -105,14 +107,19 @@ func run() error {
 			return fmt.Errorf("apply review account provisioning: %w", err)
 		}
 	}
+	httpTransactions := riidoaiserver.NewHTTPTransactionMetrics()
 	server := &http.Server{
 		Addr:              config.Addr,
-		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, AIAgentProfileThumbnails: config.AIAgentProfileThumbnails, TaskContext: config.TaskContextReader, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins, LongPollMaxHold: config.LongPollMaxHold, LongPollTick: config.LongPollTick}).Handler(),
+		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, AIAgentProfileThumbnails: config.AIAgentProfileThumbnails, TaskContext: config.TaskContextReader, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins, HTTPTransactions: httpTransactions, LongPollMaxHold: config.LongPollMaxHold, LongPollTick: config.LongPollTick}).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
-	metricsCancel, metricsErrCh := startMetricsPublisher(store, config.MetricsLogInterval, os.Stdout)
+	servers := []*http.Server{server}
+	if pprofServer := newPprofServer(config.PprofAddr); pprofServer != nil {
+		servers = append(servers, pprofServer)
+	}
+	metricsCancel, metricsErrCh := startMetricsPublisher(riidoaiserver.NewObservedMetricsReader(store, httpTransactions), config.MetricsLogInterval, os.Stdout)
 	defer stopMetricsPublisher(metricsCancel, metricsErrCh)
-	return serveUntilSignal(server, config.ShutdownTimeout, metricsErrCh)
+	return serveUntilSignal(servers, config.ShutdownTimeout, metricsErrCh)
 }
 
 func configFromEnv() (runtimeConfig, error) {
@@ -174,6 +181,7 @@ func configFromEnv() (runtimeConfig, error) {
 		Authorizer:               authorizer,
 		ReviewProvision:          reviewProvision,
 		MetricsLogInterval:       metricsLogInterval,
+		PprofAddr:                strings.TrimSpace(os.Getenv(envPprofAddr)),
 		WebAllowedOrigins:        webAllowedOrigins,
 		AssignmentActiveLease:    assignmentActiveLease,
 		LongPollMaxHold:          longPollMaxHold,
@@ -202,20 +210,22 @@ func agentRegistryFromAIAgentClient(client riidoaiserver.AIAgentClientStore) rii
 	return nil
 }
 
-func serveUntilSignal(server *http.Server, shutdownTimeout time.Duration, backgroundErrCh ...<-chan error) error {
-	var bgErrCh <-chan error
-	if len(backgroundErrCh) > 0 {
-		bgErrCh = backgroundErrCh[0]
+func serveUntilSignal(servers []*http.Server, shutdownTimeout time.Duration, backgroundErrCh ...<-chan error) error {
+	if len(servers) == 0 {
+		return errors.New("riido_ai_server: at least one http server is required")
 	}
-	errCh := make(chan error, 1)
-	go func() {
-		err := server.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			errCh <- err
-			return
-		}
-		errCh <- nil
-	}()
+	bgErrCh := mergeBackgroundErrors(backgroundErrCh...)
+	errCh := make(chan error, len(servers))
+	for _, server := range servers {
+		go func(server *http.Server) {
+			err := server.ListenAndServe()
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				errCh <- err
+				return
+			}
+			errCh <- nil
+		}(server)
+	}
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
@@ -223,25 +233,65 @@ func serveUntilSignal(server *http.Server, shutdownTimeout time.Duration, backgr
 
 	select {
 	case sig := <-sigCh:
-		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-		defer cancel()
-		if err := server.Shutdown(ctx); err != nil {
+		if err := shutdownServers(servers, shutdownTimeout); err != nil {
 			return fmt.Errorf("shutdown after %s: %w", sig, err)
 		}
-		return <-errCh
+		return waitForServers(errCh, len(servers))
 	case err := <-bgErrCh:
-		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-		defer cancel()
-		if shutdownErr := server.Shutdown(ctx); shutdownErr != nil {
+		if shutdownErr := shutdownServers(servers, shutdownTimeout); shutdownErr != nil {
 			return fmt.Errorf("shutdown after metrics publisher error: %w", shutdownErr)
 		}
-		if serverErr := <-errCh; serverErr != nil {
+		if serverErr := waitForServers(errCh, len(servers)); serverErr != nil {
 			return serverErr
 		}
 		return err
 	case err := <-errCh:
+		_ = shutdownServers(servers, shutdownTimeout)
 		return err
 	}
+}
+
+func mergeBackgroundErrors(channels ...<-chan error) <-chan error {
+	active := make([]<-chan error, 0, len(channels))
+	for _, ch := range channels {
+		if ch != nil {
+			active = append(active, ch)
+		}
+	}
+	if len(active) == 0 {
+		return nil
+	}
+	out := make(chan error, 1)
+	for _, ch := range active {
+		go func(ch <-chan error) {
+			if err, ok := <-ch; ok {
+				out <- err
+			}
+		}(ch)
+	}
+	return out
+}
+
+func shutdownServers(servers []*http.Server, timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	var shutdownErr error
+	for _, server := range servers {
+		if err := server.Shutdown(ctx); err != nil && shutdownErr == nil {
+			shutdownErr = err
+		}
+	}
+	return shutdownErr
+}
+
+func waitForServers(errCh <-chan error, count int) error {
+	var firstErr error
+	for range count {
+		if err := <-errCh; err != nil && firstErr == nil {
+			firstErr = err
+		}
+	}
+	return firstErr
 }
 
 func getenvDefault(key, fallback string) string {

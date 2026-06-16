@@ -73,6 +73,38 @@ func TestConfigFromEnvParsesMetricsLogInterval(t *testing.T) {
 	}
 }
 
+func TestConfigFromEnvParsesPprofAddr(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envPprofAddr, "127.0.0.1:6060")
+
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	if config.PprofAddr != "127.0.0.1:6060" {
+		t.Fatalf("pprof addr = %q", config.PprofAddr)
+	}
+}
+
+func TestPprofHandlerServesIndex(t *testing.T) {
+	server := newPprofServer("127.0.0.1:0")
+	if server == nil {
+		t.Fatal("pprof server should be configured")
+	}
+	req := httptest.NewRequest(http.MethodGet, "/debug/pprof/", nil)
+	resp := httptest.NewRecorder()
+	server.Handler.ServeHTTP(resp, req)
+	if resp.Code != http.StatusOK {
+		t.Fatalf("pprof status=%d body=%s", resp.Code, resp.Body.String())
+	}
+	if !strings.Contains(resp.Body.String(), "profile") {
+		t.Fatalf("pprof body = %s", resp.Body.String())
+	}
+	if newPprofServer("") != nil {
+		t.Fatal("empty pprof addr should disable pprof server")
+	}
+}
+
 func TestConfigFromEnvParsesWebAllowedOrigins(t *testing.T) {
 	clearRiidoAIServerEnv(t)
 	t.Setenv(envWebAllowedOrigins, " https://app.riido.io, http://localhost:5173/ , https://app.riido.io ")
@@ -525,6 +557,7 @@ func clearRiidoAIServerEnv(t *testing.T) {
 		envExternalAuthzTimeout,
 		envReviewAccountTokenHash,
 		envMetricsLogInterval,
+		envPprofAddr,
 		envWebAllowedOrigins,
 		envAssignmentActiveLease,
 		envAIAgentClientDev,

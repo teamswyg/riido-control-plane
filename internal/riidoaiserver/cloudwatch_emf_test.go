@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"net/http"
 	"testing"
 	"time"
 )
@@ -26,6 +27,22 @@ func TestWriteCloudWatchEMF(t *testing.T) {
 		EventAppendLatencyTotalMilliseconds: 230,
 		EventAppendLatencyMaxMilliseconds:   89,
 		EventAppendLatencyLastMilliseconds:  34,
+		HTTPRequestsTotal:                   23,
+		HTTPResponsesByStatus:               map[int]int64{http.StatusOK: 17, http.StatusNotFound: 4, http.StatusInternalServerError: 2},
+		HTTPRequestLatencySamplesTotal:      23,
+		HTTPRequestLatencyTotalMilliseconds: 345,
+		HTTPRequestLatencyMaxMilliseconds:   67,
+		HTTPRequestLatencyLastMilliseconds:  12,
+		HTTPTransactions: []HTTPTransactionMetric{{
+			Method:                   http.MethodGet,
+			Route:                    "/healthz",
+			StatusCode:               http.StatusOK,
+			RequestsTotal:            17,
+			LatencySamplesTotal:      17,
+			LatencyTotalMilliseconds: 221,
+			LatencyMaxMilliseconds:   31,
+			LatencyLastMilliseconds:  4,
+		}},
 	}
 	if err := WriteCloudWatchEMF(&buf, CloudWatchEMFConfig{}, snapshot); err != nil {
 		t.Fatalf("WriteCloudWatchEMF: %v", err)
@@ -42,18 +59,25 @@ func TestWriteCloudWatchEMF(t *testing.T) {
 				} `json:"Metrics"`
 			} `json:"CloudWatchMetrics"`
 		} `json:"_aws"`
-		SchemaVersion                       string `json:"schema_version"`
-		Service                             string `json:"service"`
-		TasksTotal                          int    `json:"tasks_total"`
-		AssignmentsQueued                   int    `json:"assignments_queued"`
-		AssignmentsRunning                  int    `json:"assignments_running"`
-		PollStartTotal                      int64  `json:"poll_start_total"`
-		SSESubscribers                      int    `json:"sse_subscribers"`
-		OutboxErrorsTotal                   int64  `json:"outbox_errors_total"`
-		EventAppendLatencySamplesTotal      int64  `json:"event_append_latency_samples_total"`
-		EventAppendLatencyTotalMilliseconds int64  `json:"event_append_latency_total_ms"`
-		EventAppendLatencyMaxMilliseconds   int64  `json:"event_append_latency_max_ms"`
-		EventAppendLatencyLastMilliseconds  int64  `json:"event_append_latency_last_ms"`
+		SchemaVersion                       string                  `json:"schema_version"`
+		Service                             string                  `json:"service"`
+		TasksTotal                          int                     `json:"tasks_total"`
+		AssignmentsQueued                   int                     `json:"assignments_queued"`
+		AssignmentsRunning                  int                     `json:"assignments_running"`
+		PollStartTotal                      int64                   `json:"poll_start_total"`
+		SSESubscribers                      int                     `json:"sse_subscribers"`
+		OutboxErrorsTotal                   int64                   `json:"outbox_errors_total"`
+		EventAppendLatencySamplesTotal      int64                   `json:"event_append_latency_samples_total"`
+		EventAppendLatencyTotalMilliseconds int64                   `json:"event_append_latency_total_ms"`
+		EventAppendLatencyMaxMilliseconds   int64                   `json:"event_append_latency_max_ms"`
+		EventAppendLatencyLastMilliseconds  int64                   `json:"event_append_latency_last_ms"`
+		HTTPRequestsTotal                   int64                   `json:"http_requests_total"`
+		HTTPResponse2xxTotal                int64                   `json:"http_response_2xx_total"`
+		HTTPResponse4xxTotal                int64                   `json:"http_response_4xx_total"`
+		HTTPResponse5xxTotal                int64                   `json:"http_response_5xx_total"`
+		HTTPRequestLatencySamplesTotal      int64                   `json:"http_request_latency_samples_total"`
+		HTTPRequestLatencyMaxMilliseconds   int64                   `json:"http_request_latency_max_ms"`
+		HTTPTransactions                    []HTTPTransactionMetric `json:"http_transactions"`
 	}
 	if err := json.Unmarshal(buf.Bytes(), &out); err != nil {
 		t.Fatalf("decode emf: %v\n%s", err, buf.String())
@@ -73,12 +97,21 @@ func TestWriteCloudWatchEMF(t *testing.T) {
 	if out.EventAppendLatencySamplesTotal != 19 || out.EventAppendLatencyTotalMilliseconds != 230 || out.EventAppendLatencyMaxMilliseconds != 89 || out.EventAppendLatencyLastMilliseconds != 34 {
 		t.Fatalf("emf latency counters = %+v", out)
 	}
+	if out.HTTPRequestsTotal != 23 || out.HTTPResponse2xxTotal != 17 || out.HTTPResponse4xxTotal != 4 || out.HTTPResponse5xxTotal != 2 {
+		t.Fatalf("emf http counters = %+v", out)
+	}
+	if out.HTTPRequestLatencySamplesTotal != 23 || out.HTTPRequestLatencyMaxMilliseconds != 67 || len(out.HTTPTransactions) != 1 || out.HTTPTransactions[0].Route != "/healthz" {
+		t.Fatalf("emf http latency/routes = %+v", out)
+	}
 	metricUnits := map[string]string{}
 	for _, spec := range out.AWS.CloudWatchMetrics[0].Metrics {
 		metricUnits[spec.Name] = spec.Unit
 	}
 	if metricUnits["event_append_latency_samples_total"] != "Count" || metricUnits["event_append_latency_max_ms"] != "Milliseconds" {
 		t.Fatalf("emf latency metric units = %+v", metricUnits)
+	}
+	if metricUnits["http_requests_total"] != "Count" || metricUnits["http_request_latency_max_ms"] != "Milliseconds" {
+		t.Fatalf("emf http metric units = %+v", metricUnits)
 	}
 }
 

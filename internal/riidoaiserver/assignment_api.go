@@ -41,4 +41,11 @@ type MetricsSnapshot struct {
 	EventAppendLatencyTotalMilliseconds int64                   `json:"event_append_latency_total_ms"`
 	EventAppendLatencyMaxMilliseconds   int64                   `json:"event_append_latency_max_ms"`
 	EventAppendLatencyLastMilliseconds  int64                   `json:"event_append_latency_last_ms"`
+	HTTPRequestsTotal                   int64                   `json:"http_requests_total,omitempty"`
+	HTTPResponsesByStatus               map[int]int64           `json:"http_responses_by_status,omitempty"`
+	HTTPRequestLatencySamplesTotal      int64                   `json:"http_request_latency_samples_total,omitempty"`
+	HTTPRequestLatencyTotalMilliseconds int64                   `json:"http_request_latency_total_ms,omitempty"`
+	HTTPRequestLatencyMaxMilliseconds   int64                   `json:"http_request_latency_max_ms,omitempty"`
+	HTTPRequestLatencyLastMilliseconds  int64                   `json:"http_request_latency_last_ms,omitempty"`
+	HTTPTransactions                    []HTTPTransactionMetric `json:"http_transactions,omitempty"`
 }
