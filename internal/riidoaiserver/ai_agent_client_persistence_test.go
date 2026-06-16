@@ -335,6 +335,93 @@ func TestPersistentAIAgentClientStoreCoalescesHotSnapshotReloads(t *testing.T) {
 	}
 }
 
+func TestPersistentAIAgentClientStoreCoalescesRuntimeHeartbeatSnapshots(t *testing.T) {
+	ctx := context.Background()
+	snapshots := &memoryAIAgentClientSnapshotStore{}
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-dev"}
+	now := time.Date(2026, 6, 16, 12, 0, 0, 0, time.UTC)
+	store, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("OpenPersistentAIAgentClientStore: %v", err)
+	}
+	store.snapshotClock = func() time.Time { return now }
+
+	enrollment, err := store.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{DisplayName: "Development Mac"})
+	if err != nil {
+		t.Fatalf("EnrollDeviceCredential: %v", err)
+	}
+	req := DeviceRuntimeSnapshotSyncRequest{
+		DaemonID:  "daemon-hot",
+		DeviceID:  enrollment.DeviceID,
+		StartedAt: now.Add(-time.Minute),
+		Runtimes: []RuntimeSnapshotRecord{{
+			RuntimeID: "daemon-hot:codex",
+			Kind:      RuntimeKindCodex,
+		}},
+	}
+	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req); err != nil {
+		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot first: %v", err)
+	}
+	savesAfterFirstRuntime := snapshots.saves
+
+	now = now.Add(time.Second)
+	req.UptimeSeconds = 61
+	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req); err != nil {
+		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot hot heartbeat: %v", err)
+	}
+	if snapshots.saves != savesAfterFirstRuntime {
+		t.Fatalf("hot heartbeat should reuse in-memory state without snapshot save: saves=%d want %d", snapshots.saves, savesAfterFirstRuntime)
+	}
+
+	now = now.Add(defaultAIAgentClientHeartbeatSnapshotSaveInterval + time.Second)
+	req.UptimeSeconds = 72
+	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req); err != nil {
+		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot persistence heartbeat: %v", err)
+	}
+	if snapshots.saves != savesAfterFirstRuntime+1 {
+		t.Fatalf("heartbeat persistence window should save once: saves=%d want %d", snapshots.saves, savesAfterFirstRuntime+1)
+	}
+}
+
+func TestPersistentAIAgentClientStoreSavesMeaningfulRuntimeSnapshotChangeImmediately(t *testing.T) {
+	ctx := context.Background()
+	snapshots := &memoryAIAgentClientSnapshotStore{}
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-dev"}
+	now := time.Date(2026, 6, 16, 13, 0, 0, 0, time.UTC)
+	store, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("OpenPersistentAIAgentClientStore: %v", err)
+	}
+	store.snapshotClock = func() time.Time { return now }
+
+	enrollment, err := store.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{DisplayName: "Development Mac"})
+	if err != nil {
+		t.Fatalf("EnrollDeviceCredential: %v", err)
+	}
+	req := DeviceRuntimeSnapshotSyncRequest{
+		DaemonID:  "daemon-hot",
+		DeviceID:  enrollment.DeviceID,
+		StartedAt: now.Add(-time.Minute),
+		Runtimes: []RuntimeSnapshotRecord{{
+			RuntimeID: "daemon-hot:codex",
+			Kind:      RuntimeKindCodex,
+		}},
+	}
+	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req); err != nil {
+		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot first: %v", err)
+	}
+	savesAfterFirstRuntime := snapshots.saves
+
+	now = now.Add(time.Second)
+	req.Runtimes[0].ProviderVersion = "codex-cli 0.133.0"
+	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req); err != nil {
+		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot changed runtime: %v", err)
+	}
+	if snapshots.saves != savesAfterFirstRuntime+1 {
+		t.Fatalf("meaningful runtime change should save immediately: saves=%d want %d", snapshots.saves, savesAfterFirstRuntime+1)
+	}
+}
+
 func TestAIAgentClientSnapshotRetainsRecentReplayEvents(t *testing.T) {
 	store := NewDevelopmentAIAgentClientStore()
 	store.mu.Lock()

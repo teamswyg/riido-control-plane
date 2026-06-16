@@ -13,7 +13,10 @@ import (
 	"time"
 )
 
-const defaultAIAgentClientSnapshotReloadInterval = time.Second
+const (
+	defaultAIAgentClientSnapshotReloadInterval        = 5 * time.Second
+	defaultAIAgentClientHeartbeatSnapshotSaveInterval = 10 * time.Second
+)
 
 type AIAgentClientSnapshotStore interface {
 	LoadAIAgentClientSnapshot(ctx context.Context) (AIAgentClientSnapshot, bool, error)
@@ -53,11 +56,13 @@ type AIAgentClientEventSnapshot struct {
 
 type PersistentAIAgentClientStore struct {
 	*DevelopmentAIAgentClientStore
-	snapshotStore          AIAgentClientSnapshotStore
-	snapshotReloadMu       sync.Mutex
-	snapshotReloadInterval time.Duration
-	snapshotLastReloadAt   time.Time
-	snapshotClock          func() time.Time
+	snapshotStore                 AIAgentClientSnapshotStore
+	snapshotReloadMu              sync.Mutex
+	snapshotReloadInterval        time.Duration
+	snapshotHeartbeatSaveInterval time.Duration
+	snapshotLastReloadAt          time.Time
+	snapshotLastSavedAt           time.Time
+	snapshotClock                 func() time.Time
 }
 
 func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAgentClientStore, snapshotStore AIAgentClientSnapshotStore) (*PersistentAIAgentClientStore, error) {
@@ -74,6 +79,7 @@ func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAg
 		DevelopmentAIAgentClientStore: base,
 		snapshotStore:                 snapshotStore,
 		snapshotReloadInterval:        defaultAIAgentClientSnapshotReloadInterval,
+		snapshotHeartbeatSaveInterval: defaultAIAgentClientHeartbeatSnapshotSaveInterval,
 		snapshotClock:                 time.Now,
 	}
 	if snapshot, ok, err := snapshotStore.LoadAIAgentClientSnapshot(ctx); err != nil {
@@ -82,7 +88,7 @@ func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAg
 		if err := base.restoreSnapshot(snapshot); err != nil {
 			return nil, err
 		}
-		store.markSnapshotReloaded()
+		store.markSnapshotObserved(snapshot.SavedAt)
 		return store, nil
 	}
 	if err := store.saveSnapshot(ctx); err != nil {
@@ -181,9 +187,12 @@ func (s *PersistentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx cont
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return DeviceRuntimeSnapshotSyncResponse{}, err
 	}
-	response, err := s.DevelopmentAIAgentClientStore.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
+	response, changed, err := s.syncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
 	if err != nil {
 		return response, err
+	}
+	if !changed && !s.shouldSaveHeartbeatSnapshot() {
+		return response, nil
 	}
 	return response, s.saveSnapshot(ctx)
 }
@@ -432,15 +441,27 @@ func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
 	}
-	snapshot, err := s.snapshot(time.Now().UTC())
+	snapshot, err := s.snapshot(s.snapshotNow().UTC())
 	if err != nil {
 		return err
 	}
 	if err := s.snapshotStore.SaveAIAgentClientSnapshot(ctx, snapshot); err != nil {
 		return err
 	}
-	s.markSnapshotReloaded()
+	s.markSnapshotObserved(snapshot.SavedAt)
 	return nil
+}
+
+func (s *PersistentAIAgentClientStore) shouldSaveHeartbeatSnapshot() bool {
+	if s == nil {
+		return true
+	}
+	s.snapshotReloadMu.Lock()
+	defer s.snapshotReloadMu.Unlock()
+	if s.snapshotHeartbeatSaveInterval <= 0 || s.snapshotLastSavedAt.IsZero() {
+		return true
+	}
+	return !s.snapshotNow().Before(s.snapshotLastSavedAt.Add(s.snapshotHeartbeatSaveInterval))
 }
 
 func (s *PersistentAIAgentClientStore) shouldReloadSnapshotLocked() bool {
@@ -450,13 +471,19 @@ func (s *PersistentAIAgentClientStore) shouldReloadSnapshotLocked() bool {
 	return !s.snapshotNow().Before(s.snapshotLastReloadAt.Add(s.snapshotReloadInterval))
 }
 
-func (s *PersistentAIAgentClientStore) markSnapshotReloaded() {
+func (s *PersistentAIAgentClientStore) markSnapshotObserved(savedAt time.Time) {
 	if s == nil {
 		return
 	}
 	s.snapshotReloadMu.Lock()
 	defer s.snapshotReloadMu.Unlock()
-	s.snapshotLastReloadAt = s.snapshotNow()
+	now := s.snapshotNow()
+	s.snapshotLastReloadAt = now
+	if !savedAt.IsZero() {
+		s.snapshotLastSavedAt = savedAt.UTC()
+		return
+	}
+	s.snapshotLastSavedAt = now
 }
 
 func (s *PersistentAIAgentClientStore) snapshotNow() time.Time {
