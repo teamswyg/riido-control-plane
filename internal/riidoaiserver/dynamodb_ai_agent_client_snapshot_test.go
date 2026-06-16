@@ -109,7 +109,7 @@ func TestDynamoDBAIAgentClientSnapshotSavesAndLoads(t *testing.T) {
 	if err := json.Unmarshal(getRequest.body, &getPayload); err != nil {
 		t.Fatalf("decode GetItem payload: %v", err)
 	}
-	if getPayload.TableName != "riido-ai-agent-development" || !getPayload.ConsistentRead {
+	if getPayload.TableName != "riido-ai-agent-development" || getPayload.ConsistentRead {
 		t.Fatalf("get payload = %+v", getPayload)
 	}
 	assertDynamoDBString(t, getPayload.Key, "pk", dynamoDBAIAgentClientSnapshotPK)
