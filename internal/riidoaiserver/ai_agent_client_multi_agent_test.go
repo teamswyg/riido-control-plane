@@ -84,6 +84,119 @@ func TestAIAgentClientAdditiveAssignmentsExposeActiveThreadFilters(t *testing.T)
 	}
 }
 
+func TestAIAgentClientStopsExplicitAssignmentWithoutStoppingSiblingThread(t *testing.T) {
+	ctx := context.Background()
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
+	agentID := "agent-public-openclaw"
+	now := time.Now().UTC()
+
+	agent := store.agents[agentID]
+	agent.WorkStatus = AgentWorkStatusRunning
+	agent.AssignedTaskCount = 2
+	agent.Editability = AgentEditabilityBlockedAssignedTasks
+	store.agents[agentID] = agent
+	store.taskThreads["task-targeted-stop"] = []AIAgentTaskThreadRecord{
+		{
+			ThreadID:        "thread-old",
+			TaskID:          "task-targeted-stop",
+			AssignmentID:    "asn-old",
+			AgentID:         agentID,
+			RunID:           "run-old",
+			WorkStatus:      AgentWorkStatusRunning,
+			AssignmentState: AgentAssignmentStateRunning,
+			CommentKind:     AgentTaskCommentAssignmentStarted,
+			StartedAt:       now,
+		},
+		{
+			ThreadID:        "thread-new",
+			TaskID:          "task-targeted-stop",
+			AssignmentID:    "asn-new",
+			AgentID:         agentID,
+			RunID:           "run-new",
+			WorkStatus:      AgentWorkStatusRunning,
+			AssignmentState: AgentAssignmentStateRunning,
+			CommentKind:     AgentTaskCommentAssignmentStarted,
+			StartedAt:       now,
+		},
+	}
+
+	stopped, err := store.StopAIAgentTaskAgentAssignment(ctx, principal, "task-targeted-stop", agentID, AgentAssignmentActionRequest{
+		AssignmentID: "asn-old",
+		Reason:       "targeted stop",
+	})
+	if err != nil {
+		t.Fatalf("StopAIAgentTaskAgentAssignment: %v", err)
+	}
+	if stopped.AssignmentID != "asn-old" || stopped.ThreadID != "thread-old" {
+		t.Fatalf("stopped wrong assignment: %+v", stopped)
+	}
+	threads, err := store.ListAIAgentTaskThreads(ctx, principal, "task-targeted-stop")
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	oldThread := taskThreadByAssignment(t, threads.Threads, "asn-old")
+	newThread := taskThreadByAssignment(t, threads.Threads, "asn-new")
+	if taskThreadHasActiveStream(oldThread) || oldThread.AssignmentState != AgentAssignmentStateStopped {
+		t.Fatalf("target assignment should be stopped: %+v", oldThread)
+	}
+	if !taskThreadHasActiveStream(newThread) || newThread.AssignmentState != AgentAssignmentStateRunning {
+		t.Fatalf("sibling assignment should remain active: %+v", newThread)
+	}
+}
+
+func TestAIAgentClientStopTaskResolvesAgentFromExplicitAssignment(t *testing.T) {
+	ctx := context.Background()
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
+	now := time.Now().UTC()
+	store.taskThreads["task-assignment-target"] = []AIAgentTaskThreadRecord{
+		{
+			ThreadID:        "thread-openclaw",
+			TaskID:          "task-assignment-target",
+			AssignmentID:    "asn-openclaw",
+			AgentID:         "agent-public-openclaw",
+			RunID:           "run-openclaw",
+			WorkStatus:      AgentWorkStatusRunning,
+			AssignmentState: AgentAssignmentStateRunning,
+			CommentKind:     AgentTaskCommentAssignmentStarted,
+			StartedAt:       now,
+		},
+		{
+			ThreadID:        "thread-owned",
+			TaskID:          "task-assignment-target",
+			AssignmentID:    "asn-owned",
+			AgentID:         "agent-owned-codex",
+			RunID:           "run-owned",
+			WorkStatus:      AgentWorkStatusRunning,
+			AssignmentState: AgentAssignmentStateRunning,
+			CommentKind:     AgentTaskCommentAssignmentStarted,
+			StartedAt:       now.Add(time.Second),
+		},
+	}
+
+	stopped, err := store.StopAIAgentTask(ctx, principal, "task-assignment-target", StopAIAgentTaskRequest{
+		AssignmentID: "asn-openclaw",
+		Reason:       "targeted stop without agent id",
+	})
+	if err != nil {
+		t.Fatalf("StopAIAgentTask: %v", err)
+	}
+	if stopped.AgentID != "agent-public-openclaw" || stopped.AssignmentID != "asn-openclaw" {
+		t.Fatalf("stop should resolve target agent from assignment id: %+v", stopped)
+	}
+	threads, err := store.ListAIAgentTaskThreads(ctx, principal, "task-assignment-target")
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	if thread := taskThreadByAssignment(t, threads.Threads, "asn-openclaw"); taskThreadHasActiveStream(thread) {
+		t.Fatalf("target assignment should be stopped: %+v", thread)
+	}
+	if thread := taskThreadByAssignment(t, threads.Threads, "asn-owned"); !taskThreadHasActiveStream(thread) {
+		t.Fatalf("latest sibling assignment should remain active: %+v", thread)
+	}
+}
+
 func TestAIAgentClientLegacyAssignStillStopsExistingTaskThreads(t *testing.T) {
 	ctx := context.Background()
 	store := NewDevelopmentAIAgentClientStore()
@@ -122,6 +235,17 @@ func TestAIAgentClientLegacyAssignStillStopsExistingTaskThreads(t *testing.T) {
 			t.Fatalf("legacy first thread should have been stopped: %+v", thread)
 		}
 	}
+}
+
+func taskThreadByAssignment(t *testing.T, threads []AIAgentTaskThreadRecord, assignmentID string) AIAgentTaskThreadRecord {
+	t.Helper()
+	for _, thread := range threads {
+		if thread.AssignmentID == assignmentID {
+			return thread
+		}
+	}
+	t.Fatalf("missing task thread for assignment %s in %+v", assignmentID, threads)
+	return AIAgentTaskThreadRecord{}
 }
 
 func TestAIAgentClientThreadProjectionExposesQueueDiagnostics(t *testing.T) {
