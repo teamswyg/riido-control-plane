@@ -105,6 +105,80 @@ func TestStoreActorAssignmentLifecycle(t *testing.T) {
 	}
 }
 
+func TestStoreActorPersistsResumeAndProviderSessionIDs(t *testing.T) {
+	ctx := context.Background()
+	now := time.Date(2026, 6, 16, 13, 0, 0, 0, time.UTC)
+	store := NewStoreWithClock(func() time.Time { return now })
+	defer store.Close()
+
+	assignment, err := store.AssignTask(ctx, "task-a", AssignRequest{
+		ComponentID:     "component-a",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "continue",
+		ResumeSessionID: "sess-prev",
+		Worktree: &AssignmentWorktree{
+			RepositoryFullName: " teamswyg/riido-daemon ",
+			RepositoryURL:      " https://github.com/teamswyg/riido-daemon ",
+			BranchName:         " RIID-4964-agent-profile-upload ",
+			Source:             " connected_pull_request ",
+		},
+		AgentInstruction: "resume if possible",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask: %v", err)
+	}
+	if assignment.ResumeSessionID != "sess-prev" {
+		t.Fatalf("assignment resume_session_id = %q", assignment.ResumeSessionID)
+	}
+	if assignment.Worktree == nil ||
+		assignment.Worktree.RepositoryFullName != "teamswyg/riido-daemon" ||
+		assignment.Worktree.RepositoryURL != "https://github.com/teamswyg/riido-daemon" ||
+		assignment.Worktree.BranchName != "RIID-4964-agent-profile-upload" ||
+		assignment.Worktree.Source != "connected_pull_request" {
+		t.Fatalf("assignment worktree was not normalized: %+v", assignment.Worktree)
+	}
+
+	now = now.Add(time.Second)
+	poll, err := store.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent: %v", err)
+	}
+	if poll.Assignment == nil || poll.Assignment.ResumeSessionID != "sess-prev" ||
+		poll.Assignment.Worktree == nil || poll.Assignment.Worktree.BranchName != "RIID-4964-agent-profile-upload" {
+		t.Fatalf("poll assignment did not preserve resume_session_id: %+v", poll.Assignment)
+	}
+
+	now = now.Add(time.Second)
+	pinned, err := store.RecordAgentEvent(ctx, "agent-1", AgentEventRequest{
+		AssignmentID:      assignment.ID,
+		DaemonID:          "daemon-1",
+		RuntimeID:         "runtime-1",
+		EventType:         EventProviderSessionPinned,
+		ProviderSessionID: "sess-current",
+		Message:           "provider session pinned",
+	})
+	if err != nil {
+		t.Fatalf("RecordAgentEvent pinned: %v", err)
+	}
+	if pinned.Assignment == nil || pinned.Assignment.ProviderSessionID != "sess-current" {
+		t.Fatalf("provider_session_id was not persisted: %+v", pinned.Assignment)
+	}
+
+	now = now.Add(time.Second)
+	heartbeat, err := store.HeartbeatAgent(ctx, "agent-1", AgentHeartbeatRequest{
+		DaemonID:            "daemon-1",
+		RuntimeID:           "runtime-1",
+		ActiveAssignmentIDs: []string{assignment.ID},
+	})
+	if err != nil {
+		t.Fatalf("HeartbeatAgent: %v", err)
+	}
+	if len(heartbeat.RefreshedAssignments) != 1 || heartbeat.RefreshedAssignments[0].ProviderSessionID != "sess-current" {
+		t.Fatalf("heartbeat did not return provider_session_id: %+v", heartbeat.RefreshedAssignments)
+	}
+}
+
 func TestStoreActorRejectsLongAgentInstruction(t *testing.T) {
 	ctx := context.Background()
 	store := NewStore()

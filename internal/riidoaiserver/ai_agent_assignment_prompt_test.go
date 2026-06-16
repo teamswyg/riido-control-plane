@@ -69,6 +69,39 @@ func TestComposeAIAgentAssignmentPromptUsesTaskContextSnapshot(t *testing.T) {
 	}
 }
 
+func TestComposeAssignRequestWithTaskContextAddsWorktree(t *testing.T) {
+	req, err := composeAssignRequestWithTaskContext("task-1", "component-1", AssignRequest{
+		ComponentID:     "component-1",
+		AgentID:         "agent-a",
+		RuntimeProvider: "codex",
+		Prompt:          "placeholder",
+	}, AIAgentTaskContext{
+		Component: AIAgentTaskContextComponent{
+			ID:         "component-1",
+			Title:      "Ship F3",
+			BranchName: "RIID-4964-agent-profile-upload",
+		},
+		Document: AIAgentTaskContextDocument{Content: "Use real repo."},
+		Repositories: []AIAgentTaskContextRepository{{
+			FullName:      "teamswyg/riido-daemon",
+			RepositoryURL: "https://github.com/teamswyg/riido-daemon",
+			Source:        TaskContextRepositorySourceConnectedPullRequest,
+		}},
+	})
+	if err != nil {
+		t.Fatalf("compose assignment request: %v", err)
+	}
+	if req.Worktree == nil {
+		t.Fatal("expected worktree")
+	}
+	if req.Worktree.RepositoryFullName != "teamswyg/riido-daemon" ||
+		req.Worktree.RepositoryURL != "https://github.com/teamswyg/riido-daemon" ||
+		req.Worktree.BranchName != "RIID-4964-agent-profile-upload" ||
+		req.Worktree.Source != TaskContextRepositorySourceConnectedPullRequest {
+		t.Fatalf("worktree = %+v", req.Worktree)
+	}
+}
+
 func TestComposeAIAgentAssignmentPromptFallsBackWithoutRepository(t *testing.T) {
 	prompt, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
 		TaskID: "task-2",

@@ -1595,6 +1595,9 @@ func composeAssignRequestWithTaskContext(taskID, componentID string, req AssignR
 		return AssignRequest{}, err
 	}
 	req.Prompt = composed.Prompt
+	if composed.HasRepository {
+		req.Worktree = assignmentWorktreeFromTaskContext(contextSnapshot, composed.SelectedRepository)
+	}
 	if strings.TrimSpace(req.ComponentID) == "" {
 		req.ComponentID = strings.TrimSpace(contextSnapshot.Component.ID)
 		if req.ComponentID == "" {
@@ -1602,6 +1605,20 @@ func composeAssignRequestWithTaskContext(taskID, componentID string, req AssignR
 		}
 	}
 	return req, nil
+}
+
+func assignmentWorktreeFromTaskContext(contextSnapshot AIAgentTaskContext, repository AIAgentTaskContextRepository) *AssignmentWorktree {
+	worktree := &AssignmentWorktree{
+		RepositoryFullName: strings.TrimSpace(repository.FullName),
+		RepositoryURL:      strings.TrimSpace(repository.RepositoryURL),
+		BranchName:         strings.TrimSpace(contextSnapshot.Component.BranchName),
+		IsPrivate:          repository.IsPrivate,
+		Source:             strings.TrimSpace(repository.Source),
+	}
+	if worktree.RepositoryFullName == "" && worktree.RepositoryURL == "" {
+		return nil
+	}
+	return worktree
 }
 
 func (s Server) handleComponentTaskEvents(w http.ResponseWriter, r *http.Request, taskID string) {
