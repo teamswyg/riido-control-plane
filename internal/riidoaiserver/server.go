@@ -35,6 +35,7 @@ type ServerConfig struct {
 	ProviderStatus           ProviderStatusStore
 	ProviderRead             ProviderStatusReader
 	WebAllowedOrigins        []string
+	HTTPTransactions         *HTTPTransactionMetrics
 	// LongPollMaxHold caps how long a daemon claim poll (PollRequest.WaitMs) may
 	// be held open. Zero applies the default (25s). Must stay well under the ALB
 	// idle timeout (60s default) and the http.Server write/idle timeouts (unset).
@@ -169,6 +170,7 @@ func (s Server) Handler() http.Handler {
 	if len(s.config.WebAllowedOrigins) > 0 {
 		handler = s.withWebFrontendCORS(handler)
 	}
+	handler = withHTTPTransactionMetrics(handler, s.config.HTTPTransactions)
 	return handler
 }
 
@@ -205,6 +207,7 @@ func (s Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusServiceUnavailable, err.Error())
 		return
 	}
+	snapshot = s.config.HTTPTransactions.ApplyToMetricsSnapshot(snapshot)
 	writeJSON(w, http.StatusOK, snapshot)
 }
 

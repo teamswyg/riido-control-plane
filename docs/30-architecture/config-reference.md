@@ -18,6 +18,7 @@ This file is the public Factor 12 configuration catalog for
 | `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS` | authorizer default when unset | `cmd/riido_ai_server` | positive integer timeout override for external authorizer requests |
 | `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` | empty | `cmd/riido_ai_server` | enables public-safe review/demo seed provisioning using only a token hash |
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | disabled | `cmd/riido_ai_server` | positive integer interval for stdout CloudWatch EMF JSON Lines |
+| `RIIDO_AI_SERVER_PPROF_ADDR` | disabled | `cmd/riido_ai_server` | optional separate listen address for Go pprof debug endpoints; keep off public ALB paths |
 | `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS` | empty | `cmd/riido_ai_server` | comma-separated exact `http://` or `https://` browser origins allowed to call the public HTTP API with CORS preflight support |
 | `RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS` | store default (`20`) | `cmd/riido_ai_server` | optional active assignment lease duration shared by the store actor and DynamoDB active-lease adapter |
 | `RIIDO_AI_SERVER_LONGPOLL_MAX_HOLD_SECONDS` | `25` | `cmd/riido_ai_server` | max time a daemon claim poll (`PollRequest.wait_ms`) is held open; must stay under the ALB idle timeout. See [`../20-domain/saas-control-plane.md`](../20-domain/saas-control-plane.md) |
@@ -58,6 +59,12 @@ available. The development store persists the whole AI Agent client read/write
 state as a schema-versioned DynamoDB snapshot item and persists assignment
 operations in the same table so generated assignment requests and daemon poll
 requests can cross ECS instance or restart boundaries.
+
+`RIIDO_AI_SERVER_PPROF_ADDR` enables `/debug/pprof/` on a separate HTTP server.
+Because pprof can expose heap, goroutine, stack, and CPU profile details, this
+listener must be treated as an operator/debug surface rather than a generated
+client API. Prefer a loopback or private-network address and inspect it through
+ECS Exec or an equivalent private tunnel.
 
 Profile thumbnail upload intents are optional and fail closed. If any profile
 thumbnail upload env var is set, the bucket, CDN base URL, AWS region, and ECS
