@@ -12,33 +12,41 @@ import (
 func TestWriteCloudWatchEMF(t *testing.T) {
 	var buf bytes.Buffer
 	snapshot := MetricsSnapshot{
-		SchemaVersion:                          MetricsSchemaVersion,
-		GeneratedAt:                            time.Unix(123, 456000000).UTC(),
-		TasksTotal:                             2,
-		AssignmentsTotal:                       3,
-		AssignmentsByState:                     map[AssignmentState]int{AssignmentQueued: 1, AssignmentRunning: 2},
-		PollRequestsTotal:                      5,
-		PollActionsTotal:                       map[PollAction]int64{PollStart: 2, PollNone: 3},
-		AgentEventsTotal:                       7,
-		TaskEventsTotal:                        11,
-		SSESubscribers:                         13,
-		OutboxErrorsTotal:                      17,
-		EventAppendLatencySamplesTotal:         19,
-		EventAppendLatencyTotalMilliseconds:    230,
-		EventAppendLatencyMaxMilliseconds:      89,
-		EventAppendLatencyLastMilliseconds:     34,
-		HTTPRequestsTotal:                      23,
-		HTTPResponsesByStatus:                  map[int]int64{http.StatusOK: 17, http.StatusNotFound: 4, http.StatusInternalServerError: 2},
-		HTTPRequestLatencySamplesTotal:         23,
-		HTTPRequestLatencyTotalMilliseconds:    345,
-		HTTPRequestLatencyMaxMilliseconds:      67,
-		HTTPRequestLatencyLastMilliseconds:     12,
-		StoreOperationCallsTotal:               29,
-		StoreOperationErrorsTotal:              3,
-		StoreOperationLatencySamplesTotal:      29,
-		StoreOperationLatencyTotalMilliseconds: 456,
-		StoreOperationLatencyMaxMilliseconds:   78,
-		StoreOperationLatencyLastMilliseconds:  9,
+		SchemaVersion:                                   MetricsSchemaVersion,
+		GeneratedAt:                                     time.Unix(123, 456000000).UTC(),
+		TasksTotal:                                      2,
+		AssignmentsTotal:                                3,
+		AssignmentsByState:                              map[AssignmentState]int{AssignmentQueued: 1, AssignmentRunning: 2},
+		PollRequestsTotal:                               5,
+		PollActionsTotal:                                map[PollAction]int64{PollStart: 2, PollNone: 3},
+		AgentEventsTotal:                                7,
+		TaskEventsTotal:                                 11,
+		SSESubscribers:                                  13,
+		OutboxErrorsTotal:                               17,
+		EventAppendLatencySamplesTotal:                  19,
+		EventAppendLatencyTotalMilliseconds:             230,
+		EventAppendLatencyMaxMilliseconds:               89,
+		EventAppendLatencyLastMilliseconds:              34,
+		HTTPRequestsTotal:                               23,
+		HTTPResponsesByStatus:                           map[int]int64{http.StatusOK: 17, http.StatusNotFound: 4, http.StatusInternalServerError: 2},
+		HTTPRequestLatencySamplesTotal:                  23,
+		HTTPRequestLatencyTotalMilliseconds:             345,
+		HTTPRequestLatencyMaxMilliseconds:               67,
+		HTTPRequestLatencyLastMilliseconds:              12,
+		StoreOperationCallsTotal:                        29,
+		StoreOperationErrorsTotal:                       3,
+		StoreOperationLatencySamplesTotal:               29,
+		StoreOperationLatencyTotalMilliseconds:          456,
+		StoreOperationLatencyMaxMilliseconds:            78,
+		StoreOperationLatencyLastMilliseconds:           9,
+		AIAgentClientSnapshotLoadCallsTotal:             31,
+		AIAgentClientSnapshotLoadBytesLast:              40960,
+		AIAgentClientSnapshotLoadLatencySamplesTotal:    31,
+		AIAgentClientSnapshotLoadLatencyMaxMilliseconds: 81,
+		AIAgentClientSnapshotSaveCallsTotal:             37,
+		AIAgentClientSnapshotSaveBytesLast:              20480,
+		AIAgentClientSnapshotSaveLatencySamplesTotal:    37,
+		AIAgentClientSnapshotSaveLatencyMaxMilliseconds: 82,
 		HTTPTransactions: []HTTPTransactionMetric{{
 			Method:                   http.MethodGet,
 			Route:                    "/healthz",
@@ -74,30 +82,38 @@ func TestWriteCloudWatchEMF(t *testing.T) {
 				} `json:"Metrics"`
 			} `json:"CloudWatchMetrics"`
 		} `json:"_aws"`
-		SchemaVersion                        string                  `json:"schema_version"`
-		Service                              string                  `json:"service"`
-		TasksTotal                           int                     `json:"tasks_total"`
-		AssignmentsQueued                    int                     `json:"assignments_queued"`
-		AssignmentsRunning                   int                     `json:"assignments_running"`
-		PollStartTotal                       int64                   `json:"poll_start_total"`
-		SSESubscribers                       int                     `json:"sse_subscribers"`
-		OutboxErrorsTotal                    int64                   `json:"outbox_errors_total"`
-		EventAppendLatencySamplesTotal       int64                   `json:"event_append_latency_samples_total"`
-		EventAppendLatencyTotalMilliseconds  int64                   `json:"event_append_latency_total_ms"`
-		EventAppendLatencyMaxMilliseconds    int64                   `json:"event_append_latency_max_ms"`
-		EventAppendLatencyLastMilliseconds   int64                   `json:"event_append_latency_last_ms"`
-		HTTPRequestsTotal                    int64                   `json:"http_requests_total"`
-		HTTPResponse2xxTotal                 int64                   `json:"http_response_2xx_total"`
-		HTTPResponse4xxTotal                 int64                   `json:"http_response_4xx_total"`
-		HTTPResponse5xxTotal                 int64                   `json:"http_response_5xx_total"`
-		HTTPRequestLatencySamplesTotal       int64                   `json:"http_request_latency_samples_total"`
-		HTTPRequestLatencyMaxMilliseconds    int64                   `json:"http_request_latency_max_ms"`
-		HTTPTransactions                     []HTTPTransactionMetric `json:"http_transactions"`
-		StoreOperationCallsTotal             int64                   `json:"store_operation_calls_total"`
-		StoreOperationErrorsTotal            int64                   `json:"store_operation_errors_total"`
-		StoreOperationLatencySamplesTotal    int64                   `json:"store_operation_latency_samples_total"`
-		StoreOperationLatencyMaxMilliseconds int64                   `json:"store_operation_latency_max_ms"`
-		StoreOperations                      []StoreOperationMetric  `json:"store_operations"`
+		SchemaVersion                                   string                  `json:"schema_version"`
+		Service                                         string                  `json:"service"`
+		TasksTotal                                      int                     `json:"tasks_total"`
+		AssignmentsQueued                               int                     `json:"assignments_queued"`
+		AssignmentsRunning                              int                     `json:"assignments_running"`
+		PollStartTotal                                  int64                   `json:"poll_start_total"`
+		SSESubscribers                                  int                     `json:"sse_subscribers"`
+		OutboxErrorsTotal                               int64                   `json:"outbox_errors_total"`
+		EventAppendLatencySamplesTotal                  int64                   `json:"event_append_latency_samples_total"`
+		EventAppendLatencyTotalMilliseconds             int64                   `json:"event_append_latency_total_ms"`
+		EventAppendLatencyMaxMilliseconds               int64                   `json:"event_append_latency_max_ms"`
+		EventAppendLatencyLastMilliseconds              int64                   `json:"event_append_latency_last_ms"`
+		HTTPRequestsTotal                               int64                   `json:"http_requests_total"`
+		HTTPResponse2xxTotal                            int64                   `json:"http_response_2xx_total"`
+		HTTPResponse4xxTotal                            int64                   `json:"http_response_4xx_total"`
+		HTTPResponse5xxTotal                            int64                   `json:"http_response_5xx_total"`
+		HTTPRequestLatencySamplesTotal                  int64                   `json:"http_request_latency_samples_total"`
+		HTTPRequestLatencyMaxMilliseconds               int64                   `json:"http_request_latency_max_ms"`
+		HTTPTransactions                                []HTTPTransactionMetric `json:"http_transactions"`
+		StoreOperationCallsTotal                        int64                   `json:"store_operation_calls_total"`
+		StoreOperationErrorsTotal                       int64                   `json:"store_operation_errors_total"`
+		StoreOperationLatencySamplesTotal               int64                   `json:"store_operation_latency_samples_total"`
+		StoreOperationLatencyMaxMilliseconds            int64                   `json:"store_operation_latency_max_ms"`
+		StoreOperations                                 []StoreOperationMetric  `json:"store_operations"`
+		AIAgentClientSnapshotLoadCallsTotal             int64                   `json:"ai_agent_client_snapshot_load_calls_total"`
+		AIAgentClientSnapshotLoadBytesLast              int64                   `json:"ai_agent_client_snapshot_load_bytes_last"`
+		AIAgentClientSnapshotLoadLatencySamplesTotal    int64                   `json:"ai_agent_client_snapshot_load_latency_samples_total"`
+		AIAgentClientSnapshotLoadLatencyMaxMilliseconds int64                   `json:"ai_agent_client_snapshot_load_latency_max_ms"`
+		AIAgentClientSnapshotSaveCallsTotal             int64                   `json:"ai_agent_client_snapshot_save_calls_total"`
+		AIAgentClientSnapshotSaveBytesLast              int64                   `json:"ai_agent_client_snapshot_save_bytes_last"`
+		AIAgentClientSnapshotSaveLatencySamplesTotal    int64                   `json:"ai_agent_client_snapshot_save_latency_samples_total"`
+		AIAgentClientSnapshotSaveLatencyMaxMilliseconds int64                   `json:"ai_agent_client_snapshot_save_latency_max_ms"`
 	}
 	if err := json.Unmarshal(buf.Bytes(), &out); err != nil {
 		t.Fatalf("decode emf: %v\n%s", err, buf.String())
@@ -129,6 +145,12 @@ func TestWriteCloudWatchEMF(t *testing.T) {
 	if len(out.StoreOperations) != 1 || out.StoreOperations[0].Operation != StoreOperationPollAssignment.String() {
 		t.Fatalf("emf store operation breakdown = %+v", out.StoreOperations)
 	}
+	if out.AIAgentClientSnapshotLoadCallsTotal != 31 || out.AIAgentClientSnapshotLoadBytesLast != 40960 || out.AIAgentClientSnapshotLoadLatencySamplesTotal != 31 || out.AIAgentClientSnapshotLoadLatencyMaxMilliseconds != 81 {
+		t.Fatalf("emf AI Agent client snapshot load metrics = %+v", out)
+	}
+	if out.AIAgentClientSnapshotSaveCallsTotal != 37 || out.AIAgentClientSnapshotSaveBytesLast != 20480 || out.AIAgentClientSnapshotSaveLatencySamplesTotal != 37 || out.AIAgentClientSnapshotSaveLatencyMaxMilliseconds != 82 {
+		t.Fatalf("emf AI Agent client snapshot save metrics = %+v", out)
+	}
 	metricUnits := map[string]string{}
 	for _, spec := range out.AWS.CloudWatchMetrics[0].Metrics {
 		metricUnits[spec.Name] = spec.Unit
@@ -141,6 +163,9 @@ func TestWriteCloudWatchEMF(t *testing.T) {
 	}
 	if metricUnits["store_operation_calls_total"] != "Count" || metricUnits["store_operation_latency_max_ms"] != "Milliseconds" {
 		t.Fatalf("emf store metric units = %+v", metricUnits)
+	}
+	if metricUnits["ai_agent_client_snapshot_load_bytes_last"] != "Bytes" || metricUnits["ai_agent_client_snapshot_save_latency_max_ms"] != "Milliseconds" {
+		t.Fatalf("emf AI Agent client snapshot metric units = %+v", metricUnits)
 	}
 }
 

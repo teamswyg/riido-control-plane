@@ -29,10 +29,15 @@ const (
 	envReviewAccountTokenHash          = "RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"
 	envMetricsLogInterval              = "RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS"
 	envPprofAddr                       = "RIIDO_AI_SERVER_PPROF_ADDR"
+	envTracingEnabled                  = "RIIDO_AI_SERVER_TRACING_ENABLED"
+	envTracingSampleRatio              = "RIIDO_AI_SERVER_TRACING_SAMPLE_RATIO"
+	envTracingOTLPEndpoint             = "RIIDO_AI_SERVER_OTEL_EXPORTER_OTLP_ENDPOINT"
+	envTracingServiceName              = "RIIDO_AI_SERVER_TRACING_SERVICE_NAME"
 	envWebAllowedOrigins               = "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"
 	envAssignmentActiveLease           = "RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS"
 	envAIAgentClientDev                = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
 	envAIAgentClientTable              = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE"
+	envDynamoDBOutboxTable             = "RIIDO_AI_SERVER_DYNAMODB_OUTBOX_TABLE"
 	envAWSRegion                       = "RIIDO_AI_SERVER_AWS_REGION"
 	envDynamoDBEndpoint                = "RIIDO_AI_SERVER_DYNAMODB_ENDPOINT"
 	envAgentProfileThumbnailBucket     = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_BUCKET"
@@ -62,14 +67,17 @@ type runtimeConfig struct {
 	ReviewProvision          *riidoaiserver.ReviewAccountProvisioning
 	MetricsLogInterval       time.Duration
 	PprofAddr                string
+	Tracing                  tracingRuntimeConfig
 	WebAllowedOrigins        []string
 	AssignmentActiveLease    time.Duration
 	LongPollMaxHold          time.Duration
 	LongPollTick             time.Duration
 	AIAgentClientDev         bool
 	AIAgentClientStore       riidoaiserver.AIAgentClientSnapshotStore
+	AIAgentClientMetrics     *riidoaiserver.AIAgentClientPersistenceMetrics
 	AIAgentProfileThumbnails riidoaiserver.AIAgentProfileThumbnailUploadService
 	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
+	AssignmentOutbox         riidoaiserver.EventSink
 	TaskContextReader        riidoaiserver.AIAgentTaskContextReader
 }
 
@@ -85,6 +93,11 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	traceRecorder, traceShutdown, err := openTracing(context.Background(), config.Tracing)
+	if err != nil {
+		return err
+	}
+	defer shutdownTracing(traceShutdown)
 	defer closeRuntimeConfig(config)
 	var aiAgentClient riidoaiserver.AIAgentClientStore
 	if config.AIAgentClientDev {
@@ -96,7 +109,9 @@ func run() error {
 	store, err := riidoaiserver.OpenStoreWithConfig(context.Background(), riidoaiserver.StoreConfig{
 		AgentRegistry:       riidoaiserver.NewCompositeAgentRegistry(agentRegistryFromAIAgentClient(aiAgentClient)),
 		ActiveLeaseDuration: config.AssignmentActiveLease,
+		Outbox:              config.AssignmentOutbox,
 		OperationStore:      config.AssignmentOperationStore,
+		TraceRecorder:       traceRecorder,
 	})
 	if err != nil {
 		return fmt.Errorf("open assignment store: %w", err)
@@ -110,14 +125,14 @@ func run() error {
 	httpTransactions := riidoaiserver.NewHTTPTransactionMetrics()
 	server := &http.Server{
 		Addr:              config.Addr,
-		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, AIAgentProfileThumbnails: config.AIAgentProfileThumbnails, TaskContext: config.TaskContextReader, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins, HTTPTransactions: httpTransactions, LongPollMaxHold: config.LongPollMaxHold, LongPollTick: config.LongPollTick}).Handler(),
+		Handler:           riidoaiserver.NewServer(riidoaiserver.ServerConfig{Assignment: store, AIAgentClient: aiAgentClient, AIAgentProfileThumbnails: config.AIAgentProfileThumbnails, TaskContext: config.TaskContextReader, Authorizer: config.Authorizer, WebAllowedOrigins: config.WebAllowedOrigins, HTTPTransactions: httpTransactions, TraceRecorder: traceRecorder, LongPollMaxHold: config.LongPollMaxHold, LongPollTick: config.LongPollTick}).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	servers := []*http.Server{server}
 	if pprofServer := newPprofServer(config.PprofAddr); pprofServer != nil {
 		servers = append(servers, pprofServer)
 	}
-	metricsCancel, metricsErrCh := startMetricsPublisher(riidoaiserver.NewObservedMetricsReader(store, httpTransactions), config.MetricsLogInterval, os.Stdout)
+	metricsCancel, metricsErrCh := startMetricsPublisher(riidoaiserver.NewObservedMetricsReader(store, httpTransactions, config.AIAgentClientMetrics), config.MetricsLogInterval, os.Stdout)
 	defer stopMetricsPublisher(metricsCancel, metricsErrCh)
 	return serveUntilSignal(servers, config.ShutdownTimeout, metricsErrCh)
 }
@@ -128,6 +143,10 @@ func configFromEnv() (runtimeConfig, error) {
 		return runtimeConfig{}, err
 	}
 	metricsLogInterval, err := envOptionalDurationSeconds(envMetricsLogInterval)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
+	tracing, err := tracingConfigFromEnv()
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -159,11 +178,16 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	aiAgentClientStore, err := aiAgentClientSnapshotStoreFromEnv(aiAgentClientDev)
+	aiAgentClientMetrics := riidoaiserver.NewAIAgentClientPersistenceMetrics()
+	aiAgentClientStore, err := aiAgentClientSnapshotStoreFromEnv(aiAgentClientDev, aiAgentClientMetrics)
 	if err != nil {
 		return runtimeConfig{}, err
 	}
 	assignmentOperationStore, err := assignmentOperationStoreFromEnv(aiAgentClientDev, assignmentActiveLease)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
+	assignmentOutbox, err := assignmentOutboxFromEnv()
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -182,14 +206,17 @@ func configFromEnv() (runtimeConfig, error) {
 		ReviewProvision:          reviewProvision,
 		MetricsLogInterval:       metricsLogInterval,
 		PprofAddr:                strings.TrimSpace(os.Getenv(envPprofAddr)),
+		Tracing:                  tracing,
 		WebAllowedOrigins:        webAllowedOrigins,
 		AssignmentActiveLease:    assignmentActiveLease,
 		LongPollMaxHold:          longPollMaxHold,
 		LongPollTick:             longPollTick,
 		AIAgentClientDev:         aiAgentClientDev,
 		AIAgentClientStore:       aiAgentClientStore,
+		AIAgentClientMetrics:     aiAgentClientMetrics,
 		AIAgentProfileThumbnails: profileThumbnails,
 		AssignmentOperationStore: assignmentOperationStore,
+		AssignmentOutbox:         assignmentOutbox,
 		TaskContextReader:        taskContextReader,
 	}, nil
 }
@@ -199,6 +226,9 @@ func closeRuntimeConfig(config runtimeConfig) {
 		_ = closer.Close()
 	}
 	if closer, ok := config.AssignmentOperationStore.(interface{ Close() error }); ok {
+		_ = closer.Close()
+	}
+	if closer, ok := config.AssignmentOutbox.(interface{ Close() error }); ok {
 		_ = closer.Close()
 	}
 }
@@ -345,7 +375,7 @@ func aiAgentClientDevelopmentFromEnv() (bool, error) {
 	return envOptionalBool(envAIAgentClientDev)
 }
 
-func aiAgentClientSnapshotStoreFromEnv(enabled bool) (riidoaiserver.AIAgentClientSnapshotStore, error) {
+func aiAgentClientSnapshotStoreFromEnv(enabled bool, metrics *riidoaiserver.AIAgentClientPersistenceMetrics) (riidoaiserver.AIAgentClientSnapshotStore, error) {
 	if !enabled {
 		return nil, nil
 	}
@@ -366,6 +396,7 @@ func aiAgentClientSnapshotStoreFromEnv(enabled bool) (riidoaiserver.AIAgentClien
 		TableName:           tableName,
 		Endpoint:            strings.TrimSpace(os.Getenv(envDynamoDBEndpoint)),
 		CredentialsProvider: provider,
+		Metrics:             metrics,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", envAIAgentClientTable, err)
@@ -400,6 +431,31 @@ func assignmentOperationStoreFromEnv(enabled bool, activeLeaseDuration time.Dura
 		return nil, fmt.Errorf("%s assignment operation store: %w", envAIAgentClientTable, err)
 	}
 	return store, nil
+}
+
+func assignmentOutboxFromEnv() (riidoaiserver.EventSink, error) {
+	tableName := strings.TrimSpace(os.Getenv(envDynamoDBOutboxTable))
+	if tableName == "" {
+		return nil, nil
+	}
+	region := strings.TrimSpace(os.Getenv(envAWSRegion))
+	if region == "" {
+		return nil, fmt.Errorf("%s is required when %s is configured", envAWSRegion, envDynamoDBOutboxTable)
+	}
+	provider, err := awsContainerCredentialsProviderFromEnv()
+	if err != nil {
+		return nil, err
+	}
+	outbox, err := riidoaiserver.NewDynamoDBOutbox(riidoaiserver.DynamoDBOutboxConfig{
+		Region:              region,
+		TableName:           tableName,
+		Endpoint:            strings.TrimSpace(os.Getenv(envDynamoDBEndpoint)),
+		CredentialsProvider: provider,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", envDynamoDBOutboxTable, err)
+	}
+	return outbox, nil
 }
 
 func agentProfileThumbnailUploadServiceFromEnv() (riidoaiserver.AIAgentProfileThumbnailUploadService, error) {

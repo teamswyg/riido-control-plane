@@ -24,6 +24,7 @@ type Store struct {
 	operationStore      AssignmentOperationStore
 	agentRegistry       AgentRegistry
 	operationMetrics    *StoreOperationMetrics
+	traceRecorder       TraceRecorder
 }
 
 type StoreConfig struct {
@@ -34,6 +35,7 @@ type StoreConfig struct {
 	OperationStore      AssignmentOperationStore
 	AgentRegistry       AgentRegistry
 	OperationMetrics    *StoreOperationMetrics
+	TraceRecorder       TraceRecorder
 }
 
 func NewStore() *Store {
@@ -105,6 +107,7 @@ func newStoreWithConfig(config StoreConfig, initial storeState) *Store {
 		operationStore:      config.OperationStore,
 		agentRegistry:       config.AgentRegistry,
 		operationMetrics:    config.OperationMetrics,
+		traceRecorder:       config.TraceRecorder,
 	}
 	if s.operationMetrics == nil {
 		s.operationMetrics = NewStoreOperationMetrics()
@@ -128,9 +131,11 @@ func (s *Store) Close() {
 }
 
 func (s *Store) AssignTask(ctx context.Context, taskID string, req AssignRequest) (assignment Assignment, err error) {
+	ctx, span := s.startStoreOperationTrace(ctx, StoreOperationCreateAssignment)
 	startedAt := time.Now()
 	defer func() {
 		s.observeStoreOperation(StoreOperationCreateAssignment, startedAt, err)
+		FinishTraceSpan(span, err)
 	}()
 	reply := make(chan assignResult, 1)
 	if err := s.send(ctx, assignCmd{taskID: taskID, req: req, reply: reply}); err != nil {
@@ -145,9 +150,11 @@ func (s *Store) AssignTask(ctx context.Context, taskID string, req AssignRequest
 }
 
 func (s *Store) AssignTaskAdditive(ctx context.Context, taskID string, req AssignRequest) (assignment Assignment, err error) {
+	ctx, span := s.startStoreOperationTrace(ctx, StoreOperationCreateAssignment)
 	startedAt := time.Now()
 	defer func() {
 		s.observeStoreOperation(StoreOperationCreateAssignment, startedAt, err)
+		FinishTraceSpan(span, err)
 	}()
 	reply := make(chan assignResult, 1)
 	if err := s.send(ctx, assignCmd{taskID: taskID, req: req, allowConcurrentTaskAgents: true, reply: reply}); err != nil {
@@ -162,9 +169,11 @@ func (s *Store) AssignTaskAdditive(ctx context.Context, taskID string, req Assig
 }
 
 func (s *Store) CancelAssignment(ctx context.Context, taskID string, req CancelAssignmentRequest) (assignment Assignment, err error) {
+	ctx, span := s.startStoreOperationTrace(ctx, StoreOperationCancelAssignment)
 	startedAt := time.Now()
 	defer func() {
 		s.observeStoreOperation(StoreOperationCancelAssignment, startedAt, err)
+		FinishTraceSpan(span, err)
 	}()
 	reply := make(chan cancelAssignmentResult, 1)
 	if err := s.send(ctx, cancelAssignmentCmd{taskID: taskID, req: req, reply: reply}); err != nil {
@@ -187,15 +196,21 @@ func (s *Store) PollAgent(ctx context.Context, agentID string, req PollRequest) 
 // short-poll or a long-poll's first evaluation; false for the internal
 // re-evaluations a long-poll performs while held).
 func (s *Store) pollAgent(ctx context.Context, agentID string, req PollRequest, count bool) (response PollResponse, err error) {
+	ctx, span := s.startStoreOperationTrace(ctx, StoreOperationPollAssignment)
 	startedAt := time.Now()
 	defer func() {
+		if err == nil {
+			span.SetAttributes(TraceAttribute{Key: "riido.poll.action", Value: string(response.Action)})
+		}
 		if !count {
+			FinishTraceSpan(span, err)
 			return
 		}
 		s.observeStoreOperation(StoreOperationPollAssignment, startedAt, err)
 		if err == nil && response.Action == PollStart {
 			s.observeStoreOperation(StoreOperationLeaseAssignment, startedAt, nil)
 		}
+		FinishTraceSpan(span, err)
 	}()
 	reply := make(chan pollResult, 1)
 	if err := s.send(ctx, pollCmd{agentID: agentID, req: req, countRequest: count, reply: reply}); err != nil {
@@ -261,9 +276,11 @@ func (s *Store) GetProviderStatus(ctx context.Context, agentID string) (Provider
 }
 
 func (s *Store) RecordAgentEvent(ctx context.Context, agentID string, req AgentEventRequest) (response AgentEventResponse, err error) {
+	ctx, span := s.startStoreOperationTrace(ctx, StoreOperationAppendEvent)
 	startedAt := time.Now()
 	defer func() {
 		s.observeStoreOperation(StoreOperationAppendEvent, startedAt, err)
+		FinishTraceSpan(span, err)
 	}()
 	reply := make(chan eventResult, 1)
 	if err := s.send(ctx, eventCmd{agentID: agentID, req: req, reply: reply}); err != nil {
@@ -311,9 +328,14 @@ func (s *Store) SubscribeTask(ctx context.Context, taskID string) ([]TaskEvent, 
 // actor loop — so the actor keeps servicing assign/heartbeat/poll commands while
 // a request is held.
 func (s *Store) WaitForAssignment(ctx context.Context, agentID string, req PollRequest, hold, tick time.Duration) (response PollResponse, err error) {
+	ctx, span := s.startStoreOperationTrace(ctx, StoreOperationWaitAssignment)
 	startedAt := time.Now()
 	defer func() {
+		if err == nil {
+			span.SetAttributes(TraceAttribute{Key: "riido.poll.action", Value: string(response.Action)})
+		}
 		s.observeStoreOperation(StoreOperationWaitAssignment, startedAt, err)
+		FinishTraceSpan(span, err)
 	}()
 	// First evaluation is the one that counts as a daemon poll request and
 	// short-circuits when work is already queued.
@@ -432,6 +454,17 @@ func (s *Store) send(ctx context.Context, cmd any) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	}
+}
+
+func (s *Store) startStoreOperationTrace(ctx context.Context, operation StoreOperationName) (context.Context, TraceSpan) {
+	return StartTraceSpan(ctx, s.traceRecorder, TraceSpanStart{
+		Name: "store." + operation.String(),
+		Kind: TraceSpanKindInternal,
+		Attributes: []TraceAttribute{
+			{Key: "riido.store.operation", Value: operation.String()},
+			{Key: "riido.trace.surface", Value: "assignment_store"},
+		},
+	})
 }
 
 type assignCmd struct {
@@ -985,12 +1018,12 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 			}
 			if expired {
 				stale := s.failStaleAssignment(state, assignment)
-				state.pollActionsTotal[response.Action]++
+				recordPollAction(state, response.Action, count)
 				return response, false, &stale, AssignmentOperationAgentEvent, nil
 			}
 			response.Action = PollCancel
 			response.Assignment = copyAssignment(assignment)
-			state.pollActionsTotal[response.Action]++
+			recordPollAction(state, response.Action, count)
 			return response, false, nil, "", nil
 		}
 	}
@@ -999,7 +1032,7 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 		return PollResponse{}, false, nil, "", err
 	}
 	if staleAssignment != nil {
-		state.pollActionsTotal[response.Action]++
+		recordPollAction(state, response.Action, count)
 		return response, false, staleAssignment, AssignmentOperationAgentEvent, nil
 	}
 	if ok {
@@ -1007,12 +1040,12 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 		case durableAssignment.State.Code() == AssignmentStateCodeCancelling:
 			response.Action = PollCancel
 			response.Assignment = copyAssignment(durableAssignment)
-			state.pollActionsTotal[response.Action]++
+			recordPollAction(state, response.Action, count)
 			return response, false, nil, "", nil
 		case isAgentActive(durableAssignment.State):
 			response.Action = PollActive
 			response.Assignment = copyAssignment(durableAssignment)
-			state.pollActionsTotal[response.Action]++
+			recordPollAction(state, response.Action, count)
 			return response, false, nil, "", nil
 		}
 	}
@@ -1025,12 +1058,12 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 			}
 			if expired {
 				stale := s.failStaleAssignment(state, assignment)
-				state.pollActionsTotal[response.Action]++
+				recordPollAction(state, response.Action, count)
 				return response, false, &stale, AssignmentOperationAgentEvent, nil
 			}
 			response.Action = PollActive
 			response.Assignment = copyAssignment(assignment)
-			state.pollActionsTotal[response.Action]++
+			recordPollAction(state, response.Action, count)
 			return response, false, nil, "", nil
 		}
 	}
@@ -1045,7 +1078,7 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 			}
 			response.Action = PollStart
 			response.Assignment = copyAssignment(claim.Assignment)
-			state.pollActionsTotal[response.Action]++
+			recordPollAction(state, response.Action, count)
 			return response, true, nil, "", nil
 		}
 	}
@@ -1069,11 +1102,17 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 		s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentLeased, assignment.State, "", map[string]string{"lease_token": assignment.LeaseToken}, now)
 		response.Action = PollStart
 		response.Assignment = copyAssignment(assignment)
-		state.pollActionsTotal[response.Action]++
+		recordPollAction(state, response.Action, count)
 		return response, false, nil, "", nil
 	}
-	state.pollActionsTotal[response.Action]++
+	recordPollAction(state, response.Action, count)
 	return response, false, nil, "", nil
+}
+
+func recordPollAction(state *storeState, action PollAction, count bool) {
+	if count {
+		state.pollActionsTotal[action]++
+	}
 }
 
 func (s *Store) loadDurableActiveAssignment(state *storeState, agentID string, at time.Time) (Assignment, *Assignment, bool, error) {
@@ -1458,6 +1497,7 @@ func (s *Store) signalAgentWaiters(state *storeState, agentID string) {
 }
 
 func (s *Store) handleMetrics(state *storeState) MetricsSnapshot {
+	rebuildStateMetricsFromHistory(state)
 	assignmentsByState := map[AssignmentState]int{}
 	for _, assignment := range state.assignments {
 		assignmentsByState[assignment.State]++
@@ -1496,6 +1536,10 @@ func (s *Store) observeStoreOperation(operation StoreOperationName, startedAt ti
 }
 
 func (s *Store) appendEvent(state *storeState, taskID, assignmentID, agentID, eventType string, assignmentState AssignmentState, message string, metadata map[string]string, at time.Time) TaskEvent {
+	startedAt := time.Now()
+	defer func() {
+		recordEventAppendLatency(state, time.Since(startedAt))
+	}()
 	state.nextEventSeq++
 	event := TaskEvent{
 		Seq:          state.nextEventSeq,
@@ -1615,6 +1659,10 @@ func assignmentIDInAgentQueue(ids []string, id string) bool {
 }
 
 func (s *Store) appendRecordedEvent(state *storeState, event TaskEvent) {
+	startedAt := time.Now()
+	defer func() {
+		recordEventAppendLatency(state, time.Since(startedAt))
+	}()
 	if event.Seq <= 0 || event.TaskID == "" {
 		return
 	}
@@ -1654,9 +1702,7 @@ func (s *Store) appendRecordedEvent(state *storeState, event TaskEvent) {
 }
 
 func (s *Store) appendTaskEventToOutbox(state *storeState, event TaskEvent) {
-	startedAt := s.now()
 	err := s.outbox.AppendTaskEvent(context.Background(), event)
-	recordEventAppendLatency(state, s.now().Sub(startedAt))
 	if err != nil {
 		state.outboxErrorsTotal++
 	}

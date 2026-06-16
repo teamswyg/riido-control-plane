@@ -53,12 +53,14 @@ func TestDynamoDBAIAgentClientSnapshotSavesAndLoads(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewStaticAWSCredentialsProvider: %v", err)
 	}
+	metrics := NewAIAgentClientPersistenceMetrics()
 	store, err := NewDynamoDBAIAgentClientSnapshot(DynamoDBAIAgentClientSnapshotConfig{
 		Region:              "ap-northeast-2",
 		TableName:           "riido-ai-agent-development",
 		Endpoint:            server.URL,
 		CredentialsProvider: provider,
 		Now:                 func() time.Time { return fixedNow },
+		Metrics:             metrics,
 	})
 	if err != nil {
 		t.Fatalf("NewDynamoDBAIAgentClientSnapshot: %v", err)
@@ -112,6 +114,17 @@ func TestDynamoDBAIAgentClientSnapshotSavesAndLoads(t *testing.T) {
 	}
 	assertDynamoDBString(t, getPayload.Key, "pk", dynamoDBAIAgentClientSnapshotPK)
 	assertDynamoDBString(t, getPayload.Key, "sk", dynamoDBAIAgentClientSnapshotSK)
+
+	metricsSnapshot := metrics.ApplyToMetricsSnapshot(MetricsSnapshot{})
+	if metricsSnapshot.AIAgentClientSnapshotSaveCallsTotal != 1 || metricsSnapshot.AIAgentClientSnapshotLoadCallsTotal != 1 {
+		t.Fatalf("snapshot persistence call metrics = %+v", metricsSnapshot)
+	}
+	if metricsSnapshot.AIAgentClientSnapshotSaveBytesLast <= 0 || metricsSnapshot.AIAgentClientSnapshotLoadBytesLast <= 0 {
+		t.Fatalf("snapshot persistence byte metrics = %+v", metricsSnapshot)
+	}
+	if metricsSnapshot.AIAgentClientSnapshotSaveLatencySamplesTotal != 1 || metricsSnapshot.AIAgentClientSnapshotLoadLatencySamplesTotal != 1 {
+		t.Fatalf("snapshot persistence latency metrics = %+v", metricsSnapshot)
+	}
 }
 
 func TestDynamoDBAIAgentClientSnapshotLoadsMissingSnapshot(t *testing.T) {

@@ -26,9 +26,11 @@ configuration.
 | Assignment Polling Contract | `github.com/teamswyg/riido-contracts/assignment` | shared assignment state, poll action, heartbeat/event DTOs, and agent binding DTOs |
 | Provider / Distribution Vocabulary | `github.com/teamswyg/riido-contracts/provider/capability` | provider status and routing vocabulary shared with the daemon |
 | IR / Task Vocabulary | `github.com/teamswyg/riido-contracts/ir` and `task` packages when needed by compatibility gates | cross-repo schema compatibility checks |
+| Go Dependency Allowlist | [`../../dependency_allowlist.riido.json`](../../dependency_allowlist.riido.json) | approved direct Go module dependency SSOT with owner, category, and reason metadata |
 
-Imported contracts are tagged Go module dependencies. Control-plane code must not
-import daemon internals, private infra modules, or former monolith package paths.
+Imported contracts and platform observability libraries are tagged Go module
+dependencies. Control-plane code must not import daemon internals, private infra
+modules, former monolith package paths, or unapproved direct dependencies.
 
 ## External Contexts
 

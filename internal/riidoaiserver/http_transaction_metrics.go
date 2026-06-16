@@ -27,20 +27,32 @@ type HTTPTransactionObservation struct {
 	Route      string
 	StatusCode int
 	Duration   time.Duration
+	ObservedAt time.Time
 }
 
 type HTTPTransactionMetrics struct {
-	mu                sync.Mutex
-	byKey             map[httpTransactionKey]HTTPTransactionMetric
-	responsesByStatus map[int]int64
-	requestsTotal     int64
-	latency           httpTransactionLatencyMetrics
+	mu      sync.Mutex
+	buckets map[int64]*httpTransactionBucket
 }
 
 type httpTransactionKey struct {
 	method     string
 	route      string
 	statusCode int
+}
+
+type httpTransactionBucket struct {
+	start             time.Time
+	byKey             map[httpTransactionKey]httpTransactionMetricState
+	responsesByStatus map[int]int64
+	requestsTotal     int64
+	latency           httpTransactionLatencyMetrics
+	lastObservedAt    time.Time
+}
+
+type httpTransactionMetricState struct {
+	metric         HTTPTransactionMetric
+	lastObservedAt time.Time
 }
 
 type httpTransactionLatencyMetrics struct {
@@ -52,8 +64,7 @@ type httpTransactionLatencyMetrics struct {
 
 func NewHTTPTransactionMetrics() *HTTPTransactionMetrics {
 	return &HTTPTransactionMetrics{
-		byKey:             map[httpTransactionKey]HTTPTransactionMetric{},
-		responsesByStatus: map[int]int64{},
+		buckets: map[int64]*httpTransactionBucket{},
 	}
 }
 
@@ -67,15 +78,23 @@ func (m *HTTPTransactionMetrics) ObserveHTTPTransaction(obs HTTPTransactionObser
 	if statusCode <= 0 {
 		statusCode = http.StatusOK
 	}
+	observedAt := metricsObservedAt(obs.ObservedAt)
+	bucketStart := metricsBucketStart(observedAt)
 	elapsedMS := durationMilliseconds(obs.Duration)
 	key := httpTransactionKey{method: method, route: route, statusCode: statusCode}
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.requestsTotal++
-	m.responsesByStatus[statusCode]++
-	m.latency.observe(elapsedMS)
-	metric := m.byKey[key]
+	m.pruneLocked(observedAt)
+	bucket := m.bucketLocked(bucketStart)
+	bucket.requestsTotal++
+	bucket.responsesByStatus[statusCode]++
+	bucket.latency.observe(elapsedMS)
+	if observedAt.After(bucket.lastObservedAt) {
+		bucket.lastObservedAt = observedAt
+	}
+	state := bucket.byKey[key]
+	metric := state.metric
 	metric.Method = method
 	metric.Route = route
 	metric.StatusCode = statusCode
@@ -86,7 +105,11 @@ func (m *HTTPTransactionMetrics) ObserveHTTPTransaction(obs HTTPTransactionObser
 		metric.LatencyMaxMilliseconds = elapsedMS
 	}
 	metric.LatencyLastMilliseconds = elapsedMS
-	m.byKey[key] = metric
+	state.metric = metric
+	if observedAt.After(state.lastObservedAt) {
+		state.lastObservedAt = observedAt
+	}
+	bucket.byKey[key] = state
 }
 
 func (m *HTTPTransactionMetrics) ApplyToMetricsSnapshot(snapshot MetricsSnapshot) MetricsSnapshot {
@@ -105,17 +128,109 @@ func (m *HTTPTransactionMetrics) ApplyToMetricsSnapshot(snapshot MetricsSnapshot
 }
 
 func (m *HTTPTransactionMetrics) snapshot() (int64, map[int]int64, httpTransactionLatencyMetrics, []HTTPTransactionMetric) {
+	buckets := m.snapshotBuckets(time.Now())
+	requestsTotal := int64(0)
+	responsesByStatus := map[int]int64{}
+	latency := httpTransactionLatencyMetrics{}
+	latencyLastObservedAt := time.Time{}
+	byKey := map[httpTransactionKey]httpTransactionMetricState{}
+	for _, bucket := range buckets {
+		requestsTotal += bucket.requestsTotal
+		for statusCode, total := range bucket.responsesByStatus {
+			responsesByStatus[statusCode] += total
+		}
+		latency.samplesTotal += bucket.latency.samplesTotal
+		latency.totalMilliseconds += bucket.latency.totalMilliseconds
+		if bucket.latency.maxMilliseconds > latency.maxMilliseconds {
+			latency.maxMilliseconds = bucket.latency.maxMilliseconds
+		}
+		if bucket.lastObservedAt.After(latencyLastObservedAt) {
+			latencyLastObservedAt = bucket.lastObservedAt
+			latency.lastMilliseconds = bucket.latency.lastMilliseconds
+		}
+		for key, state := range bucket.byKey {
+			current := byKey[key]
+			current.metric.Method = state.metric.Method
+			current.metric.Route = state.metric.Route
+			current.metric.StatusCode = state.metric.StatusCode
+			current.metric.RequestsTotal += state.metric.RequestsTotal
+			current.metric.LatencySamplesTotal += state.metric.LatencySamplesTotal
+			current.metric.LatencyTotalMilliseconds += state.metric.LatencyTotalMilliseconds
+			if state.metric.LatencyMaxMilliseconds > current.metric.LatencyMaxMilliseconds {
+				current.metric.LatencyMaxMilliseconds = state.metric.LatencyMaxMilliseconds
+			}
+			if state.lastObservedAt.After(current.lastObservedAt) {
+				current.lastObservedAt = state.lastObservedAt
+				current.metric.LatencyLastMilliseconds = state.metric.LatencyLastMilliseconds
+			}
+			byKey[key] = current
+		}
+	}
+	transactions := make([]HTTPTransactionMetric, 0, len(byKey))
+	for _, state := range byKey {
+		transactions = append(transactions, state.metric)
+	}
+	sortHTTPTransactionMetrics(transactions)
+	if len(transactions) > metricsBreakdownLimit {
+		transactions = transactions[:metricsBreakdownLimit]
+	}
+	return requestsTotal, responsesByStatus, latency, transactions
+}
+
+func (m *HTTPTransactionMetrics) snapshotBuckets(now time.Time) []httpTransactionBucket {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	responsesByStatus := make(map[int]int64, len(m.responsesByStatus))
-	for statusCode, total := range m.responsesByStatus {
-		responsesByStatus[statusCode] = total
+	m.pruneLocked(now)
+	buckets := make([]httpTransactionBucket, 0, len(m.buckets))
+	for _, bucket := range m.buckets {
+		copied := httpTransactionBucket{
+			start:             bucket.start,
+			byKey:             make(map[httpTransactionKey]httpTransactionMetricState, len(bucket.byKey)),
+			responsesByStatus: make(map[int]int64, len(bucket.responsesByStatus)),
+			requestsTotal:     bucket.requestsTotal,
+			latency:           bucket.latency,
+			lastObservedAt:    bucket.lastObservedAt,
+		}
+		for key, metric := range bucket.byKey {
+			copied.byKey[key] = metric
+		}
+		for statusCode, total := range bucket.responsesByStatus {
+			copied.responsesByStatus[statusCode] = total
+		}
+		buckets = append(buckets, copied)
 	}
-	transactions := make([]HTTPTransactionMetric, 0, len(m.byKey))
-	for _, metric := range m.byKey {
-		transactions = append(transactions, metric)
+	return buckets
+}
+
+func (m *HTTPTransactionMetrics) bucketLocked(start time.Time) *httpTransactionBucket {
+	key := start.UnixNano()
+	bucket := m.buckets[key]
+	if bucket != nil {
+		return bucket
 	}
+	bucket = &httpTransactionBucket{
+		start:             start,
+		byKey:             map[httpTransactionKey]httpTransactionMetricState{},
+		responsesByStatus: map[int]int64{},
+	}
+	m.buckets[key] = bucket
+	return bucket
+}
+
+func (m *HTTPTransactionMetrics) pruneLocked(now time.Time) {
+	cutoff := now.Add(-defaultMetricsWindow)
+	for key, bucket := range m.buckets {
+		if metricBucketExpired(bucket.start, cutoff) {
+			delete(m.buckets, key)
+		}
+	}
+}
+
+func sortHTTPTransactionMetrics(transactions []HTTPTransactionMetric) {
 	sort.Slice(transactions, func(i, j int) bool {
+		if transactions[i].RequestsTotal != transactions[j].RequestsTotal {
+			return transactions[i].RequestsTotal > transactions[j].RequestsTotal
+		}
 		if transactions[i].Route != transactions[j].Route {
 			return transactions[i].Route < transactions[j].Route
 		}
@@ -124,7 +239,6 @@ func (m *HTTPTransactionMetrics) snapshot() (int64, map[int]int64, httpTransacti
 		}
 		return transactions[i].StatusCode < transactions[j].StatusCode
 	})
-	return m.requestsTotal, responsesByStatus, m.latency, transactions
 }
 
 func (m *httpTransactionLatencyMetrics) observe(elapsedMS int64) {
@@ -160,6 +274,10 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 		return next
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if excludedHTTPTransactionMetricsPath(r.URL.Path) {
+			next.ServeHTTP(w, r)
+			return
+		}
 		startedAt := time.Now()
 		recorder := &httpStatusRecorder{ResponseWriter: w, statusCode: http.StatusOK}
 		next.ServeHTTP(recorder, r)
@@ -170,6 +288,15 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 			Duration:   time.Since(startedAt),
 		})
 	})
+}
+
+func excludedHTTPTransactionMetricsPath(path string) bool {
+	switch path {
+	case "/healthz", "/readyz", "/metrics":
+		return true
+	default:
+		return false
+	}
 }
 
 type httpStatusRecorder struct {
@@ -206,14 +333,27 @@ func (r *httpStatusRecorder) Unwrap() http.ResponseWriter {
 
 type observedMetricsReader struct {
 	base         MetricsReader
-	transactions *HTTPTransactionMetrics
+	contributors []MetricsSnapshotContributor
 }
 
-func NewObservedMetricsReader(base MetricsReader, transactions *HTTPTransactionMetrics) MetricsReader {
-	if base == nil || transactions == nil {
+type MetricsSnapshotContributor interface {
+	ApplyToMetricsSnapshot(snapshot MetricsSnapshot) MetricsSnapshot
+}
+
+func NewObservedMetricsReader(base MetricsReader, contributors ...MetricsSnapshotContributor) MetricsReader {
+	if base == nil {
 		return base
 	}
-	return observedMetricsReader{base: base, transactions: transactions}
+	filtered := make([]MetricsSnapshotContributor, 0, len(contributors))
+	for _, contributor := range contributors {
+		if contributor != nil {
+			filtered = append(filtered, contributor)
+		}
+	}
+	if len(filtered) == 0 {
+		return base
+	}
+	return observedMetricsReader{base: base, contributors: filtered}
 }
 
 func (r observedMetricsReader) Metrics(ctx context.Context) (MetricsSnapshot, error) {
@@ -221,5 +361,8 @@ func (r observedMetricsReader) Metrics(ctx context.Context) (MetricsSnapshot, er
 	if err != nil {
 		return MetricsSnapshot{}, err
 	}
-	return r.transactions.ApplyToMetricsSnapshot(snapshot), nil
+	for _, contributor := range r.contributors {
+		snapshot = contributor.ApplyToMetricsSnapshot(snapshot)
+	}
+	return snapshot, nil
 }

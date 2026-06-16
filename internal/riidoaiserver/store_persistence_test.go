@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestFileOutboxPersistsTaskEvents(t *testing.T) {
@@ -136,6 +137,52 @@ func TestFileStoreSnapshotRestoresAssignmentsAndEvents(t *testing.T) {
 	}
 	if metrics.AssignmentsByState[AssignmentReady] != 1 || metrics.TaskEventsTotal != 3 {
 		t.Fatalf("metrics = %+v", metrics)
+	}
+	if metrics.PollActionsTotal[PollStart] != 1 || metrics.AgentEventsTotal != 1 || metrics.EventAppendLatencySamplesTotal != 3 {
+		t.Fatalf("reloaded metrics did not preserve counters: %+v", metrics)
+	}
+}
+
+func TestStoreSnapshotRebuildsMissingMetricsFromEventHistory(t *testing.T) {
+	at := time.Date(2026, 6, 16, 7, 0, 0, 0, time.UTC)
+	snapshot := StoreSnapshot{
+		SchemaVersion: StoreSnapshotSchemaVersion,
+		SavedAt:       at,
+		Tasks: []StoreSnapshotTask{{
+			ID:                  "task-a",
+			ComponentID:         "component-1",
+			CurrentAssignmentID: "asn-000001",
+		}},
+		Assignments: []Assignment{{
+			ID:              "asn-000001",
+			TaskID:          "task-a",
+			ComponentID:     "component-1",
+			AgentID:         "agent-1",
+			RuntimeProvider: "codex",
+			Prompt:          "make hello world",
+			State:           AssignmentRunning,
+			CreatedAt:       at,
+			UpdatedAt:       at,
+		}},
+		AgentAssignments: map[string][]string{"agent-1": {"asn-000001"}},
+		Events: map[string][]TaskEvent{"task-a": {
+			{Seq: 1, TaskID: "task-a", AssignmentID: "asn-000001", AgentID: "agent-1", Type: EventAssignmentQueued, State: AssignmentQueued, At: at},
+			{Seq: 2, TaskID: "task-a", AssignmentID: "asn-000001", AgentID: "agent-1", Type: EventAssignmentLeased, State: AssignmentLeased, At: at},
+			{Seq: 3, TaskID: "task-a", AssignmentID: "asn-000001", AgentID: "agent-1", Type: EventAssignmentRunning, State: AssignmentRunning, At: at},
+		}},
+		NextAssignmentSeq: 1,
+		NextEventSeq:      3,
+	}
+
+	state, err := stateFromSnapshot(snapshot)
+	if err != nil {
+		t.Fatalf("stateFromSnapshot: %v", err)
+	}
+	if state.pollActionsTotal[PollStart] != 1 || state.pollRequestsTotal != 1 {
+		t.Fatalf("poll metrics = requests:%d actions:%+v", state.pollRequestsTotal, state.pollActionsTotal)
+	}
+	if state.agentEventsTotal != 1 || state.eventAppendLatency.samplesTotal != 3 {
+		t.Fatalf("event metrics = agent:%d latency:%+v", state.agentEventsTotal, state.eventAppendLatency)
 	}
 }
 

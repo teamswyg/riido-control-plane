@@ -495,8 +495,22 @@ func doDynamoDBJSON(ctx context.Context, request dynamoDBRequest) ([]byte, error
 }
 
 func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
+	ctx, span := StartTraceSpan(ctx, nil, TraceSpanStart{
+		Name: "aws." + request.service + "." + awsJSONOperationName(request.target),
+		Kind: TraceSpanKindClient,
+		Attributes: []TraceAttribute{
+			{Key: "aws.service", Value: request.service},
+			{Key: "aws.operation", Value: awsJSONOperationName(request.target)},
+			{Key: "aws.region", Value: request.region},
+			{Key: "riido.trace.surface", Value: "aws_json"},
+		},
+	})
+	defer func() {
+		span.End()
+	}()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, request.endpoint, bytes.NewReader(request.payload))
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 	req.Host = request.endpointHost
@@ -507,20 +521,38 @@ func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
 	signAWSJSONRequest(req, request.payload, request.region, request.service, request.credentials, now().UTC(), request.target, request.contentType)
 	resp, err := request.httpClient.Do(req)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 	defer resp.Body.Close()
+	span.SetAttributes(TraceAttribute{Key: "http.response.status_code", Value: strconv.Itoa(resp.StatusCode)})
 	body, readErr := io.ReadAll(io.LimitReader(resp.Body, awsJSONResponseBodyLimit+1))
 	if readErr != nil {
+		span.RecordError(readErr)
 		return nil, readErr
 	}
 	if len(body) > awsJSONResponseBodyLimit {
-		return nil, fmt.Errorf("%s response body exceeds %d bytes", request.service, awsJSONResponseBodyLimit)
+		err := fmt.Errorf("%s response body exceeds %d bytes", request.service, awsJSONResponseBodyLimit)
+		span.RecordError(err)
+		return nil, err
 	}
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		return nil, awsJSONAPIError{service: request.service, statusCode: resp.StatusCode, body: body}
+		err := awsJSONAPIError{service: request.service, statusCode: resp.StatusCode, body: body}
+		span.RecordError(err)
+		return nil, err
 	}
 	return body, nil
+}
+
+func awsJSONOperationName(target string) string {
+	_, operation, ok := strings.Cut(strings.TrimSpace(target), ".")
+	if ok && operation != "" {
+		return operation
+	}
+	if target == "" {
+		return "unknown"
+	}
+	return target
 }
 
 func signAWSJSONRequest(req *http.Request, payload []byte, region, service string, credentials AWSCredentials, now time.Time, target, contentType string) {

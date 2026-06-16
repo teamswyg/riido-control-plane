@@ -1,0 +1,37 @@
+{
+  "schema_version": "riido-go-dependency-allowlist.v1",
+  "service": "riido-control-plane",
+  "policy": "Only approved direct Go module dependencies may be added. Transitive dependencies are accepted through the approved direct dependency graph and must not become direct dependencies without an allowlist entry.",
+  "allowed_direct_modules": [
+    {
+      "path": "github.com/teamswyg/riido-contracts",
+      "category": "riido-contract",
+      "owner": "platform",
+      "reason": "Shared generated assignment/runtime vocabulary contract."
+    },
+    {
+      "path": "go.opentelemetry.io/otel",
+      "category": "observability",
+      "owner": "platform",
+      "reason": "OpenTelemetry API surface used behind the Riido TraceRecorder SPI."
+    },
+    {
+      "path": "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp",
+      "category": "observability",
+      "owner": "platform",
+      "reason": "OTLP/HTTP exporter to the local ADOT collector for sampled X-Ray trace export."
+    },
+    {
+      "path": "go.opentelemetry.io/otel/sdk",
+      "category": "observability",
+      "owner": "platform",
+      "reason": "OpenTelemetry trace provider, batching, resource, and sampler implementation."
+    },
+    {
+      "path": "go.opentelemetry.io/otel/trace",
+      "category": "observability",
+      "owner": "platform",
+      "reason": "Trace span API used by the OpenTelemetry exporter adapter."
+    }
+  ]
+}
