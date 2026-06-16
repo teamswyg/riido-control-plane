@@ -11,6 +11,7 @@ const MetricsSchemaVersion = "riido-ai-server-metrics.v1"
 type (
 	AssignRequest          = assignmentcontract.AssignRequest
 	Assignment             = assignmentcontract.Assignment
+	AssignmentWorktree     = assignmentcontract.AssignmentWorktree
 	PollRequest            = assignmentcontract.PollRequest
 	AgentHeartbeatRequest  = assignmentcontract.AgentHeartbeatRequest
 	PollResponse           = assignmentcontract.PollResponse

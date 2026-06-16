@@ -789,6 +789,8 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	req.ModelID = strings.TrimSpace(req.ModelID)
 	req.Prompt = strings.TrimSpace(req.Prompt)
 	req.AgentInstruction = strings.TrimSpace(req.AgentInstruction)
+	req.ResumeSessionID = strings.TrimSpace(req.ResumeSessionID)
+	req.Worktree = normalizeAssignmentWorktree(req.Worktree)
 	if taskID == "" {
 		return Assignment{}, errors.New("task_id is required")
 	}
@@ -872,6 +874,8 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		Prompt:                   req.Prompt,
 		AgentInstruction:         req.AgentInstruction,
 		AllowExperimentalRuntime: req.AllowExperimentalRuntime,
+		ResumeSessionID:          req.ResumeSessionID,
+		Worktree:                 cloneAssignmentWorktree(req.Worktree),
 		State:                    AssignmentQueued,
 		ReplacesAssignmentID:     replacesID,
 		BlockedByAssignmentID:    blockedByID,
@@ -886,6 +890,31 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	s.appendEvent(state, taskID, assignment.ID, assignment.AgentID, EventAssignmentQueued, assignment.State, "", nil, now)
 	s.signalAgentWaiters(state, assignment.AgentID)
 	return assignment, nil
+}
+
+func normalizeAssignmentWorktree(worktree *AssignmentWorktree) *AssignmentWorktree {
+	if worktree == nil {
+		return nil
+	}
+	out := &AssignmentWorktree{
+		RepositoryFullName: strings.TrimSpace(worktree.RepositoryFullName),
+		RepositoryURL:      strings.TrimSpace(worktree.RepositoryURL),
+		BranchName:         strings.TrimSpace(worktree.BranchName),
+		IsPrivate:          worktree.IsPrivate,
+		Source:             strings.TrimSpace(worktree.Source),
+	}
+	if out.RepositoryFullName == "" && out.RepositoryURL == "" {
+		return nil
+	}
+	return out
+}
+
+func cloneAssignmentWorktree(worktree *AssignmentWorktree) *AssignmentWorktree {
+	if worktree == nil {
+		return nil
+	}
+	out := *worktree
+	return &out
 }
 
 func (s *Store) handleCancelAssignment(state *storeState, taskID string, req CancelAssignmentRequest) (Assignment, error) {
@@ -1366,12 +1395,22 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 	}
 	state.agentEventsTotal++
 	now := s.now()
+	req.ProviderSessionID = strings.TrimSpace(req.ProviderSessionID)
+	assignmentChanged := false
 	if req.State != "" && req.State != assignment.State {
 		if !canTransitionAssignment(assignment.State, req.State) {
 			return AgentEventResponse{}, fmt.Errorf("invalid assignment transition %s -> %s", assignment.State, req.State)
 		}
 		assignment.State = req.State
 		assignment.UpdatedAt = now
+		assignmentChanged = true
+	}
+	if req.ProviderSessionID != "" && req.ProviderSessionID != assignment.ProviderSessionID {
+		assignment.ProviderSessionID = req.ProviderSessionID
+		assignment.UpdatedAt = now
+		assignmentChanged = true
+	}
+	if assignmentChanged {
 		state.assignments[assignment.ID] = assignment
 	}
 	eventType := strings.TrimSpace(req.EventType)

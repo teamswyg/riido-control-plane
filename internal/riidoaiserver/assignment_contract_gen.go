@@ -51,6 +51,7 @@ const (
 	EventAssignmentFailed       = assignmentcontract.EventAssignmentFailed
 	EventAssignmentStateUpdated = assignmentcontract.EventAssignmentStateUpdated
 	EventRiidoLog               = assignmentcontract.EventRiidoLog
+	EventProviderSessionPinned  = assignmentcontract.EventProviderSessionPinned
 	EventProviderLog            = assignmentcontract.EventProviderLog
 	EventProviderWarning        = assignmentcontract.EventProviderWarning
 	EventProviderError          = assignmentcontract.EventProviderError
