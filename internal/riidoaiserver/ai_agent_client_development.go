@@ -496,11 +496,15 @@ func (s *DevelopmentAIAgentClientStore) GetAIAgentDaemon(ctx context.Context, pr
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	_, daemon, ok := s.deviceDaemonForAgentAccessLocked(principal, agentID)
+	agent, daemon, ok := s.deviceDaemonForAgentAccessLocked(principal, agentID)
 	if !ok {
 		return DeviceDaemonDetailResponse{}, ErrAIAgentNotFound
 	}
-	return DeviceDaemonDetailResponse{SchemaVersion: SchemaVersion, Daemon: copyDeviceDaemon(daemon)}, nil
+	response := DeviceDaemonDetailResponse{SchemaVersion: SchemaVersion, Daemon: copyDeviceDaemon(daemon)}
+	if _, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID); ok {
+		response.Runtime = &runtime
+	}
+	return response, nil
 }
 
 func (s *DevelopmentAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
@@ -596,7 +600,13 @@ func (s *DevelopmentAIAgentClientStore) GetAIAgentDeviceDaemon(ctx context.Conte
 	if !ok {
 		return DeviceDaemonDetailResponse{}, ErrAIAgentNotFound
 	}
-	return DeviceDaemonDetailResponse{SchemaVersion: SchemaVersion, Daemon: copyDeviceDaemon(daemon)}, nil
+	response := DeviceDaemonDetailResponse{SchemaVersion: SchemaVersion, Daemon: copyDeviceDaemon(daemon)}
+	if device, ok := s.deviceByIDLocked(daemon.DeviceID); ok {
+		if visibleDevice, ok := s.visibleDeviceRecordLocked(principal, device); ok {
+			response.Runtimes = append([]RuntimeRecord(nil), visibleDevice.Runtimes...)
+		}
+	}
+	return response, nil
 }
 
 func (s *DevelopmentAIAgentClientStore) ControlAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {

@@ -218,6 +218,8 @@ type DeviceDaemonRecord struct {
 type DeviceDaemonDetailResponse struct {
 	SchemaVersion string             `json:"schema_version"`
 	Daemon        DeviceDaemonRecord `json:"daemon"`
+	Runtime       *RuntimeRecord     `json:"runtime,omitempty"`
+	Runtimes      []RuntimeRecord    `json:"runtimes,omitempty"`
 }
 
 type ControlDeviceDaemonRequest struct {

@@ -154,9 +154,10 @@ func TestPersistentAIAgentClientStoreReloadsDeviceCredentialAcrossProcesses(t *t
 		UptimeSeconds:     321,
 		StartedAt:         startedAt,
 		Runtimes: []RuntimeSnapshotRecord{{
-			RuntimeID: "daemon-a:codex",
-			Kind:      RuntimeKindCodex,
-			Models:    []RuntimeModelRecord{{ModelID: "gpt-5.5", Label: "GPT-5.5", IsDefault: true}},
+			RuntimeID:       "daemon-a:codex",
+			Kind:            RuntimeKindCodex,
+			ProviderVersion: "codex-cli 0.133.0",
+			Models:          []RuntimeModelRecord{{ModelID: "gpt-5.5", Label: "GPT-5.5", IsDefault: true}},
 		}},
 	}); err != nil {
 		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot: %v", err)
@@ -182,6 +183,11 @@ func TestPersistentAIAgentClientStoreReloadsDeviceCredentialAcrossProcesses(t *t
 	}
 	if detail.Daemon.Profile != "development" || detail.Daemon.PID != 4321 || detail.Daemon.UptimeSeconds != 321 || !detail.Daemon.StartedAt.Equal(startedAt) {
 		t.Fatalf("daemon detail facts after reload = %+v", detail.Daemon)
+	}
+	if len(detail.Runtimes) != 1 ||
+		detail.Runtimes[0].RuntimeID != "daemon-a:codex" ||
+		detail.Runtimes[0].ProviderVersion != "codex-cli 0.133.0" {
+		t.Fatalf("daemon detail runtimes after reload = %+v", detail.Runtimes)
 	}
 }
 
