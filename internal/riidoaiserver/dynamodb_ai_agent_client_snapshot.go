@@ -197,7 +197,7 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 		Key            map[string]map[string]string `json:"Key"`
 	}{
 		TableName:      s.tableName,
-		ConsistentRead: true,
+		ConsistentRead: false,
 		Key: map[string]map[string]string{
 			"pk": {"S": dynamoDBAIAgentClientSnapshotPK},
 			"sk": {"S": dynamoDBAIAgentClientSnapshotSK},
