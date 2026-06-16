@@ -57,6 +57,7 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, workflow, "TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}")
 	requireContains(t, workflow, "SMOKE_TOKEN_CONFIGURED: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN != '' }}")
 	requireContains(t, workflow, "if [ \"${SMOKE_TOKEN_CONFIGURED:-false}\" != \"true\" ]")
+	requireContains(t, workflow, "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true")
 	requireContains(t, workflow, "CODEDEPLOY_APPLICATION: ${{ vars.RIIDO_AI_SERVER_CODEDEPLOY_APPLICATION }}")
 	requireContains(t, workflow, "CODEDEPLOY_DEPLOYMENT_GROUP: ${{ vars.RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP }}")
 	requireContains(t, workflow, "profile-thumbnails/uploads")
