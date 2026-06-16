@@ -3,9 +3,10 @@ package riidoaiserver
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"sort"
 	"strings"
+
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 )
 
 const (
@@ -207,67 +208,11 @@ func taskContextRepositorySourceRank(source string) int {
 }
 
 func safeAIAgentRepositoryFullName(rawFullName string) string {
-	parts := strings.Split(strings.Trim(strings.TrimSpace(rawFullName), "/"), "/")
-	if len(parts) != 2 {
-		return ""
-	}
-	for _, part := range parts {
-		if !validAIAgentGitHubRepositoryPart(part) {
-			return ""
-		}
-	}
-	return parts[0] + "/" + parts[1]
+	return assignmentcontract.NormalizePublicGitHubRepositoryFullName(rawFullName)
 }
 
 func safeAIAgentRepositoryURL(rawURL string) string {
-	rawURL = strings.TrimSpace(rawURL)
-	if rawURL == "" {
-		return ""
-	}
-	parsed, err := url.Parse(rawURL)
-	if err != nil {
-		return ""
-	}
-	if parsed.Scheme != "https" || !strings.EqualFold(parsed.Hostname(), "github.com") || parsed.User != nil {
-		return ""
-	}
-	if parsed.RawQuery != "" || parsed.ForceQuery || parsed.Fragment != "" || parsed.RawFragment != "" {
-		return ""
-	}
-	if !validAIAgentGitHubRepositoryPath(parsed.Path) {
-		return ""
-	}
-	return parsed.String()
-}
-
-func validAIAgentGitHubRepositoryPath(path string) bool {
-	parts := strings.Split(strings.Trim(path, "/"), "/")
-	if len(parts) != 2 {
-		return false
-	}
-	for _, part := range parts {
-		if !validAIAgentGitHubRepositoryPart(part) {
-			return false
-		}
-	}
-	return true
-}
-
-func validAIAgentGitHubRepositoryPart(part string) bool {
-	if part == "" || part == "." || part == ".." {
-		return false
-	}
-	for _, ch := range part {
-		switch {
-		case ch >= 'a' && ch <= 'z':
-		case ch >= 'A' && ch <= 'Z':
-		case ch >= '0' && ch <= '9':
-		case ch == '-' || ch == '_' || ch == '.':
-		default:
-			return false
-		}
-	}
-	return true
+	return assignmentcontract.NormalizePublicGitHubRepositoryURL(rawURL)
 }
 
 func normalizeAIAgentTaskContextComponent(component AIAgentTaskContextComponent) AIAgentTaskContextComponent {
