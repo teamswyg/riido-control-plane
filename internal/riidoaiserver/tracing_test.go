@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -89,6 +90,46 @@ func TestStoreTracingRecordsOperationSpans(t *testing.T) {
 		if !slices.Contains(names, want) {
 			t.Fatalf("missing span %q in %v", want, names)
 		}
+	}
+}
+
+func TestHTTPAssignmentTaskContextTracingRecordsDomainOperation(t *testing.T) {
+	recorder := &recordingTraceRecorder{}
+	store := NewStoreWithConfig(StoreConfig{TraceRecorder: recorder})
+	defer store.Close()
+	taskContext := &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()}
+	server := NewServer(ServerConfig{
+		Assignment:    store,
+		TaskContext:   taskContext,
+		TraceRecorder: recorder,
+		Authorizer:    assignmentHTTPAuthorizer(t, []string{"component-task:task-a:assign"}),
+	}).Handler()
+
+	req := httptest.NewRequest(http.MethodPost, "/v1/component-tasks/task-a/assignment", strings.NewReader(`{"component_id":"component-a","agent_id":"agent-a","runtime_provider":"codex"}`))
+	req.Header.Set("Authorization", "Bearer assignment-token")
+	resp := httptest.NewRecorder()
+	server.ServeHTTP(resp, req)
+	if resp.Code != http.StatusOK {
+		t.Fatalf("assign status=%d body=%s", resp.Code, resp.Body.String())
+	}
+
+	spans := recorder.snapshot()
+	names := traceSpanNames(spans)
+	if !slices.Contains(names, "task_context.task_context_resolve") {
+		t.Fatalf("missing task context span in %v", names)
+	}
+	var taskContextSpan recordedTraceSpanSnapshot
+	for _, span := range spans {
+		if span.Name == "task_context.task_context_resolve" {
+			taskContextSpan = span
+			break
+		}
+	}
+	if got := taskContextSpan.Attributes[metadatakeys.RiidoTaskContextOperation.String()]; got != TaskContextOperationResolve.String() {
+		t.Fatalf("task context operation attr = %q, want %q; attrs=%+v", got, TaskContextOperationResolve.String(), taskContextSpan.Attributes)
+	}
+	if got := taskContextSpan.Attributes[metadatakeys.RiidoTraceSurface.String()]; got != "task_context" {
+		t.Fatalf("task context surface = %q, want task_context; attrs=%+v", got, taskContextSpan.Attributes)
 	}
 }
 

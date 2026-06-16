@@ -1553,7 +1553,7 @@ func (s Server) assignRequestWithTaskContextPrompt(ctx context.Context, taskID s
 	if componentID == "" {
 		componentID = strings.TrimSpace(taskID)
 	}
-	contextSnapshot, err := s.taskContext.GetAIAgentTaskContext(ctx, componentID)
+	contextSnapshot, err := s.getAIAgentTaskContextWithTrace(ctx, componentID)
 	if err != nil {
 		return AssignRequest{}, err
 	}
@@ -1569,11 +1569,27 @@ func (s Server) assignRequestWithTaskContextPromptForClient(ctx context.Context,
 	if contextReq.ComponentID == "" {
 		contextReq.ComponentID = componentID
 	}
-	contextSnapshot, err := s.getAIAgentTaskContextForRequest(ctx, contextReq)
+	contextSnapshot, err := s.getAIAgentTaskContextForRequestWithTrace(ctx, contextReq)
 	if err != nil {
 		return AssignRequest{}, err
 	}
 	return composeAssignRequestWithTaskContext(taskID, componentID, req, contextSnapshot)
+}
+
+func (s Server) getAIAgentTaskContextWithTrace(ctx context.Context, componentID string) (snapshot AIAgentTaskContext, err error) {
+	ctx, span := startTaskContextOperationTrace(ctx, TaskContextOperationResolve)
+	defer func() {
+		FinishTraceSpan(span, err)
+	}()
+	return s.taskContext.GetAIAgentTaskContext(ctx, componentID)
+}
+
+func (s Server) getAIAgentTaskContextForRequestWithTrace(ctx context.Context, req AIAgentTaskContextRequest) (snapshot AIAgentTaskContext, err error) {
+	ctx, span := startTaskContextOperationTrace(ctx, TaskContextOperationResolve)
+	defer func() {
+		FinishTraceSpan(span, err)
+	}()
+	return s.getAIAgentTaskContextForRequest(ctx, req)
 }
 
 func (s Server) getAIAgentTaskContextForRequest(ctx context.Context, req AIAgentTaskContextRequest) (AIAgentTaskContext, error) {
