@@ -47,6 +47,27 @@ func TestStoreOperationMetricsApplyToSnapshot(t *testing.T) {
 	}
 }
 
+func TestStoreOperationMetricsTreatCallerCancellationAsNonStoreFailure(t *testing.T) {
+	metrics := NewStoreOperationMetrics()
+	metrics.ObserveStoreOperation(StoreOperationObservation{
+		Operation: StoreOperationPollAssignment,
+		Duration:  time.Millisecond,
+		Err:       context.Canceled,
+	})
+
+	snapshot := metrics.ApplyToMetricsSnapshot(MetricsSnapshot{SchemaVersion: MetricsSchemaVersion})
+	if snapshot.StoreOperationCallsTotal != 1 || snapshot.StoreOperationErrorsTotal != 0 {
+		t.Fatalf("store operation aggregate should count canceled poll as non-failure: %+v", snapshot)
+	}
+	if len(snapshot.StoreOperations) != 1 {
+		t.Fatalf("store operation breakdown = %+v", snapshot.StoreOperations)
+	}
+	poll := snapshot.StoreOperations[0]
+	if poll.CallsTotal != 1 || poll.ErrorsTotal != 0 || poll.LatencySamplesTotal != 1 {
+		t.Fatalf("poll metric should keep call/latency and suppress cancellation error: %+v", poll)
+	}
+}
+
 func TestStoreOperationMetricsUseRollingWindow(t *testing.T) {
 	metrics := NewStoreOperationMetrics()
 	old := time.Now().Add(-10 * time.Minute)
