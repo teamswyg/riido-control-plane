@@ -5,7 +5,7 @@ go 1.26
 toolchain go1.26.2
 
 require (
-	github.com/teamswyg/riido-contracts v0.3.7-0.20260616132538-6e2561303149
+	github.com/teamswyg/riido-contracts v0.3.7-0.20260616171052-5610a00b6f23
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.44.0
 	go.opentelemetry.io/otel/sdk v1.44.0
