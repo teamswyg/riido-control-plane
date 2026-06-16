@@ -26,6 +26,7 @@ type DynamoDBAIAgentClientSnapshotConfig struct {
 	HTTPClient          *http.Client
 	Now                 func() time.Time
 	CredentialsProvider AWSCredentialsProvider
+	Metrics             *AIAgentClientPersistenceMetrics
 }
 
 type DynamoDBAIAgentClientSnapshot struct {
@@ -38,6 +39,7 @@ type DynamoDBAIAgentClientSnapshot struct {
 	httpClient          *http.Client
 	now                 func() time.Time
 	credentialsProvider AWSCredentialsProvider
+	metrics             *AIAgentClientPersistenceMetrics
 }
 
 type dynamoDBAIAgentClientSnapshotCommand struct {
@@ -81,6 +83,7 @@ func NewDynamoDBAIAgentClientSnapshot(config DynamoDBAIAgentClientSnapshotConfig
 		httpClient:          dynamoDBHTTPClient(config.HTTPClient),
 		now:                 dynamoDBClock(config.Now),
 		credentialsProvider: config.CredentialsProvider,
+		metrics:             config.Metrics,
 	}
 	go store.loop()
 	return store, nil
@@ -180,7 +183,12 @@ func (s *DynamoDBAIAgentClientSnapshot) loop() {
 	}
 }
 
-func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AWSCredentials) (AIAgentClientSnapshot, bool, error) {
+func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AWSCredentials) (snapshot AIAgentClientSnapshot, ok bool, err error) {
+	startedAt := time.Now()
+	var snapshotBytes int64
+	defer func() {
+		s.observeAIAgentClientSnapshot(AIAgentClientSnapshotLoad, startedAt, snapshotBytes, err)
+	}()
 	payload, err := json.Marshal(struct {
 		TableName      string                       `json:"TableName"`
 		ConsistentRead bool                         `json:"ConsistentRead"`
@@ -220,6 +228,7 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 	}
 	var snapshotReader io.Reader
 	if gzipped := response.Item["snapshot_gzip"]["S"]; gzipped != "" {
+		snapshotBytes = int64(len(gzipped))
 		raw, err := gunzipBase64(gzipped)
 		if err != nil {
 			return AIAgentClientSnapshot{}, false, fmt.Errorf("decode DynamoDB AI Agent client snapshot gzip: %w", err)
@@ -227,11 +236,12 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 		snapshotReader = bytes.NewReader(raw)
 	} else if rawSnapshot := response.Item["snapshot_json"]["S"]; rawSnapshot != "" {
 		// Legacy items written before gzip compression.
+		snapshotBytes = int64(len(rawSnapshot))
 		snapshotReader = strings.NewReader(rawSnapshot)
 	} else {
 		return AIAgentClientSnapshot{}, false, errors.New("decode DynamoDB AI Agent client snapshot response: snapshot_gzip or snapshot_json is required")
 	}
-	snapshot, err := decodeAIAgentClientSnapshot(snapshotReader)
+	snapshot, err = decodeAIAgentClientSnapshot(snapshotReader)
 	if err != nil {
 		return AIAgentClientSnapshot{}, false, fmt.Errorf("decode DynamoDB AI Agent client snapshot json: %w", err)
 	}
@@ -241,7 +251,12 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 	return snapshot, true, nil
 }
 
-func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAgentClientSnapshot, credentials AWSCredentials) error {
+func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAgentClientSnapshot, credentials AWSCredentials) (err error) {
+	startedAt := time.Now()
+	var snapshotBytes int64
+	defer func() {
+		s.observeAIAgentClientSnapshot(AIAgentClientSnapshotSave, startedAt, snapshotBytes, err)
+	}()
 	if snapshot.SchemaVersion != AIAgentClientPersistenceSchemaVersion {
 		return fmt.Errorf("unsupported AI Agent client snapshot schema_version %q", snapshot.SchemaVersion)
 	}
@@ -260,6 +275,7 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 	if err != nil {
 		return err
 	}
+	snapshotBytes = int64(len(snapshotGzip))
 	payload, err := json.Marshal(struct {
 		TableName string                       `json:"TableName"`
 		Item      map[string]map[string]string `json:"Item"`
@@ -292,6 +308,18 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 		return fmt.Errorf("dynamodb save AI Agent client snapshot: %w", err)
 	}
 	return nil
+}
+
+func (s *DynamoDBAIAgentClientSnapshot) observeAIAgentClientSnapshot(operation AIAgentClientPersistenceOperation, startedAt time.Time, bytes int64, err error) {
+	if s == nil || s.metrics == nil {
+		return
+	}
+	s.metrics.ObserveAIAgentClientPersistence(AIAgentClientPersistenceObservation{
+		Operation: operation,
+		Duration:  time.Since(startedAt),
+		Bytes:     bytes,
+		Err:       err,
+	})
 }
 
 // gzipBase64 gzip-compresses b and returns a base64 (std) string suitable for a

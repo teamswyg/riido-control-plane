@@ -51,13 +51,19 @@ Allowed:
 
 Forbidden without a new ADR:
 
-- third-party cloud SDKs
+- unapproved direct Go module dependencies such as ORMs, web frameworks,
+  dependency-injection frameworks, or config frameworks
 - direct imports from `riido-daemon`
 - private infra packages
 - former monolith package paths
 - generated credential, tfstate, tfvars, or release evidence files
 
-`go list -m all` must contain only this module and allowed Riido modules.
+Direct Go module dependencies must be declared in
+[`../../dependency_allowlist.riido.json`](../../dependency_allowlist.riido.json)
+and pass `go run ./tools/dependencyallowlist -contract
+dependency_allowlist.riido.json`. Transitive dependencies are accepted through
+the approved direct dependency graph and must not become direct dependencies
+without a new allowlist entry.
 
 ## Runtime Boundaries
 

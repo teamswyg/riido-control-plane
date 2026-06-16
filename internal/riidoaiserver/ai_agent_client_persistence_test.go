@@ -138,6 +138,7 @@ func TestPersistentAIAgentClientStoreReloadsDeviceCredentialAcrossProcesses(t *t
 	if err != nil {
 		t.Fatalf("open stale reader: %v", err)
 	}
+	reader.snapshotReloadInterval = 0
 
 	enrollment, err := writer.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{DisplayName: "Development Mac"})
 	if err != nil {
@@ -196,6 +197,7 @@ func TestPersistentAIAgentClientStorePreservesRuntimeSnapshotWhenDeviceSecretRot
 	if err != nil {
 		t.Fatalf("open stale reader: %v", err)
 	}
+	reader.snapshotReloadInterval = 0
 
 	enrollment, err := writer.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{DisplayName: "Development Mac"})
 	if err != nil {
@@ -274,6 +276,7 @@ func TestPersistentAIAgentClientStoreReloadsMovedRuntimeAcrossProcesses(t *testi
 	if err != nil {
 		t.Fatalf("open stale reader: %v", err)
 	}
+	reader.snapshotReloadInterval = 0
 	secondEnrollment, err := writer.EnrollDeviceCredential(ctx, principal, "workspace-dev", EnrollDeviceRequest{DisplayName: "Replacement Mac"})
 	if err != nil {
 		t.Fatalf("EnrollDeviceCredential replacement: %v", err)
@@ -298,6 +301,37 @@ func TestPersistentAIAgentClientStoreReloadsMovedRuntimeAcrossProcesses(t *testi
 	}
 	if deviceID := deviceIDForRuntime(devices.Devices, "daemon-local:codex"); deviceID != secondEnrollment.DeviceID {
 		t.Fatalf("runtime owner device = %q, want %q; devices=%+v", deviceID, secondEnrollment.DeviceID, devices.Devices)
+	}
+}
+
+func TestPersistentAIAgentClientStoreCoalescesHotSnapshotReloads(t *testing.T) {
+	ctx := context.Background()
+	snapshots := &memoryAIAgentClientSnapshotStore{}
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-dev"}
+	store, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
+	if err != nil {
+		t.Fatalf("OpenPersistentAIAgentClientStore: %v", err)
+	}
+
+	loadsAfterOpen := snapshots.loads
+	for range 5 {
+		if _, err := store.BootstrapAIAgentClient(ctx, principal, ClientKindWeb); err != nil {
+			t.Fatalf("BootstrapAIAgentClient: %v", err)
+		}
+		if _, err := store.ListAIAgentDevices(ctx, principal); err != nil {
+			t.Fatalf("ListAIAgentDevices: %v", err)
+		}
+	}
+	if snapshots.loads != loadsAfterOpen {
+		t.Fatalf("hot read methods should reuse fresh in-process snapshot: loads=%d after open=%d", snapshots.loads, loadsAfterOpen)
+	}
+
+	store.snapshotLastReloadAt = time.Now().Add(-2 * defaultAIAgentClientSnapshotReloadInterval)
+	if _, err := store.BootstrapAIAgentClient(ctx, principal, ClientKindWeb); err != nil {
+		t.Fatalf("BootstrapAIAgentClient after expiry: %v", err)
+	}
+	if snapshots.loads != loadsAfterOpen+1 {
+		t.Fatalf("expired freshness window should reload once: loads=%d after open=%d", snapshots.loads, loadsAfterOpen)
 	}
 }
 
@@ -383,10 +417,12 @@ func deviceIDForRuntime(devices []DeviceRecord, runtimeID string) string {
 type memoryAIAgentClientSnapshotStore struct {
 	snapshot AIAgentClientSnapshot
 	ok       bool
+	loads    int
 	saves    int
 }
 
 func (s *memoryAIAgentClientSnapshotStore) LoadAIAgentClientSnapshot(context.Context) (AIAgentClientSnapshot, bool, error) {
+	s.loads++
 	return s.snapshot, s.ok, nil
 }
 

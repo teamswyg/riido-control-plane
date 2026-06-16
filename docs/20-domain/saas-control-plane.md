@@ -453,9 +453,35 @@ the `AssignmentStore` port. It owns this stdlib-only route:
 
 The route must use `RequestAuthorizer` with `metrics` / `read` scope before
 reading the store. The response is the `MetricsSnapshot` DTO, including
-`riido-ai-server-metrics.v1` schema version and the in-memory assignment,
-poll, event, subscriber, outbox-error, and event-latency counters that are
-available without AWS credentials.
+`riido-ai-server-metrics.v1` schema version and the assignment, poll, event,
+subscriber, outbox-error, and event-latency counters that are available without
+AWS credentials.
+
+AI Agent client persistence contributes snapshot load/save call counts, error
+counts, payload bytes, and latency counters to the same `MetricsSnapshot`
+without adding DynamoDB table names, item keys, agent ids, or route ids as
+CloudWatch dimensions. These counters exist to validate whether the current
+monolithic `AI_AGENT_CLIENT#snapshot` item is being used as a hot query model.
+The governance target is `Snapshot != Query Model`: the snapshot may remain a
+cold recovery artifact, while hot access patterns should graduate to explicit
+small read models such as runtime binding, claimable queue, active assignment,
+and task-thread projection rows.
+Until those read models exist, the persistent AI Agent client store coalesces
+same-process snapshot reloads inside a short freshness window. This reduces
+repeated `GetItem` reads of the large snapshot while preserving cross-process
+eventual visibility. Immediate cross-process consistency is not guaranteed by
+the monolithic snapshot because writes are not versioned conditional updates.
+
+Assignment state and task event history are durable read models. Runtime
+counters such as poll actions, daemon-authored agent events, outbox errors, and
+event append samples are stored in `StoreSnapshot` when a snapshot is written.
+When an older snapshot or assignment operation journal does not contain metric
+counters, the store lazily rebuilds the minimum observable counters from task
+event history before serving metrics. This keeps restored stores from reporting
+active/running assignment history with zero poll-start or zero event-append
+samples. Live latency duration values still represent only observed appends in
+the current or metric-bearing runtime history; old event history can restore the
+sample count but not the original elapsed duration.
 
 The metrics adapter does not own health/ready routes, Prometheus conversion,
 production tuning calibration, `cmd/riido_ai_server` environment parsing,
@@ -478,7 +504,8 @@ When `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` is a positive integer,
 `cmd/riido_ai_server` starts the publisher, writes one metrics record
 immediately, and then writes at the configured interval until shutdown. The EMF
 record includes assignment, poll, agent event, task event, SSE subscriber,
-outbox error, and event-append-latency counters.
+outbox error, event-append-latency, HTTP/store operation, and AI Agent client
+snapshot persistence counters.
 
 This boundary owns only stdout EMF serialization and runtime scheduling. It
 does not own AWS SDK calls, CloudWatch PutMetricData, credentials, log group or
@@ -496,6 +523,7 @@ for the control-plane durable adapters:
 - `DynamoDBOutbox`
 - `DynamoDBStoreSnapshot`
 - `DynamoDBAssignmentOperationStore`
+- `DynamoDBAIAgentClientSnapshot`
 - DynamoDB table stream discovery
 - DynamoDB Streams relay and checkpoint handling
 - EventBridge stream relay publishing

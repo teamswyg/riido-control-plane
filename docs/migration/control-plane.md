@@ -83,7 +83,8 @@ This slice does:
 - add the public contracts module to `go.mod`
 - add a control-plane compatibility test that imports the IR, task lifecycle,
   and provider capability contracts
-- replace the stdlib-only CI assertion with a "no non-Riido dependency" gate
+- replace the stdlib-only CI assertion with an approved direct dependency
+  allowlist gate
 
 This slice does not move `cmd/riido_ai_server`, `internal/riidoaiserver`,
 AWS SDK integration, Terraform, production secret wiring, or deployment
@@ -2169,7 +2170,7 @@ Required before a control-plane migration PR is mergeable:
 
 ```bash
 go test ./...
-go list -m all
+go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
 go test ./internal/riidoaiserver -run 'ReviewAccount|HTTPReviewAccount|AgentCatalogStore' -count=1
 go test ./cmd/riido_ai_server -run 'ReviewAccount|ConfigFromEnv|AuthorizerFromEnv' -count=1
 go test ./internal/riidoaiserver -run 'CloudWatch|Metrics|EventAppend' -count=1

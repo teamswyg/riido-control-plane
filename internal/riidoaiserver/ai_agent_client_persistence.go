@@ -9,8 +9,11 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
+
+const defaultAIAgentClientSnapshotReloadInterval = time.Second
 
 type AIAgentClientSnapshotStore interface {
 	LoadAIAgentClientSnapshot(ctx context.Context) (AIAgentClientSnapshot, bool, error)
@@ -50,7 +53,11 @@ type AIAgentClientEventSnapshot struct {
 
 type PersistentAIAgentClientStore struct {
 	*DevelopmentAIAgentClientStore
-	snapshotStore AIAgentClientSnapshotStore
+	snapshotStore          AIAgentClientSnapshotStore
+	snapshotReloadMu       sync.Mutex
+	snapshotReloadInterval time.Duration
+	snapshotLastReloadAt   time.Time
+	snapshotClock          func() time.Time
 }
 
 func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAgentClientStore, snapshotStore AIAgentClientSnapshotStore) (*PersistentAIAgentClientStore, error) {
@@ -63,15 +70,21 @@ func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAg
 	if snapshotStore == nil {
 		return nil, errors.New("riidoaiserver: ai agent client snapshot store is required")
 	}
+	store := &PersistentAIAgentClientStore{
+		DevelopmentAIAgentClientStore: base,
+		snapshotStore:                 snapshotStore,
+		snapshotReloadInterval:        defaultAIAgentClientSnapshotReloadInterval,
+		snapshotClock:                 time.Now,
+	}
 	if snapshot, ok, err := snapshotStore.LoadAIAgentClientSnapshot(ctx); err != nil {
 		return nil, err
 	} else if ok {
 		if err := base.restoreSnapshot(snapshot); err != nil {
 			return nil, err
 		}
-		return &PersistentAIAgentClientStore{DevelopmentAIAgentClientStore: base, snapshotStore: snapshotStore}, nil
+		store.markSnapshotReloaded()
+		return store, nil
 	}
-	store := &PersistentAIAgentClientStore{DevelopmentAIAgentClientStore: base, snapshotStore: snapshotStore}
 	if err := store.saveSnapshot(ctx); err != nil {
 		return nil, err
 	}
@@ -399,11 +412,20 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
 	}
+	s.snapshotReloadMu.Lock()
+	defer s.snapshotReloadMu.Unlock()
+	if !s.shouldReloadSnapshotLocked() {
+		return nil
+	}
 	snapshot, ok, err := s.snapshotStore.LoadAIAgentClientSnapshot(ctx)
 	if err != nil || !ok {
 		return err
 	}
-	return s.restoreSnapshotPreservingSubscribers(snapshot)
+	if err := s.restoreSnapshotPreservingSubscribers(snapshot); err != nil {
+		return err
+	}
+	s.snapshotLastReloadAt = s.snapshotNow()
+	return nil
 }
 
 func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
@@ -414,7 +436,34 @@ func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	return s.snapshotStore.SaveAIAgentClientSnapshot(ctx, snapshot)
+	if err := s.snapshotStore.SaveAIAgentClientSnapshot(ctx, snapshot); err != nil {
+		return err
+	}
+	s.markSnapshotReloaded()
+	return nil
+}
+
+func (s *PersistentAIAgentClientStore) shouldReloadSnapshotLocked() bool {
+	if s.snapshotReloadInterval <= 0 || s.snapshotLastReloadAt.IsZero() {
+		return true
+	}
+	return !s.snapshotNow().Before(s.snapshotLastReloadAt.Add(s.snapshotReloadInterval))
+}
+
+func (s *PersistentAIAgentClientStore) markSnapshotReloaded() {
+	if s == nil {
+		return
+	}
+	s.snapshotReloadMu.Lock()
+	defer s.snapshotReloadMu.Unlock()
+	s.snapshotLastReloadAt = s.snapshotNow()
+}
+
+func (s *PersistentAIAgentClientStore) snapshotNow() time.Time {
+	if s != nil && s.snapshotClock != nil {
+		return s.snapshotClock()
+	}
+	return time.Now()
 }
 
 func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClientSnapshot, error) {

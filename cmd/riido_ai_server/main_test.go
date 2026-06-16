@@ -86,6 +86,31 @@ func TestConfigFromEnvParsesPprofAddr(t *testing.T) {
 	}
 }
 
+func TestConfigFromEnvParsesTracing(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envTracingEnabled, "true")
+	t.Setenv(envTracingSampleRatio, "0.05")
+	t.Setenv(envTracingOTLPEndpoint, "http://127.0.0.1:4318")
+	t.Setenv(envTracingServiceName, "riido-ai-server-development")
+
+	config, err := configFromEnv()
+	if err != nil {
+		t.Fatalf("configFromEnv: %v", err)
+	}
+	if !config.Tracing.Enabled || config.Tracing.SampleRatio != 0.05 || config.Tracing.OTLPEndpoint != "http://127.0.0.1:4318" || config.Tracing.ServiceName != "riido-ai-server-development" {
+		t.Fatalf("tracing config = %+v", config.Tracing)
+	}
+}
+
+func TestTracingConfigRejectsInvalidSampleRatio(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envTracingEnabled, "true")
+	t.Setenv(envTracingSampleRatio, "2")
+	if _, err := configFromEnv(); err == nil || !strings.Contains(err.Error(), envTracingSampleRatio) {
+		t.Fatalf("expected tracing sample ratio error, got %v", err)
+	}
+}
+
 func TestPprofHandlerServesIndex(t *testing.T) {
 	server := newPprofServer("127.0.0.1:0")
 	if server == nil {
@@ -140,6 +165,9 @@ func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	}
 	if config.AIAgentClientStore == nil {
 		t.Fatal("AI Agent client snapshot store should be configured")
+	}
+	if config.AIAgentClientMetrics == nil {
+		t.Fatal("AI Agent client persistence metrics should be configured")
 	}
 	if config.AssignmentOperationStore == nil {
 		t.Fatal("assignment operation store should be configured with the development DynamoDB table")

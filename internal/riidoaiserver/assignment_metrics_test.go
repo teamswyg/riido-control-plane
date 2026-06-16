@@ -55,6 +55,9 @@ func TestHTTPMetricsReturnsAssignmentSnapshot(t *testing.T) {
 	if snapshot.PollRequestsTotal != 1 || snapshot.PollActionsTotal[PollStart] != 1 || snapshot.AgentEventsTotal != 1 || snapshot.TaskEventsTotal != 3 {
 		t.Fatalf("metrics counters = %+v", snapshot)
 	}
+	if snapshot.EventAppendLatencySamplesTotal != snapshot.TaskEventsTotal {
+		t.Fatalf("event append samples = %d, want task events %d", snapshot.EventAppendLatencySamplesTotal, snapshot.TaskEventsTotal)
+	}
 	if snapshot.StoreOperationCallsTotal != 5 || len(snapshot.StoreOperations) != 5 {
 		t.Fatalf("metrics store operations = %+v", snapshot.StoreOperations)
 	}

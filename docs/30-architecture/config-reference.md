@@ -19,6 +19,10 @@ This file is the public Factor 12 configuration catalog for
 | `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` | empty | `cmd/riido_ai_server` | enables public-safe review/demo seed provisioning using only a token hash |
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | disabled | `cmd/riido_ai_server` | positive integer interval for stdout CloudWatch EMF JSON Lines |
 | `RIIDO_AI_SERVER_PPROF_ADDR` | disabled | `cmd/riido_ai_server` | optional separate listen address for Go pprof debug endpoints; keep off public ALB paths |
+| `RIIDO_AI_SERVER_TRACING_ENABLED` | `false` | `cmd/riido_ai_server` | opt-in OpenTelemetry trace export for a small allowlist of control-plane routes and Store/DynamoDB spans |
+| `RIIDO_AI_SERVER_TRACING_SAMPLE_RATIO` | `0.01` | `cmd/riido_ai_server` | decimal trace sampling ratio from `0` to `1`; keep low to control X-Ray/collector cost |
+| `RIIDO_AI_SERVER_OTEL_EXPORTER_OTLP_ENDPOINT` | empty | `cmd/riido_ai_server` | OTLP/HTTP trace collector endpoint; required when tracing is enabled unless `OTEL_EXPORTER_OTLP_ENDPOINT` is set |
+| `RIIDO_AI_SERVER_TRACING_SERVICE_NAME` | `riido_ai_server` | `cmd/riido_ai_server` | OpenTelemetry `service.name`; falls back to `OTEL_SERVICE_NAME` when the Riido-specific env var is empty |
 | `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS` | empty | `cmd/riido_ai_server` | comma-separated exact `http://` or `https://` browser origins allowed to call the public HTTP API with CORS preflight support |
 | `RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS` | store default (`20`) | `cmd/riido_ai_server` | optional active assignment lease duration shared by the store actor and DynamoDB active-lease adapter |
 | `RIIDO_AI_SERVER_LONGPOLL_MAX_HOLD_SECONDS` | `25` | `cmd/riido_ai_server` | max time a daemon claim poll (`PollRequest.wait_ms`) is held open; must stay under the ALB idle timeout. See [`../20-domain/saas-control-plane.md`](../20-domain/saas-control-plane.md) |
@@ -67,10 +71,23 @@ client API. Prefer a loopback or private-network address and inspect it through
 ECS Exec or an equivalent private tunnel.
 
 `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` publishes stdout CloudWatch EMF
-records with aggregate HTTP and Store operation counters plus log-only
-breakdown arrays. Route patterns and Store operation names must stay out of
-CloudWatch metric dimensions; use Logs Insights over `http_transactions` and
-`store_operations` when inspecting hot endpoints or persistence calls.
+records with assignment state counters plus rolling HTTP and Store operation
+windows. HTTP and Store latency/call aggregates use a five-minute rolling window
+so long-lived ECS tasks do not turn endpoint diagnostics into process-lifetime
+counters. The `http_transactions` and `store_operations` log-only breakdowns are
+sorted by request/call volume and capped to the top 20 entries. Route patterns
+and Store operation names must stay out of CloudWatch metric dimensions; use
+Logs Insights over those breakdown arrays when inspecting hot endpoints or
+persistence calls. `/healthz`, `/readyz`, and `/metrics` are excluded from HTTP
+transaction metrics.
+
+`RIIDO_AI_SERVER_TRACING_ENABLED` is an opt-in transaction tracing switch. The
+runtime exports OpenTelemetry OTLP/HTTP spans to the configured local collector
+instead of linking directly to AWS X-Ray SDKs. Trace coverage is intentionally
+small: allowlisted HTTP route patterns, Store operations, and stdlib AWS JSON
+client calls. Trace attributes must use route patterns and operation names only;
+do not add task ids, agent ids, table names, prompts, credentials, raw document
+content, or user-provided text to span names or attributes.
 
 Profile thumbnail upload intents are optional and fail closed. If any profile
 thumbnail upload env var is set, the bucket, CDN base URL, AWS region, and ECS

@@ -67,6 +67,29 @@ func TestAssignmentOperationReplayRebuildsAssignmentIndexes(t *testing.T) {
 	}
 }
 
+func TestAssignmentOperationReplayRebuildsMetricsFromEvents(t *testing.T) {
+	base := time.Date(2026, 5, 27, 16, 0, 0, 0, time.UTC)
+	queued := replayOperationRecord("task-a", "asn-000001", "agent-a", AssignmentQueued, 1, base)
+	leased := replayOperationRecord("task-a", "asn-000001", "agent-a", AssignmentLeased, 2, base.Add(time.Minute))
+	leased.OperationType = AssignmentOperationPollStart
+	leased.Events[0].Type = EventAssignmentLeased
+	leased.OperationID = assignmentOperationID(leased.OperationType, leased.Assignment, leased.Events)
+	running := replayOperationRecord("task-a", "asn-000001", "agent-a", AssignmentRunning, 3, base.Add(2*time.Minute))
+	running.Events[0].Type = EventAssignmentRunning
+	running.OperationID = assignmentOperationID(running.OperationType, running.Assignment, running.Events)
+
+	state, err := stateFromAssignmentOperations([]AssignmentOperationRecord{running, leased, queued})
+	if err != nil {
+		t.Fatalf("stateFromAssignmentOperations: %v", err)
+	}
+	if state.pollActionsTotal[PollStart] != 1 || state.pollRequestsTotal != 1 {
+		t.Fatalf("poll metrics = requests:%d actions:%+v", state.pollRequestsTotal, state.pollActionsTotal)
+	}
+	if state.agentEventsTotal != 1 || state.eventAppendLatency.samplesTotal != 3 {
+		t.Fatalf("event metrics = agent:%d latency:%+v", state.agentEventsTotal, state.eventAppendLatency)
+	}
+}
+
 func TestAssignmentOperationReplayRejectsInvalidRecords(t *testing.T) {
 	record := replayOperationRecord("task-a", "asn-000001", "agent-a", AssignmentQueued, 1, time.Date(2026, 5, 27, 16, 0, 0, 0, time.UTC))
 	record.SchemaVersion = "riido-ai-server-assignment-operation.v0"

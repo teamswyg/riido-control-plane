@@ -192,7 +192,7 @@ Riido work `branchName` delivery 정책을 따라야 합니다. 이 레포의 wo
 
 ```bash
 go test ./...
-go list -m all
+go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
 go test ./cmd/riido_ai_server -run 'AIAgentClient|ConfigFromEnv' -count=1
 go test ./tools/reactquerygen -count=1

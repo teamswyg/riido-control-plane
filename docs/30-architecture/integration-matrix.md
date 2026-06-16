@@ -9,7 +9,7 @@ operator/private infra validation.
 
 | Surface | Verification | External dependency |
 | --- | --- | --- |
-| module dependency boundary | `go list -m all` allowlist | none |
+| module dependency boundary | `tools/dependencyallowlist` against `dependency_allowlist.riido.json` | none |
 | full backend behavior | `go test ./...` | none |
 | agent catalog RBAC and HTTP | focused `internal/riidoaiserver` black-box tests | none |
 | AI Agent client development API | focused `internal/riidoaiserver` black-box tests over generated contract paths and DynamoDB snapshot fake endpoints | none |
@@ -56,7 +56,7 @@ raw secret values, or unredacted live evidence back into this public repository.
 
 ```bash
 go test ./...
-go list -m all
+go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
 go test ./awsadapters -count=1
 go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
 go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
