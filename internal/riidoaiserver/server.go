@@ -125,23 +125,94 @@ func (s Server) reconcileAIAgentTaskThreadProjections(ctx context.Context, princ
 	return err
 }
 
-func (s Server) cancelAIAgentAssignmentFromAction(ctx context.Context, response AIAgentTaskActionResponse, reason string) error {
+type aiAgentAssignmentActionTarget struct {
+	TaskID       string
+	AgentID      string
+	AssignmentID string
+}
+
+func (s Server) cancelAIAgentAssignmentBeforeAction(ctx context.Context, principal AuthorizationResult, taskID, agentID, assignmentID, reason string) (aiAgentAssignmentActionTarget, bool, error) {
 	canceller, ok := s.assignment.(AssignmentCancellationStore)
 	if !ok {
-		return nil
+		return aiAgentAssignmentActionTarget{}, false, nil
 	}
-	taskID := strings.TrimSpace(response.TaskID)
-	agentID := strings.TrimSpace(response.AgentID)
-	assignmentID := strings.TrimSpace(response.AssignmentID)
-	if taskID == "" || agentID == "" || assignmentID == "" {
-		return nil
+	target, ok, err := s.resolveAIAgentAssignmentActionTarget(ctx, principal, taskID, agentID, assignmentID)
+	if err != nil || !ok {
+		return target, ok, err
 	}
-	_, err := canceller.CancelAssignment(ctx, taskID, CancelAssignmentRequest{
-		AgentID:      agentID,
-		AssignmentID: assignmentID,
+	_, err = canceller.CancelAssignment(ctx, target.TaskID, CancelAssignmentRequest{
+		AgentID:      target.AgentID,
+		AssignmentID: target.AssignmentID,
 		Reason:       strings.TrimSpace(reason),
 	})
-	return err
+	return target, true, err
+}
+
+func (s Server) resolveAIAgentAssignmentActionTarget(ctx context.Context, principal AuthorizationResult, taskID, agentID, assignmentID string) (aiAgentAssignmentActionTarget, bool, error) {
+	taskID = strings.TrimSpace(taskID)
+	agentID = strings.TrimSpace(agentID)
+	assignmentID = strings.TrimSpace(assignmentID)
+	if taskID == "" || s.aiAgent == nil {
+		return aiAgentAssignmentActionTarget{}, false, nil
+	}
+	threads, err := s.aiAgent.ListAIAgentTaskThreads(ctx, principal, taskID)
+	if err != nil {
+		return aiAgentAssignmentActionTarget{}, false, err
+	}
+	if assignmentID != "" {
+		for i := len(threads.Threads) - 1; i >= 0; i-- {
+			thread := threads.Threads[i]
+			if strings.TrimSpace(thread.AssignmentID) != assignmentID {
+				continue
+			}
+			if agentID != "" && strings.TrimSpace(thread.AgentID) != agentID {
+				return aiAgentAssignmentActionTarget{}, false, errors.New("assignment_id does not belong to task agent")
+			}
+			return aiAgentAssignmentActionTarget{
+				TaskID:       taskID,
+				AgentID:      thread.AgentID,
+				AssignmentID: assignmentID,
+			}, true, nil
+		}
+		return aiAgentAssignmentActionTarget{}, false, errors.New("assignment_id does not belong to task agent")
+	}
+	if agentID != "" {
+		if target, ok := actionTargetFromThread(taskID, agentID, threads.Threads, true); ok {
+			return target, true, nil
+		}
+		target, ok := actionTargetFromThread(taskID, agentID, threads.Threads, false)
+		return target, ok, nil
+	}
+	for i := len(threads.Threads) - 1; i >= 0; i-- {
+		thread := threads.Threads[i]
+		if !taskThreadHasActiveStream(thread) || strings.TrimSpace(thread.AssignmentID) == "" {
+			continue
+		}
+		return aiAgentAssignmentActionTarget{
+			TaskID:       taskID,
+			AgentID:      thread.AgentID,
+			AssignmentID: thread.AssignmentID,
+		}, true, nil
+	}
+	return aiAgentAssignmentActionTarget{}, false, nil
+}
+
+func actionTargetFromThread(taskID, agentID string, threads []AIAgentTaskThreadRecord, activeOnly bool) (aiAgentAssignmentActionTarget, bool) {
+	for i := len(threads) - 1; i >= 0; i-- {
+		thread := threads[i]
+		if strings.TrimSpace(thread.AgentID) != agentID || strings.TrimSpace(thread.AssignmentID) == "" {
+			continue
+		}
+		if activeOnly && !taskThreadHasActiveStream(thread) {
+			continue
+		}
+		return aiAgentAssignmentActionTarget{
+			TaskID:       taskID,
+			AgentID:      agentID,
+			AssignmentID: thread.AssignmentID,
+		}, true
+	}
+	return aiAgentAssignmentActionTarget{}, false
 }
 
 func (s Server) Handler() http.Handler {
@@ -999,12 +1070,15 @@ func (s Server) handleAIAgentClientUnassignTask(w http.ResponseWriter, r *http.R
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	response, err := s.aiAgent.UnassignAIAgentTask(r.Context(), principal, taskID, req)
-	if err != nil {
+	if target, ok, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, req.AgentID, req.AssignmentID, req.Reason); err != nil {
 		writeAIAgentClientError(w, err)
 		return
+	} else if ok {
+		req.AgentID = target.AgentID
+		req.AssignmentID = target.AssignmentID
 	}
-	if err := s.cancelAIAgentAssignmentFromAction(r.Context(), response, req.Reason); err != nil {
+	response, err := s.aiAgent.UnassignAIAgentTask(r.Context(), principal, taskID, req)
+	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
@@ -1027,12 +1101,14 @@ func (s Server) handleAIAgentClientDeleteTaskAgentAssignment(w http.ResponseWrit
 			return
 		}
 	}
-	response, err := s.aiAgent.DeleteAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
-	if err != nil {
+	if target, ok, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, agentID, req.AssignmentID, req.Reason); err != nil {
 		writeAIAgentClientError(w, err)
 		return
+	} else if ok {
+		req.AssignmentID = target.AssignmentID
 	}
-	if err := s.cancelAIAgentAssignmentFromAction(r.Context(), response, req.Reason); err != nil {
+	response, err := s.aiAgent.DeleteAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
+	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
@@ -1141,12 +1217,15 @@ func (s Server) handleAIAgentClientStopTask(w http.ResponseWriter, r *http.Reque
 			return
 		}
 	}
-	response, err := s.aiAgent.StopAIAgentTask(r.Context(), principal, taskID, req)
-	if err != nil {
+	if target, ok, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, req.AgentID, req.AssignmentID, req.Reason); err != nil {
 		writeAIAgentClientError(w, err)
 		return
+	} else if ok {
+		req.AgentID = target.AgentID
+		req.AssignmentID = target.AssignmentID
 	}
-	if err := s.cancelAIAgentAssignmentFromAction(r.Context(), response, req.Reason); err != nil {
+	response, err := s.aiAgent.StopAIAgentTask(r.Context(), principal, taskID, req)
+	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
@@ -1169,12 +1248,14 @@ func (s Server) handleAIAgentClientStopTaskAgentAssignment(w http.ResponseWriter
 			return
 		}
 	}
-	response, err := s.aiAgent.StopAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
-	if err != nil {
+	if target, ok, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, agentID, req.AssignmentID, req.Reason); err != nil {
 		writeAIAgentClientError(w, err)
 		return
+	} else if ok {
+		req.AssignmentID = target.AssignmentID
 	}
-	if err := s.cancelAIAgentAssignmentFromAction(r.Context(), response, req.Reason); err != nil {
+	response, err := s.aiAgent.StopAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
+	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
