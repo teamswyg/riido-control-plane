@@ -13,6 +13,9 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
+	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
 
 type AIAgentClientStore interface {
@@ -118,7 +121,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				LastDetectedAt:   now,
 				HasAssignedAgent: true,
 				Models: []RuntimeModelRecord{
-					{ModelID: "codex-default", Label: "Codex 기본 모델", IsDefault: true},
+					{ModelID: providercatalog.DefaultCodexModelID, Label: "Codex 기본 모델", IsDefault: true},
 				},
 			},
 			{
@@ -150,7 +153,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				LastDetectedAt:   now,
 				HasAssignedAgent: false,
 				Models: []RuntimeModelRecord{
-					{ModelID: "cursor-auto", Label: "Cursor Auto", IsDefault: true},
+					{ModelID: providercatalog.DefaultCursorModelID, Label: "Cursor Auto", IsDefault: true},
 					{ModelID: "cursor-fast", Label: "Cursor Fast", IsDefault: false},
 				},
 			},
@@ -187,7 +190,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				LastDetectedAt:   now,
 				HasAssignedAgent: true,
 				Models: []RuntimeModelRecord{
-					{ModelID: "openclaw-default", Label: "OpenClaw 기본 모델", IsDefault: true},
+					{ModelID: providercatalog.DefaultOpenClawModelID, Label: "OpenClaw 기본 모델", IsDefault: true},
 				},
 			},
 			{
@@ -201,7 +204,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 				LastDetectedAt:   now,
 				HasAssignedAgent: true,
 				Models: []RuntimeModelRecord{
-					{ModelID: "cursor-auto", Label: "Cursor Auto", IsDefault: true},
+					{ModelID: providercatalog.DefaultCursorModelID, Label: "Cursor Auto", IsDefault: true},
 					{ModelID: "cursor-fast", Label: "Cursor Fast", IsDefault: false},
 				},
 			},
@@ -233,7 +236,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 			Visibility:          AgentVisibilityPrivate,
 			RuntimeID:           "runtime-codex-dev",
 			RuntimeKind:         RuntimeKindCodex,
-			ModelID:             "codex-default",
+			ModelID:             providercatalog.DefaultCodexModelID,
 			ModelLabel:          "Codex 기본 모델",
 			WorkStatus:          AgentWorkStatusRunning,
 			Editability:         AgentEditabilityBlockedAssignedTasks,
@@ -271,7 +274,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 			Visibility:          AgentVisibilityPublic,
 			RuntimeID:           "runtime-openclaw-shared",
 			RuntimeKind:         RuntimeKindOpenClaw,
-			ModelID:             "openclaw-default",
+			ModelID:             providercatalog.DefaultOpenClawModelID,
 			ModelLabel:          "OpenClaw 기본 모델",
 			WorkStatus:          AgentWorkStatusIdle,
 			Editability:         AgentEditabilityEditable,
@@ -290,7 +293,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 			Visibility:          AgentVisibilityPrivate,
 			RuntimeID:           "runtime-cursor-private",
 			RuntimeKind:         RuntimeKindCursor,
-			ModelID:             "cursor-auto",
+			ModelID:             providercatalog.DefaultCursorModelID,
 			ModelLabel:          "Cursor Auto",
 			WorkStatus:          AgentWorkStatusIdle,
 			Editability:         AgentEditabilityEditable,
@@ -2210,7 +2213,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 }
 
 func (s *DevelopmentAIAgentClientStore) nextThreadProgressSeqLocked(taskID, threadID string, metadata map[string]string) int {
-	if value := strings.TrimSpace(metadata["thread_progress_seq"]); value != "" {
+	if value := strings.TrimSpace(metadata[metadatakeys.ThreadProgressSeq.String()]); value != "" {
 		if seq, err := strconv.Atoi(value); err == nil && seq > 0 {
 			return seq
 		}

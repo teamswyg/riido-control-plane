@@ -5,7 +5,9 @@ import (
 
 	"github.com/teamswyg/riido-contracts/assignment"
 	"github.com/teamswyg/riido-contracts/ir"
+	"github.com/teamswyg/riido-contracts/progressmessage"
 	"github.com/teamswyg/riido-contracts/provider/capability"
+	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 	"github.com/teamswyg/riido-contracts/task"
 )
 
@@ -44,5 +46,15 @@ func TestContractsBaseline(t *testing.T) {
 	}
 	if fingerprint == "" {
 		t.Fatal("CapabilityFingerprint is empty")
+	}
+	if providercatalog.DefaultModelID("codex") != "codex-default" {
+		t.Fatal("codex default model must remain stable for assignment projections")
+	}
+	rendered, ok := progressmessage.Render(1101, progressmessage.NormalizeArgsForCode(1101, map[string]string{
+		"label":       "GitHub 조회 중",
+		"description": "이슈 목록",
+	}), progressmessage.DefaultLocale)
+	if !ok || rendered != "GitHub 수집 중 - 이슈 목록" {
+		t.Fatalf("progressmessage.Render = %q, %v", rendered, ok)
 	}
 }

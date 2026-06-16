@@ -9,6 +9,8 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
 
 type AIAgentDaemonRuntimeStore interface {
@@ -646,15 +648,15 @@ func normalizeRuntimeModels(kind RuntimeKind, models []RuntimeModelRecord) []Run
 func defaultRuntimeModel(kind RuntimeKind) RuntimeModelRecord {
 	switch kind {
 	case RuntimeKindCodex:
-		return RuntimeModelRecord{ModelID: "codex-default", Label: "Codex 기본 모델", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultCodexModelID, Label: "Codex 기본 모델", IsDefault: true}
 	case RuntimeKindClaudeCode:
-		return RuntimeModelRecord{ModelID: "claude-default", Label: "Claude Code 기본 모델", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultClaudeModelID, Label: "Claude Code 기본 모델", IsDefault: true}
 	case RuntimeKindCursor:
-		return RuntimeModelRecord{ModelID: "cursor-auto", Label: "Cursor Auto", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultCursorModelID, Label: "Cursor Auto", IsDefault: true}
 	case RuntimeKindOpenClaw:
-		return RuntimeModelRecord{ModelID: "openclaw-default", Label: "OpenClaw 기본 모델", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultOpenClawModelID, Label: "OpenClaw 기본 모델", IsDefault: true}
 	default:
-		return RuntimeModelRecord{ModelID: "runtime-default", Label: "기본 모델", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultRuntimeModelID, Label: "기본 모델", IsDefault: true}
 	}
 }
 
