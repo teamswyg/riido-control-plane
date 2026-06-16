@@ -1755,6 +1755,27 @@ This slice does not create AWS tables, change Terraform topology, implement
 production single-table projections, rotate/revoke device credentials, alter the
 OpenAPI/generated client surface, or edit `riido-client`.
 
+### RIID-4964 — AI Agent snapshot CQRS gate
+
+The observed cost path is now classified with domain Store operation vocabulary:
+daemon `runtime-snapshot` maps to AI Agent snapshot load/save, daemon
+`agent-bindings` maps to AI Agent snapshot load, and agent poll maps to
+assignment polling. This makes the AI Agent client snapshot the only current
+CQRS candidate.
+
+This slice does:
+
+- add [`../30-architecture/ai-agent-snapshot-cqrs-gate.md`](../30-architecture/ai-agent-snapshot-cqrs-gate.md)
+  as the public decision gate
+- reject Store-wide CQRS until separate evidence identifies another Store path
+  as dominant
+- require a 24 hour post-cadence window before splitting the snapshot model
+- define the candidate split as command runtime snapshot/checkpoint plus
+  bindings/runtime-status query models
+
+This slice does not split the DynamoDB item, add tables, change public API
+contracts, or publish live AWS trace/log evidence.
+
 ### RIID-4881 — Generated assignment team/OpenAPI exclusion mirror
 
 This slice mirrors the upstream contracts decision that generated AI Agent

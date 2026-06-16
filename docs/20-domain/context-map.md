@@ -67,4 +67,5 @@ Forbidden imports:
 - Assignment operation journal: [`assignment-operation-journal.md`](assignment-operation-journal.md)
 - Architecture decomposition: [`../30-architecture/module-decomposition.md`](../30-architecture/module-decomposition.md)
 - Config catalog: [`../30-architecture/config-reference.md`](../30-architecture/config-reference.md)
+- AI Agent snapshot CQRS gate: [`../30-architecture/ai-agent-snapshot-cqrs-gate.md`](../30-architecture/ai-agent-snapshot-cqrs-gate.md)
 - Open questions: [`../50-roadmap/open-questions.md`](../50-roadmap/open-questions.md)
