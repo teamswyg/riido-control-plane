@@ -1025,6 +1025,11 @@ func TestHTTPAIAgentClientDevelopmentDeviceDaemonDetailAndControl(t *testing.T) 
 	if detail.Daemon.Availability != DaemonAvailabilityOnline || detail.Daemon.PID != 5111 || detail.Daemon.Profile != "desktop-api.riido.ai" {
 		t.Fatalf("daemon detail = %+v", detail.Daemon)
 	}
+	if detail.Runtime == nil ||
+		detail.Runtime.RuntimeID != "runtime-codex-dev" ||
+		detail.Runtime.ProviderVersion != "codex-cli 0.133.0" {
+		t.Fatalf("daemon detail runtime = %+v", detail.Runtime)
+	}
 	if !sameDaemonActions(detail.Daemon.SupportedActions, []DaemonControlAction{DaemonControlActionRestart, DaemonControlActionStop}) {
 		t.Fatalf("daemon supported actions = %+v", detail.Daemon.SupportedActions)
 	}
@@ -1042,6 +1047,11 @@ func TestHTTPAIAgentClientDevelopmentDeviceDaemonDetailAndControl(t *testing.T) 
 	}
 	if publicDetail.Daemon.DeviceID != "device-shared-studio" || publicDetail.Daemon.OwnerPrincipalID != "user-2" {
 		t.Fatalf("public agent daemon detail = %+v", publicDetail.Daemon)
+	}
+	if publicDetail.Runtime == nil ||
+		publicDetail.Runtime.RuntimeID != "runtime-openclaw-shared" ||
+		publicDetail.Runtime.ProviderVersion != "openclaw 0.1.0" {
+		t.Fatalf("public daemon detail runtime = %+v", publicDetail.Runtime)
 	}
 
 	privateDeniedReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/agents/agent-private-cursor/daemon", nil)
