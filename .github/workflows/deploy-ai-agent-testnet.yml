@@ -14,6 +14,7 @@ on:
         options:
           - testnet
           - development
+          - production
 
 concurrency:
   group: deploy-ai-agent-testnet
@@ -27,7 +28,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'development' && 'ai-agent-development' || 'ai-agent-testnet' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'development' && 'ai-agent-development' || github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'production' && 'ai-agent-production' || 'ai-agent-testnet' }}
     env:
       DEPLOYMENT_TARGET: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'testnet' }}
       AWS_REGION: ${{ vars.RIIDO_AI_SERVER_AWS_REGION }}
@@ -52,7 +53,7 @@ jobs:
         run: |
           set -euo pipefail
           case "${DEPLOYMENT_TARGET:-testnet}" in
-            testnet|development) ;;
+            testnet|development|production) ;;
             *)
               echo "unsupported deployment target"
               exit 1

@@ -49,8 +49,8 @@ The `deploy-ai-agent-testnet` workflow is allowed to:
 
 - run only from a `v*` tag push or explicit manual dispatch
 - use the testnet GitHub environment for tag pushes
-- use an explicit manual-dispatch target to select only the configured testnet
-  or development GitHub environment
+- use an explicit manual-dispatch target to select only the configured
+  development, testnet, or production GitHub environment
 - assume the deploy role through GitHub OIDC
 - build the checked-in container contract image
 - push an immutable ECR tag derived from the Git ref, commit SHA, and workflow
