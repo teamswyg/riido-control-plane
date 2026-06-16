@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 const (
@@ -1742,7 +1744,7 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 	req.Lines = lines
 	for _, line := range lines {
 		metadata := copyStringMap(req.Metadata)
-		metadata["thread_progress_seq"] = fmt.Sprint(line.Seq)
+		metadata[metadatakeys.ThreadProgressSeq.String()] = fmt.Sprint(line.Seq)
 		metadata = addProgressLineMetadata(metadata, line)
 		if _, err := s.assignment.RecordAgentEvent(r.Context(), agentID, AgentEventRequest{
 			AssignmentID: req.AssignmentID,
