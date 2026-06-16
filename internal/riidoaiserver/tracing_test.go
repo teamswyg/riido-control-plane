@@ -10,6 +10,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 func TestHTTPTracingUsesAllowlistedRoutePatterns(t *testing.T) {
@@ -43,7 +45,9 @@ func TestHTTPTracingUsesAllowlistedRoutePatterns(t *testing.T) {
 	if spans[0].Name != "HTTP POST /v1/agents/{agent_id}/poll" {
 		t.Fatalf("span name = %q", spans[0].Name)
 	}
-	if spans[0].Attributes["http.route"] != "/v1/agents/{agent_id}/poll" || spans[0].Attributes["http.response.status_code"] != "202" {
+	if spans[0].Attributes[metadatakeys.HTTPRoute.String()] != "/v1/agents/{agent_id}/poll" ||
+		spans[0].Attributes[metadatakeys.HTTPResponseStatusCode.String()] != "202" ||
+		spans[0].Attributes[metadatakeys.HTTPStatusCode.String()] != "202" {
 		t.Fatalf("span attributes = %+v", spans[0].Attributes)
 	}
 }
@@ -144,6 +148,17 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 			t.Fatalf("missing span %q in %v", want, names)
 		}
 	}
+	spans := recorder.snapshot()
+	spanByName := map[string]recordedTraceSpanSnapshot{}
+	for _, span := range spans {
+		spanByName[span.Name] = span
+	}
+	if got := spanByName["aws.dynamodb.PutItem"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotSave.String() {
+		t.Fatalf("PutItem store operation = %q, want %q", got, AIAgentClientSnapshotSave.String())
+	}
+	if got := spanByName["aws.dynamodb.GetItem"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotLoad.String() {
+		t.Fatalf("GetItem store operation = %q, want %q", got, AIAgentClientSnapshotLoad.String())
+	}
 }
 
 type recordingTraceRecorder struct {
@@ -175,7 +190,7 @@ func (r *recordingTraceRecorder) StartTraceSpan(ctx context.Context, start Trace
 		Attributes: map[string]string{},
 	}
 	for _, attr := range start.Attributes {
-		span.Attributes[attr.Key] = attr.Value
+		span.Attributes[attr.Key] = attr.StringValue()
 	}
 	r.mu.Lock()
 	r.spans = append(r.spans, span)
@@ -210,7 +225,7 @@ func (s *recordingTraceSpan) SetAttributes(attributes ...TraceAttribute) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for _, attr := range attributes {
-		s.Attributes[attr.Key] = attr.Value
+		s.Attributes[attr.Key] = attr.StringValue()
 	}
 }
 

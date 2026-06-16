@@ -186,7 +186,14 @@ func otelAttributes(attributes []riidoaiserver.TraceAttribute) []attribute.KeyVa
 		if key == "" {
 			continue
 		}
-		out = append(out, attribute.String(key, attr.Value))
+		switch attr.Kind {
+		case riidoaiserver.TraceAttributeKindInt64:
+			out = append(out, attribute.Int64(key, attr.Int64Value))
+		case riidoaiserver.TraceAttributeKindBool:
+			out = append(out, attribute.Bool(key, attr.BoolValue))
+		default:
+			out = append(out, attribute.String(key, attr.Value))
+		}
 	}
 	return out
 }

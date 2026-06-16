@@ -11,6 +11,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 	"github.com/teamswyg/riido-contracts/provider/capability"
 )
 
@@ -200,7 +201,7 @@ func (s *Store) pollAgent(ctx context.Context, agentID string, req PollRequest, 
 	startedAt := time.Now()
 	defer func() {
 		if err == nil {
-			span.SetAttributes(TraceAttribute{Key: "riido.poll.action", Value: string(response.Action)})
+			span.SetAttributes(StringTraceAttribute(metadatakeys.RiidoPollAction.String(), string(response.Action)))
 		}
 		if !count {
 			FinishTraceSpan(span, err)
@@ -332,7 +333,7 @@ func (s *Store) WaitForAssignment(ctx context.Context, agentID string, req PollR
 	startedAt := time.Now()
 	defer func() {
 		if err == nil {
-			span.SetAttributes(TraceAttribute{Key: "riido.poll.action", Value: string(response.Action)})
+			span.SetAttributes(StringTraceAttribute(metadatakeys.RiidoPollAction.String(), string(response.Action)))
 		}
 		s.observeStoreOperation(StoreOperationWaitAssignment, startedAt, err)
 		FinishTraceSpan(span, err)
@@ -461,8 +462,8 @@ func (s *Store) startStoreOperationTrace(ctx context.Context, operation StoreOpe
 		Name: "store." + operation.String(),
 		Kind: TraceSpanKindInternal,
 		Attributes: []TraceAttribute{
-			{Key: "riido.store.operation", Value: operation.String()},
-			{Key: "riido.trace.surface", Value: "assignment_store"},
+			StringTraceAttribute(metadatakeys.RiidoStoreOperation.String(), operation.String()),
+			StringTraceAttribute(metadatakeys.RiidoTraceSurface.String(), "assignment_store"),
 		},
 	})
 }

@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
+	"strconv"
 )
 
 type TraceSpanKind int
@@ -14,8 +15,42 @@ const (
 )
 
 type TraceAttribute struct {
-	Key   string
-	Value string
+	Key        string
+	Value      string
+	Int64Value int64
+	BoolValue  bool
+	Kind       TraceAttributeKind
+}
+
+type TraceAttributeKind int
+
+const (
+	TraceAttributeKindString TraceAttributeKind = iota
+	TraceAttributeKindInt64
+	TraceAttributeKindBool
+)
+
+func StringTraceAttribute(key, value string) TraceAttribute {
+	return TraceAttribute{Key: key, Value: value}
+}
+
+func Int64TraceAttribute(key string, value int64) TraceAttribute {
+	return TraceAttribute{Key: key, Int64Value: value, Kind: TraceAttributeKindInt64}
+}
+
+func BoolTraceAttribute(key string, value bool) TraceAttribute {
+	return TraceAttribute{Key: key, BoolValue: value, Kind: TraceAttributeKindBool}
+}
+
+func (attr TraceAttribute) StringValue() string {
+	switch attr.Kind {
+	case TraceAttributeKindInt64:
+		return strconv.FormatInt(attr.Int64Value, 10)
+	case TraceAttributeKindBool:
+		return strconv.FormatBool(attr.BoolValue)
+	default:
+		return attr.Value
+	}
 }
 
 type TraceSpanStart struct {

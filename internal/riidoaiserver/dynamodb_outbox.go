@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 const (
@@ -448,6 +450,7 @@ type dynamoDBRequest struct {
 	credentials  AWSCredentials
 	httpClient   *http.Client
 	now          func() time.Time
+	traceAttrs   []TraceAttribute
 }
 
 type awsJSONRequest struct {
@@ -461,6 +464,7 @@ type awsJSONRequest struct {
 	credentials  AWSCredentials
 	httpClient   *http.Client
 	now          func() time.Time
+	traceAttrs   []TraceAttribute
 }
 
 type awsJSONAPIError struct {
@@ -491,19 +495,22 @@ func doDynamoDBJSON(ctx context.Context, request dynamoDBRequest) ([]byte, error
 		credentials:  request.credentials,
 		httpClient:   request.httpClient,
 		now:          request.now,
+		traceAttrs:   request.traceAttrs,
 	})
 }
 
 func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
+	traceAttrs := []TraceAttribute{
+		StringTraceAttribute(metadatakeys.AWSService.String(), request.service),
+		StringTraceAttribute(metadatakeys.AWSOperation.String(), awsJSONOperationName(request.target)),
+		StringTraceAttribute(metadatakeys.AWSRegion.String(), request.region),
+		StringTraceAttribute(metadatakeys.RiidoTraceSurface.String(), "aws_json"),
+	}
+	traceAttrs = append(traceAttrs, request.traceAttrs...)
 	ctx, span := StartTraceSpan(ctx, nil, TraceSpanStart{
-		Name: "aws." + request.service + "." + awsJSONOperationName(request.target),
-		Kind: TraceSpanKindClient,
-		Attributes: []TraceAttribute{
-			{Key: "aws.service", Value: request.service},
-			{Key: "aws.operation", Value: awsJSONOperationName(request.target)},
-			{Key: "aws.region", Value: request.region},
-			{Key: "riido.trace.surface", Value: "aws_json"},
-		},
+		Name:       "aws." + request.service + "." + awsJSONOperationName(request.target),
+		Kind:       TraceSpanKindClient,
+		Attributes: traceAttrs,
 	})
 	defer func() {
 		span.End()
@@ -525,7 +532,10 @@ func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	span.SetAttributes(TraceAttribute{Key: "http.response.status_code", Value: strconv.Itoa(resp.StatusCode)})
+	span.SetAttributes(
+		Int64TraceAttribute(metadatakeys.HTTPResponseStatusCode.String(), int64(resp.StatusCode)),
+		Int64TraceAttribute(metadatakeys.HTTPStatusCode.String(), int64(resp.StatusCode)),
+	)
 	body, readErr := io.ReadAll(io.LimitReader(resp.Body, awsJSONResponseBodyLimit+1))
 	if readErr != nil {
 		span.RecordError(readErr)
