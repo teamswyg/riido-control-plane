@@ -25,9 +25,19 @@ That means this repository owns the workflow that:
 - ECR repository
 - ECS cluster and service
 - task definition bootstrap shape
+- runtime task-definition shape: container environment, sidecars, IAM wiring,
+  observability backends, and secret references
 - ALB, target groups, listeners, WAF, DNS, and ACM
 - IAM roles and deploy permissions
 - DynamoDB, EventBridge, secret references, Terraform backend, and evidence
+
+The public deploy workflow is an artifact promotion path, not a runtime-shape
+authoring path. It reads the currently live ECS task definition, changes only
+the configured application container image, registers that derived revision,
+and promotes it. Therefore infra-owned changes such as ADOT sidecars, X-Ray
+permissions, runtime environment values, or secret references must first be
+promoted to the live service by `riido-infra`/operator workflow. Later public
+image deploys preserve that live shape.
 
 ## Current And Future Strategies
 

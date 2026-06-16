@@ -16,6 +16,7 @@
       "build checked-in container contract",
       "push immutable ECR image tag",
       "resolve image digest",
+      "preserve infra-owned runtime task-definition shape by copying the live ECS task definition and replacing only the configured container image",
       "register ECS task-definition revision",
       "update ECS service",
       "wait for ECS service stability",

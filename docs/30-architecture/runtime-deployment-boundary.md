@@ -56,8 +56,8 @@ The `deploy-ai-agent-testnet` workflow is allowed to:
 - push an immutable ECR tag derived from the Git ref, commit SHA, and workflow
   run attempt
 - resolve the pushed image to an ECR image digest
-- register a new ECS task-definition revision by replacing only the configured
-  container image
+- register a new ECS task-definition revision by copying the currently live
+  task definition and replacing only the configured container image
 - update the configured ECS service
 - wait for ECS service stability
 - smoke `healthz`, `readyz`, and the v2 workspace-scoped AI Agent bootstrap API
@@ -93,7 +93,10 @@ raw operator evidence.
 `riido-infra` still owns the Terraform module that creates ECR, ECS, ALB,
 security groups, IAM boundaries, DynamoDB, EventBridge, DNS/ACM/WAF, and the
 policy that Terraform should not roll back the ECS service task definition after
-CD promotes a new image digest.
+CD promotes a new image digest. It also owns runtime-shape deployment: container
+environment values, sidecars such as ADOT, X-Ray permissions, task secret
+references, and any private operator evidence needed to promote those changes
+to the live ECS service before the next public image-only deploy.
 
 ## CodeDeploy Handoff
 
