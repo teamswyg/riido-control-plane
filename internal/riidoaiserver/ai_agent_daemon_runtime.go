@@ -65,11 +65,16 @@ func (s *DevelopmentAIAgentClientStore) ConnectAIAgentDevice(ctx context.Context
 }
 
 func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error) {
+	response, _, err := s.syncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
+	return response, err
+}
+
+func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, bool, error) {
 	if err := ctx.Err(); err != nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, err
+		return DeviceRuntimeSnapshotSyncResponse{}, false, err
 	}
 	if s == nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, errors.New("ai agent client store is not configured")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("ai agent client store is not configured")
 	}
 	principal.PrincipalID = strings.TrimSpace(principal.PrincipalID)
 	principal.WorkspaceID = strings.TrimSpace(principal.WorkspaceID)
@@ -84,17 +89,17 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		req.UptimeSeconds = 0
 	}
 	if principal.PrincipalID == "" {
-		return DeviceRuntimeSnapshotSyncResponse{}, errors.New("principal_id is required")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("principal_id is required")
 	}
 	if req.DeviceID == "" {
-		return DeviceRuntimeSnapshotSyncResponse{}, errors.New("device_id is required")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("device_id is required")
 	}
 	if req.DaemonID == "" {
-		return DeviceRuntimeSnapshotSyncResponse{}, errors.New("daemon_id is required")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("daemon_id is required")
 	}
 	runtimes, err := normalizeRuntimeSnapshotRecords(req.DeviceID, principal.PrincipalID, req.Runtimes)
 	if err != nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, err
+		return DeviceRuntimeSnapshotSyncResponse{}, false, err
 	}
 	now := time.Now().UTC()
 	startedAt := req.StartedAt
@@ -113,7 +118,7 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 	defer s.mu.Unlock()
 	if credential, ok := s.deviceCredentials[req.DeviceID]; ok {
 		if credential.ownerPrincipalID != principal.PrincipalID {
-			return DeviceRuntimeSnapshotSyncResponse{}, ErrAuthorizationForbidden
+			return DeviceRuntimeSnapshotSyncResponse{}, false, ErrAuthorizationForbidden
 		}
 		if principal.WorkspaceID == "" {
 			principal.WorkspaceID = credential.workspaceID
@@ -176,14 +181,16 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 	// changed (runtimes, availability, connected workspaces, daemon status). A
 	// plain liveness heartbeat (only last_seen_at/uptime advanced) is suppressed
 	// so the SSE stream isn't flooded with identical snapshots every ~5s.
-	if deviceRuntimeSnapshotChangedForEvent(previousDevice, previousDeviceOK, device) {
+	deviceChanged := deviceRuntimeSnapshotChangedForEvent(previousDevice, previousDeviceOK, device)
+	if deviceChanged {
 		s.appendClientEventLocked(AgentClientEventDeviceRuntimeSnapshot, DeviceRuntimeSnapshotEvent{
 			EventType:     AgentClientEventDeviceRuntimeSnapshot,
 			SchemaVersion: SchemaVersion,
 			Device:        copyDevice(device),
 		})
 	}
-	if daemonStatusChangedForEvent(previousDaemon, previousDaemonOK, daemon) {
+	daemonChanged := daemonStatusChangedForEvent(previousDaemon, previousDaemonOK, daemon)
+	if daemonChanged {
 		s.appendClientEventLocked(AgentClientEventDeviceDaemonStatus, DeviceDaemonStatusEvent{
 			EventType:     AgentClientEventDeviceDaemonStatus,
 			SchemaVersion: SchemaVersion,
@@ -194,7 +201,7 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		SchemaVersion: SchemaVersion,
 		Device:        copyDevice(device),
 		Daemon:        copyDeviceDaemon(daemon),
-	}, nil
+	}, deviceChanged || daemonChanged, nil
 }
 
 func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx context.Context, principal AuthorizationResult, deviceID string) (AgentRuntimeBindingListResponse, error) {

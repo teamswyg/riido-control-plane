@@ -467,10 +467,19 @@ cold recovery artifact, while hot access patterns should graduate to explicit
 small read models such as runtime binding, claimable queue, active assignment,
 and task-thread projection rows.
 Until those read models exist, the persistent AI Agent client store coalesces
-same-process snapshot reloads inside a short freshness window. This reduces
-repeated `GetItem` reads of the large snapshot while preserving cross-process
-eventual visibility. Immediate cross-process consistency is not guaranteed by
-the monolithic snapshot because writes are not versioned conditional updates.
+same-process snapshot reloads inside a short freshness window. The default
+reload freshness window is 5 seconds. This reduces repeated `GetItem` reads of
+the large snapshot while preserving cross-process eventual visibility. Immediate
+cross-process consistency is not guaranteed by the monolithic snapshot because
+writes are not versioned conditional updates.
+
+Daemon runtime snapshots use a separate write policy. Meaningful runtime facts
+(runtime list, availability, provider version, model catalog, daemon status, or
+device/workspace visibility) save immediately. Pure liveness heartbeats
+(`last_seen_at`, runtime detection timestamps, and daemon uptime) update
+in-memory state immediately but persist at most once per 10 second heartbeat
+save window. This keeps restart recovery within the 20 second stale projection
+budget without writing the 40 KB snapshot on every heartbeat.
 
 Assignment state and task event history are durable read models. Runtime
 counters such as poll actions, daemon-authored agent events, outbox errors, and
