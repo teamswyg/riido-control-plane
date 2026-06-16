@@ -11,6 +11,9 @@ const (
 	TaskContextRepositorySourceConnectedPullRequest   = "connected_pull_request"
 	TaskContextRepositorySourceWorkspaceConnectedRepo = "workspace_connected_repository"
 	taskContextPromptFallbackNotProvided              = "not provided"
+	taskContextUnavailableDocumentContent             = "Task context was not available when this assignment was created. " +
+		"Use the task_id as the stable work item reference, avoid assuming repository state, " +
+		"and ask for missing repository or product context before making code changes."
 )
 
 type AIAgentTaskContext struct {
@@ -138,6 +141,28 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 		SelectedRepository: repository,
 		HasRepository:      hasRepository,
 	}, nil
+}
+
+func ComposeAIAgentAssignmentPromptWithoutTaskContext(taskID, componentID string) (AIAgentAssignmentPrompt, error) {
+	taskID = strings.TrimSpace(taskID)
+	componentID = strings.TrimSpace(componentID)
+	if componentID == "" {
+		componentID = taskID
+	}
+	return ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
+		TaskID: taskID,
+		Context: AIAgentTaskContext{
+			Component: AIAgentTaskContextComponent{
+				ID:            componentID,
+				ComponentType: "task",
+				Title:         componentID,
+			},
+			Document: AIAgentTaskContextDocument{
+				Content:       taskContextUnavailableDocumentContent,
+				ContentFormat: "markdown",
+			},
+		},
+	})
 }
 
 func SelectAIAgentTaskContextRepository(repositories []AIAgentTaskContextRepository) (AIAgentTaskContextRepository, bool) {

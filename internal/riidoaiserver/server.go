@@ -1571,9 +1571,13 @@ func (s Server) assignRequestWithTaskContextPromptForClient(ctx context.Context,
 	}
 	contextSnapshot, err := s.getAIAgentTaskContextForRequestWithTrace(ctx, contextReq)
 	if err != nil {
-		return AssignRequest{}, err
+		return composeAssignRequestWithoutTaskContext(taskID, componentID, req)
 	}
-	return composeAssignRequestWithTaskContext(taskID, componentID, req, contextSnapshot)
+	composedReq, err := composeAssignRequestWithTaskContext(taskID, componentID, req, contextSnapshot)
+	if err != nil {
+		return composeAssignRequestWithoutTaskContext(taskID, componentID, req)
+	}
+	return composedReq, nil
 }
 
 func (s Server) getAIAgentTaskContextWithTrace(ctx context.Context, componentID string) (snapshot AIAgentTaskContext, err error) {
@@ -1619,6 +1623,18 @@ func composeAssignRequestWithTaskContext(taskID, componentID string, req AssignR
 		if req.ComponentID == "" {
 			req.ComponentID = componentID
 		}
+	}
+	return req, nil
+}
+
+func composeAssignRequestWithoutTaskContext(taskID, componentID string, req AssignRequest) (AssignRequest, error) {
+	composed, err := ComposeAIAgentAssignmentPromptWithoutTaskContext(taskID, componentID)
+	if err != nil {
+		return AssignRequest{}, err
+	}
+	req.Prompt = composed.Prompt
+	if strings.TrimSpace(req.ComponentID) == "" {
+		req.ComponentID = strings.TrimSpace(componentID)
 	}
 	return req, nil
 }
