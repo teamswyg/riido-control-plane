@@ -23,6 +23,7 @@ type Store struct {
 	snapshotStore       SnapshotStore
 	operationStore      AssignmentOperationStore
 	agentRegistry       AgentRegistry
+	operationMetrics    *StoreOperationMetrics
 }
 
 type StoreConfig struct {
@@ -32,6 +33,7 @@ type StoreConfig struct {
 	SnapshotStore       SnapshotStore
 	OperationStore      AssignmentOperationStore
 	AgentRegistry       AgentRegistry
+	OperationMetrics    *StoreOperationMetrics
 }
 
 func NewStore() *Store {
@@ -102,6 +104,10 @@ func newStoreWithConfig(config StoreConfig, initial storeState) *Store {
 		snapshotStore:       config.SnapshotStore,
 		operationStore:      config.OperationStore,
 		agentRegistry:       config.AgentRegistry,
+		operationMetrics:    config.OperationMetrics,
+	}
+	if s.operationMetrics == nil {
+		s.operationMetrics = NewStoreOperationMetrics()
 	}
 	go s.loop(initial)
 	return s
@@ -121,7 +127,11 @@ func (s *Store) Close() {
 	}
 }
 
-func (s *Store) AssignTask(ctx context.Context, taskID string, req AssignRequest) (Assignment, error) {
+func (s *Store) AssignTask(ctx context.Context, taskID string, req AssignRequest) (assignment Assignment, err error) {
+	startedAt := time.Now()
+	defer func() {
+		s.observeStoreOperation(StoreOperationCreateAssignment, startedAt, err)
+	}()
 	reply := make(chan assignResult, 1)
 	if err := s.send(ctx, assignCmd{taskID: taskID, req: req, reply: reply}); err != nil {
 		return Assignment{}, err
@@ -134,7 +144,11 @@ func (s *Store) AssignTask(ctx context.Context, taskID string, req AssignRequest
 	}
 }
 
-func (s *Store) AssignTaskAdditive(ctx context.Context, taskID string, req AssignRequest) (Assignment, error) {
+func (s *Store) AssignTaskAdditive(ctx context.Context, taskID string, req AssignRequest) (assignment Assignment, err error) {
+	startedAt := time.Now()
+	defer func() {
+		s.observeStoreOperation(StoreOperationCreateAssignment, startedAt, err)
+	}()
 	reply := make(chan assignResult, 1)
 	if err := s.send(ctx, assignCmd{taskID: taskID, req: req, allowConcurrentTaskAgents: true, reply: reply}); err != nil {
 		return Assignment{}, err
@@ -147,7 +161,11 @@ func (s *Store) AssignTaskAdditive(ctx context.Context, taskID string, req Assig
 	}
 }
 
-func (s *Store) CancelAssignment(ctx context.Context, taskID string, req CancelAssignmentRequest) (Assignment, error) {
+func (s *Store) CancelAssignment(ctx context.Context, taskID string, req CancelAssignmentRequest) (assignment Assignment, err error) {
+	startedAt := time.Now()
+	defer func() {
+		s.observeStoreOperation(StoreOperationCancelAssignment, startedAt, err)
+	}()
 	reply := make(chan cancelAssignmentResult, 1)
 	if err := s.send(ctx, cancelAssignmentCmd{taskID: taskID, req: req, reply: reply}); err != nil {
 		return Assignment{}, err
@@ -168,7 +186,17 @@ func (s *Store) PollAgent(ctx context.Context, agentID string, req PollRequest) 
 // evaluation should be tallied as a daemon poll request (true for a real
 // short-poll or a long-poll's first evaluation; false for the internal
 // re-evaluations a long-poll performs while held).
-func (s *Store) pollAgent(ctx context.Context, agentID string, req PollRequest, count bool) (PollResponse, error) {
+func (s *Store) pollAgent(ctx context.Context, agentID string, req PollRequest, count bool) (response PollResponse, err error) {
+	startedAt := time.Now()
+	defer func() {
+		if !count {
+			return
+		}
+		s.observeStoreOperation(StoreOperationPollAssignment, startedAt, err)
+		if err == nil && response.Action == PollStart {
+			s.observeStoreOperation(StoreOperationLeaseAssignment, startedAt, nil)
+		}
+	}()
 	reply := make(chan pollResult, 1)
 	if err := s.send(ctx, pollCmd{agentID: agentID, req: req, countRequest: count, reply: reply}); err != nil {
 		return PollResponse{}, err
@@ -232,7 +260,11 @@ func (s *Store) GetProviderStatus(ctx context.Context, agentID string) (Provider
 	}
 }
 
-func (s *Store) RecordAgentEvent(ctx context.Context, agentID string, req AgentEventRequest) (AgentEventResponse, error) {
+func (s *Store) RecordAgentEvent(ctx context.Context, agentID string, req AgentEventRequest) (response AgentEventResponse, err error) {
+	startedAt := time.Now()
+	defer func() {
+		s.observeStoreOperation(StoreOperationAppendEvent, startedAt, err)
+	}()
 	reply := make(chan eventResult, 1)
 	if err := s.send(ctx, eventCmd{agentID: agentID, req: req, reply: reply}); err != nil {
 		return AgentEventResponse{}, err
@@ -278,7 +310,11 @@ func (s *Store) SubscribeTask(ctx context.Context, taskID string) ([]TaskEvent, 
 // The wait loop runs entirely on the caller's goroutine — never on the store
 // actor loop — so the actor keeps servicing assign/heartbeat/poll commands while
 // a request is held.
-func (s *Store) WaitForAssignment(ctx context.Context, agentID string, req PollRequest, hold, tick time.Duration) (PollResponse, error) {
+func (s *Store) WaitForAssignment(ctx context.Context, agentID string, req PollRequest, hold, tick time.Duration) (response PollResponse, err error) {
+	startedAt := time.Now()
+	defer func() {
+		s.observeStoreOperation(StoreOperationWaitAssignment, startedAt, err)
+	}()
 	// First evaluation is the one that counts as a daemon poll request and
 	// short-circuits when work is already queued.
 	resp, err := s.PollAgent(ctx, agentID, req)
@@ -562,6 +598,8 @@ func (s *Store) loop(state storeState) {
 	for cmd := range s.commands {
 		switch msg := cmd.(type) {
 		case assignCmd:
+			startedAt := time.Now()
+			_, taskExisted := state.tasks[msg.taskID]
 			beforeEventSeq := state.nextEventSeq
 			assignment, err := s.handleAssign(&state, msg.taskID, msg.req, msg.allowConcurrentTaskAgents)
 			if err == nil {
@@ -569,6 +607,9 @@ func (s *Store) loop(state storeState) {
 			}
 			if err == nil {
 				err = s.saveSnapshot(&state)
+			}
+			if err == nil && !taskExisted {
+				s.observeStoreOperation(StoreOperationCreateTask, startedAt, nil)
 			}
 			msg.reply <- assignResult{assignment: assignment, err: err}
 		case cancelAssignmentCmd:
@@ -1423,7 +1464,7 @@ func (s *Store) handleMetrics(state *storeState) MetricsSnapshot {
 	}
 	pollActions := make(map[PollAction]int64, len(state.pollActionsTotal))
 	maps.Copy(pollActions, state.pollActionsTotal)
-	return MetricsSnapshot{
+	snapshot := MetricsSnapshot{
 		SchemaVersion:                       MetricsSchemaVersion,
 		GeneratedAt:                         s.now(),
 		TasksTotal:                          len(state.tasks),
@@ -1440,6 +1481,18 @@ func (s *Store) handleMetrics(state *storeState) MetricsSnapshot {
 		EventAppendLatencyMaxMilliseconds:   state.eventAppendLatency.maxMilliseconds,
 		EventAppendLatencyLastMilliseconds:  state.eventAppendLatency.lastMilliseconds,
 	}
+	return s.operationMetrics.ApplyToMetricsSnapshot(snapshot)
+}
+
+func (s *Store) observeStoreOperation(operation StoreOperationName, startedAt time.Time, err error) {
+	if s == nil || s.operationMetrics == nil {
+		return
+	}
+	s.operationMetrics.ObserveStoreOperation(StoreOperationObservation{
+		Operation: operation,
+		Duration:  time.Since(startedAt),
+		Err:       err,
+	})
 }
 
 func (s *Store) appendEvent(state *storeState, taskID, assignmentID, agentID, eventType string, assignmentState AssignmentState, message string, metadata map[string]string, at time.Time) TaskEvent {

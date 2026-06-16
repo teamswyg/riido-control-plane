@@ -66,6 +66,12 @@ listener must be treated as an operator/debug surface rather than a generated
 client API. Prefer a loopback or private-network address and inspect it through
 ECS Exec or an equivalent private tunnel.
 
+`RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` publishes stdout CloudWatch EMF
+records with aggregate HTTP and Store operation counters plus log-only
+breakdown arrays. Route patterns and Store operation names must stay out of
+CloudWatch metric dimensions; use Logs Insights over `http_transactions` and
+`store_operations` when inspecting hot endpoints or persistence calls.
+
 Profile thumbnail upload intents are optional and fail closed. If any profile
 thumbnail upload env var is set, the bucket, CDN base URL, AWS region, and ECS
 credential endpoint must be present. The endpoint returns signed S3 POST form
