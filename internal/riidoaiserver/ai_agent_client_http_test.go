@@ -1632,6 +1632,20 @@ func TestHTTPAIAgentClientDevelopmentMutationAndDeletion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal fixture create body: %v", err)
 	}
+	duplicateRuntimeReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/onboarding/fixtures/yeongsil_backend/agents", strings.NewReader(string(fixtureBody)))
+	duplicateRuntimeReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	duplicateRuntimeResp := httptest.NewRecorder()
+	server.ServeHTTP(duplicateRuntimeResp, duplicateRuntimeReq)
+	if duplicateRuntimeResp.Code != http.StatusConflict {
+		t.Fatalf("duplicate runtime status=%d body=%s", duplicateRuntimeResp.Code, duplicateRuntimeResp.Body.String())
+	}
+	deleteCreatedReq := httptest.NewRequest(http.MethodDelete, "/v1/client/ai-agent/agents/"+created.Agent.AgentID, nil)
+	deleteCreatedReq.Header.Set(aiAgentTokenHeader, "owner-token")
+	deleteCreatedResp := httptest.NewRecorder()
+	server.ServeHTTP(deleteCreatedResp, deleteCreatedReq)
+	if deleteCreatedResp.Code != http.StatusOK {
+		t.Fatalf("delete created status=%d body=%s", deleteCreatedResp.Code, deleteCreatedResp.Body.String())
+	}
 	fixtureCreateReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/onboarding/fixtures/yeongsil_backend/agents", strings.NewReader(string(fixtureBody)))
 	fixtureCreateReq.Header.Set(aiAgentTokenHeader, "owner-token")
 	fixtureCreateResp := httptest.NewRecorder()
@@ -1656,40 +1670,8 @@ func TestHTTPAIAgentClientDevelopmentMutationAndDeletion(t *testing.T) {
 	duplicateFixtureReq.Header.Set(aiAgentTokenHeader, "owner-token")
 	duplicateFixtureResp := httptest.NewRecorder()
 	server.ServeHTTP(duplicateFixtureResp, duplicateFixtureReq)
-	if duplicateFixtureResp.Code != http.StatusCreated {
+	if duplicateFixtureResp.Code != http.StatusConflict {
 		t.Fatalf("duplicate fixture create status=%d body=%s", duplicateFixtureResp.Code, duplicateFixtureResp.Body.String())
-	}
-	var duplicateFixtureCreated AgentClientRecordResponse
-	if err := json.Unmarshal(duplicateFixtureResp.Body.Bytes(), &duplicateFixtureCreated); err != nil {
-		t.Fatalf("duplicate fixture create json: %v", err)
-	}
-	if duplicateFixtureCreated.Agent.Name != "영실" ||
-		duplicateFixtureCreated.Agent.AgentID == fixtureCreated.Agent.AgentID ||
-		duplicateFixtureCreated.Agent.Editability != AgentEditabilityEditable {
-		t.Fatalf("duplicate fixture-created agent = %+v first=%+v", duplicateFixtureCreated.Agent, fixtureCreated.Agent)
-	}
-	duplicatePatchBody, err := json.Marshal(UpdateAgentConfigurationRequest{
-		Name:       "영실",
-		Visibility: AgentVisibilityPrivate,
-		RuntimeID:  "runtime-cursor-dev",
-		ModelID:    stringPtr("cursor-fast"),
-	})
-	if err != nil {
-		t.Fatalf("marshal duplicate fixture patch body: %v", err)
-	}
-	duplicatePatchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/"+duplicateFixtureCreated.Agent.AgentID, strings.NewReader(string(duplicatePatchBody)))
-	duplicatePatchReq.Header.Set(aiAgentTokenHeader, "owner-token")
-	duplicatePatchResp := httptest.NewRecorder()
-	server.ServeHTTP(duplicatePatchResp, duplicatePatchReq)
-	if duplicatePatchResp.Code != http.StatusOK {
-		t.Fatalf("duplicate fixture patch status=%d body=%s", duplicatePatchResp.Code, duplicatePatchResp.Body.String())
-	}
-	duplicateDeleteReq := httptest.NewRequest(http.MethodDelete, "/v1/client/ai-agent/agents/"+duplicateFixtureCreated.Agent.AgentID, nil)
-	duplicateDeleteReq.Header.Set(aiAgentTokenHeader, "owner-token")
-	duplicateDeleteResp := httptest.NewRecorder()
-	server.ServeHTTP(duplicateDeleteResp, duplicateDeleteReq)
-	if duplicateDeleteResp.Code != http.StatusOK {
-		t.Fatalf("duplicate fixture delete status=%d body=%s", duplicateDeleteResp.Code, duplicateDeleteResp.Body.String())
 	}
 
 	missingFixtureReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/onboarding/fixtures/missing_fixture/agents", strings.NewReader(string(fixtureBody)))
@@ -1712,7 +1694,7 @@ func TestHTTPAIAgentClientDevelopmentMutationAndDeletion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal patch body: %v", err)
 	}
-	patchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(patchBody)))
+	patchReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/"+fixtureCreated.Agent.AgentID, strings.NewReader(string(patchBody)))
 	patchReq.Header.Set("Authorization", "Bearer owner-token")
 	patchResp := httptest.NewRecorder()
 	server.ServeHTTP(patchResp, patchReq)
@@ -1751,13 +1733,9 @@ func TestHTTPAIAgentClientDevelopmentMutationAndDeletion(t *testing.T) {
 	if err := json.Unmarshal(bootstrapResp.Body.Bytes(), &bootstrap); err != nil {
 		t.Fatalf("bootstrap json: %v", err)
 	}
-	updated, ok := findAIAgent(bootstrap.Agents, "agent-owned-claude")
+	updated, ok := findAIAgent(bootstrap.Agents, fixtureCreated.Agent.AgentID)
 	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction || !updated.CreatedAt.Equal(patched.Agent.CreatedAt) || !updated.UpdatedAt.Equal(patched.Agent.UpdatedAt) {
 		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
-	}
-	createdAgain, ok := findAIAgent(bootstrap.Agents, created.Agent.AgentID)
-	if !ok || createdAgain.OwnerPrincipalID != "user-1" || createdAgain.RuntimeID != "runtime-cursor-dev" || !createdAgain.CreatedAt.Equal(created.Agent.CreatedAt) || !createdAgain.UpdatedAt.Equal(created.Agent.UpdatedAt) {
-		t.Fatalf("bootstrap created agent = %+v found=%v", createdAgain, ok)
 	}
 	if !runtimeHasAssignedAgent(bootstrap.Devices, "runtime-cursor-dev") {
 		t.Fatalf("bootstrap runtime-cursor-dev was not marked assigned: %+v", bootstrap.Devices)
@@ -1895,7 +1873,7 @@ func TestHTTPAIAgentClientDevelopmentAdminCreateUsesAuthorizedWorkspaceRuntime(t
 	createBody, err := json.Marshal(CreateAgentConfigurationRequest{
 		Name:       "관리자 생성 에이전트",
 		Visibility: AgentVisibilityPrivate,
-		RuntimeID:  "runtime-codex-dev",
+		RuntimeID:  "runtime-cursor-dev",
 	})
 	if err != nil {
 		t.Fatalf("marshal admin create body: %v", err)
@@ -1912,8 +1890,8 @@ func TestHTTPAIAgentClientDevelopmentAdminCreateUsesAuthorizedWorkspaceRuntime(t
 		t.Fatalf("admin create json: %v", err)
 	}
 	if created.Agent.OwnerPrincipalID != "admin-1" ||
-		created.Agent.RuntimeID != "runtime-codex-dev" ||
-		created.Agent.RuntimeKind != RuntimeKindCodex ||
+		created.Agent.RuntimeID != "runtime-cursor-dev" ||
+		created.Agent.RuntimeKind != RuntimeKindCursor ||
 		!created.Agent.IsOwnedByViewer {
 		t.Fatalf("admin created agent = %+v", created.Agent)
 	}

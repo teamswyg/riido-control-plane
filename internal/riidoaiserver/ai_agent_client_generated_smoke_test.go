@@ -158,7 +158,10 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 		RuntimeID:  "runtime-cursor-dev",
 		ModelID:    stringPtr("cursor-auto"),
 	})
-	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/onboarding/fixtures/hongdo_frontend/agents", token, fixtureCreateBody, http.StatusCreated)
+	fixtureCreatedBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/onboarding/fixtures/hongdo_frontend/agents", token, fixtureCreateBody, http.StatusCreated)
+	var fixtureCreated AgentClientRecordResponse
+	aiAgentSmokeDecode(t, fixtureCreatedBytes, &fixtureCreated)
+	aiAgentSmokeRequest(t, server, http.MethodDelete, base+"/agents/"+fixtureCreated.Agent.AgentID, token, "", http.StatusOK)
 
 	createThumbnailURL := "https://cdn.riido.io/dev/ai-agents/v2-generated-smoke.png"
 	createDescription := "v2 generated endpoint smoke"

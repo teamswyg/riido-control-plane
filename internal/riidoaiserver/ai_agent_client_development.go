@@ -1168,6 +1168,9 @@ func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, princ
 	if !ok {
 		return AgentClientRecordResponse{}, errors.New("runtime_id or model_id is not available")
 	}
+	if err := s.ensureRuntimeAssignableToAgentLocked(runtimeID, ""); err != nil {
+		return AgentClientRecordResponse{}, err
+	}
 	now := time.Now().UTC()
 	agentID := uniqueAIAgentIDLocked(s.agents, "agent-"+principal.PrincipalID+"-"+runtimeID)
 	agent := AgentClientRecord{
@@ -1192,7 +1195,7 @@ func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, princ
 		UpdatedAt:           now,
 	}
 	s.agents[agent.AgentID] = agent
-	markRuntimeHasAssignedAgentLocked(s.devices, runtimeID, true)
+	s.refreshRuntimeAssignmentFlagLocked(runtimeID)
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }
 
@@ -1231,6 +1234,7 @@ func (s *DevelopmentAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.C
 	if agent.AssignedTaskCount > 0 {
 		return AgentClientRecordResponse{}, ErrAIAgentAssigned
 	}
+	previousRuntimeID := agent.RuntimeID
 	if strings.TrimSpace(req.Name) != "" {
 		agent.Name = strings.TrimSpace(req.Name)
 	}
@@ -1264,6 +1268,11 @@ func (s *DevelopmentAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.C
 		nextRuntimeID = strings.TrimSpace(req.RuntimeID)
 	}
 	if strings.TrimSpace(req.RuntimeID) != "" || req.ModelID != nil {
+		if nextRuntimeID != previousRuntimeID {
+			if err := s.ensureRuntimeAssignableToAgentLocked(nextRuntimeID, agent.AgentID); err != nil {
+				return AgentClientRecordResponse{}, err
+			}
+		}
 		runtimeKind, runtimeModel, ok := runtimeSelectionFromDevices(s.visibleDevicesLocked(principal), nextRuntimeID, req.ModelID)
 		if !ok {
 			return AgentClientRecordResponse{}, errors.New("runtime_id or model_id is not available")
@@ -1276,6 +1285,10 @@ func (s *DevelopmentAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.C
 	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
 	agent.UpdatedAt = time.Now().UTC()
 	s.agents[agent.AgentID] = agent
+	if agent.RuntimeID != previousRuntimeID {
+		s.refreshRuntimeAssignmentFlagLocked(previousRuntimeID)
+		s.refreshRuntimeAssignmentFlagLocked(agent.RuntimeID)
+	}
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }
 
@@ -1298,6 +1311,7 @@ func (s *DevelopmentAIAgentClientStore) DeleteAIAgent(ctx context.Context, princ
 	default:
 	}
 	delete(s.agents, agent.AgentID)
+	s.refreshRuntimeAssignmentFlagLocked(agent.RuntimeID)
 	s.markAgentTaskThreadsStoppedLocked(agent.AgentID, AgentTaskCommentStoppedByAgentDeleted, "에이전트가 삭제되어 진행 중이던 작업이 중지됐어요.")
 	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
 		EventType:       AgentClientEventWorkStatusChanged,
