@@ -1857,6 +1857,7 @@ func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionR
 		AssignmentState: thread.AssignmentState,
 		CommentKind:     thread.CommentKind,
 		Message:         clientVisibleTaskThreadMessage(thread),
+		ResultMessage:   clientVisibleTaskThreadResultMessage(thread),
 	}
 }
 
@@ -1933,6 +1934,7 @@ func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(th
 		threads[i].QueueDiagnostics = copyQueueDiagnostics(diagnostics)
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
+		threads[i].ResultMessage = response.ResultMessage
 		if assignmentStateIsTerminal(projection.Assignment.State) {
 			completedAt := projection.Assignment.UpdatedAt
 			if completedAt.IsZero() {
@@ -2045,7 +2047,19 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 			response.Message = "agent assignment state updated"
 		}
 	}
+	if assignmentStateCarriesResultMessage(state) {
+		response.ResultMessage = response.Message
+	}
 	return response
+}
+
+func assignmentStateCarriesResultMessage(state AssignmentState) bool {
+	switch state.Code() {
+	case AssignmentStateCodeCancelled, AssignmentStateCodeCompleted, AssignmentStateCodeFailed:
+		return true
+	default:
+		return false
+	}
 }
 
 func assignmentEventVisibleThreadMessage(state AssignmentState, eventType, message, previous string) string {
@@ -2153,6 +2167,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		AssignmentState: response.AssignmentState,
 		CommentKind:     response.CommentKind,
 		Message:         response.Message,
+		ResultMessage:   response.ResultMessage,
 		StartedAt:       now,
 		Lines:           []AgentThreadProgressLine{},
 	}
@@ -2172,6 +2187,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		threads[i].QueueDiagnostics = nil
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
+		threads[i].ResultMessage = response.ResultMessage
 		if sourceCommentID != "" {
 			threads[i].SourceCommentID = sourceCommentID
 		}
@@ -2200,6 +2216,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 		AssignmentState: response.AssignmentState,
 		CommentKind:     response.CommentKind,
 		Message:         response.Message,
+		ResultMessage:   response.ResultMessage,
 		StartedAt:       now,
 		Lines:           []AgentThreadProgressLine{},
 	}
@@ -2219,6 +2236,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
+		threads[i].ResultMessage = response.ResultMessage
 		if sourceMessageID != "" {
 			threads[i].SourceMessageID = sourceMessageID
 		}
@@ -2398,6 +2416,7 @@ func (s *DevelopmentAIAgentClientStore) markAgentTaskThreadsStoppedLocked(agentI
 			threads[i].AssignmentState = AgentAssignmentStateStopped
 			threads[i].CommentKind = kind
 			threads[i].Message = message
+			threads[i].ResultMessage = message
 			threads[i].CompletedAt = now
 		}
 		s.taskThreads[taskID] = threads
@@ -2457,10 +2476,15 @@ func applyTaskThreadStopProjection(thread *AIAgentTaskThreadRecord, response AIA
 	thread.AssignmentState = response.AssignmentState
 	thread.CommentKind = response.CommentKind
 	thread.Message = response.Message
+	thread.ResultMessage = response.ResultMessage
 	if completed {
+		if strings.TrimSpace(thread.ResultMessage) == "" {
+			thread.ResultMessage = response.Message
+		}
 		thread.CompletedAt = now
 		return
 	}
+	thread.ResultMessage = ""
 	thread.CompletedAt = time.Time{}
 }
 
@@ -2515,6 +2539,7 @@ func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAg
 		WorkStatus:      response.WorkStatus,
 		AssignmentState: response.AssignmentState,
 		CommentKind:     response.CommentKind,
+		ResultMessage:   response.ResultMessage,
 	})
 }
 
@@ -3142,8 +3167,28 @@ func deviceRuntimeSnapshotStale(lastSeenAt, now time.Time) bool {
 func copyTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
 	thread.Lines = copyClientVisibleProgressLines(thread.Lines)
 	thread.Message = clientVisibleTaskThreadMessage(thread)
+	thread.ResultMessage = clientVisibleTaskThreadResultMessage(thread)
 	thread.QueueDiagnostics = copyQueueDiagnostics(thread.QueueDiagnostics)
 	return thread
+}
+
+func clientVisibleTaskThreadResultMessage(thread AIAgentTaskThreadRecord) string {
+	if result := clientVisibleTaskThreadText(thread.ResultMessage); result != "" {
+		return result
+	}
+	if taskThreadCarriesResultMessage(thread) {
+		return clientVisibleTaskThreadMessage(thread)
+	}
+	return ""
+}
+
+func taskThreadCarriesResultMessage(thread AIAgentTaskThreadRecord) bool {
+	switch thread.AssignmentState {
+	case AgentAssignmentStateCompleted, AgentAssignmentStateFailed, AgentAssignmentStateStopped:
+		return true
+	default:
+		return false
+	}
 }
 
 func copyQueueDiagnostics(in *AIAgentTaskThreadQueueDiagnostics) *AIAgentTaskThreadQueueDiagnostics {

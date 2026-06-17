@@ -414,6 +414,7 @@ type AIAgentTaskActionResponse struct {
 	AssignmentState AgentAssignmentState `json:"assignment_state"`
 	CommentKind     AgentTaskCommentKind `json:"comment_kind"`
 	Message         string               `json:"message"`
+	ResultMessage   string               `json:"result_message,omitempty"`
 }
 
 type AIAgentTaskThreadStreamLink struct {
@@ -459,6 +460,7 @@ type AIAgentTaskThreadRecord struct {
 	QueueDiagnostics *AIAgentTaskThreadQueueDiagnostics `json:"queue_diagnostics,omitempty"`
 	CommentKind      AgentTaskCommentKind               `json:"comment_kind"`
 	Message          string                             `json:"message"`
+	ResultMessage    string                             `json:"result_message,omitempty"`
 	StartedAt        time.Time                          `json:"started_at,omitempty"`
 	CompletedAt      time.Time                          `json:"completed_at,omitempty"`
 	Lines            []AgentThreadProgressLine          `json:"lines"`
@@ -509,6 +511,7 @@ type AgentWorkStatusChangedEvent struct {
 	WorkStatus      AgentWorkStatus      `json:"work_status"`
 	AssignmentState AgentAssignmentState `json:"assignment_state,omitempty"`
 	CommentKind     AgentTaskCommentKind `json:"comment_kind,omitempty"`
+	ResultMessage   string               `json:"result_message,omitempty"`
 }
 
 type AgentThreadProgressLine struct {

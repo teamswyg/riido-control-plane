@@ -2693,6 +2693,13 @@ func TestDevelopmentAIAgentClientStoreSuppressesDuplicateAssignmentStatusFanout(
 	if len(threads.Threads) != 1 || threads.Threads[0].Message != "작업 완료" {
 		t.Fatalf("completed thread message = %+v", threads.Threads)
 	}
+	if threads.Threads[0].ResultMessage != "작업 완료" {
+		t.Fatalf("completed thread result_message = %+v", threads.Threads[0])
+	}
+	status, ok := lastWorkStatusChangedEventForTask(t, store, principal, "task-dedupe")
+	if !ok || status.ResultMessage != "작업 완료" {
+		t.Fatalf("completed status result_message = %+v", status)
+	}
 }
 
 func TestDevelopmentAIAgentClientStoreKeepsProgressMessageAcrossProviderHeartbeat(t *testing.T) {
@@ -2903,15 +2910,22 @@ func TestDevelopmentAIAgentClientStoreHidesLocalRuntimePathsFromAssignmentAction
 	if len(threads.Threads) != 1 {
 		t.Fatalf("threads = %+v", threads.Threads)
 	}
-	message := actionResponseFromThread(threads.Threads[0]).Message
+	response := actionResponseFromThread(threads.Threads[0])
+	message := response.Message
 	for _, leaked := range []string{"/Users/", "/tmp/", "file://"} {
 		if strings.Contains(message, leaked) {
 			t.Fatalf("action response leaked local runtime path marker %q: %q", leaked, message)
+		}
+		if strings.Contains(response.ResultMessage, leaked) {
+			t.Fatalf("action response result leaked local runtime path marker %q: %q", leaked, response.ResultMessage)
 		}
 	}
 	for _, want := range []string{"go/hello.go", "로컬 파일"} {
 		if !strings.Contains(message, want) {
 			t.Fatalf("action message = %q, want to contain %q", message, want)
+		}
+		if !strings.Contains(response.ResultMessage, want) {
+			t.Fatalf("action result_message = %q, want to contain %q", response.ResultMessage, want)
 		}
 	}
 }
@@ -2936,6 +2950,24 @@ func countWorkStatusChangedEventsForTask(t *testing.T, store *DevelopmentAIAgent
 		}
 	}
 	return count
+}
+
+func lastWorkStatusChangedEventForTask(t *testing.T, store *DevelopmentAIAgentClientStore, principal AuthorizationResult, taskID string) (AgentWorkStatusChangedEvent, bool) {
+	t.Helper()
+	events, err := store.AIAgentClientEvents(context.Background(), principal)
+	if err != nil {
+		t.Fatalf("AIAgentClientEvents: %v", err)
+	}
+	for i := len(events) - 1; i >= 0; i-- {
+		if events[i].EventType != AgentClientEventWorkStatusChanged {
+			continue
+		}
+		status, ok := events[i].Payload.(AgentWorkStatusChangedEvent)
+		if ok && status.TaskID == taskID {
+			return status, true
+		}
+	}
+	return AgentWorkStatusChangedEvent{}, false
 }
 
 func TestDevelopmentAIAgentClientStoreRendersStructuredProgressCode(t *testing.T) {
