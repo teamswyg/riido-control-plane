@@ -73,6 +73,13 @@
       "package": "./internal/contractscompat",
       "test": "TestContractsBaseline",
       "proves": "Control-plane consumes contracts tool approval timeout status and decision vocabulary."
+    },
+    {
+      "risk": "web-approval-round-trip",
+      "status": "verified",
+      "package": "./internal/riidoaiserver",
+      "test": "TestHTTPToolApprovalRoundTrip",
+      "proves": "Daemon-created tool approvals can be listed and decided through client v1/v2 routes, and daemon wait is released by the web decision."
     }
   ],
   "external_evidence": [
@@ -96,11 +103,6 @@
       "id": "private-repo-auth",
       "owner": "contracts-control-plane-infra-policy",
       "reason": "Private repository checkout requires an explicit credential issuance policy and is intentionally fail-closed until that policy exists."
-    },
-    {
-      "id": "web-approval-round-trip",
-      "owner": "contracts-control-plane-client",
-      "reason": "Approval DTO vocabulary exists, but control-plane approval endpoints and client-visible decision flow are not implemented yet."
     },
     {
       "id": "client-active-stream-consumption",

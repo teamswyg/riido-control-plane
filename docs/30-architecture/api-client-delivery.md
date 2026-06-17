@@ -529,6 +529,19 @@ still build and upload the package artifact without cross-repository secrets.
 The workflow must not require npm publish tokens, cloud credentials, Terraform
 state, customer data, or production request tokens.
 
+## AI Agent Risk Evidence
+
+Executable risk evidence is tracked in
+[`ai-agent-risk-evidence.riido.json`](ai-agent-risk-evidence.riido.json) and
+verified by `go test ./tools/aiagentrisk`.
+
+Current approval evidence:
+
+- `TestHTTPToolApprovalRoundTrip` proves the control-plane accepts daemon tool
+  approval requests, exposes them through client task approval routes, accepts a
+  web decision through the v2 workspace route, and releases the daemon wait
+  response from the same decision.
+
 ## Acceptance Criteria
 
 - `riido-control-plane` docs name the API sub-DSL owner and canonical contract
