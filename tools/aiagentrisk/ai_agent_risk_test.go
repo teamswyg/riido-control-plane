@@ -20,6 +20,8 @@ var requiredRisks = []string{
 	"additive-agent-active",
 	"generated-fsm-control-plane-consumption",
 	"generated-fsm-conformance",
+	"web-approval-contract-consumption",
+	"web-approval-contract",
 }
 
 var requiredBoundaries = []string{

@@ -66,6 +66,13 @@
       "package": "./internal/contractscompat",
       "test": "TestContractsBaseline",
       "proves": "Control-plane consumes contracts generated assignment and task FSM service providers."
+    },
+    {
+      "risk": "web-approval-contract-consumption",
+      "status": "verified",
+      "package": "./internal/contractscompat",
+      "test": "TestContractsBaseline",
+      "proves": "Control-plane consumes contracts tool approval timeout status and decision vocabulary."
     }
   ],
   "external_evidence": [
@@ -75,6 +82,13 @@
       "repo": "riido-contracts",
       "test": "TestVerifyGeneratedFSMFiles",
       "proves": "Contracts fsmgen verifies generated FSM drift and conformance from Common Lisp metadata."
+    },
+    {
+      "risk": "web-approval-contract",
+      "status": "verified",
+      "repo": "riido-contracts",
+      "test": "TestAssignmentContractToolApprovalWireShape",
+      "proves": "Contracts owns the tool approval request/decision/result DTO wire shape."
     }
   ],
   "remaining_boundaries": [
@@ -86,7 +100,7 @@
     {
       "id": "web-approval-round-trip",
       "owner": "contracts-control-plane-client",
-      "reason": "Dangerous headless tool approval needs a web-visible approval contract before automation can execute it."
+      "reason": "Approval DTO vocabulary exists, but control-plane approval endpoints and client-visible decision flow are not implemented yet."
     },
     {
       "id": "client-active-stream-consumption",

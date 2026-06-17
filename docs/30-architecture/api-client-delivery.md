@@ -360,8 +360,12 @@ the concrete control-plane test that proves it:
 evidence is split into `riido-contracts TestVerifyGeneratedFSMFiles` for the
 Common Lisp SSOT conformance gate and `internal/contractscompat.TestContractsBaseline`
 for this repository's consumption of the generated FSM service providers. The
-same manifest also keeps unresolved ownership boundaries explicit so a future
-cleanup cannot silently relabel them as solved.
+web-approval contract surface is similarly tracked through `riido-contracts
+TestAssignmentContractToolApprovalWireShape` and the local contracts compatibility
+test. This fixes the DTO vocabulary; the actual control-plane endpoint and
+client decision flow remain an explicit unresolved boundary. The same manifest
+also keeps unresolved ownership boundaries explicit so a future cleanup cannot
+silently relabel them as solved.
 
 This keeps SSOT ownership layered instead of duplicated:
 
