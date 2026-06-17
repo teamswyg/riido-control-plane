@@ -767,6 +767,7 @@ func TestHTTPAIAgentClientAssignUsesRequestScopedTaskContext(t *testing.T) {
 				ComponentType: "task",
 				Title:         "JWT로 task context 조회",
 				KeyNumber:     "RIID-4873",
+				BranchName:    "RIID-4964-agent-profile-upload",
 			},
 			Document: AIAgentTaskContextDocument{
 				Content:       "<p>private JWT component body</p>",
@@ -776,7 +777,11 @@ func TestHTTPAIAgentClientAssignUsesRequestScopedTaskContext(t *testing.T) {
 				Project:   AIAgentTaskContextReference{ID: "project-a", Title: "AI Agent", KeyNumber: "RIID-4800"},
 				Milestone: AIAgentTaskContextReference{ID: "milestone-a", Title: "JWT task context", KeyNumber: "RIID-4872"},
 			},
-			Repositories: []AIAgentTaskContextRepository{},
+			Repositories: []AIAgentTaskContextRepository{{
+				FullName:      "teamswyg/riido-daemon",
+				RepositoryURL: "https://github.com/teamswyg/riido-daemon",
+				Source:        TaskContextRepositorySourceConnectedPullRequest,
+			}},
 		},
 	}
 	server := NewServer(ServerConfig{
@@ -826,6 +831,13 @@ func TestHTTPAIAgentClientAssignUsesRequestScopedTaskContext(t *testing.T) {
 	}
 	if pollOut.Assignment.ModelID != "codex-default" {
 		t.Fatalf("assignment model_id = %q, want codex-default", pollOut.Assignment.ModelID)
+	}
+	if pollOut.Assignment.Worktree == nil ||
+		pollOut.Assignment.Worktree.RepositoryFullName != "teamswyg/riido-daemon" ||
+		pollOut.Assignment.Worktree.RepositoryURL != "https://github.com/teamswyg/riido-daemon" ||
+		pollOut.Assignment.Worktree.BranchName != "RIID-4964-agent-profile-upload" ||
+		pollOut.Assignment.Worktree.Source != TaskContextRepositorySourceConnectedPullRequest {
+		t.Fatalf("assignment worktree = %+v", pollOut.Assignment.Worktree)
 	}
 }
 
