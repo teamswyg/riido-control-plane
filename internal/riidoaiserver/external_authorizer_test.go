@@ -65,6 +65,68 @@ func TestExternalHTTPAuthorizerAllowsScopedRequest(t *testing.T) {
 	}
 }
 
+func TestExternalHTTPAuthorizerForbidsAIAgentClientWithoutWorkspace(t *testing.T) {
+	called := false
+	authorizerServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer authorizerServer.Close()
+
+	authorizer, err := NewExternalHTTPAuthorizer(ExternalHTTPAuthorizerConfig{
+		Endpoint: authorizerServer.URL,
+	})
+	if err != nil {
+		t.Fatalf("NewExternalHTTPAuthorizer: %v", err)
+	}
+	_, err = authorizer.Authorize(context.Background(), "external-token", AuthorizationRequest{
+		Resource: AuthorizationResourceAIAgentClient,
+		Action:   AuthorizationActionRead,
+	})
+	if !errors.Is(err, ErrAuthorizationForbidden) {
+		t.Fatalf("Authorize err=%v, want forbidden", err)
+	}
+	if called {
+		t.Fatal("workspace-less ai-agent client request must not reach external authorizer")
+	}
+}
+
+func TestExternalHTTPAuthorizerSendsAIAgentClientWorkspace(t *testing.T) {
+	var got externalAuthorizerRequest
+	authorizerServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&got); err != nil {
+			t.Fatalf("decode request: %v", err)
+		}
+		_ = json.NewEncoder(w).Encode(externalAuthorizerResponse{
+			SchemaVersion: ExternalAuthorizerResponseSchemaVersion,
+			Allowed:       true,
+			PrincipalID:   "user-1",
+		})
+	}))
+	defer authorizerServer.Close()
+
+	authorizer, err := NewExternalHTTPAuthorizer(ExternalHTTPAuthorizerConfig{
+		Endpoint: authorizerServer.URL,
+	})
+	if err != nil {
+		t.Fatalf("NewExternalHTTPAuthorizer: %v", err)
+	}
+	result, err := authorizer.Authorize(context.Background(), "external-token", AuthorizationRequest{
+		Resource:    AuthorizationResourceAIAgentClient,
+		Action:      AuthorizationActionDeviceRead,
+		WorkspaceID: "workspace-1",
+	})
+	if err != nil {
+		t.Fatalf("Authorize: %v", err)
+	}
+	if result.PrincipalID != "user-1" || result.WorkspaceID != "workspace-1" {
+		t.Fatalf("result = %+v", result)
+	}
+	if got.Request.WorkspaceID != "workspace-1" || got.Request.Resource != AuthorizationResourceAIAgentClient {
+		t.Fatalf("request = %+v", got)
+	}
+}
+
 func TestExternalHTTPAuthorizerMapsDeniedResponses(t *testing.T) {
 	tests := []struct {
 		name    string

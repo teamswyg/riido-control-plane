@@ -95,6 +95,9 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	if bearerToken == "" {
 		return AuthorizationResult{}, ErrAuthorizationUnauthenticated
 	}
+	if externalAuthorizerRequiresWorkspace(req) && strings.TrimSpace(req.WorkspaceID) == "" {
+		return AuthorizationResult{}, ErrAuthorizationForbidden
+	}
 	payload, err := json.Marshal(externalAuthorizerRequest{
 		SchemaVersion: ExternalAuthorizerRequestSchemaVersion,
 		BearerToken:   bearerToken,
@@ -165,6 +168,10 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 		return AuthorizationResult{}, fmt.Errorf("riidoaiserver: external authorizer roles: %w", err)
 	}
 	return AuthorizationResult{PrincipalID: out.PrincipalID, WorkspaceID: strings.TrimSpace(req.WorkspaceID), Roles: roles}, nil
+}
+
+func externalAuthorizerRequiresWorkspace(req AuthorizationRequest) bool {
+	return req.Resource == AuthorizationResourceAIAgentClient
 }
 
 func normalizeExternalAuthorizerEndpoint(endpoint string) (string, error) {
