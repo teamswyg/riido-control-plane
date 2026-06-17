@@ -150,6 +150,51 @@ func TestStoreDeduplicatesThreadProgressSeqEvents(t *testing.T) {
 	}
 }
 
+func TestStoreAssignmentEventKeyKeepsDifferentEventTypes(t *testing.T) {
+	ctx := context.Background()
+	operations := &runtimeFakeAssignmentOperationStore{}
+	store := NewStoreWithConfig(StoreConfig{OperationStore: operations})
+	defer store.Close()
+
+	assignment, err := store.AssignTask(ctx, "task-event-key-type", AssignRequest{
+		ComponentID:     "component-event-key-type",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "run once",
+	})
+	if err != nil {
+		t.Fatalf("AssignTask: %v", err)
+	}
+	if _, err := store.PollAgent(ctx, "agent-1", daemonPollRequest()); err != nil {
+		t.Fatalf("PollAgent: %v", err)
+	}
+	metadata := map[string]string{metadatakeys.AssignmentEventKey.String(): "event-key-shared"}
+	first, err := store.RecordAgentEvent(ctx, "agent-1", AgentEventRequest{
+		AssignmentID: assignment.ID,
+		TaskID:       assignment.TaskID,
+		State:        AssignmentRunning,
+		EventType:    EventRiidoLog,
+		Message:      "working",
+		Metadata:     metadata,
+	})
+	if err != nil {
+		t.Fatalf("RecordAgentEvent first: %v", err)
+	}
+	second, err := store.RecordAgentEvent(ctx, "agent-1", AgentEventRequest{
+		AssignmentID: assignment.ID,
+		TaskID:       assignment.TaskID,
+		EventType:    EventProviderWarning,
+		Message:      "warning",
+		Metadata:     metadata,
+	})
+	if err != nil {
+		t.Fatalf("RecordAgentEvent second: %v", err)
+	}
+	if second.Event.Seq == first.Event.Seq || second.Event.Type != EventProviderWarning {
+		t.Fatalf("different event type was incorrectly deduped: first=%+v second=%+v", first.Event, second.Event)
+	}
+}
+
 func TestStoreActorPersistsResumeAndProviderSessionIDs(t *testing.T) {
 	ctx := context.Background()
 	now := time.Date(2026, 6, 16, 13, 0, 0, 0, time.UTC)

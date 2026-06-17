@@ -1440,13 +1440,13 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 }
 
 func duplicateAssignmentEvent(state *storeState, taskID, assignmentID, agentID, eventType string, metadata map[string]string) (TaskEvent, bool) {
-	if existing, ok := duplicateAssignmentEventKey(state, taskID, assignmentID, agentID, metadata); ok {
+	if existing, ok := duplicateAssignmentEventKey(state, taskID, assignmentID, agentID, eventType, metadata); ok {
 		return existing, true
 	}
 	return duplicateThreadProgressEvent(state, taskID, assignmentID, agentID, eventType, metadata)
 }
 
-func duplicateAssignmentEventKey(state *storeState, taskID, assignmentID, agentID string, metadata map[string]string) (TaskEvent, bool) {
+func duplicateAssignmentEventKey(state *storeState, taskID, assignmentID, agentID, eventType string, metadata map[string]string) (TaskEvent, bool) {
 	key := strings.TrimSpace(metadata[metadatakeys.AssignmentEventKey.String()])
 	if key == "" {
 		return TaskEvent{}, false
@@ -1454,6 +1454,7 @@ func duplicateAssignmentEventKey(state *storeState, taskID, assignmentID, agentI
 	for _, event := range slices.Backward(state.events[taskID]) {
 		if event.AssignmentID != assignmentID ||
 			event.AgentID != agentID ||
+			event.Type != eventType ||
 			strings.TrimSpace(event.Metadata[metadatakeys.AssignmentEventKey.String()]) != key {
 			continue
 		}
