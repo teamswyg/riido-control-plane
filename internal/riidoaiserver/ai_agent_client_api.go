@@ -416,6 +416,7 @@ type AIAgentTaskActionResponse struct {
 	Message            string                               `json:"message"`
 	ResultMessage      string                               `json:"result_message,omitempty"`
 	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
+	ActiveStream       *AIAgentTaskThreadStreamLink         `json:"active_stream,omitempty"`
 }
 
 type AIAgentTaskThreadStreamLink struct {

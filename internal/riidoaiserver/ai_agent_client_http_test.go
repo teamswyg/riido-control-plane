@@ -687,6 +687,12 @@ func TestHTTPAIAgentClientDevelopmentV2WorkspaceScopedCreateAndThreadStream(t *t
 	if assigned.AgentID != created.Agent.AgentID || assigned.ThreadID == "" {
 		t.Fatalf("v2 assign response = %+v", assigned)
 	}
+	if assigned.ActiveStream == nil ||
+		assigned.ActiveStream.Href != "/v2/client/workspaces/workspace-a/ai-agent/events" ||
+		assigned.ActiveStream.ThreadID != assigned.ThreadID ||
+		assigned.ActiveStream.RunID != assigned.RunID {
+		t.Fatalf("v2 assign active_stream = %+v, assigned=%+v", assigned.ActiveStream, assigned)
+	}
 
 	pollReq := httptest.NewRequest(http.MethodPost, "/v1/agents/"+created.Agent.AgentID+"/poll", strings.NewReader(`{"daemon_id":"daemon-dev-macbook","device_id":"device-dev-macbook","runtime_id":"runtime-cursor-dev"}`))
 	pollReq.Header.Set("Authorization", "Bearer owner-token")
@@ -1177,6 +1183,9 @@ func TestHTTPAIAgentClientDevelopmentTaskCommentAndStop(t *testing.T) {
 	if comment.AssignmentState != AgentAssignmentStateQueued || comment.CommentKind != AgentTaskCommentQueuedByBusyAgent {
 		t.Fatalf("comment response = %+v", comment)
 	}
+	if comment.ActiveStream == nil || comment.ActiveStream.Href != "/v1/client/ai-agent/events" {
+		t.Fatalf("comment active_stream = %+v", comment.ActiveStream)
+	}
 
 	stopReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/tasks/task-1/stop", strings.NewReader(`{"agent_id":"agent-owned-codex","reason":"user requested stop"}`))
 	stopReq.Header.Set("Authorization", "Bearer user-token")
@@ -1194,6 +1203,9 @@ func TestHTTPAIAgentClientDevelopmentTaskCommentAndStop(t *testing.T) {
 	}
 	if stopped.ThreadID == "" {
 		t.Fatalf("stop response missing thread_id: %+v", stopped)
+	}
+	if stopped.ActiveStream != nil {
+		t.Fatalf("terminal stop must omit active_stream: %+v", stopped.ActiveStream)
 	}
 
 	threadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-1/threads", nil)
@@ -2910,7 +2922,7 @@ func TestDevelopmentAIAgentClientStoreHidesLocalRuntimePathsFromAssignmentAction
 	if len(threads.Threads) != 1 {
 		t.Fatalf("threads = %+v", threads.Threads)
 	}
-	response := actionResponseFromThread(threads.Threads[0])
+	response := actionResponseFromThread(threads.Threads[0], "")
 	message := response.Message
 	for _, leaked := range []string{"/Users/", "/tmp/", "file://"} {
 		if strings.Contains(message, leaked) {
@@ -2967,7 +2979,7 @@ func TestDevelopmentAIAgentClientStoreExposesFailureDiagnostics(t *testing.T) {
 	}
 	assertFailureDiagnostics(t, "thread", threads.Threads[0].FailureDiagnostics)
 
-	response := actionResponseFromThread(threads.Threads[0])
+	response := actionResponseFromThread(threads.Threads[0], "")
 	assertFailureDiagnostics(t, "action response", response.FailureDiagnostics)
 
 	event, ok := lastWorkStatusChangedEventForTask(t, store, principal, "task-failure-diagnostics")
