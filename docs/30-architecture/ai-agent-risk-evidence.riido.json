@@ -59,6 +59,22 @@
       "package": "./internal/riidoaiserver",
       "test": "TestStoreActorAdditiveAssignmentKeepsExistingAgentActive",
       "proves": "Adding another agent keeps existing active agent assignment state intact."
+    },
+    {
+      "risk": "generated-fsm-control-plane-consumption",
+      "status": "verified",
+      "package": "./internal/contractscompat",
+      "test": "TestContractsBaseline",
+      "proves": "Control-plane consumes contracts generated assignment and task FSM service providers."
+    }
+  ],
+  "external_evidence": [
+    {
+      "risk": "generated-fsm-conformance",
+      "status": "verified",
+      "repo": "riido-contracts",
+      "test": "TestVerifyGeneratedFSMFiles",
+      "proves": "Contracts fsmgen verifies generated FSM drift and conformance from Common Lisp metadata."
     }
   ],
   "remaining_boundaries": [
@@ -76,11 +92,6 @@
       "id": "client-active-stream-consumption",
       "owner": "riido-client",
       "reason": "The API response now carries active_stream, but client-side subscription timing remains outside this repository."
-    },
-    {
-      "id": "generated-fsm-conformance",
-      "owner": "riido-contracts-control-plane",
-      "reason": "FSM metadata and conformance generation need a contracts-owned SSOT before this repository can consume generated state machines."
     }
   ]
 }

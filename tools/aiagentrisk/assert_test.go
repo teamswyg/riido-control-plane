@@ -44,6 +44,25 @@ func assertLocalEvidence(t *testing.T, evidence localEvidence, doc string) {
 	}
 }
 
+func assertExternalEvidence(t *testing.T, evidence externalEvidence, doc string) {
+	t.Helper()
+	if evidence.Risk == "" || evidence.Status != "verified" || evidence.Proves == "" {
+		t.Fatalf("invalid external evidence %+v", evidence)
+	}
+	if !slices.Contains(requiredRisks, evidence.Risk) {
+		t.Fatalf("unexpected external evidence risk %q", evidence.Risk)
+	}
+	if evidence.Repo != "riido-contracts" {
+		t.Fatalf("external evidence repo must stay at repo boundary, got %q", evidence.Repo)
+	}
+	if strings.Contains(evidence.Test, "/") || strings.Contains(evidence.Test, "internal/") {
+		t.Fatalf("external evidence must not reference private package paths: %+v", evidence)
+	}
+	if !strings.Contains(doc, evidence.Test) {
+		t.Fatalf("human doc must mention external evidence test %s", evidence.Test)
+	}
+}
+
 func assertRemainingBoundary(t *testing.T, boundary remainingBoundary) {
 	t.Helper()
 	if boundary.ID == "" || boundary.Owner == "" || boundary.Reason == "" {
