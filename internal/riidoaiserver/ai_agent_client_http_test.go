@@ -1723,6 +1723,37 @@ func TestHTTPAIAgentClientDevelopmentMutationAndDeletion(t *testing.T) {
 		t.Fatalf("invalid model create status=%d body=%s", invalidModelResp.Code, invalidModelResp.Body.String())
 	}
 
+	trackedThumbnailURL := "https://cdn.riido.io/dev/ai-agents/tracked.png?token=secret"
+	trackedThumbnailBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:                "추적 URL",
+		Visibility:          AgentVisibilityPrivate,
+		RuntimeID:           "runtime-cursor-dev",
+		ProfileThumbnailURL: &trackedThumbnailURL,
+	})
+	if err != nil {
+		t.Fatalf("marshal tracked thumbnail body: %v", err)
+	}
+	trackedThumbnailReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(trackedThumbnailBody)))
+	trackedThumbnailReq.Header.Set("Authorization", "Bearer owner-token")
+	trackedThumbnailResp := httptest.NewRecorder()
+	server.ServeHTTP(trackedThumbnailResp, trackedThumbnailReq)
+	if trackedThumbnailResp.Code != http.StatusBadRequest {
+		t.Fatalf("tracked thumbnail create status=%d body=%s", trackedThumbnailResp.Code, trackedThumbnailResp.Body.String())
+	}
+
+	fragmentThumbnailURL := "https://cdn.riido.io/dev/ai-agents/fragment.png#secret"
+	fragmentThumbnailBody, err := json.Marshal(UpdateAgentConfigurationRequest{ProfileThumbnailURL: &fragmentThumbnailURL})
+	if err != nil {
+		t.Fatalf("marshal fragment thumbnail patch body: %v", err)
+	}
+	fragmentThumbnailReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(fragmentThumbnailBody)))
+	fragmentThumbnailReq.Header.Set("Authorization", "Bearer owner-token")
+	fragmentThumbnailResp := httptest.NewRecorder()
+	server.ServeHTTP(fragmentThumbnailResp, fragmentThumbnailReq)
+	if fragmentThumbnailResp.Code != http.StatusBadRequest {
+		t.Fatalf("fragment thumbnail patch status=%d body=%s", fragmentThumbnailResp.Code, fragmentThumbnailResp.Body.String())
+	}
+
 	tooLongDescription := strings.Repeat("가", AgentDescriptionMaxCharacters+1)
 	tooLongDescriptionBody, err := json.Marshal(UpdateAgentConfigurationRequest{Description: &tooLongDescription})
 	if err != nil {
