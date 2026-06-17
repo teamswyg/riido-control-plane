@@ -1787,6 +1787,50 @@ func TestHTTPAIAgentClientDevelopmentMutationAndDeletion(t *testing.T) {
 		t.Fatalf("fragment thumbnail patch status=%d body=%s", fragmentThumbnailResp.Code, fragmentThumbnailResp.Body.String())
 	}
 
+	externalThumbnailURL := "https://tracker.example.test/avatar.png"
+	externalThumbnailBody, err := json.Marshal(CreateAgentConfigurationRequest{
+		Name:                "외부 URL",
+		Visibility:          AgentVisibilityPrivate,
+		RuntimeID:           "runtime-cursor-dev",
+		ProfileThumbnailURL: &externalThumbnailURL,
+	})
+	if err != nil {
+		t.Fatalf("marshal external thumbnail body: %v", err)
+	}
+	externalThumbnailReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/agents", strings.NewReader(string(externalThumbnailBody)))
+	externalThumbnailReq.Header.Set("Authorization", "Bearer owner-token")
+	externalThumbnailResp := httptest.NewRecorder()
+	server.ServeHTTP(externalThumbnailResp, externalThumbnailReq)
+	if externalThumbnailResp.Code != http.StatusBadRequest {
+		t.Fatalf("external thumbnail create status=%d body=%s", externalThumbnailResp.Code, externalThumbnailResp.Body.String())
+	}
+
+	userinfoThumbnailURL := "https://token:secret@cdn.riido.io/dev/ai-agents/avatar.png"
+	userinfoThumbnailBody, err := json.Marshal(UpdateAgentConfigurationRequest{ProfileThumbnailURL: &userinfoThumbnailURL})
+	if err != nil {
+		t.Fatalf("marshal userinfo thumbnail patch body: %v", err)
+	}
+	userinfoThumbnailReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(userinfoThumbnailBody)))
+	userinfoThumbnailReq.Header.Set("Authorization", "Bearer owner-token")
+	userinfoThumbnailResp := httptest.NewRecorder()
+	server.ServeHTTP(userinfoThumbnailResp, userinfoThumbnailReq)
+	if userinfoThumbnailResp.Code != http.StatusBadRequest {
+		t.Fatalf("userinfo thumbnail patch status=%d body=%s", userinfoThumbnailResp.Code, userinfoThumbnailResp.Body.String())
+	}
+
+	portThumbnailURL := "https://cdn.riido.io:444/dev/ai-agents/avatar.png"
+	portThumbnailBody, err := json.Marshal(UpdateAgentConfigurationRequest{ProfileThumbnailURL: &portThumbnailURL})
+	if err != nil {
+		t.Fatalf("marshal port thumbnail patch body: %v", err)
+	}
+	portThumbnailReq := httptest.NewRequest(http.MethodPatch, "/v1/client/ai-agent/agents/agent-owned-claude", strings.NewReader(string(portThumbnailBody)))
+	portThumbnailReq.Header.Set("Authorization", "Bearer owner-token")
+	portThumbnailResp := httptest.NewRecorder()
+	server.ServeHTTP(portThumbnailResp, portThumbnailReq)
+	if portThumbnailResp.Code != http.StatusBadRequest {
+		t.Fatalf("port thumbnail patch status=%d body=%s", portThumbnailResp.Code, portThumbnailResp.Body.String())
+	}
+
 	tooLongDescription := strings.Repeat("가", AgentDescriptionMaxCharacters+1)
 	tooLongDescriptionBody, err := json.Marshal(UpdateAgentConfigurationRequest{Description: &tooLongDescription})
 	if err != nil {

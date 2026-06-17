@@ -64,6 +64,7 @@ type AIAgentTaskThreadProjectionReconciler interface {
 
 const (
 	defaultAIAgentClientWorkspaceID = "workspace-dev-riid"
+	agentProfileThumbnailCDNHost    = "cdn.riido.io"
 	aiAgentClientReplayEventLimit   = 200
 	// Max progress lines persisted per task thread in the snapshot. The live SSE
 	// stream is unaffected; this only bounds the replayable/persisted tail so the
@@ -2638,8 +2639,14 @@ func normalizeAgentProfileThumbnailURL(value string) (string, error) {
 	if err != nil || parsed.Scheme != "https" || parsed.Host == "" {
 		return "", errors.New("profile_thumbnail_url must be an https URL")
 	}
+	if parsed.User != nil || parsed.Port() != "" || !strings.EqualFold(parsed.Hostname(), agentProfileThumbnailCDNHost) {
+		return "", errors.New("profile_thumbnail_url must use the Riido CDN")
+	}
 	if parsed.RawQuery != "" || parsed.Fragment != "" {
 		return "", errors.New("profile_thumbnail_url must not include query or fragment")
+	}
+	if strings.Trim(parsed.EscapedPath(), "/") == "" {
+		return "", errors.New("profile_thumbnail_url must include a CDN object path")
 	}
 	return trimmed, nil
 }

@@ -76,6 +76,50 @@ func TestS3AIAgentProfileThumbnailUploadCreatesPostPolicy(t *testing.T) {
 	}
 }
 
+func TestS3AIAgentProfileThumbnailUploadIgnoresUnsafeFileName(t *testing.T) {
+	provider, err := NewStaticAWSCredentialsProvider("AKIDEXAMPLE", "SECRET", "")
+	if err != nil {
+		t.Fatalf("NewStaticAWSCredentialsProvider: %v", err)
+	}
+	service, err := NewS3AIAgentProfileThumbnailUploadService(S3AIAgentProfileThumbnailUploadConfig{
+		Region:                "ap-northeast-2",
+		Bucket:                "profile-upload-test",
+		CDNBaseURL:            "https://cdn.example.test/",
+		MaxContentLengthBytes: 1024 * 1024,
+		CredentialsProvider:   provider,
+		Now:                   func() time.Time { return time.Date(2026, 6, 15, 9, 30, 0, 0, time.UTC) },
+		Random:                bytes.NewReader([]byte("0123456789abcdef")),
+	})
+	if err != nil {
+		t.Fatalf("NewS3AIAgentProfileThumbnailUploadService: %v", err)
+	}
+
+	resp, err := service.CreateAIAgentProfileThumbnailUpload(context.Background(), AuthorizationResult{PrincipalID: "user-1"}, CreateAgentProfileThumbnailUploadRequest{
+		ContentType:        "image/jpeg",
+		ContentLengthBytes: 4096,
+		FileName:           "../../private.svg?token=secret",
+	})
+	if err != nil {
+		t.Fatalf("CreateAIAgentProfileThumbnailUpload: %v", err)
+	}
+	if strings.Contains(resp.ProfileThumbnailURL, "private") ||
+		strings.Contains(resp.ProfileThumbnailURL, "secret") ||
+		strings.Contains(resp.ProfileThumbnailURL, "..") ||
+		!strings.HasSuffix(resp.ProfileThumbnailURL, ".jpg") {
+		t.Fatalf("profile_thumbnail_url includes untrusted filename material: %q", resp.ProfileThumbnailURL)
+	}
+	policyBody, err := base64.StdEncoding.DecodeString(profileUploadFields(resp.FormFields)["policy"])
+	if err != nil {
+		t.Fatalf("decode policy: %v", err)
+	}
+	policyText := string(policyBody)
+	if strings.Contains(policyText, "private") ||
+		strings.Contains(policyText, "secret") ||
+		strings.Contains(policyText, "..") {
+		t.Fatalf("policy includes untrusted filename material: %q", policyText)
+	}
+}
+
 func TestAIAgentClientProfileThumbnailUploadEndpoint(t *testing.T) {
 	provider, err := NewStaticAWSCredentialsProvider("AKIDEXAMPLE", "SECRET", "")
 	if err != nil {
