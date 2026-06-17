@@ -14,12 +14,32 @@ func rebuildStateMetricsFromHistory(state *storeState) {
 	if replayed.taskEventsTotal > state.eventAppendLatency.samplesTotal {
 		state.eventAppendLatency.samplesTotal = replayed.taskEventsTotal
 	}
+	repairEventAppendLatencyFromHistory(state)
 	pollActionsTotal := int64(0)
 	for _, count := range state.pollActionsTotal {
 		pollActionsTotal += count
 	}
 	if pollActionsTotal > state.pollRequestsTotal {
 		state.pollRequestsTotal = pollActionsTotal
+	}
+}
+
+func repairEventAppendLatencyFromHistory(state *storeState) {
+	if state == nil || state.eventAppendLatency.samplesTotal <= 0 {
+		return
+	}
+	// Historical snapshots and operation replays know that events were appended
+	// but do not know the original wall-clock duration. Keep the metric useful
+	// by applying the same 1ms minimum used by live sub-millisecond samples.
+	minimumTotal := state.eventAppendLatency.samplesTotal
+	if state.eventAppendLatency.totalMilliseconds < minimumTotal {
+		state.eventAppendLatency.totalMilliseconds = minimumTotal
+	}
+	if state.eventAppendLatency.maxMilliseconds <= 0 {
+		state.eventAppendLatency.maxMilliseconds = 1
+	}
+	if state.eventAppendLatency.lastMilliseconds <= 0 {
+		state.eventAppendLatency.lastMilliseconds = 1
 	}
 }
 

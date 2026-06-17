@@ -85,7 +85,11 @@ func TestAssignmentOperationReplayRebuildsMetricsFromEvents(t *testing.T) {
 	if state.pollActionsTotal[PollStart] != 1 || state.pollRequestsTotal != 1 {
 		t.Fatalf("poll metrics = requests:%d actions:%+v", state.pollRequestsTotal, state.pollActionsTotal)
 	}
-	if state.agentEventsTotal != 1 || state.eventAppendLatency.samplesTotal != 3 {
+	if state.agentEventsTotal != 1 ||
+		state.eventAppendLatency.samplesTotal != 3 ||
+		state.eventAppendLatency.totalMilliseconds != 3 ||
+		state.eventAppendLatency.maxMilliseconds != 1 ||
+		state.eventAppendLatency.lastMilliseconds != 1 {
 		t.Fatalf("event metrics = agent:%d latency:%+v", state.agentEventsTotal, state.eventAppendLatency)
 	}
 }
