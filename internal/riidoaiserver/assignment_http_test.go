@@ -71,7 +71,8 @@ func TestHTTPAssignmentAssignPollHeartbeatAndEvent(t *testing.T) {
 		t.Fatalf("heartbeat response = %+v", heartbeatOut)
 	}
 
-	eventReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-a/events", bytes.NewReader([]byte(`{"assignment_id":"`+pollOut.Assignment.ID+`","daemon_id":"daemon-a","runtime_id":"runtime-a","state":"failed","event_type":"assignment_failed","message":"approval_timeout: no headless approval path","metadata":{"`+metadatakeys.AssignmentResultStatus.String()+`":"blocked","`+metadatakeys.AssignmentFailureCategory.String()+`":"provider_blocked"}}`)))
+	eventBody := []byte(`{"assignment_id":"` + pollOut.Assignment.ID + `","daemon_id":"daemon-a","runtime_id":"runtime-a","state":"failed","event_type":"assignment_failed","message":"approval_timeout: no headless approval path","metadata":{"` + metadatakeys.AssignmentResultStatus.String() + `":"blocked","` + metadatakeys.AssignmentFailureCategory.String() + `":"provider_blocked","` + metadatakeys.AssignmentEventKey.String() + `":"event-asn-1-terminal"}}`)
+	eventReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-a/events", bytes.NewReader(eventBody))
 	eventReq.Header.Set("Authorization", "Bearer assignment-token")
 	eventResp := httptest.NewRecorder()
 	server.ServeHTTP(eventResp, eventReq)
@@ -90,6 +91,21 @@ func TestHTTPAssignmentAssignPollHeartbeatAndEvent(t *testing.T) {
 	}
 	if got := eventOut.Event.Metadata[metadatakeys.AssignmentFailureCategory.String()]; got != "provider_blocked" {
 		t.Fatalf("event failure category metadata = %q", got)
+	}
+
+	duplicateReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-a/events", bytes.NewReader(eventBody))
+	duplicateReq.Header.Set("Authorization", "Bearer assignment-token")
+	duplicateResp := httptest.NewRecorder()
+	server.ServeHTTP(duplicateResp, duplicateReq)
+	if duplicateResp.Code != http.StatusOK {
+		t.Fatalf("duplicate event status=%d body=%s", duplicateResp.Code, duplicateResp.Body.String())
+	}
+	var duplicateOut AgentEventResponse
+	if err := json.Unmarshal(duplicateResp.Body.Bytes(), &duplicateOut); err != nil {
+		t.Fatalf("duplicate event json: %v", err)
+	}
+	if duplicateOut.Event.Seq != eventOut.Event.Seq {
+		t.Fatalf("duplicate event seq = %d, want %d", duplicateOut.Event.Seq, eventOut.Event.Seq)
 	}
 }
 
