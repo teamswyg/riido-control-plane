@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func TestHTTPTransactionMetricsUseServeMuxPattern(t *testing.T) {
+func TestHTTPTransactionMetricsUseRouteVocabulary(t *testing.T) {
 	metrics := NewHTTPTransactionMetrics()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/agents/", func(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +32,7 @@ func TestHTTPTransactionMetricsUseServeMuxPattern(t *testing.T) {
 		t.Fatalf("http transaction metrics = %+v", snapshot.HTTPTransactions)
 	}
 	transaction := snapshot.HTTPTransactions[0]
-	if transaction.Route != "/v1/agents/" || transaction.Method != http.MethodPost || transaction.StatusCode != http.StatusAccepted {
+	if transaction.Route != "/v1/agents/{agent_id}/poll" || transaction.Method != http.MethodPost || transaction.StatusCode != http.StatusAccepted {
 		t.Fatalf("transaction = %+v", transaction)
 	}
 	if transaction.LatencySamplesTotal != 1 || transaction.LatencyLastMilliseconds <= 0 {

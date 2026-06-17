@@ -281,9 +281,13 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 		startedAt := time.Now()
 		recorder := &httpStatusRecorder{ResponseWriter: w, statusCode: http.StatusOK}
 		next.ServeHTTP(recorder, r)
+		route := traceHTTPRoute(r.Method, r.URL.Path)
+		if route == "" {
+			route = r.Pattern
+		}
 		metrics.ObserveHTTPTransaction(HTTPTransactionObservation{
 			Method:     r.Method,
-			Route:      r.Pattern,
+			Route:      route,
 			StatusCode: recorder.statusCode,
 			Duration:   time.Since(startedAt),
 		})
