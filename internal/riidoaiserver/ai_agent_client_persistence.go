@@ -88,7 +88,11 @@ func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAg
 		if err := base.restoreSnapshot(snapshot); err != nil {
 			return nil, err
 		}
+		repaired := base.repairStaleActiveTaskThreads(store.snapshotNow().UTC())
 		store.markSnapshotObserved(snapshot.SavedAt)
+		if repaired {
+			return store, store.saveSnapshot(ctx)
+		}
 		return store, nil
 	}
 	if err := store.saveSnapshot(ctx); err != nil {
@@ -446,18 +450,25 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 		return nil
 	}
 	s.snapshotReloadMu.Lock()
-	defer s.snapshotReloadMu.Unlock()
 	if !s.shouldReloadSnapshotLocked() {
+		s.snapshotReloadMu.Unlock()
 		return nil
 	}
 	snapshot, ok, err := s.snapshotStore.LoadAIAgentClientSnapshot(ctx)
 	if err != nil || !ok {
+		s.snapshotReloadMu.Unlock()
 		return err
 	}
 	if err := s.restoreSnapshotPreservingSubscribers(snapshot); err != nil {
+		s.snapshotReloadMu.Unlock()
 		return err
 	}
+	repaired := s.repairStaleActiveTaskThreads(s.snapshotNow().UTC())
 	s.snapshotLastReloadAt = s.snapshotNow()
+	s.snapshotReloadMu.Unlock()
+	if repaired {
+		return s.saveSnapshot(ctx)
+	}
 	return nil
 }
 
