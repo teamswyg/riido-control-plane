@@ -4339,6 +4339,10 @@
           "message": {
             "type": "string"
           },
+          "result_message": {
+            "description": "completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. 진행 로그(lines)와 분리해 화면 결과 영역에 표시합니다.",
+            "type": "string"
+          },
           "run_id": {
             "type": "string"
           },
@@ -4446,6 +4450,10 @@
             "type": "array"
           },
           "message": {
+            "type": "string"
+          },
+          "result_message": {
+            "description": "completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. lines에는 진행 로그만 유지합니다.",
             "type": "string"
           },
           "run_id": {
@@ -5159,6 +5167,10 @@
             ],
             "type": "string"
           },
+          "result_message": {
+            "description": "terminal 작업 상태 변경 시 전달되는 최종 결과 본문입니다. 진행 로그 SSE와 분리해 결과 영역 갱신에 사용합니다.",
+            "type": "string"
+          },
           "run_id": {
             "type": "string"
           },
@@ -5809,6 +5821,7 @@
           "kind",
           "availability",
           "detection_state",
+          "provider_version",
           "has_assigned_agent",
           "requires_experimental_opt_in",
           "models"

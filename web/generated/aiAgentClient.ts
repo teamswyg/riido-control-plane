@@ -12,6 +12,10 @@ export interface AIAgentTaskActionResponse {
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
   message: string;
+  /**
+   * completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. 진행 로그(lines)와 분리해 화면 결과 영역에 표시합니다.
+   */
+  result_message?: string;
   run_id: string;
   schema_version: string;
   task_id: string;
@@ -49,6 +53,10 @@ export interface AIAgentTaskThreadRecord {
   completed_at?: string;
   lines: AgentThreadProgressLine[];
   message: string;
+  /**
+   * completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. lines에는 진행 로그만 유지합니다.
+   */
+  result_message?: string;
   run_id: string;
   source_comment_id?: string;
   source_message_id?: string;
@@ -359,6 +367,10 @@ export interface AgentWorkStatusChangedEvent {
   assignment_state?: AgentAssignmentState;
   comment_kind?: AgentTaskCommentKind;
   event_type: "agent_work_status_changed";
+  /**
+   * terminal 작업 상태 변경 시 전달되는 최종 결과 본문입니다. 진행 로그 SSE와 분리해 결과 영역 갱신에 사용합니다.
+   */
+  result_message?: string;
   run_id?: string;
   schema_version: string;
   task_id?: string;
@@ -656,7 +668,7 @@ export interface RuntimeRecord {
   /**
    * provider runtime이 자기 신고한 version 문자열입니다. UI 표시용 raw signal이며 capability/scheduling 분기 조건으로 사용하지 않습니다.
    */
-  provider_version?: string;
+  provider_version: string;
   requires_experimental_opt_in: boolean;
   runtime_id: string;
 }
