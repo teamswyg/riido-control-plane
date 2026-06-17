@@ -77,6 +77,24 @@ func TestRecordEventAppendLatencyCountsSubMillisecondSamples(t *testing.T) {
 	}
 }
 
+func TestRebuildStateMetricsRepairsHistoricalEventLatencyLowerBound(t *testing.T) {
+	state := newStoreState()
+	state.events["task-a"] = []TaskEvent{
+		{Seq: 1, TaskID: "task-a", AssignmentID: "asn-1", AgentID: "agent-a", Type: EventAssignmentQueued},
+		{Seq: 2, TaskID: "task-a", AssignmentID: "asn-1", AgentID: "agent-a", Type: EventAssignmentLeased},
+		{Seq: 3, TaskID: "task-a", AssignmentID: "asn-1", AgentID: "agent-a", Type: EventAssignmentRunning},
+	}
+
+	rebuildStateMetricsFromHistory(&state)
+
+	if state.eventAppendLatency.samplesTotal != 3 ||
+		state.eventAppendLatency.totalMilliseconds != 3 ||
+		state.eventAppendLatency.maxMilliseconds != 1 ||
+		state.eventAppendLatency.lastMilliseconds != 1 {
+		t.Fatalf("event append latency lower bound = %+v", state.eventAppendLatency)
+	}
+}
+
 func TestHTTPMetricsRequiresScopedAuthorization(t *testing.T) {
 	store := NewStore()
 	defer store.Close()
