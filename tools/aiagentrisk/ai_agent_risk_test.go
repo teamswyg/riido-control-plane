@@ -18,13 +18,14 @@ var requiredRisks = []string{
 	"partial-progress-coalescing",
 	"projection-read-repair",
 	"additive-agent-active",
+	"generated-fsm-control-plane-consumption",
+	"generated-fsm-conformance",
 }
 
 var requiredBoundaries = []string{
 	"private-repo-auth",
 	"web-approval-round-trip",
 	"client-active-stream-consumption",
-	"generated-fsm-conformance",
 }
 
 func TestAIAgentRiskEvidenceManifest(t *testing.T) {
@@ -35,6 +36,10 @@ func TestAIAgentRiskEvidenceManifest(t *testing.T) {
 	seen := map[string]bool{}
 	for _, evidence := range manifest.LocalEvidence {
 		assertLocalEvidence(t, evidence, doc)
+		seen[evidence.Risk] = true
+	}
+	for _, evidence := range manifest.ExternalEvidence {
+		assertExternalEvidence(t, evidence, doc)
 		seen[evidence.Risk] = true
 	}
 	for _, risk := range requiredRisks {
