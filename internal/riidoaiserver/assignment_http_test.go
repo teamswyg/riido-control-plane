@@ -9,6 +9,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 func TestHTTPAssignmentAssignPollHeartbeatAndEvent(t *testing.T) {
@@ -69,7 +71,7 @@ func TestHTTPAssignmentAssignPollHeartbeatAndEvent(t *testing.T) {
 		t.Fatalf("heartbeat response = %+v", heartbeatOut)
 	}
 
-	eventReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-a/events", bytes.NewReader([]byte(`{"assignment_id":"`+pollOut.Assignment.ID+`","daemon_id":"daemon-a","runtime_id":"runtime-a","state":"ready","event_type":"assignment_ready","message":"ready"}`)))
+	eventReq := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-a/events", bytes.NewReader([]byte(`{"assignment_id":"`+pollOut.Assignment.ID+`","daemon_id":"daemon-a","runtime_id":"runtime-a","state":"failed","event_type":"assignment_failed","message":"approval_timeout: no headless approval path","metadata":{"`+metadatakeys.AssignmentResultStatus.String()+`":"blocked","`+metadatakeys.AssignmentFailureCategory.String()+`":"provider_blocked"}}`)))
 	eventReq.Header.Set("Authorization", "Bearer assignment-token")
 	eventResp := httptest.NewRecorder()
 	server.ServeHTTP(eventResp, eventReq)
@@ -80,8 +82,14 @@ func TestHTTPAssignmentAssignPollHeartbeatAndEvent(t *testing.T) {
 	if err := json.Unmarshal(eventResp.Body.Bytes(), &eventOut); err != nil {
 		t.Fatalf("event json: %v", err)
 	}
-	if eventOut.Assignment == nil || eventOut.Assignment.State != AssignmentReady || eventOut.Event.Type != EventAssignmentReady {
+	if eventOut.Assignment == nil || eventOut.Assignment.State != AssignmentFailed || eventOut.Event.Type != EventAssignmentFailed {
 		t.Fatalf("event response = %+v", eventOut)
+	}
+	if got := eventOut.Event.Metadata[metadatakeys.AssignmentResultStatus.String()]; got != "blocked" {
+		t.Fatalf("event result status metadata = %q", got)
+	}
+	if got := eventOut.Event.Metadata[metadatakeys.AssignmentFailureCategory.String()]; got != "provider_blocked" {
+		t.Fatalf("event failure category metadata = %q", got)
 	}
 }
 
