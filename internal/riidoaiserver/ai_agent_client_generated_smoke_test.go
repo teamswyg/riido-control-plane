@@ -102,6 +102,11 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV1(t *testing.T) {
 	if assigned.ThreadID == "" {
 		t.Fatalf("assigned v1 thread id is empty: %+v", assigned)
 	}
+	if assigned.ActiveStream == nil ||
+		assigned.ActiveStream.Href != "/v1/client/ai-agent/events" ||
+		assigned.ActiveStream.ThreadID != assigned.ThreadID {
+		t.Fatalf("assigned v1 active_stream = %+v, assigned=%+v", assigned.ActiveStream, assigned)
+	}
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/tasks/"+assignmentTaskID+"/threads", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodPost, "/v1/client/ai-agent/tasks/"+assignmentTaskID+"/threads/"+assigned.ThreadID+"/messages", token, `{"body":"v1 next instruction","source_message_id":"smoke-v1-message"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodDelete, "/v1/client/ai-agent/tasks/"+assignmentTaskID+"/assignment", token, `{"agent_id":"agent-public-openclaw","reason":"smoke unassign"}`, http.StatusAccepted)

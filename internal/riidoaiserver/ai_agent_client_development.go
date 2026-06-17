@@ -830,7 +830,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
-		return actionResponseFromThread(thread), nil
+		return actionResponseFromThread(thread, principal.WorkspaceID), nil
 	}
 	if stopExistingTaskThreads {
 		s.markTaskActiveThreadsStoppedLocked(taskID, AgentTaskCommentStoppedByUserRequest, "agent assignment was replaced by a participant change")
@@ -853,6 +853,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
 		response.Message = "agent is busy; task assignment was queued"
 	}
+	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	agent.WorkStatus = response.WorkStatus
 	agent.Editability = AgentEditabilityBlockedAssignedTasks
 	agent.AssignedTaskCount++
@@ -959,6 +960,7 @@ func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Con
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
 		response.Message = "agent is busy; task comment was queued"
 	}
+	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
@@ -1016,6 +1018,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
 		response.Message = "agent is busy; task thread message was queued"
 	}
+	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID)
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
@@ -1062,6 +1065,7 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	} else {
 		s.markTaskAgentThreadsStopProjectionLocked(taskID, agent.AgentID, response, completed)
 	}
+	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.upsertTaskThreadFromActionLocked(response, "")
 	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 	s.agents[agent.AgentID] = agent
@@ -1845,8 +1849,8 @@ func (s *DevelopmentAIAgentClientStore) taskThreadForStopTargetLocked(taskID, ag
 	return s.latestTaskThreadForAgentLocked(taskID, agentID)
 }
 
-func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionResponse {
-	return AIAgentTaskActionResponse{
+func actionResponseFromThread(thread AIAgentTaskThreadRecord, workspaceID string) AIAgentTaskActionResponse {
+	response := AIAgentTaskActionResponse{
 		SchemaVersion:      SchemaVersion,
 		TaskID:             thread.TaskID,
 		AssignmentID:       thread.AssignmentID,
@@ -1860,6 +1864,23 @@ func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionR
 		ResultMessage:      clientVisibleTaskThreadResultMessage(thread),
 		FailureDiagnostics: clientVisibleFailureDiagnostics(thread.FailureDiagnostics),
 	}
+	return actionResponseWithActiveStream(response, workspaceID)
+}
+
+func actionResponseWithActiveStream(response AIAgentTaskActionResponse, workspaceID string) AIAgentTaskActionResponse {
+	if !taskThreadHasActiveStream(AIAgentTaskThreadRecord{AssignmentState: response.AssignmentState}) {
+		return response
+	}
+	if strings.TrimSpace(response.TaskID) == "" || strings.TrimSpace(response.ThreadID) == "" || strings.TrimSpace(response.RunID) == "" {
+		return response
+	}
+	link := activeStreamLinkForThread(AIAgentTaskThreadRecord{
+		TaskID:   response.TaskID,
+		ThreadID: response.ThreadID,
+		RunID:    response.RunID,
+	}, workspaceID)
+	response.ActiveStream = &link
+	return response
 }
 
 func assignmentProjectionMatchesTaskThread(thread AIAgentTaskThreadRecord, projection AssignmentProjection) bool {
