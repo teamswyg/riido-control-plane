@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	defaultAIAgentClientSnapshotReloadInterval        = 15 * time.Second
-	defaultAIAgentClientHeartbeatSnapshotSaveInterval = 15 * time.Second
+	defaultAIAgentClientSnapshotReloadInterval        = time.Minute
+	defaultAIAgentClientHeartbeatSnapshotSaveInterval = time.Minute
 )
 
 type AIAgentClientSnapshotStore interface {
