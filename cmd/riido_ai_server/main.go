@@ -158,6 +158,10 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	pprofAddr, err := parsePprofAddr(os.Getenv(envPprofAddr))
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	assignmentActiveLease, err := envOptionalDurationSeconds(envAssignmentActiveLease)
 	if err != nil {
 		return runtimeConfig{}, err
@@ -221,7 +225,7 @@ func configFromEnv() (runtimeConfig, error) {
 		Authorizer:               authorizer,
 		ReviewProvision:          reviewProvision,
 		MetricsLogInterval:       metricsLogInterval,
-		PprofAddr:                strings.TrimSpace(os.Getenv(envPprofAddr)),
+		PprofAddr:                pprofAddr,
 		Tracing:                  tracing,
 		WebAllowedOrigins:        webAllowedOrigins,
 		AssignmentActiveLease:    assignmentActiveLease,
