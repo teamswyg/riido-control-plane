@@ -126,6 +126,38 @@ func TestPersistentAIAgentClientStoreRestoresDevelopmentState(t *testing.T) {
 	}
 }
 
+func TestPersistentAIAgentClientStoreBackfillsSeedRuntimeProviderVersions(t *testing.T) {
+	ctx := context.Background()
+	seed := NewDevelopmentAIAgentClientStore()
+	snapshot, err := seed.snapshot(time.Now().UTC())
+	if err != nil {
+		t.Fatalf("snapshot seed: %v", err)
+	}
+	for deviceIndex := range snapshot.Devices {
+		for runtimeIndex := range snapshot.Devices[deviceIndex].Runtimes {
+			snapshot.Devices[deviceIndex].Runtimes[runtimeIndex].ProviderVersion = ""
+		}
+	}
+	store, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), &memoryAIAgentClientSnapshotStore{
+		snapshot: snapshot,
+		ok:       true,
+	})
+	if err != nil {
+		t.Fatalf("OpenPersistentAIAgentClientStore: %v", err)
+	}
+
+	devices, err := store.ListAIAgentDevices(ctx, AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-dev"})
+	if err != nil {
+		t.Fatalf("ListAIAgentDevices: %v", err)
+	}
+	if version := providerVersionForRuntime(devices.Devices, "runtime-codex-dev"); version != "codex-cli 0.133.0" {
+		t.Fatalf("runtime-codex-dev provider_version = %q", version)
+	}
+	if version := providerVersionForRuntime(devices.Devices, "runtime-cursor-dev"); version != "cursor-agent 1.0.0" {
+		t.Fatalf("runtime-cursor-dev provider_version = %q", version)
+	}
+}
+
 func TestPersistentAIAgentClientStoreConfiguresSnapshotCadence(t *testing.T) {
 	ctx := context.Background()
 	store, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), &memoryAIAgentClientSnapshotStore{})
@@ -578,6 +610,17 @@ func deviceIDForRuntime(devices []DeviceRecord, runtimeID string) string {
 		for _, runtime := range device.Runtimes {
 			if runtime.RuntimeID == runtimeID {
 				return device.DeviceID
+			}
+		}
+	}
+	return ""
+}
+
+func providerVersionForRuntime(devices []DeviceRecord, runtimeID string) string {
+	for _, device := range devices {
+		for _, runtime := range device.Runtimes {
+			if runtime.RuntimeID == runtimeID {
+				return runtime.ProviderVersion
 			}
 		}
 	}
