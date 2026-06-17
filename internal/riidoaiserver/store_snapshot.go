@@ -22,6 +22,8 @@ type StoreSnapshot struct {
 	Assignments       []Assignment           `json:"assignments"`
 	AgentAssignments  map[string][]string    `json:"agent_assignments"`
 	Events            map[string][]TaskEvent `json:"events"`
+	ToolApprovals     []ToolApprovalRequest  `json:"tool_approvals,omitempty"`
+	ToolDecisions     []ToolApprovalDecision `json:"tool_decisions,omitempty"`
 	Metrics           StoreSnapshotMetrics   `json:"metrics,omitempty"`
 	NextAssignmentSeq int64                  `json:"next_assignment_seq"`
 	NextEventSeq      int64                  `json:"next_event_seq"`
@@ -156,6 +158,28 @@ func snapshotFromState(state *storeState, savedAt time.Time) StoreSnapshot {
 	}
 	sort.Slice(assignments, func(i, j int) bool { return assignments[i].ID < assignments[j].ID })
 
+	approvals := make([]ToolApprovalRequest, 0, len(state.toolApprovals))
+	for _, approval := range state.toolApprovals {
+		approvals = append(approvals, approval)
+	}
+	sort.Slice(approvals, func(i, j int) bool {
+		if approvals[i].AssignmentID == approvals[j].AssignmentID {
+			return approvals[i].ApprovalID < approvals[j].ApprovalID
+		}
+		return approvals[i].AssignmentID < approvals[j].AssignmentID
+	})
+
+	decisions := make([]ToolApprovalDecision, 0, len(state.toolApprovalDecisions))
+	for _, decision := range state.toolApprovalDecisions {
+		decisions = append(decisions, decision)
+	}
+	sort.Slice(decisions, func(i, j int) bool {
+		if decisions[i].AssignmentID == decisions[j].AssignmentID {
+			return decisions[i].ApprovalID < decisions[j].ApprovalID
+		}
+		return decisions[i].AssignmentID < decisions[j].AssignmentID
+	})
+
 	agentAssignments := make(map[string][]string, len(state.agentAssignments))
 	for agentID, ids := range state.agentAssignments {
 		agentAssignments[agentID] = append([]string(nil), ids...)
@@ -171,6 +195,8 @@ func snapshotFromState(state *storeState, savedAt time.Time) StoreSnapshot {
 		Assignments:       assignments,
 		AgentAssignments:  agentAssignments,
 		Events:            events,
+		ToolApprovals:     approvals,
+		ToolDecisions:     decisions,
 		Metrics:           snapshotMetricsFromState(state),
 		NextAssignmentSeq: state.nextAssignmentSeq,
 		NextEventSeq:      state.nextEventSeq,
@@ -211,6 +237,18 @@ func stateFromSnapshot(snapshot StoreSnapshot) (storeState, error) {
 	}
 	for taskID, events := range snapshot.Events {
 		state.events[taskID] = append([]TaskEvent(nil), events...)
+	}
+	for _, approval := range snapshot.ToolApprovals {
+		if err := validateStoredToolApproval(approval); err != nil {
+			return storeState{}, fmt.Errorf("store snapshot tool approval: %w", err)
+		}
+		state.toolApprovals[toolApprovalKey(approval.AssignmentID, approval.ApprovalID)] = approval
+	}
+	for _, decision := range snapshot.ToolDecisions {
+		if err := validateStoredToolApprovalDecision(decision); err != nil {
+			return storeState{}, fmt.Errorf("store snapshot tool decision: %w", err)
+		}
+		state.toolApprovalDecisions[toolApprovalKey(decision.AssignmentID, decision.ApprovalID)] = decision
 	}
 	applySnapshotMetrics(&state, snapshot.Metrics)
 	rebuildStateMetricsFromHistory(&state)

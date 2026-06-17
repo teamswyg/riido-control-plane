@@ -7,6 +7,8 @@ const SchemaVersion = assignmentcontract.SchemaVersion
 type (
 	AssignmentState     = assignmentcontract.AssignmentState
 	AssignmentStateCode = assignmentcontract.AssignmentStateCode
+	ApprovalDecision    = assignmentcontract.ApprovalDecision
+	ApprovalStatus      = assignmentcontract.ApprovalStatus
 )
 
 const (
@@ -38,6 +40,29 @@ const (
 	PollStart  = assignmentcontract.PollStart
 	PollCancel = assignmentcontract.PollCancel
 	PollActive = assignmentcontract.PollActive
+)
+
+type (
+	ToolApprovalCreateResponse   = assignmentcontract.ToolApprovalCreateResponse
+	ToolApprovalDecision         = assignmentcontract.ToolApprovalDecision
+	ToolApprovalDecisionResponse = assignmentcontract.ToolApprovalDecisionResponse
+	ToolApprovalListResponse     = assignmentcontract.ToolApprovalListResponse
+	ToolApprovalRequest          = assignmentcontract.ToolApprovalRequest
+	ToolApprovalResult           = assignmentcontract.ToolApprovalResult
+	ToolApprovalWaitRequest      = assignmentcontract.ToolApprovalWaitRequest
+	ToolApprovalWaitResponse     = assignmentcontract.ToolApprovalWaitResponse
+)
+
+const (
+	ApprovalApproved = assignmentcontract.ApprovalApproved
+	ApprovalDenied   = assignmentcontract.ApprovalDenied
+	ApprovalPending  = assignmentcontract.ApprovalPending
+	ApprovalTimedOut = assignmentcontract.ApprovalTimedOut
+)
+
+const (
+	ApprovalDecisionApprove = assignmentcontract.ApprovalDecisionApprove
+	ApprovalDecisionDeny    = assignmentcontract.ApprovalDecisionDeny
 )
 
 const (

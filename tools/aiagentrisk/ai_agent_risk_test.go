@@ -22,11 +22,11 @@ var requiredRisks = []string{
 	"generated-fsm-conformance",
 	"web-approval-contract-consumption",
 	"web-approval-contract",
+	"web-approval-round-trip",
 }
 
 var requiredBoundaries = []string{
 	"private-repo-auth",
-	"web-approval-round-trip",
 	"client-active-stream-consumption",
 }
 

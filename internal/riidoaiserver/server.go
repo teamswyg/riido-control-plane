@@ -777,6 +777,15 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 		s.handleAIAgentClientDeleteTaskAgentAssignment(w, r, taskID, agentID)
 	case suffix == "threads" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskThreads(w, r, taskID)
+	case suffix == "tool-approvals" && r.Method == http.MethodGet:
+		s.handleAIAgentClientTaskToolApprovals(w, r, taskID)
+	case strings.HasPrefix(suffix, "tool-approvals/") && strings.HasSuffix(suffix, "/decision") && r.Method == http.MethodPost:
+		approvalID, ok := toolApprovalDecisionSuffixApprovalID(suffix)
+		if !ok {
+			writeError(w, http.StatusNotFound, "not found")
+			return
+		}
+		s.handleAIAgentClientTaskToolApprovalDecision(w, r, taskID, approvalID)
 	case suffix == "thread-stream-subscription" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskThreadStreamSubscription(w, r, taskID)
 	case suffix == "comments" && r.Method == http.MethodPost:
@@ -1562,7 +1571,7 @@ func (s Server) handleAgentCatalogDelete(w http.ResponseWriter, r *http.Request,
 }
 
 func (s Server) handleAgents(w http.ResponseWriter, r *http.Request) {
-	agentID, suffix, ok := splitResourcePath(r.URL.Path, "/v1/agents/")
+	agentID, suffix, ok := splitNestedResourcePath(r.URL.Path, "/v1/agents/")
 	if !ok {
 		writeError(w, http.StatusNotFound, "not found")
 		return
@@ -1576,6 +1585,15 @@ func (s Server) handleAgents(w http.ResponseWriter, r *http.Request) {
 		s.handleAgentThreadProgress(w, r, agentID)
 	case suffix == "events" && r.Method == http.MethodPost:
 		s.handleAgentEvent(w, r, agentID)
+	case suffix == "tool-approvals" && r.Method == http.MethodPost:
+		s.handleAgentToolApprovalCreate(w, r, agentID)
+	case strings.HasPrefix(suffix, "tool-approvals/") && strings.HasSuffix(suffix, "/wait") && r.Method == http.MethodPost:
+		approvalID, ok := toolApprovalWaitSuffixApprovalID(suffix)
+		if !ok {
+			writeError(w, http.StatusNotFound, "not found")
+			return
+		}
+		s.handleAgentToolApprovalWait(w, r, agentID, approvalID)
 	case suffix == "provider-status" && r.Method == http.MethodPost:
 		s.handleProviderStatusSync(w, r, agentID)
 	case suffix == "provider-status" && r.Method == http.MethodGet:

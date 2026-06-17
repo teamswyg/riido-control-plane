@@ -704,6 +704,27 @@ func (s *Store) loop(state storeState) {
 		case getProviderStatusCmd:
 			response, ok, err := handleGetProviderStatus(&state, msg.agentID)
 			msg.reply <- getProviderStatusResult{response: response, ok: ok, err: err}
+		case createToolApprovalCmd:
+			approval, err := s.handleCreateToolApproval(&state, msg.agentID, msg.req)
+			if err == nil {
+				err = s.saveSnapshot(&state)
+			}
+			msg.reply <- toolApprovalCreateResult{approval: approval, err: err}
+		case listToolApprovalsCmd:
+			approvals, err := s.handleListTaskToolApprovals(&state, msg.taskID)
+			msg.reply <- toolApprovalListResult{approvals: approvals, err: err}
+		case decideToolApprovalCmd:
+			result, decision, err := s.handleDecideToolApproval(&state, msg.taskID, msg.decision)
+			if err == nil {
+				err = s.saveSnapshot(&state)
+			}
+			msg.reply <- toolApprovalDecisionResult{result: result, decision: decision, err: err}
+		case readToolApprovalCmd:
+			result, decision, mutated, err := s.handleReadToolApproval(&state, msg.agentID, msg.assignmentID, msg.approvalID)
+			if err == nil && mutated {
+				err = s.saveSnapshot(&state)
+			}
+			msg.reply <- toolApprovalDecisionResult{result: result, decision: decision, mutated: mutated, err: err}
 		case listAgentCatalogCmd:
 			msg.reply <- listAgentCatalogResult{records: handleListAgentCatalog(&state)}
 		case getAgentCatalogCmd:
@@ -729,6 +750,12 @@ func (s *Store) loop(state storeState) {
 			msg.reply <- registerWaiterResult{ch: ch, id: id}
 		case unregisterWaiterCmd:
 			s.handleUnregisterWaiter(&state, msg.agentID, msg.id)
+			msg.reply <- struct{}{}
+		case registerToolApprovalWaiterCmd:
+			ch, id := s.handleRegisterToolApprovalWaiter(&state, msg.key)
+			msg.reply <- registerToolApprovalWaiterResult{ch: ch, id: id}
+		case unregisterToolApprovalWaiterCmd:
+			s.handleUnregisterToolApprovalWaiter(&state, msg.key, msg.id)
 			msg.reply <- struct{}{}
 		case metricsCmd:
 			msg.reply <- metricsResult{snapshot: s.handleMetrics(&state)}
