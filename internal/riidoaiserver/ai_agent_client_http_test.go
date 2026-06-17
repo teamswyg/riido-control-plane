@@ -1381,7 +1381,8 @@ func TestHTTPAIAgentClientStopCancelsDurableAssignmentForDaemonPoll(t *testing.T
 		t.Fatalf("stop json: %v", err)
 	}
 	if stopped.AssignmentID != assigned.AssignmentID ||
-		stopped.AssignmentState != AgentAssignmentStateStopped ||
+		stopped.AssignmentState != AgentAssignmentStateStopping ||
+		stopped.WorkStatus != AgentWorkStatusRunning ||
 		stopped.CommentKind != AgentTaskCommentStoppedByUserRequest {
 		t.Fatalf("stop response = %+v, assigned=%+v", stopped, assigned)
 	}
@@ -1411,11 +1412,43 @@ func TestHTTPAIAgentClientStopCancelsDurableAssignmentForDaemonPoll(t *testing.T
 	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
 		t.Fatalf("threads json: %v", err)
 	}
+	if threads.ActiveStream == nil ||
+		len(threads.Threads) != 1 ||
+		threads.Threads[0].AssignmentID != assigned.AssignmentID ||
+		threads.Threads[0].AssignmentState != AgentAssignmentStateStopping {
+		t.Fatalf("threads after stop = %+v", threads)
+	}
+
+	cancelledEvent, err := assignmentStore.RecordAgentEvent(ctx, assigned.AgentID, AgentEventRequest{
+		AssignmentID: assigned.AssignmentID,
+		TaskID:       assigned.TaskID,
+		DaemonID:     openClawPollRequest.DaemonID,
+		DeviceID:     openClawPollRequest.DeviceID,
+		RuntimeID:    openClawPollRequest.RuntimeID,
+		State:        AssignmentCancelled,
+		EventType:    EventAssignmentCancelled,
+		Message:      "provider cancelled after client stop",
+	})
+	if err != nil {
+		t.Fatalf("RecordAgentEvent cancel: %v", err)
+	}
+	if err := aiAgentStore.RecordAIAgentAssignmentEvent(ctx, assigned.AgentID, AgentEventRequest{}, cancelledEvent.Event); err != nil {
+		t.Fatalf("RecordAIAgentAssignmentEvent cancel: %v", err)
+	}
+	threadsResp = httptest.NewRecorder()
+	server.ServeHTTP(threadsResp, threadsReq)
+	if threadsResp.Code != http.StatusOK {
+		t.Fatalf("threads after cancel status=%d body=%s", threadsResp.Code, threadsResp.Body.String())
+	}
+	threads = AIAgentTaskThreadCollectionResponse{}
+	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
+		t.Fatalf("threads after cancel json: %v", err)
+	}
 	if threads.ActiveStream != nil ||
 		len(threads.Threads) != 1 ||
 		threads.Threads[0].AssignmentID != assigned.AssignmentID ||
 		threads.Threads[0].AssignmentState != AgentAssignmentStateStopped {
-		t.Fatalf("threads after stop = %+v", threads)
+		t.Fatalf("threads after cancel = %+v", threads)
 	}
 }
 
