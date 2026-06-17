@@ -2601,6 +2601,9 @@ func normalizeAgentProfileThumbnailURL(value string) (string, error) {
 	if err != nil || parsed.Scheme != "https" || parsed.Host == "" {
 		return "", errors.New("profile_thumbnail_url must be an https URL")
 	}
+	if parsed.RawQuery != "" || parsed.Fragment != "" {
+		return "", errors.New("profile_thumbnail_url must not include query or fragment")
+	}
 	return trimmed, nil
 }
 
