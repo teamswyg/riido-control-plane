@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -186,7 +187,18 @@ func normalizeExternalAuthorizerEndpoint(endpoint string) (string, error) {
 	if parsed.RawQuery != "" || parsed.Fragment != "" {
 		return "", errors.New("riidoaiserver: external authorizer endpoint must not include query or fragment")
 	}
+	if parsed.Scheme == "http" && !externalAuthorizerEndpointHostIsLoopback(parsed.Hostname()) {
+		return "", errors.New("riidoaiserver: external authorizer endpoint must use https unless it binds to localhost or a loopback address")
+	}
 	return parsed.String(), nil
+}
+
+func externalAuthorizerEndpointHostIsLoopback(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	return ip != nil && ip.IsLoopback()
 }
 
 func externalAuthorizerHTTPClient(client *http.Client) *http.Client {
