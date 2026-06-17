@@ -1036,13 +1036,14 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
+	workStatus, assignmentState, completed := stopReadModelProjection(req.durableState)
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
 		RunID:           "run-dev-stop-" + taskID,
-		WorkStatus:      AgentWorkStatusIdle,
-		AssignmentState: AgentAssignmentStateStopped,
+		WorkStatus:      workStatus,
+		AssignmentState: assignmentState,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
 		Message:         "agent work was stopped by user request",
 	}
@@ -1056,9 +1057,9 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
 	}
 	if req.AssignmentID != "" {
-		s.markTaskAgentAssignmentThreadStoppedLocked(taskID, agent.AgentID, req.AssignmentID, AgentTaskCommentStoppedByUserRequest, response.Message)
+		s.markTaskAgentAssignmentThreadStopProjectionLocked(taskID, agent.AgentID, req.AssignmentID, response, completed)
 	} else {
-		s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
+		s.markTaskAgentThreadsStopProjectionLocked(taskID, agent.AgentID, response, completed)
 	}
 	s.upsertTaskThreadFromActionLocked(response, "")
 	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
@@ -1072,6 +1073,7 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTaskAgentAssignment(ctx conte
 		AgentID:      agentID,
 		AssignmentID: strings.TrimSpace(req.AssignmentID),
 		Reason:       req.Reason,
+		durableState: req.durableState,
 	})
 	if err != nil {
 		return response, err
@@ -2373,22 +2375,38 @@ func (s *DevelopmentAIAgentClientStore) markAgentTaskThreadsStoppedLocked(agentI
 }
 
 func (s *DevelopmentAIAgentClientStore) markTaskAgentThreadsStoppedLocked(taskID, agentID string, kind AgentTaskCommentKind, message string) {
+	response := AIAgentTaskActionResponse{
+		WorkStatus:      AgentWorkStatusIdle,
+		AssignmentState: AgentAssignmentStateStopped,
+		CommentKind:     kind,
+		Message:         message,
+	}
+	s.markTaskAgentThreadsStopProjectionLocked(taskID, agentID, response, true)
+}
+
+func (s *DevelopmentAIAgentClientStore) markTaskAgentThreadsStopProjectionLocked(taskID, agentID string, response AIAgentTaskActionResponse, completed bool) {
 	now := time.Now().UTC()
 	threads := s.taskThreads[taskID]
 	for i := range threads {
 		if threads[i].AgentID != agentID || !taskThreadHasActiveStream(threads[i]) {
 			continue
 		}
-		threads[i].WorkStatus = AgentWorkStatusIdle
-		threads[i].AssignmentState = AgentAssignmentStateStopped
-		threads[i].CommentKind = kind
-		threads[i].Message = message
-		threads[i].CompletedAt = now
+		applyTaskThreadStopProjection(&threads[i], response, completed, now)
 	}
 	s.taskThreads[taskID] = threads
 }
 
 func (s *DevelopmentAIAgentClientStore) markTaskAgentAssignmentThreadStoppedLocked(taskID, agentID, assignmentID string, kind AgentTaskCommentKind, message string) {
+	response := AIAgentTaskActionResponse{
+		WorkStatus:      AgentWorkStatusIdle,
+		AssignmentState: AgentAssignmentStateStopped,
+		CommentKind:     kind,
+		Message:         message,
+	}
+	s.markTaskAgentAssignmentThreadStopProjectionLocked(taskID, agentID, assignmentID, response, true)
+}
+
+func (s *DevelopmentAIAgentClientStore) markTaskAgentAssignmentThreadStopProjectionLocked(taskID, agentID, assignmentID string, response AIAgentTaskActionResponse, completed bool) {
 	assignmentID = strings.TrimSpace(assignmentID)
 	if assignmentID == "" {
 		return
@@ -2399,13 +2417,32 @@ func (s *DevelopmentAIAgentClientStore) markTaskAgentAssignmentThreadStoppedLock
 		if threads[i].AgentID != agentID || threads[i].AssignmentID != assignmentID || !taskThreadHasActiveStream(threads[i]) {
 			continue
 		}
-		threads[i].WorkStatus = AgentWorkStatusIdle
-		threads[i].AssignmentState = AgentAssignmentStateStopped
-		threads[i].CommentKind = kind
-		threads[i].Message = message
-		threads[i].CompletedAt = now
+		applyTaskThreadStopProjection(&threads[i], response, completed, now)
 	}
 	s.taskThreads[taskID] = threads
+}
+
+func applyTaskThreadStopProjection(thread *AIAgentTaskThreadRecord, response AIAgentTaskActionResponse, completed bool, now time.Time) {
+	thread.WorkStatus = response.WorkStatus
+	thread.AssignmentState = response.AssignmentState
+	thread.CommentKind = response.CommentKind
+	thread.Message = response.Message
+	if completed {
+		thread.CompletedAt = now
+		return
+	}
+	thread.CompletedAt = time.Time{}
+}
+
+func stopReadModelProjection(durable AssignmentState) (AgentWorkStatus, AgentAssignmentState, bool) {
+	switch durable.Code() {
+	case AssignmentStateCodeCancelling:
+		return AgentWorkStatusRunning, AgentAssignmentStateStopping, false
+	case AssignmentStateCodeCancelled:
+		return AgentWorkStatusIdle, AgentAssignmentStateStopped, true
+	default:
+		return AgentWorkStatusIdle, AgentAssignmentStateStopped, true
+	}
 }
 
 func (s *DevelopmentAIAgentClientStore) agentForMutation(principal AuthorizationResult, agentID string) (AgentClientRecord, bool) {

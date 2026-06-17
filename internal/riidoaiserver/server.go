@@ -129,6 +129,7 @@ type aiAgentAssignmentActionTarget struct {
 	TaskID       string
 	AgentID      string
 	AssignmentID string
+	State        AssignmentState
 }
 
 func (s Server) cancelAIAgentAssignmentBeforeAction(ctx context.Context, principal AuthorizationResult, taskID, agentID, assignmentID, reason string) (aiAgentAssignmentActionTarget, bool, error) {
@@ -140,11 +141,12 @@ func (s Server) cancelAIAgentAssignmentBeforeAction(ctx context.Context, princip
 	if err != nil || !ok {
 		return target, ok, err
 	}
-	_, err = canceller.CancelAssignment(ctx, target.TaskID, CancelAssignmentRequest{
+	cancelled, err := canceller.CancelAssignment(ctx, target.TaskID, CancelAssignmentRequest{
 		AgentID:      target.AgentID,
 		AssignmentID: target.AssignmentID,
 		Reason:       strings.TrimSpace(reason),
 	})
+	target.State = cancelled.State
 	return target, true, err
 }
 
@@ -1223,6 +1225,7 @@ func (s Server) handleAIAgentClientStopTask(w http.ResponseWriter, r *http.Reque
 	} else if ok {
 		req.AgentID = target.AgentID
 		req.AssignmentID = target.AssignmentID
+		req.durableState = target.State
 	}
 	response, err := s.aiAgent.StopAIAgentTask(r.Context(), principal, taskID, req)
 	if err != nil {
@@ -1253,6 +1256,7 @@ func (s Server) handleAIAgentClientStopTaskAgentAssignment(w http.ResponseWriter
 		return
 	} else if ok {
 		req.AssignmentID = target.AssignmentID
+		req.durableState = target.State
 	}
 	response, err := s.aiAgent.StopAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
 	if err != nil {

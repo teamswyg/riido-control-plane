@@ -381,6 +381,7 @@ type UnassignAIAgentTaskRequest struct {
 type AgentAssignmentActionRequest struct {
 	AssignmentID string `json:"assignment_id,omitempty"`
 	Reason       string `json:"reason,omitempty"`
+	durableState AssignmentState
 }
 
 type SubmitAIAgentTaskCommentRequest struct {
@@ -399,6 +400,7 @@ type StopAIAgentTaskRequest struct {
 	AgentID      string `json:"agent_id,omitempty"`
 	AssignmentID string `json:"assignment_id,omitempty"`
 	Reason       string `json:"reason,omitempty"`
+	durableState AssignmentState
 }
 
 type AIAgentTaskActionResponse struct {
