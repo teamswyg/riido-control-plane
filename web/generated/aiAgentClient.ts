@@ -11,6 +11,7 @@ export interface AIAgentTaskActionResponse {
   assignment_id?: string;
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
+  failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   message: string;
   /**
    * completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. 진행 로그(lines)와 분리해 화면 결과 영역에 표시합니다.
@@ -43,6 +44,24 @@ export interface AIAgentTaskThreadCollectionResponse {
 }
 
 /**
+ * terminal failure thread에만 붙는 서버 투영 진단입니다. assignment event metadata의 result/failure 분류를 클라이언트가 문자열 파싱 없이 표시하거나 필터링할 수 있게 합니다.
+ */
+export interface AIAgentTaskThreadFailureDiagnostics {
+  /**
+   * control-plane/daemon 공통 failure category입니다. 예: provider_blocked, provider_timeout, process_aborted, provider_result_failed.
+   */
+  failure_category?: string;
+  /**
+   * 사용자에게 노출 가능한 실패 요약입니다. 로컬 파일 경로나 riido_log transport payload는 포함하지 않습니다.
+   */
+  message?: string;
+  /**
+   * daemon/provider terminal result status입니다. 예: failed, blocked, timeout, aborted.
+   */
+  result_status?: string;
+}
+
+/**
  * task 화면에 표시할 AI Agent thread의 cold record입니다.
  */
 export interface AIAgentTaskThreadRecord {
@@ -51,6 +70,7 @@ export interface AIAgentTaskThreadRecord {
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
   completed_at?: string;
+  failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   lines: AgentThreadProgressLine[];
   message: string;
   /**
@@ -367,6 +387,7 @@ export interface AgentWorkStatusChangedEvent {
   assignment_state?: AgentAssignmentState;
   comment_kind?: AgentTaskCommentKind;
   event_type: "agent_work_status_changed";
+  failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   /**
    * terminal 작업 상태 변경 시 전달되는 최종 결과 본문입니다. 진행 로그 SSE와 분리해 결과 영역 갱신에 사용합니다.
    */

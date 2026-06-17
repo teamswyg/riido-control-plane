@@ -1855,6 +1855,28 @@
       ]
     },
     {
+      "name": "AIAgentTaskThreadFailureDiagnostics",
+      "description": "terminal failure thread에만 붙는 서버 투영 진단입니다. assignment event metadata의 result/failure 분류를 클라이언트가 문자열 파싱 없이 표시하거나 필터링할 수 있게 합니다.",
+      "type": "object",
+      "properties": [
+        {
+          "name": "result_status",
+          "description": "daemon/provider terminal result status입니다. 예: failed, blocked, timeout, aborted.",
+          "type": "string"
+        },
+        {
+          "name": "failure_category",
+          "description": "control-plane/daemon 공통 failure category입니다. 예: provider_blocked, provider_timeout, process_aborted, provider_result_failed.",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "description": "사용자에게 노출 가능한 실패 요약입니다. 로컬 파일 경로나 riido_log transport payload는 포함하지 않습니다.",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "AIAgentTaskActionResponse",
       "description": "task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.",
       "type": "object",
@@ -1914,6 +1936,10 @@
           "name": "result_message",
           "description": "completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. 진행 로그(lines)와 분리해 화면 결과 영역에 표시합니다.",
           "type": "string"
+        },
+        {
+          "name": "failure_diagnostics",
+          "ref": "AIAgentTaskThreadFailureDiagnostics"
         }
       ]
     },
@@ -2065,6 +2091,10 @@
           "name": "result_message",
           "description": "terminal 작업 상태 변경 시 전달되는 최종 결과 본문입니다. 진행 로그 SSE와 분리해 결과 영역 갱신에 사용합니다.",
           "type": "string"
+        },
+        {
+          "name": "failure_diagnostics",
+          "ref": "AIAgentTaskThreadFailureDiagnostics"
         }
       ]
     },
@@ -2267,6 +2297,10 @@
         {
           "name": "assignment_state",
           "ref": "AgentAssignmentState"
+        },
+        {
+          "name": "failure_diagnostics",
+          "ref": "AIAgentTaskThreadFailureDiagnostics"
         },
         {
           "name": "comment_kind",

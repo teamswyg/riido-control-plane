@@ -2930,6 +2930,74 @@ func TestDevelopmentAIAgentClientStoreHidesLocalRuntimePathsFromAssignmentAction
 	}
 }
 
+func TestDevelopmentAIAgentClientStoreExposesFailureDiagnostics(t *testing.T) {
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1"}
+	assigned, err := store.AssignAIAgentTask(context.Background(), principal, "task-failure-diagnostics", AssignAIAgentTaskRequest{
+		AgentID:      "agent-owned-codex",
+		AssignmentID: "asn-failure-diagnostics",
+	})
+	if err != nil {
+		t.Fatalf("AssignAIAgentTask: %v", err)
+	}
+
+	failedEvent := TaskEvent{
+		TaskID:       "task-failure-diagnostics",
+		AssignmentID: assigned.AssignmentID,
+		AgentID:      assigned.AgentID,
+		Type:         EventAssignmentFailed,
+		State:        AssignmentFailed,
+		Message:      "approval_timeout: no headless approval path /tmp/riido/private.txt",
+		Metadata: map[string]string{
+			metadatakeys.AssignmentResultStatus.String():    "blocked",
+			metadatakeys.AssignmentFailureCategory.String(): "provider_blocked",
+		},
+		At: time.Now().UTC(),
+	}
+	if err := store.RecordAIAgentAssignmentEvent(context.Background(), assigned.AgentID, AgentEventRequest{}, failedEvent); err != nil {
+		t.Fatalf("RecordAIAgentAssignmentEvent: %v", err)
+	}
+
+	threads, err := store.ListAIAgentTaskThreads(context.Background(), principal, "task-failure-diagnostics")
+	if err != nil {
+		t.Fatalf("ListAIAgentTaskThreads: %v", err)
+	}
+	if len(threads.Threads) != 1 {
+		t.Fatalf("threads = %+v", threads.Threads)
+	}
+	assertFailureDiagnostics(t, "thread", threads.Threads[0].FailureDiagnostics)
+
+	response := actionResponseFromThread(threads.Threads[0])
+	assertFailureDiagnostics(t, "action response", response.FailureDiagnostics)
+
+	event, ok := lastWorkStatusChangedEventForTask(t, store, principal, "task-failure-diagnostics")
+	if !ok {
+		t.Fatal("missing work status changed event")
+	}
+	assertFailureDiagnostics(t, "work status event", event.FailureDiagnostics)
+}
+
+func assertFailureDiagnostics(t *testing.T, label string, diagnostics *AIAgentTaskThreadFailureDiagnostics) {
+	t.Helper()
+	if diagnostics == nil {
+		t.Fatalf("%s failure diagnostics is nil", label)
+	}
+	if diagnostics.ResultStatus != "blocked" {
+		t.Fatalf("%s result_status = %q", label, diagnostics.ResultStatus)
+	}
+	if diagnostics.FailureCategory != "provider_blocked" {
+		t.Fatalf("%s failure_category = %q", label, diagnostics.FailureCategory)
+	}
+	if !strings.Contains(diagnostics.Message, "approval_timeout") {
+		t.Fatalf("%s message = %q", label, diagnostics.Message)
+	}
+	for _, leaked := range []string{"/Users/", "/tmp/", "file://"} {
+		if strings.Contains(diagnostics.Message, leaked) {
+			t.Fatalf("%s diagnostics leaked local runtime path marker %q: %q", label, leaked, diagnostics.Message)
+		}
+	}
+}
+
 func countWorkStatusChangedEventsForTask(t *testing.T, store *DevelopmentAIAgentClientStore, principal AuthorizationResult, taskID string) int {
 	t.Helper()
 	events, err := store.AIAgentClientEvents(context.Background(), principal)
