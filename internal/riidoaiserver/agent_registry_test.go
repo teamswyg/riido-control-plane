@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
@@ -82,6 +83,9 @@ func TestValidateAssignmentBinding(t *testing.T) {
 			if err == nil || !strings.Contains(err.Error(), tt.want) {
 				t.Fatalf("validateAssignmentBinding err=%v, want containing %q", err, tt.want)
 			}
+			if !errors.Is(err, ErrAgentBindingValidation) {
+				t.Fatalf("validateAssignmentBinding err=%v, want ErrAgentBindingValidation", err)
+			}
 		})
 	}
 }
@@ -124,6 +128,9 @@ func TestValidateDaemonBinding(t *testing.T) {
 			err := validateDaemonBinding(registry, tt.agentID, tt.req)
 			if err == nil || !strings.Contains(err.Error(), tt.want) {
 				t.Fatalf("validateDaemonBinding err=%v, want containing %q", err, tt.want)
+			}
+			if !errors.Is(err, ErrAgentBindingValidation) {
+				t.Fatalf("validateDaemonBinding err=%v, want ErrAgentBindingValidation", err)
 			}
 		})
 	}

@@ -1,7 +1,6 @@
 package riidoaiserver
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -99,10 +98,10 @@ func validateAssignmentBinding(registry AgentRegistry, agentID, runtimeProvider 
 	}
 	binding, ok := registry.LookupAgent(agentID)
 	if !ok {
-		return fmt.Errorf("agent %s is not registered", agentID)
+		return newAgentBindingValidationErrorf("agent %s is not registered", agentID)
 	}
 	if binding.RuntimeProvider != runtimeProvider {
-		return fmt.Errorf("agent %s is bound to runtime_provider %s", agentID, binding.RuntimeProvider)
+		return newAgentBindingValidationErrorf("agent %s is bound to runtime_provider %s", agentID, binding.RuntimeProvider)
 	}
 	return nil
 }
@@ -113,25 +112,25 @@ func validateDaemonBinding(registry AgentRegistry, agentID string, req PollReque
 	}
 	binding, ok := registry.LookupAgent(agentID)
 	if !ok {
-		return fmt.Errorf("agent %s is not registered", agentID)
+		return newAgentBindingValidationErrorf("agent %s is not registered", agentID)
 	}
 	req.DaemonID = strings.TrimSpace(req.DaemonID)
 	req.DeviceID = strings.TrimSpace(req.DeviceID)
 	req.RuntimeID = strings.TrimSpace(req.RuntimeID)
 	if req.DaemonID == "" {
-		return errors.New("daemon_id is required")
+		return newAgentBindingValidationErrorf("daemon_id is required")
 	}
 	if req.RuntimeID == "" {
-		return errors.New("runtime_id is required")
+		return newAgentBindingValidationErrorf("runtime_id is required")
 	}
 	if req.DaemonID != binding.DaemonID {
-		return fmt.Errorf("agent %s is bound to daemon_id %s", agentID, binding.DaemonID)
+		return newAgentBindingValidationErrorf("agent %s is bound to daemon_id %s", agentID, binding.DaemonID)
 	}
 	if binding.DeviceID != "" && req.DeviceID != binding.DeviceID {
-		return fmt.Errorf("agent %s is bound to device_id %s", agentID, binding.DeviceID)
+		return newAgentBindingValidationErrorf("agent %s is bound to device_id %s", agentID, binding.DeviceID)
 	}
 	if req.RuntimeID != binding.RuntimeID {
-		return fmt.Errorf("agent %s is bound to runtime_id %s", agentID, binding.RuntimeID)
+		return newAgentBindingValidationErrorf("agent %s is bound to runtime_id %s", agentID, binding.RuntimeID)
 	}
 	return nil
 }
