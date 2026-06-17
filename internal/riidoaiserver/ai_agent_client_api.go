@@ -142,7 +142,7 @@ type RuntimeRecord struct {
 	Kind                      RuntimeKind           `json:"kind"`
 	Availability              RuntimeAvailability   `json:"availability"`
 	DetectionState            RuntimeDetectionState `json:"detection_state"`
-	ProviderVersion           string                `json:"provider_version,omitempty"`
+	ProviderVersion           string                `json:"provider_version"`
 	OwnerPrincipalID          string                `json:"owner_principal_id,omitempty"`
 	LastDetectedAt            time.Time             `json:"last_detected_at,omitempty"`
 	HasAssignedAgent          bool                  `json:"has_assigned_agent"`
