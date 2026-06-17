@@ -1423,7 +1423,7 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 		}
 	}
 	if !assignmentChanged {
-		if existing, ok := duplicateThreadProgressEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, eventType, req.Metadata); ok {
+		if existing, ok := duplicateAssignmentEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, eventType, req.Metadata); ok {
 			return AgentEventResponse{
 				SchemaVersion: SchemaVersion,
 				Assignment:    copyAssignment(assignment),
@@ -1437,6 +1437,29 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 		Assignment:    copyAssignment(assignment),
 		Event:         event,
 	}, nil
+}
+
+func duplicateAssignmentEvent(state *storeState, taskID, assignmentID, agentID, eventType string, metadata map[string]string) (TaskEvent, bool) {
+	if existing, ok := duplicateAssignmentEventKey(state, taskID, assignmentID, agentID, metadata); ok {
+		return existing, true
+	}
+	return duplicateThreadProgressEvent(state, taskID, assignmentID, agentID, eventType, metadata)
+}
+
+func duplicateAssignmentEventKey(state *storeState, taskID, assignmentID, agentID string, metadata map[string]string) (TaskEvent, bool) {
+	key := strings.TrimSpace(metadata[metadatakeys.AssignmentEventKey.String()])
+	if key == "" {
+		return TaskEvent{}, false
+	}
+	for _, event := range slices.Backward(state.events[taskID]) {
+		if event.AssignmentID != assignmentID ||
+			event.AgentID != agentID ||
+			strings.TrimSpace(event.Metadata[metadatakeys.AssignmentEventKey.String()]) != key {
+			continue
+		}
+		return event, true
+	}
+	return TaskEvent{}, false
 }
 
 func duplicateThreadProgressEvent(state *storeState, taskID, assignmentID, agentID, eventType string, metadata map[string]string) (TaskEvent, bool) {
