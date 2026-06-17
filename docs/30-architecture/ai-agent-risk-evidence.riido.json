@@ -1,0 +1,86 @@
+{
+  "schema_version": "riido-control-plane-ai-agent-risk-evidence.v1",
+  "id": "control-plane-ai-agent-risk-evidence",
+  "riido_task": "RIID-4964",
+  "human_doc": "docs/30-architecture/api-client-delivery.md",
+  "local_evidence": [
+    {
+      "risk": "private-worktree-url-redaction",
+      "status": "verified",
+      "package": "./internal/riidoaiserver",
+      "test": "TestStoreActorDropsSensitiveAssignmentWorktreeURL",
+      "proves": "Assignment worktree URLs are dropped before durable store persistence."
+    },
+    {
+      "risk": "active-stream-handoff",
+      "status": "verified",
+      "package": "./internal/riidoaiserver",
+      "test": "TestHTTPAIAgentClientDevelopmentV2WorkspaceScopedCreateAndThreadStream",
+      "proves": "Task action responses expose the active stream handoff for queued or running work."
+    },
+    {
+      "risk": "terminal-late-progress-fence",
+      "status": "verified",
+      "package": "./internal/riidoaiserver",
+      "test": "TestC2LateRuntimeProgressDoesNotReactivateStoppedThread",
+      "proves": "Late daemon progress cannot reactivate a stopped terminal task thread."
+    },
+    {
+      "risk": "assign-reconcile-scope",
+      "status": "verified",
+      "package": "./internal/riidoaiserver",
+      "test": "TestHTTPAIAgentClientAssignReconcilesRequestedTaskOnly",
+      "proves": "Assign mutation reconcile scope stays on the requested task instead of scanning unrelated active work."
+    },
+    {
+      "risk": "stale-terminal-busy-count",
+      "status": "verified",
+      "package": "./internal/riidoaiserver",
+      "test": "TestAIAgentClientStaleTerminalAgentCountDoesNotQueueNextAssignment",
+      "proves": "Terminal stale projections do not make an agent look busy for new assignment decisions."
+    },
+    {
+      "risk": "partial-progress-coalescing",
+      "status": "verified",
+      "package": "./internal/riidoaiserver",
+      "test": "TestDevelopmentAIAgentClientStoreCoalescesAssistantPartialThreadProgressBatches",
+      "proves": "Assistant partial progress is coalesced before read-model fanout."
+    },
+    {
+      "risk": "projection-read-repair",
+      "status": "verified",
+      "package": "./internal/riidoaiserver",
+      "test": "TestHTTPTaskThreadListRepairsStaleReadModelFromAssignmentProjection",
+      "proves": "Cold task-thread reads can repair stale read models from durable assignment projection."
+    },
+    {
+      "risk": "additive-agent-active",
+      "status": "verified",
+      "package": "./internal/riidoaiserver",
+      "test": "TestStoreActorAdditiveAssignmentKeepsExistingAgentActive",
+      "proves": "Adding another agent keeps existing active agent assignment state intact."
+    }
+  ],
+  "remaining_boundaries": [
+    {
+      "id": "private-repo-auth",
+      "owner": "contracts-control-plane-infra-policy",
+      "reason": "Private repository checkout requires an explicit credential issuance policy and is intentionally fail-closed until that policy exists."
+    },
+    {
+      "id": "web-approval-round-trip",
+      "owner": "contracts-control-plane-client",
+      "reason": "Dangerous headless tool approval needs a web-visible approval contract before automation can execute it."
+    },
+    {
+      "id": "client-active-stream-consumption",
+      "owner": "riido-client",
+      "reason": "The API response now carries active_stream, but client-side subscription timing remains outside this repository."
+    },
+    {
+      "id": "generated-fsm-conformance",
+      "owner": "riido-contracts-control-plane",
+      "reason": "FSM metadata and conformance generation need a contracts-owned SSOT before this repository can consume generated state machines."
+    }
+  ]
+}

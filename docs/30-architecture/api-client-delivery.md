@@ -345,6 +345,21 @@ endpoint shape; it is executable evidence that generated facade paths such as
 `riido.v2.aiAgent.agents.daemon.stop` still map to live control-plane handlers
 before client delivery.
 
+The AI Agent unresolved-risk closure evidence is executable in
+[`ai-agent-risk-evidence.riido.json`](ai-agent-risk-evidence.riido.json) and is
+verified by `go test ./tools/aiagentrisk`. The manifest maps each closed risk to
+the concrete control-plane test that proves it:
+`TestStoreActorDropsSensitiveAssignmentWorktreeURL`,
+`TestHTTPAIAgentClientDevelopmentV2WorkspaceScopedCreateAndThreadStream`,
+`TestC2LateRuntimeProgressDoesNotReactivateStoppedThread`,
+`TestHTTPAIAgentClientAssignReconcilesRequestedTaskOnly`,
+`TestAIAgentClientStaleTerminalAgentCountDoesNotQueueNextAssignment`,
+`TestDevelopmentAIAgentClientStoreCoalescesAssistantPartialThreadProgressBatches`,
+`TestHTTPTaskThreadListRepairsStaleReadModelFromAssignmentProjection`, and
+`TestStoreActorAdditiveAssignmentKeepsExistingAgentActive`. The same manifest
+also keeps unresolved ownership boundaries explicit so a future cleanup cannot
+silently relabel them as solved.
+
 This keeps SSOT ownership layered instead of duplicated:
 
 - `riido-contracts` owns canonical vocabulary, policy grammar, enum/sum-type

@@ -12,6 +12,7 @@ on:
       - "docs/migration/control-plane.md"
       - "cmd/riido_ai_server/main.go"
       - "internal/riidoaiserver/doc.go"
+      - "tools/aiagentrisk/**"
   pull_request:
     paths:
       - ".github/workflows/architecture-docs.yml"
@@ -22,6 +23,7 @@ on:
       - "docs/migration/control-plane.md"
       - "cmd/riido_ai_server/main.go"
       - "internal/riidoaiserver/doc.go"
+      - "tools/aiagentrisk/**"
 
 jobs:
   docs:
@@ -43,6 +45,7 @@ jobs:
           test -f docs/30-architecture/runtime-deployment-boundary.md
           test -f docs/30-architecture/runtime-cd-ownership.md
           test -f docs/30-architecture/runtime-cd-ownership.riido.json
+          test -f docs/30-architecture/ai-agent-risk-evidence.riido.json
           test -f docs/50-roadmap/open-questions.md
       - name: Verify architecture docs avoid stale ownership paths
         run: |
@@ -83,5 +86,7 @@ jobs:
           done
       - name: Verify Go dependency allowlist
         run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
+      - name: Verify AI Agent risk evidence
+        run: go test ./tools/aiagentrisk -count=1
       - name: Test
         run: go test ./...
