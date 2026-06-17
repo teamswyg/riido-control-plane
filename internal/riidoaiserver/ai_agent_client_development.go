@@ -15,6 +15,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/teamswyg/riido-contracts/metadatakeys"
+	"github.com/teamswyg/riido-contracts/progressmessage"
 	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
 
@@ -2259,7 +2260,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		if len(event.Lines) > 0 {
 			threads[i].Message = event.Lines[len(event.Lines)-1].Message
 		}
-		threads[i].Lines = append(threads[i].Lines, copyProgressLines(event.Lines)...)
+		threads[i].Lines = mergeThreadProgressLines(threads[i].Lines, event.Lines)
 		s.taskThreads[event.TaskID] = threads
 		return
 	}
@@ -2310,6 +2311,10 @@ func filterUnseenProgressLines(existing, incoming []AgentThreadProgressLine) []A
 	}
 	out := incoming[:0]
 	for _, line := range incoming {
+		if progressLineReplacesPrevious(line) {
+			out = append(out, line)
+			continue
+		}
 		if line.Seq > 0 {
 			if _, ok := seen[line.Seq]; ok {
 				continue
@@ -2319,6 +2324,31 @@ func filterUnseenProgressLines(existing, incoming []AgentThreadProgressLine) []A
 		out = append(out, line)
 	}
 	return out
+}
+
+func mergeThreadProgressLines(existing, incoming []AgentThreadProgressLine) []AgentThreadProgressLine {
+	out := copyProgressLines(existing)
+	for _, line := range incoming {
+		if progressLineReplacesPrevious(line) {
+			replaced := false
+			for i := len(out) - 1; i >= 0; i-- {
+				if progressLineReplacesPrevious(out[i]) {
+					out[i] = line
+					replaced = true
+					break
+				}
+			}
+			if replaced {
+				continue
+			}
+		}
+		out = append(out, line)
+	}
+	return out
+}
+
+func progressLineReplacesPrevious(line AgentThreadProgressLine) bool {
+	return strings.TrimSpace(line.MessageKey) == progressmessage.AssistantPartialKey
 }
 
 func progressLineSeqSeen(lines []AgentThreadProgressLine, seq int) bool {
