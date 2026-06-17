@@ -124,7 +124,9 @@ func (m *StoreOperationMetrics) ObserveStoreOperation(obs StoreOperationObservat
 }
 
 func storeOperationFailed(err error) bool {
-	return err != nil && !errors.Is(err, context.Canceled)
+	return err != nil &&
+		!errors.Is(err, context.Canceled) &&
+		!errors.Is(err, ErrAgentBindingValidation)
 }
 
 func (m *StoreOperationMetrics) ApplyToMetricsSnapshot(snapshot MetricsSnapshot) MetricsSnapshot {
