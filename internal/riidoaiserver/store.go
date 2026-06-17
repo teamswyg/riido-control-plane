@@ -86,6 +86,13 @@ func OpenStoreWithConfig(ctx context.Context, config StoreConfig) (*Store, error
 			}
 		}
 	}
+	if reader, ok := config.OperationStore.(AssignmentProjectionReader); ok {
+		projections, err := loadReplayAssignmentProjections(ctx, &state, reader)
+		if err != nil {
+			return nil, err
+		}
+		overlayAssignmentProjections(&state, projections)
+	}
 	return newStoreWithConfig(config, state), nil
 }
 

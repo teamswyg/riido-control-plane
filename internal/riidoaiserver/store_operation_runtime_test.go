@@ -200,6 +200,71 @@ func TestOpenStoreWithConfigReplaysAssignmentOperationsWithoutSnapshot(t *testin
 	}
 }
 
+func TestOpenStoreWithConfigOverlaysAssignmentProjections(t *testing.T) {
+	ctx := context.Background()
+	createdAt := time.Date(2026, 6, 18, 1, 2, 3, 0, time.UTC)
+	running := Assignment{
+		ID:              "asn-000001",
+		TaskID:          "task-a",
+		ComponentID:     "component-1",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "make hello world",
+		State:           AssignmentRunning,
+		CreatedAt:       createdAt,
+		UpdatedAt:       createdAt.Add(time.Minute),
+	}
+	completed := running
+	completed.State = AssignmentCompleted
+	completed.UpdatedAt = createdAt.Add(2 * time.Minute)
+	operations := &runtimeFakeProjectionReaderOperationStore{
+		runtimeFakeAssignmentOperationStore: runtimeFakeAssignmentOperationStore{records: []AssignmentOperationRecord{{
+			SchemaVersion: AssignmentOperationSchemaVersion,
+			OperationID:   "agent-event:asn-000001:1",
+			OperationType: AssignmentOperationAgentEvent,
+			TaskID:        running.TaskID,
+			AssignmentID:  running.ID,
+			AgentID:       running.AgentID,
+			Assignment:    running,
+			Events: []TaskEvent{{
+				Seq:          1,
+				TaskID:       running.TaskID,
+				AssignmentID: running.ID,
+				AgentID:      running.AgentID,
+				Type:         EventAssignmentRunning,
+				State:        AssignmentRunning,
+				At:           running.UpdatedAt,
+			}},
+			RecordedAt: running.UpdatedAt,
+		}}},
+		projections: map[string]AssignmentProjection{
+			completed.ID: {
+				Assignment:   completed,
+				LastEventSeq: 2,
+			},
+		},
+	}
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{OperationStore: operations})
+	if err != nil {
+		t.Fatalf("OpenStoreWithConfig: %v", err)
+	}
+	defer reloaded.Close()
+	metrics, err := reloaded.Metrics(ctx)
+	if err != nil {
+		t.Fatalf("Metrics: %v", err)
+	}
+	if metrics.AssignmentsByState[AssignmentRunning] != 0 || metrics.AssignmentsByState[AssignmentCompleted] != 1 {
+		t.Fatalf("metrics states = %+v", metrics.AssignmentsByState)
+	}
+	poll, err := reloaded.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent: %v", err)
+	}
+	if poll.Action != PollNone || poll.Assignment != nil {
+		t.Fatalf("poll after projection overlay = %+v", poll)
+	}
+}
+
 func TestHeartbeatAgentRefreshesDurableActiveLease(t *testing.T) {
 	now := time.Date(2026, 5, 28, 1, 2, 3, 0, time.UTC)
 	operations := &runtimeFakeActiveLeaseOperationStore{}
@@ -446,6 +511,16 @@ func (s *runtimeFakeAssignmentOperationStore) LoadAssignmentOperations(context.C
 func (s *runtimeFakeAssignmentOperationStore) Close() error {
 	s.closed = true
 	return nil
+}
+
+type runtimeFakeProjectionReaderOperationStore struct {
+	runtimeFakeAssignmentOperationStore
+	projections map[string]AssignmentProjection
+}
+
+func (s *runtimeFakeProjectionReaderOperationStore) LoadAssignmentProjection(_ context.Context, assignmentID string) (AssignmentProjection, bool, error) {
+	projection, ok := s.projections[assignmentID]
+	return projection, ok, nil
 }
 
 type runtimeFakeClaimingAssignmentOperationStore struct {
