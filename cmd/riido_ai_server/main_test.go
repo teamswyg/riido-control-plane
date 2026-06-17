@@ -528,6 +528,18 @@ func TestAuthorizerFromEnvRejectsExternalAPIKeyWithoutEndpoint(t *testing.T) {
 	}
 }
 
+func TestAuthorizerFromEnvRejectsRemotePlainHTTPExternalAuthorizer(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envExternalAuthzURL, "http://authz.example.com/check")
+	t.Setenv(envExternalAuthzAPIKey, "internal-key")
+
+	if _, err := authorizerFromEnv(); err == nil ||
+		!strings.Contains(err.Error(), envExternalAuthzURL) ||
+		!strings.Contains(err.Error(), "https") {
+		t.Fatalf("expected remote plain HTTP external authorizer rejection, got %v", err)
+	}
+}
+
 func TestAuthorizerFromEnvIncludesReviewAccountCredential(t *testing.T) {
 	clearRiidoAIServerEnv(t)
 	t.Setenv(envReviewAccountTokenHash, testTokenSHA256("review-token"))

@@ -139,10 +139,26 @@ func TestExternalHTTPAuthorizerRejectsUnsafeEndpoint(t *testing.T) {
 		"https://user:pass@authz.example.com",
 		"https://authz.example.com/check?token=raw",
 		"https://authz.example.com/check#fragment",
+		"http://authz.example.com/check",
+		"http://192.0.2.10/check",
 	} {
 		t.Run(strings.ReplaceAll(endpoint, "/", "_"), func(t *testing.T) {
 			if _, err := NewExternalHTTPAuthorizer(ExternalHTTPAuthorizerConfig{Endpoint: endpoint}); err == nil {
 				t.Fatalf("expected endpoint %q to be rejected", endpoint)
+			}
+		})
+	}
+}
+
+func TestExternalHTTPAuthorizerAllowsPlainHTTPOnlyForLoopback(t *testing.T) {
+	for _, endpoint := range []string{
+		"http://localhost/check",
+		"http://127.0.0.1:8080/check",
+		"http://[::1]:8080/check",
+	} {
+		t.Run(endpoint, func(t *testing.T) {
+			if _, err := NewExternalHTTPAuthorizer(ExternalHTTPAuthorizerConfig{Endpoint: endpoint}); err != nil {
+				t.Fatalf("expected loopback endpoint %q to be allowed: %v", endpoint, err)
 			}
 		})
 	}
