@@ -73,15 +73,6 @@ func TestAIAgentClientProjectionReconcileTaskScopeSkipsUnrelatedActiveThreads(t 
 	if err != nil {
 		t.Fatalf("CreateAIAgent current: %v", err)
 	}
-	otherAgent, err := store.CreateAIAgent(ctx, principal, CreateAgentConfigurationRequest{
-		Name:       "other scope agent",
-		Visibility: AgentVisibilityPrivate,
-		RuntimeID:  "runtime-cursor-dev",
-		ModelID:    stringPtr("cursor-auto"),
-	})
-	if err != nil {
-		t.Fatalf("CreateAIAgent other: %v", err)
-	}
 	current, err := store.AssignAIAgentTask(ctx, principal, "task-current-scope", AssignAIAgentTaskRequest{
 		AgentID:      currentAgent.Agent.AgentID,
 		AssignmentID: "asn-current-scope",
@@ -90,7 +81,7 @@ func TestAIAgentClientProjectionReconcileTaskScopeSkipsUnrelatedActiveThreads(t 
 		t.Fatalf("AssignAIAgentTask current: %v", err)
 	}
 	other, err := store.AssignAIAgentTask(ctx, principal, "task-other-scope", AssignAIAgentTaskRequest{
-		AgentID:      otherAgent.Agent.AgentID,
+		AgentID:      "agent-public-openclaw",
 		AssignmentID: "asn-other-scope",
 	})
 	if err != nil {
