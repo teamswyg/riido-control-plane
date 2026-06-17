@@ -4336,6 +4336,9 @@
           "comment_kind": {
             "$ref": "#/components/schemas/AgentTaskCommentKind"
           },
+          "failure_diagnostics": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadFailureDiagnostics"
+          },
           "message": {
             "type": "string"
           },
@@ -4424,6 +4427,24 @@
         ],
         "type": "object"
       },
+      "AIAgentTaskThreadFailureDiagnostics": {
+        "description": "terminal failure thread에만 붙는 서버 투영 진단입니다. assignment event metadata의 result/failure 분류를 클라이언트가 문자열 파싱 없이 표시하거나 필터링할 수 있게 합니다.",
+        "properties": {
+          "failure_category": {
+            "description": "control-plane/daemon 공통 failure category입니다. 예: provider_blocked, provider_timeout, process_aborted, provider_result_failed.",
+            "type": "string"
+          },
+          "message": {
+            "description": "사용자에게 노출 가능한 실패 요약입니다. 로컬 파일 경로나 riido_log transport payload는 포함하지 않습니다.",
+            "type": "string"
+          },
+          "result_status": {
+            "description": "daemon/provider terminal result status입니다. 예: failed, blocked, timeout, aborted.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AIAgentTaskThreadRecord": {
         "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
         "properties": {
@@ -4442,6 +4463,9 @@
           "completed_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "failure_diagnostics": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadFailureDiagnostics"
           },
           "lines": {
             "items": {
@@ -5166,6 +5190,9 @@
               "agent_work_status_changed"
             ],
             "type": "string"
+          },
+          "failure_diagnostics": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadFailureDiagnostics"
           },
           "result_message": {
             "description": "terminal 작업 상태 변경 시 전달되는 최종 결과 본문입니다. 진행 로그 SSE와 분리해 결과 영역 갱신에 사용합니다.",

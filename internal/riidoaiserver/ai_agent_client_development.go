@@ -1574,7 +1574,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	}
 
 	responseMessage := assignmentEventVisibleThreadMessage(state, strings.TrimSpace(event.Type), message, previousThread.Message)
-	response := assignmentEventActionResponse(thread, state, responseMessage)
+	response := assignmentEventActionResponse(thread, state, responseMessage, event.Metadata)
 	response.AssignmentID = assignmentID
 	s.upsertTaskThreadFromActionLocked(response, "")
 	shouldFanoutStatus := shouldFanoutAgentTaskActionEvent(hadThread, previousThread, response)
@@ -1847,17 +1847,18 @@ func (s *DevelopmentAIAgentClientStore) taskThreadForStopTargetLocked(taskID, ag
 
 func actionResponseFromThread(thread AIAgentTaskThreadRecord) AIAgentTaskActionResponse {
 	return AIAgentTaskActionResponse{
-		SchemaVersion:   SchemaVersion,
-		TaskID:          thread.TaskID,
-		AssignmentID:    thread.AssignmentID,
-		AgentID:         thread.AgentID,
-		ThreadID:        thread.ThreadID,
-		RunID:           thread.RunID,
-		WorkStatus:      thread.WorkStatus,
-		AssignmentState: thread.AssignmentState,
-		CommentKind:     thread.CommentKind,
-		Message:         clientVisibleTaskThreadMessage(thread),
-		ResultMessage:   clientVisibleTaskThreadResultMessage(thread),
+		SchemaVersion:      SchemaVersion,
+		TaskID:             thread.TaskID,
+		AssignmentID:       thread.AssignmentID,
+		AgentID:            thread.AgentID,
+		ThreadID:           thread.ThreadID,
+		RunID:              thread.RunID,
+		WorkStatus:         thread.WorkStatus,
+		AssignmentState:    thread.AssignmentState,
+		CommentKind:        thread.CommentKind,
+		Message:            clientVisibleTaskThreadMessage(thread),
+		ResultMessage:      clientVisibleTaskThreadResultMessage(thread),
+		FailureDiagnostics: clientVisibleFailureDiagnostics(thread.FailureDiagnostics),
 	}
 }
 
@@ -1919,7 +1920,7 @@ func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(th
 			continue
 		}
 		previous := threads[i]
-		response := assignmentEventActionResponse(threads[i], projection.Assignment.State, "")
+		response := assignmentEventActionResponse(threads[i], projection.Assignment.State, "", nil)
 		response.AssignmentID = projection.Assignment.ID
 		if previous.AssignmentID == response.AssignmentID &&
 			previous.WorkStatus == response.WorkStatus &&
@@ -1932,6 +1933,7 @@ func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(th
 		threads[i].WorkStatus = response.WorkStatus
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].QueueDiagnostics = copyQueueDiagnostics(diagnostics)
+		threads[i].FailureDiagnostics = copyFailureDiagnostics(response.FailureDiagnostics)
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
 		threads[i].ResultMessage = response.ResultMessage
@@ -1979,7 +1981,7 @@ func assignedAgentProfileFromAgent(agent AgentClientRecord) AssignedAgentProfile
 	}
 }
 
-func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state AssignmentState, message string) AIAgentTaskActionResponse {
+func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state AssignmentState, message string, metadata map[string]string) AIAgentTaskActionResponse {
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          thread.TaskID,
@@ -2049,6 +2051,9 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 	}
 	if assignmentStateCarriesResultMessage(state) {
 		response.ResultMessage = response.Message
+	}
+	if response.AssignmentState == AgentAssignmentStateFailed {
+		response.FailureDiagnostics = failureDiagnosticsFromAssignmentEvent(metadata, response.Message)
 	}
 	return response
 }
@@ -2151,25 +2156,27 @@ func shouldFanoutAgentTaskActionEvent(hadThread bool, previous AIAgentTaskThread
 	}
 	return previous.WorkStatus != response.WorkStatus ||
 		previous.AssignmentState != response.AssignmentState ||
-		previous.CommentKind != response.CommentKind
+		previous.CommentKind != response.CommentKind ||
+		!failureDiagnosticsEqual(previous.FailureDiagnostics, response.FailureDiagnostics)
 }
 
 func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAgentTaskActionResponse, sourceCommentID string) {
 	now := time.Now().UTC()
 	thread := AIAgentTaskThreadRecord{
-		ThreadID:        response.ThreadID,
-		TaskID:          response.TaskID,
-		AssignmentID:    response.AssignmentID,
-		AgentID:         response.AgentID,
-		RunID:           response.RunID,
-		SourceCommentID: strings.TrimSpace(sourceCommentID),
-		WorkStatus:      response.WorkStatus,
-		AssignmentState: response.AssignmentState,
-		CommentKind:     response.CommentKind,
-		Message:         response.Message,
-		ResultMessage:   response.ResultMessage,
-		StartedAt:       now,
-		Lines:           []AgentThreadProgressLine{},
+		ThreadID:           response.ThreadID,
+		TaskID:             response.TaskID,
+		AssignmentID:       response.AssignmentID,
+		AgentID:            response.AgentID,
+		RunID:              response.RunID,
+		SourceCommentID:    strings.TrimSpace(sourceCommentID),
+		WorkStatus:         response.WorkStatus,
+		AssignmentState:    response.AssignmentState,
+		CommentKind:        response.CommentKind,
+		Message:            response.Message,
+		ResultMessage:      response.ResultMessage,
+		FailureDiagnostics: copyFailureDiagnostics(response.FailureDiagnostics),
+		StartedAt:          now,
+		Lines:              []AgentThreadProgressLine{},
 	}
 	if !taskThreadHasActiveStream(thread) {
 		thread.CompletedAt = now
@@ -2185,6 +2192,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		}
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].QueueDiagnostics = nil
+		threads[i].FailureDiagnostics = copyFailureDiagnostics(response.FailureDiagnostics)
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
 		threads[i].ResultMessage = response.ResultMessage
@@ -2206,19 +2214,20 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(response AIAgentTaskActionResponse, sourceMessageID string) {
 	now := time.Now().UTC()
 	thread := AIAgentTaskThreadRecord{
-		ThreadID:        response.ThreadID,
-		TaskID:          response.TaskID,
-		AssignmentID:    response.AssignmentID,
-		AgentID:         response.AgentID,
-		RunID:           response.RunID,
-		SourceMessageID: strings.TrimSpace(sourceMessageID),
-		WorkStatus:      response.WorkStatus,
-		AssignmentState: response.AssignmentState,
-		CommentKind:     response.CommentKind,
-		Message:         response.Message,
-		ResultMessage:   response.ResultMessage,
-		StartedAt:       now,
-		Lines:           []AgentThreadProgressLine{},
+		ThreadID:           response.ThreadID,
+		TaskID:             response.TaskID,
+		AssignmentID:       response.AssignmentID,
+		AgentID:            response.AgentID,
+		RunID:              response.RunID,
+		SourceMessageID:    strings.TrimSpace(sourceMessageID),
+		WorkStatus:         response.WorkStatus,
+		AssignmentState:    response.AssignmentState,
+		CommentKind:        response.CommentKind,
+		Message:            response.Message,
+		ResultMessage:      response.ResultMessage,
+		FailureDiagnostics: copyFailureDiagnostics(response.FailureDiagnostics),
+		StartedAt:          now,
+		Lines:              []AgentThreadProgressLine{},
 	}
 	if !taskThreadHasActiveStream(thread) {
 		thread.CompletedAt = now
@@ -2234,6 +2243,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 		}
 		threads[i].WorkStatus = response.WorkStatus
 		threads[i].AssignmentState = response.AssignmentState
+		threads[i].FailureDiagnostics = copyFailureDiagnostics(response.FailureDiagnostics)
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
 		threads[i].ResultMessage = response.ResultMessage
@@ -2529,17 +2539,18 @@ func (s *DevelopmentAIAgentClientStore) agentForTaskStopLocked(principal Authori
 
 func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {
 	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
-		EventType:       AgentClientEventWorkStatusChanged,
-		SchemaVersion:   SchemaVersion,
-		AgentID:         response.AgentID,
-		TaskID:          response.TaskID,
-		AssignmentID:    response.AssignmentID,
-		ThreadID:        response.ThreadID,
-		RunID:           response.RunID,
-		WorkStatus:      response.WorkStatus,
-		AssignmentState: response.AssignmentState,
-		CommentKind:     response.CommentKind,
-		ResultMessage:   response.ResultMessage,
+		EventType:          AgentClientEventWorkStatusChanged,
+		SchemaVersion:      SchemaVersion,
+		AgentID:            response.AgentID,
+		TaskID:             response.TaskID,
+		AssignmentID:       response.AssignmentID,
+		ThreadID:           response.ThreadID,
+		RunID:              response.RunID,
+		WorkStatus:         response.WorkStatus,
+		AssignmentState:    response.AssignmentState,
+		CommentKind:        response.CommentKind,
+		ResultMessage:      response.ResultMessage,
+		FailureDiagnostics: copyFailureDiagnostics(response.FailureDiagnostics),
 	})
 }
 
@@ -3169,6 +3180,7 @@ func copyTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
 	thread.Message = clientVisibleTaskThreadMessage(thread)
 	thread.ResultMessage = clientVisibleTaskThreadResultMessage(thread)
 	thread.QueueDiagnostics = copyQueueDiagnostics(thread.QueueDiagnostics)
+	thread.FailureDiagnostics = clientVisibleFailureDiagnostics(thread.FailureDiagnostics)
 	return thread
 }
 
@@ -3197,6 +3209,44 @@ func copyQueueDiagnostics(in *AIAgentTaskThreadQueueDiagnostics) *AIAgentTaskThr
 	}
 	out := *in
 	return &out
+}
+
+func failureDiagnosticsFromAssignmentEvent(metadata map[string]string, message string) *AIAgentTaskThreadFailureDiagnostics {
+	diagnostics := AIAgentTaskThreadFailureDiagnostics{
+		ResultStatus:    strings.TrimSpace(metadata[metadatakeys.AssignmentResultStatus.String()]),
+		FailureCategory: strings.TrimSpace(metadata[metadatakeys.AssignmentFailureCategory.String()]),
+		Message:         clientVisibleTaskThreadText(message),
+	}
+	if diagnostics.ResultStatus == "" && diagnostics.FailureCategory == "" && diagnostics.Message == "" {
+		return nil
+	}
+	return &diagnostics
+}
+
+func copyFailureDiagnostics(in *AIAgentTaskThreadFailureDiagnostics) *AIAgentTaskThreadFailureDiagnostics {
+	if in == nil {
+		return nil
+	}
+	out := *in
+	return &out
+}
+
+func clientVisibleFailureDiagnostics(in *AIAgentTaskThreadFailureDiagnostics) *AIAgentTaskThreadFailureDiagnostics {
+	out := copyFailureDiagnostics(in)
+	if out == nil {
+		return nil
+	}
+	out.Message = clientVisibleTaskThreadText(out.Message)
+	return out
+}
+
+func failureDiagnosticsEqual(a, b *AIAgentTaskThreadFailureDiagnostics) bool {
+	if a == nil || b == nil {
+		return a == nil && b == nil
+	}
+	return a.ResultStatus == b.ResultStatus &&
+		a.FailureCategory == b.FailureCategory &&
+		a.Message == b.Message
 }
 
 func queueDiagnosticsEqual(a, b *AIAgentTaskThreadQueueDiagnostics) bool {
