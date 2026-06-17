@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"sort"
@@ -82,15 +83,9 @@ func NewECSContainerCredentialsProvider(config ECSContainerCredentialsProviderCo
 	if endpoint == "" {
 		return nil, errors.New("riidoaiserver: ECS credentials endpoint is required")
 	}
-	parsed, err := url.Parse(endpoint)
+	endpoint, err := normalizeECSContainerCredentialsEndpoint(endpoint)
 	if err != nil {
-		return nil, fmt.Errorf("parse ECS credentials endpoint: %w", err)
-	}
-	if parsed.Scheme != "http" && parsed.Scheme != "https" {
-		return nil, errors.New("riidoaiserver: ECS credentials endpoint must use http or https")
-	}
-	if parsed.Host == "" {
-		return nil, errors.New("riidoaiserver: ECS credentials endpoint host is required")
+		return nil, err
 	}
 	httpClient := config.HTTPClient
 	if httpClient == nil {
@@ -101,6 +96,37 @@ func NewECSContainerCredentialsProvider(config ECSContainerCredentialsProviderCo
 		authorizationToken: strings.TrimSpace(config.AuthorizationToken),
 		httpClient:         httpClient,
 	}, nil
+}
+
+func normalizeECSContainerCredentialsEndpoint(endpoint string) (string, error) {
+	parsed, err := url.Parse(endpoint)
+	if err != nil {
+		return "", fmt.Errorf("parse ECS credentials endpoint: %w", err)
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint must use http or https")
+	}
+	if parsed.Host == "" {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint host is required")
+	}
+	if parsed.User != nil {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint must not include userinfo")
+	}
+	if parsed.RawQuery != "" || parsed.Fragment != "" {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint must not include query or fragment")
+	}
+	if parsed.Scheme == "http" && !ecsCredentialsEndpointHostAllowsPlainHTTP(parsed.Hostname()) {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint must use https unless it binds to localhost, loopback, or link-local metadata address")
+	}
+	return parsed.String(), nil
+}
+
+func ecsCredentialsEndpointHostAllowsPlainHTTP(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	return ip != nil && (ip.IsLoopback() || ip.IsLinkLocalUnicast())
 }
 
 func (p *ECSContainerCredentialsProvider) Credentials(ctx context.Context) (AWSCredentials, error) {
