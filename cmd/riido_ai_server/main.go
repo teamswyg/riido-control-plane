@@ -546,10 +546,14 @@ func awsContainerCredentialsProviderFromEnvFor(feature string) (riidoaiserver.AW
 	if endpoint == "" {
 		return nil, fmt.Errorf("%s or %s is required when %s is configured", envAWSContainerCredentialsFullURI, envAWSContainerCredentialsRelativeURI, feature)
 	}
-	return riidoaiserver.NewECSContainerCredentialsProvider(riidoaiserver.ECSContainerCredentialsProviderConfig{
+	provider, err := riidoaiserver.NewECSContainerCredentialsProvider(riidoaiserver.ECSContainerCredentialsProviderConfig{
 		Endpoint:           endpoint,
 		AuthorizationToken: strings.TrimSpace(os.Getenv(envAWSContainerAuthorizationToken)),
 	})
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", envAWSContainerCredentialsFullURI, err)
+	}
+	return provider, nil
 }
 
 func envOptionalPositiveInt64(key string) (int64, error) {
