@@ -55,6 +55,14 @@ func OpenStoreWithConfig(ctx context.Context, config StoreConfig) (*Store, error
 	if ctx == nil {
 		ctx = context.Background()
 	}
+	now := config.Now
+	if now == nil {
+		now = func() time.Time { return time.Now().UTC() }
+	}
+	activeLeaseDuration := config.ActiveLeaseDuration
+	if activeLeaseDuration <= 0 {
+		activeLeaseDuration = time.Duration(DefaultAssignmentActiveLeaseSeconds) * time.Second
+	}
 	state := newStoreState()
 	loadedSnapshot := false
 	if config.SnapshotStore != nil {
@@ -92,6 +100,14 @@ func OpenStoreWithConfig(ctx context.Context, config StoreConfig) (*Store, error
 			return nil, err
 		}
 		overlayAssignmentProjections(&state, projections)
+	}
+	repairs := repairStaleReplayActiveAssignments(&state, now().UTC(), activeLeaseDuration)
+	if config.OperationStore != nil {
+		for _, repair := range repairs {
+			if err := config.OperationStore.SaveAssignmentOperation(ctx, repair); err != nil {
+				return nil, err
+			}
+		}
 	}
 	return newStoreWithConfig(config, state), nil
 }
