@@ -178,7 +178,10 @@ func TestOpenStoreWithConfigReplaysAssignmentOperationsWithoutSnapshot(t *testin
 	}
 	source.Close()
 
-	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{OperationStore: operations})
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{
+		Now:            func() time.Time { return fixedNow },
+		OperationStore: operations,
+	})
 	if err != nil {
 		t.Fatalf("OpenStoreWithConfig: %v", err)
 	}
@@ -262,6 +265,48 @@ func TestOpenStoreWithConfigOverlaysAssignmentProjections(t *testing.T) {
 	}
 	if poll.Action != PollNone || poll.Assignment != nil {
 		t.Fatalf("poll after projection overlay = %+v", poll)
+	}
+}
+
+func TestOpenStoreWithConfigFailsStaleReplayActiveWithoutProjection(t *testing.T) {
+	ctx := context.Background()
+	createdAt := time.Date(2026, 6, 18, 1, 2, 3, 0, time.UTC)
+	replayNow := createdAt.Add(time.Hour)
+	running := Assignment{
+		ID:              "asn-000001",
+		TaskID:          "task-a",
+		ComponentID:     "component-1",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "make hello world",
+		State:           AssignmentRunning,
+		CreatedAt:       createdAt,
+		UpdatedAt:       createdAt.Add(time.Minute),
+	}
+	operations := &runtimeFakeProjectionReaderOperationStore{
+		runtimeFakeAssignmentOperationStore: runtimeFakeAssignmentOperationStore{records: []AssignmentOperationRecord{
+			runtimeAssignmentOperationRecord(running, EventAssignmentRunning, 1),
+		}},
+		projections: map[string]AssignmentProjection{},
+	}
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{
+		Now:                 func() time.Time { return replayNow },
+		ActiveLeaseDuration: time.Minute,
+		OperationStore:      operations,
+	})
+	if err != nil {
+		t.Fatalf("OpenStoreWithConfig: %v", err)
+	}
+	defer reloaded.Close()
+	metrics, err := reloaded.Metrics(ctx)
+	if err != nil {
+		t.Fatalf("Metrics: %v", err)
+	}
+	if metrics.AssignmentsByState[AssignmentRunning] != 0 || metrics.AssignmentsByState[AssignmentFailed] != 1 {
+		t.Fatalf("metrics states = %+v", metrics.AssignmentsByState)
+	}
+	if len(operations.records) != 2 || operations.records[1].Assignment.State != AssignmentFailed {
+		t.Fatalf("repair operation not persisted: %+v", operations.records)
 	}
 }
 
@@ -497,6 +542,29 @@ func TestPollAgentUsesDurableCancellingProjection(t *testing.T) {
 type runtimeFakeAssignmentOperationStore struct {
 	records []AssignmentOperationRecord
 	closed  bool
+}
+
+func runtimeAssignmentOperationRecord(assignment Assignment, eventType string, seq int64) AssignmentOperationRecord {
+	event := TaskEvent{
+		Seq:          seq,
+		TaskID:       assignment.TaskID,
+		AssignmentID: assignment.ID,
+		AgentID:      assignment.AgentID,
+		Type:         eventType,
+		State:        assignment.State,
+		At:           assignment.UpdatedAt,
+	}
+	return AssignmentOperationRecord{
+		SchemaVersion: AssignmentOperationSchemaVersion,
+		OperationID:   assignmentOperationID(AssignmentOperationAgentEvent, assignment, []TaskEvent{event}),
+		OperationType: AssignmentOperationAgentEvent,
+		TaskID:        assignment.TaskID,
+		AssignmentID:  assignment.ID,
+		AgentID:       assignment.AgentID,
+		Assignment:    assignment,
+		Events:        []TaskEvent{event},
+		RecordedAt:    assignment.UpdatedAt,
+	}
 }
 
 func (s *runtimeFakeAssignmentOperationStore) SaveAssignmentOperation(_ context.Context, record AssignmentOperationRecord) error {
