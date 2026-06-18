@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 func TestAssignmentOperationRuntimeCapturesStateMutations(t *testing.T) {
@@ -307,6 +309,69 @@ func TestOpenStoreWithConfigFailsStaleReplayActiveWithoutProjection(t *testing.T
 	}
 	if len(operations.records) != 2 || operations.records[1].Assignment.State != AssignmentFailed {
 		t.Fatalf("repair operation not persisted: %+v", operations.records)
+	}
+}
+
+func TestOpenStoreWithConfigFailsStaleReplayQueuedWithoutProjection(t *testing.T) {
+	ctx := context.Background()
+	createdAt := time.Date(2026, 6, 16, 18, 0, 0, 0, time.UTC)
+	replayNow := createdAt.Add(staleReplayQueuedAssignmentMaxAge + time.Minute)
+	queued := replayOperationRecord("task-a", "asn-000001", "agent-1", AssignmentQueued, 1, createdAt)
+	operations := &runtimeFakeProjectionReaderOperationStore{
+		runtimeFakeAssignmentOperationStore: runtimeFakeAssignmentOperationStore{records: []AssignmentOperationRecord{queued}},
+		projections:                         map[string]AssignmentProjection{},
+	}
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{
+		Now:            func() time.Time { return replayNow },
+		OperationStore: operations,
+	})
+	if err != nil {
+		t.Fatalf("OpenStoreWithConfig: %v", err)
+	}
+	defer reloaded.Close()
+	metrics, err := reloaded.Metrics(ctx)
+	if err != nil {
+		t.Fatalf("Metrics: %v", err)
+	}
+	if metrics.AssignmentsByState[AssignmentQueued] != 0 || metrics.AssignmentsByState[AssignmentFailed] != 1 {
+		t.Fatalf("metrics states = %+v", metrics.AssignmentsByState)
+	}
+	last := operations.records[len(operations.records)-1]
+	if last.Assignment.State != AssignmentFailed || len(last.Events) != 1 {
+		t.Fatalf("repair operation = %+v", last)
+	}
+	categoryKey := metadatakeys.AssignmentFailureCategory.String()
+	if last.Events[0].Metadata[categoryKey] != "stale_replay_queued_assignment" {
+		t.Fatalf("repair metadata = %+v", last.Events[0].Metadata)
+	}
+}
+
+func TestOpenStoreWithConfigKeepsFreshReplayQueuedWithoutProjection(t *testing.T) {
+	ctx := context.Background()
+	createdAt := time.Date(2026, 6, 18, 1, 2, 3, 0, time.UTC)
+	replayNow := createdAt.Add(time.Hour)
+	queued := replayOperationRecord("task-a", "asn-000001", "agent-1", AssignmentQueued, 1, createdAt)
+	operations := &runtimeFakeProjectionReaderOperationStore{
+		runtimeFakeAssignmentOperationStore: runtimeFakeAssignmentOperationStore{records: []AssignmentOperationRecord{queued}},
+		projections:                         map[string]AssignmentProjection{},
+	}
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{
+		Now:            func() time.Time { return replayNow },
+		OperationStore: operations,
+	})
+	if err != nil {
+		t.Fatalf("OpenStoreWithConfig: %v", err)
+	}
+	defer reloaded.Close()
+	metrics, err := reloaded.Metrics(ctx)
+	if err != nil {
+		t.Fatalf("Metrics: %v", err)
+	}
+	if metrics.AssignmentsByState[AssignmentQueued] != 1 || metrics.AssignmentsByState[AssignmentFailed] != 0 {
+		t.Fatalf("metrics states = %+v", metrics.AssignmentsByState)
+	}
+	if len(operations.records) != 1 {
+		t.Fatalf("fresh queue should not persist repair operation: %+v", operations.records)
 	}
 }
 

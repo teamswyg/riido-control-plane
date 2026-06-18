@@ -101,7 +101,7 @@ func OpenStoreWithConfig(ctx context.Context, config StoreConfig) (*Store, error
 		}
 		overlayAssignmentProjections(&state, projections)
 	}
-	repairs := repairStaleReplayActiveAssignments(&state, now().UTC(), activeLeaseDuration)
+	repairs := repairStaleReplayAssignments(&state, now().UTC(), activeLeaseDuration)
 	if config.OperationStore != nil {
 		for _, repair := range repairs {
 			if err := config.OperationStore.SaveAssignmentOperation(ctx, repair); err != nil {
