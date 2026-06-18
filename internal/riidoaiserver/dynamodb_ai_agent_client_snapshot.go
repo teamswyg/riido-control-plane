@@ -42,6 +42,7 @@ type DynamoDBAIAgentClientSnapshot struct {
 	now                 func() time.Time
 	credentialsProvider AWSCredentialsProvider
 	metrics             *AIAgentClientPersistenceMetrics
+	partHashes          map[string]string
 }
 
 type dynamoDBAIAgentClientSnapshotCommand struct {
@@ -191,26 +192,54 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 	defer func() {
 		s.observeAIAgentClientSnapshot(AIAgentClientSnapshotLoad, startedAt, snapshotBytes, err)
 	}()
+	items, err := s.querySnapshotItems(ctx, credentials)
+	if err != nil {
+		return AIAgentClientSnapshot{}, false, err
+	}
+	current := dynamoDBAIAgentClientSnapshotCurrentItem(items)
+	if len(current) == 0 {
+		return AIAgentClientSnapshot{}, false, nil
+	}
+	if dynamoDBAIAgentClientSnapshotItemIsLegacy(current) {
+		snapshot, snapshotBytes, err = decodeLegacyDynamoDBAIAgentClientSnapshot(current)
+		if err != nil {
+			return AIAgentClientSnapshot{}, false, err
+		}
+		if err := s.save(ctx, snapshot, credentials); err != nil {
+			return snapshot, true, nil
+		}
+		return snapshot, true, nil
+	}
+	snapshot, snapshotBytes, err = decodeSplitDynamoDBAIAgentClientSnapshot(items)
+	if err != nil {
+		return AIAgentClientSnapshot{}, false, err
+	}
+	s.partHashes = dynamoDBAIAgentClientSnapshotPartHashes(items)
+	return snapshot, true, nil
+}
+
+func (s *DynamoDBAIAgentClientSnapshot) querySnapshotItems(ctx context.Context, credentials AWSCredentials) ([]map[string]map[string]string, error) {
 	payload, err := json.Marshal(struct {
-		TableName      string                       `json:"TableName"`
-		ConsistentRead bool                         `json:"ConsistentRead"`
-		Key            map[string]map[string]string `json:"Key"`
+		TableName                 string                       `json:"TableName"`
+		ConsistentRead            bool                         `json:"ConsistentRead"`
+		KeyConditionExpression    string                       `json:"KeyConditionExpression"`
+		ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues"`
 	}{
-		TableName:      s.tableName,
-		ConsistentRead: false,
-		Key: map[string]map[string]string{
-			"pk": {"S": dynamoDBAIAgentClientSnapshotPK},
-			"sk": {"S": dynamoDBAIAgentClientSnapshotSK},
+		TableName:              s.tableName,
+		ConsistentRead:         false,
+		KeyConditionExpression: "pk = :pk",
+		ExpressionAttributeValues: map[string]map[string]string{
+			":pk": {"S": dynamoDBAIAgentClientSnapshotPK},
 		},
 	})
 	if err != nil {
-		return AIAgentClientSnapshot{}, false, err
+		return nil, err
 	}
 	body, err := doDynamoDBJSON(ctx, dynamoDBRequest{
 		endpoint:     s.endpoint,
 		endpointHost: s.endpointHost,
 		region:       s.region,
-		target:       dynamoDBGetItemTarget,
+		target:       dynamoDBQueryTarget,
 		payload:      payload,
 		credentials:  credentials,
 		httpClient:   s.httpClient,
@@ -220,40 +249,15 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 		},
 	})
 	if err != nil {
-		return AIAgentClientSnapshot{}, false, fmt.Errorf("dynamodb load AI Agent client snapshot: %w", err)
+		return nil, fmt.Errorf("dynamodb load AI Agent client snapshot: %w", err)
 	}
 	var response struct {
-		Item map[string]map[string]string `json:"Item"`
+		Items []map[string]map[string]string `json:"Items"`
 	}
 	if err := json.Unmarshal(body, &response); err != nil {
-		return AIAgentClientSnapshot{}, false, fmt.Errorf("decode DynamoDB AI Agent client snapshot response: %w", err)
+		return nil, fmt.Errorf("decode DynamoDB AI Agent client snapshot response: %w", err)
 	}
-	if len(response.Item) == 0 {
-		return AIAgentClientSnapshot{}, false, nil
-	}
-	var snapshotReader io.Reader
-	if gzipped := response.Item["snapshot_gzip"]["S"]; gzipped != "" {
-		snapshotBytes = int64(len(gzipped))
-		raw, err := gunzipBase64(gzipped)
-		if err != nil {
-			return AIAgentClientSnapshot{}, false, fmt.Errorf("decode DynamoDB AI Agent client snapshot gzip: %w", err)
-		}
-		snapshotReader = bytes.NewReader(raw)
-	} else if rawSnapshot := response.Item["snapshot_json"]["S"]; rawSnapshot != "" {
-		// Legacy items written before gzip compression.
-		snapshotBytes = int64(len(rawSnapshot))
-		snapshotReader = strings.NewReader(rawSnapshot)
-	} else {
-		return AIAgentClientSnapshot{}, false, errors.New("decode DynamoDB AI Agent client snapshot response: snapshot_gzip or snapshot_json is required")
-	}
-	snapshot, err = decodeAIAgentClientSnapshot(snapshotReader)
-	if err != nil {
-		return AIAgentClientSnapshot{}, false, fmt.Errorf("decode DynamoDB AI Agent client snapshot json: %w", err)
-	}
-	if snapshot.SchemaVersion != AIAgentClientPersistenceSchemaVersion {
-		return AIAgentClientSnapshot{}, false, fmt.Errorf("unsupported AI Agent client snapshot schema_version %q", snapshot.SchemaVersion)
-	}
-	return snapshot, true, nil
+	return response.Items, nil
 }
 
 func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAgentClientSnapshot, credentials AWSCredentials) (err error) {
@@ -268,33 +272,27 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 	if snapshot.SavedAt.IsZero() {
 		snapshot.SavedAt = s.now()
 	}
-	snapshotJSON, err := json.Marshal(snapshot)
+	items, hashes, encodedBytes, err := encodeSplitDynamoDBAIAgentClientSnapshot(snapshot, s.partHashes)
 	if err != nil {
 		return err
 	}
-	// The snapshot is one DynamoDB item (400 KB hard limit). The replay event log
-	// embeds full device records, so the raw JSON grows well past the limit and
-	// every write starts failing. gzip is highly effective on this repetitive
-	// JSON, keeping the item small. Load handles both gzip and legacy plain JSON.
-	snapshotGzip, err := gzipBase64(snapshotJSON)
-	if err != nil {
-		return err
+	snapshotBytes = encodedBytes
+	for _, item := range items {
+		if err := s.putSnapshotItem(ctx, item, credentials); err != nil {
+			return err
+		}
 	}
-	snapshotBytes = int64(len(snapshotGzip))
+	s.partHashes = hashes
+	return nil
+}
+
+func (s *DynamoDBAIAgentClientSnapshot) putSnapshotItem(ctx context.Context, item map[string]map[string]string, credentials AWSCredentials) error {
 	payload, err := json.Marshal(struct {
 		TableName string                       `json:"TableName"`
 		Item      map[string]map[string]string `json:"Item"`
 	}{
 		TableName: s.tableName,
-		Item: map[string]map[string]string{
-			"pk":                         {"S": dynamoDBAIAgentClientSnapshotPK},
-			"sk":                         {"S": dynamoDBAIAgentClientSnapshotSK},
-			"schema_version":             {"S": AIAgentClientPersistenceSchemaVersion},
-			"snapshot_gzip":              {"S": snapshotGzip},
-			"saved_at":                   {"S": snapshot.SavedAt.UTC().Format(time.RFC3339Nano)},
-			"next_device_credential_seq": {"N": fmt.Sprintf("%d", snapshot.NextDeviceCredentialSeq)},
-			"next_daemon_command":        {"N": fmt.Sprintf("%d", snapshot.NextDaemonCommand)},
-		},
+		Item:      item,
 	})
 	if err != nil {
 		return err
