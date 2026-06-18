@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func repairStaleReplayActiveAssignments(state *storeState, now time.Time, activeLeaseDuration time.Duration) []AssignmentOperationRecord {
+func repairStaleReplayAssignments(state *storeState, now time.Time, activeLeaseDuration time.Duration) []AssignmentOperationRecord {
 	if state == nil {
 		return nil
 	}
@@ -15,7 +15,20 @@ func repairStaleReplayActiveAssignments(state *storeState, now time.Time, active
 	ids := replayStaleActiveAssignmentIDs(state, now.UTC(), activeLeaseDuration)
 	repairs := make([]AssignmentOperationRecord, 0, len(ids))
 	for _, id := range ids {
-		repairs = append(repairs, repairStaleReplayActiveAssignment(state, state.assignments[id], now.UTC()))
+		repairs = append(repairs, repairReplayAssignmentAsFailed(
+			state,
+			state.assignments[id],
+			staleReplayActiveAssignmentEvent,
+			now.UTC(),
+		))
+	}
+	for _, id := range replayStaleQueuedAssignmentIDs(state, now.UTC()) {
+		repairs = append(repairs, repairReplayAssignmentAsFailed(
+			state,
+			state.assignments[id],
+			staleReplayQueuedAssignmentEvent,
+			now.UTC(),
+		))
 	}
 	if len(repairs) > 0 {
 		rebuildAssignmentIndexes(state)
@@ -37,24 +50,4 @@ func replayStaleActiveAssignmentIDs(state *storeState, now time.Time, activeLeas
 	}
 	sort.Strings(ids)
 	return ids
-}
-
-func repairStaleReplayActiveAssignment(state *storeState, assignment Assignment, now time.Time) AssignmentOperationRecord {
-	state.nextEventSeq++
-	assignment.State = AssignmentFailed
-	assignment.UpdatedAt = now
-	state.assignments[assignment.ID] = assignment
-	event := staleReplayActiveAssignmentEvent(assignment, state.nextEventSeq, now)
-	state.events[assignment.TaskID] = append(state.events[assignment.TaskID], event)
-	return AssignmentOperationRecord{
-		SchemaVersion: AssignmentOperationSchemaVersion,
-		OperationID:   assignmentOperationID(AssignmentOperationAgentEvent, assignment, []TaskEvent{event}),
-		OperationType: AssignmentOperationAgentEvent,
-		TaskID:        assignment.TaskID,
-		AssignmentID:  assignment.ID,
-		AgentID:       assignment.AgentID,
-		Assignment:    assignment,
-		Events:        []TaskEvent{event},
-		RecordedAt:    now,
-	}
 }

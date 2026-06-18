@@ -7,10 +7,7 @@ import (
 )
 
 func staleReplayActiveAssignmentEvent(assignment Assignment, seq int64, at time.Time) TaskEvent {
-	metadata := map[string]string{
-		metadatakeys.AssignmentFailureCategory.String(): "stale_replay_active_assignment",
-		metadatakeys.AssignmentResultStatus.String():    "failed",
-	}
+	metadata := staleReplayAssignmentMetadata("stale_replay_active_assignment")
 	if assignment.LeaseToken != "" {
 		metadata["lease_token"] = assignment.LeaseToken
 	}
@@ -24,5 +21,26 @@ func staleReplayActiveAssignmentEvent(assignment Assignment, seq int64, at time.
 		Message:      "active assignment replay repaired after stale projection drift",
 		Metadata:     metadata,
 		At:           at,
+	}
+}
+
+func staleReplayQueuedAssignmentEvent(assignment Assignment, seq int64, at time.Time) TaskEvent {
+	return TaskEvent{
+		Seq:          seq,
+		TaskID:       assignment.TaskID,
+		AssignmentID: assignment.ID,
+		AgentID:      assignment.AgentID,
+		Type:         EventAssignmentFailed,
+		State:        AssignmentFailed,
+		Message:      "queued assignment replay repaired after stale queue timeout",
+		Metadata:     staleReplayAssignmentMetadata("stale_replay_queued_assignment"),
+		At:           at,
+	}
+}
+
+func staleReplayAssignmentMetadata(category string) map[string]string {
+	return map[string]string{
+		metadatakeys.AssignmentFailureCategory.String(): category,
+		metadatakeys.AssignmentResultStatus.String():    "failed",
 	}
 }
