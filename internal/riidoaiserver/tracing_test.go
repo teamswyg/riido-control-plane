@@ -143,21 +143,30 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 		TaskThreads:             map[string][]AIAgentTaskThreadRecord{},
 		NextDeviceCredentialSeq: 1,
 	}
-	snapshotJSON, err := json.Marshal(snapshot)
-	if err != nil {
-		t.Fatalf("marshal snapshot: %v", err)
-	}
+	items := map[string]map[string]map[string]string{}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = io.ReadAll(r.Body)
-		if r.Header.Get("X-Amz-Target") == dynamoDBGetItemTarget {
-			_ = json.NewEncoder(w).Encode(map[string]any{
-				"Item": map[string]any{
-					"snapshot_json": map[string]string{"S": string(snapshotJSON)},
-				},
-			})
+		body, _ := io.ReadAll(r.Body)
+		switch r.Header.Get("X-Amz-Target") {
+		case dynamoDBPutItemTarget:
+			var payload struct {
+				Item map[string]map[string]string `json:"Item"`
+			}
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Errorf("decode PutItem payload: %v", err)
+			}
+			items[payload.Item["sk"]["S"]] = payload.Item
+			_, _ = w.Write([]byte(`{}`))
+		case dynamoDBQueryTarget:
+			out := make([]map[string]map[string]string, 0, len(items))
+			for _, item := range items {
+				out = append(out, item)
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"Items": out})
+		default:
+			t.Errorf("target = %q", r.Header.Get("X-Amz-Target"))
+			_, _ = w.Write([]byte(`{}`))
 			return
 		}
-		_, _ = w.Write([]byte(`{}`))
 	}))
 	defer server.Close()
 	provider, err := NewStaticAWSCredentialsProvider("AKID", "SECRET", "")
@@ -184,7 +193,7 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 	}
 
 	names := traceSpanNames(recorder.snapshot())
-	for _, want := range []string{"aws.dynamodb.PutItem", "aws.dynamodb.GetItem"} {
+	for _, want := range []string{"aws.dynamodb.PutItem", "aws.dynamodb.Query"} {
 		if !slices.Contains(names, want) {
 			t.Fatalf("missing span %q in %v", want, names)
 		}
@@ -197,8 +206,8 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 	if got := spanByName["aws.dynamodb.PutItem"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotSave.String() {
 		t.Fatalf("PutItem store operation = %q, want %q", got, AIAgentClientSnapshotSave.String())
 	}
-	if got := spanByName["aws.dynamodb.GetItem"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotLoad.String() {
-		t.Fatalf("GetItem store operation = %q, want %q", got, AIAgentClientSnapshotLoad.String())
+	if got := spanByName["aws.dynamodb.Query"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotLoad.String() {
+		t.Fatalf("Query store operation = %q, want %q", got, AIAgentClientSnapshotLoad.String())
 	}
 }
 
