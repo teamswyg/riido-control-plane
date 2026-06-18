@@ -423,6 +423,31 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 		if assignment.State.Code() != AssignmentStateCodeQueued {
 			continue
 		}
+		if assignmentQueuedPastMaxAge(assignment, at) {
+			repair := dynamoDBAssignmentClaimRepair{
+				Operation:            dynamoDBFailStaleQueuedOperation(candidate, at),
+				ExpectedState:        AssignmentQueued,
+				ExpectedLastEventSeq: candidate.LastEventSeq,
+			}
+			payload, err := s.claimRepairOnlyTransactionPayload(repair)
+			if err != nil {
+				return AssignmentClaimResult{}, err
+			}
+			_, err = doDynamoDBJSON(ctx, dynamoDBRequest{
+				endpoint:     s.endpoint,
+				endpointHost: s.endpointHost,
+				region:       s.region,
+				target:       dynamoDBTransactWriteTarget,
+				payload:      payload,
+				credentials:  credentials,
+				httpClient:   s.httpClient,
+				now:          s.now,
+			})
+			if err == nil || isDynamoDBTransactionContention(err) {
+				continue
+			}
+			return AssignmentClaimResult{}, fmt.Errorf("dynamodb repair stale queued assignment: %w", err)
+		}
 		var repairs []dynamoDBAssignmentClaimRepair
 		var activeCondition *dynamoDBTransactWriteConditionCheckAction
 		clearMessage := ""

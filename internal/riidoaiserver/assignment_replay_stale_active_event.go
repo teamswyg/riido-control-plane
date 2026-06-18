@@ -25,6 +25,13 @@ func staleReplayActiveAssignmentEvent(assignment Assignment, seq int64, at time.
 }
 
 func staleReplayQueuedAssignmentEvent(assignment Assignment, seq int64, at time.Time) TaskEvent {
+	event := staleQueuedAssignmentEvent(assignment, seq, at)
+	event.Message = "queued assignment replay repaired after stale queue timeout"
+	event.Metadata = staleReplayAssignmentMetadata("stale_replay_queued_assignment")
+	return event
+}
+
+func staleQueuedAssignmentEvent(assignment Assignment, seq int64, at time.Time) TaskEvent {
 	return TaskEvent{
 		Seq:          seq,
 		TaskID:       assignment.TaskID,
@@ -32,8 +39,8 @@ func staleReplayQueuedAssignmentEvent(assignment Assignment, seq int64, at time.
 		AgentID:      assignment.AgentID,
 		Type:         EventAssignmentFailed,
 		State:        AssignmentFailed,
-		Message:      "queued assignment replay repaired after stale queue timeout",
-		Metadata:     staleReplayAssignmentMetadata("stale_replay_queued_assignment"),
+		Message:      "queued assignment repaired after stale queue timeout",
+		Metadata:     staleReplayAssignmentMetadata("stale_queued_assignment"),
 		At:           at,
 	}
 }
