@@ -12,7 +12,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `39`; runtime: `1`; internal: `3`; tools: `34`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `100`; max file lines: `2717`.
+File line budget target: `75`; files over target: `99`; max file lines: `2717`.
 
 | File | Lines |
 | --- | ---: |
@@ -24,8 +24,8 @@ File line budget target: `75`; files over target: `100`; max file lines: `2717`.
 | `internal/riidoaiserver/dynamodb_assignment_operation_store_test.go` | 1472 |
 | `tools/reactquerygen/main.go` | 1395 |
 | `tools/reactquerygen/figma_projection_test.go` | 1281 |
-| `tools/deploypolicy/deploy_policy_test.go` | 935 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
+| `cmd/riido_ai_server/main.go` | 791 |
 
 ## Packages
 
