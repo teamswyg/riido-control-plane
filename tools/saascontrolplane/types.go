@@ -18,10 +18,11 @@ type manifest struct {
 }
 
 type boundary struct {
-	ID           string        `json:"id"`
-	Summary      string        `json:"summary"`
-	Workflow     string        `json:"workflow"`
-	SourceChecks []sourceCheck `json:"source_checks"`
+	ID               string        `json:"id"`
+	Summary          string        `json:"summary"`
+	Workflow         string        `json:"workflow"`
+	EvidenceArtifact string        `json:"evidence_artifact,omitempty"`
+	SourceChecks     []sourceCheck `json:"source_checks"`
 }
 
 type sourceCheck struct {

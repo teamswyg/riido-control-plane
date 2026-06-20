@@ -22,25 +22,25 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 
 ## Executable Boundaries
 
-| Boundary | Workflow | Source checks |
-| --- | --- | ---: |
-| `assignment-contract` | `.github/workflows/assignment-contract.yml` | 2 |
-| `long-poll` | `.github/workflows/assignment-store-actor.yml` | 1 |
-| `multi-agent-task` | `.github/workflows/assignment-store-actor.yml` | 2 |
-| `prompt-composer` | `.github/workflows/assignment-http-adapter.yml` | 1 |
-| `runtime-snapshot` | `.github/workflows/assignment-store-actor.yml` | 2 |
-| `store-actor` | `.github/workflows/assignment-store-actor.yml` | 1 |
-| `snapshot-outbox` | `.github/workflows/store-snapshot-file-outbox.yml` | 1 |
-| `assignment-http` | `.github/workflows/assignment-http-adapter.yml` | 1 |
-| `task-event-sse` | `.github/workflows/assignment-sse-adapter.yml` | 1 |
-| `metrics-http` | `.github/workflows/metrics-http-adapter.yml` | 2 |
-| `cloudwatch-emf` | `.github/workflows/cloudwatch-emf.yml` | 1 |
-| `dynamodb-eventbridge` | `.github/workflows/dynamodb-eventbridge-adapters.yml` | 2 |
-| `aws-facade` | `.github/workflows/aws-adapters-facade.yml` | 1 |
-| `health-ready-cmd` | `.github/workflows/health-ready-cmd.yml` | 2 |
-| `review-account-seed` | `.github/workflows/review-account-seed.yml` | 2 |
-| `container-image` | `.github/workflows/container-image-contract.yml` | 1 |
-| `provider-status` | `.github/workflows/provider-status.yml` | 2 |
+| Boundary | Workflow | Artifact | Source checks |
+| --- | --- | --- | ---: |
+| `assignment-contract` | `.github/workflows/assignment-contract.yml` | `assignment-contract-evidence` | 2 |
+| `long-poll` | `.github/workflows/assignment-store-actor.yml` | `-` | 1 |
+| `multi-agent-task` | `.github/workflows/assignment-store-actor.yml` | `-` | 2 |
+| `prompt-composer` | `.github/workflows/assignment-http-adapter.yml` | `-` | 1 |
+| `runtime-snapshot` | `.github/workflows/assignment-store-actor.yml` | `-` | 2 |
+| `store-actor` | `.github/workflows/assignment-store-actor.yml` | `-` | 1 |
+| `snapshot-outbox` | `.github/workflows/store-snapshot-file-outbox.yml` | `-` | 1 |
+| `assignment-http` | `.github/workflows/assignment-http-adapter.yml` | `assignment-http-adapter-evidence` | 1 |
+| `task-event-sse` | `.github/workflows/assignment-sse-adapter.yml` | `-` | 1 |
+| `metrics-http` | `.github/workflows/metrics-http-adapter.yml` | `-` | 2 |
+| `cloudwatch-emf` | `.github/workflows/cloudwatch-emf.yml` | `-` | 1 |
+| `dynamodb-eventbridge` | `.github/workflows/dynamodb-eventbridge-adapters.yml` | `-` | 2 |
+| `aws-facade` | `.github/workflows/aws-adapters-facade.yml` | `-` | 1 |
+| `health-ready-cmd` | `.github/workflows/health-ready-cmd.yml` | `-` | 2 |
+| `review-account-seed` | `.github/workflows/review-account-seed.yml` | `-` | 2 |
+| `container-image` | `.github/workflows/container-image-contract.yml` | `-` | 1 |
+| `provider-status` | `.github/workflows/provider-status.yml` | `-` | 2 |
 
 ## Evidence Loop
 

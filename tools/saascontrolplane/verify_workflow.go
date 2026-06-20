@@ -28,12 +28,27 @@ func verifyFocusedWorkflows(repo string, workflows []string) error {
 	return nil
 }
 
-func verifyBoundaryWorkflow(m manifest, item boundary) error {
+func verifyBoundaryWorkflow(repo string, m manifest, item boundary) error {
 	if item.Workflow == "" {
 		return fmt.Errorf("boundary %q missing workflow", item.ID)
 	}
 	if !stringSet(m.FocusedWorkflows)[item.Workflow] {
 		return fmt.Errorf("boundary %q uses unregistered workflow %q", item.ID, item.Workflow)
+	}
+	if item.EvidenceArtifact != "" {
+		return verifyBoundaryArtifact(repo, item)
+	}
+	return nil
+}
+
+func verifyBoundaryArtifact(repo string, item boundary) error {
+	body, err := os.ReadFile(repoPath(repo, item.Workflow))
+	if err != nil {
+		return fmt.Errorf("read boundary workflow %q: %w", item.Workflow, err)
+	}
+	text := string(body)
+	if !strings.Contains(text, item.EvidenceArtifact) || !strings.Contains(text, "evidence-out") {
+		return fmt.Errorf("boundary %q workflow does not publish %s", item.ID, item.EvidenceArtifact)
 	}
 	return nil
 }

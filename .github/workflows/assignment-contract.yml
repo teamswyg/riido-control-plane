@@ -7,8 +7,10 @@ on:
       - ".github/workflows/assignment-contract.yml"
       - ".github/workflows/agent-runtime-binding.yml"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/20-domain/agent-runtime-binding.md"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -23,8 +25,10 @@ on:
       - ".github/workflows/assignment-contract.yml"
       - ".github/workflows/agent-runtime-binding.yml"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/20-domain/agent-runtime-binding.md"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -53,5 +57,19 @@ jobs:
             printf 'Disallowed assignment contract imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify assignment contract executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/saascontrolplane -count=1
+          go run ./tools/saascontrolplane \
+            -boundary assignment-contract \
+            -check-doc \
+            -evidence-out out/assignment-contract-evidence.json
       - name: Test assignment contract
         run: go test ./internal/riidoaiserver -run 'AssignmentContract|AssignmentAPI|StaticAgentRegistry|ValidateAssignmentBinding|ValidateDaemonBinding' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment-contract-evidence
+          path: out/assignment-contract-evidence.json
+          if-no-files-found: error

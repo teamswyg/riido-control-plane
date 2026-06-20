@@ -32,11 +32,18 @@ func renderFacts(b *strings.Builder, m manifest) {
 
 func renderBoundaries(b *strings.Builder, boundaries []boundary) {
 	b.WriteString("## Executable Boundaries\n\n")
-	b.WriteString("| Boundary | Workflow | Source checks |\n| --- | --- | ---: |\n")
+	b.WriteString("| Boundary | Workflow | Artifact | Source checks |\n| --- | --- | --- | ---: |\n")
 	for _, item := range boundaries {
-		fmt.Fprintf(b, "| `%s` | `%s` | %d |\n", item.ID, item.Workflow, len(item.SourceChecks))
+		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | %d |\n", item.ID, item.Workflow, emptyDash(item.EvidenceArtifact), len(item.SourceChecks))
 	}
 	b.WriteString("\n")
+}
+
+func emptyDash(value string) string {
+	if value == "" {
+		return "-"
+	}
+	return value
 }
 
 func phraseList(generatedDoc string, phrases []phrase) string {

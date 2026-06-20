@@ -15,7 +15,7 @@ func verifyBoundaries(repo string, m manifest) error {
 			return fmt.Errorf("duplicate boundary %q", item.ID)
 		}
 		seen[item.ID] = true
-		if err := verifyBoundaryWorkflow(m, item); err != nil {
+		if err := verifyBoundaryWorkflow(repo, m, item); err != nil {
 			return err
 		}
 		if len(item.SourceChecks) == 0 {
