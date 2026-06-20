@@ -15,11 +15,11 @@
 
 | Step | Evidence |
 | --- | --- |
-| Observe | Several workflows execute tests or live checks while durable JSON evidence can be missing, non-strict, disconnected from the uploaded artifact path, produced by tools that no workflow invokes, or produced by tools that are invoked only without evidence-out. |
-| Hypothesis | A workflow evidence manifest can make CI observability debt explicit, prove that each evidence-out file is bound to a fail-closed artifact upload, and ensure evidence-capable tools are exercised by public CI in evidence-producing mode. |
-| Execute | Scan GitHub Actions workflows, classify evidence coverage, require any executable workflow gap to be registered, require artifact upload steps to fail closed, require every evidence-out path to be uploaded, compare evidence-out capable tools with workflow invocations, and require tool-level evidence-out bindings. |
-| Evaluate | The verifier fails on unregistered executable workflows, non-strict artifact uploads, missing evidence-out upload bindings, evidence-capable tools with no workflow coverage, evidence-capable tools without an uploaded evidence-out invocation, stale generated docs, or unused accepted-gap entries. |
-| Retrospective | The repository can now distinguish evidence-covered workflows from accepted debt, keep artifact evidence fail-closed, prove evidence-out files reach durable artifacts, require evidence tools to be exercised in CI, require each evidence tool to produce uploaded evidence, and reduce the gap slice by slice. |
+| Observe | Several workflows execute tests or live checks while durable JSON evidence can be missing, non-strict, disconnected from the uploaded artifact path, produced by tools that no workflow invokes, produced by tools that are invoked only without evidence-out, or hidden behind an unscanned workflow file extension. |
+| Hypothesis | A workflow evidence manifest can make CI observability debt explicit, prove that each evidence-out file is bound to a fail-closed artifact upload, ensure evidence-capable tools are exercised by public CI in evidence-producing mode, and cover every GitHub Actions workflow extension. |
+| Execute | Scan .yml and .yaml GitHub Actions workflows, classify evidence coverage, require any executable workflow gap to be registered, require artifact upload steps to fail closed, require every evidence-out path to be uploaded, compare evidence-out capable tools with workflow invocations, and require tool-level evidence-out bindings. |
+| Evaluate | The verifier fails on unregistered executable workflows, non-strict artifact uploads, missing evidence-out upload bindings, evidence-capable tools with no workflow coverage, evidence-capable tools without an uploaded evidence-out invocation, stale generated docs, unused accepted-gap entries, or workflow extension drift. |
+| Retrospective | The repository can now distinguish evidence-covered workflows from accepted debt, keep artifact evidence fail-closed, prove evidence-out files reach durable artifacts, require evidence tools to be exercised in CI, require each evidence tool to produce uploaded evidence, scan both workflow extensions, and reduce the gap slice by slice. |
 
 ## Workflow Evidence
 
@@ -76,6 +76,7 @@
 - each evidence-out path must be uploaded by a strict artifact step
 - every evidence-out capable tool must be invoked by at least one workflow
 - every evidence-out capable tool must have an evidence-out invocation bound to an uploaded artifact
+- workflow inventory must include both .yml and .yaml GitHub Actions files
 - accepted gaps are debt, not completion
 - live deployment and smoke workflows must publish only redacted summary evidence
 - new executable workflows without evidence cannot appear silently

@@ -3,16 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 )
 
 func auditWorkflows(root string, m manifest) (auditResult, error) {
-	paths, err := filepath.Glob(repoPath(root, filepath.Join(m.WorkflowRoot, "*.yml")))
+	paths, err := workflowPaths(root, m.WorkflowRoot)
 	if err != nil {
 		return auditResult{}, err
 	}
-	sort.Strings(paths)
 	accepted := acceptedByPath(m.AcceptedGaps)
 	used := map[string]bool{}
 	var result auditResult
