@@ -1,0 +1,52 @@
+name: repository-readme
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/repository-readme.yml"
+      - "README.md"
+      - "README.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/repositoryreadme/**"
+      - "tools/knowledgecoverage/**"
+  pull_request:
+    paths:
+      - ".github/workflows/repository-readme.yml"
+      - "README.md"
+      - "README.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/repositoryreadme/**"
+      - "tools/knowledgecoverage/**"
+
+jobs:
+  repository-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify repository README
+        run: |
+          mkdir -p out
+          go test ./tools/repositoryreadme -count=1
+          go run ./tools/repositoryreadme \
+            -check-doc \
+            -evidence-out out/repository-readme-evidence.json
+      - name: Verify executable knowledge coverage
+        run: |
+          go run ./tools/knowledgecoverage \
+            -check-doc \
+            -evidence-out out/executable-knowledge-coverage.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: repository-readme-evidence
+          path: |
+            out/repository-readme-evidence.json
+            out/executable-knowledge-coverage.json
+          if-no-files-found: error

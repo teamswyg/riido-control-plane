@@ -1,0 +1,136 @@
+{
+  "schema_version": "riido-control-plane-repository-readme.v1",
+  "id": "control-plane-repository-readme",
+  "title": "riido-control-plane",
+  "riido_task": "RIID-4964",
+  "generated_doc": "README.md",
+  "workflow": ".github/workflows/repository-readme.yml",
+  "evidence_artifact": "repository-readme-evidence",
+  "module_path": "github.com/teamswyg/riido-control-plane",
+  "license": "Apache-2.0",
+  "summary": [
+    "`riido-control-plane`은 Riido SaaS control plane의 공개 backend boundary입니다. web client와 desktop app webview가 호출하는 HTTP/SSE API, assignment polling, provider status, authorization port, RBAC read model, development/testnet API를 소유합니다.",
+    "이 레포는 provider CLI를 실행하지 않습니다. 런타임 실행과 로컬 디바이스 제어는 `riido-daemon`의 책임이고, Terraform과 AWS 배포 구성은 `riido-infra`의 책임입니다. 이 레포는 공개 가능한 서버 코드와 검증 가능한 API surface만 담습니다."
+  ],
+  "owns": [
+    "Riido SaaS HTTP/SSE endpoint 구현",
+    "request-token authorization port와 static/external authorizer adapter",
+    "agent catalog, AI Agent client API, provider status, assignment polling control-plane domain slice",
+    "`riido-contracts` canonical DSL/IR 기반 AI Agent client API sub-DSL, OpenAPI projection, generated React Query client drift 검증",
+    "공개 GitHub Actions black-box/domain/generator 검증",
+    "tag/manual 기반 runtime artifact CD workflow와 redacted public evidence"
+  ],
+  "does_not_own": [
+    "Terraform state, AWS 계정 topology, Fargate/ECS resource topology, raw secret 값",
+    "raw request token, IdP secret, customer data export",
+    "provider runtime process 실행 또는 provider CLI binary 번들",
+    "production persistence와 DNS 운영 evidence",
+    "live URL, AWS account id, ARN, image digest, task-definition revision, workflow run URL, smoke payload 값"
+  ],
+  "rationale": [
+    "AI Agent client-facing endpoint는 Riido web과 desktop webview가 직접 호출하는 SaaS API이므로 handler, auth scope gate, development store, SSE replay, React Query generated client를 이 레포에서 함께 검증합니다.",
+    "canonical business vocabulary와 lifecycle/deprecation grammar의 최종 권한은 `riido-contracts`에 있습니다. 이 레포는 그 언어를 import해 AI Agent client API sub-DSL과 handler/generator delivery boundary를 소유합니다.",
+    "새 AI Agent client API는 workspace-aware v2 surface입니다. v1은 기존 UI 테스트와 임시 client 작업을 깨지 않기 위한 호환 경로로 유지합니다."
+  ],
+  "doc_links": [
+    {"topic": "AI Agent client API endpoint와 development/testnet 정책", "path": "docs/20-domain/ai-agent-client-api.md"},
+    {"topic": "authorization resource/action/scope 규칙", "path": "docs/20-domain/request-authorization.md"},
+    {"topic": "agent catalog RBAC 규칙", "path": "docs/20-domain/agent-catalog-rbac.md"},
+    {"topic": "runtime/agent binding domain", "path": "docs/20-domain/agent-runtime-binding.md"},
+    {"topic": "control-plane bounded context", "path": "docs/20-domain/context-map.md"},
+    {"topic": "riido-client generated React Query 전달 정책", "path": "docs/30-architecture/api-client-delivery.md"},
+    {"topic": "Figma AI Agent coverage의 control-plane generated-client 투영", "path": "docs/30-architecture/figma-ai-agent-control-plane-projection.md"},
+    {"topic": "module/package 책임 분해", "path": "docs/30-architecture/module-decomposition.md"},
+    {"topic": "runtime env 변수와 설정 책임", "path": "docs/30-architecture/config-reference.md"},
+    {"topic": "daemon/contracts/infra/client와의 연결", "path": "docs/30-architecture/integration-matrix.md"},
+    {"topic": "public runtime과 deploy boundary", "path": "docs/30-architecture/runtime-deployment-boundary.md"},
+    {"topic": "runtime artifact CD 소유권과 CodeDeploy 전환 경계", "path": "docs/30-architecture/runtime-cd-ownership.md"},
+    {"topic": "마이그레이션 히스토리", "path": "docs/migration/control-plane.md"}
+  ],
+  "development": {
+    "intro": [
+      "AI Agent client development API는 development 서버에서 DynamoDB snapshot item을 영속 저장소로 사용하므로 프로세스 재시작 이후에도 agent/device credential/task thread 상태가 유지됩니다.",
+      "development API도 인증 없이 열리지 않습니다. request-token scope와 owner/public/private visibility policy를 통과해야 합니다. AWS topology, table name 값, ECS task role, credential endpoint 값은 `riido-infra`와 GitHub environment/secret 경계에 둡니다."
+    ],
+    "env": [
+      {"name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT", "value": "true"},
+      {"name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE", "value": "<configured by riido-infra>"}
+    ],
+    "workflows": [
+      "`ai-agent-client-testnet-smoke`가 testnet smoke를 담당합니다.",
+      "`deploy-ai-agent-testnet`은 `v*` tag push 또는 manual dispatch에서만 runtime artifact CD를 실행합니다.",
+      "manual dispatch는 configured target으로 development/testnet/production GitHub environment를 선택하되 live URL 입력을 받지 않습니다."
+    ],
+    "endpoints": [
+      "`GET /healthz`",
+      "`GET /readyz`",
+      "`GET /v1/client/ai-agent/bootstrap`",
+      "`GET /v1/client/ai-agent/devices`",
+      "`GET /v1/client/ai-agent/agents/{agent_id}/daemon`",
+      "`POST /v1/client/ai-agent/agents/{agent_id}/daemon/start`",
+      "`POST /v1/client/ai-agent/agents/{agent_id}/daemon/restart`",
+      "`POST /v1/client/ai-agent/agents/{agent_id}/daemon/stop`",
+      "`GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`",
+      "`POST /v1/client/ai-agent/tasks/{task_id}/assignment`",
+      "`DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`",
+      "`POST /v1/client/ai-agent/tasks/{task_id}/comments`",
+      "`POST /v1/client/ai-agent/tasks/{task_id}/stop`",
+      "`GET /v1/client/ai-agent/events?replay=1`",
+      "`/v2/client/workspaces/{workspace_id}/ai-agent/...` workspace-scoped duplicate"
+    ]
+  },
+  "runtime_cd": {
+    "notes": [
+      "RIID-4839 기준으로 runtime CD ownership SSOT가 public CD configuration key의 최소 공개 집합입니다. 정확한 secret/variable 이름 목록은 README에서 반복하지 않고 `docs/30-architecture/runtime-cd-ownership.md`와 `runtime-cd-ownership.riido.json`에서 관리합니다.",
+      "RIID-4842 기준으로 public configuration key 이름도 민감 표면 예산으로 봅니다. 새 `RIIDO_AI_SERVER_*` key 이름은 manifest가 먼저 갱신되지 않으면 README/docs/workflow에 등장할 수 없습니다.",
+      "CodeDeploy blue/green으로 전환하더라도 CD 실행 owner는 `riido-control-plane`입니다. topology, IAM, rollback policy, private operator evidence는 `riido-infra`가 소유합니다.",
+      "public repo가 외부로 남겨도 되는 CD 정보는 stable key 이름, workflow 이름, git tag/commit, aggregate pass/fail 상태뿐입니다."
+    ]
+  },
+  "contract_flow": [
+    "riido-contracts canonical DSL/IR",
+    "control-plane AI Agent client API sub-DSL",
+    "control-plane API IR",
+    "OpenAPI projection",
+    "contracts/ai-agent-client/*.json",
+    "tools/reactquerygen",
+    "web/generated/aiAgentClient.ts"
+  ],
+  "verification": [
+    "go test ./...",
+    "go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json",
+    "go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1",
+    "go test ./cmd/riido_ai_server -run 'AIAgentClient|ConfigFromEnv' -count=1",
+    "go test ./tools/reactquerygen -count=1",
+    "go run ./tools/reactquerygen -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json -out web/generated/aiAgentClient.ts",
+    "go test ./tools/containercontract -count=1",
+    "go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -",
+    "docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local ."
+  ],
+  "rules": [
+    "OpenAPI와 generated client는 사람이 임의로 고치는 SSOT가 아닙니다. API surface 계약이 바뀌면 control-plane API sub-DSL을 먼저 바꾸고 projection과 generated client를 다시 생성해야 합니다.",
+    "`riido-client`로 React Query 코드를 전달하는 cross-repo workflow는 `docs/30-architecture/api-client-delivery.md`의 Riido work `branchName` delivery 정책을 따라야 합니다.",
+    "CI는 public repo에서 가벼운 검증을 돌리기 위한 경계입니다. 배포 비용이 생기는 동작은 pull request에서 실행하지 않습니다.",
+    "runtime artifact CD는 tag/manual workflow가 소유하고, AWS resource topology와 Terraform drift 정책은 `riido-infra`가 소유합니다."
+  ],
+  "required_markers": [
+    "RIID-4839",
+    "RIID-4842",
+    "runtime-cd-ownership.md",
+    "live URL, AWS account id, ARN, image digest"
+  ],
+  "forbidden_literals": [
+    "arn:aws:",
+    "AKIA",
+    "amazonaws.com/",
+    "cloudfront.net/",
+    "execute-api."
+  ],
+  "loop": {
+    "observation": "루트 README가 운영 경계와 검증 명령을 담고 있었지만 executable knowledge coverage가 docs/만 스캔해 evidence 밖에 남아 있었다.",
+    "hypothesis": "README를 manifest에서 생성하고 coverage scan_files에 포함하면 repo entrypoint도 generated/evidence 루프 안으로 들어온다.",
+    "execute": "README.riido.json에서 README.md를 생성하고, repositoryreadme tool이 링크/required marker/forbidden literal/doc freshness/evidence artifact를 검증한다.",
+    "evaluate": "CI는 repository-readme evidence와 executable-knowledge coverage evidence를 업로드하고, coverage count가 README를 포함한 generated reader 수로 증가해야 한다.",
+    "retrospective": "루트 entrypoint도 사람이 쓰는 설명문이 아니라 실행 가능한 repository knowledge manifest의 reader가 된다."
+  }
+}

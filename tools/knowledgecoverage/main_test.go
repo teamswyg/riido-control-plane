@@ -45,6 +45,19 @@ func TestScanRejectsUnregisteredManualDoc(t *testing.T) {
 	}
 }
 
+func TestScanFilesIncludeRootMarkdown(t *testing.T) {
+	root := t.TempDir()
+	mustWrite(t, root, "README.md", "# Manual\n")
+	m := manifest{ScanFiles: []string{"README.md"}}
+	docs, problems := scanDocs(root, m)
+	if len(docs) != 1 || docs[0].Path != "README.md" {
+		t.Fatalf("docs = %#v", docs)
+	}
+	if len(problems) == 0 || !strings.Contains(problems[0], "unregistered manual") {
+		t.Fatalf("problems = %#v", problems)
+	}
+}
+
 func mustWrite(t *testing.T, root, path, text string) {
 	t.Helper()
 	if err := writeText(filepath.Join(root, filepath.FromSlash(path)), text); err != nil {

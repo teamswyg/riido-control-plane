@@ -8,14 +8,14 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Class | Count |
 | --- | ---: |
-| Generated reader docs | 30 |
-| Generated reader docs with tool | 30 |
-| Generated reader docs with CI evidence | 30 |
+| Generated reader docs | 31 |
+| Generated reader docs with tool | 31 |
+| Generated reader docs with CI evidence | 31 |
 | Direct SSOT docs | 0 |
 | Direct SSOT docs with evidence loop | 0 |
 | Direct SSOT docs with CI evidence | 0 |
 | Registered manual docs | 0 |
-| Scanned docs | 30 |
+| Scanned docs | 31 |
 
 ## Evidence Loop
 
@@ -23,7 +23,7 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | --- | --- |
 | Observe | Executable documentation coverage can look healthy while direct SSOT readers omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, or migration history remains manual prose. |
 | Hypothesis | A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, and direct-SSOT CI evidence visible before review relies on memory. |
-| Execute | Scan markdown under docs, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, and publish coverage evidence in CI. |
+| Execute | Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, and publish coverage evidence in CI. |
 | Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, or direct SSOT manifests without CI evidence. |
 | Retrospective | This keeps the repository evidence-driven: migration history is generated from a ledger, direct SSOT readers carry loops and evidence tools, and future manual debt must be registered explicitly. |
 
@@ -45,7 +45,7 @@ None.
 
 ## Assertions
 
-- every scanned markdown file must be generated, direct-SSOT backed, or registered as manual debt
+- every scanned markdown file from scan_roots or scan_files must be generated, direct-SSOT backed, or registered as manual debt
 - manual debt registration is observable evidence, not completion when manual debt exists
 - a generated reader doc must name an existing tools/<name> generator in its marker
 - a generated reader doc generator must be referenced by at least one GitHub Actions workflow
