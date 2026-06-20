@@ -19,7 +19,8 @@
   "deployment_evidence": ["not from a manual","The workflow masks both values"],
   "source_checks": [
     {"name":"react-query-generator","file":"tools/reactquerygen/main_test.go","contains":["TestGenerateReactQueryClientDoesNotDrift","TestAIAgentClientMetadataFlowsThroughContractProjections","assignAIAgentTask"]},
-    {"name":"generated-client-handoff","file":"tools/generatedclienthandoff/main_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","TestGeneratedClientHandoffRejectsNonRiidoWorkBranch"]},
+    {"name":"generated-client-handoff-files","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","assertGeneratedClientHandoffFiles"]},
+    {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/branch_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
     {"name":"black-box-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2","TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI"]},
     {"name":"runtime-env","file":"cmd/riido_ai_server/main.go","contains":["envAIAgentClientDev","RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"]},
     {"name":"workflow","file":".github/workflows/ai-agent-client-api.yml","contains":["Verify React Query generation drift","Verify generated client handoff","Verify React Query generator command"]}
