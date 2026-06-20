@@ -76,3 +76,4 @@ jobs:
         with:
           name: web-frontend-api-evidence
           path: out/web-frontend-api-evidence.json
+          if-no-files-found: error

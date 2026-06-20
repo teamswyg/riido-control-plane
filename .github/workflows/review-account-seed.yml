@@ -86,3 +86,4 @@ jobs:
         with:
           name: review-account-seed-evidence
           path: out/review-account-seed-evidence.json
+          if-no-files-found: error

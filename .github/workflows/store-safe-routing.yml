@@ -60,3 +60,4 @@ jobs:
         with:
           name: store-safe-routing-evidence
           path: out/store-safe-routing-evidence.json
+          if-no-files-found: error

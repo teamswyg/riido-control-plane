@@ -30,6 +30,10 @@ func validateGeneratedManifestBinding(root string, doc docClass, meta generatedM
 		return []string{fmt.Sprintf("%s workflow %q must upload evidence artifact %q",
 			doc.Path, meta.Workflow, meta.EvidenceArtifact)}
 	}
+	if !workflowUploadsArtifactStrict(root, meta.Workflow, meta.EvidenceArtifact) {
+		return []string{fmt.Sprintf("%s workflow %q must fail when evidence artifact %q is missing",
+			doc.Path, meta.Workflow, meta.EvidenceArtifact)}
+	}
 	return nil
 }
 
