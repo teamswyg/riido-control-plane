@@ -32,6 +32,9 @@ func validateManifest(root string, m manifest) []string {
 	for _, source := range m.SourceManifests {
 		paths = append(paths, source.Path, source.Workflow)
 	}
+	for _, artifact := range m.ContractArtifacts {
+		paths = append(paths, artifact.Path, artifact.OwnerManifest)
+	}
 	for _, path := range paths {
 		if _, err := os.Stat(resolvePath(root, path)); err != nil {
 			problems = append(problems, fmt.Sprintf("missing path %q", path))

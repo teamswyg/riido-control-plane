@@ -1,10 +1,5 @@
 package main
 
-import (
-	"encoding/json"
-	"os"
-)
-
 type generatedManifestMeta struct {
 	GeneratedDoc     string `json:"generated_doc"`
 	Workflow         string `json:"workflow"`
@@ -17,14 +12,5 @@ func generatedManifestPath(doc docClass) string {
 }
 
 func generatedManifestMetadata(root string, doc docClass) (generatedManifestMeta, bool) {
-	path := resolvePath(root, generatedManifestPath(doc))
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return generatedManifestMeta{}, false
-	}
-	var meta generatedManifestMeta
-	if err := json.Unmarshal(data, &meta); err != nil {
-		return generatedManifestMeta{}, false
-	}
-	return meta, true
+	return loadGeneratedManifestMeta(root, generatedManifestPath(doc))
 }

@@ -16,6 +16,10 @@ func assertEvidenceCoverage(t *testing.T, got evidence) {
 		len(got.SourceMissingBinding) != 0 {
 		t.Fatalf("source manifest coverage drifted: %+v", got)
 	}
+	if got.ContractArtifactCount != got.ContractArtifactBindingCount ||
+		len(got.ContractMissingBinding) != 0 {
+		t.Fatalf("contract artifact coverage drifted: %+v", got)
+	}
 }
 
 func assertGeneratedCoverage(t *testing.T, got evidence) {
