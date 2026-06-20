@@ -10,7 +10,7 @@ This reader is generated from the generated-client delivery manifest and source 
 
 ## Coverage
 
-Source manifests: `4`; owners: `3`; Figma contexts: `9`; source checks: `6`; phrase checks: `27`; forbidden checks: `3`; risk tests: `14`.
+Source manifests: `4`; owners: `3`; Figma contexts: `9`; source checks: `7`; phrase checks: `29`; forbidden checks: `3`; risk tests: `14`.
 
 ## Source Manifests
 
