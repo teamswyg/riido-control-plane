@@ -10,6 +10,14 @@ Executable SSOT: [`agent-catalog-rbac.riido.json`](agent-catalog-rbac.riido.json
 
 `internal/riidoaiserver` owns the public agent catalog RBAC policy, request DTO boundary, and HTTP adapter authorization surface.
 
+## Evidence Profiles
+
+| Profile | Workflow | Artifact | Focus |
+| --- | --- | --- | --- |
+| `rbac` | `.github/workflows/agent-catalog-rbac.yml` | `agent-catalog-rbac-evidence` | RBAC policy, authorization scopes, and generated reader freshness |
+| `api-port` | `.github/workflows/agent-catalog-api-port.yml` | `agent-catalog-api-port-evidence` | public DTO shape and narrow AgentCatalogStore port boundary |
+| `http-adapter` | `.github/workflows/agent-catalog-http-adapter.yml` | `agent-catalog-http-adapter-evidence` | stdlib HTTP route adapter and authorization boundary |
+
 ## Roles And Visibility
 
 - Roles: `admin`

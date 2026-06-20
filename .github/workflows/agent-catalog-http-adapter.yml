@@ -6,7 +6,9 @@ on:
     paths:
       - ".github/workflows/agent-catalog-http-adapter.yml"
       - "docs/20-domain/agent-catalog-rbac.md"
+      - "docs/20-domain/agent-catalog-rbac.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentcatalogrbac/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -21,7 +23,9 @@ on:
     paths:
       - ".github/workflows/agent-catalog-http-adapter.yml"
       - "docs/20-domain/agent-catalog-rbac.md"
+      - "docs/20-domain/agent-catalog-rbac.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentcatalogrbac/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -51,5 +55,19 @@ jobs:
             printf 'Disallowed catalog HTTP imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify catalog HTTP executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/agentcatalogrbac -count=1
+          go run ./tools/agentcatalogrbac \
+            -profile http-adapter \
+            -check-doc \
+            -evidence-out out/agent-catalog-http-adapter-evidence.json
       - name: Test agent catalog HTTP adapter
         run: go test ./internal/riidoaiserver -run 'HTTPAgentCatalog|AgentCatalogHTTP' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-catalog-http-adapter-evidence
+          path: out/agent-catalog-http-adapter-evidence.json
+          if-no-files-found: error

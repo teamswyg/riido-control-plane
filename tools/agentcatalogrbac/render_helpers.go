@@ -12,6 +12,15 @@ func renderSection(b *strings.Builder, title string, values []string) {
 	}
 }
 
+func renderProfiles(b *strings.Builder, profiles []profile) {
+	b.WriteString("## Evidence Profiles\n\n")
+	b.WriteString("| Profile | Workflow | Artifact | Focus |\n| --- | --- | --- | --- |\n")
+	for _, profile := range profiles {
+		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | %s |\n", profile.ID, profile.Workflow, profile.EvidenceArtifact, profile.Focus)
+	}
+	b.WriteString("\n")
+}
+
 func join(values []string) string {
 	if len(values) == 0 {
 		return "-"

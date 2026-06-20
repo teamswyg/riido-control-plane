@@ -13,6 +13,7 @@ func renderDoc(m manifest) string {
 	b.WriteString("Executable SSOT: [`agent-catalog-rbac.riido.json`](agent-catalog-rbac.riido.json).\n\n")
 	b.WriteString("## Ownership\n\n")
 	fmt.Fprintf(&b, "`%s` owns the public agent catalog RBAC policy, request DTO boundary, and HTTP adapter authorization surface.\n\n", m.OwnerPackage)
+	renderProfiles(&b, m.EvidenceProfiles)
 	b.WriteString("## Roles And Visibility\n\n")
 	renderList(&b, "Roles", m.Roles)
 	renderList(&b, "Visibilities", m.Visibilities)

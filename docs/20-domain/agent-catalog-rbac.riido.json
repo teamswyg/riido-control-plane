@@ -6,6 +6,11 @@
   "generated_doc": "docs/20-domain/agent-catalog-rbac.md",
   "workflow": ".github/workflows/agent-catalog-rbac.yml",
   "evidence_artifact": "agent-catalog-rbac-evidence",
+  "evidence_profiles": [
+    {"id":"rbac","workflow":".github/workflows/agent-catalog-rbac.yml","evidence_artifact":"agent-catalog-rbac-evidence","focus":"RBAC policy, authorization scopes, and generated reader freshness","test_patterns":["AgentCatalogRBAC|StaticTokenAuthorizer"]},
+    {"id":"api-port","workflow":".github/workflows/agent-catalog-api-port.yml","evidence_artifact":"agent-catalog-api-port-evidence","focus":"public DTO shape and narrow AgentCatalogStore port boundary","test_patterns":["AgentCatalogAPI|AgentCatalogStorePort"]},
+    {"id":"http-adapter","workflow":".github/workflows/agent-catalog-http-adapter.yml","evidence_artifact":"agent-catalog-http-adapter-evidence","focus":"stdlib HTTP route adapter and authorization boundary","test_patterns":["HTTPAgentCatalog|AgentCatalogHTTP"]}
+  ],
   "owner_package": "internal/riidoaiserver",
   "roles": ["admin"],
   "visibilities": ["public", "private"],
@@ -27,7 +32,9 @@
     {"name": "api-dto-boundary", "file": "internal/riidoaiserver/agent_catalog_api_test.go", "contains": ["TestAgentCatalogAPIDTOsExposeOnlyCatalogShape", "owner_principal_id", "roles"]},
     {"name": "http-rbac", "file": "internal/riidoaiserver/server_test.go", "contains": ["TestHTTPAgentCatalogRBACAdminSeesAndMutatesPrivateAgents", "TestHTTPAgentCatalogCreateStampsOwnerFromAuthorization"]},
     {"name": "scope-candidates", "file": "internal/riidoaiserver/authorization.go", "contains": ["AuthorizationResourceAgentCatalog", "agent-catalog:*:", "agent-catalog:\" + req.AgentID + \":\" + string(req.Action)"]},
-    {"name": "focused-ci", "file": ".github/workflows/agent-catalog-rbac.yml", "contains": ["AgentCatalogRBAC|StaticTokenAuthorizer", "Verify RBAC slice import boundary"]}
+    {"name": "rbac-workflow", "file": ".github/workflows/agent-catalog-rbac.yml", "contains": ["AgentCatalogRBAC|StaticTokenAuthorizer", "agent-catalog-rbac-evidence"]},
+    {"name": "api-port-workflow", "file": ".github/workflows/agent-catalog-api-port.yml", "contains": ["AgentCatalogAPI|AgentCatalogStorePort", "agent-catalog-api-port-evidence"]},
+    {"name": "http-adapter-workflow", "file": ".github/workflows/agent-catalog-http-adapter.yml", "contains": ["HTTPAgentCatalog|AgentCatalogHTTP", "agent-catalog-http-adapter-evidence"]}
   ],
   "non_goals": ["persistent catalog storage", "DynamoDB/EventBridge/IAM/Terraform wiring", "external identity-provider rollout", "daemon provider execution", "production token values"],
   "loop": {
