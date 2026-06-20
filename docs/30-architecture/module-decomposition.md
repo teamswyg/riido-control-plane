@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `31`; runtime: `1`; internal: `3`; tools: `26`; forbidden import hits: `0`.
+Packages: `32`; runtime: `1`; internal: `3`; tools: `27`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `100`; max file lines: `2717`.
 
@@ -18,7 +18,7 @@ File line budget target: `75`; files over target: `100`; max file lines: `2717`.
 | --- | ---: |
 | `internal/riidoaiserver/ai_agent_client_development.go` | 2717 |
 | `internal/riidoaiserver/ai_agent_client_http_test.go` | 2481 |
-| `internal/riidoaiserver/server.go` | 2372 |
+| `internal/riidoaiserver/server.go` | 2373 |
 | `internal/riidoaiserver/store.go` | 1952 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1573 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store_test.go` | 1472 |
@@ -34,7 +34,7 @@ File line budget target: `75`; files over target: `100`; max file lines: `2717`.
 - `compatibility-test`: `internal/contractscompat`
 - `guard`: `internal/repoidentity`
 - `core`: `internal/riidoaiserver`
-- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/openquestions`, `tools/providerstatus`, `tools/requestauth`, `tools/runtimeboundary`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`
+- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/metricshttpadapter`, `tools/openquestions`, `tools/providerstatus`, `tools/requestauth`, `tools/runtimeboundary`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
 - `meta-evidence-tool`: `tools/knowledgecoverage`, `tools/moduledecomposition`, `tools/workflowevidence`

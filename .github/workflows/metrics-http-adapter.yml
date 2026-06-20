@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/metrics-http-adapter.yml"
+      - "docs/30-architecture/metrics-http-adapter.md"
+      - "docs/30-architecture/metrics-http-adapter.riido.json"
       - "docs/20-domain/request-authorization.md"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
@@ -17,9 +19,12 @@ on:
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_state.go"
+      - "tools/metricshttpadapter/**"
   pull_request:
     paths:
       - ".github/workflows/metrics-http-adapter.yml"
+      - "docs/30-architecture/metrics-http-adapter.md"
+      - "docs/30-architecture/metrics-http-adapter.riido.json"
       - "docs/20-domain/request-authorization.md"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
@@ -32,6 +37,7 @@ on:
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_state.go"
+      - "tools/metricshttpadapter/**"
 
 jobs:
   metrics-http:
@@ -51,5 +57,18 @@ jobs:
             printf 'Disallowed metrics HTTP imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify metrics HTTP executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/metricshttpadapter -count=1
+          go run ./tools/metricshttpadapter \
+            -check-doc \
+            -evidence-out out/metrics-http-adapter-evidence.json
       - name: Test metrics HTTP adapter
         run: go test ./internal/riidoaiserver -run 'HTTPMetrics|MetricsHTTP' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: metrics-http-adapter-evidence
+          path: out/metrics-http-adapter-evidence.json
+          if-no-files-found: error

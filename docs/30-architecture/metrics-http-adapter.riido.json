@@ -1,0 +1,41 @@
+{
+  "schema_version": "riido-metrics-http-adapter.v1",
+  "id": "control-plane-metrics-http-adapter",
+  "title": "Control Plane Metrics HTTP Adapter",
+  "generated_doc": "docs/30-architecture/metrics-http-adapter.md",
+  "workflow": ".github/workflows/metrics-http-adapter.yml",
+  "evidence_artifact": "metrics-http-adapter-evidence",
+  "owner_package": "internal/riidoaiserver",
+  "endpoint": {"method": "GET", "path": "/metrics", "resource": "metrics", "action": "read"},
+  "source_checks": [
+    {"name": "api", "file": "internal/riidoaiserver/assignment_api.go", "contains": ["MetricsSchemaVersion", "MetricsSnapshot", "store_operations"]},
+    {"name": "handler", "file": "internal/riidoaiserver/server.go", "contains": ["handleMetrics", "AuthorizationResourceMetrics", "ApplyToMetricsSnapshot"]},
+    {"name": "tests", "file": "internal/riidoaiserver/assignment_metrics_test.go", "contains": ["TestHTTPMetricsReturnsAssignmentSnapshot", "TestHTTPMetricsRequiresScopedAuthorization", "TestHTTPMetricsStoreNotConfiguredFailsClosed"]}
+  ],
+  "required_json_fields": [
+    "schema_version",
+    "generated_at",
+    "tasks_total",
+    "assignments_total",
+    "assignments_by_state",
+    "poll_requests_total",
+    "poll_actions_total",
+    "agent_events_total",
+    "task_events_total",
+    "event_append_latency_samples_total",
+    "http_transactions",
+    "store_operations"
+  ],
+  "required_statuses": [
+    {"case": "authorized", "status": 200},
+    {"case": "missing_scope", "status": 403},
+    {"case": "store_unconfigured", "status": 503}
+  ],
+  "loop": {
+    "observation": "The metrics HTTP adapter workflow exercised tests but did not persist which public metrics surface was proven.",
+    "hypothesis": "A focused adapter SSOT can turn the /metrics route, authorization, and JSON shape into durable CI evidence.",
+    "execute": "Call the real HTTP handler with scoped and unscoped static tokens, verify required JSON fields, source anchors, status codes, and breakdown rows, then upload evidence.",
+    "evaluate": "The verifier fails on stale generated docs, route/auth status drift, missing fields, or source anchor loss.",
+    "retrospective": "This closes the metrics HTTP workflow evidence gap without exposing live runtime counters or secrets."
+  }
+}
