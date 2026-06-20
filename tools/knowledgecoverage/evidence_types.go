@@ -18,6 +18,8 @@ type evidence struct {
 	SourceManifestBindingCount       int            `json:"source_manifest_binding_count"`
 	ContractArtifactCount            int            `json:"contract_artifact_count"`
 	ContractArtifactBindingCount     int            `json:"contract_artifact_binding_count"`
+	ImportedManifestCount            int            `json:"imported_manifest_count"`
+	ImportedManifestBindingCount     int            `json:"imported_manifest_binding_count"`
 	ManualCount                      int            `json:"manual_count"`
 	ManualByGroup                    map[string]int `json:"manual_by_group"`
 	ManualTopDirs                    []manualDir    `json:"manual_top_dirs"`
@@ -33,6 +35,7 @@ type evidence struct {
 	StandaloneMissingBinding         []string       `json:"standalone_manifest_missing_binding"`
 	SourceMissingBinding             []string       `json:"source_manifest_missing_binding"`
 	ContractMissingBinding           []string       `json:"contract_artifact_missing_binding"`
+	ImportedMissingBinding           []string       `json:"imported_manifest_missing_binding"`
 	DirectMissingEvidenceWorkflow    []string       `json:"direct_ssot_missing_evidence_workflow"`
 	DirectMissingLoop                []string       `json:"direct_ssot_missing_loop"`
 	ProblemSummaries                 []string       `json:"problem_summaries"`

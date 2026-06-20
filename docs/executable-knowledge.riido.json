@@ -56,6 +56,17 @@
       "owner_key": "smoke_matrix"
     }
   ],
+  "imported_manifests": [
+    {
+      "path": "contracts/ai-agent-client/figma-ai-agent-coverage.riido.json",
+      "owner_manifest": "docs/30-architecture/figma-ai-agent-control-plane-projection.riido.json",
+      "owner_key": "source_contracts_manifest",
+      "upstream_repo": "riido-contracts",
+      "upstream_path": "docs/30-architecture/figma-ai-agent-coverage.riido.json",
+      "schema_version": "riido-figma-ai-agent-coverage.v1",
+      "id": "figma-v1-22-ai-agent-ui-coverage"
+    }
+  ],
   "manual_groups": [],
   "assertions": [
     "every scanned markdown file from scan_roots or scan_files must be generated, direct-SSOT backed, or registered as manual debt",
@@ -69,16 +80,17 @@
     "a standalone executable manifest must define an evidence loop and upload its evidence_tool evidence-out path with if-no-files-found:error",
     "a source SSOT manifest must be consumed by its evidence_tool and uploaded as strict CI evidence",
     "a contract artifact must be declared by an owner manifest whose generated reader has strict CI evidence",
+    "an imported manifest mirror must match its owner pointer and have strict projection evidence",
     "a direct-SSOT backed markdown file must have a sibling .riido.json manifest",
     "a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest",
     "a direct-SSOT backed markdown file must declare evidence_tool in the sibling manifest",
     "a direct-SSOT evidence tool must run check-doc and publish evidence-out in GitHub Actions"
   ],
   "loop": {
-    "observation": "Executable documentation coverage can look healthy while direct SSOT readers, standalone executable manifests, non-doc source SSOT manifests, or imported contract artifacts omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, declared workflow ownership, uploaded artifact binding, strict missing-file behavior, or migration history remains manual prose.",
-    "hypothesis": "A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, direct-SSOT CI evidence, standalone executable manifests, source SSOT manifests, imported contract artifacts, declared workflow evidence ownership, generated artifact collection, and strict artifact upload failure modes visible before review relies on memory.",
-    "execute": "Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifest evidence_tool to match the generated marker tool, require generated reader manifests to bind workflow run steps to generator check-doc/evidence-out execution, require standalone manifests to bind evidence_tool execution to a strict uploaded evidence-out artifact, require source SSOT manifests to be consumed by their evidence tool with evidence-out, require contract artifacts to be declared by a strict-evidence owner manifest, require one evidence_artifact upload step to own the evidence-out path and if-no-files-found:error, and publish coverage evidence in CI.",
-    "evaluate": "The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, standalone manifests without loop-backed strict CI evidence, source SSOT manifests without strict CI evidence, contract artifacts without owner-manifest evidence, generated manifests whose evidence_tool contradicts the generated marker, generated manifests whose declared workflow run steps do not run the generator, generated manifests whose upload-artifact step does not jointly own the generator evidence-out path and strict missing-file behavior, or generated evidence uploads that warn on missing files.",
-    "retrospective": "This keeps the repository evidence-driven: migration history is generated from a ledger, standalone manifests carry their own loop and strict evidence artifact chain, source SSOT manifests show which verifier consumes them, imported contract artifacts show which owner manifest proves them, direct SSOT readers carry loops and evidence tools, generated readers bind generator execution, evidence-out path, and upload step ownership to strict durable artifacts, and future manual debt must be registered explicitly."
+    "observation": "Executable documentation coverage can look healthy while direct SSOT readers, standalone executable manifests, non-doc source SSOT manifests, imported manifest mirrors, or imported contract artifacts omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, declared workflow ownership, uploaded artifact binding, strict missing-file behavior, or migration history remains manual prose.",
+    "hypothesis": "A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, direct-SSOT CI evidence, standalone executable manifests, source SSOT manifests, imported manifest mirrors, imported contract artifacts, declared workflow evidence ownership, generated artifact collection, and strict artifact upload failure modes visible before review relies on memory.",
+    "execute": "Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifest evidence_tool to match the generated marker tool, require generated reader manifests to bind workflow run steps to generator check-doc/evidence-out execution, require standalone manifests to bind evidence_tool execution to a strict uploaded evidence-out artifact, require source SSOT manifests to be consumed by their evidence tool with evidence-out, require contract artifacts to be declared by a strict-evidence owner manifest, require imported manifest mirrors to match their owner pointer and strict projection evidence, require one evidence_artifact upload step to own the evidence-out path and if-no-files-found:error, and publish coverage evidence in CI.",
+    "evaluate": "The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, standalone manifests without loop-backed strict CI evidence, source SSOT manifests without strict CI evidence, imported manifest mirrors without owner-projection evidence, contract artifacts without owner-manifest evidence, generated manifests whose evidence_tool contradicts the generated marker, generated manifests whose declared workflow run steps do not run the generator, generated manifests whose upload-artifact step does not jointly own the generator evidence-out path and strict missing-file behavior, or generated evidence uploads that warn on missing files.",
+    "retrospective": "This keeps the repository evidence-driven: migration history is generated from a ledger, standalone manifests carry their own loop and strict evidence artifact chain, source SSOT manifests show which verifier consumes them, imported manifest mirrors show which projection proves them, imported contract artifacts show which owner manifest proves them, direct SSOT readers carry loops and evidence tools, generated readers bind generator execution, evidence-out path, and upload step ownership to strict durable artifacts, and future manual debt must be registered explicitly."
   }
 }
