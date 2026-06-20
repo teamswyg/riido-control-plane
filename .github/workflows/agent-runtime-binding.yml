@@ -6,7 +6,9 @@ on:
     paths:
       - ".github/workflows/agent-runtime-binding.yml"
       - "docs/20-domain/agent-runtime-binding.md"
+      - "docs/20-domain/agent-runtime-binding.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentruntimebinding/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -17,7 +19,9 @@ on:
     paths:
       - ".github/workflows/agent-runtime-binding.yml"
       - "docs/20-domain/agent-runtime-binding.md"
+      - "docs/20-domain/agent-runtime-binding.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentruntimebinding/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -43,5 +47,18 @@ jobs:
             printf 'Disallowed binding imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify binding executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/agentruntimebinding -count=1
+          go run ./tools/agentruntimebinding \
+            -check-doc \
+            -evidence-out out/agent-runtime-binding-evidence.json
       - name: Test agent runtime binding
         run: go test ./internal/riidoaiserver -run 'StaticAgentRegistry|ValidateAssignmentBinding|ValidateDaemonBinding' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-runtime-binding-evidence
+          path: out/agent-runtime-binding-evidence.json
+          if-no-files-found: error

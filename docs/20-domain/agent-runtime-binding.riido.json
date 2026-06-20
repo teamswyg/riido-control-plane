@@ -1,0 +1,47 @@
+{
+  "schema_version": "riido-agent-runtime-binding.v1",
+  "id": "agent-runtime-binding",
+  "title": "Agent Runtime Binding",
+  "riido_task": "RIID-4665",
+  "generated_doc": "docs/20-domain/agent-runtime-binding.md",
+  "workflow": ".github/workflows/agent-runtime-binding.yml",
+  "evidence_artifact": "agent-runtime-binding-evidence",
+  "owner_package": "internal/riidoaiserver",
+  "binding_fields": [
+    {"name": "agent_id", "required": true},
+    {"name": "daemon_id", "required": true},
+    {"name": "device_id", "required": false},
+    {"name": "runtime_id", "required": true},
+    {"name": "runtime_provider", "required": true}
+  ],
+  "binding_rules": [
+    {"id": "unique-agent", "kind": "registry", "rule": "normalized agent_id must be unique"},
+    {"id": "assignment-provider-match", "kind": "assignment", "rule": "requested runtime_provider must match the registered binding"},
+    {"id": "daemon-id-match", "kind": "daemon", "rule": "poll daemon_id must match the registered binding"},
+    {"id": "runtime-id-match", "kind": "daemon", "rule": "poll runtime_id must match the registered binding"},
+    {"id": "device-id-if-bound", "kind": "daemon", "rule": "poll device_id must match only when the binding has a non-empty device_id"},
+    {"id": "nil-registry-no-gate", "kind": "fallback", "rule": "nil registry imposes no binding gate"}
+  ],
+  "device_rules": [
+    {"id": "machine-device-id", "rule": "machine_id derives a stable physical-machine DeviceID"},
+    {"id": "connected-workspaces", "rule": "workspace connections are unioned across enroll/snapshot/connect paths"},
+    {"id": "cross-workspace-bindings", "rule": "daemon agent-bindings include agents from every workspace connected to the device"},
+    {"id": "legacy-runtime-prune", "rule": "agentd-local runtimes are pruned from restored snapshots"}
+  ],
+  "source_checks": [
+    {"name": "registry-core", "file": "internal/riidoaiserver/agent_registry.go", "contains": ["NewStaticAgentRegistry", "validateAssignmentBinding", "validateDaemonBinding"]},
+    {"name": "registry-tests", "file": "internal/riidoaiserver/agent_registry_test.go", "contains": ["TestStaticAgentRegistryRejectsInvalidBindings", "TestValidateAssignmentBinding", "TestValidateDaemonBinding"]},
+    {"name": "device-identity", "file": "internal/riidoaiserver/device_principal.go", "contains": ["deviceIDForMachine", "ConnectedWorkspaceIDs", "pruneLegacyRuntimeRecords"]},
+    {"name": "cross-workspace-bindings", "file": "internal/riidoaiserver/device_principal_machine_test.go", "contains": ["TestDaemonAgentBindingsIncludeAgentsFromOtherConnectedWorkspaces", "stuck \"queued\" forever"]},
+    {"name": "daemon-bindings", "file": "internal/riidoaiserver/ai_agent_daemon_runtime.go", "contains": ["ListAIAgentDaemonAgentBindings", "deviceConnectedToWorkspace", "binding.DeviceID"]},
+    {"name": "focused-ci", "file": ".github/workflows/agent-runtime-binding.yml", "contains": ["ValidateAssignmentBinding|ValidateDaemonBinding", "Verify binding import boundary"]}
+  ],
+  "loop": {
+    "observation": "Agent/runtime binding rules were readable prose with focused tests, but the doc itself did not emit evidence.",
+    "hypothesis": "A focused binding SSOT can make runtime identity drift detectable before daemon polling or assignment claims regress.",
+    "execute": "Generate the reader doc from this manifest and run the agentruntimebinding verifier in CI.",
+    "evaluate": "The verifier checks required fields, binding rules, source anchors, generated doc freshness, and focused runtime binding tests.",
+    "retrospective": "This slice proves document executability; live trace correlation remains a separate observability slice."
+  },
+  "non_goals": ["assignment queue state", "active lease refresh", "provider status persistence", "HTTP routing ownership", "AWS/DynamoDB/EventBridge/Terraform wiring"]
+}
