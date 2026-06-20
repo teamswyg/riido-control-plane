@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+type aiAgentWorkspaceIDContextKey struct{}
+
 func aiAgentWorkspaceIDFromRequest(r *http.Request) string {
 	if r == nil {
 		return ""
