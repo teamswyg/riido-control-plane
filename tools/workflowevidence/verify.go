@@ -15,6 +15,9 @@ func verifyResult(result auditResult) error {
 	if len(result.MissingEvidence) > 0 {
 		return fmt.Errorf("missing evidence artifact uploads: %v", result.MissingEvidence)
 	}
+	if len(result.MissingEvidenceTools) > 0 {
+		return fmt.Errorf("evidence tools missing workflow coverage: %v", result.MissingEvidenceTools)
+	}
 	if len(result.AcceptedUnused) > 0 {
 		return fmt.Errorf("unused accepted workflow gaps: %v", result.AcceptedUnused)
 	}
