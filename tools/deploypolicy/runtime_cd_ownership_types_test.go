@@ -4,6 +4,9 @@ type runtimeCDOwnership struct {
 	SchemaVersion                       string                        `json:"schema_version"`
 	ID                                  string                        `json:"id"`
 	RiidoTask                           string                        `json:"riido_task"`
+	GeneratedDoc                        string                        `json:"generated_doc"`
+	Workflow                            string                        `json:"workflow"`
+	EvidenceArtifact                    string                        `json:"evidence_artifact"`
 	Hardening                           []string                      `json:"hardening_tasks"`
 	Supersedes                          []string                      `json:"supersedes_tasks"`
 	Runtime                             string                        `json:"runtime_service"`

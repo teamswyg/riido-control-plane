@@ -8,6 +8,8 @@ const (
 	sourceID         = "figma-v1-22-ai-agent-ui-coverage"
 	requiredTask     = "RIID-4810"
 	evidenceTool     = "tools/figmaprojection"
+	workflow         = ".github/workflows/api-client-delivery.yml"
+	evidenceArtifact = "api-client-delivery-evidence"
 )
 
 const (

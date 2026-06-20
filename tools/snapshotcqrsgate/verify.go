@@ -45,6 +45,9 @@ func verifyHeader(m manifest) error {
 	if m.HumanDoc != requiredHumanDoc {
 		return fmt.Errorf("unexpected human_doc %q", m.HumanDoc)
 	}
+	if m.GeneratedDoc != requiredHumanDoc || m.Workflow != workflow || m.EvidenceArtifact != evidenceArtifact {
+		return fmt.Errorf("unexpected snapshot CQRS reader evidence binding")
+	}
 	if m.Decision.Scope != "ai_agent_client_snapshot_only" || m.Decision.StoreWideCQRS {
 		return fmt.Errorf("decision must stay scoped to AI Agent client snapshot")
 	}

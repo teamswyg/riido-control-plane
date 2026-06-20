@@ -26,7 +26,7 @@ File line budget target: `75`; files over target: `97`; max file lines: `2481`.
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `internal/riidoaiserver` | 85 | 85 | 2481 | 2481 | 23713 | 23713 |
-| `tools/reactquerygen` | 3 | 3 | 1395 | 1395 | 2770 | 2770 |
+| `tools/reactquerygen` | 3 | 3 | 1395 | 1395 | 2766 | 2766 |
 | `cmd/riido_ai_server` | 3 | 3 | 791 | 791 | 1474 | 1474 |
 | `tools/containercontract` | 2 | 2 | 597 | 597 | 663 | 663 |
 | `tools/generatedclienthandoff` | 2 | 2 | 601 | 601 | 578 | 578 |
@@ -45,7 +45,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1573 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store_test.go` | 1472 |
 | `tools/reactquerygen/main.go` | 1395 |
-| `tools/reactquerygen/figma_projection_test.go` | 1285 |
+| `tools/reactquerygen/figma_projection_test.go` | 1281 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
 | `cmd/riido_ai_server/main.go` | 791 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 746 |
@@ -55,7 +55,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
 | `internal/riidoaiserver` | 85 | 2481 | 23713 |
-| `tools/reactquerygen` | 3 | 1395 | 2770 |
+| `tools/reactquerygen` | 3 | 1395 | 2766 |
 | `cmd/riido_ai_server` | 3 | 791 | 1474 |
 | `tools/containercontract` | 2 | 597 | 663 |
 | `tools/generatedclienthandoff` | 2 | 601 | 578 |

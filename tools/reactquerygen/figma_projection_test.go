@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -1035,10 +1034,6 @@ func generatedPathHaystack(spec openAPISpec, generatedPaths map[string]string) s
 	return strings.ToLower(strings.Join(parts, "\n"))
 }
 
-func hasString(items []string, want string) bool {
-	return slices.Contains(items, want)
-}
-
 func docMentionsGeneratedPath(docText, generatedPath string) bool {
 	if strings.Contains(docText, generatedPath) {
 		return true
@@ -1051,9 +1046,10 @@ func docMentionsGeneratedPath(docText, generatedPath string) bool {
 }
 
 type figmaProjectionManifest struct {
-	SchemaVersion                     string                                    `json:"schema_version"`
-	ID                                string                                    `json:"id"`
-	RiidoTask                         string                                    `json:"riido_task"`
+	SchemaVersion string `json:"schema_version"`
+	ID            string `json:"id"`
+	RiidoTask     string `json:"riido_task"`
+	GeneratedReaderMetadata
 	EvidenceTool                      string                                    `json:"evidence_tool"`
 	SourceContractsManifest           figmaProjectionSourceManifest             `json:"source_contracts_manifest"`
 	ProjectionPolicy                  figmaProjectionPolicy                     `json:"projection_policy"`

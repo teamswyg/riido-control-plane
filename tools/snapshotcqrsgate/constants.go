@@ -7,6 +7,8 @@ const (
 	requiredTask         = "RIID-4964"
 	requiredID           = "control-plane-ai-agent-snapshot-cqrs-gate"
 	requiredHumanDoc     = "docs/30-architecture/ai-agent-snapshot-cqrs-gate.md"
+	workflow             = ".github/workflows/architecture-docs.yml"
+	evidenceArtifact     = "snapshot-cqrs-gate-evidence"
 	minDecisionThreshold = 50
 )
 

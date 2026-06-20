@@ -9,6 +9,9 @@ func verifyProjection(p projectionManifest, s sourceManifest) error {
 	if p.RiidoTask != requiredTask || p.EvidenceTool != evidenceTool {
 		return fmt.Errorf("unexpected projection task or evidence tool")
 	}
+	if p.GeneratedDoc != defaultDoc || p.Workflow != workflow || p.EvidenceArtifact != evidenceArtifact {
+		return fmt.Errorf("unexpected projection reader evidence binding")
+	}
 	if !completeLoop(p.Loop) {
 		return fmt.Errorf("projection loop must be complete")
 	}
