@@ -1,4 +1,4 @@
-package aiagentrisk
+package main
 
 type evidenceManifest struct {
 	SchemaVersion     string              `json:"schema_version"`
