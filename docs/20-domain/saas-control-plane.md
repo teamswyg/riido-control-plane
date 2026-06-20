@@ -14,7 +14,7 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 | --- | ---: |
 | Boundaries | 19 |
 | Focused workflows | 17 |
-| Source checks | 28 |
+| Source checks | 30 |
 | Shared contracts | 3 |
 
 - owner package: `internal/riidoaiserver`
@@ -24,7 +24,7 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 
 | Boundary | Workflow | Artifact | Source checks |
 | --- | --- | --- | ---: |
-| `assignment-contract` | `.github/workflows/assignment-contract.yml` | `assignment-contract-evidence` | 2 |
+| `assignment-contract` | `.github/workflows/assignment-contract.yml` | `assignment-contract-evidence` | 4 |
 | `assignment-operation-replay` | `.github/workflows/assignment-operation-replay.yml` | `assignment-operation-replay-evidence` | 1 |
 | `assignment-operation-runtime` | `.github/workflows/assignment-operation-runtime.yml` | `assignment-operation-runtime-evidence` | 1 |
 | `long-poll` | `.github/workflows/assignment-store-actor.yml` | `assignment-store-actor-long-poll-evidence` | 1 |

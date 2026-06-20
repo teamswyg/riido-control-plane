@@ -10,7 +10,7 @@ This reader is generated from the generated-client delivery manifest and source 
 
 ## Coverage
 
-Source manifests: `4`; owners: `3`; Figma contexts: `9`; source checks: `6`; phrase checks: `27`; forbidden checks: `3`; risk tests: `13`.
+Source manifests: `4`; owners: `3`; Figma contexts: `9`; source checks: `6`; phrase checks: `27`; forbidden checks: `3`; risk tests: `14`.
 
 ## Source Manifests
 
@@ -124,8 +124,9 @@ Source manifests: `4`; owners: `3`; Figma contexts: `9`; source checks: `6`; phr
 - `partial-progress-coalescing`: `TestDevelopmentAIAgentClientStoreCoalescesAssistantPartialThreadProgressBatches` proves Assistant partial progress is coalesced before read-model fanout.
 - `projection-read-repair`: `TestHTTPTaskThreadListRepairsStaleReadModelFromAssignmentProjection` proves Cold task-thread reads can repair stale read models from durable assignment projection.
 - `additive-agent-active`: `TestStoreActorAdditiveAssignmentKeepsExistingAgentActive` proves Adding another agent keeps existing active agent assignment state intact.
-- `generated-fsm-control-plane-consumption`: `TestContractsBaseline` proves Control-plane consumes contracts generated assignment and task FSM service providers.
-- `web-approval-contract-consumption`: `TestContractsBaseline` proves Control-plane consumes contracts tool approval timeout status and decision vocabulary.
+- `generated-fsm-control-plane-consumption`: `TestTaskFSMBaseline` proves Control-plane consumes contracts generated task FSM service provider.
+- `generated-fsm-control-plane-consumption`: `TestAssignmentFSMBaseline` proves Control-plane consumes contracts generated assignment FSM service provider.
+- `web-approval-contract-consumption`: `TestAssignmentApprovalBaseline` proves Control-plane consumes contracts tool approval timeout status and decision vocabulary.
 - `web-approval-round-trip`: `TestHTTPToolApprovalRoundTrip` proves Daemon-created tool approvals can be listed and decided through client v1/v2 routes, and daemon wait is released by the web decision.
 - `generated-fsm-conformance`: `TestVerifyGeneratedFSMFiles` proves Contracts fsmgen verifies generated FSM drift and conformance from Common Lisp metadata.
 - `web-approval-contract`: `TestAssignmentContractToolApprovalWireShape` proves Contracts owns the tool approval request/decision/result DTO wire shape.

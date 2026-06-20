@@ -64,14 +64,21 @@
       "risk": "generated-fsm-control-plane-consumption",
       "status": "verified",
       "package": "./internal/contractscompat",
-      "test": "TestContractsBaseline",
-      "proves": "Control-plane consumes contracts generated assignment and task FSM service providers."
+      "test": "TestTaskFSMBaseline",
+      "proves": "Control-plane consumes contracts generated task FSM service provider."
+    },
+    {
+      "risk": "generated-fsm-control-plane-consumption",
+      "status": "verified",
+      "package": "./internal/contractscompat",
+      "test": "TestAssignmentFSMBaseline",
+      "proves": "Control-plane consumes contracts generated assignment FSM service provider."
     },
     {
       "risk": "web-approval-contract-consumption",
       "status": "verified",
       "package": "./internal/contractscompat",
-      "test": "TestContractsBaseline",
+      "test": "TestAssignmentApprovalBaseline",
       "proves": "Control-plane consumes contracts tool approval timeout status and decision vocabulary."
     },
     {
