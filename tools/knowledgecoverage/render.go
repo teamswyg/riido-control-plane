@@ -39,6 +39,10 @@ func renderLoop(b *strings.Builder, loop evidenceLoop) {
 
 func renderManualGroups(b *strings.Builder, m manifest, e evidence) {
 	b.WriteString("## Registered Manual Surfaces\n\n")
+	if len(m.ManualGroups) == 0 {
+		b.WriteString("None.\n")
+		return
+	}
 	b.WriteString("| Group | Owner | Next artifact | Matched docs |\n| --- | --- | --- | ---: |\n")
 	for _, group := range m.ManualGroups {
 		fmt.Fprintf(b, "| `%s` | %s | %s | %d |\n", group.ID, group.Owner, group.NextArtifact, e.ManualByGroup[group.ID])
@@ -47,6 +51,10 @@ func renderManualGroups(b *strings.Builder, m manifest, e evidence) {
 
 func renderManualHotspots(b *strings.Builder, e evidence) {
 	b.WriteString("\n## Manual Hotspots\n\n| Directory | Matched docs |\n| --- | ---: |\n")
+	if len(e.ManualTopDirs) == 0 {
+		b.WriteString("| None | 0 |\n")
+		return
+	}
 	for _, dir := range e.ManualTopDirs {
 		fmt.Fprintf(b, "| `%s` | %d |\n", dir.Path, dir.Count)
 	}
@@ -54,6 +62,10 @@ func renderManualHotspots(b *strings.Builder, e evidence) {
 
 func renderManualSamples(b *strings.Builder, e evidence) {
 	b.WriteString("\n## Manual Samples\n\n| Group | Path |\n| --- | --- |\n")
+	if len(e.ManualSamples) == 0 {
+		b.WriteString("| None | - |\n")
+		return
+	}
 	for _, sample := range e.ManualSamples {
 		fmt.Fprintf(b, "| `%s` | `%s` |\n", sample.Group, sample.Path)
 	}

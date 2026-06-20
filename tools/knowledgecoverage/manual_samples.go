@@ -10,5 +10,8 @@ func manualSamples(docs []docClass, perGroup int) []manualSample {
 		samples = append(samples, manualSample{Group: doc.Group, Path: doc.Path, Reason: doc.Reason})
 		seen[doc.Group]++
 	}
+	if samples == nil {
+		return []manualSample{}
+	}
 	return samples
 }

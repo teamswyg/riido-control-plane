@@ -5,27 +5,21 @@
   "generated_doc": "docs/executable-knowledge.md",
   "workflow": ".github/workflows/executable-knowledge-coverage.yml",
   "evidence_artifact": "executable-knowledge-coverage",
-  "scan_roots": ["docs"],
-  "manual_groups": [
-    {
-      "id": "migration-manual-debt",
-      "owner": "control-plane-migration",
-      "reason": "Migration history remains registered debt and must not be mistaken for current executable truth.",
-      "next_artifact": "focused current-state SSOT manifests",
-      "path_prefixes": ["docs/migration/"]
-    }
+  "scan_roots": [
+    "docs"
   ],
+  "manual_groups": [],
   "assertions": [
     "every scanned markdown file must be generated, direct-SSOT backed, or registered as manual debt",
-    "manual debt registration is observable evidence, not completion",
+    "manual debt registration is observable evidence, not completion when manual debt exists",
     "a direct-SSOT backed markdown file must have a sibling .riido.json manifest",
     "a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest"
   ],
   "loop": {
-    "observation": "Executable documentation coverage can look healthy while direct SSOT readers still omit the observe/hypothesis/execute/evaluate/retrospective chain.",
-    "hypothesis": "A meta-coverage manifest can make manual debt and direct-SSOT loop coverage visible before review relies on memory.",
+    "observation": "Executable documentation coverage can look healthy while direct SSOT readers omit the observe/hypothesis/execute/evaluate/retrospective chain or migration history remains manual prose.",
+    "hypothesis": "A meta-coverage manifest can make manual debt, generated migration readers, and direct-SSOT loop coverage visible before review relies on memory.",
     "execute": "Scan markdown under docs, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, and publish coverage evidence in CI.",
     "evaluate": "The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, or direct SSOT manifests without a complete loop.",
-    "retrospective": "This keeps the repository moving toward evidence-driven knowledge without forcing every historical file to be rewritten in one slice."
+    "retrospective": "This keeps the repository evidence-driven: migration history is generated from a ledger, direct SSOT readers carry loops, and future manual debt must be registered explicitly."
   }
 }

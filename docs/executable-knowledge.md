@@ -8,43 +8,41 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Class | Count |
 | --- | ---: |
-| Generated reader docs | 16 |
+| Generated reader docs | 17 |
 | Direct SSOT docs | 3 |
 | Direct SSOT docs with evidence loop | 3 |
-| Registered manual docs | 1 |
+| Registered manual docs | 0 |
 | Scanned docs | 20 |
 
 ## Evidence Loop
 
 | Step | Statement |
 | --- | --- |
-| Observe | Executable documentation coverage can look healthy while direct SSOT readers still omit the observe/hypothesis/execute/evaluate/retrospective chain. |
-| Hypothesis | A meta-coverage manifest can make manual debt and direct-SSOT loop coverage visible before review relies on memory. |
+| Observe | Executable documentation coverage can look healthy while direct SSOT readers omit the observe/hypothesis/execute/evaluate/retrospective chain or migration history remains manual prose. |
+| Hypothesis | A meta-coverage manifest can make manual debt, generated migration readers, and direct-SSOT loop coverage visible before review relies on memory. |
 | Execute | Scan markdown under docs, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, and publish coverage evidence in CI. |
 | Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, or direct SSOT manifests without a complete loop. |
-| Retrospective | This keeps the repository moving toward evidence-driven knowledge without forcing every historical file to be rewritten in one slice. |
+| Retrospective | This keeps the repository evidence-driven: migration history is generated from a ledger, direct SSOT readers carry loops, and future manual debt must be registered explicitly. |
 
 ## Registered Manual Surfaces
 
-| Group | Owner | Next artifact | Matched docs |
-| --- | --- | --- | ---: |
-| `migration-manual-debt` | control-plane-migration | focused current-state SSOT manifests | 1 |
+None.
 
 ## Manual Hotspots
 
 | Directory | Matched docs |
 | --- | ---: |
-| `docs/migration` | 1 |
+| None | 0 |
 
 ## Manual Samples
 
 | Group | Path |
 | --- | --- |
-| `migration-manual-debt` | `docs/migration/control-plane.md` |
+| None | - |
 
 ## Assertions
 
 - every scanned markdown file must be generated, direct-SSOT backed, or registered as manual debt
-- manual debt registration is observable evidence, not completion
+- manual debt registration is observable evidence, not completion when manual debt exists
 - a direct-SSOT backed markdown file must have a sibling .riido.json manifest
 - a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest

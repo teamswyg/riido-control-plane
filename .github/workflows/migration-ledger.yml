@@ -1,0 +1,52 @@
+name: migration-ledger
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/migration-ledger.yml"
+      - "docs/migration/control-plane.md"
+      - "docs/migration/control-plane.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/migrationledger/**"
+  pull_request:
+    paths:
+      - ".github/workflows/migration-ledger.yml"
+      - "docs/migration/control-plane.md"
+      - "docs/migration/control-plane.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/migrationledger/**"
+
+jobs:
+  migration-ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
+      - name: Verify migration ledger
+        run: |
+          mkdir -p out
+          go test ./tools/migrationledger -count=1
+          go run ./tools/migrationledger \
+            -check-doc \
+            -evidence-out out/migration-ledger-evidence.json
+      - name: Verify executable knowledge coverage
+        run: |
+          go run ./tools/knowledgecoverage \
+            -check-doc \
+            -evidence-out out/executable-knowledge-coverage.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: migration-ledger-evidence
+          path: |
+            out/migration-ledger-evidence.json
+            out/executable-knowledge-coverage.json
+          if-no-files-found: error
