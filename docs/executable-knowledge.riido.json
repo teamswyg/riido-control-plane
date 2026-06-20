@@ -1,0 +1,44 @@
+{
+  "schema_version": "riido-executable-knowledge-coverage.v1",
+  "id": "control-plane-executable-knowledge-coverage",
+  "title": "Control Plane Executable Knowledge Coverage",
+  "generated_doc": "docs/executable-knowledge.md",
+  "workflow": ".github/workflows/executable-knowledge-coverage.yml",
+  "evidence_artifact": "executable-knowledge-coverage",
+  "scan_roots": ["docs"],
+  "manual_groups": [
+    {
+      "id": "domain-manual-debt",
+      "owner": "control-plane-domain",
+      "reason": "Domain SSOT docs still need focused executable manifests or generated readers.",
+      "next_artifact": "domain-specific .riido.json manifests",
+      "path_prefixes": ["docs/20-domain/"]
+    },
+    {
+      "id": "architecture-manual-debt",
+      "owner": "control-plane-architecture",
+      "reason": "Architecture docs without sibling manifests are registered debt until they become executable gates.",
+      "next_artifact": "architecture-specific evidence tools",
+      "path_prefixes": ["docs/30-architecture/"]
+    },
+    {
+      "id": "roadmap-manual-debt",
+      "owner": "control-plane-planning",
+      "reason": "Open questions are tracked as planning debt until each question resolves into an executable owner.",
+      "next_artifact": "open-question decision manifests",
+      "path_prefixes": ["docs/50-roadmap/"]
+    },
+    {
+      "id": "migration-manual-debt",
+      "owner": "control-plane-migration",
+      "reason": "Migration history remains registered debt and must not be mistaken for current executable truth.",
+      "next_artifact": "focused current-state SSOT manifests",
+      "path_prefixes": ["docs/migration/"]
+    }
+  ],
+  "assertions": [
+    "every scanned markdown file must be generated, direct-SSOT backed, or registered as manual debt",
+    "manual debt registration is observable evidence, not completion",
+    "a direct-SSOT backed markdown file must have a sibling .riido.json manifest"
+  ]
+}
