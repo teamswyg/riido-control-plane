@@ -17,6 +17,7 @@ type evidence struct {
 	Status        string       `json:"status"`
 	Result        verifyResult `json:"result"`
 	Workflow      string       `json:"workflow"`
+	Delivery      delivery     `json:"delivery_workflow"`
 	GeneratedDoc  string       `json:"generated_doc"`
 	Loop          loopRecord   `json:"loop"`
 }
@@ -28,6 +29,7 @@ func newEvidence(m manifest, r verifyResult) evidence {
 		Status:        "verified",
 		Result:        r,
 		Workflow:      m.Workflow,
+		Delivery:      m.Delivery,
 		GeneratedDoc:  m.GeneratedDoc,
 		Loop:          m.Loop,
 	}
