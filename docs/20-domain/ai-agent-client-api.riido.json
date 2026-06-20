@@ -1,0 +1,35 @@
+{
+  "schema_version": "riido-ai-agent-client-api.v1",
+  "id": "ai-agent-client-api",
+  "title": "AI Agent Client API",
+  "riido_task": "RIID-4721",
+  "generated_doc": "docs/20-domain/ai-agent-client-api.md",
+  "workflow": ".github/workflows/ai-agent-client-api.yml",
+  "evidence_artifact": "ai-agent-client-api-evidence",
+  "openapi": "contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json",
+  "smoke_matrix": "contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json",
+  "dsl": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json",
+  "ir": "contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json",
+  "generated_core": "web/generated/aiAgentClient.ts",
+  "generated_react": "web/generated/aiAgentClient.react.ts",
+  "operation_counts": {"total":55,"v1":25,"v2":30,"smoke_matrix":55},
+  "required_generated_paths": ["aiAgent.bootstrap","aiAgent.profileThumbnails.uploads.create","aiAgent.tasks.assign","aiAgent.tasks.threadMessages.create","v2.aiAgent.bootstrap","v2.aiAgent.agents.create","v2.aiAgent.profileThumbnails.uploads.create","v2.aiAgent.tasks.assignedAgentProfiles","v2.aiAgent.tasks.agentAssignments.create","v2.aiAgent.tasks.threadStreamSubscription"],
+  "runtime_config_keys": ["RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"],
+  "public_fields": ["workspace_id","profile_thumbnail_url","provider_version","assigned-agent-profiles","agent-assignments","thread-stream-subscription"],
+  "deployment_evidence": ["not from a manual","The workflow masks both values"],
+  "source_checks": [
+    {"name":"react-query-generator","file":"tools/reactquerygen/main_test.go","contains":["TestGenerateReactQueryClientDoesNotDrift","TestAIAgentClientMetadataFlowsThroughContractProjections","assignAIAgentTask"]},
+    {"name":"generated-client-handoff","file":"tools/generatedclienthandoff/main_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","TestGeneratedClientHandoffRejectsNonRiidoWorkBranch"]},
+    {"name":"black-box-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2","TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI"]},
+    {"name":"runtime-env","file":"cmd/riido_ai_server/main.go","contains":["envAIAgentClientDev","RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"]},
+    {"name":"workflow","file":".github/workflows/ai-agent-client-api.yml","contains":["Verify React Query generation drift","Verify generated client handoff","Verify React Query generator command"]}
+  ],
+  "loop": {
+    "observation": "The AI Agent client API doc repeated contract, generated-client, smoke, deployment, and runtime rules as prose while the machine-readable mirrors already existed.",
+    "hypothesis": "A compact SSOT gate can prove the OpenAPI/generated client/smoke matrix mirror and keep required runtime/deployment strings visible without using prose as truth.",
+    "execute": "Generate this reader doc from the manifest and run the aiagentclientapi verifier in CI.",
+    "evaluate": "The verifier checks contract file presence, OpenAPI operation counts, v1/v2 split, generated path coverage, smoke matrix parity, source anchors, generated doc freshness, and CLI evidence output.",
+    "retrospective": "This slice proves the public control-plane mirror and generated-client evidence; canonical domain changes still start in riido-contracts."
+  },
+  "non_goals": ["canonical riido-contracts changes","frontend hook policy","Figma interpretation","live AWS deployment","production persistence topology"]
+}

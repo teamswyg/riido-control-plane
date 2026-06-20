@@ -8,6 +8,7 @@ on:
       - ".github/workflows/generated-client-delivery.yml"
       - "contracts/ai-agent-client/**"
       - "docs/20-domain/ai-agent-client-api.md"
+      - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/20-domain/context-map.md"
       - "docs/20-domain/request-authorization.md"
       - "docs/30-architecture/api-client-delivery.md"
@@ -20,6 +21,7 @@ on:
       - "internal/riidoaiserver/ai_agent_client_*.go"
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/authorization.go"
+      - "tools/aiagentclientapi/**"
       - "tools/reactquerygen/**"
       - "tools/generatedclienthandoff/**"
       - "web/generated/aiAgentClient.ts"
@@ -30,6 +32,7 @@ on:
       - ".github/workflows/generated-client-delivery.yml"
       - "contracts/ai-agent-client/**"
       - "docs/20-domain/ai-agent-client-api.md"
+      - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/20-domain/context-map.md"
       - "docs/20-domain/request-authorization.md"
       - "docs/30-architecture/api-client-delivery.md"
@@ -42,6 +45,7 @@ on:
       - "internal/riidoaiserver/ai_agent_client_*.go"
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/authorization.go"
+      - "tools/aiagentclientapi/**"
       - "tools/reactquerygen/**"
       - "tools/generatedclienthandoff/**"
       - "web/generated/aiAgentClient.ts"
@@ -58,6 +62,13 @@ jobs:
           cache: false
       - name: Verify Go dependency allowlist
         run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
+      - name: Verify AI Agent client API executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/aiagentclientapi -count=1
+          go run ./tools/aiagentclientapi \
+            -check-doc \
+            -evidence-out out/ai-agent-client-api-evidence.json
       - name: Test AI Agent development API
         run: go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
       - name: Test AI Agent runtime env
@@ -75,3 +86,9 @@ jobs:
             -out "$tmp"
           diff -u web/generated/aiAgentClient.ts "$tmp"
           diff -u web/generated/aiAgentClient.react.ts "$tmpdir/aiAgentClient.react.ts"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ai-agent-client-api-evidence
+          path: out/ai-agent-client-api-evidence.json
+          if-no-files-found: error
