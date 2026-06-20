@@ -7,7 +7,9 @@ on:
       - ".github/workflows/assignment-operation-runtime.yml"
       - "docs/20-domain/assignment-operation-journal.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/assignment_api.go"
@@ -23,7 +25,9 @@ on:
       - ".github/workflows/assignment-operation-runtime.yml"
       - "docs/20-domain/assignment-operation-journal.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/assignment_api.go"
@@ -53,5 +57,19 @@ jobs:
             printf 'Disallowed operation runtime imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify runtime executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/saascontrolplane -count=1
+          go run ./tools/saascontrolplane \
+            -boundary assignment-operation-runtime \
+            -check-doc \
+            -evidence-out out/assignment-operation-runtime-evidence.json
       - name: Test assignment operation runtime wiring
         run: go test ./internal/riidoaiserver -run 'AssignmentOperationRuntimeCaptures|PollAgentUsesAssignmentClaimer|OpenStoreWithConfigReplaysAssignmentOperations|HeartbeatAgentRefreshesDurableActiveLease|PollAgentFailsStaleActiveAssignment|PollAgentUsesDurableCancellingProjection' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment-operation-runtime-evidence
+          path: out/assignment-operation-runtime-evidence.json
+          if-no-files-found: error

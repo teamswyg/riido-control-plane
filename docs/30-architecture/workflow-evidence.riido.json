@@ -13,16 +13,6 @@
       "next": "publish redacted smoke summary evidence"
     },
     {
-      "path": ".github/workflows/assignment-operation-replay.yml",
-      "reason": "legacy replay workflow currently runs tests without JSON evidence",
-      "next": "publish replay conformance evidence"
-    },
-    {
-      "path": ".github/workflows/assignment-operation-runtime.yml",
-      "reason": "legacy runtime workflow currently runs tests without JSON evidence",
-      "next": "publish runtime operation evidence"
-    },
-    {
       "path": ".github/workflows/aws-adapters-facade.yml",
       "reason": "legacy AWS facade workflow currently runs tests without JSON evidence",
       "next": "publish facade boundary evidence without live credentials"
