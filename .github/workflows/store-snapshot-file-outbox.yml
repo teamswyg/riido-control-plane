@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/store-snapshot-file-outbox.yml"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/30-architecture/store-snapshot-file-outbox.md"
+      - "docs/30-architecture/store-snapshot-file-outbox.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
@@ -17,10 +19,13 @@ on:
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_snapshot.go"
       - "internal/riidoaiserver/store_state.go"
+      - "tools/storesnapshotoutbox/**"
   pull_request:
     paths:
       - ".github/workflows/store-snapshot-file-outbox.yml"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/30-architecture/store-snapshot-file-outbox.md"
+      - "docs/30-architecture/store-snapshot-file-outbox.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
@@ -32,6 +37,7 @@ on:
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_snapshot.go"
       - "internal/riidoaiserver/store_state.go"
+      - "tools/storesnapshotoutbox/**"
 
 jobs:
   persistence:
@@ -53,3 +59,12 @@ jobs:
           fi
       - name: Test store snapshot and file outbox
         run: go test ./internal/riidoaiserver -run 'FileOutbox|FileStoreSnapshot|DecodeStoreSnapshot|StateFromSnapshot|OutboxFailure' -count=1
+      - name: Publish store snapshot and file outbox evidence
+        run: |
+          mkdir -p out
+          go test ./tools/storesnapshotoutbox -count=1
+          go run ./tools/storesnapshotoutbox -check-doc -evidence-out out/store-snapshot-file-outbox-evidence.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-snapshot-file-outbox-evidence
+          path: out/store-snapshot-file-outbox-evidence.json
