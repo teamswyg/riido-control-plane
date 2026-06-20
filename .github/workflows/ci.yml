@@ -15,6 +15,16 @@ jobs:
           go-version-file: go.mod
           cache: false
       - name: Verify Go dependency allowlist
-        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
+        run: |
+          mkdir -p out
+          go run ./tools/dependencyallowlist \
+            -contract dependency_allowlist.riido.json \
+            -evidence-out out/dependency-allowlist-evidence.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-allowlist-evidence
+          path: out/dependency-allowlist-evidence.json
+          if-no-files-found: warn
       - name: Test
         run: go test ./...
