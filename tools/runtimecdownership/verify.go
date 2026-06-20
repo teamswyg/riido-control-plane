@@ -37,6 +37,9 @@ func verifyIdentity(m manifest) error {
 	if m.RiidoTask != requiredTask || m.Runtime != requiredRuntime {
 		return fmt.Errorf("unexpected runtime ownership target")
 	}
+	if m.GeneratedDoc != generatedDoc || m.Workflow != workflow || m.EvidenceArtifact != evidenceArtifact {
+		return fmt.Errorf("unexpected runtime ownership reader evidence binding")
+	}
 	if len(m.Hardening) == 0 || len(m.Supersedes) == 0 {
 		return fmt.Errorf("runtime ownership manifest must keep task lineage")
 	}

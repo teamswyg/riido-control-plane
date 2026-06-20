@@ -27,6 +27,7 @@ func scanDocs(root string, m manifest) ([]docClass, []string) {
 	docs = dedupeDocs(docs)
 	slices.SortFunc(docs, func(a, b docClass) int { return strings.Compare(a.Path, b.Path) })
 	problems = append(problems, validateGeneratedDocs(root, docs)...)
+	problems = append(problems, validateGeneratedArtifactBindings(root, docs)...)
 	problems = append(problems, validateManualEntries(root, m, docs)...)
 	problems = append(problems, validateDirectLoops(docs)...)
 	problems = append(problems, validateDirectEvidence(root, docs)...)

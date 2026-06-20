@@ -29,3 +29,7 @@ func loadWorkflows(root string) []workflowDoc {
 func isWorkflowPath(path string) bool {
 	return strings.HasSuffix(path, ".yml") || strings.HasSuffix(path, ".yaml")
 }
+
+func readWorkflow(root, workflowPath string) ([]byte, error) {
+	return os.ReadFile(resolvePath(root, workflowPath))
+}

@@ -4,6 +4,9 @@ type projectionManifest struct {
 	SchemaVersion       string                 `json:"schema_version"`
 	ID                  string                 `json:"id"`
 	RiidoTask           string                 `json:"riido_task"`
+	GeneratedDoc        string                 `json:"generated_doc"`
+	Workflow            string                 `json:"workflow"`
+	EvidenceArtifact    string                 `json:"evidence_artifact"`
 	EvidenceTool        string                 `json:"evidence_tool"`
 	Source              sourcePointer          `json:"source_contracts_manifest"`
 	ProjectionPolicy    projectionPolicy       `json:"projection_policy"`

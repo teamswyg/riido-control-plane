@@ -11,6 +11,7 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Generated reader docs | 31 |
 | Generated reader docs with tool | 31 |
 | Generated reader docs with CI evidence | 31 |
+| Generated reader docs with uploaded evidence artifact | 31 |
 | Direct SSOT docs | 0 |
 | Direct SSOT docs with evidence loop | 0 |
 | Direct SSOT docs with CI evidence | 0 |
@@ -21,11 +22,11 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Step | Statement |
 | --- | --- |
-| Observe | Executable documentation coverage can look healthy while direct SSOT readers omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, or migration history remains manual prose. |
-| Hypothesis | A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, and direct-SSOT CI evidence visible before review relies on memory. |
-| Execute | Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, and publish coverage evidence in CI. |
-| Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, or direct SSOT manifests without CI evidence. |
-| Retrospective | This keeps the repository evidence-driven: migration history is generated from a ledger, direct SSOT readers carry loops and evidence tools, and future manual debt must be registered explicitly. |
+| Observe | Executable documentation coverage can look healthy while direct SSOT readers omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, uploaded artifact binding, or migration history remains manual prose. |
+| Hypothesis | A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, direct-SSOT CI evidence, and generated artifact collection visible before review relies on memory. |
+| Execute | Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifests to bind evidence_artifact to upload-artifact, and publish coverage evidence in CI. |
+| Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, or generated manifests whose evidence artifact is not uploaded. |
+| Retrospective | This keeps the repository evidence-driven: migration history is generated from a ledger, direct SSOT readers carry loops and evidence tools, generated readers bind evidence to durable artifacts, and future manual debt must be registered explicitly. |
 
 ## Registered Manual Surfaces
 
@@ -50,6 +51,7 @@ None.
 - a generated reader doc must name an existing tools/<name> generator in its marker
 - a generated reader doc generator must be referenced by at least one GitHub Actions workflow
 - a generated reader doc generator must run check-doc and publish evidence-out in GitHub Actions
+- a generated reader doc manifest evidence_artifact must be uploaded by its declared GitHub Actions workflow
 - a direct-SSOT backed markdown file must have a sibling .riido.json manifest
 - a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest
 - a direct-SSOT backed markdown file must declare evidence_tool in the sibling manifest
