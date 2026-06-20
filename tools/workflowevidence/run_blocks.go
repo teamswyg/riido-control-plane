@@ -7,6 +7,7 @@ func workflowRunBlocks(text string) []string {
 	var blocks []string
 	for i := 0; i < len(lines); i++ {
 		trimmed := strings.TrimSpace(lines[i])
+		trimmed = strings.TrimPrefix(trimmed, "- ")
 		value, ok := strings.CutPrefix(trimmed, "run:")
 		if !ok {
 			continue
