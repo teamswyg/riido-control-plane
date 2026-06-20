@@ -40,3 +40,17 @@ func TestWorkflowTextUploadsArtifactStrictStopsAtNextStep(t *testing.T) {
 		t.Fatal("strict mode must not borrow error handling from a later step")
 	}
 }
+
+func TestWorkflowTextUploadsArtifactPathMatchesSameStep(t *testing.T) {
+	text := "steps:\n- uses: actions/upload-artifact@v4\n  with:\n    name: example-evidence\n    path: out/example.json\n"
+	if !workflowTextUploadsArtifactPath(text, "example-evidence", "out/example.json") {
+		t.Fatal("expected upload path match")
+	}
+}
+
+func TestWorkflowTextUploadsArtifactPathStopsAtNextStep(t *testing.T) {
+	text := "steps:\n- uses: actions/upload-artifact@v4\n  with:\n    name: example-evidence\n- run: echo later\n  env:\n    path: out/example.json\n"
+	if workflowTextUploadsArtifactPath(text, "example-evidence", "out/example.json") {
+		t.Fatal("upload path must not be borrowed from a later step")
+	}
+}
