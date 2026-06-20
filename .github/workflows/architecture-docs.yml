@@ -180,14 +180,14 @@ jobs:
         with:
           name: runtime-cd-ownership-evidence
           path: out/runtime-cd-ownership-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Upload live workflow redaction evidence
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: live-workflow-redaction-evidence
           path: out/live-workflow-redaction-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Verify AI Agent snapshot CQRS gate
         run: |
           mkdir -p out
@@ -199,6 +199,6 @@ jobs:
         with:
           name: snapshot-cqrs-gate-evidence
           path: out/snapshot-cqrs-gate-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Test
         run: go test ./...

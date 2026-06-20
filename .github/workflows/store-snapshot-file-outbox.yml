@@ -68,3 +68,4 @@ jobs:
         with:
           name: store-snapshot-file-outbox-evidence
           path: out/store-snapshot-file-outbox-evidence.json
+          if-no-files-found: error
