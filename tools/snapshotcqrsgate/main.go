@@ -19,6 +19,7 @@ func run(args []string) error {
 	fs.SetOutput(os.Stderr)
 	manifestPath := fs.String("manifest", defaultManifest, "snapshot CQRS gate manifest")
 	repo := fs.String("repo", ".", "repository root")
+	writeDoc := fs.Bool("write-doc", false, "write the paired reader doc")
 	checkDoc := fs.Bool("check-doc", false, "verify the paired reader doc")
 	evidenceOut := fs.String("evidence-out", "", "optional evidence JSON output path")
 	if err := fs.Parse(args); err != nil {
@@ -31,6 +32,11 @@ func run(args []string) error {
 	m, err := loadManifest(filepath.Join(repoRoot, filepath.FromSlash(*manifestPath)))
 	if err != nil {
 		return err
+	}
+	if *writeDoc {
+		if err := writeDocFile(repoRoot, m); err != nil {
+			return err
+		}
 	}
 	result, err := verify(repoRoot, m, *checkDoc)
 	if err != nil {
