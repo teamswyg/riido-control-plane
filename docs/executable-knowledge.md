@@ -8,16 +8,16 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Class | Count |
 | --- | ---: |
-| Generated reader docs | 9 |
+| Generated reader docs | 10 |
 | Direct SSOT docs | 3 |
-| Registered manual docs | 8 |
+| Registered manual docs | 7 |
 | Scanned docs | 20 |
 
 ## Registered Manual Surfaces
 
 | Group | Owner | Next artifact | Matched docs |
 | --- | --- | --- | ---: |
-| `architecture-manual-debt` | control-plane-architecture | architecture-specific evidence tools | 6 |
+| `architecture-manual-debt` | control-plane-architecture | architecture-specific evidence tools | 5 |
 | `roadmap-manual-debt` | control-plane-planning | open-question decision manifests | 1 |
 | `migration-manual-debt` | control-plane-migration | focused current-state SSOT manifests | 1 |
 
@@ -25,7 +25,7 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Directory | Matched docs |
 | --- | ---: |
-| `docs/30-architecture` | 6 |
+| `docs/30-architecture` | 5 |
 | `docs/50-roadmap` | 1 |
 | `docs/migration` | 1 |
 
@@ -33,8 +33,8 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Group | Path |
 | --- | --- |
-| `architecture-manual-debt` | `docs/30-architecture/ai-agent-generated-endpoint-smoke-matrix.md` |
 | `architecture-manual-debt` | `docs/30-architecture/api-client-delivery.md` |
+| `architecture-manual-debt` | `docs/30-architecture/config-reference.md` |
 | `roadmap-manual-debt` | `docs/50-roadmap/open-questions.md` |
 | `migration-manual-debt` | `docs/migration/control-plane.md` |
 

@@ -1,0 +1,28 @@
+{
+  "schema_version": "riido-ai-agent-generated-smoke-matrix-gate.v1",
+  "id": "ai-agent-generated-endpoint-smoke-matrix",
+  "title": "AI Agent Generated Endpoint Smoke Matrix",
+  "riido_task": "RIID-4897",
+  "generated_doc": "docs/30-architecture/ai-agent-generated-endpoint-smoke-matrix.md",
+  "workflow": ".github/workflows/ai-agent-generated-endpoint-smoke-matrix.yml",
+  "evidence_artifact": "ai-agent-generated-endpoint-smoke-matrix-evidence",
+  "openapi": "contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json",
+  "smoke_matrix": "contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json",
+  "smoke_schema_version": "riido-ai-agent-generated-endpoint-smoke-matrix.v1",
+  "operation_counts": {"total":55,"v1":25,"v2":30},
+  "required_evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2"],
+  "source_checks": [
+    {"name":"matrix-parity","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI","readAIAgentGeneratedOpenAPIOperations","readAIAgentGeneratedSmokeMatrix"]},
+    {"name":"matrix-sorted","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestAIAgentGeneratedEndpointSmokeMatrixEntriesStaySorted","generated_path"]},
+    {"name":"v1-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","/v1/client/ai-agent"]},
+    {"name":"v2-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV2","/v2/client/workspaces/"]}
+  ],
+  "loop": {
+    "observation": "The smoke matrix doc described an executable OpenAPI-to-smoke parity rule, but the doc itself was manual prose.",
+    "hypothesis": "A focused smoke-matrix gate can prove generated endpoint coverage directly from OpenAPI and the matrix fixture.",
+    "execute": "Generate this reader from the manifest and run the smoke matrix verifier in CI.",
+    "evaluate": "The verifier checks OpenAPI generated-path parity, v1/v2 evidence tests, sorted matrix entries, source anchors, generated doc freshness, and CLI evidence output.",
+    "retrospective": "This slice makes the smoke matrix architecture note executable; broader API delivery policy remains a separate architecture debt."
+  },
+  "non_goals": ["frontend composition policy","Figma coverage","response schema ownership","generated TypeScript output","live AWS smoke"]
+}
