@@ -12,14 +12,14 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `42`; runtime: `1`; internal: `3`; tools: `37`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `96`; max file lines: `1311`.
+File line budget target: `75`; files over target: `96`; max file lines: `1251`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
 | Files over target | 96 | 97 | 1 |
-| Max file lines | 1311 | 2481 | 1170 |
+| Max file lines | 1251 | 2481 | 1230 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
 
@@ -27,7 +27,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 96 | 85 | 1311 | 2481 | 18547 | 23713 |
+| `internal/riidoaiserver` | 96 | 85 | 1251 | 2481 | 17773 | 23713 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
 | `tools/containercontract` | 0 | 2 | 0 | 597 | 0 | 663 |
@@ -43,7 +43,6 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | File | Lines |
 | --- | ---: |
-| `internal/riidoaiserver/store.go` | 1311 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1251 |
 | `internal/riidoaiserver/server.go` | 1129 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
@@ -53,12 +52,13 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
 | `internal/riidoaiserver/ai_agent_client_persistence_test.go` | 661 |
 | `internal/riidoaiserver/ai_agent_client_api.go` | 610 |
+| `internal/riidoaiserver/store.go` | 537 |
 
 ### Line Budget Hotspots
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 96 | 1311 | 18547 |
+| `internal/riidoaiserver` | 96 | 1251 | 17773 |
 
 ## Packages
 
