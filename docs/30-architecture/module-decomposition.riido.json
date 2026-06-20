@@ -23,6 +23,7 @@
     {"path":"tools/aiagentrisk","kind":"evidence-tool","role":"AI Agent unresolved-risk closure evidence verifier.","must_not_own":"risk resolution without source tests"},
     {"path":"tools/aigeneratedsmokematrix","kind":"evidence-tool","role":"Generated endpoint smoke matrix verifier.","must_not_own":"endpoint shape"},
     {"path":"tools/assignmentjournal","kind":"evidence-tool","role":"Assignment operation journal evidence verifier.","must_not_own":"assignment store execution"},
+    {"path":"tools/cloudwatchemf","kind":"evidence-tool","role":"CloudWatch EMF shape generated reader and verifier.","must_not_own":"live AWS metrics publishing or dashboard topology"},
     {"path":"tools/configreference","kind":"evidence-tool","role":"Runtime config catalog verifier.","must_not_own":"deployment values or secrets"},
     {"path":"tools/containercontract","kind":"evidence-tool","role":"Container image contract verifier.","must_not_own":"image publishing or ECS deployment"},
     {"path":"tools/contextmap","kind":"evidence-tool","role":"Context map generated reader and verifier.","must_not_own":"runtime package boundaries"},
