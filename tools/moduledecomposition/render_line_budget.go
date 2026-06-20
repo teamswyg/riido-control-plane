@@ -13,6 +13,7 @@ func renderLineBudget(b *strings.Builder, result lineBudgetResult) {
 		result.Target, result.OverTarget, result.MaxLines)
 	renderLineBudgetRatchet(b, result)
 	renderLineBudgetHotspotRatchets(b, result.HotspotRatchets)
+	renderLineBudgetUntrackedHotspots(b, result.UntrackedHotspots)
 	if len(result.Samples) == 0 {
 		return
 	}

@@ -14,6 +14,9 @@ func verifyLineBudgetRatchet(result lineBudgetResult) error {
 	if err := verifyLineBudgetHotspotRatchets(result.HotspotRatchets); err != nil {
 		return err
 	}
+	if err := verifyLineBudgetHotspotCoverage(result.UntrackedHotspots); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -24,6 +27,13 @@ func verifyLineBudgetHotspotRatchets(ratchets []lineBudgetHotspotRatchet) error 
 		}
 	}
 	return nil
+}
+
+func verifyLineBudgetHotspotCoverage(untracked []lineBudgetHotspot) error {
+	if len(untracked) == 0 {
+		return nil
+	}
+	return fmt.Errorf("line budget untracked hotspot %q", untracked[0].Path)
 }
 
 func lineBudgetFilesSlack(result lineBudgetResult) int {

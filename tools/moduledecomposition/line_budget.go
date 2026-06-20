@@ -15,6 +15,7 @@ type lineBudgetResult struct {
 	Samples            []lineBudgetSample
 	Hotspots           []lineBudgetHotspot
 	HotspotRatchets    []lineBudgetHotspotRatchet
+	UntrackedHotspots  []lineBudgetHotspot
 }
 
 type lineBudgetSample struct {
@@ -62,5 +63,6 @@ func scanLineBudget(repoRoot string, roots []string, budget fileLineBudget) (lin
 	result.Samples = topLineBudgetSamples(samples, budget.SampleLimit)
 	result.Hotspots = trimLineBudgetHotspots(hotspots, budget.HotspotLimit)
 	result.HotspotRatchets = buildLineBudgetHotspotRatchets(hotspots, budget.HotspotLimits)
+	result.UntrackedHotspots = untrackedLineBudgetHotspots(hotspots, budget.HotspotLimits)
 	return result, nil
 }

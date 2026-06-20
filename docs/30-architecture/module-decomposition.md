@@ -33,6 +33,10 @@ File line budget target: `75`; files over target: `97`; max file lines: `2481`.
 | `awsadapters` | 1 | 1 | 84 | 84 | 9 | 9 |
 | `internal/contractscompat` | 1 | 1 | 81 | 81 | 6 | 6 |
 
+### Line Budget Untracked Hotspots
+
+None. Every over-budget directory is covered by a hotspot ratchet.
+
 | File | Lines |
 | --- | ---: |
 | `internal/riidoaiserver/ai_agent_client_http_test.go` | 2481 |
