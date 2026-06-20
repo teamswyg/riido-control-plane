@@ -9,7 +9,7 @@
   "endpoint": {"method": "GET", "path": "/metrics", "resource": "metrics", "action": "read"},
   "source_checks": [
     {"name": "api", "file": "internal/riidoaiserver/assignment_api.go", "contains": ["MetricsSchemaVersion", "MetricsSnapshot", "store_operations"]},
-    {"name": "handler", "file": "internal/riidoaiserver/server.go", "contains": ["handleMetrics", "AuthorizationResourceMetrics", "ApplyToMetricsSnapshot"]},
+    {"name": "handler", "file": "internal/riidoaiserver/server_metrics_http.go", "contains": ["handleMetrics", "AuthorizationResourceMetrics", "ApplyToMetricsSnapshot"]},
     {"name": "tests", "file": "internal/riidoaiserver/assignment_metrics_test.go", "contains": ["TestHTTPMetricsReturnsAssignmentSnapshot", "TestHTTPMetricsRequiresScopedAuthorization", "TestHTTPMetricsStoreNotConfiguredFailsClosed"]}
   ],
   "required_json_fields": [

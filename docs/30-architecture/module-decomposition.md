@@ -25,7 +25,7 @@ File line budget target: `75`; files over target: `85`; max file lines: `2481`.
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 85 | 85 | 2481 | 2481 | 23713 | 23713 |
+| `internal/riidoaiserver` | 85 | 85 | 2481 | 2481 | 23100 | 23713 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
 | `tools/containercontract` | 0 | 2 | 0 | 597 | 0 | 663 |
@@ -40,8 +40,8 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | File | Lines |
 | --- | ---: |
 | `internal/riidoaiserver/ai_agent_client_http_test.go` | 2481 |
-| `internal/riidoaiserver/server.go` | 2373 |
 | `internal/riidoaiserver/store.go` | 1952 |
+| `internal/riidoaiserver/server.go` | 1760 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1573 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store_test.go` | 1472 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
@@ -54,7 +54,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 85 | 2481 | 23713 |
+| `internal/riidoaiserver` | 85 | 2481 | 23100 |
 
 ## Packages
 
