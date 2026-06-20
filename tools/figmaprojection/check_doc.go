@@ -6,7 +6,18 @@ import (
 	"os/exec"
 )
 
-func checkDoc(root string) error {
+func checkGeneratedDoc(root, expected string) error {
+	actual, err := readText(repoPath(root, defaultDoc))
+	if err != nil {
+		return err
+	}
+	if actual != expected {
+		return fmt.Errorf("%s is stale; run go run ./tools/figmaprojection -write-doc", defaultDoc)
+	}
+	return nil
+}
+
+func checkProjectionGate(root string) error {
 	cmd := exec.Command("go", "test", "./tools/reactquerygen", "-run",
 		"TestFigmaAIAgentControlPlaneProjectionManifest", "-count=1")
 	cmd.Dir = root

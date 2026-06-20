@@ -1,19 +1,17 @@
 package main
 
-import "encoding/json"
-
 type projectionManifest struct {
-	SchemaVersion       string            `json:"schema_version"`
-	ID                  string            `json:"id"`
-	RiidoTask           string            `json:"riido_task"`
-	EvidenceTool        string            `json:"evidence_tool"`
-	Source              sourcePointer     `json:"source_contracts_manifest"`
-	ProjectionPolicy    json.RawMessage   `json:"projection_policy"`
-	ToolLimitations     []json.RawMessage `json:"mirrored_supporting_tool_limitations"`
-	LegacyAbsorptions   []json.RawMessage `json:"legacy_non_ui_absorptions"`
-	PlanningAbsorptions []json.RawMessage `json:"non_ui_planning_absorptions"`
-	Entries             []projectionEntry `json:"entries"`
-	Loop                evidenceLoop      `json:"loop"`
+	SchemaVersion       string                 `json:"schema_version"`
+	ID                  string                 `json:"id"`
+	RiidoTask           string                 `json:"riido_task"`
+	EvidenceTool        string                 `json:"evidence_tool"`
+	Source              sourcePointer          `json:"source_contracts_manifest"`
+	ProjectionPolicy    projectionPolicy       `json:"projection_policy"`
+	ToolLimitations     []projectionLimitation `json:"mirrored_supporting_tool_limitations"`
+	LegacyAbsorptions   []legacyAbsorption     `json:"legacy_non_ui_absorptions"`
+	PlanningAbsorptions []planningAbsorption   `json:"non_ui_planning_absorptions"`
+	Entries             []projectionEntry      `json:"entries"`
+	Loop                evidenceLoop           `json:"loop"`
 }
 
 type sourcePointer struct {
@@ -33,4 +31,10 @@ type projectionEntry struct {
 	RequiredGeneratedPaths          []string `json:"required_generated_paths,omitempty"`
 	ForbiddenGeneratedPathFragments []string `json:"forbidden_generated_path_fragments,omitempty"`
 	NoEndpointReason                string   `json:"no_endpoint_reason,omitempty"`
+}
+
+type projectionPolicy struct {
+	Summary  string `json:"summary"`
+	TopDown  string `json:"top_down"`
+	BottomUp string `json:"bottom_up"`
 }
