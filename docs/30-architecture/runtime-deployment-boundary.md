@@ -56,7 +56,7 @@ Boundaries: `6`; evidence paths: `12`; phrase checks: `24`; rules: `11`.
 - owner: `riido-control-plane`
 - scope: Git/tag, Go module, container contract result, and aggregate deploy/smoke pass-fail only.
 - does not own: task-definition ARNs, image digests, live workflow run URLs; Terraform plan output; raw operator evidence
-- evidence: `tools/deploypolicy/deploy_policy_test.go`, `docs/30-architecture/runtime-cd-ownership.riido.json`
+- evidence: `tools/deploypolicy/runtime_cd_manifest_test.go`, `docs/30-architecture/runtime-cd-ownership.riido.json`
 
 ## Boundary Rules
 

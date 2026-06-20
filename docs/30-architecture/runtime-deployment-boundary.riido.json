@@ -64,8 +64,8 @@
       "scope": "Git/tag, Go module, container contract result, and aggregate deploy/smoke pass-fail only.",
       "does_not_own": ["task-definition ARNs, image digests, live workflow run URLs", "Terraform plan output", "raw operator evidence"],
       "evidence": [
-        {"path": "tools/deploypolicy/deploy_policy_test.go", "contains": ["TestRuntimeCDOwnershipManifest", "ai-api.riido.io"]},
-        {"path": "docs/30-architecture/runtime-cd-ownership.riido.json", "contains": ["public_surface_scan_contract", "public_sensitive_surface_guard"]}
+        {"path": "tools/deploypolicy/runtime_cd_manifest_test.go", "contains": ["TestRuntimeCDOwnershipManifest"]},
+        {"path": "docs/30-architecture/runtime-cd-ownership.riido.json", "contains": ["public_surface_scan_contract", "public_sensitive_surface_guard", "ai-api.riido.io"]}
       ]
     }
   ],
