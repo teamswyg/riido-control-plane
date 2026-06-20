@@ -13,19 +13,9 @@
       "next": "publish redacted smoke summary evidence"
     },
     {
-      "path": ".github/workflows/aws-adapters-facade.yml",
-      "reason": "legacy AWS facade workflow currently runs tests without JSON evidence",
-      "next": "publish facade boundary evidence without live credentials"
-    },
-    {
       "path": ".github/workflows/deploy-ai-agent-testnet.yml",
       "reason": "deployment workflow must avoid leaking live operator evidence",
       "next": "publish redacted deployment summary evidence"
-    },
-    {
-      "path": ".github/workflows/dynamodb-eventbridge-adapters.yml",
-      "reason": "legacy AWS adapter workflow currently runs tests without JSON evidence",
-      "next": "publish adapter conformance evidence without live credentials"
     },
     {
       "path": ".github/workflows/go-ci.yml",

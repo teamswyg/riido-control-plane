@@ -37,8 +37,8 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 | `task-event-sse` | `.github/workflows/assignment-sse-adapter.yml` | `assignment-sse-adapter-evidence` | 1 |
 | `metrics-http` | `.github/workflows/metrics-http-adapter.yml` | `-` | 2 |
 | `cloudwatch-emf` | `.github/workflows/cloudwatch-emf.yml` | `-` | 1 |
-| `dynamodb-eventbridge` | `.github/workflows/dynamodb-eventbridge-adapters.yml` | `-` | 2 |
-| `aws-facade` | `.github/workflows/aws-adapters-facade.yml` | `-` | 1 |
+| `dynamodb-eventbridge` | `.github/workflows/dynamodb-eventbridge-adapters.yml` | `dynamodb-eventbridge-adapters-evidence` | 2 |
+| `aws-facade` | `.github/workflows/aws-adapters-facade.yml` | `aws-adapters-facade-evidence` | 1 |
 | `health-ready-cmd` | `.github/workflows/health-ready-cmd.yml` | `-` | 2 |
 | `review-account-seed` | `.github/workflows/review-account-seed.yml` | `-` | 2 |
 | `container-image` | `.github/workflows/container-image-contract.yml` | `-` | 1 |

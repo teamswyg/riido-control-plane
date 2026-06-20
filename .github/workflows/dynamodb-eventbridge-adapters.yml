@@ -6,7 +6,9 @@ on:
     paths:
       - ".github/workflows/dynamodb-eventbridge-adapters.yml"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/dynamodb_*.go"
@@ -15,7 +17,9 @@ on:
     paths:
       - ".github/workflows/dynamodb-eventbridge-adapters.yml"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/dynamodb_*.go"
@@ -46,5 +50,19 @@ jobs:
             printf 'Forbidden private deployment artifacts:\n%s\n' "$forbidden"
             exit 1
           fi
+      - name: Verify adapter executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/saascontrolplane -count=1
+          go run ./tools/saascontrolplane \
+            -boundary dynamodb-eventbridge \
+            -check-doc \
+            -evidence-out out/dynamodb-eventbridge-adapters-evidence.json
       - name: Test DynamoDB and EventBridge adapters
         run: go test ./internal/riidoaiserver -run 'DynamoDB|EventBridge' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dynamodb-eventbridge-adapters-evidence
+          path: out/dynamodb-eventbridge-adapters-evidence.json
+          if-no-files-found: error
