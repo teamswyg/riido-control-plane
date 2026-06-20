@@ -1,0 +1,134 @@
+{
+  "schema_version": "riido-control-plane-workflow-evidence.v1",
+  "id": "control-plane-workflow-evidence",
+  "title": "Control Plane Workflow Evidence",
+  "generated_doc": "docs/30-architecture/workflow-evidence.md",
+  "workflow": ".github/workflows/workflow-evidence.yml",
+  "evidence_artifact": "workflow-evidence",
+  "workflow_root": ".github/workflows",
+  "accepted_gaps": [
+    {
+      "path": ".github/workflows/agent-catalog-api-port.yml",
+      "reason": "legacy contract workflow currently runs tests without JSON evidence",
+      "next": "wrap the tested gate with an evidence writer"
+    },
+    {
+      "path": ".github/workflows/agent-catalog-http-adapter.yml",
+      "reason": "legacy adapter workflow currently runs tests without JSON evidence",
+      "next": "publish adapter conformance evidence"
+    },
+    {
+      "path": ".github/workflows/ai-agent-client-testnet-smoke.yml",
+      "reason": "live smoke workflow should keep raw endpoint evidence private",
+      "next": "publish redacted smoke summary evidence"
+    },
+    {
+      "path": ".github/workflows/assignment-contract.yml",
+      "reason": "legacy contract workflow currently runs tests without JSON evidence",
+      "next": "publish generated contract parity evidence"
+    },
+    {
+      "path": ".github/workflows/assignment-http-adapter.yml",
+      "reason": "legacy adapter workflow currently runs tests without JSON evidence",
+      "next": "publish HTTP adapter conformance evidence"
+    },
+    {
+      "path": ".github/workflows/assignment-operation-replay.yml",
+      "reason": "legacy replay workflow currently runs tests without JSON evidence",
+      "next": "publish replay conformance evidence"
+    },
+    {
+      "path": ".github/workflows/assignment-operation-runtime.yml",
+      "reason": "legacy runtime workflow currently runs tests without JSON evidence",
+      "next": "publish runtime operation evidence"
+    },
+    {
+      "path": ".github/workflows/assignment-sse-adapter.yml",
+      "reason": "legacy SSE workflow currently runs tests without JSON evidence",
+      "next": "publish SSE adapter conformance evidence"
+    },
+    {
+      "path": ".github/workflows/assignment-store-actor.yml",
+      "reason": "legacy actor workflow currently runs tests without JSON evidence",
+      "next": "publish store actor conformance evidence"
+    },
+    {
+      "path": ".github/workflows/aws-adapters-facade.yml",
+      "reason": "legacy AWS facade workflow currently runs tests without JSON evidence",
+      "next": "publish facade boundary evidence without live credentials"
+    },
+    {
+      "path": ".github/workflows/cloudwatch-emf.yml",
+      "reason": "legacy observability workflow currently runs tests without JSON evidence",
+      "next": "publish EMF metric shape evidence"
+    },
+    {
+      "path": ".github/workflows/container-image-contract.yml",
+      "reason": "legacy container workflow currently runs checks without JSON evidence",
+      "next": "publish container contract evidence"
+    },
+    {
+      "path": ".github/workflows/deploy-ai-agent-testnet.yml",
+      "reason": "deployment workflow must avoid leaking live operator evidence",
+      "next": "publish redacted deployment summary evidence"
+    },
+    {
+      "path": ".github/workflows/dynamodb-eventbridge-adapters.yml",
+      "reason": "legacy AWS adapter workflow currently runs tests without JSON evidence",
+      "next": "publish adapter conformance evidence without live credentials"
+    },
+    {
+      "path": ".github/workflows/generated-client-delivery.yml",
+      "reason": "client handoff workflow produces generated files but no JSON evidence",
+      "next": "publish handoff manifest evidence"
+    },
+    {
+      "path": ".github/workflows/go-ci.yml",
+      "reason": "baseline CI proves build/test health but not loop evidence",
+      "next": "keep as broad safety net or add summarized test evidence"
+    },
+    {
+      "path": ".github/workflows/health-ready-cmd.yml",
+      "reason": "legacy command workflow currently runs tests without JSON evidence",
+      "next": "publish health command evidence"
+    },
+    {
+      "path": ".github/workflows/metrics-http-adapter.yml",
+      "reason": "legacy metrics workflow currently runs tests without JSON evidence",
+      "next": "publish HTTP metrics conformance evidence"
+    },
+    {
+      "path": ".github/workflows/review-account-seed.yml",
+      "reason": "seed workflow currently runs checks without JSON evidence",
+      "next": "publish redacted seed conformance evidence"
+    },
+    {
+      "path": ".github/workflows/store-safe-routing.yml",
+      "reason": "legacy store workflow currently runs tests without JSON evidence",
+      "next": "publish safe-routing evidence"
+    },
+    {
+      "path": ".github/workflows/store-snapshot-file-outbox.yml",
+      "reason": "legacy outbox workflow currently runs tests without JSON evidence",
+      "next": "publish snapshot/outbox evidence"
+    },
+    {
+      "path": ".github/workflows/web-frontend-api.yml",
+      "reason": "frontend API guard currently runs checks without JSON evidence",
+      "next": "publish generated API compatibility evidence"
+    }
+  ],
+  "assertions": [
+    "workflows with executable checks must either publish evidence artifacts or be registered as accepted gaps",
+    "accepted gaps are debt, not completion",
+    "live deployment and smoke workflows must publish only redacted summary evidence",
+    "new executable workflows without evidence cannot appear silently"
+  ],
+  "loop": {
+    "observation": "Several workflows execute tests or live checks while leaving no durable JSON evidence artifact.",
+    "hypothesis": "A workflow evidence manifest can make CI observability debt explicit without blocking current legacy workflows.",
+    "execute": "Scan GitHub Actions workflows, classify evidence coverage, and require any executable workflow gap to be registered.",
+    "evaluate": "The verifier fails on unregistered executable workflows, stale generated docs, or unused accepted-gap entries.",
+    "retrospective": "The repository can now distinguish evidence-covered workflows from accepted debt and reduce the gap slice by slice."
+  }
+}
