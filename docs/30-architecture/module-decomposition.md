@@ -12,6 +12,21 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `28`; runtime: `1`; internal: `3`; tools: `23`; forbidden import hits: `0`.
 
+File line budget target: `75`; files over target: `100`; max file lines: `3479`.
+
+| File | Lines |
+| --- | ---: |
+| `internal/riidoaiserver/ai_agent_client_development.go` | 3479 |
+| `internal/riidoaiserver/ai_agent_client_http_test.go` | 3273 |
+| `internal/riidoaiserver/server.go` | 2372 |
+| `internal/riidoaiserver/store.go` | 1952 |
+| `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1573 |
+| `internal/riidoaiserver/dynamodb_assignment_operation_store_test.go` | 1472 |
+| `tools/reactquerygen/main.go` | 1395 |
+| `tools/reactquerygen/figma_projection_test.go` | 1281 |
+| `tools/deploypolicy/deploy_policy_test.go` | 895 |
+| `internal/riidoaiserver/store_actor_test.go` | 837 |
+
 ## Packages
 
 - `public-adapter`: `awsadapters`

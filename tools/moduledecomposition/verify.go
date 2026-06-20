@@ -8,6 +8,7 @@ type verifyResult struct {
 	InternalPackages    int `json:"internal_packages"`
 	ToolPackages        int `json:"tool_packages"`
 	ForbiddenImportHits int `json:"forbidden_import_hits"`
+	LineBudget          lineBudgetResult
 }
 
 func verifyAll(repoRoot string, m manifest) (verifyResult, error) {
@@ -28,7 +29,13 @@ func verifyAll(repoRoot string, m manifest) (verifyResult, error) {
 	if len(violations) > 0 {
 		return verifyResult{}, fmt.Errorf("forbidden imports: %v", violations)
 	}
-	return summarizePackages(m.Packages), nil
+	result := summarizePackages(m.Packages)
+	lineBudget, err := scanLineBudget(repoRoot, m.SourceRoots, m.FileLineBudget)
+	if err != nil {
+		return verifyResult{}, err
+	}
+	result.LineBudget = lineBudget
+	return result, nil
 }
 
 func verifyManifestShape(m manifest) error {
@@ -37,6 +44,9 @@ func verifyManifestShape(m manifest) error {
 	}
 	if m.ModulePath == "" || len(m.SourceRoots) == 0 || len(m.Packages) == 0 {
 		return fmt.Errorf("module_path, source_roots, and packages are required")
+	}
+	if m.FileLineBudget.TargetLines < 0 || m.FileLineBudget.SampleLimit < 0 {
+		return fmt.Errorf("file_line_budget values must be non-negative")
 	}
 	return verifyLoop(m.Loop)
 }

@@ -16,8 +16,9 @@ func buildEvidence(m manifest, docs []docClass, problems []string) evidence {
 		ScannedCount: len(docs), GeneratedCount: counts["generated"],
 		DirectSSOTCount: counts["direct_ssot"], ManualCount: counts["manual_registered"],
 		ManualByGroup: manualCountsByGroup(docs), ManualTopDirs: manualTopDirs(docs, 8),
-		ManualSamples: manualSamples(docs, 2), ProblemSummaries: problems,
-		EvidenceArtifact: m.EvidenceArtifact,
+		ManualSamples: manualSamples(docs, 2), DirectLoopCount: countDirectLoops(docs),
+		DirectMissingLoop: directMissingLoops(docs), ProblemSummaries: problems,
+		EvidenceArtifact: m.EvidenceArtifact, Loop: m.Loop,
 	}
 }
 

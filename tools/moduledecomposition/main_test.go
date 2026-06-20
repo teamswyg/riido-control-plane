@@ -23,6 +23,9 @@ func TestModuleDecompositionEvidence(t *testing.T) {
 	if got.PackageCount < 20 || got.ToolPackages == 0 || got.ForbiddenImportHit != 0 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
+	if got.LineBudgetTarget == 0 || got.FilesOverLineBudget == 0 || len(got.LineBudgetSamples) == 0 {
+		t.Fatalf("missing line budget evidence: %+v", got)
+	}
 }
 
 func TestModuleDecompositionGeneratedDocFresh(t *testing.T) {

@@ -26,4 +26,7 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.OperationsVerified < len(requiredOperations) || got.SignalsVerified < len(requiredSignals) {
 		t.Fatalf("missing evidence counts: %+v", got)
 	}
+	if got.Loop.Observation == "" || got.Loop.Retrospective == "" {
+		t.Fatalf("missing loop evidence: %+v", got.Loop)
+	}
 }

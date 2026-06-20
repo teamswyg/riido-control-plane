@@ -22,7 +22,9 @@ func scanDocs(root string, m manifest) ([]docClass, []string) {
 		docs = append(docs, found...)
 	}
 	slices.SortFunc(docs, func(a, b docClass) int { return strings.Compare(a.Path, b.Path) })
-	return docs, append(problems, validateManualEntries(root, m, docs)...)
+	problems = append(problems, validateManualEntries(root, m, docs)...)
+	problems = append(problems, validateDirectLoops(docs)...)
+	return docs, problems
 }
 
 func scanRootDocs(root, scanRoot string, m manifest, manualByPath map[string]manualGroup) ([]docClass, error) {
@@ -43,8 +45,9 @@ func classifyDoc(root, rel string, m manifest, manualByPath map[string]manualGro
 	if err == nil && strings.Contains(string(text), generatedMarker) {
 		return docClass{Path: rel, Kind: "generated"}
 	}
-	if _, err := os.Stat(resolvePath(root, siblingManifest(rel))); err == nil {
-		return docClass{Path: rel, Kind: "direct_ssot"}
+	manifestPath := siblingManifest(rel)
+	if _, err := os.Stat(resolvePath(root, manifestPath)); err == nil {
+		return docClass{Path: rel, Kind: "direct_ssot", HasLoop: manifestHasLoop(resolvePath(root, manifestPath))}
 	}
 	if group, ok := manualByPath[rel]; ok {
 		return docClass{Path: rel, Kind: "manual_registered", Group: group.ID, Reason: group.Reason}

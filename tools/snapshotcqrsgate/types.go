@@ -13,6 +13,15 @@ type manifest struct {
 	CandidateSplit           candidateSplit      `json:"candidate_split"`
 	ForbiddenTraceAttributes []string            `json:"forbidden_trace_attributes"`
 	NonGoals                 []string            `json:"non_goals"`
+	Loop                     evidenceLoop        `json:"loop"`
+}
+
+type evidenceLoop struct {
+	Observation   string `json:"observation"`
+	Hypothesis    string `json:"hypothesis"`
+	Execute       string `json:"execute"`
+	Evaluate      string `json:"evaluate"`
+	Retrospective string `json:"retrospective"`
 }
 
 type decision struct {

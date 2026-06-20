@@ -109,5 +109,12 @@
       "owner": "riido-client",
       "reason": "The API response now carries active_stream, but client-side subscription timing remains outside this repository."
     }
-  ]
+  ],
+  "loop": {
+    "observation": "Unresolved AI Agent risks were spread across review notes, tests, and cross-repository boundaries, making closure evidence easy to overstate.",
+    "hypothesis": "A risk evidence manifest can separate verified local fixes, external contract evidence, and remaining ownership boundaries without relying on prose memory.",
+    "execute": "Verify local test functions, referenced external evidence, required risk ids, remaining boundaries, and the human handoff document link.",
+    "evaluate": "The verifier fails when required risks lack evidence, test functions disappear, remaining boundaries are missing, or loop metadata is incomplete.",
+    "retrospective": "This keeps risk closure evidence explicit while preserving private repository authentication and client-side stream consumption as separate owners."
+  }
 }

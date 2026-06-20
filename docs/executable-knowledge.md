@@ -10,8 +10,19 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | --- | ---: |
 | Generated reader docs | 16 |
 | Direct SSOT docs | 3 |
+| Direct SSOT docs with evidence loop | 3 |
 | Registered manual docs | 1 |
 | Scanned docs | 20 |
+
+## Evidence Loop
+
+| Step | Statement |
+| --- | --- |
+| Observe | Executable documentation coverage can look healthy while direct SSOT readers still omit the observe/hypothesis/execute/evaluate/retrospective chain. |
+| Hypothesis | A meta-coverage manifest can make manual debt and direct-SSOT loop coverage visible before review relies on memory. |
+| Execute | Scan markdown under docs, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, and publish coverage evidence in CI. |
+| Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, or direct SSOT manifests without a complete loop. |
+| Retrospective | This keeps the repository moving toward evidence-driven knowledge without forcing every historical file to be rewritten in one slice. |
 
 ## Registered Manual Surfaces
 
@@ -36,3 +47,4 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 - every scanned markdown file must be generated, direct-SSOT backed, or registered as manual debt
 - manual debt registration is observable evidence, not completion
 - a direct-SSOT backed markdown file must have a sibling .riido.json manifest
+- a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest

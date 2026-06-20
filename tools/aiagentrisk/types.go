@@ -8,6 +8,7 @@ type evidenceManifest struct {
 	LocalEvidence     []localEvidence     `json:"local_evidence"`
 	ExternalEvidence  []externalEvidence  `json:"external_evidence"`
 	RemainingBoundary []remainingBoundary `json:"remaining_boundaries"`
+	Loop              evidenceLoop        `json:"loop"`
 }
 
 type localEvidence struct {
@@ -30,4 +31,12 @@ type remainingBoundary struct {
 	ID     string `json:"id"`
 	Owner  string `json:"owner"`
 	Reason string `json:"reason"`
+}
+
+type evidenceLoop struct {
+	Observation   string `json:"observation"`
+	Hypothesis    string `json:"hypothesis"`
+	Execute       string `json:"execute"`
+	Evaluate      string `json:"evaluate"`
+	Retrospective string `json:"retrospective"`
 }

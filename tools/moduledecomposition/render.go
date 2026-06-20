@@ -23,4 +23,5 @@ func renderCoverage(b *strings.Builder, result verifyResult) {
 	fmt.Fprintf(b, "Packages: `%d`; runtime: `%d`; internal: `%d`; tools: `%d`; forbidden import hits: `%d`.\n\n",
 		result.PackageCount, result.RuntimePackages, result.InternalPackages,
 		result.ToolPackages, result.ForbiddenImportHits)
+	renderLineBudget(b, result.LineBudget)
 }

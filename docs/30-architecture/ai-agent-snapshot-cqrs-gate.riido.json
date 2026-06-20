@@ -61,5 +61,12 @@
     "credentials", "profile_url", "payload_document", "aws_account_id", "trace_id",
     "raw_log_excerpt"
   ],
-  "non_goals": ["store_wide_cqrs", "assignment_polling_split_without_evidence", "broad_event_sourcing_framework", "public_persistence_api", "raw_operator_evidence_in_public_repo"]
+  "non_goals": ["store_wide_cqrs", "assignment_polling_split_without_evidence", "broad_event_sourcing_framework", "public_persistence_api", "raw_operator_evidence_in_public_repo"],
+  "loop": {
+    "observation": "Development traces showed snapshot load/save operations on runtime-snapshot and agent-bindings paths, while broader Store CQRS had no matching evidence.",
+    "hypothesis": "A narrow snapshot CQRS gate can keep optimization scoped to the observed hot item until post-cadence measurements prove a split is needed.",
+    "execute": "Record route-to-store-operation evidence, cadence rules, measurement signals, decision thresholds, and forbidden trace attributes in this manifest.",
+    "evaluate": "The snapshot CQRS verifier checks operations, signals, decision rules, and forbidden public trace attributes before the reader can be trusted.",
+    "retrospective": "This keeps cost optimization evidence-driven: cadence changes are measured first, and only the AI Agent snapshot becomes a CQRS candidate."
+  }
 }

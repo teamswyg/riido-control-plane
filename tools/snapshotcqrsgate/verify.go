@@ -32,6 +32,9 @@ func verify(repoRoot string, m manifest, checkDoc bool) (result, error) {
 	if err := verifyForbiddenAttributes(m); err != nil {
 		return result{}, err
 	}
+	if err := verifyLoop(m.Loop); err != nil {
+		return result{}, err
+	}
 	return result{operations, signals, len(m.DecisionRules), len(m.ForbiddenTraceAttributes)}, nil
 }
 

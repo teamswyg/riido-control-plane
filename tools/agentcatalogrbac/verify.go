@@ -9,6 +9,9 @@ func verify(root string, m manifest, checkDoc bool) error {
 	if err := verifyDomain(m); err != nil {
 		return err
 	}
+	if err := verifyLoop(m.Loop); err != nil {
+		return err
+	}
 	if err := verifySources(root, m); err != nil {
 		return err
 	}

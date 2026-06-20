@@ -11,9 +11,15 @@ type manifest struct {
 	ModulePath       string         `json:"module_path"`
 	SourceRoots      []string       `json:"source_roots"`
 	ForbiddenImports []string       `json:"forbidden_imports"`
+	FileLineBudget   fileLineBudget `json:"file_line_budget"`
 	Packages         []packageEntry `json:"packages"`
 	Rules            []string       `json:"rules"`
 	Loop             evidenceLoop   `json:"loop"`
+}
+
+type fileLineBudget struct {
+	TargetLines int `json:"target_lines"`
+	SampleLimit int `json:"sample_limit"`
 }
 
 type packageEntry struct {

@@ -14,8 +14,10 @@ func renderDoc(m manifest, docs []docClass, problems []string) string {
 	b.WriteString("## Coverage\n\n| Class | Count |\n| --- | ---: |\n")
 	fmt.Fprintf(&b, "| Generated reader docs | %d |\n", e.GeneratedCount)
 	fmt.Fprintf(&b, "| Direct SSOT docs | %d |\n", e.DirectSSOTCount)
+	fmt.Fprintf(&b, "| Direct SSOT docs with evidence loop | %d |\n", e.DirectLoopCount)
 	fmt.Fprintf(&b, "| Registered manual docs | %d |\n", e.ManualCount)
 	fmt.Fprintf(&b, "| Scanned docs | %d |\n\n", e.ScannedCount)
+	renderLoop(&b, m.Loop)
 	renderManualGroups(&b, m, e)
 	renderManualHotspots(&b, e)
 	renderManualSamples(&b, e)
@@ -24,6 +26,15 @@ func renderDoc(m manifest, docs []docClass, problems []string) string {
 		b.WriteString("- " + assertion + "\n")
 	}
 	return b.String()
+}
+
+func renderLoop(b *strings.Builder, loop evidenceLoop) {
+	b.WriteString("## Evidence Loop\n\n| Step | Statement |\n| --- | --- |\n")
+	fmt.Fprintf(b, "| Observe | %s |\n", loop.Observation)
+	fmt.Fprintf(b, "| Hypothesis | %s |\n", loop.Hypothesis)
+	fmt.Fprintf(b, "| Execute | %s |\n", loop.Execute)
+	fmt.Fprintf(b, "| Evaluate | %s |\n", loop.Evaluate)
+	fmt.Fprintf(b, "| Retrospective | %s |\n\n", loop.Retrospective)
 }
 
 func renderManualGroups(b *strings.Builder, m manifest, e evidence) {

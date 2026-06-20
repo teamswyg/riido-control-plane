@@ -8,17 +8,18 @@ import (
 )
 
 type evidence struct {
-	SchemaVersion       string `json:"schema_version"`
-	ID                  string `json:"id"`
-	Status              string `json:"status"`
-	OperationsVerified  int    `json:"operations_verified"`
-	SignalsVerified     int    `json:"signals_verified"`
-	DecisionRules       int    `json:"decision_rules"`
-	ForbiddenAttributes int    `json:"forbidden_trace_attributes"`
+	SchemaVersion       string       `json:"schema_version"`
+	ID                  string       `json:"id"`
+	Status              string       `json:"status"`
+	OperationsVerified  int          `json:"operations_verified"`
+	SignalsVerified     int          `json:"signals_verified"`
+	DecisionRules       int          `json:"decision_rules"`
+	ForbiddenAttributes int          `json:"forbidden_trace_attributes"`
+	Loop                evidenceLoop `json:"loop"`
 }
 
 func newEvidence(m manifest, r result) evidence {
-	return evidence{evidenceSchema, m.ID, "verified", r.Operations, r.Signals, r.DecisionRules, r.ForbiddenAttributes}
+	return evidence{evidenceSchema, m.ID, "verified", r.Operations, r.Signals, r.DecisionRules, r.ForbiddenAttributes, m.Loop}
 }
 
 func writeEvidence(path string, value evidence) error {

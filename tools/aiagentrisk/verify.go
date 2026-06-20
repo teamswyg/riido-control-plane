@@ -34,6 +34,9 @@ func verifyManifest(repoRoot string, manifest evidenceManifest) (verificationRes
 	if err := verifyBoundaries(manifest.RemainingBoundary); err != nil {
 		return verificationResult{}, err
 	}
+	if err := verifyLoop(manifest.Loop); err != nil {
+		return verificationResult{}, err
+	}
 	return verificationResult{len(manifest.LocalEvidence), len(manifest.ExternalEvidence), len(manifest.RemainingBoundary)}, nil
 }
 

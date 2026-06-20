@@ -296,6 +296,13 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 			TopDown  string `json:"top_down"`
 			BottomUp string `json:"bottom_up"`
 		} `json:"dependency_direction"`
+		Loop struct {
+			Observation   string `json:"observation"`
+			Hypothesis    string `json:"hypothesis"`
+			Execute       string `json:"execute"`
+			Evaluate      string `json:"evaluate"`
+			Retrospective string `json:"retrospective"`
+		} `json:"loop"`
 	}
 	decodeStrictJSONDocument(t, "runtime CD ownership manifest", manifest, &parsed)
 
@@ -304,6 +311,9 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	}
 	if parsed.ID != "runtime-cd-ownership" || parsed.RiidoTask != "RIID-4825" || parsed.Runtime != "riido_ai_server" {
 		t.Fatalf("manifest identity drifted: %#v", parsed)
+	}
+	if parsed.Loop.Observation == "" || parsed.Loop.Retrospective == "" {
+		t.Fatalf("runtime CD ownership loop is missing: %#v", parsed.Loop)
 	}
 	requireSliceContains(t, parsed.Hardening, "RIID-4833")
 	requireSliceContains(t, parsed.Hardening, "RIID-4835")

@@ -32,4 +32,7 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.LocalEvidence == 0 || got.ExternalEvidence == 0 || got.RemainingBoundary == 0 {
 		t.Fatalf("missing evidence counts: %+v", got)
 	}
+	if got.Loop.Observation == "" || got.Loop.Retrospective == "" {
+		t.Fatalf("missing loop evidence: %+v", got.Loop)
+	}
 }
