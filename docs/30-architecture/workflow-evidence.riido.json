@@ -83,11 +83,6 @@
       "next": "publish redacted seed conformance evidence"
     },
     {
-      "path": ".github/workflows/store-safe-routing.yml",
-      "reason": "legacy store workflow currently runs tests without JSON evidence",
-      "next": "publish safe-routing evidence"
-    },
-    {
       "path": ".github/workflows/store-snapshot-file-outbox.yml",
       "reason": "legacy outbox workflow currently runs tests without JSON evidence",
       "next": "publish snapshot/outbox evidence"

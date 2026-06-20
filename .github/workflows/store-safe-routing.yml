@@ -7,23 +7,29 @@ on:
       - ".github/workflows/store-safe-routing.yml"
       - "docs/20-domain/provider-status.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/30-architecture/store-safe-routing.md"
+      - "docs/30-architecture/store-safe-routing.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/provider_status.go"
       - "internal/riidoaiserver/store_safe_routing.go"
       - "internal/riidoaiserver/store_safe_routing_test.go"
+      - "tools/storesaferouting/**"
   pull_request:
     paths:
       - ".github/workflows/store-safe-routing.yml"
       - "docs/20-domain/provider-status.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/30-architecture/store-safe-routing.md"
+      - "docs/30-architecture/store-safe-routing.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/provider_status.go"
       - "internal/riidoaiserver/store_safe_routing.go"
       - "internal/riidoaiserver/store_safe_routing_test.go"
+      - "tools/storesaferouting/**"
 
 jobs:
   store-safe-routing:
@@ -45,3 +51,12 @@ jobs:
           fi
       - name: Test store-safe routing
         run: go test ./internal/riidoaiserver -run 'StoreSafeRouting' -count=1
+      - name: Publish store-safe routing evidence
+        run: |
+          mkdir -p out
+          go test ./tools/storesaferouting -count=1
+          go run ./tools/storesaferouting -check-doc -evidence-out out/store-safe-routing-evidence.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-safe-routing-evidence
+          path: out/store-safe-routing-evidence.json
