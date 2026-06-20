@@ -31,6 +31,9 @@ func renderCoverageTable(b *strings.Builder, e evidence) {
 	fmt.Fprintf(b, "| Imported manifests | %d |\n", e.ImportedManifestCount)
 	fmt.Fprintf(b, "| Imported manifests with projection evidence | %d |\n",
 		e.ImportedManifestBindingCount)
+	fmt.Fprintf(b, "| Owned manifests | %d |\n", e.OwnedManifestCount)
+	fmt.Fprintf(b, "| Owned manifests with owner evidence | %d |\n",
+		e.OwnedManifestBindingCount)
 	fmt.Fprintf(b, "| Registered manual docs | %d |\n", e.ManualCount)
 	fmt.Fprintf(b, "| Scanned docs | %d |\n\n", e.ScannedCount)
 }
