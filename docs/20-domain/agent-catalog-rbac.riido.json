@@ -1,0 +1,33 @@
+{
+  "schema_version": "riido-agent-catalog-rbac.v1",
+  "id": "agent-catalog-rbac",
+  "title": "Agent Catalog RBAC",
+  "riido_task": "RIID-4663",
+  "generated_doc": "docs/20-domain/agent-catalog-rbac.md",
+  "workflow": ".github/workflows/agent-catalog-rbac.yml",
+  "evidence_artifact": "agent-catalog-rbac-evidence",
+  "owner_package": "internal/riidoaiserver",
+  "roles": ["admin"],
+  "visibilities": ["public", "private"],
+  "actions": ["read", "update", "delete"],
+  "visibility_rules": [
+    {"id": "admin-all", "subject": "admin principal", "record": "any public or private record", "allowed_actions": ["read", "update", "delete"], "reason": "admin-role"},
+    {"id": "owner-all", "subject": "record owner", "record": "own public or private record", "allowed_actions": ["read", "update", "delete"], "reason": "owner"},
+    {"id": "public-read", "subject": "non-admin non-owner", "record": "other public record", "allowed_actions": ["read"], "reason": "public"},
+    {"id": "private-deny", "subject": "non-admin non-owner", "record": "other private record", "denied_actions": ["read", "update", "delete"], "reason": "private-agent"},
+    {"id": "public-mutation-deny", "subject": "non-admin non-owner", "record": "other public record", "denied_actions": ["update", "delete"], "reason": "mutation-requires-admin-or-owner"}
+  ],
+  "authorization_scopes": ["riido:*", "agent-catalog:*", "agent-catalog:read", "agent-catalog:write", "agent-catalog:create", "agent-catalog:*:<action>", "agent-catalog:<agent-id>:*", "agent-catalog:<agent-id>:<action>"],
+  "routes": ["GET /v1/agent-catalog", "POST /v1/agent-catalog", "GET /v1/agent-catalog/{agent_id}", "PATCH /v1/agent-catalog/{agent_id}", "DELETE /v1/agent-catalog/{agent_id}"],
+  "request_dtos": ["CreateAgentCatalogRequest", "UpdateAgentCatalogRequest"],
+  "response_dtos": ["AgentCatalogListResponse", "AgentCatalogRecordResponse"],
+  "store_methods": ["ListAgentCatalog", "GetAgentCatalog", "SaveAgentCatalog", "DeleteAgentCatalog"],
+  "source_checks": [
+    {"name": "rbac-policy", "file": "internal/riidoaiserver/agent_catalog_rbac.go", "contains": ["EvaluateAgentCatalogAccess", "VisibleAgentCatalogRecords", "AgentCatalogRoleAdmin"]},
+    {"name": "api-dto-boundary", "file": "internal/riidoaiserver/agent_catalog_api_test.go", "contains": ["TestAgentCatalogAPIDTOsExposeOnlyCatalogShape", "owner_principal_id", "roles"]},
+    {"name": "http-rbac", "file": "internal/riidoaiserver/server_test.go", "contains": ["TestHTTPAgentCatalogRBACAdminSeesAndMutatesPrivateAgents", "TestHTTPAgentCatalogCreateStampsOwnerFromAuthorization"]},
+    {"name": "scope-candidates", "file": "internal/riidoaiserver/authorization.go", "contains": ["AuthorizationResourceAgentCatalog", "agent-catalog:*:", "agent-catalog:\" + req.AgentID + \":\" + string(req.Action)"]},
+    {"name": "focused-ci", "file": ".github/workflows/agent-catalog-rbac.yml", "contains": ["AgentCatalogRBAC|StaticTokenAuthorizer", "Verify RBAC slice import boundary"]}
+  ],
+  "non_goals": ["persistent catalog storage", "DynamoDB/EventBridge/IAM/Terraform wiring", "external identity-provider rollout", "daemon provider execution", "production token values"]
+}

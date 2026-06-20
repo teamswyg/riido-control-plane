@@ -8,16 +8,16 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Class | Count |
 | --- | ---: |
-| Generated reader docs | 1 |
+| Generated reader docs | 2 |
 | Direct SSOT docs | 3 |
-| Registered manual docs | 16 |
+| Registered manual docs | 15 |
 | Scanned docs | 20 |
 
 ## Registered Manual Surfaces
 
 | Group | Owner | Next artifact | Matched docs |
 | --- | --- | --- | ---: |
-| `domain-manual-debt` | control-plane-domain | domain-specific .riido.json manifests | 8 |
+| `domain-manual-debt` | control-plane-domain | domain-specific .riido.json manifests | 7 |
 | `architecture-manual-debt` | control-plane-architecture | architecture-specific evidence tools | 6 |
 | `roadmap-manual-debt` | control-plane-planning | open-question decision manifests | 1 |
 | `migration-manual-debt` | control-plane-migration | focused current-state SSOT manifests | 1 |
@@ -26,7 +26,7 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Directory | Matched docs |
 | --- | ---: |
-| `docs/20-domain` | 8 |
+| `docs/20-domain` | 7 |
 | `docs/30-architecture` | 6 |
 | `docs/50-roadmap` | 1 |
 | `docs/migration` | 1 |
@@ -35,8 +35,8 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Group | Path |
 | --- | --- |
-| `domain-manual-debt` | `docs/20-domain/agent-catalog-rbac.md` |
 | `domain-manual-debt` | `docs/20-domain/agent-runtime-binding.md` |
+| `domain-manual-debt` | `docs/20-domain/ai-agent-client-api.md` |
 | `architecture-manual-debt` | `docs/30-architecture/ai-agent-generated-endpoint-smoke-matrix.md` |
 | `architecture-manual-debt` | `docs/30-architecture/api-client-delivery.md` |
 | `roadmap-manual-debt` | `docs/50-roadmap/open-questions.md` |

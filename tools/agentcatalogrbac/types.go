@@ -1,0 +1,38 @@
+package main
+
+type manifest struct {
+	SchemaVersion       string        `json:"schema_version"`
+	ID                  string        `json:"id"`
+	Title               string        `json:"title"`
+	RiidoTask           string        `json:"riido_task"`
+	GeneratedDoc        string        `json:"generated_doc"`
+	Workflow            string        `json:"workflow"`
+	EvidenceArtifact    string        `json:"evidence_artifact"`
+	OwnerPackage        string        `json:"owner_package"`
+	Roles               []string      `json:"roles"`
+	Visibilities        []string      `json:"visibilities"`
+	Actions             []string      `json:"actions"`
+	VisibilityRules     []rule        `json:"visibility_rules"`
+	AuthorizationScopes []string      `json:"authorization_scopes"`
+	Routes              []string      `json:"routes"`
+	RequestDTOs         []string      `json:"request_dtos"`
+	ResponseDTOs        []string      `json:"response_dtos"`
+	StoreMethods        []string      `json:"store_methods"`
+	SourceChecks        []sourceCheck `json:"source_checks"`
+	NonGoals            []string      `json:"non_goals"`
+}
+
+type rule struct {
+	ID             string   `json:"id"`
+	Subject        string   `json:"subject"`
+	Record         string   `json:"record"`
+	AllowedActions []string `json:"allowed_actions,omitempty"`
+	DeniedActions  []string `json:"denied_actions,omitempty"`
+	Reason         string   `json:"reason"`
+}
+
+type sourceCheck struct {
+	Name     string   `json:"name"`
+	File     string   `json:"file"`
+	Contains []string `json:"contains"`
+}
