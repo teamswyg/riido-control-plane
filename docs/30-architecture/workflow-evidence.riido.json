@@ -78,11 +78,6 @@
       "next": "keep as broad safety net or add summarized test evidence"
     },
     {
-      "path": ".github/workflows/health-ready-cmd.yml",
-      "reason": "legacy command workflow currently runs tests without JSON evidence",
-      "next": "publish health command evidence"
-    },
-    {
       "path": ".github/workflows/review-account-seed.yml",
       "reason": "seed workflow currently runs checks without JSON evidence",
       "next": "publish redacted seed conformance evidence"
