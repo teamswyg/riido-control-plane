@@ -22,6 +22,8 @@ type evidence struct {
 	ImportedManifestBindingCount     int            `json:"imported_manifest_binding_count"`
 	OwnedManifestCount               int            `json:"owned_manifest_count"`
 	OwnedManifestBindingCount        int            `json:"owned_manifest_binding_count"`
+	ManifestInventoryCount           int            `json:"manifest_inventory_count"`
+	TrackedManifestCount             int            `json:"tracked_manifest_count"`
 	ManualCount                      int            `json:"manual_count"`
 	ManualByGroup                    map[string]int `json:"manual_by_group"`
 	ManualTopDirs                    []manualDir    `json:"manual_top_dirs"`
@@ -39,6 +41,7 @@ type evidence struct {
 	ContractMissingBinding           []string       `json:"contract_artifact_missing_binding"`
 	ImportedMissingBinding           []string       `json:"imported_manifest_missing_binding"`
 	OwnedMissingBinding              []string       `json:"owned_manifest_missing_binding"`
+	UntrackedManifests               []string       `json:"untracked_manifests"`
 	DirectMissingEvidenceWorkflow    []string       `json:"direct_ssot_missing_evidence_workflow"`
 	DirectMissingLoop                []string       `json:"direct_ssot_missing_loop"`
 	ProblemSummaries                 []string       `json:"problem_summaries"`

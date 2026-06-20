@@ -12,5 +12,6 @@ func scanValidationProblems(root string, m manifest, docs []docClass) []string {
 	problems = append(problems, validateContractArtifacts(root, m)...)
 	problems = append(problems, validateImportedManifests(root, m)...)
 	problems = append(problems, validateOwnedManifests(root, m)...)
+	problems = append(problems, validateManifestInventory(root, m, docs)...)
 	return problems
 }
