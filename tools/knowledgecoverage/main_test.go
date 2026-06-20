@@ -27,6 +27,9 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.GeneratedCount != got.GeneratedToolCount || len(got.GeneratedMissingWorkflow) != 0 {
 		t.Fatalf("generated tool coverage drifted: %+v", got)
 	}
+	if got.GeneratedCount != got.GeneratedEvidenceWorkflowCount || len(got.GeneratedMissingEvidenceWorkflow) != 0 {
+		t.Fatalf("generated evidence workflow coverage drifted: %+v", got)
+	}
 	if got.DirectSSOTCount != got.DirectLoopCount || len(got.DirectMissingLoop) != 0 {
 		t.Fatalf("direct SSOT loop coverage drifted: %+v", got)
 	}

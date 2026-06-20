@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 func validateGeneratedDocs(root string, docs []docClass) []string {
-	workflowText := allWorkflowText(root)
+	workflows := loadWorkflows(root)
 	var problems []string
 	for _, doc := range docs {
 		if doc.Kind != "generated" {
@@ -21,25 +19,12 @@ func validateGeneratedDocs(root string, docs []docClass) []string {
 		if _, err := os.Stat(resolvePath(root, doc.GeneratorTool)); err != nil {
 			problems = append(problems, fmt.Sprintf("generated doc %q references missing generator %q", doc.Path, doc.GeneratorTool))
 		}
-		if !strings.Contains(workflowText, doc.GeneratorTool) {
+		if !workflowMentionsTool(workflows, doc.GeneratorTool) {
 			problems = append(problems, fmt.Sprintf("generated doc %q generator %q is not referenced by CI workflow", doc.Path, doc.GeneratorTool))
+		}
+		if !workflowHasGeneratorEvidence(workflows, doc.GeneratorTool) {
+			problems = append(problems, fmt.Sprintf("generated doc %q generator %q must run check-doc with evidence-out in CI", doc.Path, doc.GeneratorTool))
 		}
 	}
 	return problems
-}
-
-func allWorkflowText(root string) string {
-	var b strings.Builder
-	_ = filepath.WalkDir(resolvePath(root, ".github/workflows"), func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() || (!strings.HasSuffix(path, ".yml") && !strings.HasSuffix(path, ".yaml")) {
-			return err
-		}
-		data, err := os.ReadFile(path)
-		if err == nil {
-			b.Write(data)
-			b.WriteByte('\n')
-		}
-		return nil
-	})
-	return b.String()
 }
