@@ -7,11 +7,13 @@ import (
 )
 
 type lineBudgetResult struct {
-	Target     int
-	OverTarget int
-	MaxLines   int
-	Samples    []lineBudgetSample
-	Hotspots   []lineBudgetHotspot
+	Target             int
+	OverTarget         int
+	MaxLines           int
+	MaxFilesOverTarget int
+	MaxFileLinesLimit  int
+	Samples            []lineBudgetSample
+	Hotspots           []lineBudgetHotspot
 }
 
 type lineBudgetSample struct {
@@ -20,7 +22,11 @@ type lineBudgetSample struct {
 }
 
 func scanLineBudget(repoRoot string, roots []string, budget fileLineBudget) (lineBudgetResult, error) {
-	result := lineBudgetResult{Target: budget.TargetLines}
+	result := lineBudgetResult{
+		Target:             budget.TargetLines,
+		MaxFilesOverTarget: budget.MaxFilesOverTarget,
+		MaxFileLinesLimit:  budget.MaxFileLines,
+	}
 	if budget.TargetLines <= 0 {
 		return result, nil
 	}

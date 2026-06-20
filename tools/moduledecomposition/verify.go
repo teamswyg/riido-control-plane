@@ -34,6 +34,9 @@ func verifyAll(repoRoot string, m manifest) (verifyResult, error) {
 	if err != nil {
 		return verifyResult{}, err
 	}
+	if err := verifyLineBudgetRatchet(lineBudget); err != nil {
+		return verifyResult{}, err
+	}
 	result.LineBudget = lineBudget
 	return result, nil
 }
@@ -45,7 +48,9 @@ func verifyManifestShape(m manifest) error {
 	if m.ModulePath == "" || len(m.SourceRoots) == 0 || len(m.Packages) == 0 {
 		return fmt.Errorf("module_path, source_roots, and packages are required")
 	}
-	if m.FileLineBudget.TargetLines < 0 || m.FileLineBudget.SampleLimit < 0 || m.FileLineBudget.HotspotLimit < 0 {
+	if m.FileLineBudget.TargetLines < 0 || m.FileLineBudget.SampleLimit < 0 ||
+		m.FileLineBudget.HotspotLimit < 0 || m.FileLineBudget.MaxFilesOverTarget < 0 ||
+		m.FileLineBudget.MaxFileLines < 0 {
 		return fmt.Errorf("file_line_budget values must be non-negative")
 	}
 	return verifyLoop(m.Loop)

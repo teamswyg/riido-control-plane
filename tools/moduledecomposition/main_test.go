@@ -29,10 +29,25 @@ func TestModuleDecompositionEvidence(t *testing.T) {
 	if len(got.LineBudgetHotspots) == 0 {
 		t.Fatalf("missing line budget hotspot evidence: %+v", got)
 	}
+	if got.LineBudgetRatchet.MaxFilesOverTarget == 0 || got.LineBudgetRatchet.MaxFileLines == 0 {
+		t.Fatalf("missing line budget ratchet evidence: %+v", got)
+	}
 }
 
 func TestModuleDecompositionGeneratedDocFresh(t *testing.T) {
 	if err := mainRun([]string{"-repo", "../..", "-check-doc"}); err != nil {
 		t.Fatalf("check doc: %v", err)
+	}
+}
+
+func TestLineBudgetRatchetRejectsWorseEvidence(t *testing.T) {
+	err := verifyLineBudgetRatchet(lineBudgetResult{
+		OverTarget:         2,
+		MaxLines:           101,
+		MaxFilesOverTarget: 1,
+		MaxFileLinesLimit:  100,
+	})
+	if err == nil {
+		t.Fatal("expected ratchet failure")
 	}
 }

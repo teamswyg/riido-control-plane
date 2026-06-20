@@ -14,6 +14,13 @@ Packages: `42`; runtime: `1`; internal: `3`; tools: `37`; forbidden import hits:
 
 File line budget target: `75`; files over target: `97`; max file lines: `2481`.
 
+### Line Budget Ratchet
+
+| Metric | Current | Limit | Slack |
+| --- | ---: | ---: | ---: |
+| Files over target | 97 | 97 | 0 |
+| Max file lines | 2481 | 2481 | 0 |
+
 | File | Lines |
 | --- | ---: |
 | `internal/riidoaiserver/ai_agent_client_http_test.go` | 2481 |
