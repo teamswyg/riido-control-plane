@@ -12,13 +12,13 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `42`; runtime: `1`; internal: `3`; tools: `37`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `88`; max file lines: `2481`.
+File line budget target: `75`; files over target: `85`; max file lines: `2481`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 88 | 97 | 9 |
+| Files over target | 85 | 97 | 12 |
 | Max file lines | 2481 | 2481 | 0 |
 
 ### Line Budget Hotspot Ratchets
@@ -27,7 +27,7 @@ File line budget target: `75`; files over target: `88`; max file lines: `2481`.
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `internal/riidoaiserver` | 85 | 85 | 2481 | 2481 | 23713 | 23713 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
-| `cmd/riido_ai_server` | 3 | 3 | 791 | 791 | 1474 | 1474 |
+| `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
 | `tools/containercontract` | 0 | 2 | 0 | 597 | 0 | 663 |
 | `tools/generatedclienthandoff` | 0 | 2 | 0 | 601 | 0 | 578 |
 | `awsadapters` | 0 | 1 | 0 | 84 | 0 | 9 |
@@ -45,17 +45,16 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1573 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store_test.go` | 1472 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
-| `cmd/riido_ai_server/main.go` | 791 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 746 |
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
-| `cmd/riido_ai_server/main_test.go` | 697 |
+| `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 693 |
+| `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
 
 ### Line Budget Hotspots
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
 | `internal/riidoaiserver` | 85 | 2481 | 23713 |
-| `cmd/riido_ai_server` | 3 | 791 | 1474 |
 
 ## Packages
 

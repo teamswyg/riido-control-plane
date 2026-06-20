@@ -55,7 +55,8 @@
     {"name": "cors-handler", "file": "internal/riidoaiserver/web_frontend_cors.go", "contains": ["webCORSAllowedMethods", "webCORSAllowedHeaders", "webCORSHeadersAllowed", "Access-Control-Allow-Origin"]},
     {"name": "cors-tests", "file": "internal/riidoaiserver/web_frontend_cors_test.go", "contains": ["TestHTTPWebFrontendCORSAllowsConfiguredOriginPreflight", "TestHTTPWebFrontendCORSAddsHeadersToAllowedActualRequest", "TestHTTPWebFrontendCORSRejectsUnsupportedPreflightHeader"]},
     {"name": "server-wiring", "file": "internal/riidoaiserver/server.go", "contains": ["withWebFrontendCORS", "WebAllowedOrigins"]},
-    {"name": "command-env", "file": "cmd/riido_ai_server/main.go", "contains": ["envWebAllowedOrigins", "parseWebAllowedOrigins"]},
+    {"name": "command-env", "file": "cmd/riido_ai_server/env_names.go", "contains": ["envWebAllowedOrigins", "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"]},
+    {"name": "command-origin-parser", "file": "cmd/riido_ai_server/web_origin_config.go", "contains": ["parseWebAllowedOrigins", "normalizeWebOrigin"]},
     {"name": "request-auth-ssot", "file": "docs/20-domain/request-authorization.riido.json", "contains": ["exact-origin-allowlist", "no-browser-credentials", "unsupported-header-rejected"]}
   ],
   "loop": {

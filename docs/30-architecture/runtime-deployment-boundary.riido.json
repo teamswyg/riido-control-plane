@@ -14,7 +14,8 @@
       "scope": "Buildable riido_ai_server process, HTTP routes, graceful shutdown, safe seed shape, and stdout EMF.",
       "does_not_own": ["AWS resources", "production secrets", "Terraform state", "container image publishing"],
       "evidence": [
-        {"path": "cmd/riido_ai_server/main.go", "contains": ["RIIDO_AI_SERVER_ADDR", "Shutdown"]},
+        {"path": "cmd/riido_ai_server/env_names.go", "contains": ["RIIDO_AI_SERVER_ADDR"]},
+        {"path": "cmd/riido_ai_server/server_shutdown.go", "contains": ["Shutdown"]},
         {"path": "internal/riidoaiserver/server.go", "contains": ["Handler", "ServeMux"]}
       ]
     },
