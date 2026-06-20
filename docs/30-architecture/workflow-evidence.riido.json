@@ -58,11 +58,6 @@
       "next": "publish facade boundary evidence without live credentials"
     },
     {
-      "path": ".github/workflows/container-image-contract.yml",
-      "reason": "legacy container workflow currently runs checks without JSON evidence",
-      "next": "publish container contract evidence"
-    },
-    {
       "path": ".github/workflows/deploy-ai-agent-testnet.yml",
       "reason": "deployment workflow must avoid leaking live operator evidence",
       "next": "publish redacted deployment summary evidence"

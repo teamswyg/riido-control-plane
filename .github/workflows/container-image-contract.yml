@@ -50,6 +50,16 @@ jobs:
       - name: Test container contract verifier
         run: go test ./tools/containercontract -count=1
       - name: Verify container image contract
-        run: go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
+        run: |
+          mkdir -p out
+          go run ./tools/containercontract \
+            -contract packaging/containers/riido_ai_server_container.riido.json \
+            -evidence-out out/container-image-contract-evidence.json
       - name: Build container image
         run: docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:ci .
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: container-image-contract-evidence
+          path: out/container-image-contract-evidence.json
+          if-no-files-found: error
