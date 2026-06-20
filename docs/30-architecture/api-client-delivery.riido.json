@@ -39,7 +39,8 @@
   "source_checks":[
     {"name":"workflow-token-boundary","file":".github/workflows/generated-client-delivery.yml","contains":["actions/create-github-app-token@v1","RIIDO_CLIENT_DELIVERY_APP_ID","RIIDO_CLIENT_DELIVERY_PRIVATE_KEY","RIIDO_CLIENT_DELIVERY_TOKEN","github.event.inputs.create_pr == 'true'","target_branch must be the Riido work branchName","grep -Eq '^[A-Z][A-Z0-9]*-[0-9]+-.+'"]},
     {"name":"react-query-generator","file":"tools/reactquerygen/main_test.go","contains":["TestGenerateReactQueryClientDoesNotDrift","TestAPIClientDeliveryUsesResolvedRuntimeModelCatalogWording"]},
-    {"name":"generated-client-handoff","file":"tools/generatedclienthandoff/main_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","TestGeneratedClientHandoffRejectsNonRiidoWorkBranch"]},
+    {"name":"generated-client-handoff-files","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","assertGeneratedClientHandoffFiles"]},
+    {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/branch_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
     {"name":"public-surface-scan","file":"docs/30-architecture/runtime-cd-ownership.riido.json","contains":["docs/30-architecture/api-client-delivery.md","public_surface_scan_contract"]},
     {"name":"risk-evidence","file":"docs/30-architecture/ai-agent-risk-evidence.riido.json","contains":["docs/30-architecture/api-client-delivery.md","active-stream-handoff"]}
   ],
