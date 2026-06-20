@@ -29,6 +29,7 @@
     {"path":"tools/contextmap","kind":"evidence-tool","role":"Context map generated reader and verifier.","must_not_own":"runtime package boundaries"},
     {"path":"tools/dependencyallowlist","kind":"policy-tool","role":"Direct Go dependency allowlist verifier.","must_not_own":"transitive dependency policy outside the allowlist contract"},
     {"path":"tools/deploypolicy","kind":"policy-tool","role":"Public workflow and docs redaction plus CD ownership drift tests.","must_not_own":"live AWS deploy execution or private operator evidence"},
+    {"path":"tools/figmaprojection","kind":"evidence-tool","role":"Figma control-plane projection evidence verifier.","must_not_own":"Figma source coverage or generated-client implementation"},
     {"path":"tools/generatedclienthandoff","kind":"generator","role":"Generated client README, history, manifest, barrels, and PR body handoff generator.","must_not_own":"riido-client application code"},
     {"path":"tools/gocibaseline","kind":"meta-evidence-tool","role":"Go CI baseline workflow contract verifier.","must_not_own":"domain-specific test semantics or live smoke evidence"},
     {"path":"tools/healthreadycmd","kind":"evidence-tool","role":"Health/ready and command runtime generated reader and verifier.","must_not_own":"runtime server lifecycle"},

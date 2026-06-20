@@ -31,6 +31,9 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	if manifest.RiidoTask != "RIID-4810" {
 		t.Fatalf("riido_task = %q", manifest.RiidoTask)
 	}
+	if manifest.EvidenceTool != "tools/figmaprojection" {
+		t.Fatalf("evidence_tool = %q", manifest.EvidenceTool)
+	}
 	if manifest.SourceContractsManifest.Repo != "riido-contracts" ||
 		manifest.SourceContractsManifest.Path != "docs/30-architecture/figma-ai-agent-coverage.riido.json" ||
 		manifest.SourceContractsManifest.SchemaVersion != "riido-figma-ai-agent-coverage.v1" ||
@@ -1051,6 +1054,7 @@ type figmaProjectionManifest struct {
 	SchemaVersion                     string                                    `json:"schema_version"`
 	ID                                string                                    `json:"id"`
 	RiidoTask                         string                                    `json:"riido_task"`
+	EvidenceTool                      string                                    `json:"evidence_tool"`
 	SourceContractsManifest           figmaProjectionSourceManifest             `json:"source_contracts_manifest"`
 	ProjectionPolicy                  figmaProjectionPolicy                     `json:"projection_policy"`
 	MirroredSupportingToolLimitations []figmaProjectionSupportingToolLimitation `json:"mirrored_supporting_tool_limitations"`

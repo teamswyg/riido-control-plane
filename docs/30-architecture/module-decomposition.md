@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `40`; runtime: `1`; internal: `3`; tools: `35`; forbidden import hits: `0`.
+Packages: `41`; runtime: `1`; internal: `3`; tools: `36`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `98`; max file lines: `2481`.
 
@@ -22,7 +22,7 @@ File line budget target: `75`; files over target: `98`; max file lines: `2481`.
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1573 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store_test.go` | 1472 |
 | `tools/reactquerygen/main.go` | 1395 |
-| `tools/reactquerygen/figma_projection_test.go` | 1281 |
+| `tools/reactquerygen/figma_projection_test.go` | 1285 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
 | `cmd/riido_ai_server/main.go` | 791 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 746 |
@@ -34,7 +34,7 @@ File line budget target: `75`; files over target: `98`; max file lines: `2481`.
 - `compatibility-test`: `internal/contractscompat`
 - `guard`: `internal/repoidentity`
 - `core`: `internal/riidoaiserver`
-- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/metricshttpadapter`, `tools/openquestions`, `tools/providerstatus`, `tools/reviewaccountseed`, `tools/requestauth`, `tools/runtimeboundary`, `tools/runtimecdownership`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
+- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/figmaprojection`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/metricshttpadapter`, `tools/openquestions`, `tools/providerstatus`, `tools/reviewaccountseed`, `tools/requestauth`, `tools/runtimeboundary`, `tools/runtimecdownership`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
 - `meta-evidence-tool`: `tools/gocibaseline`, `tools/knowledgecoverage`, `tools/liveworkflowevidence`, `tools/moduledecomposition`, `tools/workflowevidence`

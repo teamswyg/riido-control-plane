@@ -2,6 +2,7 @@
   "schema_version": "riido-control-plane-figma-ai-agent-projection.v1",
   "id": "figma-ai-agent-control-plane-generated-client-projection",
   "riido_task": "RIID-4810",
+  "evidence_tool": "tools/figmaprojection",
   "source_contracts_manifest": {
     "repo": "riido-contracts",
     "path": "docs/30-architecture/figma-ai-agent-coverage.riido.json",

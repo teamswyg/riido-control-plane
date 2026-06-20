@@ -22,6 +22,8 @@ func buildEvidence(root string, m manifest, docs []docClass, problems []string) 
 		GeneratedMissingTool:             generatedMissingTool(root, docs),
 		GeneratedMissingWorkflow:         generatedMissingWorkflow(root, docs),
 		GeneratedMissingEvidenceWorkflow: generatedMissingEvidenceWorkflow(root, docs),
+		DirectEvidenceWorkflowCount:      directEvidenceWorkflowCount(root, docs),
+		DirectMissingEvidenceWorkflow:    directMissingEvidenceWorkflow(root, docs),
 		DirectMissingLoop:                directMissingLoops(docs), ProblemSummaries: problems,
 		EvidenceArtifact: m.EvidenceArtifact, Loop: m.Loop,
 	}

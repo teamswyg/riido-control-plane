@@ -17,6 +17,7 @@ func renderDoc(root string, m manifest, docs []docClass, problems []string) stri
 	fmt.Fprintf(&b, "| Generated reader docs with CI evidence | %d |\n", e.GeneratedEvidenceWorkflowCount)
 	fmt.Fprintf(&b, "| Direct SSOT docs | %d |\n", e.DirectSSOTCount)
 	fmt.Fprintf(&b, "| Direct SSOT docs with evidence loop | %d |\n", e.DirectLoopCount)
+	fmt.Fprintf(&b, "| Direct SSOT docs with CI evidence | %d |\n", e.DirectEvidenceWorkflowCount)
 	fmt.Fprintf(&b, "| Registered manual docs | %d |\n", e.ManualCount)
 	fmt.Fprintf(&b, "| Scanned docs | %d |\n\n", e.ScannedCount)
 	renderLoop(&b, m.Loop)

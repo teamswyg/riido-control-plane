@@ -12,6 +12,10 @@ func workflowMentionsTool(workflows []workflowDoc, tool string) bool {
 }
 
 func workflowHasGeneratorEvidence(workflows []workflowDoc, tool string) bool {
+	return workflowHasEvidenceTool(workflows, tool)
+}
+
+func workflowHasEvidenceTool(workflows []workflowDoc, tool string) bool {
 	for _, workflow := range workflows {
 		if strings.Contains(workflow.Text, tool) &&
 			strings.Contains(workflow.Text, "-check-doc") &&

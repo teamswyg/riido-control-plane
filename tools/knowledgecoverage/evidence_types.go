@@ -17,6 +17,8 @@ type evidence struct {
 	GeneratedMissingWorkflow         []string       `json:"generated_missing_workflow"`
 	GeneratedMissingEvidenceWorkflow []string       `json:"generated_missing_evidence_workflow"`
 	DirectLoopCount                  int            `json:"direct_ssot_loop_count"`
+	DirectEvidenceWorkflowCount      int            `json:"direct_ssot_evidence_workflow_count"`
+	DirectMissingEvidenceWorkflow    []string       `json:"direct_ssot_missing_evidence_workflow"`
 	DirectMissingLoop                []string       `json:"direct_ssot_missing_loop"`
 	ProblemSummaries                 []string       `json:"problem_summaries"`
 	EvidenceArtifact                 string         `json:"evidence_artifact"`
