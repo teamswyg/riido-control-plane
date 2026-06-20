@@ -11,6 +11,15 @@
   "scan_files": [
     "README.md"
   ],
+  "standalone_manifests": [
+    {
+      "path": "docs/30-architecture/ai-agent-risk-evidence.riido.json",
+      "evidence_tool": "tools/aiagentrisk",
+      "workflow": ".github/workflows/architecture-docs.yml",
+      "evidence_artifact": "ai-agent-risk-evidence",
+      "human_doc": "docs/30-architecture/api-client-delivery.md"
+    }
+  ],
   "manual_groups": [],
   "assertions": [
     "every scanned markdown file from scan_roots or scan_files must be generated, direct-SSOT backed, or registered as manual debt",
@@ -21,16 +30,17 @@
     "a generated reader doc manifest evidence_tool, when declared, must match the generated marker tool",
     "a generated reader doc manifest workflow must run its generator in a run step with check-doc and evidence-out",
     "a generated reader doc manifest evidence_artifact must upload the generator evidence-out path and if-no-files-found:error from the same upload-artifact step",
+    "a standalone executable manifest must define an evidence loop and upload its evidence_tool evidence-out path with if-no-files-found:error",
     "a direct-SSOT backed markdown file must have a sibling .riido.json manifest",
     "a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest",
     "a direct-SSOT backed markdown file must declare evidence_tool in the sibling manifest",
     "a direct-SSOT evidence tool must run check-doc and publish evidence-out in GitHub Actions"
   ],
   "loop": {
-    "observation": "Executable documentation coverage can look healthy while direct SSOT readers omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, declared workflow ownership, uploaded artifact binding, strict missing-file behavior, or migration history remains manual prose.",
-    "hypothesis": "A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, direct-SSOT CI evidence, declared workflow evidence ownership, generated artifact collection, and strict artifact upload failure modes visible before review relies on memory.",
-    "execute": "Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifest evidence_tool to match the generated marker tool, require generated reader manifests to bind workflow run steps to generator check-doc/evidence-out execution, require one evidence_artifact upload step to own the evidence-out path and if-no-files-found:error, and publish coverage evidence in CI.",
-    "evaluate": "The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, generated manifests whose evidence_tool contradicts the generated marker, generated manifests whose declared workflow run steps do not run the generator, generated manifests whose upload-artifact step does not jointly own the generator evidence-out path and strict missing-file behavior, or generated evidence uploads that warn on missing files.",
-    "retrospective": "This keeps the repository evidence-driven: migration history is generated from a ledger, direct SSOT readers carry loops and evidence tools, generated readers bind generator execution, evidence-out path, and upload step ownership to strict durable artifacts, and future manual debt must be registered explicitly."
+    "observation": "Executable documentation coverage can look healthy while direct SSOT readers or standalone executable manifests omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, declared workflow ownership, uploaded artifact binding, strict missing-file behavior, or migration history remains manual prose.",
+    "hypothesis": "A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, direct-SSOT CI evidence, standalone executable manifests, declared workflow evidence ownership, generated artifact collection, and strict artifact upload failure modes visible before review relies on memory.",
+    "execute": "Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifest evidence_tool to match the generated marker tool, require generated reader manifests to bind workflow run steps to generator check-doc/evidence-out execution, require standalone manifests to bind evidence_tool execution to a strict uploaded evidence-out artifact, require one evidence_artifact upload step to own the evidence-out path and if-no-files-found:error, and publish coverage evidence in CI.",
+    "evaluate": "The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, standalone manifests without loop-backed strict CI evidence, generated manifests whose evidence_tool contradicts the generated marker, generated manifests whose declared workflow run steps do not run the generator, generated manifests whose upload-artifact step does not jointly own the generator evidence-out path and strict missing-file behavior, or generated evidence uploads that warn on missing files.",
+    "retrospective": "This keeps the repository evidence-driven: migration history is generated from a ledger, standalone manifests carry their own loop and strict evidence artifact chain, direct SSOT readers carry loops and evidence tools, generated readers bind generator execution, evidence-out path, and upload step ownership to strict durable artifacts, and future manual debt must be registered explicitly."
   }
 }

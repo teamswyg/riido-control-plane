@@ -39,6 +39,9 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.DirectSSOTCount != got.DirectLoopCount || len(got.DirectMissingLoop) != 0 {
 		t.Fatalf("direct SSOT loop coverage drifted: %+v", got)
 	}
+	if got.StandaloneManifestCount != got.StandaloneManifestBindingCount || len(got.StandaloneMissingBinding) != 0 {
+		t.Fatalf("standalone manifest coverage drifted: %+v", got)
+	}
 }
 
 func TestScanRejectsUnregisteredManualDoc(t *testing.T) {
