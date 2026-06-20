@@ -54,3 +54,10 @@ func TestWorkflowTextUploadsArtifactPathStopsAtNextStep(t *testing.T) {
 		t.Fatal("upload path must not be borrowed from a later step")
 	}
 }
+
+func TestWorkflowTextUploadsArtifactPathStrictRequiresSameStep(t *testing.T) {
+	text := "steps:\n- uses: actions/upload-artifact@v4\n  with:\n    name: example-evidence\n    path: out/example.json\n- uses: actions/upload-artifact@v4\n  with:\n    name: example-evidence\n    path: out/other.json\n    if-no-files-found: error\n"
+	if workflowTextUploadsArtifactPathStrict(text, "example-evidence", "out/example.json") {
+		t.Fatal("path and strict missing-file behavior must belong to the same upload step")
+	}
+}

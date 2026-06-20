@@ -42,6 +42,10 @@ func validateGeneratedManifestBinding(root string, doc docClass, meta generatedM
 		return []string{fmt.Sprintf("%s workflow %q must upload generator %q evidence-out path in artifact %q",
 			doc.Path, meta.Workflow, doc.GeneratorTool, meta.EvidenceArtifact)}
 	}
+	if !workflowUploadsEvidenceOutStrict(root, meta.Workflow, doc.GeneratorTool, meta.EvidenceArtifact) {
+		return []string{fmt.Sprintf("%s workflow %q must upload generator %q evidence-out path in strict artifact step %q",
+			doc.Path, meta.Workflow, doc.GeneratorTool, meta.EvidenceArtifact)}
+	}
 	return nil
 }
 
