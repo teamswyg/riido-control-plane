@@ -1,0 +1,29 @@
+{
+  "schema_version": "riido-control-plane-go-ci-baseline.v1",
+  "id": "go-ci-baseline",
+  "title": "Go CI Baseline",
+  "riido_task": "RIID-4964",
+  "generated_doc": "docs/30-architecture/go-ci-baseline.md",
+  "workflow": ".github/workflows/go-ci.yml",
+  "evidence_artifact": "go-ci-baseline-evidence",
+  "gates": [
+    {"id": "go-version", "summary": "Go version follows go.mod", "contains": ["go-version-file: go.mod"]},
+    {"id": "module-download", "summary": "module graph resolves before lint/test", "contains": ["go mod download"]},
+    {"id": "golangci-lint", "summary": "golangci-lint version and repo-wide lint are pinned", "contains": ["golangci-lint@v2.12.2", "golangci-lint run ./... --timeout=5m"]},
+    {"id": "full-go-test", "summary": "all Go packages run in the baseline gate", "contains": ["go test ./..."]},
+    {"id": "baseline-evidence", "summary": "baseline CI publishes this executable evidence", "contains": ["go run ./tools/gocibaseline", "-evidence-out out/go-ci-baseline-evidence.json", "name: go-ci-baseline-evidence"]}
+  ],
+  "loop": {
+    "observation": "The broad Go CI workflow was the final non-live workflow that executed important checks without durable JSON evidence.",
+    "hypothesis": "A compact baseline manifest can make lint, full-test, tool-version, and evidence publication expectations explicit without duplicating domain-specific gates.",
+    "execute": "Verify go-ci.yml against this manifest, generate the reader, and publish go-ci-baseline-evidence from the workflow.",
+    "evaluate": "The verifier fails when go-ci drops the Go version pin, module download, lint command, full test, or evidence artifact upload.",
+    "retrospective": "This keeps broad CI as a safety net while making its observable contract machine-checkable."
+  },
+  "non_goals": [
+    "domain-specific test ownership",
+    "live deployment smoke evidence",
+    "test result parsing",
+    "private infrastructure evidence"
+  ]
+}
