@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/health-ready-cmd.yml"
+      - "docs/30-architecture/health-ready-cmd.md"
+      - "docs/30-architecture/health-ready-cmd.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
       - "go.mod"
@@ -19,9 +21,12 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_port.go"
+      - "tools/healthreadycmd/**"
   pull_request:
     paths:
       - ".github/workflows/health-ready-cmd.yml"
+      - "docs/30-architecture/health-ready-cmd.md"
+      - "docs/30-architecture/health-ready-cmd.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
       - "go.mod"
@@ -36,6 +41,7 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_port.go"
+      - "tools/healthreadycmd/**"
 
 jobs:
   health-cmd:
@@ -55,9 +61,22 @@ jobs:
             printf 'Disallowed health/cmd imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify health/cmd executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/healthreadycmd -count=1
+          go run ./tools/healthreadycmd \
+            -check-doc \
+            -evidence-out out/health-ready-cmd-evidence.json
       - name: Test health adapter
         run: go test ./internal/riidoaiserver -run 'HTTPHealth|HTTPReady|HealthAndReady' -count=1
       - name: Test command environment
         run: go test ./cmd/riido_ai_server -count=1
       - name: Build command
         run: go build -o /tmp/riido_ai_server ./cmd/riido_ai_server
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: health-ready-cmd-evidence
+          path: out/health-ready-cmd-evidence.json
+          if-no-files-found: error

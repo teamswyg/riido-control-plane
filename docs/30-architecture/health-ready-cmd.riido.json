@@ -1,0 +1,26 @@
+{
+  "schema_version": "riido-health-ready-cmd.v1",
+  "id": "control-plane-health-ready-cmd",
+  "title": "Control Plane Health Ready Command",
+  "generated_doc": "docs/30-architecture/health-ready-cmd.md",
+  "workflow": ".github/workflows/health-ready-cmd.yml",
+  "evidence_artifact": "health-ready-cmd-evidence",
+  "owner_packages": ["internal/riidoaiserver", "cmd/riido_ai_server"],
+  "endpoints": [
+    {"name": "health", "method": "GET", "path": "/healthz", "status": "ok", "http_status": 200},
+    {"name": "ready", "method": "GET", "path": "/readyz", "status": "ready", "http_status": 200}
+  ],
+  "source_checks": [
+    {"name": "server", "file": "internal/riidoaiserver/server.go", "contains": ["handleHealth", "handleReady", "SchemaVersion"]},
+    {"name": "health-tests", "file": "internal/riidoaiserver/health_http_test.go", "contains": ["TestHTTPHealthAndReadyArePublic", "TestHTTPHealthAndReadyRejectWrongMethod"]},
+    {"name": "cmd-config", "file": "cmd/riido_ai_server/main_test.go", "contains": ["TestConfigFromEnvParsesAddressShutdownAndStaticAuthorizer", "TestConfigFromEnvDefaultsToPublicHealthOnlyRuntime", "TestConfigFromEnvParsesPprofAddr"]}
+  ],
+  "command_tests": ["ConfigFromEnv", "EnvOptionalDuration", "PprofAddr"],
+  "loop": {
+    "observation": "The health/ready command workflow proved public endpoints and command configuration through tests but left no durable JSON evidence.",
+    "hypothesis": "A small SSOT can make public liveness/readiness and command-runtime configuration evidence visible without exposing deployment values.",
+    "execute": "Call the real health and ready HTTP handlers, verify command source anchors, require generated doc freshness, and upload CI evidence.",
+    "evaluate": "The verifier fails on endpoint status drift, missing source anchors, stale generated docs, or workflow evidence regression.",
+    "retrospective": "This keeps health/ready runtime knowledge executable while private deploy topology remains outside the public repo."
+  }
+}
