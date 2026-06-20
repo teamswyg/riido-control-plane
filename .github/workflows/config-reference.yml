@@ -1,0 +1,54 @@
+name: config-reference
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/config-reference.yml"
+      - "cmd/riido_ai_server/**"
+      - "docs/30-architecture/config-reference.md"
+      - "docs/30-architecture/config-reference.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/configreference/**"
+  pull_request:
+    paths:
+      - ".github/workflows/config-reference.yml"
+      - "cmd/riido_ai_server/**"
+      - "docs/30-architecture/config-reference.md"
+      - "docs/30-architecture/config-reference.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/configreference/**"
+
+jobs:
+  config-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
+      - name: Verify config reference
+        run: |
+          mkdir -p out
+          go test ./tools/configreference -count=1
+          go run ./tools/configreference \
+            -check-doc \
+            -evidence-out out/config-reference-evidence.json
+      - name: Verify executable knowledge coverage
+        run: |
+          go run ./tools/knowledgecoverage \
+            -check-doc \
+            -evidence-out out/executable-knowledge-coverage.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: config-reference-evidence
+          path: |
+            out/config-reference-evidence.json
+            out/executable-knowledge-coverage.json
+          if-no-files-found: error
