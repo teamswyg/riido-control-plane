@@ -6,8 +6,10 @@ on:
     paths:
       - ".github/workflows/provider-status.yml"
       - "docs/20-domain/provider-status.md"
+      - "docs/20-domain/provider-status.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
+      - "tools/providerstatus/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/server.go"
@@ -19,8 +21,10 @@ on:
     paths:
       - ".github/workflows/provider-status.yml"
       - "docs/20-domain/provider-status.md"
+      - "docs/20-domain/provider-status.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
+      - "tools/providerstatus/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/server.go"
@@ -47,5 +51,18 @@ jobs:
             printf 'Disallowed provider status imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify provider status executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/providerstatus -count=1
+          go run ./tools/providerstatus \
+            -check-doc \
+            -evidence-out out/provider-status-evidence.json
       - name: Test provider status
         run: go test ./internal/riidoaiserver -run 'ProviderStatus' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: provider-status-evidence
+          path: out/provider-status-evidence.json
+          if-no-files-found: error

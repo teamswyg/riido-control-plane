@@ -1,0 +1,65 @@
+{
+  "schema_version": "riido-provider-status.v1",
+  "id": "provider-status",
+  "title": "Provider Status",
+  "riido_task": "RIID-4671",
+  "generated_doc": "docs/20-domain/provider-status.md",
+  "workflow": ".github/workflows/provider-status.yml",
+  "evidence_artifact": "provider-status-evidence",
+  "owner_package": "internal/riidoaiserver",
+  "surfaces": [
+    {"name": "ProviderStatusRecord", "role": "provider kind plus routing status row"},
+    {"name": "ProviderStatusSyncRequest", "role": "daemon sync input"},
+    {"name": "ProviderStatusSyncResponse", "role": "server read/write projection"},
+    {"name": "ProviderStatusStore", "role": "provider status writer port"},
+    {"name": "ProviderStatusReader", "role": "provider status reader port"},
+    {"name": "StoreSafeRoutingInput", "role": "assignment routing guard input"},
+    {"name": "StoreSafeRoutingDecision", "role": "assignment routing guard decision"}
+  ],
+  "routing_statuses": [{"value": "available", "owner": "riido-contracts/hostintegration"}, {"value": "login-required", "owner": "riido-contracts/hostintegration"}, {"value": "unsupported", "owner": "riido-contracts/hostintegration"}, {"value": "store-blocked", "owner": "riido-contracts/hostintegration"}],
+  "distribution_channels": [{"value": "developer-id", "owner": "riido-contracts/hostintegration"}, {"value": "mac-app-store", "owner": "riido-contracts/hostintegration"}, {"value": "msix-sideload", "owner": "riido-contracts/hostintegration"}, {"value": "msix-store", "owner": "riido-contracts/hostintegration"}, {"value": "dev-local", "owner": "riido-contracts/hostintegration"}],
+  "validation_rules": [
+    {"id": "agent-id-required", "kind": "sync", "rule": "agent_id must be non-blank"},
+    {"id": "identity-fields-trimmed", "kind": "sync", "rule": "daemon_id, device_id, runtime_id, and app_version are trimmed"},
+    {"id": "daemon-id-required", "kind": "sync", "rule": "daemon_id must be non-blank"},
+    {"id": "runtime-id-required", "kind": "sync", "rule": "runtime_id must be non-blank"},
+    {"id": "distribution-channel-known", "kind": "sync", "rule": "distribution_channel must be contract-valid"},
+    {"id": "providers-required", "kind": "sync", "rule": "providers must contain at least one row"},
+    {"id": "provider-kind-required", "kind": "sync", "rule": "provider_kind is trimmed and must be non-blank"},
+    {"id": "provider-kind-unique", "kind": "sync", "rule": "provider_kind values must be unique after normalization"},
+    {"id": "routing-status-known", "kind": "sync", "rule": "routing_status must be contract-valid"},
+    {"id": "providers-sorted", "kind": "sync", "rule": "providers are sorted by provider_kind before persistence/response"}
+  ],
+  "routing_rules": [
+    {"id": "runtime-provider-required", "kind": "routing", "rule": "runtime_provider must be non-blank"},
+    {"id": "available-allowed", "kind": "routing", "rule": "available allows assignment with reason provider available"},
+    {"id": "login-required-blocked", "kind": "routing", "rule": "login-required blocks assignment with reason provider login required"},
+    {"id": "unsupported-blocked", "kind": "routing", "rule": "unsupported blocks assignment with reason provider unsupported"},
+    {"id": "store-blocked-blocked", "kind": "routing", "rule": "store-blocked blocks assignment with reason provider blocked by store policy"},
+    {"id": "missing-synced-provider-blocked", "kind": "routing", "rule": "synced snapshot missing the requested provider blocks assignment"},
+    {"id": "not-synced-allowed", "kind": "routing", "rule": "no synced provider snapshot preserves legacy assignment behavior"},
+    {"id": "unknown-routing-status-rejected", "kind": "routing", "rule": "unknown routing status returns an error"}
+  ],
+  "authorization": [
+    {"action": "write", "scope": "agent:{agent_id}:provider-status:write"},
+    {"action": "read", "scope": "agent:{agent_id}:provider-status:read"}
+  ],
+  "source_checks": [
+    {"name": "dto-normalization", "file": "internal/riidoaiserver/provider_status.go", "contains": ["ProviderStatusRecord", "ProviderStatusSyncRequest", "ProviderStatusSyncResponse", "normalizeProviderStatusSync"]},
+    {"name": "ports", "file": "internal/riidoaiserver/provider_status_port.go", "contains": ["ProviderStatusStore", "ProviderStatusReader", "SyncProviderStatus", "GetProviderStatus"]},
+    {"name": "store-safe-routing", "file": "internal/riidoaiserver/store_safe_routing.go", "contains": ["StoreSafeRoutingInput", "StoreSafeRoutingDecision", "EvaluateStoreSafeRouting"]},
+    {"name": "domain-tests", "file": "internal/riidoaiserver/provider_status_test.go", "contains": ["TestNormalizeProviderStatusSyncRejectsInvalidRequests", "TestProviderStatusJSONShape", "TestProviderStatusPortsCompile"]},
+    {"name": "routing-tests", "file": "internal/riidoaiserver/store_safe_routing_test.go", "contains": ["TestStoreSafeRoutingAllowsAvailableProvider", "TestStoreSafeRoutingBlocksUnavailableProviderStatuses", "TestStoreSafeRoutingKeepsLegacyAssignmentWhenNoStatusWasSynced"]},
+    {"name": "http-tests", "file": "internal/riidoaiserver/provider_status_http_test.go", "contains": ["TestHTTPProviderStatusSyncAndRead", "TestHTTPProviderStatusRejectsPrivateAndUnknownFields", "TestHTTPProviderStatusRequiresScopedAuthorization"]},
+    {"name": "auth-actions", "file": "internal/riidoaiserver/authorization.go", "contains": ["AuthorizationActionProviderStatusRead", "AuthorizationActionProviderStatusWrite"]},
+    {"name": "route-wiring", "file": "internal/riidoaiserver/server.go", "contains": ["handleProviderStatusSync", "handleProviderStatusRead", "provider-status"]}
+  ],
+  "loop": {
+    "observation": "Provider status rules were prose with tests, but the doc itself did not emit evidence or bind shared vocabulary to source anchors.",
+    "hypothesis": "A provider-status SSOT gate can catch drift in sync validation, routing decisions, authorization scopes, and private-field exclusion before daemon/provider behavior regresses.",
+    "execute": "Generate this reader doc from the manifest and run the providerstatus verifier in CI.",
+    "evaluate": "The verifier checks required surfaces, shared vocabulary, sync/routing rules, authorization scopes, source anchors, generated doc freshness, and CLI evidence output.",
+    "retrospective": "This slice proves server-facing provider status semantics; customer-PC detection, AWS persistence, and deployment evidence remain out of scope."
+  },
+  "non_goals": ["customer-PC provider process execution", "executable path detection", "login detection", "provider provenance collection", "store-channel policy decisions", "Terraform", "AWS", "deployment state", "raw credentials"]
+}
