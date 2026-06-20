@@ -5,6 +5,7 @@ import "fmt"
 type options struct {
 	Repo        string
 	Manifest    string
+	Boundary    string
 	EvidenceOut string
 	WriteDoc    bool
 	CheckDoc    bool
@@ -16,6 +17,10 @@ func run(opt options) error {
 		return err
 	}
 	if err := verifyManifest(opt.Repo, m); err != nil {
+		return err
+	}
+	selected, err := selectBoundary(m, opt.Boundary)
+	if err != nil {
 		return err
 	}
 	doc := renderDoc(m)
@@ -33,7 +38,7 @@ func run(opt options) error {
 		}
 	}
 	if opt.EvidenceOut != "" {
-		if err := writeJSON(opt.EvidenceOut, newEvidence(m)); err != nil {
+		if err := writeJSON(opt.EvidenceOut, newEvidence(m, selected)); err != nil {
 			return fmt.Errorf("write evidence: %w", err)
 		}
 	}

@@ -7,7 +7,9 @@ on:
       - ".github/workflows/assignment-http-adapter.yml"
       - "docs/20-domain/request-authorization.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/assignment_api.go"
@@ -23,7 +25,9 @@ on:
       - ".github/workflows/assignment-http-adapter.yml"
       - "docs/20-domain/request-authorization.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/assignment_api.go"
@@ -53,5 +57,19 @@ jobs:
             printf 'Disallowed assignment HTTP imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify assignment HTTP executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/saascontrolplane -count=1
+          go run ./tools/saascontrolplane \
+            -boundary assignment-http \
+            -check-doc \
+            -evidence-out out/assignment-http-adapter-evidence.json
       - name: Test assignment HTTP adapter
         run: go test ./internal/riidoaiserver -run 'HTTPAssignment|AssignmentHTTP' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment-http-adapter-evidence
+          path: out/assignment-http-adapter-evidence.json
+          if-no-files-found: error

@@ -13,16 +13,6 @@
       "next": "publish redacted smoke summary evidence"
     },
     {
-      "path": ".github/workflows/assignment-contract.yml",
-      "reason": "legacy contract workflow currently runs tests without JSON evidence",
-      "next": "publish generated contract parity evidence"
-    },
-    {
-      "path": ".github/workflows/assignment-http-adapter.yml",
-      "reason": "legacy adapter workflow currently runs tests without JSON evidence",
-      "next": "publish HTTP adapter conformance evidence"
-    },
-    {
       "path": ".github/workflows/assignment-operation-replay.yml",
       "reason": "legacy replay workflow currently runs tests without JSON evidence",
       "next": "publish replay conformance evidence"
