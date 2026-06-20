@@ -13,6 +13,12 @@ func TestDefaultManifestVerifies(t *testing.T) {
 	}
 }
 
+func TestRunAcceptsCheckDoc(t *testing.T) {
+	if err := run([]string{"-check-doc"}); err != nil {
+		t.Fatalf("run check-doc: %v", err)
+	}
+}
+
 func TestRunWritesEvidence(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "risk-evidence.json")
 	if err := run([]string{"-evidence-out", path}); err != nil {

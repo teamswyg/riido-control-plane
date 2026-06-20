@@ -23,6 +23,12 @@ func validateManifest(root string, m manifest) []string {
 	}
 	paths := append([]string{m.Workflow}, m.ScanRoots...)
 	paths = append(paths, m.ScanFiles...)
+	for _, standalone := range m.Standalone {
+		paths = append(paths, standalone.Path, standalone.Workflow)
+		if standalone.HumanDoc != "" {
+			paths = append(paths, standalone.HumanDoc)
+		}
+	}
 	for _, path := range paths {
 		if _, err := os.Stat(resolvePath(root, path)); err != nil {
 			problems = append(problems, fmt.Sprintf("missing path %q", path))

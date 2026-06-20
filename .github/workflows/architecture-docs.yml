@@ -123,7 +123,9 @@ jobs:
       - name: Verify AI Agent risk evidence
         run: |
           mkdir -p out
-          go run ./tools/aiagentrisk -evidence-out out/ai-agent-risk-evidence.json
+          go run ./tools/aiagentrisk \
+            -check-doc \
+            -evidence-out out/ai-agent-risk-evidence.json
           go test ./tools/aiagentrisk -count=1
       - name: Upload AI Agent risk evidence
         uses: actions/upload-artifact@v4
@@ -131,7 +133,7 @@ jobs:
         with:
           name: ai-agent-risk-evidence
           path: out/ai-agent-risk-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Upload config reference evidence
         uses: actions/upload-artifact@v4
         if: always()

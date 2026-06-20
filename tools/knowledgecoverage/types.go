@@ -9,9 +9,18 @@ type manifest struct {
 	EvidenceArtifact string        `json:"evidence_artifact"`
 	ScanRoots        []string      `json:"scan_roots"`
 	ScanFiles        []string      `json:"scan_files"`
+	Standalone       []standalone  `json:"standalone_manifests"`
 	ManualGroups     []manualGroup `json:"manual_groups"`
 	Assertions       []string      `json:"assertions"`
 	Loop             evidenceLoop  `json:"loop"`
+}
+
+type standalone struct {
+	Path             string `json:"path"`
+	EvidenceTool     string `json:"evidence_tool"`
+	Workflow         string `json:"workflow"`
+	EvidenceArtifact string `json:"evidence_artifact"`
+	HumanDoc         string `json:"human_doc,omitempty"`
 }
 
 type manualGroup struct {

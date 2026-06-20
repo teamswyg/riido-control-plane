@@ -19,6 +19,9 @@ func renderCoverageTable(b *strings.Builder, e evidence) {
 	fmt.Fprintf(b, "| Direct SSOT docs | %d |\n", e.DirectSSOTCount)
 	fmt.Fprintf(b, "| Direct SSOT docs with evidence loop | %d |\n", e.DirectLoopCount)
 	fmt.Fprintf(b, "| Direct SSOT docs with CI evidence | %d |\n", e.DirectEvidenceWorkflowCount)
+	fmt.Fprintf(b, "| Standalone executable manifests | %d |\n", e.StandaloneManifestCount)
+	fmt.Fprintf(b, "| Standalone executable manifests with strict CI evidence | %d |\n",
+		e.StandaloneManifestBindingCount)
 	fmt.Fprintf(b, "| Registered manual docs | %d |\n", e.ManualCount)
 	fmt.Fprintf(b, "| Scanned docs | %d |\n\n", e.ScannedCount)
 }

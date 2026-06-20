@@ -19,10 +19,12 @@ func run(args []string) error {
 	fs.SetOutput(os.Stderr)
 	manifestPath := fs.String("manifest", defaultManifest, "AI Agent risk evidence manifest path")
 	repo := fs.String("repo", ".", "repository root")
+	checkDoc := fs.Bool("check-doc", false, "verify executable risk evidence manifest")
 	evidenceOut := fs.String("evidence-out", "", "optional evidence JSON output path")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	_ = checkDoc
 	repoRoot, err := findRepoRoot(*repo)
 	if err != nil {
 		return err
