@@ -12,6 +12,7 @@ func renderDoc(m manifest, result auditResult) string {
 	fmt.Fprintf(&b, "- evidence covered: `%d`\n", result.Covered)
 	fmt.Fprintf(&b, "- accepted gaps: `%d`\n", result.Accepted)
 	fmt.Fprintf(&b, "- non-strict artifact uploads: `%d`\n", len(result.NonStrict))
+	fmt.Fprintf(&b, "- missing evidence uploads: `%d`\n", len(result.MissingEvidence))
 	fmt.Fprintf(&b, "- unregistered gaps: `%d`\n\n", len(result.Unregistered))
 	renderLoop(&b, m.Loop)
 	renderWorkflowTable(&b, result.Records)

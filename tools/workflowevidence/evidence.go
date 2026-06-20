@@ -3,11 +3,12 @@ package main
 func newEvidence(m manifest, result auditResult) evidence {
 	status := "verified"
 	if len(result.Unregistered) > 0 || len(result.NonStrict) > 0 ||
-		len(result.AcceptedUnused) > 0 {
+		len(result.MissingEvidence) > 0 || len(result.AcceptedUnused) > 0 {
 		status = "failed"
 	}
 	unregistered := append([]string{}, result.Unregistered...)
 	nonStrict := append([]string{}, result.NonStrict...)
+	missingEvidence := append([]string{}, result.MissingEvidence...)
 	acceptedUnused := append([]string{}, result.AcceptedUnused...)
 	return evidence{
 		SchemaVersion:    evidenceSchema,
@@ -17,6 +18,7 @@ func newEvidence(m manifest, result auditResult) evidence {
 		CoveredCount:     result.Covered,
 		AcceptedGapCount: result.Accepted,
 		NonStrict:        nonStrict,
+		MissingEvidence:  missingEvidence,
 		Unregistered:     unregistered,
 		AcceptedUnused:   acceptedUnused,
 		Records:          result.Records,

@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 )
 
 func auditWorkflows(root string, m manifest) (auditResult, error) {
@@ -41,10 +40,15 @@ func scanWorkflow(root, path string, accepted map[string]acceptedGap, used map[s
 	}
 	rel, text := slashPath(path[len(root)+1:]), string(data)
 	uploadModes := artifactUploadModes(text)
+	evidenceOut := evidenceOutPaths(text)
+	uploadPaths := artifactUploadPathValues(text)
 	record := workflowRecord{
 		Path:                 rel,
 		HasExecutable:        hasExecutableStep(text),
-		HasEvidenceOut:       strings.Contains(text, "evidence-out"),
+		HasEvidenceOut:       len(evidenceOut) > 0,
+		EvidenceOutCount:     len(evidenceOut),
+		UploadedEvidenceOut:  countUploadedEvidenceOut(evidenceOut, uploadPaths),
+		MissingEvidenceOut:   missingEvidenceUploads(evidenceOut, uploadPaths),
 		UploadsArtifact:      len(uploadModes) > 0,
 		ArtifactUploadCount:  len(uploadModes),
 		StrictUploadCount:    countUploadMode(uploadModes, "error"),

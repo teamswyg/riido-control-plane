@@ -18,6 +18,11 @@ func classify(record workflowRecord, accepted map[string]acceptedGap, used map[s
 		record.Reason = "artifact upload must fail closed with if-no-files-found:error"
 		return record
 	}
+	if len(record.MissingEvidenceOut) > 0 {
+		record.Status = "missing_evidence_upload"
+		record.Reason = "each evidence-out path must be uploaded as a workflow artifact"
+		return record
+	}
 	if record.HasEvidenceOut && record.UploadsArtifact {
 		record.Status = "covered"
 		return record
@@ -47,5 +52,7 @@ func addRecord(result *auditResult, record workflowRecord) {
 		result.Unregistered = append(result.Unregistered, record.Path)
 	case "non_strict_upload":
 		result.NonStrict = append(result.NonStrict, record.Path)
+	case "missing_evidence_upload":
+		result.MissingEvidence = append(result.MissingEvidence, record.Path)
 	}
 }

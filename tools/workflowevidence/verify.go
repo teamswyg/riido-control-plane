@@ -12,6 +12,9 @@ func verifyResult(result auditResult) error {
 	if len(result.NonStrict) > 0 {
 		return fmt.Errorf("non-strict artifact upload steps: %v", result.NonStrict)
 	}
+	if len(result.MissingEvidence) > 0 {
+		return fmt.Errorf("missing evidence artifact uploads: %v", result.MissingEvidence)
+	}
 	if len(result.AcceptedUnused) > 0 {
 		return fmt.Errorf("unused accepted workflow gaps: %v", result.AcceptedUnused)
 	}

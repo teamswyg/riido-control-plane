@@ -20,16 +20,19 @@ type acceptedGap struct {
 }
 
 type workflowRecord struct {
-	Path                 string `json:"path"`
-	Status               string `json:"status"`
-	HasExecutable        bool   `json:"has_executable"`
-	HasEvidenceOut       bool   `json:"has_evidence_out"`
-	UploadsArtifact      bool   `json:"uploads_artifact"`
-	ArtifactUploadCount  int    `json:"artifact_upload_count"`
-	StrictUploadCount    int    `json:"strict_upload_count"`
-	NonStrictUploadCount int    `json:"non_strict_upload_count"`
-	Reason               string `json:"reason,omitempty"`
-	Next                 string `json:"next,omitempty"`
+	Path                 string   `json:"path"`
+	Status               string   `json:"status"`
+	HasExecutable        bool     `json:"has_executable"`
+	HasEvidenceOut       bool     `json:"has_evidence_out"`
+	EvidenceOutCount     int      `json:"evidence_out_count"`
+	UploadedEvidenceOut  int      `json:"uploaded_evidence_out_count"`
+	MissingEvidenceOut   []string `json:"missing_evidence_out_uploads,omitempty"`
+	UploadsArtifact      bool     `json:"uploads_artifact"`
+	ArtifactUploadCount  int      `json:"artifact_upload_count"`
+	StrictUploadCount    int      `json:"strict_upload_count"`
+	NonStrictUploadCount int      `json:"non_strict_upload_count"`
+	Reason               string   `json:"reason,omitempty"`
+	Next                 string   `json:"next,omitempty"`
 }
 
 type evidenceLoop struct {
@@ -41,12 +44,13 @@ type evidenceLoop struct {
 }
 
 type auditResult struct {
-	Records        []workflowRecord
-	Covered        int
-	Accepted       int
-	Unregistered   []string
-	NonStrict      []string
-	AcceptedUnused []string
+	Records         []workflowRecord
+	Covered         int
+	Accepted        int
+	Unregistered    []string
+	NonStrict       []string
+	MissingEvidence []string
+	AcceptedUnused  []string
 }
 
 type evidence struct {
@@ -57,6 +61,7 @@ type evidence struct {
 	CoveredCount     int              `json:"covered_count"`
 	AcceptedGapCount int              `json:"accepted_gap_count"`
 	NonStrict        []string         `json:"non_strict_artifact_uploads"`
+	MissingEvidence  []string         `json:"missing_evidence_uploads"`
 	Unregistered     []string         `json:"unregistered_gaps"`
 	AcceptedUnused   []string         `json:"accepted_gaps_unused"`
 	Records          []workflowRecord `json:"records"`
