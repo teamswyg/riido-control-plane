@@ -28,7 +28,7 @@ Boundaries: `6`; evidence paths: `12`; phrase checks: `24`; rules: `11`.
 - owner: `riido-control-plane`
 - scope: Static scratch image contract for /riido_ai_server.
 - does not own: ECR repository creation; ECS service wiring
-- evidence: `tools/containercontract/main_test.go`, `.github/workflows/ci.yml`
+- evidence: `packaging/containers/riido_ai_server_container.riido.json`, `.github/workflows/ci.yml`
 
 ### runtime-artifact-cd
 

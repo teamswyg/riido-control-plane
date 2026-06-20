@@ -24,7 +24,7 @@
       "scope": "Static scratch image contract for /riido_ai_server.",
       "does_not_own": ["ECR repository creation", "ECS service wiring"],
       "evidence": [
-        {"path": "tools/containercontract/main_test.go", "contains": ["CGO_ENABLED=0", "scratch", "65532:65532"]},
+        {"path": "packaging/containers/riido_ai_server_container.riido.json", "contains": ["cgo_enabled", "scratch", "65532:65532"]},
         {"path": ".github/workflows/ci.yml", "contains": ["go test ./..."]}
       ]
     },
