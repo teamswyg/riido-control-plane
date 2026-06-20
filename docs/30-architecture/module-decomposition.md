@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `29`; runtime: `1`; internal: `3`; tools: `24`; forbidden import hits: `0`.
+Packages: `30`; runtime: `1`; internal: `3`; tools: `25`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `100`; max file lines: `3479`.
 
@@ -37,7 +37,7 @@ File line budget target: `75`; files over target: `100`; max file lines: `3479`.
 - `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/openquestions`, `tools/providerstatus`, `tools/requestauth`, `tools/runtimeboundary`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
-- `meta-evidence-tool`: `tools/knowledgecoverage`, `tools/moduledecomposition`
+- `meta-evidence-tool`: `tools/knowledgecoverage`, `tools/moduledecomposition`, `tools/workflowevidence`
 
 ## Boundary Rules
 
