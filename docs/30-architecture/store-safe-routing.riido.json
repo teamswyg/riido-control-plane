@@ -1,0 +1,33 @@
+{
+  "schema_version": "riido-store-safe-routing.v1",
+  "id": "control-plane-store-safe-routing",
+  "title": "Control Plane Store Safe Routing",
+  "generated_doc": "docs/30-architecture/store-safe-routing.md",
+  "workflow": ".github/workflows/store-safe-routing.yml",
+  "evidence_artifact": "store-safe-routing-evidence",
+  "domain_ssot": "docs/20-domain/provider-status.riido.json",
+  "owner_package": "internal/riidoaiserver",
+  "cases": [
+    {"name":"available-allowed","runtime_provider":" codex ","provider_statuses":[{"provider_kind":"codex","routing_status":"available"}],"want_allowed":true,"want_routing_status":"available","want_reason":"provider available"},
+    {"name":"login-required-blocked","runtime_provider":"codex","provider_statuses":[{"provider_kind":"codex","routing_status":"login-required"}],"want_allowed":false,"want_routing_status":"login-required","want_reason":"provider login required"},
+    {"name":"unsupported-blocked","runtime_provider":"codex","provider_statuses":[{"provider_kind":"codex","routing_status":"unsupported"}],"want_allowed":false,"want_routing_status":"unsupported","want_reason":"provider unsupported"},
+    {"name":"store-blocked-blocked","runtime_provider":"codex","provider_statuses":[{"provider_kind":"codex","routing_status":"store-blocked"}],"want_allowed":false,"want_routing_status":"store-blocked","want_reason":"provider blocked by store policy"},
+    {"name":"missing-synced-provider-blocked","runtime_provider":"codex","provider_statuses":[{"provider_kind":"claude","routing_status":"available"}],"want_allowed":false,"want_routing_status":"unsupported","want_reason":"provider status missing"},
+    {"name":"not-synced-legacy-allowed","runtime_provider":"codex","provider_statuses":[],"want_allowed":true,"want_routing_status":"unsupported","want_reason":"provider status not synced"},
+    {"name":"missing-runtime-provider-rejected","runtime_provider":" ","provider_statuses":[],"want_error_contains":"runtime_provider is required"},
+    {"name":"unknown-routing-status-rejected","runtime_provider":"codex","provider_statuses":[{"provider_kind":"codex","routing_status":"unknown"}],"want_error_contains":"unknown provider routing status"}
+  ],
+  "source_checks": [
+    {"name":"domain-ssot-routing-rules","file":"docs/20-domain/provider-status.riido.json","contains":["available-allowed","login-required-blocked","store-blocked-blocked","unknown-routing-status-rejected"]},
+    {"name":"routing-evaluator","file":"internal/riidoaiserver/store_safe_routing.go","contains":["EvaluateStoreSafeRouting","provider status not synced","provider blocked by store policy"]},
+    {"name":"routing-tests","file":"internal/riidoaiserver/store_safe_routing_test.go","contains":["TestStoreSafeRoutingAllowsAvailableProvider","TestStoreSafeRoutingBlocksUnavailableProviderStatuses","TestStoreSafeRoutingRejectsInvalidInput"]},
+    {"name":"provider-status-model","file":"internal/riidoaiserver/provider_status.go","contains":["ProviderStatusRecord","RoutingStatus","ProviderKind"]}
+  ],
+  "loop": {
+    "observation": "The store-safe routing workflow executed the routing tests but did not publish durable evidence for the allow/block decision matrix.",
+    "hypothesis": "A focused verification sidecar can prove the provider-status routing rules through the real evaluator while keeping the domain vocabulary in the provider-status SSOT.",
+    "execute": "Load routing cases, call EvaluateStoreSafeRouting, verify source anchors and generated doc freshness, then publish redaction-safe CI evidence.",
+    "evaluate": "The verifier fails on decision drift, missing error classification, stale generated docs, missing source anchors, or workflow evidence regression.",
+    "retrospective": "This closes the store-safe-routing workflow evidence gap without introducing live AWS, daemon execution, or duplicated deployment knowledge."
+  }
+}
