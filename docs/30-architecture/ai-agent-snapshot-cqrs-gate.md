@@ -3,6 +3,9 @@
 > Riido task: RIID-4964 — AI Agent control-plane cost attribution and
 > snapshot persistence review.
 
+Executable gate manifest:
+[`ai-agent-snapshot-cqrs-gate.riido.json`](ai-agent-snapshot-cqrs-gate.riido.json).
+
 ## Decision
 
 Do not promote the whole control-plane Store to CQS/CQRS yet.
