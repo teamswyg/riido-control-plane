@@ -26,6 +26,10 @@ func validateGeneratedManifestBinding(root string, doc docClass, meta generatedM
 	if meta.Workflow == "" || meta.EvidenceArtifact == "" {
 		return []string{fmt.Sprintf("%s manifest must declare workflow and evidence_artifact", doc.Path)}
 	}
+	if !workflowRunsEvidenceTool(root, meta.Workflow, doc.GeneratorTool) {
+		return []string{fmt.Sprintf("%s workflow %q must run generator %q with check-doc and evidence-out",
+			doc.Path, meta.Workflow, doc.GeneratorTool)}
+	}
 	if !workflowUploadsArtifact(root, meta.Workflow, meta.EvidenceArtifact) {
 		return []string{fmt.Sprintf("%s workflow %q must upload evidence artifact %q",
 			doc.Path, meta.Workflow, meta.EvidenceArtifact)}

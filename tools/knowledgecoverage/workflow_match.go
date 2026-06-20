@@ -17,11 +17,23 @@ func workflowHasGeneratorEvidence(workflows []workflowDoc, tool string) bool {
 
 func workflowHasEvidenceTool(workflows []workflowDoc, tool string) bool {
 	for _, workflow := range workflows {
-		if strings.Contains(workflow.Text, tool) &&
-			strings.Contains(workflow.Text, "-check-doc") &&
-			strings.Contains(workflow.Text, "-evidence-out") {
+		if workflowTextRunsEvidenceTool(workflow.Text, tool) {
 			return true
 		}
 	}
 	return false
+}
+
+func workflowRunsEvidenceTool(root, workflowPath, tool string) bool {
+	data, err := readWorkflow(root, workflowPath)
+	if err != nil {
+		return false
+	}
+	return workflowTextRunsEvidenceTool(string(data), tool)
+}
+
+func workflowTextRunsEvidenceTool(text, tool string) bool {
+	return strings.Contains(text, tool) &&
+		strings.Contains(text, "-check-doc") &&
+		strings.Contains(text, "-evidence-out")
 }
