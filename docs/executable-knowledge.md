@@ -25,8 +25,8 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | --- | --- |
 | Observe | Executable documentation coverage can look healthy while direct SSOT readers omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, declared workflow ownership, uploaded artifact binding, strict missing-file behavior, or migration history remains manual prose. |
 | Hypothesis | A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, direct-SSOT CI evidence, declared workflow evidence ownership, generated artifact collection, and strict artifact upload failure modes visible before review relies on memory. |
-| Execute | Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifests to bind workflow to generator check-doc/evidence-out execution, require evidence_artifact to upload-artifact with if-no-files-found:error, and publish coverage evidence in CI. |
-| Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, generated manifests whose declared workflow does not run the generator, generated manifests whose evidence artifact is not uploaded, or generated evidence uploads that warn on missing files. |
+| Execute | Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifests to bind workflow run steps to generator check-doc/evidence-out execution, require evidence_artifact to upload-artifact with if-no-files-found:error, and publish coverage evidence in CI. |
+| Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, generated manifests whose declared workflow run steps do not run the generator, generated manifests whose evidence artifact is not uploaded, or generated evidence uploads that warn on missing files. |
 | Retrospective | This keeps the repository evidence-driven: migration history is generated from a ledger, direct SSOT readers carry loops and evidence tools, generated readers bind generator execution and evidence upload to strict durable artifacts, and future manual debt must be registered explicitly. |
 
 ## Registered Manual Surfaces
@@ -52,7 +52,7 @@ None.
 - a generated reader doc must name an existing tools/<name> generator in its marker
 - a generated reader doc generator must be referenced by at least one GitHub Actions workflow
 - a generated reader doc generator must run check-doc and publish evidence-out in GitHub Actions
-- a generated reader doc manifest workflow must run its generator with check-doc and evidence-out
+- a generated reader doc manifest workflow must run its generator in a run step with check-doc and evidence-out
 - a generated reader doc manifest evidence_artifact must be uploaded by its declared GitHub Actions workflow with if-no-files-found:error
 - a direct-SSOT backed markdown file must have a sibling .riido.json manifest
 - a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest
