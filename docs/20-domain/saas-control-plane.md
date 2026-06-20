@@ -14,7 +14,7 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 | --- | ---: |
 | Boundaries | 19 |
 | Focused workflows | 17 |
-| Source checks | 27 |
+| Source checks | 28 |
 | Shared contracts | 3 |
 
 - owner package: `internal/riidoaiserver`
@@ -41,7 +41,7 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 | `aws-facade` | `.github/workflows/aws-adapters-facade.yml` | `aws-adapters-facade-evidence` | 1 |
 | `health-ready-cmd` | `.github/workflows/health-ready-cmd.yml` | `-` | 2 |
 | `review-account-seed` | `.github/workflows/review-account-seed.yml` | `-` | 2 |
-| `container-image` | `.github/workflows/container-image-contract.yml` | `-` | 1 |
+| `container-image` | `.github/workflows/container-image-contract.yml` | `-` | 2 |
 | `provider-status` | `.github/workflows/provider-status.yml` | `-` | 2 |
 
 ## Evidence Loop
