@@ -12,6 +12,7 @@ on:
       - "docs/20-domain/context-map.md"
       - "docs/20-domain/request-authorization.md"
       - "docs/30-architecture/api-client-delivery.md"
+      - "docs/30-architecture/api-client-delivery.riido.json"
       - "docs/30-architecture/config-reference.md"
       - "docs/30-architecture/integration-matrix.md"
       - "docs/30-architecture/module-decomposition.md"
@@ -22,6 +23,7 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/authorization.go"
       - "tools/aiagentclientapi/**"
+      - "tools/apiclientdelivery/**"
       - "tools/reactquerygen/**"
       - "tools/generatedclienthandoff/**"
       - "web/generated/aiAgentClient.ts"
@@ -36,6 +38,7 @@ on:
       - "docs/20-domain/context-map.md"
       - "docs/20-domain/request-authorization.md"
       - "docs/30-architecture/api-client-delivery.md"
+      - "docs/30-architecture/api-client-delivery.riido.json"
       - "docs/30-architecture/config-reference.md"
       - "docs/30-architecture/integration-matrix.md"
       - "docs/30-architecture/module-decomposition.md"
@@ -46,6 +49,7 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/authorization.go"
       - "tools/aiagentclientapi/**"
+      - "tools/apiclientdelivery/**"
       - "tools/reactquerygen/**"
       - "tools/generatedclienthandoff/**"
       - "web/generated/aiAgentClient.ts"
@@ -69,6 +73,12 @@ jobs:
           go run ./tools/aiagentclientapi \
             -check-doc \
             -evidence-out out/ai-agent-client-api-evidence.json
+      - name: Verify API client delivery executable SSOT
+        run: |
+          go test ./tools/apiclientdelivery -count=1
+          go run ./tools/apiclientdelivery \
+            -check-doc \
+            -evidence-out out/api-client-delivery-evidence.json
       - name: Test AI Agent development API
         run: go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1
       - name: Test AI Agent runtime env
@@ -90,5 +100,7 @@ jobs:
         if: always()
         with:
           name: ai-agent-client-api-evidence
-          path: out/ai-agent-client-api-evidence.json
+          path: |
+            out/ai-agent-client-api-evidence.json
+            out/api-client-delivery-evidence.json
           if-no-files-found: error

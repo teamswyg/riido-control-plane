@@ -17,6 +17,7 @@
     {"path":"internal/riidoaiserver","kind":"core","role":"Domain and adapter implementation for HTTP, SSE, metrics, assignment, AI Agent client, auth, RBAC, and stdlib AWS requests.","must_not_own":"daemon runtime, live deploy evidence, cloud resource topology"},
     {"path":"tools/agentcatalogrbac","kind":"evidence-tool","role":"Agent catalog RBAC executable knowledge gate.","must_not_own":"runtime authorization behavior"},
     {"path":"tools/agentruntimebinding","kind":"evidence-tool","role":"Agent runtime binding generated reader and verifier.","must_not_own":"runtime persistence behavior"},
+    {"path":"tools/apiclientdelivery","kind":"evidence-tool","role":"API client delivery generated reader and frontend handoff boundary verifier.","must_not_own":"riido-client application implementation or live delivery execution"},
     {"path":"tools/aiagentclientapi","kind":"evidence-tool","role":"AI Agent client API SSOT verifier.","must_not_own":"HTTP handler implementation"},
     {"path":"tools/aiagentrisk","kind":"evidence-tool","role":"AI Agent unresolved-risk closure evidence verifier.","must_not_own":"risk resolution without source tests"},
     {"path":"tools/aigeneratedsmokematrix","kind":"evidence-tool","role":"Generated endpoint smoke matrix verifier.","must_not_own":"endpoint shape"},

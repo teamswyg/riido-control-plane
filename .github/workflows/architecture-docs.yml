@@ -13,6 +13,7 @@ on:
       - "cmd/riido_ai_server/main.go"
       - "internal/riidoaiserver/doc.go"
       - "tools/aiagentrisk/**"
+      - "tools/apiclientdelivery/**"
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
       - "tools/moduledecomposition/**"
@@ -29,6 +30,7 @@ on:
       - "cmd/riido_ai_server/main.go"
       - "internal/riidoaiserver/doc.go"
       - "tools/aiagentrisk/**"
+      - "tools/apiclientdelivery/**"
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
       - "tools/moduledecomposition/**"
@@ -49,6 +51,7 @@ jobs:
           test -f docs/20-domain/context-map.md
           test -f docs/20-domain/ai-agent-client-api.md
           test -f docs/30-architecture/api-client-delivery.md
+          test -f docs/30-architecture/api-client-delivery.riido.json
           test -f docs/30-architecture/module-decomposition.md
           test -f docs/30-architecture/config-reference.md
           test -f docs/30-architecture/integration-matrix.md
@@ -71,6 +74,11 @@ jobs:
           go run ./tools/configreference \
             -check-doc \
             -evidence-out out/config-reference-evidence.json
+      - name: Verify API client delivery
+        run: |
+          go run ./tools/apiclientdelivery \
+            -check-doc \
+            -evidence-out out/api-client-delivery-evidence.json
       - name: Verify integration matrix
         run: |
           go run ./tools/integrationmatrix \
@@ -106,6 +114,13 @@ jobs:
         with:
           name: config-reference-evidence
           path: out/config-reference-evidence.json
+          if-no-files-found: warn
+      - name: Upload API client delivery evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-client-delivery-evidence
+          path: out/api-client-delivery-evidence.json
           if-no-files-found: warn
       - name: Upload integration matrix evidence
         uses: actions/upload-artifact@v4
