@@ -7,6 +7,8 @@ on:
       - ".github/workflows/review-account-seed.yml"
       - "README.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/30-architecture/review-account-seed.md"
+      - "docs/30-architecture/review-account-seed.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
@@ -21,11 +23,14 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/server_test.go"
       - "internal/riidoaiserver/store.go"
+      - "tools/reviewaccountseed/**"
   pull_request:
     paths:
       - ".github/workflows/review-account-seed.yml"
       - "README.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/30-architecture/review-account-seed.md"
+      - "docs/30-architecture/review-account-seed.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
@@ -40,6 +45,7 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/server_test.go"
       - "internal/riidoaiserver/store.go"
+      - "tools/reviewaccountseed/**"
 
 jobs:
   review-account-seed:
@@ -71,3 +77,12 @@ jobs:
         run: go test ./cmd/riido_ai_server -run 'ReviewAccount|ConfigFromEnv|AuthorizerFromEnv' -count=1
       - name: Build command
         run: go build -o /tmp/riido_ai_server ./cmd/riido_ai_server
+      - name: Publish review account seed evidence
+        run: |
+          mkdir -p out
+          go test ./tools/reviewaccountseed -count=1
+          go run ./tools/reviewaccountseed -check-doc -evidence-out out/review-account-seed-evidence.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: review-account-seed-evidence
+          path: out/review-account-seed-evidence.json

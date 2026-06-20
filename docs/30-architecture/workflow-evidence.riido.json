@@ -76,11 +76,6 @@
       "path": ".github/workflows/go-ci.yml",
       "reason": "baseline CI proves build/test health but not loop evidence",
       "next": "keep as broad safety net or add summarized test evidence"
-    },
-    {
-      "path": ".github/workflows/review-account-seed.yml",
-      "reason": "seed workflow currently runs checks without JSON evidence",
-      "next": "publish redacted seed conformance evidence"
     }
   ],
   "assertions": [

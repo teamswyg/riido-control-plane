@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `36`; runtime: `1`; internal: `3`; tools: `31`; forbidden import hits: `0`.
+Packages: `37`; runtime: `1`; internal: `3`; tools: `32`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `100`; max file lines: `2717`.
 
@@ -34,7 +34,7 @@ File line budget target: `75`; files over target: `100`; max file lines: `2717`.
 - `compatibility-test`: `internal/contractscompat`
 - `guard`: `internal/repoidentity`
 - `core`: `internal/riidoaiserver`
-- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/metricshttpadapter`, `tools/openquestions`, `tools/providerstatus`, `tools/requestauth`, `tools/runtimeboundary`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
+- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/metricshttpadapter`, `tools/openquestions`, `tools/providerstatus`, `tools/reviewaccountseed`, `tools/requestauth`, `tools/runtimeboundary`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
 - `meta-evidence-tool`: `tools/knowledgecoverage`, `tools/moduledecomposition`, `tools/workflowevidence`
