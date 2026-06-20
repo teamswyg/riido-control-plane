@@ -21,7 +21,7 @@ func validateImportedManifest(root string, imported importedManifest) []string {
 	if !importedLocalMirrorMatches(root, imported) {
 		return []string{fmt.Sprintf("%s local mirror must match imported manifest identity", imported.Path)}
 	}
-	if !contractOwnerHasStrictEvidence(root, imported.OwnerManifest) {
+	if !ownerManifestHasStrictEvidence(root, imported.OwnerManifest) {
 		return []string{fmt.Sprintf("%s owner manifest %q must have strict generated evidence",
 			imported.Path, imported.OwnerManifest)}
 	}

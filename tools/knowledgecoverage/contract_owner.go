@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-func contractOwnerDeclaresArtifact(root string, artifact contractArtifact) bool {
-	data, err := os.ReadFile(resolvePath(root, artifact.OwnerManifest))
+func ownerManifestDeclaresPath(root, ownerManifest, ownerKey, path string) bool {
+	data, err := os.ReadFile(resolvePath(root, ownerManifest))
 	if err != nil {
 		return false
 	}
@@ -15,8 +15,8 @@ func contractOwnerDeclaresArtifact(root string, artifact contractArtifact) bool 
 	if err := json.Unmarshal(data, &object); err != nil {
 		return false
 	}
-	value, ok := contractOwnerValue(object, artifact.OwnerKey)
-	return ok && value == artifact.Path
+	value, ok := contractOwnerValue(object, ownerKey)
+	return ok && value == path
 }
 
 func contractOwnerValue(object map[string]any, key string) (string, bool) {
@@ -35,7 +35,7 @@ func contractOwnerValue(object map[string]any, key string) (string, bool) {
 	return value, ok
 }
 
-func contractOwnerHasStrictEvidence(root, ownerManifest string) bool {
+func ownerManifestHasStrictEvidence(root, ownerManifest string) bool {
 	meta, ok := loadGeneratedManifestMeta(root, ownerManifest)
 	if !ok {
 		return false

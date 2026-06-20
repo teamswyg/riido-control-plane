@@ -14,11 +14,11 @@ func validateContractArtifact(root string, artifact contractArtifact) []string {
 	if artifact.Path == "" || artifact.OwnerManifest == "" || artifact.OwnerKey == "" {
 		return []string{"contract artifact path, owner_manifest, and owner_key are required"}
 	}
-	if !contractOwnerDeclaresArtifact(root, artifact) {
+	if !ownerManifestDeclaresPath(root, artifact.OwnerManifest, artifact.OwnerKey, artifact.Path) {
 		return []string{fmt.Sprintf("%s owner manifest %q key %q must declare artifact path",
 			artifact.Path, artifact.OwnerManifest, artifact.OwnerKey)}
 	}
-	if !contractOwnerHasStrictEvidence(root, artifact.OwnerManifest) {
+	if !ownerManifestHasStrictEvidence(root, artifact.OwnerManifest) {
 		return []string{fmt.Sprintf("%s owner manifest %q must have strict generated evidence",
 			artifact.Path, artifact.OwnerManifest)}
 	}

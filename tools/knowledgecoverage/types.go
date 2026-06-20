@@ -13,6 +13,7 @@ type manifest struct {
 	SourceManifests   []sourceSSOT       `json:"source_manifests"`
 	ContractArtifacts []contractArtifact `json:"contract_artifacts"`
 	ImportedManifests []importedManifest `json:"imported_manifests"`
+	OwnedManifests    []ownedManifest    `json:"owned_manifests"`
 	ManualGroups      []manualGroup      `json:"manual_groups"`
 	Assertions        []string           `json:"assertions"`
 	Loop              evidenceLoop       `json:"loop"`

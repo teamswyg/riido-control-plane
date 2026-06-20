@@ -38,6 +38,9 @@ func validateManifest(root string, m manifest) []string {
 	for _, imported := range m.ImportedManifests {
 		paths = append(paths, imported.Path, imported.OwnerManifest)
 	}
+	for _, owned := range m.OwnedManifests {
+		paths = append(paths, owned.Path, owned.OwnerManifest)
+	}
 	for _, path := range paths {
 		if _, err := os.Stat(resolvePath(root, path)); err != nil {
 			problems = append(problems, fmt.Sprintf("missing path %q", path))

@@ -24,6 +24,10 @@ func assertEvidenceCoverage(t *testing.T, got evidence) {
 		len(got.ImportedMissingBinding) != 0 {
 		t.Fatalf("imported manifest coverage drifted: %+v", got)
 	}
+	if got.OwnedManifestCount != got.OwnedManifestBindingCount ||
+		len(got.OwnedMissingBinding) != 0 {
+		t.Fatalf("owned manifest coverage drifted: %+v", got)
+	}
 }
 
 func assertGeneratedCoverage(t *testing.T, got evidence) {
