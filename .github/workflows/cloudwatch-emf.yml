@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/cloudwatch-emf.yml"
+      - "docs/30-architecture/cloudwatch-emf.md"
+      - "docs/30-architecture/cloudwatch-emf.riido.json"
       - "README.md"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
@@ -18,9 +20,12 @@ on:
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_port.go"
+      - "tools/cloudwatchemf/**"
   pull_request:
     paths:
       - ".github/workflows/cloudwatch-emf.yml"
+      - "docs/30-architecture/cloudwatch-emf.md"
+      - "docs/30-architecture/cloudwatch-emf.riido.json"
       - "README.md"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
@@ -34,6 +39,7 @@ on:
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_port.go"
+      - "tools/cloudwatchemf/**"
 
 jobs:
   cloudwatch-emf:
@@ -53,9 +59,22 @@ jobs:
             printf 'Disallowed CloudWatch EMF imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify CloudWatch EMF executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/cloudwatchemf -count=1
+          go run ./tools/cloudwatchemf \
+            -check-doc \
+            -evidence-out out/cloudwatch-emf-evidence.json
       - name: Test CloudWatch EMF metrics
         run: go test ./internal/riidoaiserver -run 'CloudWatch|Metrics|EventAppend' -count=1
       - name: Test command metrics log wiring
         run: go test ./cmd/riido_ai_server -run 'MetricsLog|ConfigFromEnv|EnvOptionalDuration' -count=1
       - name: Build command
         run: go build -o /tmp/riido_ai_server ./cmd/riido_ai_server
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloudwatch-emf-evidence
+          path: out/cloudwatch-emf-evidence.json
+          if-no-files-found: error

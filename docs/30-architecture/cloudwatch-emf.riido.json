@@ -1,0 +1,42 @@
+{
+  "schema_version": "riido-cloudwatch-emf.v1",
+  "id": "control-plane-cloudwatch-emf",
+  "title": "Control Plane CloudWatch EMF",
+  "generated_doc": "docs/30-architecture/cloudwatch-emf.md",
+  "workflow": ".github/workflows/cloudwatch-emf.yml",
+  "evidence_artifact": "cloudwatch-emf-evidence",
+  "owner_package": "internal/riidoaiserver",
+  "source_checks": [
+    {"name": "writer", "file": "internal/riidoaiserver/cloudwatch_emf.go", "contains": ["WriteCloudWatchEMF", "cloudWatchMetricSpecs", "ai_agent_client_snapshot_load_calls_total"]},
+    {"name": "tests", "file": "internal/riidoaiserver/cloudwatch_emf_test.go", "contains": ["TestWriteCloudWatchEMF", "TestPublishCloudWatchEMFUsesStoreSnapshot", "store_operation_calls_total"]}
+  ],
+  "required_dimensions": ["service"],
+  "required_json_fields": [
+    "schema_version",
+    "service",
+    "http_transactions",
+    "store_operations",
+    "ai_agent_client_snapshot_load_bytes_last",
+    "ai_agent_client_snapshot_save_latency_max_ms"
+  ],
+  "required_metric_units": [
+    {"name": "tasks_total", "unit": "Count"},
+    {"name": "poll_none_total", "unit": "Count"},
+    {"name": "event_append_latency_max_ms", "unit": "Milliseconds"},
+    {"name": "http_requests_total", "unit": "Count"},
+    {"name": "http_request_latency_max_ms", "unit": "Milliseconds"},
+    {"name": "store_operation_calls_total", "unit": "Count"},
+    {"name": "store_operation_latency_max_ms", "unit": "Milliseconds"},
+    {"name": "ai_agent_client_snapshot_load_bytes_last", "unit": "Bytes"},
+    {"name": "ai_agent_client_snapshot_load_latency_max_ms", "unit": "Milliseconds"},
+    {"name": "ai_agent_client_snapshot_save_bytes_last", "unit": "Bytes"},
+    {"name": "ai_agent_client_snapshot_save_latency_max_ms", "unit": "Milliseconds"}
+  ],
+  "loop": {
+    "observation": "The CloudWatch EMF workflow exercised metrics tests but left no durable JSON evidence describing the metric shape.",
+    "hypothesis": "A small EMF shape SSOT can make the public observability contract machine-checkable without publishing live AWS data.",
+    "execute": "Generate a sample EMF envelope, verify required dimensions, JSON fields, metric units, and source anchors, then upload redaction-safe evidence in CI.",
+    "evaluate": "The verifier fails on stale generated docs, missing source anchors, missing JSON fields, or metric unit drift.",
+    "retrospective": "This closes one workflow evidence accepted gap while keeping live dashboards and deployment evidence infra-owned."
+  }
+}

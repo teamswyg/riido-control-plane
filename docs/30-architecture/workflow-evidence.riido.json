@@ -58,11 +58,6 @@
       "next": "publish facade boundary evidence without live credentials"
     },
     {
-      "path": ".github/workflows/cloudwatch-emf.yml",
-      "reason": "legacy observability workflow currently runs tests without JSON evidence",
-      "next": "publish EMF metric shape evidence"
-    },
-    {
       "path": ".github/workflows/container-image-contract.yml",
       "reason": "legacy container workflow currently runs checks without JSON evidence",
       "next": "publish container contract evidence"
