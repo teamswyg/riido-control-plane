@@ -12,6 +12,8 @@ func renderDoc(m manifest, result auditResult) string {
 	fmt.Fprintf(&b, "- evidence covered: `%d`\n", result.Covered)
 	fmt.Fprintf(&b, "- evidence tools covered: `%d/%d`\n",
 		result.EvidenceToolCovered, result.EvidenceTools)
+	fmt.Fprintf(&b, "- evidence tools bound to artifacts: `%d/%d`\n",
+		result.EvidenceToolBound, result.EvidenceTools)
 	fmt.Fprintf(&b, "- accepted gaps: `%d`\n", result.Accepted)
 	fmt.Fprintf(&b, "- non-strict artifact uploads: `%d`\n", len(result.NonStrict))
 	fmt.Fprintf(&b, "- missing evidence uploads: `%d`\n", len(result.MissingEvidence))

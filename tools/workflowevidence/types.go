@@ -42,34 +42,3 @@ type evidenceLoop struct {
 	Evaluate      string `json:"evaluate"`
 	Retrospective string `json:"retrospective"`
 }
-
-type auditResult struct {
-	Records              []workflowRecord
-	Covered              int
-	Accepted             int
-	EvidenceTools        int
-	EvidenceToolCovered  int
-	Unregistered         []string
-	NonStrict            []string
-	MissingEvidence      []string
-	MissingEvidenceTools []string
-	AcceptedUnused       []string
-}
-
-type evidence struct {
-	SchemaVersion            string           `json:"schema_version"`
-	ID                       string           `json:"id"`
-	Status                   string           `json:"status"`
-	WorkflowCount            int              `json:"workflow_count"`
-	CoveredCount             int              `json:"covered_count"`
-	AcceptedGapCount         int              `json:"accepted_gap_count"`
-	EvidenceToolCount        int              `json:"evidence_tool_count"`
-	EvidenceToolCoveredCount int              `json:"evidence_tool_covered_count"`
-	MissingEvidenceTools     []string         `json:"missing_evidence_tools"`
-	NonStrict                []string         `json:"non_strict_artifact_uploads"`
-	MissingEvidence          []string         `json:"missing_evidence_uploads"`
-	Unregistered             []string         `json:"unregistered_gaps"`
-	AcceptedUnused           []string         `json:"accepted_gaps_unused"`
-	Records                  []workflowRecord `json:"records"`
-	Loop                     evidenceLoop     `json:"loop"`
-}

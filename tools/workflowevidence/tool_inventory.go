@@ -28,6 +28,9 @@ func toolSupportsEvidenceOut(root, tool string) bool {
 		return false
 	}
 	for _, file := range files {
+		if strings.HasSuffix(file, "_test.go") {
+			continue
+		}
 		data, err := os.ReadFile(file)
 		if err == nil && strings.Contains(string(data), "evidence-out") {
 			return true
@@ -44,4 +47,26 @@ func workflowCallsEvidenceTool(workflowTexts []string, tool string) bool {
 		}
 	}
 	return false
+}
+
+func workflowBindsEvidenceTool(workflows []workflowSource, tool string) bool {
+	for _, workflow := range workflows {
+		for _, path := range workflowToolEvidenceOutPaths(workflow.Text, tool) {
+			if evidenceOutUploaded(path, workflow.UploadPaths) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func workflowToolEvidenceOutPaths(text, tool string) []string {
+	needle := "./tools/" + tool
+	var paths []string
+	for _, block := range workflowRunBlocks(text) {
+		if strings.Contains(block, needle) {
+			paths = append(paths, evidenceOutPaths(block)...)
+		}
+	}
+	return uniqueStrings(paths)
 }
