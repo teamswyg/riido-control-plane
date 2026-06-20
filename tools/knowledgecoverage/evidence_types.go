@@ -9,6 +9,7 @@ type evidence struct {
 	GeneratedToolCount               int            `json:"generated_tool_count"`
 	GeneratedEvidenceWorkflowCount   int            `json:"generated_evidence_workflow_count"`
 	GeneratedDeclaredWorkflowCount   int            `json:"generated_declared_workflow_evidence_count"`
+	GeneratedManifestEvidenceTool    int            `json:"generated_manifest_evidence_tool_count"`
 	GeneratedArtifactBindingCount    int            `json:"generated_artifact_binding_count"`
 	DirectSSOTCount                  int            `json:"direct_ssot_count"`
 	ManualCount                      int            `json:"manual_count"`
@@ -19,6 +20,7 @@ type evidence struct {
 	GeneratedMissingWorkflow         []string       `json:"generated_missing_workflow"`
 	GeneratedMissingEvidenceWorkflow []string       `json:"generated_missing_evidence_workflow"`
 	GeneratedMissingDeclaredWorkflow []string       `json:"generated_missing_declared_workflow_evidence"`
+	GeneratedEvidenceToolMismatch    []string       `json:"generated_manifest_evidence_tool_mismatch"`
 	GeneratedMissingArtifactBinding  []string       `json:"generated_missing_artifact_binding"`
 	DirectLoopCount                  int            `json:"direct_ssot_loop_count"`
 	DirectEvidenceWorkflowCount      int            `json:"direct_ssot_evidence_workflow_count"`

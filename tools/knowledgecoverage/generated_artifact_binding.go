@@ -23,6 +23,10 @@ func validateGeneratedManifestBinding(root string, doc docClass, meta generatedM
 	if meta.GeneratedDoc != doc.Path {
 		return []string{fmt.Sprintf("%s manifest generated_doc mismatch: %q", doc.Path, meta.GeneratedDoc)}
 	}
+	if meta.EvidenceTool != "" && meta.EvidenceTool != doc.GeneratorTool {
+		return []string{fmt.Sprintf("%s manifest evidence_tool %q must match generator %q",
+			doc.Path, meta.EvidenceTool, doc.GeneratorTool)}
+	}
 	if meta.Workflow == "" || meta.EvidenceArtifact == "" {
 		return []string{fmt.Sprintf("%s manifest must declare workflow and evidence_artifact", doc.Path)}
 	}
