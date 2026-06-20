@@ -10,6 +10,9 @@ func verifyContract(c contract) error {
 	if c.SchemaVersion != schemaVersion {
 		return fmt.Errorf("schema_version = %q, want %q", c.SchemaVersion, schemaVersion)
 	}
+	if err := verifyEvidenceMetadata(c.ID, c.Assertions, c.Loop); err != nil {
+		return err
+	}
 	if strings.TrimSpace(c.Service) == "" {
 		return errors.New("service is required")
 	}

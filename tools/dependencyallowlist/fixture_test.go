@@ -3,8 +3,17 @@ package main
 func testContract() contract {
 	return contract{
 		SchemaVersion: schemaVersion,
+		ID:            "test-dependency-allowlist",
 		Service:       "riido-control-plane",
 		Policy:        "test",
+		Assertions:    []string{"direct modules must be approved"},
+		Loop: evidenceLoop{
+			Observation:   "test",
+			Hypothesis:    "test",
+			Execute:       "test",
+			Evaluate:      "test",
+			Retrospective: "test",
+		},
 		AllowedDirectModules: []allowedModule{
 			{Path: "github.com/teamswyg/riido-contracts", Layer: "contract", Owner: "platform", Approved: true, Reason: "test"},
 			{Path: "go.opentelemetry.io/otel", Layer: "observability", Owner: "platform", Approved: true, Reason: "test"},

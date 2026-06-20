@@ -20,6 +20,9 @@ func TestVerifyContractPassesWithoutPrivateInfraIR(t *testing.T) {
 	if record.SchemaVersion != checkSchemaVersion {
 		t.Fatalf("schema_version = %q, want %q", record.SchemaVersion, checkSchemaVersion)
 	}
+	if record.ID == "" || record.Status != "verified" || record.Loop.Observation == "" {
+		t.Fatalf("missing evidence metadata: %+v", record)
+	}
 	if record.Service != "riido_ai_server" {
 		t.Fatalf("service = %q", record.Service)
 	}
@@ -115,6 +118,9 @@ func TestRunWritesEvidenceOutJSON(t *testing.T) {
 	if record.SchemaVersion != checkSchemaVersion || record.ChecksTotal != 13 {
 		t.Fatalf("unexpected evidence: %+v", record)
 	}
+	if record.ID == "" || record.Status != "verified" || record.Loop.Observation == "" {
+		t.Fatalf("missing evidence metadata: %+v", record)
+	}
 }
 
 func writeContainerContractFixture(t *testing.T, finalUser string, includeTaskIR bool) (imageContract, string) {
@@ -175,8 +181,17 @@ func writeContainerContractFixture(t *testing.T, finalUser string, includeTaskIR
 	}
 	contract := imageContract{
 		SchemaVersion: contractSchemaVersion,
+		ID:            "test-container-contract",
 		Service:       "riido_ai_server",
 		Dockerfile:    dockerfilePath,
+		Assertions:    []string{"image must be non-root"},
+		Loop: evidenceLoop{
+			Observation:   "test",
+			Hypothesis:    "test",
+			Execute:       "test",
+			Evaluate:      "test",
+			Retrospective: "test",
+		},
 		Build: buildContract{
 			BuildArg:   buildArgContract{Name: "GO_IMAGE", Default: "golang:1.26"},
 			StageName:  "build",

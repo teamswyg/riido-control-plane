@@ -23,6 +23,9 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.SchemaVersion != evidenceSchemaVersion || got.Status != "verified" {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
+	if got.ID == "" || got.Loop.Observation == "" {
+		t.Fatalf("missing loop evidence: %+v", got)
+	}
 	if got.DirectDependenciesVerified == 0 || got.AllowedDirectModules == 0 {
 		t.Fatalf("missing evidence counts: %+v", got)
 	}

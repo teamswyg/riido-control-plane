@@ -10,18 +10,22 @@ import (
 const evidenceSchemaVersion = "riido-dependency-allowlist-evidence.v1"
 
 type evidence struct {
-	SchemaVersion              string `json:"schema_version"`
-	Service                    string `json:"service"`
-	Status                     string `json:"status"`
-	DirectDependenciesVerified int    `json:"direct_dependencies_verified"`
-	AllowedDirectModules       int    `json:"allowed_direct_modules"`
+	SchemaVersion              string       `json:"schema_version"`
+	ID                         string       `json:"id"`
+	Service                    string       `json:"service"`
+	Status                     string       `json:"status"`
+	Loop                       evidenceLoop `json:"loop"`
+	DirectDependenciesVerified int          `json:"direct_dependencies_verified"`
+	AllowedDirectModules       int          `json:"allowed_direct_modules"`
 }
 
 func newEvidence(c contract, report dependencyReport) evidence {
 	return evidence{
 		SchemaVersion:              evidenceSchemaVersion,
+		ID:                         c.ID,
 		Service:                    c.Service,
 		Status:                     "verified",
+		Loop:                       c.Loop,
 		DirectDependenciesVerified: report.DirectDependenciesVerified,
 		AllowedDirectModules:       report.AllowedDirectModules,
 	}
