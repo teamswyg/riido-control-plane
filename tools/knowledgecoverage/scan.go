@@ -32,6 +32,7 @@ func scanDocs(root string, m manifest) ([]docClass, []string) {
 	problems = append(problems, validateDirectLoops(docs)...)
 	problems = append(problems, validateDirectEvidence(root, docs)...)
 	problems = append(problems, validateStandaloneManifests(root, m)...)
+	problems = append(problems, validateSourceManifests(root, m)...)
 	return docs, problems
 }
 

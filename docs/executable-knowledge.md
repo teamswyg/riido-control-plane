@@ -19,6 +19,8 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Direct SSOT docs with CI evidence | 0 |
 | Standalone executable manifests | 1 |
 | Standalone executable manifests with strict CI evidence | 1 |
+| Source SSOT manifests | 2 |
+| Source SSOT manifests with strict CI evidence | 2 |
 | Registered manual docs | 0 |
 | Scanned docs | 31 |
 
@@ -26,11 +28,11 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Step | Statement |
 | --- | --- |
-| Observe | Executable documentation coverage can look healthy while direct SSOT readers or standalone executable manifests omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, declared workflow ownership, uploaded artifact binding, strict missing-file behavior, or migration history remains manual prose. |
-| Hypothesis | A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, direct-SSOT CI evidence, standalone executable manifests, declared workflow evidence ownership, generated artifact collection, and strict artifact upload failure modes visible before review relies on memory. |
-| Execute | Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifest evidence_tool to match the generated marker tool, require generated reader manifests to bind workflow run steps to generator check-doc/evidence-out execution, require standalone manifests to bind evidence_tool execution to a strict uploaded evidence-out artifact, require one evidence_artifact upload step to own the evidence-out path and if-no-files-found:error, and publish coverage evidence in CI. |
-| Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, standalone manifests without loop-backed strict CI evidence, generated manifests whose evidence_tool contradicts the generated marker, generated manifests whose declared workflow run steps do not run the generator, generated manifests whose upload-artifact step does not jointly own the generator evidence-out path and strict missing-file behavior, or generated evidence uploads that warn on missing files. |
-| Retrospective | This keeps the repository evidence-driven: migration history is generated from a ledger, standalone manifests carry their own loop and strict evidence artifact chain, direct SSOT readers carry loops and evidence tools, generated readers bind generator execution, evidence-out path, and upload step ownership to strict durable artifacts, and future manual debt must be registered explicitly. |
+| Observe | Executable documentation coverage can look healthy while direct SSOT readers, standalone executable manifests, or non-doc source SSOT manifests omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, declared workflow ownership, uploaded artifact binding, strict missing-file behavior, or migration history remains manual prose. |
+| Hypothesis | A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, direct-SSOT CI evidence, standalone executable manifests, source SSOT manifests, declared workflow evidence ownership, generated artifact collection, and strict artifact upload failure modes visible before review relies on memory. |
+| Execute | Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifest evidence_tool to match the generated marker tool, require generated reader manifests to bind workflow run steps to generator check-doc/evidence-out execution, require standalone manifests to bind evidence_tool execution to a strict uploaded evidence-out artifact, require source SSOT manifests to be consumed by their evidence tool with evidence-out, require one evidence_artifact upload step to own the evidence-out path and if-no-files-found:error, and publish coverage evidence in CI. |
+| Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, standalone manifests without loop-backed strict CI evidence, source SSOT manifests without strict CI evidence, generated manifests whose evidence_tool contradicts the generated marker, generated manifests whose declared workflow run steps do not run the generator, generated manifests whose upload-artifact step does not jointly own the generator evidence-out path and strict missing-file behavior, or generated evidence uploads that warn on missing files. |
+| Retrospective | This keeps the repository evidence-driven: migration history is generated from a ledger, standalone manifests carry their own loop and strict evidence artifact chain, source SSOT manifests show which verifier consumes them, direct SSOT readers carry loops and evidence tools, generated readers bind generator execution, evidence-out path, and upload step ownership to strict durable artifacts, and future manual debt must be registered explicitly. |
 
 ## Registered Manual Surfaces
 
@@ -59,6 +61,7 @@ None.
 - a generated reader doc manifest workflow must run its generator in a run step with check-doc and evidence-out
 - a generated reader doc manifest evidence_artifact must upload the generator evidence-out path and if-no-files-found:error from the same upload-artifact step
 - a standalone executable manifest must define an evidence loop and upload its evidence_tool evidence-out path with if-no-files-found:error
+- a source SSOT manifest must be consumed by its evidence_tool and uploaded as strict CI evidence
 - a direct-SSOT backed markdown file must have a sibling .riido.json manifest
 - a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest
 - a direct-SSOT backed markdown file must declare evidence_tool in the sibling manifest

@@ -10,6 +10,7 @@ type manifest struct {
 	ScanRoots        []string      `json:"scan_roots"`
 	ScanFiles        []string      `json:"scan_files"`
 	Standalone       []standalone  `json:"standalone_manifests"`
+	SourceManifests  []sourceSSOT  `json:"source_manifests"`
 	ManualGroups     []manualGroup `json:"manual_groups"`
 	Assertions       []string      `json:"assertions"`
 	Loop             evidenceLoop  `json:"loop"`

@@ -14,6 +14,8 @@ type evidence struct {
 	DirectSSOTCount                  int            `json:"direct_ssot_count"`
 	StandaloneManifestCount          int            `json:"standalone_manifest_count"`
 	StandaloneManifestBindingCount   int            `json:"standalone_manifest_binding_count"`
+	SourceManifestCount              int            `json:"source_manifest_count"`
+	SourceManifestBindingCount       int            `json:"source_manifest_binding_count"`
 	ManualCount                      int            `json:"manual_count"`
 	ManualByGroup                    map[string]int `json:"manual_by_group"`
 	ManualTopDirs                    []manualDir    `json:"manual_top_dirs"`
@@ -27,6 +29,7 @@ type evidence struct {
 	DirectLoopCount                  int            `json:"direct_ssot_loop_count"`
 	DirectEvidenceWorkflowCount      int            `json:"direct_ssot_evidence_workflow_count"`
 	StandaloneMissingBinding         []string       `json:"standalone_manifest_missing_binding"`
+	SourceMissingBinding             []string       `json:"source_manifest_missing_binding"`
 	DirectMissingEvidenceWorkflow    []string       `json:"direct_ssot_missing_evidence_workflow"`
 	DirectMissingLoop                []string       `json:"direct_ssot_missing_loop"`
 	ProblemSummaries                 []string       `json:"problem_summaries"`
