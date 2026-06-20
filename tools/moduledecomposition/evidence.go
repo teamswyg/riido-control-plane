@@ -12,6 +12,7 @@ type evidence struct {
 	LineBudgetTarget    int                 `json:"line_budget_target"`
 	FilesOverLineBudget int                 `json:"files_over_line_budget"`
 	MaxFileLines        int                 `json:"max_file_lines"`
+	LineBudgetRatchet   lineBudgetRatchet   `json:"line_budget_ratchet"`
 	LineBudgetSamples   []lineBudgetSample  `json:"line_budget_samples"`
 	LineBudgetHotspots  []lineBudgetHotspot `json:"line_budget_hotspots"`
 	Workflow            string              `json:"workflow"`
@@ -32,6 +33,7 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		LineBudgetTarget:    result.LineBudget.Target,
 		FilesOverLineBudget: result.LineBudget.OverTarget,
 		MaxFileLines:        result.LineBudget.MaxLines,
+		LineBudgetRatchet:   newLineBudgetRatchet(result.LineBudget),
 		LineBudgetSamples:   result.LineBudget.Samples,
 		LineBudgetHotspots:  result.LineBudget.Hotspots,
 		Workflow:            m.Workflow,
