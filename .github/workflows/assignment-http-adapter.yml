@@ -19,6 +19,7 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_state.go"
   pull_request:
@@ -38,6 +39,7 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_state.go"
 

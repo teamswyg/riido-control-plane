@@ -25,6 +25,7 @@ on:
       - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/server_test.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "tools/reviewaccountseed/**"
   pull_request:
     paths:
@@ -49,6 +50,7 @@ on:
       - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/server_test.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "tools/reviewaccountseed/**"
 
 jobs:
