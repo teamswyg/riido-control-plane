@@ -28,7 +28,8 @@
     {"name":"fallback","file":"internal/riidoaiserver/authorization.go","contains":["ErrAuthorizationUnauthenticated","continue","return AuthorizationResult{}, err"]},
     {"name":"external-contract","file":"internal/riidoaiserver/external_authorizer.go","contains":["ExternalAuthorizerRequestSchemaVersion","ExternalAuthorizerResponseSchemaVersion","ExternalAuthorizerAPIKeyHeader","DisallowUnknownFields","io.LimitReader(resp.Body, 1<<20)"]},
     {"name":"external-fail-closed-tests","file":"internal/riidoaiserver/external_authorizer_test.go","contains":["TestExternalHTTPAuthorizerMapsDeniedResponses","TestExternalHTTPAuthorizerFailsClosedOnProviderError","TestFallbackAuthorizerUsesNextOnlyForUnauthenticated"]},
-    {"name":"runtime-config","file":"cmd/riido_ai_server/main.go","contains":["envWebAllowedOrigins","RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"]},
+    {"name":"runtime-env","file":"cmd/riido_ai_server/env_names.go","contains":["envWebAllowedOrigins","RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"]},
+    {"name":"runtime-origin-parser","file":"cmd/riido_ai_server/web_origin_config.go","contains":["parseWebAllowedOrigins","normalizeWebOrigin"]},
     {"name":"token-transport","file":"internal/riidoaiserver/server.go","contains":["aiAgentTokenHeader = \"X-Riido-Ai-Agent-Token\"","Header.Get(\"Authorization\")","strings.HasPrefix(got, \"Bearer \")","authorizeDeviceCredential"]},
     {"name":"cors","file":"internal/riidoaiserver/web_frontend_cors.go","contains":["webCORSAllowedMethods","webCORSAllowedHeaders","x-riido-ai-agent-token","webCORSHeadersAllowed"]},
     {"name":"cors-tests","file":"internal/riidoaiserver/web_frontend_cors_test.go","contains":["Access-Control-Allow-Credentials","TestHTTPWebFrontendCORSRejectsUnsupportedPreflightHeader"]}

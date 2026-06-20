@@ -12,7 +12,7 @@ This reader is generated from the public/private runtime deployment boundary man
 
 ## Coverage
 
-Boundaries: `6`; evidence paths: `12`; phrase checks: `24`; rules: `11`.
+Boundaries: `6`; evidence paths: `13`; phrase checks: `24`; rules: `11`.
 
 ## Boundaries
 
@@ -21,7 +21,7 @@ Boundaries: `6`; evidence paths: `12`; phrase checks: `24`; rules: `11`.
 - owner: `riido-control-plane`
 - scope: Buildable riido_ai_server process, HTTP routes, graceful shutdown, safe seed shape, and stdout EMF.
 - does not own: AWS resources; production secrets; Terraform state; container image publishing
-- evidence: `cmd/riido_ai_server/main.go`, `internal/riidoaiserver/server.go`
+- evidence: `cmd/riido_ai_server/env_names.go`, `cmd/riido_ai_server/server_shutdown.go`, `internal/riidoaiserver/server.go`
 
 ### container-artifact
 

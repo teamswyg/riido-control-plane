@@ -18,7 +18,8 @@
     {"name":"seed-domain","file":"internal/riidoaiserver/review_account_seed.go","contains":["ReviewAccountSeed","ProvisionReviewAccount","forbiddenReviewAccountScope","ApplyReviewAccountProvisioning"]},
     {"name":"seed-tests","file":"internal/riidoaiserver/review_account_seed_test.go","contains":["TestReviewAccountSeedProvisionsScopedCredentialWithoutRawSecret","TestReviewAccountSeedArtifactContainsNoRawSecrets","TestReviewAccountSeedUsesOnlySyntheticNonRoutableProviderStatus"]},
     {"name":"http-tests","file":"internal/riidoaiserver/server_test.go","contains":["TestHTTPReviewAccountProvisioningExposesSeededCatalogAndSyntheticProviderStatus","review poll status"]},
-    {"name":"cmd-wiring","file":"cmd/riido_ai_server/main.go","contains":["envReviewAccountTokenHash","reviewAccountProvisioningFromEnv"]}
+    {"name":"cmd-env","file":"cmd/riido_ai_server/env_names.go","contains":["envReviewAccountTokenHash","RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256"]},
+    {"name":"cmd-wiring","file":"cmd/riido_ai_server/review_account_config.go","contains":["reviewAccountProvisioningFromEnv","ProvisionReviewAccount"]}
   ],
   "forbidden_seed_terms": ["\"token\"", "\"password\"", "provider_executable_path", "workspace_root_path", "api_key"],
   "forbidden_seed_term_sets": ["aws_credential_env_names"],
