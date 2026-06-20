@@ -18,7 +18,9 @@
   "public_fields": ["workspace_id","profile_thumbnail_url","provider_version","assigned-agent-profiles","agent-assignments","thread-stream-subscription"],
   "deployment_evidence": ["not from a manual","The workflow masks both values"],
   "source_checks": [
-    {"name":"react-query-generator","file":"tools/reactquerygen/main_test.go","contains":["TestGenerateReactQueryClientDoesNotDrift","TestAIAgentClientMetadataFlowsThroughContractProjections","assignAIAgentTask"]},
+    {"name":"react-query-generator-drift","file":"tools/reactquerygen/drift_test.go","contains":["TestGenerateReactQueryClientDoesNotDrift","generateReact"]},
+    {"name":"react-query-generator-metadata","file":"tools/reactquerygen/client_metadata_projection_test.go","contains":["TestAIAgentClientMetadataFlowsThroughContractProjections","assertRequiredClientMetadataFields"]},
+    {"name":"react-query-generator-required-fields","file":"tools/reactquerygen/client_metadata_required_test.go","contains":["assignAIAgentTask","invalidates"]},
     {"name":"generated-client-handoff-files","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","assertGeneratedClientHandoffFiles"]},
     {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/branch_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
     {"name":"black-box-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2","TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI"]},
