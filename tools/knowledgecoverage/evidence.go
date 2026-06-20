@@ -2,7 +2,7 @@ package main
 
 const evidenceSchema = "riido-executable-knowledge-coverage-result.v1"
 
-func buildEvidence(m manifest, docs []docClass, problems []string) evidence {
+func buildEvidence(root string, m manifest, docs []docClass, problems []string) evidence {
 	counts := countDocs(docs)
 	status := "verified"
 	if len(problems) > 0 {
@@ -14,10 +14,13 @@ func buildEvidence(m manifest, docs []docClass, problems []string) evidence {
 	return evidence{
 		SchemaVersion: evidenceSchema, ID: m.ID, Status: status,
 		ScannedCount: len(docs), GeneratedCount: counts["generated"],
-		DirectSSOTCount: counts["direct_ssot"], ManualCount: counts["manual_registered"],
+		GeneratedToolCount: generatedToolCount(docs),
+		DirectSSOTCount:    counts["direct_ssot"], ManualCount: counts["manual_registered"],
 		ManualByGroup: manualCountsByGroup(docs), ManualTopDirs: manualTopDirs(docs, 8),
 		ManualSamples: manualSamples(docs, 2), DirectLoopCount: countDirectLoops(docs),
-		DirectMissingLoop: directMissingLoops(docs), ProblemSummaries: problems,
+		GeneratedMissingTool:     generatedMissingTool(root, docs),
+		GeneratedMissingWorkflow: generatedMissingWorkflow(root, docs),
+		DirectMissingLoop:        directMissingLoops(docs), ProblemSummaries: problems,
 		EvidenceArtifact: m.EvidenceArtifact, Loop: m.Loop,
 	}
 }

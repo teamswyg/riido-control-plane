@@ -24,6 +24,9 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.Status != "verified" || got.ScannedCount == 0 || got.ManualCount != 0 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
+	if got.GeneratedCount != got.GeneratedToolCount || len(got.GeneratedMissingWorkflow) != 0 {
+		t.Fatalf("generated tool coverage drifted: %+v", got)
+	}
 	if got.DirectSSOTCount != got.DirectLoopCount || len(got.DirectMissingLoop) != 0 {
 		t.Fatalf("direct SSOT loop coverage drifted: %+v", got)
 	}
