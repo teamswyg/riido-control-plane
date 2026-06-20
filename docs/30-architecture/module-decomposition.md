@@ -12,14 +12,14 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `42`; runtime: `1`; internal: `3`; tools: `37`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `96`; max file lines: `1251`.
+File line budget target: `75`; files over target: `96`; max file lines: `1129`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
 | Files over target | 96 | 97 | 1 |
-| Max file lines | 1251 | 2481 | 1230 |
+| Max file lines | 1129 | 2481 | 1352 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
 
@@ -27,7 +27,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 96 | 85 | 1251 | 2481 | 17773 | 23713 |
+| `internal/riidoaiserver` | 96 | 85 | 1129 | 2481 | 17360 | 23713 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
 | `tools/containercontract` | 0 | 2 | 0 | 597 | 0 | 663 |
@@ -43,8 +43,8 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | File | Lines |
 | --- | ---: |
-| `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1251 |
 | `internal/riidoaiserver/server.go` | 1129 |
+| `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 838 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 746 |
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
@@ -58,7 +58,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 96 | 1251 | 17773 |
+| `internal/riidoaiserver` | 96 | 1129 | 17360 |
 
 ## Packages
 
