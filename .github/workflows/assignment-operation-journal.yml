@@ -6,8 +6,10 @@ on:
     paths:
       - ".github/workflows/assignment-operation-journal.yml"
       - "docs/20-domain/assignment-operation-journal.md"
+      - "docs/20-domain/assignment-operation-journal.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
+      - "tools/assignmentjournal/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -19,8 +21,10 @@ on:
     paths:
       - ".github/workflows/assignment-operation-journal.yml"
       - "docs/20-domain/assignment-operation-journal.md"
+      - "docs/20-domain/assignment-operation-journal.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
+      - "tools/assignmentjournal/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -47,5 +51,18 @@ jobs:
             printf 'Disallowed assignment journal imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify assignment journal executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/assignmentjournal -count=1
+          go run ./tools/assignmentjournal \
+            -check-doc \
+            -evidence-out out/assignment-operation-journal-evidence.json
       - name: Test assignment operation journal
         run: go test ./internal/riidoaiserver -run 'AssignmentOperation|AssignmentActiveLease' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment-operation-journal-evidence
+          path: out/assignment-operation-journal-evidence.json
+          if-no-files-found: error

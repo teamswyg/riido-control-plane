@@ -1,0 +1,56 @@
+{
+  "schema_version": "riido-assignment-operation-journal.v1",
+  "id": "assignment-operation-journal",
+  "title": "Assignment Operation Journal",
+  "riido_task": "RIID-4669",
+  "generated_doc": "docs/20-domain/assignment-operation-journal.md",
+  "workflow": ".github/workflows/assignment-operation-journal.yml",
+  "evidence_artifact": "assignment-operation-journal-evidence",
+  "owner_package": "internal/riidoaiserver",
+  "ports": [
+    {"name": "AssignmentOperationStore", "role": "append assignment mutation records"},
+    {"name": "AssignmentOperationLoader", "role": "load durable records for replay"},
+    {"name": "AssignmentQueueReader", "role": "read queued assignments by agent"},
+    {"name": "AssignmentClaimer", "role": "atomically claim next assignment"},
+    {"name": "AssignmentActiveLeaseStore", "role": "load and refresh active assignment leases"},
+    {"name": "AssignmentProjectionReader", "role": "load assignment read projections"}
+  ],
+  "records": [
+    {"name": "AssignmentOperationRecord", "role": "append-only mutation plus emitted task events"},
+    {"name": "AssignmentProjection", "role": "durable assignment read projection"},
+    {"name": "AssignmentActiveLease", "role": "active assignment lease snapshot"},
+    {"name": "AssignmentClaimResult", "role": "claim outcome plus operation evidence"}
+  ],
+  "replay_rules": [
+    {"id": "validate-before-apply", "kind": "replay", "rule": "validate every operation record before applying it"},
+    {"id": "stable-replay-order", "kind": "replay", "rule": "order by last event sequence, recorded_at, then operation_id"},
+    {"id": "dedupe-task-events", "kind": "replay", "rule": "dedupe events by task_id and sequence"},
+    {"id": "cross-task-same-seq", "kind": "replay", "rule": "keep same sequence events when task_id differs"},
+    {"id": "track-next-sequences", "kind": "replay", "rule": "rebuild next_event_seq and next_assignment_seq"},
+    {"id": "sort-replayed-events", "kind": "replay", "rule": "sort task event histories by sequence"},
+    {"id": "rebuild-current-assignment", "kind": "index", "rule": "rebuild task current_assignment_id from newest assignment ordering"},
+    {"id": "rebuild-agent-index", "kind": "index", "rule": "rebuild agent assignment lists in assignment creation order"}
+  ],
+  "version_constants": [
+    {"name": "AssignmentOperationSchemaVersion", "value": "riido-ai-server-assignment-operation.v1"},
+    {"name": "AssignmentProjectionSchemaVersion", "value": "riido-ai-server-assignment-projection.v1"},
+    {"name": "AssignmentAgentActiveSchemaVersion", "value": "riido-ai-server-agent-active-assignment.v1"},
+    {"name": "DefaultAssignmentActiveLeaseSeconds", "value": "20"}
+  ],
+  "source_checks": [
+    {"name": "port-surface", "file": "internal/riidoaiserver/assignment_operation_port.go", "contains": ["AssignmentOperationStore", "AssignmentOperationLoader", "AssignmentQueueReader", "AssignmentClaimer", "AssignmentActiveLeaseStore", "AssignmentProjectionReader"]},
+    {"name": "record-surface", "file": "internal/riidoaiserver/assignment_operation_port.go", "contains": ["AssignmentOperationRecord", "AssignmentProjection", "AssignmentActiveLease", "AssignmentClaimResult", "validateAssignmentOperationRecord"]},
+    {"name": "version-surface", "file": "internal/riidoaiserver/assignment_operation_port.go", "contains": ["AssignmentOperationSchemaVersion", "AssignmentProjectionSchemaVersion", "AssignmentAgentActiveSchemaVersion", "DefaultAssignmentActiveLeaseSeconds = 20"]},
+    {"name": "replay-reducer", "file": "internal/riidoaiserver/assignment_operation_replay.go", "contains": ["stateFromAssignmentOperations", "validateAssignmentOperationRecord", "assignmentOperationEventReplayKey", "rebuildAssignmentIndexes"]},
+    {"name": "port-tests", "file": "internal/riidoaiserver/assignment_operation_port_test.go", "contains": ["TestAssignmentOperationRecordValidation", "TestAssignmentActiveLeaseExpired", "TestAssignmentOperationPortsCompile"]},
+    {"name": "replay-tests", "file": "internal/riidoaiserver/assignment_operation_replay_test.go", "contains": ["TestAssignmentOperationReplayOrdersAndDedupesEvents", "TestAssignmentOperationReplayKeepsSameEventSeqAcrossDifferentTasks", "TestAssignmentOperationReplayRebuildsAssignmentIndexes", "TestAssignmentOperationReplayRejectsInvalidRecords"]}
+  ],
+  "loop": {
+    "observation": "The assignment journal doc described public ports and replay behavior but did not itself produce CI evidence.",
+    "hypothesis": "A focused journal SSOT can catch drift in operation records, claim ports, lease semantics, and replay reducers before durable adapters regress.",
+    "execute": "Generate the reader doc from this manifest and run the assignmentjournal verifier in CI.",
+    "evaluate": "The verifier checks required ports, records, replay rules, version constants, source anchors, generated doc freshness, and focused journal tests.",
+    "retrospective": "This slice proves public journal semantics without AWS credentials; DynamoDB adapter cost and deployment evidence stay in adapter-owned slices."
+  },
+  "non_goals": ["in-memory store actor behavior", "snapshot replay runtime wiring", "HTTP routes", "SSE fan-out", "DynamoDB payloads", "Terraform", "AWS credentials", "production deployment evidence"]
+}
