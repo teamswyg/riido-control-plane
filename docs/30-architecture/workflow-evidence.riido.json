@@ -16,11 +16,6 @@
       "path": ".github/workflows/deploy-ai-agent-testnet.yml",
       "reason": "deployment workflow must avoid leaking live operator evidence",
       "next": "publish redacted deployment summary evidence"
-    },
-    {
-      "path": ".github/workflows/go-ci.yml",
-      "reason": "baseline CI proves build/test health but not loop evidence",
-      "next": "keep as broad safety net or add summarized test evidence"
     }
   ],
   "assertions": [
