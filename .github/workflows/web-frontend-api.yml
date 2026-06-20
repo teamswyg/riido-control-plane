@@ -9,6 +9,8 @@ on:
       - "docs/20-domain/request-authorization.md"
       - "docs/30-architecture/config-reference.md"
       - "docs/30-architecture/integration-matrix.md"
+      - "docs/30-architecture/web-frontend-api.md"
+      - "docs/30-architecture/web-frontend-api.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
@@ -18,6 +20,7 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/web_frontend_cors.go"
       - "internal/riidoaiserver/web_frontend_cors_test.go"
+      - "tools/webfrontendapi/**"
   pull_request:
     paths:
       - ".github/workflows/web-frontend-api.yml"
@@ -25,6 +28,8 @@ on:
       - "docs/20-domain/request-authorization.md"
       - "docs/30-architecture/config-reference.md"
       - "docs/30-architecture/integration-matrix.md"
+      - "docs/30-architecture/web-frontend-api.md"
+      - "docs/30-architecture/web-frontend-api.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
@@ -34,6 +39,7 @@ on:
       - "internal/riidoaiserver/server.go"
       - "internal/riidoaiserver/web_frontend_cors.go"
       - "internal/riidoaiserver/web_frontend_cors_test.go"
+      - "tools/webfrontendapi/**"
 
 jobs:
   web-frontend-api:
@@ -61,3 +67,12 @@ jobs:
         run: go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
       - name: Test command environment web origins
         run: go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
+      - name: Publish web frontend API evidence
+        run: |
+          mkdir -p out
+          go test ./tools/webfrontendapi -count=1
+          go run ./tools/webfrontendapi -check-doc -evidence-out out/web-frontend-api-evidence.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-frontend-api-evidence
+          path: out/web-frontend-api-evidence.json

@@ -1,0 +1,68 @@
+{
+  "schema_version": "riido-web-frontend-api.v1",
+  "id": "control-plane-web-frontend-api",
+  "title": "Control Plane Web Frontend API",
+  "generated_doc": "docs/30-architecture/web-frontend-api.md",
+  "workflow": ".github/workflows/web-frontend-api.yml",
+  "evidence_artifact": "web-frontend-api-evidence",
+  "owner_packages": ["internal/riidoaiserver", "cmd/riido_ai_server"],
+  "runtime_config_keys": ["RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"],
+  "cors_cases": [
+    {
+      "name": "allowed-preflight",
+      "allowed_origins": ["https://app.riido.io"],
+      "method": "OPTIONS",
+      "path": "/v1/agent-catalog",
+      "origin": "https://app.riido.io",
+      "request_method": "GET",
+      "request_headers": "X-Riido-AI-Agent-Token, Content-Type",
+      "want_status": 204,
+      "want_allow_origin": "https://app.riido.io"
+    },
+    {
+      "name": "allowed-actual",
+      "allowed_origins": ["http://localhost:3000"],
+      "method": "GET",
+      "path": "/healthz",
+      "origin": "http://localhost:3000",
+      "want_status": 200,
+      "want_allow_origin": "http://localhost:3000",
+      "want_credentials": ""
+    },
+    {
+      "name": "rejected-origin-preflight",
+      "allowed_origins": ["https://app.riido.io"],
+      "method": "OPTIONS",
+      "path": "/v1/agent-catalog",
+      "origin": "https://evil.example",
+      "request_method": "GET",
+      "want_status": 403,
+      "want_allow_origin": ""
+    },
+    {
+      "name": "unsupported-header",
+      "allowed_origins": ["https://app.riido.io"],
+      "method": "OPTIONS",
+      "path": "/v1/agent-catalog",
+      "origin": "https://app.riido.io",
+      "request_method": "GET",
+      "request_headers": "X-Private-Debug",
+      "want_status": 400,
+      "want_allow_origin": "https://app.riido.io"
+    }
+  ],
+  "source_checks": [
+    {"name": "cors-handler", "file": "internal/riidoaiserver/web_frontend_cors.go", "contains": ["webCORSAllowedMethods", "webCORSAllowedHeaders", "webCORSHeadersAllowed", "Access-Control-Allow-Origin"]},
+    {"name": "cors-tests", "file": "internal/riidoaiserver/web_frontend_cors_test.go", "contains": ["TestHTTPWebFrontendCORSAllowsConfiguredOriginPreflight", "TestHTTPWebFrontendCORSAddsHeadersToAllowedActualRequest", "TestHTTPWebFrontendCORSRejectsUnsupportedPreflightHeader"]},
+    {"name": "server-wiring", "file": "internal/riidoaiserver/server.go", "contains": ["withWebFrontendCORS", "WebAllowedOrigins"]},
+    {"name": "command-env", "file": "cmd/riido_ai_server/main.go", "contains": ["envWebAllowedOrigins", "parseWebAllowedOrigins"]},
+    {"name": "request-auth-ssot", "file": "docs/20-domain/request-authorization.riido.json", "contains": ["exact-origin-allowlist", "no-browser-credentials", "unsupported-header-rejected"]}
+  ],
+  "loop": {
+    "observation": "The web frontend API workflow verified CORS behavior and env documentation but left no durable JSON evidence artifact.",
+    "hypothesis": "A focused web frontend API SSOT can prove browser-origin compatibility through the real HTTP handler without exposing live deployment origins.",
+    "execute": "Call the control-plane handler with allowed and rejected origins, verify source anchors, require generated doc freshness, and upload CI evidence.",
+    "evaluate": "The verifier fails on CORS status drift, origin header drift, credential header regression, stale generated docs, or workflow evidence regression.",
+    "retrospective": "This closes the web frontend API workflow evidence gap while keeping private deployment topology and token values outside the public repository."
+  }
+}
