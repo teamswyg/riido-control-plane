@@ -12,11 +12,10 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `39`; runtime: `1`; internal: `3`; tools: `34`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `99`; max file lines: `2717`.
+File line budget target: `75`; files over target: `98`; max file lines: `2481`.
 
 | File | Lines |
 | --- | ---: |
-| `internal/riidoaiserver/ai_agent_client_development.go` | 2717 |
 | `internal/riidoaiserver/ai_agent_client_http_test.go` | 2481 |
 | `internal/riidoaiserver/server.go` | 2373 |
 | `internal/riidoaiserver/store.go` | 1952 |
@@ -26,6 +25,7 @@ File line budget target: `75`; files over target: `99`; max file lines: `2717`.
 | `tools/reactquerygen/figma_projection_test.go` | 1281 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
 | `cmd/riido_ai_server/main.go` | 791 |
+| `internal/riidoaiserver/ai_agent_client_persistence.go` | 746 |
 
 ## Packages
 
