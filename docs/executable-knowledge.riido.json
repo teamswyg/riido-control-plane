@@ -69,6 +69,36 @@
   ],
   "owned_manifests": [
     {
+      "path": "docs/readme/overview.riido.json",
+      "owner_manifest": "README.riido.json",
+      "owner_key": "fragments"
+    },
+    {
+      "path": "docs/readme/navigation.riido.json",
+      "owner_manifest": "README.riido.json",
+      "owner_key": "fragments"
+    },
+    {
+      "path": "docs/readme/development.riido.json",
+      "owner_manifest": "README.riido.json",
+      "owner_key": "fragments"
+    },
+    {
+      "path": "docs/readme/runtime-cd.riido.json",
+      "owner_manifest": "README.riido.json",
+      "owner_key": "fragments"
+    },
+    {
+      "path": "docs/readme/verification.riido.json",
+      "owner_manifest": "README.riido.json",
+      "owner_key": "fragments"
+    },
+    {
+      "path": "docs/readme/evidence-loop.riido.json",
+      "owner_manifest": "README.riido.json",
+      "owner_key": "fragments"
+    },
+    {
       "path": "internal/riidoaiserver/review_account_seed.riido.json",
       "owner_manifest": "docs/30-architecture/review-account-seed.riido.json",
       "owner_key": "seed_ssot"

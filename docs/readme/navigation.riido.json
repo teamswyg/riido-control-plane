@@ -1,0 +1,19 @@
+{
+  "schema_version": "riido-control-plane-repository-readme-fragment.v1",
+  "id": "control-plane-readme-navigation",
+  "doc_links": [
+    {"topic": "AI Agent client API endpoint와 development/testnet 정책", "path": "docs/20-domain/ai-agent-client-api.md"},
+    {"topic": "authorization resource/action/scope 규칙", "path": "docs/20-domain/request-authorization.md"},
+    {"topic": "agent catalog RBAC 규칙", "path": "docs/20-domain/agent-catalog-rbac.md"},
+    {"topic": "runtime/agent binding domain", "path": "docs/20-domain/agent-runtime-binding.md"},
+    {"topic": "control-plane bounded context", "path": "docs/20-domain/context-map.md"},
+    {"topic": "riido-client generated React Query 전달 정책", "path": "docs/30-architecture/api-client-delivery.md"},
+    {"topic": "Figma AI Agent coverage의 control-plane generated-client 투영", "path": "docs/30-architecture/figma-ai-agent-control-plane-projection.md"},
+    {"topic": "module/package 책임 분해", "path": "docs/30-architecture/module-decomposition.md"},
+    {"topic": "runtime env 변수와 설정 책임", "path": "docs/30-architecture/config-reference.md"},
+    {"topic": "daemon/contracts/infra/client와의 연결", "path": "docs/30-architecture/integration-matrix.md"},
+    {"topic": "public runtime과 deploy boundary", "path": "docs/30-architecture/runtime-deployment-boundary.md"},
+    {"topic": "runtime artifact CD 소유권과 CodeDeploy 전환 경계", "path": "docs/30-architecture/runtime-cd-ownership.md"},
+    {"topic": "마이그레이션 히스토리", "path": "docs/migration/control-plane.md"}
+  ]
+}

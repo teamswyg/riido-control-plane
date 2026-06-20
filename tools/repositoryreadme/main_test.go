@@ -20,7 +20,7 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(body, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.Status != "verified" || got.DocLinkCount == 0 || got.EndpointCount == 0 {
+	if got.Status != "verified" || got.FragmentCount == 0 || got.DocLinkCount == 0 || got.EndpointCount == 0 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
 }

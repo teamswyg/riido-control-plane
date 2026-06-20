@@ -2,6 +2,7 @@ package main
 
 const (
 	manifestSchema  = "riido-control-plane-repository-readme.v1"
+	fragmentSchema  = "riido-control-plane-repository-readme-fragment.v1"
 	evidenceSchema  = "riido-control-plane-repository-readme-evidence.v1"
 	defaultManifest = "README.riido.json"
 	generatedDoc    = "README.md"

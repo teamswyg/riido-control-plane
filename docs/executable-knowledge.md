@@ -26,10 +26,10 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Contract artifacts with owner evidence | 4 |
 | Imported manifests | 1 |
 | Imported manifests with projection evidence | 1 |
-| Owned manifests | 1 |
-| Owned manifests with owner evidence | 1 |
-| Executable manifest inventory | 39 |
-| Tracked executable manifests | 39 |
+| Owned manifests | 7 |
+| Owned manifests with owner evidence | 7 |
+| Executable manifest inventory | 45 |
+| Tracked executable manifests | 45 |
 | Registered manual docs | 0 |
 | Scanned docs | 31 |
 
