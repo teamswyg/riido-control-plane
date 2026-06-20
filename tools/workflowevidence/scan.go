@@ -16,14 +16,17 @@ func auditWorkflows(root string, m manifest) (auditResult, error) {
 	accepted := acceptedByPath(m.AcceptedGaps)
 	used := map[string]bool{}
 	var result auditResult
+	var texts []string
 	for _, path := range paths {
-		record, err := scanWorkflow(root, path, accepted, used)
+		record, text, err := scanWorkflow(root, path, accepted, used)
 		if err != nil {
 			return auditResult{}, err
 		}
+		texts = append(texts, text)
 		result.Records = append(result.Records, record)
 		addRecord(&result, record)
 	}
+	result.EvidenceTools, result.EvidenceToolCovered, result.MissingEvidenceTools = auditEvidenceTools(root, texts)
 	for path := range accepted {
 		if !used[path] {
 			result.AcceptedUnused = append(result.AcceptedUnused, path)
@@ -33,10 +36,10 @@ func auditWorkflows(root string, m manifest) (auditResult, error) {
 	return result, nil
 }
 
-func scanWorkflow(root, path string, accepted map[string]acceptedGap, used map[string]bool) (workflowRecord, error) {
+func scanWorkflow(root, path string, accepted map[string]acceptedGap, used map[string]bool) (workflowRecord, string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return workflowRecord{}, fmt.Errorf("read workflow: %w", err)
+		return workflowRecord{}, "", fmt.Errorf("read workflow: %w", err)
 	}
 	rel, text := slashPath(path[len(root)+1:]), string(data)
 	uploadModes := artifactUploadModes(text)
@@ -54,7 +57,7 @@ func scanWorkflow(root, path string, accepted map[string]acceptedGap, used map[s
 		StrictUploadCount:    countUploadMode(uploadModes, "error"),
 		NonStrictUploadCount: countNonStrictUploadModes(uploadModes),
 	}
-	return classify(record, accepted, used), nil
+	return classify(record, accepted, used), text, nil
 }
 
 func acceptedByPath(gaps []acceptedGap) map[string]acceptedGap {
