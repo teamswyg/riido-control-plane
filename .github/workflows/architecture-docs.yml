@@ -13,6 +13,7 @@ on:
       - "cmd/riido_ai_server/main.go"
       - "internal/riidoaiserver/doc.go"
       - "tools/aiagentrisk/**"
+      - "tools/configreference/**"
       - "tools/snapshotcqrsgate/**"
   pull_request:
     paths:
@@ -25,6 +26,7 @@ on:
       - "cmd/riido_ai_server/main.go"
       - "internal/riidoaiserver/doc.go"
       - "tools/aiagentrisk/**"
+      - "tools/configreference/**"
       - "tools/snapshotcqrsgate/**"
 
 jobs:
@@ -57,36 +59,11 @@ jobs:
             printf 'Stale/private ownership wording found:\n%s\n' "$stale"
             exit 1
           fi
-      - name: Verify documented env coverage
+      - name: Verify config reference
         run: |
-          for env in \
-            RIIDO_AI_SERVER_ADDR \
-            RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS \
-            RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON \
-            RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL \
-            RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE \
-            RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY \
-            RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS \
-            RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256 \
-            RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS \
-            RIIDO_AI_SERVER_PPROF_ADDR \
-            RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS \
-            RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT \
-            RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE \
-            RIIDO_AI_SERVER_AWS_REGION \
-            RIIDO_AI_SERVER_DYNAMODB_ENDPOINT \
-            RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_BUCKET \
-            RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_PREFIX \
-            RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_CDN_BASE_URL \
-            RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_MAX_BYTES \
-            RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_UPLOAD_EXPIRES_SECONDS \
-            RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_S3_ENDPOINT \
-            AWS_CONTAINER_CREDENTIALS_FULL_URI \
-            AWS_CONTAINER_CREDENTIALS_RELATIVE_URI \
-            AWS_CONTAINER_AUTHORIZATION_TOKEN
-          do
-            grep -R "$env" docs/30-architecture/config-reference.md >/dev/null
-          done
+          go run ./tools/configreference \
+            -check-doc \
+            -evidence-out out/config-reference-evidence.json
       - name: Verify Go dependency allowlist
         run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify AI Agent risk evidence
@@ -100,6 +77,13 @@ jobs:
         with:
           name: ai-agent-risk-evidence
           path: out/ai-agent-risk-evidence.json
+          if-no-files-found: warn
+      - name: Upload config reference evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: config-reference-evidence
+          path: out/config-reference-evidence.json
           if-no-files-found: warn
       - name: Verify AI Agent snapshot CQRS gate
         run: |
