@@ -63,6 +63,7 @@ type Server struct {
 type aiAgentWorkspaceIDContextKey struct{}
 
 func NewServer(config ServerConfig) Server {
+	config = normalizeServerConfigNilInterfaces(config)
 	config.WebAllowedOrigins = normalizeWebAllowedOrigins(config.WebAllowedOrigins)
 	if config.LongPollMaxHold <= 0 {
 		config.LongPollMaxHold = 25 * time.Second
