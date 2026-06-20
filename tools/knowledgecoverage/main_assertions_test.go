@@ -12,6 +12,10 @@ func assertEvidenceCoverage(t *testing.T, got evidence) {
 		len(got.StandaloneMissingBinding) != 0 {
 		t.Fatalf("standalone manifest coverage drifted: %+v", got)
 	}
+	if got.SourceManifestCount != got.SourceManifestMetadataCount ||
+		len(got.SourceMissingMetadata) != 0 {
+		t.Fatalf("source manifest metadata coverage drifted: %+v", got)
+	}
 	if got.SourceManifestCount != got.SourceManifestBindingCount ||
 		len(got.SourceMissingBinding) != 0 {
 		t.Fatalf("source manifest coverage drifted: %+v", got)
