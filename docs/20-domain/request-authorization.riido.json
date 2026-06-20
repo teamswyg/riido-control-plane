@@ -30,7 +30,9 @@
     {"name":"external-fail-closed-tests","file":"internal/riidoaiserver/external_authorizer_test.go","contains":["TestExternalHTTPAuthorizerMapsDeniedResponses","TestExternalHTTPAuthorizerFailsClosedOnProviderError","TestFallbackAuthorizerUsesNextOnlyForUnauthenticated"]},
     {"name":"runtime-env","file":"cmd/riido_ai_server/env_names.go","contains":["envWebAllowedOrigins","RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"]},
     {"name":"runtime-origin-parser","file":"cmd/riido_ai_server/web_origin_config.go","contains":["parseWebAllowedOrigins","normalizeWebOrigin"]},
-    {"name":"token-transport","file":"internal/riidoaiserver/server.go","contains":["aiAgentTokenHeader = \"X-Riido-Ai-Agent-Token\"","Header.Get(\"Authorization\")","strings.HasPrefix(got, \"Bearer \")","authorizeDeviceCredential"]},
+    {"name":"token-header","file":"internal/riidoaiserver/server.go","contains":["aiAgentTokenHeader = \"X-Riido-Ai-Agent-Token\""]},
+    {"name":"token-transport","file":"internal/riidoaiserver/server_request_token.go","contains":["Header.Get(\"Authorization\")","strings.HasPrefix(got, \"Bearer \")"]},
+    {"name":"device-credential-transport","file":"internal/riidoaiserver/server_device_credential_auth.go","contains":["authorizeDeviceCredential","deviceIDHeader","deviceSecretHeader"]},
     {"name":"cors","file":"internal/riidoaiserver/web_frontend_cors.go","contains":["webCORSAllowedMethods","webCORSAllowedHeaders","x-riido-ai-agent-token","webCORSHeadersAllowed"]},
     {"name":"cors-tests","file":"internal/riidoaiserver/web_frontend_cors_test.go","contains":["Access-Control-Allow-Credentials","TestHTTPWebFrontendCORSRejectsUnsupportedPreflightHeader"]}
   ],

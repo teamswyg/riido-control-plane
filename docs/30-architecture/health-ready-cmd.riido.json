@@ -11,7 +11,7 @@
     {"name": "ready", "method": "GET", "path": "/readyz", "status": "ready", "http_status": 200}
   ],
   "source_checks": [
-    {"name": "server", "file": "internal/riidoaiserver/server.go", "contains": ["handleHealth", "handleReady", "SchemaVersion"]},
+    {"name": "server", "file": "internal/riidoaiserver/server_health.go", "contains": ["handleHealth", "handleReady", "SchemaVersion"]},
     {"name": "health-tests", "file": "internal/riidoaiserver/health_http_test.go", "contains": ["TestHTTPHealthAndReadyArePublic", "TestHTTPHealthAndReadyRejectWrongMethod"]},
     {"name": "cmd-core-config", "file": "cmd/riido_ai_server/config_core_test.go", "contains": ["TestConfigFromEnvParsesAddressShutdownAndStaticAuthorizer", "TestConfigFromEnvDefaultsToPublicHealthOnlyRuntime"]},
     {"name": "cmd-observability-config", "file": "cmd/riido_ai_server/observability_config_test.go", "contains": ["TestConfigFromEnvParsesPprofAddr", "TestConfigFromEnvParsesMetricsLogInterval"]}
