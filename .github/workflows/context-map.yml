@@ -1,0 +1,53 @@
+name: context-map
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/context-map.yml"
+      - "docs/20-domain/context-map.md"
+      - "docs/20-domain/context-map.riido.json"
+      - "tools/contextmap/**"
+      - "go.mod"
+      - "dependency_allowlist.riido.json"
+      - "cmd/riido_ai_server/**"
+      - "internal/riidoaiserver/**"
+      - "awsadapters/**"
+      - "packaging/containers/**"
+  pull_request:
+    paths:
+      - ".github/workflows/context-map.yml"
+      - "docs/20-domain/context-map.md"
+      - "docs/20-domain/context-map.riido.json"
+      - "tools/contextmap/**"
+      - "go.mod"
+      - "dependency_allowlist.riido.json"
+      - "cmd/riido_ai_server/**"
+      - "internal/riidoaiserver/**"
+      - "awsadapters/**"
+      - "packaging/containers/**"
+
+jobs:
+  context-map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
+      - name: Verify context map executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/contextmap -count=1
+          go run ./tools/contextmap \
+            -check-doc \
+            -evidence-out out/control-plane-context-map-evidence.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: control-plane-context-map-evidence
+          path: out/control-plane-context-map-evidence.json
+          if-no-files-found: error
