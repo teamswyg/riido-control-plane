@@ -12,12 +12,12 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `30`; runtime: `1`; internal: `3`; tools: `25`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `100`; max file lines: `3142`.
+File line budget target: `75`; files over target: `100`; max file lines: `2798`.
 
 | File | Lines |
 | --- | ---: |
-| `internal/riidoaiserver/ai_agent_client_development.go` | 3142 |
 | `internal/riidoaiserver/ai_agent_client_http_test.go` | 2798 |
+| `internal/riidoaiserver/ai_agent_client_development.go` | 2717 |
 | `internal/riidoaiserver/server.go` | 2372 |
 | `internal/riidoaiserver/store.go` | 1952 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1573 |
