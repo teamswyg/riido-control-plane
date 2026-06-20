@@ -25,6 +25,6 @@ jobs:
         with:
           name: dependency-allowlist-evidence
           path: out/dependency-allowlist-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Test
         run: go test ./...

@@ -40,11 +40,15 @@ func scanWorkflow(root, path string, accepted map[string]acceptedGap, used map[s
 		return workflowRecord{}, fmt.Errorf("read workflow: %w", err)
 	}
 	rel, text := slashPath(path[len(root)+1:]), string(data)
+	uploadModes := artifactUploadModes(text)
 	record := workflowRecord{
-		Path:            rel,
-		HasExecutable:   hasExecutableStep(text),
-		HasEvidenceOut:  strings.Contains(text, "evidence-out"),
-		UploadsArtifact: strings.Contains(text, "actions/upload-artifact"),
+		Path:                 rel,
+		HasExecutable:        hasExecutableStep(text),
+		HasEvidenceOut:       strings.Contains(text, "evidence-out"),
+		UploadsArtifact:      len(uploadModes) > 0,
+		ArtifactUploadCount:  len(uploadModes),
+		StrictUploadCount:    countUploadMode(uploadModes, "error"),
+		NonStrictUploadCount: countNonStrictUploadModes(uploadModes),
 	}
 	return classify(record, accepted, used), nil
 }

@@ -89,6 +89,7 @@ jobs:
         with:
           name: riido-control-plane-generated-client
           path: dist
+          if-no-files-found: error
       - name: Upload generated client delivery evidence
         uses: actions/upload-artifact@v4
         if: always()

@@ -7,16 +7,18 @@ import (
 
 func renderWorkflowTable(b *strings.Builder, records []workflowRecord) {
 	b.WriteString("## Workflow Evidence\n\n")
-	b.WriteString("| Workflow | Status | Evidence Out | Artifact | Reason |\n")
-	b.WriteString("| --- | --- | --- | --- | --- |\n")
+	b.WriteString("| Workflow | Status | Evidence Out | Artifact | Strict Uploads | Reason |\n")
+	b.WriteString("| --- | --- | --- | --- | --- | --- |\n")
 	for _, record := range records {
 		fmt.Fprintf(
 			b,
-			"| `%s` | `%s` | `%t` | `%t` | %s |\n",
+			"| `%s` | `%s` | `%t` | `%t` | `%d/%d` | %s |\n",
 			record.Path,
 			record.Status,
 			record.HasEvidenceOut,
 			record.UploadsArtifact,
+			record.StrictUploadCount,
+			record.ArtifactUploadCount,
 			tableText(recordReason(record)),
 		)
 	}

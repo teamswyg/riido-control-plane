@@ -140,42 +140,42 @@ jobs:
         with:
           name: config-reference-evidence
           path: out/config-reference-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Upload API client delivery evidence
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: api-client-delivery-evidence
           path: out/api-client-delivery-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Upload integration matrix evidence
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integration-matrix-evidence
           path: out/integration-matrix-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Upload module decomposition evidence
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: module-decomposition-evidence
           path: out/module-decomposition-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Upload open questions evidence
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: open-questions-evidence
           path: out/open-questions-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Upload runtime deployment boundary evidence
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: runtime-deployment-boundary-evidence
           path: out/runtime-deployment-boundary-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
       - name: Upload runtime CD ownership evidence
         uses: actions/upload-artifact@v4
         if: always()

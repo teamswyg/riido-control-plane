@@ -13,6 +13,11 @@ func hasExecutableStep(text string) bool {
 }
 
 func classify(record workflowRecord, accepted map[string]acceptedGap, used map[string]bool) workflowRecord {
+	if record.NonStrictUploadCount > 0 {
+		record.Status = "non_strict_upload"
+		record.Reason = "artifact upload must fail closed with if-no-files-found:error"
+		return record
+	}
 	if record.HasEvidenceOut && record.UploadsArtifact {
 		record.Status = "covered"
 		return record
@@ -40,5 +45,7 @@ func addRecord(result *auditResult, record workflowRecord) {
 		result.Accepted++
 	case "unregistered_gap":
 		result.Unregistered = append(result.Unregistered, record.Path)
+	case "non_strict_upload":
+		result.NonStrict = append(result.NonStrict, record.Path)
 	}
 }
