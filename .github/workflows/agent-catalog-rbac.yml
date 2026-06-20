@@ -6,7 +6,9 @@ on:
     paths:
       - ".github/workflows/agent-catalog-rbac.yml"
       - "docs/20-domain/agent-catalog-rbac.md"
+      - "docs/20-domain/agent-catalog-rbac.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentcatalogrbac/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -18,7 +20,9 @@ on:
     paths:
       - ".github/workflows/agent-catalog-rbac.yml"
       - "docs/20-domain/agent-catalog-rbac.md"
+      - "docs/20-domain/agent-catalog-rbac.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentcatalogrbac/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -45,5 +49,18 @@ jobs:
             printf 'Disallowed RBAC imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify RBAC executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/agentcatalogrbac -count=1
+          go run ./tools/agentcatalogrbac \
+            -check-doc \
+            -evidence-out out/agent-catalog-rbac-evidence.json
       - name: Test RBAC domain
         run: go test ./internal/riidoaiserver -run 'AgentCatalogRBAC|StaticTokenAuthorizer' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-catalog-rbac-evidence
+          path: out/agent-catalog-rbac-evidence.json
+          if-no-files-found: error
