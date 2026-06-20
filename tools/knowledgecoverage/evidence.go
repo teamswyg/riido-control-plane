@@ -14,13 +14,15 @@ func buildEvidence(root string, m manifest, docs []docClass, problems []string) 
 	return evidence{
 		SchemaVersion: evidenceSchema, ID: m.ID, Status: status,
 		ScannedCount: len(docs), GeneratedCount: counts["generated"],
-		GeneratedToolCount: generatedToolCount(docs),
-		DirectSSOTCount:    counts["direct_ssot"], ManualCount: counts["manual_registered"],
+		GeneratedToolCount:             generatedToolCount(docs),
+		GeneratedEvidenceWorkflowCount: generatedEvidenceWorkflowCount(root, docs),
+		DirectSSOTCount:                counts["direct_ssot"], ManualCount: counts["manual_registered"],
 		ManualByGroup: manualCountsByGroup(docs), ManualTopDirs: manualTopDirs(docs, 8),
 		ManualSamples: manualSamples(docs, 2), DirectLoopCount: countDirectLoops(docs),
-		GeneratedMissingTool:     generatedMissingTool(root, docs),
-		GeneratedMissingWorkflow: generatedMissingWorkflow(root, docs),
-		DirectMissingLoop:        directMissingLoops(docs), ProblemSummaries: problems,
+		GeneratedMissingTool:             generatedMissingTool(root, docs),
+		GeneratedMissingWorkflow:         generatedMissingWorkflow(root, docs),
+		GeneratedMissingEvidenceWorkflow: generatedMissingEvidenceWorkflow(root, docs),
+		DirectMissingLoop:                directMissingLoops(docs), ProblemSummaries: problems,
 		EvidenceArtifact: m.EvidenceArtifact, Loop: m.Loop,
 	}
 }
