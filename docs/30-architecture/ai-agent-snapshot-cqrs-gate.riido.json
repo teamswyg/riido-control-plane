@@ -1,0 +1,65 @@
+{
+  "schema_version": "riido-control-plane-ai-agent-snapshot-cqrs-gate.v1",
+  "id": "control-plane-ai-agent-snapshot-cqrs-gate",
+  "riido_task": "RIID-4964",
+  "human_doc": "docs/30-architecture/ai-agent-snapshot-cqrs-gate.md",
+  "decision": {
+    "scope": "ai_agent_client_snapshot_only",
+    "store_wide_cqrs": false,
+    "reason": "Current trace evidence identifies AI Agent client snapshot load/save as the CQRS candidate, not the whole Store."
+  },
+  "operation_evidence": [
+    {
+      "route": "/v1/daemon/runtime-snapshot",
+      "intent": "command_sync",
+      "store_operations": ["ai_agent_client_snapshot_load", "ai_agent_client_snapshot_save"]
+    },
+    {
+      "route": "/v1/daemon/agent-bindings",
+      "intent": "query_bindings",
+      "store_operations": ["ai_agent_client_snapshot_load"]
+    },
+    {
+      "route": "/v1/agents/{agent_id}/poll",
+      "intent": "poll_assignment",
+      "store_operations": ["store_poll_assignment"]
+    }
+  ],
+  "measurement_signals": [
+    "ai_agent_client_snapshot_load_calls_total",
+    "ai_agent_client_snapshot_save_calls_total",
+    "ai_agent_client_snapshot_load_bytes_last",
+    "ai_agent_client_snapshot_save_bytes_last",
+    "DynamoDB ConsumedReadCapacityUnits",
+    "DynamoDB ConsumedWriteCapacityUnits",
+    "X-Ray route/store-operation samples"
+  ],
+  "cadence_rules": [
+    {"name": "snapshot_reload_interval", "seconds": 15, "must_stay_below_seconds": 20},
+    {"name": "heartbeat_no_change_save_interval", "seconds": 15, "must_stay_below_seconds": 20}
+  ],
+  "decision_rules": [
+    {
+      "id": "keep_monolithic_snapshot",
+      "threshold_drop_percent": 50,
+      "when": "request units drop by at least threshold and snapshot operations no longer dominate sampled Store traces",
+      "action": "keep_monolithic_snapshot"
+    },
+    {
+      "id": "split_ai_agent_client_snapshot",
+      "threshold_drop_percent": 50,
+      "when": "request units drop by less than threshold or snapshot operations remain dominant",
+      "action": "split_ai_agent_client_snapshot_only"
+    }
+  ],
+  "candidate_split": {
+    "command_models": ["daemon runtime snapshot sync", "daemon heartbeat/status save", "device credential and daemon command mutations", "cold recovery checkpoint"],
+    "query_models": ["agent bindings read model", "runtime/device status read model", "task-thread participant/progress projection"]
+  },
+  "forbidden_trace_attributes": [
+    "task_id", "agent_id", "dynamodb_pk", "dynamodb_sk", "table_name", "prompt",
+    "credentials", "profile_url", "payload_document", "aws_account_id", "trace_id",
+    "raw_log_excerpt"
+  ],
+  "non_goals": ["store_wide_cqrs", "assignment_polling_split_without_evidence", "broad_event_sourcing_framework", "public_persistence_api", "raw_operator_evidence_in_public_repo"]
+}

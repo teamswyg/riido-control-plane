@@ -13,6 +13,7 @@ on:
       - "cmd/riido_ai_server/main.go"
       - "internal/riidoaiserver/doc.go"
       - "tools/aiagentrisk/**"
+      - "tools/snapshotcqrsgate/**"
   pull_request:
     paths:
       - ".github/workflows/architecture-docs.yml"
@@ -24,6 +25,7 @@ on:
       - "cmd/riido_ai_server/main.go"
       - "internal/riidoaiserver/doc.go"
       - "tools/aiagentrisk/**"
+      - "tools/snapshotcqrsgate/**"
 
 jobs:
   docs:
@@ -46,6 +48,7 @@ jobs:
           test -f docs/30-architecture/runtime-cd-ownership.md
           test -f docs/30-architecture/runtime-cd-ownership.riido.json
           test -f docs/30-architecture/ai-agent-risk-evidence.riido.json
+          test -f docs/30-architecture/ai-agent-snapshot-cqrs-gate.riido.json
           test -f docs/50-roadmap/open-questions.md
       - name: Verify architecture docs avoid stale ownership paths
         run: |
@@ -97,6 +100,18 @@ jobs:
         with:
           name: ai-agent-risk-evidence
           path: out/ai-agent-risk-evidence.json
+          if-no-files-found: warn
+      - name: Verify AI Agent snapshot CQRS gate
+        run: |
+          mkdir -p out
+          go run ./tools/snapshotcqrsgate -check-doc -evidence-out out/snapshot-cqrs-gate-evidence.json
+          go test ./tools/snapshotcqrsgate -count=1
+      - name: Upload AI Agent snapshot CQRS gate evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: snapshot-cqrs-gate-evidence
+          path: out/snapshot-cqrs-gate-evidence.json
           if-no-files-found: warn
       - name: Test
         run: go test ./...
