@@ -2,81 +2,45 @@ package riidoaiserver
 
 import (
 	"encoding/json"
-	"net/http"
 	"testing"
 )
 
 func decodeDynamoDBPutPayload(t *testing.T, got capturedDynamoDBRequest) dynamoDBPutPayload {
 	t.Helper()
-	if got.method != http.MethodPost {
-		t.Fatalf("method = %s", got.method)
-	}
-	if got.header.Get("X-Amz-Target") != dynamoDBPutItemTarget {
-		t.Fatalf("target = %q", got.header.Get("X-Amz-Target"))
-	}
-	var payload dynamoDBPutPayload
-	if err := json.Unmarshal(got.body, &payload); err != nil {
-		t.Fatalf("decode payload: %v", err)
-	}
-	return payload
+	return decodeDynamoDBPayload[dynamoDBPutPayload](t, got, dynamoDBPutItemTarget, "payload")
 }
 
 func decodeDynamoDBDeletePayload(t *testing.T, got capturedDynamoDBRequest) dynamoDBDeletePayload {
 	t.Helper()
-	if got.method != http.MethodPost {
-		t.Fatalf("method = %s", got.method)
-	}
-	if got.header.Get("X-Amz-Target") != dynamoDBDeleteItemTarget {
-		t.Fatalf("target = %q", got.header.Get("X-Amz-Target"))
-	}
-	var payload dynamoDBDeletePayload
-	if err := json.Unmarshal(got.body, &payload); err != nil {
-		t.Fatalf("decode delete payload: %v", err)
-	}
-	return payload
+	return decodeDynamoDBPayload[dynamoDBDeletePayload](t, got, dynamoDBDeleteItemTarget, "delete payload")
 }
 
 func decodeDynamoDBUpdatePayload(t *testing.T, got capturedDynamoDBRequest) dynamoDBUpdatePayload {
 	t.Helper()
-	if got.method != http.MethodPost {
-		t.Fatalf("method = %s", got.method)
-	}
-	if got.header.Get("X-Amz-Target") != dynamoDBUpdateItemTarget {
-		t.Fatalf("target = %q", got.header.Get("X-Amz-Target"))
-	}
-	var payload dynamoDBUpdatePayload
-	if err := json.Unmarshal(got.body, &payload); err != nil {
-		t.Fatalf("decode update payload: %v", err)
-	}
-	return payload
+	return decodeDynamoDBPayload[dynamoDBUpdatePayload](t, got, dynamoDBUpdateItemTarget, "update payload")
 }
 
 func decodeDynamoDBTransactWritePayload(t *testing.T, got capturedDynamoDBRequest) dynamoDBTransactWritePayload {
 	t.Helper()
-	if got.method != http.MethodPost {
-		t.Fatalf("method = %s", got.method)
-	}
-	if got.header.Get("X-Amz-Target") != dynamoDBTransactWriteTarget {
-		t.Fatalf("target = %q", got.header.Get("X-Amz-Target"))
-	}
-	var payload dynamoDBTransactWritePayload
-	if err := json.Unmarshal(got.body, &payload); err != nil {
-		t.Fatalf("decode transact payload: %v", err)
-	}
-	return payload
+	return decodeDynamoDBPayload[dynamoDBTransactWritePayload](t, got, dynamoDBTransactWriteTarget, "transact payload")
 }
 
 func decodeDynamoDBRepairTransactWritePayload(t *testing.T, got capturedDynamoDBRequest) dynamoDBRepairTransactWritePayload {
 	t.Helper()
-	if got.method != http.MethodPost {
-		t.Fatalf("method = %s", got.method)
-	}
-	if got.header.Get("X-Amz-Target") != dynamoDBTransactWriteTarget {
-		t.Fatalf("target = %q", got.header.Get("X-Amz-Target"))
-	}
-	var payload dynamoDBRepairTransactWritePayload
+	return decodeDynamoDBPayload[dynamoDBRepairTransactWritePayload](t, got, dynamoDBTransactWriteTarget, "repair transact payload")
+}
+
+func decodeDynamoDBPayload[T any](
+	t *testing.T,
+	got capturedDynamoDBRequest,
+	target string,
+	label string,
+) T {
+	t.Helper()
+	assertDynamoDBTarget(t, got, target)
+	var payload T
 	if err := json.Unmarshal(got.body, &payload); err != nil {
-		t.Fatalf("decode repair transact payload: %v", err)
+		t.Fatalf("decode %s: %v", label, err)
 	}
 	return payload
 }
