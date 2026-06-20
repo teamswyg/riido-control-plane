@@ -21,12 +21,20 @@ func scanDocs(root string, m manifest) ([]docClass, []string) {
 		}
 		docs = append(docs, found...)
 	}
+	for _, path := range m.ScanFiles {
+		docs = append(docs, scanFileDoc(root, path, m, manualByPath))
+	}
+	docs = dedupeDocs(docs)
 	slices.SortFunc(docs, func(a, b docClass) int { return strings.Compare(a.Path, b.Path) })
 	problems = append(problems, validateGeneratedDocs(root, docs)...)
 	problems = append(problems, validateManualEntries(root, m, docs)...)
 	problems = append(problems, validateDirectLoops(docs)...)
 	problems = append(problems, validateDirectEvidence(root, docs)...)
 	return docs, problems
+}
+
+func scanFileDoc(root, path string, m manifest, manualByPath map[string]manualGroup) docClass {
+	return classifyDoc(root, filepath.ToSlash(path), m, manualByPath)
 }
 
 func scanRootDocs(root, scanRoot string, m manifest, manualByPath map[string]manualGroup) ([]docClass, error) {

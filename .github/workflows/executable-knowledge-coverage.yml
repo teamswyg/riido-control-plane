@@ -6,15 +6,21 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/executable-knowledge-coverage.yml"
+      - "README.md"
+      - "README.riido.json"
       - "docs/**"
       - "tools/knowledgecoverage/**"
+      - "tools/repositoryreadme/**"
       - "go.mod"
       - "go.sum"
   pull_request:
     paths:
       - ".github/workflows/executable-knowledge-coverage.yml"
+      - "README.md"
+      - "README.riido.json"
       - "docs/**"
       - "tools/knowledgecoverage/**"
+      - "tools/repositoryreadme/**"
       - "go.mod"
       - "go.sum"
 
