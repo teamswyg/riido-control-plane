@@ -21,6 +21,7 @@ on:
       - "internal/riidoaiserver/cloudwatch_emf_test.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "internal/riidoaiserver/store_port.go"
       - "tools/cloudwatchemf/**"
   pull_request:
@@ -42,6 +43,7 @@ on:
       - "internal/riidoaiserver/cloudwatch_emf_test.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "internal/riidoaiserver/store_port.go"
       - "tools/cloudwatchemf/**"
 

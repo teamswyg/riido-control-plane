@@ -15,7 +15,8 @@
     {"name":"file-outbox","file":"internal/riidoaiserver/file_outbox.go","contains":["OutboxRecordSchemaVersion","NewFileOutbox","AppendTaskEvent","json.NewEncoder"]},
     {"name":"file-snapshot","file":"internal/riidoaiserver/store_snapshot.go","contains":["StoreSnapshotSchemaVersion","NewFileStoreSnapshot","LoadStoreSnapshot","SaveStoreSnapshot","DisallowUnknownFields"]},
     {"name":"persistence-tests","file":"internal/riidoaiserver/store_persistence_test.go","contains":["TestFileOutboxPersistsTaskEvents","TestFileStoreSnapshotRestoresAssignmentsAndEvents","TestOutboxFailureRecordsMetricsWithoutFailingMutation"]},
-    {"name":"store-config","file":"internal/riidoaiserver/store.go","contains":["OpenStoreWithConfig","SnapshotStore","Outbox"]}
+    {"name":"store-config","file":"internal/riidoaiserver/store_type.go","contains":["type StoreConfig struct","SnapshotStore","Outbox"]},
+    {"name":"store-open","file":"internal/riidoaiserver/store_open.go","contains":["OpenStoreWithConfig","LoadStoreSnapshot","SaveAssignmentOperation"]}
   ],
   "loop": {
     "observation": "The store snapshot and file outbox workflow exercised durability tests but did not publish machine-readable evidence for the recovered event and metric shape.",
