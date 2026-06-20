@@ -28,11 +28,6 @@
       "next": "publish adapter conformance evidence without live credentials"
     },
     {
-      "path": ".github/workflows/generated-client-delivery.yml",
-      "reason": "client handoff workflow produces generated files but no JSON evidence",
-      "next": "publish handoff manifest evidence"
-    },
-    {
       "path": ".github/workflows/go-ci.yml",
       "reason": "baseline CI proves build/test health but not loop evidence",
       "next": "keep as broad safety net or add summarized test evidence"
