@@ -22,6 +22,9 @@ func renderCoverageTable(b *strings.Builder, e evidence) {
 	fmt.Fprintf(b, "| Standalone executable manifests | %d |\n", e.StandaloneManifestCount)
 	fmt.Fprintf(b, "| Standalone executable manifests with strict CI evidence | %d |\n",
 		e.StandaloneManifestBindingCount)
+	fmt.Fprintf(b, "| Source SSOT manifests | %d |\n", e.SourceManifestCount)
+	fmt.Fprintf(b, "| Source SSOT manifests with strict CI evidence | %d |\n",
+		e.SourceManifestBindingCount)
 	fmt.Fprintf(b, "| Registered manual docs | %d |\n", e.ManualCount)
 	fmt.Fprintf(b, "| Scanned docs | %d |\n\n", e.ScannedCount)
 }
