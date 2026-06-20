@@ -131,6 +131,7 @@ func run(args []string, stdout io.Writer) error {
 	fs.SetOutput(io.Discard)
 	contractPath := fs.String("contract", "", "path to riido-container-image-contract.v1")
 	outPath := fs.String("out", "", "optional path to write riido-container-image-contract-check.v1 JSON, or - for stdout")
+	evidenceOut := fs.String("evidence-out", "", "optional evidence JSON output path")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -144,6 +145,9 @@ func run(args []string, stdout io.Writer) error {
 	record, err := verifyContract(contract)
 	if err != nil {
 		return err
+	}
+	if strings.TrimSpace(*outPath) == "" {
+		outPath = evidenceOut
 	}
 	if strings.TrimSpace(*outPath) == "" {
 		return nil

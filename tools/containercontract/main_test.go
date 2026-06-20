@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -86,6 +87,33 @@ func TestRunWritesCheckJSON(t *testing.T) {
 	}
 	if record.ChecksTotal != 13 {
 		t.Fatalf("checks_total = %d, want 13", record.ChecksTotal)
+	}
+}
+
+func TestRunWritesEvidenceOutJSON(t *testing.T) {
+	contract, contractPath := writeContainerContractFixture(t, "65532:65532", false)
+	body, err := json.MarshalIndent(contract, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(contractPath, append(body, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	outPath := filepath.Join(t.TempDir(), "container-evidence.json")
+	if err := run([]string{"-contract", contractPath, "-evidence-out", outPath}, io.Discard); err != nil {
+		t.Fatalf("run() error = %v", err)
+	}
+	var record checkRecord
+	data, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &record); err != nil {
+		t.Fatalf("decode check JSON: %v\n%s", err, string(data))
+	}
+	if record.SchemaVersion != checkSchemaVersion || record.ChecksTotal != 13 {
+		t.Fatalf("unexpected evidence: %+v", record)
 	}
 }
 
