@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 func verifyDoc(repoRoot string, m manifest) error {
@@ -13,17 +12,8 @@ func verifyDoc(repoRoot string, m manifest) error {
 	if err != nil {
 		return fmt.Errorf("read human doc: %w", err)
 	}
-	doc := string(data)
-	for _, token := range []string{
-		"ai-agent-snapshot-cqrs-gate.riido.json",
-		"ai_agent_client_snapshot_load",
-		"ai_agent_client_snapshot_save",
-		"store_poll_assignment",
-		"50%",
-	} {
-		if !strings.Contains(doc, token) {
-			return fmt.Errorf("human doc missing %q", token)
-		}
+	if string(data) != renderDoc(m) {
+		return fmt.Errorf("reader doc drift: run go run ./tools/snapshotcqrsgate -write-doc")
 	}
 	return nil
 }
