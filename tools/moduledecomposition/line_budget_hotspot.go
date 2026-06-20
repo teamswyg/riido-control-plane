@@ -13,7 +13,7 @@ type lineBudgetHotspot struct {
 	TotalOver int    `json:"total_over_target_lines"`
 }
 
-func topLineBudgetHotspots(samples []lineBudgetSample, limit, target int) []lineBudgetHotspot {
+func lineBudgetHotspots(samples []lineBudgetSample, target int) []lineBudgetHotspot {
 	byDir := map[string]*lineBudgetHotspot{}
 	for _, sample := range samples {
 		dir := strings.TrimPrefix(filepath.ToSlash(filepath.Dir(sample.Path)), "./")
@@ -28,7 +28,7 @@ func topLineBudgetHotspots(samples []lineBudgetSample, limit, target int) []line
 			hotspot.MaxLines = sample.Lines
 		}
 	}
-	return trimLineBudgetHotspots(sortLineBudgetHotspots(byDir), limit)
+	return sortLineBudgetHotspots(byDir)
 }
 
 func sortLineBudgetHotspots(byDir map[string]*lineBudgetHotspot) []lineBudgetHotspot {

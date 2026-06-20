@@ -9,7 +9,15 @@
   "module_path":"github.com/teamswyg/riido-control-plane",
   "source_roots":["awsadapters","cmd","internal","tools"],
   "forbidden_imports":["riido-daemon","riido_daemon","riido-infra"],
-  "file_line_budget":{"target_lines":75,"sample_limit":10,"hotspot_limit":8,"max_files_over_target":97,"max_file_lines":2481},
+  "file_line_budget":{"target_lines":75,"sample_limit":10,"hotspot_limit":8,"max_files_over_target":97,"max_file_lines":2481,"hotspot_limits":[
+    {"path":"internal/riidoaiserver","max_files":85,"max_lines":2481,"max_total_over_target_lines":23713},
+    {"path":"tools/reactquerygen","max_files":3,"max_lines":1395,"max_total_over_target_lines":2770},
+    {"path":"cmd/riido_ai_server","max_files":3,"max_lines":791,"max_total_over_target_lines":1474},
+    {"path":"tools/containercontract","max_files":2,"max_lines":597,"max_total_over_target_lines":663},
+    {"path":"tools/generatedclienthandoff","max_files":2,"max_lines":601,"max_total_over_target_lines":578},
+    {"path":"awsadapters","max_files":1,"max_lines":84,"max_total_over_target_lines":9},
+    {"path":"internal/contractscompat","max_files":1,"max_lines":81,"max_total_over_target_lines":6}
+  ]},
   "packages":[
     {"path":"awsadapters","kind":"public-adapter","role":"Public facade for private infra and evidence tooling that needs selected AWS adapter behavior.","must_not_own":"new adapter behavior, duplicated DTOs, credential storage"},
     {"path":"cmd/riido_ai_server","kind":"runtime-shell","role":"Binary entrypoint, Factor 12 env parsing, HTTP lifecycle, optional metrics and tracing startup.","must_not_own":"domain decisions, Terraform, production secret values, provider process execution"},

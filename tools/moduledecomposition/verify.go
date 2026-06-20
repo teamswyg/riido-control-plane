@@ -48,10 +48,8 @@ func verifyManifestShape(m manifest) error {
 	if m.ModulePath == "" || len(m.SourceRoots) == 0 || len(m.Packages) == 0 {
 		return fmt.Errorf("module_path, source_roots, and packages are required")
 	}
-	if m.FileLineBudget.TargetLines < 0 || m.FileLineBudget.SampleLimit < 0 ||
-		m.FileLineBudget.HotspotLimit < 0 || m.FileLineBudget.MaxFilesOverTarget < 0 ||
-		m.FileLineBudget.MaxFileLines < 0 {
-		return fmt.Errorf("file_line_budget values must be non-negative")
+	if err := verifyLineBudgetConfig(m.FileLineBudget); err != nil {
+		return err
 	}
 	return verifyLoop(m.Loop)
 }

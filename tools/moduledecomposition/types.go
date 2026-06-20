@@ -18,11 +18,12 @@ type manifest struct {
 }
 
 type fileLineBudget struct {
-	TargetLines        int `json:"target_lines"`
-	SampleLimit        int `json:"sample_limit"`
-	HotspotLimit       int `json:"hotspot_limit"`
-	MaxFilesOverTarget int `json:"max_files_over_target"`
-	MaxFileLines       int `json:"max_file_lines"`
+	TargetLines        int                      `json:"target_lines"`
+	SampleLimit        int                      `json:"sample_limit"`
+	HotspotLimit       int                      `json:"hotspot_limit"`
+	MaxFilesOverTarget int                      `json:"max_files_over_target"`
+	MaxFileLines       int                      `json:"max_file_lines"`
+	HotspotLimits      []lineBudgetHotspotLimit `json:"hotspot_limits"`
 }
 
 type packageEntry struct {
