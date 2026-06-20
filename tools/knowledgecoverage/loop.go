@@ -6,18 +6,21 @@ import (
 	"strings"
 )
 
-func manifestHasLoop(path string) bool {
+type directManifestMeta struct {
+	Loop         evidenceLoop `json:"loop"`
+	EvidenceTool string       `json:"evidence_tool"`
+}
+
+func directManifestMetadata(path string) directManifestMeta {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return false
+		return directManifestMeta{}
 	}
-	var raw struct {
-		Loop evidenceLoop `json:"loop"`
-	}
+	var raw directManifestMeta
 	if err := json.Unmarshal(data, &raw); err != nil {
-		return false
+		return directManifestMeta{}
 	}
-	return completeLoop(raw.Loop)
+	return raw
 }
 
 func completeLoop(loop evidenceLoop) bool {

@@ -28,6 +28,7 @@ type docClass struct {
 	Group         string
 	Reason        string
 	GeneratorTool string
+	EvidenceTool  string
 	HasLoop       bool
 }
 

@@ -15,6 +15,7 @@ on:
       - "docs/executable-knowledge.md"
       - "docs/executable-knowledge.riido.json"
       - "tools/apiclientdelivery/**"
+      - "tools/figmaprojection/**"
       - "tools/reactquerygen/**"
       - "tools/generatedclienthandoff/**"
   pull_request:
@@ -30,6 +31,7 @@ on:
       - "docs/executable-knowledge.md"
       - "docs/executable-knowledge.riido.json"
       - "tools/apiclientdelivery/**"
+      - "tools/figmaprojection/**"
       - "tools/reactquerygen/**"
       - "tools/generatedclienthandoff/**"
 
@@ -55,6 +57,12 @@ jobs:
         run: |
           go test ./tools/reactquerygen -count=1
           go test ./tools/generatedclienthandoff -count=1
+      - name: Verify Figma projection evidence
+        run: |
+          go test ./tools/figmaprojection -count=1
+          go run ./tools/figmaprojection \
+            -check-doc \
+            -evidence-out out/figma-projection-evidence.json
       - name: Verify executable knowledge coverage
         run: |
           go run ./tools/knowledgecoverage \
@@ -66,5 +74,6 @@ jobs:
           name: api-client-delivery-evidence
           path: |
             out/api-client-delivery-evidence.json
+            out/figma-projection-evidence.json
             out/executable-knowledge-coverage.json
           if-no-files-found: error

@@ -25,6 +25,7 @@ func scanDocs(root string, m manifest) ([]docClass, []string) {
 	problems = append(problems, validateGeneratedDocs(root, docs)...)
 	problems = append(problems, validateManualEntries(root, m, docs)...)
 	problems = append(problems, validateDirectLoops(docs)...)
+	problems = append(problems, validateDirectEvidence(root, docs)...)
 	return docs, problems
 }
 
@@ -48,7 +49,8 @@ func classifyDoc(root, rel string, m manifest, manualByPath map[string]manualGro
 	}
 	manifestPath := siblingManifest(rel)
 	if _, err := os.Stat(resolvePath(root, manifestPath)); err == nil {
-		return docClass{Path: rel, Kind: "direct_ssot", HasLoop: manifestHasLoop(resolvePath(root, manifestPath))}
+		meta := directManifestMetadata(resolvePath(root, manifestPath))
+		return docClass{Path: rel, Kind: "direct_ssot", HasLoop: completeLoop(meta.Loop), EvidenceTool: meta.EvidenceTool}
 	}
 	if group, ok := manualByPath[rel]; ok {
 		return docClass{Path: rel, Kind: "manual_registered", Group: group.ID, Reason: group.Reason}
