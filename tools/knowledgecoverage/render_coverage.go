@@ -10,6 +10,8 @@ func renderCoverageTable(b *strings.Builder, e evidence) {
 	fmt.Fprintf(b, "| Generated reader docs | %d |\n", e.GeneratedCount)
 	fmt.Fprintf(b, "| Generated reader docs with tool | %d |\n", e.GeneratedToolCount)
 	fmt.Fprintf(b, "| Generated reader docs with CI evidence | %d |\n", e.GeneratedEvidenceWorkflowCount)
+	fmt.Fprintf(b, "| Generated reader docs with declared workflow evidence | %d |\n",
+		e.GeneratedDeclaredWorkflowCount)
 	fmt.Fprintf(b, "| Generated reader docs with uploaded evidence artifact | %d |\n",
 		e.GeneratedArtifactBindingCount)
 	fmt.Fprintf(b, "| Direct SSOT docs | %d |\n", e.DirectSSOTCount)

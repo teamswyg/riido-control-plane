@@ -30,6 +30,9 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.GeneratedCount != got.GeneratedEvidenceWorkflowCount || len(got.GeneratedMissingEvidenceWorkflow) != 0 {
 		t.Fatalf("generated evidence workflow coverage drifted: %+v", got)
 	}
+	if got.GeneratedCount != got.GeneratedDeclaredWorkflowCount || len(got.GeneratedMissingDeclaredWorkflow) != 0 {
+		t.Fatalf("generated declared workflow coverage drifted: %+v", got)
+	}
 	if got.GeneratedCount != got.GeneratedArtifactBindingCount || len(got.GeneratedMissingArtifactBinding) != 0 {
 		t.Fatalf("generated artifact binding coverage drifted: %+v", got)
 	}
