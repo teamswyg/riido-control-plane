@@ -1,7 +1,20 @@
 {
   "schema_version": "riido-container-image-contract.v1",
+  "id": "riido-ai-server-container-image-contract",
   "service": "riido_ai_server",
   "dockerfile": "packaging/containers/riido_ai_server.Dockerfile",
+  "assertions": [
+    "the public container image shape must not depend on private infra IR",
+    "the final image must run the control-plane binary as a non-root user",
+    "the exposed port and runtime env must match the public runtime contract"
+  ],
+  "loop": {
+    "observation": "Runtime image shape can drift from the public source contract when Dockerfile details are reviewed as prose or by memory.",
+    "hypothesis": "A container image contract can keep the Dockerfile, binary entrypoint, exposed port, non-root user, and optional Fargate IR checks executable.",
+    "execute": "Parse the Dockerfile, compare build and final stage fields against this contract, and emit strict CI evidence.",
+    "evaluate": "CI uploads container-image-contract evidence with status, check count, image shape, and this loop metadata.",
+    "retrospective": "The public repository owns the buildable runtime artifact contract while private infra remains responsible for deployment shape."
+  },
   "build": {
     "build_arg": {
       "name": "GO_IMAGE",

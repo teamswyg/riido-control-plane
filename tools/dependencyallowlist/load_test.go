@@ -9,8 +9,17 @@ import (
 func TestLoadContractRejectsUnapprovedEntry(t *testing.T) {
 	path := writeContract(t, `{
 		"schema_version": "riido-go-dependency-allowlist.v2",
+		"id": "test-dependency-allowlist",
 		"service": "riido-control-plane",
 		"policy": "test",
+		"assertions": ["direct modules must be approved"],
+		"loop": {
+			"observation": "test",
+			"hypothesis": "test",
+			"execute": "test",
+			"evaluate": "test",
+			"retrospective": "test"
+		},
 		"allowed_direct_modules": [
 			{"path": "go.opentelemetry.io/otel", "layer": "observability", "owner": "platform", "approved": false, "reason": "test"}
 		]
@@ -24,8 +33,17 @@ func TestLoadContractRejectsUnapprovedEntry(t *testing.T) {
 func TestLoadContractRejectsUnknownLayer(t *testing.T) {
 	path := writeContract(t, `{
 		"schema_version": "riido-go-dependency-allowlist.v2",
+		"id": "test-dependency-allowlist",
 		"service": "riido-control-plane",
 		"policy": "test",
+		"assertions": ["direct modules must use a known layer"],
+		"loop": {
+			"observation": "test",
+			"hypothesis": "test",
+			"execute": "test",
+			"evaluate": "test",
+			"retrospective": "test"
+		},
 		"allowed_direct_modules": [
 			{"path": "github.com/example/config-framework", "layer": "framework", "owner": "platform", "approved": true, "reason": "test"}
 		]

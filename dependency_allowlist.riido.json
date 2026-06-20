@@ -1,7 +1,20 @@
 {
   "schema_version": "riido-go-dependency-allowlist.v2",
+  "id": "control-plane-go-dependency-allowlist",
   "service": "riido-control-plane",
   "policy": "Only approved direct Go module dependencies may be added. Transitive dependencies are accepted through the approved direct dependency graph and must not become direct dependencies without an allowlist entry.",
+  "assertions": [
+    "direct non-standard Go modules must be explicitly approved",
+    "approved direct modules must declare layer, owner, reason, and approval",
+    "new platform dependencies must appear as executable policy, not reviewer memory"
+  ],
+  "loop": {
+    "observation": "A strict no-external-dependency rule blocked platform observability dependencies while ad hoc exceptions would make dependency policy reviewer-memory based.",
+    "hypothesis": "An executable allowlist can preserve dependency governance while allowing approved platform dependencies for contracts and observability.",
+    "execute": "Load go list module metadata, compare direct non-standard dependencies against this allowlist, and fail on unapproved, duplicate, or unused allowlist entries.",
+    "evaluate": "CI uploads dependency-allowlist evidence with status, direct dependency counts, and this loop metadata.",
+    "retrospective": "Dependency policy remains machine-verifiable while approved SDKs stay scoped by layer, owner, and reason."
+  },
   "allowed_direct_modules": [
     {
       "path": "github.com/teamswyg/riido-contracts",

@@ -28,7 +28,7 @@ File line budget target: `75`; files over target: `97`; max file lines: `2481`.
 | `internal/riidoaiserver` | 85 | 85 | 2481 | 2481 | 23713 | 23713 |
 | `tools/reactquerygen` | 3 | 3 | 1395 | 1395 | 2766 | 2766 |
 | `cmd/riido_ai_server` | 3 | 3 | 791 | 791 | 1474 | 1474 |
-| `tools/containercontract` | 2 | 2 | 597 | 597 | 663 | 663 |
+| `tools/containercontract` | 2 | 2 | 454 | 597 | 535 | 663 |
 | `tools/generatedclienthandoff` | 2 | 2 | 601 | 601 | 578 | 578 |
 | `awsadapters` | 1 | 1 | 84 | 84 | 9 | 9 |
 | `internal/contractscompat` | 1 | 1 | 81 | 81 | 6 | 6 |
@@ -57,8 +57,8 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver` | 85 | 2481 | 23713 |
 | `tools/reactquerygen` | 3 | 1395 | 2766 |
 | `cmd/riido_ai_server` | 3 | 791 | 1474 |
-| `tools/containercontract` | 2 | 597 | 663 |
 | `tools/generatedclienthandoff` | 2 | 601 | 578 |
+| `tools/containercontract` | 2 | 454 | 535 |
 | `awsadapters` | 1 | 84 | 9 |
 | `internal/contractscompat` | 1 | 81 | 6 |
 

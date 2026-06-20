@@ -21,104 +21,6 @@ const (
 	checkSchemaVersion    = "riido-container-image-contract-check.v1"
 )
 
-type imageContract struct {
-	SchemaVersion           string        `json:"schema_version"`
-	Service                 string        `json:"service"`
-	Dockerfile              string        `json:"dockerfile"`
-	FargateTaskDefinitionIR string        `json:"fargate_task_definition_ir,omitempty"`
-	Build                   buildContract `json:"build"`
-	Final                   finalContract `json:"final"`
-}
-
-type buildContract struct {
-	BuildArg   buildArgContract `json:"build_arg"`
-	StageName  string           `json:"stage_name"`
-	Workdir    string           `json:"workdir"`
-	CGOEnabled string           `json:"cgo_enabled"`
-	GoBuild    goBuildContract  `json:"go_build"`
-}
-
-type buildArgContract struct {
-	Name    string `json:"name"`
-	Default string `json:"default"`
-}
-
-type goBuildContract struct {
-	Package  string   `json:"package"`
-	Output   string   `json:"output"`
-	Trimpath bool     `json:"trimpath"`
-	LDFlags  []string `json:"ldflags"`
-}
-
-type finalContract struct {
-	BaseImage      string                 `json:"base_image"`
-	CopyFrom       string                 `json:"copy_from"`
-	CopySource     string                 `json:"copy_source"`
-	Binary         string                 `json:"binary"`
-	RequiredCopies []requiredCopyContract `json:"required_copies,omitempty"`
-	ExposedPorts   []int                  `json:"exposed_ports"`
-	Env            map[string]string      `json:"env"`
-	User           string                 `json:"user"`
-	Entrypoint     []string               `json:"entrypoint"`
-}
-
-type requiredCopyContract struct {
-	From        string `json:"from"`
-	Source      string `json:"source"`
-	Destination string `json:"destination"`
-}
-
-type dockerfile struct {
-	Args   map[string]string
-	Stages []stage
-}
-
-type stage struct {
-	Base       string
-	Alias      string
-	Workdir    string
-	Env        map[string]string
-	Runs       []string
-	Copies     []copyInstruction
-	Exposes    []int
-	User       string
-	Entrypoint []string
-}
-
-type copyInstruction struct {
-	From string
-	Src  string
-	Dst  string
-}
-
-type taskDefinitionIR struct {
-	RuntimePlatform struct {
-		OperatingSystemFamily string `json:"operatingSystemFamily"`
-	} `json:"runtime_platform"`
-	Container struct {
-		PortMappings []struct {
-			ContainerPort int `json:"containerPort"`
-		} `json:"portMappings"`
-		Environment []struct {
-			Name  string `json:"name"`
-			Value string `json:"value"`
-		} `json:"environment"`
-	} `json:"container"`
-}
-
-type checkRecord struct {
-	SchemaVersion           string   `json:"schema_version"`
-	Service                 string   `json:"service"`
-	Dockerfile              string   `json:"dockerfile"`
-	FargateTaskDefinitionIR string   `json:"fargate_task_definition_ir,omitempty"`
-	BuildStage              string   `json:"build_stage"`
-	FinalBaseImage          string   `json:"final_base_image"`
-	FinalUser               string   `json:"final_user"`
-	Entrypoint              []string `json:"entrypoint"`
-	ExposedPorts            []int    `json:"exposed_ports"`
-	ChecksTotal             int      `json:"checks_total"`
-}
-
 func main() {
 	if err := run(os.Args[1:], os.Stdout); err != nil {
 		fmt.Fprintln(os.Stderr, "containercontract:", err)
@@ -183,54 +85,6 @@ func loadContract(path string) (imageContract, error) {
 		return imageContract{}, err
 	}
 	return contract, nil
-}
-
-func validateContract(contract imageContract) error {
-	if contract.SchemaVersion != contractSchemaVersion {
-		return fmt.Errorf("schema_version must be %s", contractSchemaVersion)
-	}
-	required := map[string]string{
-		"service":                 contract.Service,
-		"dockerfile":              contract.Dockerfile,
-		"build.build_arg.name":    contract.Build.BuildArg.Name,
-		"build.build_arg.default": contract.Build.BuildArg.Default,
-		"build.stage_name":        contract.Build.StageName,
-		"build.workdir":           contract.Build.Workdir,
-		"build.cgo_enabled":       contract.Build.CGOEnabled,
-		"build.go_build.package":  contract.Build.GoBuild.Package,
-		"build.go_build.output":   contract.Build.GoBuild.Output,
-		"final.base_image":        contract.Final.BaseImage,
-		"final.copy_from":         contract.Final.CopyFrom,
-		"final.copy_source":       contract.Final.CopySource,
-		"final.binary":            contract.Final.Binary,
-		"final.user":              contract.Final.User,
-	}
-	for field, value := range required {
-		if strings.TrimSpace(value) == "" {
-			return fmt.Errorf("%s is required", field)
-		}
-	}
-	if len(contract.Final.ExposedPorts) == 0 {
-		return errors.New("final.exposed_ports is required")
-	}
-	if len(contract.Final.Entrypoint) == 0 {
-		return errors.New("final.entrypoint is required")
-	}
-	if len(contract.Final.Env) == 0 {
-		return errors.New("final.env is required")
-	}
-	for i, copy := range contract.Final.RequiredCopies {
-		if strings.TrimSpace(copy.From) == "" {
-			return fmt.Errorf("final.required_copies[%d].from is required", i)
-		}
-		if strings.TrimSpace(copy.Source) == "" {
-			return fmt.Errorf("final.required_copies[%d].source is required", i)
-		}
-		if strings.TrimSpace(copy.Destination) == "" {
-			return fmt.Errorf("final.required_copies[%d].destination is required", i)
-		}
-	}
-	return nil
 }
 
 func verifyContract(contract imageContract) (checkRecord, error) {
@@ -306,7 +160,9 @@ func verifyContract(contract imageContract) (checkRecord, error) {
 	}
 	return checkRecord{
 		SchemaVersion:           checkSchemaVersion,
+		ID:                      contract.ID,
 		Service:                 contract.Service,
+		Status:                  "verified",
 		Dockerfile:              filepath.ToSlash(contract.Dockerfile),
 		FargateTaskDefinitionIR: filepath.ToSlash(contract.FargateTaskDefinitionIR),
 		BuildStage:              contract.Build.StageName,
@@ -314,6 +170,7 @@ func verifyContract(contract imageContract) (checkRecord, error) {
 		FinalUser:               finalStage.User,
 		Entrypoint:              append([]string(nil), finalStage.Entrypoint...),
 		ExposedPorts:            sortedInts(finalStage.Exposes),
+		Loop:                    contract.Loop,
 		ChecksTotal:             checks,
 	}, nil
 }
