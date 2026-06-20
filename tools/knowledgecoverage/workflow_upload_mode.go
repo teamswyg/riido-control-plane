@@ -9,7 +9,3 @@ func workflowIfNoFilesFoundValue(line string) string {
 	}
 	return strings.Trim(strings.TrimSpace(value), `"'`)
 }
-
-func nextArtifactUpload(line string) bool {
-	return strings.Contains(line, "actions/upload-artifact")
-}
