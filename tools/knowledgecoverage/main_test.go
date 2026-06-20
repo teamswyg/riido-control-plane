@@ -21,8 +21,11 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.Status != "verified" || got.ScannedCount == 0 || got.ManualCount == 0 {
+	if got.Status != "verified" || got.ScannedCount == 0 || got.ManualCount != 0 {
 		t.Fatalf("unexpected evidence: %+v", got)
+	}
+	if got.DirectSSOTCount != got.DirectLoopCount || len(got.DirectMissingLoop) != 0 {
+		t.Fatalf("direct SSOT loop coverage drifted: %+v", got)
 	}
 }
 
