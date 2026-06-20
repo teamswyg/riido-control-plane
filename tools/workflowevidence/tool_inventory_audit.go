@@ -1,15 +1,29 @@
 package main
 
-func auditEvidenceTools(root string, workflowTexts []string) (int, int, []string) {
+func auditEvidenceTools(root string, workflows []workflowSource) (int, int, int, []string, []string) {
 	tools := evidenceToolDirs(root)
-	covered := 0
-	var missing []string
+	called, bound := 0, 0
+	texts := workflowSourceTexts(workflows)
+	var missingCalls, missingBindings []string
 	for _, tool := range tools {
-		if workflowCallsEvidenceTool(workflowTexts, tool) {
-			covered++
-			continue
+		if workflowCallsEvidenceTool(texts, tool) {
+			called++
+		} else {
+			missingCalls = append(missingCalls, tool)
 		}
-		missing = append(missing, tool)
+		if workflowBindsEvidenceTool(workflows, tool) {
+			bound++
+		} else {
+			missingBindings = append(missingBindings, tool)
+		}
 	}
-	return len(tools), covered, uniqueStrings(missing)
+	return len(tools), called, bound, uniqueStrings(missingCalls), uniqueStrings(missingBindings)
+}
+
+func workflowSourceTexts(workflows []workflowSource) []string {
+	texts := make([]string, 0, len(workflows))
+	for _, workflow := range workflows {
+		texts = append(texts, workflow.Text)
+	}
+	return texts
 }

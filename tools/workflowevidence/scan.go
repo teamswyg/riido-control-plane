@@ -16,17 +16,18 @@ func auditWorkflows(root string, m manifest) (auditResult, error) {
 	accepted := acceptedByPath(m.AcceptedGaps)
 	used := map[string]bool{}
 	var result auditResult
-	var texts []string
+	var sources []workflowSource
 	for _, path := range paths {
 		record, text, err := scanWorkflow(root, path, accepted, used)
 		if err != nil {
 			return auditResult{}, err
 		}
-		texts = append(texts, text)
+		sources = append(sources, workflowSource{Text: text, UploadPaths: artifactUploadPathValues(text)})
 		result.Records = append(result.Records, record)
 		addRecord(&result, record)
 	}
-	result.EvidenceTools, result.EvidenceToolCovered, result.MissingEvidenceTools = auditEvidenceTools(root, texts)
+	result.EvidenceTools, result.EvidenceToolCovered, result.EvidenceToolBound,
+		result.MissingEvidenceTools, result.MissingEvidenceToolBindings = auditEvidenceTools(root, sources)
 	for path := range accepted {
 		if !used[path] {
 			result.AcceptedUnused = append(result.AcceptedUnused, path)
