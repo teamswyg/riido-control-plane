@@ -9,6 +9,7 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Class | Count |
 | --- | ---: |
 | Generated reader docs | 27 |
+| Generated reader docs with tool | 27 |
 | Direct SSOT docs | 3 |
 | Direct SSOT docs with evidence loop | 3 |
 | Registered manual docs | 0 |
@@ -44,5 +45,7 @@ None.
 
 - every scanned markdown file must be generated, direct-SSOT backed, or registered as manual debt
 - manual debt registration is observable evidence, not completion when manual debt exists
+- a generated reader doc must name an existing tools/<name> generator in its marker
+- a generated reader doc generator must be referenced by at least one GitHub Actions workflow
 - a direct-SSOT backed markdown file must have a sibling .riido.json manifest
 - a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest

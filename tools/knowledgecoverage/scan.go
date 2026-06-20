@@ -22,6 +22,7 @@ func scanDocs(root string, m manifest) ([]docClass, []string) {
 		docs = append(docs, found...)
 	}
 	slices.SortFunc(docs, func(a, b docClass) int { return strings.Compare(a.Path, b.Path) })
+	problems = append(problems, validateGeneratedDocs(root, docs)...)
 	problems = append(problems, validateManualEntries(root, m, docs)...)
 	problems = append(problems, validateDirectLoops(docs)...)
 	return docs, problems
@@ -43,7 +44,7 @@ func scanRootDocs(root, scanRoot string, m manifest, manualByPath map[string]man
 func classifyDoc(root, rel string, m manifest, manualByPath map[string]manualGroup) docClass {
 	text, err := os.ReadFile(resolvePath(root, rel))
 	if err == nil && strings.Contains(string(text), generatedMarker) {
-		return docClass{Path: rel, Kind: "generated"}
+		return docClass{Path: rel, Kind: "generated", GeneratorTool: generatedToolFromMarker(string(text))}
 	}
 	manifestPath := siblingManifest(rel)
 	if _, err := os.Stat(resolvePath(root, manifestPath)); err == nil {
