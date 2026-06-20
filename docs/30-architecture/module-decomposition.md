@@ -21,6 +21,18 @@ File line budget target: `75`; files over target: `97`; max file lines: `2481`.
 | Files over target | 97 | 97 | 0 |
 | Max file lines | 2481 | 2481 | 0 |
 
+### Line Budget Hotspot Ratchets
+
+| Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `internal/riidoaiserver` | 85 | 85 | 2481 | 2481 | 23713 | 23713 |
+| `tools/reactquerygen` | 3 | 3 | 1395 | 1395 | 2770 | 2770 |
+| `cmd/riido_ai_server` | 3 | 3 | 791 | 791 | 1474 | 1474 |
+| `tools/containercontract` | 2 | 2 | 597 | 597 | 663 | 663 |
+| `tools/generatedclienthandoff` | 2 | 2 | 601 | 601 | 578 | 578 |
+| `awsadapters` | 1 | 1 | 84 | 84 | 9 | 9 |
+| `internal/contractscompat` | 1 | 1 | 81 | 81 | 6 | 6 |
+
 | File | Lines |
 | --- | ---: |
 | `internal/riidoaiserver/ai_agent_client_http_test.go` | 2481 |

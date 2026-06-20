@@ -11,6 +11,18 @@ func verifyLineBudgetRatchet(result lineBudgetResult) error {
 		return fmt.Errorf("line budget max file lines increased: got %d, max %d",
 			result.MaxLines, result.MaxFileLinesLimit)
 	}
+	if err := verifyLineBudgetHotspotRatchets(result.HotspotRatchets); err != nil {
+		return err
+	}
+	return nil
+}
+
+func verifyLineBudgetHotspotRatchets(ratchets []lineBudgetHotspotRatchet) error {
+	for _, ratchet := range ratchets {
+		if ratchet.FilesSlack < 0 || ratchet.MaxLinesSlack < 0 || ratchet.TotalOverSlack < 0 {
+			return fmt.Errorf("line budget hotspot %q increased", ratchet.Path)
+		}
+	}
 	return nil
 }
 

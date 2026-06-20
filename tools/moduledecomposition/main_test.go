@@ -32,6 +32,9 @@ func TestModuleDecompositionEvidence(t *testing.T) {
 	if got.LineBudgetRatchet.MaxFilesOverTarget == 0 || got.LineBudgetRatchet.MaxFileLines == 0 {
 		t.Fatalf("missing line budget ratchet evidence: %+v", got)
 	}
+	if len(got.LineBudgetHotspotRatchets) == 0 {
+		t.Fatalf("missing line budget hotspot ratchet evidence: %+v", got)
+	}
 }
 
 func TestModuleDecompositionGeneratedDocFresh(t *testing.T) {
@@ -49,5 +52,14 @@ func TestLineBudgetRatchetRejectsWorseEvidence(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("expected ratchet failure")
+	}
+}
+
+func TestLineBudgetHotspotRatchetRejectsWorseEvidence(t *testing.T) {
+	err := verifyLineBudgetHotspotRatchets([]lineBudgetHotspotRatchet{
+		{Path: "internal/example", FilesSlack: -1},
+	})
+	if err == nil {
+		t.Fatal("expected hotspot ratchet failure")
 	}
 }

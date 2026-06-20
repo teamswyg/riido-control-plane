@@ -12,6 +12,7 @@ func renderLineBudget(b *strings.Builder, result lineBudgetResult) {
 	fmt.Fprintf(b, "File line budget target: `%d`; files over target: `%d`; max file lines: `%d`.\n\n",
 		result.Target, result.OverTarget, result.MaxLines)
 	renderLineBudgetRatchet(b, result)
+	renderLineBudgetHotspotRatchets(b, result.HotspotRatchets)
 	if len(result.Samples) == 0 {
 		return
 	}

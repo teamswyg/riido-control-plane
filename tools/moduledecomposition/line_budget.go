@@ -14,6 +14,7 @@ type lineBudgetResult struct {
 	MaxFileLinesLimit  int
 	Samples            []lineBudgetSample
 	Hotspots           []lineBudgetHotspot
+	HotspotRatchets    []lineBudgetHotspotRatchet
 }
 
 type lineBudgetSample struct {
@@ -57,7 +58,9 @@ func scanLineBudget(repoRoot string, roots []string, budget fileLineBudget) (lin
 			return result, err
 		}
 	}
+	hotspots := lineBudgetHotspots(samples, budget.TargetLines)
 	result.Samples = topLineBudgetSamples(samples, budget.SampleLimit)
-	result.Hotspots = topLineBudgetHotspots(samples, budget.HotspotLimit, budget.TargetLines)
+	result.Hotspots = trimLineBudgetHotspots(hotspots, budget.HotspotLimit)
+	result.HotspotRatchets = buildLineBudgetHotspotRatchets(hotspots, budget.HotspotLimits)
 	return result, nil
 }
