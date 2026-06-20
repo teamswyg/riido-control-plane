@@ -1,0 +1,68 @@
+name: runtime-deployment-boundary
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/runtime-deployment-boundary.yml"
+      - ".github/workflows/deploy-ai-agent-testnet.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - "awsadapters/**"
+      - "cmd/riido_ai_server/**"
+      - "internal/riidoaiserver/**"
+      - "tools/containercontract/**"
+      - "tools/deploypolicy/**"
+      - "tools/runtimeboundary/**"
+      - "docs/30-architecture/runtime-deployment-boundary.md"
+      - "docs/30-architecture/runtime-deployment-boundary.riido.json"
+      - "docs/30-architecture/runtime-cd-ownership.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+  pull_request:
+    paths:
+      - ".github/workflows/runtime-deployment-boundary.yml"
+      - ".github/workflows/deploy-ai-agent-testnet.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - "awsadapters/**"
+      - "cmd/riido_ai_server/**"
+      - "internal/riidoaiserver/**"
+      - "tools/containercontract/**"
+      - "tools/deploypolicy/**"
+      - "tools/runtimeboundary/**"
+      - "docs/30-architecture/runtime-deployment-boundary.md"
+      - "docs/30-architecture/runtime-deployment-boundary.riido.json"
+      - "docs/30-architecture/runtime-cd-ownership.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+
+jobs:
+  runtime-deployment-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
+      - name: Verify runtime deployment boundary
+        run: |
+          mkdir -p out
+          go test ./tools/runtimeboundary -count=1
+          go run ./tools/runtimeboundary \
+            -check-doc \
+            -evidence-out out/runtime-deployment-boundary-evidence.json
+      - name: Verify executable knowledge coverage
+        run: |
+          go run ./tools/knowledgecoverage \
+            -check-doc \
+            -evidence-out out/executable-knowledge-coverage.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-deployment-boundary-evidence
+          path: |
+            out/runtime-deployment-boundary-evidence.json
+            out/executable-knowledge-coverage.json
+          if-no-files-found: error

@@ -1,0 +1,92 @@
+{
+  "schema_version": "riido-control-plane-runtime-deployment-boundary.v1",
+  "id": "runtime-deployment-boundary",
+  "title": "Runtime Deployment Boundary",
+  "riido_task": "RIID-4712",
+  "generated_doc": "docs/30-architecture/runtime-deployment-boundary.md",
+  "workflow": ".github/workflows/runtime-deployment-boundary.yml",
+  "evidence_artifact": "runtime-deployment-boundary-evidence",
+  "linked_runtime_cd_manifest": "docs/30-architecture/runtime-cd-ownership.riido.json",
+  "boundaries": [
+    {
+      "id": "public-runtime",
+      "owner": "riido-control-plane",
+      "scope": "Buildable riido_ai_server process, HTTP routes, graceful shutdown, safe seed shape, and stdout EMF.",
+      "does_not_own": ["AWS resources", "production secrets", "Terraform state", "container image publishing"],
+      "evidence": [
+        {"path": "cmd/riido_ai_server/main.go", "contains": ["RIIDO_AI_SERVER_ADDR", "Shutdown"]},
+        {"path": "internal/riidoaiserver/server.go", "contains": ["Handler", "ServeMux"]}
+      ]
+    },
+    {
+      "id": "container-artifact",
+      "owner": "riido-control-plane",
+      "scope": "Static scratch image contract for /riido_ai_server.",
+      "does_not_own": ["ECR repository creation", "ECS service wiring"],
+      "evidence": [
+        {"path": "tools/containercontract/main_test.go", "contains": ["CGO_ENABLED=0", "scratch", "65532:65532"]},
+        {"path": ".github/workflows/ci.yml", "contains": ["go test ./..."]}
+      ]
+    },
+    {
+      "id": "runtime-artifact-cd",
+      "owner": "riido-control-plane",
+      "scope": "Manual or tag-triggered image-only ECS service promotion using stable environment configuration.",
+      "does_not_own": ["AWS topology", "secret values", "Terraform drift policy"],
+      "evidence": [
+        {"path": ".github/workflows/deploy-ai-agent-testnet.yml", "contains": ["workflow_dispatch", "deployment_target", "update-service"]},
+        {"path": "docs/30-architecture/runtime-cd-ownership.riido.json", "contains": ["RIID-4835", "RIID-4839", "runtime-cd-ownership"]}
+      ]
+    },
+    {
+      "id": "codedeploy-handoff",
+      "owner": "riido-control-plane plus riido-infra",
+      "scope": "CodeDeploy creation/wait/smoke is public workflow execution; topology remains private infra.",
+      "does_not_own": ["CodeDeploy service role ARN", "target group ARN", "listener ARN"],
+      "evidence": [
+        {"path": ".github/workflows/deploy-ai-agent-testnet.yml", "contains": ["create-deployment", "deployment-successful"]},
+        {"path": "docs/30-architecture/runtime-cd-ownership.riido.json", "contains": ["RIID-4855", "codedeploy_activation_gate"]}
+      ]
+    },
+    {
+      "id": "aws-adapter-boundary",
+      "owner": "riido-control-plane public adapters",
+      "scope": "Stdlib-only request construction and fake-endpoint verified behavior.",
+      "does_not_own": ["IAM policy attachment", "DynamoDB table creation", "SDK credential discovery"],
+      "evidence": [
+        {"path": "awsadapters/doc.go", "contains": ["Package awsadapters"]},
+        {"path": "tools/dependencyallowlist/verify.go", "contains": ["verifyModules"]}
+      ]
+    },
+    {
+      "id": "public-release-handoff",
+      "owner": "riido-control-plane",
+      "scope": "Git/tag, Go module, container contract result, and aggregate deploy/smoke pass-fail only.",
+      "does_not_own": ["task-definition ARNs, image digests, live workflow run URLs", "Terraform plan output", "raw operator evidence"],
+      "evidence": [
+        {"path": "tools/deploypolicy/deploy_policy_test.go", "contains": ["TestRuntimeCDOwnershipManifest", "ai-api.riido.io"]},
+        {"path": "docs/30-architecture/runtime-cd-ownership.riido.json", "contains": ["public_surface_scan_contract", "public_sensitive_surface_guard"]}
+      ]
+    }
+  ],
+  "rules": [
+    "runtime artifact CD execution stays in riido-control-plane",
+    "riido-infra owns topology, IAM, drift, and private operator evidence",
+    "RIID-4835 defines the public export contract for aggregate-only deploy and smoke handoff",
+    "RIID-4839 keeps exact deploy and smoke key-name lists in runtime-cd-ownership.riido.json and workflow files",
+    "RIID-4842 treats public key names as a sensitivity budget and keeps broad summary docs linked, not duplicated",
+    "RIID-4845 keeps exact deploy and smoke key-name lists out of human-readable public docs",
+    "RIID-4853 allows aggregate deploy/smoke pass-fail status without live payload values while keeping live details private",
+    "public docs link to runtime-cd-ownership.riido.json instead of repeating exact deploy and smoke key lists",
+    "image values, task-definition values, CodeDeploy payloads, deployment IDs, and smoke payloads are not public hand-off artifacts",
+    "public workflows must not upload deployment artifacts from the live run",
+    "CodeDeploy Handoff is topology-gated and runtime artifact CD execution still belongs to riido-control-plane"
+  ],
+  "loop": {
+    "observation": "The runtime deployment boundary was a prose document even though most of its rules were already enforced by runtime CD ownership and deploy redaction tests.",
+    "hypothesis": "A compact boundary manifest can generate the reader and verify that each ownership claim has an executable source.",
+    "execute": "Generate this reader from the boundary manifest and verify linked workflow, source, container, deploy policy, and runtime-CD ownership evidence.",
+    "evaluate": "The verifier fails on stale generated docs, missing evidence anchors, missing linked runtime-CD manifest shape, or missing public redaction phrases.",
+    "retrospective": "This keeps public/private deployment interpretation narrow while leaving live AWS evidence in infra/operator systems."
+  }
+}

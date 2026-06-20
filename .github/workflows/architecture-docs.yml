@@ -16,6 +16,7 @@ on:
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
       - "tools/moduledecomposition/**"
+      - "tools/runtimeboundary/**"
       - "tools/snapshotcqrsgate/**"
   pull_request:
     paths:
@@ -31,6 +32,7 @@ on:
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
       - "tools/moduledecomposition/**"
+      - "tools/runtimeboundary/**"
       - "tools/snapshotcqrsgate/**"
 
 jobs:
@@ -51,6 +53,7 @@ jobs:
           test -f docs/30-architecture/config-reference.md
           test -f docs/30-architecture/integration-matrix.md
           test -f docs/30-architecture/runtime-deployment-boundary.md
+          test -f docs/30-architecture/runtime-deployment-boundary.riido.json
           test -f docs/30-architecture/runtime-cd-ownership.md
           test -f docs/30-architecture/runtime-cd-ownership.riido.json
           test -f docs/30-architecture/ai-agent-risk-evidence.riido.json
@@ -78,6 +81,11 @@ jobs:
           go run ./tools/moduledecomposition \
             -check-doc \
             -evidence-out out/module-decomposition-evidence.json
+      - name: Verify runtime deployment boundary
+        run: |
+          go run ./tools/runtimeboundary \
+            -check-doc \
+            -evidence-out out/runtime-deployment-boundary-evidence.json
       - name: Verify Go dependency allowlist
         run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify AI Agent risk evidence
@@ -112,6 +120,13 @@ jobs:
         with:
           name: module-decomposition-evidence
           path: out/module-decomposition-evidence.json
+          if-no-files-found: warn
+      - name: Upload runtime deployment boundary evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-deployment-boundary-evidence
+          path: out/runtime-deployment-boundary-evidence.json
           if-no-files-found: warn
       - name: Verify AI Agent snapshot CQRS gate
         run: |
