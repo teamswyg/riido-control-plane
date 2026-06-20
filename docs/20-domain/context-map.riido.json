@@ -1,0 +1,53 @@
+{
+  "schema_version": "riido-control-plane-context-map.v1",
+  "id": "control-plane-context-map",
+  "title": "Control Plane Context Map",
+  "riido_task": "RIID-4712",
+  "generated_doc": "docs/20-domain/context-map.md",
+  "workflow": ".github/workflows/context-map.yml",
+  "evidence_artifact": "control-plane-context-map-evidence",
+  "owned_contexts": [
+    {"id": "c10-saas-control-plane", "name": "C10 SaaS Control Plane", "owner_paths": ["internal/riidoaiserver"], "responsibility": "assignment, polling, heartbeat, event append, SSE, metrics, AI Agent client API, authorization ports"},
+    {"id": "c10-runtime-adapter", "name": "C10 Runtime Adapter", "owner_paths": ["cmd/riido_ai_server"], "responsibility": "environment parsing, HTTP server lifecycle, metrics/pprof/tracing startup"},
+    {"id": "c10-public-aws-adapter-facade", "name": "C10 Public AWS Adapter Facade", "owner_paths": ["awsadapters"], "responsibility": "module-consumable facade over stdlib-only DynamoDB/EventBridge adapters"},
+    {"id": "c10-container-contract", "name": "C10 Container Contract", "owner_paths": ["packaging/containers", "tools/containercontract"], "responsibility": "public executable image shape for the control-plane binary"}
+  ],
+  "imported_contexts": [
+    {"id": "assignment-polling-contract", "name": "Assignment Polling Contract", "imported_from": "github.com/teamswyg/riido-contracts/assignment", "use": "shared assignment state, poll action, heartbeat/event DTOs, and agent binding DTOs"},
+    {"id": "provider-distribution-vocabulary", "name": "Provider / Distribution Vocabulary", "imported_from": "github.com/teamswyg/riido-contracts/provider", "use": "provider status and routing vocabulary shared with the daemon"},
+    {"id": "go-dependency-allowlist", "name": "Go Dependency Allowlist", "imported_from": "dependency_allowlist.riido.json", "use": "approved direct Go dependency metadata"}
+  ],
+  "external_contexts": [
+    {"id": "customer-pc-daemon-runtime", "name": "Customer-PC daemon runtime", "owner": "riido-daemon", "boundary": "provider execution, local task DB, socket API, customer host integration"},
+    {"id": "shared-contract-tags", "name": "Shared contract tags", "owner": "riido-contracts", "boundary": "cross-repo DTOs, state vocabulary, schema-versioned fixtures"},
+    {"id": "infrastructure-deployment", "name": "Infrastructure / deployment", "owner": "riido-infra", "boundary": "Terraform, remote state, AWS account wiring, ECR/ECS, DNS/ACM/WAF, deployment evidence"},
+    {"id": "store-app-clients", "name": "Store/app clients", "owner": "riido-client and riido-desktop", "boundary": "UI composition over public HTTP contracts, generated AI Agent client artifacts, browser origins"}
+  ],
+  "direction_rules": {
+    "allowed_imports": ["cmd/riido_ai_server -> internal/riidoaiserver", "awsadapters -> internal/riidoaiserver", "internal/riidoaiserver -> github.com/teamswyg/riido-contracts/...", "tests/tools -> public package surfaces under this module"],
+    "forbidden_go_imports": ["github.com/teamswyg/riido-daemon/internal", "github.com/teamswyg/riido_daemon/internal", "github.com/teamswyg/riido-infra/internal", "github.com/aws/aws-sdk-go-v2"],
+    "forbidden_path_tokens": ["riido_daemon/internal", "riido-daemon/internal", "terraform/internal"]
+  },
+  "ssot_links": [
+    {"name": "SaaS behavior", "path": "saas-control-plane.md"},
+    {"name": "AI Agent client API", "path": "ai-agent-client-api.md"},
+    {"name": "Agent catalog RBAC", "path": "agent-catalog-rbac.md"},
+    {"name": "Assignment operation journal", "path": "assignment-operation-journal.md"},
+    {"name": "Config catalog", "path": "../30-architecture/config-reference.md"},
+    {"name": "Snapshot CQRS gate", "path": "../30-architecture/ai-agent-snapshot-cqrs-gate.md"}
+  ],
+  "source_checks": [
+    {"name": "module", "file": "go.mod", "contains": ["module github.com/teamswyg/riido-control-plane"]},
+    {"name": "runtime-adapter", "file": "cmd/riido_ai_server/main.go", "contains": ["internal/riidoaiserver"]},
+    {"name": "aws-facade", "file": "awsadapters/doc.go", "contains": ["public, module-consumable facade"]},
+    {"name": "container-contract", "file": "packaging/containers/riido_ai_server_container.riido.json", "contains": ["./cmd/riido_ai_server"]},
+    {"name": "dependency-gate", "file": ".github/workflows/ci.yml", "contains": ["tools/dependencyallowlist", "dependency_allowlist.riido.json"]}
+  ],
+  "loop": {
+    "observation": "The context map fixed ownership and forbidden boundaries in prose, but CI did not prove those boundaries.",
+    "hypothesis": "A generated context-map SSOT can reduce interpretation variance across agents and catch import-boundary drift cheaply.",
+    "execute": "Generate this reader doc from the manifest and run the contextmap verifier in CI.",
+    "evaluate": "The verifier checks required contexts, owner paths, SSOT links, source anchors, forbidden Go imports, generated doc freshness, and loop metadata.",
+    "retrospective": "This slice proves public repository context boundaries; runtime cost and live AWS evidence remain in deployment-owned slices."
+  }
+}
