@@ -35,6 +35,12 @@ func TestModuleDecompositionEvidence(t *testing.T) {
 	if len(got.LineBudgetHotspotRatchets) == 0 {
 		t.Fatalf("missing line budget hotspot ratchet evidence: %+v", got)
 	}
+	if got.LineBudgetUntrackedHotspots == nil {
+		t.Fatalf("missing line budget hotspot coverage evidence: %+v", got)
+	}
+	if len(got.LineBudgetUntrackedHotspots) != 0 {
+		t.Fatalf("unexpected untracked line budget hotspots: %+v", got)
+	}
 }
 
 func TestModuleDecompositionGeneratedDocFresh(t *testing.T) {
