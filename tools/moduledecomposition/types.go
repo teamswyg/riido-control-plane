@@ -18,8 +18,9 @@ type manifest struct {
 }
 
 type fileLineBudget struct {
-	TargetLines int `json:"target_lines"`
-	SampleLimit int `json:"sample_limit"`
+	TargetLines  int `json:"target_lines"`
+	SampleLimit  int `json:"sample_limit"`
+	HotspotLimit int `json:"hotspot_limit"`
 }
 
 type packageEntry struct {

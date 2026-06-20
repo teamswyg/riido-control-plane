@@ -19,4 +19,5 @@ func renderLineBudget(b *strings.Builder, result lineBudgetResult) {
 		fmt.Fprintf(b, "| `%s` | %d |\n", sample.Path, sample.Lines)
 	}
 	b.WriteString("\n")
+	renderLineBudgetHotspots(b, result.Hotspots)
 }

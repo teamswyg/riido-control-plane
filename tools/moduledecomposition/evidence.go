@@ -1,21 +1,22 @@
 package main
 
 type evidence struct {
-	SchemaVersion       string             `json:"schema_version"`
-	ID                  string             `json:"id"`
-	Status              string             `json:"status"`
-	PackageCount        int                `json:"package_count"`
-	RuntimePackages     int                `json:"runtime_packages"`
-	InternalPackages    int                `json:"internal_packages"`
-	ToolPackages        int                `json:"tool_packages"`
-	ForbiddenImportHit  int                `json:"forbidden_import_hits"`
-	LineBudgetTarget    int                `json:"line_budget_target"`
-	FilesOverLineBudget int                `json:"files_over_line_budget"`
-	MaxFileLines        int                `json:"max_file_lines"`
-	LineBudgetSamples   []lineBudgetSample `json:"line_budget_samples"`
-	Workflow            string             `json:"workflow"`
-	GeneratedDoc        string             `json:"generated_doc"`
-	Loop                evidenceLoop       `json:"loop"`
+	SchemaVersion       string              `json:"schema_version"`
+	ID                  string              `json:"id"`
+	Status              string              `json:"status"`
+	PackageCount        int                 `json:"package_count"`
+	RuntimePackages     int                 `json:"runtime_packages"`
+	InternalPackages    int                 `json:"internal_packages"`
+	ToolPackages        int                 `json:"tool_packages"`
+	ForbiddenImportHit  int                 `json:"forbidden_import_hits"`
+	LineBudgetTarget    int                 `json:"line_budget_target"`
+	FilesOverLineBudget int                 `json:"files_over_line_budget"`
+	MaxFileLines        int                 `json:"max_file_lines"`
+	LineBudgetSamples   []lineBudgetSample  `json:"line_budget_samples"`
+	LineBudgetHotspots  []lineBudgetHotspot `json:"line_budget_hotspots"`
+	Workflow            string              `json:"workflow"`
+	GeneratedDoc        string              `json:"generated_doc"`
+	Loop                evidenceLoop        `json:"loop"`
 }
 
 func newEvidence(m manifest, result verifyResult) evidence {
@@ -32,6 +33,7 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		FilesOverLineBudget: result.LineBudget.OverTarget,
 		MaxFileLines:        result.LineBudget.MaxLines,
 		LineBudgetSamples:   result.LineBudget.Samples,
+		LineBudgetHotspots:  result.LineBudget.Hotspots,
 		Workflow:            m.Workflow,
 		GeneratedDoc:        m.GeneratedDoc,
 		Loop:                m.Loop,

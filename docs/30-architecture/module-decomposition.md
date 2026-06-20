@@ -12,7 +12,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `42`; runtime: `1`; internal: `3`; tools: `37`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `98`; max file lines: `2481`.
+File line budget target: `75`; files over target: `97`; max file lines: `2481`.
 
 | File | Lines |
 | --- | ---: |
@@ -26,6 +26,18 @@ File line budget target: `75`; files over target: `98`; max file lines: `2481`.
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
 | `cmd/riido_ai_server/main.go` | 791 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 746 |
+
+### Line Budget Hotspots
+
+| Directory | Files over target | Max lines | Total over target lines |
+| --- | ---: | ---: | ---: |
+| `internal/riidoaiserver` | 85 | 2481 | 23713 |
+| `tools/reactquerygen` | 3 | 1395 | 2770 |
+| `cmd/riido_ai_server` | 3 | 791 | 1474 |
+| `tools/containercontract` | 2 | 597 | 663 |
+| `tools/generatedclienthandoff` | 2 | 601 | 578 |
+| `awsadapters` | 1 | 84 | 9 |
+| `internal/contractscompat` | 1 | 81 | 6 |
 
 ## Packages
 

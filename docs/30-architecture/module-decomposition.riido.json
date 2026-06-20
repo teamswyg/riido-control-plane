@@ -9,7 +9,7 @@
   "module_path":"github.com/teamswyg/riido-control-plane",
   "source_roots":["awsadapters","cmd","internal","tools"],
   "forbidden_imports":["riido-daemon","riido_daemon","riido-infra"],
-  "file_line_budget":{"target_lines":75,"sample_limit":10},
+  "file_line_budget":{"target_lines":75,"sample_limit":10,"hotspot_limit":8},
   "packages":[
     {"path":"awsadapters","kind":"public-adapter","role":"Public facade for private infra and evidence tooling that needs selected AWS adapter behavior.","must_not_own":"new adapter behavior, duplicated DTOs, credential storage"},
     {"path":"cmd/riido_ai_server","kind":"runtime-shell","role":"Binary entrypoint, Factor 12 env parsing, HTTP lifecycle, optional metrics and tracing startup.","must_not_own":"domain decisions, Terraform, production secret values, provider process execution"},
