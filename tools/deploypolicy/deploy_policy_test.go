@@ -93,11 +93,12 @@ func TestDeployAIAgentTestnetPublicRedactionPolicy(t *testing.T) {
 	requireContains(t, smokeWorkflow, "echo \"::add-mask::$TESTNET_TOKEN\"")
 	requireContains(t, smokeWorkflow, "umask 077")
 	requireContains(t, smokeWorkflow, "trap 'rm -f \"$replay\"' EXIT")
+	requireRedactedSummaryArtifact(t, workflow, "deploy-ai-agent-testnet-redacted-summary")
+	requireRedactedSummaryArtifact(t, smokeWorkflow, "ai-agent-client-testnet-smoke-redacted-summary")
 	requireContains(t, clientAPI, "not from a manual")
 	requireContains(t, clientAPI, "The workflow masks both values")
 
 	for _, forbidden := range []string{
-		"actions/upload-artifact",
 		"inputs.base_url",
 		"description: \"Optional AI Agent testnet base URL",
 		"GITHUB_OUTPUT",
@@ -443,6 +444,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicExport.AllowedPublicExports, "stable GitHub secret and variable key names")
 	requireSliceContains(t, parsed.PublicExport.AllowedPublicExports, "stable infra output key names that operators map into GitHub environment variables")
 	requireSliceContains(t, parsed.PublicExport.AllowedPublicExports, "aggregate pass or fail status without live payload values")
+	requireSliceContains(t, parsed.PublicExport.AllowedPublicExports, "redacted live workflow summary artifact names and paths")
 	requireSliceContains(t, parsed.PublicExport.ForbiddenPublicExports, "image URIs or digests")
 	requireSliceContains(t, parsed.PublicExport.ForbiddenPublicExports, "ECS task-definition JSON")
 	requireSliceContains(t, parsed.PublicExport.ForbiddenPublicExports, "CodeDeploy create-deployment request JSON")
@@ -466,6 +468,7 @@ func TestRuntimeCDOwnershipManifest(t *testing.T) {
 	requireSliceContains(t, parsed.PublicSurfaceScan.ForbiddenLiterals, "ai-api.riido.io")
 	requireSliceContains(t, parsed.PublicSurfaceScan.WorkflowForbiddenMechanism, "GITHUB_OUTPUT")
 	requireSliceContains(t, parsed.PublicSurfaceScan.AllowedPublicSurface, "AWS CLI response field names inside the deploy workflow")
+	requireSliceContains(t, parsed.PublicSurfaceScan.AllowedPublicSurface, "redacted live workflow summary artifact names and paths")
 	requireContains(t, parsed.PublicSurfaceScan.InfraMustTreatScanAs, "awareness policy only")
 	if parsed.PublicConfigKeyMinimization.RiidoTask != "RIID-4839" {
 		t.Fatalf("public config key minimization work unit drifted: %#v", parsed.PublicConfigKeyMinimization)
@@ -835,6 +838,43 @@ func requireContains(t *testing.T, body, want string) {
 	if !strings.Contains(body, want) {
 		t.Fatalf("missing %q", want)
 	}
+}
+
+func requireRedactedSummaryArtifact(t *testing.T, body, artifact string) {
+	t.Helper()
+	requireContains(t, body, "go run ./tools/liveworkflowevidence")
+	requireContains(t, body, "actions/upload-artifact@v4")
+	requireContains(t, body, "name: "+artifact)
+	requireContains(t, body, "path: out/"+artifact+".json")
+	for _, forbidden := range []string{
+		"$RUNNER_TEMP",
+		"riido-image-uri",
+		"riido-task-definition-arn",
+		"task-definition.current.json",
+		"task-definition.next.json",
+		"codedeploy-appspec.json",
+		"codedeploy-deployment.json",
+	} {
+		if strings.Contains(extractArtifactBlock(body, artifact), forbidden) {
+			t.Fatalf("redacted artifact block leaks live handoff path %q", forbidden)
+		}
+	}
+}
+
+func extractArtifactBlock(body, artifact string) string {
+	index := strings.Index(body, "name: "+artifact)
+	if index < 0 {
+		return body
+	}
+	start := strings.LastIndex(body[:index], "- uses: actions/upload-artifact")
+	if start < 0 {
+		start = index
+	}
+	end := strings.Index(body[index:], "\n      - ")
+	if end < 0 {
+		return body[start:]
+	}
+	return body[start : index+end]
 }
 
 func requireNotContains(t *testing.T, body, want string) {

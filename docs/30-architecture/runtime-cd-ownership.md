@@ -228,6 +228,8 @@ deploy mechanism, while still minimizing anything that helps reconstruct a live
 environment. New public key names, live examples, hostnames, AWS identifiers,
 image/task-definition values, generated CodeDeploy payloads, deployment IDs,
 smoke payloads, and raw operator evidence remain outside the public surface.
+Redacted summary artifacts may remain public only when they contain aggregate
+status and artifact shape, not live payload values.
 The current non-CD runtime exceptions are listed in
 [`runtime-cd-ownership.riido.json`](runtime-cd-ownership.riido.json). They are
 container/runtime shape names, not deploy/smoke GitHub configuration keys.
@@ -264,9 +266,11 @@ duplicating environment-specific setup details, exact key lists outside the
 machine-readable manifest/workflow files, live host examples, image/task
 definition values, CodeDeploy payload examples, deployment IDs, smoke payloads,
 workflow run references, Terraform plans/state/tfvars/apply logs, raw evidence,
-or convenience handoff examples. When a link to the manifest is enough, broad
-README, client-facing docs, generated-client docs, and PR prose should link
-instead of restating the detail.
+or convenience handoff examples. Redacted live workflow summary artifacts are
+allowed as evidence-loop outputs when they contain no endpoint, AWS resource,
+token, raw response, or generated deployment payload. When a link to the
+manifest is enough, broad README, client-facing docs, generated-client docs, and
+PR prose should link instead of restating the detail.
 
 `riido-infra` must know this rule so it can interpret topology and evidence
 requests, but the rule does not make infra the CD execution owner. Tightening

@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `38`; runtime: `1`; internal: `3`; tools: `33`; forbidden import hits: `0`.
+Packages: `39`; runtime: `1`; internal: `3`; tools: `34`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `100`; max file lines: `2717`.
 
@@ -24,7 +24,7 @@ File line budget target: `75`; files over target: `100`; max file lines: `2717`.
 | `internal/riidoaiserver/dynamodb_assignment_operation_store_test.go` | 1472 |
 | `tools/reactquerygen/main.go` | 1395 |
 | `tools/reactquerygen/figma_projection_test.go` | 1281 |
-| `tools/deploypolicy/deploy_policy_test.go` | 895 |
+| `tools/deploypolicy/deploy_policy_test.go` | 935 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
 
 ## Packages
@@ -37,7 +37,7 @@ File line budget target: `75`; files over target: `100`; max file lines: `2717`.
 - `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/metricshttpadapter`, `tools/openquestions`, `tools/providerstatus`, `tools/reviewaccountseed`, `tools/requestauth`, `tools/runtimeboundary`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
-- `meta-evidence-tool`: `tools/gocibaseline`, `tools/knowledgecoverage`, `tools/moduledecomposition`, `tools/workflowevidence`
+- `meta-evidence-tool`: `tools/gocibaseline`, `tools/knowledgecoverage`, `tools/liveworkflowevidence`, `tools/moduledecomposition`, `tools/workflowevidence`
 
 ## Boundary Rules
 

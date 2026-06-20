@@ -229,7 +229,8 @@
       "stable GitHub secret and variable key names",
       "stable infra output key names that operators map into GitHub environment variables",
       "control-plane git tag or commit identifiers",
-      "aggregate pass or fail status without live payload values"
+      "aggregate pass or fail status without live payload values",
+      "redacted live workflow summary artifact names and paths"
     ],
     "forbidden_public_exports": [
       "live deployment URLs",
@@ -285,7 +286,6 @@
       "https?://[^\\s`\"'<>]*(?:elb\\.amazonaws\\.com|cloudfront\\.net|execute-api\\.)[^\\s`\"'<>]*"
     ],
     "workflow_forbidden_mechanisms": [
-      "actions/upload-artifact",
       "GITHUB_OUTPUT",
       "inputs.base_url",
       "cross-workflow live value handoff"
@@ -295,7 +295,8 @@
       "stable infra output key names",
       "non-live workflow behavior descriptions",
       "placeholder host examples that use angle brackets",
-      "AWS CLI response field names inside the deploy workflow"
+      "AWS CLI response field names inside the deploy workflow",
+      "redacted live workflow summary artifact names and paths"
     ],
     "infra_must_treat_scan_as": "awareness policy only; scan results are not infra inputs, release artifacts, or operator evidence"
   },

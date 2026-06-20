@@ -6,18 +6,7 @@
   "workflow": ".github/workflows/workflow-evidence.yml",
   "evidence_artifact": "workflow-evidence",
   "workflow_root": ".github/workflows",
-  "accepted_gaps": [
-    {
-      "path": ".github/workflows/ai-agent-client-testnet-smoke.yml",
-      "reason": "live smoke workflow should keep raw endpoint evidence private",
-      "next": "publish redacted smoke summary evidence"
-    },
-    {
-      "path": ".github/workflows/deploy-ai-agent-testnet.yml",
-      "reason": "deployment workflow must avoid leaking live operator evidence",
-      "next": "publish redacted deployment summary evidence"
-    }
-  ],
+  "accepted_gaps": [],
   "assertions": [
     "workflows with executable checks must either publish evidence artifacts or be registered as accepted gaps",
     "accepted gaps are debt, not completion",

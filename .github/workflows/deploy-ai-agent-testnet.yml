@@ -312,6 +312,7 @@ jobs:
             echo "RIIDO_AI_SERVER_TESTNET_TOKEN is required"
             exit 1
           fi
+          echo "::add-mask::$TESTNET_TOKEN"
           base_url="${TESTNET_BASE_URL%/}"
           workspace_id="${TESTNET_WORKSPACE_ID:-workspace-smoke}"
           auth_header="X-Riido-AI-Agent-Token: ${TESTNET_TOKEN}"
@@ -353,3 +354,22 @@ jobs:
             "$RUNNER_TEMP/riido-image-uri" \
             "$RUNNER_TEMP/riido-task-definition-arn" \
             "$RUNNER_TEMP/riido-container-port"
+
+      - name: Publish redacted deploy summary evidence
+        if: always()
+        env:
+          RIIDO_LIVE_CHECK_STATUS: ${{ job.status }}
+        run: |
+          mkdir -p out
+          go run ./tools/liveworkflowevidence \
+            -workflow deploy-ai-agent-testnet \
+            -live-status "$RIIDO_LIVE_CHECK_STATUS" \
+            -deployment-target "$DEPLOYMENT_TARGET" \
+            -evidence-out out/deploy-ai-agent-testnet-redacted-summary.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deploy-ai-agent-testnet-redacted-summary
+          path: out/deploy-ai-agent-testnet-redacted-summary.json
+          if-no-files-found: error

@@ -15,6 +15,13 @@ jobs:
       TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
       TESTNET_TOKEN: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN }}
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
       - name: Verify testnet configuration
         run: |
           test -n "$TESTNET_BASE_URL" || {
@@ -134,3 +141,21 @@ jobs:
             | jq -e --arg agent_id "$created_v2_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' >/dev/null
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/task-smoke-v2/threads" \
             | jq -e --arg agent_id "$created_v2_agent" --arg href "/v2/client/workspaces/$workspace_id/ai-agent/events" '.schema_version == "riido-ai-server.v1" and any(.threads[]; .agent_id == $agent_id) and .active_stream.href == $href' >/dev/null
+
+      - name: Publish redacted smoke summary evidence
+        if: always()
+        env:
+          RIIDO_LIVE_CHECK_STATUS: ${{ job.status }}
+        run: |
+          mkdir -p out
+          go run ./tools/liveworkflowevidence \
+            -workflow ai-agent-client-testnet-smoke \
+            -live-status "$RIIDO_LIVE_CHECK_STATUS" \
+            -evidence-out out/ai-agent-client-testnet-smoke-redacted-summary.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ai-agent-client-testnet-smoke-redacted-summary
+          path: out/ai-agent-client-testnet-smoke-redacted-summary.json
+          if-no-files-found: error

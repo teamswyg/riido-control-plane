@@ -16,6 +16,7 @@ on:
       - "tools/apiclientdelivery/**"
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
+      - "tools/liveworkflowevidence/**"
       - "tools/moduledecomposition/**"
       - "tools/openquestions/**"
       - "tools/runtimeboundary/**"
@@ -34,6 +35,7 @@ on:
       - "tools/apiclientdelivery/**"
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
+      - "tools/liveworkflowevidence/**"
       - "tools/moduledecomposition/**"
       - "tools/openquestions/**"
       - "tools/runtimeboundary/**"
@@ -61,6 +63,8 @@ jobs:
           test -f docs/30-architecture/runtime-deployment-boundary.riido.json
           test -f docs/30-architecture/runtime-cd-ownership.md
           test -f docs/30-architecture/runtime-cd-ownership.riido.json
+          test -f docs/30-architecture/live-workflow-redaction.md
+          test -f docs/30-architecture/live-workflow-redaction.riido.json
           test -f docs/30-architecture/ai-agent-risk-evidence.riido.json
           test -f docs/30-architecture/ai-agent-snapshot-cqrs-gate.riido.json
           test -f docs/50-roadmap/open-questions.md
@@ -102,6 +106,11 @@ jobs:
           go run ./tools/runtimeboundary \
             -check-doc \
             -evidence-out out/runtime-deployment-boundary-evidence.json
+      - name: Verify live workflow redaction evidence
+        run: |
+          go run ./tools/liveworkflowevidence \
+            -check-doc \
+            -evidence-out out/live-workflow-redaction-evidence.json
       - name: Verify Go dependency allowlist
         run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify AI Agent risk evidence
@@ -157,6 +166,13 @@ jobs:
         with:
           name: runtime-deployment-boundary-evidence
           path: out/runtime-deployment-boundary-evidence.json
+          if-no-files-found: warn
+      - name: Upload live workflow redaction evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-workflow-redaction-evidence
+          path: out/live-workflow-redaction-evidence.json
           if-no-files-found: warn
       - name: Verify AI Agent snapshot CQRS gate
         run: |
