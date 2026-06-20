@@ -15,6 +15,10 @@ func validateSourceManifest(root string, source sourceSSOT) []string {
 		source.Workflow == "" || source.EvidenceArtifact == "" {
 		return []string{"source manifest path, evidence_tool, workflow, and evidence_artifact are required"}
 	}
+	if !sourceManifestHasMetadata(root, source.Path) {
+		return []string{fmt.Sprintf("%s source manifest must define id, assertions, and a complete evidence loop",
+			source.Path)}
+	}
 	if !workflowRunsSourceEvidenceTool(root, source) {
 		return []string{fmt.Sprintf("%s evidence_tool %q must read source path and write evidence-out in %q",
 			source.Path, source.EvidenceTool, source.Workflow)}

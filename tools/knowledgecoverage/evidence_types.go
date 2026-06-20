@@ -15,6 +15,7 @@ type evidence struct {
 	StandaloneManifestCount          int            `json:"standalone_manifest_count"`
 	StandaloneManifestBindingCount   int            `json:"standalone_manifest_binding_count"`
 	SourceManifestCount              int            `json:"source_manifest_count"`
+	SourceManifestMetadataCount      int            `json:"source_manifest_metadata_count"`
 	SourceManifestBindingCount       int            `json:"source_manifest_binding_count"`
 	ContractArtifactCount            int            `json:"contract_artifact_count"`
 	ContractArtifactBindingCount     int            `json:"contract_artifact_binding_count"`
@@ -37,6 +38,7 @@ type evidence struct {
 	DirectLoopCount                  int            `json:"direct_ssot_loop_count"`
 	DirectEvidenceWorkflowCount      int            `json:"direct_ssot_evidence_workflow_count"`
 	StandaloneMissingBinding         []string       `json:"standalone_manifest_missing_binding"`
+	SourceMissingMetadata            []string       `json:"source_manifest_missing_metadata"`
 	SourceMissingBinding             []string       `json:"source_manifest_missing_binding"`
 	ContractMissingBinding           []string       `json:"contract_artifact_missing_binding"`
 	ImportedMissingBinding           []string       `json:"imported_manifest_missing_binding"`
