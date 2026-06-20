@@ -8,13 +8,6 @@
   "scan_roots": ["docs"],
   "manual_groups": [
     {
-      "id": "domain-manual-debt",
-      "owner": "control-plane-domain",
-      "reason": "Domain SSOT docs still need focused executable manifests or generated readers.",
-      "next_artifact": "domain-specific .riido.json manifests",
-      "path_prefixes": ["docs/20-domain/"]
-    },
-    {
       "id": "architecture-manual-debt",
       "owner": "control-plane-architecture",
       "reason": "Architecture docs without sibling manifests are registered debt until they become executable gates.",
