@@ -6,6 +6,7 @@ type evidence struct {
 	Status              string       `json:"status"`
 	Manifest            string       `json:"manifest"`
 	GeneratedDoc        string       `json:"generated_doc"`
+	FragmentCount       int          `json:"fragment_count"`
 	DocLinkCount        int          `json:"doc_link_count"`
 	EndpointCount       int          `json:"endpoint_count"`
 	VerificationCount   int          `json:"verification_count"`
@@ -17,7 +18,7 @@ type evidence struct {
 func buildEvidence(m manifest) evidence {
 	return evidence{
 		SchemaVersion: evidenceSchema, ID: m.ID, Status: "verified",
-		Manifest: defaultManifest, GeneratedDoc: generatedDoc,
+		Manifest: defaultManifest, GeneratedDoc: generatedDoc, FragmentCount: len(m.Fragments),
 		DocLinkCount: len(m.DocLinks), EndpointCount: len(m.Development.Endpoints),
 		VerificationCount: len(m.Verification), RuntimeCDNoteCount: len(m.RuntimeCD.Notes),
 		RequiredMarkerCount: len(m.RequiredMarkers), Loop: m.Loop,

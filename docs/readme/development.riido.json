@@ -1,0 +1,36 @@
+{
+  "schema_version": "riido-control-plane-repository-readme-fragment.v1",
+  "id": "control-plane-readme-development",
+  "development": {
+    "intro": [
+      "AI Agent client development API는 development 서버에서 DynamoDB snapshot item을 영속 저장소로 사용하므로 프로세스 재시작 이후에도 agent/device credential/task thread 상태가 유지됩니다.",
+      "development API도 인증 없이 열리지 않습니다. request-token scope와 owner/public/private visibility policy를 통과해야 합니다. AWS topology, table name 값, ECS task role, credential endpoint 값은 `riido-infra`와 GitHub environment/secret 경계에 둡니다."
+    ],
+    "env": [
+      {"name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT", "value": "true"},
+      {"name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE", "value": "<configured by riido-infra>"}
+    ],
+    "workflows": [
+      "`ai-agent-client-testnet-smoke`가 testnet smoke를 담당합니다.",
+      "`deploy-ai-agent-testnet`은 `v*` tag push 또는 manual dispatch에서만 runtime artifact CD를 실행합니다.",
+      "manual dispatch는 configured target으로 development/testnet/production GitHub environment를 선택하되 live URL 입력을 받지 않습니다."
+    ],
+    "endpoints": [
+      "`GET /healthz`",
+      "`GET /readyz`",
+      "`GET /v1/client/ai-agent/bootstrap`",
+      "`GET /v1/client/ai-agent/devices`",
+      "`GET /v1/client/ai-agent/agents/{agent_id}/daemon`",
+      "`POST /v1/client/ai-agent/agents/{agent_id}/daemon/start`",
+      "`POST /v1/client/ai-agent/agents/{agent_id}/daemon/restart`",
+      "`POST /v1/client/ai-agent/agents/{agent_id}/daemon/stop`",
+      "`GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`",
+      "`POST /v1/client/ai-agent/tasks/{task_id}/assignment`",
+      "`DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`",
+      "`POST /v1/client/ai-agent/tasks/{task_id}/comments`",
+      "`POST /v1/client/ai-agent/tasks/{task_id}/stop`",
+      "`GET /v1/client/ai-agent/events?replay=1`",
+      "`/v2/client/workspaces/{workspace_id}/ai-agent/...` workspace-scoped duplicate"
+    ]
+  }
+}

@@ -1,25 +1,24 @@
 package main
 
-import (
-	"encoding/json"
-	"os"
-	"strings"
-)
+import "strings"
 
 func ownerManifestDeclaresPath(root, ownerManifest, ownerKey, path string) bool {
-	data, err := os.ReadFile(resolvePath(root, ownerManifest))
-	if err != nil {
+	object, ok := readJSONObject(root, ownerManifest)
+	if !ok {
 		return false
 	}
-	var object map[string]any
-	if err := json.Unmarshal(data, &object); err != nil {
-		return false
-	}
-	value, ok := contractOwnerValue(object, ownerKey)
-	return ok && value == path
+	return ownerValueContainsPath(object, ownerKey, path)
 }
 
-func contractOwnerValue(object map[string]any, key string) (string, bool) {
+func ownerValueContainsPath(object map[string]any, key, path string) bool {
+	value, ok := contractOwnerValue(object, key)
+	if !ok {
+		return false
+	}
+	return ownerValueMatchesPath(value, path)
+}
+
+func contractOwnerValue(object map[string]any, key string) (any, bool) {
 	var current any = object
 	for _, part := range strings.Split(key, ".") {
 		next, ok := current.(map[string]any)
@@ -31,8 +30,23 @@ func contractOwnerValue(object map[string]any, key string) (string, bool) {
 			return "", false
 		}
 	}
-	value, ok := current.(string)
-	return value, ok
+	return current, true
+}
+
+func ownerValueMatchesPath(value any, path string) bool {
+	if text, ok := value.(string); ok {
+		return text == path
+	}
+	list, ok := value.([]any)
+	if !ok {
+		return false
+	}
+	for _, item := range list {
+		if text, ok := item.(string); ok && text == path {
+			return true
+		}
+	}
+	return false
 }
 
 func ownerManifestHasStrictEvidence(root, ownerManifest string) bool {
