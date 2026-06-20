@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `26`; runtime: `1`; internal: `3`; tools: `21`; forbidden import hits: `0`.
+Packages: `27`; runtime: `1`; internal: `3`; tools: `22`; forbidden import hits: `0`.
 
 ## Packages
 
@@ -19,7 +19,7 @@ Packages: `26`; runtime: `1`; internal: `3`; tools: `21`; forbidden import hits:
 - `compatibility-test`: `internal/contractscompat`
 - `guard`: `internal/repoidentity`
 - `core`: `internal/riidoaiserver`
-- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/integrationmatrix`, `tools/providerstatus`, `tools/requestauth`, `tools/runtimeboundary`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`
+- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/assignmentjournal`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/integrationmatrix`, `tools/providerstatus`, `tools/requestauth`, `tools/runtimeboundary`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
 - `meta-evidence-tool`: `tools/knowledgecoverage`, `tools/moduledecomposition`

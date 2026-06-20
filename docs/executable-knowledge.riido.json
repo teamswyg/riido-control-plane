@@ -8,13 +8,6 @@
   "scan_roots": ["docs"],
   "manual_groups": [
     {
-      "id": "architecture-manual-debt",
-      "owner": "control-plane-architecture",
-      "reason": "Architecture docs without sibling manifests are registered debt until they become executable gates.",
-      "next_artifact": "architecture-specific evidence tools",
-      "path_prefixes": ["docs/30-architecture/"]
-    },
-    {
       "id": "roadmap-manual-debt",
       "owner": "control-plane-planning",
       "reason": "Open questions are tracked as planning debt until each question resolves into an executable owner.",

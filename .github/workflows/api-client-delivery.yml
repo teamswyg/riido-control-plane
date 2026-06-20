@@ -1,0 +1,70 @@
+name: api-client-delivery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/api-client-delivery.yml"
+      - ".github/workflows/generated-client-delivery.yml"
+      - "docs/20-domain/ai-agent-client-api.riido.json"
+      - "docs/30-architecture/api-client-delivery.md"
+      - "docs/30-architecture/api-client-delivery.riido.json"
+      - "docs/30-architecture/figma-ai-agent-control-plane-projection.riido.json"
+      - "docs/30-architecture/runtime-cd-ownership.riido.json"
+      - "docs/30-architecture/ai-agent-risk-evidence.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/apiclientdelivery/**"
+      - "tools/reactquerygen/**"
+      - "tools/generatedclienthandoff/**"
+  pull_request:
+    paths:
+      - ".github/workflows/api-client-delivery.yml"
+      - ".github/workflows/generated-client-delivery.yml"
+      - "docs/20-domain/ai-agent-client-api.riido.json"
+      - "docs/30-architecture/api-client-delivery.md"
+      - "docs/30-architecture/api-client-delivery.riido.json"
+      - "docs/30-architecture/figma-ai-agent-control-plane-projection.riido.json"
+      - "docs/30-architecture/runtime-cd-ownership.riido.json"
+      - "docs/30-architecture/ai-agent-risk-evidence.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/apiclientdelivery/**"
+      - "tools/reactquerygen/**"
+      - "tools/generatedclienthandoff/**"
+
+jobs:
+  api-client-delivery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
+      - name: Verify API client delivery
+        run: |
+          mkdir -p out
+          go test ./tools/apiclientdelivery -count=1
+          go run ./tools/apiclientdelivery \
+            -check-doc \
+            -evidence-out out/api-client-delivery-evidence.json
+      - name: Verify generated client tools
+        run: |
+          go test ./tools/reactquerygen -count=1
+          go test ./tools/generatedclienthandoff -count=1
+      - name: Verify executable knowledge coverage
+        run: |
+          go run ./tools/knowledgecoverage \
+            -check-doc \
+            -evidence-out out/executable-knowledge-coverage.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-client-delivery-evidence
+          path: |
+            out/api-client-delivery-evidence.json
+            out/executable-knowledge-coverage.json
+          if-no-files-found: error

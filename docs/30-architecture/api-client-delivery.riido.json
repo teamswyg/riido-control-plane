@@ -1,0 +1,48 @@
+{
+  "schema_version":"riido-control-plane-api-client-delivery.v1",
+  "id":"api-client-delivery",
+  "title":"API Client Delivery",
+  "riido_task":"RIID-4746",
+  "generated_doc":"docs/30-architecture/api-client-delivery.md",
+  "workflow":".github/workflows/api-client-delivery.yml",
+  "evidence_artifact":"api-client-delivery-evidence",
+  "risk_evidence_manifest":"docs/30-architecture/ai-agent-risk-evidence.riido.json",
+  "source_manifests":[
+    {"name":"AI Agent client API mirror","path":"docs/20-domain/ai-agent-client-api.riido.json"},
+    {"name":"Figma generated-client projection","path":"docs/30-architecture/figma-ai-agent-control-plane-projection.riido.json"},
+    {"name":"runtime CD public surface scan","path":"docs/30-architecture/runtime-cd-ownership.riido.json"},
+    {"name":"AI Agent risk evidence","path":"docs/30-architecture/ai-agent-risk-evidence.riido.json"}
+  ],
+  "owners":[
+    {"name":"riido-contracts","owns":"canonical vocabulary, domain policy grammar, lifecycle/deprecation grammar","does_not_own":"control-plane handler behavior or client branches"},
+    {"name":"riido-control-plane","owns":"AI Agent client API sub-DSL, HTTP/SSE implementation, OpenAPI projection handoff, generated-client delivery workflow, release manifest","does_not_own":"canonical business meaning outside API projection"},
+    {"name":"riido-client","owns":"consuming generated React Query code and API usability feedback","does_not_own":"OpenAPI SSOT, control-plane codegen, generated-code hand edits"}
+  ],
+  "delivery_workflow":{"workflow":".github/workflows/generated-client-delivery.yml","package_mode":"create_pr=false builds the review artifact without requiring `riido-client` write credentials","deliver_mode":"create_pr=true opens or updates a riido-client generated handoff PR","intentional_failure":"This failure is intentional only for `create_pr=true` when cross-repository credentials are absent."},
+  "target_branch":{"source":"Riido `branchName`","rule":"target_branch must match ^[A-Z][A-Z0-9]*-[0-9]+-.+ and must not contain path separators","example":"A-60-AI-Agent-generated-client-handoff","secret_gate":"delivery requires branch-name and secret gates before cross-repository write"},
+  "lifecycle_states":["active","deprecated","superseded","frozen","removed_from_active_projection","archived"],
+  "generator_boundary":{"react_query":"tools/reactquerygen","handoff":"tools/generatedclienthandoff","must_not_own":["riido-client application implementation","frontend route layout","manual generated-code edits"],"artifacts":["aiAgentClient.ts","aiAgentClient.react.ts","README.generated.md","contractManifest.generated.ts","HISTORY.generated.md","index.ts","PR_BODY.generated.md"]},
+  "figma_contexts":[
+    {"id":"menu-placement","node_ids":["156-19307"],"generated_paths":[],"rule":"menu placement is generated-client consumption context, not endpoint evidence","must_not_own":"client menu labels, ordering, selected state, or route wiring"},
+    {"id":"task-thread","node_ids":["153-15931","236-21379"],"generated_paths":["riido.aiAgent.tasks.assign","riido.aiAgent.tasks.unassign","riido.aiAgent.tasks.stop","riido.aiAgent.tasks.threads","riido.aiAgent.events.stream"],"rule":"active_stream is the generated handoff into SSE when present","must_not_own":"comment box, row layout, right panel, or stopped-row presentation"},
+    {"id":"busy-agent","node_ids":["153-8761"],"generated_paths":["riido.aiAgent.tasks.threadMessages.create","riido.aiAgent.tasks.submitComment","riido.aiAgent.tasks.stop"],"rule":"assignment_ready is daemon/runtime handoff and must not be rendered as queued_by_busy_agent","must_not_own":"Korean display copy, timestamp wording, avatar, or comment-row layout"},
+    {"id":"deleted-agent-stop","node_ids":["227-19354"],"generated_paths":["riido.aiAgent.agents.delete","riido.aiAgent.tasks.threads","riido.aiAgent.events.stream"],"rule":"delete can expose running_tasks_force_stopped and stopped_by_agent_deleted","must_not_own":"stopped-row copy, actor label, timestamp wording, hidden action state, avatar, or row layout"},
+    {"id":"participant-dropdown","node_ids":["153-12742"],"generated_paths":["listAIAgentTaskAssignableAgents"],"rule":"query feeds AI Agent rows in the participant dropdown","must_not_own":"sorting, truncation, max-height, scrollbar width, or checkbox layout"},
+    {"id":"runtime-settings","node_ids":["162-23090"],"generated_paths":["listAIAgentDeviceRuntimes","getAIAgentDeviceDaemon","startAIAgentDeviceDaemon","restartAIAgentDeviceDaemon","stopAIAgentDeviceDaemon"],"rule":"generated pieces feed device/runtime grouping and daemon controls","must_not_own":"hover popover, stop modal layout, or restart animation rendering"},
+    {"id":"agent-settings","node_ids":["432-37336","134-6542","432-35713"],"generated_paths":["createAIAgent","updateAIAgent","deleteAIAgent"],"rule":"created_at and updated_at feed list dates and tooltips","must_not_own":"row click, meatball menu, status label copy/color, save enablement, or provider-specific model labels"},
+    {"id":"onboarding","node_ids":["42-3014"],"generated_paths":["riido.aiAgent.onboarding.fixtures","riido.aiAgent.onboarding.fixtures.createAgent"],"rule":"fixtures create a normal agent with CreateAgentConfigurationRequest","must_not_own":"workspace selector layout, copied fixture text as SSOT, or app-start helper endpoints"},
+    {"id":"web-onboarding","node_ids":["236-29749"],"generated_paths":[],"rule":"auth/onboarding screens are not generated-client endpoint evidence for this API","must_not_own":"sign-up/login, terms consent, invite, app download, waitlist, or marketing-consent helpers"}
+  ],
+  "runtime_model_catalog":{"policy":"`runtime_model_catalog.v1`","rendering":"clients render `RuntimeRecord.models`; model labels stay runtime-scoped display data rather than enum members","fixture_rule":"Fixture records must not include model defaults or `model_id`; clients rely on the omitted-`model_id` defaulting rule."},
+  "required_doc_phrases":["create_pr=false","requiring `riido-client` write credentials","This failure is intentional only for `create_pr=true`","Riido `branchName`","secret gates","`runtime_model_catalog.v1`","clients render `RuntimeRecord.models`","model labels stay runtime-scoped display data rather than enum members","include model defaults or `model_id`","omitted-`model_id` defaulting rule"],
+  "forbidden_doc_phrases":["model-catalog question is resolved","until the canonical contracts model-catalog policy","promotes them; clients derive the selected model"],
+  "source_checks":[
+    {"name":"workflow-token-boundary","file":".github/workflows/generated-client-delivery.yml","contains":["actions/create-github-app-token@v1","RIIDO_CLIENT_DELIVERY_APP_ID","RIIDO_CLIENT_DELIVERY_PRIVATE_KEY","RIIDO_CLIENT_DELIVERY_TOKEN","github.event.inputs.create_pr == 'true'","target_branch must be the Riido work branchName","grep -Eq '^[A-Z][A-Z0-9]*-[0-9]+-.+'"]},
+    {"name":"react-query-generator","file":"tools/reactquerygen/main_test.go","contains":["TestGenerateReactQueryClientDoesNotDrift","TestAPIClientDeliveryUsesResolvedRuntimeModelCatalogWording"]},
+    {"name":"generated-client-handoff","file":"tools/generatedclienthandoff/main_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","TestGeneratedClientHandoffRejectsNonRiidoWorkBranch"]},
+    {"name":"public-surface-scan","file":"docs/30-architecture/runtime-cd-ownership.riido.json","contains":["docs/30-architecture/api-client-delivery.md","public_surface_scan_contract"]},
+    {"name":"risk-evidence","file":"docs/30-architecture/ai-agent-risk-evidence.riido.json","contains":["docs/30-architecture/api-client-delivery.md","active-stream-handoff"]}
+  ],
+  "loop":{"observation":"The API client delivery document repeated generated-client workflow, branch, Figma context, model-catalog, and permission rules as prose while executable generators and manifests already existed.","hypothesis":"A delivery manifest can generate the reader and verify each frontend handoff claim against workflow, generator, projection, risk, and public-surface evidence.","execute":"Generate this reader from the delivery manifest and run the apiclientdelivery verifier in CI.","evaluate":"The verifier checks source anchors, required reader phrases, forbidden stale phrases, linked source manifests, workflow token gates, and generated doc freshness.","retrospective":"This keeps generated-client delivery reviewable without making the prose document a second source of truth."},
+  "non_goals":["riido-client application implementation","canonical contract changes","Figma coverage redefinition","live delivery execution","automatic riido-client PR merge"]
+}
