@@ -28,6 +28,10 @@ func assertEvidenceCoverage(t *testing.T, got evidence) {
 		len(got.OwnedMissingBinding) != 0 {
 		t.Fatalf("owned manifest coverage drifted: %+v", got)
 	}
+	if got.ManifestInventoryCount != got.TrackedManifestCount ||
+		len(got.UntrackedManifests) != 0 {
+		t.Fatalf("manifest inventory coverage drifted: %+v", got)
+	}
 }
 
 func assertGeneratedCoverage(t *testing.T, got evidence) {

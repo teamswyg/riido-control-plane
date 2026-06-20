@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -22,4 +23,9 @@ func slashPath(root, path string) string {
 
 func siblingManifest(path string) string {
 	return strings.TrimSuffix(path, ".md") + ".riido.json"
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
