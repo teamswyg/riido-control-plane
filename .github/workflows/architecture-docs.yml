@@ -15,6 +15,7 @@ on:
       - "tools/aiagentrisk/**"
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
+      - "tools/moduledecomposition/**"
       - "tools/snapshotcqrsgate/**"
   pull_request:
     paths:
@@ -29,6 +30,7 @@ on:
       - "tools/aiagentrisk/**"
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
+      - "tools/moduledecomposition/**"
       - "tools/snapshotcqrsgate/**"
 
 jobs:
@@ -71,6 +73,11 @@ jobs:
           go run ./tools/integrationmatrix \
             -check-doc \
             -evidence-out out/integration-matrix-evidence.json
+      - name: Verify module decomposition
+        run: |
+          go run ./tools/moduledecomposition \
+            -check-doc \
+            -evidence-out out/module-decomposition-evidence.json
       - name: Verify Go dependency allowlist
         run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify AI Agent risk evidence
@@ -98,6 +105,13 @@ jobs:
         with:
           name: integration-matrix-evidence
           path: out/integration-matrix-evidence.json
+          if-no-files-found: warn
+      - name: Upload module decomposition evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: module-decomposition-evidence
+          path: out/module-decomposition-evidence.json
           if-no-files-found: warn
       - name: Verify AI Agent snapshot CQRS gate
         run: |
