@@ -6,8 +6,10 @@ on:
     paths:
       - ".github/workflows/external-authorizer.yml"
       - "docs/20-domain/request-authorization.md"
+      - "docs/20-domain/request-authorization.riido.json"
       - "docs/20-domain/agent-catalog-rbac.md"
       - "docs/migration/control-plane.md"
+      - "tools/requestauth/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -20,8 +22,10 @@ on:
     paths:
       - ".github/workflows/external-authorizer.yml"
       - "docs/20-domain/request-authorization.md"
+      - "docs/20-domain/request-authorization.riido.json"
       - "docs/20-domain/agent-catalog-rbac.md"
       - "docs/migration/control-plane.md"
+      - "tools/requestauth/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -49,5 +53,18 @@ jobs:
             printf 'Disallowed external authorizer imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify request authorization executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/requestauth -count=1
+          go run ./tools/requestauth \
+            -check-doc \
+            -evidence-out out/request-authorization-evidence.json
       - name: Test external authorizer
         run: go test ./internal/riidoaiserver -run 'ExternalHTTPAuthorizer|FallbackAuthorizer' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: request-authorization-evidence
+          path: out/request-authorization-evidence.json
+          if-no-files-found: error
