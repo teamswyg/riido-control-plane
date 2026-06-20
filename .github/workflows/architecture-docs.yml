@@ -14,6 +14,7 @@ on:
       - "internal/riidoaiserver/doc.go"
       - "tools/aiagentrisk/**"
       - "tools/configreference/**"
+      - "tools/integrationmatrix/**"
       - "tools/snapshotcqrsgate/**"
   pull_request:
     paths:
@@ -27,6 +28,7 @@ on:
       - "internal/riidoaiserver/doc.go"
       - "tools/aiagentrisk/**"
       - "tools/configreference/**"
+      - "tools/integrationmatrix/**"
       - "tools/snapshotcqrsgate/**"
 
 jobs:
@@ -64,6 +66,11 @@ jobs:
           go run ./tools/configreference \
             -check-doc \
             -evidence-out out/config-reference-evidence.json
+      - name: Verify integration matrix
+        run: |
+          go run ./tools/integrationmatrix \
+            -check-doc \
+            -evidence-out out/integration-matrix-evidence.json
       - name: Verify Go dependency allowlist
         run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify AI Agent risk evidence
@@ -84,6 +91,13 @@ jobs:
         with:
           name: config-reference-evidence
           path: out/config-reference-evidence.json
+          if-no-files-found: warn
+      - name: Upload integration matrix evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-matrix-evidence
+          path: out/integration-matrix-evidence.json
           if-no-files-found: warn
       - name: Verify AI Agent snapshot CQRS gate
         run: |

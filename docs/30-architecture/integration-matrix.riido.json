@@ -1,0 +1,38 @@
+{
+  "schema_version":"riido-control-plane-integration-matrix.v1",
+  "id":"control-plane-integration-matrix",
+  "title":"Control Plane Integration Matrix",
+  "riido_task":"RIID-4712",
+  "generated_doc":"docs/30-architecture/integration-matrix.md",
+  "workflow":".github/workflows/integration-matrix.yml",
+  "evidence_artifact":"integration-matrix-evidence",
+  "public_gates":[
+    {"surface":"module dependency boundary","verification":"tools/dependencyallowlist against dependency_allowlist.riido.json","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/go-ci.yml"],"commands":["go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json"]},
+    {"surface":"full backend behavior","verification":"go test ./...","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/ci.yml"],"commands":["go test ./..."]},
+    {"surface":"AI Agent client development API","verification":"generated contract path HTTP tests with fake DynamoDB endpoints","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/ai-agent-client-api.yml"],"commands":["go test ./internal/riidoaiserver -run AIAgentClient -count=1"]},
+    {"surface":"generated React Query client","verification":"tools/reactquerygen drift tests from checked-in OpenAPI","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/ai-agent-client-api.yml"],"commands":["go test ./tools/reactquerygen -count=1"]},
+    {"surface":"riido-client generated delivery","verification":"manual package/delivery workflow with target-path allowlist and generated PR body","external_dependency":"GitHub API only after delivery secrets are configured","pull_request_gate":false,"workflows":[".github/workflows/generated-client-delivery.yml"],"commands":["go test ./tools/generatedclienthandoff -count=1"]},
+    {"surface":"request authorization","verification":"static token and httptest external authorizer tests","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/external-authorizer.yml"],"commands":["go test ./cmd/riido_ai_server -run Auth -count=1"]},
+    {"surface":"assignment polling heartbeat events","verification":"in-memory store and HTTP tests","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/assignment-operation-runtime.yml"],"commands":["go test ./internal/riidoaiserver -run Assignment -count=1"]},
+    {"surface":"SSE","verification":"httptest streaming tests","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/assignment-sse-adapter.yml"],"commands":["go test ./internal/riidoaiserver -run SSE -count=1"]},
+    {"surface":"web frontend API transport","verification":"CORS preflight HTTP tests and env parser tests","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/web-frontend-api.yml"],"commands":["go test ./internal/riidoaiserver -run WebFrontendCORS -count=1"]},
+    {"surface":"metrics and stdout EMF","verification":"metrics read-model and writer tests","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/cloudwatch-emf.yml"],"commands":["go test ./internal/riidoaiserver -run Metrics -count=1"]},
+    {"surface":"DynamoDB EventBridge adapters","verification":"fake endpoint HTTP tests with fake credentials","external_dependency":"no live AWS","pull_request_gate":true,"workflows":[".github/workflows/dynamodb-eventbridge-adapters.yml"],"commands":["go test ./internal/riidoaiserver -run DynamoDB -count=1"]},
+    {"surface":"awsadapters facade","verification":"compile and usage tests","external_dependency":"none","pull_request_gate":true,"workflows":[".github/workflows/aws-adapters-facade.yml"],"commands":["go test ./awsadapters -count=1"]},
+    {"surface":"container image contract","verification":"tools/containercontract and optional local Docker build","external_dependency":"Docker only for image build check","pull_request_gate":true,"workflows":[".github/workflows/container-image-contract.yml"],"commands":["go test ./tools/containercontract -count=1","go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -"]},
+    {"surface":"AI Agent runtime CD","verification":"tag-triggered or manual deploy-ai-agent-testnet workflow with ECR push, ECS wait, and live smoke","external_dependency":"GitHub OIDC, masked AWS account boundary, configured environment secrets","pull_request_gate":false,"workflows":[".github/workflows/deploy-ai-agent-testnet.yml"],"commands":[]},
+    {"surface":"infra-output-gated CodeDeploy runtime CD","verification":"same deploy workflow uses infra-supplied topology evidence before CodeDeploy deployment","external_dependency":"GitHub OIDC and masked deployment target config","pull_request_gate":false,"workflows":[".github/workflows/deploy-ai-agent-testnet.yml"],"commands":[]}
+  ],
+  "private_gates":[
+    {"surface":"Terraform plan apply","owner":"riido-infra","evidence":"typed plan/apply evidence and Terraform work-unit records"},
+    {"surface":"ECR repository topology","owner":"riido-infra","evidence":"Terraform plan/apply evidence"},
+    {"surface":"ECS Fargate topology","owner":"riido-infra","evidence":"Terraform plan/apply evidence and drift policy"},
+    {"surface":"CodeDeploy topology","owner":"riido-infra","evidence":"Terraform evidence, rollback policy, and exported deployment group names"},
+    {"surface":"DNS ACM WAF public ingress","owner":"riido-infra","evidence":"traffic, certificate, and ingress evidence"},
+    {"surface":"production secret wiring","owner":"riido-infra plus secret manager","evidence":"redacted runtime secret evidence"},
+    {"surface":"live DynamoDB EventBridge behavior","owner":"riido-infra","evidence":"backend bootstrap and traffic/evidence tools"}
+  ],
+  "rules":["Public PR checks must not require AWS credentials, Terraform state, ECR access, production secret material, or write access to riido-client.","Tag/manual runtime CD may use live AWS only outside pull_request gates.","Runtime artifact CD execution remains owned by riido-control-plane while topology and private evidence remain owned by riido-infra.","Private gates may consume public tags and redacted summaries but must not push account-specific state or raw secret values back to this public repository.","Docker is optional for local release preparation and is not a required public PR dependency."],
+  "forbidden_pull_request_dependencies":["AWS credentials","Terraform state","ECR access","production secret","write access to riido-client","live AWS"],
+  "loop":{"observation":"The integration matrix was manual prose describing the public/private verification boundary.","hypothesis":"A manifest can make PR-safe and operator-only verification boundaries checkable without live infrastructure.","execute":"Generate this reader from the matrix manifest and verify workflow/command evidence in CI.","evaluate":"The verifier checks gate counts, workflow existence, pull-request trigger classification, forbidden PR dependency wording, generated doc freshness, and evidence output.","retrospective":"This keeps public CI low-cost while preserving an explicit place for private/operator evidence."}
+}
