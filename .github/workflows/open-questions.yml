@@ -1,0 +1,52 @@
+name: open-questions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/open-questions.yml"
+      - "docs/50-roadmap/open-questions.md"
+      - "docs/50-roadmap/open-questions.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/openquestions/**"
+  pull_request:
+    paths:
+      - ".github/workflows/open-questions.yml"
+      - "docs/50-roadmap/open-questions.md"
+      - "docs/50-roadmap/open-questions.riido.json"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
+      - "tools/openquestions/**"
+
+jobs:
+  open-questions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
+      - name: Verify open questions
+        run: |
+          mkdir -p out
+          go test ./tools/openquestions -count=1
+          go run ./tools/openquestions \
+            -check-doc \
+            -evidence-out out/open-questions-evidence.json
+      - name: Verify executable knowledge coverage
+        run: |
+          go run ./tools/knowledgecoverage \
+            -check-doc \
+            -evidence-out out/executable-knowledge-coverage.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: open-questions-evidence
+          path: |
+            out/open-questions-evidence.json
+            out/executable-knowledge-coverage.json
+          if-no-files-found: error

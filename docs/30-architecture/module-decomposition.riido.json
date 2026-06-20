@@ -31,6 +31,7 @@
     {"path":"tools/integrationmatrix","kind":"evidence-tool","role":"Public/private integration matrix verifier.","must_not_own":"private infra evidence"},
     {"path":"tools/knowledgecoverage","kind":"meta-evidence-tool","role":"Executable knowledge coverage verifier.","must_not_own":"domain-specific verification semantics"},
     {"path":"tools/moduledecomposition","kind":"meta-evidence-tool","role":"Go package surface and module boundary verifier.","must_not_own":"runtime package behavior"},
+    {"path":"tools/openquestions","kind":"evidence-tool","role":"Open question decision queue generated reader and verifier.","must_not_own":"architecture decisions without owner evidence"},
     {"path":"tools/providerstatus","kind":"evidence-tool","role":"Provider status vocabulary verifier.","must_not_own":"provider process execution"},
     {"path":"tools/reactquerygen","kind":"generator","role":"Deterministic OpenAPI-to-React-Query generator for AI Agent client surfaces.","must_not_own":"frontend app implementation"},
     {"path":"tools/requestauth","kind":"evidence-tool","role":"Request authorization generated reader and verifier.","must_not_own":"external identity provider policy"},
