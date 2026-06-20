@@ -12,9 +12,9 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 
 | Fact | Count |
 | --- | ---: |
-| Boundaries | 17 |
+| Boundaries | 19 |
 | Focused workflows | 17 |
-| Source checks | 25 |
+| Source checks | 27 |
 | Shared contracts | 3 |
 
 - owner package: `internal/riidoaiserver`
@@ -25,6 +25,8 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 | Boundary | Workflow | Artifact | Source checks |
 | --- | --- | --- | ---: |
 | `assignment-contract` | `.github/workflows/assignment-contract.yml` | `assignment-contract-evidence` | 2 |
+| `assignment-operation-replay` | `.github/workflows/assignment-operation-replay.yml` | `assignment-operation-replay-evidence` | 1 |
+| `assignment-operation-runtime` | `.github/workflows/assignment-operation-runtime.yml` | `assignment-operation-runtime-evidence` | 1 |
 | `long-poll` | `.github/workflows/assignment-store-actor.yml` | `assignment-store-actor-long-poll-evidence` | 1 |
 | `multi-agent-task` | `.github/workflows/assignment-store-actor.yml` | `assignment-store-actor-multi-agent-evidence` | 2 |
 | `prompt-composer` | `.github/workflows/assignment-http-adapter.yml` | `-` | 1 |
