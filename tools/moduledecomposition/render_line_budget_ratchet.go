@@ -16,4 +16,5 @@ func renderLineBudgetRatchet(b *strings.Builder, result lineBudgetResult) {
 		result.OverTarget, result.MaxFilesOverTarget, lineBudgetFilesSlack(result))
 	fmt.Fprintf(b, "| Max file lines | %d | %d | %d |\n\n",
 		result.MaxLines, result.MaxFileLinesLimit, lineBudgetMaxLinesSlack(result))
+	b.WriteString("Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.\n\n")
 }

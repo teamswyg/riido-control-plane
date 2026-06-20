@@ -12,20 +12,22 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `42`; runtime: `1`; internal: `3`; tools: `37`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `85`; max file lines: `2481`.
+File line budget target: `75`; files over target: `97`; max file lines: `1952`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 85 | 97 | 12 |
-| Max file lines | 2481 | 2481 | 0 |
+| Files over target | 97 | 97 | 0 |
+| Max file lines | 1952 | 2481 | 529 |
+
+Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
 
 ### Line Budget Hotspot Ratchets
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 85 | 85 | 2481 | 2481 | 23100 | 23713 |
+| `internal/riidoaiserver` | 97 | 85 | 1952 | 2481 | 21538 | 23713 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
 | `tools/containercontract` | 0 | 2 | 0 | 597 | 0 | 663 |
@@ -33,13 +35,14 @@ File line budget target: `75`; files over target: `85`; max file lines: `2481`.
 | `awsadapters` | 0 | 1 | 0 | 84 | 0 | 9 |
 | `internal/contractscompat` | 0 | 1 | 0 | 81 | 0 | 6 |
 
+Files limit is informational; a split is acceptable when max lines and total over-target lines do not regress.
+
 ### Line Budget Untracked Hotspots
 
 None. Every over-budget directory is covered by a hotspot ratchet.
 
 | File | Lines |
 | --- | ---: |
-| `internal/riidoaiserver/ai_agent_client_http_test.go` | 2481 |
 | `internal/riidoaiserver/store.go` | 1952 |
 | `internal/riidoaiserver/server.go` | 1760 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 1573 |
@@ -49,12 +52,13 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
 | `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 693 |
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
+| `internal/riidoaiserver/ai_agent_client_persistence_test.go` | 661 |
 
 ### Line Budget Hotspots
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 85 | 2481 | 23100 |
+| `internal/riidoaiserver` | 97 | 1952 | 21538 |
 
 ## Packages
 

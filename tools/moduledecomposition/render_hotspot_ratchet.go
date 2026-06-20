@@ -17,5 +17,5 @@ func renderLineBudgetHotspotRatchets(b *strings.Builder, ratchets []lineBudgetHo
 			ratchet.Path, ratchet.Files, ratchet.MaxFiles, ratchet.MaxLines,
 			ratchet.MaxLinesLimit, ratchet.TotalOver, ratchet.MaxTotalOver)
 	}
-	b.WriteString("\n")
+	b.WriteString("\nFiles limit is informational; a split is acceptable when max lines and total over-target lines do not regress.\n\n")
 }

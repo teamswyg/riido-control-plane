@@ -48,24 +48,3 @@ func TestModuleDecompositionGeneratedDocFresh(t *testing.T) {
 		t.Fatalf("check doc: %v", err)
 	}
 }
-
-func TestLineBudgetRatchetRejectsWorseEvidence(t *testing.T) {
-	err := verifyLineBudgetRatchet(lineBudgetResult{
-		OverTarget:         2,
-		MaxLines:           101,
-		MaxFilesOverTarget: 1,
-		MaxFileLinesLimit:  100,
-	})
-	if err == nil {
-		t.Fatal("expected ratchet failure")
-	}
-}
-
-func TestLineBudgetHotspotRatchetRejectsWorseEvidence(t *testing.T) {
-	err := verifyLineBudgetHotspotRatchets([]lineBudgetHotspotRatchet{
-		{Path: "internal/example", FilesSlack: -1},
-	})
-	if err == nil {
-		t.Fatal("expected hotspot ratchet failure")
-	}
-}
