@@ -9,6 +9,7 @@
   "accepted_gaps": [],
   "assertions": [
     "workflows with executable checks must either publish evidence artifacts or be registered as accepted gaps",
+    "artifact uploads must fail closed with if-no-files-found:error",
     "accepted gaps are debt, not completion",
     "live deployment and smoke workflows must publish only redacted summary evidence",
     "new executable workflows without evidence cannot appear silently"
@@ -16,8 +17,8 @@
   "loop": {
     "observation": "Several workflows execute tests or live checks while leaving no durable JSON evidence artifact.",
     "hypothesis": "A workflow evidence manifest can make CI observability debt explicit without blocking current legacy workflows.",
-    "execute": "Scan GitHub Actions workflows, classify evidence coverage, and require any executable workflow gap to be registered.",
-    "evaluate": "The verifier fails on unregistered executable workflows, stale generated docs, or unused accepted-gap entries.",
-    "retrospective": "The repository can now distinguish evidence-covered workflows from accepted debt and reduce the gap slice by slice."
+    "execute": "Scan GitHub Actions workflows, classify evidence coverage, require any executable workflow gap to be registered, and require artifact upload steps to fail closed.",
+    "evaluate": "The verifier fails on unregistered executable workflows, non-strict artifact uploads, stale generated docs, or unused accepted-gap entries.",
+    "retrospective": "The repository can now distinguish evidence-covered workflows from accepted debt, keep artifact evidence fail-closed, and reduce the gap slice by slice."
   }
 }

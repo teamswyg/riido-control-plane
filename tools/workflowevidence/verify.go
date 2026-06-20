@@ -9,6 +9,9 @@ func verifyResult(result auditResult) error {
 	if len(result.Unregistered) > 0 {
 		return fmt.Errorf("unregistered workflow evidence gaps: %v", result.Unregistered)
 	}
+	if len(result.NonStrict) > 0 {
+		return fmt.Errorf("non-strict artifact upload steps: %v", result.NonStrict)
+	}
 	if len(result.AcceptedUnused) > 0 {
 		return fmt.Errorf("unused accepted workflow gaps: %v", result.AcceptedUnused)
 	}

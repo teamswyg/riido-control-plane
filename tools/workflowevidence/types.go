@@ -20,13 +20,16 @@ type acceptedGap struct {
 }
 
 type workflowRecord struct {
-	Path            string `json:"path"`
-	Status          string `json:"status"`
-	HasExecutable   bool   `json:"has_executable"`
-	HasEvidenceOut  bool   `json:"has_evidence_out"`
-	UploadsArtifact bool   `json:"uploads_artifact"`
-	Reason          string `json:"reason,omitempty"`
-	Next            string `json:"next,omitempty"`
+	Path                 string `json:"path"`
+	Status               string `json:"status"`
+	HasExecutable        bool   `json:"has_executable"`
+	HasEvidenceOut       bool   `json:"has_evidence_out"`
+	UploadsArtifact      bool   `json:"uploads_artifact"`
+	ArtifactUploadCount  int    `json:"artifact_upload_count"`
+	StrictUploadCount    int    `json:"strict_upload_count"`
+	NonStrictUploadCount int    `json:"non_strict_upload_count"`
+	Reason               string `json:"reason,omitempty"`
+	Next                 string `json:"next,omitempty"`
 }
 
 type evidenceLoop struct {
@@ -42,6 +45,7 @@ type auditResult struct {
 	Covered        int
 	Accepted       int
 	Unregistered   []string
+	NonStrict      []string
 	AcceptedUnused []string
 }
 
@@ -52,6 +56,7 @@ type evidence struct {
 	WorkflowCount    int              `json:"workflow_count"`
 	CoveredCount     int              `json:"covered_count"`
 	AcceptedGapCount int              `json:"accepted_gap_count"`
+	NonStrict        []string         `json:"non_strict_artifact_uploads"`
 	Unregistered     []string         `json:"unregistered_gaps"`
 	AcceptedUnused   []string         `json:"accepted_gaps_unused"`
 	Records          []workflowRecord `json:"records"`

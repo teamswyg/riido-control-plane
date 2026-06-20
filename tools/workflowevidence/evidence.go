@@ -2,10 +2,12 @@ package main
 
 func newEvidence(m manifest, result auditResult) evidence {
 	status := "verified"
-	if len(result.Unregistered) > 0 || len(result.AcceptedUnused) > 0 {
+	if len(result.Unregistered) > 0 || len(result.NonStrict) > 0 ||
+		len(result.AcceptedUnused) > 0 {
 		status = "failed"
 	}
 	unregistered := append([]string{}, result.Unregistered...)
+	nonStrict := append([]string{}, result.NonStrict...)
 	acceptedUnused := append([]string{}, result.AcceptedUnused...)
 	return evidence{
 		SchemaVersion:    evidenceSchema,
@@ -14,6 +16,7 @@ func newEvidence(m manifest, result auditResult) evidence {
 		WorkflowCount:    len(result.Records),
 		CoveredCount:     result.Covered,
 		AcceptedGapCount: result.Accepted,
+		NonStrict:        nonStrict,
 		Unregistered:     unregistered,
 		AcceptedUnused:   acceptedUnused,
 		Records:          result.Records,
