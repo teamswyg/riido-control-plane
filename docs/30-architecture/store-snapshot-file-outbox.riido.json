@@ -1,0 +1,27 @@
+{
+  "schema_version": "riido-store-snapshot-file-outbox.v1",
+  "id": "control-plane-store-snapshot-file-outbox",
+  "title": "Control Plane Store Snapshot File Outbox",
+  "generated_doc": "docs/30-architecture/store-snapshot-file-outbox.md",
+  "workflow": ".github/workflows/store-snapshot-file-outbox.yml",
+  "evidence_artifact": "store-snapshot-file-outbox-evidence",
+  "owner_package": "internal/riidoaiserver",
+  "cases": [
+    {"name":"file-outbox-persists-events","kind":"outbox","want_records":2,"want_events":["assignment_queued","assignment_leased"]},
+    {"name":"file-store-snapshot-restores-assignment","kind":"snapshot","want_history_events":3,"want_assignment_state":"ready","want_task_events":3},
+    {"name":"outbox-failure-records-metrics","kind":"outbox-failure","want_outbox_errors":1,"want_latency_samples":1}
+  ],
+  "source_checks": [
+    {"name":"file-outbox","file":"internal/riidoaiserver/file_outbox.go","contains":["OutboxRecordSchemaVersion","NewFileOutbox","AppendTaskEvent","json.NewEncoder"]},
+    {"name":"file-snapshot","file":"internal/riidoaiserver/store_snapshot.go","contains":["StoreSnapshotSchemaVersion","NewFileStoreSnapshot","LoadStoreSnapshot","SaveStoreSnapshot","DisallowUnknownFields"]},
+    {"name":"persistence-tests","file":"internal/riidoaiserver/store_persistence_test.go","contains":["TestFileOutboxPersistsTaskEvents","TestFileStoreSnapshotRestoresAssignmentsAndEvents","TestOutboxFailureRecordsMetricsWithoutFailingMutation"]},
+    {"name":"store-config","file":"internal/riidoaiserver/store.go","contains":["OpenStoreWithConfig","SnapshotStore","Outbox"]}
+  ],
+  "loop": {
+    "observation": "The store snapshot and file outbox workflow exercised durability tests but did not publish machine-readable evidence for the recovered event and metric shape.",
+    "hypothesis": "A focused durability sidecar can replay a tiny assignment flow through the real store, snapshot, and outbox adapters without live infrastructure.",
+    "execute": "Create temporary file-backed snapshot/outbox stores, run assignment and poll flows, verify recovered history and metrics, then upload CI evidence.",
+    "evaluate": "The verifier fails on event ordering drift, snapshot recovery drift, outbox failure metric drift, stale generated docs, missing source anchors, or workflow evidence regression.",
+    "retrospective": "This closes the file snapshot/outbox workflow evidence gap while keeping DynamoDB, EventBridge, and live deployment evidence in separate gates."
+  }
+}

@@ -81,11 +81,6 @@
       "path": ".github/workflows/review-account-seed.yml",
       "reason": "seed workflow currently runs checks without JSON evidence",
       "next": "publish redacted seed conformance evidence"
-    },
-    {
-      "path": ".github/workflows/store-snapshot-file-outbox.yml",
-      "reason": "legacy outbox workflow currently runs tests without JSON evidence",
-      "next": "publish snapshot/outbox evidence"
     }
   ],
   "assertions": [
