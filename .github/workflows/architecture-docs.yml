@@ -20,6 +20,7 @@ on:
       - "tools/moduledecomposition/**"
       - "tools/openquestions/**"
       - "tools/runtimeboundary/**"
+      - "tools/runtimecdownership/**"
       - "tools/snapshotcqrsgate/**"
   pull_request:
     paths:
@@ -39,6 +40,7 @@ on:
       - "tools/moduledecomposition/**"
       - "tools/openquestions/**"
       - "tools/runtimeboundary/**"
+      - "tools/runtimecdownership/**"
       - "tools/snapshotcqrsgate/**"
 
 jobs:
@@ -106,6 +108,11 @@ jobs:
           go run ./tools/runtimeboundary \
             -check-doc \
             -evidence-out out/runtime-deployment-boundary-evidence.json
+      - name: Verify runtime CD ownership
+        run: |
+          go run ./tools/runtimecdownership \
+            -check-doc \
+            -evidence-out out/runtime-cd-ownership-evidence.json
       - name: Verify live workflow redaction evidence
         run: |
           go run ./tools/liveworkflowevidence \
@@ -166,6 +173,13 @@ jobs:
         with:
           name: runtime-deployment-boundary-evidence
           path: out/runtime-deployment-boundary-evidence.json
+          if-no-files-found: warn
+      - name: Upload runtime CD ownership evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-cd-ownership-evidence
+          path: out/runtime-cd-ownership-evidence.json
           if-no-files-found: warn
       - name: Upload live workflow redaction evidence
         uses: actions/upload-artifact@v4
