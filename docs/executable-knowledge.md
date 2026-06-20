@@ -8,30 +8,27 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Class | Count |
 | --- | ---: |
-| Generated reader docs | 15 |
+| Generated reader docs | 16 |
 | Direct SSOT docs | 3 |
-| Registered manual docs | 2 |
+| Registered manual docs | 1 |
 | Scanned docs | 20 |
 
 ## Registered Manual Surfaces
 
 | Group | Owner | Next artifact | Matched docs |
 | --- | --- | --- | ---: |
-| `roadmap-manual-debt` | control-plane-planning | open-question decision manifests | 1 |
 | `migration-manual-debt` | control-plane-migration | focused current-state SSOT manifests | 1 |
 
 ## Manual Hotspots
 
 | Directory | Matched docs |
 | --- | ---: |
-| `docs/50-roadmap` | 1 |
 | `docs/migration` | 1 |
 
 ## Manual Samples
 
 | Group | Path |
 | --- | --- |
-| `roadmap-manual-debt` | `docs/50-roadmap/open-questions.md` |
 | `migration-manual-debt` | `docs/migration/control-plane.md` |
 
 ## Assertions

@@ -8,13 +8,6 @@
   "scan_roots": ["docs"],
   "manual_groups": [
     {
-      "id": "roadmap-manual-debt",
-      "owner": "control-plane-planning",
-      "reason": "Open questions are tracked as planning debt until each question resolves into an executable owner.",
-      "next_artifact": "open-question decision manifests",
-      "path_prefixes": ["docs/50-roadmap/"]
-    },
-    {
       "id": "migration-manual-debt",
       "owner": "control-plane-migration",
       "reason": "Migration history remains registered debt and must not be mistaken for current executable truth.",

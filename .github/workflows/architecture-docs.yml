@@ -17,6 +17,7 @@ on:
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
       - "tools/moduledecomposition/**"
+      - "tools/openquestions/**"
       - "tools/runtimeboundary/**"
       - "tools/snapshotcqrsgate/**"
   pull_request:
@@ -34,6 +35,7 @@ on:
       - "tools/configreference/**"
       - "tools/integrationmatrix/**"
       - "tools/moduledecomposition/**"
+      - "tools/openquestions/**"
       - "tools/runtimeboundary/**"
       - "tools/snapshotcqrsgate/**"
 
@@ -62,6 +64,7 @@ jobs:
           test -f docs/30-architecture/ai-agent-risk-evidence.riido.json
           test -f docs/30-architecture/ai-agent-snapshot-cqrs-gate.riido.json
           test -f docs/50-roadmap/open-questions.md
+          test -f docs/50-roadmap/open-questions.riido.json
       - name: Verify architecture docs avoid stale ownership paths
         run: |
           stale="$(grep -R --line-number -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon/internal|packaging/terraform|terraform\\.tfstate|terraform\\.tfvars|AWS_ACCESS_KEY|AWS_SECRET' docs/20-domain/context-map.md docs/30-architecture docs/50-roadmap || true)"
@@ -89,6 +92,11 @@ jobs:
           go run ./tools/moduledecomposition \
             -check-doc \
             -evidence-out out/module-decomposition-evidence.json
+      - name: Verify open questions
+        run: |
+          go run ./tools/openquestions \
+            -check-doc \
+            -evidence-out out/open-questions-evidence.json
       - name: Verify runtime deployment boundary
         run: |
           go run ./tools/runtimeboundary \
@@ -135,6 +143,13 @@ jobs:
         with:
           name: module-decomposition-evidence
           path: out/module-decomposition-evidence.json
+          if-no-files-found: warn
+      - name: Upload open questions evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: open-questions-evidence
+          path: out/open-questions-evidence.json
           if-no-files-found: warn
       - name: Upload runtime deployment boundary evidence
         uses: actions/upload-artifact@v4
