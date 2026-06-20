@@ -91,11 +91,6 @@
       "path": ".github/workflows/store-snapshot-file-outbox.yml",
       "reason": "legacy outbox workflow currently runs tests without JSON evidence",
       "next": "publish snapshot/outbox evidence"
-    },
-    {
-      "path": ".github/workflows/web-frontend-api.yml",
-      "reason": "frontend API guard currently runs checks without JSON evidence",
-      "next": "publish generated API compatibility evidence"
     }
   ],
   "assertions": [

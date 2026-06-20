@@ -43,6 +43,7 @@
     {"path":"tools/runtimeboundary","kind":"evidence-tool","role":"Runtime deployment boundary generated reader and public/private ownership verifier.","must_not_own":"live AWS deploy execution or private topology evidence"},
     {"path":"tools/saascontrolplane","kind":"evidence-tool","role":"SaaS control-plane generated reader and verifier.","must_not_own":"private infra topology"},
     {"path":"tools/snapshotcqrsgate","kind":"evidence-tool","role":"AI Agent snapshot CQRS decision gate.","must_not_own":"store-wide CQRS migration"},
+    {"path":"tools/webfrontendapi","kind":"evidence-tool","role":"Web frontend API CORS generated reader and verifier.","must_not_own":"frontend implementation or private deployment origins"},
     {"path":"tools/workflowevidence","kind":"meta-evidence-tool","role":"GitHub Actions evidence coverage verifier.","must_not_own":"domain-specific test semantics or private operator evidence"}
   ],
   "rules":["Every Go package directory under the source roots must appear exactly once in this manifest.","Forbidden imports are checked from Go import declarations, not from test fixture strings.","Public behavior must remain black-box testable without AWS credentials.","Runtime artifact CD is owned by this repository, while topology and private operator evidence remain outside it.","Direct Go module dependencies remain governed by dependency_allowlist.riido.json."],
