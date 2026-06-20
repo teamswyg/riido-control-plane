@@ -23,6 +23,9 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.SchemaVersion != evidenceSchema || got.Routes != len(requiredRoutes) {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
+	if got.Loop.Observation == "" || got.Loop.Retrospective == "" {
+		t.Fatalf("missing loop evidence: %+v", got.Loop)
+	}
 }
 
 func TestGeneratedDocMatchesManifest(t *testing.T) {

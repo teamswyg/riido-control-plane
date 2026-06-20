@@ -481,5 +481,12 @@
   "dependency_direction": {
     "top_down": "Runtime artifact CD behavior changes in control-plane first; infra consumes the required topology/evidence needs.",
     "bottom_up": "Infra may discover topology or security constraints and request a control-plane workflow change, but that does not move CD execution out of control-plane."
+  },
+  "loop": {
+    "observation": "Terraform, GitHub deployment workflows, and live ECS revisions can drift unless runtime ownership and public redaction rules are executable.",
+    "hypothesis": "A runtime CD ownership manifest can keep public artifact promotion separate from private topology evidence while still allowing CI to scan the public surface.",
+    "execute": "Verify the deploy policy, workflow redaction behavior, public export contract, and linked runtime-boundary evidence from this manifest.",
+    "evaluate": "The deploy policy tests fail on live payload exports, forbidden public operational detail, workflow drift, or missing ownership boundary evidence.",
+    "retrospective": "This keeps deployment review evidence-based without moving AWS topology, Terraform state, or operator evidence into the public repository."
   }
 }

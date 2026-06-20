@@ -69,3 +69,13 @@ Executable SSOT: [`agent-catalog-rbac.riido.json`](agent-catalog-rbac.riido.json
 - `external identity-provider rollout`
 - `daemon provider execution`
 - `production token values`
+
+## Evidence Loop
+
+| Step | Statement |
+| --- | --- |
+| Observe | The first public agent catalog RBAC slice originally proved policy shape but did not carry an explicit engineering loop. |
+| Hypothesis | Keeping the RBAC loop in the executable manifest makes the early migration slice auditable without turning prose into the source of truth. |
+| Execute | Generate this reader from the RBAC manifest and verify source checks, routes, visibility rules, and doc freshness in CI. |
+| Evaluate | The verifier fails on missing identity fields, domain values, route coverage, source evidence, generated doc drift, or loop fields. |
+| Retrospective | This keeps the migration-era RBAC slice aligned with the newer evidence-driven documentation model. |

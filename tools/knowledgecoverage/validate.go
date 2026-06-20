@@ -18,6 +18,9 @@ func validateManifest(root string, m manifest) []string {
 	if len(m.ScanRoots) == 0 || len(m.Assertions) == 0 {
 		problems = append(problems, "scan_roots and assertions must not be empty")
 	}
+	if !completeLoop(m.Loop) {
+		problems = append(problems, "loop must define observe/hypothesis/execute/evaluate/retrospective")
+	}
 	for _, path := range append([]string{m.Workflow}, m.ScanRoots...) {
 		if _, err := os.Stat(resolvePath(root, path)); err != nil {
 			problems = append(problems, fmt.Sprintf("missing path %q", path))

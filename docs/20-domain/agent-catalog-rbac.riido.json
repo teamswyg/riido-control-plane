@@ -29,5 +29,12 @@
     {"name": "scope-candidates", "file": "internal/riidoaiserver/authorization.go", "contains": ["AuthorizationResourceAgentCatalog", "agent-catalog:*:", "agent-catalog:\" + req.AgentID + \":\" + string(req.Action)"]},
     {"name": "focused-ci", "file": ".github/workflows/agent-catalog-rbac.yml", "contains": ["AgentCatalogRBAC|StaticTokenAuthorizer", "Verify RBAC slice import boundary"]}
   ],
-  "non_goals": ["persistent catalog storage", "DynamoDB/EventBridge/IAM/Terraform wiring", "external identity-provider rollout", "daemon provider execution", "production token values"]
+  "non_goals": ["persistent catalog storage", "DynamoDB/EventBridge/IAM/Terraform wiring", "external identity-provider rollout", "daemon provider execution", "production token values"],
+  "loop": {
+    "observation": "The first public agent catalog RBAC slice originally proved policy shape but did not carry an explicit engineering loop.",
+    "hypothesis": "Keeping the RBAC loop in the executable manifest makes the early migration slice auditable without turning prose into the source of truth.",
+    "execute": "Generate this reader from the RBAC manifest and verify source checks, routes, visibility rules, and doc freshness in CI.",
+    "evaluate": "The verifier fails on missing identity fields, domain values, route coverage, source evidence, generated doc drift, or loop fields.",
+    "retrospective": "This keeps the migration-era RBAC slice aligned with the newer evidence-driven documentation model."
+  }
 }

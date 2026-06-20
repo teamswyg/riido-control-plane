@@ -52,6 +52,9 @@ func TestFigmaAIAgentControlPlaneProjectionManifest(t *testing.T) {
 	if strings.TrimSpace(manifest.ProjectionPolicy.TopDown) == "" || strings.TrimSpace(manifest.ProjectionPolicy.BottomUp) == "" {
 		t.Fatalf("projection policy must include both directions: %+v", manifest.ProjectionPolicy)
 	}
+	if strings.TrimSpace(manifest.Loop.Observation) == "" || strings.TrimSpace(manifest.Loop.Retrospective) == "" {
+		t.Fatalf("projection loop must be present: %+v", manifest.Loop)
+	}
 
 	doc, err := os.ReadFile(docPath)
 	if err != nil {
@@ -1054,6 +1057,15 @@ type figmaProjectionManifest struct {
 	LegacyNonUIAbsorptions            []figmaProjectionLegacyAbsorption         `json:"legacy_non_ui_absorptions"`
 	NonUIPlanningAbsorptions          []figmaProjectionPlanningAbsorption       `json:"non_ui_planning_absorptions"`
 	Entries                           []figmaProjectionEntry                    `json:"entries"`
+	Loop                              figmaProjectionLoop                       `json:"loop"`
+}
+
+type figmaProjectionLoop struct {
+	Observation   string `json:"observation"`
+	Hypothesis    string `json:"hypothesis"`
+	Execute       string `json:"execute"`
+	Evaluate      string `json:"evaluate"`
+	Retrospective string `json:"retrospective"`
 }
 
 type figmaProjectionSourceManifest struct {

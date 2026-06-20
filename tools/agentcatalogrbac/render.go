@@ -28,6 +28,7 @@ func renderDoc(m manifest) string {
 	renderSection(&b, "Response DTOs", m.ResponseDTOs)
 	renderSection(&b, "Store Port Methods", m.StoreMethods)
 	renderSection(&b, "Non-Goals", m.NonGoals)
+	renderLoop(&b, m.Loop)
 	return b.String()
 }
 

@@ -10,12 +10,13 @@ import (
 const evidenceSchemaVersion = "riido-ai-agent-risk-evidence-result.v1"
 
 type evidenceResult struct {
-	SchemaVersion     string `json:"schema_version"`
-	ID                string `json:"id"`
-	Status            string `json:"status"`
-	LocalEvidence     int    `json:"local_evidence"`
-	ExternalEvidence  int    `json:"external_evidence"`
-	RemainingBoundary int    `json:"remaining_boundaries"`
+	SchemaVersion     string       `json:"schema_version"`
+	ID                string       `json:"id"`
+	Status            string       `json:"status"`
+	LocalEvidence     int          `json:"local_evidence"`
+	ExternalEvidence  int          `json:"external_evidence"`
+	RemainingBoundary int          `json:"remaining_boundaries"`
+	Loop              evidenceLoop `json:"loop"`
 }
 
 func newEvidence(manifest evidenceManifest, result verificationResult) evidenceResult {
@@ -26,6 +27,7 @@ func newEvidence(manifest evidenceManifest, result verificationResult) evidenceR
 		LocalEvidence:     result.LocalEvidence,
 		ExternalEvidence:  result.ExternalEvidence,
 		RemainingBoundary: result.RemainingBoundary,
+		Loop:              manifest.Loop,
 	}
 }
 

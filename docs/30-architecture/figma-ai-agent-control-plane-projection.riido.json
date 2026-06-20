@@ -394,5 +394,12 @@
         "v2.aiAgent.devices.runtimes"
       ]
     }
-  ]
+  ],
+  "loop": {
+    "observation": "The control-plane projection depends on a contracts-owned Figma coverage mirror, so local generated-client decisions can drift if mirror limits and projection rules are only prose.",
+    "hypothesis": "A projection manifest can make the upstream Figma SSOT, mirrored limitations, absorbed legacy nodes, and generated-client path checks executable in this repository.",
+    "execute": "Verify the local projection against the mirrored contracts coverage, generated TypeScript paths, annotation policies, and forbidden endpoint fragments.",
+    "evaluate": "The projection tests fail on stale mirrors, missing generated paths, unexpected endpoint claims, annotation policy drift, or source-coverage mismatch.",
+    "retrospective": "This lets control-plane consume design coverage without becoming the Figma source of truth or inventing API paths from local prose."
+  }
 }
