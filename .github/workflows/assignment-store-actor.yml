@@ -6,15 +6,20 @@ on:
     paths:
       - ".github/workflows/assignment-store-actor.yml"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/agent_registry.go"
       - "internal/riidoaiserver/ai_agent_client_api.go"
       - "internal/riidoaiserver/ai_agent_client_development.go"
       - "internal/riidoaiserver/ai_agent_client_multi_agent_test.go"
+      - "internal/riidoaiserver/ai_agent_client_persistence_test.go"
+      - "internal/riidoaiserver/assignment_longpoll_test.go"
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/assignment_contract_gen.go"
+      - "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_item.go"
       - "internal/riidoaiserver/provider_status.go"
       - "internal/riidoaiserver/provider_status_port.go"
       - "internal/riidoaiserver/server.go"
@@ -27,15 +32,20 @@ on:
     paths:
       - ".github/workflows/assignment-store-actor.yml"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/agent_registry.go"
       - "internal/riidoaiserver/ai_agent_client_api.go"
       - "internal/riidoaiserver/ai_agent_client_development.go"
       - "internal/riidoaiserver/ai_agent_client_multi_agent_test.go"
+      - "internal/riidoaiserver/ai_agent_client_persistence_test.go"
+      - "internal/riidoaiserver/assignment_longpoll_test.go"
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/assignment_contract_gen.go"
+      - "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_item.go"
       - "internal/riidoaiserver/provider_status.go"
       - "internal/riidoaiserver/provider_status_port.go"
       - "internal/riidoaiserver/server.go"
@@ -63,5 +73,39 @@ jobs:
             printf 'Disallowed store actor imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify store actor executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/saascontrolplane -count=1
+          for boundary in long-poll multi-agent-task runtime-snapshot store-actor; do
+            go run ./tools/saascontrolplane \
+              -boundary "$boundary" \
+              -check-doc \
+              -evidence-out "out/${boundary}-evidence.json"
+          done
       - name: Test assignment store actor and client assignment domain
-        run: go test ./internal/riidoaiserver -run 'StoreActor|AssignmentStore|AIAgentClient.*Assignment|AIAgentClient.*ThreadStream' -count=1
+        run: go test ./internal/riidoaiserver -run 'StoreActor|AssignmentStore|AIAgentClient.*Assignment|AIAgentClient.*ThreadStream|WaitForAssignment|HTTPAgentPollLongPoll|PersistentAIAgentClientStore' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment-store-actor-long-poll-evidence
+          path: out/long-poll-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment-store-actor-multi-agent-evidence
+          path: out/multi-agent-task-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment-store-actor-runtime-snapshot-evidence
+          path: out/runtime-snapshot-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment-store-actor-evidence
+          path: out/store-actor-evidence.json
+          if-no-files-found: error

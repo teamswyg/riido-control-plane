@@ -7,7 +7,9 @@ on:
       - ".github/workflows/assignment-sse-adapter.yml"
       - "docs/20-domain/request-authorization.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/assignment_api.go"
@@ -25,7 +27,9 @@ on:
       - ".github/workflows/assignment-sse-adapter.yml"
       - "docs/20-domain/request-authorization.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/20-domain/saas-control-plane.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/saascontrolplane/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/assignment_api.go"
@@ -57,5 +61,19 @@ jobs:
             printf 'Disallowed assignment SSE imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify assignment SSE executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/saascontrolplane -count=1
+          go run ./tools/saascontrolplane \
+            -boundary task-event-sse \
+            -check-doc \
+            -evidence-out out/assignment-sse-adapter-evidence.json
       - name: Test assignment SSE adapter
         run: go test ./internal/riidoaiserver -run 'SSE|SubscribeTask' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment-sse-adapter-evidence
+          path: out/assignment-sse-adapter-evidence.json
+          if-no-files-found: error
