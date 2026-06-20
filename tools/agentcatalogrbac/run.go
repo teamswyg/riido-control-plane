@@ -14,6 +14,10 @@ func run(opts options) error {
 	if err != nil {
 		return err
 	}
+	profile, err := evidenceProfileFor(m, opts.Profile)
+	if err != nil {
+		return err
+	}
 	if opts.WriteDoc {
 		if err := writeText(resolve(root, m.GeneratedDoc), renderDoc(m)); err != nil {
 			return fmt.Errorf("write generated doc: %w", err)
@@ -23,7 +27,7 @@ func run(opts options) error {
 		return err
 	}
 	if opts.EvidenceOut != "" {
-		if err := writeJSON(resolve(root, opts.EvidenceOut), newEvidence(m)); err != nil {
+		if err := writeJSON(resolve(root, opts.EvidenceOut), newEvidence(m, profile)); err != nil {
 			return err
 		}
 	}
@@ -33,6 +37,7 @@ func run(opts options) error {
 type options struct {
 	Repo        string
 	Manifest    string
+	Profile     string
 	EvidenceOut string
 	WriteDoc    bool
 	CheckDoc    bool

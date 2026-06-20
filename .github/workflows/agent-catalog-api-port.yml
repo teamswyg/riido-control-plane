@@ -6,7 +6,9 @@ on:
     paths:
       - ".github/workflows/agent-catalog-api-port.yml"
       - "docs/20-domain/agent-catalog-rbac.md"
+      - "docs/20-domain/agent-catalog-rbac.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentcatalogrbac/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -18,7 +20,9 @@ on:
     paths:
       - ".github/workflows/agent-catalog-api-port.yml"
       - "docs/20-domain/agent-catalog-rbac.md"
+      - "docs/20-domain/agent-catalog-rbac.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentcatalogrbac/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -45,5 +49,19 @@ jobs:
             printf 'Disallowed catalog API imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify catalog API executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/agentcatalogrbac -count=1
+          go run ./tools/agentcatalogrbac \
+            -profile api-port \
+            -check-doc \
+            -evidence-out out/agent-catalog-api-port-evidence.json
       - name: Test agent catalog API port
         run: go test ./internal/riidoaiserver -run 'AgentCatalogAPI|AgentCatalogStorePort' -count=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-catalog-api-port-evidence
+          path: out/agent-catalog-api-port-evidence.json
+          if-no-files-found: error

@@ -8,6 +8,7 @@ type manifest struct {
 	GeneratedDoc        string        `json:"generated_doc"`
 	Workflow            string        `json:"workflow"`
 	EvidenceArtifact    string        `json:"evidence_artifact"`
+	EvidenceProfiles    []profile     `json:"evidence_profiles"`
 	OwnerPackage        string        `json:"owner_package"`
 	Roles               []string      `json:"roles"`
 	Visibilities        []string      `json:"visibilities"`
@@ -30,6 +31,14 @@ type rule struct {
 	AllowedActions []string `json:"allowed_actions,omitempty"`
 	DeniedActions  []string `json:"denied_actions,omitempty"`
 	Reason         string   `json:"reason"`
+}
+
+type profile struct {
+	ID               string   `json:"id"`
+	Workflow         string   `json:"workflow"`
+	EvidenceArtifact string   `json:"evidence_artifact"`
+	Focus            string   `json:"focus"`
+	TestPatterns     []string `json:"test_patterns"`
 }
 
 type sourceCheck struct {
