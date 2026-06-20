@@ -26,6 +26,9 @@ func TestModuleDecompositionEvidence(t *testing.T) {
 	if got.LineBudgetTarget == 0 || got.FilesOverLineBudget == 0 || len(got.LineBudgetSamples) == 0 {
 		t.Fatalf("missing line budget evidence: %+v", got)
 	}
+	if len(got.LineBudgetHotspots) == 0 {
+		t.Fatalf("missing line budget hotspot evidence: %+v", got)
+	}
 }
 
 func TestModuleDecompositionGeneratedDocFresh(t *testing.T) {

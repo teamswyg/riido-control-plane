@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 )
 
@@ -13,6 +11,7 @@ type lineBudgetResult struct {
 	OverTarget int
 	MaxLines   int
 	Samples    []lineBudgetSample
+	Hotspots   []lineBudgetHotspot
 }
 
 type lineBudgetSample struct {
@@ -53,28 +52,6 @@ func scanLineBudget(repoRoot string, roots []string, budget fileLineBudget) (lin
 		}
 	}
 	result.Samples = topLineBudgetSamples(samples, budget.SampleLimit)
+	result.Hotspots = topLineBudgetHotspots(samples, budget.HotspotLimit, budget.TargetLines)
 	return result, nil
-}
-
-func countLines(path string) (int, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return 0, err
-	}
-	if len(data) == 0 {
-		return 0, nil
-	}
-	lines := bytes.Count(data, []byte{'\n'})
-	if data[len(data)-1] != '\n' {
-		lines++
-	}
-	return lines, nil
-}
-
-func topLineBudgetSamples(samples []lineBudgetSample, limit int) []lineBudgetSample {
-	slices.SortFunc(samples, func(a, b lineBudgetSample) int { return b.Lines - a.Lines })
-	if limit > 0 && len(samples) > limit {
-		return samples[:limit]
-	}
-	return samples
 }
