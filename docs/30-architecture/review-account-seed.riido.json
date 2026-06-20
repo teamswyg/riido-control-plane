@@ -1,0 +1,32 @@
+{
+  "schema_version": "riido-review-account-seed-evidence.v1",
+  "id": "control-plane-review-account-seed",
+  "title": "Control Plane Review Account Seed",
+  "generated_doc": "docs/30-architecture/review-account-seed.md",
+  "workflow": ".github/workflows/review-account-seed.yml",
+  "evidence_artifact": "review-account-seed-evidence",
+  "seed_ssot": "internal/riidoaiserver/review_account_seed.riido.json",
+  "owner_packages": ["internal/riidoaiserver", "cmd/riido_ai_server"],
+  "cases": [
+    {"name":"credential-redacted","kind":"provision","want_token_hash_present":true,"want_raw_token_present":false},
+    {"name":"catalog-visibility","kind":"catalog","want_visible_agents":["review-other-public","review-owned-private","review-owned-public"],"want_admin":false},
+    {"name":"provider-status-non-routable","kind":"provider-status","want_provider_count":4,"want_available_count":0,"want_channel":"mac-app-store"},
+    {"name":"http-review-read-deny-poll","kind":"http","want_catalog_status":200,"want_provider_status":200,"want_poll_status":403}
+  ],
+  "source_checks": [
+    {"name":"seed-ssot-redaction","file":"internal/riidoaiserver/review_account_seed.riido.json","contains":["riido-review-account-seed.v1","store-reviewer","synthetic_provider_status"]},
+    {"name":"seed-domain","file":"internal/riidoaiserver/review_account_seed.go","contains":["ReviewAccountSeed","ProvisionReviewAccount","forbiddenReviewAccountScope","ApplyReviewAccountProvisioning"]},
+    {"name":"seed-tests","file":"internal/riidoaiserver/review_account_seed_test.go","contains":["TestReviewAccountSeedProvisionsScopedCredentialWithoutRawSecret","TestReviewAccountSeedArtifactContainsNoRawSecrets","TestReviewAccountSeedUsesOnlySyntheticNonRoutableProviderStatus"]},
+    {"name":"http-tests","file":"internal/riidoaiserver/server_test.go","contains":["TestHTTPReviewAccountProvisioningExposesSeededCatalogAndSyntheticProviderStatus","review poll status"]},
+    {"name":"cmd-wiring","file":"cmd/riido_ai_server/main.go","contains":["envReviewAccountTokenHash","reviewAccountProvisioningFromEnv"]}
+  ],
+  "forbidden_seed_terms": ["\"token\"", "\"password\"", "provider_executable_path", "workspace_root_path", "api_key"],
+  "forbidden_seed_term_sets": ["aws_credential_env_names"],
+  "loop": {
+    "observation": "The review account seed workflow checked redaction and behavior but did not publish durable evidence for scoped credentials, catalog visibility, non-routable provider status, or poll denial.",
+    "hypothesis": "A focused review-account sidecar can execute the embedded seed and HTTP read paths while publishing only redacted shape evidence.",
+    "execute": "Load the embedded seed, provision a hashed credential, apply it to a store, call the real HTTP handler, verify source anchors and generated doc freshness, then upload CI evidence.",
+    "evaluate": "The verifier fails on raw secret terms, forbidden scope drift, catalog visibility drift, provider routability drift, poll-denial drift, stale docs, or workflow evidence regression.",
+    "retrospective": "This closes the review-account-seed workflow evidence gap while leaving actual operator tokens and live deployment values outside the public repository."
+  }
+}
