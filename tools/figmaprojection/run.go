@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func run(repo, projectionPath, sourcePath, evidenceOut string, check bool) error {
+func run(repo, projectionPath, sourcePath, evidenceOut string, writeDoc, check bool) error {
 	root, err := findRepoRoot(repo)
 	if err != nil {
 		return err
@@ -18,8 +18,17 @@ func run(repo, projectionPath, sourcePath, evidenceOut string, check bool) error
 	if err := verifyProjection(p, s); err != nil {
 		return err
 	}
+	doc := renderDoc(p, s)
+	if writeDoc {
+		if err := writeDocFile(root, doc); err != nil {
+			return err
+		}
+	}
 	if check {
-		if err := checkDoc(root); err != nil {
+		if err := checkGeneratedDoc(root, doc); err != nil {
+			return err
+		}
+		if err := checkProjectionGate(root); err != nil {
 			return err
 		}
 	}

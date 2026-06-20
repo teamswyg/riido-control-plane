@@ -8,12 +8,12 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Class | Count |
 | --- | ---: |
-| Generated reader docs | 29 |
-| Generated reader docs with tool | 29 |
-| Generated reader docs with CI evidence | 29 |
-| Direct SSOT docs | 1 |
-| Direct SSOT docs with evidence loop | 1 |
-| Direct SSOT docs with CI evidence | 1 |
+| Generated reader docs | 30 |
+| Generated reader docs with tool | 30 |
+| Generated reader docs with CI evidence | 30 |
+| Direct SSOT docs | 0 |
+| Direct SSOT docs with evidence loop | 0 |
+| Direct SSOT docs with CI evidence | 0 |
 | Registered manual docs | 0 |
 | Scanned docs | 30 |
 

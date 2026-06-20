@@ -19,10 +19,11 @@ func mainRun(args []string) error {
 	repo := fs.String("repo", ".", "repository root")
 	projection := fs.String("projection", defaultProjection, "projection manifest")
 	source := fs.String("source", defaultSource, "mirrored source manifest")
+	writeDoc := fs.Bool("write-doc", false, "write generated reader doc")
 	checkDoc := fs.Bool("check-doc", false, "run the generated-client projection gate")
 	evidenceOut := fs.String("evidence-out", "", "optional evidence JSON output path")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	return run(*repo, *projection, *source, *evidenceOut, *checkDoc)
+	return run(*repo, *projection, *source, *evidenceOut, *writeDoc, *checkDoc)
 }
