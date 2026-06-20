@@ -23,16 +23,6 @@
       "next": "publish runtime operation evidence"
     },
     {
-      "path": ".github/workflows/assignment-sse-adapter.yml",
-      "reason": "legacy SSE workflow currently runs tests without JSON evidence",
-      "next": "publish SSE adapter conformance evidence"
-    },
-    {
-      "path": ".github/workflows/assignment-store-actor.yml",
-      "reason": "legacy actor workflow currently runs tests without JSON evidence",
-      "next": "publish store actor conformance evidence"
-    },
-    {
       "path": ".github/workflows/aws-adapters-facade.yml",
       "reason": "legacy AWS facade workflow currently runs tests without JSON evidence",
       "next": "publish facade boundary evidence without live credentials"
