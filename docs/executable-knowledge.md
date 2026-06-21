@@ -43,6 +43,18 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | `internal` | 1 | `internal/riidoaiserver/review_account_seed.riido.json` |
 | `packaging` | 1 | `packaging/containers/riido_ai_server_container.riido.json` |
 
+## Manifest Loop Inventory
+
+- Complete manifest loops: `45`
+- Direct manifest loops: `34`
+- Delegated manifest loops: `11`
+- Missing manifest loops: `0`
+- Missing loop budget: `0`
+
+| Group | Missing loops | Budget | Sample paths |
+| --- | ---: | ---: | --- |
+| None | 0 | 0 | - |
+
 ## Evidence Loop
 
 | Step | Statement |
@@ -87,6 +99,8 @@ None.
 - an owned manifest must be declared by its owner manifest and have strict owner evidence
 - every *.riido.json executable manifest in the repository must be tracked by the coverage inventory
 - repository-wide manifest inventory evidence must include bounded group samples for traceable review
+- every tracked executable manifest must carry a direct loop, a loop_source, or an owner-manifest delegated loop
+- new loop-less executable manifest debt must not exceed the manifest_loop_budget
 - a direct-SSOT backed markdown file must have a sibling .riido.json manifest
 - a direct-SSOT backed markdown file must have a complete evidence loop in that sibling manifest
 - a direct-SSOT backed markdown file must declare evidence_tool in the sibling manifest

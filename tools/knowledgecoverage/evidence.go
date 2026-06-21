@@ -4,6 +4,7 @@ const evidenceSchema = "riido-executable-knowledge-coverage-result.v1"
 
 func buildEvidence(root string, m manifest, docs []docClass, problems []string) evidence {
 	counts := countDocs(docs)
+	loops := scanManifestLoops(root, m)
 	status := "verified"
 	if len(problems) > 0 {
 		status = "failed"
@@ -50,6 +51,13 @@ func buildEvidence(root string, m manifest, docs []docClass, problems []string) 
 		TrackedManifestCount:             trackedManifestCount(root, m, docs),
 		ManifestInventoryByGroup:         manifestInventoryByGroup(root),
 		ManifestInventorySamples:         manifestInventorySamples(root, 3),
+		ManifestLoopCount:                loops.Complete,
+		ManifestDirectLoopCount:          loops.Direct,
+		ManifestDelegatedLoopCount:       loops.Delegated,
+		ManifestMissingLoopCount:         loops.Missing,
+		ManifestMissingLoopByGroup:       loops.MissingGroups,
+		ManifestMissingLoopSamples:       loops.MissingSamples,
+		ManifestLoopBudget:               m.ManifestLoopBudget,
 		UntrackedManifests:               untrackedManifests(root, m, docs),
 		DirectMissingEvidenceWorkflow:    directMissingEvidenceWorkflow(root, docs),
 		DirectMissingLoop:                directMissingLoops(docs), ProblemSummaries: problems,

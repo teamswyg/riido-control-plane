@@ -13,6 +13,7 @@ func renderDoc(root string, m manifest, docs []docClass, problems []string) stri
 	b.WriteString("Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.json).\n\n")
 	renderCoverageTable(&b, e)
 	renderManifestInventory(&b, e)
+	renderManifestLoopInventory(&b, e)
 	renderLoop(&b, m.Loop)
 	renderManualGroups(&b, m, e)
 	renderManualHotspots(&b, e)
