@@ -51,11 +51,6 @@ type manualDir struct {
 	Count int    `json:"count"`
 }
 
-type manifestDir struct {
-	Group string `json:"group"`
-	Count int    `json:"count"`
-}
-
 type manualSample struct {
 	Group  string `json:"group"`
 	Path   string `json:"path"`
