@@ -33,6 +33,16 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Registered manual docs | 0 |
 | Scanned docs | 31 |
 
+## Manifest Inventory
+
+| Group | Count |
+| --- | ---: |
+| `docs` | 37 |
+| `contracts` | 4 |
+| `.` | 2 |
+| `internal` | 1 |
+| `packaging` | 1 |
+
 ## Evidence Loop
 
 | Step | Statement |

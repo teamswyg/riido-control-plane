@@ -48,6 +48,7 @@ func buildEvidence(root string, m manifest, docs []docClass, problems []string) 
 		OwnedMissingBinding:              ownedManifestMissingBinding(root, m),
 		ManifestInventoryCount:           manifestInventoryCount(root),
 		TrackedManifestCount:             trackedManifestCount(root, m, docs),
+		ManifestInventoryByGroup:         manifestInventoryByGroup(root),
 		UntrackedManifests:               untrackedManifests(root, m, docs),
 		DirectMissingEvidenceWorkflow:    directMissingEvidenceWorkflow(root, docs),
 		DirectMissingLoop:                directMissingLoops(docs), ProblemSummaries: problems,
