@@ -6,6 +6,7 @@
   "generated_doc": "README.md",
   "workflow": ".github/workflows/repository-readme.yml",
   "evidence_artifact": "repository-readme-evidence",
+  "loop_source": "docs/readme/evidence-loop.riido.json",
   "module_path": "github.com/teamswyg/riido-control-plane",
   "license": "Apache-2.0",
   "fragments": [

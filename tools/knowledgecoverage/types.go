@@ -1,22 +1,28 @@
 package main
 
 type manifest struct {
-	SchemaVersion     string             `json:"schema_version"`
-	ID                string             `json:"id"`
-	Title             string             `json:"title"`
-	GeneratedDoc      string             `json:"generated_doc"`
-	Workflow          string             `json:"workflow"`
-	EvidenceArtifact  string             `json:"evidence_artifact"`
-	ScanRoots         []string           `json:"scan_roots"`
-	ScanFiles         []string           `json:"scan_files"`
-	Standalone        []standalone       `json:"standalone_manifests"`
-	SourceManifests   []sourceSSOT       `json:"source_manifests"`
-	ContractArtifacts []contractArtifact `json:"contract_artifacts"`
-	ImportedManifests []importedManifest `json:"imported_manifests"`
-	OwnedManifests    []ownedManifest    `json:"owned_manifests"`
-	ManualGroups      []manualGroup      `json:"manual_groups"`
-	Assertions        []string           `json:"assertions"`
-	Loop              evidenceLoop       `json:"loop"`
+	SchemaVersion      string             `json:"schema_version"`
+	ID                 string             `json:"id"`
+	Title              string             `json:"title"`
+	GeneratedDoc       string             `json:"generated_doc"`
+	Workflow           string             `json:"workflow"`
+	EvidenceArtifact   string             `json:"evidence_artifact"`
+	ScanRoots          []string           `json:"scan_roots"`
+	ScanFiles          []string           `json:"scan_files"`
+	Standalone         []standalone       `json:"standalone_manifests"`
+	SourceManifests    []sourceSSOT       `json:"source_manifests"`
+	ContractArtifacts  []contractArtifact `json:"contract_artifacts"`
+	ImportedManifests  []importedManifest `json:"imported_manifests"`
+	OwnedManifests     []ownedManifest    `json:"owned_manifests"`
+	ManualGroups       []manualGroup      `json:"manual_groups"`
+	ManifestLoopBudget manifestLoopBudget `json:"manifest_loop_budget"`
+	Assertions         []string           `json:"assertions"`
+	Loop               evidenceLoop       `json:"loop"`
+}
+
+type manifestLoopBudget struct {
+	MaxMissing        int            `json:"max_missing"`
+	MaxMissingByGroup map[string]int `json:"max_missing_by_group"`
 }
 
 type standalone struct {

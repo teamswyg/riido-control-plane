@@ -8,6 +8,7 @@ type manifest struct {
 	GeneratedDoc      string       `json:"generated_doc"`
 	Workflow          string       `json:"workflow"`
 	EvidenceArtifact  string       `json:"evidence_artifact"`
+	LoopSource        string       `json:"loop_source"`
 	ModulePath        string       `json:"module_path"`
 	License           string       `json:"license"`
 	Fragments         []string     `json:"fragments"`
