@@ -39,6 +39,9 @@ func assertEvidenceCoverage(t *testing.T, got evidence) {
 	if len(got.ManifestInventoryByGroup) == 0 {
 		t.Fatalf("manifest inventory breakdown is missing: %+v", got)
 	}
+	if len(got.ManifestInventorySamples) == 0 {
+		t.Fatalf("manifest inventory samples are missing: %+v", got)
+	}
 }
 
 func assertGeneratedCoverage(t *testing.T, got evidence) {
