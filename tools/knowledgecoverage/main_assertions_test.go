@@ -36,6 +36,9 @@ func assertEvidenceCoverage(t *testing.T, got evidence) {
 		len(got.UntrackedManifests) != 0 {
 		t.Fatalf("manifest inventory coverage drifted: %+v", got)
 	}
+	if len(got.ManifestInventoryByGroup) == 0 {
+		t.Fatalf("manifest inventory breakdown is missing: %+v", got)
+	}
 }
 
 func assertGeneratedCoverage(t *testing.T, got evidence) {

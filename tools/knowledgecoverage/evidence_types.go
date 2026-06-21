@@ -25,6 +25,7 @@ type evidence struct {
 	OwnedManifestBindingCount        int            `json:"owned_manifest_binding_count"`
 	ManifestInventoryCount           int            `json:"manifest_inventory_count"`
 	TrackedManifestCount             int            `json:"tracked_manifest_count"`
+	ManifestInventoryByGroup         []manifestDir  `json:"manifest_inventory_by_group"`
 	ManualCount                      int            `json:"manual_count"`
 	ManualByGroup                    map[string]int `json:"manual_by_group"`
 	ManualTopDirs                    []manualDir    `json:"manual_top_dirs"`
