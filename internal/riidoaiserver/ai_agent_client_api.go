@@ -203,6 +203,7 @@ type DeviceDaemonRecord struct {
 	DeviceDisplayName      string                `json:"device_display_name,omitempty"`
 	DaemonID               string                `json:"daemon_id,omitempty"`
 	Profile                string                `json:"profile,omitempty"`
+	AppVersion             string                `json:"app_version,omitempty"`
 	PID                    int                   `json:"pid,omitempty"`
 	UptimeSeconds          int                   `json:"uptime_seconds,omitempty"`
 	StartedAt              time.Time             `json:"started_at,omitempty"`
