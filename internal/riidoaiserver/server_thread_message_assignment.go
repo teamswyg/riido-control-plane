@@ -41,9 +41,6 @@ func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, p
 }
 
 func selectAIAgentThreadForFollowup(threads AIAgentTaskThreadCollectionResponse, threadID string) (AIAgentTaskThreadRecord, error) {
-	if threads.ActiveStream != nil && threads.ActiveStream.ThreadID != threadID {
-		return AIAgentTaskThreadRecord{}, ErrAIAgentTaskThreadConflict
-	}
 	for _, thread := range threads.Threads {
 		if thread.ThreadID == threadID {
 			return thread, nil

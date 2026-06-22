@@ -32,9 +32,6 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
-	if active, ok := s.activeTaskThreadLocked(taskID); ok && active.ThreadID != threadID {
-		return AIAgentTaskActionResponse{}, ErrAIAgentTaskThreadConflict
-	}
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,

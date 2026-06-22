@@ -43,6 +43,14 @@ func TestHTTPAIAgentClientProviderMultiAssignmentReplaysEachThread(t *testing.T)
 	if !strings.Contains(events, first.AssignmentID) || !strings.Contains(events, second.AssignmentID) {
 		t.Fatalf("sse replay missed multi assignments: %s", events)
 	}
+	messagePath := base + "/tasks/" + taskID + "/threads/" + first.ThreadID + "/messages"
+	messageBody := `{"body":"follow up first thread","source_message_id":"provider-multi-message-1"}`
+	messageBytes := aiAgentSmokeRequest(t, server, http.MethodPost, messagePath, token, messageBody, http.StatusAccepted)
+	var message AIAgentTaskActionResponse
+	aiAgentSmokeDecode(t, messageBytes, &message)
+	if message.ThreadID != first.ThreadID || message.AgentID != first.AgentID {
+		t.Fatalf("thread message targeted wrong thread: %+v first=%+v", message, first)
+	}
 }
 
 func createProviderMultiCursorAgent(t *testing.T, server http.Handler, base, token string) string {
