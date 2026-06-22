@@ -21,7 +21,7 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.Status != "verified" || got.MetricUnitsVerified == 0 || got.HTTPBreakdownRows != 1 {
+	if got.Status != "verified" || got.MetricUnitsVerified == 0 || got.ScopesVerified == 0 || got.HTTPBreakdownRows != 1 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
 }
