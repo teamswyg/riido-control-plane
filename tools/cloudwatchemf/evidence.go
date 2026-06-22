@@ -8,6 +8,7 @@ type evidence struct {
 	Service             string       `json:"service"`
 	DimensionsVerified  int          `json:"dimensions_verified"`
 	JSONFieldsVerified  int          `json:"json_fields_verified"`
+	ScopesVerified      int          `json:"scopes_verified"`
 	MetricUnitsVerified int          `json:"metric_units_verified"`
 	MetricSpecsTotal    int          `json:"metric_specs_total"`
 	HTTPBreakdownRows   int          `json:"http_breakdown_rows"`
@@ -27,6 +28,7 @@ func newEvidence(m manifest, shape emfShape) evidence {
 		Service:             shape.Service,
 		DimensionsVerified:  len(m.RequiredDimensions),
 		JSONFieldsVerified:  len(m.RequiredJSONFields),
+		ScopesVerified:      len(m.RequiredScopes),
 		MetricUnitsVerified: len(m.RequiredMetricUnit),
 		MetricSpecsTotal:    len(shape.MetricUnits),
 		HTTPBreakdownRows:   shape.HTTPBreakdownRows,

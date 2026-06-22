@@ -13,6 +13,7 @@ type emfShape struct {
 	Dimensions         []string
 	MetricUnits        map[string]string
 	JSONFields         map[string]bool
+	StringFields       map[string]string
 	HTTPBreakdownRows  int
 	StoreBreakdownRows int
 }
@@ -41,6 +42,7 @@ func decodeEMFShape(body []byte) (emfShape, error) {
 		Dimensions:         aws.Dimensions,
 		MetricUnits:        aws.MetricUnits,
 		JSONFields:         keys(raw),
+		StringFields:       stringFields(raw),
 		HTTPBreakdownRows:  lenRawArray(raw["http_transactions"]),
 		StoreBreakdownRows: lenRawArray(raw["store_operations"]),
 	}, nil

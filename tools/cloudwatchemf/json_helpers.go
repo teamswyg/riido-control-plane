@@ -18,6 +18,17 @@ func lenRawArray(body json.RawMessage) int {
 	return len(rows)
 }
 
+func stringFields(raw map[string]json.RawMessage) map[string]string {
+	out := map[string]string{}
+	for key, body := range raw {
+		var value string
+		if err := json.Unmarshal(body, &value); err == nil {
+			out[key] = value
+		}
+	}
+	return out
+}
+
 func hasString(values []string, want string) bool {
 	for _, value := range values {
 		if value == want {

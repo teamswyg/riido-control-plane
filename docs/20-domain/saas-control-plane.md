@@ -14,7 +14,7 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 | --- | ---: |
 | Boundaries | 19 |
 | Focused workflows | 17 |
-| Source checks | 31 |
+| Source checks | 33 |
 | Shared contracts | 3 |
 
 - owner package: `internal/riidoaiserver`
@@ -36,7 +36,7 @@ This reader is generated from the coverage-hub manifest. Focused workflows and s
 | `assignment-http` | `.github/workflows/assignment-http-adapter.yml` | `assignment-http-adapter-evidence` | 1 |
 | `task-event-sse` | `.github/workflows/assignment-sse-adapter.yml` | `assignment-sse-adapter-evidence` | 1 |
 | `metrics-http` | `.github/workflows/metrics-http-adapter.yml` | `-` | 2 |
-| `cloudwatch-emf` | `.github/workflows/cloudwatch-emf.yml` | `-` | 1 |
+| `cloudwatch-emf` | `.github/workflows/cloudwatch-emf.yml` | `-` | 3 |
 | `dynamodb-eventbridge` | `.github/workflows/dynamodb-eventbridge-adapters.yml` | `dynamodb-eventbridge-adapters-evidence` | 2 |
 | `aws-facade` | `.github/workflows/aws-adapters-facade.yml` | `aws-adapters-facade-evidence` | 1 |
 | `health-ready-cmd` | `.github/workflows/health-ready-cmd.yml` | `-` | 3 |

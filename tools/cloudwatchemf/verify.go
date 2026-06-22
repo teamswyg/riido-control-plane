@@ -12,6 +12,9 @@ func verify(root string, m manifest, shape emfShape, checkDoc bool) error {
 	if err := verifyJSONFields(m, shape); err != nil {
 		return err
 	}
+	if err := verifyScopes(m, shape); err != nil {
+		return err
+	}
 	if err := verifyMetricUnits(m, shape); err != nil {
 		return err
 	}
@@ -43,6 +46,15 @@ func verifyMetricUnits(m manifest, shape emfShape) error {
 	for _, required := range m.RequiredMetricUnit {
 		if got := shape.MetricUnits[required.Name]; got != required.Unit {
 			return fmt.Errorf("metric %s unit = %q, want %q", required.Name, got, required.Unit)
+		}
+	}
+	return nil
+}
+
+func verifyScopes(m manifest, shape emfShape) error {
+	for _, required := range m.RequiredScopes {
+		if got := shape.StringFields[required.Field]; got != required.Value {
+			return fmt.Errorf("scope %s = %q, want %q", required.Field, got, required.Value)
 		}
 	}
 	return nil

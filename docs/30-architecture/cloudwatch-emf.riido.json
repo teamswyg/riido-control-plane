@@ -7,17 +7,33 @@
   "evidence_artifact": "cloudwatch-emf-evidence",
   "owner_package": "internal/riidoaiserver",
   "source_checks": [
-    {"name": "writer", "file": "internal/riidoaiserver/cloudwatch_emf.go", "contains": ["WriteCloudWatchEMF", "cloudWatchMetricSpecs", "ai_agent_client_snapshot_load_calls_total"]},
-    {"name": "tests", "file": "internal/riidoaiserver/cloudwatch_emf_test.go", "contains": ["TestWriteCloudWatchEMF", "TestPublishCloudWatchEMFUsesStoreSnapshot", "store_operation_calls_total"]}
+    {"name": "writer", "file": "internal/riidoaiserver/cloudwatch_emf_write.go", "contains": ["WriteCloudWatchEMF"]},
+    {"name": "envelope", "file": "internal/riidoaiserver/cloudwatch_emf_envelope.go", "contains": ["metric_scope_schema_version", "ai_agent_client_snapshot_load_calls_total"]},
+    {"name": "metric_specs", "file": "internal/riidoaiserver/cloudwatch_emf_metric_specs.go", "contains": ["cloudWatchMetricSpecs", "ai_agent_client_snapshot_load_calls_total"]},
+    {"name": "write_test", "file": "internal/riidoaiserver/cloudwatch_emf_write_test.go", "contains": ["TestWriteCloudWatchEMF"]},
+    {"name": "publish_test", "file": "internal/riidoaiserver/cloudwatch_emf_publish_test.go", "contains": ["TestPublishCloudWatchEMFUsesStoreSnapshot"]},
+    {"name": "store_assertions", "file": "internal/riidoaiserver/cloudwatch_emf_assert_store_test.go", "contains": ["StoreOperationCallsTotal"]}
   ],
   "required_dimensions": ["service"],
   "required_json_fields": [
     "schema_version",
     "service",
+    "metric_scope_schema_version",
+    "store_state_metric_scope",
+    "http_metric_scope",
+    "store_operation_metric_scope",
+    "snapshot_persistence_metric_scope",
     "http_transactions",
     "store_operations",
     "ai_agent_client_snapshot_load_bytes_last",
     "ai_agent_client_snapshot_save_latency_max_ms"
+  ],
+  "required_scopes": [
+    {"field": "metric_scope_schema_version", "value": "riido-metric-scope.v1"},
+    {"field": "store_state_metric_scope", "value": "store_state_cumulative"},
+    {"field": "http_metric_scope", "value": "rolling_5m"},
+    {"field": "store_operation_metric_scope", "value": "rolling_5m"},
+    {"field": "snapshot_persistence_metric_scope", "value": "process_lifetime"}
   ],
   "required_metric_units": [
     {"name": "tasks_total", "unit": "Count"},
@@ -33,10 +49,10 @@
     {"name": "ai_agent_client_snapshot_save_latency_max_ms", "unit": "Milliseconds"}
   ],
   "loop": {
-    "observation": "The CloudWatch EMF workflow exercised metrics tests but left no durable JSON evidence describing the metric shape.",
-    "hypothesis": "A small EMF shape SSOT can make the public observability contract machine-checkable without publishing live AWS data.",
-    "execute": "Generate a sample EMF envelope, verify required dimensions, JSON fields, metric units, and source anchors, then upload redaction-safe evidence in CI.",
-    "evaluate": "The verifier fails on stale generated docs, missing source anchors, missing JSON fields, or metric unit drift.",
-    "retrospective": "This closes one workflow evidence accepted gap while keeping live dashboards and deployment evidence infra-owned."
+    "observation": "Live CloudWatch logs showed fresh process-window metrics next to persisted store-state counters, making post-deploy poll and snapshot readings easy to misinterpret.",
+    "hypothesis": "EMF records should carry machine-checkable metric scope metadata so Logs Insights readers can distinguish cumulative store state, rolling windows, and process-lifetime counters.",
+    "execute": "Generate a sample EMF envelope, verify required dimensions, JSON fields, metric scopes, metric units, and source anchors, then upload redaction-safe evidence in CI.",
+    "evaluate": "The verifier fails on stale generated docs, missing source anchors, missing JSON fields, missing scope metadata, or metric unit drift.",
+    "retrospective": "Metric scope metadata keeps observability evidence executable without adding CloudWatch dimensions or publishing live AWS data."
   }
 }

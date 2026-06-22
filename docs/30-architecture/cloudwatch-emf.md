@@ -14,6 +14,16 @@ This reader is generated from the CloudWatch EMF shape SSOT.
 
 - `service`
 
+## Metric Scopes
+
+| Field | Value |
+| --- | --- |
+| `metric_scope_schema_version` | `riido-metric-scope.v1` |
+| `store_state_metric_scope` | `store_state_cumulative` |
+| `http_metric_scope` | `rolling_5m` |
+| `store_operation_metric_scope` | `rolling_5m` |
+| `snapshot_persistence_metric_scope` | `process_lifetime` |
+
 ## Required Metric Units
 
 | Metric | Unit |
@@ -32,8 +42,8 @@ This reader is generated from the CloudWatch EMF shape SSOT.
 
 ## Evidence Loop
 
-- Observation: The CloudWatch EMF workflow exercised metrics tests but left no durable JSON evidence describing the metric shape.
-- Hypothesis: A small EMF shape SSOT can make the public observability contract machine-checkable without publishing live AWS data.
-- Execute: Generate a sample EMF envelope, verify required dimensions, JSON fields, metric units, and source anchors, then upload redaction-safe evidence in CI.
-- Evaluate: The verifier fails on stale generated docs, missing source anchors, missing JSON fields, or metric unit drift.
-- Retrospective: This closes one workflow evidence accepted gap while keeping live dashboards and deployment evidence infra-owned.
+- Observation: Live CloudWatch logs showed fresh process-window metrics next to persisted store-state counters, making post-deploy poll and snapshot readings easy to misinterpret.
+- Hypothesis: EMF records should carry machine-checkable metric scope metadata so Logs Insights readers can distinguish cumulative store state, rolling windows, and process-lifetime counters.
+- Execute: Generate a sample EMF envelope, verify required dimensions, JSON fields, metric scopes, metric units, and source anchors, then upload redaction-safe evidence in CI.
+- Evaluate: The verifier fails on stale generated docs, missing source anchors, missing JSON fields, missing scope metadata, or metric unit drift.
+- Retrospective: Metric scope metadata keeps observability evidence executable without adding CloudWatch dimensions or publishing live AWS data.

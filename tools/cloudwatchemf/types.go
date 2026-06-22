@@ -1,18 +1,19 @@
 package main
 
 type manifest struct {
-	SchemaVersion      string         `json:"schema_version"`
-	ID                 string         `json:"id"`
-	Title              string         `json:"title"`
-	GeneratedDoc       string         `json:"generated_doc"`
-	Workflow           string         `json:"workflow"`
-	EvidenceArtifact   string         `json:"evidence_artifact"`
-	OwnerPackage       string         `json:"owner_package"`
-	SourceChecks       []sourceCheck  `json:"source_checks"`
-	RequiredDimensions []string       `json:"required_dimensions"`
-	RequiredJSONFields []string       `json:"required_json_fields"`
-	RequiredMetricUnit []requiredUnit `json:"required_metric_units"`
-	Loop               evidenceLoop   `json:"loop"`
+	SchemaVersion      string          `json:"schema_version"`
+	ID                 string          `json:"id"`
+	Title              string          `json:"title"`
+	GeneratedDoc       string          `json:"generated_doc"`
+	Workflow           string          `json:"workflow"`
+	EvidenceArtifact   string          `json:"evidence_artifact"`
+	OwnerPackage       string          `json:"owner_package"`
+	SourceChecks       []sourceCheck   `json:"source_checks"`
+	RequiredDimensions []string        `json:"required_dimensions"`
+	RequiredJSONFields []string        `json:"required_json_fields"`
+	RequiredScopes     []requiredScope `json:"required_scopes"`
+	RequiredMetricUnit []requiredUnit  `json:"required_metric_units"`
+	Loop               evidenceLoop    `json:"loop"`
 }
 
 type sourceCheck struct {
@@ -24,6 +25,11 @@ type sourceCheck struct {
 type requiredUnit struct {
 	Name string `json:"name"`
 	Unit string `json:"unit"`
+}
+
+type requiredScope struct {
+	Field string `json:"field"`
+	Value string `json:"value"`
 }
 
 type evidenceLoop struct {

@@ -18,6 +18,11 @@ func renderDoc(m manifest) string {
 	for _, dimension := range m.RequiredDimensions {
 		fmt.Fprintf(&b, "- `%s`\n", dimension)
 	}
+	b.WriteString("\n## Metric Scopes\n\n")
+	b.WriteString("| Field | Value |\n| --- | --- |\n")
+	for _, scope := range m.RequiredScopes {
+		fmt.Fprintf(&b, "| `%s` | `%s` |\n", scope.Field, scope.Value)
+	}
 	b.WriteString("\n## Required Metric Units\n\n")
 	b.WriteString("| Metric | Unit |\n| --- | --- |\n")
 	for _, unit := range m.RequiredMetricUnit {
