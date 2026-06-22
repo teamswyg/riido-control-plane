@@ -32,12 +32,16 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	if stopExistingTaskThreads {
 		s.markTaskActiveThreadsStoppedLocked(taskID, AgentTaskCommentStoppedByUserRequest, "agent assignment was replaced by a participant change")
 	}
+	sequence := strconv.Itoa(len(s.taskThreads[taskID]) + 1)
+	if req.AssignmentID == "" {
+		req.AssignmentID = "asn-dev-assignment-" + taskID + "-" + sequence
+	}
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AssignmentID:    req.AssignmentID,
 		AgentID:         agent.AgentID,
-		RunID:           "run-dev-assignment-" + taskID + "-" + strconv.Itoa(len(s.taskThreads[taskID])+1),
+		RunID:           "run-dev-assignment-" + taskID + "-" + sequence,
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentAssignmentStarted,
