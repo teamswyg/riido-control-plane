@@ -55,4 +55,9 @@ func TestDaemonStatusChangedForEvent(t *testing.T) {
 	if !daemonStatusChangedForEvent(base, true, restarted) {
 		t.Fatal("PID change (restart) should be a change")
 	}
+	version := base
+	version.AppVersion = "riido-daemon v0.0.39"
+	if !daemonStatusChangedForEvent(base, true, version) {
+		t.Fatal("app_version change should be a change")
+	}
 }

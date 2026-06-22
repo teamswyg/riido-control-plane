@@ -154,6 +154,7 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 		DeviceDisplayName: displayName,
 		DaemonID:          req.DaemonID,
 		Profile:           req.Profile,
+		AppVersion:        strings.TrimSpace(req.AppVersion),
 		PID:               req.PID,
 		UptimeSeconds:     req.UptimeSeconds,
 		StartedAt:         startedAt,
@@ -174,6 +175,9 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 		}
 		if daemon.Profile == "" {
 			daemon.Profile = existing.Profile
+		}
+		if daemon.AppVersion == "" {
+			daemon.AppVersion = existing.AppVersion
 		}
 	}
 	s.daemons[req.DeviceID] = daemon
@@ -407,6 +411,7 @@ func daemonStatusChangedForEvent(prev DeviceDaemonRecord, prevOK bool, next Devi
 	if prev.Availability != next.Availability ||
 		prev.ControlState != next.ControlState ||
 		prev.Profile != next.Profile ||
+		prev.AppVersion != next.AppVersion ||
 		prev.PID != next.PID ||
 		prev.DaemonID != next.DaemonID ||
 		prev.DeviceDisplayName != next.DeviceDisplayName ||
