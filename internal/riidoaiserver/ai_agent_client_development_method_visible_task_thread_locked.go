@@ -1,15 +1,17 @@
 package riidoaiserver
 
 func (s *DevelopmentAIAgentClientStore) visibleTaskThreadLocked(principal AuthorizationResult, taskID, threadID string) (AIAgentTaskThreadRecord, bool) {
-	for _, thread := range s.taskThreads[taskID] {
-		if thread.ThreadID != threadID {
+	threads := s.taskThreads[taskID]
+	for i := range threads {
+		if threads[i].ThreadID != threadID {
 			continue
 		}
-		agent, ok := s.agents[thread.AgentID]
-		if !ok || !s.aiAgentVisibleTo(principal, agent) {
+		s.ensureTaskThreadAgentSnapshotLocked(&threads[i], threads[i].StartedAt)
+		if !s.taskThreadVisibleTo(principal, threads[i]) {
 			return AIAgentTaskThreadRecord{}, false
 		}
-		return copyTaskThread(thread), true
+		s.taskThreads[taskID] = threads
+		return copyTaskThread(threads[i]), true
 	}
 	return AIAgentTaskThreadRecord{}, false
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest, stopExistingTaskThreads bool) (AIAgentTaskActionResponse, error) {
@@ -41,6 +42,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 		TaskID:          taskID,
 		AssignmentID:    req.AssignmentID,
 		AgentID:         agent.AgentID,
+		AgentSnapshot:   s.agentSnapshotFromAgent(agent, time.Now().UTC()),
 		RunID:           "run-dev-assignment-" + taskID + "-" + sequence,
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,

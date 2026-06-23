@@ -8,6 +8,7 @@ import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@/lib/rea
  */
 export interface AIAgentTaskActionResponse {
   agent_id: string;
+  agent_snapshot?: AIAgentTaskThreadAgentSnapshot;
   assignment_id?: string;
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
@@ -31,6 +32,23 @@ export interface AIAgentTaskEventStreamLink {
   event_type: "agent_thread_progress";
   href: string;
   rel: "agent_thread_progress_stream";
+}
+
+/**
+ * AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.
+ */
+export interface AIAgentTaskThreadAgentSnapshot {
+  agent_id: string;
+  captured_at?: string;
+  model_id?: string;
+  model_label?: string;
+  name?: string;
+  owner_principal_id?: string;
+  profile_thumbnail_url?: string;
+  runtime_kind?: RuntimeKind;
+  tmp_color?: string;
+  visibility?: AgentVisibility;
+  workspace_id?: string;
 }
 
 /**
@@ -66,6 +84,7 @@ export interface AIAgentTaskThreadFailureDiagnostics {
  */
 export interface AIAgentTaskThreadRecord {
   agent_id: string;
+  agent_snapshot?: AIAgentTaskThreadAgentSnapshot;
   assignment_id?: string;
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;

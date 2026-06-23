@@ -4327,6 +4327,9 @@
           "agent_id": {
             "type": "string"
           },
+          "agent_snapshot": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadAgentSnapshot"
+          },
           "assignment_id": {
             "type": "string"
           },
@@ -4445,11 +4448,57 @@
         },
         "type": "object"
       },
+      "AIAgentTaskThreadAgentSnapshot": {
+        "description": "AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "captured_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "model_id": {
+            "type": "string"
+          },
+          "model_label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner_principal_id": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "type": "string"
+          },
+          "runtime_kind": {
+            "$ref": "#/components/schemas/RuntimeKind"
+          },
+          "tmp_color": {
+            "type": "string"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AgentVisibility"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      },
       "AIAgentTaskThreadRecord": {
         "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
         "properties": {
           "agent_id": {
             "type": "string"
+          },
+          "agent_snapshot": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadAgentSnapshot"
           },
           "assignment_id": {
             "type": "string"

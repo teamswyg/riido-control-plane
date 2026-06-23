@@ -12,6 +12,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 		TaskID:             response.TaskID,
 		AssignmentID:       response.AssignmentID,
 		AgentID:            response.AgentID,
+		AgentSnapshot:      copyTaskThreadAgentSnapshot(response.AgentSnapshot),
 		RunID:              response.RunID,
 		SourceMessageID:    strings.TrimSpace(sourceMessageID),
 		WorkStatus:         response.WorkStatus,
@@ -26,6 +27,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 	if !taskThreadHasActiveStream(thread) {
 		thread.CompletedAt = now
 	}
+	s.ensureTaskThreadAgentSnapshotLocked(&thread, now)
 	threads := s.taskThreads[response.TaskID]
 	for i := range threads {
 		if threads[i].ThreadID != response.ThreadID {
@@ -34,6 +36,10 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 		threads[i].RunID = response.RunID
 		if strings.TrimSpace(response.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
+		}
+		if threads[i].AgentSnapshot == nil {
+			threads[i].AgentSnapshot = copyTaskThreadAgentSnapshot(response.AgentSnapshot)
+			s.ensureTaskThreadAgentSnapshotLocked(&threads[i], now)
 		}
 		threads[i].WorkStatus = response.WorkStatus
 		threads[i].AssignmentState = response.AssignmentState

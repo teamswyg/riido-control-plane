@@ -27,6 +27,7 @@ func (s *DevelopmentAIAgentClientStore) assignmentEventThreadLocked(input assign
 	if thread.StartedAt.IsZero() {
 		thread.StartedAt = time.Now().UTC()
 	}
+	s.ensureTaskThreadAgentSnapshotLocked(&thread, thread.StartedAt)
 	s.taskThreads[input.TaskID] = append(s.taskThreads[input.TaskID], thread)
 	return thread, false
 }

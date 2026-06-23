@@ -573,6 +573,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		copied := make([]AIAgentTaskThreadRecord, len(retainedThreads))
 		for i, thread := range retainedThreads {
 			copied[i] = copyTaskThread(thread)
+			s.ensureTaskThreadAgentSnapshotLocked(&copied[i], savedAt)
 			copied[i].Lines = retainLatestThreadProgressLines(copied[i].Lines)
 		}
 		taskThreads[taskID] = copied

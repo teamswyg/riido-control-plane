@@ -1,6 +1,7 @@
 package riidoaiserver
 
 func copyTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
+	thread.AgentSnapshot = copyTaskThreadAgentSnapshot(thread.AgentSnapshot)
 	thread.Lines = copyClientVisibleProgressLines(thread.Lines)
 	thread.Message = clientVisibleTaskThreadMessage(thread)
 	thread.ResultMessage = clientVisibleTaskThreadResultMessage(thread)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 )
 
 func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error) {
@@ -32,6 +33,7 @@ func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Con
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
 		AgentID:         agent.AgentID,
+		AgentSnapshot:   s.agentSnapshotFromAgent(agent, time.Now().UTC()),
 		RunID:           "run-dev-comment-" + taskID,
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
