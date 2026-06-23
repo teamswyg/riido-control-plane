@@ -6,39 +6,39 @@ func applyAssignmentStateActionResponse(response *AIAgentTaskActionResponse, sta
 		response.WorkStatus = AgentWorkStatusQueued
 		response.AssignmentState = AgentAssignmentStateQueued
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
-		ensureAssignmentResponseMessage(response, "agent assignment is queued")
+		ensureAssignmentResponseMessage(response, clientMessageAgentBusyQueued)
 	case AssignmentStateCodeReady:
 		response.WorkStatus = AgentWorkStatusRunning
 		response.AssignmentState = AgentAssignmentStateRunning
 		response.CommentKind = AgentTaskCommentAssignmentStarted
-		ensureAssignmentResponseMessage(response, "agent assignment was accepted by runtime")
+		ensureAssignmentResponseMessage(response, clientMessageTaskRunning)
 	case AssignmentStateCodeRunning:
 		response.WorkStatus = AgentWorkStatusRunning
 		response.AssignmentState = AgentAssignmentStateRunning
 		response.CommentKind = AgentTaskCommentRuntimeProgress
-		ensureAssignmentResponseMessage(response, "agent work is running")
+		ensureAssignmentResponseMessage(response, clientMessageTaskRunning)
 	case AssignmentStateCodeCancelling:
 		response.WorkStatus = AgentWorkStatusIdle
 		response.AssignmentState = AgentAssignmentStateStopped
 		response.CommentKind = AgentTaskCommentStoppedByUserRequest
-		ensureAssignmentResponseMessage(response, "agent work was stopped")
+		ensureAssignmentResponseMessage(response, clientMessageTaskStopped)
 	case AssignmentStateCodeCancelled:
 		response.WorkStatus = AgentWorkStatusIdle
 		response.AssignmentState = AgentAssignmentStateStopped
 		response.CommentKind = AgentTaskCommentStoppedByUserRequest
-		ensureAssignmentResponseMessage(response, "agent work was stopped")
+		ensureAssignmentResponseMessage(response, clientMessageTaskStopped)
 	case AssignmentStateCodeCompleted:
 		response.WorkStatus = AgentWorkStatusCompleted
 		response.AssignmentState = AgentAssignmentStateCompleted
 		response.CommentKind = AgentTaskCommentTaskCompleted
-		ensureAssignmentResponseMessage(response, "agent work completed")
+		ensureAssignmentResponseMessage(response, clientMessageTaskCompleted)
 	case AssignmentStateCodeFailed:
 		response.WorkStatus = AgentWorkStatusFailed
 		response.AssignmentState = AgentAssignmentStateFailed
 		response.CommentKind = AgentTaskCommentTaskFailed
-		ensureAssignmentResponseMessage(response, "agent work failed")
+		ensureAssignmentResponseMessage(response, clientMessageTaskFailed)
 	default:
-		ensureAssignmentResponseMessage(response, "agent assignment state updated")
+		ensureAssignmentResponseMessage(response, clientMessageTaskRunning)
 	}
 }
 

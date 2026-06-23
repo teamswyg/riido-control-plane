@@ -38,14 +38,14 @@ func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Con
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentRuntimeProgress,
-		Message:         "agent work started from task comment",
+		Message:         clientMessageTaskRunning,
 	}
 	response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
 	if agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser || agent.WorkStatus == AgentWorkStatusQueued {
 		response.WorkStatus = AgentWorkStatusQueued
 		response.AssignmentState = AgentAssignmentStateQueued
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
-		response.Message = "agent is busy; task comment was queued"
+		response.Message = clientMessageAgentBusyQueued
 	}
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)

@@ -31,7 +31,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 		return actionResponseFromThread(thread, principal.WorkspaceID), nil
 	}
 	if stopExistingTaskThreads {
-		s.markTaskActiveThreadsStoppedLocked(taskID, AgentTaskCommentStoppedByUserRequest, "agent assignment was replaced by a participant change")
+		s.markTaskActiveThreadsStoppedLocked(taskID, AgentTaskCommentStoppedByUserRequest, clientMessageTaskStopped)
 		if refreshed, ok := s.visibleAgent(principal, agent.AgentID); ok {
 			agent = refreshed
 		}
@@ -50,14 +50,14 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentAssignmentStarted,
-		Message:         "agent assignment started from task participant",
+		Message:         clientMessageTaskRunning,
 	}
 	response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
 	if agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser || agent.WorkStatus == AgentWorkStatusQueued {
 		response.WorkStatus = AgentWorkStatusQueued
 		response.AssignmentState = AgentAssignmentStateQueued
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
-		response.Message = "agent is busy; task assignment was queued"
+		response.Message = clientMessageAgentBusyQueued
 	}
 	if assignmentStateIsKnown(req.durableState) {
 		response.Message = ""

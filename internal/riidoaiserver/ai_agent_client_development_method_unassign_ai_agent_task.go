@@ -33,7 +33,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		WorkStatus:      AgentWorkStatusIdle,
 		AssignmentState: AgentAssignmentStateStopped,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
-		Message:         "agent work was stopped by task participant removal",
+		Message:         clientMessageTaskStopped,
 	}
 	if thread, ok := s.taskThreadForStopTargetLocked(taskID, agent.AgentID, req.AssignmentID); ok {
 		response.ThreadID = thread.ThreadID

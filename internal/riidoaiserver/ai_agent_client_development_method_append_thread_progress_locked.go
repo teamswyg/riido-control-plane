@@ -34,7 +34,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		s.taskThreads[event.TaskID] = threads
 		return
 	}
-	message := "agent progress updated"
+	message := clientMessageTaskRunning
 	if len(event.Lines) > 0 {
 		message = event.Lines[len(event.Lines)-1].Message
 	}

@@ -43,7 +43,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentRuntimeProgress,
-		Message:         "agent work continued from task thread message",
+		Message:         clientMessageTaskRunning,
 	}
 	threadWasActive := taskThreadHasActiveStream(thread)
 	if !threadWasActive {
@@ -54,7 +54,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		response.WorkStatus = AgentWorkStatusQueued
 		response.AssignmentState = AgentAssignmentStateQueued
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
-		response.Message = "agent is busy; task thread message was queued"
+		response.Message = clientMessageAgentBusyQueued
 	}
 	if assignmentStateIsKnown(req.durableState) {
 		response.Message = ""

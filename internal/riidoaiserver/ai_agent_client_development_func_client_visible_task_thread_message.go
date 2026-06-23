@@ -5,6 +5,9 @@ import (
 )
 
 func clientVisibleTaskThreadMessage(thread AIAgentTaskThreadRecord) string {
+	if thread.CommentKind == AgentTaskCommentStoppedByAgentDeleted {
+		return clientMessageAgentDeleted
+	}
 	if message := clientVisibleTaskThreadText(thread.Message); message != "" {
 		return message
 	}
@@ -13,18 +16,5 @@ func clientVisibleTaskThreadMessage(thread AIAgentTaskThreadRecord) string {
 			return message
 		}
 	}
-	switch thread.CommentKind {
-	case AgentTaskCommentTaskCompleted:
-		return "agent work completed"
-	case AgentTaskCommentTaskFailed:
-		return "agent work failed"
-	case AgentTaskCommentStoppedByUserRequest, AgentTaskCommentStoppedByAgentDeleted:
-		return "agent work was stopped"
-	case AgentTaskCommentQueuedByBusyAgent:
-		return "agent assignment is queued"
-	case AgentTaskCommentAssignmentStarted, AgentTaskCommentRuntimeProgress:
-		return "agent work is running"
-	default:
-		return ""
-	}
+	return clientVisibleTaskThreadFallback(thread.CommentKind)
 }
