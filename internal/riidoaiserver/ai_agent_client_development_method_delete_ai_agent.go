@@ -25,7 +25,7 @@ func (s *DevelopmentAIAgentClientStore) DeleteAIAgent(ctx context.Context, princ
 	}
 	s.snapshotAgentTaskThreadsLocked(agent, time.Now().UTC())
 	delete(s.agents, agent.AgentID)
-	stopped := s.markAgentTaskThreadsStoppedLocked(agent.AgentID, AgentTaskCommentStoppedByAgentDeleted, "에이전트가 삭제되어 진행 중이던 작업이 중지됐어요.")
+	stopped := s.markAgentTaskThreadsStoppedLocked(agent.AgentID, AgentTaskCommentStoppedByAgentDeleted, clientMessageAgentDeleted)
 	for _, thread := range stopped {
 		s.appendAgentTaskActionEvent(actionResponseFromThread(thread, principal.WorkspaceID))
 	}

@@ -7,7 +7,7 @@ func applyStaleActiveTaskThreadProjection(thread *AIAgentTaskThreadRecord, now t
 		applyStaleStoppingTaskThreadProjection(thread, now)
 		return
 	}
-	message := "agent assignment timed out after runtime went silent"
+	message := clientMessageTaskTimeout
 	thread.WorkStatus = AgentWorkStatusFailed
 	thread.AssignmentState = AgentAssignmentStateFailed
 	thread.CommentKind = AgentTaskCommentTaskFailed
@@ -23,7 +23,7 @@ func applyStaleActiveTaskThreadProjection(thread *AIAgentTaskThreadRecord, now t
 }
 
 func applyStaleStoppingTaskThreadProjection(thread *AIAgentTaskThreadRecord, now time.Time) {
-	message := "agent stop timed out after runtime went silent"
+	message := clientMessageTaskTimeout
 	thread.WorkStatus = AgentWorkStatusIdle
 	thread.AssignmentState = AgentAssignmentStateStopped
 	thread.CommentKind = AgentTaskCommentStoppedByUserRequest
