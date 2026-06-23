@@ -6,7 +6,8 @@
   "assertions": [
     "the public container image shape must not depend on private infra IR",
     "the final image must run the control-plane binary as a non-root user",
-    "the exposed port and runtime env must match the public runtime contract"
+    "the exposed port and runtime env must match the public runtime contract",
+    "the build stage must use BuildKit cache mounts for Go module and build caches without adding runtime dependencies"
   ],
   "loop": {
     "observation": "Runtime image shape can drift from the public source contract when Dockerfile details are reviewed as prose or by memory.",
@@ -23,11 +24,16 @@
     "stage_name": "build",
     "workdir": "/src",
     "cgo_enabled": "0",
+    "module_download": {
+      "command": "go mod download",
+      "cache_mounts": ["/go/pkg/mod"]
+    },
     "go_build": {
       "package": "./cmd/riido_ai_server",
       "output": "/out/riido_ai_server",
       "trimpath": true,
-      "ldflags": ["-s", "-w"]
+      "ldflags": ["-s", "-w"],
+      "cache_mounts": ["/go/pkg/mod", "/root/.cache/go-build"]
     }
   },
   "final": {

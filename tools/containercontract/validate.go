@@ -28,6 +28,7 @@ func requireContractFields(contract imageContract) error {
 		"build.stage_name":        contract.Build.StageName,
 		"build.workdir":           contract.Build.Workdir,
 		"build.cgo_enabled":       contract.Build.CGOEnabled,
+		"build.module_download":   contract.Build.ModuleDownload.Command,
 		"build.go_build.package":  contract.Build.GoBuild.Package,
 		"build.go_build.output":   contract.Build.GoBuild.Output,
 		"final.base_image":        contract.Final.BaseImage,

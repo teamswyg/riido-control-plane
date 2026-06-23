@@ -13,11 +13,12 @@ type imageContract struct {
 }
 
 type buildContract struct {
-	BuildArg   buildArgContract `json:"build_arg"`
-	StageName  string           `json:"stage_name"`
-	Workdir    string           `json:"workdir"`
-	CGOEnabled string           `json:"cgo_enabled"`
-	GoBuild    goBuildContract  `json:"go_build"`
+	BuildArg       buildArgContract       `json:"build_arg"`
+	StageName      string                 `json:"stage_name"`
+	Workdir        string                 `json:"workdir"`
+	CGOEnabled     string                 `json:"cgo_enabled"`
+	ModuleDownload moduleDownloadContract `json:"module_download"`
+	GoBuild        goBuildContract        `json:"go_build"`
 }
 
 type buildArgContract struct {
@@ -26,10 +27,16 @@ type buildArgContract struct {
 }
 
 type goBuildContract struct {
-	Package  string   `json:"package"`
-	Output   string   `json:"output"`
-	Trimpath bool     `json:"trimpath"`
-	LDFlags  []string `json:"ldflags"`
+	Package     string   `json:"package"`
+	Output      string   `json:"output"`
+	Trimpath    bool     `json:"trimpath"`
+	LDFlags     []string `json:"ldflags"`
+	CacheMounts []string `json:"cache_mounts,omitempty"`
+}
+
+type moduleDownloadContract struct {
+	Command     string   `json:"command"`
+	CacheMounts []string `json:"cache_mounts,omitempty"`
 }
 
 type finalContract struct {

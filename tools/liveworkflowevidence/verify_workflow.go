@@ -19,6 +19,7 @@ func verifyWorkflowFile(root string, spec workflowSpec) (int, error) {
 		"actions/upload-artifact@v4",
 	}
 	phrases = append(phrases, spec.SensitiveInputs...)
+	phrases = append(phrases, spec.RequiredPhrases...)
 	for _, phrase := range phrases {
 		if !strings.Contains(text, phrase) {
 			return 0, fmt.Errorf("%s missing phrase %q", spec.Path, phrase)

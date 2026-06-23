@@ -10,10 +10,10 @@ Evidence artifact: `live-workflow-redaction-evidence`
 
 ## Redacted Live Workflows
 
-| Workflow | Summary Artifact | Summary Path | Sensitive Inputs |
-| --- | --- | --- | --- |
-| `.github/workflows/ai-agent-client-testnet-smoke.yml` | `ai-agent-client-testnet-smoke-redacted-summary` | `out/ai-agent-client-testnet-smoke-redacted-summary.json` | `TESTNET_BASE_URL, TESTNET_TOKEN` |
-| `.github/workflows/deploy-ai-agent-testnet.yml` | `deploy-ai-agent-testnet-redacted-summary` | `out/deploy-ai-agent-testnet-redacted-summary.json` | `AWS_REGION, ECR_REPOSITORY, ECS_CLUSTER, ECS_SERVICE, ECS_CONTAINER_NAME, TESTNET_BASE_URL, TESTNET_TOKEN` |
+| Workflow | Summary Artifact | Summary Path | Sensitive Inputs | Required Phrases |
+| --- | --- | --- | --- | --- |
+| `.github/workflows/ai-agent-client-testnet-smoke.yml` | `ai-agent-client-testnet-smoke-redacted-summary` | `out/ai-agent-client-testnet-smoke-redacted-summary.json` | `TESTNET_BASE_URL, TESTNET_TOKEN` | `` |
+| `.github/workflows/deploy-ai-agent-testnet.yml` | `deploy-ai-agent-testnet-redacted-summary` | `out/deploy-ai-agent-testnet-redacted-summary.json` | `AWS_REGION, ECR_REPOSITORY, ECS_CLUSTER, ECS_SERVICE, ECS_CONTAINER_NAME, CODEDEPLOY_APPLICATION, CODEDEPLOY_DEPLOYMENT_GROUP, TESTNET_BASE_URL, TESTNET_TOKEN` | `docker buildx build, --cache-from "type=gha,scope=${cache_scope}", --cache-to "type=gha,mode=max,scope=${cache_scope}", -deployment-mode "$deployment_mode", -build-cache-mode "buildkit-gha"` |
 
 ## Assertions
 
@@ -32,4 +32,4 @@ Evidence artifact: `live-workflow-redaction-evidence`
 ## Verification
 
 - Workflow count: `2`
-- Phrase checks: `21`
+- Phrase checks: `28`

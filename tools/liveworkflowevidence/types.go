@@ -19,6 +19,7 @@ type workflowSpec struct {
 	SummaryPath     string   `json:"summary_path"`
 	SensitiveInputs []string `json:"sensitive_inputs"`
 	AllowedFields   []string `json:"allowed_summary_fields"`
+	RequiredPhrases []string `json:"required_phrases,omitempty"`
 }
 
 type loopRecord struct {

@@ -12,6 +12,7 @@ type workflowRecord struct {
 	SummaryArtifact string   `json:"summary_artifact"`
 	SummaryPath     string   `json:"summary_path"`
 	SensitiveInputs []string `json:"sensitive_inputs"`
+	RequiredPhrases []string `json:"required_phrases,omitempty"`
 }
 
 type manifestEvidence struct {
@@ -34,6 +35,8 @@ type liveSummary struct {
 	Run              runRecord          `json:"run"`
 	LiveStatus       string             `json:"live_status"`
 	DeploymentTarget string             `json:"deployment_target,omitempty"`
+	DeploymentMode   string             `json:"deployment_mode,omitempty"`
+	BuildCacheMode   string             `json:"build_cache_mode,omitempty"`
 	Redaction        redactionAssertion `json:"redaction"`
 }
 

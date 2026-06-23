@@ -6,11 +6,16 @@ func fixtureBuildContract() buildContract {
 		StageName:  "build",
 		Workdir:    "/src",
 		CGOEnabled: "0",
+		ModuleDownload: moduleDownloadContract{
+			Command:     "go mod download",
+			CacheMounts: []string{"/go/pkg/mod"},
+		},
 		GoBuild: goBuildContract{
-			Package:  "./cmd/riido_ai_server",
-			Output:   "/out/riido_ai_server",
-			Trimpath: true,
-			LDFlags:  []string{"-s", "-w"},
+			Package:     "./cmd/riido_ai_server",
+			Output:      "/out/riido_ai_server",
+			Trimpath:    true,
+			LDFlags:     []string{"-s", "-w"},
+			CacheMounts: []string{"/go/pkg/mod", "/root/.cache/go-build"},
 		},
 	}
 }
