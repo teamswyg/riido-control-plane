@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"strings"
+	"time"
 )
 
 func (s Server) reconcileAIAgentTaskThreadProjections(ctx context.Context, principal AuthorizationResult, taskID string) error {
@@ -14,7 +15,18 @@ func (s Server) reconcileAIAgentTaskThreadProjections(ctx context.Context, princ
 	if !ok {
 		return nil
 	}
+	globalKey := ""
+	if strings.TrimSpace(taskID) == "" {
+		key, ok := s.aiAgentGlobalReconcile.reserve(principal, time.Now())
+		if !ok {
+			return nil
+		}
+		globalKey = key
+	}
 	_, err := reconciler.ReconcileAIAgentActiveThreadProjections(ctx, principal, taskID, reader)
+	if err != nil {
+		s.aiAgentGlobalReconcile.forget(globalKey)
+	}
 	return err
 }
 

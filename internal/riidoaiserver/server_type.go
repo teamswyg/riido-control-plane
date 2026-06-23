@@ -23,6 +23,9 @@ type ServerConfig struct {
 	// bounds cross-instance discovery latency (an assignment queued on another
 	// control-plane instance). Zero applies the default (2s).
 	LongPollTick time.Duration
+	// AIAgentGlobalReconcileMinInterval coalesces workspace-wide AI Agent
+	// projection repair. Task-scoped action/read repair still runs per request.
+	AIAgentGlobalReconcileMinInterval time.Duration
 }
 
 type Server struct {
@@ -35,5 +38,6 @@ type Server struct {
 	provider                 ProviderStatusStore
 	providerRead             ProviderStatusReader
 	devices                  DeviceCredentialStore
+	aiAgentGlobalReconcile   *aiAgentGlobalReconcileGate
 	config                   ServerConfig
 }

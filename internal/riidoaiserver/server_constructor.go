@@ -11,6 +11,9 @@ func NewServer(config ServerConfig) Server {
 	if config.LongPollTick <= 0 {
 		config.LongPollTick = 2 * time.Second
 	}
+	if config.AIAgentGlobalReconcileMinInterval <= 0 {
+		config.AIAgentGlobalReconcileMinInterval = time.Second
+	}
 	agentCatalog := config.AgentCatalogStore
 	if agentCatalog == nil {
 		if store, ok := config.Assignment.(AgentCatalogStore); ok {
@@ -49,6 +52,7 @@ func NewServer(config ServerConfig) Server {
 		provider:                 provider,
 		providerRead:             providerRead,
 		devices:                  devices,
+		aiAgentGlobalReconcile:   newAIAgentGlobalReconcileGate(config.AIAgentGlobalReconcileMinInterval),
 		config:                   config,
 	}
 }
