@@ -28,9 +28,5 @@ func (s *DevelopmentAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.C
 	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
 	agent.UpdatedAt = time.Now().UTC()
 	s.agents[agent.AgentID] = agent
-	if agent.RuntimeID != previousRuntimeID {
-		s.refreshRuntimeAssignmentFlagLocked(previousRuntimeID)
-		s.refreshRuntimeAssignmentFlagLocked(agent.RuntimeID)
-	}
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }

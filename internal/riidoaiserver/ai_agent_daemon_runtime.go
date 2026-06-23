@@ -130,9 +130,6 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 	if existing, ok := s.deviceByIDLocked(req.DeviceID); ok && req.DeviceDisplayName == "" && existing.DisplayName != "" {
 		displayName = existing.DisplayName
 	}
-	for i := range runtimes {
-		runtimes[i].HasAssignedAgent = s.runtimeHasAssignedAgentLocked(runtimes[i].RuntimeID)
-	}
 	device := DeviceRecord{
 		DeviceID:         req.DeviceID,
 		OwnerPrincipalID: principal.PrincipalID,
@@ -529,19 +526,6 @@ func (s *DevelopmentAIAgentClientStore) deviceRuntimeByRuntimeIDLocked(runtimeID
 		}
 	}
 	return DeviceRecord{}, RuntimeRecord{}, false
-}
-
-func (s *DevelopmentAIAgentClientStore) runtimeHasAssignedAgentLocked(runtimeID string) bool {
-	runtimeID = strings.TrimSpace(runtimeID)
-	if runtimeID == "" {
-		return false
-	}
-	for _, agent := range s.agents {
-		if strings.TrimSpace(agent.RuntimeID) == runtimeID {
-			return true
-		}
-	}
-	return false
 }
 
 func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID string, in []RuntimeSnapshotRecord) ([]RuntimeRecord, error) {

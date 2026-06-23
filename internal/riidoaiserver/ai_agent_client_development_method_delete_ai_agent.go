@@ -23,7 +23,6 @@ func (s *DevelopmentAIAgentClientStore) DeleteAIAgent(ctx context.Context, princ
 	default:
 	}
 	delete(s.agents, agent.AgentID)
-	s.refreshRuntimeAssignmentFlagLocked(agent.RuntimeID)
 	s.markAgentTaskThreadsStoppedLocked(agent.AgentID, AgentTaskCommentStoppedByAgentDeleted, "에이전트가 삭제되어 진행 중이던 작업이 중지됐어요.")
 	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
 		EventType:       AgentClientEventWorkStatusChanged,

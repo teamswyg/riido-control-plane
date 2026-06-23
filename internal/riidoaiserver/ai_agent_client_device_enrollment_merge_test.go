@@ -32,9 +32,6 @@ func (f *deviceEnrollmentHTTPFixture) syncCursorRuntimeAndVerifyMergedReadModels
 	if !ok {
 		t.Fatalf("merged enrolled device missing: %+v", mergedDevices.Devices)
 	}
-	if !runtimeHasAssignedAgent(mergedDevices.Devices, f.codexRuntimeID) {
-		t.Fatalf("codex runtime lost assigned-agent flag after cursor snapshot: %+v", mergedDevice.Runtimes)
-	}
 	codexRuntime, ok := findRuntime(mergedDevice.Runtimes, f.codexRuntimeID)
 	if !ok || !codexRuntime.RequiresExperimentalOptIn {
 		t.Fatalf("codex runtime opt-in fact missing after second snapshot: %+v", mergedDevice.Runtimes)
