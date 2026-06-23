@@ -27,11 +27,14 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
-	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok {
+	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok && canReuseActiveTaskThreadForAssignment(thread, req.AssignmentID) {
 		return actionResponseFromThread(thread, principal.WorkspaceID), nil
 	}
 	if stopExistingTaskThreads {
 		s.markTaskActiveThreadsStoppedLocked(taskID, AgentTaskCommentStoppedByUserRequest, "agent assignment was replaced by a participant change")
+		if refreshed, ok := s.visibleAgent(principal, agent.AgentID); ok {
+			agent = refreshed
+		}
 	}
 	sequence := strconv.Itoa(len(s.taskThreads[taskID]) + 1)
 	if req.AssignmentID == "" {

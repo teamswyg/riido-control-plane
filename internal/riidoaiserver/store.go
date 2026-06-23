@@ -19,7 +19,7 @@ func (s *Store) loop(state storeState) {
 			startedAt := time.Now()
 			_, taskExisted := state.tasks[msg.taskID]
 			beforeEventSeq := state.nextEventSeq
-			assignment, err := s.handleAssign(&state, msg.taskID, msg.req, msg.allowConcurrentTaskAgents)
+			assignment, err := s.handleAssign(&state, msg.taskID, msg.req, msg.allowConcurrentTaskAgents, msg.forceNewAssignment)
 			if err == nil {
 				err = s.saveAssignmentMutationOperations(&state, AssignmentOperationAssignTask, assignment, eventsAfterSeq(&state, beforeEventSeq))
 			}
@@ -168,7 +168,7 @@ func (s *Store) loop(state storeState) {
 	}
 }
 
-func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest, allowConcurrentTaskAgents bool) (Assignment, error) {
+func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest, allowConcurrentTaskAgents, forceNewAssignment bool) (Assignment, error) {
 	taskID = strings.TrimSpace(taskID)
 	req.AgentID = strings.TrimSpace(req.AgentID)
 	req.RuntimeProvider = strings.TrimSpace(req.RuntimeProvider)
@@ -229,7 +229,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	if !allowConcurrentTaskAgents && task.currentAssignmentID != "" {
 		current := state.assignments[task.currentAssignmentID]
 		if !isTerminal(current.State) {
-			if current.AgentID == req.AgentID {
+			if current.AgentID == req.AgentID && !forceNewAssignment {
 				s.cancelQueuedBlockerForAssignment(state, &current, now)
 				return current, nil
 			}

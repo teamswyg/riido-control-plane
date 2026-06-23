@@ -7,6 +7,7 @@ import (
 
 type AssignmentStore interface {
 	AssignTask(ctx context.Context, taskID string, req AssignRequest) (Assignment, error)
+	AssignTaskReplacement(ctx context.Context, taskID string, req AssignRequest) (Assignment, error)
 	AssignTaskAdditive(ctx context.Context, taskID string, req AssignRequest) (Assignment, error)
 	PollAgent(ctx context.Context, agentID string, req PollRequest) (PollResponse, error)
 	HeartbeatAgent(ctx context.Context, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, error)

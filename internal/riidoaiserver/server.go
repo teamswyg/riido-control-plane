@@ -381,7 +381,7 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		writeAIAgentClientError(w, err)
 		return
 	}
-	assignment, err := s.assignment.AssignTask(r.Context(), taskID, assignmentReq)
+	assignment, err := s.assignment.AssignTaskReplacement(r.Context(), taskID, assignmentReq)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
