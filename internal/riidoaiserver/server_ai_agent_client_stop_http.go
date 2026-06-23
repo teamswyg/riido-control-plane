@@ -44,15 +44,7 @@ func (s Server) handleAIAgentClientStopTaskAgentAssignment(w http.ResponseWriter
 	if !decodeOptionalStopRequest(w, r, &req) {
 		return
 	}
-	requestedAssignmentID := strings.TrimSpace(req.AssignmentID)
-	if target, ok, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, agentID, req.AssignmentID, req.Reason); err != nil {
-		writeAIAgentClientError(w, err)
-		return
-	} else if ok {
-		applyStopActionTarget(&req.AssignmentID, requestedAssignmentID, target)
-		req.durableState = target.State
-	}
-	response, err := s.aiAgent.StopAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
+	response, err := s.stopAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
