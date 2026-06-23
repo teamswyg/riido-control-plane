@@ -4,13 +4,26 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAgentClientSnapshot, credentials AWSCredentials) (err error) {
 	startedAt := time.Now()
 	var snapshotBytes int64
+	var stats dynamoDBAIAgentClientSnapshotWriteStats
+	ctx, span := StartTraceSpan(ctx, nil, TraceSpanStart{
+		Name: aiAgentClientSnapshotSaveTraceName,
+		Kind: TraceSpanKindInternal,
+		Attributes: []TraceAttribute{
+			StringTraceAttribute(metadatakeys.RiidoStoreOperation.String(), AIAgentClientSnapshotSave.String()),
+			StringTraceAttribute(metadatakeys.RiidoTraceSurface.String(), aiAgentClientSnapshotTraceSurface),
+		},
+	})
 	defer func() {
+		span.SetAttributes(aiAgentClientSnapshotSaveTraceAttributes(stats, snapshotBytes)...)
 		s.observeAIAgentClientSnapshot(AIAgentClientSnapshotSave, startedAt, snapshotBytes, err)
+		FinishTraceSpan(span, err)
 	}()
 	if snapshot.SchemaVersion != AIAgentClientPersistenceSchemaVersion {
 		return fmt.Errorf("unsupported AI Agent client snapshot schema_version %q", snapshot.SchemaVersion)
@@ -23,18 +36,10 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 		return err
 	}
 	snapshotBytes = encodedBytes
+	stats = dynamoDBAIAgentClientSnapshotWritePressure(items)
 	if err := s.putSnapshotItems(ctx, items, credentials); err != nil {
 		return err
 	}
 	s.partHashes = hashes
-	return nil
-}
-
-func (s *DynamoDBAIAgentClientSnapshot) putSnapshotItems(ctx context.Context, items []map[string]map[string]string, credentials AWSCredentials) error {
-	for _, item := range items {
-		if err := s.putSnapshotItem(ctx, item, credentials); err != nil {
-			return err
-		}
-	}
 	return nil
 }

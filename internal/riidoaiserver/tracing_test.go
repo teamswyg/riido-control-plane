@@ -93,6 +93,33 @@ func TestStoreTracingRecordsOperationSpans(t *testing.T) {
 	}
 }
 
+func TestStoreTracingRecordsLongPollPressure(t *testing.T) {
+	recorder := &recordingTraceRecorder{}
+	store := NewStoreWithConfig(StoreConfig{TraceRecorder: recorder})
+	defer store.Close()
+	_, err := store.WaitForAssignment(context.Background(), "agent-a",
+		PollRequest{DaemonID: "daemon-a", RuntimeID: "runtime-a", WaitMs: 20}, 20*time.Millisecond, 10*time.Millisecond)
+	if err != nil {
+		t.Fatalf("WaitForAssignment: %v", err)
+	}
+	var span recordedTraceSpanSnapshot
+	for _, candidate := range recorder.snapshot() {
+		if candidate.Name == "store."+StoreOperationWaitAssignment.String() {
+			span = candidate
+			break
+		}
+	}
+	if span.Name == "" {
+		t.Fatal("missing wait assignment span")
+	}
+	if span.Attributes[riidoPollWaitedKey] != "true" || span.Attributes[metadatakeys.RiidoPollAction.String()] != string(PollNone) {
+		t.Fatalf("wait span attrs = %+v", span.Attributes)
+	}
+	if span.Attributes[riidoPollHoldMsKey] != "20" || span.Attributes[riidoPollTickMsKey] != "10" {
+		t.Fatalf("wait pressure attrs = %+v", span.Attributes)
+	}
+}
+
 func TestHTTPAssignmentTaskContextTracingRecordsDomainOperation(t *testing.T) {
 	recorder := &recordingTraceRecorder{}
 	store := NewStoreWithConfig(StoreConfig{TraceRecorder: recorder})
@@ -144,6 +171,7 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 		NextDeviceCredentialSeq: 1,
 	}
 	items := map[string]map[string]map[string]string{}
+	var itemsMu sync.Mutex
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
 		switch r.Header.Get("X-Amz-Target") {
@@ -154,13 +182,17 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 			if err := json.Unmarshal(body, &payload); err != nil {
 				t.Errorf("decode PutItem payload: %v", err)
 			}
+			itemsMu.Lock()
 			items[payload.Item["sk"]["S"]] = payload.Item
+			itemsMu.Unlock()
 			_, _ = w.Write([]byte(`{}`))
 		case dynamoDBQueryTarget:
+			itemsMu.Lock()
 			out := make([]map[string]map[string]string, 0, len(items))
 			for _, item := range items {
 				out = append(out, item)
 			}
+			itemsMu.Unlock()
 			_ = json.NewEncoder(w).Encode(map[string]any{"Items": out})
 		default:
 			t.Errorf("target = %q", r.Header.Get("X-Amz-Target"))
@@ -193,7 +225,7 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 	}
 
 	names := traceSpanNames(recorder.snapshot())
-	for _, want := range []string{"aws.dynamodb.PutItem", "aws.dynamodb.Query"} {
+	for _, want := range []string{aiAgentClientSnapshotSaveTraceName, "aws.dynamodb.PutItem", "aws.dynamodb.Query"} {
 		if !slices.Contains(names, want) {
 			t.Fatalf("missing span %q in %v", want, names)
 		}
@@ -208,6 +240,16 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 	}
 	if got := spanByName["aws.dynamodb.Query"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotLoad.String() {
 		t.Fatalf("Query store operation = %q, want %q", got, AIAgentClientSnapshotLoad.String())
+	}
+	saveSpan := spanByName[aiAgentClientSnapshotSaveTraceName]
+	if got := saveSpan.Attributes[riidoSnapshotItemsWrittenKey]; got != "8" {
+		t.Fatalf("snapshot items_written = %q, want 8; attrs=%+v", got, saveSpan.Attributes)
+	}
+	if got := saveSpan.Attributes[riidoSnapshotPartsSkippedKey]; got != "0" {
+		t.Fatalf("snapshot parts_skipped = %q, want 0; attrs=%+v", got, saveSpan.Attributes)
+	}
+	if got := saveSpan.Attributes[riidoSnapshotBytesEncodedKey]; got == "" || got == "0" {
+		t.Fatalf("snapshot bytes_encoded = %q, want positive; attrs=%+v", got, saveSpan.Attributes)
 	}
 }
 
