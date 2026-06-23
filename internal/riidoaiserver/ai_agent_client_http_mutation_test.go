@@ -75,8 +75,16 @@ func TestHTTPAIAgentClientDevelopmentMutationAndDeletion(t *testing.T) {
 	duplicateRuntimeReq.Header.Set(aiAgentTokenHeader, "owner-token")
 	duplicateRuntimeResp := httptest.NewRecorder()
 	server.ServeHTTP(duplicateRuntimeResp, duplicateRuntimeReq)
-	if duplicateRuntimeResp.Code != http.StatusConflict {
+	if duplicateRuntimeResp.Code != http.StatusCreated {
 		t.Fatalf("duplicate runtime status=%d body=%s", duplicateRuntimeResp.Code, duplicateRuntimeResp.Body.String())
+	}
+	var duplicateRuntimeCreated AgentClientRecordResponse
+	if err := json.Unmarshal(duplicateRuntimeResp.Body.Bytes(), &duplicateRuntimeCreated); err != nil {
+		t.Fatalf("duplicate runtime create json: %v", err)
+	}
+	if duplicateRuntimeCreated.Agent.AgentID == created.Agent.AgentID ||
+		duplicateRuntimeCreated.Agent.RuntimeID != created.Agent.RuntimeID {
+		t.Fatalf("duplicate runtime created = %+v first=%+v", duplicateRuntimeCreated.Agent, created.Agent)
 	}
 	deleteCreatedReq := httptest.NewRequest(http.MethodDelete, "/v1/client/ai-agent/agents/"+created.Agent.AgentID, nil)
 	deleteCreatedReq.Header.Set(aiAgentTokenHeader, "owner-token")
@@ -109,7 +117,7 @@ func TestHTTPAIAgentClientDevelopmentMutationAndDeletion(t *testing.T) {
 	duplicateFixtureReq.Header.Set(aiAgentTokenHeader, "owner-token")
 	duplicateFixtureResp := httptest.NewRecorder()
 	server.ServeHTTP(duplicateFixtureResp, duplicateFixtureReq)
-	if duplicateFixtureResp.Code != http.StatusConflict {
+	if duplicateFixtureResp.Code != http.StatusCreated {
 		t.Fatalf("duplicate fixture create status=%d body=%s", duplicateFixtureResp.Code, duplicateFixtureResp.Body.String())
 	}
 

@@ -13,11 +13,6 @@ func (s *DevelopmentAIAgentClientStore) applyAgentRuntimePatchLocked(agent *Agen
 	if strings.TrimSpace(req.RuntimeID) == "" && req.ModelID == nil {
 		return nil
 	}
-	if nextRuntimeID != previousRuntimeID {
-		if err := s.ensureRuntimeAssignableToAgentLocked(nextRuntimeID, agent.AgentID); err != nil {
-			return err
-		}
-	}
 	runtimeKind, runtimeModel, ok := runtimeSelectionFromDevices(s.visibleDevicesLocked(principal), nextRuntimeID, req.ModelID)
 	if !ok {
 		return errors.New("runtime_id or model_id is not available")

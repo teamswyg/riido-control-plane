@@ -210,7 +210,6 @@ func TestDaemonAgentBindingsIncludeAgentsFromOtherConnectedWorkspaces(t *testing
 	if err != nil {
 		t.Fatalf("create agent in wsB: %v", err)
 	}
-
 	// The daemon authenticates with the device credential (enroll workspace wsA, no
 	// explicit workspace). Its bindings must still include the wsB agent.
 	bindings, err := store.ListAIAgentDaemonAgentBindings(ctx,

@@ -21,9 +21,6 @@ func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, princ
 	if !ok {
 		return AgentClientRecordResponse{}, errors.New("runtime_id or model_id is not available")
 	}
-	if err := s.ensureRuntimeAssignableToAgentLocked(input.RuntimeID, ""); err != nil {
-		return AgentClientRecordResponse{}, err
-	}
 	now := time.Now().UTC()
 	agentID := uniqueAIAgentIDLocked(s.agents, "agent-"+principal.PrincipalID+"-"+input.RuntimeID)
 	agent := AgentClientRecord{

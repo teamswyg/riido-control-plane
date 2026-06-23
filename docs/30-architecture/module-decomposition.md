@@ -48,7 +48,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 746 |
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
-| `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 698 |
+| `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 691 |
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
 | `internal/riidoaiserver/ai_agent_client_persistence_test.go` | 661 |
 | `internal/riidoaiserver/ai_agent_client_api.go` | 611 |
