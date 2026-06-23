@@ -35,6 +35,10 @@ func writePrivateTaskContextResponse(w http.ResponseWriter, r *http.Request) {
 				"HTMLContent":      "<p>Existing API server private document.</p>",
 			},
 		})
+	case "/documents/providers/team-a/component-a":
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"html": "<p>Provider document from Mongo.</p>",
+		})
 	default:
 		http.NotFound(w, r)
 	}

@@ -35,7 +35,11 @@ func TestConfigFromEnvParsesPrivateTaskContextReader(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetAIAgentTaskContextForRequest: %v", err)
 	}
-	if !reflect.DeepEqual(gotPaths, []string{"/public/components/component-a/workspace", "/teams/team-a/components/component-a?getDocument=true"}) {
+	if !reflect.DeepEqual(gotPaths, []string{
+		"/public/components/component-a/workspace",
+		"/teams/team-a/components/component-a?getDocument=true",
+		"/documents/providers/team-a/component-a?format=html",
+	}) {
 		t.Fatalf("task context paths = %v", gotPaths)
 	}
 	for _, got := range gotAuthorization {
@@ -44,7 +48,7 @@ func TestConfigFromEnvParsesPrivateTaskContextReader(t *testing.T) {
 		}
 	}
 	if contextSnapshot.Component.Title != "Private task context from existing API server" ||
-		contextSnapshot.Document.Content != "<p>Existing API server private document.</p>" {
+		contextSnapshot.Document.Content != "<p>Provider document from Mongo.</p>" {
 		t.Fatalf("task context snapshot = %+v", contextSnapshot)
 	}
 }
