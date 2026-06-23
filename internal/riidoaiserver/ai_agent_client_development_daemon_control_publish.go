@@ -1,7 +1,7 @@
 package riidoaiserver
 
 func (s *DevelopmentAIAgentClientStore) publishDaemonControlLocked(daemon DeviceDaemonRecord, action DaemonControlAction) {
-	s.daemons[daemon.DeviceID] = daemon
+	s.putDaemonLocked(daemon)
 	s.appendClientEventLocked(AgentClientEventDeviceDaemonStatus, DeviceDaemonStatusEvent{
 		EventType:     AgentClientEventDeviceDaemonStatus,
 		SchemaVersion: SchemaVersion,

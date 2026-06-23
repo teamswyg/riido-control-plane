@@ -36,8 +36,11 @@ func newDevelopmentAIAgentClientSeed() developmentAIAgentClientSeed {
 	daemon := developmentPrimaryDaemon(device, now)
 	sharedDaemon := developmentSharedDaemon(sharedDevice, now)
 	return developmentAIAgentClientSeed{
-		devices:     []DeviceRecord{device, sharedDevice},
-		daemons:     map[string]DeviceDaemonRecord{device.DeviceID: daemon, sharedDevice.DeviceID: sharedDaemon},
+		devices: []DeviceRecord{device, sharedDevice},
+		daemons: map[string]DeviceDaemonRecord{
+			daemonStorageKey(daemon):       daemon,
+			daemonStorageKey(sharedDaemon): sharedDaemon,
+		},
 		agents:      developmentSeedAgents(now),
 		fixtures:    developmentSeedFixtures(),
 		taskThreads: developmentSeedTaskThreads(now),

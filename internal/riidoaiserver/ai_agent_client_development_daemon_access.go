@@ -20,11 +20,11 @@ func (s *DevelopmentAIAgentClientStore) deviceDaemonForAgentAccessLocked(princip
 	if !ok {
 		return AgentClientRecord{}, DeviceDaemonRecord{}, false
 	}
-	device, ok := s.deviceByRuntimeIDLocked(agent.RuntimeID)
+	device, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
 	if !ok {
 		return AgentClientRecord{}, DeviceDaemonRecord{}, false
 	}
-	daemon, ok := s.daemons[device.DeviceID]
+	daemon, ok := s.daemonForRuntimeLocked(device.DeviceID, runtime)
 	if !ok {
 		return AgentClientRecord{}, DeviceDaemonRecord{}, false
 	}

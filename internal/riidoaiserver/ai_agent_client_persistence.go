@@ -549,7 +549,15 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 	for _, daemon := range s.daemons {
 		daemons = append(daemons, copyDeviceDaemon(daemon))
 	}
-	sort.Slice(daemons, func(i, j int) bool { return daemons[i].DeviceID < daemons[j].DeviceID })
+	sort.Slice(daemons, func(i, j int) bool {
+		if daemons[i].DeviceID != daemons[j].DeviceID {
+			return daemons[i].DeviceID < daemons[j].DeviceID
+		}
+		if daemons[i].Profile != daemons[j].Profile {
+			return daemons[i].Profile < daemons[j].Profile
+		}
+		return daemons[i].DaemonID < daemons[j].DaemonID
+	})
 
 	agents := make([]AgentClientRecord, 0, len(s.agents))
 	for _, agent := range s.agents {
@@ -638,7 +646,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		if deviceID == "" {
 			return errors.New("ai agent client snapshot daemon device_id is required")
 		}
-		daemons[deviceID] = copyDeviceDaemon(daemon)
+		daemons[daemonStorageKey(daemon)] = copyDeviceDaemon(daemon)
 	}
 	agents := make(map[string]AgentClientRecord, len(snapshot.Agents))
 	for _, agent := range snapshot.Agents {

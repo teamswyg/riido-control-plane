@@ -23,9 +23,12 @@ func (f *deviceEnrollmentHTTPFixture) markEnrolledDeviceStale() {
 			break
 		}
 	}
-	if daemon, ok := f.aiAgentStore.daemons[f.enrollment.DeviceID]; ok {
+	for key, daemon := range f.aiAgentStore.daemons {
+		if daemon.DeviceID != f.enrollment.DeviceID {
+			continue
+		}
 		daemon.LastSeenAt = staleAt
-		f.aiAgentStore.daemons[f.enrollment.DeviceID] = daemon
+		f.aiAgentStore.daemons[key] = daemon
 	}
 	f.aiAgentStore.mu.Unlock()
 }
