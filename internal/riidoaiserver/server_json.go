@@ -59,8 +59,6 @@ func writeAIAgentClientError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusNotFound, "not found")
 	case errors.Is(err, ErrAIAgentAssigned):
 		writeError(w, http.StatusConflict, err.Error())
-	case errors.Is(err, ErrAIAgentRuntimeAlreadyAssigned):
-		writeError(w, http.StatusConflict, err.Error())
 	case errors.Is(err, ErrAIAgentTaskThreadConflict):
 		writeError(w, http.StatusConflict, err.Error())
 	default:

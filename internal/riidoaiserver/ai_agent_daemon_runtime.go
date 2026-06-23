@@ -239,7 +239,7 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx conte
 		return AgentRuntimeBindingListResponse{}, ErrAuthorizationForbidden
 	}
 	s.repairStaleActiveTaskThreadsLocked(time.Now().UTC())
-	candidates := map[string]agentRuntimeBindingCandidate{}
+	bindings := []AgentRuntimeBinding{}
 	scope := s.workspaceScope(principal)
 	for _, agent := range s.agents {
 		// A physical machine connects to many workspaces under one device
@@ -258,14 +258,7 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx conte
 		}
 		agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 		s.agents[agent.AgentID] = agent
-		candidate := agentRuntimeBindingCandidate{binding: binding, agent: agent}
-		if existing, ok := candidates[binding.RuntimeID]; !ok || preferRuntimeBindingCandidate(candidate, existing) {
-			candidates[binding.RuntimeID] = candidate
-		}
-	}
-	bindings := make([]AgentRuntimeBinding, 0, len(candidates))
-	for _, candidate := range candidates {
-		bindings = append(bindings, candidate.binding)
+		bindings = append(bindings, binding)
 	}
 	sort.Slice(bindings, func(i, j int) bool {
 		if bindings[i].RuntimeProvider != bindings[j].RuntimeProvider {

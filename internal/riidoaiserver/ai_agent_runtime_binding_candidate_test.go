@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestListAIAgentDaemonAgentBindingsDedupesLegacyRuntimeAgents(t *testing.T) {
+func TestListAIAgentDaemonAgentBindingsAllowsRuntimeSharedAgents(t *testing.T) {
 	now := time.Now().UTC()
 	store := NewDevelopmentAIAgentClientStore()
 	prepareRuntimeBindingCandidateFixture(store, now)
@@ -26,10 +26,14 @@ func TestListAIAgentDaemonAgentBindingsDedupesLegacyRuntimeAgents(t *testing.T) 
 			cursorBindings = append(cursorBindings, binding)
 		}
 	}
-	if len(cursorBindings) != 1 {
-		t.Fatalf("cursor binding count = %d, want 1: %+v", len(cursorBindings), cursorBindings)
+	if len(cursorBindings) != 2 {
+		t.Fatalf("cursor binding count = %d, want 2: %+v", len(cursorBindings), cursorBindings)
 	}
-	if cursorBindings[0].AgentID != "agent-cursor-active" {
-		t.Fatalf("selected binding = %+v, want active agent", cursorBindings[0])
+	seen := map[string]bool{}
+	for _, binding := range cursorBindings {
+		seen[binding.AgentID] = true
+	}
+	if !seen["agent-cursor-active"] || !seen["agent-cursor-idle"] {
+		t.Fatalf("shared runtime bindings = %+v", cursorBindings)
 	}
 }
