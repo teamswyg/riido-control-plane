@@ -5,9 +5,26 @@ import "time"
 func (s *DevelopmentAIAgentClientStore) snapshotForTaskThreadLocked(agentID string, capturedAt time.Time) *AIAgentTaskThreadAgentSnapshot {
 	agent, ok := s.agents[agentID]
 	if !ok {
-		return nil
+		return s.deletedAgentSnapshot(agentID, capturedAt)
 	}
 	return s.agentSnapshotFromAgent(agent, capturedAt)
+}
+
+func (s *DevelopmentAIAgentClientStore) deletedAgentSnapshot(agentID string, capturedAt time.Time) *AIAgentTaskThreadAgentSnapshot {
+	if agentID == "" {
+		return nil
+	}
+	if capturedAt.IsZero() {
+		capturedAt = time.Now().UTC()
+	}
+	return &AIAgentTaskThreadAgentSnapshot{
+		AgentID:     agentID,
+		WorkspaceID: s.workspaceScope(AuthorizationResult{}),
+		Name:        "삭제된 에이전트",
+		TmpColor:    "#94A3B8",
+		Visibility:  AgentVisibilityPublic,
+		CapturedAt:  capturedAt.UTC(),
+	}
 }
 
 func (s *DevelopmentAIAgentClientStore) ensureTaskThreadAgentSnapshotLocked(thread *AIAgentTaskThreadRecord, capturedAt time.Time) {
