@@ -15,6 +15,7 @@ type DevelopmentAIAgentClientStore struct {
 	agents                  map[string]AgentClientRecord
 	fixtures                []AgentOnboardingFixture
 	taskThreads             map[string][]AIAgentTaskThreadRecord
+	taskThreadMessages      map[string][]AIAgentTaskThreadHistoryMessage
 	events                  []ClientStreamEvent
 	subscribers             map[int]aiAgentClientSubscriber
 	nextSubscriberID        int

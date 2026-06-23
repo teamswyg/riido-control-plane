@@ -4,7 +4,10 @@ func aiAgentClientHTTPRoute(_, path string) string {
 	if route := aiAgentClientV1Route(path); route != "" {
 		return route
 	}
-	return aiAgentClientV2Route(path)
+	if route := aiAgentClientV2Route(path); route != "" {
+		return route
+	}
+	return aiAgentClientV3Route(path)
 }
 
 func aiAgentClientRouteFromSegments(base string, segments []string) string {

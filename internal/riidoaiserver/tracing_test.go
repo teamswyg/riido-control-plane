@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -242,8 +243,9 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 		t.Fatalf("Query store operation = %q, want %q", got, AIAgentClientSnapshotLoad.String())
 	}
 	saveSpan := spanByName[aiAgentClientSnapshotSaveTraceName]
-	if got := saveSpan.Attributes[riidoSnapshotItemsWrittenKey]; got != "8" {
-		t.Fatalf("snapshot items_written = %q, want 8; attrs=%+v", got, saveSpan.Attributes)
+	wantItemsWritten := strconv.Itoa(len(dynamoDBAIAgentClientSnapshotPartNames) + 1)
+	if got := saveSpan.Attributes[riidoSnapshotItemsWrittenKey]; got != wantItemsWritten {
+		t.Fatalf("snapshot items_written = %q, want %s; attrs=%+v", got, wantItemsWritten, saveSpan.Attributes)
 	}
 	if got := saveSpan.Attributes[riidoSnapshotPartsSkippedKey]; got != "0" {
 		t.Fatalf("snapshot parts_skipped = %q, want 0; attrs=%+v", got, saveSpan.Attributes)

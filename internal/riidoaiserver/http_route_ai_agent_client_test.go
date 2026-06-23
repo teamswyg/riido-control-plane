@@ -14,6 +14,7 @@ func TestTraceHTTPRouteClassifiesV2AIAgentClientRoutes(t *testing.T) {
 		"/v2/client/workspaces/ws-sensitive/ai-agent/tasks/task-sensitive/assignable-agents":         "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignable-agents",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/tasks/task-sensitive/agent-assignments":         "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/tasks/task-sensitive/threads/thread-a/messages": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages",
+		"/v3/client/workspaces/ws-sensitive/ai-agent/tasks/task-sensitive/threads":                   "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/threads/thread-sensitive/messages":              "/v2/client/workspaces/{workspace_id}/ai-agent/threads/{thread_id}/messages",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/agent-assignments/agent-sensitive/stop":         "/v2/client/workspaces/{workspace_id}/ai-agent/agent-assignments/{agent_id}/stop",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/agents/agent-sensitive/daemon/restart":          "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon/{action}",

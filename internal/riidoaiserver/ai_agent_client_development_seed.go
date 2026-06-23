@@ -8,6 +8,7 @@ type developmentAIAgentClientSeed struct {
 	agents      map[string]AgentClientRecord
 	fixtures    []AgentOnboardingFixture
 	taskThreads map[string][]AIAgentTaskThreadRecord
+	messages    map[string][]AIAgentTaskThreadHistoryMessage
 	events      []ClientStreamEvent
 }
 
@@ -22,6 +23,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 		agents:                  seed.agents,
 		fixtures:                seed.fixtures,
 		taskThreads:             seed.taskThreads,
+		taskThreadMessages:      seed.messages,
 		subscribers:             map[int]aiAgentClientSubscriber{},
 		events:                  seed.events,
 		nextSubscriberID:        0,
@@ -44,6 +46,7 @@ func newDevelopmentAIAgentClientSeed() developmentAIAgentClientSeed {
 		agents:      developmentSeedAgents(now),
 		fixtures:    developmentSeedFixtures(),
 		taskThreads: developmentSeedTaskThreads(now),
+		messages:    map[string][]AIAgentTaskThreadHistoryMessage{},
 		events:      developmentSeedEvents(device, daemon),
 	}
 }

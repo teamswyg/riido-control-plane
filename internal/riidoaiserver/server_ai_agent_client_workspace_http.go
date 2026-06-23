@@ -13,6 +13,8 @@ func (s Server) handleAIAgentClientWorkspaceRoutes(w http.ResponseWriter, r *htt
 	}
 	r = requestWithAIAgentWorkspaceIDAndPath(r, workspaceID, v1Path)
 	switch {
+	case strings.HasPrefix(v1Path, "/v3/client/ai-agent/tasks/"):
+		s.handleAIAgentClientTasksV3(w, r)
 	case v1Path == "/v1/client/ai-agent/bootstrap":
 		s.handleAIAgentClientBootstrap(w, r)
 	case v1Path == "/v1/client/ai-agent/devices":
