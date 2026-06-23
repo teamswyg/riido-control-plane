@@ -23,8 +23,12 @@ func makeDefaultDeviceFresh(store *DevelopmentAIAgentClientStore, now time.Time)
 			store.devices[i].Runtimes[j].DetectionState = RuntimeDetectionStateDetected
 		}
 	}
-	daemon := store.daemons["device-dev-macbook"]
-	daemon.LastSeenAt = now
-	daemon.Availability = DaemonAvailabilityOnline
-	store.daemons["device-dev-macbook"] = daemon
+	for key, daemon := range store.daemons {
+		if daemon.DeviceID != "device-dev-macbook" {
+			continue
+		}
+		daemon.LastSeenAt = now
+		daemon.Availability = DaemonAvailabilityOnline
+		store.daemons[key] = daemon
+	}
 }

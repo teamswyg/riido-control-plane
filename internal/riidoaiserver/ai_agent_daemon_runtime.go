@@ -97,7 +97,7 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 	if req.DaemonID == "" {
 		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("daemon_id is required")
 	}
-	runtimes, err := normalizeRuntimeSnapshotRecords(req.DeviceID, principal.PrincipalID, req.Runtimes)
+	runtimes, err := normalizeRuntimeSnapshotRecords(req.DeviceID, principal.PrincipalID, req.DaemonID, req.Profile, req.Runtimes)
 	if err != nil {
 		return DeviceRuntimeSnapshotSyncResponse{}, false, err
 	}
@@ -142,7 +142,7 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 	if ws := strings.TrimSpace(principal.WorkspaceID); ws != "" {
 		device.ConnectedWorkspaceIDs = []string{ws}
 	}
-	previousDaemon, previousDaemonOK := s.daemons[req.DeviceID]
+	previousDaemon, previousDaemonOK := s.daemonByIdentityLocked(req.DeviceID, req.Profile, req.DaemonID)
 	daemon := DeviceDaemonRecord{
 		DeviceID:          req.DeviceID,
 		OwnerPrincipalID:  principal.PrincipalID,
@@ -184,7 +184,7 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 		}, false, nil
 	}
 	device = s.upsertDeviceRuntimeSnapshotLocked(device)
-	s.daemons[req.DeviceID] = daemon
+	s.putDaemonLocked(daemon)
 	// Only emit client stream events when something a viewer cares about actually
 	// changed (runtimes, availability, connected workspaces, daemon status). A
 	// plain liveness heartbeat (only last_seen_at/uptime advanced) is suppressed
@@ -336,7 +336,7 @@ func (s *DevelopmentAIAgentClientStore) agentRuntimeBindingLocked(agent AgentCli
 	if !ok || !runtimeAvailableForBinding(runtime) {
 		return AgentRuntimeBinding{}, false
 	}
-	daemon, ok := s.daemons[device.DeviceID]
+	daemon, ok := s.daemonForRuntimeLocked(device.DeviceID, runtime)
 	if !ok || strings.TrimSpace(daemon.DaemonID) == "" {
 		return AgentRuntimeBinding{}, false
 	}
@@ -387,6 +387,8 @@ func deviceRuntimeSnapshotChangedForEvent(prev DeviceRecord, prevOK bool, next D
 			return true
 		}
 		if p.Kind != rt.Kind ||
+			p.DaemonID != rt.DaemonID ||
+			p.DaemonProfile != rt.DaemonProfile ||
 			p.Availability != rt.Availability ||
 			p.DetectionState != rt.DetectionState ||
 			p.ProviderVersion != rt.ProviderVersion ||
@@ -535,13 +537,14 @@ func (s *DevelopmentAIAgentClientStore) deviceRuntimeByRuntimeIDLocked(runtimeID
 	return DeviceRecord{}, RuntimeRecord{}, false
 }
 
-func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID string, in []RuntimeSnapshotRecord) ([]RuntimeRecord, error) {
+func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemonProfile string, in []RuntimeSnapshotRecord) ([]RuntimeRecord, error) {
 	if len(in) == 0 {
 		return nil, errors.New("runtimes is required")
 	}
 	out := make([]RuntimeRecord, 0, len(in))
 	seen := map[string]struct{}{}
 	now := time.Now().UTC()
+	daemonProfile, daemonID = normalizeDaemonRuntimeScope(daemonProfile, daemonID)
 	for i, runtime := range in {
 		runtime.RuntimeID = strings.TrimSpace(runtime.RuntimeID)
 		if runtime.RuntimeID == "" {
@@ -576,6 +579,8 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID string, in []Run
 		out = append(out, RuntimeRecord{
 			RuntimeID:                 runtime.RuntimeID,
 			DeviceID:                  deviceID,
+			DaemonID:                  daemonID,
+			DaemonProfile:             daemonProfile,
 			Kind:                      runtime.Kind,
 			Availability:              runtime.Availability,
 			DetectionState:            runtime.DetectionState,

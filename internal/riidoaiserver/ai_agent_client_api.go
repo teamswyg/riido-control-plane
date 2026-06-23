@@ -139,6 +139,8 @@ const (
 type RuntimeRecord struct {
 	RuntimeID                 string                `json:"runtime_id"`
 	DeviceID                  string                `json:"device_id"`
+	DaemonID                  string                `json:"daemon_id,omitempty"`
+	DaemonProfile             string                `json:"daemon_profile,omitempty"`
 	Kind                      RuntimeKind           `json:"kind"`
 	Availability              RuntimeAvailability   `json:"availability"`
 	DetectionState            RuntimeDetectionState `json:"detection_state"`
