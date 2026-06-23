@@ -15,6 +15,7 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/client/ai-agent/onboarding/fixtures", s.handleAIAgentClientOnboardingFixtures)
 	mux.HandleFunc("/v1/client/ai-agent/onboarding/fixtures/", s.handleAIAgentClientOnboardingFixtures)
 	mux.HandleFunc("/v1/client/ai-agent/profile-thumbnails/uploads", s.handleAIAgentClientProfileThumbnailUpload)
+	mux.HandleFunc("/v1/client/ai-agent/agent-assignments/", s.handleAIAgentClientAgentAssignments)
 	mux.HandleFunc("/v1/client/ai-agent/tasks/", s.handleAIAgentClientTasks)
 	mux.HandleFunc("/v1/client/ai-agent/threads/", s.handleAIAgentClientThreads)
 	mux.HandleFunc("/v1/client/ai-agent/agents", s.handleAIAgentClientAgents)

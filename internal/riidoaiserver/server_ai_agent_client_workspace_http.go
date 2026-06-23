@@ -25,6 +25,8 @@ func (s Server) handleAIAgentClientWorkspaceRoutes(w http.ResponseWriter, r *htt
 		s.handleAIAgentClientProfileThumbnailUpload(w, r)
 	case v1Path == "/v1/client/ai-agent/tasks/assigned-agent-profiles":
 		s.handleAIAgentClientWorkspaceAssignedAgentProfiles(w, r)
+	case strings.HasPrefix(v1Path, "/v1/client/ai-agent/agent-assignments/"):
+		s.handleAIAgentClientAgentAssignments(w, r)
 	case strings.HasPrefix(v1Path, "/v1/client/ai-agent/tasks/"):
 		s.handleAIAgentClientTasks(w, r)
 	case strings.HasPrefix(v1Path, "/v1/client/ai-agent/threads/"):
