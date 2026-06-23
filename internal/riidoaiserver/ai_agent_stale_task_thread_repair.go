@@ -37,7 +37,7 @@ func (s *DevelopmentAIAgentClientStore) repairStaleActiveTaskThreadsLocked(now t
 }
 
 func staleActiveTaskThread(thread AIAgentTaskThreadRecord, now time.Time) bool {
-	if !taskThreadHasActiveStream(thread) {
+	if thread.AssignmentState != AgentAssignmentStateStopping && !taskThreadHasActiveStream(thread) {
 		return false
 	}
 	lastObservedAt := taskThreadLastObservedAt(thread)

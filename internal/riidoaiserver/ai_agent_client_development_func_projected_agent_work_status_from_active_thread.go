@@ -9,7 +9,7 @@ func projectedAgentWorkStatusFromActiveThread(thread AIAgentTaskThreadRecord) Ag
 	switch thread.AssignmentState {
 	case AgentAssignmentStateQueued:
 		return AgentWorkStatusQueued
-	case AgentAssignmentStateRunning, AgentAssignmentStateStopping:
+	case AgentAssignmentStateRunning:
 		return AgentWorkStatusRunning
 	default:
 		return AgentWorkStatusRunning

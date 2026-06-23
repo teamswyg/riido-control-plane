@@ -68,10 +68,13 @@ func TestHTTPAIAgentClientStopCancelsDurableAssignmentForDaemonPoll(t *testing.T
 		t.Fatalf("stop json: %v", err)
 	}
 	if stopped.AssignmentID != assigned.AssignmentID ||
-		stopped.AssignmentState != AgentAssignmentStateStopping ||
-		stopped.WorkStatus != AgentWorkStatusRunning ||
+		stopped.AssignmentState != AgentAssignmentStateStopped ||
+		stopped.WorkStatus != AgentWorkStatusIdle ||
 		stopped.CommentKind != AgentTaskCommentStoppedByUserRequest {
 		t.Fatalf("stop response = %+v, assigned=%+v", stopped, assigned)
+	}
+	if stopped.ActiveStream != nil {
+		t.Fatalf("stop response must close ui active stream: %+v", stopped.ActiveStream)
 	}
 	projection, ok, err := assignmentStore.LoadAssignmentProjection(ctx, assigned.AssignmentID)
 	if err != nil {
@@ -99,10 +102,11 @@ func TestHTTPAIAgentClientStopCancelsDurableAssignmentForDaemonPoll(t *testing.T
 	if err := json.Unmarshal(threadsResp.Body.Bytes(), &threads); err != nil {
 		t.Fatalf("threads json: %v", err)
 	}
-	if threads.ActiveStream == nil ||
+	if threads.ActiveStream != nil ||
 		len(threads.Threads) != 1 ||
 		threads.Threads[0].AssignmentID != assigned.AssignmentID ||
-		threads.Threads[0].AssignmentState != AgentAssignmentStateStopping {
+		threads.Threads[0].AssignmentState != AgentAssignmentStateStopped ||
+		threads.Threads[0].WorkStatus != AgentWorkStatusIdle {
 		t.Fatalf("threads after stop = %+v", threads)
 	}
 

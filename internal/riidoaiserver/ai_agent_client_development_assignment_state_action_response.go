@@ -18,10 +18,10 @@ func applyAssignmentStateActionResponse(response *AIAgentTaskActionResponse, sta
 		response.CommentKind = AgentTaskCommentRuntimeProgress
 		ensureAssignmentResponseMessage(response, "agent work is running")
 	case AssignmentStateCodeCancelling:
-		response.WorkStatus = AgentWorkStatusRunning
-		response.AssignmentState = AgentAssignmentStateStopping
+		response.WorkStatus = AgentWorkStatusIdle
+		response.AssignmentState = AgentAssignmentStateStopped
 		response.CommentKind = AgentTaskCommentStoppedByUserRequest
-		ensureAssignmentResponseMessage(response, "agent work is stopping")
+		ensureAssignmentResponseMessage(response, "agent work was stopped")
 	case AssignmentStateCodeCancelled:
 		response.WorkStatus = AgentWorkStatusIdle
 		response.AssignmentState = AgentAssignmentStateStopped
