@@ -1,0 +1,67 @@
+name: ai-agent-client-testnet-load
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "public or client-read"
+        required: true
+        default: client-read
+      duration:
+        description: "Go duration, for example 60s"
+        required: true
+        default: 60s
+      concurrency:
+        description: "Concurrent workers"
+        required: true
+        default: "64"
+
+concurrency:
+  group: ai-agent-client-testnet-load
+  cancel-in-progress: false
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
+      TESTNET_TOKEN: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN }}
+      TESTNET_WORKSPACE_ID: ${{ vars.RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Verify load configuration
+        run: |
+          test -n "$TESTNET_BASE_URL"
+          echo "::add-mask::$TESTNET_BASE_URL"
+          echo "::add-mask::$TESTNET_TOKEN"
+          if [ "${{ inputs.scenario }}" = "client-read" ]; then
+            test -n "$TESTNET_TOKEN"
+          fi
+
+      - name: Run AI Agent load evidence
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          workspace_id="${TESTNET_WORKSPACE_ID:-workspace-smoke}"
+          go run ./tools/aiagentload \
+            -base-url "${TESTNET_BASE_URL%/}" \
+            -token "$TESTNET_TOKEN" \
+            -workspace-id "$workspace_id" \
+            -scenario "${{ inputs.scenario }}" \
+            -duration "${{ inputs.duration }}" \
+            -concurrency "${{ inputs.concurrency }}" \
+            -evidence-out out/ai-agent-client-testnet-load.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ai-agent-client-testnet-load
+          path: out/ai-agent-client-testnet-load.json
+          if-no-files-found: error
