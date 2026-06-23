@@ -44,6 +44,7 @@ jobs:
           workspace_id="workspace-smoke"
           smoke_suffix="${GITHUB_RUN_ID:-manual}-$(date +%s)"
           smoke_task_id="task-smoke-$smoke_suffix"
+          smoke_task_id_v2="task-smoke-v2-$smoke_suffix"
 
           curl_json() {
             curl --fail --silent --show-error \
@@ -133,14 +134,41 @@ jobs:
               "$base_url/v2/client/workspaces/$workspace_id/ai-agent/agents" \
               | jq -re --arg workspace_id "$workspace_id" 'if .schema_version == "riido-ai-server.v1" and .agent.workspace_id == $workspace_id and .agent.is_owned_by_viewer == true and .agent.runtime_kind == "cursor" then .agent.agent_id else empty end' \
           )"
+          v2_assignment="$(mktemp)"
           curl_json \
             -H "$auth_header" \
             -H "Content-Type: application/json" \
             -d "{\"agent_id\":\"$created_v2_agent\"}" \
-            "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/task-smoke-v2/assignment" \
-            | jq -e --arg agent_id "$created_v2_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' >/dev/null
-          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/task-smoke-v2/threads" \
+            "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/assignment" \
+            > "$v2_assignment"
+          jq -e --arg agent_id "$created_v2_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' "$v2_assignment" >/dev/null
+          thread_id_v2="$(jq -re '.thread_id' "$v2_assignment")"
+          rm -f "$v2_assignment"
+          v3_followup_body="Please preserve this v3 follow-up after refresh"
+          curl_json \
+            -H "$auth_header" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\":\"$v3_followup_body\",\"source_message_id\":\"message-smoke-v3-$smoke_suffix\"}" \
+            "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/threads/$thread_id_v2/messages" \
+            | jq -e --arg thread_id "$thread_id_v2" '.schema_version == "riido-ai-server.v1" and .thread_id == $thread_id' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/threads" \
             | jq -e --arg agent_id "$created_v2_agent" --arg href "/v2/client/workspaces/$workspace_id/ai-agent/events" '.schema_version == "riido-ai-server.v1" and any(.threads[]; .agent_id == $agent_id) and .active_stream.href == $href' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v3/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/threads" \
+            | jq -e --arg task_id "$smoke_task_id_v2" --arg agent_id "$created_v2_agent" --arg href "/v2/client/workspaces/$workspace_id/ai-agent/events" --arg thread_id "$thread_id_v2" --arg body "$v3_followup_body" '
+              . as $root
+              | .schema_version == "riido-ai-server.v1"
+              and .task_id == $task_id
+              and .active_stream.href == $href
+              and (.agent_snapshots | type) == "object"
+              and any(.threads[];
+                .thread_id == $thread_id
+                and .agent_id == $agent_id
+                and ((.agent_snapshot_id // "") | length) > 0
+                and ($root.agent_snapshots[.agent_snapshot_id].agent_id == $agent_id)
+                and ((.messages | type) == "array")
+                and any(.messages[]; .role == "user" and .body == $body)
+              )
+            ' >/dev/null
 
       - name: Publish redacted smoke summary evidence
         if: always()
