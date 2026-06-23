@@ -142,8 +142,6 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 	if ws := strings.TrimSpace(principal.WorkspaceID); ws != "" {
 		device.ConnectedWorkspaceIDs = []string{ws}
 	}
-	previousDevice, previousDeviceOK := s.deviceByIDLocked(req.DeviceID)
-	device = s.upsertDeviceRuntimeSnapshotLocked(device)
 	previousDaemon, previousDaemonOK := s.daemons[req.DeviceID]
 	daemon := DeviceDaemonRecord{
 		DeviceID:          req.DeviceID,
@@ -160,23 +158,32 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 		ControlState:      DaemonControlStateIdle,
 		SupportedActions:  []DaemonControlAction{DaemonControlActionRestart, DaemonControlActionStop},
 	}
-	if existing, ok := s.daemons[req.DeviceID]; ok {
+	if previousDaemonOK {
 		if daemon.PID == 0 {
-			daemon.PID = existing.PID
+			daemon.PID = previousDaemon.PID
 		}
 		if daemon.UptimeSeconds == 0 {
-			daemon.UptimeSeconds = existing.UptimeSeconds
+			daemon.UptimeSeconds = previousDaemon.UptimeSeconds
 		}
 		if daemon.StartedAt.IsZero() {
-			daemon.StartedAt = existing.StartedAt
+			daemon.StartedAt = previousDaemon.StartedAt
 		}
 		if daemon.Profile == "" {
-			daemon.Profile = existing.Profile
+			daemon.Profile = previousDaemon.Profile
 		}
 		if daemon.AppVersion == "" {
-			daemon.AppVersion = existing.AppVersion
+			daemon.AppVersion = previousDaemon.AppVersion
 		}
 	}
+	previousDevice, previousDeviceOK := s.deviceByIDLocked(req.DeviceID)
+	if staleDaemonRuntimeSnapshot(previousDaemon, previousDaemonOK, daemon) {
+		return DeviceRuntimeSnapshotSyncResponse{
+			SchemaVersion: SchemaVersion,
+			Device:        copyDevice(previousDevice),
+			Daemon:        copyDeviceDaemon(previousDaemon),
+		}, false, nil
+	}
+	device = s.upsertDeviceRuntimeSnapshotLocked(device)
 	s.daemons[req.DeviceID] = daemon
 	// Only emit client stream events when something a viewer cares about actually
 	// changed (runtimes, availability, connected workspaces, daemon status). A

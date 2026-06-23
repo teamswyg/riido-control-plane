@@ -386,7 +386,7 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		writeAIAgentClientError(w, err)
 		return
 	}
-	req.AssignmentID = assignment.ID
+	req.AssignmentID, req.durableState = assignment.ID, assignmentClientResponseDurableState(assignment)
 	response, err := s.aiAgent.AssignAIAgentTask(r.Context(), principal, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
@@ -428,7 +428,7 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		writeAIAgentClientError(w, err)
 		return
 	}
-	req.AssignmentID = assignment.ID
+	req.AssignmentID, req.durableState = assignment.ID, assignmentClientResponseDurableState(assignment)
 	response, err := s.aiAgent.CreateAIAgentTaskAgentAssignment(r.Context(), principal, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)

@@ -59,6 +59,10 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
 		response.Message = "agent is busy; task assignment was queued"
 	}
+	if assignmentStateIsKnown(req.durableState) {
+		response.Message = ""
+		applyAssignmentStateActionResponse(&response, req.durableState)
+	}
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	agent.WorkStatus = response.WorkStatus
 	agent.Editability = AgentEditabilityBlockedAssignedTasks
