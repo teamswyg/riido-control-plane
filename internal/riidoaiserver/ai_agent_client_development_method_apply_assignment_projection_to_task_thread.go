@@ -16,6 +16,7 @@ func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(th
 			continue
 		}
 		previous := threads[i]
+		s.ensureTaskThreadAgentSnapshotLocked(&threads[i], threads[i].StartedAt)
 		response := assignmentEventActionResponse(threads[i], projection.Assignment.State, "", nil)
 		response.AssignmentID = projection.Assignment.ID
 		if previous.AssignmentID == response.AssignmentID &&

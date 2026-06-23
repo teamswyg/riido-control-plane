@@ -22,6 +22,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		if strings.TrimSpace(event.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(event.AssignmentID)
 		}
+		s.ensureTaskThreadAgentSnapshotLocked(&threads[i], threads[i].StartedAt)
 		threads[i].WorkStatus = event.WorkStatus
 		threads[i].AssignmentState = event.AssignmentState
 		threads[i].QueueDiagnostics = nil
@@ -37,7 +38,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 	if len(event.Lines) > 0 {
 		message = event.Lines[len(event.Lines)-1].Message
 	}
-	s.taskThreads[event.TaskID] = append(threads, AIAgentTaskThreadRecord{
+	thread := AIAgentTaskThreadRecord{
 		ThreadID:        event.ThreadID,
 		TaskID:          event.TaskID,
 		AssignmentID:    event.AssignmentID,
@@ -49,5 +50,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		Message:         message,
 		StartedAt:       now,
 		Lines:           copyProgressLines(event.Lines),
-	})
+	}
+	s.ensureTaskThreadAgentSnapshotLocked(&thread, now)
+	s.taskThreads[event.TaskID] = append(threads, thread)
 }

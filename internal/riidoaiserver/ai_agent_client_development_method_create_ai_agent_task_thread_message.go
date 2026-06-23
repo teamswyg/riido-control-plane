@@ -37,6 +37,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		TaskID:          taskID,
 		AssignmentID:    thread.AssignmentID,
 		AgentID:         agent.AgentID,
+		AgentSnapshot:   copyTaskThreadAgentSnapshot(thread.AgentSnapshot),
 		ThreadID:        threadID,
 		RunID:           thread.RunID,
 		WorkStatus:      AgentWorkStatusRunning,
