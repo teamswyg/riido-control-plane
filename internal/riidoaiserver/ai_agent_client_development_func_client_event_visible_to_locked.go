@@ -13,7 +13,12 @@ func clientEventVisibleToLocked(s *DevelopmentAIAgentClientStore, principal Auth
 	}
 	agent, exists := s.agents[agentID]
 	if !exists {
-		return aiAgentIsAdmin(principal)
+		taskID, threadID, ok := eventTaskThreadRef(event.Payload)
+		if !ok {
+			return aiAgentIsAdmin(principal)
+		}
+		thread, ok := s.visibleTaskThreadLocked(principal, taskID, threadID)
+		return ok && thread.AgentID == agentID
 	}
 	return s.aiAgentVisibleTo(principal, agent)
 }

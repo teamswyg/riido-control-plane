@@ -2,7 +2,6 @@ package riidoaiserver
 
 import (
 	"context"
-	"slices"
 	"sort"
 	"strings"
 )
@@ -21,12 +20,14 @@ func (s *DevelopmentAIAgentClientStore) ListWorkspaceAssignedAgentProfiles(ctx c
 	sort.Strings(taskIDs)
 	for _, taskID := range taskIDs {
 		threads := s.taskThreads[taskID]
-		for _, thread := range slices.Backward(threads) {
+		for i := len(threads) - 1; i >= 0; i-- {
+			thread := threads[i]
 			if !taskThreadHasActiveStream(thread) {
 				continue
 			}
-			agent, ok := s.agents[thread.AgentID]
-			if !ok || !s.aiAgentVisibleTo(principal, agent) {
+			s.ensureTaskThreadAgentSnapshotLocked(&threads[i], threads[i].StartedAt)
+			thread = threads[i]
+			if !s.taskThreadVisibleTo(principal, thread) {
 				continue
 			}
 			componentID := strings.TrimSpace(thread.TaskID)
@@ -36,9 +37,17 @@ func (s *DevelopmentAIAgentClientStore) ListWorkspaceAssignedAgentProfiles(ctx c
 			if componentID == "" {
 				continue
 			}
-			profiles[componentID] = assignedAgentProfileFromAgent(agent)
-			break
+			agent, ok := s.agents[thread.AgentID]
+			if ok && s.aiAgentVisibleTo(principal, agent) {
+				profiles[componentID] = assignedAgentProfileFromAgent(agent)
+				break
+			}
+			if profile, ok := assignedAgentProfileFromSnapshot(thread.AgentSnapshot); ok {
+				profiles[componentID] = profile
+				break
+			}
 		}
+		s.taskThreads[taskID] = threads
 	}
 	return AssignedAgentProfileMapResponse{
 		SchemaVersion:         SchemaVersion,
