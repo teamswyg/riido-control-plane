@@ -12,7 +12,14 @@ import (
 func (s *Store) WaitForAssignment(ctx context.Context, agentID string, req PollRequest, hold, tick time.Duration) (response PollResponse, err error) {
 	ctx, span := s.startStoreOperationTrace(ctx, StoreOperationWaitAssignment)
 	startedAt := time.Now()
+	waited := false
 	defer func() {
+		span.SetAttributes(
+			BoolTraceAttribute(riidoPollWaitedKey, waited),
+			Int64TraceAttribute(riidoPollElapsedMsKey, pollDurationMs(time.Since(startedAt))),
+			Int64TraceAttribute(riidoPollHoldMsKey, pollDurationMs(hold)),
+			Int64TraceAttribute(riidoPollTickMsKey, pollDurationMs(tick)),
+		)
 		if err == nil {
 			span.SetAttributes(StringTraceAttribute(metadatakeys.RiidoPollAction.String(), string(response.Action)))
 		}
@@ -32,6 +39,7 @@ func (s *Store) WaitForAssignment(ctx context.Context, agentID string, req PollR
 	if err != nil || resp.Action != PollNone {
 		return resp, err
 	}
+	waited = true
 	return s.waitForAssignmentSignal(ctx, agentID, req, signal, hold, tick)
 }
 

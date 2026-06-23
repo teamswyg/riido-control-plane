@@ -4,12 +4,14 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 )
 
 type snapshotDynamoDBFixture struct {
 	requests chan capturedDynamoDBRequest
+	mu       sync.Mutex
 	items    map[string]map[string]map[string]string
 	server   *httptest.Server
 	store    *DynamoDBAIAgentClientSnapshot
