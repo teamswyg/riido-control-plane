@@ -4,6 +4,7 @@ type assignCmd struct {
 	taskID                    string
 	req                       AssignRequest
 	allowConcurrentTaskAgents bool
+	forceNewAssignment        bool
 	reply                     chan assignResult
 }
 
