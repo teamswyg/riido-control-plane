@@ -27,8 +27,8 @@ func TestVerifyContractPassesWithoutPrivateInfraIR(t *testing.T) {
 	if record.FinalUser != "65532:65532" {
 		t.Fatalf("final_user = %q", record.FinalUser)
 	}
-	if record.ChecksTotal != 13 {
-		t.Fatalf("checks_total = %d, want 13", record.ChecksTotal)
+	if record.ChecksTotal != 17 {
+		t.Fatalf("checks_total = %d, want 17", record.ChecksTotal)
 	}
 }
 
@@ -42,8 +42,8 @@ func TestVerifyContractPassesAndChecksOptionalTaskIR(t *testing.T) {
 	if record.FargateTaskDefinitionIR == "" {
 		t.Fatal("fargate_task_definition_ir is empty")
 	}
-	if record.ChecksTotal != 16 {
-		t.Fatalf("checks_total = %d, want 16", record.ChecksTotal)
+	if record.ChecksTotal != 20 {
+		t.Fatalf("checks_total = %d, want 20", record.ChecksTotal)
 	}
 }
 

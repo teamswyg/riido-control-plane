@@ -19,8 +19,15 @@
       "path": ".github/workflows/deploy-ai-agent-testnet.yml",
       "summary_artifact": "deploy-ai-agent-testnet-redacted-summary",
       "summary_path": "out/deploy-ai-agent-testnet-redacted-summary.json",
-      "sensitive_inputs": ["AWS_REGION", "ECR_REPOSITORY", "ECS_CLUSTER", "ECS_SERVICE", "ECS_CONTAINER_NAME", "TESTNET_BASE_URL", "TESTNET_TOKEN"],
-      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "live_status", "deployment_target", "redaction"]
+      "sensitive_inputs": ["AWS_REGION", "ECR_REPOSITORY", "ECS_CLUSTER", "ECS_SERVICE", "ECS_CONTAINER_NAME", "CODEDEPLOY_APPLICATION", "CODEDEPLOY_DEPLOYMENT_GROUP", "TESTNET_BASE_URL", "TESTNET_TOKEN"],
+      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "live_status", "deployment_target", "deployment_mode", "build_cache_mode", "redaction"],
+      "required_phrases": [
+        "docker buildx build",
+        "--cache-from \"type=gha,scope=${cache_scope}\"",
+        "--cache-to \"type=gha,mode=max,scope=${cache_scope}\"",
+        "-deployment-mode \"$deployment_mode\"",
+        "-build-cache-mode \"buildkit-gha\""
+      ]
     }
   ],
   "assertions": [

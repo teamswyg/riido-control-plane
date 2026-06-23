@@ -28,7 +28,13 @@ func TestLiveSummaryRedactsRuntimeValues(t *testing.T) {
 	t.Setenv("TESTNET_TOKEN", "super-secret-token")
 	t.Setenv("TESTNET_BASE_URL", "https://private.example.test")
 	out := filepath.Join(t.TempDir(), "summary.json")
-	err := mainRun([]string{"-repo", "../..", "-workflow", "ai-agent-client-testnet-smoke", "-evidence-out", out})
+	err := mainRun([]string{
+		"-repo", "../..",
+		"-workflow", "deploy-ai-agent-testnet",
+		"-deployment-mode", "ecs-rolling",
+		"-build-cache-mode", "buildkit-gha",
+		"-evidence-out", out,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,6 +46,11 @@ func TestLiveSummaryRedactsRuntimeValues(t *testing.T) {
 	for _, forbidden := range []string{"super-secret-token", "private.example.test"} {
 		if strings.Contains(text, forbidden) {
 			t.Fatalf("summary leaked %s: %s", forbidden, text)
+		}
+	}
+	for _, required := range []string{"\"deployment_mode\": \"ecs-rolling\"", "\"build_cache_mode\": \"buildkit-gha\""} {
+		if !strings.Contains(text, required) {
+			t.Fatalf("summary missing %s: %s", required, text)
 		}
 	}
 }

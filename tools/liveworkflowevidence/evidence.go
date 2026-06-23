@@ -29,6 +29,8 @@ func newLiveSummary(spec workflowSpec, opt options) liveSummary {
 		Run:              newRunRecord(),
 		LiveStatus:       status,
 		DeploymentTarget: opt.DeploymentTarget,
+		DeploymentMode:   opt.DeploymentMode,
+		BuildCacheMode:   opt.BuildCacheMode,
 		Redaction:        newRedaction(spec),
 	}
 }

@@ -12,13 +12,13 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `42`; runtime: `1`; internal: `3`; tools: `37`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `96`; max file lines: `1072`.
+File line budget target: `75`; files over target: `98`; max file lines: `1072`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 96 | 97 | 1 |
+| Files over target | 98 | 97 | -1 |
 | Max file lines | 1072 | 2481 | 1409 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
@@ -30,7 +30,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 | `internal/riidoaiserver` | 96 | 85 | 1072 | 2481 | 17034 | 23713 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
-| `tools/containercontract` | 0 | 2 | 0 | 597 | 0 | 663 |
+| `tools/containercontract` | 2 | 2 | 85 | 597 | 11 | 663 |
 | `tools/generatedclienthandoff` | 0 | 2 | 0 | 601 | 0 | 578 |
 | `awsadapters` | 0 | 1 | 0 | 84 | 0 | 9 |
 | `internal/contractscompat` | 0 | 1 | 0 | 81 | 0 | 6 |
@@ -59,6 +59,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
 | `internal/riidoaiserver` | 96 | 1072 | 17034 |
+| `tools/containercontract` | 2 | 85 | 11 |
 
 ## Packages
 

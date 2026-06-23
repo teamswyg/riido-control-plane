@@ -26,8 +26,8 @@ func TestRunWritesCheckJSON(t *testing.T) {
 	if record.Service != contract.Service {
 		t.Fatalf("service = %q, want %q", record.Service, contract.Service)
 	}
-	if record.ChecksTotal != 13 {
-		t.Fatalf("checks_total = %d, want 13", record.ChecksTotal)
+	if record.ChecksTotal != 17 {
+		t.Fatalf("checks_total = %d, want 17", record.ChecksTotal)
 	}
 }
 
@@ -46,7 +46,7 @@ func TestRunWritesEvidenceOutJSON(t *testing.T) {
 	if err := json.Unmarshal(data, &record); err != nil {
 		t.Fatalf("decode check JSON: %v\n%s", err, string(data))
 	}
-	if record.SchemaVersion != checkSchemaVersion || record.ChecksTotal != 13 {
+	if record.SchemaVersion != checkSchemaVersion || record.ChecksTotal != 17 {
 		t.Fatalf("unexpected evidence: %+v", record)
 	}
 	if record.ID == "" || record.Status != "verified" || record.Loop.Observation == "" {

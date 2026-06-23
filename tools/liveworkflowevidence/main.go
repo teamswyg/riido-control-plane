@@ -21,6 +21,8 @@ func mainRun(args []string) error {
 	fs.StringVar(&opt.WorkflowID, "workflow", "", "live workflow id")
 	fs.StringVar(&opt.LiveStatus, "live-status", "", "redacted live status")
 	fs.StringVar(&opt.DeploymentTarget, "deployment-target", "", "deployment target")
+	fs.StringVar(&opt.DeploymentMode, "deployment-mode", "", "redacted deployment mode")
+	fs.StringVar(&opt.BuildCacheMode, "build-cache-mode", "", "redacted build cache mode")
 	fs.StringVar(&opt.EvidenceOut, "evidence-out", "", "optional evidence JSON output path")
 	fs.BoolVar(&opt.WriteDoc, "write-doc", false, "write generated doc")
 	fs.BoolVar(&opt.CheckDoc, "check-doc", false, "verify generated doc")

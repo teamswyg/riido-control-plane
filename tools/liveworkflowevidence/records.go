@@ -9,6 +9,7 @@ func newRecord(spec workflowSpec) workflowRecord {
 		SummaryArtifact: spec.SummaryArtifact,
 		SummaryPath:     spec.SummaryPath,
 		SensitiveInputs: spec.SensitiveInputs,
+		RequiredPhrases: spec.RequiredPhrases,
 	}
 }
 

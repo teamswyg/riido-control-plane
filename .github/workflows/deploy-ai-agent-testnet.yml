@@ -48,7 +48,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          cache: false
+          cache: true
 
       - name: Verify deploy configuration
         shell: bash
@@ -145,11 +145,16 @@ jobs:
           aws ecr get-login-password --region "$AWS_REGION" \
             | docker login --username AWS --password-stdin "$registry"
 
-          local_image="riido-control-plane:${GITHUB_SHA}"
           tagged_image="${registry}/${ECR_REPOSITORY}:${image_tag}"
-          docker build -f packaging/containers/riido_ai_server.Dockerfile -t "$local_image" .
-          docker tag "$local_image" "$tagged_image"
-          docker push "$tagged_image"
+          cache_scope="riido-ai-server-${DEPLOYMENT_TARGET:-testnet}"
+          docker buildx create --use --name riido-runtime-builder
+          docker buildx build \
+            --file packaging/containers/riido_ai_server.Dockerfile \
+            --tag "$tagged_image" \
+            --cache-from "type=gha,scope=${cache_scope}" \
+            --cache-to "type=gha,mode=max,scope=${cache_scope}" \
+            --push \
+            .
 
           image_digest="$(
             aws ecr describe-images \
@@ -361,10 +366,17 @@ jobs:
           RIIDO_LIVE_CHECK_STATUS: ${{ job.status }}
         run: |
           mkdir -p out
+          if [ -n "${CODEDEPLOY_APPLICATION:-}" ]; then
+            deployment_mode="codedeploy-blue-green"
+          else
+            deployment_mode="ecs-rolling"
+          fi
           go run ./tools/liveworkflowevidence \
             -workflow deploy-ai-agent-testnet \
             -live-status "$RIIDO_LIVE_CHECK_STATUS" \
             -deployment-target "$DEPLOYMENT_TARGET" \
+            -deployment-mode "$deployment_mode" \
+            -build-cache-mode "buildkit-gha" \
             -evidence-out out/deploy-ai-agent-testnet-redacted-summary.json
 
       - uses: actions/upload-artifact@v4

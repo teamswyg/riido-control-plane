@@ -49,8 +49,21 @@ func verifyBuildStage(contract imageContract, parsed dockerfile) (int, *stage, e
 	if err := require(buildStage.Env["CGO_ENABLED"] == contract.Build.CGOEnabled, "CGO_ENABLED = %q, want %q", buildStage.Env["CGO_ENABLED"], contract.Build.CGOEnabled); err != nil {
 		return checks, nil, err
 	}
+	if err := require(hasModuleDownloadRun(buildStage.Runs, contract.Build.ModuleDownload), "module download command %q not found", contract.Build.ModuleDownload.Command); err != nil {
+		return checks, nil, err
+	}
+	for _, target := range contract.Build.ModuleDownload.CacheMounts {
+		if err := require(runHasCacheMount(buildStage.Runs, contract.Build.ModuleDownload.Command, target), "module download cache mount target %q not found", target); err != nil {
+			return checks, nil, err
+		}
+	}
 	if err := require(hasGoBuildRun(buildStage.Runs, contract.Build.GoBuild), "go build command does not satisfy container contract"); err != nil {
 		return checks, nil, err
+	}
+	for _, target := range contract.Build.GoBuild.CacheMounts {
+		if err := require(runHasCacheMount(buildStage.Runs, "go build", target), "go build cache mount target %q not found", target); err != nil {
+			return checks, nil, err
+		}
 	}
 	return checks, buildStage, nil
 }
