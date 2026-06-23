@@ -4,8 +4,9 @@ import (
 	"time"
 )
 
-func (s *DevelopmentAIAgentClientStore) markAgentTaskThreadsStoppedLocked(agentID string, kind AgentTaskCommentKind, message string) {
+func (s *DevelopmentAIAgentClientStore) markAgentTaskThreadsStoppedLocked(agentID string, kind AgentTaskCommentKind, message string) []AIAgentTaskThreadRecord {
 	now := time.Now().UTC()
+	stopped := []AIAgentTaskThreadRecord{}
 	for taskID, threads := range s.taskThreads {
 		for i := range threads {
 			if threads[i].AgentID != agentID || !taskThreadHasActiveStream(threads[i]) {
@@ -17,7 +18,9 @@ func (s *DevelopmentAIAgentClientStore) markAgentTaskThreadsStoppedLocked(agentI
 			threads[i].Message = message
 			threads[i].ResultMessage = message
 			threads[i].CompletedAt = now
+			stopped = append(stopped, copyTaskThread(threads[i]))
 		}
 		s.taskThreads[taskID] = threads
 	}
+	return stopped
 }
