@@ -16,18 +16,7 @@ func (s *DevelopmentAIAgentClientStore) GetAIAgentTaskThreadStreamSubscription(c
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	threads := s.visibleTaskThreadsLocked(principal, taskID)
-	filters := make([]AIAgentTaskThreadStreamTarget, 0, len(threads))
-	for _, thread := range threads {
-		if !taskThreadHasActiveStream(thread) {
-			continue
-		}
-		filters = append(filters, AIAgentTaskThreadStreamTarget{
-			AgentID:  thread.AgentID,
-			ThreadID: thread.ThreadID,
-			RunID:    thread.RunID,
-		})
-	}
+	filters := s.activeTaskThreadStreamTargetsLocked(principal, taskID)
 	return AIAgentTaskThreadStreamSubscriptionResponse{
 		SchemaVersion: SchemaVersion,
 		TaskID:        taskID,

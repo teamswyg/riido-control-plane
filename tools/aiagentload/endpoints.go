@@ -29,5 +29,6 @@ func clientReadEndpoints(workspaceID string) []endpoint {
 		{Method: "GET", Path: "/v2/client/workspaces/" + ws + "/ai-agent/devices", Auth: true},
 		{Method: "GET", Path: "/v2/client/workspaces/" + ws + "/ai-agent/tasks/task-load-read/assignable-agents", Auth: true},
 		{Method: "GET", Path: "/v2/client/workspaces/" + ws + "/ai-agent/tasks/task-load-read/threads", Auth: true},
+		{Method: "GET", Path: "/v2/client/workspaces/" + ws + "/ai-agent/tasks/task-load-read/thread-stream-subscription", Auth: true},
 	}
 }
