@@ -22,7 +22,6 @@ func developmentPrimaryDevice(now time.Time) DeviceRecord {
 				ProviderVersion:  "codex-cli 0.133.0",
 				OwnerPrincipalID: "user-1",
 				LastDetectedAt:   now,
-				HasAssignedAgent: true,
 				Models: []RuntimeModelRecord{
 					{ModelID: providercatalog.DefaultCodexModelID, Label: "Codex 기본 모델", IsDefault: true},
 				},
@@ -36,7 +35,6 @@ func developmentPrimaryDevice(now time.Time) DeviceRecord {
 				ProviderVersion:  "2.1.142 (Claude Code)",
 				OwnerPrincipalID: "user-1",
 				LastDetectedAt:   now.Add(-30 * time.Second),
-				HasAssignedAgent: true,
 				Models: []RuntimeModelRecord{
 					{ModelID: "claude-sonnect-4-6", Label: "Sonnect 4.6 (기본값)", IsDefault: true},
 					{ModelID: "claude-opus-4-7", Label: "Opus 4.7", IsDefault: false},

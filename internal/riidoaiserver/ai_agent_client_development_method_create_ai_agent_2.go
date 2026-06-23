@@ -45,6 +45,5 @@ func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, princ
 		UpdatedAt:           now,
 	}
 	s.agents[agent.AgentID] = agent
-	s.refreshRuntimeAssignmentFlagLocked(input.RuntimeID)
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }

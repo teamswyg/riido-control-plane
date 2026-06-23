@@ -22,7 +22,6 @@ func developmentSharedDevice(now time.Time) DeviceRecord {
 				ProviderVersion:  "openclaw 0.1.0",
 				OwnerPrincipalID: "user-2",
 				LastDetectedAt:   now,
-				HasAssignedAgent: true,
 				Models: []RuntimeModelRecord{
 					{ModelID: providercatalog.DefaultOpenClawModelID, Label: "OpenClaw 기본 모델", IsDefault: true},
 				},
@@ -42,7 +41,6 @@ func developmentPrivateCursorRuntime(now time.Time) RuntimeRecord {
 		ProviderVersion:  "cursor-agent 1.0.0",
 		OwnerPrincipalID: "user-2",
 		LastDetectedAt:   now,
-		HasAssignedAgent: true,
 		Models: []RuntimeModelRecord{
 			{ModelID: providercatalog.DefaultCursorModelID, Label: "Cursor Auto", IsDefault: true},
 			{ModelID: "cursor-fast", Label: "Cursor Fast", IsDefault: false},

@@ -184,8 +184,8 @@ func TestHTTPAIAgentClientDevelopmentMutationAndDeletion(t *testing.T) {
 	if !ok || updated.ProfileThumbnailURL != thumbnailURL || updated.Description != description || updated.Instruction != instruction || !updated.CreatedAt.Equal(patched.Agent.CreatedAt) || !updated.UpdatedAt.Equal(patched.Agent.UpdatedAt) {
 		t.Fatalf("bootstrap updated agent = %+v found=%v", updated, ok)
 	}
-	if !runtimeHasAssignedAgent(bootstrap.Devices, "runtime-cursor-dev") {
-		t.Fatalf("bootstrap runtime-cursor-dev was not marked assigned: %+v", bootstrap.Devices)
+	if runtimeIsMarkedAssigned(bootstrap.Devices, "runtime-cursor-dev") {
+		t.Fatalf("runtime-cursor-dev must remain reusable in bootstrap: %+v", bootstrap.Devices)
 	}
 
 	invalidModelBody, err := json.Marshal(CreateAgentConfigurationRequest{

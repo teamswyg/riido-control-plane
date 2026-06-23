@@ -31,8 +31,5 @@ func preferRuntimeForDisplay(candidate, current RuntimeRecord) bool {
 	if candidateLive != currentLive {
 		return candidateLive
 	}
-	if candidate.HasAssignedAgent != current.HasAssignedAgent {
-		return candidate.HasAssignedAgent
-	}
 	return candidate.LastDetectedAt.After(current.LastDetectedAt)
 }

@@ -27,7 +27,7 @@ func findRuntime(runtimes []RuntimeRecord, id string) (RuntimeRecord, bool) {
 	return RuntimeRecord{}, false
 }
 
-func runtimeHasAssignedAgent(devices []DeviceRecord, runtimeID string) bool {
+func runtimeIsMarkedAssigned(devices []DeviceRecord, runtimeID string) bool {
 	for _, device := range devices {
 		for _, runtime := range device.Runtimes {
 			if runtime.RuntimeID == runtimeID {
