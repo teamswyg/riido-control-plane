@@ -24,6 +24,21 @@ func TestClientVisibleTaskThreadTextLocalizesSystemMessages(t *testing.T) {
 	}
 }
 
+func TestClientVisibleTaskThreadTextStripsPartialRiidoLogFragments(t *testing.T) {
+	t.Parallel()
+	cases := map[string]string{
+		"생각 중...\n<ri":                                   "생각 중...",
+		`<riido_log>{"code":1001,"args"`:                 "",
+		`prefix <riido_log>{"code":1001,"args":{}}<end>`: "prefix",
+		`prefix <riido_`:                                 "prefix",
+	}
+	for input, want := range cases {
+		if got := clientVisibleTaskThreadText(input); got != want {
+			t.Fatalf("clientVisibleTaskThreadText(%q) = %q, want %q", input, got, want)
+		}
+	}
+}
+
 func TestClientVisibleTaskThreadMessageUsesCommentKindFallback(t *testing.T) {
 	t.Parallel()
 	cases := map[AgentTaskCommentKind]string{
