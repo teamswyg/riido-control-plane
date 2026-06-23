@@ -4,20 +4,38 @@ import (
 	"strings"
 )
 
+const (
+	riidoLogStart = "<riido_log>"
+	riidoLogEnd   = "<end>"
+)
+
 func stripRiidoLogBlocks(message string) string {
 	message = strings.TrimSpace(message)
-	const start = "<riido_log>"
-	const end = "<end>"
 	for {
-		startIndex := strings.Index(message, start)
+		startIndex := strings.Index(message, riidoLogStart)
 		if startIndex < 0 {
-			return strings.TrimSpace(message)
+			return strings.TrimSpace(stripDanglingRiidoLogPrefix(message))
 		}
-		endOffset := strings.Index(message[startIndex+len(start):], end)
+		endOffset := strings.Index(message[startIndex+len(riidoLogStart):], riidoLogEnd)
 		if endOffset < 0 {
-			return strings.TrimSpace(message)
+			return strings.TrimSpace(message[:startIndex])
 		}
-		endIndex := startIndex + len(start) + endOffset + len(end)
+		endIndex := startIndex + len(riidoLogStart) + endOffset + len(riidoLogEnd)
 		message = message[:startIndex] + message[endIndex:]
 	}
+}
+
+func stripDanglingRiidoLogPrefix(message string) string {
+	for offset := 0; offset < len(message); offset++ {
+		index := strings.Index(message[offset:], "<")
+		if index < 0 {
+			return message
+		}
+		index += offset
+		if strings.HasPrefix(riidoLogStart, message[index:]) {
+			return message[:index]
+		}
+		offset = index
+	}
+	return message
 }

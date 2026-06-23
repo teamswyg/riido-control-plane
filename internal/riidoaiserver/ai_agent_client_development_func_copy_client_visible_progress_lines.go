@@ -1,9 +1,13 @@
 package riidoaiserver
 
 func copyClientVisibleProgressLines(lines []AgentThreadProgressLine) []AgentThreadProgressLine {
-	out := copyProgressLines(lines)
-	for i := range out {
-		out[i].Message = clientVisibleTaskThreadText(out[i].Message)
+	out := make([]AgentThreadProgressLine, 0, len(lines))
+	for _, line := range copyProgressLines(lines) {
+		line.Message = clientVisibleTaskThreadText(line.Message)
+		if line.Message == "" {
+			continue
+		}
+		out = append(out, line)
 	}
 	return out
 }
