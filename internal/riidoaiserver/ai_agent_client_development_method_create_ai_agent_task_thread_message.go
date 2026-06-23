@@ -55,6 +55,10 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
 		response.Message = "agent is busy; task thread message was queued"
 	}
+	if assignmentStateIsKnown(req.durableState) {
+		response.Message = ""
+		applyAssignmentStateActionResponse(&response, req.durableState)
+	}
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID)
 	s.appendAgentTaskActionEvent(response)

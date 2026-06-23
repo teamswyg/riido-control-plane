@@ -12,14 +12,14 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `42`; runtime: `1`; internal: `3`; tools: `37`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `94`; max file lines: `1129`.
+File line budget target: `75`; files over target: `94`; max file lines: `1131`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
 | Files over target | 94 | 97 | 3 |
-| Max file lines | 1129 | 2481 | 1352 |
+| Max file lines | 1131 | 2481 | 1350 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
 
@@ -27,7 +27,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 94 | 85 | 1129 | 2481 | 16992 | 23713 |
+| `internal/riidoaiserver` | 94 | 85 | 1131 | 2481 | 16998 | 23713 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
 | `tools/containercontract` | 0 | 2 | 0 | 597 | 0 | 663 |
@@ -43,7 +43,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | File | Lines |
 | --- | ---: |
-| `internal/riidoaiserver/server.go` | 1129 |
+| `internal/riidoaiserver/server.go` | 1131 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 838 |
 | `internal/riidoaiserver/store_actor_test.go` | 837 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 746 |
@@ -51,14 +51,14 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 675 |
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
 | `internal/riidoaiserver/ai_agent_client_persistence_test.go` | 661 |
-| `internal/riidoaiserver/ai_agent_client_api.go` | 611 |
+| `internal/riidoaiserver/ai_agent_client_api.go` | 612 |
 | `internal/riidoaiserver/store.go` | 537 |
 
 ### Line Budget Hotspots
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 94 | 1129 | 16992 |
+| `internal/riidoaiserver` | 94 | 1131 | 16998 |
 
 ## Packages
 

@@ -61,8 +61,8 @@ func TestHTTPAIAgentClientDevelopmentTaskAssignmentAndParticipantRemoval(t *test
 		t.Fatalf("thread message json: %v", err)
 	}
 	if message.ThreadID != assigned.ThreadID ||
-		message.AssignmentState != AgentAssignmentStateRunning ||
-		message.CommentKind != AgentTaskCommentRuntimeProgress {
+		message.AssignmentState != AgentAssignmentStateQueued ||
+		message.CommentKind != AgentTaskCommentQueuedByBusyAgent {
 		t.Fatalf("thread message response = %+v", message)
 	}
 
@@ -117,7 +117,9 @@ func TestHTTPAIAgentClientDevelopmentTaskAssignmentAndParticipantRemoval(t *test
 	eventsReq.Header.Set("Authorization", "Bearer user-token")
 	eventsResp := httptest.NewRecorder()
 	server.ServeHTTP(eventsResp, eventsReq)
-	if body := eventsResp.Body.String(); !strings.Contains(body, string(AgentTaskCommentAssignmentStarted)) || !strings.Contains(body, string(AgentTaskCommentStoppedByUserRequest)) {
+	if body := eventsResp.Body.String(); !strings.Contains(body, string(AgentTaskCommentAssignmentStarted)) ||
+		!strings.Contains(body, string(AgentTaskCommentQueuedByBusyAgent)) ||
+		!strings.Contains(body, string(AgentTaskCommentStoppedByUserRequest)) {
 		t.Fatalf("events body = %q", body)
 	}
 }

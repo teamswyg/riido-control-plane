@@ -574,6 +574,7 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 		return
 	}
 	req.AssignmentID = assignment.ID
+	req.durableState = assignment.State
 	response, err := s.aiAgent.CreateAIAgentTaskThreadMessage(r.Context(), principal, taskID, threadID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
@@ -929,6 +930,7 @@ func (s Server) handleAgentPoll(w http.ResponseWriter, r *http.Request, agentID 
 		response, err = s.assignment.PollAgent(r.Context(), agentID, req)
 	}
 	if err != nil {
+		logAgentPollRejected(agentID, err)
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
