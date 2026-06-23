@@ -27,6 +27,8 @@ func (s Server) handleAIAgentClientWorkspaceRoutes(w http.ResponseWriter, r *htt
 		s.handleAIAgentClientWorkspaceAssignedAgentProfiles(w, r)
 	case strings.HasPrefix(v1Path, "/v1/client/ai-agent/tasks/"):
 		s.handleAIAgentClientTasks(w, r)
+	case strings.HasPrefix(v1Path, "/v1/client/ai-agent/threads/"):
+		s.handleAIAgentClientThreads(w, r)
 	case v1Path == "/v1/client/ai-agent/agents" || strings.HasPrefix(v1Path, "/v1/client/ai-agent/agents/"):
 		s.handleAIAgentClientAgents(w, r)
 	case v1Path == "/v1/client/ai-agent/events":
