@@ -195,7 +195,9 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 	if err := json.Unmarshal(followupResp.Body.Bytes(), &followup); err != nil {
 		t.Fatalf("followup json: %v", err)
 	}
-	if followup.ThreadID != assigned.ThreadID ||
+	if followup.ThreadID == assigned.ThreadID ||
+		followup.RunID == assigned.RunID ||
+		followup.AssignmentID == assigned.AssignmentID ||
 		followup.AgentID != assigned.AgentID ||
 		followup.WorkStatus != AgentWorkStatusQueued ||
 		followup.AssignmentState != AgentAssignmentStateQueued ||
@@ -229,12 +231,11 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		t.Fatalf("followup threads json: %v", err)
 	}
 	if followupThreads.ActiveStream == nil ||
-		followupThreads.ActiveStream.ThreadID != assigned.ThreadID ||
-		len(followupThreads.Threads) != 1 ||
-		followupThreads.Threads[0].ThreadID != assigned.ThreadID ||
-		followupThreads.Threads[0].SourceMessageID != "message-followup-1" {
+		followupThreads.ActiveStream.ThreadID != followup.ThreadID ||
+		len(followupThreads.Threads) != 2 {
 		t.Fatalf("followup threads = %+v", followupThreads)
 	}
+	assertThreadPreservedAfterFollowup(t, followupThreads.Threads, assigned, followup)
 
 	eventsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/events?replay=1", nil)
 	eventsReq.Header.Set("Authorization", "Bearer user-token")
@@ -248,5 +249,24 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		!strings.Contains(eventsBody, "event: agent_work_status_changed\n") ||
 		!strings.Contains(eventsBody, string(AgentTaskCommentQueuedByBusyAgent)) {
 		t.Fatalf("events body = %q", eventsBody)
+	}
+}
+
+func assertThreadPreservedAfterFollowup(t *testing.T, threads []AIAgentTaskThreadRecord, assigned, followup AIAgentTaskActionResponse) {
+	t.Helper()
+	var oldFound, followupFound bool
+	for _, thread := range threads {
+		switch thread.ThreadID {
+		case assigned.ThreadID:
+			oldFound = thread.AssignmentID == assigned.AssignmentID &&
+				thread.AssignmentState == AgentAssignmentStateCompleted
+		case followup.ThreadID:
+			followupFound = thread.AssignmentID == followup.AssignmentID &&
+				thread.RunID == followup.RunID &&
+				thread.SourceMessageID == "message-followup-1"
+		}
+	}
+	if !oldFound || !followupFound {
+		t.Fatalf("oldFound=%v followupFound=%v threads=%+v", oldFound, followupFound, threads)
 	}
 }

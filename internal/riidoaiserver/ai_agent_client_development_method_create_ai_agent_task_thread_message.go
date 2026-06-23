@@ -46,9 +46,10 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		Message:         clientMessageTaskRunning,
 	}
 	threadWasActive := taskThreadHasActiveStream(thread)
-	if !threadWasActive {
-		response.RunID = "run-dev-message-" + taskID + "-" + threadID
+	if taskThreadMessageStartsNewExecution(thread) {
 		response.AssignmentID = strings.TrimSpace(req.AssignmentID)
+		response.RunID = taskThreadMessageRunID(taskID, response.AssignmentID, len(s.taskThreads[taskID])+1)
+		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
 	}
 	if !threadWasActive && (agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser || agent.WorkStatus == AgentWorkStatusQueued) {
 		response.WorkStatus = AgentWorkStatusQueued

@@ -23,6 +23,13 @@ func TestHTTPAIAgentClientProviderMultiAssignmentReplaysEachThread(t *testing.T)
 	}
 	assertProviderMultiPollStart(t, server, token, first, "daemon-shared-studio", "device-shared-studio", "runtime-openclaw-shared")
 	assertProviderMultiPollStart(t, server, token, second, "daemon-dev-macbook", "device-dev-macbook", "runtime-cursor-dev")
+	directMessagePath := base + "/threads/" + second.ThreadID + "/messages"
+	directMessageBytes := aiAgentSmokeRequest(t, server, http.MethodPost, directMessagePath, token, `{"body":"follow up second thread"}`, http.StatusAccepted)
+	var directMessage AIAgentTaskActionResponse
+	aiAgentSmokeDecode(t, directMessageBytes, &directMessage)
+	if directMessage.TaskID != taskID || directMessage.ThreadID != second.ThreadID || directMessage.AgentID != second.AgentID {
+		t.Fatalf("direct active thread message resolved wrong thread: %+v second=%+v", directMessage, second)
+	}
 	threadsBytes := aiAgentSmokeRequest(t, server, http.MethodGet, base+"/tasks/"+taskID+"/threads", token, "", http.StatusOK)
 	var threads AIAgentTaskThreadCollectionResponse
 	aiAgentSmokeDecode(t, threadsBytes, &threads)
@@ -52,13 +59,6 @@ func TestHTTPAIAgentClientProviderMultiAssignmentReplaysEachThread(t *testing.T)
 		message.AssignmentState != AgentAssignmentStateQueued ||
 		message.CommentKind != AgentTaskCommentQueuedByBusyAgent {
 		t.Fatalf("thread message targeted wrong thread: %+v first=%+v", message, first)
-	}
-	directMessagePath := base + "/threads/" + second.ThreadID + "/messages"
-	directMessageBytes := aiAgentSmokeRequest(t, server, http.MethodPost, directMessagePath, token, `{"body":"follow up second thread"}`, http.StatusAccepted)
-	var directMessage AIAgentTaskActionResponse
-	aiAgentSmokeDecode(t, directMessageBytes, &directMessage)
-	if directMessage.TaskID != taskID || directMessage.ThreadID != second.ThreadID || directMessage.AgentID != second.AgentID {
-		t.Fatalf("direct thread message resolved wrong thread: %+v second=%+v", directMessage, second)
 	}
 }
 
