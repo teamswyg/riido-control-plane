@@ -31,7 +31,9 @@
   "source_checks": [
     {"name": "registry-core", "file": "internal/riidoaiserver/agent_registry.go", "contains": ["NewStaticAgentRegistry", "validateAssignmentBinding", "validateDaemonBinding"]},
     {"name": "registry-tests", "file": "internal/riidoaiserver/agent_registry_test.go", "contains": ["TestStaticAgentRegistryRejectsInvalidBindings", "TestValidateAssignmentBinding", "TestValidateDaemonBinding"]},
-    {"name": "device-identity", "file": "internal/riidoaiserver/device_principal.go", "contains": ["deviceIDForMachine", "ConnectedWorkspaceIDs", "pruneLegacyRuntimeRecords"]},
+    {"name": "device-identity", "file": "internal/riidoaiserver/device_credential_identity.go", "contains": ["deviceIDForMachine"]},
+    {"name": "connected-workspaces", "file": "internal/riidoaiserver/device_credential_device_upsert.go", "contains": ["ConnectedWorkspaceIDs", "addConnectedWorkspace"]},
+    {"name": "legacy-runtime-prune", "file": "internal/riidoaiserver/device_runtime_legacy.go", "contains": ["pruneLegacyRuntimeRecords"]},
     {"name": "cross-workspace-bindings", "file": "internal/riidoaiserver/device_principal_machine_test.go", "contains": ["TestDaemonAgentBindingsIncludeAgentsFromOtherConnectedWorkspaces", "stuck \"queued\" forever"]},
     {"name": "daemon-bindings", "file": "internal/riidoaiserver/ai_agent_daemon_runtime.go", "contains": ["ListAIAgentDaemonAgentBindings", "deviceConnectedToWorkspace", "binding.DeviceID"]},
     {"name": "focused-ci", "file": ".github/workflows/agent-runtime-binding.yml", "contains": ["ValidateAssignmentBinding|ValidateDaemonBinding", "Verify binding import boundary"]}
