@@ -19,15 +19,23 @@ func httpRouteSegments(path string) []string {
 }
 
 func aiAgentClientV2Route(path string) string {
+	return aiAgentClientVersionedRoute(path, "v2")
+}
+
+func aiAgentClientV3Route(path string) string {
+	return aiAgentClientVersionedRoute(path, "v3")
+}
+
+func aiAgentClientVersionedRoute(path, version string) string {
 	segments := httpRouteSegments(path)
 	if len(segments) < 5 ||
-		segments[0] != "v2" ||
+		segments[0] != version ||
 		segments[1] != "client" ||
 		segments[2] != "workspaces" ||
 		segments[4] != "ai-agent" {
 		return ""
 	}
-	base := "/v2/client/workspaces/{workspace_id}/ai-agent"
+	base := "/" + version + "/client/workspaces/{workspace_id}/ai-agent"
 	return aiAgentClientRouteFromSegments(base, segments[5:])
 }
 

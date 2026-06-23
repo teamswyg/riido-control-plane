@@ -16,10 +16,20 @@ func decodeSplitDynamoDBAIAgentClientSnapshot(items []map[string]map[string]stri
 	snapshot := dynamoDBAIAgentClientSnapshotFromManifest(current)
 	var encodedBytes int64
 	byPart := dynamoDBAIAgentClientSnapshotItemsByPart(items)
-	for _, name := range dynamoDBAIAgentClientSnapshotPartNames {
+	for _, name := range dynamoDBAIAgentClientSnapshotRequiredPartNames {
 		item := byPart[name]
 		if item == nil {
 			return AIAgentClientSnapshot{}, 0, fmt.Errorf("decode DynamoDB AI Agent client split snapshot: part %s is required", name)
+		}
+		encodedBytes += int64(len(dynamoDBStringValue(item, "part_gzip")))
+		if err := decodeDynamoDBAIAgentClientSnapshotPart(name, item, &snapshot); err != nil {
+			return AIAgentClientSnapshot{}, 0, err
+		}
+	}
+	for _, name := range dynamoDBAIAgentClientSnapshotOptionalPartNames {
+		item := byPart[name]
+		if item == nil {
+			continue
 		}
 		encodedBytes += int64(len(dynamoDBStringValue(item, "part_gzip")))
 		if err := decodeDynamoDBAIAgentClientSnapshotPart(name, item, &snapshot); err != nil {

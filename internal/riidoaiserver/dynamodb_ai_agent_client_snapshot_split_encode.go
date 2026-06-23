@@ -36,6 +36,7 @@ func encodeDynamoDBAIAgentClientSnapshotParts(snapshot AIAgentClientSnapshot) ([
 		{name: dynamoDBAIAgentClientSnapshotPartAgents, value: snapshot.Agents},
 		{name: dynamoDBAIAgentClientSnapshotPartFixtures, value: snapshot.Fixtures},
 		{name: dynamoDBAIAgentClientSnapshotPartTaskThreads, value: snapshot.TaskThreads},
+		{name: dynamoDBAIAgentClientSnapshotPartTaskThreadMessages, value: snapshot.TaskThreadMessages},
 		{name: dynamoDBAIAgentClientSnapshotPartEvents, value: snapshot.Events},
 	}
 	parts := make([]dynamoDBAIAgentClientSnapshotPart, 0, len(values))

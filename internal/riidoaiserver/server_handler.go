@@ -9,6 +9,7 @@ func (s Server) Handler() http.Handler {
 	mux.HandleFunc("/metrics", s.handleMetrics)
 	mux.HandleFunc("/v2/desktop/workspaces/", s.handleDesktopWorkspaceRoutes)
 	mux.HandleFunc("/v2/client/workspaces/", s.handleAIAgentClientWorkspaceRoutes)
+	mux.HandleFunc("/v3/client/workspaces/", s.handleAIAgentClientWorkspaceRoutes)
 	mux.HandleFunc("/v1/client/ai-agent/bootstrap", s.handleAIAgentClientBootstrap)
 	mux.HandleFunc("/v1/client/ai-agent/devices", s.handleAIAgentClientDevices)
 	mux.HandleFunc("/v1/client/ai-agent/devices/", s.handleAIAgentClientDeviceRoutes)

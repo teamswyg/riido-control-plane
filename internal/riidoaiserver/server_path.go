@@ -27,16 +27,25 @@ func requestWithAIAgentWorkspaceIDAndPath(r *http.Request, workspaceID, path str
 }
 
 func splitAIAgentClientWorkspacePath(path string) (string, string, bool) {
+	version := "v2"
 	workspaceID, suffix, ok := splitNestedResourcePath(path, "/v2/client/workspaces/")
+	if !ok {
+		version = "v3"
+		workspaceID, suffix, ok = splitNestedResourcePath(path, "/v3/client/workspaces/")
+	}
 	if !ok || strings.TrimSpace(workspaceID) == "" {
 		return "", "", false
 	}
 	suffix = strings.Trim(suffix, "/")
+	base := "/v1/client/ai-agent"
+	if version == "v3" {
+		base = "/v3/client/ai-agent"
+	}
 	switch {
 	case suffix == "ai-agent":
-		return workspaceID, "/v1/client/ai-agent", true
+		return workspaceID, base, true
 	case strings.HasPrefix(suffix, "ai-agent/"):
-		return workspaceID, "/v1/client/ai-agent/" + strings.TrimPrefix(suffix, "ai-agent/"), true
+		return workspaceID, base + "/" + strings.TrimPrefix(suffix, "ai-agent/"), true
 	default:
 		return "", "", false
 	}

@@ -10,4 +10,7 @@ const (
 	// Max threads persisted per task in the snapshot (most recent kept). Bounds
 	// snapshot growth from accumulated runs across long-lived tasks.
 	aiAgentClientThreadsPerTaskLimit = 50
+	// Max user-authored thread messages persisted per thread. Agent status can be
+	// rebuilt from the thread projection; this retains the human interaction tail.
+	aiAgentClientThreadHistoryMessageLimit = 100
 )
