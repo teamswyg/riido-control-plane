@@ -43,6 +43,29 @@ func TestHTTPAIAgentClientLegacyAssignmentRepeatsSameAgentAsNewThread(t *testing
 	}
 }
 
+func TestHTTPAIAgentClientLegacyAssignmentReportsBlockedRepeatAsQueued(t *testing.T) {
+	const token = "owner-token"
+	const taskID = "task-legacy-repeat-blocked"
+	const agentID = "agent-public-openclaw"
+	base := "/v2/client/workspaces/" + defaultAIAgentClientWorkspaceID + "/ai-agent"
+	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
+		PrincipalID: "user-1",
+		Token:       token,
+		Scopes:      []string{"ai-agent:*", "agent:*:poll"},
+	}})
+
+	first := legacyAssignSameAgent(t, server, base, token, taskID, agentID)
+	assertProviderMultiPollStart(t, server, token, first, "daemon-shared-studio", "device-shared-studio", "runtime-openclaw-shared")
+	second := legacyAssignSameAgent(t, server, base, token, taskID, agentID)
+	if second.AssignmentID == first.AssignmentID || second.ThreadID == first.ThreadID {
+		t.Fatalf("blocked legacy repeat collapsed: first=%+v second=%+v", first, second)
+	}
+	if second.AssignmentState != AgentAssignmentStateQueued ||
+		second.CommentKind != AgentTaskCommentQueuedByBusyAgent {
+		t.Fatalf("blocked repeat should be queued immediately: %+v", second)
+	}
+}
+
 func legacyAssignSameAgent(t *testing.T, server http.Handler, base, token, taskID, agentID string) AIAgentTaskActionResponse {
 	t.Helper()
 	bytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+taskID+"/assignment", token, `{"agent_id":"`+agentID+`"}`, http.StatusAccepted)
