@@ -3,7 +3,7 @@ package riidoaiserver
 func stopReadModelProjection(durable AssignmentState) (AgentWorkStatus, AgentAssignmentState, bool) {
 	switch durable.Code() {
 	case AssignmentStateCodeCancelling:
-		return AgentWorkStatusRunning, AgentAssignmentStateStopping, false
+		return AgentWorkStatusIdle, AgentAssignmentStateStopped, true
 	case AssignmentStateCodeCancelled:
 		return AgentWorkStatusIdle, AgentAssignmentStateStopped, true
 	default:

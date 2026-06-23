@@ -20,27 +20,17 @@ func assignmentActionTargetByAssignmentID(taskID, agentID, assignmentID string, 
 }
 
 func activeAssignmentActionTarget(taskID string, threads []AIAgentTaskThreadRecord) (aiAgentAssignmentActionTarget, bool, error) {
-	for i := len(threads) - 1; i >= 0; i-- {
-		thread := threads[i]
-		if !taskThreadHasActiveStream(thread) || strings.TrimSpace(thread.AssignmentID) == "" {
-			continue
-		}
-		return aiAgentAssignmentActionTarget{
-			TaskID:       taskID,
-			AgentID:      thread.AgentID,
-			AssignmentID: thread.AssignmentID,
-		}, true, nil
-	}
-	return aiAgentAssignmentActionTarget{}, false, nil
+	target, ok := preferredActiveAssignmentActionTarget(taskID, "", threads)
+	return target, ok, nil
 }
 
 func actionTargetFromThread(taskID, agentID string, threads []AIAgentTaskThreadRecord, activeOnly bool) (aiAgentAssignmentActionTarget, bool) {
+	if activeOnly {
+		return preferredActiveAssignmentActionTarget(taskID, agentID, threads)
+	}
 	for i := len(threads) - 1; i >= 0; i-- {
 		thread := threads[i]
 		if strings.TrimSpace(thread.AgentID) != agentID || strings.TrimSpace(thread.AssignmentID) == "" {
-			continue
-		}
-		if activeOnly && !taskThreadHasActiveStream(thread) {
 			continue
 		}
 		return aiAgentAssignmentActionTarget{

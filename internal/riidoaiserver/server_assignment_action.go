@@ -30,39 +30,23 @@ func (s Server) cancelAIAgentAssignmentBeforeAction(ctx context.Context, princip
 	if !ok {
 		return aiAgentAssignmentActionTarget{}, false, nil
 	}
-	target, ok, err := s.resolveAIAgentAssignmentActionTarget(ctx, principal, taskID, agentID, assignmentID)
+	targets, ok, err := s.resolveAIAgentAssignmentActionTargets(ctx, principal, taskID, agentID, assignmentID)
 	if err != nil || !ok {
-		return target, ok, err
+		return aiAgentAssignmentActionTarget{}, ok, err
 	}
-	cancelled, err := canceller.CancelAssignment(ctx, target.TaskID, CancelAssignmentRequest{
-		AgentID:      target.AgentID,
-		AssignmentID: target.AssignmentID,
-		Reason:       strings.TrimSpace(reason),
-	})
-	target.State = cancelled.State
-	return target, true, err
-}
-
-func (s Server) resolveAIAgentAssignmentActionTarget(ctx context.Context, principal AuthorizationResult, taskID, agentID, assignmentID string) (aiAgentAssignmentActionTarget, bool, error) {
-	taskID = strings.TrimSpace(taskID)
-	agentID = strings.TrimSpace(agentID)
-	assignmentID = strings.TrimSpace(assignmentID)
-	if taskID == "" || s.aiAgent == nil {
-		return aiAgentAssignmentActionTarget{}, false, nil
-	}
-	threads, err := s.aiAgent.ListAIAgentTaskThreads(ctx, principal, taskID)
-	if err != nil {
-		return aiAgentAssignmentActionTarget{}, false, err
-	}
-	if assignmentID != "" {
-		return assignmentActionTargetByAssignmentID(taskID, agentID, assignmentID, threads.Threads)
-	}
-	if agentID != "" {
-		if target, ok := actionTargetFromThread(taskID, agentID, threads.Threads, true); ok {
-			return target, true, nil
+	primary := targets[0]
+	for _, target := range targets {
+		cancelled, err := canceller.CancelAssignment(ctx, target.TaskID, CancelAssignmentRequest{
+			AgentID:      target.AgentID,
+			AssignmentID: target.AssignmentID,
+			Reason:       strings.TrimSpace(reason),
+		})
+		if err != nil {
+			return primary, true, err
 		}
-		target, ok := actionTargetFromThread(taskID, agentID, threads.Threads, false)
-		return target, ok, nil
+		if target.AssignmentID == primary.AssignmentID {
+			primary.State = cancelled.State
+		}
 	}
-	return activeAssignmentActionTarget(taskID, threads.Threads)
+	return primary, true, nil
 }

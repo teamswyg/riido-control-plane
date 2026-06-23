@@ -583,65 +583,6 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 	writeJSON(w, http.StatusAccepted, response)
 }
 
-func (s Server) handleAIAgentClientStopTask(w http.ResponseWriter, r *http.Request, taskID string) {
-	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStop, TaskID: taskID})
-	if !ok {
-		return
-	}
-	var req StopAIAgentTaskRequest
-	if r.Body != nil && r.ContentLength != 0 {
-		if err := decodeJSON(r, &req); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-	}
-	if target, ok, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, req.AgentID, req.AssignmentID, req.Reason); err != nil {
-		writeAIAgentClientError(w, err)
-		return
-	} else if ok {
-		req.AgentID = target.AgentID
-		req.AssignmentID = target.AssignmentID
-		req.durableState = target.State
-	}
-	response, err := s.aiAgent.StopAIAgentTask(r.Context(), principal, taskID, req)
-	if err != nil {
-		writeAIAgentClientError(w, err)
-		return
-	}
-	writeJSON(w, http.StatusAccepted, response)
-}
-
-func (s Server) handleAIAgentClientStopTaskAgentAssignment(w http.ResponseWriter, r *http.Request, taskID, agentID string) {
-	if aiAgentWorkspaceIDFromRequest(r) == "" {
-		writeError(w, http.StatusNotFound, "not found")
-		return
-	}
-	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStop, TaskID: taskID})
-	if !ok {
-		return
-	}
-	var req AgentAssignmentActionRequest
-	if r.Body != nil && r.ContentLength != 0 {
-		if err := decodeJSON(r, &req); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-	}
-	if target, ok, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, agentID, req.AssignmentID, req.Reason); err != nil {
-		writeAIAgentClientError(w, err)
-		return
-	} else if ok {
-		req.AssignmentID = target.AssignmentID
-		req.durableState = target.State
-	}
-	response, err := s.aiAgent.StopAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
-	if err != nil {
-		writeAIAgentClientError(w, err)
-		return
-	}
-	writeJSON(w, http.StatusAccepted, response)
-}
-
 func (s Server) handleAIAgentClientAgents(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
 		writeError(w, http.StatusServiceUnavailable, "ai agent client store is not configured")
