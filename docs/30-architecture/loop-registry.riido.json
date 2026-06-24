@@ -308,7 +308,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "6b3b211ddecb4844230ce06111cb38a26e407b822fdfd417dba43ccfc60e4278"
+      "semantic_hash": "3daacf4892612e4dce09615e5b2e9285bb17c22c5a9b520b757f8aef636d1be1"
     },
     {
       "id": "expired_harness_evidence_must_not_promote_candidates",
@@ -395,6 +395,7 @@
         "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_helpers_test.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_metadata_test.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go",
+        "internal/riidoaiserver/ai_agent_assignment_prompt_component_intent_test.go",
         "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go",
         "tools/aiagentclientapi/main.go",
         "tools/aiagentclientapi/main_test.go",
@@ -405,6 +406,8 @@
       "verifiers": [
         "TestAssignmentPromptAsksForIntentOnAmbiguousMarketingDocument",
         "TestAssignmentPromptInfersFromMetadataWhenDocumentMissing",
+        "TestAssignmentPromptClassifiesIntentComponentTypes",
+        "TestAssignmentPromptKeepsExplicitInstructionExecutable",
         "TestFollowupPromptKeepsLatestUserInstructionAuthoritative",
         "TestAIAgentIntentDialogueScenarioStaysInConversation",
         "TestClientVisibleTaskThreadTextLocalizesProviderLimitMessages",
@@ -416,7 +419,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "db1e1b25a5398c08edd905d4d6ed8ab943fdc7271c30c67c4641aa90fadc2ac8"
+      "semantic_hash": "a40414b9f4cb1ec66e0e8452dcd582ebdfde331c941b0f646f9d96ee66cb2c9f"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
@@ -462,7 +465,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b38c817bc4be501c7ce4c15415a0a991a962f43fe0e5cc0e414aaca6fa43afdd"
+      "semantic_hash": "2d5eaf24bb69b817c8747c9519203c15e366db09fc515ef939f9a2950b8c97d9"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
