@@ -41,6 +41,7 @@ func threadHistoryV3RuleCount(v3 threadHistoryV3) int {
 		len(v3.GroupingRules) +
 		len(v3.AgentSnapshotRules) +
 		len(v3.MessageRoles) +
+		len(v3.InteractionScenarios) +
 		len(v3.OrderingRules) +
 		len(v3.MutationRules) +
 		len(v3.SSEHandlingRules) +

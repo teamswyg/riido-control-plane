@@ -123,6 +123,14 @@ One stable timeline row inside a thread history record. message_id is the React 
 | `progress` | Runtime progress log, ordered by seq inside assignment_id and run_id |
 | `agent` | Agent status or final result message |
 
+### Thread History v3 Interaction Scenarios
+
+| Rule | Detail |
+| --- | --- |
+| `intent-clarification-before-deliverable` | When the task title/document is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the agent's first visible answer should ask a concise clarification question in the existing thread before producing deliverables. |
+| `concrete-followup-authoritative` | When the user replies in that thread with a concrete instruction, render the user message in the same conversation_id and let the follow-up run treat that latest message as the current directive while re-reading the latest task document. |
+| `provider-limit-result` | When provider token, quota, or cloud-credit exhaustion stops the run, keep the same conversation and render the normalized result message: 보유하신 크레딧이 부족합니다. 더 깊은 리서치를 진행하려면 추가 Cloud AI 자원이 필요합니다. |
+
 ### Thread History v3 Message Ordering
 
 | Rule | Detail |

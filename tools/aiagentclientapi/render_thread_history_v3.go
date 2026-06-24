@@ -15,6 +15,7 @@ func renderThreadHistoryV3(b *strings.Builder, v3 threadHistoryV3) {
 	renderBullets(b, "Thread History v3 Grouping Rules", v3.GroupingRules)
 	renderBullets(b, "Thread History v3 Agent Snapshot Rules", v3.AgentSnapshotRules)
 	renderMessageRoleTable(b, v3.MessageRoles)
+	renderNamedRuleTable(b, "Thread History v3 Interaction Scenarios", v3.InteractionScenarios)
 	renderNamedRuleTable(b, "Thread History v3 Message Ordering", v3.OrderingRules)
 	renderNamedRuleTable(b, "Thread History v3 Mutation Rules", v3.MutationRules)
 	renderBullets(b, "Thread History v3 SSE Handling Rules", v3.SSEHandlingRules)

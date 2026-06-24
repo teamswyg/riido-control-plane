@@ -42,3 +42,9 @@ func TestGeneratedDocMatchesManifest(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestVerifyAliasChecksGeneratedDoc(t *testing.T) {
+	if err := mainRun([]string{"-verify"}); err != nil {
+		t.Fatal(err)
+	}
+}
