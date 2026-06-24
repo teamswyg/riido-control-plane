@@ -4,9 +4,11 @@ type impactEvidence struct {
 	Enabled                 bool                 `json:"enabled"`
 	BaseRef                 string               `json:"base_ref,omitempty"`
 	ChangedFileCount        int                  `json:"changed_file_count"`
+	AddedClaimCount         int                  `json:"added_claim_count"`
 	ChangedClaimCount       int                  `json:"changed_claim_count"`
 	RemovedClaimCount       int                  `json:"removed_claim_count"`
 	BoundSurfaceChangeCount int                  `json:"bound_surface_change_count"`
+	AddedClaims             []impactClaim        `json:"added_claims,omitempty"`
 	Claims                  []impactClaim        `json:"claims,omitempty"`
 	RemovedClaims           []impactClaim        `json:"removed_claims,omitempty"`
 	BoundSurfaces           []impactBoundSurface `json:"bound_surfaces,omitempty"`
