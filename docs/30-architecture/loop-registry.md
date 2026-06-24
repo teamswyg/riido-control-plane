@@ -46,22 +46,22 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `92594cfc172f` |
 | `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `c37100d11565` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `2ddc994bf63d` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `5e004f3651cc` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `10c69d6d3745` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `6` | `4` | `05f1f8b25b5a` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `16` | `3` | `fe549fd47346` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `54f44ee2f2eb` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `d3e017a27b75` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `3f326072ec1c` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `12aaa7c390d9` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `865d29a15207` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `49` | `18` | `bebf5ac1a6c6` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `b85ef058d762` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `9cae56b9ed06` |
 | `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `7` | `3` | `38af5b95d870` |
-| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `10` | `3` | `fcbdab26dfca` |
-| `claim_meaning_changes_require_reasoning_chain` | `closed_loop_candidate` | `4` | `2` | `e232c1ad352e` |
+| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `11` | `4` | `1f820a6341fd` |
+| `claim_meaning_changes_require_reasoning_chain` | `closed_loop_candidate` | `4` | `2` | `c937e672a68a` |
 | `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `0b29eecb5f25` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `7beb162c172a` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `8593f4014fae` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `4bba15299fad` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `52de75c15397` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `ecbb736921fe` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `1e8ef279b114` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `03049fb8bb3c` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `8` | `3` | `31f7dbfc4692` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `f8046a39ad14` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `6` | `4` | `72a38909879b` |
@@ -92,7 +92,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `ambiguous_task_context_must_ask_before_work` | `32` | `16` | `1` | `2` | `18` | `2` | `1` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `12` | `4` | `1` | `1` | `7` | `1` | `1` |
 | `claim_verifier_commands_must_surface_as_ci_annotations` | `4` | `2` | `1` | `1` | `3` | `1` | `1` |
-| `claim_meaning_changes_require_code_or_test_surface` | `6` | `3` | `1` | `2` | `3` | `1` | `1` |
+| `claim_meaning_changes_require_code_or_test_surface` | `6` | `4` | `1` | `2` | `4` | `1` | `1` |
 | `claim_meaning_changes_require_reasoning_chain` | `3` | `1` | `0` | `2` | `2` | `1` | `1` |
 | `pre_commit_must_run_claim_binding_impact` | `3` | `2` | `3` | `3` | `4` | `1` | `1` |
 | `claim_bound_paths_must_trigger_loop_registry` | `3` | `1` | `1` | `1` | `4` | `1` | `1` |

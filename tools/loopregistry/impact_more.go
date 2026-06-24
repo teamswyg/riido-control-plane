@@ -17,6 +17,7 @@ func claimSignature(claim claimBinding) string {
 	parts := []string{claim.ID, claim.Statement, claim.Loop}
 	parts = append(parts, prefixedValues("file", claim.Files)...)
 	parts = append(parts, prefixedValues("verifier", claim.Verifiers)...)
+	parts = append(parts, prefixedValues("generated_doc", claim.GeneratedDoc)...)
 	return strings.Join(parts, "\x00")
 }
 

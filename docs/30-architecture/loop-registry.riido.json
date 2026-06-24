@@ -427,7 +427,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "5e004f3651cc989d7f89f70f4c19c95bc657eda634dd2e4ebeecdc1c23d277b1"
+      "semantic_hash": "10c69d6d3745a3bba9888606323d63ac5c89a796d05233c95b57ab0891c535e5"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -528,7 +528,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "54f44ee2f2eb552dddd430ee8267b8f3d066afb789a8ba2b2d9498c8836968d4"
+      "semantic_hash": "d3e017a27b75290c9989d991ced1fd3fb78f864f9232992498a6121f8c902e15"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -583,7 +583,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "12aaa7c390d95f295b6bf6a35ac40ee9d9c79bced4229b0ff547cdad8e228832"
+      "semantic_hash": "865d29a15207a09bbba573c90b82797ef9a6e950d20fd4c18d8e9b617c8c48cb"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -701,7 +701,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b85ef058d7629aa74e666610f58b275e445129283ed1c8b1377bc4e3bb44661f"
+      "semantic_hash": "9cae56b9ed067b1f52e5341e989f268cc7675d897ada636bd6dd121612ea2ba6"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -728,13 +728,14 @@
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
-      "statement": "When a business claim meaning changes in a pull request, the impact verifier must require at least one bound code or test path to change; manifest-only or generated-doc-only edits are not sufficient proof that runtime meaning was updated.",
+      "statement": "When a business claim meaning or generated-doc binding changes in a pull request, the impact verifier must require at least one bound code or test path to change; manifest-only or generated-doc-only edits are not sufficient proof that runtime meaning was updated.",
       "loop": "closed_loop_candidate",
       "files": [
         ".github/workflows/loop-registry.yml",
         "tools/loopregistry/git.go",
         "tools/loopregistry/git_changed_files_test.go",
         "tools/loopregistry/impact.go",
+        "tools/loopregistry/impact_generated_doc_test.go",
         "tools/loopregistry/impact_manifest_test.go",
         "tools/loopregistry/impact_more.go",
         "tools/loopregistry/impact_required_files.go",
@@ -745,13 +746,14 @@
       "verifiers": [
         "TestClaimImpactRequiresBoundFileChange",
         "TestClaimImpactAllowsBoundFileChange",
+        "TestGeneratedDocBindingChangeRequiresBoundFileChange",
         "TestClaimImpactRejectsManifestOnlyChangeForMeaningChange"
       ],
       "generated_docs": [
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "fcbdab26dfca49c9ac3659e659cbe8b432ccbbe25fcd8fd11d3074afcaf3cfe8"
+      "semantic_hash": "1f820a6341fdc354441db641b21e72970b79697628752cfc465f32f248c7629e"
     },
     {
       "id": "claim_meaning_changes_require_reasoning_chain",
@@ -771,7 +773,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e232c1ad352e844150f57ece95bed34a83d8d561f652b9d910d1d55df9341e98"
+      "semantic_hash": "c937e672a68ab0f23d7c5b0d712e46c913b6d63e3075dde13ff1a4a66e4dd364"
     },
     {
       "id": "pre_commit_must_run_claim_binding_impact",
@@ -844,7 +846,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8593f4014faeb1a03d037a2a3eaaec73bcd49263b92d92437e738b092b9f0ba0"
+      "semantic_hash": "ecbb736921fe56743f23c384945082fabc8b8d22f509b8ea4012fc60623bc266"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -868,7 +870,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "4bba15299fad351ac67a48c75149996b22a98811b12c5afd5403e2b7ed3a9c43"
+      "semantic_hash": "1e8ef279b114d93139d37be3006f250430a13dc0f41a500e9ab63b92488e9367"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -888,7 +890,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "52de75c15397d6d5188939e61c115edd78266c7931104870080c8704aef3616d"
+      "semantic_hash": "03049fb8bb3caf9d78dc79a7ebb2ce15a7b803724b90f5ce32c84dcd036d2ca2"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
