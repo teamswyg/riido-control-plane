@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/harness-promotion.yml"
       - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - ".github/workflows/ai-agent-client-testnet-load.yml"
       - "docs/30-architecture/harness-promotion.md"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "tools/harnesspromotion/**"
@@ -16,6 +17,7 @@ on:
     paths:
       - ".github/workflows/harness-promotion.yml"
       - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - ".github/workflows/ai-agent-client-testnet-load.yml"
       - "docs/30-architecture/harness-promotion.md"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "tools/harnesspromotion/**"

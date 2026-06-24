@@ -63,6 +63,33 @@
       "next_loop": "provider_acceptance_harness"
     },
     {
+      "id": "load_harness_closed_loop_promotion_loop",
+      "observation": "The AI Agent load harness produced useful stress evidence, but failures could remain a standalone load artifact instead of becoming a closed-loop adoption candidate.",
+      "hypothesis": "Scheduling the load harness and routing its redacted live summary through harness promotion lets performance or reliability failures enter the same candidate intake path as smoke failures.",
+      "claims": ["load_harness_failures_must_promote_candidates"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/live-workflow-redaction.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "test", "path": "tools/liveworkflowevidence/main_load_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/liveworkflowevidence/main_load_test.go"},
+        {"kind": "tool", "path": "tools/liveworkflowevidence"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "tool", "path": "tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "ai-agent-client-testnet-load", "redacted": true},
+        {"kind": "artifact", "path": "ai-agent-client-testnet-load-redacted-summary", "redacted": true},
+        {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Load/stress failures now have the same closed-loop promotion path as smoke failures: daily evidence refresh, redacted summary, candidate artifact, intake, and decision records.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "claim_binding_impact_loop",
       "observation": "Business claims could change without bound code or tests changing in the same pull request.",
       "hypothesis": "Comparing the PR diff against the loop registry can force claim meaning changes to co-change bound files.",

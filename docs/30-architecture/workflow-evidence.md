@@ -31,7 +31,7 @@
 | `.github/workflows/agent-catalog-rbac.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/agent-runtime-binding.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/ai-agent-client-api.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
-| `.github/workflows/ai-agent-client-testnet-load.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/ai-agent-client-testnet-load.yml` | `covered` | `2` | `2/2` | `true` | `3/3` | `0` | - |
 | `.github/workflows/ai-agent-client-testnet-smoke.yml` | `covered` | `1` | `1/1` | `true` | `2/2` | `0` | - |
 | `.github/workflows/ai-agent-generated-endpoint-smoke-matrix.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/api-client-delivery.yml` | `covered` | `3` | `3/3` | `true` | `1/1` | `0` | - |

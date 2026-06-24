@@ -13,6 +13,7 @@ Evidence artifact: `live-workflow-redaction-evidence`
 | Workflow | Summary Artifact | Summary Path | TTL Hours | Sensitive Inputs | Claims | Required Phrases |
 | --- | --- | --- | ---: | --- | --- | --- |
 | `.github/workflows/ai-agent-client-testnet-smoke.yml` | `ai-agent-client-testnet-smoke-redacted-summary` | `out/ai-agent-client-testnet-smoke-redacted-summary.json` | `24` | `TESTNET_BASE_URL, TESTNET_TOKEN` | `v1_thumbnail_upload_intent, v1_stop_strong_consistency, v2_thread_message_post, v2_threads_active_stream_href, v3_history_agent_snapshot_map, v3_history_message_retention` | `` |
+| `.github/workflows/ai-agent-client-testnet-load.yml` | `ai-agent-client-testnet-load-redacted-summary` | `out/ai-agent-client-testnet-load-redacted-summary.json` | `24` | `TESTNET_BASE_URL, TESTNET_TOKEN` | `load_harness_client_read_pressure, load_harness_closed_loop_promotion` | `` |
 | `.github/workflows/deploy-ai-agent-testnet.yml` | `deploy-ai-agent-testnet-redacted-summary` | `out/deploy-ai-agent-testnet-redacted-summary.json` | `24` | `AWS_REGION, ECR_REPOSITORY, ECS_CLUSTER, ECS_SERVICE, ECS_CONTAINER_NAME, CODEDEPLOY_APPLICATION, CODEDEPLOY_DEPLOYMENT_GROUP, TESTNET_BASE_URL, TESTNET_TOKEN` | `` | `docker buildx build, --cache-from "type=gha,scope=${cache_scope}", --cache-to "type=gha,mode=max,scope=${cache_scope}", -deployment-mode "$deployment_mode", -build-cache-mode "buildkit-gha"` |
 
 ## Assertions
@@ -33,5 +34,5 @@ Evidence artifact: `live-workflow-redaction-evidence`
 
 ## Verification
 
-- Workflow count: `2`
-- Phrase checks: `41`
+- Workflow count: `3`
+- Phrase checks: `56`
