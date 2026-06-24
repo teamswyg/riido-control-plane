@@ -267,6 +267,16 @@
       ]
     }
   ],
+  "harness_workflow_exclusions": [
+    {
+      "workflow": ".github/workflows/ai-agent-generated-endpoint-smoke-matrix.yml",
+      "reason": "generated endpoint smoke matrix is a contract and generator gate, not a live exploratory harness that discovers runtime failures"
+    },
+    {
+      "workflow": ".github/workflows/harness-promotion.yml",
+      "reason": "harness promotion is the closed-loop candidate promotion sidecar consumed by harness loops, not a source harness"
+    }
+  ],
   "claim_bindings": [
     {
       "id": "deleted_agent_threads_must_remain_visible",
@@ -414,7 +424,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "77d8d218f136418a7d9640946dea0abd7d8d17b2ce5f9812367612c6c52151bd"
+      "semantic_hash": "1479e9ded6fc434c0c6674b62e5154e565faf144d0f9c5bdc38ab8bc15f81811"
     },
     {
       "id": "closed_loop_candidates_must_carry_adoption_plan",
@@ -579,7 +589,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "9eee16d15eb2ba9ce4fc81cafca89d7ce0c827860fb5cba369f13c4c69fa5e0d"
+      "semantic_hash": "e95c562c4678485f671b124a08b9154ae4dbb3ac7464bab873cf006c8011d141"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -602,7 +612,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "94a88211e618d1df5834910b6d3331bd2ab8e7e2ae7f78f31f2cf729f2cb6b73"
+      "semantic_hash": "69b8a85e017262d094ce0991f51b45d4675ad268acc0f694995cc7020b28028d"
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
@@ -628,7 +638,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "49e9832be0976013d9d0fc9d47acdbc56b772c77abe618fd5620d9ea81b1c353"
+      "semantic_hash": "5e8bd1197e05d12fa29063d03ac333281e837b614cfe2ea54ec2eac733421b9b"
     },
     {
       "id": "claim_bound_paths_must_trigger_loop_registry",
@@ -650,7 +660,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c08dde94161459aa4ebe9967e0352d5918411f0ea0d68592ea63b114637dc72a"
+      "semantic_hash": "9d15a335094669a6f252ca820ae470f6b679ee9748ba570387e043fc9dd5465f"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -674,7 +684,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "fd4b9e3a34868595fd0fd98c4c984c49da5069acc3be49ddee95826cf421442e"
+      "semantic_hash": "4f9363147cf63d73f8205c7fd7b34e9c850c953474791836cf2d6f33db3c9e06"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -698,7 +708,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c85ee2506e30c08b18f26904eea44a2f7b97bba9454c0ef3b7ca76b27eb8722a"
+      "semantic_hash": "540104d5e5cf4540fa141fee2b04c21a0b5c3c2a730afad265ce3fb451a8f842"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -795,7 +805,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "538a8b157a209e3ef8d699ca79f23bff2b56e8d1092b656fd2e23f94cb125653"
+      "semantic_hash": "95ea18c84aedefaa594f9e2c76d0228b5983fe42fe805a99fe6b74c2f4cb96e1"
     },
     {
       "id": "loop_registry_evidence_must_expose_refresh_plans",
@@ -816,6 +826,30 @@
         "docs/30-architecture/evidence-graph.md"
       ],
       "semantic_hash": "b31d601f24f4d42e8c04f915b1c5dbdf8b61df816f791cf694aec754f54b0138"
+    },
+    {
+      "id": "harness_like_workflows_must_be_registered_or_excluded",
+      "statement": "Every smoke, load, or harness workflow must either be registered as a harness loop that promotes failures into closed-loop candidates or be explicitly excluded with a machine-readable reason.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        ".github/workflows/loop-registry.yml",
+        "tools/loopregistry/types.go",
+        "tools/loopregistry/verify.go",
+        "tools/loopregistry/harness_workflow_coverage.go",
+        "tools/loopregistry/harness_workflow_exclusion.go",
+        "tools/loopregistry/harness_workflow_coverage_test.go"
+      ],
+      "verifiers": [
+        "TestHarnessWorkflowCoverageAcceptsManifest",
+        "TestHarnessWorkflowCoverageRejectsUnregisteredWorkflow",
+        "TestHarnessWorkflowCoverageRejectsStaleExclusion",
+        "TestHarnessWorkflowCoverageRejectsReasonlessExclusion"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "140d251e2f32f6464866b7616f82a378d2301e18ccc681ff88b81a81566aed61"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
@@ -982,6 +1016,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "refresh_workflows_must_declare_loop_identity",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "harness_like_workflows_must_be_registered_or_excluded",
       "relation": "enforces"
     },
     {
