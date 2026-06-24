@@ -405,7 +405,9 @@
       ],
       "verifiers": [
         "TestAssignmentPromptAsksForIntentOnAmbiguousMarketingDocument",
-        "TestAssignmentPromptInfersFromMetadataWhenDocumentMissing",
+        "TestAssignmentPromptAsksFromIntentMetadataWhenDocumentMissing",
+        "TestAssignmentPromptKeepsMetadataOnlyWhenDocumentAndIntentMarkersMissing",
+        "TestAssignmentPromptClassifiesIntentFromMetadataWhenDocumentMissing",
         "TestAssignmentPromptClassifiesIntentComponentTypes",
         "TestAssignmentPromptKeepsExplicitInstructionExecutable",
         "TestFollowupPromptKeepsLatestUserInstructionAuthoritative",
@@ -419,7 +421,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "a40414b9f4cb1ec66e0e8452dcd582ebdfde331c941b0f646f9d96ee66cb2c9f"
+      "semantic_hash": "8e97f4ddd5ec25c623359aa54360e549c24f074031dd2b7a9028b2b16d1caead"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
