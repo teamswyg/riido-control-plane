@@ -267,6 +267,31 @@
       "next_loop": "closed_loop_candidate_intake"
     },
     {
+      "id": "expiring_loop_refresh_scope_loop",
+      "observation": "The loop registry verifier was upgraded to check every expiring loop, but the registry wording could still describe only 24h loops and mislead future agents.",
+      "hypothesis": "Promoting the refresh-scope rule to a claim and rejecting stale 24h-only wording keeps the SSOT, verifier, and generated reader aligned.",
+      "claims": ["expiring_loops_must_schedule_refresh"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/verify_assertions.go"},
+        {"kind": "tool", "path": "tools/loopregistry/verify_schedule.go"},
+        {"kind": "test", "path": "tools/loopregistry/refresh_workflow_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/main_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/refresh_workflow_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/main_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "All expiring loops, including long-expiry queues, are now covered by scheduled refresh verification and stale 24h-only SSOT language fails.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "closed_loop_candidate_decision_loop",
       "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact and report decision evidence that is not tied to the current candidate set.",
       "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, and reject stale decision records that no longer map to a current candidate.",
