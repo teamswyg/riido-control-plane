@@ -43,6 +43,7 @@
     {"path":"tools/gocibaseline","kind":"meta-evidence-tool","role":"Go CI baseline workflow contract verifier.","must_not_own":"domain-specific test semantics or live smoke evidence"},
     {"path":"tools/healthreadycmd","kind":"evidence-tool","role":"Health/ready and command runtime generated reader and verifier.","must_not_own":"runtime server lifecycle"},
     {"path":"tools/harnesspromotion","kind":"meta-evidence-tool","role":"Harness failure to closed-loop candidate promotion verifier and redacted candidate generator.","must_not_own":"harness execution or runtime behavior"},
+    {"path":"tools/closedloopcandidateintake","kind":"meta-evidence-tool","role":"Closed-loop candidate intake verifier that consumes redacted candidate artifacts and checks adoption requirements.","must_not_own":"candidate implementation priority or runtime bug fixing"},
     {"path":"tools/evidencegraph","kind":"meta-evidence-tool","role":"Evidence graph verifier that connects observations, hypotheses, changes, verifiers, evidence, decisions, and next loops.","must_not_own":"runtime behavior, raw evidence payloads, or human-only narrative memory"},
     {"path":"tools/integrationmatrix","kind":"evidence-tool","role":"Public/private integration matrix verifier.","must_not_own":"private infra evidence"},
     {"path":"tools/knowledgecoverage","kind":"meta-evidence-tool","role":"Executable knowledge coverage verifier.","must_not_own":"domain-specific verification semantics"},

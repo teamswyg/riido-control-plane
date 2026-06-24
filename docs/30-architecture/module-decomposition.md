@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `47`; runtime: `1`; internal: `3`; tools: `42`; forbidden import hits: `0`.
+Packages: `48`; runtime: `1`; internal: `3`; tools: `43`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `88`; max file lines: `1072`.
 
@@ -71,7 +71,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 - `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/aiagentload`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/figmaprojection`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/metricshttpadapter`, `tools/openquestions`, `tools/providerstatus`, `tools/reviewaccountseed`, `tools/requestauth`, `tools/runtimeboundary`, `tools/runtimecdownership`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
-- `meta-evidence-tool`: `tools/gocibaseline`, `tools/harnesspromotion`, `tools/evidencegraph`, `tools/knowledgecoverage`, `tools/liveworkflowevidence`, `tools/loopregistry`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/repositoryreadme`, `tools/workflowevidence`
+- `meta-evidence-tool`: `tools/gocibaseline`, `tools/harnesspromotion`, `tools/closedloopcandidateintake`, `tools/evidencegraph`, `tools/knowledgecoverage`, `tools/liveworkflowevidence`, `tools/loopregistry`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/repositoryreadme`, `tools/workflowevidence`
 
 ## Boundary Rules
 
