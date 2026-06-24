@@ -21,6 +21,14 @@ func verifyLoopSchedule(root string, m manifest, loop loopRecord) error {
 	if !strings.Contains(text, "schedule:") {
 		return fmt.Errorf("loop %s expires within 24h but refresh workflow has no schedule", loop.ID)
 	}
+	cadence, err := refreshWorkflowCadenceMinutes(text)
+	if err != nil {
+		return fmt.Errorf("loop %s refresh workflow cadence: %w", loop.ID, err)
+	}
+	if cadence > expiryMinutes(loop) {
+		return fmt.Errorf("loop %s refresh cadence %dm exceeds evidence expiry %dm",
+			loop.ID, cadence, expiryMinutes(loop))
+	}
 	if !refreshWorkflowPublishesEvidence(text, loop.Evidence) {
 		return fmt.Errorf("loop %s refresh workflow must publish one strict loop evidence artifact", loop.ID)
 	}
