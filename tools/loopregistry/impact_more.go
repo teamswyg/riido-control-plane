@@ -22,13 +22,13 @@ func claimSignature(claim claimBinding) string {
 
 func verifyChangedClaimImpact(claim claimBinding, changed map[string]bool) (impactClaim, error) {
 	record := impactClaim{ID: claim.ID}
-	for _, path := range claim.Files {
+	for _, path := range claimRequiredImpactFiles(claim) {
 		if changed[path] {
 			record.ChangedBoundFiles = append(record.ChangedBoundFiles, path)
 		}
 	}
 	if len(record.ChangedBoundFiles) == 0 {
-		return record, fmt.Errorf("claim %s changed without a bound code/test file change", claim.ID)
+		return record, fmt.Errorf("claim %s changed without a bound code or test file change", claim.ID)
 	}
 	return record, nil
 }
