@@ -427,7 +427,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "86603dacbfe72b9144ce4a7db39b3be449419cbc0d144af62e4bd8ba21488213"
+      "semantic_hash": "2d4b93e227ab2e289fffa61bc26cdfa9994736dcb1277dac83eda23d7203b84e"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -528,7 +528,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "fca053b2505980ad62886a8ba27a092b097cce8b7b2e9b049b92a3c86c9c54dc"
+      "semantic_hash": "d9cde880c45ac402d49586931b359466ea2fc4a1c09bfb3209e7365fef7af9c0"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -583,7 +583,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c5b015e670fcef025b2b3528b75e4d5e9f7ae8478b23d91c7f2496c044498b90"
+      "semantic_hash": "45d3bd0eecf70c737fb9f9d1a98ef2a713691b0f44444ebee13e99b78bf47b95"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -699,7 +699,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "66126d861cfbc6ae559a768c03b3acf36eb9d797cc8b809ae599819f848d0fa7"
+      "semantic_hash": "9525f38fd817bb90b2164b038612e094b27f120189dcdcfdbcba26f44e95c43c"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -842,7 +842,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9d9faf79e68ffabb5343e126c2428e9ba869088531a3c75210146a9df486e2ac"
+      "semantic_hash": "79a48869fd4df0a13445fd8b4aa1a37f015782390bd6797ee15033b877bf3ec3"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -866,7 +866,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "869db16d40442693d609e93efa685f2b7b499e65f3780c10e20e3edb531d5171"
+      "semantic_hash": "eb921463768168847b79eaffe1815ccc4210d4feb01181fbe96658b50f0b2efa"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -886,7 +886,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c7444ae6a7fb98a0c38800e21c601d86f431b86d5780fe904187d447d19c9cc9"
+      "semantic_hash": "e97bc2e7cec5f5788eb6d0dde0b6c7e70548d16d5fa5801322e80bd145ff67a8"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -1039,20 +1039,23 @@
     },
     {
       "id": "loop_registry_evidence_must_expose_graph_edges",
-      "statement": "Loop registry evidence must expose the executable evidence_graph edge list, not only edge counts, so agents can infer loop-to-claim enforcement paths from the artifact without opening narrative docs.",
+      "statement": "Loop registry evidence must expose the executable evidence_graph edge list, not only edge counts, and every harness promotes_to target must have a matching promotes_failure_to graph edge so agents can infer loop-to-claim and harness-to-candidate paths from the artifact without opening narrative docs.",
       "loop": "closed_loop_candidate",
       "files": [
         "tools/loopregistry/evidence.go",
-        "tools/loopregistry/evidence_graph_test.go"
+        "tools/loopregistry/verify_graph.go",
+        "tools/loopregistry/evidence_graph_test.go",
+        "tools/loopregistry/evidence_graph_promotion_test.go"
       ],
       "verifiers": [
-        "TestLoopRegistryEvidenceExposesGraphEdges"
+        "TestLoopRegistryEvidenceExposesGraphEdges",
+        "TestEvidenceGraphRequiresHarnessPromotionEdges"
       ],
       "generated_docs": [
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1d98131a1836eb656b2d5f6c59d80b8cf4caf82d79ed455373b065c4359a0e31"
+      "semantic_hash": "28f970cd6c16f29660a115d507e9532adfab5069e486fd779eab9d1bac606b39"
     },
     {
       "id": "harness_like_workflows_must_be_registered_or_excluded",
@@ -1157,6 +1160,11 @@
   "evidence_graph": [
     {
       "from": "provider_acceptance_harness",
+      "to": "closed_loop_candidate",
+      "relation": "promotes_failure_to"
+    },
+    {
+      "from": "ai_agent_load_harness",
       "to": "closed_loop_candidate",
       "relation": "promotes_failure_to"
     },

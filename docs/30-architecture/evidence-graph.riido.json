@@ -239,17 +239,20 @@
     },
     {
       "id": "loop_registry_graph_edge_evidence_loop",
-      "observation": "Loop registry evidence exposed graph edge counts, but not the actual loop-to-claim enforcement edge list, so an agent reading only the artifact still had to open a manifest or generated doc to infer which loop enforces which claim.",
-      "hypothesis": "Publishing the executable evidence_graph edges in the loop-registry evidence artifact lets agents infer claim enforcement paths directly from machine evidence.",
+      "observation": "Loop registry evidence exposed graph edge counts, but not the actual loop-to-claim or harness-to-candidate edge list, so an agent reading only the artifact still had to open a manifest or generated doc to infer which loop enforces which claim or where harness failures promote.",
+      "hypothesis": "Publishing the executable evidence_graph edges in the loop-registry evidence artifact and verifying each harness promotes_to target has a matching promotes_failure_to edge lets agents infer claim enforcement and harness promotion paths directly from machine evidence.",
       "claims": ["loop_registry_evidence_must_expose_graph_edges"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
         {"kind": "tool", "path": "tools/loopregistry/evidence.go"},
-        {"kind": "test", "path": "tools/loopregistry/evidence_graph_test.go"}
+        {"kind": "tool", "path": "tools/loopregistry/verify_graph.go"},
+        {"kind": "test", "path": "tools/loopregistry/evidence_graph_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/evidence_graph_promotion_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/evidence_graph_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/evidence_graph_promotion_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -257,7 +260,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Loop registry evidence now carries the graph edge list, so a skipped-doc agent can read the artifact and see which closed loop enforces each business claim.",
+      "decision": "Loop registry evidence now carries graph edges and rejects harness promotes_to targets without matching promotion edges, so a skipped-doc agent can see both claim enforcement and failure-promotion paths.",
       "next_loop": "closed_loop_candidate"
     },
     {
