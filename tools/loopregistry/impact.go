@@ -28,6 +28,14 @@ func verifyClaimImpact(
 	evidence := &impactEvidence{Enabled: true, BaseRef: baseRef, ChangedFileCount: len(changed)}
 	for _, claim := range currentClaims {
 		base, ok := baseByID[claim.ID]
+		if !ok {
+			record, err := verifyAddedClaimImpact(claim, changed)
+			if err != nil {
+				return nil, err
+			}
+			evidence.AddedClaims = append(evidence.AddedClaims, record)
+			continue
+		}
 		if ok && claimSignature(base) != claimSignature(claim) {
 			record, err := verifyChangedClaimImpact(claim, changed)
 			if err != nil {
@@ -53,6 +61,7 @@ func verifyClaimImpact(
 		}
 		evidence.RemovedClaims = append(evidence.RemovedClaims, record)
 	}
+	evidence.AddedClaimCount = len(evidence.AddedClaims)
 	evidence.ChangedClaimCount = len(evidence.Claims)
 	evidence.RemovedClaimCount = len(evidence.RemovedClaims)
 	evidence.BoundSurfaceChangeCount = len(evidence.BoundSurfaces)
