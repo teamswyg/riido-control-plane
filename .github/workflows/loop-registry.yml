@@ -1,0 +1,73 @@
+name: loop-registry
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 20 * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/loop-registry.yml"
+      - "docs/30-architecture/loop-registry.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"
+      - "internal/riidoaiserver/ai_agent_client_same_provider_assignment_test.go"
+      - "internal/riidoaiserver/ai_agent_client_http_provider_multi_assignment_test.go"
+      - "internal/riidoaiserver/ai_agent_client_development_append_thread_history_message.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_thread_id_for_run.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_agent_assignment.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_delete_ai_agent.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_mark_task_agent_threads_stopped_locked.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go"
+      - "tools/loopregistry/**"
+      - "go.mod"
+      - "go.sum"
+  pull_request:
+    paths:
+      - ".github/workflows/loop-registry.yml"
+      - "docs/30-architecture/loop-registry.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"
+      - "internal/riidoaiserver/ai_agent_client_same_provider_assignment_test.go"
+      - "internal/riidoaiserver/ai_agent_client_http_provider_multi_assignment_test.go"
+      - "internal/riidoaiserver/ai_agent_client_development_append_thread_history_message.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_thread_id_for_run.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_agent_assignment.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_delete_ai_agent.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_mark_task_agent_threads_stopped_locked.go"
+      - "internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go"
+      - "tools/loopregistry/**"
+      - "go.mod"
+      - "go.sum"
+
+jobs:
+  loop-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify loop registry
+        run: |
+          mkdir -p out
+          go test ./tools/loopregistry -count=1
+          go test ./internal/riidoaiserver \
+            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread)$' \
+            -count=1
+          go run ./tools/loopregistry \
+            -check-doc \
+            -evidence-out out/loop-registry-evidence.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: loop-registry-evidence
+          path: out/loop-registry-evidence.json
+          if-no-files-found: error
