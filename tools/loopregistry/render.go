@@ -28,10 +28,11 @@ func renderDoc(m manifest, result verifyResult) string {
 func renderLoops(b *strings.Builder, loops []loopRecord) {
 	fmt.Fprintln(b, "## Loops")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Loop | Kind | Expires | Evidence |")
-	fmt.Fprintln(b, "| --- | --- | ---: | --- |")
+	fmt.Fprintln(b, "| Loop | Kind | Expires | Refresh Workflow | Evidence |")
+	fmt.Fprintln(b, "| --- | --- | ---: | --- | ---: |")
 	for _, loop := range loops {
-		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%d` |\n", loop.ID, loop.Kind, loop.ExpiresAfterHours, len(loop.Evidence))
+		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%s` | `%d` |\n",
+			loop.ID, loop.Kind, loop.ExpiresAfterHours, loop.RefreshWorkflow, len(loop.Evidence))
 	}
 	fmt.Fprintln(b)
 }

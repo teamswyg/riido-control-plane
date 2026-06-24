@@ -15,11 +15,11 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 
 ## Loops
 
-| Loop | Kind | Expires | Evidence |
-| --- | --- | ---: | --- |
-| `ai_thread_history` | `closed_loop` | `24` | `2` |
-| `provider_acceptance_harness` | `harness` | `24` | `2` |
-| `closed_loop_candidate` | `closed_loop` | `24` | `2` |
+| Loop | Kind | Expires | Refresh Workflow | Evidence |
+| --- | --- | ---: | --- | ---: |
+| `ai_thread_history` | `closed_loop` | `24` | `.github/workflows/loop-registry.yml` | `2` |
+| `provider_acceptance_harness` | `harness` | `24` | `.github/workflows/ai-agent-client-testnet-smoke.yml` | `2` |
+| `closed_loop_candidate` | `closed_loop` | `24` | `.github/workflows/loop-registry.yml` | `2` |
 
 ## Claim Bindings
 
@@ -43,8 +43,8 @@ Observe: AI agents can skip or misunderstand narrative docs, while previously fi
 
 Hypothesis: A loop registry can make the intended QA loop executable by binding business claims to code files, tests, generated docs, semantic hashes, evidence expiry, and harness promotion paths.
 
-Execute: Generate this reader from the loop registry, verify claim-code-test-doc bindings, require scheduled evidence for 24h loops, compute claim semantic hashes, enforce PR impact co-change for claim meaning changes, and publish redacted evidence in CI.
+Execute: Generate this reader from the loop registry, verify claim-code-test-doc bindings, require each 24h loop to name a scheduled refresh workflow that publishes strict evidence, compute claim semantic hashes, enforce PR impact co-change for claim meaning changes, and publish redacted evidence in CI.
 
-Evaluate: The verifier fails on missing loop fields, missing tests, missing bound files, stale generated docs, missing scheduled workflow coverage, unknown graph nodes, semantic hash drift, or claim meaning changes without bound code/test changes.
+Evaluate: The verifier fails on missing loop fields, missing tests, missing bound files, stale generated docs, missing scheduled refresh workflow coverage, missing strict refresh evidence, unknown graph nodes, semantic hash drift, or claim meaning changes without bound code/test changes.
 
 Retrospective: This moves the human out of the inner loop: a future AI can change code without reading this prose, but cannot merge drift without updating the executable claim binding and evidence.

@@ -10,12 +10,19 @@ func verifyLoopSchedule(root string, m manifest, loop loopRecord) error {
 	if loop.ExpiresAfterHours > 24 {
 		return nil
 	}
-	data, err := os.ReadFile(repoPath(root, m.Workflow))
-	if err != nil {
-		return fmt.Errorf("read workflow %s: %w", m.Workflow, err)
+	if strings.TrimSpace(loop.RefreshWorkflow) == "" {
+		return fmt.Errorf("loop %s expires within 24h but has no refresh_workflow", loop.ID)
 	}
-	if !strings.Contains(string(data), "schedule:") {
-		return fmt.Errorf("loop %s expires within 24h but workflow has no schedule", loop.ID)
+	data, err := os.ReadFile(repoPath(root, loop.RefreshWorkflow))
+	if err != nil {
+		return fmt.Errorf("read refresh workflow %s: %w", loop.RefreshWorkflow, err)
+	}
+	text := string(data)
+	if !strings.Contains(text, "schedule:") {
+		return fmt.Errorf("loop %s expires within 24h but refresh workflow has no schedule", loop.ID)
+	}
+	if !refreshWorkflowPublishesEvidence(text, loop.Evidence) {
+		return fmt.Errorf("loop %s refresh workflow must publish one strict loop evidence artifact", loop.ID)
 	}
 	return nil
 }
