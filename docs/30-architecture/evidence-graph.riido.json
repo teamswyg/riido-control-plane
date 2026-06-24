@@ -36,6 +36,30 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "harness_evidence_expiry_gate_loop",
+      "observation": "Redacted live workflow summaries could be reused after their evidence window expired, allowing stale harness output to create fresh closed-loop candidates.",
+      "hypothesis": "Stamping generated_at and expires_at in the redacted summary, then rejecting expired summaries in harness promotion, prevents stale observations from entering the closed-loop backlog.",
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/live-workflow-redaction.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "tool", "path": "tools/liveworkflowevidence"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/liveworkflowevidence"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "tool", "path": "tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "live-workflow-redaction-evidence", "redacted": true},
+        {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Harness promotion now treats evidence freshness as a merge gate: expired or malformed summary freshness metadata cannot produce closed-loop candidate evidence.",
+      "next_loop": "provider_acceptance_harness"
+    },
+    {
       "id": "claim_binding_impact_loop",
       "observation": "Business claims could change without bound code or tests changing in the same pull request.",
       "hypothesis": "Comparing the PR diff against the loop registry can force claim meaning changes to co-change bound files.",

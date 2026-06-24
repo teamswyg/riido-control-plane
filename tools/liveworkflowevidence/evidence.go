@@ -1,6 +1,9 @@
 package main
 
-import "os"
+import (
+	"os"
+	"time"
+)
 
 func newManifestEvidence(m manifest, result verifyResult) manifestEvidence {
 	return manifestEvidence{
@@ -21,12 +24,16 @@ func newLiveSummary(spec workflowSpec, opt options) liveSummary {
 	if status == "" {
 		status = getenvDefault("RIIDO_LIVE_CHECK_STATUS", "unknown")
 	}
+	generatedAt := liveEvidenceNow()
+	expiresAt := generatedAt.Add(evidenceTTL(spec))
 	return liveSummary{
 		SchemaVersion:    "riido-control-plane-live-workflow-redacted-summary.v1",
 		ID:               spec.ID,
 		Status:           "redacted_summary",
 		Workflow:         newRecord(spec),
 		Run:              newRunRecord(),
+		GeneratedAt:      formatTime(generatedAt),
+		ExpiresAt:        formatTime(expiresAt),
 		LiveStatus:       status,
 		DeploymentTarget: opt.DeploymentTarget,
 		DeploymentMode:   opt.DeploymentMode,
@@ -34,6 +41,10 @@ func newLiveSummary(spec workflowSpec, opt options) liveSummary {
 		EvidenceClaims:   newLiveClaims(spec, status),
 		Redaction:        newRedaction(spec),
 	}
+}
+
+func evidenceTTL(spec workflowSpec) time.Duration {
+	return time.Duration(spec.EvidenceTTLHours) * time.Hour
 }
 
 func getenvDefault(name, fallback string) string {

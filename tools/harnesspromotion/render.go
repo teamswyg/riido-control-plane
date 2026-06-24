@@ -18,6 +18,7 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "- required next artifact refs: `%d`\n\n", result.ClaimCount)
 	fmt.Fprintf(&b, "- loop registry: `%s`\n\n", m.LoopRegistryManifest)
 	renderSources(&b, m.Sources)
+	renderAssertions(&b, m.Assertions)
 	renderLoop(&b, m.Loop)
 	return b.String()
 }
@@ -31,6 +32,15 @@ func renderSources(b *strings.Builder, sources []promotionSource) {
 		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%s` | `%d` |\n",
 			source.ID, source.HarnessLoop, source.CandidateArtifact,
 			source.PromotionTarget, len(source.RequiredNextArtifacts))
+	}
+	fmt.Fprintln(b)
+}
+
+func renderAssertions(b *strings.Builder, assertions []string) {
+	fmt.Fprintln(b, "## Assertions")
+	fmt.Fprintln(b)
+	for _, assertion := range assertions {
+		fmt.Fprintf(b, "- %s\n", assertion)
 	}
 	fmt.Fprintln(b)
 }

@@ -19,6 +19,9 @@ func promoteSummary(root string, m manifest, path, out string) error {
 	if !ok {
 		return fmt.Errorf("summary %s is not a promotion source", summary.ID)
 	}
+	if err := verifySummaryFresh(summary, promotionNow()); err != nil {
+		return err
+	}
 	return writeJSON(repoPath(root, out), buildCandidateEvidence(source, summary))
 }
 

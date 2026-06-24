@@ -17,10 +17,18 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 | --- | --- | --- | --- | ---: |
 | `ai-agent-client-testnet-smoke` | `provider_acceptance_harness` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 
+## Assertions
+
+- a harness failure must produce a redacted closed-loop candidate artifact
+- a successful harness run may produce an empty candidate list
+- candidate artifacts must not include raw endpoint hosts, tokens, AWS resource ids, or response bodies
+- expired redacted summaries must be rejected before closed-loop candidate generation
+- harness workflows that produce expiring evidence must be runnable without a human trigger
+
 ## Evidence Loop
 
 - Observation: Provider and smoke harnesses can find failures, but a failed run can still end as an isolated artifact unless it is converted into a closed-loop candidate.
 - Hypothesis: A promotion sidecar can transform redacted harness summaries into candidate records that name the next artifacts required for a durable closed loop and bind them to the loop registry target.
-- Execute: Verify harness workflows call this tool after redacted summaries, upload candidate artifacts with strict missing-file behavior, verify source-to-loop-registry target bindings, and generate reader/evidence outputs in CI.
-- Evaluate: The verifier fails on missing promotion wiring, missing candidate uploads, missing strict upload behavior, missing adoption artifacts, loop-registry target drift, stale generated docs, or unsupported manifest identity.
+- Execute: Verify harness workflows call this tool after redacted summaries, reject expired summaries before promotion, upload candidate artifacts with strict missing-file behavior, verify source-to-loop-registry target bindings, and generate reader/evidence outputs in CI.
+- Evaluate: The verifier fails on missing promotion wiring, missing candidate uploads, expired or malformed summary freshness metadata, missing strict upload behavior, missing adoption artifacts, loop-registry target drift, stale generated docs, or unsupported manifest identity.
 - Retrospective: Harnesses now increase exploration space while failed observations automatically enter the closed-loop backlog instead of relying on human memory.

@@ -276,6 +276,41 @@
       "semantic_hash": "505f626d13ff44641c9ba8b4524ce15f5bc678cbd506c45d1704a73ed52eee8f"
     },
     {
+      "id": "expired_harness_evidence_must_not_promote_candidates",
+      "statement": "Redacted live workflow summaries must declare generated_at and expires_at, and harness promotion must reject expired or malformed summary freshness metadata before writing closed-loop candidate evidence.",
+      "loop": "provider_acceptance_harness",
+      "files": [
+        "docs/30-architecture/live-workflow-redaction.riido.json",
+        "docs/30-architecture/harness-promotion.riido.json",
+        "tools/liveworkflowevidence/types.go",
+        "tools/liveworkflowevidence/evidence_types.go",
+        "tools/liveworkflowevidence/evidence.go",
+        "tools/liveworkflowevidence/records.go",
+        "tools/liveworkflowevidence/verify.go",
+        "tools/liveworkflowevidence/time.go",
+        "tools/liveworkflowevidence/main_test.go",
+        "tools/harnesspromotion/types_summary.go",
+        "tools/harnesspromotion/types_candidate.go",
+        "tools/harnesspromotion/candidate.go",
+        "tools/harnesspromotion/promote.go",
+        "tools/harnesspromotion/freshness.go",
+        "tools/harnesspromotion/main_test.go",
+        "tools/harnesspromotion/freshness_test.go",
+        "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
+      ],
+      "verifiers": [
+        "TestLiveSummaryRedactsRuntimeValues",
+        "TestHarnessPromotionRejectsExpiredSummary",
+        "TestHarnessPromotionRejectsMissingExpiry"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/live-workflow-redaction.md",
+        "docs/30-architecture/harness-promotion.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "40c80ece1ed944d5c3a19fea4d3b97bfe97f1cac0ec7861c292b75c445d5c634"
+    },
+    {
       "id": "loop_verifiers_must_accept_verify_intent",
       "statement": "Closed-loop verifier tools must accept the common -verify intent as an alias for their generated-doc verification mode so agents do not need tool-specific flag memory.",
       "loop": "closed_loop_candidate",
@@ -309,6 +344,11 @@
       "from": "provider_acceptance_harness",
       "to": "closed_loop_candidate",
       "relation": "promotes_failure_to"
+    },
+    {
+      "from": "provider_acceptance_harness",
+      "to": "expired_harness_evidence_must_not_promote_candidates",
+      "relation": "enforces"
     },
     {
       "from": "closed_loop_candidate",

@@ -13,14 +13,15 @@ type manifest struct {
 }
 
 type workflowSpec struct {
-	ID              string      `json:"id"`
-	Path            string      `json:"path"`
-	SummaryArtifact string      `json:"summary_artifact"`
-	SummaryPath     string      `json:"summary_path"`
-	SensitiveInputs []string    `json:"sensitive_inputs"`
-	AllowedFields   []string    `json:"allowed_summary_fields"`
-	RequiredPhrases []string    `json:"required_phrases,omitempty"`
-	EvidenceClaims  []claimSpec `json:"evidence_claims,omitempty"`
+	ID               string      `json:"id"`
+	Path             string      `json:"path"`
+	SummaryArtifact  string      `json:"summary_artifact"`
+	SummaryPath      string      `json:"summary_path"`
+	EvidenceTTLHours int         `json:"evidence_ttl_hours"`
+	SensitiveInputs  []string    `json:"sensitive_inputs"`
+	AllowedFields    []string    `json:"allowed_summary_fields"`
+	RequiredPhrases  []string    `json:"required_phrases,omitempty"`
+	EvidenceClaims   []claimSpec `json:"evidence_claims,omitempty"`
 }
 
 type loopRecord struct {

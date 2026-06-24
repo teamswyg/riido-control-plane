@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"os/exec"
 	"testing"
 )
@@ -23,5 +25,9 @@ func promoteSummary(root, summary, out string) error {
 	cmd := exec.Command("go", "run", "./tools/harnesspromotion",
 		"-summary", summary, "-candidate-out", out)
 	cmd.Dir = root
-	return cmd.Run()
+	cmd.Env = append(os.Environ(), "RIIDO_HARNESS_PROMOTION_NOW=2026-06-24T01:00:00Z")
+	if body, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("%w: %s", err, body)
+	}
+	return nil
 }
