@@ -12,6 +12,9 @@ func verify(root string, m manifest, checkDoc bool) error {
 	if err := verifyStaticLists(m); err != nil {
 		return err
 	}
+	if err := verifyThreadHistoryV3(m.ThreadHistoryV3); err != nil {
+		return err
+	}
 	if err := verifySources(root, m.SourceChecks); err != nil {
 		return err
 	}

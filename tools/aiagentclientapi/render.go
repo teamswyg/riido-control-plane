@@ -18,6 +18,7 @@ func renderDoc(m manifest) string {
 	renderList(&b, "Runtime Config Keys", m.RuntimeConfigKeys)
 	renderList(&b, "Public Field And Endpoint Signals", m.PublicFields)
 	renderList(&b, "Deployment Evidence Phrases", m.DeploymentEvidence)
+	renderThreadHistoryV3(&b, m.ThreadHistoryV3)
 	renderLoop(&b, m.Loop)
 	renderList(&b, "Non-Goals", m.NonGoals)
 	return b.String()

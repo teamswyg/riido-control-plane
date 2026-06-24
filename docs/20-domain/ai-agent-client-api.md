@@ -38,11 +38,87 @@ Canonical domain changes start in `riido-contracts`; this repo verifies the exec
 
 ## Public Field And Endpoint Signals
 
-- `workspace_id`, `profile_thumbnail_url`, `provider_version`, `assigned-agent-profiles`, `agent-assignments`, `thread-stream-subscription`
+- `workspace_id`, `profile_thumbnail_url`, `provider_version`, `assigned-agent-profiles`, `agent-assignments`, `thread-stream-subscription`, `conversation_id`, `parent_thread_id`, `agent_snapshot_id`, `agent_snapshots`, `messages`
 
 ## Deployment Evidence Phrases
 
 - `not from a manual`, `The workflow masks both values`
+
+## Frontend Thread History v3 Handoff
+
+Use v3 for initial/read refresh, v2 for mutations, and v2 SSE for live progress.
+
+### Endpoint Split
+
+| Name | Method | Path | Purpose | Truth role |
+| --- | --- | --- | --- | --- |
+| thread-history-v3 | `GET` | `/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads` | Task screen initial render and refresh recovery | canonical read model |
+| thread-stream-subscription-v2 | `GET` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/thread-stream-subscription` | Task scoped live progress subscription | live update input |
+| assign-agent-v2 | `POST` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments` | Assign one AI Agent to the task | mutation |
+| thread-message-v2 | `POST` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages` | Send a user follow-up message to one AI thread | mutation |
+| stop-agent-v2 | `POST` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop` | Stop one assigned AI Agent in a task | strong UI mutation |
+| delete-agent-assignment-v2 | `DELETE` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}` | Remove one assigned AI Agent from a task while preserving history | strong UI mutation |
+
+### Identity Rules
+
+| Name | Meaning | Frontend use |
+| --- | --- | --- |
+| `task_id` | Task screen parent scope | Group all AI thread history for one task screen |
+| `conversation_id` | Stable AI comment card key | Render one Agent conversation card; same value means reply chain, different value means separate card even for same agent_id |
+| `thread_id` | Concrete thread/run identity | Route v2 user messages and render sub-run blocks inside a conversation card |
+| `parent_thread_id` | Source thread for a follow-up run | Nest a follow-up run under the original Agent comment when present |
+| `assignment_id` | Durable work assignment | Manage execution status and stop/delete targeting |
+| `run_id` | Runtime execution flow | Deduplicate live progress together with assignment_id and seq |
+| `message_id` | Stable v3 timeline row key | Render messages without collapsing repeated user bodies or repeated progress text |
+
+## Thread History v3 Grouping Rules
+
+- Task screen scope is task_id.
+- Agent comment card key is conversation_id, not thread_id.
+- A new participant-dropdown reassignment creates a new conversation_id even when agent_id is the same.
+- A user reply submitted to an existing thread keeps the existing conversation_id.
+- parent_thread_id is present only when a follow-up run is derived from an existing thread.
+- provider, runtime_kind, label, and agent name must never be used for dedupe.
+
+## Thread History v3 Agent Snapshot Rules
+
+- Each thread may carry agent_snapshot_id instead of an embedded agent snapshot.
+- The screen resolves agent_snapshots[thread.agent_snapshot_id] for display.
+- Historical cards must keep the captured snapshot even if the current agent settings change.
+
+### Message Roles
+
+| Role | Meaning |
+| --- | --- |
+| `user` | User follow-up instruction inside the AI thread |
+| `progress` | Runtime progress log, ordered by seq inside assignment_id and run_id |
+| `agent` | Agent status or final result message |
+
+## Thread History v3 SSE Handling Rules
+
+- Open one task-level SSE stream from the v2 thread-stream-subscription response.
+- Filter payloads by task_id, agent_id, thread_id, and run_id.
+- Use assignment_id + run_id + seq as the progress dedupe key when assignment_id is present.
+- SSE is a live update input; v3 thread history remains the refresh recovery truth.
+- Do not revive a terminal assignment when a late runtime progress event arrives.
+
+## Thread History v3 Terminal States
+
+- `completed`, `failed`, `stopped`, `cancelled`, `timeout`
+
+## Thread History v3 Frontend Checklist
+
+- v3-read-model
+- conversation-id-card-key
+- thread-id-inner-run-key
+- message-id-row-key
+- agent-snapshot-map
+- v2-mutations
+- v2-sse
+- optimistic-then-v3-refetch
+- progress-dedupe
+- terminal-late-event-guard
+- deleted-agent-history-retention
 
 ## Evidence Loop
 

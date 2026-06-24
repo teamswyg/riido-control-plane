@@ -9,6 +9,7 @@ type evidence struct {
 	RuntimeConfigs       int             `json:"runtime_configs"`
 	PublicFields         int             `json:"public_fields"`
 	DeploymentEvidence   int             `json:"deployment_evidence"`
+	ThreadHistoryV3Rules int             `json:"thread_history_v3_rules"`
 	SourceChecks         int             `json:"source_checks"`
 	SmokeMatrixParity    bool            `json:"smoke_matrix_parity"`
 	GeneratedPathCovered bool            `json:"generated_path_covered"`
@@ -25,6 +26,7 @@ func newEvidence(m manifest) evidence {
 		RuntimeConfigs:       len(m.RuntimeConfigKeys),
 		PublicFields:         len(m.PublicFields),
 		DeploymentEvidence:   len(m.DeploymentEvidence),
+		ThreadHistoryV3Rules: len(m.ThreadHistoryV3.Checklist),
 		SourceChecks:         len(m.SourceChecks),
 		SmokeMatrixParity:    true,
 		GeneratedPathCovered: true,
