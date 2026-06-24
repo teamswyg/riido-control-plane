@@ -463,6 +463,8 @@ type AIAgentTaskThreadFailureDiagnostics struct {
 
 type AIAgentTaskThreadRecord struct {
 	ThreadID           string                               `json:"thread_id"`
+	ConversationID     string                               `json:"conversation_id,omitempty"`
+	ParentThreadID     string                               `json:"parent_thread_id,omitempty"`
 	TaskID             string                               `json:"task_id"`
 	AssignmentID       string                               `json:"assignment_id,omitempty"`
 	AgentID            string                               `json:"agent_id"`

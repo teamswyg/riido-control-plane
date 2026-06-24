@@ -9,6 +9,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 	now := time.Now().UTC()
 	thread := AIAgentTaskThreadRecord{
 		ThreadID:           response.ThreadID,
+		ConversationID:     response.ThreadID,
 		TaskID:             response.TaskID,
 		AssignmentID:       response.AssignmentID,
 		AgentID:            response.AgentID,
@@ -32,6 +33,9 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 	for i := range threads {
 		if threads[i].ThreadID != response.ThreadID {
 			continue
+		}
+		if threads[i].ConversationID == "" {
+			threads[i].ConversationID = taskThreadConversationID(threads[i])
 		}
 		threads[i].WorkStatus = response.WorkStatus
 		if strings.TrimSpace(response.AssignmentID) != "" {

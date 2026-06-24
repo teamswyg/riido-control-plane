@@ -220,7 +220,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "a302d7191e2bd365991252154a287ec39673b9b44f95e5db21cb63bfe20ec2f9"
+      "semantic_hash": "b750489076ff529707d43acfe1568029d2cb39ef8efcf707db0e760658cc2ad8"
     },
     {
       "id": "same_provider_agents_must_keep_distinct_threads",

@@ -1,29 +1,15 @@
 package riidoaiserver
 
-import (
-	"strings"
-	"time"
-)
+import "time"
 
-func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(response AIAgentTaskActionResponse, sourceMessageID string) {
+func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
+	response AIAgentTaskActionResponse,
+	sourceMessageID string,
+	conversationID string,
+	parentThreadID string,
+) {
 	now := time.Now().UTC()
-	thread := AIAgentTaskThreadRecord{
-		ThreadID:           response.ThreadID,
-		TaskID:             response.TaskID,
-		AssignmentID:       response.AssignmentID,
-		AgentID:            response.AgentID,
-		AgentSnapshot:      copyTaskThreadAgentSnapshot(response.AgentSnapshot),
-		RunID:              response.RunID,
-		SourceMessageID:    strings.TrimSpace(sourceMessageID),
-		WorkStatus:         response.WorkStatus,
-		AssignmentState:    response.AssignmentState,
-		CommentKind:        response.CommentKind,
-		Message:            response.Message,
-		ResultMessage:      response.ResultMessage,
-		FailureDiagnostics: copyFailureDiagnostics(response.FailureDiagnostics),
-		StartedAt:          now,
-		Lines:              []AgentThreadProgressLine{},
-	}
+	thread := taskThreadMessageFromAction(response, sourceMessageID, conversationID, parentThreadID, now)
 	if !taskThreadHasActiveStream(thread) {
 		thread.CompletedAt = now
 	}
@@ -33,31 +19,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 		if threads[i].ThreadID != response.ThreadID {
 			continue
 		}
-		threads[i].RunID = response.RunID
-		if strings.TrimSpace(response.AssignmentID) != "" {
-			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
-		}
-		if threads[i].AgentSnapshot == nil {
-			threads[i].AgentSnapshot = copyTaskThreadAgentSnapshot(response.AgentSnapshot)
-			s.ensureTaskThreadAgentSnapshotLocked(&threads[i], now)
-		}
-		threads[i].WorkStatus = response.WorkStatus
-		threads[i].AssignmentState = response.AssignmentState
-		threads[i].FailureDiagnostics = copyFailureDiagnostics(response.FailureDiagnostics)
-		threads[i].CommentKind = response.CommentKind
-		threads[i].Message = response.Message
-		threads[i].ResultMessage = response.ResultMessage
-		if sourceMessageID != "" {
-			threads[i].SourceMessageID = sourceMessageID
-		}
-		if threads[i].StartedAt.IsZero() {
-			threads[i].StartedAt = now
-		}
-		if taskThreadHasActiveStream(threads[i]) {
-			threads[i].CompletedAt = time.Time{}
-		} else {
-			threads[i].CompletedAt = now
-		}
+		s.updateTaskThreadMessageFromActionLocked(&threads[i], response, sourceMessageID, conversationID, parentThreadID, now)
 		s.taskThreads[response.TaskID] = threads
 		return
 	}

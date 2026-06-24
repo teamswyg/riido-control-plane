@@ -25,6 +25,8 @@ type AIAgentTaskThreadHistoryMessage struct {
 
 type AIAgentTaskThreadHistoryRecord struct {
 	ThreadID        string                            `json:"thread_id"`
+	ConversationID  string                            `json:"conversation_id"`
+	ParentThreadID  string                            `json:"parent_thread_id,omitempty"`
 	TaskID          string                            `json:"task_id"`
 	AssignmentID    string                            `json:"assignment_id,omitempty"`
 	AgentID         string                            `json:"agent_id"`

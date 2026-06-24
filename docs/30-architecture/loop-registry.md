@@ -28,7 +28,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | Claim | Loop | Files | Verifiers | Semantic Hash |
 | --- | --- | ---: | ---: | --- |
 | `deleted_agent_threads_must_remain_visible` | `ai_thread_history` | `4` | `3` | `090a4a1be855` |
-| `thread_history_must_keep_user_followups` | `ai_thread_history` | `4` | `2` | `a302d7191e2b` |
+| `thread_history_must_keep_user_followups` | `ai_thread_history` | `4` | `2` | `b750489076ff` |
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `92594cfc172f` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `32a647f595ad` |
 

@@ -41,6 +41,8 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(principal 
 	snapshotID := taskThreadAgentSnapshotID(thread.AgentSnapshot)
 	record := AIAgentTaskThreadHistoryRecord{
 		ThreadID:        thread.ThreadID,
+		ConversationID:  taskThreadConversationID(thread),
+		ParentThreadID:  taskThreadParentThreadID(thread),
 		TaskID:          thread.TaskID,
 		AssignmentID:    thread.AssignmentID,
 		AgentID:         thread.AgentID,
