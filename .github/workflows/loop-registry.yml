@@ -34,6 +34,12 @@ on:
       - "internal/riidoaiserver/ai_agent_client_visible_limit_message.go"
       - "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"
       - "internal/riidoaiserver/ai_agent_client_visible_messages.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_apply_assignment_metadata_action_response.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_assignment_event_action_response.go"
+      - "internal/riidoaiserver/ai_agent_client_development_record_assignment_status.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_message_policy.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_helpers_test.go"
       - "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
@@ -93,6 +99,12 @@ on:
       - "internal/riidoaiserver/ai_agent_client_visible_limit_message.go"
       - "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"
       - "internal/riidoaiserver/ai_agent_client_visible_messages.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_apply_assignment_metadata_action_response.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_assignment_event_action_response.go"
+      - "internal/riidoaiserver/ai_agent_client_development_record_assignment_status.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_message_policy.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_helpers_test.go"
       - "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
@@ -148,7 +160,7 @@ jobs:
           go test ./tools/aiagentclientapi -run 'Test(GeneratedDocMatchesManifest|RunWritesEvidence)$' -count=1
           go test ./tools/evidencegraph ./tools/harnesspromotion ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision -count=1
           go test ./internal/riidoaiserver \
-            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory)$' \
+            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory|AIAgentIntentDialogueScenarioStaysInConversation)$' \
             -count=1
           go run ./tools/loopregistry \
             -check-doc \
