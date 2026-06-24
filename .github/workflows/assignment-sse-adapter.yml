@@ -21,7 +21,7 @@ on:
       - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_*.go"
-      - "internal/riidoaiserver/store_actor_test.go"
+      - "internal/riidoaiserver/store_actor_*_test.go"
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_state.go"
   pull_request:
@@ -43,7 +43,7 @@ on:
       - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/store.go"
       - "internal/riidoaiserver/store_*.go"
-      - "internal/riidoaiserver/store_actor_test.go"
+      - "internal/riidoaiserver/store_actor_*_test.go"
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_state.go"
 
