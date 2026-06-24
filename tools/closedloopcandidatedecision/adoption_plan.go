@@ -23,3 +23,12 @@ func verifyAdoptionPlan(item closedLoopCandidate) error {
 	}
 	return nil
 }
+
+func adoptionCommandFor(item closedLoopCandidate, artifact string) (string, bool) {
+	for _, step := range item.AdoptionPlan {
+		if step.Artifact == artifact {
+			return step.Command, true
+		}
+	}
+	return "", false
+}

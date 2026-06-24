@@ -414,7 +414,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "df32cafc08877da4e41c8c7be69ff89b76efd5a7a03d08aa617398b957fa5314"
+      "semantic_hash": "f6d649744cfdfd9788b931849d4bcceb16c22dcf56dce6b3bd73a7a7dbe4fa77"
     },
     {
       "id": "closed_loop_candidates_must_carry_adoption_plan",
@@ -449,7 +449,7 @@
         "docs/30-architecture/closed-loop-candidate-decision.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e09a43e9b549889bd17f0eba9a2cfab0a90f626e86550d068f3b03ffe00d0c69"
+      "semantic_hash": "efa51e2cd2e5eb4edee084a377008099821bb81f8ceef2fd509ae2a7c1b04820"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -674,7 +674,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "82a017323f2b92e0b06cf899610232066b9a489829d0c88097baaf7e5749bd53"
+      "semantic_hash": "e2c6f68c9dedd9d3e94a1548c96738bdcd4499087d1dfc23d4038cd7c5683a87"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -698,7 +698,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "15349e5b5acdec3801a34b80db00d1b9b7312c69a010c3a4d09277f13165cc59"
+      "semantic_hash": "33de0973c63de19f9488364f2da5901788bc997810f5a00c700ce38fca2ccd5f"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -822,7 +822,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "12ac4b46961827645414ca1edefbe77d6e9074e1eddaec230faad949d91ab2c6"
+      "semantic_hash": "f50616ef117531a8c86bbb8d39ca164cdbf89fa06c06ada35946f77eb911dda3"
     },
     {
       "id": "candidate_decision_next_artifact_must_be_required",
@@ -839,15 +839,38 @@
       ],
       "verifiers": [
         "TestCandidateDecisionRejectsUnknownNextArtifact",
-        "TestCandidateDecisionEvidenceBindsNextArtifact",
-        "TestCandidateDecisionEvidenceFileIncludesNextArtifact"
+        "TestCandidateDecisionEvidenceBindsNextArtifactCommand",
+        "TestCandidateDecisionEvidenceFileIncludesNextArtifactCommand"
       ],
       "generated_docs": [
         "docs/30-architecture/closed-loop-candidate-decision.md",
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ae56f1f2908f743b46dc32362c1833d4aa5888ba9adf93261f28f90d00d0f758"
+      "semantic_hash": "f8b1129b94942972ca74277099f897616d8660b54eec71c3537aae000fb107ee"
+    },
+    {
+      "id": "candidate_decision_evidence_must_expose_next_command",
+      "statement": "Closed-loop candidate decision evidence must expose the executable next_command selected from the consumed candidate adoption_plan for the chosen next_artifact.",
+      "loop": "closed_loop_candidate_decision",
+      "files": [
+        "docs/30-architecture/closed-loop-candidate-decision.riido.json",
+        "tools/closedloopcandidatedecision/adoption_plan.go",
+        "tools/closedloopcandidatedecision/candidate.go",
+        "tools/closedloopcandidatedecision/decision_artifact_test.go",
+        "tools/closedloopcandidatedecision/evidence.go",
+        "tools/closedloopcandidatedecision/types_more.go"
+      ],
+      "verifiers": [
+        "TestCandidateDecisionEvidenceBindsNextArtifactCommand",
+        "TestCandidateDecisionEvidenceFileIncludesNextArtifactCommand"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/closed-loop-candidate-decision.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "24e7c355080628de7f4790298a327a0a2b893d23df4793c4b9c64513b12ab567"
     }
   ],
   "evidence_graph": [
@@ -949,6 +972,11 @@
     {
       "from": "closed_loop_candidate_decision",
       "to": "candidate_decision_next_artifact_must_be_required",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate_decision",
+      "to": "candidate_decision_evidence_must_expose_next_command",
       "relation": "enforces"
     }
   ],

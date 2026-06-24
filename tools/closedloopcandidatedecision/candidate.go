@@ -23,10 +23,15 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		if err := verifyDecisionNextArtifact(item, decision); err != nil {
 			return result, err
 		}
+		command, ok := adoptionCommandFor(item, decision.NextArtifact)
+		if !ok {
+			return result, fmt.Errorf("candidate %s has no command for next_artifact %s", item.ID, decision.NextArtifact)
+		}
 		result.DecisionIDs = append(result.DecisionIDs, item.ID)
 		result.DecisionArtifacts = append(result.DecisionArtifacts, decisionArtifactEvidence{
 			CandidateID:  item.ID,
 			NextArtifact: decision.NextArtifact,
+			NextCommand:  command,
 		})
 	}
 	if err := verifyNoOrphanDecisions(m.Decisions, candidate.Candidates); err != nil {

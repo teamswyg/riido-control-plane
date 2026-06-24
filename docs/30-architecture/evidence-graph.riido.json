@@ -418,6 +418,28 @@
       "next_loop": "closed_loop_candidate_decision"
     },
     {
+      "id": "candidate_decision_next_command_loop",
+      "observation": "Candidate decision evidence selected a next_artifact but did not expose the executable command from the consumed candidate adoption_plan.",
+      "hypothesis": "Copying the selected adoption command into decision evidence lets agents continue from the decision artifact without reopening narrative docs or candidate JSON by hand.",
+      "claims": ["candidate_decision_evidence_must_expose_next_command"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_artifact_test.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "tool", "path": "tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Candidate decision evidence now exposes next_command for the chosen next_artifact, preserving the executable follow-up path through the decision layer.",
+      "next_loop": "closed_loop_candidate_decision"
+    },
+    {
       "id": "pre_commit_claim_binding_loop",
       "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier.",
       "hypothesis": "A pre-commit hook can run loop registry claim/doc/impact verification before PR creation.",

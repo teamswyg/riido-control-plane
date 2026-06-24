@@ -10,6 +10,7 @@ type verifyResult struct {
 type decisionArtifactEvidence struct {
 	CandidateID  string `json:"candidate_id"`
 	NextArtifact string `json:"next_artifact"`
+	NextCommand  string `json:"next_command"`
 }
 
 type candidateEvidence struct {
