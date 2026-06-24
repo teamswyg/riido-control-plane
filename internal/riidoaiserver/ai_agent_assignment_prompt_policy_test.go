@@ -26,6 +26,10 @@ func TestAssignmentPromptAsksForIntentOnAmbiguousMarketingDocument(t *testing.T)
 	}
 	for _, want := range []string{
 		"## Interaction Policy",
+		"## Task Interpretation",
+		"- intent_class: intent_oriented",
+		"- first_response_policy: ask_for_intent_before_deliverables_when_first_action_is_ambiguous",
+		"- clarification_question_example: 어떤 작업부터 진행할까요?",
 		"Classify the task context as either an explicit instruction or background/intent before doing work.",
 		"ask a concise clarification question in the existing AI Agent thread before producing deliverables.",
 		"Use the user's apparent language and product tone when asking clarification questions or reporting provider limits.",
@@ -55,6 +59,9 @@ func TestFollowupPromptKeepsLatestUserInstructionAuthoritative(t *testing.T) {
 		"보유하신 크레딧이 부족합니다.",
 		"### New User Instruction",
 		"팩트 기반으로 작성하자",
+		"### Follow-up Execution Policy",
+		"The New User Instruction is authoritative for this run.",
+		"Re-read the latest Task Document before answering because it may have changed after the previous run.",
 	} {
 		if !strings.Contains(prompt, want) {
 			t.Fatalf("follow-up prompt missing %q:\n%s", want, prompt)

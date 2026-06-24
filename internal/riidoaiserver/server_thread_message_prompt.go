@@ -18,6 +18,7 @@ func appendAIAgentTaskThreadMessagePrompt(prompt string, thread AIAgentTaskThrea
 	appendPreviousThreadMessage(&b, thread.Message)
 	b.WriteString("\n\n### New User Instruction\n")
 	b.WriteString(strings.TrimSpace(req.Body))
+	appendFollowupExecutionPolicy(&b)
 	return strings.TrimSpace(b.String())
 }
 
@@ -32,5 +33,22 @@ func appendPreviousThreadMessage(b *strings.Builder, previousMessage string) {
 	if previousMessage = strings.TrimSpace(previousMessage); previousMessage != "" {
 		b.WriteString("\n\n### Previous Thread Message\n")
 		b.WriteString(previousMessage)
+	}
+}
+
+func appendFollowupExecutionPolicy(b *strings.Builder) {
+	b.WriteString("\n\n### Follow-up Execution Policy\n")
+	for _, rule := range followupExecutionPolicyRules() {
+		b.WriteString("- ")
+		b.WriteString(rule)
+		b.WriteString("\n")
+	}
+}
+
+func followupExecutionPolicyRules() []string {
+	return []string{
+		"The New User Instruction is authoritative for this run.",
+		"Re-read the latest Task Document before answering because it may have changed after the previous run.",
+		"If the follow-up asks for research and provider quota is exhausted, return the provider limit result message instead of asking for local tool approval.",
 	}
 }

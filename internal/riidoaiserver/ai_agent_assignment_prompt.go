@@ -98,6 +98,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	builder.WriteString("Provider-specific instruction placement is owned by riido-daemon.\n\n")
 
 	writePromptInteractionPolicy(&builder)
+	writePromptTaskInterpretation(&builder, component, document)
 
 	builder.WriteString("## Task\n")
 	writePromptLine(&builder, "task_id", taskID)
