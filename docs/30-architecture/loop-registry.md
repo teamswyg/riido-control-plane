@@ -23,7 +23,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `closed_loop_candidate` | `closed_loop` | `24` | `1440` | `.github/workflows/loop-registry.yml` | `` | `2` |
 | `closed_loop_candidate_intake` | `closed_loop` | `24` | `1440` | `.github/workflows/closed-loop-candidate-intake.yml` | `` | `2` |
 | `closed_loop_candidate_decision` | `closed_loop` | `24` | `1440` | `.github/workflows/closed-loop-candidate-decision.yml` | `` | `2` |
-| `open_decision_queue` | `closed_loop` | `168` | `0` | `.github/workflows/open-questions.yml` | `` | `2` |
+| `open_decision_queue` | `closed_loop` | `168` | `1440` | `.github/workflows/open-questions.yml` | `` | `2` |
 
 ## Claim Bindings
 

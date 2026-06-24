@@ -1,6 +1,8 @@
 name: open-questions
 
 on:
+  schedule:
+    - cron: "41 18 * * *"
   push:
     branches: [main]
     paths:
