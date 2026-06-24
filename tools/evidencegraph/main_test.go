@@ -14,6 +14,17 @@ func TestEvidenceGraphManifestVerifies(t *testing.T) {
 	}
 }
 
+func TestEvidenceGraphVerifyAlias(t *testing.T) {
+	if err := mainRun([]string{
+		"-repo", "../..",
+		"-manifest", defaultManifest,
+		"-verify",
+		"-evidence-out", t.TempDir() + "/evidence.json",
+	}); err != nil {
+		t.Fatalf("mainRun -verify: %v", err)
+	}
+}
+
 func TestArtifactEvidenceMustBeRedacted(t *testing.T) {
 	m, err := loadManifest("../../" + defaultManifest)
 	if err != nil {

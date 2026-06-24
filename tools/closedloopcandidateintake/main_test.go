@@ -13,6 +13,17 @@ func TestClosedLoopCandidateIntakeManifestVerifies(t *testing.T) {
 	}
 }
 
+func TestClosedLoopCandidateIntakeVerifyAlias(t *testing.T) {
+	if err := mainRun([]string{
+		"-repo", "../..",
+		"-manifest", defaultManifest,
+		"-verify",
+		"-evidence-out", t.TempDir() + "/evidence.json",
+	}); err != nil {
+		t.Fatalf("mainRun -verify: %v", err)
+	}
+}
+
 func TestCandidateIntakeRejectsMissingGraph(t *testing.T) {
 	m := loadIntakeManifestForTest(t)
 	m.Sources[0].EvidenceGraphManifest = "missing.json"

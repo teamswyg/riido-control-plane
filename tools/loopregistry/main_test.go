@@ -13,6 +13,17 @@ func TestLoopRegistryManifestVerifies(t *testing.T) {
 	}
 }
 
+func TestLoopRegistryVerifyAlias(t *testing.T) {
+	if err := mainRun([]string{
+		"-repo", "../..",
+		"-manifest", defaultManifest,
+		"-verify",
+		"-evidence-out", t.TempDir() + "/evidence.json",
+	}); err != nil {
+		t.Fatalf("mainRun -verify: %v", err)
+	}
+}
+
 func TestClaimSemanticHashDriftFails(t *testing.T) {
 	root, err := findRepoRoot("../..")
 	if err != nil {
