@@ -25,7 +25,8 @@ func TestClaimSurfaceEvidenceIncludesCodeTestDocBindings(t *testing.T) {
 	for _, surface := range result.ClaimSurfaces {
 		if len(surface.CodePaths)+len(surface.ManifestPaths) == 0 ||
 			len(surface.TestPaths)+len(surface.Verifiers) == 0 ||
-			len(surface.GeneratedDocs) == 0 {
+			len(surface.GeneratedDocs) == 0 ||
+			len(surface.VerifierCommands) == 0 {
 			t.Fatalf("incomplete claim surface: %+v", surface)
 		}
 	}
@@ -39,5 +40,26 @@ func TestClaimSurfaceRejectsNarrativeOnlyClaim(t *testing.T) {
 	}
 	if err := verifyClaimSurface(claim); err == nil {
 		t.Fatal("expected narrative-only claim to fail")
+	}
+}
+
+func TestClaimSurfaceEvidenceIncludesTargetVerifierCommands(t *testing.T) {
+	claim := claimBinding{
+		ID:        "claim",
+		Verifiers: []string{"TestGeneratedDocMatchesManifest"},
+		Files: []string{
+			"tools/aiagentclientapi/main_test.go",
+		},
+	}
+	tests := map[string][]string{
+		"TestGeneratedDocMatchesManifest": {
+			"./tools/aiagentclientapi",
+			"./tools/configreference",
+		},
+	}
+	surface := claimSurfaceFor(claim, tests)
+	want := "go test ./tools/aiagentclientapi -run '^(TestGeneratedDocMatchesManifest)$' -count=1"
+	if len(surface.VerifierCommands) != 1 || surface.VerifierCommands[0] != want {
+		t.Fatalf("commands = %#v, want %q", surface.VerifierCommands, want)
 	}
 }
