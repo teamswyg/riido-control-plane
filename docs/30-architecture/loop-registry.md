@@ -6,12 +6,12 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 
 ## Summary
 
-- loops: `5`
+- loops: `6`
 - harness loops: `1`
-- closed loops: `4`
+- closed loops: `5`
 - claim bindings: `6`
-- evidence graph edges: `10`
-- max evidence expiry hours: `24`
+- evidence graph edges: `11`
+- max evidence expiry hours: `168`
 
 ## Loops
 
@@ -22,6 +22,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `closed_loop_candidate` | `closed_loop` | `24` | `1440` | `.github/workflows/loop-registry.yml` | `` | `2` |
 | `closed_loop_candidate_intake` | `closed_loop` | `24` | `1440` | `.github/workflows/closed-loop-candidate-intake.yml` | `` | `2` |
 | `closed_loop_candidate_decision` | `closed_loop` | `24` | `1440` | `.github/workflows/closed-loop-candidate-decision.yml` | `` | `2` |
+| `open_decision_queue` | `closed_loop` | `168` | `0` | `.github/workflows/open-questions.yml` | `` | `2` |
 
 ## Claim Bindings
 
@@ -46,6 +47,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `ai_thread_history` --enforces--> `same_provider_agents_must_keep_distinct_threads`
 - `ai_thread_history` --enforces--> `thread_history_v3_must_expose_stable_conversation_grouping`
 - `closed_loop_candidate` --enforces--> `loop_verifiers_must_accept_verify_intent`
+- `closed_loop_candidate_decision` --defers_unowned_boundary_to--> `open_decision_queue`
 
 ## Evidence Loop
 

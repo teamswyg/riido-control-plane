@@ -10,7 +10,7 @@ This reader is generated from the control-plane decision queue manifest.
 
 ## Coverage
 
-Questions: `7`; open: `6`; resolved: `1`.
+Questions: `8`; open: `7`; resolved: `1`.
 
 ## Decision Queue
 
@@ -67,6 +67,15 @@ Questions: `7`; open: `6`; resolved: `1`.
 - question: How are review/demo accounts rotated, disabled, and audited in production?
 - stance: Public repo stores only safe seed shape and token-hash provisioning; operations lifecycle is private evidence.
 - next artifact: review account lifecycle policy
+
+### Q-CP-008
+
+- status: `open`
+- area: Desktop daemon lifecycle
+- owner: `desktop-daemon-runtime`
+- question: Should a desktop-managed daemon stop on app quit for every environment profile, or should staging/development/production daemon instances have profile-scoped lifecycle ownership that can stay online independently?
+- stance: Current evidence shows desktop app quit can gracefully stop the desktop-managed daemon, leaving SaaS runtime settings to show the device offline. Public control-plane should expose daemon state and stop-source evidence but must not infer local launcher intent. The ownership rule belongs in the desktop/daemon lifecycle contract.
+- next artifact: desktop daemon lifecycle/profile ownership manifest with stop-source evidence
 
 ### Q-CP-007
 
