@@ -10,7 +10,8 @@
     "every evidence chain must connect observation, hypothesis, change, verifier, evidence, decision, and next loop",
     "change and verifier refs must point to existing repository files or package directories",
     "artifact evidence refs are names only and must stay redacted",
-    "evidence graph records explain why a loop exists without relying on narrative memory"
+    "evidence graph records explain why a loop exists without relying on narrative memory",
+    "frontend handoff decisions that change thread semantics must connect to the closed-loop claim that enforces them"
   ],
   "chains": [
     {
@@ -50,6 +51,31 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
       "decision": "PR impact verification is part of the loop registry gate.",
+      "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "ai_thread_history_conversation_grouping_loop",
+      "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card.",
+      "hypothesis": "Binding conversation_id and parent_thread_id to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations.",
+      "changes": [
+        {"kind": "manifest", "path": "docs/20-domain/ai-agent-client-api.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "api", "path": "internal/riidoaiserver/ai_agent_client_thread_history_api.go"},
+        {"kind": "projection", "path": "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/aiagentclientapi"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-api.yml"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "ai-agent-client-api-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, and same-agent reassignment receives a distinct conversation.",
       "next_loop": "ai_thread_history"
     },
     {
