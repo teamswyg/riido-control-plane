@@ -9,8 +9,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `6`
 - harness loops: `1`
 - closed loops: `5`
-- claim bindings: `14`
-- evidence graph edges: `17`
+- claim bindings: `15`
+- evidence graph edges: `18`
 - max evidence expiry hours: `168`
 
 ## Loops
@@ -37,11 +37,12 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `23` | `8` | `db1e1b25a539` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `9` | `2` | `36ae2e3a1ebf` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `b38c817bc4be` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `f5707f9b47e9` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `d24e3aab56b4` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `19510d3503e6` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `9c04c4ccec35` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `8` | `3` | `56b77c1280f6` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `6` | `4` | `ecfd5e2a0c5f` |
-| `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `8` | `4` | `b632f70d02fb` |
+| `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `8` | `4` | `12b95a07a295` |
+| `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `4201a0be4e01` |
 
 ## Claim Surface Evidence
 
@@ -61,6 +62,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `loop_evidence_artifacts_must_self_expire` | `4` | `3` | `1` | `2` | `3` |
 | `candidate_intake_must_consume_candidate_artifact` | `3` | `2` | `1` | `3` | `4` |
 | `candidate_decisions_must_match_consumed_candidates` | `3` | `4` | `1` | `3` | `4` |
+| `candidate_decision_next_artifact_must_be_required` | `5` | `1` | `1` | `3` | `3` |
 
 ## Evidence Graph
 
@@ -81,6 +83,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `closed_loop_candidate` --enforces--> `evidence_graph_must_cover_loop_registry_claims`
 - `closed_loop_candidate` --enforces--> `evidence_graph_refs_must_trigger_evidence_workflow`
 - `closed_loop_candidate_decision` --enforces--> `candidate_decisions_must_match_consumed_candidates`
+- `closed_loop_candidate_decision` --enforces--> `candidate_decision_next_artifact_must_be_required`
 
 ## Evidence Loop
 

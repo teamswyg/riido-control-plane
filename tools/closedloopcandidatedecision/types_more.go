@@ -1,9 +1,15 @@
 package main
 
 type verifyResult struct {
-	DecisionCount  int      `json:"decision_count"`
-	CandidateCount int      `json:"candidate_count"`
-	DecisionIDs    []string `json:"decision_ids"`
+	DecisionCount     int                        `json:"decision_count"`
+	CandidateCount    int                        `json:"candidate_count"`
+	DecisionIDs       []string                   `json:"decision_ids"`
+	DecisionArtifacts []decisionArtifactEvidence `json:"decision_artifacts"`
+}
+
+type decisionArtifactEvidence struct {
+	CandidateID  string `json:"candidate_id"`
+	NextArtifact string `json:"next_artifact"`
 }
 
 type candidateEvidence struct {

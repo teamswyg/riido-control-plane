@@ -13,15 +13,30 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 	decisionByID := decisionsByID(m.Decisions)
 	result := verifyResult{CandidateCount: candidate.CandidateCount}
 	for _, item := range candidate.Candidates {
-		if _, ok := decisionByID[item.ID]; !ok {
+		decision, ok := decisionByID[item.ID]
+		if !ok {
 			return result, fmt.Errorf("candidate %s has no decision record", item.ID)
 		}
+		if err := verifyDecisionNextArtifact(item, decision); err != nil {
+			return result, err
+		}
 		result.DecisionIDs = append(result.DecisionIDs, item.ID)
+		result.DecisionArtifacts = append(result.DecisionArtifacts, decisionArtifactEvidence{
+			CandidateID:  item.ID,
+			NextArtifact: decision.NextArtifact,
+		})
 	}
 	if err := verifyNoOrphanDecisions(m.Decisions, candidate.Candidates); err != nil {
 		return result, err
 	}
 	return result, nil
+}
+
+func verifyDecisionNextArtifact(candidate closedLoopCandidate, decision decisionRecord) error {
+	if !containsString(candidate.RequiredNextArtifacts, decision.NextArtifact) {
+		return fmt.Errorf("candidate %s decision next_artifact %s is not required by candidate artifact", candidate.ID, decision.NextArtifact)
+	}
+	return nil
 }
 
 func decisionsByID(decisions []decisionRecord) map[string]decisionRecord {
