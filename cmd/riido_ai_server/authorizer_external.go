@@ -22,5 +22,5 @@ func newExternalAuthorizer(endpoint, apiKey string) (riidoaiserver.RequestAuthor
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", envExternalAuthzURL, err)
 	}
-	return authorizer, nil
+	return riidoaiserver.NewCoalescingAuthorizer(authorizer)
 }

@@ -7,7 +7,7 @@
   "workflow": ".github/workflows/external-authorizer.yml",
   "evidence_artifact": "request-authorization-evidence",
   "owner_package": "internal/riidoaiserver",
-  "surfaces": [{"name":"RequestAuthorizer","role":"authorization decision port"},{"name":"AuthorizationRequest","role":"resource/action request model"},{"name":"AuthorizationResult","role":"server-owned principal projection"},{"name":"StaticTokenAuthorizer","role":"static request-token evaluator"},{"name":"FallbackAuthorizer","role":"unauthenticated-only chain"},{"name":"ExternalHTTPAuthorizer","role":"external HTTP adapter"},{"name":"ExternalHTTPAuthorizerConfig","role":"external adapter runtime config"}],
+  "surfaces": [{"name":"RequestAuthorizer","role":"authorization decision port"},{"name":"AuthorizationRequest","role":"resource/action request model"},{"name":"AuthorizationResult","role":"server-owned principal projection"},{"name":"StaticTokenAuthorizer","role":"static request-token evaluator"},{"name":"FallbackAuthorizer","role":"unauthenticated-only chain"},{"name":"ExternalHTTPAuthorizer","role":"external HTTP adapter"},{"name":"ExternalHTTPAuthorizerConfig","role":"external adapter runtime config"},{"name":"CoalescingAuthorizer","role":"in-flight duplicate authorization collapse without TTL caching"}],
   "resources": ["agent", "ai_agent_client", "agent_catalog", "component_task", "component_task_events", "metrics"],
   "token_transports": [{"id":"generated-client-token","value":"X-Riido-AI-Agent-Token"},{"id":"compat-bearer-token","value":"Authorization: Bearer"},{"id":"device-id","value":"X-Riido-Device-ID"},{"id":"device-secret","value":"X-Riido-Device-Secret"},{"id":"external-api-key","value":"X-Riido-Control-Plane-Authorizer-Key"}],
   "runtime_config_keys": ["RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"],
@@ -17,6 +17,7 @@
     {"id":"external-authorizer","rules":["request-schema-v1","response-schema-v1","opaque-bearer-token","ai-agent-client-workspace-required","api-key-header-server-only","response-disallow-unknown-fields","response-size-limit","allowed-principal-required","admin-role-only"]},
     {"id":"fail-closed","rules":["http-401-unauthenticated","http-403-forbidden","allowed-false-forbidden","non-2xx-service-error","malformed-json-service-error","unsupported-schema-service-error","invalid-role-service-error","network-error-service-error"]},
     {"id":"fallback","rules":["next-only-unauthenticated","forbidden-stops-chain","empty-chain-unauthenticated"]},
+    {"id":"coalescing","rules":["in-flight-only","no-ttl-auth-cache","bearer-token-hashed-in-key","request-scope-separated","concurrent-identical-requests-share-one-hop"]},
     {"id":"cors","rules":["exact-origin-allowlist","method-allowlist","header-allowlist","no-browser-credentials","unsupported-header-rejected"]},
     {"id":"device-principal","rules":["device-headers-server-only","both-device-fields-required","device-auth-before-token-auth","browser-jwt-not-daemon-auth"]}
   ],
@@ -26,6 +27,8 @@
     {"name":"static-token-safety","file":"internal/riidoaiserver/authorization.go","contains":["TokenSHA256","exactly one of token or token_sha256","subtle.ConstantTimeCompare","at least one scope is required"]},
     {"name":"scope-candidates","file":"internal/riidoaiserver/authorization.go","contains":["ai-agent:*","task:\"+req.TaskID+\":stop","agent:\" + req.AgentID + \":\" + string(req.Action)"]},
     {"name":"fallback","file":"internal/riidoaiserver/authorization.go","contains":["ErrAuthorizationUnauthenticated","continue","return AuthorizationResult{}, err"]},
+    {"name":"coalescing","file":"internal/riidoaiserver/authorization_coalescing.go","contains":["type CoalescingAuthorizer struct","joinOrStart","waitForCoalescedAuthorization"]},
+    {"name":"coalescing-tests","file":"internal/riidoaiserver/authorization_coalescing_test.go","contains":["TestCoalescingAuthorizerCollapsesConcurrentIdenticalRequests","TestCoalescingAuthorizerKeepsDifferentRequestsSeparate","TestCoalescingAuthorizerDoesNotExposeBearerTokenInKey"]},
     {"name":"external-contract","file":"internal/riidoaiserver/external_authorizer.go","contains":["ExternalAuthorizerRequestSchemaVersion","ExternalAuthorizerResponseSchemaVersion","ExternalAuthorizerAPIKeyHeader","DisallowUnknownFields","io.LimitReader(resp.Body, 1<<20)"]},
     {"name":"external-fail-closed-tests","file":"internal/riidoaiserver/external_authorizer_test.go","contains":["TestExternalHTTPAuthorizerMapsDeniedResponses","TestExternalHTTPAuthorizerFailsClosedOnProviderError","TestFallbackAuthorizerUsesNextOnlyForUnauthenticated"]},
     {"name":"runtime-env","file":"cmd/riido_ai_server/env_names.go","contains":["envWebAllowedOrigins","RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"]},
@@ -41,7 +44,7 @@
     "hypothesis": "A request-authorization SSOT gate can catch drift in token transport, static scopes, external authorizer failure mapping, fallback chaining, and CORS policy before security semantics regress.",
     "execute": "Generate this reader doc from the manifest and run the requestauth verifier in CI.",
     "evaluate": "The verifier checks required surfaces, resources, token transports, contract versions, rule groups, source anchors, generated doc freshness, and CLI evidence output.",
-    "retrospective": "This slice proves public control-plane request authorization semantics; production IdP, JWKS/OIDC, secret rotation, Terraform, and live deployment evidence remain out of scope."
+    "retrospective": "This slice proves public control-plane request authorization semantics and in-flight duplicate external authorization collapse; production IdP, JWKS/OIDC, secret rotation, Terraform, and live deployment evidence remain out of scope."
   },
   "non_goals": ["production IdP rollout", "tenant claim mapping", "JWKS/OIDC validation", "Terraform", "SSM secret rotation", "production token values", "generated frontend implementation"]
 }
