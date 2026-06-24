@@ -137,7 +137,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | Rule | Detail |
 | --- | --- |
 | `conversation-card-ordering` | First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root. |
-| `message-row-ordering` | Within one thread record, render messages by observed_at and then seq. Use message_id as the stable row key, not body text. |
+| `message-row-ordering` | Within one thread record, render messages by observed_at, then role order user -> progress -> agent, then seq, then message_id. Use message_id as the stable row key, not body text. |
 | `progress-dedupe-ordering` | For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility. |
 | `late-terminal-guard` | If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running. |
 

@@ -308,7 +308,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3daacf4892612e4dce09615e5b2e9285bb17c22c5a9b520b757f8aef636d1be1"
+      "semantic_hash": "873bd9477b62d38081d047bbc95f7160469581f6577954a3284e628634c737cb"
     },
     {
       "id": "expired_harness_evidence_must_not_promote_candidates",
@@ -390,9 +390,16 @@
         "internal/riidoaiserver/ai_agent_client_development_func_assignment_event_action_response.go",
         "internal/riidoaiserver/ai_agent_client_development_record_assignment_status.go",
         "internal/riidoaiserver/ai_agent_client_development_thread_message_policy.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_progress_input_from_request.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_progress_observed_at.go",
+        "internal/riidoaiserver/ai_agent_client_thread_history_messages.go",
+        "internal/riidoaiserver/ai_agent_client_thread_history_sort.go",
         "internal/riidoaiserver/ai_agent_client_development_func_client_visible_task_thread_text.go",
         "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go",
         "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_helpers_test.go",
+        "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go",
+        "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_helpers_test.go",
+        "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_assert_test.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_metadata_test.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_component_intent_test.go",
@@ -412,6 +419,7 @@
         "TestAssignmentPromptKeepsExplicitInstructionExecutable",
         "TestFollowupPromptKeepsLatestUserInstructionAuthoritative",
         "TestAIAgentIntentDialogueScenarioStaysInConversation",
+        "TestAIAgentIntentDialogueScenarioKeepsProgressAndLimitResult",
         "TestClientVisibleTaskThreadTextLocalizesProviderLimitMessages",
         "TestFailureDiagnosticsLocalizesProviderLimitMessages",
         "TestVerifyAliasChecksGeneratedDoc",
@@ -421,7 +429,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "8e97f4ddd5ec25c623359aa54360e549c24f074031dd2b7a9028b2b16d1caead"
+      "semantic_hash": "440496edfaee9e7467a7b209935ddec8b7845816644f22e817679546ca590754"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
@@ -467,7 +475,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "2d5eaf24bb69b817c8747c9519203c15e366db09fc515ef939f9a2950b8c97d9"
+      "semantic_hash": "11198d172b2350146a63a5bb35ea3eefb700fd062cad5367db5d370f0f623bfe"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -491,7 +499,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "19510d3503e6a496bb7082b013f45fc5e8931cc1c3319f7fa459f34c5407ccbd"
+      "semantic_hash": "d703818a0f2ca616e3c7c6e64d6736a9fd9a114e5308383f762ffdc603b9a09e"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -515,7 +523,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9c04c4ccec35dfc4c242f72e1db7c859ec4c06db52b4cf72a5dc20d16595a92e"
+      "semantic_hash": "5fd7d12b2701653ce62624d5da1ce832f127578af602ed2b61ee8d9f86b8246b"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
