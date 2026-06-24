@@ -16,6 +16,16 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 | `ai-agent-client-testnet-smoke` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `ai-agent-client-testnet-load` | `ai-agent-client-testnet-load-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 
+## Assertions
+
+- closed-loop candidate artifacts must be redacted before intake
+- each candidate must name the adoption artifacts required to become a closed loop
+- each candidate must include an adoption_plan that covers every required next artifact with an executable command
+- intake sources must be backed by the producer manifest, loop registry, and evidence graph
+- candidate intake must run on a schedule so stale candidates do not rely on human memory
+- candidate intake verification must fail when no candidate artifact is supplied
+- scheduled candidate intake must download the latest live candidate artifacts from each producer harness workflow instead of validating only a fixture
+
 ## Evidence Loop
 
 - Observation: Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.

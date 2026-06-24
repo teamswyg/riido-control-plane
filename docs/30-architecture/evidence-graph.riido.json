@@ -90,6 +90,32 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "closed_loop_candidate_adoption_plan_loop",
+      "observation": "Closed-loop candidates named required artifact types, but the candidate artifact did not itself carry executable commands for producing or verifying those artifacts.",
+      "hypothesis": "Embedding an adoption_plan in each candidate lets agents act from the artifact even if they do not read the surrounding documentation.",
+      "claims": ["closed_loop_candidates_must_carry_adoption_plan"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/harnesspromotion/adoption_plan_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/adoption_plan_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/adoption_plan_test.go"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
+      ],
+      "decision": "Candidate artifacts now carry an adoption_plan, and both intake and decision verification reject candidates whose plan does not cover every required next artifact.",
+      "next_loop": "closed_loop_candidate_decision"
+    },
+    {
       "id": "claim_binding_impact_loop",
       "observation": "Business claims could change without bound code or tests changing in the same pull request.",
       "hypothesis": "Comparing the PR diff against the loop registry can force claim meaning changes to co-change bound code or test paths, not just manifests or generated docs.",
