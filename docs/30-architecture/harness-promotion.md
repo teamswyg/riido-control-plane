@@ -7,18 +7,20 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 ## Summary
 
 - promotion sources: `1`
-- required next artifact refs: `4`
+- required next artifact refs: `6`
+
+- loop registry: `docs/30-architecture/loop-registry.riido.json`
 
 ## Promotion Sources
 
-| Source | Harness Loop | Candidate Artifact | Target |
-| --- | --- | --- | --- |
-| `ai-agent-client-testnet-smoke` | `provider_acceptance_harness` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `closed_loop_candidate` |
+| Source | Harness Loop | Candidate Artifact | Target | Required Next Artifacts |
+| --- | --- | --- | --- | ---: |
+| `ai-agent-client-testnet-smoke` | `provider_acceptance_harness` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 
 ## Evidence Loop
 
 - Observation: Provider and smoke harnesses can find failures, but a failed run can still end as an isolated artifact unless it is converted into a closed-loop candidate.
-- Hypothesis: A promotion sidecar can transform redacted harness summaries into candidate records that name the next artifacts required for a durable closed loop.
-- Execute: Verify harness workflows call this tool after redacted summaries, upload candidate artifacts with strict missing-file behavior, and generate reader/evidence outputs in CI.
-- Evaluate: The verifier fails on missing promotion wiring, missing candidate uploads, missing strict upload behavior, stale generated docs, or unsupported manifest identity.
+- Hypothesis: A promotion sidecar can transform redacted harness summaries into candidate records that name the next artifacts required for a durable closed loop and bind them to the loop registry target.
+- Execute: Verify harness workflows call this tool after redacted summaries, upload candidate artifacts with strict missing-file behavior, verify source-to-loop-registry target bindings, and generate reader/evidence outputs in CI.
+- Evaluate: The verifier fails on missing promotion wiring, missing candidate uploads, missing strict upload behavior, missing adoption artifacts, loop-registry target drift, stale generated docs, or unsupported manifest identity.
 - Retrospective: Harnesses now increase exploration space while failed observations automatically enter the closed-loop backlog instead of relying on human memory.

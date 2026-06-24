@@ -27,3 +27,32 @@ func TestHarnessFailurePromotesUnverifiedClaims(t *testing.T) {
 		t.Fatalf("candidates = %+v", got.Candidates)
 	}
 }
+
+func TestPromotionSourceMustBindLoopRegistryTarget(t *testing.T) {
+	m := loadPromotionManifestForTest(t)
+	m.Sources[0].PromotionTarget = "missing_loop"
+	if _, err := verifyAll("../..", m); err == nil {
+		t.Fatal("expected missing loop registry target to fail")
+	}
+}
+
+func TestPromotionSourceMustRequireDecisionAndGraph(t *testing.T) {
+	m := loadPromotionManifestForTest(t)
+	m.Sources[0].RequiredNextArtifacts = []string{"claim_binding", "verifier", "ci_gate", "redacted_evidence"}
+	if _, err := verifyAll("../..", m); err == nil {
+		t.Fatal("expected missing adoption artifacts to fail")
+	}
+}
+
+func loadPromotionManifestForTest(t *testing.T) manifest {
+	t.Helper()
+	root, err := findRepoRoot("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := loadManifest(repoPath(root, defaultManifest))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return m
+}

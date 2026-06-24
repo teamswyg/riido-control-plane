@@ -1,16 +1,17 @@
 package main
 
 type manifest struct {
-	SchemaVersion    string            `json:"schema_version"`
-	ID               string            `json:"id"`
-	Title            string            `json:"title"`
-	GeneratedDoc     string            `json:"generated_doc"`
-	Workflow         string            `json:"workflow"`
-	EvidenceArtifact string            `json:"evidence_artifact"`
-	EvidenceTool     string            `json:"evidence_tool"`
-	Sources          []promotionSource `json:"sources"`
-	Assertions       []string          `json:"assertions"`
-	Loop             evidenceLoop      `json:"loop"`
+	SchemaVersion        string            `json:"schema_version"`
+	ID                   string            `json:"id"`
+	Title                string            `json:"title"`
+	GeneratedDoc         string            `json:"generated_doc"`
+	Workflow             string            `json:"workflow"`
+	EvidenceArtifact     string            `json:"evidence_artifact"`
+	EvidenceTool         string            `json:"evidence_tool"`
+	LoopRegistryManifest string            `json:"loop_registry_manifest"`
+	Sources              []promotionSource `json:"sources"`
+	Assertions           []string          `json:"assertions"`
+	Loop                 evidenceLoop      `json:"loop"`
 }
 
 type promotionSource struct {

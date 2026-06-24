@@ -30,7 +30,7 @@
         {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true},
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true}
       ],
-      "decision": "Harness failures are promoted into closed-loop candidate artifacts instead of relying on human memory.",
+      "decision": "Harness failures are promoted into closed-loop candidate artifacts that require claim binding, verifier, CI gate, redacted evidence, decision record, and evidence graph edge before adoption.",
       "next_loop": "closed_loop_candidate"
     },
     {
