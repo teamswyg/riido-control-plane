@@ -36,7 +36,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `6e7f25486f11` |
 | `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `758f844270af` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `353a8e4bb6d2` |
-| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `31` | `13` | `440496edfaee` |
+| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `31` | `13` | `ae0d12563977` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `9` | `2` | `36ae2e3a1ebf` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `e59a826e8bde` |
 | `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `655bdf7f0a2e` |

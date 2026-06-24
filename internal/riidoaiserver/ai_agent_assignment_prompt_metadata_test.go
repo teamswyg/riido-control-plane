@@ -22,7 +22,8 @@ func TestAssignmentPromptAsksFromIntentMetadataWhenDocumentMissing(t *testing.T)
 	}
 	for _, want := range []string{
 		"- intent_class: intent_oriented",
-		"- first_response_policy: ask_for_intent_before_deliverables_when_first_action_is_ambiguous",
+		"- intent_gate_required: true",
+		"- first_response_policy: ask_for_intent_before_deliverables_do_not_create_deliverables_until_user_replies",
 		"- clarification_question_example: 어떤 작업부터 진행할까요?",
 		"- title: 신기능 분석 방향 정리",
 		"not provided",

@@ -28,7 +28,8 @@ func TestAssignmentPromptClassifiesIntentComponentTypes(t *testing.T) {
 		assertPromptHasAll(t, prompt.Prompt, []string{
 			"- component_type: " + componentType,
 			"- intent_class: intent_oriented",
-			"- first_response_policy: ask_for_intent_before_deliverables_when_first_action_is_ambiguous",
+			"- intent_gate_required: true",
+			"- first_response_policy: ask_for_intent_before_deliverables_do_not_create_deliverables_until_user_replies",
 			"- clarification_question_example: 어떤 작업부터 진행할까요?",
 		})
 	}
@@ -51,7 +52,8 @@ func TestAssignmentPromptClassifiesIntentFromMetadataWhenDocumentMissing(t *test
 	}
 	assertPromptHasAll(t, prompt.Prompt, []string{
 		"- intent_class: intent_oriented",
-		"- first_response_policy: ask_for_intent_before_deliverables_when_first_action_is_ambiguous",
+		"- intent_gate_required: true",
+		"- first_response_policy: ask_for_intent_before_deliverables_do_not_create_deliverables_until_user_replies",
 		"- clarification_question_example: 어떤 작업부터 진행할까요?",
 	})
 }
@@ -73,6 +75,7 @@ func TestAssignmentPromptKeepsMetadataOnlyWhenDocumentAndIntentMarkersMissing(t 
 	}
 	assertPromptHasAll(t, prompt.Prompt, []string{
 		"- intent_class: metadata_only",
+		"- intent_gate_required: true",
 		"- first_response_policy: infer_from_metadata_then_ask_when_unsure",
 	})
 }
@@ -97,6 +100,7 @@ func TestAssignmentPromptKeepsExplicitInstructionExecutable(t *testing.T) {
 	}
 	assertPromptHasAll(t, prompt.Prompt, []string{
 		"- intent_class: explicit_instruction",
+		"- intent_gate_required: false",
 		"- first_response_policy: execute_the_explicit_instruction",
 	})
 }
