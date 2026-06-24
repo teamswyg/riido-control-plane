@@ -37,8 +37,8 @@ jobs:
   journal:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
@@ -60,7 +60,7 @@ jobs:
             -evidence-out out/assignment-operation-journal-evidence.json
       - name: Test assignment operation journal
         run: go test ./internal/riidoaiserver -run 'AssignmentOperation|AssignmentActiveLease' -count=1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: assignment-operation-journal-evidence

@@ -49,8 +49,8 @@ jobs:
   web-frontend-api:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
@@ -76,7 +76,7 @@ jobs:
           mkdir -p out
           go test ./tools/webfrontendapi -count=1
           go run ./tools/webfrontendapi -check-doc -evidence-out out/web-frontend-api-evidence.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: web-frontend-api-evidence
           path: out/web-frontend-api-evidence.json

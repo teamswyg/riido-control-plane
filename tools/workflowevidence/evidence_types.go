@@ -16,6 +16,7 @@ type evidence struct {
 	MissingEvidence             []string         `json:"missing_evidence_uploads"`
 	Unregistered                []string         `json:"unregistered_gaps"`
 	AcceptedUnused              []string         `json:"accepted_gaps_unused"`
+	DeprecatedActions           []string         `json:"deprecated_actions"`
 	Records                     []workflowRecord `json:"records"`
 	Loop                        evidenceLoop     `json:"loop"`
 }

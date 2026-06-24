@@ -35,7 +35,7 @@ func standaloneManifestFixture() string {
 func standaloneWorkflowFixture(missingMode string) string {
 	return "steps:\n" +
 		"  - run: go run ./tools/risk -check-doc -evidence-out out/risk.json\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      name: risk-evidence\n" +
 		"      path: out/risk.json\n" +

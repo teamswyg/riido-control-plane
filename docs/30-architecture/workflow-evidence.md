@@ -9,66 +9,67 @@
 - accepted gaps: `0`
 - non-strict artifact uploads: `0`
 - missing evidence uploads: `0`
+- deprecated action workflows: `0`
 - unregistered gaps: `0`
 
 ## Evidence Loop
 
 | Step | Evidence |
 | --- | --- |
-| Observe | Several workflows execute tests or live checks while durable JSON evidence can be missing, non-strict, disconnected from the uploaded artifact path, produced by tools that no workflow invokes, produced by tools that are invoked only without evidence-out, or hidden behind an unscanned workflow file extension. |
-| Hypothesis | A workflow evidence manifest can make CI observability debt explicit, prove that each evidence-out file is bound to a fail-closed artifact upload, ensure evidence-capable tools are exercised by public CI in evidence-producing mode, and cover every GitHub Actions workflow extension. |
-| Execute | Scan .yml and .yaml GitHub Actions workflows, classify evidence coverage, require any executable workflow gap to be registered, require artifact upload steps to fail closed, require every evidence-out path to be uploaded, compare evidence-out capable tools with workflow invocations, and require tool-level evidence-out bindings. |
-| Evaluate | The verifier fails on unregistered executable workflows, non-strict artifact uploads, missing evidence-out upload bindings, evidence-capable tools with no workflow coverage, evidence-capable tools without an uploaded evidence-out invocation, stale generated docs, unused accepted-gap entries, or workflow extension drift. |
-| Retrospective | The repository can now distinguish evidence-covered workflows from accepted debt, keep artifact evidence fail-closed, prove evidence-out files reach durable artifacts, require evidence tools to be exercised in CI, require each evidence tool to produce uploaded evidence, scan both workflow extensions, and reduce the gap slice by slice. |
+| Observe | Several workflows execute tests or live checks while durable JSON evidence can be missing, non-strict, disconnected from the uploaded artifact path, produced by tools that no workflow invokes, produced by tools that are invoked only without evidence-out, hidden behind an unscanned workflow file extension, or noisy with GitHub Actions Node runtime deprecation annotations. |
+| Hypothesis | A workflow evidence manifest can make CI observability debt explicit, prove that each evidence-out file is bound to a fail-closed artifact upload, ensure evidence-capable tools are exercised by public CI in evidence-producing mode, cover every GitHub Actions workflow extension, and reject action versions known to emit runtime deprecation annotations. |
+| Execute | Scan .yml and .yaml GitHub Actions workflows, classify evidence coverage, require any executable workflow gap to be registered, require artifact upload steps to fail closed, require every evidence-out path to be uploaded, compare evidence-out capable tools with workflow invocations, require tool-level evidence-out bindings, and fail on deprecated action references. |
+| Evaluate | The verifier fails on unregistered executable workflows, non-strict artifact uploads, missing evidence-out upload bindings, evidence-capable tools with no workflow coverage, evidence-capable tools without an uploaded evidence-out invocation, deprecated action references, stale generated docs, unused accepted-gap entries, or workflow extension drift. |
+| Retrospective | The repository can now distinguish evidence-covered workflows from accepted debt, keep artifact evidence fail-closed, prove evidence-out files reach durable artifacts, require evidence tools to be exercised in CI, require each evidence tool to produce uploaded evidence, scan both workflow extensions, keep CI annotation debt out, and reduce the gap slice by slice. |
 
 ## Workflow Evidence
 
-| Workflow | Status | Evidence Out | Uploaded Evidence | Artifact | Strict Uploads | Reason |
-| --- | --- | ---: | ---: | --- | --- | --- |
-| `.github/workflows/agent-catalog-api-port.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/agent-catalog-http-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/agent-catalog-rbac.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/agent-runtime-binding.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/ai-agent-client-api.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/ai-agent-client-testnet-load.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/ai-agent-client-testnet-smoke.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/ai-agent-generated-endpoint-smoke-matrix.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/api-client-delivery.yml` | `covered` | `3` | `3/3` | `true` | `1/1` | - |
-| `.github/workflows/architecture-docs.yml` | `covered` | `10` | `10/10` | `true` | `10/10` | - |
-| `.github/workflows/assignment-contract.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/assignment-http-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/assignment-operation-journal.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/assignment-operation-replay.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/assignment-operation-runtime.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/assignment-sse-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/assignment-store-actor.yml` | `covered` | `1` | `1/1` | `true` | `4/4` | - |
-| `.github/workflows/aws-adapters-facade.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/ci.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/cloudwatch-emf.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/config-reference.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/container-image-contract.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/context-map.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/deploy-ai-agent-testnet.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/dynamodb-eventbridge-adapters.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/executable-knowledge-coverage.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/external-authorizer.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/generated-client-delivery.yml` | `covered` | `1` | `1/1` | `true` | `2/2` | - |
-| `.github/workflows/go-ci.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/health-ready-cmd.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/integration-matrix.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/metrics-http-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/migration-ledger.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/module-decomposition.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/open-questions.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/provider-status.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/repository-readme.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/review-account-seed.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/runtime-deployment-boundary.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/saas-control-plane.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | - |
-| `.github/workflows/store-safe-routing.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/store-snapshot-file-outbox.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/web-frontend-api.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
-| `.github/workflows/workflow-evidence.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | - |
+| Workflow | Status | Evidence Out | Uploaded Evidence | Artifact | Strict Uploads | Deprecated Actions | Reason |
+| --- | --- | ---: | ---: | --- | --- | ---: | --- |
+| `.github/workflows/agent-catalog-api-port.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/agent-catalog-http-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/agent-catalog-rbac.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/agent-runtime-binding.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/ai-agent-client-api.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/ai-agent-client-testnet-load.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/ai-agent-client-testnet-smoke.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/ai-agent-generated-endpoint-smoke-matrix.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/api-client-delivery.yml` | `covered` | `3` | `3/3` | `true` | `1/1` | `0` | - |
+| `.github/workflows/architecture-docs.yml` | `covered` | `10` | `10/10` | `true` | `10/10` | `0` | - |
+| `.github/workflows/assignment-contract.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/assignment-http-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/assignment-operation-journal.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/assignment-operation-replay.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/assignment-operation-runtime.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/assignment-sse-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/assignment-store-actor.yml` | `covered` | `1` | `1/1` | `true` | `4/4` | `0` | - |
+| `.github/workflows/aws-adapters-facade.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/ci.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/cloudwatch-emf.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/config-reference.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/container-image-contract.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/context-map.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/deploy-ai-agent-testnet.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/dynamodb-eventbridge-adapters.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/executable-knowledge-coverage.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/external-authorizer.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/generated-client-delivery.yml` | `covered` | `1` | `1/1` | `true` | `2/2` | `0` | - |
+| `.github/workflows/go-ci.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/health-ready-cmd.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/integration-matrix.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/metrics-http-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/migration-ledger.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/module-decomposition.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/open-questions.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/provider-status.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/repository-readme.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/review-account-seed.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/runtime-deployment-boundary.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/saas-control-plane.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
+| `.github/workflows/store-safe-routing.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/store-snapshot-file-outbox.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/web-frontend-api.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/workflow-evidence.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 
 ## Assertions
 
@@ -80,5 +81,6 @@
 - workflow inventory must include both .yml and .yaml GitHub Actions files
 - accepted gaps are debt, not completion
 - live deployment and smoke workflows must publish only redacted summary evidence
+- workflows must not use GitHub Actions releases that emit Node runtime deprecation annotations
 - new executable workflows without evidence cannot appear silently
 

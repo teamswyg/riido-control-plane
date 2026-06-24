@@ -39,7 +39,7 @@ jobs:
   report:
     steps:
       - run: go run ./tools/report -check-doc
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: report
           path: out/report.json

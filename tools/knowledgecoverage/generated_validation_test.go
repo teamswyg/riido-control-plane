@@ -48,7 +48,7 @@ func TestScanRejectsGeneratedDocWhenDeclaredWorkflowDoesNotRunTool(t *testing.T)
 	mustWrite(t, root, "docs/generated.riido.json", `{"generated_doc":"docs/generated.md","workflow":".github/workflows/other.yml","evidence_artifact":"example-evidence"}`)
 	mustWrite(t, root, "tools/example/main.go", "package main\n")
 	mustWrite(t, root, ".github/workflows/example.yml", "steps:\n  - run: go run ./tools/example -check-doc -evidence-out out/example.json\n")
-	mustWrite(t, root, ".github/workflows/other.yml", "steps:\n- uses: actions/upload-artifact@v4\n  with:\n    name: example-evidence\n    if-no-files-found: error\n")
+	mustWrite(t, root, ".github/workflows/other.yml", "steps:\n- uses: actions/upload-artifact@v7\n  with:\n    name: example-evidence\n    if-no-files-found: error\n")
 	m := manifest{ScanRoots: []string{"docs"}}
 	_, problems := scanDocs(root, m)
 	if len(problems) == 0 || !strings.Contains(strings.Join(problems, "\n"), "must run generator") {

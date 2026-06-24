@@ -8,7 +8,7 @@ import (
 func requireRedactedSummaryArtifact(t *testing.T, body, artifact string) {
 	t.Helper()
 	requireContains(t, body, "go run ./tools/liveworkflowevidence")
-	requireContains(t, body, "actions/upload-artifact@v4")
+	requireContains(t, body, "actions/upload-artifact@v7")
 	requireContains(t, body, "name: "+artifact)
 	requireContains(t, body, "path: out/"+artifact+".json")
 	for _, forbidden := range liveHandoffPathNeedles() {

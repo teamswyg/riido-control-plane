@@ -20,19 +20,21 @@ type acceptedGap struct {
 }
 
 type workflowRecord struct {
-	Path                 string   `json:"path"`
-	Status               string   `json:"status"`
-	HasExecutable        bool     `json:"has_executable"`
-	HasEvidenceOut       bool     `json:"has_evidence_out"`
-	EvidenceOutCount     int      `json:"evidence_out_count"`
-	UploadedEvidenceOut  int      `json:"uploaded_evidence_out_count"`
-	MissingEvidenceOut   []string `json:"missing_evidence_out_uploads,omitempty"`
-	UploadsArtifact      bool     `json:"uploads_artifact"`
-	ArtifactUploadCount  int      `json:"artifact_upload_count"`
-	StrictUploadCount    int      `json:"strict_upload_count"`
-	NonStrictUploadCount int      `json:"non_strict_upload_count"`
-	Reason               string   `json:"reason,omitempty"`
-	Next                 string   `json:"next,omitempty"`
+	Path                  string   `json:"path"`
+	Status                string   `json:"status"`
+	HasExecutable         bool     `json:"has_executable"`
+	HasEvidenceOut        bool     `json:"has_evidence_out"`
+	EvidenceOutCount      int      `json:"evidence_out_count"`
+	UploadedEvidenceOut   int      `json:"uploaded_evidence_out_count"`
+	MissingEvidenceOut    []string `json:"missing_evidence_out_uploads,omitempty"`
+	UploadsArtifact       bool     `json:"uploads_artifact"`
+	ArtifactUploadCount   int      `json:"artifact_upload_count"`
+	StrictUploadCount     int      `json:"strict_upload_count"`
+	NonStrictUploadCount  int      `json:"non_strict_upload_count"`
+	DeprecatedActionRefs  []string `json:"deprecated_action_refs,omitempty"`
+	DeprecatedActionCount int      `json:"deprecated_action_count"`
+	Reason                string   `json:"reason,omitempty"`
+	Next                  string   `json:"next,omitempty"`
 }
 
 type evidenceLoop struct {

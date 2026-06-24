@@ -4,7 +4,8 @@ func newEvidence(m manifest, result auditResult) evidence {
 	status := "verified"
 	if len(result.Unregistered) > 0 || len(result.NonStrict) > 0 ||
 		len(result.MissingEvidence) > 0 || len(result.MissingEvidenceTools) > 0 ||
-		len(result.MissingEvidenceToolBindings) > 0 || len(result.AcceptedUnused) > 0 {
+		len(result.MissingEvidenceToolBindings) > 0 || len(result.AcceptedUnused) > 0 ||
+		len(result.DeprecatedActions) > 0 {
 		status = "failed"
 	}
 	unregistered := append([]string{}, result.Unregistered...)
@@ -13,6 +14,7 @@ func newEvidence(m manifest, result auditResult) evidence {
 	missingEvidenceTools := append([]string{}, result.MissingEvidenceTools...)
 	missingEvidenceToolBindings := append([]string{}, result.MissingEvidenceToolBindings...)
 	acceptedUnused := append([]string{}, result.AcceptedUnused...)
+	deprecatedActions := append([]string{}, result.DeprecatedActions...)
 	return evidence{
 		SchemaVersion:               evidenceSchema,
 		ID:                          m.ID,
@@ -29,6 +31,7 @@ func newEvidence(m manifest, result auditResult) evidence {
 		MissingEvidence:             missingEvidence,
 		Unregistered:                unregistered,
 		AcceptedUnused:              acceptedUnused,
+		DeprecatedActions:           deprecatedActions,
 		Records:                     result.Records,
 		Loop:                        m.Loop,
 	}

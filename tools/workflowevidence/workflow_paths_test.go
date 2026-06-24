@@ -15,7 +15,7 @@ jobs:
   report:
     steps:
       - run: go run ./tools/report -evidence-out out/report.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: report
           path: out/report.json

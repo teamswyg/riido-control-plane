@@ -13,4 +13,5 @@ type auditResult struct {
 	MissingEvidenceTools        []string
 	MissingEvidenceToolBindings []string
 	AcceptedUnused              []string
+	DeprecatedActions           []string
 }

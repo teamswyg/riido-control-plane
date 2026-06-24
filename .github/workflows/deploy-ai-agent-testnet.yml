@@ -43,9 +43,9 @@ jobs:
       SMOKE_TOKEN_CONFIGURED: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN != '' }}
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
@@ -117,7 +117,7 @@ jobs:
           go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.RIIDO_AI_SERVER_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -379,7 +379,7 @@ jobs:
             -build-cache-mode "buildkit-gha" \
             -evidence-out out/deploy-ai-agent-testnet-redacted-summary.json
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: deploy-ai-agent-testnet-redacted-summary
