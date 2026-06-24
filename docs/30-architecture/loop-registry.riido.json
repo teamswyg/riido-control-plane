@@ -368,7 +368,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "70149a736f34015e821075799cff7bf2773558864ba31287c49bd41501917f87"
+      "semantic_hash": "b048e4a8ff81b37a247982a26823c9007885d6825409499f9bf5597f6e4da89e"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -415,7 +415,31 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "63883bca6ea45e7f07c9ac376de935ba42ffcabc2172bb14d6abf33ece65f893"
+      "semantic_hash": "c20bae489c3fa0b3a2d59e47e1d0f0dcc9f607c38047326806c9caf25ee0f328"
+    },
+    {
+      "id": "evidence_graph_must_cover_loop_registry_claims",
+      "statement": "Every loop-registry business claim must be referenced by at least one evidence-graph chain, and every chain claim reference must point to an existing loop-registry claim.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        "docs/30-architecture/evidence-graph.riido.json",
+        "tools/evidencegraph/types.go",
+        "tools/evidencegraph/types_more.go",
+        "tools/evidencegraph/loop_registry.go",
+        "tools/evidencegraph/verify.go",
+        "tools/evidencegraph/verify_chain.go",
+        "tools/evidencegraph/main_test.go"
+      ],
+      "verifiers": [
+        "TestClaimReferenceMustExistInLoopRegistry",
+        "TestEveryLoopRegistryClaimNeedsEvidenceChain",
+        "TestEvidenceGraphManifestVerifies"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "855a20c77530cf01103ea3c61de6b53e15c7547e9cec17be2e96070175e7b833"
     }
   ],
   "evidence_graph": [
@@ -482,6 +506,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "claim_bound_paths_must_trigger_loop_registry",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "evidence_graph_must_cover_loop_registry_claims",
       "relation": "enforces"
     }
   ],

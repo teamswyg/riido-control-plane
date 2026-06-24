@@ -7,30 +7,45 @@ import (
 )
 
 type loopRegistryManifest struct {
-	Loops []loopRegistryLoop `json:"loops"`
+	Loops  []loopRegistryLoop  `json:"loops"`
+	Claims []loopRegistryClaim `json:"claim_bindings"`
 }
 
 type loopRegistryLoop struct {
 	ID string `json:"id"`
 }
 
-func loadLoopRegistryIDs(root, path string) (map[string]bool, error) {
+type loopRegistryClaim struct {
+	ID string `json:"id"`
+}
+
+type loopRegistryIndex struct {
+	Loops  map[string]bool
+	Claims map[string]bool
+}
+
+func loadLoopRegistryIndex(root, path string) (loopRegistryIndex, error) {
 	data, err := os.ReadFile(repoPath(root, path))
 	if err != nil {
-		return nil, fmt.Errorf("read loop registry manifest: %w", err)
+		return loopRegistryIndex{}, fmt.Errorf("read loop registry manifest: %w", err)
 	}
 	var m loopRegistryManifest
 	if err := json.Unmarshal(data, &m); err != nil {
-		return nil, fmt.Errorf("decode loop registry manifest: %w", err)
+		return loopRegistryIndex{}, fmt.Errorf("decode loop registry manifest: %w", err)
 	}
-	out := map[string]bool{}
+	index := loopRegistryIndex{Loops: map[string]bool{}, Claims: map[string]bool{}}
 	for _, loop := range m.Loops {
 		if loop.ID != "" {
-			out[loop.ID] = true
+			index.Loops[loop.ID] = true
 		}
 	}
-	if len(out) == 0 {
-		return nil, fmt.Errorf("loop registry manifest has no loops")
+	for _, claim := range m.Claims {
+		if claim.ID != "" {
+			index.Claims[claim.ID] = true
+		}
 	}
-	return out, nil
+	if len(index.Loops) == 0 || len(index.Claims) == 0 {
+		return loopRegistryIndex{}, fmt.Errorf("loop registry manifest must have loops and claims")
+	}
+	return index, nil
 }

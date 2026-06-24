@@ -9,25 +9,31 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - workflow: `.github/workflows/evidence-graph.yml`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `10`
-- change refs: `39`
-- verifier refs: `26`
-- evidence refs: `16`
+- chains: `15`
+- claim refs: `9`
+- change refs: `59`
+- verifier refs: `43`
+- evidence refs: `22`
 
 ## Evidence Chains
 
-| Chain | Changes | Verifiers | Evidence | Next Loop |
-| --- | ---: | ---: | ---: | --- |
-| `harness_failure_promotion_loop` | `3` | `2` | `2` | `closed_loop_candidate` |
-| `harness_evidence_expiry_gate_loop` | `5` | `3` | `3` | `provider_acceptance_harness` |
-| `claim_binding_impact_loop` | `3` | `2` | `1` | `ai_thread_history` |
-| `ai_thread_history_conversation_grouping_loop` | `6` | `4` | `2` | `ai_thread_history` |
-| `closed_loop_candidate_intake_loop` | `3` | `2` | `1` | `closed_loop_candidate_intake` |
-| `closed_loop_candidate_decision_loop` | `3` | `2` | `1` | `closed_loop_candidate_decision` |
-| `pre_commit_claim_binding_loop` | `4` | `2` | `2` | `closed_loop_candidate` |
-| `desktop_daemon_lifecycle_decision_queue_loop` | `4` | `3` | `2` | `open_decision_queue` |
-| `ambiguous_task_context_thread_interaction_loop` | `5` | `4` | `1` | `ai_thread_history` |
-| `claim_workflow_trigger_coverage_loop` | `3` | `2` | `1` | `closed_loop_candidate` |
+| Chain | Claims | Changes | Verifiers | Evidence | Next Loop |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `harness_failure_promotion_loop` | `0` | `3` | `2` | `2` | `closed_loop_candidate` |
+| `harness_evidence_expiry_gate_loop` | `1` | `5` | `3` | `3` | `provider_acceptance_harness` |
+| `claim_binding_impact_loop` | `0` | `3` | `2` | `1` | `ai_thread_history` |
+| `deleted_agent_thread_retention_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
+| `thread_history_user_followup_retention_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
+| `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
+| `ai_thread_history_conversation_grouping_loop` | `1` | `6` | `4` | `2` | `ai_thread_history` |
+| `closed_loop_candidate_intake_loop` | `0` | `3` | `2` | `1` | `closed_loop_candidate_intake` |
+| `closed_loop_candidate_decision_loop` | `0` | `3` | `2` | `1` | `closed_loop_candidate_decision` |
+| `pre_commit_claim_binding_loop` | `0` | `4` | `2` | `2` | `closed_loop_candidate` |
+| `closed_loop_verifier_alias_loop` | `1` | `5` | `5` | `1` | `closed_loop_candidate` |
+| `desktop_daemon_lifecycle_decision_queue_loop` | `0` | `4` | `3` | `2` | `open_decision_queue` |
+| `ambiguous_task_context_thread_interaction_loop` | `1` | `5` | `4` | `1` | `ai_thread_history` |
+| `claim_workflow_trigger_coverage_loop` | `1` | `3` | `2` | `1` | `closed_loop_candidate` |
+| `evidence_graph_claim_coverage_loop` | `1` | `3` | `3` | `2` | `closed_loop_candidate` |
 
 ## Loop
 

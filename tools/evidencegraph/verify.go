@@ -6,16 +6,20 @@ func verifyAll(root string, m manifest) (verifyResult, error) {
 	if err := verifyManifest(m); err != nil {
 		return verifyResult{}, err
 	}
-	nextLoops, err := loadLoopRegistryIDs(root, m.LoopRegistry)
+	registry, err := loadLoopRegistryIndex(root, m.LoopRegistry)
 	if err != nil {
 		return verifyResult{}, err
 	}
 	result := verifyResult{Chains: len(m.Chains)}
 	seen := map[string]bool{}
+	coveredClaims := map[string]bool{}
 	for _, c := range m.Chains {
-		if err := verifyChain(root, c, seen, &result, nextLoops); err != nil {
+		if err := verifyChain(root, c, seen, &result, registry, coveredClaims); err != nil {
 			return verifyResult{}, err
 		}
+	}
+	if err := verifyClaimCoverage(registry.Claims, coveredClaims); err != nil {
+		return verifyResult{}, err
 	}
 	return result, nil
 }

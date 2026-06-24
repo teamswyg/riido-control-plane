@@ -5,6 +5,7 @@ type evidence struct {
 	ID               string       `json:"id"`
 	Status           string       `json:"status"`
 	ChainCount       int          `json:"chain_count"`
+	ClaimRefs        int          `json:"claim_ref_count"`
 	ChangeRefs       int          `json:"change_ref_count"`
 	VerifierRefs     int          `json:"verifier_ref_count"`
 	EvidenceRefs     int          `json:"evidence_ref_count"`
@@ -27,6 +28,7 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		ID:               m.ID,
 		Status:           "verified",
 		ChainCount:       result.Chains,
+		ClaimRefs:        result.ClaimRefs,
 		ChangeRefs:       result.ChangeRefs,
 		VerifierRefs:     result.VerifierRefs,
 		EvidenceRefs:     result.EvidenceRefs,

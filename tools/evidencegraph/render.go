@@ -16,6 +16,7 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "- evidence artifact: `%s`\n", m.Evidence)
 	fmt.Fprintf(&b, "- loop registry: `%s`\n", m.LoopRegistry)
 	fmt.Fprintf(&b, "- chains: `%d`\n", result.Chains)
+	fmt.Fprintf(&b, "- claim refs: `%d`\n", result.ClaimRefs)
 	fmt.Fprintf(&b, "- change refs: `%d`\n", result.ChangeRefs)
 	fmt.Fprintf(&b, "- verifier refs: `%d`\n", result.VerifierRefs)
 	fmt.Fprintf(&b, "- evidence refs: `%d`\n\n", result.EvidenceRefs)
@@ -27,11 +28,11 @@ func renderDoc(m manifest, result verifyResult) string {
 func renderChains(b *strings.Builder, chains []chain) {
 	fmt.Fprintln(b, "## Evidence Chains")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Chain | Changes | Verifiers | Evidence | Next Loop |")
-	fmt.Fprintln(b, "| --- | ---: | ---: | ---: | --- |")
+	fmt.Fprintln(b, "| Chain | Claims | Changes | Verifiers | Evidence | Next Loop |")
+	fmt.Fprintln(b, "| --- | ---: | ---: | ---: | ---: | --- |")
 	for _, c := range chains {
-		fmt.Fprintf(b, "| `%s` | `%d` | `%d` | `%d` | `%s` |\n",
-			c.ID, len(c.Changes), len(c.Verifiers), len(c.Evidence), c.NextLoop)
+		fmt.Fprintf(b, "| `%s` | `%d` | `%d` | `%d` | `%d` | `%s` |\n",
+			c.ID, len(c.Claims), len(c.Changes), len(c.Verifiers), len(c.Evidence), c.NextLoop)
 	}
 	fmt.Fprintln(b)
 }
