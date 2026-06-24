@@ -427,7 +427,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "96e0b18baa57dab3256eebea0f72467722b83d5329e68dc92b77dabe2700fcba"
+      "semantic_hash": "d00283f5fce94ea616037596b1d611b992f9261dc5937fbeefefaf163dc46e91"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -528,7 +528,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "cf9547106103bae6885d3c01dd143ea1aca28d291c2607e5ddcfa6735122a59f"
+      "semantic_hash": "f5c600211e61fefbd4875f2fd5d1365b564a9aad0e87760b82e2102b8f30905c"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -556,7 +556,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3f326072ec1c70d1eb3c063f18400a4646759ac768590c94850a5619c0566731"
+      "semantic_hash": "0ae2db74267a7f6f154caf179c812f560d961faed8bb0e3071a11aeb59a9d51e"
     },
     {
       "id": "loop_evidence_artifacts_must_have_refresh_owners",
@@ -583,7 +583,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "3fbcbb9a85c8a59bb972a1b993754c6e52bd8ae346ce129f86b5688e9abcd551"
+      "semantic_hash": "0db46a10f06a599d009409dcf7f94f5ff11146b23cd02aab998e3e71d18792d0"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -701,7 +701,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "48f39e53d30a9a02e318f046f696ddc85da3ed17c0ba140290ba5e9778747b87"
+      "semantic_hash": "532804d8e793a537abb1e495c47acdb595006ab30e740252b6937c3de8f34a32"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -854,7 +854,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "b1c7808aaf1450551a9618acac55ca3f6a09253e83752eeda95ba93b49663f50"
+      "semantic_hash": "2699aee43fe49362bab4bc1687f4c8552a2cfdc6852e2ccc9a0e8952d59de148"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -878,7 +878,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "eb6ca129764b58b77bf3bce0d9720a4bb6f08a274a1a1cea592c1a60d41b8346"
+      "semantic_hash": "e9a35f7578dde9a7f751e1ff0dee2fac1febacab56f813b022a02379ed0126b8"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -898,7 +898,35 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "cd283416be2c2a92853a05050794ae19362c62023f53a765844b579d0b35320e"
+      "semantic_hash": "c46ea24dadd71a8bc3b52bad41511c34388cc448ff22f54b62096cd831ac1096"
+    },
+    {
+      "id": "evidence_graph_chain_changes_require_executable_surface",
+      "statement": "When an evidence graph chain is added, changed, or removed in a pull request, the evidence graph impact verifier must require at least one referenced executable change or verifier surface to move so reasoning-only edits cannot pass as closed-loop progress.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        ".github/workflows/evidence-graph.yml",
+        "tools/evidencegraph/main.go",
+        "tools/evidencegraph/options.go",
+        "tools/evidencegraph/run.go",
+        "tools/evidencegraph/evidence.go",
+        "tools/evidencegraph/git.go",
+        "tools/evidencegraph/impact.go",
+        "tools/evidencegraph/impact_capture.go",
+        "tools/evidencegraph/impact_chain.go",
+        "tools/evidencegraph/impact_refs.go",
+        "tools/evidencegraph/impact_test.go",
+        "tools/evidencegraph/impact_types.go"
+      ],
+      "verifiers": [
+        "TestChainImpactRequiresExecutableRefChange",
+        "TestChainImpactAllowsExecutableRefChange"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "779a2cb5b4a1b7552ab27da79022cc39f9439aaa87dc6e079d6dba6b11896d69"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -923,7 +951,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "31f7dbfc46925815d55978bbbff0063a48a89619d9c549761c38dfa41f86795e"
+      "semantic_hash": "5817dae9a586bba552a0659499ec398b2fba26568a8f48d1a517811f2d85d586"
     },
     {
       "id": "closed_loop_candidate_evidence_must_self_expire",

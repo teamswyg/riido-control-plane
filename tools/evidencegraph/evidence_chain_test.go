@@ -11,7 +11,7 @@ func TestEvidenceGraphEvidenceExposesFullChainSurface(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got := newEvidence(m, result)
+	got := newEvidence(m, result, nil)
 	if len(got.Chains) == 0 {
 		t.Fatal("chains missing")
 	}

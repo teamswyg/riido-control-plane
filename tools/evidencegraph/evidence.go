@@ -17,9 +17,10 @@ type evidence struct {
 	LoopRegistry     string          `json:"loop_registry_manifest"`
 	Loop             loopRecord      `json:"loop"`
 	Chains           []chainEvidence `json:"chains"`
+	Impact           *impactEvidence `json:"impact,omitempty"`
 }
 
-func newEvidence(m manifest, result verifyResult) evidence {
+func newEvidence(m manifest, result verifyResult, impact *impactEvidence) evidence {
 	generatedAt, expiresAt := evidenceWindow(evidenceGraphEvidenceTTLHours)
 	return evidence{
 		SchemaVersion:    evidenceSchema,
@@ -38,5 +39,6 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		LoopRegistry:     m.LoopRegistry,
 		Loop:             m.Loop,
 		Chains:           evidenceChains(m.Chains),
+		Impact:           impact,
 	}
 }

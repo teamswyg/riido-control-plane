@@ -91,13 +91,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
       - run: go test ./tools/evidencegraph -count=1
       - run: mkdir -p out
-      - run: go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json
+      - name: Verify evidence graph
+        env:
+          RIIDO_EVIDENCE_GRAPH_IMPACT_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || '' }}
+        run: |
+          impact_args=()
+          if [ -n "$RIIDO_EVIDENCE_GRAPH_IMPACT_BASE" ]; then
+            impact_args=(-impact-base "$RIIDO_EVIDENCE_GRAPH_IMPACT_BASE")
+          fi
+          go run ./tools/evidencegraph \
+            -check-doc \
+            "${impact_args[@]}" \
+            -evidence-out out/evidence-graph-evidence.json
       - uses: actions/upload-artifact@v7
         with:
           name: evidence-graph-evidence

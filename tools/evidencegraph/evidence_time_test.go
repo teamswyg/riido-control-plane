@@ -12,7 +12,7 @@ func TestEvidenceGraphEvidenceCarriesExpiry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got := newEvidence(m, result)
+	got := newEvidence(m, result, nil)
 	if got.GeneratedAt != "2026-06-24T00:00:00Z" {
 		t.Fatalf("generated_at = %q", got.GeneratedAt)
 	}
