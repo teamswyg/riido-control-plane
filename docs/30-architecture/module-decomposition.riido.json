@@ -51,6 +51,7 @@
     {"path":"tools/metricshttpadapter","kind":"evidence-tool","role":"Metrics HTTP adapter generated reader and verifier.","must_not_own":"runtime metrics implementation"},
     {"path":"tools/moduledecomposition","kind":"meta-evidence-tool","role":"Go package surface and module boundary verifier.","must_not_own":"runtime package behavior"},
     {"path":"tools/openquestions","kind":"evidence-tool","role":"Open question decision queue generated reader and verifier.","must_not_own":"architecture decisions without owner evidence"},
+    {"path":"tools/precommitbaseline","kind":"meta-evidence-tool","role":"Pre-commit baseline and loopregistry claim-binding hook verifier.","must_not_own":"runtime behavior or domain-specific claim semantics"},
     {"path":"tools/providerstatus","kind":"evidence-tool","role":"Provider status vocabulary verifier.","must_not_own":"provider process execution"},
     {"path":"tools/reactquerygen","kind":"generator","role":"Deterministic OpenAPI-to-React-Query generator for AI Agent client surfaces.","must_not_own":"frontend app implementation"},
     {"path":"tools/reviewaccountseed","kind":"evidence-tool","role":"Review account seed generated reader and redacted verifier.","must_not_own":"operator token values or live review account deployment"},

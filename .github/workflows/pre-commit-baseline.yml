@@ -1,0 +1,48 @@
+name: pre-commit-baseline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/pre-commit-baseline.yml"
+      - ".pre-commit-config.yaml"
+      - "docs/30-architecture/pre-commit-baseline.md"
+      - "docs/30-architecture/pre-commit-baseline.riido.json"
+      - "tools/precommitbaseline/**"
+      - "tools/loopregistry/precommit.sh"
+      - "go.mod"
+      - "go.sum"
+  pull_request:
+    paths:
+      - ".github/workflows/pre-commit-baseline.yml"
+      - ".pre-commit-config.yaml"
+      - "docs/30-architecture/pre-commit-baseline.md"
+      - "docs/30-architecture/pre-commit-baseline.riido.json"
+      - "tools/precommitbaseline/**"
+      - "tools/loopregistry/precommit.sh"
+      - "go.mod"
+      - "go.sum"
+
+jobs:
+  pre-commit-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify pre-commit baseline
+        run: |
+          mkdir -p out
+          go test ./tools/precommitbaseline -count=1
+          go run ./tools/precommitbaseline \
+            -check-doc \
+            -evidence-out out/pre-commit-baseline-evidence.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: pre-commit-baseline-evidence
+          path: out/pre-commit-baseline-evidence.json
+          if-no-files-found: error
