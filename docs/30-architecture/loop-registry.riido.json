@@ -11,6 +11,7 @@
     "business claim meaning changes must co-change at least one bound code or test file in pull requests",
     "bound code or test file changes must co-change the claim registry manifest or generated claim evidence",
     "harness loops must promote failures into closed-loop candidates by running tools/harnesspromotion and publishing strict candidate evidence",
+    "claim evidence must expose code, test, manifest, generated doc, and verifier surface so agents can infer required co-change scope without reading prose",
     "loops with evidence expiry at or below 24 hours must declare a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence",
     "loop registry and evidence graph evidence must carry generated_at and expires_at so tools can reject stale evidence",
     "AI agents do not need to read the prose doc when the verifier can enforce the bound surface"
@@ -411,6 +412,30 @@
       "semantic_hash": "5959e59287d22c9fb91099d04c4a791c93e3e1a5476c260b242016a4238cfc65"
     },
     {
+      "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
+      "statement": "Loop registry evidence must expose each business claim's executable surface across code, tests, manifests, generated docs, and verifier names so agents can infer co-change scope without reading narrative docs.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        "tools/loopregistry/claim_surface.go",
+        "tools/loopregistry/claim_surface_verify.go",
+        "tools/loopregistry/claim_surface_test.go",
+        "tools/loopregistry/evidence.go",
+        "tools/loopregistry/render.go",
+        "tools/loopregistry/render_more.go",
+        "tools/loopregistry/types_more.go",
+        "tools/loopregistry/verify.go",
+        "tools/loopregistry/verify_claim.go"
+      ],
+      "verifiers": [
+        "TestClaimSurfaceEvidenceIncludesCodeTestDocBindings",
+        "TestClaimSurfaceRejectsNarrativeOnlyClaim"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "36ae2e3a1ebf45607bbeb65659cf61e9161007d2edbb336133b6a4a03f70221c"
+    },
+    {
       "id": "claim_bound_paths_must_trigger_loop_registry",
       "statement": "Every claim-bound code, test, fixture, manifest, and generated reader path must be covered by the loop-registry workflow trigger paths so PR impact verification runs when any bound surface changes.",
       "loop": "closed_loop_candidate",
@@ -430,7 +455,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "da530e201ffeb8da1e43dd58a2f947828c0546cfab478a2110d9d577c3864194"
+      "semantic_hash": "6704ed9f57ec17d2512465d9afdaf05daf104f2871a6af091861c83077c00230"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -454,7 +479,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f5ac7e00da2a44bb58de4f97e8d9e50b08396b16cb570333b0c2702c472c7891"
+      "semantic_hash": "002496a4101ce590ae50ed5fe10188d65ca24da13dcd6ac227caf84b8275ada5"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -478,7 +503,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f1a26251c776ead550bea501995477c20ddff0257e96262ccd1406be8963e814"
+      "semantic_hash": "f74e301c0a8cbbbfa07d2ce80a5e7fc5ec8d1c16644d497cb00982d18ca7b59a"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -503,7 +528,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0a09bdd8e6fd118950822bc8b58084cf1fad4729397c518ca4cd0325821f593c"
+      "semantic_hash": "56b77c1280f6b8773a08aa16d3a3c4e4d9c5fadcdbc0151d20318c637bb88621"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -622,6 +647,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "claim_bound_paths_must_trigger_loop_registry",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "claim_surface_evidence_must_expose_code_test_doc_binding",
       "relation": "enforces"
     },
     {

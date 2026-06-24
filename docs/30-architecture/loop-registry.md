@@ -9,8 +9,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `6`
 - harness loops: `1`
 - closed loops: `5`
-- claim bindings: `13`
-- evidence graph edges: `16`
+- claim bindings: `14`
+- evidence graph edges: `17`
 - max evidence expiry hours: `168`
 
 ## Loops
@@ -35,12 +35,32 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `40c80ece1ed9` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `353a8e4bb6d2` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `17` | `7` | `5959e59287d2` |
-| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `da530e201ffe` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `f5ac7e00da2a` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `f1a26251c776` |
-| `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `8` | `3` | `0a09bdd8e6fd` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `9` | `2` | `36ae2e3a1ebf` |
+| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `6704ed9f57ec` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `002496a4101c` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `f74e301c0a8c` |
+| `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `8` | `3` | `56b77c1280f6` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `6` | `4` | `ecfd5e2a0c5f` |
 | `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `8` | `4` | `b632f70d02fb` |
+
+## Claim Surface Evidence
+
+| Claim | Code | Test | Manifest | Generated docs | Verifiers |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `deleted_agent_threads_must_remain_visible` | `3` | `1` | `0` | `1` | `3` |
+| `thread_history_must_keep_user_followups` | `2` | `2` | `0` | `1` | `2` |
+| `same_provider_agents_must_keep_distinct_threads` | `2` | `2` | `0` | `1` | `2` |
+| `thread_history_v3_must_expose_stable_conversation_grouping` | `8` | `3` | `1` | `2` | `3` |
+| `expired_harness_evidence_must_not_promote_candidates` | `12` | `3` | `2` | `3` | `3` |
+| `loop_verifiers_must_accept_verify_intent` | `5` | `5` | `0` | `1` | `5` |
+| `ambiguous_task_context_must_ask_before_work` | `12` | `4` | `1` | `2` | `7` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `8` | `1` | `0` | `1` | `2` |
+| `claim_bound_paths_must_trigger_loop_registry` | `3` | `1` | `1` | `1` | `4` |
+| `evidence_graph_must_cover_loop_registry_claims` | `5` | `1` | `1` | `2` | `3` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `3` | `1` | `2` | `2` | `4` |
+| `loop_evidence_artifacts_must_self_expire` | `4` | `3` | `1` | `2` | `3` |
+| `candidate_intake_must_consume_candidate_artifact` | `3` | `2` | `1` | `3` | `4` |
+| `candidate_decisions_must_match_consumed_candidates` | `3` | `4` | `1` | `3` | `4` |
 
 ## Evidence Graph
 
@@ -57,6 +77,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `closed_loop_candidate_decision` --defers_unowned_boundary_to--> `open_decision_queue`
 - `ai_thread_history` --enforces--> `ambiguous_task_context_must_ask_before_work`
 - `closed_loop_candidate` --enforces--> `claim_bound_paths_must_trigger_loop_registry`
+- `closed_loop_candidate` --enforces--> `claim_surface_evidence_must_expose_code_test_doc_binding`
 - `closed_loop_candidate` --enforces--> `evidence_graph_must_cover_loop_registry_claims`
 - `closed_loop_candidate` --enforces--> `evidence_graph_refs_must_trigger_evidence_workflow`
 - `closed_loop_candidate_decision` --enforces--> `candidate_decisions_must_match_consumed_candidates`

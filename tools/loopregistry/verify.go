@@ -25,6 +25,7 @@ func verifyAll(root string, m manifest, hashes map[string]string) (verifyResult,
 	result.Claims = len(m.Claims)
 	result.GraphEdges = len(m.EvidenceGraph)
 	result.Hashes = hashes
+	result.ClaimSurfaces = claimSurfaces(m.Claims)
 	return result, nil
 }
 
