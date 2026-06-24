@@ -13,7 +13,8 @@
     "artifact evidence refs are names only and must stay redacted",
     "evidence graph records explain why a loop exists without relying on narrative memory",
     "frontend handoff decisions that change thread semantics must connect to the closed-loop claim that enforces them",
-    "cross-repository lifecycle observations must become owned open questions when this repository cannot safely change the runtime owner"
+    "cross-repository lifecycle observations must become owned open questions when this repository cannot safely change the runtime owner",
+    "evidence graph evidence must publish generated_at and expires_at and refresh on a schedule"
   ],
   "chains": [
     {
@@ -171,6 +172,30 @@
       ],
       "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, and same-agent reassignment receives a distinct conversation.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "loop_evidence_expiry_loop",
+      "observation": "Loop registry and evidence graph evidence could prove shape but not freshness because the artifacts lacked generated_at and expires_at, and the evidence graph workflow did not run unless code changed.",
+      "hypothesis": "Self-expiring evidence artifacts plus a scheduled evidence graph workflow let tools detect stale reasoning evidence and refresh it without a human reminder.",
+      "claims": ["loop_evidence_artifacts_must_self_expire"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/evidencegraph/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/evidencegraph/workflow_schedule_test.go"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Core loop reasoning evidence now carries a 24h freshness window and the evidence graph refreshes daily, so stale loop evidence is machine-detectable.",
+      "next_loop": "closed_loop_candidate"
     },
     {
       "id": "closed_loop_candidate_intake_loop",

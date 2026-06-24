@@ -4,6 +4,8 @@ type evidence struct {
 	SchemaVersion             string            `json:"schema_version"`
 	ID                        string            `json:"id"`
 	Status                    string            `json:"status"`
+	GeneratedAt               string            `json:"generated_at"`
+	ExpiresAt                 string            `json:"expires_at"`
 	LoopCount                 int               `json:"loop_count"`
 	HarnessCount              int               `json:"harness_count"`
 	ClosedLoopCount           int               `json:"closed_loop_count"`
@@ -23,10 +25,13 @@ type evidence struct {
 }
 
 func newEvidence(m manifest, result verifyResult, impact *impactEvidence) evidence {
+	generatedAt, expiresAt := evidenceWindow(loopRegistryEvidenceTTLHours)
 	return evidence{
 		SchemaVersion:             evidenceSchema,
 		ID:                        m.ID,
 		Status:                    "verified",
+		GeneratedAt:               generatedAt,
+		ExpiresAt:                 expiresAt,
 		LoopCount:                 result.Loops,
 		HarnessCount:              result.Harnesses,
 		ClosedLoopCount:           result.ClosedLoops,
