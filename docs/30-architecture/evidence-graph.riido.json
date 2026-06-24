@@ -449,6 +449,29 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "loop_evidence_artifact_refresh_owner_loop",
+      "observation": "A loop can declare multiple redacted evidence artifacts while its loop-level refresh workflow only publishes one of them, leaving the remaining evidence to expire even though the refresh plan looks healthy.",
+      "hypothesis": "Artifact-level refresh workflow ownership lets each redacted evidence artifact name the scheduled workflow that produces it, and verification can require exact strict artifact uploads for every declared evidence source.",
+      "claims": ["loop_evidence_artifacts_must_have_refresh_owners"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "workflow", "path": ".github/workflows/harness-promotion.yml"},
+        {"kind": "tool", "path": "tools/loopregistry"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/refresh_workflow_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/refresh_plan_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true}
+      ],
+      "decision": "Expiring loop evidence is now artifact-owned: every redacted evidence artifact must be refreshed by a scheduled workflow that declares the loop id and uploads that exact artifact strictly.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "closed_loop_candidate_decision_loop",
       "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact and report decision evidence that is not tied to the current candidate set.",
       "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, and reject stale decision records that no longer map to a current candidate.",

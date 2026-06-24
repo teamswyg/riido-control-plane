@@ -29,8 +29,8 @@ func verifyLoopSchedule(root string, m manifest, loop loopRecord) error {
 	if !refreshWorkflowDeclaresLoopID(text, loop.ID) {
 		return fmt.Errorf("loop %s refresh workflow must declare RIIDO_LOOP_IDS with its loop id", loop.ID)
 	}
-	if !refreshWorkflowPublishesEvidence(text, loop.Evidence) {
-		return fmt.Errorf("loop %s refresh workflow must publish one strict loop evidence artifact", loop.ID)
+	if err := verifyEvidenceRefreshWorkflows(root, loop); err != nil {
+		return err
 	}
 	return nil
 }
