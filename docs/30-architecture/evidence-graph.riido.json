@@ -135,6 +135,32 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "claim_verifier_annotation_loop",
+      "observation": "Claim verifier commands existed in the loop-registry evidence artifact, but a reviewer or agent still had to open artifacts or run jq before seeing the exact target QA command in a PR check.",
+      "hypothesis": "Emitting GitHub Actions annotations from the same loop-registry evidence surface makes the target verifier commands visible in CI without adding another narrative handoff.",
+      "claims": ["claim_verifier_commands_must_surface_as_ci_annotations"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/github_annotation.go"},
+        {"kind": "tool", "path": "tools/loopregistry/github_annotation_escape.go"},
+        {"kind": "tool", "path": "tools/loopregistry/main.go"},
+        {"kind": "tool", "path": "tools/loopregistry/run.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/github_annotation_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/github_annotation_workflow_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "decision": "Loop-registry PR checks now surface claim verifier commands as GitHub annotations, keeping QA scope visible even when artifacts and prose are skipped.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "deleted_agent_thread_retention_loop",
       "observation": "Deleting an AI Agent can accidentally remove or hide historical task thread replies if the read model depends on the live agent row.",
       "hypothesis": "Capturing an agent snapshot on the thread and falling back to that snapshot for deleted agents keeps prior replies, results, and progress visible.",

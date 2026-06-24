@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 type options struct {
 	Repo        string
@@ -10,6 +13,9 @@ type options struct {
 	CheckDoc    bool
 	WriteHashes bool
 	ImpactBase  string
+
+	GitHubAnnotations bool
+	AnnotationOut     io.Writer
 }
 
 func run(opt options) error {
@@ -34,6 +40,9 @@ func run(opt options) error {
 	result, err := verifyAll(root, m, hashes)
 	if err != nil {
 		return err
+	}
+	if opt.GitHubAnnotations {
+		writeGitHubAnnotations(opt.AnnotationOut, result)
 	}
 	doc := renderDoc(m, result)
 	if err := maybeDoc(root, m.GeneratedDoc, doc, opt.WriteDoc, opt.CheckDoc); err != nil {

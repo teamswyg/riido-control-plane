@@ -2,7 +2,7 @@ package main
 
 import "path/filepath"
 
-func claimTestPackages(paths []string) map[string]bool {
+func claimBoundPackages(paths []string) map[string]bool {
 	packages := map[string]bool{}
 	for _, path := range paths {
 		packages[packagePathFromRepoPath(path)] = true
