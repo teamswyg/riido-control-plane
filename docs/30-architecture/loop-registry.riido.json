@@ -394,6 +394,28 @@
         "docs/30-architecture/loop-registry.md"
       ],
       "semantic_hash": "004a77ab0157ee256c1668d9d8e347fb612438b2845c46feb4d640aef806a297"
+    },
+    {
+      "id": "claim_bound_paths_must_trigger_loop_registry",
+      "statement": "Every claim-bound code, test, fixture, manifest, and generated reader path must be covered by the loop-registry workflow trigger paths so PR impact verification runs when any bound surface changes.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        ".github/workflows/loop-registry.yml",
+        "tools/loopregistry/verify.go",
+        "tools/loopregistry/workflow_paths.go",
+        "tools/loopregistry/workflow_coverage.go",
+        "tools/loopregistry/workflow_coverage_test.go"
+      ],
+      "verifiers": [
+        "TestRegistryWorkflowCoversClaimBoundPaths",
+        "TestRegistryWorkflowCoverageFailsForMissingClaimPath",
+        "TestWorkflowPathFiltersExtractsAllPathBlocks",
+        "TestWorkflowPathCoveredSupportsDirectoryGlob"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "63883bca6ea45e7f07c9ac376de935ba42ffcabc2172bb14d6abf33ece65f893"
     }
   ],
   "evidence_graph": [
@@ -455,6 +477,11 @@
     {
       "from": "ai_thread_history",
       "to": "ambiguous_task_context_must_ask_before_work",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "claim_bound_paths_must_trigger_loop_registry",
       "relation": "enforces"
     }
   ],

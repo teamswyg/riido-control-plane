@@ -207,6 +207,25 @@
       ],
       "decision": "Ambiguous task intent handling and provider-limit copy are enforced as an AI thread history claim while preserving existing endpoint input and output fields.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "claim_workflow_trigger_coverage_loop",
+      "observation": "Claim-bound files can drift without running the loop-registry PR impact gate when workflow path filters omit newly bound code, tests, fixtures, manifests, or generated readers.",
+      "hypothesis": "The loop-registry verifier can read its own workflow path filters and fail when any claim-bound surface is not covered, so agents do not need to remember trigger maintenance manually.",
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Loop-registry workflow trigger coverage is now part of claim binding verification: every claim-bound path must be included directly or through a directory glob before a PR can pass.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
