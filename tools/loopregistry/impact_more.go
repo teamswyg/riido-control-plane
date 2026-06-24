@@ -30,6 +30,10 @@ func verifyChangedClaimImpact(claim claimBinding, changed map[string]bool) (impa
 	if len(record.ChangedBoundFiles) == 0 {
 		return record, fmt.Errorf("claim %s changed without a bound code or test file change", claim.ID)
 	}
+	record.ChangedReasoningEvidence = changedValues(claimReasoningEvidenceFiles(), changed)
+	if len(record.ChangedReasoningEvidence) == 0 {
+		return record, fmt.Errorf("claim %s changed without evidence graph reasoning change", claim.ID)
+	}
 	return record, nil
 }
 
@@ -52,20 +56,6 @@ func claimEvidenceFiles(claim claimBinding) []string {
 	return values
 }
 
-func changedValues(values []string, changed map[string]bool) []string {
-	out := []string{}
-	for _, value := range values {
-		if changed[value] {
-			out = append(out, value)
-		}
-	}
-	return out
-}
-
-func prefixedValues(prefix string, values []string) []string {
-	out := []string{}
-	for _, value := range sortedCopy(values) {
-		out = append(out, prefix+":"+value)
-	}
-	return out
+func claimReasoningEvidenceFiles() []string {
+	return []string{evidenceGraphManifest}
 }
