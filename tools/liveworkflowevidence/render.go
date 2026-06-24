@@ -24,16 +24,17 @@ func renderDoc(m manifest, result verifyResult) string {
 func renderWorkflowTable(b *strings.Builder, records []workflowRecord) {
 	fmt.Fprintln(b, "## Redacted Live Workflows")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Workflow | Summary Artifact | Summary Path | Sensitive Inputs | Required Phrases |")
-	fmt.Fprintln(b, "| --- | --- | --- | --- | --- |")
+	fmt.Fprintln(b, "| Workflow | Summary Artifact | Summary Path | Sensitive Inputs | Claims | Required Phrases |")
+	fmt.Fprintln(b, "| --- | --- | --- | --- | --- | --- |")
 	for _, record := range records {
 		fmt.Fprintf(
 			b,
-			"| `%s` | `%s` | `%s` | `%s` | `%s` |\n",
+			"| `%s` | `%s` | `%s` | `%s` | `%s` | `%s` |\n",
 			record.Path,
 			record.SummaryArtifact,
 			record.SummaryPath,
 			strings.Join(record.SensitiveInputs, ", "),
+			strings.Join(record.EvidenceClaims, ", "),
 			strings.Join(record.RequiredPhrases, ", "),
 		)
 	}

@@ -37,6 +37,12 @@ func verifyWorkflowSpec(spec workflowSpec, seen map[string]bool) error {
 	if len(spec.SensitiveInputs) == 0 || len(spec.AllowedFields) == 0 {
 		return fmt.Errorf("workflow %q needs sensitive inputs and allowed fields", spec.ID)
 	}
+	if len(spec.EvidenceClaims) > 0 && !summaryAllowsField(spec, "evidence_claims") {
+		return fmt.Errorf("workflow %q evidence claims need allowed field evidence_claims", spec.ID)
+	}
+	if err := verifyClaimSpecs(spec); err != nil {
+		return err
+	}
 	return nil
 }
 
