@@ -16,6 +16,7 @@ func writePromptTaskInterpretation(
 	intentClass := classifyTaskContextIntent(component, document)
 	builder.WriteString("## Task Interpretation\n")
 	writePromptLine(builder, "intent_class", intentClass)
+	writePromptLine(builder, "intent_gate_required", intentGateRequired(intentClass))
 	writePromptLine(builder, "first_response_policy", firstResponsePolicy(intentClass))
 	writePromptLine(builder, "clarification_question_example", clarificationQuestionExample(component))
 	writePromptLine(builder, "provider_limit_result_message", clientMessageCloudCreditInsufficient)
@@ -39,11 +40,20 @@ func classifyTaskContextIntent(
 func firstResponsePolicy(intentClass string) string {
 	switch intentClass {
 	case taskIntentIntentOriented:
-		return "ask_for_intent_before_deliverables_when_first_action_is_ambiguous"
+		return "ask_for_intent_before_deliverables_do_not_create_deliverables_until_user_replies"
 	case taskIntentMetadataOnly:
 		return "infer_from_metadata_then_ask_when_unsure"
 	default:
 		return "execute_the_explicit_instruction"
+	}
+}
+
+func intentGateRequired(intentClass string) string {
+	switch intentClass {
+	case taskIntentIntentOriented, taskIntentMetadataOnly:
+		return "true"
+	default:
+		return "false"
 	}
 }
 

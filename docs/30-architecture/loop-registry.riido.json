@@ -445,7 +445,7 @@
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
-      "statement": "When task context is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the assignment prompt must require the agent to ask for intent in the existing thread before producing deliverables; provider token, quota, or cloud-credit exhaustion must render as a user-facing thread result without changing API shape.",
+      "statement": "When task context is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the assignment prompt must emit intent_gate_required=true and require the agent to ask for intent in the existing thread before producing deliverables; provider token, quota, or cloud-credit exhaustion must render as a user-facing thread result without changing API shape.",
       "loop": "ai_thread_history",
       "files": [
         "docs/20-domain/ai-agent-client-api.riido.json",
@@ -499,7 +499,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "440496edfaee9e7467a7b209935ddec8b7845816644f22e817679546ca590754"
+      "semantic_hash": "ae0d125639776b4b7e7c9bfde7580437163ebd48ba6e88da9414cd206c313712"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
