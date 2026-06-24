@@ -8,6 +8,7 @@ type manifest struct {
 	Workflow      string     `json:"workflow"`
 	Evidence      string     `json:"evidence_artifact"`
 	EvidenceTool  string     `json:"evidence_tool"`
+	LoopRegistry  string     `json:"loop_registry_manifest"`
 	Assertions    []string   `json:"assertions"`
 	Chains        []chain    `json:"chains"`
 	Loop          loopRecord `json:"loop"`

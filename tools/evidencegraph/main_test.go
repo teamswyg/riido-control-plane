@@ -35,3 +35,14 @@ func TestArtifactEvidenceMustBeRedacted(t *testing.T) {
 		t.Fatal("expected unredacted artifact evidence to fail")
 	}
 }
+
+func TestNextLoopMustExistInLoopRegistry(t *testing.T) {
+	m, err := loadManifest("../../" + defaultManifest)
+	if err != nil {
+		t.Fatalf("load manifest: %v", err)
+	}
+	m.Chains[0].NextLoop = "missing_loop"
+	if _, err := verifyAll("../..", m); err == nil {
+		t.Fatal("expected unknown next_loop to fail")
+	}
+}

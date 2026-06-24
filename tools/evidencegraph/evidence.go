@@ -11,6 +11,7 @@ type evidence struct {
 	Workflow         string       `json:"workflow"`
 	GeneratedDoc     string       `json:"generated_doc"`
 	EvidenceArtifact string       `json:"evidence_artifact"`
+	LoopRegistry     string       `json:"loop_registry_manifest"`
 	Loop             loopRecord   `json:"loop"`
 	Chains           []chainBrief `json:"chains"`
 }
@@ -32,6 +33,7 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		Workflow:         m.Workflow,
 		GeneratedDoc:     m.GeneratedDoc,
 		EvidenceArtifact: m.Evidence,
+		LoopRegistry:     m.LoopRegistry,
 		Loop:             m.Loop,
 		Chains:           briefChains(m.Chains),
 	}

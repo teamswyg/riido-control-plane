@@ -6,10 +6,14 @@ func verifyAll(root string, m manifest) (verifyResult, error) {
 	if err := verifyManifest(m); err != nil {
 		return verifyResult{}, err
 	}
+	nextLoops, err := loadLoopRegistryIDs(root, m.LoopRegistry)
+	if err != nil {
+		return verifyResult{}, err
+	}
 	result := verifyResult{Chains: len(m.Chains)}
 	seen := map[string]bool{}
 	for _, c := range m.Chains {
-		if err := verifyChain(root, c, seen, &result); err != nil {
+		if err := verifyChain(root, c, seen, &result, nextLoops); err != nil {
 			return verifyResult{}, err
 		}
 	}
@@ -25,6 +29,9 @@ func verifyManifest(m manifest) error {
 	}
 	if m.Workflow == "" || m.Evidence == "" || m.EvidenceTool != "tools/evidencegraph" {
 		return fmt.Errorf("workflow, evidence_artifact, and evidence_tool are required")
+	}
+	if m.LoopRegistry == "" {
+		return fmt.Errorf("loop_registry_manifest is required")
 	}
 	if len(m.Assertions) == 0 || len(m.Chains) == 0 {
 		return fmt.Errorf("assertions and chains are required")
