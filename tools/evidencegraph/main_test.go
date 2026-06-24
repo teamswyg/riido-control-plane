@@ -46,3 +46,27 @@ func TestNextLoopMustExistInLoopRegistry(t *testing.T) {
 		t.Fatal("expected unknown next_loop to fail")
 	}
 }
+
+func TestClaimReferenceMustExistInLoopRegistry(t *testing.T) {
+	m, err := loadManifest("../../" + defaultManifest)
+	if err != nil {
+		t.Fatalf("load manifest: %v", err)
+	}
+	m.Chains[0].Claims = []string{"missing_claim"}
+	if _, err := verifyAll("../..", m); err == nil {
+		t.Fatal("expected unknown claim reference to fail")
+	}
+}
+
+func TestEveryLoopRegistryClaimNeedsEvidenceChain(t *testing.T) {
+	m, err := loadManifest("../../" + defaultManifest)
+	if err != nil {
+		t.Fatalf("load manifest: %v", err)
+	}
+	for i := range m.Chains {
+		m.Chains[i].Claims = nil
+	}
+	if _, err := verifyAll("../..", m); err == nil {
+		t.Fatal("expected missing claim coverage to fail")
+	}
+}

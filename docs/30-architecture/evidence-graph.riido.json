@@ -40,6 +40,7 @@
       "id": "harness_evidence_expiry_gate_loop",
       "observation": "Redacted live workflow summaries could be reused after their evidence window expired, allowing stale harness output to create fresh closed-loop candidates.",
       "hypothesis": "Stamping generated_at and expires_at in the redacted summary, then rejecting expired summaries in harness promotion, prevents stale observations from entering the closed-loop backlog.",
+      "claims": ["expired_harness_evidence_must_not_promote_candidates"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/live-workflow-redaction.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
@@ -80,9 +81,76 @@
       "next_loop": "ai_thread_history"
     },
     {
+      "id": "deleted_agent_thread_retention_loop",
+      "observation": "Deleting an AI Agent can accidentally remove or hide historical task thread replies if the read model depends on the live agent row.",
+      "hypothesis": "Capturing an agent snapshot on the thread and falling back to that snapshot for deleted agents keeps prior replies, results, and progress visible.",
+      "claims": ["deleted_agent_threads_must_remain_visible"],
+      "changes": [
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_delete_ai_agent.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Deleted-agent thread retention is a closed-loop claim: historical AI thread records use captured agent snapshots instead of disappearing with the mutable agent row.",
+      "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "thread_history_user_followup_retention_loop",
+      "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status.",
+      "hypothesis": "Persisting user follow-up messages as thread history rows and replaying them into v3 history preserves human-agent 티키타카 after reload.",
+      "claims": ["thread_history_must_keep_user_followups"],
+      "changes": [
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_append_thread_history_message.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory.",
+      "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "same_provider_multi_assignment_loop",
+      "observation": "Two different AI Agents can use the same provider runtime, so provider-based dedupe can collapse independent task assignments and threads.",
+      "hypothesis": "Assignment and thread identity must stay agent/assignment scoped even when provider/runtime_kind is identical.",
+      "claims": ["same_provider_agents_must_keep_distinct_threads"],
+      "changes": [
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_agent_assignment.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_thread_id_for_run.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_same_provider_assignment_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_provider_multi_assignment_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_same_provider_assignment_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_provider_multi_assignment_test.go"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Same-provider multi-assignment is a thread identity claim: provider/runtime labels are display metadata, not dedupe keys.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "ai_thread_history_conversation_grouping_loop",
       "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card.",
       "hypothesis": "Binding conversation_id and parent_thread_id to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations.",
+      "claims": ["thread_history_v3_must_expose_stable_conversation_grouping"],
       "changes": [
         {"kind": "manifest", "path": "docs/20-domain/ai-agent-client-api.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -164,6 +232,31 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "closed_loop_verifier_alias_loop",
+      "observation": "Closed-loop tools used different verification flags, leaving agents to remember tool-specific commands.",
+      "hypothesis": "A shared -verify intent lets agents and pre-commit invoke closed-loop verification without reading each tool's prose usage.",
+      "claims": ["loop_verifiers_must_accept_verify_intent"],
+      "changes": [
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/main_test.go"},
+        {"kind": "test", "path": "tools/evidencegraph/main_test.go"},
+        {"kind": "test", "path": "tools/harnesspromotion/main_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/main_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/main_test.go"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Closed-loop verifier tools expose a common -verify intent so execution can be driven by policy instead of human command memory.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "desktop_daemon_lifecycle_decision_queue_loop",
       "observation": "A staging runtime settings page can show a local daemon offline after the desktop app gracefully stops its desktop-managed daemon on app quit.",
       "hypothesis": "Cross-repository daemon lifecycle ambiguity should be captured as an owned executable open question instead of staying in operator memory or being patched in the public control-plane runtime path.",
@@ -189,6 +282,7 @@
       "id": "ambiguous_task_context_thread_interaction_loop",
       "observation": "Marketing, analysis, and intent-oriented task documents can be misread as executable instructions, while token or cloud-credit exhaustion can leak provider wording into the AI Agent thread.",
       "hypothesis": "A prompt interaction policy plus visible-message normalization can keep the existing thread conversational: ambiguous task context asks for intent first, concrete follow-up instructions become authoritative, and provider limits render as a stable user-facing result without changing API shape.",
+      "claims": ["ambiguous_task_context_must_ask_before_work"],
       "changes": [
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message.go"},
@@ -212,6 +306,7 @@
       "id": "claim_workflow_trigger_coverage_loop",
       "observation": "Claim-bound files can drift without running the loop-registry PR impact gate when workflow path filters omit newly bound code, tests, fixtures, manifests, or generated readers.",
       "hypothesis": "The loop-registry verifier can read its own workflow path filters and fail when any claim-bound surface is not covered, so agents do not need to remember trigger maintenance manually.",
+      "claims": ["claim_bound_paths_must_trigger_loop_registry"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
         {"kind": "tool", "path": "tools/loopregistry"},
@@ -225,6 +320,28 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
       "decision": "Loop-registry workflow trigger coverage is now part of claim binding verification: every claim-bound path must be included directly or through a directory glob before a PR can pass.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "evidence_graph_claim_coverage_loop",
+      "observation": "Loop-registry business claims can exist without an evidence graph chain that explains the observation, hypothesis, change, verifier, evidence, decision, and next loop behind that claim.",
+      "hypothesis": "Adding explicit claim references to evidence graph chains and verifying full claim coverage keeps claim meaning connected to executable reasoning instead of narrative memory.",
+      "claims": ["evidence_graph_must_cover_loop_registry_claims"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Evidence graph verification now fails when any loop-registry claim lacks a chain or any chain references an unknown claim.",
       "next_loop": "closed_loop_candidate"
     }
   ],

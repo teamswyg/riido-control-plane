@@ -15,12 +15,13 @@ type manifest struct {
 }
 
 type chain struct {
-	ID          string `json:"id"`
-	Observation string `json:"observation"`
-	Hypothesis  string `json:"hypothesis"`
-	Changes     []ref  `json:"changes"`
-	Verifiers   []ref  `json:"verifiers"`
-	Evidence    []ref  `json:"evidence"`
-	Decision    string `json:"decision"`
-	NextLoop    string `json:"next_loop"`
+	ID          string   `json:"id"`
+	Observation string   `json:"observation"`
+	Hypothesis  string   `json:"hypothesis"`
+	Claims      []string `json:"claims,omitempty"`
+	Changes     []ref    `json:"changes"`
+	Verifiers   []ref    `json:"verifiers"`
+	Evidence    []ref    `json:"evidence"`
+	Decision    string   `json:"decision"`
+	NextLoop    string   `json:"next_loop"`
 }
