@@ -18,6 +18,6 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 - Observation: Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.
 - Hypothesis: A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, next artifact, and review expiry.
-- Execute: Generate this reader from the decision manifest, generate a deterministic candidate fixture, verify intake, verify candidate decisions, and publish decision evidence in CI.
-- Evaluate: The verifier fails on missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, stale docs, missing scheduled workflow evidence, or unredacted candidate content.
+- Execute: Generate this reader from the decision manifest, generate a deterministic candidate fixture, verify intake, verify candidate decisions with an explicit candidate artifact, and publish decision evidence in CI.
+- Evaluate: The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, stale docs, missing scheduled workflow evidence, or unredacted candidate content.
 - Retrospective: This moves prioritization metadata into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition and review deadline.

@@ -19,6 +19,6 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 
 - Observation: Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.
 - Hypothesis: A candidate intake sidecar can verify redacted candidate shape, adoption artifact requirements, producer wiring, and graph linkage before humans choose implementation order.
-- Execute: Generate this reader from the intake manifest, run a deterministic redacted candidate fixture through harness promotion, validate the candidate artifact, and publish intake evidence in CI.
-- Evaluate: The verifier fails on missing producer linkage, missing loop-registry target, missing evidence-graph next loop, missing adoption artifacts, raw endpoint or secret leakage, stale docs, or missing scheduled workflow evidence.
+- Execute: Generate this reader from the intake manifest, run a deterministic redacted candidate fixture through harness promotion, validate the candidate artifact through explicit input, and publish intake evidence in CI.
+- Evaluate: The verifier fails on missing candidate input, missing producer linkage, missing loop-registry target, missing evidence-graph next loop, missing adoption artifacts, raw endpoint or secret leakage, stale docs, or missing scheduled workflow evidence.
 - Retrospective: This moves candidate triage one step out of the human loop: failures become structured intake records that already know what artifacts are required for adoption.

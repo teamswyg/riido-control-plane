@@ -174,8 +174,9 @@
     },
     {
       "id": "closed_loop_candidate_intake_loop",
-      "observation": "Closed-loop candidate artifacts could be produced without a scheduled intake verifier that reads them.",
-      "hypothesis": "A candidate intake tool can consume redacted candidate artifacts and verify producer, loop registry, graph, and adoption artifact requirements.",
+      "observation": "Closed-loop candidate artifacts could be produced without a scheduled intake verifier that reads them, and an intake verifier could report evidence without being tied to the current candidate artifact.",
+      "hypothesis": "A candidate intake tool can require explicit redacted candidate input and verify producer, loop registry, graph, and adoption artifact requirements.",
+      "claims": ["candidate_intake_must_consume_candidate_artifact"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
@@ -188,13 +189,13 @@
       "evidence": [
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true}
       ],
-      "decision": "Candidate intake is scheduled and verifies candidate adoption requirements before humans choose implementation order.",
+      "decision": "Candidate intake is scheduled and cannot produce evidence without explicit candidate input, redaction, producer linkage, graph linkage, and adoption artifact requirements.",
       "next_loop": "closed_loop_candidate_intake"
     },
     {
       "id": "closed_loop_candidate_decision_loop",
-      "observation": "Candidate intake can verify adoption requirements, but candidates still need owned disposition records that exactly match the consumed candidate artifact.",
-      "hypothesis": "A candidate decision tool can force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, and reject stale decision records that no longer map to a current candidate.",
+      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact and report decision evidence that is not tied to the current candidate set.",
+      "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, and reject stale decision records that no longer map to a current candidate.",
       "claims": ["candidate_decisions_must_match_consumed_candidates"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
@@ -208,7 +209,7 @@
       "evidence": [
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
-      "decision": "Candidate decisions are scheduled and cannot omit owner, priority, disposition, next loop, or next artifact, and cannot retain orphan decisions after the candidate artifact changes.",
+      "decision": "Candidate decisions are scheduled and cannot verify without candidate input, omit owner, priority, disposition, next loop, or next artifact, or retain orphan decisions after the candidate artifact changes.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
