@@ -35,6 +35,7 @@ func TestAssignmentPromptAsksForIntentOnAmbiguousMarketingDocument(t *testing.T)
 		"ask a concise clarification question in the existing AI Agent thread before producing deliverables.",
 		"Use the user's apparent language and product tone when asking clarification questions or reporting provider limits.",
 		"When a follow-up thread message supplies a concrete instruction, treat that latest user message as the current directive",
+		"Do not ask the user to click local CLI, desktop, or provider approval dialogs",
 		"- title: [1.23 신기능 마케팅] 카피라이트 3개안 준비",
 	} {
 		if !strings.Contains(prompt.Prompt, want) {
@@ -63,6 +64,7 @@ func TestFollowupPromptKeepsLatestUserInstructionAuthoritative(t *testing.T) {
 		"### Follow-up Execution Policy",
 		"The New User Instruction is authoritative for this run.",
 		"Re-read the latest Task Document before answering because it may have changed after the previous run.",
+		"Do not ask the user to click local CLI, desktop, or provider approval dialogs",
 	} {
 		if !strings.Contains(prompt, want) {
 			t.Fatalf("follow-up prompt missing %q:\n%s", want, prompt)

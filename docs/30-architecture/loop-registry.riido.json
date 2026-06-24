@@ -515,7 +515,7 @@
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
-      "statement": "When task context is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the assignment prompt must emit intent_gate_required=true and require the agent to ask for intent in the existing thread before producing deliverables; provider token, quota, or cloud-credit exhaustion must render as a user-facing thread result without changing API shape.",
+      "statement": "When task context is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the assignment prompt must emit intent_gate_required=true and require the agent to ask for intent in the existing thread before producing deliverables; provider token, quota, cloud-credit exhaustion, or local approval-dialog wording must render as a user-facing thread result without changing API shape.",
       "loop": "ai_thread_history",
       "files": [
         "docs/20-domain/ai-agent-client-api.riido.json",
@@ -537,6 +537,7 @@
         "internal/riidoaiserver/server_thread_message_prompt.go",
         "internal/riidoaiserver/ai_agent_client_visible_messages.go",
         "internal/riidoaiserver/ai_agent_client_visible_limit_message.go",
+        "internal/riidoaiserver/ai_agent_client_visible_local_approval_message.go",
         "internal/riidoaiserver/ai_agent_client_development_func_apply_assignment_metadata_action_response.go",
         "internal/riidoaiserver/ai_agent_client_development_func_assignment_event_action_response.go",
         "internal/riidoaiserver/ai_agent_client_development_record_assignment_status.go",
@@ -555,8 +556,11 @@
         "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_component_intent_test.go",
         "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go",
+        "internal/riidoaiserver/ai_agent_client_visible_local_approval_message_test.go",
         "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go",
         "internal/riidoaiserver/ai_agent_client_http_intent_gate_helpers_test.go",
+        "internal/riidoaiserver/ai_agent_client_http_intent_gate_metadata_test.go",
+        "internal/riidoaiserver/ai_agent_client_http_intent_gate_metadata_helpers_test.go",
         "tools/aiagentclientapi/main.go",
         "tools/aiagentclientapi/main_test.go",
         "tools/aiagentclientapi/types_thread_history_v3.go",
@@ -576,6 +580,9 @@
         "TestAIAgentIntentDialogueScenarioKeepsProgressAndLimitResult",
         "TestClientVisibleTaskThreadTextLocalizesProviderLimitMessages",
         "TestFailureDiagnosticsLocalizesProviderLimitMessages",
+        "TestClientVisibleTaskThreadTextConvertsLocalApprovalDialog",
+        "TestFailureDiagnosticsConvertsLocalApprovalDialog",
+        "TestHTTPAIAgentIntentGateUsesMetadataWhenDocumentMissing",
         "TestVerifyAliasChecksGeneratedDoc",
         "TestGeneratedDocMatchesManifest"
       ],
@@ -583,7 +590,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "9343985a1e0f1467f463ae9998277fbbda1d61d7bdc3c0f3df2255a3b3f61f36"
+      "semantic_hash": "3893171015fa89cef9233f0d07b640d1da50a09487bc8a4a4e34e78853b1dc00"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
@@ -636,7 +643,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "461828ce45bafd7c4ea8e6caced948cfd163daaef092223ec12f3f37af502e5d"
+      "semantic_hash": "727bd1ee6dc14a7fd6963752f72e7906d8581bb0c53224c3a79b7a56e3feacfa"
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
@@ -662,7 +669,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2db5cd1ee3f011f4703b921847d1cc94247985ab7ff01e9ffe8c343805e49319"
+      "semantic_hash": "859e89e196b144121aabc4d706867a89ab19669fa5951d234bc1aaf3e08eb7e8"
     },
     {
       "id": "pre_commit_must_run_claim_binding_impact",
@@ -689,7 +696,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9e925943012cdc57087f0c06902027ae5d9a4de64c9ac4db10fbdb2794bd08a0"
+      "semantic_hash": "f4f0241c503b11b99286973ffcd0df28026cd9c967585a036ee6e4acf72fdc53"
     },
     {
       "id": "claim_bound_paths_must_trigger_loop_registry",
@@ -711,7 +718,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "2c99c78a2cfd06db6ec54b31190e4998571616df5657aaedc3ecbdf0d679bb01"
+      "semantic_hash": "3cd1ac2e54c2d6f46304a3df2d6bca572d4b1903d68e8a43ec6d371921d669cd"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -856,7 +863,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "752a1db126dfd96fe2f3ad1c14fbad44dd57ecb04f98ac49ce529108b432d8d9"
+      "semantic_hash": "8254ec32e8d895e7bed132eeaecad21b64b91a044aa566355c420ada110b81da"
     },
     {
       "id": "loop_registry_evidence_must_expose_refresh_plans",
@@ -900,7 +907,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "6c3b03c4c7139f00b3770c418f5b03fa0f32541bece49a2eb16d102d5d52071a"
+      "semantic_hash": "0c7a2fd37a494ddfa531ba3fd68b0404f146309cc40e13fa71ef9585fc33dd8e"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",

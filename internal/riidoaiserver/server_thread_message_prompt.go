@@ -49,6 +49,7 @@ func followupExecutionPolicyRules() []string {
 	return []string{
 		"The New User Instruction is authoritative for this run.",
 		"Re-read the latest Task Document before answering because it may have changed after the previous run.",
+		"Do not ask the user to click local CLI, desktop, or provider approval dialogs; ask a conversational question in this thread if confirmation is needed.",
 		"If the follow-up asks for research and provider quota is exhausted, return the provider limit result message instead of asking for local tool approval.",
 	}
 }
