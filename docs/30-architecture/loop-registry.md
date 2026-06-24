@@ -9,8 +9,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `5`
 - harness loops: `1`
 - closed loops: `4`
-- claim bindings: `4`
-- evidence graph edges: `8`
+- claim bindings: `5`
+- evidence graph edges: `9`
 - max evidence expiry hours: `24`
 
 ## Loops
@@ -30,6 +30,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `deleted_agent_threads_must_remain_visible` | `ai_thread_history` | `4` | `3` | `090a4a1be855` |
 | `thread_history_must_keep_user_followups` | `ai_thread_history` | `4` | `2` | `b750489076ff` |
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `92594cfc172f` |
+| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `11` | `3` | `7e42f736840e` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `32a647f595ad` |
 
 ## Evidence Graph
@@ -41,6 +42,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `ai_thread_history` --enforces--> `deleted_agent_threads_must_remain_visible`
 - `ai_thread_history` --enforces--> `thread_history_must_keep_user_followups`
 - `ai_thread_history` --enforces--> `same_provider_agents_must_keep_distinct_threads`
+- `ai_thread_history` --enforces--> `thread_history_v3_must_expose_stable_conversation_grouping`
 - `closed_loop_candidate` --enforces--> `loop_verifiers_must_accept_verify_intent`
 
 ## Evidence Loop
