@@ -26,7 +26,8 @@ func TestClaimSurfaceEvidenceIncludesCodeTestDocBindings(t *testing.T) {
 		if len(surface.CodePaths)+len(surface.ManifestPaths) == 0 ||
 			len(surface.TestPaths)+len(surface.Verifiers) == 0 ||
 			len(surface.GeneratedDocs) == 0 ||
-			len(surface.VerifierCommands) == 0 {
+			len(surface.VerifierCommands) == 0 ||
+			len(surface.EvidenceChainIDs) == 0 {
 			t.Fatalf("incomplete claim surface: %+v", surface)
 		}
 	}
@@ -57,7 +58,8 @@ func TestClaimSurfaceEvidenceIncludesTargetVerifierCommands(t *testing.T) {
 			"./tools/configreference",
 		},
 	}
-	surface := claimSurfaceFor(claim, tests)
+	chains := map[string][]string{"claim": {"chain-a"}}
+	surface := claimSurfaceFor(claim, tests, chains)
 	want := "go test ./tools/aiagentclientapi -run '^(TestGeneratedDocMatchesManifest)$' -count=1"
 	if len(surface.VerifierCommands) != 1 || surface.VerifierCommands[0] != want {
 		t.Fatalf("commands = %#v, want %q", surface.VerifierCommands, want)

@@ -65,4 +65,5 @@ type claimSurface struct {
 	GeneratedDocs    []string `json:"generated_docs"`
 	Verifiers        []string `json:"verifiers"`
 	VerifierCommands []string `json:"verifier_commands"`
+	EvidenceChainIDs []string `json:"evidence_chain_ids"`
 }

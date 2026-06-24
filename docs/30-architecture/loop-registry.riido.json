@@ -11,7 +11,7 @@
     "business claim meaning changes must co-change at least one bound code or test file in pull requests",
     "bound code or test file changes must co-change the claim registry manifest or generated claim evidence",
     "harness loops must promote failures into closed-loop candidates by running tools/harnesspromotion and publishing strict candidate evidence",
-    "claim evidence must expose code, test, manifest, generated doc, and verifier surface so agents can infer required co-change scope without reading prose",
+    "claim evidence must expose code, test, manifest, generated doc, verifier surface, and evidence chain ids so agents can infer required co-change and reasoning scope without reading prose",
     "all loops with evidence expiry must declare a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence",
     "loop registry and evidence graph evidence must carry generated_at and expires_at so tools can reject stale evidence",
     "evidence graph evidence must expose full reasoning chains, not only chain ids",
@@ -427,7 +427,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "7dad2803d6f9aa5d238c4c6cdf9362ae754ba1b23485e0bf4443fdcaae093f9f"
+      "semantic_hash": "cad00b2d32591dd27989c7695889a23305093aee40a0e2c167f2694307585502"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -528,7 +528,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "0f984e6a25fd7c71fb8ce85969c24c6b67c1fb4fcc4967535e758158d6f8c543"
+      "semantic_hash": "826c10a4a78b67e0ecb0bae794bd38614b9ab47bdd22d027cdbfc4cba7a8740d"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -583,7 +583,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "deaff7105b22b4d359264dda5338e21d9d846132d0d0a2ce854b3c52c4eb9a6a"
+      "semantic_hash": "9e1f0ee5871a5171ab5f825f9a13a53bcf10be683af15cd382586703130004f7"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -666,7 +666,7 @@
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
-      "statement": "Loop registry evidence must expose each business claim's executable surface across code, tests, manifests, generated docs, verifier names, and target verifier commands so agents can infer co-change and QA scope without reading narrative docs.",
+      "statement": "Loop registry evidence must expose each business claim's executable surface across code, tests, manifests, generated docs, verifier names, target verifier commands, and evidence graph chain ids so agents can infer co-change, QA, and reasoning scope without reading narrative docs.",
       "loop": "closed_loop_candidate",
       "files": [
         "tools/loopregistry/package_path.go",
@@ -675,16 +675,21 @@
         "tools/loopregistry/claim_surface_command_pkg.go",
         "tools/loopregistry/claim_surface_command_test.go",
         "tools/loopregistry/claim_surface_verify.go",
+        "tools/loopregistry/claim_surface_chain_test.go",
         "tools/loopregistry/claim_surface_test.go",
+        "tools/loopregistry/evidence_chain.go",
         "tools/loopregistry/evidence.go",
         "tools/loopregistry/render.go",
         "tools/loopregistry/render_more.go",
         "tools/loopregistry/types_more.go",
         "tools/loopregistry/verify.go",
-        "tools/loopregistry/verify_claim.go"
+        "tools/loopregistry/verify_claim.go",
+        "docs/30-architecture/evidence-graph.riido.json"
       ],
       "verifiers": [
         "TestClaimSurfaceEvidenceIncludesCodeTestDocBindings",
+        "TestClaimSurfaceEvidenceIncludesEvidenceGraphChainIDs",
+        "TestClaimEvidenceChainCoverageRejectsMissingClaim",
         "TestClaimSurfaceEvidenceIncludesTargetVerifierCommands",
         "TestVerifierCommandsPreferClaimBoundGoPackages",
         "TestClaimSurfaceRejectsNarrativeOnlyClaim"
@@ -692,7 +697,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ddbbf5999d7a13f396fa4317460dab2080ecbffe4911d0bb130715cc142d5a8d"
+      "semantic_hash": "3933330667effb913c5089d2d0fb5f4a13d07cb0e76dc3c22fa118db9c9c4526"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -742,7 +747,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8f69f0156a76b1229903ed0e7ad4aac8d61ac9f2715178ed816fedb54db41948"
+      "semantic_hash": "3504aca516787a3754c9573fea42d3ee9037451a716f51f58b970d5f8f4777c5"
     },
     {
       "id": "claim_meaning_changes_require_reasoning_chain",
@@ -811,7 +816,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3cd1ac2e54c2d6f46304a3df2d6bca572d4b1903d68e8a43ec6d371921d669cd"
+      "semantic_hash": "9cad8481fc27245add7fc9804dcd7bf674869d8c47242c9bfe5078e72f3c3882"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -835,7 +840,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "be6e48af1b62bbd1085d86ea13ba792f2a214633450a63dcd7dc4c508cf1977a"
+      "semantic_hash": "9f383d25a946c0fced187a7864eb77531579cdc6669677aa0f343b65d323c063"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -859,7 +864,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "524e5ee715b4396964fbb3745d4e526c7c40e0cebacfdbdaa85a91c46eb88ac5"
+      "semantic_hash": "581b7487885414e752009f04360a6c00ec543312012d2475c5ce2849741d5432"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -879,7 +884,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "3c33a7c4749d69a06e905dbdc31e6b32c2ecadcb093b14781898df4e3f4392e4"
+      "semantic_hash": "6cdb0451298fdee08df9ca89900fbf2abd0e696452d50f8072dd4adc3c30f524"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -1028,7 +1033,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "09d7afbc376d78a11e221b9c647892e42ed4688e8927641647831451a4628f35"
+      "semantic_hash": "71c6bc35ad5f71f2b32040b9cbfe41f90d8dfe9d253979670a431acd1d0a0588"
     },
     {
       "id": "loop_registry_evidence_must_expose_graph_edges",
@@ -1069,7 +1074,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "142080b20465050916e0ade35807c6456572cdd3472bfcfcbac233c044635380"
+      "semantic_hash": "9bb1930e8aaa2bf33001d0ee0ad4d77641eb9a373edf0332184a51fff1430f9e"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",

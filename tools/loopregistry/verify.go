@@ -14,7 +14,14 @@ func verifyAll(root string, m manifest, hashes map[string]string) (verifyResult,
 	if err != nil {
 		return verifyResult{}, err
 	}
+	chains, err := claimEvidenceChains(root)
+	if err != nil {
+		return verifyResult{}, err
+	}
 	if err := verifyClaims(root, m, loopIDs, hashes, tests); err != nil {
+		return verifyResult{}, err
+	}
+	if err := verifyClaimEvidenceChains(m.Claims, chains); err != nil {
 		return verifyResult{}, err
 	}
 	if err := verifyEvidenceGraph(m, loopIDs); err != nil {
@@ -32,7 +39,7 @@ func verifyAll(root string, m manifest, hashes map[string]string) (verifyResult,
 	result.Claims = len(m.Claims)
 	result.GraphEdges = len(m.EvidenceGraph)
 	result.Hashes = hashes
-	result.ClaimSurfaces = claimSurfaces(m.Claims, tests)
+	result.ClaimSurfaces = claimSurfaces(m.Claims, tests, chains)
 	return result, nil
 }
 

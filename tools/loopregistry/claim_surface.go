@@ -2,15 +2,23 @@ package main
 
 import "strings"
 
-func claimSurfaces(claims []claimBinding, tests map[string][]string) []claimSurface {
+func claimSurfaces(
+	claims []claimBinding,
+	tests map[string][]string,
+	chains map[string][]string,
+) []claimSurface {
 	out := make([]claimSurface, 0, len(claims))
 	for _, claim := range claims {
-		out = append(out, claimSurfaceFor(claim, tests))
+		out = append(out, claimSurfaceFor(claim, tests, chains))
 	}
 	return out
 }
 
-func claimSurfaceFor(claim claimBinding, tests map[string][]string) claimSurface {
+func claimSurfaceFor(
+	claim claimBinding,
+	tests map[string][]string,
+	chains map[string][]string,
+) claimSurface {
 	surface := claimSurface{
 		ID:               claim.ID,
 		CodePaths:        []string{},
@@ -19,6 +27,7 @@ func claimSurfaceFor(claim claimBinding, tests map[string][]string) claimSurface
 		GeneratedDocs:    sortedCopy(claim.GeneratedDoc),
 		Verifiers:        sortedCopy(claim.Verifiers),
 		VerifierCommands: []string{},
+		EvidenceChainIDs: sortedCopy(chains[claim.ID]),
 	}
 	for _, path := range sortedCopy(claim.Files) {
 		switch {
