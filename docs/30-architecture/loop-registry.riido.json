@@ -21,12 +21,17 @@
       "observes": [
         "v3_threads_response",
         "task_thread_messages",
-        "agent_snapshot_map"
+        "agent_snapshot_map",
+        "conversation_id",
+        "parent_thread_id"
       ],
       "verifies": [
         "deleted_agent_thread_retention",
         "user_followup_retention",
-        "assignment_scoped_threads"
+        "assignment_scoped_threads",
+        "conversation_grouping",
+        "followup_parent_thread",
+        "frontend_handoff_v3_contract"
       ],
       "evidence": [
         {
@@ -242,6 +247,34 @@
       "semantic_hash": "92594cfc172f2a21374874edaf234694178a1f6c72cc97563fc3a86eef658306"
     },
     {
+      "id": "thread_history_v3_must_expose_stable_conversation_grouping",
+      "statement": "AI thread history v3 must expose a stable conversation_id for agent comment card grouping, preserve that conversation_id for follow-up replies, expose parent_thread_id for follow-up runs, and allocate a different conversation_id for same-agent reassignment.",
+      "loop": "ai_thread_history",
+      "files": [
+        "docs/20-domain/ai-agent-client-api.riido.json",
+        "internal/riidoaiserver/ai_agent_client_thread_history_api.go",
+        "internal/riidoaiserver/ai_agent_client_thread_history_projection.go",
+        "internal/riidoaiserver/ai_agent_client_thread_conversation.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_message_from_action.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_message_update.go",
+        "internal/riidoaiserver/ai_agent_client_thread_history_conversation_test.go",
+        "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go",
+        "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go",
+        "tools/aiagentclientapi/verify_thread_history_v3.go"
+      ],
+      "verifiers": [
+        "TestAIAgentTaskThreadHistoryConversationGrouping",
+        "TestHTTPAIAgentClientV3ThreadHistory",
+        "TestGeneratedDocMatchesManifest"
+      ],
+      "generated_docs": [
+        "docs/20-domain/ai-agent-client-api.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "7e42f736840e93ac468013e1939278cd02e3bffdfceef094a055998171502070"
+    },
+    {
       "id": "loop_verifiers_must_accept_verify_intent",
       "statement": "Closed-loop verifier tools must accept the common -verify intent as an alias for their generated-doc verification mode so agents do not need tool-specific flag memory.",
       "loop": "closed_loop_candidate",
@@ -304,6 +337,11 @@
     {
       "from": "ai_thread_history",
       "to": "same_provider_agents_must_keep_distinct_threads",
+      "relation": "enforces"
+    },
+    {
+      "from": "ai_thread_history",
+      "to": "thread_history_v3_must_expose_stable_conversation_grouping",
       "relation": "enforces"
     },
     {

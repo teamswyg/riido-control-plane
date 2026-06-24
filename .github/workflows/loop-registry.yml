@@ -8,13 +8,21 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/loop-registry.yml"
+      - "docs/20-domain/ai-agent-client-api.md"
+      - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/30-architecture/loop-registry.md"
       - "docs/30-architecture/loop-registry.riido.json"
       - "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_conversation_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go"
+      - "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"
       - "internal/riidoaiserver/ai_agent_client_same_provider_assignment_test.go"
       - "internal/riidoaiserver/ai_agent_client_http_provider_multi_assignment_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_conversation.go"
       - "internal/riidoaiserver/ai_agent_client_development_append_thread_history_message.go"
       - "internal/riidoaiserver/ai_agent_client_development_func_thread_id_for_run.go"
       - "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_agent_assignment.go"
@@ -22,6 +30,9 @@ on:
       - "internal/riidoaiserver/ai_agent_client_development_method_delete_ai_agent.go"
       - "internal/riidoaiserver/ai_agent_client_development_method_mark_task_agent_threads_stopped_locked.go"
       - "internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_message_from_action.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_message_update.go"
+      - "tools/aiagentclientapi/**"
       - "tools/loopregistry/**"
       - "tools/evidencegraph/**"
       - "tools/harnesspromotion/**"
@@ -32,13 +43,21 @@ on:
   pull_request:
     paths:
       - ".github/workflows/loop-registry.yml"
+      - "docs/20-domain/ai-agent-client-api.md"
+      - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/30-architecture/loop-registry.md"
       - "docs/30-architecture/loop-registry.riido.json"
       - "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_conversation_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go"
+      - "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"
       - "internal/riidoaiserver/ai_agent_client_same_provider_assignment_test.go"
       - "internal/riidoaiserver/ai_agent_client_http_provider_multi_assignment_test.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_conversation.go"
       - "internal/riidoaiserver/ai_agent_client_development_append_thread_history_message.go"
       - "internal/riidoaiserver/ai_agent_client_development_func_thread_id_for_run.go"
       - "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_agent_assignment.go"
@@ -46,6 +65,9 @@ on:
       - "internal/riidoaiserver/ai_agent_client_development_method_delete_ai_agent.go"
       - "internal/riidoaiserver/ai_agent_client_development_method_mark_task_agent_threads_stopped_locked.go"
       - "internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_message_from_action.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_message_update.go"
+      - "tools/aiagentclientapi/**"
       - "tools/loopregistry/**"
       - "tools/evidencegraph/**"
       - "tools/harnesspromotion/**"
@@ -75,9 +97,10 @@ jobs:
             impact_args=(-impact-base "$RIIDO_LOOP_REGISTRY_IMPACT_BASE")
           fi
           go test ./tools/loopregistry -count=1
+          go test ./tools/aiagentclientapi -run 'Test(GeneratedDocMatchesManifest|RunWritesEvidence)$' -count=1
           go test ./tools/evidencegraph ./tools/harnesspromotion ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision -count=1
           go test ./internal/riidoaiserver \
-            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread)$' \
+            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory)$' \
             -count=1
           go run ./tools/loopregistry \
             -check-doc \
