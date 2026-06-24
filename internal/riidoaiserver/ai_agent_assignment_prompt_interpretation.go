@@ -27,11 +27,11 @@ func classifyTaskContextIntent(
 	document AIAgentTaskContextDocument,
 ) string {
 	text := strings.ToLower(component.Title + "\n" + document.Content)
-	if strings.TrimSpace(document.Content) == "" {
-		return taskIntentMetadataOnly
-	}
 	if containsAny(text, intentOrientedTaskMarkers()) {
 		return taskIntentIntentOriented
+	}
+	if strings.TrimSpace(document.Content) == "" {
+		return taskIntentMetadataOnly
 	}
 	return taskIntentExplicit
 }

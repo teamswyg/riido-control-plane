@@ -34,7 +34,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `3daacf489261` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `40c80ece1ed9` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `353a8e4bb6d2` |
-| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `24` | `10` | `a40414b9f4cb` |
+| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `24` | `12` | `8e97f4ddd5ec` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `9` | `2` | `36ae2e3a1ebf` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `2d5eaf24bb69` |
 | `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `19510d3503e6` |
@@ -54,7 +54,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `thread_history_v3_must_expose_stable_conversation_grouping` | `8` | `3` | `1` | `2` | `3` |
 | `expired_harness_evidence_must_not_promote_candidates` | `12` | `3` | `2` | `3` | `3` |
 | `loop_verifiers_must_accept_verify_intent` | `5` | `5` | `0` | `1` | `5` |
-| `ambiguous_task_context_must_ask_before_work` | `16` | `7` | `1` | `2` | `10` |
+| `ambiguous_task_context_must_ask_before_work` | `16` | `7` | `1` | `2` | `12` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `8` | `1` | `0` | `1` | `2` |
 | `claim_bound_paths_must_trigger_loop_registry` | `3` | `1` | `1` | `1` | `4` |
 | `evidence_graph_must_cover_loop_registry_claims` | `5` | `1` | `1` | `2` | `3` |
