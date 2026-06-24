@@ -376,6 +376,28 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "loop_registry_refresh_plan_evidence_loop",
+      "observation": "Loop registry evidence exposed refresh workflow maps and cadence maps, but an agent still had to compose the manual QA refresh command and evidence artifact set itself.",
+      "hypothesis": "A per-loop refresh_plans evidence surface lets agents and reviewers identify expired-evidence QA commands directly from machine evidence.",
+      "claims": ["loop_registry_evidence_must_expose_refresh_plans"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/refresh_plan_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Loop registry evidence now exposes refresh_plans with workflow, cadence, expiry, evidence artifacts, and manual refresh commands for every loop.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "closed_loop_candidate_decision_loop",
       "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact and report decision evidence that is not tied to the current candidate set.",
       "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, and reject stale decision records that no longer map to a current candidate.",
