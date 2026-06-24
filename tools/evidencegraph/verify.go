@@ -21,6 +21,9 @@ func verifyAll(root string, m manifest) (verifyResult, error) {
 	if err := verifyClaimCoverage(registry.Claims, coveredClaims); err != nil {
 		return verifyResult{}, err
 	}
+	if err := verifyEvidenceWorkflowCoversRefs(root, m); err != nil {
+		return verifyResult{}, err
+	}
 	return result, nil
 }
 

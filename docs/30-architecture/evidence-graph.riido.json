@@ -343,6 +343,32 @@
       ],
       "decision": "Evidence graph verification now fails when any loop-registry claim lacks a chain or any chain references an unknown claim.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "evidence_graph_workflow_trigger_coverage_loop",
+      "observation": "Evidence graph chains can reference code, workflows, tools, or manifests that do not trigger the evidence-graph workflow when they change.",
+      "hypothesis": "The evidence graph verifier can read its own workflow path filters and fail when any non-artifact chain reference is outside those filters, keeping graph evidence refreshed without asking agents to remember trigger maintenance.",
+      "claims": ["evidence_graph_refs_must_trigger_evidence_workflow"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/evidencegraph/workflow_coverage_test.go"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Evidence graph workflow trigger coverage is part of graph verification: referenced non-artifact surfaces must be covered by direct paths or directory globs.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
