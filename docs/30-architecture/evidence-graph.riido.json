@@ -193,8 +193,9 @@
     },
     {
       "id": "closed_loop_candidate_decision_loop",
-      "observation": "Candidate intake can verify adoption requirements, but candidates still need owned disposition records.",
-      "hypothesis": "A candidate decision tool can force each redacted candidate to bind owner, priority, disposition, next loop, and next artifact.",
+      "observation": "Candidate intake can verify adoption requirements, but candidates still need owned disposition records that exactly match the consumed candidate artifact.",
+      "hypothesis": "A candidate decision tool can force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, and reject stale decision records that no longer map to a current candidate.",
+      "claims": ["candidate_decisions_must_match_consumed_candidates"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
@@ -207,7 +208,7 @@
       "evidence": [
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
-      "decision": "Candidate decisions are scheduled and cannot omit owner, priority, disposition, next loop, or next artifact.",
+      "decision": "Candidate decisions are scheduled and cannot omit owner, priority, disposition, next loop, or next artifact, and cannot retain orphan decisions after the candidate artifact changes.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

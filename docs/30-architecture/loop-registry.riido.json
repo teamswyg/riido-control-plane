@@ -415,7 +415,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "bf99dc2889632e1b8b23851a523fb8b83221be43b28a7099745edd030912750f"
+      "semantic_hash": "44cd2583951277ddc97300743ac329979680b1cc7830cd7095fd24ef22301fcc"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -439,7 +439,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "07b02deb451f7af6e1ae38a7b1d6b224080e2ccc72f14f14158d8dfcc602cdfc"
+      "semantic_hash": "7478bbcc41ceb90b0d67b5d1b5f4b2c964d1a630199b89554c11f25af5161702"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -463,7 +463,28 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "067beaec53837f5963f2e1dc3b1bd1fd26ef68278936b9c94fdaa913ea504cd2"
+      "semantic_hash": "eeb203560f9b43d6b1cef017b56d2bee4d6f3d6f439968454a4a9e511f4c55f1"
+    },
+    {
+      "id": "candidate_decisions_must_match_consumed_candidates",
+      "statement": "Closed-loop candidate decision records must match the consumed candidate artifact exactly: every candidate needs one decision, and every decision must point to a current candidate.",
+      "loop": "closed_loop_candidate_decision",
+      "files": [
+        "docs/30-architecture/closed-loop-candidate-decision.riido.json",
+        "tools/closedloopcandidatedecision/candidate.go",
+        "tools/closedloopcandidatedecision/candidate_orphan_test.go",
+        "tools/closedloopcandidatedecision/candidate_test.go"
+      ],
+      "verifiers": [
+        "TestCandidateDecisionCoversGeneratedCandidate",
+        "TestCandidateDecisionRejectsOrphanDecision"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/closed-loop-candidate-decision.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "7c508191245cfd60bafa083d9e5296e72aba59bf9ef945bc1e53409b3ab5aefc"
     }
   ],
   "evidence_graph": [
@@ -540,6 +561,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "evidence_graph_refs_must_trigger_evidence_workflow",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate_decision",
+      "to": "candidate_decisions_must_match_consumed_candidates",
       "relation": "enforces"
     }
   ],
