@@ -45,13 +45,14 @@
     "each candidate must name the adoption artifacts required to become a closed loop",
     "intake sources must be backed by the producer manifest, loop registry, and evidence graph",
     "candidate intake must run on a schedule so stale candidates do not rely on human memory",
-    "candidate intake verification must fail when no candidate artifact is supplied"
+    "candidate intake verification must fail when no candidate artifact is supplied",
+    "scheduled candidate intake must download the latest live candidate artifacts from each producer harness workflow instead of validating only a fixture"
   ],
   "loop": {
     "observation": "Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.",
     "hypothesis": "A candidate intake sidecar can verify redacted candidate shape, adoption artifact requirements, producer wiring, and graph linkage before humans choose implementation order.",
-    "execute": "Generate this reader from the intake manifest, run a deterministic redacted candidate fixture through harness promotion, validate the candidate artifact through explicit input, and publish intake evidence in CI.",
-    "evaluate": "The verifier fails on missing candidate input, missing producer linkage, missing loop-registry target, missing evidence-graph next loop, missing adoption artifacts, raw endpoint or secret leakage, stale docs, or missing scheduled workflow evidence.",
+    "execute": "Generate this reader from the intake manifest, run a deterministic redacted candidate fixture through harness promotion, validate the candidate artifact through explicit input, download latest live producer candidate artifacts on non-PR runs, and publish intake evidence in CI.",
+    "evaluate": "The verifier fails on missing candidate input, missing producer linkage, missing loop-registry target, missing evidence-graph next loop, missing adoption artifacts, raw endpoint or secret leakage, stale docs, missing live artifact download wiring, or missing scheduled workflow evidence.",
     "retrospective": "This moves candidate triage one step out of the human loop: failures become structured intake records that already know what artifacts are required for adoption."
   }
 }

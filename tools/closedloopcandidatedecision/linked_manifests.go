@@ -7,7 +7,9 @@ type intakeManifest struct {
 }
 
 type intakeSource struct {
-	PromotionTarget string `json:"promotion_target"`
+	ID                string `json:"id"`
+	CandidateArtifact string `json:"candidate_artifact"`
+	PromotionTarget   string `json:"promotion_target"`
 }
 
 func verifyLinkedManifests(root string, m manifest) error {

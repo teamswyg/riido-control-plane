@@ -13,7 +13,10 @@ func verifyWorkflow(root string, m manifest) error {
 	}
 	text := string(data)
 	required := []string{
+		"actions: read",
 		"schedule:",
+		"gh run download",
+		"live-candidate-files.txt",
 		"go run ./tools/harnesspromotion",
 		"go run ./tools/closedloopcandidateintake",
 		"go run ./tools/closedloopcandidatedecision",
@@ -24,6 +27,15 @@ func verifyWorkflow(root string, m manifest) error {
 	for _, needle := range required {
 		if !strings.Contains(text, needle) {
 			return fmt.Errorf("candidate decision workflow missing %q", needle)
+		}
+	}
+	var intake intakeManifest
+	if err := readJSON(repoPath(root, m.IntakeManifest), &intake); err != nil {
+		return err
+	}
+	for _, source := range intake.Sources {
+		if source.CandidateArtifact == "" || !strings.Contains(text, source.CandidateArtifact) {
+			return fmt.Errorf("candidate decision workflow missing live artifact for source %q", source.ID)
 		}
 	}
 	return nil
