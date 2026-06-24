@@ -14,6 +14,7 @@
     "claim evidence must expose code, test, manifest, generated doc, and verifier surface so agents can infer required co-change scope without reading prose",
     "all loops with evidence expiry must declare a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence",
     "loop registry and evidence graph evidence must carry generated_at and expires_at so tools can reject stale evidence",
+    "refresh workflows must declare the loop ids they refresh so workflow edits cannot drift away from the loop registry manifest",
     "AI agents do not need to read the prose doc when the verifier can enforce the bound surface"
   ],
   "loops": [
@@ -413,7 +414,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "f4ffcccdfda7d525f0aefc9ff9a0947530f9329f1cff07e4a800740378ed30ad"
+      "semantic_hash": "370c3dddc7cd507628660f26d7bec84304c3172b6e9bce7fdbe4e2c92f03d5be"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -563,7 +564,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "38978e035bece5f0d27eb3f17af37f7d18201ad6c112f68013324677a839e8ee"
+      "semantic_hash": "3f285859d9e314a2bbb1dd5977bc4164b14d9c0348dfc3b91814a84b833884af"
     },
     {
       "id": "claim_bound_paths_must_trigger_loop_registry",
@@ -585,7 +586,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "6292e5b97a29e385e2977cbb2a4d27a4601ef50c8ea36293fa47d70fe2251a8f"
+      "semantic_hash": "a3dd55564534bbba7257cea5b45e087a88b02f97bddf676d50964453f33a5a36"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -609,7 +610,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0cae80519a2062dd67587c5d6b419f80f6e220e1b45417cf3d4f7f58e0842e22"
+      "semantic_hash": "e1206cff2edb1f58d6f8233b374d3a9d3988bba0ced55de83cacfd228c430bfa"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -633,7 +634,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "fc74f97dae92b8872e75bfc57292a1423acf10b11558382d42f4af406c2ff42d"
+      "semantic_hash": "ab636313cbf6724ee6b03d01748db2c53139b947f6408d3bdfb79a74fe4361ee"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -658,7 +659,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8af17d7b91c5268e3d2a80f3a1a6d8c1b2fafaa57ea1938a125f4227a4527a5d"
+      "semantic_hash": "e9f40d12e93f5a24a359a5808e664136372f3fbb5abbfae94dbe0121f4605ed0"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -704,7 +705,33 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "5dd1938f321808b25438ca0d1176428ba7f7ad7b5bc5311f0eeb5fa87135fd59"
+      "semantic_hash": "a92b22fc771d49cb4590d4608207ea8f694291a9acc9ff2006cbd2fea77f4b29"
+    },
+    {
+      "id": "refresh_workflows_must_declare_loop_identity",
+      "statement": "Every refresh workflow named by the loop registry must declare RIIDO_LOOP_IDS with the loop ids it refreshes, so workflow-only edits still expose their semantic loop ownership to verifiers and agents.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        ".github/workflows/loop-registry.yml",
+        ".github/workflows/ai-agent-client-testnet-smoke.yml",
+        ".github/workflows/ai-agent-client-testnet-load.yml",
+        ".github/workflows/closed-loop-candidate-intake.yml",
+        ".github/workflows/closed-loop-candidate-decision.yml",
+        ".github/workflows/open-questions.yml",
+        "tools/loopregistry/verify_schedule.go",
+        "tools/loopregistry/refresh_workflow_identity.go",
+        "tools/loopregistry/refresh_workflow_identity_test.go"
+      ],
+      "verifiers": [
+        "TestRefreshWorkflowMustDeclareLoopIdentity",
+        "TestRefreshWorkflowLoopIDParser",
+        "TestLoopRegistryManifestVerifies"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "1c8c8b07beecd2d17198bd988503e12c8ee08bd4439949d3fef5c56a22587f71"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
@@ -838,6 +865,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "evidence_graph_refs_must_trigger_evidence_workflow",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "refresh_workflows_must_declare_loop_identity",
       "relation": "enforces"
     },
     {

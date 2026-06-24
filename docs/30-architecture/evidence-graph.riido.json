@@ -296,6 +296,34 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "refresh_workflow_identity_loop",
+      "observation": "A refresh workflow can be edited without carrying the loop id it refreshes, leaving agents to infer semantic ownership from file names or prose.",
+      "hypothesis": "Requiring RIIDO_LOOP_IDS in every refresh workflow makes loop ownership executable and lets the registry verifier catch workflow-only drift.",
+      "claims": ["refresh_workflows_must_declare_loop_identity"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-smoke.yml"},
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-intake.yml"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"},
+        {"kind": "workflow", "path": ".github/workflows/open-questions.yml"},
+        {"kind": "tool", "path": "tools/loopregistry/refresh_workflow_identity.go"},
+        {"kind": "test", "path": "tools/loopregistry/refresh_workflow_identity_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/refresh_workflow_identity_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Refresh workflows now declare their loop identities directly, so workflow-only edits cannot silently detach scheduled QA from the loop registry.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "closed_loop_candidate_decision_loop",
       "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact and report decision evidence that is not tied to the current candidate set.",
       "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, and reject stale decision records that no longer map to a current candidate.",

@@ -9,8 +9,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `7`
 - harness loops: `2`
 - closed loops: `5`
-- claim bindings: `18`
-- evidence graph edges: `18`
+- claim bindings: `19`
+- evidence graph edges: `19`
 - max evidence expiry hours: `168`
 
 ## Loops
@@ -34,17 +34,18 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `92594cfc172f` |
 | `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `ef70ad2baa0f` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `6e7f25486f11` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `f4ffcccdfda7` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `370c3dddc7cd` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `a04fce499962` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `44` | `14` | `9343985a1e0f` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `9` | `2` | `47e288cd3ad5` |
-| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `9` | `3` | `38978e035bec` |
-| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `6292e5b97a29` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `0cae80519a20` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `fc74f97dae92` |
-| `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `8` | `3` | `8af17d7b91c5` |
+| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `9` | `3` | `3f285859d9e3` |
+| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `a3dd55564534` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `e1206cff2edb` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `ab636313cbf6` |
+| `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `8` | `3` | `e9f40d12e93f` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `6` | `4` | `26203290d14b` |
-| `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `5dd1938f3218` |
+| `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `a92b22fc771d` |
+| `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `1c8c8b07beec` |
 | `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `8` | `4` | `e50a3a6405ab` |
 | `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `1b340d39de23` |
 
@@ -68,6 +69,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `loop_evidence_artifacts_must_self_expire` | `4` | `3` | `1` | `2` | `3` |
 | `candidate_intake_must_consume_candidate_artifact` | `3` | `2` | `1` | `3` | `4` |
 | `expiring_loops_must_schedule_refresh` | `3` | `2` | `0` | `1` | `3` |
+| `refresh_workflows_must_declare_loop_identity` | `2` | `1` | `6` | `2` | `3` |
 | `candidate_decisions_must_match_consumed_candidates` | `3` | `4` | `1` | `3` | `4` |
 | `candidate_decision_next_artifact_must_be_required` | `5` | `1` | `1` | `3` | `3` |
 
@@ -89,6 +91,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `closed_loop_candidate` --enforces--> `claim_surface_evidence_must_expose_code_test_doc_binding`
 - `closed_loop_candidate` --enforces--> `evidence_graph_must_cover_loop_registry_claims`
 - `closed_loop_candidate` --enforces--> `evidence_graph_refs_must_trigger_evidence_workflow`
+- `closed_loop_candidate` --enforces--> `refresh_workflows_must_declare_loop_identity`
 - `closed_loop_candidate_decision` --enforces--> `candidate_decisions_must_match_consumed_candidates`
 - `closed_loop_candidate_decision` --enforces--> `candidate_decision_next_artifact_must_be_required`
 
