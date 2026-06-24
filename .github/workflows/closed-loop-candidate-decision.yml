@@ -1,0 +1,59 @@
+name: closed-loop-candidate-decision
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "47 2 * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/closed-loop-candidate-decision.yml"
+      - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
+      - "docs/30-architecture/closed-loop-candidate-decision.md"
+      - "tools/closedloopcandidatedecision/**"
+      - "tools/closedloopcandidateintake/**"
+      - "tools/harnesspromotion/**"
+  pull_request:
+    paths:
+      - ".github/workflows/closed-loop-candidate-decision.yml"
+      - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
+      - "docs/30-architecture/closed-loop-candidate-decision.md"
+      - "tools/closedloopcandidatedecision/**"
+      - "tools/closedloopcandidateintake/**"
+      - "tools/harnesspromotion/**"
+
+jobs:
+  closed-loop-candidate-decision:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify closed-loop candidate decision
+        run: |
+          mkdir -p out
+          go test ./tools/closedloopcandidatedecision -count=1
+          go run ./tools/harnesspromotion \
+            -summary docs/30-architecture/fixtures/harness-failure-summary.fixture.json \
+            -candidate-out out/sample-closed-loop-candidates.json
+          go run ./tools/closedloopcandidateintake \
+            -candidate-in out/sample-closed-loop-candidates.json \
+            -evidence-out out/sample-candidate-intake-evidence.json
+          go run ./tools/closedloopcandidatedecision \
+            -check-doc \
+            -candidate-in out/sample-closed-loop-candidates.json \
+            -evidence-out out/closed-loop-candidate-decision-evidence.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-decision-evidence
+          path: out/closed-loop-candidate-decision-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-decision-intake-evidence
+          path: out/sample-candidate-intake-evidence.json
+          if-no-files-found: error

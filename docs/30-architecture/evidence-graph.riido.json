@@ -72,6 +72,25 @@
       "next_loop": "closed_loop_candidate_intake"
     },
     {
+      "id": "closed_loop_candidate_decision_loop",
+      "observation": "Candidate intake can verify adoption requirements, but candidates still need owned disposition records.",
+      "hypothesis": "A candidate decision tool can force each redacted candidate to bind owner, priority, disposition, next loop, and next artifact.",
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
+      ],
+      "decision": "Candidate decisions are scheduled and cannot omit owner, priority, disposition, next loop, or next artifact.",
+      "next_loop": "closed_loop_candidate_decision"
+    },
+    {
       "id": "pre_commit_claim_binding_loop",
       "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier.",
       "hypothesis": "A pre-commit hook can run loop registry claim/doc/impact verification before PR creation.",

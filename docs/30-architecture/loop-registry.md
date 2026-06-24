@@ -6,11 +6,11 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 
 ## Summary
 
-- loops: `4`
+- loops: `5`
 - harness loops: `1`
-- closed loops: `3`
+- closed loops: `4`
 - claim bindings: `3`
-- evidence graph edges: `6`
+- evidence graph edges: `7`
 - max evidence expiry hours: `24`
 
 ## Loops
@@ -21,6 +21,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `provider_acceptance_harness` | `harness` | `24` | `1440` | `.github/workflows/ai-agent-client-testnet-smoke.yml` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `2` |
 | `closed_loop_candidate` | `closed_loop` | `24` | `1440` | `.github/workflows/loop-registry.yml` | `` | `2` |
 | `closed_loop_candidate_intake` | `closed_loop` | `24` | `1440` | `.github/workflows/closed-loop-candidate-intake.yml` | `` | `2` |
+| `closed_loop_candidate_decision` | `closed_loop` | `24` | `1440` | `.github/workflows/closed-loop-candidate-decision.yml` | `` | `2` |
 
 ## Claim Bindings
 
@@ -34,7 +35,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 
 - `provider_acceptance_harness` --promotes_failure_to--> `closed_loop_candidate`
 - `closed_loop_candidate` --feeds_candidate_intake--> `closed_loop_candidate_intake`
-- `closed_loop_candidate_intake` --hardens_claim--> `ai_thread_history`
+- `closed_loop_candidate_intake` --requires_candidate_decision--> `closed_loop_candidate_decision`
+- `closed_loop_candidate_decision` --hardens_claim--> `ai_thread_history`
 - `ai_thread_history` --enforces--> `deleted_agent_threads_must_remain_visible`
 - `ai_thread_history` --enforces--> `thread_history_must_keep_user_followups`
 - `ai_thread_history` --enforces--> `same_provider_agents_must_keep_distinct_threads`

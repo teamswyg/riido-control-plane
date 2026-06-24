@@ -1,0 +1,35 @@
+{
+  "schema_version": "riido-control-plane-closed-loop-candidate-decision.v1",
+  "id": "control-plane-closed-loop-candidate-decision",
+  "title": "Control Plane Closed Loop Candidate Decision",
+  "generated_doc": "docs/30-architecture/closed-loop-candidate-decision.md",
+  "workflow": ".github/workflows/closed-loop-candidate-decision.yml",
+  "evidence_artifact": "closed-loop-candidate-decision-evidence",
+  "evidence_tool": "tools/closedloopcandidatedecision",
+  "intake_manifest": "docs/30-architecture/closed-loop-candidate-intake.riido.json",
+  "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+  "decisions": [
+    {
+      "candidate_id": "ai-agent-client-testnet-smoke:provider_smoke",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "reason": "Provider smoke failures need an owned claim/verifier decision before becoming durable closed loops."
+    }
+  ],
+  "assertions": [
+    "every candidate consumed by intake must have exactly one decision record",
+    "decision records must name owner, priority, disposition, next loop, and next artifact",
+    "triage-required candidates must stay redacted and carry enough context for a follow-up claim binding",
+    "candidate decision verification must run on a schedule so decision ownership does not rely on memory"
+  ],
+  "loop": {
+    "observation": "Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.",
+    "hypothesis": "A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, and next artifact.",
+    "execute": "Generate this reader from the decision manifest, generate a deterministic candidate fixture, verify intake, verify candidate decisions, and publish decision evidence in CI.",
+    "evaluate": "The verifier fails on missing candidate decisions, duplicate decisions, unknown dispositions, missing owners, invalid priorities, stale docs, missing scheduled workflow evidence, or unredacted candidate content.",
+    "retrospective": "This moves prioritization metadata into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition."
+  }
+}
