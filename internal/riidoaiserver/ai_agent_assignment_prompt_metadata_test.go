@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAssignmentPromptInfersFromMetadataWhenDocumentMissing(t *testing.T) {
+func TestAssignmentPromptAsksFromIntentMetadataWhenDocumentMissing(t *testing.T) {
 	t.Parallel()
 	prompt, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
 		TaskID: "task-analysis",
@@ -21,8 +21,9 @@ func TestAssignmentPromptInfersFromMetadataWhenDocumentMissing(t *testing.T) {
 		t.Fatalf("compose prompt: %v", err)
 	}
 	for _, want := range []string{
-		"- intent_class: metadata_only",
-		"- first_response_policy: infer_from_metadata_then_ask_when_unsure",
+		"- intent_class: intent_oriented",
+		"- first_response_policy: ask_for_intent_before_deliverables_when_first_action_is_ambiguous",
+		"- clarification_question_example: 어떤 작업부터 진행할까요?",
 		"- title: 신기능 분석 방향 정리",
 		"not provided",
 	} {
