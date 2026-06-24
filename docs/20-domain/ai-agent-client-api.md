@@ -59,6 +59,35 @@ Use v3 for initial/read refresh, v2 for mutations, and v2 SSE for live progress.
 | stop-agent-v2 | `POST` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop` | Stop one assigned AI Agent in a task | strong UI mutation |
 | delete-agent-assignment-v2 | `DELETE` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}` | Remove one assigned AI Agent from a task while preserving history | strong UI mutation |
 
+### Thread History v3 Frontend Flow
+
+| Rule | Detail |
+| --- | --- |
+| `initial-load-v3` | When the task screen opens or refreshes, call GET /v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads and use it as the canonical read model. |
+| `group-by-conversation-id` | Render one Agent comment card per conversation_id. thread_id is the concrete run/thread record inside that card, not the card grouping key. |
+| `optimistic-v2-mutation` | For assign, message, stop, and delete, use the existing v2 mutation endpoint and apply an optimistic UI update immediately from the mutation response. |
+| `refetch-v3-after-mutation` | After each v2 mutation settles, refetch v3 thread history to recover persisted user messages, agent replies, progress rows, and historical snapshots. |
+
+### Thread History v3 Response Model
+
+#### `AIAgentTaskThreadHistoryCollectionResponse`
+
+Top-level response for one task screen. The frontend should treat threads as timeline records and resolve display metadata through agent_snapshots.
+
+- Fields: `schema_version`, `task_id`, `threads[]`, `agent_snapshots?`, `active_stream?`
+
+#### `AIAgentTaskThreadHistoryRecord`
+
+One persisted AI thread/run record in the task timeline. Multiple records may share conversation_id when they belong to the same visible Agent comment card.
+
+- Fields: `thread_id`, `conversation_id`, `parent_thread_id`, `task_id`, `assignment_id`, `agent_id`, `agent_snapshot_id`, `run_id`, `work_status`, `assignment_state`, `started_at`, `completed_at`, `messages[]`
+
+#### `AIAgentTaskThreadHistoryMessage`
+
+One stable timeline row inside a thread history record. message_id is the React row key; body can contain sanitized HTML from a user reply.
+
+- Fields: `message_id`, `role`, `comment_kind`, `assignment_id`, `run_id`, `source_message_id`, `seq`, `body`, `result_message`, `observed_at`
+
 ### Identity Rules
 
 | Name | Meaning | Frontend use |
@@ -93,6 +122,24 @@ Use v3 for initial/read refresh, v2 for mutations, and v2 SSE for live progress.
 | `user` | User follow-up instruction inside the AI thread |
 | `progress` | Runtime progress log, ordered by seq inside assignment_id and run_id |
 | `agent` | Agent status or final result message |
+
+### Thread History v3 Message Ordering
+
+| Rule | Detail |
+| --- | --- |
+| `conversation-card-ordering` | First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root. |
+| `message-row-ordering` | Within one thread record, render messages by observed_at and then seq. Use message_id as the stable row key, not body text. |
+| `progress-dedupe-ordering` | For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility. |
+| `late-terminal-guard` | If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running. |
+
+### Thread History v3 Mutation Rules
+
+| Rule | Detail |
+| --- | --- |
+| `assign-agent` | POST the v2 agent-assignments endpoint with agent_id. Same provider or same agent_id can still produce a distinct conversation when the user performs a new participant-dropdown assignment. |
+| `send-thread-message` | POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run. |
+| `stop-agent` | POST the task-scoped v2 stop endpoint, preferably including assignment_id. The UI should close the work immediately from control-plane truth; daemon acknowledgement is eventual. |
+| `delete-agent` | DELETE the task-scoped v2 assignment endpoint. Historical v3 thread history must stay visible even when the current agent profile is removed. |
 
 ## Thread History v3 SSE Handling Rules
 

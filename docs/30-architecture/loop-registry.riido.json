@@ -261,7 +261,8 @@
         "internal/riidoaiserver/ai_agent_client_thread_history_conversation_test.go",
         "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go",
         "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go",
-        "tools/aiagentclientapi/verify_thread_history_v3.go"
+        "tools/aiagentclientapi/verify_thread_history_v3.go",
+        "tools/aiagentclientapi/verify_thread_history_v3_rules.go"
       ],
       "verifiers": [
         "TestAIAgentTaskThreadHistoryConversationGrouping",
@@ -272,7 +273,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "7e42f736840e93ac468013e1939278cd02e3bffdfceef094a055998171502070"
+      "semantic_hash": "505f626d13ff44641c9ba8b4524ce15f5bc678cbd506c45d1704a73ed52eee8f"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
