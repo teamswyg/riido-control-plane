@@ -185,6 +185,38 @@
         "candidate_owner_missing",
         "candidate_next_artifact_missing"
       ]
+    },
+    {
+      "id": "open_decision_queue",
+      "kind": "closed_loop",
+      "observes": [
+        "unresolved_cross_repo_boundary",
+        "operator_observation",
+        "next_executable_artifact"
+      ],
+      "verifies": [
+        "question_owner",
+        "question_next_artifact",
+        "generated_reader_freshness"
+      ],
+      "evidence": [
+        {
+          "kind": "workflow_artifact",
+          "path": "open-questions-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/50-roadmap/open-questions.md"
+        }
+      ],
+      "refresh_workflow": ".github/workflows/open-questions.yml",
+      "expires_after_hours": 168,
+      "fails_when": [
+        "owner_missing",
+        "next_artifact_missing",
+        "generated_reader_stale"
+      ]
     }
   ],
   "claim_bindings": [
@@ -389,6 +421,11 @@
       "from": "closed_loop_candidate",
       "to": "loop_verifiers_must_accept_verify_intent",
       "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate_decision",
+      "to": "open_decision_queue",
+      "relation": "defers_unowned_boundary_to"
     }
   ],
   "loop": {
