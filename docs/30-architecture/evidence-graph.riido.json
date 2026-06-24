@@ -6,6 +6,7 @@
   "workflow": ".github/workflows/evidence-graph.yml",
   "evidence_artifact": "evidence-graph-evidence",
   "evidence_tool": "tools/evidencegraph",
+  "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
   "assertions": [
     "every evidence chain must connect observation, hypothesis, change, verifier, evidence, decision, and next loop",
     "change and verifier refs must point to existing repository files or package directories",
@@ -135,7 +136,7 @@
         {"kind": "artifact", "path": "riido-loop-registry-precommit-evidence.json", "redacted": true}
       ],
       "decision": "Local pre-commit now blocks claim binding drift before review.",
-      "next_loop": "claim_binding_created"
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

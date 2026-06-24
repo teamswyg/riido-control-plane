@@ -14,6 +14,7 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintln(&b)
 	fmt.Fprintf(&b, "- workflow: `%s`\n", m.Workflow)
 	fmt.Fprintf(&b, "- evidence artifact: `%s`\n", m.Evidence)
+	fmt.Fprintf(&b, "- loop registry: `%s`\n", m.LoopRegistry)
 	fmt.Fprintf(&b, "- chains: `%d`\n", result.Chains)
 	fmt.Fprintf(&b, "- change refs: `%d`\n", result.ChangeRefs)
 	fmt.Fprintf(&b, "- verifier refs: `%d`\n", result.VerifierRefs)
