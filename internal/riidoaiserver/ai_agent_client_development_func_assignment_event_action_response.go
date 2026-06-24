@@ -15,6 +15,7 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		Message:         clientVisibleTaskThreadText(message),
 	}
 	applyAssignmentStateActionResponse(&response, state)
+	applyAssignmentMetadataActionResponse(&response, metadata)
 	if assignmentStateCarriesResultMessage(state) {
 		response.ResultMessage = response.Message
 	}

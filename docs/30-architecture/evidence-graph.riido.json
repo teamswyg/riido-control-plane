@@ -335,12 +335,17 @@
       "changes": [
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_apply_assignment_metadata_action_response.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_assignment_event_action_response.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_thread_message_policy.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
