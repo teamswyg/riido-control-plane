@@ -46,7 +46,10 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		Message:         clientMessageTaskRunning,
 	}
 	threadWasActive := taskThreadHasActiveStream(thread)
+	conversationID := taskThreadConversationID(thread)
+	parentThreadID := ""
 	if taskThreadMessageStartsNewExecution(thread) {
+		parentThreadID = thread.ThreadID
 		response.AssignmentID = strings.TrimSpace(req.AssignmentID)
 		response.RunID = taskThreadMessageRunID(taskID, response.AssignmentID, len(s.taskThreads[taskID])+1)
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
@@ -63,7 +66,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	}
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.appendThreadUserMessageLocked(response, req.Body, req.SourceMessageID)
-	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID)
+	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID, conversationID, parentThreadID)
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
 }

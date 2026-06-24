@@ -36,6 +36,9 @@ func TestHTTPAIAgentClientV3ThreadHistory(t *testing.T) {
 	if len(history.Threads) != 1 || len(history.Threads[0].Messages) == 0 {
 		t.Fatalf("v3 history = %+v", history)
 	}
+	if history.Threads[0].ConversationID == "" {
+		t.Fatalf("v3 history conversation_id missing: %+v", history.Threads[0])
+	}
 	if history.Threads[0].AgentSnapshotID == "" || len(history.AgentSnapshots) != 1 {
 		t.Fatalf("v3 history snapshots = %+v", history)
 	}
