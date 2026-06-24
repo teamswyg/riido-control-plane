@@ -22,6 +22,10 @@ on:
       - "tools/closedloopcandidateintake/**"
       - "tools/harnesspromotion/**"
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   closed-loop-candidate-intake:
     runs-on: ubuntu-latest
@@ -42,9 +46,66 @@ jobs:
             -check-doc \
             -candidate-in out/sample-closed-loop-candidates.json \
             -evidence-out out/closed-loop-candidate-intake-evidence.json
+      - name: Download latest live candidate artifacts
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/live-candidates
+          : > out/live-candidate-files.txt
+          download_candidate_artifact() {
+            local workflow="$1"
+            local artifact="$2"
+            local dest="$3"
+            local run_id
+            run_id="$(gh run list \
+              --workflow "$workflow" \
+              --branch main \
+              --limit 20 \
+              --json databaseId,status \
+              --jq '[.[] | select(.status == "completed")][0].databaseId // ""')"
+            test -n "$run_id"
+            mkdir -p "$dest"
+            gh run download "$run_id" --name "$artifact" --dir "$dest"
+            find "$dest" -type f -name '*.json' -print >> out/live-candidate-files.txt
+          }
+          download_candidate_artifact \
+            ai-agent-client-testnet-smoke.yml \
+            ai-agent-client-testnet-smoke-closed-loop-candidates \
+            out/live-candidates/smoke
+          download_candidate_artifact \
+            ai-agent-client-testnet-load.yml \
+            ai-agent-client-testnet-load-closed-loop-candidates \
+            out/live-candidates/load
+          test -s out/live-candidate-files.txt
+      - name: Verify live candidate intake
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_candidate="$(find out/live-candidates/smoke -type f -name '*.json' | head -n 1)"
+          load_candidate="$(find out/live-candidates/load -type f -name '*.json' | head -n 1)"
+          test -n "$smoke_candidate"
+          test -n "$load_candidate"
+          go run ./tools/closedloopcandidateintake \
+            -candidate-in "$smoke_candidate" \
+            -evidence-out out/live-intake-smoke-evidence.json
+          go run ./tools/closedloopcandidateintake \
+            -candidate-in "$load_candidate" \
+            -evidence-out out/live-intake-load-evidence.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: closed-loop-candidate-intake-evidence
           path: out/closed-loop-candidate-intake-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always() && github.event_name != 'pull_request'
+        with:
+          name: closed-loop-candidate-intake-live-evidence
+          path: |
+            out/live-intake-smoke-evidence.json
+            out/live-intake-load-evidence.json
           if-no-files-found: error
