@@ -165,6 +165,29 @@
       "next_loop": "ai_thread_history"
     },
     {
+      "id": "claim_reasoning_impact_loop",
+      "observation": "A business claim meaning change could co-change bound code or tests while leaving the evidence graph reasoning chain stale.",
+      "hypothesis": "Requiring the evidence graph reasoning manifest to change with claim meaning changes keeps Observation, Hypothesis, Decision, and Next Loop aligned with the changed claim.",
+      "claims": ["claim_meaning_changes_require_reasoning_chain"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/impact_more.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/impact_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Claim meaning impact now requires reasoning evidence movement, preventing code/test-only claim edits from bypassing the evidence graph.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "claim_surface_evidence_loop",
       "observation": "The loop registry could reject semantic drift internally while its evidence artifact did not show each claim's code, test, manifest, generated doc, verifier, and target command surface to downstream agents.",
       "hypothesis": "Publishing per-claim surface evidence with target verifier commands lets agents infer the required co-change and QA scope from machine evidence instead of relying on narrative docs or memory.",
@@ -184,6 +207,29 @@
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
       "decision": "Claim surface binding and target verifier commands are now visible in loop-registry evidence and generated docs, so AI agents can detect code/test/doc and QA scope from verifier output even when they skip prose.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "loop_registry_graph_edge_evidence_loop",
+      "observation": "Loop registry evidence exposed graph edge counts, but not the actual loop-to-claim enforcement edge list, so an agent reading only the artifact still had to open a manifest or generated doc to infer which loop enforces which claim.",
+      "hypothesis": "Publishing the executable evidence_graph edges in the loop-registry evidence artifact lets agents infer claim enforcement paths directly from machine evidence.",
+      "claims": ["loop_registry_evidence_must_expose_graph_edges"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence.go"},
+        {"kind": "test", "path": "tools/loopregistry/evidence_graph_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/evidence_graph_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Loop registry evidence now carries the graph edge list, so a skipped-doc agent can read the artifact and see which closed loop enforces each business claim.",
       "next_loop": "closed_loop_candidate"
     },
     {

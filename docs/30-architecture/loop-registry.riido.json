@@ -427,7 +427,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "719381068dc4dc08bc6983619fbb3c5d406e961b36d17731155e8f43ec7163d3"
+      "semantic_hash": "016003581dbd47125e95d1ad8b4c890e2801fdd2408ddf3f423a9f76ae5fc7cc"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -541,7 +541,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a4423effce6ff9443e23db470a54ed5d78d712b8d8e432bd589e389d38acc816"
+      "semantic_hash": "1b9dbc35527c78c5a012aac9ced464382b77a966c9cbe4d5678c82d597e01146"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -650,7 +650,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "83b441e21c0a36057a141519fecdc42bb45f9cf9745d62379e9b7a8700efb79e"
+      "semantic_hash": "ddbbf5999d7a13f396fa4317460dab2080ecbffe4911d0bb130715cc142d5a8d"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -688,7 +688,8 @@
         "tools/loopregistry/impact_more.go",
         "tools/loopregistry/impact_required_files.go",
         "tools/loopregistry/impact_test.go",
-        "tools/loopregistry/impact_types.go"
+        "tools/loopregistry/impact_types.go",
+        "tools/loopregistry/impact_values.go"
       ],
       "verifiers": [
         "TestClaimImpactRequiresBoundFileChange",
@@ -699,7 +700,27 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "859e89e196b144121aabc4d706867a89ab19669fa5951d234bc1aaf3e08eb7e8"
+      "semantic_hash": "8f69f0156a76b1229903ed0e7ad4aac8d61ac9f2715178ed816fedb54db41948"
+    },
+    {
+      "id": "claim_meaning_changes_require_reasoning_chain",
+      "statement": "When a business claim meaning changes in a pull request, the impact verifier must also require the evidence graph reasoning manifest to change so Observation, Hypothesis, Decision, and Next Loop stay aligned with the changed claim.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        "tools/loopregistry/impact_more.go",
+        "tools/loopregistry/impact_test.go",
+        "tools/loopregistry/impact_types.go",
+        "tools/loopregistry/impact_values.go"
+      ],
+      "verifiers": [
+        "TestClaimImpactRequiresEvidenceGraphReasoningForMeaningChange",
+        "TestClaimImpactAllowsBoundFileChange"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "e232c1ad352e844150f57ece95bed34a83d8d561f652b9d910d1d55df9341e98"
     },
     {
       "id": "pre_commit_must_run_claim_binding_impact",
@@ -772,7 +793,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "687e7768bb1c57824d29cb3900446463b86e000a3118bcce8a39654c13dbff9a"
+      "semantic_hash": "82b42ec386079cadcf0574516985a14a2876e42840bf1605fdb74a7490ff78b5"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -796,7 +817,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9f4950bf6b45c5265c498f88266b2de52b7799754f848c88e9df3ccac2033cef"
+      "semantic_hash": "2caa55c8e16b42dfa95b6e64fd3d327388c67751e106ebc380934f0cf09d317c"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -816,7 +837,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c93804f6b72a29f88e40a6310b9134898e2c8930f6960cc1affc08725aa7d786"
+      "semantic_hash": "e648dda28550f0a87016d02b61f685c217e746607206db3f0308a29ecf838138"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -841,7 +862,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a5ce7b90c778d4764e0c9b5e49d4e993443a55648395c407e03ca81627fba72e"
+      "semantic_hash": "31f7dbfc46925815d55978bbbff0063a48a89619d9c549761c38dfa41f86795e"
     },
     {
       "id": "closed_loop_candidate_evidence_must_self_expire",
@@ -965,7 +986,24 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5262cc02f8d14e7ce871eef962ed5e8a83fca887be1daf840b24c0bdb538c063"
+      "semantic_hash": "09d7afbc376d78a11e221b9c647892e42ed4688e8927641647831451a4628f35"
+    },
+    {
+      "id": "loop_registry_evidence_must_expose_graph_edges",
+      "statement": "Loop registry evidence must expose the executable evidence_graph edge list, not only edge counts, so agents can infer loop-to-claim enforcement paths from the artifact without opening narrative docs.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        "tools/loopregistry/evidence.go",
+        "tools/loopregistry/evidence_graph_test.go"
+      ],
+      "verifiers": [
+        "TestLoopRegistryEvidenceExposesGraphEdges"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "1d98131a1836eb656b2d5f6c59d80b8cf4caf82d79ed455373b065c4359a0e31"
     },
     {
       "id": "harness_like_workflows_must_be_registered_or_excluded",
@@ -1145,6 +1183,11 @@
     },
     {
       "from": "closed_loop_candidate",
+      "to": "claim_meaning_changes_require_reasoning_chain",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
       "to": "claim_surface_evidence_must_expose_code_test_doc_binding",
       "relation": "enforces"
     },
@@ -1196,6 +1239,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "loop_registry_evidence_must_expose_refresh_plans",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "loop_registry_evidence_must_expose_graph_edges",
       "relation": "enforces"
     },
     {

@@ -11,8 +11,9 @@ type impactEvidence struct {
 }
 
 type impactClaim struct {
-	ID                string   `json:"id"`
-	ChangedBoundFiles []string `json:"changed_bound_files"`
+	ID                       string   `json:"id"`
+	ChangedBoundFiles        []string `json:"changed_bound_files"`
+	ChangedReasoningEvidence []string `json:"changed_reasoning_evidence"`
 }
 
 type impactBoundSurface struct {
