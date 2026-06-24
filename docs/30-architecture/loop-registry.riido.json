@@ -114,6 +114,39 @@
         "unpromoted_harness_failure",
         "claim_without_verifier"
       ]
+    },
+    {
+      "id": "closed_loop_candidate_intake",
+      "kind": "closed_loop",
+      "observes": [
+        "closed_loop_candidate_artifact",
+        "harness_promotion_manifest",
+        "loop_registry_target",
+        "evidence_graph_next_loop"
+      ],
+      "verifies": [
+        "candidate_redaction",
+        "adoption_artifact_requirements",
+        "candidate_target_binding"
+      ],
+      "evidence": [
+        {
+          "kind": "workflow_artifact",
+          "path": "closed-loop-candidate-intake-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/closed-loop-candidate-intake.md"
+        }
+      ],
+      "refresh_workflow": ".github/workflows/closed-loop-candidate-intake.yml",
+      "expires_after_hours": 24,
+      "fails_when": [
+        "candidate_evidence_missing",
+        "adoption_artifact_missing",
+        "raw_candidate_leak"
+      ]
     }
   ],
   "claim_bindings": [
@@ -184,6 +217,11 @@
     },
     {
       "from": "closed_loop_candidate",
+      "to": "closed_loop_candidate_intake",
+      "relation": "feeds_candidate_intake"
+    },
+    {
+      "from": "closed_loop_candidate_intake",
       "to": "ai_thread_history",
       "relation": "hardens_claim"
     },

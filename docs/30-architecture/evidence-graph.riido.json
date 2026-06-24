@@ -53,6 +53,25 @@
       "next_loop": "ai_thread_history"
     },
     {
+      "id": "closed_loop_candidate_intake_loop",
+      "observation": "Closed-loop candidate artifacts could be produced without a scheduled intake verifier that reads them.",
+      "hypothesis": "A candidate intake tool can consume redacted candidate artifacts and verify producer, loop registry, graph, and adoption artifact requirements.",
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-intake.yml"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-intake.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true}
+      ],
+      "decision": "Candidate intake is scheduled and verifies candidate adoption requirements before humans choose implementation order.",
+      "next_loop": "closed_loop_candidate_intake"
+    },
+    {
       "id": "pre_commit_claim_binding_loop",
       "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier.",
       "hypothesis": "A pre-commit hook can run loop registry claim/doc/impact verification before PR creation.",
