@@ -4,13 +4,16 @@ import "fmt"
 
 func verifyLoops(root string, m manifest) (map[string]bool, verifyResult, error) {
 	ids := map[string]bool{}
-	result := verifyResult{}
+	result := verifyResult{RefreshCadenceMinutes: map[string]int{}}
 	for _, loop := range m.Loops {
 		if ids[loop.ID] || loop.ID == "" {
 			return nil, result, fmt.Errorf("loop id must be unique and non-empty: %q", loop.ID)
 		}
 		ids[loop.ID] = true
 		if err := verifyLoop(root, m, loop); err != nil {
+			return nil, result, err
+		}
+		if err := captureRefreshCadence(root, loop, &result); err != nil {
 			return nil, result, err
 		}
 		result.Loops++

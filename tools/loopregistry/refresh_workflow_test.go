@@ -26,6 +26,14 @@ func TestRefreshWorkflowMustPublishLoopEvidence(t *testing.T) {
 	}
 }
 
+func TestRefreshWorkflowCadenceMustFitExpiry(t *testing.T) {
+	m, hashes := loadLoopRegistryForTest(t)
+	m.Loops[0].ExpiresAfterHours = 23
+	if _, err := verifyAll("../..", m, hashes); err == nil {
+		t.Fatal("expected daily refresh to fail for 23h expiry")
+	}
+}
+
 func loadLoopRegistryForTest(t *testing.T) (manifest, map[string]string) {
 	t.Helper()
 	root, err := findRepoRoot("../..")
