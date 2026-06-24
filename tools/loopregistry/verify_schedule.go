@@ -7,11 +7,8 @@ import (
 )
 
 func verifyLoopSchedule(root string, m manifest, loop loopRecord) error {
-	if loop.ExpiresAfterHours > 24 {
-		return nil
-	}
 	if strings.TrimSpace(loop.RefreshWorkflow) == "" {
-		return fmt.Errorf("loop %s expires within 24h but has no refresh_workflow", loop.ID)
+		return fmt.Errorf("loop %s expires but has no refresh_workflow", loop.ID)
 	}
 	data, err := os.ReadFile(repoPath(root, loop.RefreshWorkflow))
 	if err != nil {
@@ -19,7 +16,7 @@ func verifyLoopSchedule(root string, m manifest, loop loopRecord) error {
 	}
 	text := string(data)
 	if !strings.Contains(text, "schedule:") {
-		return fmt.Errorf("loop %s expires within 24h but refresh workflow has no schedule", loop.ID)
+		return fmt.Errorf("loop %s expires but refresh workflow has no schedule", loop.ID)
 	}
 	cadence, err := refreshWorkflowCadenceMinutes(text)
 	if err != nil {

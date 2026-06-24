@@ -6,9 +6,6 @@ import (
 )
 
 func captureRefreshCadence(root string, loop loopRecord, result *verifyResult) error {
-	if loop.ExpiresAfterHours > 24 {
-		return nil
-	}
 	data, err := os.ReadFile(repoPath(root, loop.RefreshWorkflow))
 	if err != nil {
 		return fmt.Errorf("read refresh workflow %s: %w", loop.RefreshWorkflow, err)
