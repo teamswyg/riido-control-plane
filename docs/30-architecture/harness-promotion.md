@@ -26,6 +26,7 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 - candidate artifacts must include an adoption_plan with executable commands for every required next artifact
 - expired redacted summaries must be rejected before closed-loop candidate generation
 - harness workflows that produce expiring evidence must be runnable without a human trigger
+- harness promotion evidence must publish generated_at and expires_at
 
 ## Evidence Loop
 
