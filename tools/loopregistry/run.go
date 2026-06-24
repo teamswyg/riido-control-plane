@@ -9,6 +9,7 @@ type options struct {
 	WriteDoc    bool
 	CheckDoc    bool
 	WriteHashes bool
+	ImpactBase  string
 }
 
 func run(opt options) error {
@@ -38,8 +39,12 @@ func run(opt options) error {
 	if err := maybeDoc(root, m.GeneratedDoc, doc, opt.WriteDoc, opt.CheckDoc); err != nil {
 		return err
 	}
+	impact, err := maybeVerifyImpact(root, opt.Manifest, opt.ImpactBase, m)
+	if err != nil {
+		return err
+	}
 	if opt.EvidenceOut != "" {
-		return writeJSON(opt.EvidenceOut, newEvidence(m, result))
+		return writeJSON(opt.EvidenceOut, newEvidence(m, result, impact))
 	}
 	return nil
 }

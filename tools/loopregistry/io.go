@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,12 +34,16 @@ func repoPath(root, path string) string {
 }
 
 func loadManifest(path string) (manifest, error) {
-	var m manifest
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return m, err
+		return manifest{}, err
 	}
-	if err := json.Unmarshal(data, &m); err != nil {
+	return decodeManifest(strings.NewReader(string(data)))
+}
+
+func decodeManifest(r io.Reader) (manifest, error) {
+	var m manifest
+	if err := json.NewDecoder(r).Decode(&m); err != nil {
 		return m, err
 	}
 	return m, nil

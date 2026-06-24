@@ -15,9 +15,10 @@ type evidence struct {
 	GeneratedDoc     string            `json:"generated_doc"`
 	EvidenceArtifact string            `json:"evidence_artifact"`
 	Loop             evidenceLoop      `json:"loop"`
+	Impact           *impactEvidence   `json:"impact,omitempty"`
 }
 
-func newEvidence(m manifest, result verifyResult) evidence {
+func newEvidence(m manifest, result verifyResult, impact *impactEvidence) evidence {
 	return evidence{
 		SchemaVersion:    evidenceSchema,
 		ID:               m.ID,
@@ -33,5 +34,6 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		GeneratedDoc:     m.GeneratedDoc,
 		EvidenceArtifact: m.EvidenceArtifact,
 		Loop:             m.Loop,
+		Impact:           impact,
 	}
 }
