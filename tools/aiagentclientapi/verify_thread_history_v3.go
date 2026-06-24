@@ -33,7 +33,14 @@ func verifyThreadHistoryV3(v3 threadHistoryV3) error {
 	if err := requireNamedRules("thread history v3 mutation rule", v3.MutationRules, []string{"assign-agent", "send-thread-message", "stop-agent", "delete-agent"}); err != nil {
 		return err
 	}
-	if err := requireNamedRules("thread history v3 interaction scenario", v3.InteractionScenarios, []string{"intent-clarification-before-deliverable", "intent-clarification-waits-for-user", "concrete-followup-authoritative", "provider-limit-result"}); err != nil {
+	scenarios := []string{
+		"intent-clarification-before-deliverable",
+		"intent-clarification-waits-for-user",
+		"concrete-followup-authoritative",
+		"draft-then-research-limit-in-same-conversation",
+		"provider-limit-result",
+	}
+	if err := requireNamedRules("thread history v3 interaction scenario", v3.InteractionScenarios, scenarios); err != nil {
 		return err
 	}
 	if err := requireStrings("thread history v3 terminal state", v3.TerminalStates, []string{"completed", "failed", "stopped", "cancelled", "timeout"}); err != nil {
