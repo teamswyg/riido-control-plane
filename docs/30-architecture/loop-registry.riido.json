@@ -369,6 +369,31 @@
         "docs/30-architecture/loop-registry.md"
       ],
       "semantic_hash": "70149a736f34015e821075799cff7bf2773558864ba31287c49bd41501917f87"
+    },
+    {
+      "id": "ambiguous_task_context_must_ask_before_work",
+      "statement": "When task context is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the assignment prompt must require the agent to ask for intent in the existing thread before producing deliverables; provider token, quota, or cloud-credit exhaustion must render as a user-facing thread result without changing API shape.",
+      "loop": "ai_thread_history",
+      "files": [
+        "internal/riidoaiserver/ai_agent_assignment_prompt.go",
+        "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go",
+        "internal/riidoaiserver/server_thread_message_prompt.go",
+        "internal/riidoaiserver/ai_agent_client_visible_messages.go",
+        "internal/riidoaiserver/ai_agent_client_visible_limit_message.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_client_visible_task_thread_text.go",
+        "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go",
+        "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"
+      ],
+      "verifiers": [
+        "TestAssignmentPromptAsksForIntentOnAmbiguousMarketingDocument",
+        "TestFollowupPromptKeepsLatestUserInstructionAuthoritative",
+        "TestClientVisibleTaskThreadTextLocalizesProviderLimitMessages",
+        "TestFailureDiagnosticsLocalizesProviderLimitMessages"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "004a77ab0157ee256c1668d9d8e347fb612438b2845c46feb4d640aef806a297"
     }
   ],
   "evidence_graph": [
@@ -426,6 +451,11 @@
       "from": "closed_loop_candidate_decision",
       "to": "open_decision_queue",
       "relation": "defers_unowned_boundary_to"
+    },
+    {
+      "from": "ai_thread_history",
+      "to": "ambiguous_task_context_must_ask_before_work",
+      "relation": "enforces"
     }
   ],
   "loop": {

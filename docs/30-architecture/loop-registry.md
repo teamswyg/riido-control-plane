@@ -9,8 +9,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `6`
 - harness loops: `1`
 - closed loops: `5`
-- claim bindings: `6`
-- evidence graph edges: `11`
+- claim bindings: `7`
+- evidence graph edges: `12`
 - max evidence expiry hours: `168`
 
 ## Loops
@@ -34,6 +34,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `505f626d13ff` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `40c80ece1ed9` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `70149a736f34` |
+| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `8` | `4` | `004a77ab0157` |
 
 ## Evidence Graph
 
@@ -48,6 +49,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `ai_thread_history` --enforces--> `thread_history_v3_must_expose_stable_conversation_grouping`
 - `closed_loop_candidate` --enforces--> `loop_verifiers_must_accept_verify_intent`
 - `closed_loop_candidate_decision` --defers_unowned_boundary_to--> `open_decision_queue`
+- `ai_thread_history` --enforces--> `ambiguous_task_context_must_ask_before_work`
 
 ## Evidence Loop
 

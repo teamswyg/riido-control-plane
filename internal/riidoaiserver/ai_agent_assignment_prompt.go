@@ -97,6 +97,8 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	builder.WriteString("Use this immutable assignment snapshot as the runtime task context.\n")
 	builder.WriteString("Provider-specific instruction placement is owned by riido-daemon.\n\n")
 
+	writePromptInteractionPolicy(&builder)
+
 	builder.WriteString("## Task\n")
 	writePromptLine(&builder, "task_id", taskID)
 	writePromptLine(&builder, "component_id", component.ID)
