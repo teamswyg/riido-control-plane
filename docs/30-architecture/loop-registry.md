@@ -9,8 +9,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `5`
 - harness loops: `1`
 - closed loops: `4`
-- claim bindings: `5`
-- evidence graph edges: `9`
+- claim bindings: `6`
+- evidence graph edges: `10`
 - max evidence expiry hours: `24`
 
 ## Loops
@@ -31,11 +31,13 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `thread_history_must_keep_user_followups` | `ai_thread_history` | `4` | `2` | `b750489076ff` |
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `92594cfc172f` |
 | `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `505f626d13ff` |
+| `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `40c80ece1ed9` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `70149a736f34` |
 
 ## Evidence Graph
 
 - `provider_acceptance_harness` --promotes_failure_to--> `closed_loop_candidate`
+- `provider_acceptance_harness` --enforces--> `expired_harness_evidence_must_not_promote_candidates`
 - `closed_loop_candidate` --feeds_candidate_intake--> `closed_loop_candidate_intake`
 - `closed_loop_candidate_intake` --requires_candidate_decision--> `closed_loop_candidate_decision`
 - `closed_loop_candidate_decision` --hardens_claim--> `ai_thread_history`

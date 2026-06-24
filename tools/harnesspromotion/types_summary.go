@@ -6,6 +6,8 @@ type liveSummary struct {
 	LiveStatus     string      `json:"live_status"`
 	EvidenceClaims []liveClaim `json:"evidence_claims,omitempty"`
 	Run            runRecord   `json:"run"`
+	GeneratedAt    string      `json:"generated_at"`
+	ExpiresAt      string      `json:"expires_at"`
 }
 
 type liveClaim struct {

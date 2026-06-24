@@ -11,8 +11,9 @@
       "path": ".github/workflows/ai-agent-client-testnet-smoke.yml",
       "summary_artifact": "ai-agent-client-testnet-smoke-redacted-summary",
       "summary_path": "out/ai-agent-client-testnet-smoke-redacted-summary.json",
+      "evidence_ttl_hours": 24,
       "sensitive_inputs": ["TESTNET_BASE_URL", "TESTNET_TOKEN"],
-      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "live_status", "evidence_claims", "redaction"],
+      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "generated_at", "expires_at", "live_status", "evidence_claims", "redaction"],
       "evidence_claims": [
         {
           "id": "v1_thumbnail_upload_intent",
@@ -51,8 +52,9 @@
       "path": ".github/workflows/deploy-ai-agent-testnet.yml",
       "summary_artifact": "deploy-ai-agent-testnet-redacted-summary",
       "summary_path": "out/deploy-ai-agent-testnet-redacted-summary.json",
+      "evidence_ttl_hours": 24,
       "sensitive_inputs": ["AWS_REGION", "ECR_REPOSITORY", "ECS_CLUSTER", "ECS_SERVICE", "ECS_CONTAINER_NAME", "CODEDEPLOY_APPLICATION", "CODEDEPLOY_DEPLOYMENT_GROUP", "TESTNET_BASE_URL", "TESTNET_TOKEN"],
-      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "live_status", "deployment_target", "deployment_mode", "build_cache_mode", "redaction"],
+      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "generated_at", "expires_at", "live_status", "deployment_target", "deployment_mode", "build_cache_mode", "redaction"],
       "required_phrases": [
         "docker buildx build",
         "--cache-from \"type=gha,scope=${cache_scope}\"",
@@ -66,13 +68,14 @@
     "live workflows may run curl, aws, or docker, but public artifacts must contain only redacted summary evidence",
     "redacted summaries must not include endpoint hosts, AWS resource names, tokens, task definition ARNs, image URIs, or raw response bodies",
     "redacted summaries may include manifest-declared contract claim ids and summaries when the workflow source proves each claim",
+    "redacted summaries must publish generated_at and expires_at so stale live evidence cannot be promoted as fresh",
     "public workflow evidence coverage must not need accepted gaps for live smoke or live deploy workflows"
   ],
   "loop": {
     "observation": "The remaining workflow evidence gaps were live smoke and deployment jobs that could not safely publish raw operator output; the smoke summary also hid which frontend-facing contracts were exercised.",
     "hypothesis": "A redacted summary sidecar can prove execution shape and contract claim coverage without exporting private endpoint hosts, token, raw response bodies, or AWS topology values.",
-    "execute": "Verify each live workflow publishes a generated summary artifact through this tool, keep only safe GitHub metadata in that artifact, and require manifest-declared claim source phrases to exist in the workflow.",
-    "evaluate": "The verifier fails on missing summary wiring, stale generated docs, summary fields outside the redaction contract, claim fields not explicitly allowed, or claim source phrases absent from the workflow.",
+    "execute": "Verify each live workflow publishes a generated summary artifact through this tool, keep only safe GitHub metadata in that artifact, stamp generated_at/expires_at, and require manifest-declared claim source phrases to exist in the workflow.",
+    "evaluate": "The verifier fails on missing summary wiring, missing positive TTL, stale generated docs, summary fields outside the redaction contract, claim fields not explicitly allowed, or claim source phrases absent from the workflow.",
     "retrospective": "Live workflows can now participate in the evidence loop while exposing enough safe claim coverage for frontend and operations review."
   }
 }

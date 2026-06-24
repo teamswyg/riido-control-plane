@@ -4,13 +4,14 @@ import "os"
 
 func newRecord(spec workflowSpec) workflowRecord {
 	return workflowRecord{
-		ID:              spec.ID,
-		Path:            spec.Path,
-		SummaryArtifact: spec.SummaryArtifact,
-		SummaryPath:     spec.SummaryPath,
-		SensitiveInputs: spec.SensitiveInputs,
-		RequiredPhrases: spec.RequiredPhrases,
-		EvidenceClaims:  claimIDs(spec.EvidenceClaims),
+		ID:               spec.ID,
+		Path:             spec.Path,
+		SummaryArtifact:  spec.SummaryArtifact,
+		SummaryPath:      spec.SummaryPath,
+		EvidenceTTLHours: spec.EvidenceTTLHours,
+		SensitiveInputs:  spec.SensitiveInputs,
+		RequiredPhrases:  spec.RequiredPhrases,
+		EvidenceClaims:   claimIDs(spec.EvidenceClaims),
 	}
 }
 

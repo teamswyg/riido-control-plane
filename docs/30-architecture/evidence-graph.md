@@ -9,16 +9,17 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - workflow: `.github/workflows/evidence-graph.yml`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `6`
-- change refs: `22`
-- verifier refs: `14`
-- evidence refs: `9`
+- chains: `7`
+- change refs: `27`
+- verifier refs: `17`
+- evidence refs: `12`
 
 ## Evidence Chains
 
 | Chain | Changes | Verifiers | Evidence | Next Loop |
 | --- | ---: | ---: | ---: | --- |
 | `harness_failure_promotion_loop` | `3` | `2` | `2` | `closed_loop_candidate` |
+| `harness_evidence_expiry_gate_loop` | `5` | `3` | `3` | `provider_acceptance_harness` |
 | `claim_binding_impact_loop` | `3` | `2` | `1` | `ai_thread_history` |
 | `ai_thread_history_conversation_grouping_loop` | `6` | `4` | `2` | `ai_thread_history` |
 | `closed_loop_candidate_intake_loop` | `3` | `2` | `1` | `closed_loop_candidate_intake` |

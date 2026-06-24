@@ -7,13 +7,14 @@ type verifyResult struct {
 }
 
 type workflowRecord struct {
-	ID              string   `json:"id"`
-	Path            string   `json:"path"`
-	SummaryArtifact string   `json:"summary_artifact"`
-	SummaryPath     string   `json:"summary_path"`
-	SensitiveInputs []string `json:"sensitive_inputs"`
-	RequiredPhrases []string `json:"required_phrases,omitempty"`
-	EvidenceClaims  []string `json:"evidence_claims,omitempty"`
+	ID               string   `json:"id"`
+	Path             string   `json:"path"`
+	SummaryArtifact  string   `json:"summary_artifact"`
+	SummaryPath      string   `json:"summary_path"`
+	EvidenceTTLHours int      `json:"evidence_ttl_hours"`
+	SensitiveInputs  []string `json:"sensitive_inputs"`
+	RequiredPhrases  []string `json:"required_phrases,omitempty"`
+	EvidenceClaims   []string `json:"evidence_claims,omitempty"`
 }
 
 type manifestEvidence struct {
@@ -34,6 +35,8 @@ type liveSummary struct {
 	Status           string             `json:"status"`
 	Workflow         workflowRecord     `json:"workflow"`
 	Run              runRecord          `json:"run"`
+	GeneratedAt      string             `json:"generated_at"`
+	ExpiresAt        string             `json:"expires_at"`
 	LiveStatus       string             `json:"live_status"`
 	DeploymentTarget string             `json:"deployment_target,omitempty"`
 	DeploymentMode   string             `json:"deployment_mode,omitempty"`

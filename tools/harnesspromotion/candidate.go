@@ -3,15 +3,17 @@ package main
 func buildCandidateEvidence(source promotionSource, summary liveSummary) candidateEvidence {
 	candidates := candidatesForSummary(source, summary)
 	return candidateEvidence{
-		SchemaVersion:  candidateSchema,
-		ID:             source.ID,
-		Status:         "verified",
-		SourceWorkflow: source.SourceWorkflow,
-		LiveStatus:     summary.LiveStatus,
-		Run:            summary.Run,
-		CandidateCount: len(candidates),
-		Candidates:     candidates,
-		Redaction:      candidateRedaction{true, true, true, true},
+		SchemaVersion:     candidateSchema,
+		ID:                source.ID,
+		Status:            "verified",
+		SourceWorkflow:    source.SourceWorkflow,
+		LiveStatus:        summary.LiveStatus,
+		SourceGeneratedAt: summary.GeneratedAt,
+		SourceExpiresAt:   summary.ExpiresAt,
+		Run:               summary.Run,
+		CandidateCount:    len(candidates),
+		Candidates:        candidates,
+		Redaction:         candidateRedaction{true, true, true, true},
 	}
 }
 

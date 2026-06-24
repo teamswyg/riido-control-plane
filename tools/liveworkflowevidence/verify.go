@@ -37,6 +37,14 @@ func verifyWorkflowSpec(spec workflowSpec, seen map[string]bool) error {
 	if len(spec.SensitiveInputs) == 0 || len(spec.AllowedFields) == 0 {
 		return fmt.Errorf("workflow %q needs sensitive inputs and allowed fields", spec.ID)
 	}
+	if spec.EvidenceTTLHours <= 0 {
+		return fmt.Errorf("workflow %q needs positive evidence_ttl_hours", spec.ID)
+	}
+	for _, field := range []string{"generated_at", "expires_at"} {
+		if !summaryAllowsField(spec, field) {
+			return fmt.Errorf("workflow %q needs allowed field %s", spec.ID, field)
+		}
+	}
 	if len(spec.EvidenceClaims) > 0 && !summaryAllowsField(spec, "evidence_claims") {
 		return fmt.Errorf("workflow %q evidence claims need allowed field evidence_claims", spec.ID)
 	}
