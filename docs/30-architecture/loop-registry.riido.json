@@ -62,6 +62,11 @@
           "kind": "workflow_artifact",
           "path": "ai-agent-client-testnet-smoke-redacted-summary",
           "redacted": true
+        },
+        {
+          "kind": "workflow_artifact",
+          "path": "ai-agent-client-testnet-smoke-closed-loop-candidates",
+          "redacted": true
         }
       ],
       "expires_after_hours": 24,
@@ -91,6 +96,11 @@
         {
           "kind": "json",
           "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "json",
+          "path": "harness-promotion-evidence",
           "redacted": true
         }
       ],

@@ -18,8 +18,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | Loop | Kind | Expires | Evidence |
 | --- | --- | ---: | --- |
 | `ai_thread_history` | `closed_loop` | `24` | `2` |
-| `provider_acceptance_harness` | `harness` | `24` | `1` |
-| `closed_loop_candidate` | `closed_loop` | `24` | `1` |
+| `provider_acceptance_harness` | `harness` | `24` | `2` |
+| `closed_loop_candidate` | `closed_loop` | `24` | `2` |
 
 ## Claim Bindings
 

@@ -2,6 +2,8 @@ name: ai-agent-client-testnet-smoke
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "11 19 * * *"
 
 concurrency:
   group: ai-agent-client-testnet-smoke
@@ -181,9 +183,24 @@ jobs:
             -live-status "$RIIDO_LIVE_CHECK_STATUS" \
             -evidence-out out/ai-agent-client-testnet-smoke-redacted-summary.json
 
+      - name: Promote harness failures to closed-loop candidates
+        if: always()
+        run: |
+          mkdir -p out
+          go run ./tools/harnesspromotion \
+            -summary out/ai-agent-client-testnet-smoke-redacted-summary.json \
+            -candidate-out out/ai-agent-client-testnet-smoke-closed-loop-candidates.json
+
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ai-agent-client-testnet-smoke-redacted-summary
           path: out/ai-agent-client-testnet-smoke-redacted-summary.json
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ai-agent-client-testnet-smoke-closed-loop-candidates
+          path: out/ai-agent-client-testnet-smoke-closed-loop-candidates.json
           if-no-files-found: error

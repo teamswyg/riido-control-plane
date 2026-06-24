@@ -1,0 +1,36 @@
+{
+  "schema_version": "riido-control-plane-harness-promotion.v1",
+  "id": "control-plane-harness-promotion",
+  "title": "Control Plane Harness Promotion",
+  "generated_doc": "docs/30-architecture/harness-promotion.md",
+  "workflow": ".github/workflows/harness-promotion.yml",
+  "evidence_artifact": "harness-promotion-evidence",
+  "evidence_tool": "tools/harnesspromotion",
+  "sources": [
+    {
+      "id": "ai-agent-client-testnet-smoke",
+      "harness_loop": "provider_acceptance_harness",
+      "source_workflow": ".github/workflows/ai-agent-client-testnet-smoke.yml",
+      "summary_artifact": "ai-agent-client-testnet-smoke-redacted-summary",
+      "summary_path": "out/ai-agent-client-testnet-smoke-redacted-summary.json",
+      "candidate_artifact": "ai-agent-client-testnet-smoke-closed-loop-candidates",
+      "candidate_path": "out/ai-agent-client-testnet-smoke-closed-loop-candidates.json",
+      "promotion_target": "closed_loop_candidate",
+      "failure_statuses": ["failure", "cancelled", "timed_out", "unknown"],
+      "required_next_artifacts": ["claim_binding", "verifier", "ci_gate", "redacted_evidence"]
+    }
+  ],
+  "assertions": [
+    "a harness failure must produce a redacted closed-loop candidate artifact",
+    "a successful harness run may produce an empty candidate list",
+    "candidate artifacts must not include raw endpoint hosts, tokens, AWS resource ids, or response bodies",
+    "harness workflows that produce expiring evidence must be runnable without a human trigger"
+  ],
+  "loop": {
+    "observation": "Provider and smoke harnesses can find failures, but a failed run can still end as an isolated artifact unless it is converted into a closed-loop candidate.",
+    "hypothesis": "A promotion sidecar can transform redacted harness summaries into candidate records that name the next artifacts required for a durable closed loop.",
+    "execute": "Verify harness workflows call this tool after redacted summaries, upload candidate artifacts with strict missing-file behavior, and generate reader/evidence outputs in CI.",
+    "evaluate": "The verifier fails on missing promotion wiring, missing candidate uploads, missing strict upload behavior, stale generated docs, or unsupported manifest identity.",
+    "retrospective": "Harnesses now increase exploration space while failed observations automatically enter the closed-loop backlog instead of relying on human memory."
+  }
+}
