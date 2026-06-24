@@ -1,0 +1,198 @@
+{
+  "schema_version": "riido-control-plane-loop-registry.v1",
+  "id": "control-plane-loop-registry",
+  "title": "Control Plane Loop Registry",
+  "generated_doc": "docs/30-architecture/loop-registry.md",
+  "workflow": ".github/workflows/loop-registry.yml",
+  "evidence_artifact": "loop-registry-evidence",
+  "evidence_tool": "tools/loopregistry",
+  "assertions": [
+    "closed loops must bind business claims to code, tests, generated docs, and semantic hashes",
+    "harness loops must promote failures into closed-loop candidates instead of ending as reports",
+    "loops with evidence expiry at or below 24 hours must be backed by scheduled CI",
+    "AI agents do not need to read the prose doc when the verifier can enforce the bound surface"
+  ],
+  "loops": [
+    {
+      "id": "ai_thread_history",
+      "kind": "closed_loop",
+      "observes": [
+        "v3_threads_response",
+        "task_thread_messages",
+        "agent_snapshot_map"
+      ],
+      "verifies": [
+        "deleted_agent_thread_retention",
+        "user_followup_retention",
+        "assignment_scoped_threads"
+      ],
+      "evidence": [
+        {
+          "kind": "json",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        }
+      ],
+      "expires_after_hours": 24,
+      "fails_when": [
+        "evidence_missing",
+        "semantic_drift",
+        "verifier_missing"
+      ]
+    },
+    {
+      "id": "provider_acceptance_harness",
+      "kind": "harness",
+      "observes": [
+        "codex_provider_qa",
+        "openclaw_provider_qa",
+        "daemon_runtime_snapshot"
+      ],
+      "verifies": [
+        "provider_smoke",
+        "runtime_detection",
+        "dashboard_evidence"
+      ],
+      "evidence": [
+        {
+          "kind": "workflow_artifact",
+          "path": "ai-agent-client-testnet-smoke-redacted-summary",
+          "redacted": true
+        }
+      ],
+      "expires_after_hours": 24,
+      "fails_when": [
+        "provider_smoke_failed",
+        "evidence_expired",
+        "raw_secret_leak"
+      ],
+      "promotes_to": [
+        "closed_loop_candidate"
+      ]
+    },
+    {
+      "id": "closed_loop_candidate",
+      "kind": "closed_loop",
+      "observes": [
+        "harness_failure",
+        "operator_decision",
+        "regression_pattern"
+      ],
+      "verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "evidence": [
+        {
+          "kind": "json",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "expires_after_hours": 24,
+      "fails_when": [
+        "unpromoted_harness_failure",
+        "claim_without_verifier"
+      ]
+    }
+  ],
+  "claim_bindings": [
+    {
+      "id": "deleted_agent_threads_must_remain_visible",
+      "statement": "Deleting an agent must not delete or hide prior task thread replies, result messages, progress lines, or captured agent snapshot.",
+      "loop": "ai_thread_history",
+      "files": [
+        "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_delete_ai_agent.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_mark_task_agent_threads_stopped_locked.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go"
+      ],
+      "verifiers": [
+        "TestTaskThreadsKeepAgentSnapshotAfterAgentDeleted",
+        "TestTaskThreadsBackfillDeletedAgentSnapshotForLegacyRows",
+        "TestAssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "090a4a1be8557ee3e4dc86825072ccd3686b7f5cc76b403764cc3a7d19821a63"
+    },
+    {
+      "id": "thread_history_must_keep_user_followups",
+      "statement": "AI thread history must preserve user follow-up messages and restore them after persistence reloads.",
+      "loop": "ai_thread_history",
+      "files": [
+        "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go",
+        "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go",
+        "internal/riidoaiserver/ai_agent_client_development_append_thread_history_message.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
+      ],
+      "verifiers": [
+        "TestAIAgentTaskThreadHistoryKeepsUserFollowupMessages",
+        "TestPersistentAIAgentTaskThreadHistoryRestoresUserMessages"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "a302d7191e2bd365991252154a287ec39673b9b44f95e5db21cb63bfe20ec2f9"
+    },
+    {
+      "id": "same_provider_agents_must_keep_distinct_threads",
+      "statement": "Multiple agents backed by the same provider must remain distinct assignments and threads across assignment, message posting, listing, and SSE filters.",
+      "loop": "ai_thread_history",
+      "files": [
+        "internal/riidoaiserver/ai_agent_client_same_provider_assignment_test.go",
+        "internal/riidoaiserver/ai_agent_client_http_provider_multi_assignment_test.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_agent_assignment.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_thread_id_for_run.go"
+      ],
+      "verifiers": [
+        "TestAIAgentClientSameProviderAgentsKeepDistinctAssignments",
+        "TestHTTPAIAgentClientProviderMultiAssignmentReplaysEachThread"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "92594cfc172f2a21374874edaf234694178a1f6c72cc97563fc3a86eef658306"
+    }
+  ],
+  "evidence_graph": [
+    {
+      "from": "provider_acceptance_harness",
+      "to": "closed_loop_candidate",
+      "relation": "promotes_failure_to"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "ai_thread_history",
+      "relation": "hardens_claim"
+    },
+    {
+      "from": "ai_thread_history",
+      "to": "deleted_agent_threads_must_remain_visible",
+      "relation": "enforces"
+    },
+    {
+      "from": "ai_thread_history",
+      "to": "thread_history_must_keep_user_followups",
+      "relation": "enforces"
+    },
+    {
+      "from": "ai_thread_history",
+      "to": "same_provider_agents_must_keep_distinct_threads",
+      "relation": "enforces"
+    }
+  ],
+  "loop": {
+    "observation": "AI agents can skip or misunderstand narrative docs, while previously fixed AI thread regressions can reappear when related files are edited independently.",
+    "hypothesis": "A loop registry can make the intended QA loop executable by binding business claims to code files, tests, generated docs, semantic hashes, evidence expiry, and harness promotion paths.",
+    "execute": "Generate this reader from the loop registry, verify claim-code-test-doc bindings, require scheduled evidence for 24h loops, compute claim semantic hashes, and publish redacted evidence in CI.",
+    "evaluate": "The verifier fails on missing loop fields, missing tests, missing bound files, stale generated docs, missing scheduled workflow coverage, unknown graph nodes, or semantic hash drift.",
+    "retrospective": "This moves the human out of the inner loop: a future AI can change code without reading this prose, but cannot merge drift without updating the executable claim binding and evidence."
+  }
+}
