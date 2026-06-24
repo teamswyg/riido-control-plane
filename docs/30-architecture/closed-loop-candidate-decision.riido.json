@@ -22,6 +22,7 @@
   ],
   "assertions": [
     "every candidate consumed by intake must have exactly one decision record",
+    "decision records without a matching consumed candidate are stale loop residue and must fail verification",
     "decision records must name owner, priority, disposition, next loop, and next artifact",
     "triage-required or deferred candidates must name a non-expired review_by date",
     "triage-required candidates must stay redacted and carry enough context for a follow-up claim binding",
@@ -31,7 +32,7 @@
     "observation": "Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.",
     "hypothesis": "A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, next artifact, and review expiry.",
     "execute": "Generate this reader from the decision manifest, generate a deterministic candidate fixture, verify intake, verify candidate decisions, and publish decision evidence in CI.",
-    "evaluate": "The verifier fails on missing candidate decisions, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, stale docs, missing scheduled workflow evidence, or unredacted candidate content.",
+    "evaluate": "The verifier fails on missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, stale docs, missing scheduled workflow evidence, or unredacted candidate content.",
     "retrospective": "This moves prioritization metadata into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition and review deadline."
   }
 }
