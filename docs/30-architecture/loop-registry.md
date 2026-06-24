@@ -44,32 +44,32 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `deleted_agent_threads_must_remain_visible` | `ai_thread_history` | `4` | `3` | `090a4a1be855` |
 | `thread_history_must_keep_user_followups` | `ai_thread_history` | `4` | `2` | `b750489076ff` |
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `92594cfc172f` |
-| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `ef70ad2baa0f` |
+| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `c37100d11565` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `2ddc994bf63d` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `cad00b2d3259` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `86603dacbfe7` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `6` | `4` | `05f1f8b25b5a` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `16` | `3` | `fe549fd47346` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `826c10a4a78b` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `fca053b25059` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `3f326072ec1c` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `9e1f0ee5871a` |
-| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `48` | `17` | `3893171015fa` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `16` | `6` | `3933330667ef` |
-| `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `7` | `3` | `727bd1ee6dc1` |
-| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `10` | `3` | `3504aca51678` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `c5b015e670fc` |
+| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `49` | `18` | `bebf5ac1a6c6` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `16` | `6` | `66126d861cfb` |
+| `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `7` | `3` | `38af5b95d870` |
+| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `10` | `3` | `fcbdab26dfca` |
 | `claim_meaning_changes_require_reasoning_chain` | `closed_loop_candidate` | `4` | `2` | `e232c1ad352e` |
-| `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `f4f0241c503b` |
-| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `9cad8481fc27` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `9f383d25a946` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `581b74878854` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `6cdb0451298f` |
+| `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `0b29eecb5f25` |
+| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `7beb162c172a` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `9d9faf79e68f` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `869db16d4044` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `c7444ae6a7fb` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `8` | `3` | `31f7dbfc4692` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `f8046a39ad14` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `6` | `4` | `72a38909879b` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `68d2b171fd9c` |
-| `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `21cae7042a84` |
+| `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `6b3942ff3003` |
 | `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `5` | `1` | `71c6bc35ad5f` |
 | `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `2` | `1` | `1d98131a1836` |
-| `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `9bb1930e8aaa` |
+| `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `3d90459746c4` |
 | `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `8` | `4` | `04de7a802c89` |
 | `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `9bdbb2724691` |
 | `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `6` | `2` | `2b822755ffd3` |
@@ -89,7 +89,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `closed_loop_candidates_must_carry_promotion_edge` | `12` | `4` | `4` | `5` | `5` | `3` | `1` |
 | `loop_verifiers_must_accept_verify_intent` | `5` | `5` | `0` | `1` | `5` | `5` | `1` |
 | `loop_evidence_artifacts_must_have_refresh_owners` | `5` | `3` | `2` | `2` | `3` | `1` | `1` |
-| `ambiguous_task_context_must_ask_before_work` | `32` | `15` | `1` | `2` | `17` | `2` | `1` |
+| `ambiguous_task_context_must_ask_before_work` | `32` | `16` | `1` | `2` | `18` | `2` | `1` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `12` | `3` | `1` | `1` | `6` | `1` | `1` |
 | `claim_verifier_commands_must_surface_as_ci_annotations` | `4` | `2` | `1` | `1` | `3` | `1` | `1` |
 | `claim_meaning_changes_require_code_or_test_surface` | `6` | `3` | `1` | `2` | `3` | `1` | `1` |
