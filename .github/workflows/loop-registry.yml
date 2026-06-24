@@ -39,8 +39,15 @@ on:
       - "internal/riidoaiserver/ai_agent_client_development_func_assignment_event_action_response.go"
       - "internal/riidoaiserver/ai_agent_client_development_record_assignment_status.go"
       - "internal/riidoaiserver/ai_agent_client_development_thread_message_policy.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_progress_input_from_request.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_progress_observed_at.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_messages.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_sort.go"
       - "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"
       - "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_helpers_test.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_helpers_test.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_assert_test.go"
       - "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
@@ -105,8 +112,15 @@ on:
       - "internal/riidoaiserver/ai_agent_client_development_func_assignment_event_action_response.go"
       - "internal/riidoaiserver/ai_agent_client_development_record_assignment_status.go"
       - "internal/riidoaiserver/ai_agent_client_development_thread_message_policy.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_progress_input_from_request.go"
+      - "internal/riidoaiserver/ai_agent_client_development_thread_progress_observed_at.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_messages.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_sort.go"
       - "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"
       - "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_helpers_test.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_helpers_test.go"
+      - "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_assert_test.go"
       - "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
@@ -162,7 +176,7 @@ jobs:
           go test ./tools/aiagentclientapi -run 'Test(GeneratedDocMatchesManifest|RunWritesEvidence)$' -count=1
           go test ./tools/evidencegraph ./tools/harnesspromotion ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision -count=1
           go test ./internal/riidoaiserver \
-            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory|AIAgentIntentDialogueScenarioStaysInConversation|AssignmentPromptClassifiesIntentComponentTypes|AssignmentPromptKeepsExplicitInstructionExecutable)$' \
+            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory|AIAgentIntentDialogueScenarioStaysInConversation|AIAgentIntentDialogueScenarioKeepsProgressAndLimitResult|AssignmentPromptClassifiesIntentComponentTypes|AssignmentPromptKeepsExplicitInstructionExecutable)$' \
             -count=1
           go run ./tools/loopregistry \
             -check-doc \

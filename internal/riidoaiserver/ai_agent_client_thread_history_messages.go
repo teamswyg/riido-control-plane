@@ -1,5 +1,7 @@
 package riidoaiserver
 
+import "time"
+
 func taskThreadProgressMessages(thread AIAgentTaskThreadRecord) []AIAgentTaskThreadHistoryMessage {
 	if len(thread.Lines) == 0 {
 		return nil
@@ -17,10 +19,17 @@ func taskThreadProgressMessages(thread AIAgentTaskThreadRecord) []AIAgentTaskThr
 			RunID:        thread.RunID,
 			Seq:          line.Seq,
 			Body:         line.Message,
-			ObservedAt:   line.ObservedAt,
+			ObservedAt:   taskThreadProgressObservedAt(thread, line),
 		})
 	}
 	return out
+}
+
+func taskThreadProgressObservedAt(thread AIAgentTaskThreadRecord, line AgentThreadProgressLine) time.Time {
+	if !line.ObservedAt.IsZero() {
+		return line.ObservedAt
+	}
+	return thread.StartedAt
 }
 
 func taskThreadProjectionMessage(thread AIAgentTaskThreadRecord) (AIAgentTaskThreadHistoryMessage, bool) {

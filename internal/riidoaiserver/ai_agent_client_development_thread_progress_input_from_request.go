@@ -24,6 +24,7 @@ func newThreadProgressInput(agentID string, req AgentThreadProgressBatchRequest)
 	if len(input.Lines) == 0 {
 		return threadProgressInput{}, errors.New("lines are required")
 	}
+	input.Lines = stampMissingProgressObservedAt(input.Lines, input.Request.BatchStartedAt)
 	if input.Request.RunID == "" {
 		input.Request.RunID = "run-" + input.Request.AssignmentID
 	}
