@@ -13,6 +13,7 @@ type evidence struct {
 	GraphEdgeCount            int               `json:"graph_edge_count"`
 	MaxExpiryHours            int               `json:"max_expiry_hours"`
 	SemanticHashes            map[string]string `json:"semantic_hashes"`
+	ClaimSurfaces             []claimSurface    `json:"claim_surfaces"`
 	RefreshWorkflows          map[string]string `json:"refresh_workflows"`
 	RefreshCadenceMinutes     map[string]int    `json:"refresh_cadence_minutes"`
 	HarnessPromotionWorkflows map[string]string `json:"harness_promotion_workflows"`
@@ -39,6 +40,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		GraphEdgeCount:            result.GraphEdges,
 		MaxExpiryHours:            result.MaxExpiryHours,
 		SemanticHashes:            result.Hashes,
+		ClaimSurfaces:             result.ClaimSurfaces,
 		RefreshWorkflows:          refreshWorkflows(m.Loops),
 		RefreshCadenceMinutes:     result.RefreshCadenceMinutes,
 		HarnessPromotionWorkflows: result.HarnessPromotionWorkflows,

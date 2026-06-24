@@ -33,6 +33,9 @@ func verifyClaim(
 	if len(claim.Files) == 0 || len(claim.Verifiers) == 0 || len(claim.GeneratedDoc) == 0 {
 		return fmt.Errorf("claim %s must bind files, verifiers, and docs", claim.ID)
 	}
+	if err := verifyClaimSurface(claim); err != nil {
+		return err
+	}
 	for _, path := range append(claim.Files, claim.GeneratedDoc...) {
 		if err := requireFile(root, path); err != nil {
 			return fmt.Errorf("claim %s: %w", claim.ID, err)

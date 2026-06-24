@@ -32,7 +32,17 @@ type verifyResult struct {
 	GraphEdges                int
 	MaxExpiryHours            int
 	Hashes                    map[string]string
+	ClaimSurfaces             []claimSurface
 	RefreshCadenceMinutes     map[string]int
 	HarnessPromotionWorkflows map[string]string
 	HarnessCandidateArtifacts map[string]string
+}
+
+type claimSurface struct {
+	ID            string   `json:"id"`
+	CodePaths     []string `json:"code_paths"`
+	TestPaths     []string `json:"test_paths"`
+	ManifestPaths []string `json:"manifest_paths"`
+	GeneratedDocs []string `json:"generated_docs"`
+	Verifiers     []string `json:"verifiers"`
 }

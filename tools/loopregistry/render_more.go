@@ -21,6 +21,19 @@ func renderClaims(b *strings.Builder, claims []claimBinding) {
 	fmt.Fprintln(b)
 }
 
+func renderClaimSurfaces(b *strings.Builder, surfaces []claimSurface) {
+	fmt.Fprintln(b, "## Claim Surface Evidence")
+	fmt.Fprintln(b)
+	fmt.Fprintln(b, "| Claim | Code | Test | Manifest | Generated docs | Verifiers |")
+	fmt.Fprintln(b, "| --- | ---: | ---: | ---: | ---: | ---: |")
+	for _, surface := range surfaces {
+		fmt.Fprintf(b, "| `%s` | `%d` | `%d` | `%d` | `%d` | `%d` |\n",
+			surface.ID, len(surface.CodePaths), len(surface.TestPaths),
+			len(surface.ManifestPaths), len(surface.GeneratedDocs), len(surface.Verifiers))
+	}
+	fmt.Fprintln(b)
+}
+
 func renderGraph(b *strings.Builder, edges []graphEdge) {
 	fmt.Fprintln(b, "## Evidence Graph")
 	fmt.Fprintln(b)
