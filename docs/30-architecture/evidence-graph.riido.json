@@ -516,15 +516,21 @@
       "id": "pre_commit_claim_binding_loop",
       "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier.",
       "hypothesis": "A pre-commit hook can run loop registry claim/doc/impact verification before PR creation.",
+      "claims": ["pre_commit_must_run_claim_binding_impact"],
       "changes": [
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "workflow", "path": ".github/workflows/pre-commit-baseline.yml"},
         {"kind": "manifest", "path": "docs/30-architecture/pre-commit-baseline.riido.json"},
         {"kind": "tool", "path": "tools/precommitbaseline"},
         {"kind": "script", "path": "tools/loopregistry/precommit.sh"},
-        {"kind": "config", "path": ".pre-commit-config.yaml"}
+        {"kind": "config", "path": ".pre-commit-config.yaml"},
+        {"kind": "test", "path": "tools/precommitbaseline/loopregistry_hook_test.go"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/precommitbaseline/loopregistry_hook_test.go"},
         {"kind": "tool", "path": "tools/precommitbaseline"},
-        {"kind": "script", "path": "tools/loopregistry/precommit.sh"}
+        {"kind": "script", "path": "tools/loopregistry/precommit.sh"},
+        {"kind": "tool", "path": "tools/loopregistry"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "pre-commit-baseline-evidence", "redacted": true},

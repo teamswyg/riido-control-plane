@@ -424,7 +424,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "11af8dc840f3cdabde6318b6b38be4ab768459246688c211c73477c9774370e7"
+      "semantic_hash": "4b91cf7ce765697d60e84082308fe1b73ba8a629b51176bacebfff461752108a"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -636,7 +636,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "69b8a85e017262d094ce0991f51b45d4675ad268acc0f694995cc7020b28028d"
+      "semantic_hash": "461828ce45bafd7c4ea8e6caced948cfd163daaef092223ec12f3f37af502e5d"
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
@@ -662,7 +662,34 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5e8bd1197e05d12fa29063d03ac333281e837b614cfe2ea54ec2eac733421b9b"
+      "semantic_hash": "2db5cd1ee3f011f4703b921847d1cc94247985ab7ff01e9ffe8c343805e49319"
+    },
+    {
+      "id": "pre_commit_must_run_claim_binding_impact",
+      "statement": "The local pre-commit hook must run loop-registry generated-doc and impact verification with evidence output, so claim-code-test-doc drift is blocked before PR creation.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        ".pre-commit-config.yaml",
+        ".github/workflows/pre-commit-baseline.yml",
+        ".github/workflows/loop-registry.yml",
+        "docs/30-architecture/pre-commit-baseline.riido.json",
+        "tools/loopregistry/precommit.sh",
+        "tools/precommitbaseline/verify_sources.go",
+        "tools/precommitbaseline/main_test.go",
+        "tools/precommitbaseline/loopregistry_hook_test.go"
+      ],
+      "verifiers": [
+        "TestPreCommitBaselineManifest",
+        "TestPreCommitBaselineRejectsMissingPhrase",
+        "TestPreCommitBaselineConfigRunsLoopRegistryHook",
+        "TestPreCommitBaselineLoopRegistryScriptRequiresImpactEvidence"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/pre-commit-baseline.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "9e925943012cdc57087f0c06902027ae5d9a4de64c9ac4db10fbdb2794bd08a0"
     },
     {
       "id": "claim_bound_paths_must_trigger_loop_registry",
@@ -684,7 +711,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "9d15a335094669a6f252ca820ae470f6b679ee9748ba570387e043fc9dd5465f"
+      "semantic_hash": "2c99c78a2cfd06db6ec54b31190e4998571616df5657aaedc3ecbdf0d679bb01"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -708,7 +735,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "518e10036c2de2c8965e6b6a9744b10dc9814e3db272b8028b3dee38d6e4dce7"
+      "semantic_hash": "2b8780f79212105a94459138af3dbfc515cd3548140943e8e89fd18af6849408"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -732,7 +759,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ec3c5354b3b5a9103cd9eef00ed991be95547156e5d21794cabf5c88c030b0f5"
+      "semantic_hash": "79311c4020afaff5e95eb147747e33fc135bb947b36e35c2aeff80aac6d50b40"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -829,7 +856,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "95ea18c84aedefaa594f9e2c76d0228b5983fe42fe805a99fe6b74c2f4cb96e1"
+      "semantic_hash": "752a1db126dfd96fe2f3ad1c14fbad44dd57ecb04f98ac49ce529108b432d8d9"
     },
     {
       "id": "loop_registry_evidence_must_expose_refresh_plans",
@@ -873,7 +900,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "140d251e2f32f6464866b7616f82a378d2301e18ccc681ff88b81a81566aed61"
+      "semantic_hash": "6c3b03c4c7139f00b3770c418f5b03fa0f32541bece49a2eb16d102d5d52071a"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
@@ -1020,6 +1047,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "claim_bound_paths_must_trigger_loop_registry",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "pre_commit_must_run_claim_binding_impact",
       "relation": "enforces"
     },
     {

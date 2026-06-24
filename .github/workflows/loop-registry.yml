@@ -15,6 +15,8 @@ on:
       - ".github/workflows/closed-loop-candidate-intake.yml"
       - ".github/workflows/closed-loop-candidate-decision.yml"
       - ".github/workflows/open-questions.yml"
+      - ".github/workflows/pre-commit-baseline.yml"
+      - ".pre-commit-config.yaml"
       - "docs/20-domain/ai-agent-client-api.md"
       - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/30-architecture/evidence-graph.md"
@@ -29,6 +31,8 @@ on:
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.md"
       - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
+      - "docs/30-architecture/pre-commit-baseline.md"
+      - "docs/30-architecture/pre-commit-baseline.riido.json"
       - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
       - "internal/riidoaiserver/ai_agent_assignment_prompt.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation.go"
@@ -96,6 +100,7 @@ on:
       - "tools/harnesspromotion/**"
       - "tools/closedloopcandidateintake/**"
       - "tools/closedloopcandidatedecision/**"
+      - "tools/precommitbaseline/**"
       - "go.mod"
       - "go.sum"
   pull_request:
@@ -108,6 +113,8 @@ on:
       - ".github/workflows/closed-loop-candidate-intake.yml"
       - ".github/workflows/closed-loop-candidate-decision.yml"
       - ".github/workflows/open-questions.yml"
+      - ".github/workflows/pre-commit-baseline.yml"
+      - ".pre-commit-config.yaml"
       - "docs/20-domain/ai-agent-client-api.md"
       - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/30-architecture/evidence-graph.md"
@@ -122,6 +129,8 @@ on:
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.md"
       - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
+      - "docs/30-architecture/pre-commit-baseline.md"
+      - "docs/30-architecture/pre-commit-baseline.riido.json"
       - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
       - "internal/riidoaiserver/ai_agent_assignment_prompt.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation.go"
@@ -189,6 +198,7 @@ on:
       - "tools/harnesspromotion/**"
       - "tools/closedloopcandidateintake/**"
       - "tools/closedloopcandidatedecision/**"
+      - "tools/precommitbaseline/**"
       - "go.mod"
       - "go.sum"
 
@@ -216,7 +226,7 @@ jobs:
           fi
           go test ./tools/loopregistry -count=1
           go test ./tools/aiagentclientapi -run 'Test(GeneratedDocMatchesManifest|RunWritesEvidence)$' -count=1
-          go test ./tools/evidencegraph ./tools/harnesspromotion ./tools/liveworkflowevidence ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision -count=1
+          go test ./tools/evidencegraph ./tools/harnesspromotion ./tools/liveworkflowevidence ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision ./tools/precommitbaseline -count=1
           go test ./internal/riidoaiserver \
             -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory|AIAgentIntentDialogueScenarioStaysInConversation|AIAgentIntentDialogueScenarioKeepsProgressAndLimitResult|HTTPAIAgentIntentGateWaitsForUserBeforeDurableAssignment|AssignmentPromptClassifiesIntentComponentTypes|AssignmentPromptKeepsExplicitInstructionExecutable)$' \
             -count=1
