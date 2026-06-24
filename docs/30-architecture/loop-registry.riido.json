@@ -147,6 +147,39 @@
         "adoption_artifact_missing",
         "raw_candidate_leak"
       ]
+    },
+    {
+      "id": "closed_loop_candidate_decision",
+      "kind": "closed_loop",
+      "observes": [
+        "closed_loop_candidate_intake_evidence",
+        "candidate_disposition",
+        "candidate_owner",
+        "candidate_priority"
+      ],
+      "verifies": [
+        "candidate_decision_coverage",
+        "candidate_decision_owner",
+        "candidate_decision_next_artifact"
+      ],
+      "evidence": [
+        {
+          "kind": "workflow_artifact",
+          "path": "closed-loop-candidate-decision-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/closed-loop-candidate-decision.md"
+        }
+      ],
+      "refresh_workflow": ".github/workflows/closed-loop-candidate-decision.yml",
+      "expires_after_hours": 24,
+      "fails_when": [
+        "candidate_decision_missing",
+        "candidate_owner_missing",
+        "candidate_next_artifact_missing"
+      ]
     }
   ],
   "claim_bindings": [
@@ -222,6 +255,11 @@
     },
     {
       "from": "closed_loop_candidate_intake",
+      "to": "closed_loop_candidate_decision",
+      "relation": "requires_candidate_decision"
+    },
+    {
+      "from": "closed_loop_candidate_decision",
       "to": "ai_thread_history",
       "relation": "hardens_claim"
     },

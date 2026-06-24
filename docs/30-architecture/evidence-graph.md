@@ -8,10 +8,10 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 - workflow: `.github/workflows/evidence-graph.yml`
 - evidence artifact: `evidence-graph-evidence`
-- chains: `4`
-- change refs: `13`
-- verifier refs: `8`
-- evidence refs: `6`
+- chains: `5`
+- change refs: `16`
+- verifier refs: `10`
+- evidence refs: `7`
 
 ## Evidence Chains
 
@@ -20,6 +20,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `harness_failure_promotion_loop` | `3` | `2` | `2` | `closed_loop_candidate` |
 | `claim_binding_impact_loop` | `3` | `2` | `1` | `ai_thread_history` |
 | `closed_loop_candidate_intake_loop` | `3` | `2` | `1` | `closed_loop_candidate_intake` |
+| `closed_loop_candidate_decision_loop` | `3` | `2` | `1` | `closed_loop_candidate_decision` |
 | `pre_commit_claim_binding_loop` | `4` | `2` | `2` | `claim_binding_created` |
 
 ## Loop
