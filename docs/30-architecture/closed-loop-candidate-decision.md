@@ -15,6 +15,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - decision records must name owner, priority, disposition, next loop, and next artifact
 - decision next_artifact must be one of the required_next_artifacts declared by the consumed candidate artifact
 - decision verification must reject candidates whose adoption_plan does not cover every required_next_artifact
+- decision evidence must expose the executable command selected from the consumed candidate adoption_plan
 - triage-required or deferred candidates must name a non-expired review_by date
 - triage-required candidates must stay redacted and carry enough context for a follow-up claim binding
 - candidate decision verification must run on a schedule so decision ownership does not rely on memory

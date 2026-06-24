@@ -15,7 +15,7 @@ func TestCandidateDecisionRejectsUnknownNextArtifact(t *testing.T) {
 	}
 }
 
-func TestCandidateDecisionEvidenceBindsNextArtifact(t *testing.T) {
+func TestCandidateDecisionEvidenceBindsNextArtifactCommand(t *testing.T) {
 	root := repoRootForTest(t)
 	out := t.TempDir() + "/candidates.json"
 	if err := generateCandidate(root, out); err != nil {
@@ -31,9 +31,12 @@ func TestCandidateDecisionEvidenceBindsNextArtifact(t *testing.T) {
 	if result.DecisionArtifacts[0].NextArtifact != "claim_binding" {
 		t.Fatalf("next artifact = %q", result.DecisionArtifacts[0].NextArtifact)
 	}
+	if result.DecisionArtifacts[0].NextCommand == "" {
+		t.Fatalf("next command missing: %+v", result.DecisionArtifacts[0])
+	}
 }
 
-func TestCandidateDecisionEvidenceFileIncludesNextArtifact(t *testing.T) {
+func TestCandidateDecisionEvidenceFileIncludesNextArtifactCommand(t *testing.T) {
 	root := repoRootForTest(t)
 	out := t.TempDir() + "/candidates.json"
 	evidenceOut := t.TempDir() + "/evidence.json"
@@ -49,5 +52,8 @@ func TestCandidateDecisionEvidenceFileIncludesNextArtifact(t *testing.T) {
 	}
 	if len(got.DecisionArtifacts) != 1 || got.DecisionArtifacts[0].NextArtifact != "claim_binding" {
 		t.Fatalf("decision artifacts = %+v", got.DecisionArtifacts)
+	}
+	if got.DecisionArtifacts[0].NextCommand == "" {
+		t.Fatalf("next command missing: %+v", got.DecisionArtifacts[0])
 	}
 }
