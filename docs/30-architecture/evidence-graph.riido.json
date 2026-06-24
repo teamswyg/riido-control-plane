@@ -1,0 +1,84 @@
+{
+  "schema_version": "riido-control-plane-evidence-graph.v1",
+  "id": "control-plane-evidence-graph",
+  "title": "Control Plane Evidence Graph",
+  "generated_doc": "docs/30-architecture/evidence-graph.md",
+  "workflow": ".github/workflows/evidence-graph.yml",
+  "evidence_artifact": "evidence-graph-evidence",
+  "evidence_tool": "tools/evidencegraph",
+  "assertions": [
+    "every evidence chain must connect observation, hypothesis, change, verifier, evidence, decision, and next loop",
+    "change and verifier refs must point to existing repository files or package directories",
+    "artifact evidence refs are names only and must stay redacted",
+    "evidence graph records explain why a loop exists without relying on narrative memory"
+  ],
+  "chains": [
+    {
+      "id": "harness_failure_promotion_loop",
+      "observation": "Provider and smoke harness failures could previously end as isolated artifacts.",
+      "hypothesis": "Redacted harness summaries can be transformed into closed-loop candidate records.",
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "workflow", "path": ".github/workflows/harness-promotion.yml"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "workflow", "path": ".github/workflows/harness-promotion.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true},
+        {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true}
+      ],
+      "decision": "Harness failures are promoted into closed-loop candidate artifacts instead of relying on human memory.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "claim_binding_impact_loop",
+      "observation": "Business claims could change without bound code or tests changing in the same pull request.",
+      "hypothesis": "Comparing the PR diff against the loop registry can force claim meaning changes to co-change bound files.",
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "PR impact verification is part of the loop registry gate.",
+      "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "pre_commit_claim_binding_loop",
+      "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier.",
+      "hypothesis": "A pre-commit hook can run loop registry claim/doc/impact verification before PR creation.",
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/pre-commit-baseline.riido.json"},
+        {"kind": "tool", "path": "tools/precommitbaseline"},
+        {"kind": "script", "path": "tools/loopregistry/precommit.sh"},
+        {"kind": "config", "path": ".pre-commit-config.yaml"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/precommitbaseline"},
+        {"kind": "script", "path": "tools/loopregistry/precommit.sh"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "pre-commit-baseline-evidence", "redacted": true},
+        {"kind": "artifact", "path": "riido-loop-registry-precommit-evidence.json", "redacted": true}
+      ],
+      "decision": "Local pre-commit now blocks claim binding drift before review.",
+      "next_loop": "claim_binding_created"
+    }
+  ],
+  "loop": {
+    "observation": "Evidence artifacts existed, but the reasoning chain from observation to next loop was still scattered across generated readers and PR memory.",
+    "hypothesis": "A compact evidence graph can make the development loop navigable by tools without asking an AI to read every narrative document.",
+    "execute": "Verify every chain has observation, hypothesis, change, verifier, evidence, decision, and next-loop nodes; verify repository refs exist; generate this reader and publish graph evidence in CI.",
+    "evaluate": "The verifier fails on incomplete chains, duplicate ids, missing refs, stale generated docs, missing strict workflow evidence, or missing redaction on artifact evidence.",
+    "retrospective": "This makes the evidence loop itself inspectable: future agents can see why a loop exists, what changed, what verifies it, and what loop should run next."
+  }
+}

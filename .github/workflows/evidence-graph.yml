@@ -1,0 +1,58 @@
+name: Evidence Graph
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/evidence-graph.yml"
+      - ".github/workflows/harness-promotion.yml"
+      - ".github/workflows/loop-registry.yml"
+      - ".github/workflows/pre-commit-baseline.yml"
+      - ".pre-commit-config.yaml"
+      - "docs/30-architecture/evidence-graph.md"
+      - "docs/30-architecture/evidence-graph.riido.json"
+      - "docs/30-architecture/harness-promotion.riido.json"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/pre-commit-baseline.riido.json"
+      - "go.mod"
+      - "go.sum"
+      - "tools/evidencegraph/**"
+      - "tools/harnesspromotion/**"
+      - "tools/loopregistry/**"
+      - "tools/precommitbaseline/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/evidence-graph.yml"
+      - ".github/workflows/harness-promotion.yml"
+      - ".github/workflows/loop-registry.yml"
+      - ".github/workflows/pre-commit-baseline.yml"
+      - ".pre-commit-config.yaml"
+      - "docs/30-architecture/evidence-graph.md"
+      - "docs/30-architecture/evidence-graph.riido.json"
+      - "docs/30-architecture/harness-promotion.riido.json"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/pre-commit-baseline.riido.json"
+      - "go.mod"
+      - "go.sum"
+      - "tools/evidencegraph/**"
+      - "tools/harnesspromotion/**"
+      - "tools/loopregistry/**"
+      - "tools/precommitbaseline/**"
+
+jobs:
+  evidence-graph:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go test ./tools/evidencegraph -count=1
+      - run: mkdir -p out
+      - run: go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: evidence-graph-evidence
+          path: out/evidence-graph-evidence.json
+          if-no-files-found: error

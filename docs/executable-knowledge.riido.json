@@ -18,6 +18,13 @@
       "workflow": ".github/workflows/architecture-docs.yml",
       "evidence_artifact": "ai-agent-risk-evidence",
       "human_doc": "docs/30-architecture/api-client-delivery.md"
+    },
+    {
+      "path": "docs/30-architecture/evidence-graph.riido.json",
+      "evidence_tool": "tools/evidencegraph",
+      "workflow": ".github/workflows/evidence-graph.yml",
+      "evidence_artifact": "evidence-graph-evidence",
+      "human_doc": "docs/30-architecture/evidence-graph.md"
     }
   ],
   "source_manifests": [
