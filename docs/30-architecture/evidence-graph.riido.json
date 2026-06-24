@@ -218,15 +218,17 @@
     {
       "id": "claim_surface_evidence_loop",
       "observation": "The loop registry could reject semantic drift internally while its evidence artifact did not show each claim's code, test, manifest, generated doc, verifier, target command, and evidence-chain surface to downstream agents.",
-      "hypothesis": "Publishing per-claim surface evidence with target verifier commands and evidence graph chain ids lets agents infer the required co-change, QA, and reasoning scope from machine evidence instead of relying on narrative docs or memory.",
+      "hypothesis": "Publishing per-claim surface evidence with target verifier commands and evidence graph chain ids, then rejecting manifest-only claims without code or test paths, lets agents infer the required co-change, QA, and reasoning scope from machine evidence instead of relying on narrative docs or memory.",
       "claims": ["claim_surface_evidence_must_expose_code_test_doc_binding"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "test", "path": "tools/loopregistry/claim_surface_executable_path_test.go"},
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/claim_surface_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/claim_surface_executable_path_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -234,7 +236,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Claim surface binding, target verifier commands, and evidence graph chain ids are now visible in loop-registry evidence and generated docs, so AI agents can detect code/test/doc, QA, and reasoning scope from verifier output even when they skip prose.",
+      "decision": "Claim surface binding, target verifier commands, and evidence graph chain ids are now visible in loop-registry evidence and generated docs, and manifest-only claims are rejected so AI agents can detect executable code/test, QA, and reasoning scope from verifier output even when they skip prose.",
       "next_loop": "closed_loop_candidate"
     },
     {
