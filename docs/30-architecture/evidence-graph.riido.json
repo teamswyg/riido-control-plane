@@ -171,17 +171,19 @@
     },
     {
       "id": "claim_binding_impact_loop",
-      "observation": "Business claims could change without bound code or tests changing in the same pull request.",
-      "hypothesis": "Comparing the PR diff against the loop registry can force claim meaning changes to co-change bound code or test paths, not just manifests or generated docs.",
+      "observation": "Business claims and their generated-doc bindings could change without bound code or tests changing in the same pull request.",
+      "hypothesis": "Comparing the PR diff against the loop registry can force claim meaning and generated-doc binding changes to co-change bound code or test paths, not just manifests or generated docs.",
       "claims": ["claim_meaning_changes_require_code_or_test_surface"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "tool", "path": "tools/loopregistry/impact.go"},
         {"kind": "tool", "path": "tools/loopregistry/impact_more.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_generated_doc_test.go"},
         {"kind": "test", "path": "tools/loopregistry/impact_test.go"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/impact_generated_doc_test.go"},
         {"kind": "test", "path": "tools/loopregistry/impact_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
@@ -189,7 +191,7 @@
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "PR impact verification rejects claim meaning changes when the diff only changes manifests or generated docs; at least one bound code or test path must move.",
+      "decision": "PR impact verification rejects claim meaning and generated-doc binding changes when the diff only changes manifests or generated docs; at least one bound code or test path must move.",
       "next_loop": "ai_thread_history"
     },
     {
