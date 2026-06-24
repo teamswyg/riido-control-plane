@@ -12,6 +12,9 @@ func clientVisibleTaskThreadText(message string) string {
 	message = clientVisibleLocalPathPattern.ReplaceAllString(message, "로컬 파일")
 	message = restoreClientVisibleInlineCode(message)
 	message = clientVisibleLocalizedTaskThreadText(message)
+	if limitMessage, ok := clientVisibleProviderLimitMessage(message); ok {
+		message = limitMessage
+	}
 	return strings.TrimSpace(message)
 }
 

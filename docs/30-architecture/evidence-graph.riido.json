@@ -184,6 +184,29 @@
       ],
       "decision": "Desktop daemon lifecycle/profile ownership remains an executable open decision until a desktop-owned manifest defines app quit, profile isolation, and stop-source evidence behavior.",
       "next_loop": "open_decision_queue"
+    },
+    {
+      "id": "ambiguous_task_context_thread_interaction_loop",
+      "observation": "Marketing, analysis, and intent-oriented task documents can be misread as executable instructions, while token or cloud-credit exhaustion can leak provider wording into the AI Agent thread.",
+      "hypothesis": "A prompt interaction policy plus visible-message normalization can keep the existing thread conversational: ambiguous task context asks for intent first, concrete follow-up instructions become authoritative, and provider limits render as a stable user-facing result without changing API shape.",
+      "changes": [
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message.go"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Ambiguous task intent handling and provider-limit copy are enforced as an AI thread history claim while preserving existing endpoint input and output fields.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {
