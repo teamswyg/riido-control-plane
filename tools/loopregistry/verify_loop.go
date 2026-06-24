@@ -4,7 +4,11 @@ import "fmt"
 
 func verifyLoops(root string, m manifest) (map[string]bool, verifyResult, error) {
 	ids := map[string]bool{}
-	result := verifyResult{RefreshCadenceMinutes: map[string]int{}}
+	result := verifyResult{
+		RefreshCadenceMinutes:     map[string]int{},
+		HarnessPromotionWorkflows: map[string]string{},
+		HarnessCandidateArtifacts: map[string]string{},
+	}
 	for _, loop := range m.Loops {
 		if ids[loop.ID] || loop.ID == "" {
 			return nil, result, fmt.Errorf("loop id must be unique and non-empty: %q", loop.ID)
@@ -14,6 +18,9 @@ func verifyLoops(root string, m manifest) (map[string]bool, verifyResult, error)
 			return nil, result, err
 		}
 		if err := captureRefreshCadence(root, loop, &result); err != nil {
+			return nil, result, err
+		}
+		if err := captureHarnessPromotion(root, loop, &result); err != nil {
 			return nil, result, err
 		}
 		result.Loops++
@@ -42,6 +49,11 @@ func verifyLoop(root string, m manifest, loop loopRecord) error {
 	}
 	if loop.Kind == kindHarness && len(loop.PromotesTo) == 0 {
 		return fmt.Errorf("harness loop %s must promote failures to candidates", loop.ID)
+	}
+	if loop.Kind == kindHarness {
+		if err := verifyHarnessTargets(m, loop); err != nil {
+			return err
+		}
 	}
 	return verifyLoopSchedule(root, m, loop)
 }

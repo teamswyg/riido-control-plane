@@ -18,21 +18,23 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "- claim bindings: `%d`\n", result.Claims)
 	fmt.Fprintf(&b, "- evidence graph edges: `%d`\n", result.GraphEdges)
 	fmt.Fprintf(&b, "- max evidence expiry hours: `%d`\n\n", result.MaxExpiryHours)
-	renderLoops(&b, m.Loops, result.RefreshCadenceMinutes)
+	renderLoops(&b, m.Loops, result)
 	renderClaims(&b, m.Claims)
 	renderGraph(&b, m.EvidenceGraph)
 	renderLoop(&b, m.Loop)
 	return b.String()
 }
 
-func renderLoops(b *strings.Builder, loops []loopRecord, cadence map[string]int) {
+func renderLoops(b *strings.Builder, loops []loopRecord, result verifyResult) {
 	fmt.Fprintln(b, "## Loops")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Loop | Kind | Expires | Refresh Minutes | Refresh Workflow | Evidence |")
-	fmt.Fprintln(b, "| --- | --- | ---: | ---: | --- | ---: |")
+	fmt.Fprintln(b, "| Loop | Kind | Expires | Refresh Minutes | Refresh Workflow | Promotion Evidence | Evidence |")
+	fmt.Fprintln(b, "| --- | --- | ---: | ---: | --- | --- | ---: |")
 	for _, loop := range loops {
-		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%d` | `%s` | `%d` |\n",
-			loop.ID, loop.Kind, loop.ExpiresAfterHours, cadence[loop.ID], loop.RefreshWorkflow, len(loop.Evidence))
+		promotion := result.HarnessCandidateArtifacts[loop.ID]
+		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%d` | `%s` | `%s` | `%d` |\n",
+			loop.ID, loop.Kind, loop.ExpiresAfterHours,
+			result.RefreshCadenceMinutes[loop.ID], loop.RefreshWorkflow, promotion, len(loop.Evidence))
 	}
 	fmt.Fprintln(b)
 }
