@@ -412,6 +412,13 @@
       "claims": ["ambiguous_task_context_must_ask_before_work"],
       "changes": [
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_intent_gate_assignment.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_assignment_start_projection.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/server.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/server_assignment_action.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/server_assignment_request.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/server_task_context_compose.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/server_task_context_request.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_apply_assignment_metadata_action_response.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_assignment_event_action_response.go"},
@@ -422,12 +429,14 @@
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_thread_message_policy.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"},

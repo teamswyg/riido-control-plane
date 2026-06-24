@@ -2,13 +2,30 @@ package riidoaiserver
 
 import "strings"
 
+type composedAssignRequest struct {
+	Request            AssignRequest
+	IntentGateRequired bool
+}
+
 func composeAssignRequestWithTaskContext(taskID, componentID string, req AssignRequest, contextSnapshot AIAgentTaskContext) (AssignRequest, error) {
+	composed, err := composeAssignRequestWithTaskContextResult(taskID, componentID, req, contextSnapshot)
+	if err != nil {
+		return AssignRequest{}, err
+	}
+	return composed.Request, nil
+}
+
+func composeAssignRequestWithTaskContextResult(
+	taskID, componentID string,
+	req AssignRequest,
+	contextSnapshot AIAgentTaskContext,
+) (composedAssignRequest, error) {
 	composed, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
 		TaskID:  taskID,
 		Context: contextSnapshot,
 	})
 	if err != nil {
-		return AssignRequest{}, err
+		return composedAssignRequest{}, err
 	}
 	req.Prompt = composed.Prompt
 	if composed.HasRepository {
@@ -20,7 +37,10 @@ func composeAssignRequestWithTaskContext(taskID, componentID string, req AssignR
 			req.ComponentID = componentID
 		}
 	}
-	return req, nil
+	return composedAssignRequest{
+		Request:            req,
+		IntentGateRequired: composed.IntentGateRequired,
+	}, nil
 }
 
 func composeAssignRequestWithoutTaskContext(taskID, componentID string, req AssignRequest) (AssignRequest, error) {

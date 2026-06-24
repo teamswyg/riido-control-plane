@@ -12,14 +12,14 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `49`; runtime: `1`; internal: `3`; tools: `44`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `89`; max file lines: `1072`.
+File line budget target: `75`; files over target: `89`; max file lines: `1098`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
 | Files over target | 89 | 97 | 8 |
-| Max file lines | 1072 | 2481 | 1409 |
+| Max file lines | 1098 | 2481 | 1383 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
 
@@ -27,7 +27,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 87 | 85 | 1072 | 2481 | 14624 | 23713 |
+| `internal/riidoaiserver` | 87 | 85 | 1098 | 2481 | 14654 | 23713 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
 | `tools/containercontract` | 2 | 2 | 85 | 597 | 11 | 663 |
@@ -43,14 +43,14 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | File | Lines |
 | --- | ---: |
-| `internal/riidoaiserver/server.go` | 1072 |
+| `internal/riidoaiserver/server.go` | 1098 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 838 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 777 |
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
 | `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 687 |
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
 | `internal/riidoaiserver/ai_agent_client_persistence_test.go` | 661 |
-| `internal/riidoaiserver/ai_agent_client_api.go` | 619 |
+| `internal/riidoaiserver/ai_agent_client_api.go` | 620 |
 | `internal/riidoaiserver/store.go` | 537 |
 | `internal/riidoaiserver/dynamodb_stream_relay.go` | 519 |
 
@@ -58,7 +58,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 87 | 1072 | 14624 |
+| `internal/riidoaiserver` | 87 | 1098 | 14654 |
 | `tools/containercontract` | 2 | 85 | 11 |
 
 ## Packages
