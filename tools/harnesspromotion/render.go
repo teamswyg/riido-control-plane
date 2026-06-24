@@ -16,6 +16,7 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintln(&b)
 	fmt.Fprintf(&b, "- promotion sources: `%d`\n", result.SourceCount)
 	fmt.Fprintf(&b, "- required next artifact refs: `%d`\n\n", result.ClaimCount)
+	fmt.Fprintf(&b, "- loop registry: `%s`\n\n", m.LoopRegistryManifest)
 	renderSources(&b, m.Sources)
 	renderLoop(&b, m.Loop)
 	return b.String()
@@ -24,11 +25,12 @@ func renderDoc(m manifest, result verifyResult) string {
 func renderSources(b *strings.Builder, sources []promotionSource) {
 	fmt.Fprintln(b, "## Promotion Sources")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Source | Harness Loop | Candidate Artifact | Target |")
-	fmt.Fprintln(b, "| --- | --- | --- | --- |")
+	fmt.Fprintln(b, "| Source | Harness Loop | Candidate Artifact | Target | Required Next Artifacts |")
+	fmt.Fprintln(b, "| --- | --- | --- | --- | ---: |")
 	for _, source := range sources {
-		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%s` |\n",
-			source.ID, source.HarnessLoop, source.CandidateArtifact, source.PromotionTarget)
+		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%s` | `%d` |\n",
+			source.ID, source.HarnessLoop, source.CandidateArtifact,
+			source.PromotionTarget, len(source.RequiredNextArtifacts))
 	}
 	fmt.Fprintln(b)
 }

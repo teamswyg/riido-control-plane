@@ -6,6 +6,7 @@
   "workflow": ".github/workflows/harness-promotion.yml",
   "evidence_artifact": "harness-promotion-evidence",
   "evidence_tool": "tools/harnesspromotion",
+  "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
   "sources": [
     {
       "id": "ai-agent-client-testnet-smoke",
@@ -17,7 +18,14 @@
       "candidate_path": "out/ai-agent-client-testnet-smoke-closed-loop-candidates.json",
       "promotion_target": "closed_loop_candidate",
       "failure_statuses": ["failure", "cancelled", "timed_out", "unknown"],
-      "required_next_artifacts": ["claim_binding", "verifier", "ci_gate", "redacted_evidence"]
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
     }
   ],
   "assertions": [
@@ -28,9 +36,9 @@
   ],
   "loop": {
     "observation": "Provider and smoke harnesses can find failures, but a failed run can still end as an isolated artifact unless it is converted into a closed-loop candidate.",
-    "hypothesis": "A promotion sidecar can transform redacted harness summaries into candidate records that name the next artifacts required for a durable closed loop.",
-    "execute": "Verify harness workflows call this tool after redacted summaries, upload candidate artifacts with strict missing-file behavior, and generate reader/evidence outputs in CI.",
-    "evaluate": "The verifier fails on missing promotion wiring, missing candidate uploads, missing strict upload behavior, stale generated docs, or unsupported manifest identity.",
+    "hypothesis": "A promotion sidecar can transform redacted harness summaries into candidate records that name the next artifacts required for a durable closed loop and bind them to the loop registry target.",
+    "execute": "Verify harness workflows call this tool after redacted summaries, upload candidate artifacts with strict missing-file behavior, verify source-to-loop-registry target bindings, and generate reader/evidence outputs in CI.",
+    "evaluate": "The verifier fails on missing promotion wiring, missing candidate uploads, missing strict upload behavior, missing adoption artifacts, loop-registry target drift, stale generated docs, or unsupported manifest identity.",
     "retrospective": "Harnesses now increase exploration space while failed observations automatically enter the closed-loop backlog instead of relying on human memory."
   }
 }
