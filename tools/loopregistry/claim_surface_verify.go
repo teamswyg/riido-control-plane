@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func verifyClaimSurface(claim claimBinding) error {
-	surface := claimSurfaceFor(claim, nil)
+	surface := claimSurfaceFor(claim, nil, nil)
 	if len(surface.CodePaths)+len(surface.ManifestPaths) == 0 {
 		return fmt.Errorf("claim %s must bind code, workflow, or manifest surface", claim.ID)
 	}
