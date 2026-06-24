@@ -16,6 +16,9 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		if err := verifyAdoptionPlan(item); err != nil {
 			return result, err
 		}
+		if err := verifyCandidatePromotionEdge(item); err != nil {
+			return result, err
+		}
 		decision, ok := decisionByID[item.ID]
 		if !ok {
 			return result, fmt.Errorf("candidate %s has no decision record", item.ID)
@@ -29,9 +32,10 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		}
 		result.DecisionIDs = append(result.DecisionIDs, item.ID)
 		result.DecisionArtifacts = append(result.DecisionArtifacts, decisionArtifactEvidence{
-			CandidateID:  item.ID,
-			NextArtifact: decision.NextArtifact,
-			NextCommand:  command,
+			CandidateID:   item.ID,
+			NextArtifact:  decision.NextArtifact,
+			NextCommand:   command,
+			PromotionEdge: item.PromotionEdge,
 		})
 	}
 	if err := verifyNoOrphanDecisions(m.Decisions, candidate.Candidates); err != nil {

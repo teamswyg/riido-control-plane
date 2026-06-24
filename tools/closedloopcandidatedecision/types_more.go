@@ -8,9 +8,10 @@ type verifyResult struct {
 }
 
 type decisionArtifactEvidence struct {
-	CandidateID  string `json:"candidate_id"`
-	NextArtifact string `json:"next_artifact"`
-	NextCommand  string `json:"next_command"`
+	CandidateID   string    `json:"candidate_id"`
+	NextArtifact  string    `json:"next_artifact"`
+	NextCommand   string    `json:"next_command"`
+	PromotionEdge graphEdge `json:"promotion_edge"`
 }
 
 type candidateEvidence struct {
@@ -25,11 +26,19 @@ type candidateEvidence struct {
 
 type closedLoopCandidate struct {
 	ID                    string         `json:"id"`
+	HarnessLoop           string         `json:"harness_loop"`
 	PromotionTarget       string         `json:"promotion_target"`
+	PromotionEdge         graphEdge      `json:"promotion_edge"`
 	Observation           string         `json:"observation"`
 	Hypothesis            string         `json:"hypothesis"`
 	RequiredNextArtifacts []string       `json:"required_next_artifacts"`
 	AdoptionPlan          []adoptionStep `json:"adoption_plan"`
+}
+
+type graphEdge struct {
+	From     string `json:"from"`
+	To       string `json:"to"`
+	Relation string `json:"relation"`
 }
 
 type candidateRedaction struct {

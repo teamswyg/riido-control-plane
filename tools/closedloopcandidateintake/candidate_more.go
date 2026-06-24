@@ -9,12 +9,12 @@ func verifyCandidateItem(m manifest, item closedLoopCandidate) error {
 	if strings.TrimSpace(item.ID) == "" || strings.TrimSpace(item.Observation) == "" {
 		return fmt.Errorf("candidate item must bind id and observation")
 	}
-	source, ok := findSourceForTarget(m.Sources, item.PromotionTarget)
+	source, ok := findSourceForCandidate(m.Sources, item)
 	if !ok {
-		return fmt.Errorf("candidate %s targets unknown loop %s", item.ID, item.PromotionTarget)
+		return fmt.Errorf("candidate %s targets unknown harness/loop edge", item.ID)
 	}
-	if item.HarnessLoop == "" {
-		return fmt.Errorf("candidate %s must name harness loop", item.ID)
+	if err := verifyCandidatePromotionEdge(item, source); err != nil {
+		return err
 	}
 	if err := verifyRequiredNextArtifacts(item.RequiredNextArtifacts, source.ID); err != nil {
 		return err
@@ -22,9 +22,9 @@ func verifyCandidateItem(m manifest, item closedLoopCandidate) error {
 	return verifyAdoptionPlan(item)
 }
 
-func findSourceForTarget(sources []intakeSource, target string) (intakeSource, bool) {
+func findSourceForCandidate(sources []intakeSource, item closedLoopCandidate) (intakeSource, bool) {
 	for _, source := range sources {
-		if source.PromotionTarget == target {
+		if source.PromotionTarget == item.PromotionTarget && source.HarnessLoop == item.HarnessLoop {
 			return source, true
 		}
 	}

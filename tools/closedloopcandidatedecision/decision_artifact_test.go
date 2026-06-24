@@ -56,4 +56,7 @@ func TestCandidateDecisionEvidenceFileIncludesNextArtifactCommand(t *testing.T) 
 	if got.DecisionArtifacts[0].NextCommand == "" {
 		t.Fatalf("next command missing: %+v", got.DecisionArtifacts[0])
 	}
+	if got.DecisionArtifacts[0].PromotionEdge.Relation != "promotes_failure_to" {
+		t.Fatalf("promotion edge missing: %+v", got.DecisionArtifacts[0])
+	}
 }
