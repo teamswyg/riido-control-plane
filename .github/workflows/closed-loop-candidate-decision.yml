@@ -29,6 +29,8 @@ permissions:
 jobs:
   closed-loop-candidate-decision:
     runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: closed_loop_candidate_decision
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v6

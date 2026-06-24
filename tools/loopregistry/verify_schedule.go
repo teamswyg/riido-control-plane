@@ -26,6 +26,9 @@ func verifyLoopSchedule(root string, m manifest, loop loopRecord) error {
 		return fmt.Errorf("loop %s refresh cadence %dm exceeds evidence expiry %dm",
 			loop.ID, cadence, expiryMinutes(loop))
 	}
+	if !refreshWorkflowDeclaresLoopID(text, loop.ID) {
+		return fmt.Errorf("loop %s refresh workflow must declare RIIDO_LOOP_IDS with its loop id", loop.ID)
+	}
 	if !refreshWorkflowPublishesEvidence(text, loop.Evidence) {
 		return fmt.Errorf("loop %s refresh workflow must publish one strict loop evidence artifact", loop.ID)
 	}

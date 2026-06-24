@@ -9,7 +9,11 @@ on:
     paths:
       - ".github/workflows/loop-registry.yml"
       - ".github/workflows/evidence-graph.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
       - ".github/workflows/ai-agent-client-testnet-load.yml"
+      - ".github/workflows/closed-loop-candidate-intake.yml"
+      - ".github/workflows/closed-loop-candidate-decision.yml"
+      - ".github/workflows/open-questions.yml"
       - "docs/20-domain/ai-agent-client-api.md"
       - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/30-architecture/evidence-graph.md"
@@ -97,7 +101,11 @@ on:
     paths:
       - ".github/workflows/loop-registry.yml"
       - ".github/workflows/evidence-graph.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
       - ".github/workflows/ai-agent-client-testnet-load.yml"
+      - ".github/workflows/closed-loop-candidate-intake.yml"
+      - ".github/workflows/closed-loop-candidate-decision.yml"
+      - ".github/workflows/open-questions.yml"
       - "docs/20-domain/ai-agent-client-api.md"
       - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/30-architecture/evidence-graph.md"
@@ -185,6 +193,8 @@ on:
 jobs:
   loop-registry:
     runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: ai_thread_history closed_loop_candidate
     steps:
       - uses: actions/checkout@v7
         with:

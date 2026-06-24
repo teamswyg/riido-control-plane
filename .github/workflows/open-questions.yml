@@ -24,6 +24,8 @@ on:
 jobs:
   open-questions:
     runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: open_decision_queue
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
