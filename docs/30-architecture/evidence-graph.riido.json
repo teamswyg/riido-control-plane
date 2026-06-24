@@ -90,6 +90,32 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "harness_failure_always_promotion_loop",
+      "observation": "A harness workflow can run harnesspromotion in the happy path but skip promotion or candidate artifact upload after the smoke/load step fails.",
+      "hypothesis": "Verifying that both the harnesspromotion step and closed-loop candidate artifact upload step run under if: always() keeps failed harness runs from becoming silent artifacts.",
+      "claims": ["harness_promotion_must_run_after_failure"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-smoke.yml"},
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"},
+        {"kind": "tool", "path": "tools/loopregistry/harness_promotion.go"},
+        {"kind": "tool", "path": "tools/loopregistry/workflow_step.go"},
+        {"kind": "test", "path": "tools/loopregistry/harness_promotion_always_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/harness_promotion_always_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/harness_promotion_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true}
+      ],
+      "decision": "Harness promotion is now verified as a failure-path behavior: smoke/load failures must still produce closed-loop candidate evidence.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "closed_loop_candidate_adoption_plan_loop",
       "observation": "Closed-loop candidates named required artifact types, but the candidate artifact did not itself carry executable commands for producing or verifying those artifacts.",
       "hypothesis": "Embedding an adoption_plan in each candidate lets agents act from the artifact even if they do not read the surrounding documentation.",

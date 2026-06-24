@@ -28,8 +28,23 @@ func captureHarnessPromotion(root string, loop loopRecord, result *verifyResult)
 }
 
 func harnessWorkflowPromotesCandidates(text, artifact string) bool {
-	return strings.Contains(text, "go run ./tools/harnesspromotion") &&
-		strings.Contains(text, "-summary") &&
-		strings.Contains(text, "-candidate-out") &&
-		workflowUploadsStrictArtifact(text, artifact)
+	return workflowHasAlwaysStep(
+		text,
+		"go run ./tools/harnesspromotion",
+		"-summary",
+		"-candidate-out",
+		artifact,
+	) && workflowAlwaysUploadsStrictArtifact(text, artifact)
+}
+
+func workflowAlwaysUploadsStrictArtifact(text, artifact string) bool {
+	if artifact == "" || strings.Contains(artifact, "/") {
+		return false
+	}
+	return workflowHasAlwaysStep(
+		text,
+		"actions/upload-artifact",
+		"name: "+artifact,
+		"if-no-files-found: error",
+	)
 }

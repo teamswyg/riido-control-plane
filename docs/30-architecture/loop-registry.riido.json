@@ -424,7 +424,31 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "1479e9ded6fc434c0c6674b62e5154e565faf144d0f9c5bdc38ab8bc15f81811"
+      "semantic_hash": "11af8dc840f3cdabde6318b6b38be4ab768459246688c211c73477c9774370e7"
+    },
+    {
+      "id": "harness_promotion_must_run_after_failure",
+      "statement": "Harness refresh workflows must run both harnesspromotion and closed-loop candidate artifact upload under if: always(), so a failing smoke or load run still produces closed-loop candidate evidence.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        ".github/workflows/ai-agent-client-testnet-smoke.yml",
+        ".github/workflows/ai-agent-client-testnet-load.yml",
+        "tools/loopregistry/harness_promotion.go",
+        "tools/loopregistry/workflow_step.go",
+        "tools/loopregistry/harness_promotion_test.go",
+        "tools/loopregistry/harness_promotion_always_test.go"
+      ],
+      "verifiers": [
+        "TestHarnessRefreshWorkflowMustRunPromotion",
+        "TestHarnessMustPublishCandidateArtifact",
+        "TestHarnessPromotionStepRequiresAlways",
+        "TestHarnessCandidateArtifactUploadRequiresAlways"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "05f1f8b25b5af18d813397bb20e65e2ec43986171b12033ccd89b8b8edba16dc"
     },
     {
       "id": "closed_loop_candidates_must_carry_adoption_plan",
@@ -684,7 +708,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "4f9363147cf63d73f8205c7fd7b34e9c850c953474791836cf2d6f33db3c9e06"
+      "semantic_hash": "518e10036c2de2c8965e6b6a9744b10dc9814e3db272b8028b3dee38d6e4dce7"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -708,7 +732,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "540104d5e5cf4540fa141fee2b04c21a0b5c3c2a730afad265ce3fb451a8f842"
+      "semantic_hash": "ec3c5354b3b5a9103cd9eef00ed991be95547156e5d21794cabf5c88c030b0f5"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -1021,6 +1045,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "harness_like_workflows_must_be_registered_or_excluded",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "harness_promotion_must_run_after_failure",
       "relation": "enforces"
     },
     {

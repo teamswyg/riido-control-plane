@@ -9,11 +9,11 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - workflow: `.github/workflows/evidence-graph.yml`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `27`
-- claim refs: `24`
-- change refs: `136`
-- verifier refs: `89`
-- evidence refs: `49`
+- chains: `28`
+- claim refs: `25`
+- change refs: `141`
+- verifier refs: `93`
+- evidence refs: `52`
 
 ## Evidence Chains
 
@@ -22,6 +22,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `harness_failure_promotion_loop` | `0` | `3` | `2` | `2` | `closed_loop_candidate` |
 | `harness_evidence_expiry_gate_loop` | `1` | `5` | `3` | `3` | `provider_acceptance_harness` |
 | `load_harness_closed_loop_promotion_loop` | `1` | `5` | `4` | `4` | `closed_loop_candidate` |
+| `harness_failure_always_promotion_loop` | `1` | `5` | `4` | `3` | `closed_loop_candidate` |
 | `closed_loop_candidate_adoption_plan_loop` | `1` | `6` | `3` | `3` | `closed_loop_candidate_decision` |
 | `claim_binding_impact_loop` | `1` | `5` | `3` | `1` | `ai_thread_history` |
 | `claim_surface_evidence_loop` | `1` | `3` | `3` | `2` | `closed_loop_candidate` |
