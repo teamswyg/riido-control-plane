@@ -24,6 +24,7 @@ func verifyClaimImpact(
 	changed map[string]bool,
 ) (*impactEvidence, error) {
 	baseByID := claimsByID(baseClaims)
+	currentByID := claimsByID(currentClaims)
 	evidence := &impactEvidence{Enabled: true, BaseRef: baseRef, ChangedFileCount: len(changed)}
 	for _, claim := range currentClaims {
 		base, ok := baseByID[claim.ID]
@@ -42,7 +43,18 @@ func verifyClaimImpact(
 			evidence.BoundSurfaces = append(evidence.BoundSurfaces, record)
 		}
 	}
+	for _, claim := range baseClaims {
+		if _, ok := currentByID[claim.ID]; ok {
+			continue
+		}
+		record, err := verifyRemovedClaimImpact(claim, changed)
+		if err != nil {
+			return nil, err
+		}
+		evidence.RemovedClaims = append(evidence.RemovedClaims, record)
+	}
 	evidence.ChangedClaimCount = len(evidence.Claims)
+	evidence.RemovedClaimCount = len(evidence.RemovedClaims)
 	evidence.BoundSurfaceChangeCount = len(evidence.BoundSurfaces)
 	return evidence, nil
 }
