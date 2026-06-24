@@ -18,6 +18,7 @@ func gitChangedFiles(root, baseRef string) (map[string]bool, error) {
 		{"diff", "--name-only", baseRef + "...HEAD", "--"},
 		{"diff", "--name-only", "--cached", "--"},
 		{"diff", "--name-only", "--"},
+		{"ls-files", "--others", "--exclude-standard"},
 	} {
 		out, err := gitOutput(root, args...)
 		if err != nil {

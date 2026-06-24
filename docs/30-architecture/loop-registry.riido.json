@@ -413,7 +413,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "dbef2113870d81962573022282e2eb562cc1d9f01680ce1aaf694df779de55e6"
+      "semantic_hash": "3b04c5b7ccd952883ab2d30b2eb0df6dbef8e44c6e231e2220eaa2dc911fe383"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -526,6 +526,32 @@
       "semantic_hash": "47e288cd3ad5c6e03e197a2638b2a53b56ce609ee34c43044e37c6fbe41abfc8"
     },
     {
+      "id": "claim_meaning_changes_require_code_or_test_surface",
+      "statement": "When a business claim meaning changes in a pull request, the impact verifier must require at least one bound code or test path to change; manifest-only or generated-doc-only edits are not sufficient proof that runtime meaning was updated.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        ".github/workflows/loop-registry.yml",
+        "tools/loopregistry/git.go",
+        "tools/loopregistry/git_changed_files_test.go",
+        "tools/loopregistry/impact.go",
+        "tools/loopregistry/impact_manifest_test.go",
+        "tools/loopregistry/impact_more.go",
+        "tools/loopregistry/impact_required_files.go",
+        "tools/loopregistry/impact_test.go",
+        "tools/loopregistry/impact_types.go"
+      ],
+      "verifiers": [
+        "TestClaimImpactRequiresBoundFileChange",
+        "TestClaimImpactAllowsBoundFileChange",
+        "TestClaimImpactRejectsManifestOnlyChangeForMeaningChange"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "21d237e889d5affb821493cc40ba8d8d97aa582cefb728375442cbda1f0b0397"
+    },
+    {
       "id": "claim_bound_paths_must_trigger_loop_registry",
       "statement": "Every claim-bound code, test, fixture, manifest, and generated reader path must be covered by the loop-registry workflow trigger paths so PR impact verification runs when any bound surface changes.",
       "loop": "closed_loop_candidate",
@@ -569,7 +595,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "07ba3406f336ce633149f4ae10917597019746cb42b58b88c36f78782fc9e6d6"
+      "semantic_hash": "def94d47cdb3e69e35535459e692911529db8ddd7ad445168fecda93335c1012"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -593,7 +619,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1924a289acbc5bda61931ee07f2916cc4a99b59e71ff7c71938bf87d69fe30c5"
+      "semantic_hash": "52e8f30728cdc60ba4fcaf0407986e4e8aa7ae8ce49ba081c64418b1a8d6f373"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
