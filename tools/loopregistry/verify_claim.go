@@ -2,12 +2,14 @@ package main
 
 import "fmt"
 
-func verifyClaims(root string, m manifest, loopIDs map[string]bool, hashes map[string]string) error {
+func verifyClaims(
+	root string,
+	m manifest,
+	loopIDs map[string]bool,
+	hashes map[string]string,
+	tests map[string][]string,
+) error {
 	ids := map[string]bool{}
-	tests, err := testSymbols(root)
-	if err != nil {
-		return err
-	}
 	for _, claim := range m.Claims {
 		if ids[claim.ID] || claim.ID == "" {
 			return fmt.Errorf("claim id must be unique and non-empty: %q", claim.ID)
@@ -23,7 +25,7 @@ func verifyClaims(root string, m manifest, loopIDs map[string]bool, hashes map[s
 func verifyClaim(
 	root string,
 	loopIDs map[string]bool,
-	tests map[string]bool,
+	tests map[string][]string,
 	hashes map[string]string,
 	claim claimBinding,
 ) error {
@@ -42,7 +44,7 @@ func verifyClaim(
 		}
 	}
 	for _, name := range claim.Verifiers {
-		if !tests[name] {
+		if len(tests[name]) == 0 {
 			return fmt.Errorf("claim %s verifier %s is missing", claim.ID, name)
 		}
 	}

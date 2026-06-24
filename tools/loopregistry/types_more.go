@@ -39,10 +39,11 @@ type verifyResult struct {
 }
 
 type claimSurface struct {
-	ID            string   `json:"id"`
-	CodePaths     []string `json:"code_paths"`
-	TestPaths     []string `json:"test_paths"`
-	ManifestPaths []string `json:"manifest_paths"`
-	GeneratedDocs []string `json:"generated_docs"`
-	Verifiers     []string `json:"verifiers"`
+	ID               string   `json:"id"`
+	CodePaths        []string `json:"code_paths"`
+	TestPaths        []string `json:"test_paths"`
+	ManifestPaths    []string `json:"manifest_paths"`
+	GeneratedDocs    []string `json:"generated_docs"`
+	Verifiers        []string `json:"verifiers"`
+	VerifierCommands []string `json:"verifier_commands"`
 }

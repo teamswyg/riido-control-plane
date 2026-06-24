@@ -2,22 +2,23 @@ package main
 
 import "strings"
 
-func claimSurfaces(claims []claimBinding) []claimSurface {
+func claimSurfaces(claims []claimBinding, tests map[string][]string) []claimSurface {
 	out := make([]claimSurface, 0, len(claims))
 	for _, claim := range claims {
-		out = append(out, claimSurfaceFor(claim))
+		out = append(out, claimSurfaceFor(claim, tests))
 	}
 	return out
 }
 
-func claimSurfaceFor(claim claimBinding) claimSurface {
+func claimSurfaceFor(claim claimBinding, tests map[string][]string) claimSurface {
 	surface := claimSurface{
-		ID:            claim.ID,
-		CodePaths:     []string{},
-		TestPaths:     []string{},
-		ManifestPaths: []string{},
-		GeneratedDocs: sortedCopy(claim.GeneratedDoc),
-		Verifiers:     sortedCopy(claim.Verifiers),
+		ID:               claim.ID,
+		CodePaths:        []string{},
+		TestPaths:        []string{},
+		ManifestPaths:    []string{},
+		GeneratedDocs:    sortedCopy(claim.GeneratedDoc),
+		Verifiers:        sortedCopy(claim.Verifiers),
+		VerifierCommands: []string{},
 	}
 	for _, path := range sortedCopy(claim.Files) {
 		switch {
@@ -29,6 +30,7 @@ func claimSurfaceFor(claim claimBinding) claimSurface {
 			surface.CodePaths = append(surface.CodePaths, path)
 		}
 	}
+	surface.VerifierCommands = verifierCommandsForClaim(claim, surface.TestPaths, tests)
 	return surface
 }
 
