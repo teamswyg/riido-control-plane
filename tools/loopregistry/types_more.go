@@ -39,14 +39,22 @@ type verifyResult struct {
 }
 
 type refreshPlan struct {
-	LoopID               string   `json:"loop_id"`
-	Kind                 string   `json:"kind"`
-	RefreshWorkflow      string   `json:"refresh_workflow"`
-	WorkflowFile         string   `json:"workflow_file"`
-	CadenceMinutes       int      `json:"cadence_minutes"`
-	ExpiresAfterHours    int      `json:"expires_after_hours"`
-	ManualRefreshCommand string   `json:"manual_refresh_command"`
-	EvidenceArtifacts    []string `json:"evidence_artifacts"`
+	LoopID               string                    `json:"loop_id"`
+	Kind                 string                    `json:"kind"`
+	RefreshWorkflow      string                    `json:"refresh_workflow"`
+	WorkflowFile         string                    `json:"workflow_file"`
+	CadenceMinutes       int                       `json:"cadence_minutes"`
+	ExpiresAfterHours    int                       `json:"expires_after_hours"`
+	ManualRefreshCommand string                    `json:"manual_refresh_command"`
+	EvidenceArtifacts    []string                  `json:"evidence_artifacts"`
+	EvidenceRefreshes    []evidenceArtifactRefresh `json:"evidence_refreshes"`
+}
+
+type evidenceArtifactRefresh struct {
+	Artifact             string `json:"artifact"`
+	RefreshWorkflow      string `json:"refresh_workflow"`
+	WorkflowFile         string `json:"workflow_file"`
+	ManualRefreshCommand string `json:"manual_refresh_command"`
 }
 
 type claimSurface struct {

@@ -30,9 +30,10 @@ type loopRecord struct {
 }
 
 type evidenceSource struct {
-	Kind     string `json:"kind"`
-	Path     string `json:"path"`
-	Redacted bool   `json:"redacted,omitempty"`
+	Kind            string `json:"kind"`
+	Path            string `json:"path"`
+	Redacted        bool   `json:"redacted,omitempty"`
+	RefreshWorkflow string `json:"refresh_workflow,omitempty"`
 }
 
 type harnessWorkflowExclusion struct {

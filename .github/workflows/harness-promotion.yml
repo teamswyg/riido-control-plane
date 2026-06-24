@@ -2,6 +2,8 @@ name: harness-promotion
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "41 20 * * *"
   push:
     branches: [main]
     paths:
@@ -27,6 +29,8 @@ on:
 jobs:
   harness-promotion:
     runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: closed_loop_candidate
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
