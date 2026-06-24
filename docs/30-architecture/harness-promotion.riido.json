@@ -26,6 +26,25 @@
         "decision_record",
         "evidence_graph_edge"
       ]
+    },
+    {
+      "id": "ai-agent-client-testnet-load",
+      "harness_loop": "ai_agent_load_harness",
+      "source_workflow": ".github/workflows/ai-agent-client-testnet-load.yml",
+      "summary_artifact": "ai-agent-client-testnet-load-redacted-summary",
+      "summary_path": "out/ai-agent-client-testnet-load-redacted-summary.json",
+      "candidate_artifact": "ai-agent-client-testnet-load-closed-loop-candidates",
+      "candidate_path": "out/ai-agent-client-testnet-load-closed-loop-candidates.json",
+      "promotion_target": "closed_loop_candidate",
+      "failure_statuses": ["failure", "cancelled", "timed_out", "unknown"],
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
     }
   ],
   "assertions": [

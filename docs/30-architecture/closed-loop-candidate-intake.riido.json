@@ -22,6 +22,22 @@
         "decision_record",
         "evidence_graph_edge"
       ]
+    },
+    {
+      "id": "ai-agent-client-testnet-load",
+      "candidate_artifact": "ai-agent-client-testnet-load-closed-loop-candidates",
+      "producer_manifest": "docs/30-architecture/harness-promotion.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
     }
   ],
   "assertions": [

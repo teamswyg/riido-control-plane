@@ -15,6 +15,8 @@ on:
         description: "Concurrent workers"
         required: true
         default: "64"
+  schedule:
+    - cron: "37 19 * * *"
 
 concurrency:
   group: ai-agent-client-testnet-load
@@ -28,6 +30,9 @@ jobs:
       TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
       TESTNET_TOKEN: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN }}
       TESTNET_WORKSPACE_ID: ${{ vars.RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID }}
+      LOAD_SCENARIO: ${{ github.event_name == 'workflow_dispatch' && inputs.scenario || 'client-read' }}
+      LOAD_DURATION: ${{ github.event_name == 'workflow_dispatch' && inputs.duration || '60s' }}
+      LOAD_CONCURRENCY: ${{ github.event_name == 'workflow_dispatch' && inputs.concurrency || '64' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -41,7 +46,7 @@ jobs:
           test -n "$TESTNET_BASE_URL"
           echo "::add-mask::$TESTNET_BASE_URL"
           echo "::add-mask::$TESTNET_TOKEN"
-          if [ "${{ inputs.scenario }}" = "client-read" ]; then
+          if [ "$LOAD_SCENARIO" = "client-read" ]; then
             test -n "$TESTNET_TOKEN"
           fi
 
@@ -54,14 +59,47 @@ jobs:
             -base-url "${TESTNET_BASE_URL%/}" \
             -token "$TESTNET_TOKEN" \
             -workspace-id "$workspace_id" \
-            -scenario "${{ inputs.scenario }}" \
-            -duration "${{ inputs.duration }}" \
-            -concurrency "${{ inputs.concurrency }}" \
+            -scenario "$LOAD_SCENARIO" \
+            -duration "$LOAD_DURATION" \
+            -concurrency "$LOAD_CONCURRENCY" \
             -evidence-out out/ai-agent-client-testnet-load.json
+
+      - name: Publish redacted load summary evidence
+        if: always()
+        env:
+          RIIDO_LIVE_CHECK_STATUS: ${{ job.status }}
+        run: |
+          mkdir -p out
+          go run ./tools/liveworkflowevidence \
+            -workflow ai-agent-client-testnet-load \
+            -live-status "$RIIDO_LIVE_CHECK_STATUS" \
+            -evidence-out out/ai-agent-client-testnet-load-redacted-summary.json
+
+      - name: Promote load harness failures to closed-loop candidates
+        if: always()
+        run: |
+          mkdir -p out
+          go run ./tools/harnesspromotion \
+            -summary out/ai-agent-client-testnet-load-redacted-summary.json \
+            -candidate-out out/ai-agent-client-testnet-load-closed-loop-candidates.json
 
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ai-agent-client-testnet-load
           path: out/ai-agent-client-testnet-load.json
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ai-agent-client-testnet-load-redacted-summary
+          path: out/ai-agent-client-testnet-load-redacted-summary.json
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ai-agent-client-testnet-load-closed-loop-candidates
+          path: out/ai-agent-client-testnet-load-closed-loop-candidates.json
           if-no-files-found: error

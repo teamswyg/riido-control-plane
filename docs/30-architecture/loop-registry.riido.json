@@ -91,6 +91,50 @@
       ]
     },
     {
+      "id": "ai_agent_load_harness",
+      "kind": "harness",
+      "observes": [
+        "client_read_load_evidence",
+        "public_health_pressure",
+        "http_latency_distribution",
+        "load_error_distribution"
+      ],
+      "verifies": [
+        "load_success_rate",
+        "latency_envelope",
+        "redacted_summary",
+        "candidate_promotion"
+      ],
+      "evidence": [
+        {
+          "kind": "workflow_artifact",
+          "path": "ai-agent-client-testnet-load",
+          "redacted": true
+        },
+        {
+          "kind": "workflow_artifact",
+          "path": "ai-agent-client-testnet-load-redacted-summary",
+          "redacted": true
+        },
+        {
+          "kind": "workflow_artifact",
+          "path": "ai-agent-client-testnet-load-closed-loop-candidates",
+          "redacted": true
+        }
+      ],
+      "refresh_workflow": ".github/workflows/ai-agent-client-testnet-load.yml",
+      "expires_after_hours": 24,
+      "fails_when": [
+        "load_failure",
+        "evidence_expired",
+        "performance_regression",
+        "raw_secret_leak"
+      ],
+      "promotes_to": [
+        "closed_loop_candidate"
+      ]
+    },
+    {
       "id": "closed_loop_candidate",
       "kind": "closed_loop",
       "observes": [
@@ -343,7 +387,33 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "40c80ece1ed944d5c3a19fea4d3b97bfe97f1cac0ec7861c292b75c445d5c634"
+      "semantic_hash": "6e7f25486f11cb2eb14d476e2c64f0cbfe1f62d84f9b808274a7364d23079c95"
+    },
+    {
+      "id": "load_harness_failures_must_promote_candidates",
+      "statement": "The AI Agent load and stress harness must run on a schedule, publish redacted live summary evidence, and promote failed runs into closed-loop candidate artifacts without exposing raw endpoint, token, or response data.",
+      "loop": "ai_agent_load_harness",
+      "files": [
+        ".github/workflows/ai-agent-client-testnet-load.yml",
+        "docs/30-architecture/live-workflow-redaction.riido.json",
+        "docs/30-architecture/harness-promotion.riido.json",
+        "docs/30-architecture/evidence-graph.riido.json",
+        "tools/liveworkflowevidence/verify_workflow.go",
+        "tools/liveworkflowevidence/main_load_test.go",
+        "tools/harnesspromotion/verify_more.go",
+        "tools/harnesspromotion/main_test.go"
+      ],
+      "verifiers": [
+        "TestLoadLiveSummaryCarriesSafeClaims",
+        "TestHarnessPromotionManifestVerifies",
+        "TestLoopRegistryManifestVerifies"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/live-workflow-redaction.md",
+        "docs/30-architecture/harness-promotion.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "758f844270af92c736afeb73e8aea933fd7a657f168781f0868a9560ccbd1251"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -475,7 +545,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "11198d172b2350146a63a5bb35ea3eefb700fd062cad5367db5d370f0f623bfe"
+      "semantic_hash": "e59a826e8bdeef95625c26a4f3ddf0849a907e05c7bb3601015d6d493cd4d8ba"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -499,7 +569,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d703818a0f2ca616e3c7c6e64d6736a9fd9a114e5308383f762ffdc603b9a09e"
+      "semantic_hash": "655bdf7f0a2ecfc10506964b7efec49bc4e67ceae713968044282cb44b52c7e8"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -523,7 +593,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5fd7d12b2701653ce62624d5da1ce832f127578af602ed2b61ee8d9f86b8246b"
+      "semantic_hash": "e18022655d9aa9379fb1261c9848260784f573dad9f01650f7ad198954c49be4"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -548,7 +618,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "56b77c1280f6b8773a08aa16d3a3c4e4d9c5fadcdbc0151d20318c637bb88621"
+      "semantic_hash": "8af17d7b91c5268e3d2a80f3a1a6d8c1b2fafaa57ea1938a125f4227a4527a5d"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -573,7 +643,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ecfd5e2a0c5fdd80bc29b66890b963d5ce8b34251877358921e7237df63d62a9"
+      "semantic_hash": "a6ba8577a6431768139a3eb5d24884c92ffab7ab3c4612386ad458c25dd7cb28"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",

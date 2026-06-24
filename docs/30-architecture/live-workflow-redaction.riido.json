@@ -48,6 +48,27 @@
       ]
     },
     {
+      "id": "ai-agent-client-testnet-load",
+      "path": ".github/workflows/ai-agent-client-testnet-load.yml",
+      "summary_artifact": "ai-agent-client-testnet-load-redacted-summary",
+      "summary_path": "out/ai-agent-client-testnet-load-redacted-summary.json",
+      "evidence_ttl_hours": 24,
+      "sensitive_inputs": ["TESTNET_BASE_URL", "TESTNET_TOKEN"],
+      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "generated_at", "expires_at", "live_status", "evidence_claims", "redaction"],
+      "evidence_claims": [
+        {
+          "id": "load_harness_client_read_pressure",
+          "summary": "testnet load harness exercises authenticated client-read endpoints with scheduled scenario, duration, and concurrency controls.",
+          "source_phrases": ["go run ./tools/aiagentload", "-scenario \"$LOAD_SCENARIO\"", "-duration \"$LOAD_DURATION\"", "-concurrency \"$LOAD_CONCURRENCY\""]
+        },
+        {
+          "id": "load_harness_closed_loop_promotion",
+          "summary": "testnet load harness publishes redacted live summary evidence and promotes failed runs into closed-loop candidates.",
+          "source_phrases": ["ai-agent-client-testnet-load-redacted-summary", "ai-agent-client-testnet-load-closed-loop-candidates", "go run ./tools/harnesspromotion"]
+        }
+      ]
+    },
+    {
       "id": "deploy-ai-agent-testnet",
       "path": ".github/workflows/deploy-ai-agent-testnet.yml",
       "summary_artifact": "deploy-ai-agent-testnet-redacted-summary",

@@ -6,14 +6,15 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 
 ## Summary
 
-- sources: `1`
-- required refs: `6`
+- sources: `2`
+- required refs: `12`
 
 ## Sources
 
 | Source | Candidate Artifact | Target | Required Artifacts |
 | --- | --- | --- | ---: |
 | `ai-agent-client-testnet-smoke` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `closed_loop_candidate` | `6` |
+| `ai-agent-client-testnet-load` | `ai-agent-client-testnet-load-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 
 ## Evidence Loop
 
