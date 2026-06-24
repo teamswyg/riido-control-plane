@@ -427,7 +427,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "2d4b93e227ab2e289fffa61bc26cdfa9994736dcb1277dac83eda23d7203b84e"
+      "semantic_hash": "5e004f3651cc989d7f89f70f4c19c95bc657eda634dd2e4ebeecdc1c23d277b1"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -528,7 +528,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "d9cde880c45ac402d49586931b359466ea2fc4a1c09bfb3209e7365fef7af9c0"
+      "semantic_hash": "54f44ee2f2eb552dddd430ee8267b8f3d066afb789a8ba2b2d9498c8836968d4"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -583,7 +583,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "45d3bd0eecf70c737fb9f9d1a98ef2a713691b0f44444ebee13e99b78bf47b95"
+      "semantic_hash": "12aaa7c390d95f295b6bf6a35ac40ee9d9c79bced4229b0ff547cdad8e228832"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -668,7 +668,7 @@
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
-      "statement": "Loop registry evidence must expose each business claim's executable surface across code, tests, manifests, generated docs, verifier names, target verifier commands, and evidence graph chain ids so agents can infer co-change, QA, and reasoning scope without reading narrative docs.",
+      "statement": "Loop registry evidence must expose each business claim's executable surface across code, tests, manifests, generated docs, verifier names, target verifier commands, and evidence graph chain ids, and each claim must bind at least one code or test path so agents can infer co-change, QA, and reasoning scope without reading narrative docs.",
       "loop": "closed_loop_candidate",
       "files": [
         "tools/loopregistry/package_path.go",
@@ -676,6 +676,7 @@
         "tools/loopregistry/claim_surface_command.go",
         "tools/loopregistry/claim_surface_command_pkg.go",
         "tools/loopregistry/claim_surface_command_test.go",
+        "tools/loopregistry/claim_surface_executable_path_test.go",
         "tools/loopregistry/claim_surface_verify.go",
         "tools/loopregistry/claim_surface_chain_test.go",
         "tools/loopregistry/claim_surface_test.go",
@@ -694,12 +695,13 @@
         "TestClaimEvidenceChainCoverageRejectsMissingClaim",
         "TestClaimSurfaceEvidenceIncludesTargetVerifierCommands",
         "TestVerifierCommandsPreferClaimBoundGoPackages",
-        "TestClaimSurfaceRejectsNarrativeOnlyClaim"
+        "TestClaimSurfaceRejectsNarrativeOnlyClaim",
+        "TestClaimSurfaceRejectsManifestOnlyClaim"
       ],
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "9525f38fd817bb90b2164b038612e094b27f120189dcdcfdbcba26f44e95c43c"
+      "semantic_hash": "b85ef058d7629aa74e666610f58b275e445129283ed1c8b1377bc4e3bb44661f"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -842,7 +844,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "79a48869fd4df0a13445fd8b4aa1a37f015782390bd6797ee15033b877bf3ec3"
+      "semantic_hash": "8593f4014faeb1a03d037a2a3eaaec73bcd49263b92d92437e738b092b9f0ba0"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -866,7 +868,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "eb921463768168847b79eaffe1815ccc4210d4feb01181fbe96658b50f0b2efa"
+      "semantic_hash": "4bba15299fad351ac67a48c75149996b22a98811b12c5afd5403e2b7ed3a9c43"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -886,7 +888,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e97bc2e7cec5f5788eb6d0dde0b6c7e70548d16d5fa5801322e80bd145ff67a8"
+      "semantic_hash": "52de75c15397d6d5188939e61c115edd78266c7931104870080c8704aef3616d"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",

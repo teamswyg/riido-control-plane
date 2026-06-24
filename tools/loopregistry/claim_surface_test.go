@@ -23,7 +23,7 @@ func TestClaimSurfaceEvidenceIncludesCodeTestDocBindings(t *testing.T) {
 		t.Fatalf("claim surfaces = %d, want %d", len(result.ClaimSurfaces), len(m.Claims))
 	}
 	for _, surface := range result.ClaimSurfaces {
-		if len(surface.CodePaths)+len(surface.ManifestPaths) == 0 ||
+		if len(surface.CodePaths)+len(surface.TestPaths) == 0 ||
 			len(surface.TestPaths)+len(surface.Verifiers) == 0 ||
 			len(surface.GeneratedDocs) == 0 ||
 			len(surface.VerifierCommands) == 0 ||
