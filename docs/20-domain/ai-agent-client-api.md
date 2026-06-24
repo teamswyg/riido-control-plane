@@ -132,6 +132,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | `concrete-followup-authoritative` | When the user replies in that thread with a concrete instruction, render the user message in the same conversation_id and let the follow-up run treat that latest message as the current directive while re-reading the latest task document. |
 | `draft-then-research-limit-in-same-conversation` | A marketing-copy task can first ask what to do, then complete a copywriting draft from the user's concrete follow-up, then accept another follow-up for research in the same conversation_id. If provider quota is exhausted during that research run, only the latest run fails with the normalized cloud-credit message; the prior draft result remains visible. |
 | `provider-limit-result` | When provider token, quota, or cloud-credit exhaustion stops the run, keep the same conversation and render the normalized result message: 보유하신 크레딧이 부족합니다. 더 깊은 리서치를 진행하려면 추가 Cloud AI 자원이 필요합니다. |
+| `handoff-after-provider-limit` | When the user assigns another agent after a provider-limit result, the new agent must create a separate conversation_id while the limited research conversation and prior draft remain visible in v3 history. |
 
 ### Thread History v3 Message Ordering
 

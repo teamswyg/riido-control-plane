@@ -722,7 +722,7 @@
     {
       "id": "ambiguous_task_context_thread_interaction_loop",
       "observation": "Marketing, analysis, and intent-oriented task documents can be misread as executable instructions, while token or cloud-credit exhaustion can leak provider wording into the AI Agent thread.",
-      "hypothesis": "A prompt interaction policy plus visible-message normalization can keep the existing thread conversational: ambiguous task context asks for intent first, concrete follow-up instructions become authoritative, and provider limits render as a stable user-facing result without changing API shape.",
+      "hypothesis": "A prompt interaction policy plus visible-message normalization can keep the existing thread conversational: ambiguous task context asks for intent first, concrete follow-up instructions become authoritative, provider limits render as a stable user-facing result, and a later handoff to another agent creates a separate conversation without changing API shape.",
       "claims": ["ambiguous_task_context_must_ask_before_work"],
       "changes": [
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go"},
@@ -746,6 +746,7 @@
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"}
       ],
       "verifiers": [
@@ -753,6 +754,7 @@
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
@@ -760,7 +762,7 @@
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Ambiguous task intent handling and provider-limit copy are enforced as an AI thread history claim while preserving existing endpoint input and output fields.",
+      "decision": "Ambiguous task intent handling, provider-limit copy, and post-limit agent handoff are enforced as an AI thread history claim while preserving existing endpoint input and output fields.",
       "next_loop": "ai_thread_history"
     },
     {
