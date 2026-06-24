@@ -13,17 +13,27 @@ func gitOutput(root string, args ...string) ([]byte, error) {
 }
 
 func gitChangedFiles(root, baseRef string) (map[string]bool, error) {
-	out, err := gitOutput(root, "diff", "--name-only", baseRef+"...HEAD", "--")
-	if err != nil {
-		return nil, err
-	}
 	files := map[string]bool{}
+	for _, args := range [][]string{
+		{"diff", "--name-only", baseRef + "...HEAD", "--"},
+		{"diff", "--name-only", "--cached", "--"},
+		{"diff", "--name-only", "--"},
+	} {
+		out, err := gitOutput(root, args...)
+		if err != nil {
+			return nil, err
+		}
+		addChangedFiles(files, out)
+	}
+	return files, nil
+}
+
+func addChangedFiles(files map[string]bool, out []byte) {
 	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
 		if line != "" {
 			files[line] = true
 		}
 	}
-	return files, nil
 }
 
 func gitManifest(root, baseRef, manifestPath string) (manifest, error) {

@@ -1,0 +1,47 @@
+{
+  "schema_version": "riido-control-plane-pre-commit-baseline.v1",
+  "id": "pre-commit-baseline",
+  "title": "Pre-Commit Baseline",
+  "generated_doc": "docs/30-architecture/pre-commit-baseline.md",
+  "workflow": ".github/workflows/pre-commit-baseline.yml",
+  "evidence_artifact": "pre-commit-baseline-evidence",
+  "evidence_tool": "tools/precommitbaseline",
+  "pre_commit_config": ".pre-commit-config.yaml",
+  "hooks": [
+    {"id": "go-fmt", "summary": "format Go sources before commit", "contains": ["id: go-fmt"]},
+    {"id": "go-vet", "summary": "run repository Go vet before commit", "contains": ["id: go-vet-repo-mod"]},
+    {"id": "go-imports", "summary": "normalize Go imports before commit", "contains": ["id: go-imports"]},
+    {"id": "golangci-lint", "summary": "run pinned repository golangci-lint before commit", "contains": ["id: golangci-lint-repo-mod"]},
+    {"id": "go-test", "summary": "run repository Go tests before commit", "contains": ["id: go-test-repo-mod"]},
+    {
+      "id": "loop-registry-claim-binding",
+      "summary": "block claim binding drift before commit",
+      "contains": [
+        "repo: local",
+        "id: loop-registry-claim-binding",
+        "entry: tools/loopregistry/precommit.sh",
+        "pass_filenames: false"
+      ]
+    }
+  ],
+  "scripts": [
+    {
+      "path": "tools/loopregistry/precommit.sh",
+      "summary": "runs loopregistry claim/doc/impact verification against the configured base ref",
+      "contains": [
+        "RIIDO_LOOP_REGISTRY_IMPACT_BASE",
+        "go run ./tools/loopregistry",
+        "-check-doc",
+        "-impact-base",
+        "-evidence-out"
+      ]
+    }
+  ],
+  "loop": {
+    "observation": "CI caught claim binding drift, but local commits could still rely on a developer remembering to run the loop registry verifier before opening a PR.",
+    "hypothesis": "A pre-commit baseline manifest can make local formatting, tests, lint, and claim binding impact checks executable before the PR loop starts.",
+    "execute": "Verify the pre-commit config and loopregistry hook script from this manifest, generate this reader, and publish pre-commit-baseline evidence in CI.",
+    "evaluate": "The verifier fails when required hooks disappear, the loopregistry hook stops using impact verification, the generated reader drifts, or strict evidence upload is removed.",
+    "retrospective": "This moves another human reminder into the loop: AI agents can skip the prose, but commits cannot skip the local claim binding verifier."
+  }
+}
