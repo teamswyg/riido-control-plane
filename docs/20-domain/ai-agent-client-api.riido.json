@@ -32,6 +32,29 @@
       "purpose": "Task scoped live progress subscription",
       "truth_role": "live update input"
     },
+    "implementation_steps": [
+      {"name":"initial-load-v3","detail":"When the task screen opens or refreshes, call GET /v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads and use it as the canonical read model."},
+      {"name":"group-by-conversation-id","detail":"Render one Agent comment card per conversation_id. thread_id is the concrete run/thread record inside that card, not the card grouping key."},
+      {"name":"optimistic-v2-mutation","detail":"For assign, message, stop, and delete, use the existing v2 mutation endpoint and apply an optimistic UI update immediately from the mutation response."},
+      {"name":"refetch-v3-after-mutation","detail":"After each v2 mutation settles, refetch v3 thread history to recover persisted user messages, agent replies, progress rows, and historical snapshots."}
+    ],
+    "response_shapes": [
+      {
+        "name":"AIAgentTaskThreadHistoryCollectionResponse",
+        "purpose":"Top-level response for one task screen. The frontend should treat threads as timeline records and resolve display metadata through agent_snapshots.",
+        "fields":["schema_version","task_id","threads[]","agent_snapshots?","active_stream?"]
+      },
+      {
+        "name":"AIAgentTaskThreadHistoryRecord",
+        "purpose":"One persisted AI thread/run record in the task timeline. Multiple records may share conversation_id when they belong to the same visible Agent comment card.",
+        "fields":["thread_id","conversation_id","parent_thread_id","task_id","assignment_id","agent_id","agent_snapshot_id","run_id","work_status","assignment_state","started_at","completed_at","messages[]"]
+      },
+      {
+        "name":"AIAgentTaskThreadHistoryMessage",
+        "purpose":"One stable timeline row inside a thread history record. message_id is the React row key; body can contain sanitized HTML from a user reply.",
+        "fields":["message_id","role","comment_kind","assignment_id","run_id","source_message_id","seq","body","result_message","observed_at"]
+      }
+    ],
     "action_endpoints": [
       {
         "name": "assign-agent-v2",
@@ -96,6 +119,18 @@
       {"role":"progress","meaning":"Runtime progress log, ordered by seq inside assignment_id and run_id"},
       {"role":"agent","meaning":"Agent status or final result message"}
     ],
+    "ordering_rules": [
+      {"name":"conversation-card-ordering","detail":"First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root."},
+      {"name":"message-row-ordering","detail":"Within one thread record, render messages by observed_at and then seq. Use message_id as the stable row key, not body text."},
+      {"name":"progress-dedupe-ordering","detail":"For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility."},
+      {"name":"late-terminal-guard","detail":"If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running."}
+    ],
+    "mutation_rules": [
+      {"name":"assign-agent","detail":"POST the v2 agent-assignments endpoint with agent_id. Same provider or same agent_id can still produce a distinct conversation when the user performs a new participant-dropdown assignment."},
+      {"name":"send-thread-message","detail":"POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run."},
+      {"name":"stop-agent","detail":"POST the task-scoped v2 stop endpoint, preferably including assignment_id. The UI should close the work immediately from control-plane truth; daemon acknowledgement is eventual."},
+      {"name":"delete-agent","detail":"DELETE the task-scoped v2 assignment endpoint. Historical v3 thread history must stay visible even when the current agent profile is removed."}
+    ],
     "sse_handling_rules": [
       "Open one task-level SSE stream from the v2 thread-stream-subscription response.",
       "Filter payloads by task_id, agent_id, thread_id, and run_id.",
@@ -129,6 +164,9 @@
     {"name":"thread-history-v3-projection","file":"internal/riidoaiserver/ai_agent_client_thread_history_projection.go","contains":["taskThreadConversationID","taskThreadParentThreadID","taskThreadHistoryMessagesLocked","AgentSnapshots"]},
     {"name":"thread-history-v3-conversation-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go","contains":["assertConversationFollowup","ConversationID","ParentThreadID","assertConversationReassignment"]},
     {"name":"thread-history-v3-http","file":"internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go","contains":["/v3/client/workspaces/","conversation_id missing"]},
+    {"name":"thread-history-v3-handoff-types","file":"tools/aiagentclientapi/types_thread_history_v3.go","contains":["ImplementationSteps","ResponseShapes","OrderingRules","MutationRules"]},
+    {"name":"thread-history-v3-handoff-renderer","file":"tools/aiagentclientapi/render_thread_history_v3.go","contains":["Thread History v3 Frontend Flow","Thread History v3 Response Model","Thread History v3 Message Ordering"]},
+    {"name":"thread-history-v3-handoff-verifier-rules","file":"tools/aiagentclientapi/verify_thread_history_v3_rules.go","contains":["requireNamedRules","requireShape","hasString"]},
     {"name":"thread-history-v2-actions","file":"internal/riidoaiserver/server.go","contains":["agent-assignments","thread-stream-subscription","threads/","/messages"]},
     {"name":"runtime-env","file":"cmd/riido_ai_server/env_names.go","contains":["envAIAgentClientDev","RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"]},
     {"name":"workflow","file":".github/workflows/ai-agent-client-api.yml","contains":["Verify React Query generation drift","Verify generated client handoff","Verify React Query generator command"]}

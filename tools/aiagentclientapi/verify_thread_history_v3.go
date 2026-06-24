@@ -12,10 +12,25 @@ func verifyThreadHistoryV3(v3 threadHistoryV3) error {
 	if len(v3.ActionEndpoints) < 4 {
 		return fmt.Errorf("thread history v3 action endpoints are incomplete")
 	}
+	if err := requireNamedRules("thread history v3 implementation step", v3.ImplementationSteps, []string{"initial-load-v3", "group-by-conversation-id", "optimistic-v2-mutation", "refetch-v3-after-mutation"}); err != nil {
+		return err
+	}
+	if err := requireShape(v3.ResponseShapes, "AIAgentTaskThreadHistoryRecord", []string{"conversation_id", "parent_thread_id", "messages[]"}); err != nil {
+		return err
+	}
+	if err := requireShape(v3.ResponseShapes, "AIAgentTaskThreadHistoryMessage", []string{"message_id", "role", "body", "result_message"}); err != nil {
+		return err
+	}
 	if err := requireIdentity(v3.IdentityRules, "conversation_id"); err != nil {
 		return err
 	}
 	if err := requireIdentity(v3.IdentityRules, "thread_id"); err != nil {
+		return err
+	}
+	if err := requireNamedRules("thread history v3 ordering rule", v3.OrderingRules, []string{"conversation-card-ordering", "message-row-ordering", "late-terminal-guard"}); err != nil {
+		return err
+	}
+	if err := requireNamedRules("thread history v3 mutation rule", v3.MutationRules, []string{"assign-agent", "send-thread-message", "stop-agent", "delete-agent"}); err != nil {
 		return err
 	}
 	if err := requireStrings("thread history v3 terminal state", v3.TerminalStates, []string{"completed", "failed", "stopped", "cancelled", "timeout"}); err != nil {

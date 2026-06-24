@@ -26,10 +26,24 @@ func newEvidence(m manifest) evidence {
 		RuntimeConfigs:       len(m.RuntimeConfigKeys),
 		PublicFields:         len(m.PublicFields),
 		DeploymentEvidence:   len(m.DeploymentEvidence),
-		ThreadHistoryV3Rules: len(m.ThreadHistoryV3.Checklist),
+		ThreadHistoryV3Rules: threadHistoryV3RuleCount(m.ThreadHistoryV3),
 		SourceChecks:         len(m.SourceChecks),
 		SmokeMatrixParity:    true,
 		GeneratedPathCovered: true,
 		Loop:                 m.Loop,
 	}
+}
+
+func threadHistoryV3RuleCount(v3 threadHistoryV3) int {
+	return len(v3.ImplementationSteps) +
+		len(v3.ResponseShapes) +
+		len(v3.IdentityRules) +
+		len(v3.GroupingRules) +
+		len(v3.AgentSnapshotRules) +
+		len(v3.MessageRoles) +
+		len(v3.OrderingRules) +
+		len(v3.MutationRules) +
+		len(v3.SSEHandlingRules) +
+		len(v3.TerminalStates) +
+		len(v3.Checklist)
 }
