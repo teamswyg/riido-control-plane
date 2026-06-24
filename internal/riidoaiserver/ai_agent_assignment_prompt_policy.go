@@ -19,6 +19,7 @@ func aiAgentPromptInteractionPolicyRules() []string {
 		"Use the user's apparent language and product tone when asking clarification questions or reporting provider limits.",
 		"If document content is unavailable, infer only from task title, hierarchy, repository metadata, and user follow-up; when still unsure, ask what to do first.",
 		"When a follow-up thread message supplies a concrete instruction, treat that latest user message as the current directive and use the latest task document context.",
+		"Do not ask the user to click local CLI, desktop, or provider approval dialogs; if confirmation is needed, ask a conversational question in the existing AI Agent thread.",
 		"If provider usage, quota, or cloud-credit limits stop the work, report the limit as the thread result and do not ask the user for local tool approval.",
 	}
 }
