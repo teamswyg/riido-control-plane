@@ -388,7 +388,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "6e7f25486f11cb2eb14d476e2c64f0cbfe1f62d84f9b808274a7364d23079c95"
+      "semantic_hash": "d4b1b2c90548df2c7bec2881a5d65d2c5eda784e93b9f982062ce6c0b560a1f4"
     },
     {
       "id": "load_harness_failures_must_promote_candidates",
@@ -414,7 +414,42 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "2e1089aea98b87989c307ee8570215badd825f178248fca6e9168b8522386a86"
+      "semantic_hash": "df32cafc08877da4e41c8c7be69ff89b76efd5a7a03d08aa617398b957fa5314"
+    },
+    {
+      "id": "closed_loop_candidates_must_carry_adoption_plan",
+      "statement": "Closed-loop candidate artifacts must include an adoption_plan that maps every required_next_artifact to an executable command, and intake/decision verifiers must reject candidates whose adoption plan is missing or incomplete.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        "docs/30-architecture/harness-promotion.riido.json",
+        "docs/30-architecture/closed-loop-candidate-intake.riido.json",
+        "docs/30-architecture/closed-loop-candidate-decision.riido.json",
+        "tools/harnesspromotion/types_candidate.go",
+        "tools/harnesspromotion/adoption_plan.go",
+        "tools/harnesspromotion/candidate_more.go",
+        "tools/harnesspromotion/adoption_plan_test.go",
+        "tools/closedloopcandidateintake/types_more.go",
+        "tools/closedloopcandidateintake/adoption_plan.go",
+        "tools/closedloopcandidateintake/candidate_more.go",
+        "tools/closedloopcandidateintake/render.go",
+        "tools/closedloopcandidateintake/adoption_plan_test.go",
+        "tools/closedloopcandidatedecision/types_more.go",
+        "tools/closedloopcandidatedecision/adoption_plan.go",
+        "tools/closedloopcandidatedecision/candidate.go",
+        "tools/closedloopcandidatedecision/adoption_plan_test.go"
+      ],
+      "verifiers": [
+        "TestHarnessCandidateCarriesAdoptionPlan",
+        "TestCandidateIntakeRejectsMissingAdoptionPlan",
+        "TestCandidateDecisionRejectsMissingAdoptionPlan"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/harness-promotion.md",
+        "docs/30-architecture/closed-loop-candidate-intake.md",
+        "docs/30-architecture/closed-loop-candidate-decision.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "e09a43e9b549889bd17f0eba9a2cfab0a90f626e86550d068f3b03ffe00d0c69"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -639,7 +674,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2546c4d775b554e59e7c456e9a6fc5252ac55260b0258af2c251185a4e64c687"
+      "semantic_hash": "82a017323f2b92e0b06cf899610232066b9a489829d0c88097baaf7e5749bd53"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -663,7 +698,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0d291a5bacd5de1f9f69a036cf0ab0d831a1e2f0fe281b9ee94b2e9675a14637"
+      "semantic_hash": "15349e5b5acdec3801a34b80db00d1b9b7312c69a010c3a4d09277f13165cc59"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -713,7 +748,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "26203290d14be8452346fb338d325d4d036479672fc0547e9660eb045b5e9de9"
+      "semantic_hash": "71c720f35a7d7f55b4552269ff12137fede060532179ab24e3ccdb2328367cb4"
     },
     {
       "id": "expiring_loops_must_schedule_refresh",
@@ -787,7 +822,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e50a3a6405abc84e47e583d6d41c0b63772626e4492e765ef1ff2b2ddb552756"
+      "semantic_hash": "12ac4b46961827645414ca1edefbe77d6e9074e1eddaec230faad949d91ab2c6"
     },
     {
       "id": "candidate_decision_next_artifact_must_be_required",
@@ -812,7 +847,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1b340d39de2331e6d37b65faa4798fb5ef8a39d67f118bd4fc8e83ffbdd91332"
+      "semantic_hash": "ae56f1f2908f743b46dc32362c1833d4aa5888ba9adf93261f28f90d00d0f758"
     }
   ],
   "evidence_graph": [
@@ -864,6 +899,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "loop_verifiers_must_accept_verify_intent",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "closed_loop_candidates_must_carry_adoption_plan",
       "relation": "enforces"
     },
     {

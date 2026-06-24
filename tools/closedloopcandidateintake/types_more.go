@@ -19,12 +19,13 @@ type candidateEvidence struct {
 }
 
 type closedLoopCandidate struct {
-	ID                    string   `json:"id"`
-	HarnessLoop           string   `json:"harness_loop"`
-	PromotionTarget       string   `json:"promotion_target"`
-	Observation           string   `json:"observation"`
-	Hypothesis            string   `json:"hypothesis"`
-	RequiredNextArtifacts []string `json:"required_next_artifacts"`
+	ID                    string         `json:"id"`
+	HarnessLoop           string         `json:"harness_loop"`
+	PromotionTarget       string         `json:"promotion_target"`
+	Observation           string         `json:"observation"`
+	Hypothesis            string         `json:"hypothesis"`
+	RequiredNextArtifacts []string       `json:"required_next_artifacts"`
+	AdoptionPlan          []adoptionStep `json:"adoption_plan"`
 }
 
 type candidateRedaction struct {
@@ -32,4 +33,9 @@ type candidateRedaction struct {
 	NoRawSecrets     bool `json:"no_raw_secrets"`
 	NoRawEndpoints   bool `json:"no_raw_endpoints"`
 	NoRawAWSResource bool `json:"no_raw_aws_resource_ids"`
+}
+
+type adoptionStep struct {
+	Artifact string `json:"artifact"`
+	Command  string `json:"command"`
 }

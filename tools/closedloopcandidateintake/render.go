@@ -16,6 +16,7 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "\n- sources: `%d`\n", result.SourceCount)
 	fmt.Fprintf(&b, "- required refs: `%d`\n\n", result.RequiredRefs)
 	renderSources(&b, m.Sources)
+	renderAssertions(&b, m.Assertions)
 	renderLoop(&b, m.Loop)
 	return b.String()
 }
@@ -28,6 +29,15 @@ func renderSources(b *strings.Builder, sources []intakeSource) {
 	for _, source := range sources {
 		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%d` |\n",
 			source.ID, source.CandidateArtifact, source.PromotionTarget, len(source.RequiredNextArtifacts))
+	}
+	fmt.Fprintln(b)
+}
+
+func renderAssertions(b *strings.Builder, assertions []string) {
+	fmt.Fprintln(b, "## Assertions")
+	fmt.Fprintln(b)
+	for _, assertion := range assertions {
+		fmt.Fprintf(b, "- %s\n", assertion)
 	}
 	fmt.Fprintln(b)
 }

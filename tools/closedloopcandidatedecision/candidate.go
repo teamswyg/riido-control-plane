@@ -13,6 +13,9 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 	decisionByID := decisionsByID(m.Decisions)
 	result := verifyResult{CandidateCount: candidate.CandidateCount}
 	for _, item := range candidate.Candidates {
+		if err := verifyAdoptionPlan(item); err != nil {
+			return result, err
+		}
 		decision, ok := decisionByID[item.ID]
 		if !ok {
 			return result, fmt.Errorf("candidate %s has no decision record", item.ID)

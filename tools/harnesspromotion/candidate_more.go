@@ -10,6 +10,7 @@ func newCandidate(source promotionSource, claimID, summary string) closedLoopCan
 		Observation:           "Harness " + source.ID + " reported unverified claim " + claimID + ".",
 		Hypothesis:            summary,
 		RequiredNextArtifacts: append([]string(nil), source.RequiredNextArtifacts...),
+		AdoptionPlan:          adoptionPlan(source),
 	}
 }
 

@@ -16,7 +16,10 @@ func verifyCandidateItem(m manifest, item closedLoopCandidate) error {
 	if item.HarnessLoop == "" {
 		return fmt.Errorf("candidate %s must name harness loop", item.ID)
 	}
-	return verifyRequiredNextArtifacts(item.RequiredNextArtifacts, source.ID)
+	if err := verifyRequiredNextArtifacts(item.RequiredNextArtifacts, source.ID); err != nil {
+		return err
+	}
+	return verifyAdoptionPlan(item)
 }
 
 func findSourceForTarget(sources []intakeSource, target string) (intakeSource, bool) {
