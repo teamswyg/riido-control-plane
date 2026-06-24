@@ -30,6 +30,11 @@ var requiredPublicFields = []string{
 	"assigned-agent-profiles",
 	"agent-assignments",
 	"thread-stream-subscription",
+	"conversation_id",
+	"parent_thread_id",
+	"agent_snapshot_id",
+	"agent_snapshots",
+	"messages",
 }
 
 var requiredDeploymentEvidence = []string{

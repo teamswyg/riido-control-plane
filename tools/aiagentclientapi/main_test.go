@@ -21,7 +21,7 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.SchemaVersion != evidenceSchema || got.OperationCounts.Total != 55 {
+	if got.SchemaVersion != evidenceSchema || got.OperationCounts.Total != 55 || got.ThreadHistoryV3Rules == 0 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
 }

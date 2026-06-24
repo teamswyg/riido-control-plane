@@ -19,6 +19,7 @@ type manifest struct {
 	RuntimeConfigKeys      []string        `json:"runtime_config_keys"`
 	PublicFields           []string        `json:"public_fields"`
 	DeploymentEvidence     []string        `json:"deployment_evidence"`
+	ThreadHistoryV3        threadHistoryV3 `json:"thread_history_v3_frontend"`
 	SourceChecks           []sourceCheck   `json:"source_checks"`
 	Loop                   loop            `json:"loop"`
 	NonGoals               []string        `json:"non_goals"`

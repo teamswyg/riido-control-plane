@@ -15,8 +15,109 @@
   "operation_counts": {"total":55,"v1":25,"v2":30,"smoke_matrix":55},
   "required_generated_paths": ["aiAgent.bootstrap","aiAgent.profileThumbnails.uploads.create","aiAgent.tasks.assign","aiAgent.tasks.threadMessages.create","v2.aiAgent.bootstrap","v2.aiAgent.agents.create","v2.aiAgent.profileThumbnails.uploads.create","v2.aiAgent.tasks.assignedAgentProfiles","v2.aiAgent.tasks.agentAssignments.create","v2.aiAgent.tasks.threadStreamSubscription"],
   "runtime_config_keys": ["RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"],
-  "public_fields": ["workspace_id","profile_thumbnail_url","provider_version","assigned-agent-profiles","agent-assignments","thread-stream-subscription"],
+  "public_fields": ["workspace_id","profile_thumbnail_url","provider_version","assigned-agent-profiles","agent-assignments","thread-stream-subscription","conversation_id","parent_thread_id","agent_snapshot_id","agent_snapshots","messages"],
   "deployment_evidence": ["not from a manual","The workflow masks both values"],
+  "thread_history_v3_frontend": {
+    "read_endpoint": {
+      "name": "thread-history-v3",
+      "method": "GET",
+      "path": "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads",
+      "purpose": "Task screen initial render and refresh recovery",
+      "truth_role": "canonical read model"
+    },
+    "sse_endpoint": {
+      "name": "thread-stream-subscription-v2",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/thread-stream-subscription",
+      "purpose": "Task scoped live progress subscription",
+      "truth_role": "live update input"
+    },
+    "action_endpoints": [
+      {
+        "name": "assign-agent-v2",
+        "method": "POST",
+        "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments",
+        "purpose": "Assign one AI Agent to the task",
+        "truth_role": "mutation",
+        "optimistic": true,
+        "request_body": "{\"agent_id\":\"agent_xxx\"}"
+      },
+      {
+        "name": "thread-message-v2",
+        "method": "POST",
+        "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages",
+        "purpose": "Send a user follow-up message to one AI thread",
+        "truth_role": "mutation",
+        "optimistic": true,
+        "request_body": "{\"body\":\"<p>다시 해줘</p>\"}"
+      },
+      {
+        "name": "stop-agent-v2",
+        "method": "POST",
+        "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop",
+        "purpose": "Stop one assigned AI Agent in a task",
+        "truth_role": "strong UI mutation",
+        "optimistic": true,
+        "request_body": "{\"assignment_id\":\"asn_xxx\",\"reason\":\"user_request\"}"
+      },
+      {
+        "name": "delete-agent-assignment-v2",
+        "method": "DELETE",
+        "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}",
+        "purpose": "Remove one assigned AI Agent from a task while preserving history",
+        "truth_role": "strong UI mutation",
+        "optimistic": true
+      }
+    ],
+    "identity_rules": [
+      {"name":"task_id","meaning":"Task screen parent scope","use":"Group all AI thread history for one task screen"},
+      {"name":"conversation_id","meaning":"Stable AI comment card key","use":"Render one Agent conversation card; same value means reply chain, different value means separate card even for same agent_id"},
+      {"name":"thread_id","meaning":"Concrete thread/run identity","use":"Route v2 user messages and render sub-run blocks inside a conversation card"},
+      {"name":"parent_thread_id","meaning":"Source thread for a follow-up run","use":"Nest a follow-up run under the original Agent comment when present"},
+      {"name":"assignment_id","meaning":"Durable work assignment","use":"Manage execution status and stop/delete targeting"},
+      {"name":"run_id","meaning":"Runtime execution flow","use":"Deduplicate live progress together with assignment_id and seq"},
+      {"name":"message_id","meaning":"Stable v3 timeline row key","use":"Render messages without collapsing repeated user bodies or repeated progress text"}
+    ],
+    "grouping_rules": [
+      "Task screen scope is task_id.",
+      "Agent comment card key is conversation_id, not thread_id.",
+      "A new participant-dropdown reassignment creates a new conversation_id even when agent_id is the same.",
+      "A user reply submitted to an existing thread keeps the existing conversation_id.",
+      "parent_thread_id is present only when a follow-up run is derived from an existing thread.",
+      "provider, runtime_kind, label, and agent name must never be used for dedupe."
+    ],
+    "agent_snapshot_rules": [
+      "Each thread may carry agent_snapshot_id instead of an embedded agent snapshot.",
+      "The screen resolves agent_snapshots[thread.agent_snapshot_id] for display.",
+      "Historical cards must keep the captured snapshot even if the current agent settings change."
+    ],
+    "message_roles": [
+      {"role":"user","meaning":"User follow-up instruction inside the AI thread"},
+      {"role":"progress","meaning":"Runtime progress log, ordered by seq inside assignment_id and run_id"},
+      {"role":"agent","meaning":"Agent status or final result message"}
+    ],
+    "sse_handling_rules": [
+      "Open one task-level SSE stream from the v2 thread-stream-subscription response.",
+      "Filter payloads by task_id, agent_id, thread_id, and run_id.",
+      "Use assignment_id + run_id + seq as the progress dedupe key when assignment_id is present.",
+      "SSE is a live update input; v3 thread history remains the refresh recovery truth.",
+      "Do not revive a terminal assignment when a late runtime progress event arrives."
+    ],
+    "terminal_states": ["completed","failed","stopped","cancelled","timeout"],
+    "checklist": [
+      "v3-read-model",
+      "conversation-id-card-key",
+      "thread-id-inner-run-key",
+      "message-id-row-key",
+      "agent-snapshot-map",
+      "v2-mutations",
+      "v2-sse",
+      "optimistic-then-v3-refetch",
+      "progress-dedupe",
+      "terminal-late-event-guard",
+      "deleted-agent-history-retention"
+    ]
+  },
   "source_checks": [
     {"name":"react-query-generator-drift","file":"tools/reactquerygen/drift_test.go","contains":["TestGenerateReactQueryClientDoesNotDrift","generateReact"]},
     {"name":"react-query-generator-metadata","file":"tools/reactquerygen/client_metadata_projection_test.go","contains":["TestAIAgentClientMetadataFlowsThroughContractProjections","assertRequiredClientMetadataFields"]},
@@ -24,6 +125,11 @@
     {"name":"generated-client-handoff-files","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","assertGeneratedClientHandoffFiles"]},
     {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/branch_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
     {"name":"black-box-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2","TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI"]},
+    {"name":"thread-history-v3-api","file":"internal/riidoaiserver/ai_agent_client_thread_history_api.go","contains":["ConversationID","ParentThreadID","AgentSnapshotID","Messages","AgentSnapshots"]},
+    {"name":"thread-history-v3-projection","file":"internal/riidoaiserver/ai_agent_client_thread_history_projection.go","contains":["taskThreadConversationID","taskThreadParentThreadID","taskThreadHistoryMessagesLocked","AgentSnapshots"]},
+    {"name":"thread-history-v3-conversation-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go","contains":["assertConversationFollowup","ConversationID","ParentThreadID","assertConversationReassignment"]},
+    {"name":"thread-history-v3-http","file":"internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go","contains":["/v3/client/workspaces/","conversation_id missing"]},
+    {"name":"thread-history-v2-actions","file":"internal/riidoaiserver/server.go","contains":["agent-assignments","thread-stream-subscription","threads/","/messages"]},
     {"name":"runtime-env","file":"cmd/riido_ai_server/env_names.go","contains":["envAIAgentClientDev","RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"]},
     {"name":"workflow","file":".github/workflows/ai-agent-client-api.yml","contains":["Verify React Query generation drift","Verify generated client handoff","Verify React Query generator command"]}
   ],
