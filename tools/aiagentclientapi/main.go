@@ -16,11 +16,12 @@ func mainRun(args []string) error {
 	evidenceOut := fs.String("evidence-out", "", "optional evidence JSON output path")
 	writeDoc := fs.Bool("write-doc", false, "write generated reader doc")
 	checkDoc := fs.Bool("check-doc", false, "check generated reader doc")
+	verify := fs.Bool("verify", false, "alias for -check-doc")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 	opts := options{Repo: *repo, Manifest: *manifest, EvidenceOut: *evidenceOut}
 	opts.WriteDoc = *writeDoc
-	opts.CheckDoc = *checkDoc
+	opts.CheckDoc = *checkDoc || *verify
 	return run(opts)
 }

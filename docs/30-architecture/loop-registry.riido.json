@@ -307,7 +307,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "505f626d13ff44641c9ba8b4524ce15f5bc678cbd506c45d1704a73ed52eee8f"
+      "semantic_hash": "60ef14ca29a13d532c1beaa4517dcf8c9a59fec7ee62f78e42f774334237cfe0"
     },
     {
       "id": "expired_harness_evidence_must_not_promote_candidates",
@@ -377,6 +377,7 @@
       "statement": "When task context is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the assignment prompt must require the agent to ask for intent in the existing thread before producing deliverables; provider token, quota, or cloud-credit exhaustion must render as a user-facing thread result without changing API shape.",
       "loop": "ai_thread_history",
       "files": [
+        "docs/20-domain/ai-agent-client-api.riido.json",
         "internal/riidoaiserver/ai_agent_assignment_prompt.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation_markers.go",
@@ -387,19 +388,27 @@
         "internal/riidoaiserver/ai_agent_client_development_func_client_visible_task_thread_text.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_metadata_test.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go",
-        "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"
+        "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go",
+        "tools/aiagentclientapi/main.go",
+        "tools/aiagentclientapi/main_test.go",
+        "tools/aiagentclientapi/types_thread_history_v3.go",
+        "tools/aiagentclientapi/verify_thread_history_v3.go",
+        "tools/aiagentclientapi/render_thread_history_v3.go"
       ],
       "verifiers": [
         "TestAssignmentPromptAsksForIntentOnAmbiguousMarketingDocument",
         "TestAssignmentPromptInfersFromMetadataWhenDocumentMissing",
         "TestFollowupPromptKeepsLatestUserInstructionAuthoritative",
         "TestClientVisibleTaskThreadTextLocalizesProviderLimitMessages",
-        "TestFailureDiagnosticsLocalizesProviderLimitMessages"
+        "TestFailureDiagnosticsLocalizesProviderLimitMessages",
+        "TestVerifyAliasChecksGeneratedDoc",
+        "TestGeneratedDocMatchesManifest"
       ],
       "generated_docs": [
+        "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "bb212fd0fe85dd5cdc23cbb0e95f1195587509c8bbaac3dd5f867721c1834c20"
+      "semantic_hash": "5959e59287d22c9fb91099d04c4a791c93e3e1a5476c260b242016a4238cfc65"
     },
     {
       "id": "claim_bound_paths_must_trigger_loop_registry",
