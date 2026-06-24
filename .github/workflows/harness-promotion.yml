@@ -1,0 +1,46 @@
+name: harness-promotion
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/harness-promotion.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - "docs/30-architecture/harness-promotion.md"
+      - "docs/30-architecture/harness-promotion.riido.json"
+      - "tools/harnesspromotion/**"
+      - "go.mod"
+      - "go.sum"
+  pull_request:
+    paths:
+      - ".github/workflows/harness-promotion.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - "docs/30-architecture/harness-promotion.md"
+      - "docs/30-architecture/harness-promotion.riido.json"
+      - "tools/harnesspromotion/**"
+      - "go.mod"
+      - "go.sum"
+
+jobs:
+  harness-promotion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify harness promotion
+        run: |
+          mkdir -p out
+          go test ./tools/harnesspromotion -count=1
+          go run ./tools/harnesspromotion \
+            -check-doc \
+            -evidence-out out/harness-promotion-evidence.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: harness-promotion-evidence
+          path: out/harness-promotion-evidence.json
+          if-no-files-found: error
