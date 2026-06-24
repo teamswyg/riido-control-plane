@@ -240,6 +240,34 @@
         "docs/30-architecture/loop-registry.md"
       ],
       "semantic_hash": "92594cfc172f2a21374874edaf234694178a1f6c72cc97563fc3a86eef658306"
+    },
+    {
+      "id": "loop_verifiers_must_accept_verify_intent",
+      "statement": "Closed-loop verifier tools must accept the common -verify intent as an alias for their generated-doc verification mode so agents do not need tool-specific flag memory.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        "tools/loopregistry/main.go",
+        "tools/loopregistry/main_test.go",
+        "tools/evidencegraph/main.go",
+        "tools/evidencegraph/main_test.go",
+        "tools/harnesspromotion/main.go",
+        "tools/harnesspromotion/main_test.go",
+        "tools/closedloopcandidateintake/main.go",
+        "tools/closedloopcandidateintake/main_test.go",
+        "tools/closedloopcandidatedecision/main.go",
+        "tools/closedloopcandidatedecision/main_test.go"
+      ],
+      "verifiers": [
+        "TestLoopRegistryVerifyAlias",
+        "TestEvidenceGraphVerifyAlias",
+        "TestHarnessPromotionVerifyAlias",
+        "TestClosedLoopCandidateIntakeVerifyAlias",
+        "TestCandidateDecisionVerifyAlias"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "32a647f595addefcc7ce7a12aecf34248ab3664db73dc4ad40766b9d42f2387f"
     }
   ],
   "evidence_graph": [
@@ -276,6 +304,11 @@
     {
       "from": "ai_thread_history",
       "to": "same_provider_agents_must_keep_distinct_threads",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "loop_verifiers_must_accept_verify_intent",
       "relation": "enforces"
     }
   ],

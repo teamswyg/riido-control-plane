@@ -13,6 +13,17 @@ func TestHarnessPromotionManifestVerifies(t *testing.T) {
 	}
 }
 
+func TestHarnessPromotionVerifyAlias(t *testing.T) {
+	if err := mainRun([]string{
+		"-repo", "../..",
+		"-manifest", defaultManifest,
+		"-verify",
+		"-evidence-out", t.TempDir() + "/evidence.json",
+	}); err != nil {
+		t.Fatalf("mainRun -verify: %v", err)
+	}
+}
+
 func TestHarnessFailurePromotesUnverifiedClaims(t *testing.T) {
 	source := promotionSource{
 		ID: "smoke", HarnessLoop: "provider_acceptance_harness",

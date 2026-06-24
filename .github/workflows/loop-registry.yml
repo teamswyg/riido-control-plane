@@ -23,6 +23,10 @@ on:
       - "internal/riidoaiserver/ai_agent_client_development_method_mark_task_agent_threads_stopped_locked.go"
       - "internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go"
       - "tools/loopregistry/**"
+      - "tools/evidencegraph/**"
+      - "tools/harnesspromotion/**"
+      - "tools/closedloopcandidateintake/**"
+      - "tools/closedloopcandidatedecision/**"
       - "go.mod"
       - "go.sum"
   pull_request:
@@ -43,6 +47,10 @@ on:
       - "internal/riidoaiserver/ai_agent_client_development_method_mark_task_agent_threads_stopped_locked.go"
       - "internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go"
       - "tools/loopregistry/**"
+      - "tools/evidencegraph/**"
+      - "tools/harnesspromotion/**"
+      - "tools/closedloopcandidateintake/**"
+      - "tools/closedloopcandidatedecision/**"
       - "go.mod"
       - "go.sum"
 
@@ -67,6 +75,7 @@ jobs:
             impact_args=(-impact-base "$RIIDO_LOOP_REGISTRY_IMPACT_BASE")
           fi
           go test ./tools/loopregistry -count=1
+          go test ./tools/evidencegraph ./tools/harnesspromotion ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision -count=1
           go test ./internal/riidoaiserver \
             -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread)$' \
             -count=1

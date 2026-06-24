@@ -13,6 +13,17 @@ func TestCandidateDecisionManifestVerifies(t *testing.T) {
 	}
 }
 
+func TestCandidateDecisionVerifyAlias(t *testing.T) {
+	if err := mainRun([]string{
+		"-repo", "../..",
+		"-manifest", defaultManifest,
+		"-verify",
+		"-evidence-out", t.TempDir() + "/evidence.json",
+	}); err != nil {
+		t.Fatalf("mainRun -verify: %v", err)
+	}
+}
+
 func TestCandidateDecisionRejectsInvalidPriority(t *testing.T) {
 	m := loadDecisionManifestForTest(t)
 	m.Decisions[0].Priority = "urgent"
