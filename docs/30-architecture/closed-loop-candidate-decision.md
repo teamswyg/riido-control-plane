@@ -21,6 +21,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - candidate decision verification must run on a schedule so decision ownership does not rely on memory
 - candidate decision verification must fail when no candidate artifact is supplied
 - scheduled candidate decision must download live candidate artifacts from every intake source and verify non-empty candidate sets against decision records
+- candidate decision evidence must publish generated_at and expires_at
 
 ## Decisions
 

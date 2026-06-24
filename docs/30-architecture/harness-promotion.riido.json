@@ -53,7 +53,8 @@
     "candidate artifacts must not include raw endpoint hosts, tokens, AWS resource ids, or response bodies",
     "candidate artifacts must include an adoption_plan with executable commands for every required next artifact",
     "expired redacted summaries must be rejected before closed-loop candidate generation",
-    "harness workflows that produce expiring evidence must be runnable without a human trigger"
+    "harness workflows that produce expiring evidence must be runnable without a human trigger",
+    "harness promotion evidence must publish generated_at and expires_at"
   ],
   "loop": {
     "observation": "Provider and smoke harnesses can find failures, but a failed run can still end as an isolated artifact unless it is converted into a closed-loop candidate.",

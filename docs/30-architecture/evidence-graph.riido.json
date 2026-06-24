@@ -536,6 +536,42 @@
       "next_loop": "closed_loop_candidate_decision"
     },
     {
+      "id": "closed_loop_candidate_evidence_expiry_loop",
+      "observation": "Candidate promotion, intake, and decision workflows produced evidence artifacts for expiring loops, but those artifacts did not carry their own generated_at and expires_at timestamps.",
+      "hypothesis": "Stamping candidate-loop evidence with generated_at and expires_at lets downstream QA distinguish fresh promotion, intake, and decision evidence from stale artifacts without reading workflow history.",
+      "claims": ["closed_loop_candidate_evidence_must_self_expire"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/harnesspromotion/evidence.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/evidence_time.go"},
+        {"kind": "test", "path": "tools/harnesspromotion/evidence_time_test.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake/evidence.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake/evidence_time.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/evidence_time_test.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/evidence.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/evidence_time.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/evidence_time_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/harnesspromotion/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/evidence_time_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Candidate-loop promotion, intake, and decision evidence now self-expires, making stale closed-loop evidence machine-detectable.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "pre_commit_claim_binding_loop",
       "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier.",
       "hypothesis": "A pre-commit hook can run loop registry claim/doc/impact verification before PR creation.",

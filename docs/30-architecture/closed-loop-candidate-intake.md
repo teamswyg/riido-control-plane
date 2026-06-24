@@ -25,6 +25,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - candidate intake must run on a schedule so stale candidates do not rely on human memory
 - candidate intake verification must fail when no candidate artifact is supplied
 - scheduled candidate intake must download the latest live candidate artifacts from each producer harness workflow instead of validating only a fixture
+- candidate intake evidence must publish generated_at and expires_at
 
 ## Evidence Loop
 

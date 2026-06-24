@@ -4,6 +4,8 @@ type evidence struct {
 	SchemaVersion    string         `json:"schema_version"`
 	ID               string         `json:"id"`
 	Status           string         `json:"status"`
+	GeneratedAt      string         `json:"generated_at"`
+	ExpiresAt        string         `json:"expires_at"`
 	SourceCount      int            `json:"source_count"`
 	RequiredRefs     int            `json:"required_refs"`
 	CandidateCount   int            `json:"candidate_count"`
@@ -16,10 +18,13 @@ type evidence struct {
 }
 
 func newEvidence(m manifest, result verifyResult) evidence {
+	generatedAt, expiresAt := evidenceWindow(candidateIntakeEvidenceTTLHours)
 	return evidence{
 		SchemaVersion:    evidenceSchema,
 		ID:               m.ID,
 		Status:           "verified",
+		GeneratedAt:      generatedAt,
+		ExpiresAt:        expiresAt,
 		SourceCount:      result.SourceCount,
 		RequiredRefs:     result.RequiredRefs,
 		CandidateCount:   result.CandidateCount,
