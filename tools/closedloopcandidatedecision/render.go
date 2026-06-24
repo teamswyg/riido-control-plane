@@ -14,9 +14,19 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintln(&b)
 	fmt.Fprintln(&b, "## Summary")
 	fmt.Fprintf(&b, "\n- decisions: `%d`\n\n", result.DecisionCount)
+	renderAssertions(&b, m.Assertions)
 	renderDecisions(&b, m.Decisions)
 	renderLoop(&b, m.Loop)
 	return b.String()
+}
+
+func renderAssertions(b *strings.Builder, assertions []string) {
+	fmt.Fprintln(b, "## Assertions")
+	fmt.Fprintln(b)
+	for _, assertion := range assertions {
+		fmt.Fprintf(b, "- %s\n", assertion)
+	}
+	fmt.Fprintln(b)
 }
 
 func renderDecisions(b *strings.Builder, decisions []decisionRecord) {

@@ -8,6 +8,17 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 - decisions: `1`
 
+## Assertions
+
+- every candidate consumed by intake must have exactly one decision record
+- decision records without a matching consumed candidate are stale loop residue and must fail verification
+- decision records must name owner, priority, disposition, next loop, and next artifact
+- decision next_artifact must be one of the required_next_artifacts declared by the consumed candidate artifact
+- triage-required or deferred candidates must name a non-expired review_by date
+- triage-required candidates must stay redacted and carry enough context for a follow-up claim binding
+- candidate decision verification must run on a schedule so decision ownership does not rely on memory
+- candidate decision verification must fail when no candidate artifact is supplied
+
 ## Decisions
 
 | Candidate | Disposition | Priority | Owner | Review By | Next Artifact |

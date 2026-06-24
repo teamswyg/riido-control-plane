@@ -486,7 +486,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f5707f9b47e9072a532de2e117f3d92a35fa17b6f1ee3f8acdbe245036933245"
+      "semantic_hash": "19510d3503e6a496bb7082b013f45fc5e8931cc1c3319f7fa459f34c5407ccbd"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -510,7 +510,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d24e3aab56b46968defdef60de99362c45f05d40e2f7cf8eefe1aa174e7bb4fc"
+      "semantic_hash": "9c04c4ccec35dfc4c242f72e1db7c859ec4c06db52b4cf72a5dc20d16595a92e"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -587,7 +587,32 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "b632f70d02fb8a4161630bb56fb279ba9a0ce30ab13fe515096d41bcee1528c1"
+      "semantic_hash": "12b95a07a295eacab1215045b9c96dc08c497d91dc76aa85b7c11dc23dbef800"
+    },
+    {
+      "id": "candidate_decision_next_artifact_must_be_required",
+      "statement": "Closed-loop candidate decisions must choose a next_artifact that is explicitly required by the consumed candidate artifact, so harness failures cannot be routed to arbitrary or non-executable follow-up work.",
+      "loop": "closed_loop_candidate_decision",
+      "files": [
+        "docs/30-architecture/closed-loop-candidate-decision.riido.json",
+        "tools/closedloopcandidatedecision/candidate.go",
+        "tools/closedloopcandidatedecision/decision_artifact_test.go",
+        "tools/closedloopcandidatedecision/evidence.go",
+        "tools/closedloopcandidatedecision/render.go",
+        "tools/closedloopcandidatedecision/run.go",
+        "tools/closedloopcandidatedecision/types_more.go"
+      ],
+      "verifiers": [
+        "TestCandidateDecisionRejectsUnknownNextArtifact",
+        "TestCandidateDecisionEvidenceBindsNextArtifact",
+        "TestCandidateDecisionEvidenceFileIncludesNextArtifact"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/closed-loop-candidate-decision.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "4201a0be4e0166e8529c2eb7e849206d076502c18c6f28da4683d67d09475c41"
     }
   ],
   "evidence_graph": [
@@ -674,6 +699,11 @@
     {
       "from": "closed_loop_candidate_decision",
       "to": "candidate_decisions_must_match_consumed_candidates",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate_decision",
+      "to": "candidate_decision_next_artifact_must_be_required",
       "relation": "enforces"
     }
   ],

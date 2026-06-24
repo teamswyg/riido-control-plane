@@ -260,6 +260,28 @@
       "next_loop": "closed_loop_candidate_decision"
     },
     {
+      "id": "candidate_decision_next_artifact_loop",
+      "observation": "Closed-loop candidate decisions could name an arbitrary next_artifact even when the consumed candidate artifact declared a bounded adoption artifact set.",
+      "hypothesis": "Comparing each decision next_artifact against the candidate required_next_artifacts keeps harness failures on an executable adoption path.",
+      "claims": ["candidate_decision_next_artifact_must_be_required"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_artifact_test.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "tool", "path": "tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Candidate decisions now prove that the selected next artifact is one of the candidate's required executable adoption artifacts.",
+      "next_loop": "closed_loop_candidate_decision"
+    },
+    {
       "id": "pre_commit_claim_binding_loop",
       "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier.",
       "hypothesis": "A pre-commit hook can run loop registry claim/doc/impact verification before PR creation.",
