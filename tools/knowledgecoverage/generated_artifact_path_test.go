@@ -34,7 +34,7 @@ func TestScanRejectsGeneratedDocWhenStrictStepMissesEvidenceOutPath(t *testing.T
 func mismatchedEvidenceOutWorkflow() string {
 	return "steps:\n" +
 		"  - run: go run ./tools/example -check-doc -evidence-out out/example.json\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      name: example-evidence\n" +
 		"      path: out/other.json\n" +
@@ -44,11 +44,11 @@ func mismatchedEvidenceOutWorkflow() string {
 func splitStrictEvidenceOutWorkflow() string {
 	return "steps:\n" +
 		"  - run: go run ./tools/example -check-doc -evidence-out out/example.json\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      name: example-evidence\n" +
 		"      path: out/example.json\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      name: example-evidence\n" +
 		"      path: out/other.json\n" +

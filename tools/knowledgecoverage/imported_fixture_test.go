@@ -19,7 +19,7 @@ func importedWorkflowFixture(mode string) string {
 	return "" +
 		"steps:\n" +
 		"  - run: go run ./tools/projection -check-doc -evidence-out out/projection.json\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      name: projection-evidence\n" +
 		"      path: out/projection.json\n" +

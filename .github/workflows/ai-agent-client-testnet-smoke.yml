@@ -15,9 +15,9 @@ jobs:
       TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
       TESTNET_TOKEN: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
@@ -181,7 +181,7 @@ jobs:
             -live-status "$RIIDO_LIVE_CHECK_STATUS" \
             -evidence-out out/ai-agent-client-testnet-smoke-redacted-summary.json
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ai-agent-client-testnet-smoke-redacted-summary

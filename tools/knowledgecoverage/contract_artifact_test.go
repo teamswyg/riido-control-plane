@@ -45,7 +45,7 @@ func contractWorkflowFixture(mode string) string {
 	return "" +
 		"steps:\n" +
 		"  - run: go run ./tools/apicheck -check-doc -evidence-out out/api.json\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      name: api-evidence\n" +
 		"      path: out/api.json\n" +

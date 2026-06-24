@@ -25,6 +25,9 @@ func verifyResult(result auditResult) error {
 	if len(result.AcceptedUnused) > 0 {
 		return fmt.Errorf("unused accepted workflow gaps: %v", result.AcceptedUnused)
 	}
+	if len(result.DeprecatedActions) > 0 {
+		return fmt.Errorf("deprecated GitHub action references: %v", result.DeprecatedActions)
+	}
 	return nil
 }
 

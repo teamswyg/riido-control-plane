@@ -63,8 +63,8 @@ jobs:
   actor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
@@ -89,25 +89,25 @@ jobs:
           done
       - name: Test assignment store actor and client assignment domain
         run: go test ./internal/riidoaiserver -run 'StoreActor|AssignmentStore|AIAgentClient.*Assignment|AIAgentClient.*ThreadStream|WaitForAssignment|HTTPAgentPollLongPoll|PersistentAIAgentClientStore' -count=1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: assignment-store-actor-long-poll-evidence
           path: out/long-poll-evidence.json
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: assignment-store-actor-multi-agent-evidence
           path: out/multi-agent-task-evidence.json
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: assignment-store-actor-runtime-snapshot-evidence
           path: out/runtime-snapshot-evidence.json
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: assignment-store-actor-evidence

@@ -11,7 +11,7 @@ func TestWorkflowTextEvidenceOutPathsMatchesBlockCommand(t *testing.T) {
 }
 
 func TestWorkflowTextUploadsArtifactPathMatchesBlockPath(t *testing.T) {
-	text := "steps:\n- uses: actions/upload-artifact@v4\n  with:\n    name: example-evidence\n    path: |\n      out/example.json\n      out/other.json\n"
+	text := "steps:\n- uses: actions/upload-artifact@v7\n  with:\n    name: example-evidence\n    path: |\n      out/example.json\n      out/other.json\n"
 	if !workflowTextUploadsArtifactPath(text, "example-evidence", "out/example.json") {
 		t.Fatal("expected block upload path match")
 	}

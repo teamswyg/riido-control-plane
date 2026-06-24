@@ -60,7 +60,7 @@ func sourceWorkflowFixture(mode string) string {
 	return "" +
 		"steps:\n" +
 		"  - run: go run ./tools/policycheck -contract policy.riido.json -evidence-out out/policy.json\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      name: policy-evidence\n" +
 		"      path: out/policy.json\n" +

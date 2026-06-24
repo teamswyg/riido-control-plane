@@ -5,10 +5,10 @@ import "testing"
 func TestArtifactUploadModes(t *testing.T) {
 	text := "" +
 		"steps:\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      if-no-files-found: error\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      name: optional\n"
 	modes := artifactUploadModes(text)

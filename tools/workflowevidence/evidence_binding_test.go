@@ -6,7 +6,7 @@ func TestWorkflowEvidenceRequiresUploadedEvidenceOutPath(t *testing.T) {
 	text := "" +
 		"steps:\n" +
 		"  - run: go run ./tools/example -evidence-out out/example.json\n" +
-		"  - uses: actions/upload-artifact@v4\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
 		"    with:\n" +
 		"      name: example\n" +
 		"      path: out/other.json\n" +

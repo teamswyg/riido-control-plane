@@ -47,8 +47,8 @@ jobs:
   assignment-http:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
@@ -71,7 +71,7 @@ jobs:
             -evidence-out out/assignment-http-adapter-evidence.json
       - name: Test assignment HTTP adapter
         run: go test ./internal/riidoaiserver -run 'HTTPAssignment|AssignmentHTTP' -count=1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: assignment-http-adapter-evidence

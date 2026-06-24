@@ -13,6 +13,11 @@ func hasExecutableStep(text string) bool {
 }
 
 func classify(record workflowRecord, accepted map[string]acceptedGap, used map[string]bool) workflowRecord {
+	if len(record.DeprecatedActionRefs) > 0 {
+		record.Status = "deprecated_action"
+		record.Reason = "workflow uses GitHub Actions releases that emit Node runtime deprecation annotations"
+		return record
+	}
 	if record.NonStrictUploadCount > 0 {
 		record.Status = "non_strict_upload"
 		record.Reason = "artifact upload must fail closed with if-no-files-found:error"
@@ -54,5 +59,7 @@ func addRecord(result *auditResult, record workflowRecord) {
 		result.NonStrict = append(result.NonStrict, record.Path)
 	case "missing_evidence_upload":
 		result.MissingEvidence = append(result.MissingEvidence, record.Path)
+	case "deprecated_action":
+		result.DeprecatedActions = append(result.DeprecatedActions, record.Path)
 	}
 }

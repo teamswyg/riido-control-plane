@@ -16,7 +16,7 @@ func verifyWorkflowFile(root string, spec workflowSpec) (int, error) {
 		"-evidence-out " + spec.SummaryPath,
 		"name: " + spec.SummaryArtifact,
 		"path: " + spec.SummaryPath,
-		"actions/upload-artifact@v4",
+		"actions/upload-artifact@v7",
 	}
 	phrases = append(phrases, spec.SensitiveInputs...)
 	phrases = append(phrases, spec.RequiredPhrases...)

@@ -53,8 +53,8 @@ jobs:
   health-cmd:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
@@ -80,7 +80,7 @@ jobs:
         run: go test ./cmd/riido_ai_server -count=1
       - name: Build command
         run: go build -o /tmp/riido_ai_server ./cmd/riido_ai_server
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: health-ready-cmd-evidence

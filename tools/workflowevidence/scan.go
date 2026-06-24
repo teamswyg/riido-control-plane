@@ -44,17 +44,20 @@ func scanWorkflow(root, path string, accepted map[string]acceptedGap, used map[s
 	uploadModes := artifactUploadModes(text)
 	evidenceOut := evidenceOutPaths(text)
 	uploadPaths := artifactUploadPathValues(text)
+	deprecatedActions := deprecatedWorkflowActions(text)
 	record := workflowRecord{
-		Path:                 rel,
-		HasExecutable:        hasExecutableStep(text),
-		HasEvidenceOut:       len(evidenceOut) > 0,
-		EvidenceOutCount:     len(evidenceOut),
-		UploadedEvidenceOut:  countUploadedEvidenceOut(evidenceOut, uploadPaths),
-		MissingEvidenceOut:   missingEvidenceUploads(evidenceOut, uploadPaths),
-		UploadsArtifact:      len(uploadModes) > 0,
-		ArtifactUploadCount:  len(uploadModes),
-		StrictUploadCount:    countUploadMode(uploadModes, "error"),
-		NonStrictUploadCount: countNonStrictUploadModes(uploadModes),
+		Path:                  rel,
+		HasExecutable:         hasExecutableStep(text),
+		HasEvidenceOut:        len(evidenceOut) > 0,
+		EvidenceOutCount:      len(evidenceOut),
+		UploadedEvidenceOut:   countUploadedEvidenceOut(evidenceOut, uploadPaths),
+		MissingEvidenceOut:    missingEvidenceUploads(evidenceOut, uploadPaths),
+		UploadsArtifact:       len(uploadModes) > 0,
+		ArtifactUploadCount:   len(uploadModes),
+		StrictUploadCount:     countUploadMode(uploadModes, "error"),
+		NonStrictUploadCount:  countNonStrictUploadModes(uploadModes),
+		DeprecatedActionRefs:  deprecatedActions,
+		DeprecatedActionCount: len(deprecatedActions),
 	}
 	return classify(record, accepted, used), text, nil
 }
