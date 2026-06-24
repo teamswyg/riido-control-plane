@@ -9,11 +9,11 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - workflow: `.github/workflows/evidence-graph.yml`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `20`
-- claim refs: `16`
-- change refs: `89`
-- verifier refs: `63`
-- evidence refs: `34`
+- chains: `21`
+- claim refs: `17`
+- change refs: `94`
+- verifier refs: `67`
+- evidence refs: `36`
 
 ## Evidence Chains
 
@@ -30,6 +30,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `ai_thread_history_conversation_grouping_loop` | `1` | `6` | `4` | `2` | `ai_thread_history` |
 | `loop_evidence_expiry_loop` | `1` | `5` | `3` | `2` | `closed_loop_candidate` |
 | `closed_loop_candidate_intake_loop` | `1` | `3` | `2` | `1` | `closed_loop_candidate_intake` |
+| `expiring_loop_refresh_scope_loop` | `1` | `5` | `4` | `2` | `closed_loop_candidate` |
 | `closed_loop_candidate_decision_loop` | `1` | `3` | `2` | `1` | `closed_loop_candidate_decision` |
 | `candidate_decision_next_artifact_loop` | `1` | `3` | `3` | `2` | `closed_loop_candidate_decision` |
 | `pre_commit_claim_binding_loop` | `0` | `4` | `2` | `2` | `closed_loop_candidate` |

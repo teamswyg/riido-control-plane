@@ -9,7 +9,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `7`
 - harness loops: `2`
 - closed loops: `5`
-- claim bindings: `16`
+- claim bindings: `17`
 - evidence graph edges: `18`
 - max evidence expiry hours: `168`
 
@@ -34,15 +34,16 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `92594cfc172f` |
 | `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `873bd9477b62` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `6e7f25486f11` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `758f844270af` |
-| `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `353a8e4bb6d2` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `dbef2113870d` |
+| `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `a04fce499962` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `31` | `13` | `ae0d12563977` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `9` | `2` | `36ae2e3a1ebf` |
-| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `e59a826e8bde` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `655bdf7f0a2e` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `e18022655d9a` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `9` | `2` | `47e288cd3ad5` |
+| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `1d6cbfe8b62e` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `07ba3406f336` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `1924a289acbc` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `8` | `3` | `8af17d7b91c5` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `6` | `4` | `a6ba8577a643` |
+| `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `5dd1938f3218` |
 | `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `8` | `4` | `12b95a07a295` |
 | `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `4201a0be4e01` |
 
@@ -64,6 +65,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `evidence_graph_refs_must_trigger_evidence_workflow` | `3` | `1` | `2` | `2` | `4` |
 | `loop_evidence_artifacts_must_self_expire` | `4` | `3` | `1` | `2` | `3` |
 | `candidate_intake_must_consume_candidate_artifact` | `3` | `2` | `1` | `3` | `4` |
+| `expiring_loops_must_schedule_refresh` | `3` | `2` | `0` | `1` | `3` |
 | `candidate_decisions_must_match_consumed_candidates` | `3` | `4` | `1` | `3` | `4` |
 | `candidate_decision_next_artifact_must_be_required` | `5` | `1` | `1` | `3` | `3` |
 
@@ -94,7 +96,7 @@ Observe: AI agents can skip or misunderstand narrative docs, while previously fi
 
 Hypothesis: A loop registry can make the intended QA loop executable by binding business claims to code files, tests, generated docs, semantic hashes, evidence expiry, and harness promotion paths.
 
-Execute: Generate this reader from the loop registry, verify claim-code-test-doc bindings, require each 24h loop to name a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence, require harness workflows to run tools/harnesspromotion and upload strict candidate evidence, compute claim semantic hashes, enforce PR impact co-change for claim meaning changes and bound file changes, and publish redacted evidence in CI.
+Execute: Generate this reader from the loop registry, verify claim-code-test-doc bindings, require each expiring loop to name a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence, require harness workflows to run tools/harnesspromotion and upload strict candidate evidence, compute claim semantic hashes, enforce PR impact co-change for claim meaning changes and bound file changes, and publish redacted evidence in CI.
 
 Evaluate: The verifier fails on missing loop fields, missing tests, missing bound files, stale generated docs, missing scheduled refresh workflow coverage, refresh cadence slower than evidence expiry, missing strict refresh evidence, harness workflows without candidate promotion, unknown graph nodes, semantic hash drift, claim meaning changes without bound code/test changes, or bound code/test changes without claim evidence changes.
 

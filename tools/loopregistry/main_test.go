@@ -42,3 +42,23 @@ func TestClaimSemanticHashDriftFails(t *testing.T) {
 		t.Fatal("expected semantic hash drift failure")
 	}
 }
+
+func TestLoopRegistryRejectsStaleExpiryScopeAssertion(t *testing.T) {
+	root, err := findRepoRoot("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := loadManifest(repoPath(root, defaultManifest))
+	if err != nil {
+		t.Fatal(err)
+	}
+	hashes, err := claimHashes(root, m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Assertions = append(m.Assertions,
+		"loops with evidence expiry at or below 24 hours must declare a scheduled refresh workflow")
+	if _, err := verifyAll(root, m, hashes); err == nil {
+		t.Fatal("expected stale expiry scope assertion failure")
+	}
+}

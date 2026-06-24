@@ -12,7 +12,7 @@
     "bound code or test file changes must co-change the claim registry manifest or generated claim evidence",
     "harness loops must promote failures into closed-loop candidates by running tools/harnesspromotion and publishing strict candidate evidence",
     "claim evidence must expose code, test, manifest, generated doc, and verifier surface so agents can infer required co-change scope without reading prose",
-    "loops with evidence expiry at or below 24 hours must declare a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence",
+    "all loops with evidence expiry must declare a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence",
     "loop registry and evidence graph evidence must carry generated_at and expires_at so tools can reject stale evidence",
     "AI agents do not need to read the prose doc when the verifier can enforce the bound surface"
   ],
@@ -413,7 +413,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "758f844270af92c736afeb73e8aea933fd7a657f168781f0868a9560ccbd1251"
+      "semantic_hash": "dbef2113870d81962573022282e2eb562cc1d9f01680ce1aaf694df779de55e6"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -441,7 +441,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "353a8e4bb6d2c93dd9945ef1554d4d2974be0a7341be14dfb085e0021a0fae88"
+      "semantic_hash": "a04fce49996262ef363a8ae0cf7ba085b6d22a4f7ed1cfd6a740eea4dedbcfc1"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -523,7 +523,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "36ae2e3a1ebf45607bbeb65659cf61e9161007d2edbb336133b6a4a03f70221c"
+      "semantic_hash": "47e288cd3ad5c6e03e197a2638b2a53b56ce609ee34c43044e37c6fbe41abfc8"
     },
     {
       "id": "claim_bound_paths_must_trigger_loop_registry",
@@ -545,7 +545,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e59a826e8bdeef95625c26a4f3ddf0849a907e05c7bb3601015d6d493cd4d8ba"
+      "semantic_hash": "1d6cbfe8b62e02b878eacd3eadb64c90835376f57148581687a5a555db9c7a08"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -569,7 +569,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "655bdf7f0a2ecfc10506964b7efec49bc4e67ceae713968044282cb44b52c7e8"
+      "semantic_hash": "07ba3406f336ce633149f4ae10917597019746cb42b58b88c36f78782fc9e6d6"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -593,7 +593,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e18022655d9aa9379fb1261c9848260784f573dad9f01650f7ad198954c49be4"
+      "semantic_hash": "1924a289acbc5bda61931ee07f2916cc4a99b59e71ff7c71938bf87d69fe30c5"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -644,6 +644,27 @@
         "docs/30-architecture/evidence-graph.md"
       ],
       "semantic_hash": "a6ba8577a6431768139a3eb5d24884c92ffab7ab3c4612386ad458c25dd7cb28"
+    },
+    {
+      "id": "expiring_loops_must_schedule_refresh",
+      "statement": "Every loop with evidence expiry, regardless of expiry duration, must declare a scheduled refresh workflow whose cadence is no slower than the expiry and whose workflow publishes strict redacted evidence.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        "tools/loopregistry/verify_assertions.go",
+        "tools/loopregistry/verify_schedule.go",
+        "tools/loopregistry/refresh_cadence_capture.go",
+        "tools/loopregistry/refresh_workflow_test.go",
+        "tools/loopregistry/main_test.go"
+      ],
+      "verifiers": [
+        "TestLongExpiryLoopRequiresScheduledRefreshWorkflow",
+        "TestLoopRegistryRejectsStaleExpiryScopeAssertion",
+        "TestLoopRegistryManifestVerifies"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "5dd1938f321808b25438ca0d1176428ba7f7ad7b5bc5311f0eeb5fa87135fd59"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
@@ -793,7 +814,7 @@
   "loop": {
     "observation": "AI agents can skip or misunderstand narrative docs, while previously fixed AI thread regressions can reappear when related files are edited independently.",
     "hypothesis": "A loop registry can make the intended QA loop executable by binding business claims to code files, tests, generated docs, semantic hashes, evidence expiry, and harness promotion paths.",
-    "execute": "Generate this reader from the loop registry, verify claim-code-test-doc bindings, require each 24h loop to name a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence, require harness workflows to run tools/harnesspromotion and upload strict candidate evidence, compute claim semantic hashes, enforce PR impact co-change for claim meaning changes and bound file changes, and publish redacted evidence in CI.",
+    "execute": "Generate this reader from the loop registry, verify claim-code-test-doc bindings, require each expiring loop to name a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence, require harness workflows to run tools/harnesspromotion and upload strict candidate evidence, compute claim semantic hashes, enforce PR impact co-change for claim meaning changes and bound file changes, and publish redacted evidence in CI.",
     "evaluate": "The verifier fails on missing loop fields, missing tests, missing bound files, stale generated docs, missing scheduled refresh workflow coverage, refresh cadence slower than evidence expiry, missing strict refresh evidence, harness workflows without candidate promotion, unknown graph nodes, semantic hash drift, claim meaning changes without bound code/test changes, or bound code/test changes without claim evidence changes.",
     "retrospective": "This moves the human out of the inner loop: a future AI can change code without reading this prose, but cannot merge drift without updating the executable claim binding and evidence."
   }

@@ -42,5 +42,5 @@ func verifyIdentity(m manifest) error {
 	if len(m.Assertions) == 0 || len(m.Loops) == 0 || len(m.Claims) == 0 {
 		return fmt.Errorf("loop registry must declare assertions, loops, and claims")
 	}
-	return nil
+	return verifyAssertions(m)
 }
