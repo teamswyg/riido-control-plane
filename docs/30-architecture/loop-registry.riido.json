@@ -14,6 +14,7 @@
     "claim evidence must expose code, test, manifest, generated doc, and verifier surface so agents can infer required co-change scope without reading prose",
     "all loops with evidence expiry must declare a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence",
     "loop registry and evidence graph evidence must carry generated_at and expires_at so tools can reject stale evidence",
+    "evidence graph evidence must expose full reasoning chains, not only chain ids",
     "refresh workflows must declare the loop ids they refresh so workflow edits cannot drift away from the loop registry manifest",
     "AI agents do not need to read the prose doc when the verifier can enforce the bound surface"
   ],
@@ -425,7 +426,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "dcaf33f844bceba863ef178b666d42e486a25641d19069c1dca33fa12aef8340"
+      "semantic_hash": "db0aaba980c21f4a63bc04cd79086aa9df22e0f3f1ec85f076ed2837ef55250d"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -539,7 +540,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "fbaed6ed9bd6d0ac4b6851a593fdbd8dd496c5c8435efa4eb0ad0ea35a681c96"
+      "semantic_hash": "5473e5e17ff7dae29c7ea4e42573bc277bbf5df58b8b73a7f130ac3cdfbbb776"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -770,7 +771,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d3c48318611f1b8302b77e7ce0a449691ab4b4a178a0c1ab81d42e4c62b206f0"
+      "semantic_hash": "3eca9441dd65438a499100be5e8f3f1aacaaf87562ece06e2b5c76c8edb78728"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -794,7 +795,27 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8409010bff25cf6bb66c1776dce66fc41fe9e2c796c4fd070bc4aaf184f0bff7"
+      "semantic_hash": "a432c359fbbedc7c9a9b8441a9d9fb0e980099ff5e23cf1e18cbd1014836535a"
+    },
+    {
+      "id": "evidence_graph_evidence_must_expose_full_chain",
+      "statement": "Evidence graph evidence must publish each chain's observation, hypothesis, changes, verifiers, evidence refs, decision, and next loop so agents can infer why a loop exists without opening narrative docs.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        "docs/30-architecture/evidence-graph.riido.json",
+        "tools/evidencegraph/evidence.go",
+        "tools/evidencegraph/evidence_chain.go",
+        "tools/evidencegraph/evidence_chain_test.go"
+      ],
+      "verifiers": [
+        "TestEvidenceGraphEvidenceExposesFullChainSurface",
+        "TestEvidenceGraphManifestVerifies"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "811a3b1d6fd6235a6bda5cf184c20f174a5aed80af09804c661d140282a4f2af"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -819,7 +840,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "439a47f1c310356373da31251a91e597fb9921e31846cd8ce734409e4733684f"
+      "semantic_hash": "a5ce7b90c778d4764e0c9b5e49d4e993443a55648395c407e03ca81627fba72e"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -1102,6 +1123,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "evidence_graph_refs_must_trigger_evidence_workflow",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "evidence_graph_evidence_must_expose_full_chain",
       "relation": "enforces"
     },
     {

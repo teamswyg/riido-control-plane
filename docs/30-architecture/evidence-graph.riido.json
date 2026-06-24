@@ -696,6 +696,30 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "evidence_graph_full_chain_evidence_loop",
+      "observation": "The evidence graph manifest carried observation, hypothesis, changes, verifiers, evidence, decision, and next_loop, but the generated evidence artifact exposed only chain id and next_loop.",
+      "hypothesis": "Publishing the same executable chain surface in the evidence artifact lets agents and CI infer reasoning scope from evidence JSON without opening narrative readers.",
+      "claims": ["evidence_graph_evidence_must_expose_full_chain"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/evidencegraph/evidence.go"},
+        {"kind": "tool", "path": "tools/evidencegraph/evidence_chain.go"},
+        {"kind": "test", "path": "tools/evidencegraph/evidence_chain_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/evidencegraph/evidence_chain_test.go"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "tool", "path": "tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Evidence graph evidence now carries full chain surfaces, turning the reasoning graph into executable evidence rather than a pointer back to prose.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "evidence_graph_workflow_trigger_coverage_loop",
       "observation": "Evidence graph chains can reference code, workflows, tools, or manifests that do not trigger the evidence-graph workflow when they change.",
       "hypothesis": "The evidence graph verifier can read its own workflow path filters and fail when any non-artifact chain reference is outside those filters, keeping graph evidence refreshed without asking agents to remember trigger maintenance.",
