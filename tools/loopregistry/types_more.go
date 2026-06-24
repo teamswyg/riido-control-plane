@@ -25,12 +25,14 @@ type evidenceLoop struct {
 }
 
 type verifyResult struct {
-	Loops                 int
-	Harnesses             int
-	ClosedLoops           int
-	Claims                int
-	GraphEdges            int
-	MaxExpiryHours        int
-	Hashes                map[string]string
-	RefreshCadenceMinutes map[string]int
+	Loops                     int
+	Harnesses                 int
+	ClosedLoops               int
+	Claims                    int
+	GraphEdges                int
+	MaxExpiryHours            int
+	Hashes                    map[string]string
+	RefreshCadenceMinutes     map[string]int
+	HarnessPromotionWorkflows map[string]string
+	HarnessCandidateArtifacts map[string]string
 }
