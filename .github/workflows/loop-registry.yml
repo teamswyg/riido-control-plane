@@ -27,6 +27,7 @@ on:
       - "internal/riidoaiserver/ai_agent_assignment_prompt.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation_markers.go"
+      - "internal/riidoaiserver/ai_agent_assignment_prompt_component_intent_test.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_metadata_test.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"
@@ -92,6 +93,7 @@ on:
       - "internal/riidoaiserver/ai_agent_assignment_prompt.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation_markers.go"
+      - "internal/riidoaiserver/ai_agent_assignment_prompt_component_intent_test.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_metadata_test.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"
@@ -160,7 +162,7 @@ jobs:
           go test ./tools/aiagentclientapi -run 'Test(GeneratedDocMatchesManifest|RunWritesEvidence)$' -count=1
           go test ./tools/evidencegraph ./tools/harnesspromotion ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision -count=1
           go test ./internal/riidoaiserver \
-            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory|AIAgentIntentDialogueScenarioStaysInConversation)$' \
+            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory|AIAgentIntentDialogueScenarioStaysInConversation|AssignmentPromptClassifiesIntentComponentTypes|AssignmentPromptKeepsExplicitInstructionExecutable)$' \
             -count=1
           go run ./tools/loopregistry \
             -check-doc \
