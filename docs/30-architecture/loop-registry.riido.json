@@ -12,6 +12,7 @@
     "bound code or test file changes must co-change the claim registry manifest or generated claim evidence",
     "harness loops must promote failures into closed-loop candidates by running tools/harnesspromotion and publishing strict candidate evidence",
     "loops with evidence expiry at or below 24 hours must declare a scheduled refresh workflow whose cadence is no slower than expiry and publishes strict evidence",
+    "loop registry and evidence graph evidence must carry generated_at and expires_at so tools can reject stale evidence",
     "AI agents do not need to read the prose doc when the verifier can enforce the bound surface"
   ],
   "loops": [
@@ -444,7 +445,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e5b686b59e1f73963786ba7eedc968cd8ec9b48094e4110e632ef482c533a550"
+      "semantic_hash": "f5ac7e00da2a44bb58de4f97e8d9e50b08396b16cb570333b0c2702c472c7891"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -468,7 +469,32 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "222256e5344bb76f95c99f0fff3b5343ba2d500240ffd04667a1a74dd219c3ed"
+      "semantic_hash": "f1a26251c776ead550bea501995477c20ddff0257e96262ccd1406be8963e814"
+    },
+    {
+      "id": "loop_evidence_artifacts_must_self_expire",
+      "statement": "Loop registry and evidence graph evidence artifacts must publish generated_at and expires_at, and the evidence graph workflow must run on a schedule so stale reasoning graphs are refreshed without human reminders.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        ".github/workflows/evidence-graph.yml",
+        "tools/loopregistry/evidence.go",
+        "tools/loopregistry/evidence_time.go",
+        "tools/loopregistry/evidence_time_test.go",
+        "tools/evidencegraph/evidence.go",
+        "tools/evidencegraph/evidence_time.go",
+        "tools/evidencegraph/evidence_time_test.go",
+        "tools/evidencegraph/workflow_schedule_test.go"
+      ],
+      "verifiers": [
+        "TestLoopRegistryEvidenceCarriesExpiry",
+        "TestEvidenceGraphEvidenceCarriesExpiry",
+        "TestEvidenceGraphWorkflowIsScheduled"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "0a09bdd8e6fd118950822bc8b58084cf1fad4729397c518ca4cd0325821f593c"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",

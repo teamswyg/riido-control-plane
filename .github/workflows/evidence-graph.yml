@@ -1,6 +1,9 @@
 name: Evidence Graph
 
 on:
+  workflow_dispatch:
+  schedule:
+    - cron: "29 20 * * *"
   pull_request:
     paths:
       - ".github/workflows/evidence-graph.yml"
