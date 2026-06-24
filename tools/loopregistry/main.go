@@ -22,8 +22,9 @@ func mainRun(args []string) error {
 	writeDoc := fs.Bool("write-doc", false, "write generated reader doc")
 	checkDoc := fs.Bool("check-doc", false, "verify generated reader doc")
 	writeHashes := fs.Bool("write-hashes", false, "update claim semantic hashes")
+	impactBase := fs.String("impact-base", "", "optional git base ref for PR impact verification")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	return run(options{*repo, *manifest, *evidenceOut, *writeDoc, *checkDoc, *writeHashes})
+	return run(options{*repo, *manifest, *evidenceOut, *writeDoc, *checkDoc, *writeHashes, *impactBase})
 }
