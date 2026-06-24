@@ -26,6 +26,9 @@ func verifyAll(root string, m manifest, hashes map[string]string) (verifyResult,
 	if err := verifyRegistryWorkflowCoversClaims(root, m); err != nil {
 		return verifyResult{}, err
 	}
+	if err := verifyHarnessWorkflowCoverage(root, m); err != nil {
+		return verifyResult{}, err
+	}
 	result.Claims = len(m.Claims)
 	result.GraphEdges = len(m.EvidenceGraph)
 	result.Hashes = hashes

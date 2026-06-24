@@ -187,6 +187,31 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "harness_workflow_coverage_loop",
+      "observation": "Harness-like workflow names could be added without being registered as harness loops or explicitly excluded from harness ownership.",
+      "hypothesis": "Scanning smoke, load, and harness workflow filenames and requiring either a harness loop registration or a reasoned exclusion keeps new QA workflows bound to closed-loop promotion semantics.",
+      "claims": ["harness_like_workflows_must_be_registered_or_excluded"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/harness_workflow_coverage.go"},
+        {"kind": "tool", "path": "tools/loopregistry/harness_workflow_exclusion.go"},
+        {"kind": "test", "path": "tools/loopregistry/harness_workflow_coverage_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/harness_workflow_coverage_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Smoke, load, and harness workflow additions now fail loop-registry verification unless they are registered as failure-promoting harness loops or explicitly excluded with a machine-readable reason.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "deleted_agent_thread_retention_loop",
       "observation": "Deleting an AI Agent can accidentally remove or hide historical task thread replies if the read model depends on the live agent row.",
       "hypothesis": "Capturing an agent snapshot on the thread and falling back to that snapshot for deleted agents keeps prior replies, results, and progress visible.",

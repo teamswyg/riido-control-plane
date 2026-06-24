@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/loop-registry.yml"
+      - ".github/workflows/**"
       - ".github/workflows/evidence-graph.yml"
       - ".github/workflows/ai-agent-client-testnet-smoke.yml"
       - ".github/workflows/ai-agent-client-testnet-load.yml"
@@ -100,6 +101,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/loop-registry.yml"
+      - ".github/workflows/**"
       - ".github/workflows/evidence-graph.yml"
       - ".github/workflows/ai-agent-client-testnet-smoke.yml"
       - ".github/workflows/ai-agent-client-testnet-load.yml"
