@@ -33,6 +33,35 @@ func verifyChangedClaimImpact(claim claimBinding, changed map[string]bool) (impa
 	return record, nil
 }
 
+func verifyBoundSurfaceImpact(claim claimBinding, changed map[string]bool) (impactBoundSurface, error) {
+	record := impactBoundSurface{ID: claim.ID}
+	record.ChangedBoundFiles = changedValues(claim.Files, changed)
+	if len(record.ChangedBoundFiles) == 0 {
+		return record, nil
+	}
+	record.ChangedEvidence = changedValues(claimEvidenceFiles(claim), changed)
+	if len(record.ChangedEvidence) == 0 {
+		return record, fmt.Errorf("claim %s bound files changed without claim evidence change", claim.ID)
+	}
+	return record, nil
+}
+
+func claimEvidenceFiles(claim claimBinding) []string {
+	values := []string{defaultManifest}
+	values = append(values, claim.GeneratedDoc...)
+	return values
+}
+
+func changedValues(values []string, changed map[string]bool) []string {
+	out := []string{}
+	for _, value := range values {
+		if changed[value] {
+			out = append(out, value)
+		}
+	}
+	return out
+}
+
 func prefixedValues(prefix string, values []string) []string {
 	out := []string{}
 	for _, value := range sortedCopy(values) {

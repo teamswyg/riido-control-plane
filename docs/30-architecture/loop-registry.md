@@ -43,8 +43,8 @@ Observe: AI agents can skip or misunderstand narrative docs, while previously fi
 
 Hypothesis: A loop registry can make the intended QA loop executable by binding business claims to code files, tests, generated docs, semantic hashes, evidence expiry, and harness promotion paths.
 
-Execute: Generate this reader from the loop registry, verify claim-code-test-doc bindings, require each 24h loop to name a scheduled refresh workflow that publishes strict evidence, compute claim semantic hashes, enforce PR impact co-change for claim meaning changes, and publish redacted evidence in CI.
+Execute: Generate this reader from the loop registry, verify claim-code-test-doc bindings, require each 24h loop to name a scheduled refresh workflow that publishes strict evidence, compute claim semantic hashes, enforce PR impact co-change for claim meaning changes and bound file changes, and publish redacted evidence in CI.
 
-Evaluate: The verifier fails on missing loop fields, missing tests, missing bound files, stale generated docs, missing scheduled refresh workflow coverage, missing strict refresh evidence, unknown graph nodes, semantic hash drift, or claim meaning changes without bound code/test changes.
+Evaluate: The verifier fails on missing loop fields, missing tests, missing bound files, stale generated docs, missing scheduled refresh workflow coverage, missing strict refresh evidence, unknown graph nodes, semantic hash drift, claim meaning changes without bound code/test changes, or bound code/test changes without claim evidence changes.
 
 Retrospective: This moves the human out of the inner loop: a future AI can change code without reading this prose, but cannot merge drift without updating the executable claim binding and evidence.
