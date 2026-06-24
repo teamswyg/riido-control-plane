@@ -16,6 +16,7 @@ type evidence struct {
 	ClaimSurfaces             []claimSurface    `json:"claim_surfaces"`
 	RefreshWorkflows          map[string]string `json:"refresh_workflows"`
 	RefreshCadenceMinutes     map[string]int    `json:"refresh_cadence_minutes"`
+	RefreshPlans              []refreshPlan     `json:"refresh_plans"`
 	HarnessPromotionWorkflows map[string]string `json:"harness_promotion_workflows"`
 	HarnessCandidateArtifacts map[string]string `json:"harness_candidate_artifacts"`
 	Workflow                  string            `json:"workflow"`
@@ -43,6 +44,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		ClaimSurfaces:             result.ClaimSurfaces,
 		RefreshWorkflows:          refreshWorkflows(m.Loops),
 		RefreshCadenceMinutes:     result.RefreshCadenceMinutes,
+		RefreshPlans:              refreshPlans(m.Loops, result.RefreshCadenceMinutes),
 		HarnessPromotionWorkflows: result.HarnessPromotionWorkflows,
 		HarnessCandidateArtifacts: result.HarnessCandidateArtifacts,
 		Workflow:                  m.Workflow,
