@@ -10,26 +10,27 @@ Evidence artifact: `live-workflow-redaction-evidence`
 
 ## Redacted Live Workflows
 
-| Workflow | Summary Artifact | Summary Path | Sensitive Inputs | Required Phrases |
-| --- | --- | --- | --- | --- |
-| `.github/workflows/ai-agent-client-testnet-smoke.yml` | `ai-agent-client-testnet-smoke-redacted-summary` | `out/ai-agent-client-testnet-smoke-redacted-summary.json` | `TESTNET_BASE_URL, TESTNET_TOKEN` | `` |
-| `.github/workflows/deploy-ai-agent-testnet.yml` | `deploy-ai-agent-testnet-redacted-summary` | `out/deploy-ai-agent-testnet-redacted-summary.json` | `AWS_REGION, ECR_REPOSITORY, ECS_CLUSTER, ECS_SERVICE, ECS_CONTAINER_NAME, CODEDEPLOY_APPLICATION, CODEDEPLOY_DEPLOYMENT_GROUP, TESTNET_BASE_URL, TESTNET_TOKEN` | `docker buildx build, --cache-from "type=gha,scope=${cache_scope}", --cache-to "type=gha,mode=max,scope=${cache_scope}", -deployment-mode "$deployment_mode", -build-cache-mode "buildkit-gha"` |
+| Workflow | Summary Artifact | Summary Path | Sensitive Inputs | Claims | Required Phrases |
+| --- | --- | --- | --- | --- | --- |
+| `.github/workflows/ai-agent-client-testnet-smoke.yml` | `ai-agent-client-testnet-smoke-redacted-summary` | `out/ai-agent-client-testnet-smoke-redacted-summary.json` | `TESTNET_BASE_URL, TESTNET_TOKEN` | `v1_thumbnail_upload_intent, v1_stop_strong_consistency, v2_thread_message_post, v2_threads_active_stream_href, v3_history_agent_snapshot_map, v3_history_message_retention` | `` |
+| `.github/workflows/deploy-ai-agent-testnet.yml` | `deploy-ai-agent-testnet-redacted-summary` | `out/deploy-ai-agent-testnet-redacted-summary.json` | `AWS_REGION, ECR_REPOSITORY, ECS_CLUSTER, ECS_SERVICE, ECS_CONTAINER_NAME, CODEDEPLOY_APPLICATION, CODEDEPLOY_DEPLOYMENT_GROUP, TESTNET_BASE_URL, TESTNET_TOKEN` | `` | `docker buildx build, --cache-from "type=gha,scope=${cache_scope}", --cache-to "type=gha,mode=max,scope=${cache_scope}", -deployment-mode "$deployment_mode", -build-cache-mode "buildkit-gha"` |
 
 ## Assertions
 
 - live workflows may run curl, aws, or docker, but public artifacts must contain only redacted summary evidence
-- redacted summaries must not include endpoint URLs, AWS resource names, tokens, task definition ARNs, image URIs, or raw response bodies
+- redacted summaries must not include endpoint hosts, AWS resource names, tokens, task definition ARNs, image URIs, or raw response bodies
+- redacted summaries may include manifest-declared contract claim ids and summaries when the workflow source proves each claim
 - public workflow evidence coverage must not need accepted gaps for live smoke or live deploy workflows
 
 ## Loop
 
-- Observation: The remaining workflow evidence gaps were live smoke and deployment jobs that could not safely publish raw operator output.
-- Hypothesis: A redacted summary sidecar can prove execution shape without exporting private endpoint, token, or AWS topology values.
-- Execute: Verify each live workflow publishes a generated summary artifact through this tool and keep only safe GitHub metadata in that artifact.
-- Evaluate: The verifier fails on missing summary wiring, stale generated docs, or summary fields outside the redaction contract.
-- Retrospective: Live workflows can now participate in the evidence loop while keeping private runtime details outside the public repository.
+- Observation: The remaining workflow evidence gaps were live smoke and deployment jobs that could not safely publish raw operator output; the smoke summary also hid which frontend-facing contracts were exercised.
+- Hypothesis: A redacted summary sidecar can prove execution shape and contract claim coverage without exporting private endpoint hosts, token, raw response bodies, or AWS topology values.
+- Execute: Verify each live workflow publishes a generated summary artifact through this tool, keep only safe GitHub metadata in that artifact, and require manifest-declared claim source phrases to exist in the workflow.
+- Evaluate: The verifier fails on missing summary wiring, stale generated docs, summary fields outside the redaction contract, claim fields not explicitly allowed, or claim source phrases absent from the workflow.
+- Retrospective: Live workflows can now participate in the evidence loop while exposing enough safe claim coverage for frontend and operations review.
 
 ## Verification
 
 - Workflow count: `2`
-- Phrase checks: `28`
+- Phrase checks: `41`

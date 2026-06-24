@@ -13,6 +13,7 @@ type workflowRecord struct {
 	SummaryPath     string   `json:"summary_path"`
 	SensitiveInputs []string `json:"sensitive_inputs"`
 	RequiredPhrases []string `json:"required_phrases,omitempty"`
+	EvidenceClaims  []string `json:"evidence_claims,omitempty"`
 }
 
 type manifestEvidence struct {
@@ -37,7 +38,14 @@ type liveSummary struct {
 	DeploymentTarget string             `json:"deployment_target,omitempty"`
 	DeploymentMode   string             `json:"deployment_mode,omitempty"`
 	BuildCacheMode   string             `json:"build_cache_mode,omitempty"`
+	EvidenceClaims   []liveClaim        `json:"evidence_claims,omitempty"`
 	Redaction        redactionAssertion `json:"redaction"`
+}
+
+type liveClaim struct {
+	ID      string `json:"id"`
+	Summary string `json:"summary"`
+	Status  string `json:"status"`
 }
 
 type runRecord struct {

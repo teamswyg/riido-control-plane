@@ -31,6 +31,7 @@ func newLiveSummary(spec workflowSpec, opt options) liveSummary {
 		DeploymentTarget: opt.DeploymentTarget,
 		DeploymentMode:   opt.DeploymentMode,
 		BuildCacheMode:   opt.BuildCacheMode,
+		EvidenceClaims:   newLiveClaims(spec, status),
 		Redaction:        newRedaction(spec),
 	}
 }

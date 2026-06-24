@@ -13,13 +13,14 @@ type manifest struct {
 }
 
 type workflowSpec struct {
-	ID              string   `json:"id"`
-	Path            string   `json:"path"`
-	SummaryArtifact string   `json:"summary_artifact"`
-	SummaryPath     string   `json:"summary_path"`
-	SensitiveInputs []string `json:"sensitive_inputs"`
-	AllowedFields   []string `json:"allowed_summary_fields"`
-	RequiredPhrases []string `json:"required_phrases,omitempty"`
+	ID              string      `json:"id"`
+	Path            string      `json:"path"`
+	SummaryArtifact string      `json:"summary_artifact"`
+	SummaryPath     string      `json:"summary_path"`
+	SensitiveInputs []string    `json:"sensitive_inputs"`
+	AllowedFields   []string    `json:"allowed_summary_fields"`
+	RequiredPhrases []string    `json:"required_phrases,omitempty"`
+	EvidenceClaims  []claimSpec `json:"evidence_claims,omitempty"`
 }
 
 type loopRecord struct {
@@ -28,4 +29,10 @@ type loopRecord struct {
 	Execute       string `json:"execute"`
 	Evaluate      string `json:"evaluate"`
 	Retrospective string `json:"retrospective"`
+}
+
+type claimSpec struct {
+	ID            string   `json:"id"`
+	Summary       string   `json:"summary"`
+	SourcePhrases []string `json:"source_phrases"`
 }

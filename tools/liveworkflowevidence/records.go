@@ -10,6 +10,7 @@ func newRecord(spec workflowSpec) workflowRecord {
 		SummaryPath:     spec.SummaryPath,
 		SensitiveInputs: spec.SensitiveInputs,
 		RequiredPhrases: spec.RequiredPhrases,
+		EvidenceClaims:  claimIDs(spec.EvidenceClaims),
 	}
 }
 

@@ -20,6 +20,7 @@ func verifyWorkflowFile(root string, spec workflowSpec) (int, error) {
 	}
 	phrases = append(phrases, spec.SensitiveInputs...)
 	phrases = append(phrases, spec.RequiredPhrases...)
+	phrases = append(phrases, claimSourcePhrases(spec)...)
 	for _, phrase := range phrases {
 		if !strings.Contains(text, phrase) {
 			return 0, fmt.Errorf("%s missing phrase %q", spec.Path, phrase)

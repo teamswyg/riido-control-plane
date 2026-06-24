@@ -12,7 +12,39 @@
       "summary_artifact": "ai-agent-client-testnet-smoke-redacted-summary",
       "summary_path": "out/ai-agent-client-testnet-smoke-redacted-summary.json",
       "sensitive_inputs": ["TESTNET_BASE_URL", "TESTNET_TOKEN"],
-      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "live_status", "redaction"]
+      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "live_status", "evidence_claims", "redaction"],
+      "evidence_claims": [
+        {
+          "id": "v1_thumbnail_upload_intent",
+          "summary": "v1 thumbnail upload intent returns a POST form contract without receiving image bytes in control-plane.",
+          "source_phrases": ["/v1/client/ai-agent/profile-thumbnails/uploads", ".form_file_field == \"file\""]
+        },
+        {
+          "id": "v1_stop_strong_consistency",
+          "summary": "v1 task stop returns stopped_by_user_request immediately as the SaaS-visible state.",
+          "source_phrases": ["/v1/client/ai-agent/tasks/$smoke_task_id/stop", ".comment_kind == \"stopped_by_user_request\" and .assignment_state == \"stopped\""]
+        },
+        {
+          "id": "v2_thread_message_post",
+          "summary": "v2 task-scoped thread message POST accepts a selected thread_id and returns that thread_id.",
+          "source_phrases": ["/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/threads/$thread_id_v2/messages", "source_message_id"]
+        },
+        {
+          "id": "v2_threads_active_stream_href",
+          "summary": "v2 thread collection exposes the task stream href that points at the workspace AI Agent events stream.",
+          "source_phrases": ["active_stream.href == $href", "/v2/client/workspaces/$workspace_id/ai-agent/events"]
+        },
+        {
+          "id": "v3_history_agent_snapshot_map",
+          "summary": "v3 thread history returns agent_snapshots as an id-addressed map and thread records reference agent_snapshot_id.",
+          "source_phrases": ["/v3/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/threads", "(.agent_snapshots | type) == \"object\"", "agent_snapshot_id"]
+        },
+        {
+          "id": "v3_history_message_retention",
+          "summary": "v3 thread history preserves a user follow-up message after refresh through messages[].",
+          "source_phrases": ["v3_followup_body=\"Please preserve this v3 follow-up after refresh\"", "any(.messages[]; .role == \"user\" and .body == $body)"]
+        }
+      ]
     },
     {
       "id": "deploy-ai-agent-testnet",
@@ -32,14 +64,15 @@
   ],
   "assertions": [
     "live workflows may run curl, aws, or docker, but public artifacts must contain only redacted summary evidence",
-    "redacted summaries must not include endpoint URLs, AWS resource names, tokens, task definition ARNs, image URIs, or raw response bodies",
+    "redacted summaries must not include endpoint hosts, AWS resource names, tokens, task definition ARNs, image URIs, or raw response bodies",
+    "redacted summaries may include manifest-declared contract claim ids and summaries when the workflow source proves each claim",
     "public workflow evidence coverage must not need accepted gaps for live smoke or live deploy workflows"
   ],
   "loop": {
-    "observation": "The remaining workflow evidence gaps were live smoke and deployment jobs that could not safely publish raw operator output.",
-    "hypothesis": "A redacted summary sidecar can prove execution shape without exporting private endpoint, token, or AWS topology values.",
-    "execute": "Verify each live workflow publishes a generated summary artifact through this tool and keep only safe GitHub metadata in that artifact.",
-    "evaluate": "The verifier fails on missing summary wiring, stale generated docs, or summary fields outside the redaction contract.",
-    "retrospective": "Live workflows can now participate in the evidence loop while keeping private runtime details outside the public repository."
+    "observation": "The remaining workflow evidence gaps were live smoke and deployment jobs that could not safely publish raw operator output; the smoke summary also hid which frontend-facing contracts were exercised.",
+    "hypothesis": "A redacted summary sidecar can prove execution shape and contract claim coverage without exporting private endpoint hosts, token, raw response bodies, or AWS topology values.",
+    "execute": "Verify each live workflow publishes a generated summary artifact through this tool, keep only safe GitHub metadata in that artifact, and require manifest-declared claim source phrases to exist in the workflow.",
+    "evaluate": "The verifier fails on missing summary wiring, stale generated docs, summary fields outside the redaction contract, claim fields not explicitly allowed, or claim source phrases absent from the workflow.",
+    "retrospective": "Live workflows can now participate in the evidence loop while exposing enough safe claim coverage for frontend and operations review."
   }
 }
