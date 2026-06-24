@@ -53,3 +53,19 @@ func recordAssignmentFailed(t *testing.T, store *DevelopmentAIAgentClientStore, 
 		t.Fatalf("RecordAIAgentAssignmentEvent failed: %v", err)
 	}
 }
+
+func recordAssignmentCompleted(t *testing.T, store *DevelopmentAIAgentClientStore, action AIAgentTaskActionResponse, message string) {
+	t.Helper()
+	event := TaskEvent{
+		TaskID:       action.TaskID,
+		AssignmentID: action.AssignmentID,
+		AgentID:      action.AgentID,
+		Type:         EventAssignmentCompleted,
+		State:        AssignmentCompleted,
+		Message:      message,
+		At:           time.Now().UTC(),
+	}
+	if err := store.RecordAIAgentAssignmentEvent(context.Background(), action.AgentID, AgentEventRequest{}, event); err != nil {
+		t.Fatalf("RecordAIAgentAssignmentEvent completed: %v", err)
+	}
+}

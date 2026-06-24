@@ -352,7 +352,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "873bd9477b62d38081d047bbc95f7160469581f6577954a3284e628634c737cb"
+      "semantic_hash": "ef70ad2baa0f015e79b12a8e129ae388e265040e27057fa7ce230919c66d0c22"
     },
     {
       "id": "expired_harness_evidence_must_not_promote_candidates",
@@ -499,7 +499,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ae0d125639776b4b7e7c9bfde7580437163ebd48ba6e88da9414cd206c313712"
+      "semantic_hash": "fa91cfa677ce1e9d717c8ff6cad66780f383046e092f2bda17911c584478e558"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
@@ -549,7 +549,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "21d237e889d5affb821493cc40ba8d8d97aa582cefb728375442cbda1f0b0397"
+      "semantic_hash": "0dcaea9087fa02b8027cab36e1c32258e4b645f6b2874d53fff86cfa68c0b0ac"
     },
     {
       "id": "claim_bound_paths_must_trigger_loop_registry",
@@ -571,7 +571,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "1d6cbfe8b62e02b878eacd3eadb64c90835376f57148581687a5a555db9c7a08"
+      "semantic_hash": "ba1b70a30abe43ec53324f839f50e7778c2a1a7519db44ee299edc4567ae1e4e"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
