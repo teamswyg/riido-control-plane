@@ -11,7 +11,7 @@ func verifierCommandsForClaim(
 	testPaths []string,
 	tests map[string][]string,
 ) []string {
-	claimPackages := claimTestPackages(testPaths)
+	claimPackages := claimBoundPackages(claim.Files)
 	byPackage := map[string][]string{}
 	for _, verifier := range sortedCopy(claim.Verifiers) {
 		for _, pkg := range verifierPackages(verifier, claimPackages, tests) {

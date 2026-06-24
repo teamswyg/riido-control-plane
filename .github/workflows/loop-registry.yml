@@ -220,6 +220,7 @@ jobs:
             -count=1
           go run ./tools/loopregistry \
             -check-doc \
+            -github-annotations \
             "${impact_args[@]}" \
             -evidence-out out/loop-registry-evidence.json
       - uses: actions/upload-artifact@v7
