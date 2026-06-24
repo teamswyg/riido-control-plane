@@ -10,14 +10,14 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Decisions
 
-| Candidate | Disposition | Priority | Owner | Next Artifact |
-| --- | --- | --- | --- | --- |
-| `ai-agent-client-testnet-smoke:provider_smoke` | `triage_required` | `P1` | `agent-platform-loop` | `claim_binding` |
+| Candidate | Disposition | Priority | Owner | Review By | Next Artifact |
+| --- | --- | --- | --- | --- | --- |
+| `ai-agent-client-testnet-smoke:provider_smoke` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-01` | `claim_binding` |
 
 ## Evidence Loop
 
 - Observation: Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.
-- Hypothesis: A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, and next artifact.
+- Hypothesis: A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, next artifact, and review expiry.
 - Execute: Generate this reader from the decision manifest, generate a deterministic candidate fixture, verify intake, verify candidate decisions, and publish decision evidence in CI.
-- Evaluate: The verifier fails on missing candidate decisions, duplicate decisions, unknown dispositions, missing owners, invalid priorities, stale docs, missing scheduled workflow evidence, or unredacted candidate content.
-- Retrospective: This moves prioritization metadata into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition.
+- Evaluate: The verifier fails on missing candidate decisions, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, stale docs, missing scheduled workflow evidence, or unredacted candidate content.
+- Retrospective: This moves prioritization metadata into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition and review deadline.

@@ -26,6 +26,9 @@ func verifyDecision(decision decisionRecord) error {
 	if !containsString(allowedPriorities, decision.Priority) {
 		return fmt.Errorf("candidate %s has unknown priority %s", decision.CandidateID, decision.Priority)
 	}
+	if err := verifyDecisionReviewBy(decision); err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -22,6 +22,7 @@ type decisionRecord struct {
 	Owner        string `json:"owner"`
 	NextLoop     string `json:"next_loop"`
 	NextArtifact string `json:"next_artifact"`
+	ReviewBy     string `json:"review_by,omitempty"`
 	Reason       string `json:"reason"`
 }
 
