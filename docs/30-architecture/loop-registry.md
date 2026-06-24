@@ -9,8 +9,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `6`
 - harness loops: `1`
 - closed loops: `5`
-- claim bindings: `9`
-- evidence graph edges: `14`
+- claim bindings: `10`
+- evidence graph edges: `15`
 - max evidence expiry hours: `168`
 
 ## Loops
@@ -35,8 +35,9 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `40c80ece1ed9` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `b048e4a8ff81` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `8` | `4` | `004a77ab0157` |
-| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `c20bae489c3f` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `855a20c77530` |
+| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `bf99dc288963` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `07b02deb451f` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `067beaec5383` |
 
 ## Evidence Graph
 
@@ -54,6 +55,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `ai_thread_history` --enforces--> `ambiguous_task_context_must_ask_before_work`
 - `closed_loop_candidate` --enforces--> `claim_bound_paths_must_trigger_loop_registry`
 - `closed_loop_candidate` --enforces--> `evidence_graph_must_cover_loop_registry_claims`
+- `closed_loop_candidate` --enforces--> `evidence_graph_refs_must_trigger_evidence_workflow`
 
 ## Evidence Loop
 

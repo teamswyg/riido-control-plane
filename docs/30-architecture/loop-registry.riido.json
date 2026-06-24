@@ -415,7 +415,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c20bae489c3fa0b3a2d59e47e1d0f0dcc9f607c38047326806c9caf25ee0f328"
+      "semantic_hash": "bf99dc2889632e1b8b23851a523fb8b83221be43b28a7099745edd030912750f"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -439,7 +439,31 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "855a20c77530cf01103ea3c61de6b53e15c7547e9cec17be2e96070175e7b833"
+      "semantic_hash": "07b02deb451f7af6e1ae38a7b1d6b224080e2ccc72f14f14158d8dfcc602cdfc"
+    },
+    {
+      "id": "evidence_graph_refs_must_trigger_evidence_workflow",
+      "statement": "Every non-artifact file or workflow referenced by the evidence graph must be covered by the evidence-graph workflow trigger paths so graph verification runs when referenced surfaces move or change.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        ".github/workflows/evidence-graph.yml",
+        "docs/30-architecture/evidence-graph.riido.json",
+        "tools/evidencegraph/verify.go",
+        "tools/evidencegraph/workflow_paths.go",
+        "tools/evidencegraph/workflow_coverage.go",
+        "tools/evidencegraph/workflow_coverage_test.go"
+      ],
+      "verifiers": [
+        "TestEvidenceWorkflowCoversReferencedPaths",
+        "TestEvidenceWorkflowCoverageFailsForMissingPath",
+        "TestWorkflowPathFiltersExtractsAllPathBlocks",
+        "TestWorkflowPathCoveredSupportsDirectoryGlob"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "067beaec53837f5963f2e1dc3b1bd1fd26ef68278936b9c94fdaa913ea504cd2"
     }
   ],
   "evidence_graph": [
@@ -511,6 +535,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "evidence_graph_must_cover_loop_registry_claims",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "evidence_graph_refs_must_trigger_evidence_workflow",
       "relation": "enforces"
     }
   ],

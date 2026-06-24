@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/loop-registry.yml"
+      - ".github/workflows/evidence-graph.yml"
       - "docs/20-domain/ai-agent-client-api.md"
       - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/30-architecture/evidence-graph.md"
@@ -59,6 +60,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/loop-registry.yml"
+      - ".github/workflows/evidence-graph.yml"
       - "docs/20-domain/ai-agent-client-api.md"
       - "docs/20-domain/ai-agent-client-api.riido.json"
       - "docs/30-architecture/evidence-graph.md"
