@@ -376,11 +376,26 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusBadGateway, err.Error())
 		return
 	}
-	assignmentReq, err := s.assignRequestFromAIAgentClientTask(r.Context(), principal, bearerToken, taskID, req)
+	composedReq, err := s.assignRequestFromAIAgentClientTaskResult(r.Context(), principal, bearerToken, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
+	if composedReq.IntentGateRequired {
+		if _, _, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, "", "", "intent_gate_required"); err != nil {
+			writeAIAgentClientError(w, err)
+			return
+		}
+		req.intentGateRequired = true
+		response, err := s.aiAgent.AssignAIAgentTask(r.Context(), principal, taskID, req)
+		if err != nil {
+			writeAIAgentClientError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusAccepted, response)
+		return
+	}
+	assignmentReq := composedReq.Request
 	assignment, err := s.assignment.AssignTaskReplacement(r.Context(), taskID, assignmentReq)
 	if err != nil {
 		writeAIAgentClientError(w, err)
@@ -418,11 +433,22 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		writeError(w, http.StatusBadGateway, err.Error())
 		return
 	}
-	assignmentReq, err := s.assignRequestFromAIAgentClientTask(r.Context(), principal, bearerToken, taskID, req)
+	composedReq, err := s.assignRequestFromAIAgentClientTaskResult(r.Context(), principal, bearerToken, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
+	if composedReq.IntentGateRequired {
+		req.intentGateRequired = true
+		response, err := s.aiAgent.CreateAIAgentTaskAgentAssignment(r.Context(), principal, taskID, req)
+		if err != nil {
+			writeAIAgentClientError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusAccepted, response)
+		return
+	}
+	assignmentReq := composedReq.Request
 	assignment, err := s.assignment.AssignTaskAdditive(r.Context(), taskID, assignmentReq)
 	if err != nil {
 		writeAIAgentClientError(w, err)

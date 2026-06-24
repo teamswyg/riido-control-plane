@@ -70,6 +70,7 @@ type AIAgentAssignmentPrompt struct {
 	Prompt             string
 	SelectedRepository AIAgentTaskContextRepository
 	HasRepository      bool
+	IntentGateRequired bool
 }
 
 func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgentAssignmentPrompt, error) {
@@ -91,6 +92,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	if component.Title == "" && document.Content == "" {
 		return AIAgentAssignmentPrompt{}, errors.New("task context title or document content is required")
 	}
+	intentClass := classifyTaskContextIntent(component, document)
 
 	var builder strings.Builder
 	builder.WriteString("# Riido AI Agent Assignment\n\n")
@@ -98,7 +100,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	builder.WriteString("Provider-specific instruction placement is owned by riido-daemon.\n\n")
 
 	writePromptInteractionPolicy(&builder)
-	writePromptTaskInterpretation(&builder, component, document)
+	writePromptTaskInterpretation(&builder, component, document, intentClass)
 
 	builder.WriteString("## Task\n")
 	writePromptLine(&builder, "task_id", taskID)
@@ -145,6 +147,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 		Prompt:             builder.String(),
 		SelectedRepository: repository,
 		HasRepository:      hasRepository,
+		IntentGateRequired: intentGateRequiredBool(intentClass),
 	}, nil
 }
 

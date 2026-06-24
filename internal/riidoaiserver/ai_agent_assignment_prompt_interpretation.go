@@ -12,8 +12,8 @@ func writePromptTaskInterpretation(
 	builder *strings.Builder,
 	component AIAgentTaskContextComponent,
 	document AIAgentTaskContextDocument,
+	intentClass string,
 ) {
-	intentClass := classifyTaskContextIntent(component, document)
 	builder.WriteString("## Task Interpretation\n")
 	writePromptLine(builder, "intent_class", intentClass)
 	writePromptLine(builder, "intent_gate_required", intentGateRequired(intentClass))
@@ -49,11 +49,18 @@ func firstResponsePolicy(intentClass string) string {
 }
 
 func intentGateRequired(intentClass string) string {
+	if intentGateRequiredBool(intentClass) {
+		return "true"
+	}
+	return "false"
+}
+
+func intentGateRequiredBool(intentClass string) bool {
 	switch intentClass {
 	case taskIntentIntentOriented, taskIntentMetadataOnly:
-		return "true"
+		return true
 	default:
-		return "false"
+		return false
 	}
 }
 

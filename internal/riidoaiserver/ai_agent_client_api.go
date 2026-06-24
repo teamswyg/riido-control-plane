@@ -371,9 +371,10 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
-	AgentID      string `json:"agent_id"`
-	AssignmentID string `json:"-"`
-	durableState AssignmentState
+	AgentID            string `json:"agent_id"`
+	AssignmentID       string `json:"-"`
+	durableState       AssignmentState
+	intentGateRequired bool
 }
 
 type UnassignAIAgentTaskRequest struct {

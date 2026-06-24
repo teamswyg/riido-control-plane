@@ -413,7 +413,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3b04c5b7ccd952883ab2d30b2eb0df6dbef8e44c6e231e2220eaa2dc911fe383"
+      "semantic_hash": "f4ffcccdfda7d525f0aefc9ff9a0947530f9329f1cff07e4a800740378ed30ad"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -453,6 +453,17 @@
         "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation_markers.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go",
+        "internal/riidoaiserver/ai_agent_intent_gate_assignment.go",
+        "internal/riidoaiserver/ai_agent_client_development_assignment_start_projection.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_assign_ai_agent_task_2.go",
+        "internal/riidoaiserver/server.go",
+        "internal/riidoaiserver/server_assignment_action.go",
+        "internal/riidoaiserver/server_assignment_agent_select.go",
+        "internal/riidoaiserver/server_assignment_request.go",
+        "internal/riidoaiserver/server_assignment_runtime_fact.go",
+        "internal/riidoaiserver/server_task_context_compose.go",
+        "internal/riidoaiserver/server_task_context_request.go",
+        "internal/riidoaiserver/server_task_context_trace.go",
         "internal/riidoaiserver/server_thread_message_prompt.go",
         "internal/riidoaiserver/ai_agent_client_visible_messages.go",
         "internal/riidoaiserver/ai_agent_client_visible_limit_message.go",
@@ -474,6 +485,8 @@
         "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go",
         "internal/riidoaiserver/ai_agent_assignment_prompt_component_intent_test.go",
         "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go",
+        "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go",
+        "internal/riidoaiserver/ai_agent_client_http_intent_gate_helpers_test.go",
         "tools/aiagentclientapi/main.go",
         "tools/aiagentclientapi/main_test.go",
         "tools/aiagentclientapi/types_thread_history_v3.go",
@@ -488,6 +501,7 @@
         "TestAssignmentPromptClassifiesIntentComponentTypes",
         "TestAssignmentPromptKeepsExplicitInstructionExecutable",
         "TestFollowupPromptKeepsLatestUserInstructionAuthoritative",
+        "TestHTTPAIAgentIntentGateWaitsForUserBeforeDurableAssignment",
         "TestAIAgentIntentDialogueScenarioStaysInConversation",
         "TestAIAgentIntentDialogueScenarioKeepsProgressAndLimitResult",
         "TestClientVisibleTaskThreadTextLocalizesProviderLimitMessages",
@@ -499,7 +513,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "fa91cfa677ce1e9d717c8ff6cad66780f383046e092f2bda17911c584478e558"
+      "semantic_hash": "9343985a1e0f1467f463ae9998277fbbda1d61d7bdc3c0f3df2255a3b3f61f36"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
@@ -549,7 +563,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0dcaea9087fa02b8027cab36e1c32258e4b645f6b2874d53fff86cfa68c0b0ac"
+      "semantic_hash": "38978e035bece5f0d27eb3f17af37f7d18201ad6c112f68013324677a839e8ee"
     },
     {
       "id": "claim_bound_paths_must_trigger_loop_registry",
@@ -571,7 +585,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ba1b70a30abe43ec53324f839f50e7778c2a1a7519db44ee299edc4567ae1e4e"
+      "semantic_hash": "6292e5b97a29e385e2977cbb2a4d27a4601ef50c8ea36293fa47d70fe2251a8f"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -595,7 +609,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "def94d47cdb3e69e35535459e692911529db8ddd7ad445168fecda93335c1012"
+      "semantic_hash": "0cae80519a2062dd67587c5d6b419f80f6e220e1b45417cf3d4f7f58e0842e22"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -619,7 +633,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "52e8f30728cdc60ba4fcaf0407986e4e8aa7ae8ce49ba081c64418b1a8d6f373"
+      "semantic_hash": "fc74f97dae92b8872e75bfc57292a1423acf10b11558382d42f4af406c2ff42d"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",

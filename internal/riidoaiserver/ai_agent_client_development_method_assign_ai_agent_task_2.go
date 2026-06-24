@@ -3,7 +3,6 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -36,10 +35,8 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 			agent = refreshed
 		}
 	}
-	sequence := strconv.Itoa(len(s.taskThreads[taskID]) + 1)
-	if req.AssignmentID == "" {
-		req.AssignmentID = "asn-dev-assignment-" + taskID + "-" + sequence
-	}
+	sequence := nextTaskThreadSequence(s.taskThreads[taskID])
+	req.AssignmentID = taskAssignmentIDForRequest(taskID, sequence, req)
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
@@ -53,12 +50,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 		Message:         clientMessageTaskRunning,
 	}
 	response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
-	if agent.WorkStatus == AgentWorkStatusRunning || agent.WorkStatus == AgentWorkStatusWaitingForUser || agent.WorkStatus == AgentWorkStatusQueued {
-		response.WorkStatus = AgentWorkStatusQueued
-		response.AssignmentState = AgentAssignmentStateQueued
-		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
-		response.Message = clientMessageAgentBusyQueued
-	}
+	applyAssignmentStartProjection(&response, agent.WorkStatus, req)
 	if assignmentStateIsKnown(req.durableState) {
 		response.Message = ""
 		applyAssignmentStateActionResponse(&response, req.durableState)

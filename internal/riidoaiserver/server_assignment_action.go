@@ -48,6 +48,9 @@ func (s Server) cancelAIAgentAssignmentBeforeAction(ctx context.Context, princip
 	}
 	primary := targets[0]
 	for _, target := range targets {
+		if isIntentGateAssignmentID(target.AssignmentID) {
+			continue
+		}
 		cancelled, err := canceller.CancelAssignment(ctx, target.TaskID, CancelAssignmentRequest{
 			AgentID:      target.AgentID,
 			AssignmentID: target.AssignmentID,
