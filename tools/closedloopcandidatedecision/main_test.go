@@ -2,28 +2,6 @@ package main
 
 import "testing"
 
-func TestCandidateDecisionManifestVerifies(t *testing.T) {
-	if err := run(options{
-		Repo:        "../..",
-		Manifest:    defaultManifest,
-		CheckDoc:    true,
-		EvidenceOut: t.TempDir() + "/evidence.json",
-	}); err != nil {
-		t.Fatalf("run: %v", err)
-	}
-}
-
-func TestCandidateDecisionVerifyAlias(t *testing.T) {
-	if err := mainRun([]string{
-		"-repo", "../..",
-		"-manifest", defaultManifest,
-		"-verify",
-		"-evidence-out", t.TempDir() + "/evidence.json",
-	}); err != nil {
-		t.Fatalf("mainRun -verify: %v", err)
-	}
-}
-
 func TestCandidateDecisionRejectsInvalidPriority(t *testing.T) {
 	m := loadDecisionManifestForTest(t)
 	m.Decisions[0].Priority = "urgent"
@@ -58,10 +36,7 @@ func TestCandidateDecisionRejectsExpiredReviewBy(t *testing.T) {
 
 func loadDecisionManifestForTest(t *testing.T) manifest {
 	t.Helper()
-	root, err := findRepoRoot("../..")
-	if err != nil {
-		t.Fatal(err)
-	}
+	root := repoRootForTest(t)
 	m, err := loadManifest(repoPath(root, defaultManifest))
 	if err != nil {
 		t.Fatal(err)

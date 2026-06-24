@@ -148,6 +148,7 @@
       "refresh_workflow": ".github/workflows/closed-loop-candidate-intake.yml",
       "expires_after_hours": 24,
       "fails_when": [
+        "candidate_input_missing",
         "candidate_evidence_missing",
         "adoption_artifact_missing",
         "raw_candidate_leak"
@@ -368,7 +369,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b048e4a8ff81b37a247982a26823c9007885d6825409499f9bf5597f6e4da89e"
+      "semantic_hash": "353a8e4bb6d2c93dd9945ef1554d4d2974be0a7341be14dfb085e0021a0fae88"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -419,7 +420,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "00926a26027c47c584b607da4d378f5175e934d3bbf0b364a6bcba1756cb18ea"
+      "semantic_hash": "da530e201ffeb8da1e43dd58a2f947828c0546cfab478a2110d9d577c3864194"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -443,7 +444,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "7478bbcc41ceb90b0d67b5d1b5f4b2c964d1a630199b89554c11f25af5161702"
+      "semantic_hash": "e5b686b59e1f73963786ba7eedc968cd8ec9b48094e4110e632ef482c533a550"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -467,28 +468,59 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "eeb203560f9b43d6b1cef017b56d2bee4d6f3d6f439968454a4a9e511f4c55f1"
+      "semantic_hash": "222256e5344bb76f95c99f0fff3b5343ba2d500240ffd04667a1a74dd219c3ed"
+    },
+    {
+      "id": "candidate_intake_must_consume_candidate_artifact",
+      "statement": "Closed-loop candidate intake verification must consume a candidate artifact before producing intake evidence, so harness failures cannot become passive manifest-only reports.",
+      "loop": "closed_loop_candidate_intake",
+      "files": [
+        "docs/30-architecture/closed-loop-candidate-intake.riido.json",
+        "tools/closedloopcandidateintake/candidate.go",
+        "tools/closedloopcandidateintake/errors.go",
+        "tools/closedloopcandidateintake/run.go",
+        "tools/closedloopcandidateintake/main_test.go",
+        "tools/closedloopcandidateintake/candidate_test.go"
+      ],
+      "verifiers": [
+        "TestClosedLoopCandidateIntakeManifestVerifies",
+        "TestClosedLoopCandidateIntakeVerifyAlias",
+        "TestClosedLoopCandidateIntakeRequiresCandidateInput",
+        "TestCandidateFixtureIntakeVerifiesGeneratedCandidate"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/closed-loop-candidate-intake.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "ecfd5e2a0c5fdd80bc29b66890b963d5ce8b34251877358921e7237df63d62a9"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
-      "statement": "Closed-loop candidate decision records must match the consumed candidate artifact exactly: every candidate needs one decision, and every decision must point to a current candidate.",
+      "statement": "Closed-loop candidate decision verification must consume a candidate artifact, and decision records must match that artifact exactly: every candidate needs one decision, and every decision must point to a current candidate.",
       "loop": "closed_loop_candidate_decision",
       "files": [
         "docs/30-architecture/closed-loop-candidate-decision.riido.json",
         "tools/closedloopcandidatedecision/candidate.go",
+        "tools/closedloopcandidatedecision/errors.go",
+        "tools/closedloopcandidatedecision/run.go",
+        "tools/closedloopcandidatedecision/candidate_input_test.go",
         "tools/closedloopcandidatedecision/candidate_orphan_test.go",
-        "tools/closedloopcandidatedecision/candidate_test.go"
+        "tools/closedloopcandidatedecision/candidate_test.go",
+        "tools/closedloopcandidatedecision/verify_alias_test.go"
       ],
       "verifiers": [
         "TestCandidateDecisionCoversGeneratedCandidate",
-        "TestCandidateDecisionRejectsOrphanDecision"
+        "TestCandidateDecisionRejectsOrphanDecision",
+        "TestCandidateDecisionVerifyRequiresCandidateInput",
+        "TestCandidateDecisionVerifyAlias"
       ],
       "generated_docs": [
         "docs/30-architecture/closed-loop-candidate-decision.md",
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "7c508191245cfd60bafa083d9e5296e72aba59bf9ef945bc1e53409b3ab5aefc"
+      "semantic_hash": "b632f70d02fb8a4161630bb56fb279ba9a0ce30ab13fe515096d41bcee1528c1"
     }
   ],
   "evidence_graph": [

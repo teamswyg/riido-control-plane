@@ -13,6 +13,9 @@ func run(opt options) error {
 	if err != nil {
 		return err
 	}
+	if err := requireCandidateInput(opt); err != nil {
+		return err
+	}
 	if opt.CandidateIn != "" {
 		candidateResult, err := verifyCandidateDecisions(root, m, opt.CandidateIn)
 		if err != nil {
@@ -28,4 +31,11 @@ func run(opt options) error {
 		return writeJSON(opt.EvidenceOut, newEvidence(m, result))
 	}
 	return nil
+}
+
+func requireCandidateInput(opt options) error {
+	if opt.CandidateIn != "" || (!opt.CheckDoc && opt.EvidenceOut == "") {
+		return nil
+	}
+	return errMissingCandidateInput
 }

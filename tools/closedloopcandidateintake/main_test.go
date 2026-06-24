@@ -1,11 +1,17 @@
 package main
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestClosedLoopCandidateIntakeManifestVerifies(t *testing.T) {
+	root := repoRootForTest(t)
+	candidateIn := candidateFixtureForTest(t, root)
 	if err := run(options{
 		Repo:        "../..",
 		Manifest:    defaultManifest,
+		CandidateIn: candidateIn,
 		CheckDoc:    true,
 		EvidenceOut: t.TempDir() + "/evidence.json",
 	}); err != nil {
@@ -14,13 +20,28 @@ func TestClosedLoopCandidateIntakeManifestVerifies(t *testing.T) {
 }
 
 func TestClosedLoopCandidateIntakeVerifyAlias(t *testing.T) {
+	root := repoRootForTest(t)
+	candidateIn := candidateFixtureForTest(t, root)
 	if err := mainRun([]string{
 		"-repo", "../..",
 		"-manifest", defaultManifest,
+		"-candidate-in", candidateIn,
 		"-verify",
 		"-evidence-out", t.TempDir() + "/evidence.json",
 	}); err != nil {
 		t.Fatalf("mainRun -verify: %v", err)
+	}
+}
+
+func TestClosedLoopCandidateIntakeRequiresCandidateInput(t *testing.T) {
+	err := run(options{
+		Repo:        "../..",
+		Manifest:    defaultManifest,
+		CheckDoc:    true,
+		EvidenceOut: t.TempDir() + "/evidence.json",
+	})
+	if !errors.Is(err, errMissingCandidateInput) {
+		t.Fatalf("expected missing candidate input, got %v", err)
 	}
 }
 
@@ -42,10 +63,7 @@ func TestCandidateIntakeRejectsMissingAdoptionArtifact(t *testing.T) {
 
 func loadIntakeManifestForTest(t *testing.T) manifest {
 	t.Helper()
-	root, err := findRepoRoot("../..")
-	if err != nil {
-		t.Fatal(err)
-	}
+	root := repoRootForTest(t)
 	m, err := loadManifest(repoPath(root, defaultManifest))
 	if err != nil {
 		t.Fatal(err)
