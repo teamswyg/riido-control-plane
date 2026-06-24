@@ -16,6 +16,7 @@ on:
       - "cmd/riido_ai_server/web_origin_config.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/authorization.go"
+      - "internal/riidoaiserver/authorization_coalescing*.go"
       - "internal/riidoaiserver/authorization_test.go"
       - "internal/riidoaiserver/agent_catalog_rbac.go"
       - "internal/riidoaiserver/external_authorizer.go"
@@ -34,6 +35,7 @@ on:
       - "cmd/riido_ai_server/web_origin_config.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/authorization.go"
+      - "internal/riidoaiserver/authorization_coalescing*.go"
       - "internal/riidoaiserver/authorization_test.go"
       - "internal/riidoaiserver/agent_catalog_rbac.go"
       - "internal/riidoaiserver/external_authorizer.go"
@@ -65,7 +67,7 @@ jobs:
             -check-doc \
             -evidence-out out/request-authorization-evidence.json
       - name: Test external authorizer
-        run: go test ./internal/riidoaiserver -run 'ExternalHTTPAuthorizer|FallbackAuthorizer' -count=1
+        run: go test ./internal/riidoaiserver -run 'ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer' -count=1
       - uses: actions/upload-artifact@v4
         if: always()
         with:

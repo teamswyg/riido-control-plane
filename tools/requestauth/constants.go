@@ -16,6 +16,7 @@ var requiredSurfaces = []string{
 	"FallbackAuthorizer",
 	"ExternalHTTPAuthorizer",
 	"ExternalHTTPAuthorizerConfig",
+	"CoalescingAuthorizer",
 }
 
 var requiredResources = []string{
@@ -58,7 +59,11 @@ var requiredRuleGroups = map[string][]string{
 		"unsupported-schema-service-error", "invalid-role-service-error", "network-error-service-error",
 	},
 	"fallback": {"next-only-unauthenticated", "forbidden-stops-chain", "empty-chain-unauthenticated"},
-	"cors":     {"exact-origin-allowlist", "method-allowlist", "header-allowlist", "no-browser-credentials", "unsupported-header-rejected"},
+	"coalescing": {
+		"in-flight-only", "no-ttl-auth-cache", "bearer-token-hashed-in-key",
+		"request-scope-separated", "concurrent-identical-requests-share-one-hop",
+	},
+	"cors": {"exact-origin-allowlist", "method-allowlist", "header-allowlist", "no-browser-credentials", "unsupported-header-rejected"},
 	"device-principal": {
 		"device-headers-server-only", "both-device-fields-required",
 		"device-auth-before-token-auth", "browser-jwt-not-daemon-auth",

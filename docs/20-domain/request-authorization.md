@@ -19,6 +19,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | `FallbackAuthorizer` | unauthenticated-only chain |
 | `ExternalHTTPAuthorizer` | external HTTP adapter |
 | `ExternalHTTPAuthorizerConfig` | external adapter runtime config |
+| `CoalescingAuthorizer` | in-flight duplicate authorization collapse without TTL caching |
 
 ## Resources
 
@@ -48,6 +49,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | `external-authorizer` | `request-schema-v1`, `response-schema-v1`, `opaque-bearer-token`, `ai-agent-client-workspace-required`, `api-key-header-server-only`, `response-disallow-unknown-fields`, `response-size-limit`, `allowed-principal-required`, `admin-role-only` |
 | `fail-closed` | `http-401-unauthenticated`, `http-403-forbidden`, `allowed-false-forbidden`, `non-2xx-service-error`, `malformed-json-service-error`, `unsupported-schema-service-error`, `invalid-role-service-error`, `network-error-service-error` |
 | `fallback` | `next-only-unauthenticated`, `forbidden-stops-chain`, `empty-chain-unauthenticated` |
+| `coalescing` | `in-flight-only`, `no-ttl-auth-cache`, `bearer-token-hashed-in-key`, `request-scope-separated`, `concurrent-identical-requests-share-one-hop` |
 | `cors` | `exact-origin-allowlist`, `method-allowlist`, `header-allowlist`, `no-browser-credentials`, `unsupported-header-rejected` |
 | `device-principal` | `device-headers-server-only`, `both-device-fields-required`, `device-auth-before-token-auth`, `browser-jwt-not-daemon-auth` |
 
@@ -59,7 +61,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | Hypothesis | A request-authorization SSOT gate can catch drift in token transport, static scopes, external authorizer failure mapping, fallback chaining, and CORS policy before security semantics regress. |
 | Execute | Generate this reader doc from the manifest and run the requestauth verifier in CI. |
 | Evaluate | The verifier checks required surfaces, resources, token transports, contract versions, rule groups, source anchors, generated doc freshness, and CLI evidence output. |
-| Retrospective | This slice proves public control-plane request authorization semantics; production IdP, JWKS/OIDC, secret rotation, Terraform, and live deployment evidence remain out of scope. |
+| Retrospective | This slice proves public control-plane request authorization semantics and in-flight duplicate external authorization collapse; production IdP, JWKS/OIDC, secret rotation, Terraform, and live deployment evidence remain out of scope. |
 
 ## Non-Goals
 
