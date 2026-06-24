@@ -10,6 +10,9 @@ func TestCandidateIntakeRejectsMissingAdoptionPlan(t *testing.T) {
 	item := closedLoopCandidate{
 		ID: "smoke:broken", HarnessLoop: "provider_acceptance_harness",
 		PromotionTarget: m.Sources[0].PromotionTarget, Observation: "broken",
+		PromotionEdge: graphEdge{
+			From: "provider_acceptance_harness", To: m.Sources[0].PromotionTarget, Relation: "promotes_failure_to",
+		},
 		RequiredNextArtifacts: m.Sources[0].RequiredNextArtifacts,
 	}
 	err := verifyCandidateItem(m, item)

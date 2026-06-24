@@ -142,6 +142,34 @@
       "next_loop": "closed_loop_candidate_decision"
     },
     {
+      "id": "closed_loop_candidate_promotion_edge_loop",
+      "observation": "Closed-loop candidate artifacts required an evidence_graph_edge follow-up, but the candidate record did not name the concrete harness-to-closed-loop edge it was created from.",
+      "hypothesis": "Embedding promotion_edge in the candidate and exposing it through intake and decision evidence lets agents follow the failure-to-closed-loop path without reading narrative docs.",
+      "claims": ["closed_loop_candidates_must_carry_promotion_edge"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/harnesspromotion/candidate_edge_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/candidate_edge_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_edge_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_artifact_test.go"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
+      ],
+      "decision": "Candidate artifacts now carry promotion_edge, and intake plus decision verification reject drift between the candidate edge and its source harness target.",
+      "next_loop": "closed_loop_candidate_decision"
+    },
+    {
       "id": "claim_binding_impact_loop",
       "observation": "Business claims could change without bound code or tests changing in the same pull request.",
       "hypothesis": "Comparing the PR diff against the loop registry can force claim meaning changes to co-change bound code or test paths, not just manifests or generated docs.",

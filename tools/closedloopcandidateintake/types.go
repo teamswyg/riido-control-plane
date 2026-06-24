@@ -19,6 +19,7 @@ type intakeSource struct {
 	ProducerManifest      string   `json:"producer_manifest"`
 	LoopRegistryManifest  string   `json:"loop_registry_manifest"`
 	EvidenceGraphManifest string   `json:"evidence_graph_manifest"`
+	HarnessLoop           string   `json:"harness_loop"`
 	PromotionTarget       string   `json:"promotion_target"`
 	RequiredNextArtifacts []string `json:"required_next_artifacts"`
 }

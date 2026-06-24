@@ -16,6 +16,7 @@ func verifyCandidateFile(root string, m manifest, path string) (verifyResult, er
 			return result, err
 		}
 		result.CandidateIDs = append(result.CandidateIDs, item.ID)
+		result.CandidateEdges = append(result.CandidateEdges, item.PromotionEdge)
 	}
 	return result, nil
 }

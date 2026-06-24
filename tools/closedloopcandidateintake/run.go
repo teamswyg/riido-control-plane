@@ -23,6 +23,7 @@ func run(opt options) error {
 		}
 		result.CandidateCount = candidateResult.CandidateCount
 		result.CandidateIDs = candidateResult.CandidateIDs
+		result.CandidateEdges = candidateResult.CandidateEdges
 	}
 	if err := maybeDoc(root, m.GeneratedDoc, renderDoc(m, result), opt.WriteDoc, opt.CheckDoc); err != nil {
 		return err

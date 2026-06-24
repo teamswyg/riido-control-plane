@@ -24,6 +24,7 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 - a successful harness run may produce an empty candidate list
 - candidate artifacts must not include raw endpoint hosts, tokens, AWS resource ids, or response bodies
 - candidate artifacts must include an adoption_plan with executable commands for every required next artifact
+- candidate artifacts must include a promotion_edge that names the harness loop, closed-loop target, and promotes_failure_to relation
 - expired redacted summaries must be rejected before closed-loop candidate generation
 - harness workflows that produce expiring evidence must be runnable without a human trigger
 - harness promotion evidence must publish generated_at and expires_at

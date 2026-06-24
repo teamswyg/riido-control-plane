@@ -10,6 +10,7 @@ type evidence struct {
 	RequiredRefs     int            `json:"required_refs"`
 	CandidateCount   int            `json:"candidate_count"`
 	CandidateIDs     []string       `json:"candidate_ids"`
+	CandidateEdges   []graphEdge    `json:"candidate_edges"`
 	Workflow         string         `json:"workflow"`
 	GeneratedDoc     string         `json:"generated_doc"`
 	EvidenceArtifact string         `json:"evidence_artifact"`
@@ -29,6 +30,7 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		RequiredRefs:     result.RequiredRefs,
 		CandidateCount:   result.CandidateCount,
 		CandidateIDs:     result.CandidateIDs,
+		CandidateEdges:   result.CandidateEdges,
 		Workflow:         m.Workflow,
 		GeneratedDoc:     m.GeneratedDoc,
 		EvidenceArtifact: m.EvidenceArtifact,
