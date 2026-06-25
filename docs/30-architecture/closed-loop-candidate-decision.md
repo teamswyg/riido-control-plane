@@ -6,7 +6,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `27`
+- decisions: `26`
 
 ## Assertions
 
@@ -44,7 +44,6 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `control-plane-performance:control_plane_performance_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `loop-closure-audit:claim_coverage_token_completeness` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `loop-closure-audit:candidate_adoption_decision_freshness` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `decision_record` |
-| `loop-closure-audit:claim_coverage:evidence_graph_must_cover_loop_registry_claims` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
 | `loop-closure-audit:claim_coverage:evidence_graph_refs_must_trigger_evidence_workflow` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
 | `loop-closure-audit:claim_coverage:expired_loop_evidence_must_select_refresh_commands` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
 | `loop-closure-audit:claim_coverage:expired_loop_refresh_commands_must_dispatch_safe_workflows` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
