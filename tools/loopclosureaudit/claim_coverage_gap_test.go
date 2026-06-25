@@ -41,3 +41,12 @@ func TestAIThreadHistoryClaimsHaveCoverageTokens(t *testing.T) {
 		}
 	}
 }
+
+func TestHarnessPromotionClaimHasCoverageTokens(t *testing.T) {
+	_, deps := loadForTest(t)
+	for _, gap := range claimCoverageGaps(deps) {
+		if gap.ClaimID == "harness_promotion_must_run_after_failure" {
+			t.Fatalf("harness promotion claim coverage gap remains: %+v", gap)
+		}
+	}
+}
