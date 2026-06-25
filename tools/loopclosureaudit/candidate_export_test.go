@@ -24,18 +24,21 @@ func TestLoopClosureAuditExportsAuditGapCandidates(t *testing.T) {
 	if got.SchemaVersion != candidateSchema || got.CandidateCount != len(got.Candidates) {
 		t.Fatalf("candidate artifact shape = %+v", got)
 	}
-	want := len(m.ResidualGaps) + len(claimCoverageGaps(deps))
+	coverageGaps := claimCoverageGaps(deps)
+	want := len(m.ResidualGaps) + len(coverageGaps)
 	if got.CandidateCount != want {
 		t.Fatalf("candidate_count = %d, want %d", got.CandidateCount, want)
 	}
 	if got.CandidateCount < 2 || got.Candidates[0].PromotionTarget != "closed_loop_candidate" {
 		t.Fatalf("candidate artifact content = %+v", got)
 	}
-	if !hasCandidatePrefix(got.Candidates, "loop-closure-audit:claim_coverage:") {
-		t.Fatalf("candidate artifact missing claim coverage candidates = %+v", got.Candidates)
-	}
-	if !hasClaimCoverageSubject(got.Candidates) {
-		t.Fatalf("candidate artifact missing structured claim coverage subject = %+v", got.Candidates)
+	if len(coverageGaps) > 0 {
+		if !hasCandidatePrefix(got.Candidates, "loop-closure-audit:claim_coverage:") {
+			t.Fatalf("candidate artifact missing claim coverage candidates = %+v", got.Candidates)
+		}
+		if !hasClaimCoverageSubject(got.Candidates) {
+			t.Fatalf("candidate artifact missing structured claim coverage subject = %+v", got.Candidates)
+		}
 	}
 	if got.LiveStatus != candidateLiveStatus {
 		t.Fatalf("live_status = %q", got.LiveStatus)
@@ -45,21 +48,6 @@ func TestLoopClosureAuditExportsAuditGapCandidates(t *testing.T) {
 func hasCandidatePrefix(candidates []closedLoopCandidate, prefix string) bool {
 	for _, candidate := range candidates {
 		if len(candidate.ID) >= len(prefix) && candidate.ID[:len(prefix)] == prefix {
-			return true
-		}
-	}
-	return false
-}
-
-func hasClaimCoverageSubject(candidates []closedLoopCandidate) bool {
-	for _, candidate := range candidates {
-		if candidate.Subject == nil {
-			continue
-		}
-		if candidate.Subject.Kind == "claim_coverage_gap" &&
-			candidate.Subject.ClaimID != "" &&
-			candidate.Subject.Loop != "" &&
-			len(candidate.Subject.MissingDimensions) > 0 {
 			return true
 		}
 	}

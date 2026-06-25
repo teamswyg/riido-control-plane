@@ -1151,17 +1151,19 @@
     },
     {
       "id": "candidate_decision_next_command_loop",
-      "observation": "Candidate decision evidence selected a next_artifact but did not expose the executable command from the consumed candidate adoption_plan, and source-seeded decisions must preserve that command for every intake source.",
-      "hypothesis": "Copying the selected adoption command into decision evidence lets agents continue from the decision artifact without reopening narrative docs or candidate JSON by hand, regardless of which harness source produced the candidate.",
+      "observation": "Candidate decision evidence selected a next_artifact but did not expose the executable command from the consumed candidate adoption_plan, and the claim that guards that behavior can omit observe/verify/fail coverage tokens.",
+      "hypothesis": "Copying the selected adoption command into decision evidence and claim coverage tokens into the guard claim lets agents continue from the decision artifact without reopening narrative docs or candidate JSON by hand, regardless of which harness source produced the candidate.",
       "claims": ["candidate_decision_evidence_must_expose_next_command"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
-        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_artifact_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "tool", "path": "tools/loopregistry"}
       ],
@@ -1169,7 +1171,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Candidate decision evidence now exposes next_command for the chosen next_artifact, preserving the executable follow-up path through the decision layer for smoke, load, and performance candidates.",
+      "decision": "Candidate decision evidence now exposes next_command for the chosen next_artifact, and the guard claim exposes coverage tokens plus regression coverage, preserving the executable follow-up path through the decision layer for smoke, load, and performance candidates.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
@@ -1457,6 +1459,7 @@
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_export.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_residual.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_claim_coverage.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/candidate_claim_coverage_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_claim_coverage_plan.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/candidate_export_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/verify_residual_gap.go"},
@@ -1471,6 +1474,7 @@
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopclosureaudit/main_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/candidate_claim_coverage_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_gap_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit"},
