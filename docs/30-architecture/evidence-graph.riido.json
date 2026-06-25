@@ -355,6 +355,35 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "loop_evidence_source_coverage_loop",
+      "observation": "Loop manifests declared evidence source paths, but those paths could remain artifact labels that were not mapped to a concrete claim and evidence surface.",
+      "hypothesis": "Adding covers_evidence to claim bindings and rejecting uncovered or unknown evidence paths lets the loop registry derive artifact-to-claim meaning from the manifest instead of relying on a human to interpret artifact names.",
+      "claims": ["loop_evidence_sources_must_be_claim_covered"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/verify_loop_evidence.go"},
+        {"kind": "tool", "path": "tools/loopregistry/types_claim.go"},
+        {"kind": "tool", "path": "tools/loopregistry/hash.go"},
+        {"kind": "tool", "path": "tools/loopregistry/claim_surface.go"},
+        {"kind": "tool", "path": "tools/loopregistry/render_more.go"},
+        {"kind": "test", "path": "tools/loopregistry/verify_loop_evidence_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/claim_surface_evidence_source_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/verify_loop_evidence_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/claim_surface_evidence_source_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Loop evidence source paths are now executable coverage requirements: every path must be claimed by a business claim in the same loop, and claim surfaces expose which evidence artifacts they close.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "loop_registry_graph_edge_evidence_loop",
       "observation": "Loop registry evidence exposed graph edge counts, but not the actual loop-to-claim or harness-to-candidate edge list, so an agent reading only the artifact still had to open a manifest or generated doc to infer which loop enforces which claim or where harness failures promote.",
       "hypothesis": "Publishing the executable evidence_graph edges in the loop-registry evidence artifact, verifying each harness promotes_to target has a matching promotes_failure_to edge, and requiring every claim to have a loop-owned enforces edge lets agents infer claim enforcement and harness promotion paths directly from machine evidence.",
