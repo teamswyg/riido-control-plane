@@ -7,6 +7,7 @@ type evidence struct {
 	BenchmarkCount         int                 `json:"benchmark_count"`
 	TestCount              int                 `json:"test_count"`
 	CandidateCount         int                 `json:"candidate_count"`
+	AssertionCount         int                 `json:"assertion_count"`
 	BenchmarkCommand       string              `json:"benchmark_command"`
 	LocalPressureCommand   string              `json:"local_pressure_command"`
 	ManualPressureCommand  string              `json:"manual_pressure_command"`
@@ -14,6 +15,7 @@ type evidence struct {
 	PprofCommand           string              `json:"pprof_command"`
 	LiveLoadCommand        string              `json:"live_load_command"`
 	LocalPressureScenarios []string            `json:"local_pressure_scenarios"`
+	Assertions             []string            `json:"assertions"`
 	HotPaths               []hotPathEvidence   `json:"hot_paths"`
 	Candidates             []candidateEvidence `json:"candidates"`
 }
@@ -40,6 +42,7 @@ func newEvidence(m manifest) evidence {
 		BenchmarkCount:         benchmarkCount(m.HotPaths),
 		TestCount:              testCount(m.HotPaths),
 		CandidateCount:         len(m.HotPaths),
+		AssertionCount:         len(m.Assertions),
 		BenchmarkCommand:       m.BenchmarkCommand,
 		LocalPressureCommand:   m.LocalPressureCommand,
 		ManualPressureCommand:  m.ManualPressureCommand,
@@ -47,6 +50,7 @@ func newEvidence(m manifest) evidence {
 		PprofCommand:           m.PprofCommand,
 		LiveLoadCommand:        m.LiveLoadCommand,
 		LocalPressureScenarios: append([]string(nil), m.LocalPressureScenarios...),
+		Assertions:             append([]string(nil), m.Assertions...),
 		HotPaths:               hotPathEvidenceRows(m.HotPaths),
 		Candidates:             candidateEvidenceRows(m.HotPaths),
 	}

@@ -12,6 +12,12 @@ func TestControlPlaneHighTrafficAuditVerifies(t *testing.T) {
 	if got.SurfaceCount < 7 || got.CandidateCount != got.SurfaceCount {
 		t.Fatalf("audit coverage = %+v", got)
 	}
+	if got.AssertionCount == 0 || len(got.Assertions) != got.AssertionCount {
+		t.Fatalf("audit assertions missing from evidence: %+v", got)
+	}
+	if len(got.RequiredCategories) == 0 || len(got.MissingCategories) != 0 {
+		t.Fatalf("audit category coverage missing from evidence: %+v", got)
+	}
 	assertRequiredCategoriesCovered(t, got.CategoryCounts)
 }
 
