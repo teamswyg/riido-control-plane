@@ -50,12 +50,12 @@ func renderRefreshPlans(b *strings.Builder, plans []refreshPlan) {
 func renderLoops(b *strings.Builder, loops []loopRecord, result verifyResult) {
 	fmt.Fprintln(b, "## Loops")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Loop | Kind | Expires | Refresh Minutes | Refresh Workflow | Promotion Evidence | Evidence |")
-	fmt.Fprintln(b, "| --- | --- | ---: | ---: | --- | --- | ---: |")
+	fmt.Fprintln(b, "| Loop | Kind | Providers | Expires | Refresh Minutes | Refresh Workflow | Promotion Evidence | Evidence |")
+	fmt.Fprintln(b, "| --- | --- | --- | ---: | ---: | --- | --- | ---: |")
 	for _, loop := range loops {
 		promotion := result.HarnessCandidateArtifacts[loop.ID]
-		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%d` | `%s` | `%s` | `%d` |\n",
-			loop.ID, loop.Kind, loop.ExpiresAfterHours,
+		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%d` | `%d` | `%s` | `%s` | `%d` |\n",
+			loop.ID, loop.Kind, strings.Join(loop.Providers, ", "), loop.ExpiresAfterHours,
 			result.RefreshCadenceMinutes[loop.ID], loop.RefreshWorkflow, promotion, len(loop.Evidence))
 	}
 	fmt.Fprintln(b)

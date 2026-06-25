@@ -70,5 +70,5 @@ func writeJSON(path string, value any) error {
 }
 
 func normalizedText(data []byte) string {
-	return strings.ReplaceAll(string(data), "\r\n", "\n")
+	return normalizeSemanticHashFields(strings.ReplaceAll(string(data), "\r\n", "\n"))
 }
