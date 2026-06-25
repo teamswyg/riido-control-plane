@@ -11,6 +11,10 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 - evidence artifact: `loop-closure-audit-evidence`
 - workflow: `.github/workflows/loop-closure-audit.yml`
 
+## Assertions
+
+- loop closure audit evidence must expose each requirement's check details, not only check kinds
+
 ## Requirements
 
 | ID | Checks | Statement |

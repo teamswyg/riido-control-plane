@@ -15,6 +15,9 @@ func verifyAll(root string, m manifest, deps dependencies) error {
 	if m.EvidenceArtifact == "" || len(m.Requirements) == 0 {
 		return fmt.Errorf("audit must declare evidence artifact and requirements")
 	}
+	if err := verifyAssertions(m.Assertions); err != nil {
+		return err
+	}
 	if err := verifyLoopText(m.Loop); err != nil {
 		return err
 	}

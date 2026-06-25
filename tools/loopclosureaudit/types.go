@@ -12,6 +12,7 @@ type manifest struct {
 	EvidenceGraphManifest string        `json:"evidence_graph_manifest"`
 	PreCommitManifest     string        `json:"pre_commit_manifest"`
 	Requirements          []requirement `json:"requirements"`
+	Assertions            []string      `json:"assertions"`
 	Loop                  loopSpec      `json:"loop"`
 }
 

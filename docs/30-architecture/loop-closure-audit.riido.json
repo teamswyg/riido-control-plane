@@ -62,5 +62,8 @@
     "execute": "Verify the required loops, claim bindings, pre-commit hook, scheduled refresh dispatcher, provider harness coverage, harness promotion edges, and evidence graph chains; generate this reader and publish audit evidence in CI.",
     "evaluate": "The verifier fails when any human-exit requirement loses its executable proof surface, including missing claims, missing provider coverage, missing scheduled dispatch, missing pre-commit hook, missing graph chains, or stale generated docs.",
     "retrospective": "This keeps the objective executable: agents can ignore the prose, but the audit still proves whether the loop system lets humans leave the inner loop."
-  }
+  },
+  "assertions": [
+    "loop closure audit evidence must expose each requirement's check details, not only check kinds"
+  ]
 }

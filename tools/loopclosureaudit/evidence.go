@@ -6,6 +6,7 @@ type evidence struct {
 	RequirementCount int                   `json:"requirement_count"`
 	CheckCount       int                   `json:"check_count"`
 	Requirements     []requirementEvidence `json:"requirements"`
+	Assertions       []string              `json:"assertions"`
 	Loop             loopSpec              `json:"loop"`
 }
 
@@ -13,6 +14,7 @@ type requirementEvidence struct {
 	ID         string   `json:"id"`
 	Statement  string   `json:"statement"`
 	CheckKinds []string `json:"check_kinds"`
+	Checks     []check  `json:"checks"`
 }
 
 func newEvidence(m manifest) evidence {
@@ -22,6 +24,7 @@ func newEvidence(m manifest) evidence {
 		RequirementCount: len(m.Requirements),
 		CheckCount:       checkCount(m.Requirements),
 		Requirements:     requirementEvidenceRows(m.Requirements),
+		Assertions:       append([]string(nil), m.Assertions...),
 		Loop:             m.Loop,
 	}
 }
@@ -41,7 +44,12 @@ func requirementEvidenceRows(requirements []requirement) []requirementEvidence {
 		for _, check := range req.Checks {
 			kinds = append(kinds, check.Kind)
 		}
-		rows = append(rows, requirementEvidence{ID: req.ID, Statement: req.Statement, CheckKinds: kinds})
+		rows = append(rows, requirementEvidence{
+			ID:         req.ID,
+			Statement:  req.Statement,
+			CheckKinds: kinds,
+			Checks:     evidenceChecks(req.Checks),
+		})
 	}
 	return rows
 }
