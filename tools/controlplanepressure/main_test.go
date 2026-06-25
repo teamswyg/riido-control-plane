@@ -36,6 +36,9 @@ func TestControlPlanePressureProducesEvidence(t *testing.T) {
 	if len(got.Candidates) != len(scenarios()) {
 		t.Fatalf("candidates = %+v", got.Candidates)
 	}
+	if len(got.Capacity) != len(scenarios()) {
+		t.Fatalf("capacity estimates = %+v", got.Capacity)
+	}
 	for _, run := range got.Runs {
 		if run.Operations == 0 || run.Candidate.Next == "" {
 			t.Fatalf("run missing evidence: %+v", run)
@@ -45,6 +48,11 @@ func TestControlPlanePressureProducesEvidence(t *testing.T) {
 		}
 		if run.Resources.CPUSecondsPerOp < 0 || run.Resources.CPUUtilizationPct < 0 {
 			t.Fatalf("run has invalid CPU evidence: %+v", run.Resources)
+		}
+	}
+	for _, row := range got.Capacity {
+		if !row.ErrorFree || row.MaxConcurrentUsers == 0 || row.P95LatencyUS < 0 {
+			t.Fatalf("invalid capacity estimate: %+v", row)
 		}
 	}
 	assertPressureCandidatesActionable(t, got)

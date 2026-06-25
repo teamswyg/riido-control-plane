@@ -5,14 +5,15 @@ import "time"
 const evidenceSchema = "riido-control-plane-local-pressure-evidence.v1"
 
 type pressureReport struct {
-	SchemaVersion string           `json:"schema_version"`
-	StartedAt     time.Time        `json:"started_at"`
-	EndedAt       time.Time        `json:"ended_at"`
-	DurationMs    int64            `json:"duration_ms"`
-	Fixture       fixtureSummary   `json:"fixture"`
-	Runs          []pressureRun    `json:"runs"`
-	Candidates    []candidateEntry `json:"candidates"`
-	Findings      []findingEntry   `json:"findings"`
+	SchemaVersion string             `json:"schema_version"`
+	StartedAt     time.Time          `json:"started_at"`
+	EndedAt       time.Time          `json:"ended_at"`
+	DurationMs    int64              `json:"duration_ms"`
+	Fixture       fixtureSummary     `json:"fixture"`
+	Runs          []pressureRun      `json:"runs"`
+	Capacity      []capacityEstimate `json:"capacity_estimates"`
+	Candidates    []candidateEntry   `json:"candidates"`
+	Findings      []findingEntry     `json:"findings"`
 }
 
 type fixtureSummary struct {
