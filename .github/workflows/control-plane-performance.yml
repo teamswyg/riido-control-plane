@@ -50,6 +50,7 @@ jobs:
         run: |
           mkdir -p out
           go test ./tools/controlplaneperf -count=1
+          go test ./tools/aiagentload -count=1
           go run ./tools/controlplaneperf \
             -check-doc \
             -evidence-out out/control-plane-performance-evidence.json
