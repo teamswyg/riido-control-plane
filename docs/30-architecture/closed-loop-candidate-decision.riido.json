@@ -280,16 +280,6 @@
       "reason": "Claim coverage gap candidates need owned claim-binding triage before they become durable closed-loop gates."
     },
     {
-      "candidate_id": "loop-closure-audit:claim_coverage:harness_promotion_must_run_after_failure",
-      "disposition": "triage_required",
-      "priority": "P2",
-      "owner": "agent-platform-loop",
-      "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
-      "reason": "Claim coverage gap candidates need owned claim-binding triage before they become durable closed-loop gates."
-    },
-    {
       "candidate_id": "loop-closure-audit:claim_coverage:loop_evidence_artifacts_must_have_refresh_owners",
       "disposition": "triage_required",
       "priority": "P2",
