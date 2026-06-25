@@ -24,6 +24,9 @@ func verifyAll(root string, m manifest) (verifyResult, error) {
 	if err := verifyEvidenceWorkflowCoversRefs(root, m); err != nil {
 		return verifyResult{}, err
 	}
+	if err := verifyEvidenceWorkflowRefresh(root, m, &result); err != nil {
+		return verifyResult{}, err
+	}
 	return result, nil
 }
 
