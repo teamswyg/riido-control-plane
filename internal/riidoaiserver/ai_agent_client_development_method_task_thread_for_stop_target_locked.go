@@ -11,8 +11,15 @@ func (s *DevelopmentAIAgentClientStore) taskThreadForStopTargetLocked(taskID, ag
 	if strings.TrimSpace(assignmentID) != "" {
 		return AIAgentTaskThreadRecord{}, false
 	}
-	if thread, ok := s.stopTargetActiveTaskThreadForAgentLocked(taskID, agentID); ok {
+	return s.stopTargetActiveTaskThreadForAgentLocked(taskID, agentID)
+}
+
+func (s *DevelopmentAIAgentClientStore) taskThreadForUnassignTargetLocked(taskID, agentID, assignmentID string) (AIAgentTaskThreadRecord, bool) {
+	if thread, ok := s.taskThreadForStopTargetLocked(taskID, agentID, assignmentID); ok {
 		return thread, true
+	}
+	if strings.TrimSpace(assignmentID) != "" {
+		return AIAgentTaskThreadRecord{}, false
 	}
 	return s.latestTaskThreadForAgentLocked(taskID, agentID)
 }
