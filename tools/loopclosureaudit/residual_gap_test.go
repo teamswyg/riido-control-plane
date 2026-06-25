@@ -29,3 +29,11 @@ func TestLoopClosureAuditRejectsResidualGapWithoutCommand(t *testing.T) {
 		t.Fatal("expected missing residual gap command to fail")
 	}
 }
+
+func TestLoopClosureAuditAllowsNoResidualGaps(t *testing.T) {
+	m, deps := loadForTest(t)
+	m.ResidualGaps = nil
+	if err := verifyAll("../..", m, deps); err != nil {
+		t.Fatalf("expected closed residual gap set to verify: %v", err)
+	}
+}

@@ -26,3 +26,10 @@ func TestCandidateDecisionRejectsOrphanDecision(t *testing.T) {
 		t.Fatal("expected orphan decision to fail")
 	}
 }
+
+func TestCandidateDecisionAllowsSourceCoverageSeedWithoutLiveCandidate(t *testing.T) {
+	decisions := []decisionRecord{{CandidateID: "loop-closure-audit:source_coverage_seed"}}
+	if err := verifyNoOrphanDecisions(decisions, nil, "loop-closure-audit"); err != nil {
+		t.Fatalf("expected source coverage seed to bypass orphan matching: %v", err)
+	}
+}
