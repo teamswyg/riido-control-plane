@@ -25,6 +25,7 @@ func claimSurfaceFor(
 		TestPaths:        []string{},
 		ManifestPaths:    []string{},
 		GeneratedDocs:    sortedCopy(claim.GeneratedDoc),
+		CoversObserves:   sortedCopy(claim.CoversObserves),
 		CoversVerifies:   sortedCopy(claim.CoversVerifies),
 		Verifiers:        sortedCopy(claim.Verifiers),
 		VerifierCommands: []string{},
