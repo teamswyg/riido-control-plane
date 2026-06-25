@@ -1,0 +1,59 @@
+name: loop-closure-audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "11 21 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/loop-closure-audit.yml"
+      - ".github/workflows/loop-refresh-dispatch.yml"
+      - ".github/workflows/evidence-graph.yml"
+      - ".pre-commit-config.yaml"
+      - "docs/30-architecture/loop-closure-audit.md"
+      - "docs/30-architecture/loop-closure-audit.riido.json"
+      - "docs/30-architecture/loop-registry.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/evidence-graph.md"
+      - "docs/30-architecture/evidence-graph.riido.json"
+      - "docs/30-architecture/pre-commit-baseline.riido.json"
+      - "tools/loopclosureaudit/**"
+      - "tools/loopregistry/**"
+      - "tools/evidencegraph/**"
+      - "tools/looprefreshdispatch/**"
+      - "go.mod"
+      - "go.sum"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/loop-closure-audit.yml"
+      - "docs/30-architecture/loop-closure-audit.md"
+      - "docs/30-architecture/loop-closure-audit.riido.json"
+      - "tools/loopclosureaudit/**"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/evidence-graph.riido.json"
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: loop_closure_audit
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify loop closure audit
+        run: |
+          mkdir -p out
+          go test ./tools/loopclosureaudit -count=1
+          go run ./tools/loopclosureaudit \
+            -check-doc \
+            -evidence-out out/loop-closure-audit-evidence.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: loop-closure-audit-evidence
+          path: out/loop-closure-audit-evidence.json
+          if-no-files-found: error

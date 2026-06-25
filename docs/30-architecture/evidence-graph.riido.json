@@ -1293,6 +1293,30 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "loop_closure_audit_loop",
+      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence.",
+      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, or reasoning chain drifts.",
+      "claims": ["loop_closure_audit_must_prove_human_exit_requirements"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-closure-audit.riido.json"},
+        {"kind": "workflow", "path": ".github/workflows/loop-closure-audit.yml"},
+        {"kind": "tool", "path": "tools/loopclosureaudit"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopclosureaudit/main_test.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit"},
+        {"kind": "workflow", "path": ".github/workflows/loop-closure-audit.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-closure-audit-evidence", "redacted": true},
+        {"kind": "generated_doc", "path": "docs/30-architecture/loop-closure-audit.md"}
+      ],
+      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "evidence_graph_full_chain_evidence_loop",
       "observation": "The evidence graph manifest carried observation, hypothesis, changes, verifiers, evidence, decision, and next_loop, but the generated evidence artifact exposed only chain id and next_loop.",
       "hypothesis": "Publishing the same executable chain surface in the evidence artifact lets agents and CI infer reasoning scope from evidence JSON without opening narrative readers.",
