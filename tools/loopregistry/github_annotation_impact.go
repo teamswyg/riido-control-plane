@@ -19,12 +19,21 @@ func writeImpactAnnotation(w io.Writer, impact *impactEvidence) {
 }
 
 func impactAnnotationMessage(impact *impactEvidence) string {
+	parts := []string{changedFilesImpactMessage(impact)}
+	if claimSummary := changedClaimImpactMessage(impact); claimSummary != "" {
+		parts = append(parts, claimSummary)
+	}
+	if surfaceSummary := boundSurfaceImpactMessage(impact); surfaceSummary != "" {
+		parts = append(parts, surfaceSummary)
+	}
+	return strings.Join(parts, " | ")
+}
+
+func changedFilesImpactMessage(impact *impactEvidence) string {
 	if len(impact.ChangedFiles) == 0 {
 		return "0 changed files"
 	}
-	return fmt.Sprintf(
-		"%d changed files: %s",
+	return fmt.Sprintf("%d changed files: %s",
 		impact.ChangedFileCount,
-		strings.Join(impact.ChangedFiles, ", "),
-	)
+		strings.Join(impact.ChangedFiles, ", "))
 }
