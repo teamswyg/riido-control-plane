@@ -446,7 +446,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "faf8ae42b46ba6fb83faefd2ab46fff5e861759a24f9b07084671ee08748db84"
+      "semantic_hash": "82f449d330a42d4f9b27a3c7bd0619f7a84994ff721bfbe5edf7f635e079ed04"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -547,7 +547,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3a7544340c45a7cc012d4572f5186395888c07200dc84672bbeb8eaff39d8831"
+      "semantic_hash": "a4e3bf1ef9df16a581b4586dea75c1184046a9c06dba14606bc4a8c3c005c671"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -602,7 +602,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d123755a7e1ed85d59e0319ed7132b178dcc4bb2ec036c8f8934f8c86c66d2b6"
+      "semantic_hash": "bd2e5c620ed26f3765758146bb25d8ba27293a13f583ea3c28d5aea3ab10b9a4"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -725,7 +725,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "9ad384cd5a5fd22b896a6df572de9f8d1f131eee1043ea7be3a500ebc2ba2b12"
+      "semantic_hash": "d5c3e7974311908b2f0d6a88bda14901ea0b0714ee56d828405d7b9f090e7b03"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -878,7 +878,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "abe6b9a1b1bd3913062dcb9d1e499d0c77949b57365491c296e8b93d02f7da31"
+      "semantic_hash": "57756e4ceaff97ae72f159bddcf6b4b2b20c8252c833051c5aa2ea4abb6edfbe"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -902,7 +902,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e7ee2f77eca3e48299b42d5b12369773cd1a05f576dedbb90887ca75fee3fdaa"
+      "semantic_hash": "39b7f7dcc3b61f6f0f44658a0e723d17fe289f765c57070f080ea3d3beb4eb2f"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -922,7 +922,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8b0f995c167378442f91da80b74e47888164c797756d107d1a4926f9a0d60f8e"
+      "semantic_hash": "8efb163e82563432dc6025337211de8745ba349b8fff16b20a69101271e98e71"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -1113,18 +1113,21 @@
       "files": [
         "tools/loopregistry/evidence.go",
         "tools/loopregistry/verify_graph.go",
+        "tools/loopregistry/verify_claim_graph.go",
         "tools/loopregistry/evidence_graph_test.go",
-        "tools/loopregistry/evidence_graph_promotion_test.go"
+        "tools/loopregistry/evidence_graph_promotion_test.go",
+        "tools/loopregistry/evidence_graph_claim_test.go"
       ],
       "verifiers": [
         "TestLoopRegistryEvidenceExposesGraphEdges",
-        "TestEvidenceGraphRequiresHarnessPromotionEdges"
+        "TestEvidenceGraphRequiresHarnessPromotionEdges",
+        "TestEvidenceGraphRequiresClaimEnforcementEdges"
       ],
       "generated_docs": [
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "28f970cd6c16f29660a115d507e9532adfab5069e486fd779eab9d1bac606b39"
+      "semantic_hash": "c55ac32a960be721cc28ba07ab2894753c82c6a12baf69a0c99ce5a6f0f4ad3e"
     },
     {
       "id": "harness_like_workflows_must_be_registered_or_excluded",
@@ -1249,6 +1252,16 @@
       "relation": "enforces"
     },
     {
+      "from": "provider_acceptance_harness",
+      "to": "provider_acceptance_summary_must_cover_declared_observations",
+      "relation": "enforces"
+    },
+    {
+      "from": "ai_agent_load_harness",
+      "to": "load_harness_failures_must_promote_candidates",
+      "relation": "enforces"
+    },
+    {
       "from": "closed_loop_candidate",
       "to": "closed_loop_candidate_intake",
       "relation": "feeds_candidate_intake"
@@ -1299,6 +1312,11 @@
       "relation": "enforces"
     },
     {
+      "from": "closed_loop_candidate",
+      "to": "loop_evidence_artifacts_must_have_refresh_owners",
+      "relation": "enforces"
+    },
+    {
       "from": "closed_loop_candidate_decision",
       "to": "open_decision_queue",
       "relation": "defers_unowned_boundary_to"
@@ -1325,7 +1343,17 @@
     },
     {
       "from": "closed_loop_candidate",
+      "to": "claim_meaning_changes_require_code_or_test_surface",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
       "to": "claim_surface_evidence_must_expose_code_test_doc_binding",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "claim_verifier_commands_must_surface_as_ci_annotations",
       "relation": "enforces"
     },
     {
@@ -1341,6 +1369,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "evidence_graph_evidence_must_expose_full_chain",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "evidence_graph_chain_changes_require_executable_surface",
       "relation": "enforces"
     },
     {
@@ -1374,6 +1407,16 @@
       "relation": "enforces"
     },
     {
+      "from": "closed_loop_candidate_intake",
+      "to": "candidate_intake_must_consume_candidate_artifact",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "expiring_loops_must_schedule_refresh",
+      "relation": "enforces"
+    },
+    {
       "from": "closed_loop_candidate",
       "to": "loop_registry_evidence_must_expose_refresh_plans",
       "relation": "enforces"
@@ -1386,6 +1429,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "closed_loop_candidate_evidence_must_self_expire",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "loop_evidence_artifacts_must_self_expire",
       "relation": "enforces"
     }
   ],
