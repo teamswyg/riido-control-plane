@@ -17,7 +17,7 @@ func TestLoopRefreshDispatchCLIWritesPlan(t *testing.T) {
 		SchemaVersion: refreshCommandsSchema,
 		Status:        "refresh_required",
 		GeneratedAt:   "2026-06-24T00:00:00Z",
-		ExpiresAt:     "2026-06-25T00:00:00Z",
+		ExpiresAt:     "2026-06-26T00:00:00Z",
 		Commands: []selectedRefreshCommand{{
 			LoopID:  "closed_loop_candidate",
 			Kind:    "refresh_workflow",

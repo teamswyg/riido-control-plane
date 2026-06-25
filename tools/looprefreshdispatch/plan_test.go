@@ -8,7 +8,7 @@ func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
 		SchemaVersion: refreshCommandsSchema,
 		Status:        "refresh_required",
 		GeneratedAt:   "2026-06-24T00:00:00Z",
-		ExpiresAt:     "2026-06-25T00:00:00Z",
+		ExpiresAt:     "2026-06-26T00:00:00Z",
 		Commands: []selectedRefreshCommand{{
 			LoopID:  "ai_thread_history",
 			Kind:    "refresh_workflow",
@@ -45,8 +45,11 @@ func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
 }
 
 func TestBuildDispatchPlanRejectsUnsafeRefreshWorkflow(t *testing.T) {
+	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-25T00:00:00Z")
 	_, err := buildDispatchPlan(repoRootForTest(t), refreshCommandEvidence{
 		SchemaVersion: refreshCommandsSchema,
+		GeneratedAt:   "2026-06-24T00:00:00Z",
+		ExpiresAt:     "2026-06-26T00:00:00Z",
 		Commands: []selectedRefreshCommand{{
 			LoopID:  "loop",
 			Kind:    "refresh_workflow",

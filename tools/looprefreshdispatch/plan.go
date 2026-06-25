@@ -6,6 +6,9 @@ import (
 )
 
 func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan, error) {
+	if err := verifySourceFresh(source, evidenceNow()); err != nil {
+		return dispatchPlan{}, err
+	}
 	generatedAt, expiresAt := evidenceWindow()
 	out := dispatchPlan{
 		SchemaVersion:     dispatchPlanSchema,
