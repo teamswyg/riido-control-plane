@@ -15,12 +15,30 @@ func TestGitHubAnnotationsIncludeClaimVerifierCommands(t *testing.T) {
 				"go test ./tools/loopregistry -run '^(TestClaim)$' -count=1",
 			},
 		}},
-	})
+	}, nil)
 	got := out.String()
 	for _, want := range []string{
 		"::notice title=Riido claim verifier::",
 		"claim:one => go test ./tools/loopregistry",
 		"-run '^(TestClaim)$' -count=1",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("annotation missing %q: %s", want, got)
+		}
+	}
+}
+
+func TestGitHubAnnotationsIncludeImpactScope(t *testing.T) {
+	var out bytes.Buffer
+	writeGitHubAnnotations(&out, verifyResult{}, &impactEvidence{
+		Enabled:          true,
+		ChangedFileCount: 2,
+		ChangedFiles:     []string{"docs/claim.md", "internal/example.go"},
+	})
+	got := out.String()
+	for _, want := range []string{
+		"::notice title=Riido impact scope::",
+		"2 changed files: docs/claim.md, internal/example.go",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("annotation missing %q: %s", want, got)
