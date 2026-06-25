@@ -1,17 +1,28 @@
 package main
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"time"
+)
 
 func refreshPlans(loops []loopRecord, cadence map[string]int) []refreshPlan {
+	return refreshPlansAt(loops, cadence, time.Time{})
+}
+
+func refreshPlansAt(loops []loopRecord, cadence map[string]int, generatedAt time.Time) []refreshPlan {
 	plans := []refreshPlan{}
 	for _, loop := range loops {
+		minutes := cadence[loop.ID]
 		plans = append(plans, refreshPlan{
 			LoopID:               loop.ID,
 			Kind:                 loop.Kind,
 			RefreshWorkflow:      loop.RefreshWorkflow,
 			WorkflowFile:         filepath.Base(loop.RefreshWorkflow),
-			CadenceMinutes:       cadence[loop.ID],
+			CadenceMinutes:       minutes,
 			ExpiresAfterHours:    loop.ExpiresAfterHours,
+			EvidenceGeneratedAt:  refreshEvidenceGeneratedAt(generatedAt),
+			NextRefreshDueAt:     refreshDueAt(generatedAt, minutes),
+			EvidenceExpiresAt:    refreshExpiresAt(generatedAt, loop.ExpiresAfterHours),
 			ManualRefreshCommand: refreshCommand(loop.RefreshWorkflow),
 			EvidenceArtifacts:    redactedEvidenceArtifacts(loop.Evidence),
 			EvidenceRefreshes:    evidenceRefreshes(loop),

@@ -7,8 +7,7 @@ import (
 
 const loopRegistryEvidenceTTLHours = 24
 
-func evidenceWindow(ttlHours int) (string, string) {
-	now := evidenceNow()
+func evidenceWindowAt(now time.Time, ttlHours int) (string, string) {
 	return formatEvidenceTime(now), formatEvidenceTime(now.Add(time.Duration(ttlHours) * time.Hour))
 }
 
