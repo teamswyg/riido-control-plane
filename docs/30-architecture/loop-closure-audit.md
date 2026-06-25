@@ -9,7 +9,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 - requirements: `4`
 - checks: `21`
 - residual gaps: `2`
-- claim coverage gaps: `20`
+- claim coverage gaps: `19`
 - evidence artifact: `loop-closure-audit-evidence`
 - workflow: `.github/workflows/loop-closure-audit.yml`
 
@@ -40,7 +40,6 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 | Claim | Loop | Missing Dimensions |
 | --- | --- | --- |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `expired_loop_evidence_must_select_refresh_commands` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
