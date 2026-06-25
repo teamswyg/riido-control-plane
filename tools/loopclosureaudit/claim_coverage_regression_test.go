@@ -46,6 +46,10 @@ func TestExpiredCandidateConsumerClaimHasCoverageTokens(t *testing.T) {
 	requireNoClaimCoverageGapForClaim(t, "closed_loop_candidate_consumers_must_reject_expired_candidates")
 }
 
+func TestCandidateEvidenceExpiryClaimHasCoverageTokens(t *testing.T) {
+	requireNoClaimCoverageGapForClaim(t, "closed_loop_candidate_evidence_must_self_expire")
+}
+
 func requireNoClaimCoverageGapForLoop(t *testing.T, loop string) {
 	t.Helper()
 	_, deps := loadForTest(t)
