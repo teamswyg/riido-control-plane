@@ -10,6 +10,9 @@ func verifyCandidateFile(root string, m manifest, path string) (verifyResult, er
 	if err := verifyCandidateEnvelope(candidate, data); err != nil {
 		return verifyResult{}, err
 	}
+	if err := verifyCandidateFresh(candidate, evidenceNow()); err != nil {
+		return verifyResult{}, err
+	}
 	result := verifyResult{CandidateCount: candidate.CandidateCount}
 	for _, item := range candidate.Candidates {
 		if err := verifyCandidateItem(m, item); err != nil {

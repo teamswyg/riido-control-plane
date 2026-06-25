@@ -5,7 +5,7 @@ import "testing"
 func TestCandidateDecisionRejectsPromotionEdgeDrift(t *testing.T) {
 	root := repoRootForTest(t)
 	out := t.TempDir() + "/candidates.json"
-	if err := generateCandidate(root, out); err != nil {
+	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
 	candidate, _, err := loadCandidate(out)

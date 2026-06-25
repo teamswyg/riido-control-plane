@@ -10,6 +10,9 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 	if err := verifyCandidateEnvelope(candidate, data); err != nil {
 		return verifyResult{}, err
 	}
+	if err := verifyCandidateFresh(candidate, evidenceNow()); err != nil {
+		return verifyResult{}, err
+	}
 	decisionByID := decisionsByID(m.Decisions)
 	result := verifyResult{CandidateCount: candidate.CandidateCount}
 	for _, item := range candidate.Candidates {
@@ -47,27 +50,6 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 func verifyDecisionNextArtifact(candidate closedLoopCandidate, decision decisionRecord) error {
 	if !containsString(candidate.RequiredNextArtifacts, decision.NextArtifact) {
 		return fmt.Errorf("candidate %s decision next_artifact %s is not required by candidate artifact", candidate.ID, decision.NextArtifact)
-	}
-	return nil
-}
-
-func decisionsByID(decisions []decisionRecord) map[string]decisionRecord {
-	out := map[string]decisionRecord{}
-	for _, decision := range decisions {
-		out[decision.CandidateID] = decision
-	}
-	return out
-}
-
-func verifyNoOrphanDecisions(decisions []decisionRecord, candidates []closedLoopCandidate) error {
-	candidateByID := map[string]bool{}
-	for _, item := range candidates {
-		candidateByID[item.ID] = true
-	}
-	for _, decision := range decisions {
-		if !candidateByID[decision.CandidateID] {
-			return fmt.Errorf("decision %s has no matching candidate", decision.CandidateID)
-		}
 	}
 	return nil
 }

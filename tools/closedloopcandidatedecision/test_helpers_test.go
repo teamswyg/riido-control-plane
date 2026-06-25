@@ -10,3 +10,8 @@ func repoRootForTest(t *testing.T) string {
 	}
 	return root
 }
+
+func pinCandidateFreshnessClock(t *testing.T) {
+	t.Helper()
+	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-24T01:00:00Z")
+}
