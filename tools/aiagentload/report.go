@@ -4,7 +4,14 @@ import "time"
 
 const reportSchemaVersion = "riido-ai-agent-load-evidence.v1"
 
-func (a *aggregator) report(cfg config, host string, startedAt, endedAt time.Time, resources resourceDelta) report {
+func (a *aggregator) report(
+	cfg config,
+	host string,
+	startedAt time.Time,
+	endedAt time.Time,
+	resources resourceDelta,
+	pprof pprofEvidence,
+) report {
 	success := successCount(a.status)
 	total := len(a.all)
 	duration := endedAt.Sub(startedAt)
@@ -44,6 +51,7 @@ func (a *aggregator) report(cfg config, host string, startedAt, endedAt time.Tim
 		Latency:        summarizeLatency(a.all),
 		Endpoints:      endpoints,
 		Resource:       resources,
+		Pprof:          pprof,
 	}
 	r.Capacity = capacityFromReport(r)
 	r.Findings = loadFindings(endpoints, resources)

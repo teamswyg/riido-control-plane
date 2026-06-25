@@ -91,14 +91,15 @@
     "local pressure findings must carry closed-loop candidate required artifacts and adoption commands",
     "live load evidence must stay redacted and use aiagentload rather than ad-hoc curl loops",
     "live load evidence must emit requests_per_second, success_per_second, failure_rate_pct, endpoint findings, capacity_estimate, and load_generator_resource_delta",
+    "live load evidence may attach opt-in pprof sample metadata but must never persist pprof profile bodies",
     "pprof collection must use loopback-only RIIDO_AI_SERVER_PPROF_ADDR",
     "performance candidates must name the hot path, risk, existing evidence, and next verifier candidate"
   ],
   "loop": {
-    "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates and local CPU/resource deltas are not emitted from one executable performance loop.",
-    "hypothesis": "A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts.",
-    "execute": "Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings, and generate candidate optimization rows whose findings carry closed-loop adoption commands.",
-    "evaluate": "The verifier fails on missing benchmark coverage, missing local pressure evidence, missing capacity estimates, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource fields.",
+    "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates, local CPU/resource deltas, and opt-in pprof sample metadata are not emitted from one executable performance loop.",
+    "hypothesis": "A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts or persisting profile bodies.",
+    "execute": "Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings plus opt-in pprof sample metadata, and generate candidate optimization rows whose findings carry closed-loop adoption commands.",
+    "evaluate": "The verifier fails on missing benchmark coverage, missing local pressure evidence, missing capacity estimates, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource/pprof fields.",
     "retrospective": "This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates."
   }
 }
