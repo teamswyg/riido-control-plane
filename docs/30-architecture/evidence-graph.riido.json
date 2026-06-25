@@ -1040,17 +1040,19 @@
     },
     {
       "id": "loop_evidence_artifact_refresh_owner_loop",
-      "observation": "A loop can declare multiple redacted evidence artifacts while its loop-level refresh workflow only publishes one of them, leaving the remaining evidence to expire even though the refresh plan looks healthy.",
-      "hypothesis": "Artifact-level refresh workflow ownership lets each redacted evidence artifact name the scheduled workflow that produces it, and verification can require exact strict artifact uploads for every declared evidence source.",
+      "observation": "A loop can declare multiple redacted evidence artifacts while its loop-level refresh workflow only publishes one of them, leaving the remaining evidence to expire even though the refresh plan looks healthy; without observe/verify/fail tokens, agents cannot tell this is an evidence-expiry closed-loop rule.",
+      "hypothesis": "Artifact-level refresh workflow ownership lets each redacted evidence artifact name the scheduled workflow that produces it, verification can require exact strict artifact uploads for every declared evidence source, and claim coverage tokens keep the rule routable from evidence_expired observations to CI gates.",
       "claims": ["loop_evidence_artifacts_must_have_refresh_owners"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "workflow", "path": ".github/workflows/harness-promotion.yml"},
-        {"kind": "tool", "path": "tools/loopregistry"}
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/refresh_workflow_test.go"},
         {"kind": "test", "path": "tools/loopregistry/refresh_plan_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -1058,7 +1060,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true}
       ],
-      "decision": "Expiring loop evidence is now artifact-owned: every redacted evidence artifact must be refreshed by a scheduled workflow that declares the loop id and uploads that exact artifact strictly.",
+      "decision": "Expiring loop evidence is now artifact-owned: every redacted evidence artifact must be refreshed by a scheduled workflow that declares the loop id and uploads that exact artifact strictly, and loopclosureaudit keeps the rule bound to explicit evidence-expiry observe/verify/fail tokens.",
       "next_loop": "closed_loop_candidate"
     },
     {
