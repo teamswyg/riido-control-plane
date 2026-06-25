@@ -31,5 +31,5 @@ func verifyLinkedManifests(root string, m manifest) error {
 			return fmt.Errorf("candidate %s references unknown next loop %s", decision.CandidateID, decision.NextLoop)
 		}
 	}
-	return nil
+	return verifyDecisionSourceCoverage(intake.Sources, m.Decisions)
 }

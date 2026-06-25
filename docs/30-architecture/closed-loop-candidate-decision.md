@@ -6,12 +6,12 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `1`
+- decisions: `5`
 
 ## Assertions
 
 - every candidate consumed by intake must have exactly one decision record
-- decision records without a matching consumed candidate are stale loop residue and must fail verification
+- decision records for the consumed candidate source without a matching candidate are stale loop residue and must fail verification
 - decision records must name owner, priority, disposition, next loop, and next artifact
 - decision next_artifact must be one of the required_next_artifacts declared by the consumed candidate artifact
 - decision verification must reject candidates whose adoption_plan does not cover every required_next_artifact
@@ -29,12 +29,17 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - candidate decision must reject consumed candidate artifacts whose source_expires_at has passed
 - candidate decision evidence must publish generated_at and expires_at
 - candidate decision evidence must expose consumed candidate artifact path, source workflow, freshness window, and candidate ids
+- candidate decision records must include at least one owned seed decision for every intake source so new harness sources cannot be passive
 
 ## Decisions
 
 | Candidate | Disposition | Priority | Owner | Review By | Next Artifact |
 | --- | --- | --- | --- | --- | --- |
 | `ai-agent-client-testnet-smoke:provider_smoke` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-01` | `claim_binding` |
+| `ai-agent-client-testnet-load:load_harness_client_read_pressure` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `ai-agent-client-testnet-load:load_harness_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `control-plane-performance:control_plane_performance_hot_path_benchmarks` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `control-plane-performance:control_plane_performance_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 
 ## Evidence Loop
 

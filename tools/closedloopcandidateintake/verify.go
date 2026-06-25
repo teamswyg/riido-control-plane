@@ -19,6 +19,9 @@ func verifyAll(root string, m manifest) (verifyResult, error) {
 		}
 		refs += len(source.RequiredNextArtifacts)
 	}
+	if err := verifyProducerCoverage(root, m); err != nil {
+		return verifyResult{}, err
+	}
 	return verifyResult{SourceCount: len(m.Sources), RequiredRefs: refs}, nil
 }
 

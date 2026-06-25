@@ -47,7 +47,7 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 			PromotionEdge: item.PromotionEdge,
 		})
 	}
-	if err := verifyNoOrphanDecisions(m.Decisions, candidate.Candidates); err != nil {
+	if err := verifyNoOrphanDecisions(m.Decisions, candidate.Candidates, candidate.ID); err != nil {
 		return result, err
 	}
 	result.ConsumedCandidateArtifacts = []consumedCandidateArtifact{
