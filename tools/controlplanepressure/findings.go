@@ -12,12 +12,15 @@ type findingEntry struct {
 }
 
 func pressureFindings(runs []pressureRun) []findingEntry {
-	return []findingEntry{
+	rows := []findingEntry{
 		maxFinding("allocation_hotspot", runs, "total_alloc_bytes_per_op", "bytes/op", allocPerOp),
 		maxFinding("latency_hotspot", runs, "p95_latency_us", "microseconds", p95LatencyUS),
 		maxFinding("cpu_hotspot", runs, "cpu_seconds_per_op", "seconds/op", cpuPerOp),
-		maxFinding("goroutine_delta_max", runs, "goroutine_delta", "goroutines", goroutineDelta),
 	}
+	if finding, ok := positiveMaxFinding("goroutine_delta_max", runs, "goroutine_delta", "goroutines", goroutineDelta); ok {
+		rows = append(rows, finding)
+	}
+	return rows
 }
 
 func maxFinding(id string, runs []pressureRun, metric, unit string, value func(pressureRun) float64) findingEntry {
@@ -34,6 +37,17 @@ func maxFinding(id string, runs []pressureRun, metric, unit string, value func(p
 		Value: bestValue, Unit: unit, Next: best.Candidate.Next,
 		Candidate: best.Candidate,
 	}
+}
+
+func positiveMaxFinding(
+	id string,
+	runs []pressureRun,
+	metric string,
+	unit string,
+	value func(pressureRun) float64,
+) (findingEntry, bool) {
+	finding := maxFinding(id, runs, metric, unit, value)
+	return finding, finding.Value > 0
 }
 
 func allocPerOp(run pressureRun) float64 {
