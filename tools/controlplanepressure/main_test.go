@@ -33,6 +33,9 @@ func TestControlPlanePressureProducesEvidence(t *testing.T) {
 	if len(got.Findings) != 4 {
 		t.Fatalf("findings = %+v", got.Findings)
 	}
+	if len(got.Candidates) != len(scenarios()) {
+		t.Fatalf("candidates = %+v", got.Candidates)
+	}
 	for _, run := range got.Runs {
 		if run.Operations == 0 || run.Candidate.Next == "" {
 			t.Fatalf("run missing evidence: %+v", run)
@@ -44,6 +47,7 @@ func TestControlPlanePressureProducesEvidence(t *testing.T) {
 			t.Fatalf("run has invalid CPU evidence: %+v", run.Resources)
 		}
 	}
+	assertPressureCandidatesActionable(t, got)
 }
 
 func TestParseConcurrenciesRejectsInvalidValues(t *testing.T) {

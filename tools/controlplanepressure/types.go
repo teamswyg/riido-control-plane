@@ -58,9 +58,3 @@ type resourceDelta struct {
 	CPUUtilizationPct   float64 `json:"cpu_utilization_pct"`
 	CPUSecondsPerOp     float64 `json:"cpu_seconds_per_op"`
 }
-
-type candidateEntry struct {
-	Scenario string `json:"scenario"`
-	Risk     string `json:"risk"`
-	Next     string `json:"next"`
-}

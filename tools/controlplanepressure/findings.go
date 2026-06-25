@@ -1,13 +1,14 @@
 package main
 
 type findingEntry struct {
-	ID          string  `json:"id"`
-	Scenario    string  `json:"scenario"`
-	Concurrency int     `json:"concurrency"`
-	Metric      string  `json:"metric"`
-	Value       float64 `json:"value"`
-	Unit        string  `json:"unit"`
-	Next        string  `json:"next"`
+	ID          string         `json:"id"`
+	Scenario    string         `json:"scenario"`
+	Concurrency int            `json:"concurrency"`
+	Metric      string         `json:"metric"`
+	Value       float64        `json:"value"`
+	Unit        string         `json:"unit"`
+	Next        string         `json:"next"`
+	Candidate   candidateEntry `json:"candidate"`
 }
 
 func pressureFindings(runs []pressureRun) []findingEntry {
@@ -31,6 +32,7 @@ func maxFinding(id string, runs []pressureRun, metric, unit string, value func(p
 	return findingEntry{
 		ID: id, Scenario: best.Scenario, Concurrency: best.Concurrency, Metric: metric,
 		Value: bestValue, Unit: unit, Next: best.Candidate.Next,
+		Candidate: best.Candidate,
 	}
 }
 
