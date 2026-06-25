@@ -24,12 +24,12 @@ func renderClaims(b *strings.Builder, claims []claimBinding) {
 func renderClaimSurfaces(b *strings.Builder, surfaces []claimSurface) {
 	fmt.Fprintln(b, "## Claim Surface Evidence")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Claim | Code | Test | Manifest | Generated docs | Observes covered | Verifies covered | Fails covered | Verifiers | Commands | Evidence chains |")
-	fmt.Fprintln(b, "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
+	fmt.Fprintln(b, "| Claim | Code | Test | Manifest | Generated docs | Observes covered | Verifies covered | Fails covered | Evidence covered | Verifiers | Commands | Evidence chains |")
+	fmt.Fprintln(b, "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
 	for _, surface := range surfaces {
-		fmt.Fprintf(b, "| `%s` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` |\n",
+		fmt.Fprintf(b, "| `%s` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` | `%d` |\n",
 			surface.ID, len(surface.CodePaths), len(surface.TestPaths),
-			len(surface.ManifestPaths), len(surface.GeneratedDocs), len(surface.CoversObserves), len(surface.CoversVerifies), len(surface.CoversFails), len(surface.Verifiers),
+			len(surface.ManifestPaths), len(surface.GeneratedDocs), len(surface.CoversObserves), len(surface.CoversVerifies), len(surface.CoversFails), len(surface.CoversEvidence), len(surface.Verifiers),
 			len(surface.VerifierCommands), len(surface.EvidenceChainIDs))
 	}
 	fmt.Fprintln(b)

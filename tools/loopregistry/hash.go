@@ -33,6 +33,9 @@ func claimHash(root string, claim claimBinding) (string, error) {
 	for _, value := range sortedCopy(claim.CoversFails) {
 		writeHashPart(sum, "covers_fail", value)
 	}
+	for _, value := range sortedCopy(claim.CoversEvidence) {
+		writeHashPart(sum, "covers_evidence", value)
+	}
 	for _, value := range sortedCopy(claim.Verifiers) {
 		writeHashPart(sum, "verifier", value)
 	}

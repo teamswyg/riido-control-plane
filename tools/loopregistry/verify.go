@@ -30,6 +30,9 @@ func verifyAll(root string, m manifest, hashes map[string]string) (verifyResult,
 	if err := verifyLoopFailureCoverage(m); err != nil {
 		return verifyResult{}, err
 	}
+	if err := verifyLoopEvidenceCoverage(m); err != nil {
+		return verifyResult{}, err
+	}
 	if err := verifyClaimEvidenceChains(m.Claims, chains); err != nil {
 		return verifyResult{}, err
 	}

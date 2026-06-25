@@ -9,8 +9,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `7`
 - harness loops: `2`
 - closed loops: `5`
-- claim bindings: `39`
-- evidence graph edges: `45`
+- claim bindings: `40`
+- evidence graph edges: `46`
 - max evidence expiry hours: `168`
 
 ## Loops
@@ -44,86 +44,88 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `deleted_agent_threads_must_remain_visible` | `ai_thread_history` | `4` | `3` | `0c833a8f52bd` |
 | `thread_history_must_keep_user_followups` | `ai_thread_history` | `4` | `2` | `40b76ad3d89b` |
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `ba0efa3cb2d1` |
-| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `9d34ac9b8e77` |
-| `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `641eba0a7268` |
-| `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `3` | `2` | `9623c0b4a641` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `acddfece8387` |
+| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `a8c0f132faf4` |
+| `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `0ced382b8e64` |
+| `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `3` | `2` | `da1de8237916` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `a309a6ef3ff2` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `6` | `4` | `a394d2fa717e` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `16` | `3` | `737b710062c0` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `322a8eb72d01` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `47e2d2567cc3` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `0ae2db74267a` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `59176c722316` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `5b36b0cf2355` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `56` | `21` | `1a56cee065bc` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `20e7233ccd0e` |
-| `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `230ad6a3cbec` |
-| `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `addfbe34a516` |
-| `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `20d82d90d65e` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `b5d81bdfed90` |
+| `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `222b266beb29` |
+| `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `408f0e5108b9` |
+| `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `28f3b3ae3ebf` |
+| `loop_evidence_sources_must_be_claim_covered` | `closed_loop_candidate` | `9` | `4` | `ab4d90f54fe3` |
 | `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `7` | `3` | `b76bf6fab058` |
 | `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `15` | `8` | `f777c403c60b` |
 | `claim_meaning_changes_require_reasoning_chain` | `closed_loop_candidate` | `4` | `2` | `dfb62f4b9fbc` |
 | `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `6ffed19f5327` |
-| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `3918da49509b` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `34c1bb35a84c` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `ec8444f2d904` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `eeef198a6ed7` |
+| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `99015d27ca2e` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `e572a8d6c527` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `ab9a33206c8c` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `ff2344162704` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `12` | `2` | `779a2cb5b4a1` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `8` | `3` | `5817dae9a586` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `f021bf4f7d8d` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `7fd46c7cd2c2` |
-| `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `10` | `5` | `64ce5fa66404` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `501e5cbe6162` |
+| `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `10` | `5` | `ed4662c28b80` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `68d2b171fd9c` |
 | `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `002c7ecdaaaf` |
-| `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `5` | `1` | `1fcd6a587954` |
+| `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `5` | `1` | `beed860a0124` |
 | `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `6` | `3` | `c55ac32a960b` |
-| `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `c78cff7da0a0` |
-| `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `13` | `5` | `b5d3fcbb9634` |
+| `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `2be8f6c2bcd2` |
+| `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `13` | `5` | `a41298d5a583` |
 | `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `193e717c2f9c` |
-| `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `6` | `2` | `b609ba5963eb` |
-| `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `open_decision_queue` | `6` | `2` | `33d0e31df996` |
+| `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `6` | `2` | `d3bd2ab223f9` |
+| `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `open_decision_queue` | `6` | `2` | `797239731d4f` |
 
 ## Claim Surface Evidence
 
-| Claim | Code | Test | Manifest | Generated docs | Observes covered | Verifies covered | Fails covered | Verifiers | Commands | Evidence chains |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `deleted_agent_threads_must_remain_visible` | `3` | `1` | `0` | `1` | `1` | `1` | `1` | `3` | `1` | `1` |
-| `thread_history_must_keep_user_followups` | `2` | `2` | `0` | `1` | `1` | `1` | `0` | `2` | `1` | `1` |
-| `same_provider_agents_must_keep_distinct_threads` | `2` | `2` | `0` | `1` | `0` | `1` | `1` | `2` | `1` | `1` |
-| `thread_history_v3_must_expose_stable_conversation_grouping` | `8` | `3` | `1` | `2` | `3` | `3` | `1` | `3` | `2` | `1` |
-| `expired_harness_evidence_must_not_promote_candidates` | `12` | `3` | `2` | `3` | `0` | `0` | `1` | `3` | `2` | `1` |
-| `provider_acceptance_summary_must_cover_declared_observations` | `0` | `1` | `2` | `2` | `3` | `3` | `2` | `2` | `1` | `1` |
-| `load_harness_failures_must_promote_candidates` | `2` | `2` | `4` | `3` | `4` | `4` | `4` | `3` | `3` | `1` |
-| `harness_promotion_must_run_after_failure` | `2` | `2` | `2` | `2` | `1` | `0` | `1` | `4` | `1` | `1` |
-| `closed_loop_candidates_must_carry_adoption_plan` | `10` | `3` | `3` | `4` | `1` | `0` | `0` | `3` | `3` | `1` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `12` | `4` | `4` | `5` | `0` | `0` | `0` | `5` | `3` | `1` |
-| `loop_verifiers_must_accept_verify_intent` | `5` | `5` | `0` | `1` | `0` | `0` | `0` | `5` | `5` | `1` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `5` | `3` | `2` | `2` | `0` | `0` | `0` | `3` | `1` | `1` |
-| `ambiguous_task_context_must_ask_before_work` | `34` | `21` | `1` | `2` | `0` | `0` | `0` | `21` | `2` | `1` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `12` | `4` | `1` | `1` | `0` | `2` | `1` | `7` | `1` | `1` |
-| `loop_verify_tokens_must_be_claim_covered` | `6` | `1` | `0` | `2` | `0` | `2` | `0` | `3` | `1` | `1` |
-| `loop_observation_tokens_must_be_claim_covered` | `6` | `1` | `0` | `2` | `1` | `2` | `0` | `3` | `1` | `1` |
-| `loop_failure_conditions_must_be_claim_covered` | `6` | `2` | `0` | `2` | `0` | `2` | `0` | `4` | `1` | `1` |
-| `claim_verifier_commands_must_surface_as_ci_annotations` | `4` | `2` | `1` | `1` | `0` | `0` | `0` | `3` | `1` | `1` |
-| `claim_meaning_changes_require_code_or_test_surface` | `8` | `6` | `1` | `2` | `0` | `0` | `0` | `8` | `1` | `1` |
-| `claim_meaning_changes_require_reasoning_chain` | `3` | `1` | `0` | `2` | `0` | `0` | `0` | `2` | `1` | `1` |
-| `pre_commit_must_run_claim_binding_impact` | `3` | `2` | `3` | `3` | `0` | `1` | `0` | `4` | `1` | `1` |
-| `claim_bound_paths_must_trigger_loop_registry` | `3` | `1` | `1` | `1` | `0` | `0` | `0` | `4` | `1` | `1` |
-| `evidence_graph_must_cover_loop_registry_claims` | `5` | `1` | `1` | `2` | `0` | `0` | `0` | `3` | `1` | `1` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `3` | `1` | `2` | `2` | `0` | `0` | `0` | `4` | `1` | `1` |
-| `evidence_graph_evidence_must_expose_full_chain` | `2` | `1` | `1` | `2` | `0` | `0` | `0` | `2` | `1` | `1` |
-| `evidence_graph_chain_changes_require_executable_surface` | `10` | `1` | `1` | `2` | `0` | `0` | `0` | `2` | `1` | `1` |
-| `loop_evidence_artifacts_must_self_expire` | `4` | `3` | `1` | `2` | `0` | `0` | `0` | `3` | `2` | `1` |
-| `closed_loop_candidate_evidence_must_self_expire` | `6` | `3` | `3` | `5` | `0` | `0` | `0` | `3` | `3` | `1` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `6` | `4` | `3` | `4` | `0` | `0` | `0` | `2` | `2` | `1` |
-| `candidate_intake_must_consume_candidate_artifact` | `5` | `3` | `2` | `3` | `4` | `3` | `4` | `5` | `1` | `1` |
-| `expiring_loops_must_schedule_refresh` | `3` | `2` | `0` | `1` | `0` | `0` | `0` | `3` | `1` | `1` |
-| `refresh_workflows_must_declare_loop_identity` | `2` | `1` | `6` | `2` | `0` | `0` | `0` | `3` | `1` | `1` |
-| `loop_registry_evidence_must_expose_refresh_plans` | `4` | `1` | `0` | `2` | `0` | `0` | `0` | `1` | `1` | `1` |
-| `loop_registry_evidence_must_expose_graph_edges` | `3` | `3` | `0` | `2` | `0` | `0` | `0` | `3` | `1` | `1` |
-| `harness_like_workflows_must_be_registered_or_excluded` | `4` | `1` | `1` | `2` | `0` | `0` | `0` | `4` | `1` | `1` |
-| `candidate_decisions_must_match_consumed_candidates` | `6` | `5` | `2` | `3` | `4` | `2` | `2` | `5` | `1` | `1` |
-| `candidate_decision_next_artifact_must_be_required` | `5` | `1` | `1` | `3` | `0` | `1` | `1` | `3` | `1` | `1` |
-| `candidate_decision_evidence_must_expose_next_command` | `4` | `1` | `1` | `3` | `0` | `0` | `0` | `2` | `1` | `1` |
-| `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `3` | `1` | `2` | `3` | `3` | `3` | `3` | `2` | `1` | `1` |
+| Claim | Code | Test | Manifest | Generated docs | Observes covered | Verifies covered | Fails covered | Evidence covered | Verifiers | Commands | Evidence chains |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `deleted_agent_threads_must_remain_visible` | `3` | `1` | `0` | `1` | `1` | `1` | `1` | `0` | `3` | `1` | `1` |
+| `thread_history_must_keep_user_followups` | `2` | `2` | `0` | `1` | `1` | `1` | `0` | `0` | `2` | `1` | `1` |
+| `same_provider_agents_must_keep_distinct_threads` | `2` | `2` | `0` | `1` | `0` | `1` | `1` | `0` | `2` | `1` | `1` |
+| `thread_history_v3_must_expose_stable_conversation_grouping` | `8` | `3` | `1` | `2` | `3` | `3` | `1` | `2` | `3` | `2` | `1` |
+| `expired_harness_evidence_must_not_promote_candidates` | `12` | `3` | `2` | `3` | `0` | `0` | `1` | `1` | `3` | `2` | `1` |
+| `provider_acceptance_summary_must_cover_declared_observations` | `0` | `1` | `2` | `2` | `3` | `3` | `2` | `1` | `2` | `1` | `1` |
+| `load_harness_failures_must_promote_candidates` | `2` | `2` | `4` | `3` | `4` | `4` | `4` | `3` | `3` | `3` | `1` |
+| `harness_promotion_must_run_after_failure` | `2` | `2` | `2` | `2` | `1` | `0` | `1` | `0` | `4` | `1` | `1` |
+| `closed_loop_candidates_must_carry_adoption_plan` | `10` | `3` | `3` | `4` | `1` | `0` | `0` | `0` | `3` | `3` | `1` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `12` | `4` | `4` | `5` | `0` | `0` | `0` | `0` | `5` | `3` | `1` |
+| `loop_verifiers_must_accept_verify_intent` | `5` | `5` | `0` | `1` | `0` | `0` | `0` | `0` | `5` | `5` | `1` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `5` | `3` | `2` | `2` | `0` | `0` | `0` | `2` | `3` | `1` | `1` |
+| `ambiguous_task_context_must_ask_before_work` | `34` | `21` | `1` | `2` | `0` | `0` | `0` | `0` | `21` | `2` | `1` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `12` | `4` | `1` | `1` | `0` | `2` | `1` | `0` | `7` | `1` | `1` |
+| `loop_verify_tokens_must_be_claim_covered` | `6` | `1` | `0` | `2` | `0` | `2` | `0` | `0` | `3` | `1` | `1` |
+| `loop_observation_tokens_must_be_claim_covered` | `6` | `1` | `0` | `2` | `1` | `2` | `0` | `0` | `3` | `1` | `1` |
+| `loop_failure_conditions_must_be_claim_covered` | `6` | `2` | `0` | `2` | `0` | `2` | `0` | `1` | `4` | `1` | `1` |
+| `loop_evidence_sources_must_be_claim_covered` | `7` | `2` | `0` | `2` | `0` | `2` | `0` | `1` | `4` | `1` | `1` |
+| `claim_verifier_commands_must_surface_as_ci_annotations` | `4` | `2` | `1` | `1` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
+| `claim_meaning_changes_require_code_or_test_surface` | `8` | `6` | `1` | `2` | `0` | `0` | `0` | `0` | `8` | `1` | `1` |
+| `claim_meaning_changes_require_reasoning_chain` | `3` | `1` | `0` | `2` | `0` | `0` | `0` | `0` | `2` | `1` | `1` |
+| `pre_commit_must_run_claim_binding_impact` | `3` | `2` | `3` | `3` | `0` | `1` | `0` | `0` | `4` | `1` | `1` |
+| `claim_bound_paths_must_trigger_loop_registry` | `3` | `1` | `1` | `1` | `0` | `0` | `0` | `0` | `4` | `1` | `1` |
+| `evidence_graph_must_cover_loop_registry_claims` | `5` | `1` | `1` | `2` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `3` | `1` | `2` | `2` | `0` | `0` | `0` | `0` | `4` | `1` | `1` |
+| `evidence_graph_evidence_must_expose_full_chain` | `2` | `1` | `1` | `2` | `0` | `0` | `0` | `0` | `2` | `1` | `1` |
+| `evidence_graph_chain_changes_require_executable_surface` | `10` | `1` | `1` | `2` | `0` | `0` | `0` | `0` | `2` | `1` | `1` |
+| `loop_evidence_artifacts_must_self_expire` | `4` | `3` | `1` | `2` | `0` | `0` | `0` | `0` | `3` | `2` | `1` |
+| `closed_loop_candidate_evidence_must_self_expire` | `6` | `3` | `3` | `5` | `0` | `0` | `0` | `0` | `3` | `3` | `1` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `6` | `4` | `3` | `4` | `0` | `0` | `0` | `0` | `2` | `2` | `1` |
+| `candidate_intake_must_consume_candidate_artifact` | `5` | `3` | `2` | `3` | `4` | `3` | `4` | `2` | `5` | `1` | `1` |
+| `expiring_loops_must_schedule_refresh` | `3` | `2` | `0` | `1` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
+| `refresh_workflows_must_declare_loop_identity` | `2` | `1` | `6` | `2` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
+| `loop_registry_evidence_must_expose_refresh_plans` | `4` | `1` | `0` | `2` | `0` | `0` | `0` | `0` | `1` | `1` | `1` |
+| `loop_registry_evidence_must_expose_graph_edges` | `3` | `3` | `0` | `2` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
+| `harness_like_workflows_must_be_registered_or_excluded` | `4` | `1` | `1` | `2` | `0` | `0` | `0` | `0` | `4` | `1` | `1` |
+| `candidate_decisions_must_match_consumed_candidates` | `6` | `5` | `2` | `3` | `4` | `2` | `2` | `1` | `5` | `1` | `1` |
+| `candidate_decision_next_artifact_must_be_required` | `5` | `1` | `1` | `3` | `0` | `1` | `1` | `0` | `3` | `1` | `1` |
+| `candidate_decision_evidence_must_expose_next_command` | `4` | `1` | `1` | `3` | `0` | `0` | `0` | `1` | `2` | `1` | `1` |
+| `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `3` | `1` | `2` | `3` | `3` | `3` | `3` | `2` | `2` | `1` | `1` |
 
 ## Evidence Graph
 
@@ -171,6 +173,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `closed_loop_candidate` --enforces--> `loop_evidence_artifacts_must_self_expire`
 - `closed_loop_candidate` --enforces--> `loop_observation_tokens_must_be_claim_covered`
 - `closed_loop_candidate` --enforces--> `loop_failure_conditions_must_be_claim_covered`
+- `closed_loop_candidate` --enforces--> `loop_evidence_sources_must_be_claim_covered`
 - `closed_loop_candidate` --enforces--> `closed_loop_candidate_consumers_must_reject_expired_candidates`
 
 ## Evidence Loop
