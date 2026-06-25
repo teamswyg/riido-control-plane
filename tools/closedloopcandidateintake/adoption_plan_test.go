@@ -23,6 +23,26 @@ func TestCandidateIntakeRejectsMissingAdoptionPlan(t *testing.T) {
 	}
 }
 
+func TestCandidateIntakeEvidenceExposesAdoptionPlan(t *testing.T) {
+	root := repoRootForTest(t)
+	path := candidateFixtureForTest(t, root)
+	result, err := verifyCandidateFile(root, loadIntakeManifestForTest(t), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.CandidateAdoptionPlans) != result.CandidateCount {
+		t.Fatalf("expected adoption plan evidence for each candidate, got %d/%d",
+			len(result.CandidateAdoptionPlans), result.CandidateCount)
+	}
+	plan := result.CandidateAdoptionPlans[0]
+	if plan.CandidateID == "" || len(plan.RequiredNextArtifacts) == 0 || len(plan.AdoptionPlan) == 0 {
+		t.Fatalf("adoption plan evidence is incomplete: %+v", plan)
+	}
+	if plan.AdoptionPlan[0].Artifact == "" || plan.AdoptionPlan[0].Command == "" {
+		t.Fatalf("adoption plan evidence must carry executable command: %+v", plan.AdoptionPlan[0])
+	}
+}
+
 func intakeTestCandidateEvidence() candidateEvidence {
 	return candidateEvidence{
 		SourceWorkflow:    ".github/workflows/smoke.yml",

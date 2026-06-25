@@ -7,7 +7,8 @@ type verifyResult struct {
 	CandidateIDs               []string                     `json:"candidate_ids"`
 	CandidateEdges             []graphEdge                  `json:"candidate_edges"`
 	CandidateSourceRefs        []candidateSourceRefEvidence `json:"candidate_source_refs"`
-	ConsumedCandidateArtifacts []consumedCandidateArtifact  `json:"consumed_candidate_artifacts"`
+	CandidateAdoptionPlans     []candidateAdoptionPlanEvidence
+	ConsumedCandidateArtifacts []consumedCandidateArtifact `json:"consumed_candidate_artifacts"`
 }
 
 type candidateEvidence struct {

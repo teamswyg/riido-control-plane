@@ -22,6 +22,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - closed-loop candidate artifacts must be redacted before intake
 - each candidate must name the adoption artifacts required to become a closed loop
 - each candidate must include an adoption_plan that covers every required next artifact with an executable command
+- candidate intake evidence must expose candidate_adoption_plans so agents can see required next artifacts and commands without reopening candidate artifacts
 - each candidate promotion_edge must match the source harness loop and closed-loop promotion target
 - each candidate source_ref must match the producer source, candidate artifact, source workflow, run id, and freshness window
 - candidate intake evidence must expose candidate_source_refs for every consumed candidate item

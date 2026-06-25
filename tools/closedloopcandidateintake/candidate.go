@@ -24,6 +24,7 @@ func verifyCandidateFile(root string, m manifest, path string) (verifyResult, er
 		result.CandidateIDs = append(result.CandidateIDs, item.ID)
 		result.CandidateEdges = append(result.CandidateEdges, item.PromotionEdge)
 		result.CandidateSourceRefs = append(result.CandidateSourceRefs, sourceRefEvidence(item))
+		result.CandidateAdoptionPlans = append(result.CandidateAdoptionPlans, adoptionPlanEvidence(item))
 	}
 	result.ConsumedCandidateArtifacts = []consumedCandidateArtifact{
 		consumedArtifact(path, candidate, result.CandidateIDs, sourceIDs),
