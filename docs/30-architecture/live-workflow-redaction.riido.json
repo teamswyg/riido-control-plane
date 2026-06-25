@@ -84,6 +84,27 @@
       ]
     },
     {
+      "id": "control-plane-performance",
+      "path": ".github/workflows/control-plane-performance.yml",
+      "summary_artifact": "control-plane-performance-redacted-summary",
+      "summary_path": "out/control-plane-performance-redacted-summary.json",
+      "evidence_ttl_hours": 24,
+      "sensitive_inputs": ["RIIDO_LIVE_CHECK_STATUS"],
+      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "generated_at", "expires_at", "live_status", "evidence_claims", "redaction"],
+      "evidence_claims": [
+        {
+          "id": "control_plane_performance_hot_path_benchmarks",
+          "summary": "control-plane performance workflow runs lightweight hot-path benchmarks and uploads benchmark evidence without live credentials.",
+          "source_phrases": ["go test ./internal/riidoaiserver", "-benchmem", "control-plane-performance-bench"]
+        },
+        {
+          "id": "control_plane_performance_closed_loop_promotion",
+          "summary": "control-plane performance workflow publishes redacted summary evidence and promotes failed runs into closed-loop candidates.",
+          "source_phrases": ["control-plane-performance-redacted-summary", "control-plane-performance-closed-loop-candidates", "go run ./tools/harnesspromotion"]
+        }
+      ]
+    },
+    {
       "id": "deploy-ai-agent-testnet",
       "path": ".github/workflows/deploy-ai-agent-testnet.yml",
       "summary_artifact": "deploy-ai-agent-testnet-redacted-summary",

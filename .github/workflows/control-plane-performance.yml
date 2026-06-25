@@ -52,7 +52,7 @@ jobs:
             -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|AIAgentTaskThreadStreamSubscriptionTargets)' \
             -benchmem \
             -benchtime=100ms \
-            -count=1 | tee out/control-plane-performance-bench.txt
+            -count=1 > out/control-plane-performance-bench.txt
       - name: Publish redacted performance summary evidence
         if: always()
         env:

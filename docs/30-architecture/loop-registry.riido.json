@@ -600,7 +600,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "add846bfb02ab8241b039efaea52959ae8b74c8076aaf66424701989e040967f"
+      "semantic_hash": "f31da27c369c8875c17cf90ba24d62e06861cf78c2d406acf95913dacc0a42cf"
     },
     {
       "id": "provider_acceptance_summary_must_cover_declared_observations",
@@ -642,7 +642,7 @@
         "docs/30-architecture/live-workflow-redaction.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "5aa28cc9c7a1a12ed11a2e8d168fc1593a20a0937b5e0676a3b7efcd8322998c"
+      "semantic_hash": "df5174dec7892906bd5ce403824753afeb16beca3407978553c5f5ae62b11ac8"
     },
     {
       "id": "load_harness_failures_must_promote_candidates",
@@ -691,7 +691,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "01f12fb491d7a336ef5cc25339d56a2722b28a7d2419029ecf7a86d36d292ab6"
+      "semantic_hash": "2ea0334fdb52410f744de5dd6e6202a5f4e6ebb84ea2aac68397e2dfc4ffde35"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
@@ -750,7 +750,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "fd5e473e1783dcbf70256c44b22482e896664545bed30af6462071264dae3eef"
+      "semantic_hash": "2493664d6e097f69a6e075d689ef49e2b40db7d09f2ed24d52199cf2383bfec9"
     },
     {
       "id": "harness_promotion_must_run_after_failure",

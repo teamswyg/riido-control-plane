@@ -17,7 +17,11 @@ func TestManifestEvidence(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(data)
-	for _, phrase := range []string{"\"status\": \"verified\"", "\"workflow_count\": 3"} {
+	for _, phrase := range []string{
+		"\"status\": \"verified\"",
+		"\"workflow_count\": 4",
+		"\"id\": \"control-plane-performance\"",
+	} {
 		if !strings.Contains(text, phrase) {
 			t.Fatalf("evidence missing %s: %s", phrase, text)
 		}

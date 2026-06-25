@@ -49,10 +49,10 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `a8c0f132faf4` |
 | `thread_history_v3_must_preserve_run_identity_and_message_order` | `ai_thread_history` | `7` | `2` | `a1f46bad310e` |
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `ai_thread_history` | `7` | `5` | `febe48b3ee92` |
-| `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `add846bfb02a` |
-| `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `5aa28cc9c7a1` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `01f12fb491d7` |
-| `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `13` | `3` | `fd5e473e1783` |
+| `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `f31da27c369c` |
+| `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `df5174dec789` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `2ea0334fdb52` |
+| `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `13` | `3` | `2493664d6e09` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `6` | `4` | `a394d2fa717e` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `16` | `3` | `63854a963d4c` |
 | `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `7d5a7ca914f3` |
