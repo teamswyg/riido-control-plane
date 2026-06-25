@@ -28,6 +28,9 @@ func verifyNoOrphanDecisions(
 			!strings.HasPrefix(decision.CandidateID, sourcePrefix) {
 			continue
 		}
+		if isSourceCoverageSeed(decision) {
+			continue
+		}
 		if !candidateByID[decision.CandidateID] {
 			return fmt.Errorf("decision %s has no matching candidate", decision.CandidateID)
 		}

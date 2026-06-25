@@ -1102,17 +1102,20 @@
     },
     {
       "id": "closed_loop_candidate_decision_loop",
-      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, or without PR evidence that performance-shaped candidates reach decision.",
-      "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale decision records for the consumed source, fail when workflow path triggers omit linked manifests, and consume a performance-specific candidate fixture in PR checks.",
+      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, or with a source seed incorrectly treated as a stale live candidate decision.",
+      "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale non-seed decision records for the consumed source, allow source coverage seeds when a source currently has no open candidates, fail when workflow path triggers omit linked manifests, and consume a performance-specific candidate fixture in PR checks.",
       "claims": ["candidate_decisions_must_match_consumed_candidates"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
         {"kind": "fixture", "path": "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/source_coverage_seed.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_orphan_test.go"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_orphan_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"}
       ],
@@ -1123,7 +1126,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-performance-sample-evidence", "redacted": true}
       ],
-      "decision": "Candidate decisions are scheduled and cannot verify without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, or skip performance-specific sample decision evidence.",
+      "decision": "Candidate decisions are scheduled and cannot verify without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, or skip performance-specific sample decision evidence.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
@@ -1446,8 +1449,8 @@
     },
     {
       "id": "loop_closure_audit_loop",
-      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed proof checks but claim coverage token gaps still needed to become closed-loop candidate artifacts; candidate-loop evidence expiry, candidate adoption-plan coverage, candidate promotion-edge coverage, expired harness evidence freshness, and semantic-hash metadata normalization also needed named coverage so already-implemented expiry, adoption command, freshness, failure-promotion edge, and hash-stability proofs could not disappear from the audit surface.",
-      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, or claim coverage token drifts, and publish residual gap candidates plus claim coverage gap candidates with structured subject fields for claim id, loop, missing dimensions, source refs, promotion edges, adoption commands, harness freshness semantics, semantic-hash metadata semantics, and table-driven claim-specific regression tests for repaired coverage gaps.",
+      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed proof checks but residual gaps and claim coverage token gaps needed to become closed-loop candidate artifacts when present and disappear from live candidates when closed.",
+      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, or claim coverage token drifts, publish residual or claim coverage candidates only while gaps exist, and keep synthetic candidate fixtures so the candidate export path remains verified even when the live manifest is fully covered.",
       "claims": ["loop_closure_audit_must_prove_human_exit_requirements"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-closure-audit.riido.json"},
@@ -1463,6 +1466,7 @@
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_claim_coverage_plan.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/candidate_export_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/verify_residual_gap.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/candidate_residual_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/residual_gap_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/claim_coverage_gap.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/claim_coverage_missing.go"},
@@ -1474,6 +1478,7 @@
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopclosureaudit/main_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/candidate_residual_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/candidate_claim_coverage_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_gap_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},

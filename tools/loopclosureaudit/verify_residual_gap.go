@@ -6,9 +6,6 @@ import (
 )
 
 func verifyResidualGaps(gaps []residualGap, idx indexes) error {
-	if len(gaps) == 0 {
-		return fmt.Errorf("audit must declare residual gap candidates")
-	}
 	seen := map[string]struct{}{}
 	for _, gap := range gaps {
 		if err := verifyResidualGap(gap, idx); err != nil {

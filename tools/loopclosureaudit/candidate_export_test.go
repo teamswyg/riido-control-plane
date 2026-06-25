@@ -29,7 +29,7 @@ func TestLoopClosureAuditExportsAuditGapCandidates(t *testing.T) {
 	if got.CandidateCount != want {
 		t.Fatalf("candidate_count = %d, want %d", got.CandidateCount, want)
 	}
-	if got.CandidateCount < 2 || got.Candidates[0].PromotionTarget != "closed_loop_candidate" {
+	if got.CandidateCount > 0 && got.Candidates[0].PromotionTarget != "closed_loop_candidate" {
 		t.Fatalf("candidate artifact content = %+v", got)
 	}
 	if len(coverageGaps) > 0 {

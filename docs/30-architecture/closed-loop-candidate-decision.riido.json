@@ -60,24 +60,14 @@
       "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership."
     },
     {
-      "candidate_id": "loop-closure-audit:claim_coverage_token_completeness",
-      "disposition": "triage_required",
-      "priority": "P1",
-      "owner": "agent-platform-loop",
-      "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
-      "review_by": "2026-07-08",
-      "reason": "Loop closure audit residual gaps must become claim-bound verifier work instead of passive audit notes."
-    },
-    {
-      "candidate_id": "loop-closure-audit:candidate_adoption_decision_freshness",
-      "disposition": "triage_required",
-      "priority": "P1",
+      "candidate_id": "loop-closure-audit:source_coverage_seed",
+      "disposition": "deferred",
+      "priority": "P2",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
-      "review_by": "2026-07-08",
-      "reason": "Candidate decision freshness gaps need an owned decision record so adoption does not rely on human memory."
+      "review_by": "2026-07-15",
+      "reason": "Loop closure audit is an intake source even when current residual and claim coverage gaps are closed, so it keeps a seed decision for source coverage."
     }
   ],
   "assertions": [

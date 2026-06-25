@@ -74,24 +74,7 @@
       ]
     }
   ],
-  "residual_gaps": [
-    {
-      "id": "claim_coverage_token_completeness",
-      "observation": "Some claim bindings still rely on files and verifiers while leaving one or more observe, verify, or failure-token coverage arrays empty.",
-      "risk": "Agents can infer co-change files, but may still miss why a claim observes or fails without reading adjacent context.",
-      "next_loop": "closed_loop_candidate",
-      "next_artifact": "closed-loop-candidate-intake",
-      "next_command": "go run ./tools/loopregistry -check-doc -evidence-out out/loop-registry-evidence.json"
-    },
-    {
-      "id": "candidate_adoption_decision_freshness",
-      "observation": "Harnesses publish closed-loop candidate artifacts, but adoption still depends on fresh candidate decision evidence staying visible to the next agent.",
-      "risk": "A failed harness can create a candidate, yet the adoption step can become stale or invisible if agents only inspect the source PR.",
-      "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "closed-loop-candidate-decision-evidence",
-      "next_command": "go run ./tools/closedloopcandidatedecision -check-doc -evidence-out out/closed-loop-candidate-decision-evidence.json"
-    }
-  ],
+  "residual_gaps": [],
   "loop": {
     "observation": "Riido has loop registry, evidence graph, harness promotion, and pre-commit gates, but the high-level human-exit objective is still distributed across many artifacts.",
     "hypothesis": "A loop closure audit can compile the human-exit objective into machine-checkable requirements that point at existing loops, claims, workflows, hooks, providers, and graph edges.",
@@ -101,8 +84,8 @@
   },
   "assertions": [
     "loop closure audit evidence must expose each requirement's check details, not only check kinds",
-    "loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts",
+    "loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts when present",
     "loop closure audit evidence must expose concrete claim coverage token gaps with claim id, loop, and missing dimensions",
-    "loop closure audit claim coverage gaps must be exported as redacted closed-loop candidate artifacts with adoption commands"
+    "loop closure audit claim coverage gaps must be exported as redacted closed-loop candidate artifacts with adoption commands when present"
   ]
 }

@@ -8,7 +8,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 - requirements: `4`
 - checks: `21`
-- residual gaps: `2`
+- residual gaps: `0`
 - claim coverage gaps: `0`
 - evidence artifact: `loop-closure-audit-evidence`
 - workflow: `.github/workflows/loop-closure-audit.yml`
@@ -16,9 +16,9 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 ## Assertions
 
 - loop closure audit evidence must expose each requirement's check details, not only check kinds
-- loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts
+- loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts when present
 - loop closure audit evidence must expose concrete claim coverage token gaps with claim id, loop, and missing dimensions
-- loop closure audit claim coverage gaps must be exported as redacted closed-loop candidate artifacts with adoption commands
+- loop closure audit claim coverage gaps must be exported as redacted closed-loop candidate artifacts with adoption commands when present
 
 ## Requirements
 
@@ -33,8 +33,6 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 | ID | Next Loop | Next Artifact | Next Command |
 | --- | --- | --- | --- |
-| `claim_coverage_token_completeness` | `closed_loop_candidate` | `closed-loop-candidate-intake` | `go run ./tools/loopregistry -check-doc -evidence-out out/loop-registry-evidence.json` |
-| `candidate_adoption_decision_freshness` | `closed_loop_candidate_decision` | `closed-loop-candidate-decision-evidence` | `go run ./tools/closedloopcandidatedecision -check-doc -evidence-out out/closed-loop-candidate-decision-evidence.json` |
 
 ## Claim Coverage Gaps
 
