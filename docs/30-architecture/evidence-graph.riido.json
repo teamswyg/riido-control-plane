@@ -800,6 +800,34 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "expired_loop_refresh_dispatch_loop",
+      "observation": "Expired loop refresh command artifacts could name runnable GitHub workflow commands, but executing raw command strings would make the automation boundary depend on shell parsing rather than verified dispatch intent.",
+      "hypothesis": "A dispatcher can treat command strings as evidence only, accept the exact refresh_workflow shape, validate the workflow basename exists, publish a dispatch plan artifact, and dispatch only the structured workflow_file values outside pull requests.",
+      "claims": ["expired_loop_refresh_commands_must_dispatch_safe_workflows"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/loop-refresh-dispatch.yml"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/module-decomposition.riido.json"},
+        {"kind": "tool", "path": "tools/looprefreshdispatch"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/looprefreshdispatch/command_test.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/plan_test.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/run_test.go"},
+        {"kind": "tool", "path": "tools/looprefreshdispatch"},
+        {"kind": "tool", "path": "tools/workflowevidence"},
+        {"kind": "tool", "path": "tools/moduledecomposition"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-refresh-commands", "redacted": true},
+        {"kind": "artifact", "path": "loop-refresh-dispatch-plan", "redacted": true}
+      ],
+      "decision": "Expired evidence can now move from selected refresh command evidence to a validated workflow dispatch plan without eval, while PRs produce evidence only and main/scheduled runs perform dispatch.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "loop_evidence_artifact_refresh_owner_loop",
       "observation": "A loop can declare multiple redacted evidence artifacts while its loop-level refresh workflow only publishes one of them, leaving the remaining evidence to expire even though the refresh plan looks healthy.",
       "hypothesis": "Artifact-level refresh workflow ownership lets each redacted evidence artifact name the scheduled workflow that produces it, and verification can require exact strict artifact uploads for every declared evidence source.",
