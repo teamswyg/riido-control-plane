@@ -9,20 +9,26 @@ type loopRegistry struct {
 type registryLoop struct {
 	ID                string   `json:"id"`
 	Kind              string   `json:"kind"`
+	Observes          []string `json:"observes"`
+	Verifies          []string `json:"verifies"`
 	RefreshWorkflow   string   `json:"refresh_workflow"`
+	FailsWhen         []string `json:"fails_when"`
 	Providers         []string `json:"providers"`
 	PromotesTo        []string `json:"promotes_to"`
 	ExpiresAfterHours int      `json:"expires_after_hours"`
 }
 
 type registryClaim struct {
-	ID            string   `json:"id"`
-	Statement     string   `json:"statement"`
-	Loop          string   `json:"loop"`
-	Files         []string `json:"files"`
-	Verifiers     []string `json:"verifiers"`
-	GeneratedDocs []string `json:"generated_docs"`
-	SemanticHash  string   `json:"semantic_hash"`
+	ID             string   `json:"id"`
+	Statement      string   `json:"statement"`
+	Loop           string   `json:"loop"`
+	CoversObserves []string `json:"covers_observes,omitempty"`
+	CoversVerifies []string `json:"covers_verifies,omitempty"`
+	CoversFails    []string `json:"covers_fails_when,omitempty"`
+	Files          []string `json:"files"`
+	Verifiers      []string `json:"verifiers"`
+	GeneratedDocs  []string `json:"generated_docs"`
+	SemanticHash   string   `json:"semantic_hash"`
 }
 
 type graphEdge struct {

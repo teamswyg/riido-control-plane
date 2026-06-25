@@ -101,6 +101,7 @@
   },
   "assertions": [
     "loop closure audit evidence must expose each requirement's check details, not only check kinds",
-    "loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts"
+    "loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts",
+    "loop closure audit evidence must expose concrete claim coverage token gaps with claim id, loop, and missing dimensions"
   ]
 }

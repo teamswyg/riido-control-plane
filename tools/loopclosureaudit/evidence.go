@@ -1,15 +1,17 @@
 package main
 
 type evidence struct {
-	SchemaVersion    string                `json:"schema_version"`
-	Status           string                `json:"status"`
-	RequirementCount int                   `json:"requirement_count"`
-	CheckCount       int                   `json:"check_count"`
-	ResidualGapCount int                   `json:"residual_gap_count"`
-	Requirements     []requirementEvidence `json:"requirements"`
-	Assertions       []string              `json:"assertions"`
-	ResidualGaps     []residualGap         `json:"residual_gaps"`
-	Loop             loopSpec              `json:"loop"`
+	SchemaVersion         string                `json:"schema_version"`
+	Status                string                `json:"status"`
+	RequirementCount      int                   `json:"requirement_count"`
+	CheckCount            int                   `json:"check_count"`
+	ResidualGapCount      int                   `json:"residual_gap_count"`
+	ClaimCoverageGapCount int                   `json:"claim_coverage_gap_count"`
+	Requirements          []requirementEvidence `json:"requirements"`
+	Assertions            []string              `json:"assertions"`
+	ResidualGaps          []residualGap         `json:"residual_gaps"`
+	ClaimCoverageGaps     []claimCoverageGap    `json:"claim_coverage_gaps,omitempty"`
+	Loop                  loopSpec              `json:"loop"`
 }
 
 type requirementEvidence struct {
@@ -19,17 +21,29 @@ type requirementEvidence struct {
 	Checks     []check  `json:"checks"`
 }
 
-func newEvidence(m manifest) evidence {
+type claimCoverageGap struct {
+	ClaimID           string   `json:"claim_id"`
+	Loop              string   `json:"loop"`
+	MissingDimensions []string `json:"missing_dimensions"`
+}
+
+func newEvidence(m manifest, depsOpt ...dependencies) evidence {
+	coverageGaps := []claimCoverageGap{}
+	if len(depsOpt) > 0 {
+		coverageGaps = claimCoverageGaps(depsOpt[0])
+	}
 	return evidence{
-		SchemaVersion:    evidenceSchema,
-		Status:           "verified",
-		RequirementCount: len(m.Requirements),
-		CheckCount:       checkCount(m.Requirements),
-		ResidualGapCount: len(m.ResidualGaps),
-		Requirements:     requirementEvidenceRows(m.Requirements),
-		Assertions:       append([]string(nil), m.Assertions...),
-		ResidualGaps:     append([]residualGap(nil), m.ResidualGaps...),
-		Loop:             m.Loop,
+		SchemaVersion:         evidenceSchema,
+		Status:                "verified",
+		RequirementCount:      len(m.Requirements),
+		CheckCount:            checkCount(m.Requirements),
+		ResidualGapCount:      len(m.ResidualGaps),
+		ClaimCoverageGapCount: len(coverageGaps),
+		Requirements:          requirementEvidenceRows(m.Requirements),
+		Assertions:            append([]string(nil), m.Assertions...),
+		ResidualGaps:          append([]residualGap(nil), m.ResidualGaps...),
+		ClaimCoverageGaps:     coverageGaps,
+		Loop:                  m.Loop,
 	}
 }
 

@@ -53,17 +53,17 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `ai_thread_history` | `7` | `5` | `febe48b3ee92` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `f31da27c369c` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `df5174dec789` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `8807578b5007` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `ec5fc562c13c` |
 | `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `37` | `10` | `c841f1bb54c0` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `6` | `4` | `a394d2fa717e` |
-| `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `25` | `7` | `3b2a72b1cadc` |
+| `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `29` | `9` | `555007958969` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `21` | `5` | `c1f125432d54` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `bc13c91c01f2` |
-| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `46a5d4e8475c` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `f7b06899bf7e` |
+| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `8e2451cc4e33` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `371bebdb7588` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `4c8ba7035ab5` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `4b3048c3b53a` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `63` | `25` | `07530b8f1a57` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `b137c2d75085` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `cedb982abfc1` |
 | `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `af2fab895ef6` |
 | `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `759ffeb80d39` |
 | `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `115a5da29c24` |
@@ -76,14 +76,14 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `3715f314308e` |
 | `semantic_hash_metadata_must_not_affect_claim_meaning` | `closed_loop_candidate` | `5` | `2` | `ded70199102f` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `5ca4fac732cb` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `eead29eac69d` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `23dba23fd7d7` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `75f513303f4b` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `84678968b814` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `086d8a5421ef` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `de974d8845c7` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `12` | `2` | `0a527c852c9a` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `13` | `6` | `617ef9e3b33b` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `afc8c46bcd08` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `29c13d92fdce` |
-| `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `14` | `5` | `c13345d4c229` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `e93fc7fc7d69` |
+| `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `14` | `5` | `76264dc56e13` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `68d2b171fd9c` |
 | `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `478ee5990118` |
 | `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `13` | `4` | `c2b0eb3d83b1` |
@@ -91,7 +91,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `closed_loop_candidate` | `17` | `13` | `1dded2c8b394` |
 | `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `6` | `3` | `313224bb56d9` |
 | `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `4a3201f2fce8` |
-| `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `17` | `5` | `3fc4acea7d88` |
+| `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `17` | `5` | `28b7a2233a6f` |
 | `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `ddc02f0de343` |
 | `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `6` | `2` | `a9ac1c37f0e3` |
 | `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `open_decision_queue` | `6` | `2` | `797239731d4f` |
@@ -111,7 +111,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `load_harness_failures_must_promote_candidates` | `2` | `2` | `4` | `3` | `4` | `4` | `4` | `3` | `3` | `3` | `1` |
 | `control_plane_performance_hot_paths_must_emit_evidence` | `22` | `12` | `3` | `5` | `11` | `7` | `6` | `8` | `10` | `4` | `1` |
 | `harness_promotion_must_run_after_failure` | `2` | `2` | `2` | `2` | `1` | `0` | `1` | `0` | `4` | `1` | `1` |
-| `loop_closure_audit_must_prove_human_exit_requirements` | `18` | `5` | `2` | `3` | `6` | `7` | `5` | `3` | `7` | `1` | `1` |
+| `loop_closure_audit_must_prove_human_exit_requirements` | `21` | `6` | `2` | `3` | `7` | `8` | `6` | `3` | `9` | `1` | `1` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `14` | `4` | `3` | `4` | `1` | `0` | `0` | `0` | `5` | `3` | `1` |
 | `closed_loop_candidates_must_carry_promotion_edge` | `12` | `4` | `4` | `5` | `0` | `0` | `0` | `0` | `5` | `3` | `1` |
 | `closed_loop_candidates_must_carry_source_ref` | `15` | `3` | `4` | `5` | `0` | `0` | `0` | `0` | `6` | `3` | `1` |

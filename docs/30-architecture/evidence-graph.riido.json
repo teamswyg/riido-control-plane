@@ -1351,8 +1351,8 @@
     },
     {
       "id": "loop_closure_audit_loop",
-      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed proof checks but not residual gaps that should become the next closed-loop candidates.",
-      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, or reasoning chain drifts, and publish residual gap candidates with next loop, artifact, and command fields.",
+      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed proof checks but not residual gaps or claim coverage token gaps that should become the next closed-loop candidates.",
+      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, or claim coverage token drifts, and publish residual gap candidates plus claim coverage gaps with concrete claim id, loop, and missing dimension fields.",
       "claims": ["loop_closure_audit_must_prove_human_exit_requirements"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-closure-audit.riido.json"},
@@ -1365,11 +1365,16 @@
         {"kind": "test", "path": "tools/loopclosureaudit/candidate_export_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/verify_residual_gap.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/residual_gap_test.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/claim_coverage_gap.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/claim_coverage_missing.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/render_coverage.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_gap_test.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopclosureaudit/main_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_gap_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit"},
         {"kind": "workflow", "path": ".github/workflows/loop-closure-audit.yml"}
       ],
@@ -1378,7 +1383,7 @@
         {"kind": "artifact", "path": "loop-closure-audit-closed-loop-candidates", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/loop-closure-audit.md"}
       ],
-      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory, and the audit evidence exposes concrete proof checks plus residual gap candidates.",
+      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory, and the audit evidence exposes concrete proof checks, residual gap candidates, and claim coverage token gaps.",
       "next_loop": "closed_loop_candidate"
     },
     {

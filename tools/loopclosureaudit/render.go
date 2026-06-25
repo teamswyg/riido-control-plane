@@ -13,6 +13,7 @@ func renderDoc(m manifest, e evidence) string {
 	renderAssertions(&b, m.Assertions)
 	renderRequirements(&b, m.Requirements)
 	renderResidualGaps(&b, m.ResidualGaps)
+	renderClaimCoverageGaps(&b, e.ClaimCoverageGaps)
 	renderLoop(&b, m.Loop)
 	return strings.TrimRight(b.String(), "\n") + "\n"
 }
@@ -22,6 +23,7 @@ func renderSummary(b *strings.Builder, m manifest, e evidence) {
 	fmt.Fprintf(b, "- requirements: `%d`\n", e.RequirementCount)
 	fmt.Fprintf(b, "- checks: `%d`\n", e.CheckCount)
 	fmt.Fprintf(b, "- residual gaps: `%d`\n", e.ResidualGapCount)
+	fmt.Fprintf(b, "- claim coverage gaps: `%d`\n", e.ClaimCoverageGapCount)
 	fmt.Fprintf(b, "- evidence artifact: `%s`\n", m.EvidenceArtifact)
 	fmt.Fprintf(b, "- workflow: `%s`\n\n", m.Workflow)
 }

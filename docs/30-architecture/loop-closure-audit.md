@@ -9,6 +9,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 - requirements: `4`
 - checks: `21`
 - residual gaps: `2`
+- claim coverage gaps: `39`
 - evidence artifact: `loop-closure-audit-evidence`
 - workflow: `.github/workflows/loop-closure-audit.yml`
 
@@ -16,6 +17,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 - loop closure audit evidence must expose each requirement's check details, not only check kinds
 - loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts
+- loop closure audit evidence must expose concrete claim coverage token gaps with claim id, loop, and missing dimensions
 
 ## Requirements
 
@@ -32,6 +34,50 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 | --- | --- | --- | --- |
 | `claim_coverage_token_completeness` | `closed_loop_candidate` | `closed-loop-candidate-intake` | `go run ./tools/loopregistry -check-doc -evidence-out out/loop-registry-evidence.json` |
 | `candidate_adoption_decision_freshness` | `closed_loop_candidate_decision` | `closed-loop-candidate-decision-evidence` | `go run ./tools/closedloopcandidatedecision -check-doc -evidence-out out/closed-loop-candidate-decision-evidence.json` |
+
+## Claim Coverage Gaps
+
+| Claim | Loop | Missing Dimensions |
+| --- | --- | --- |
+| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `covers_observes, covers_verifies, covers_fails_when` |
+| `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `covers_observes` |
+| `thread_history_must_keep_user_followups` | `ai_thread_history` | `covers_fails_when` |
+| `claim_bound_file_changes_require_reasoning_chain` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `claim_impact_evidence_must_expose_changed_files` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `claim_meaning_changes_require_reasoning_chain` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `covers_observes` |
+| `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `covers_verifies, covers_fails_when` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `expired_loop_evidence_must_select_refresh_commands` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `covers_verifies` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `loop_evidence_sources_must_be_claim_covered` | `closed_loop_candidate` | `covers_observes, covers_fails_when` |
+| `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `covers_observes, covers_fails_when` |
+| `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `covers_fails_when` |
+| `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `covers_observes, covers_fails_when` |
+| `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `covers_observes, covers_fails_when` |
+| `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `semantic_hash_metadata_must_not_affect_claim_meaning` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
+| `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `covers_observes, covers_verifies, covers_fails_when` |
+| `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `covers_observes` |
+| `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `covers_observes, covers_verifies` |
 
 ## Loop
 
