@@ -1,13 +1,14 @@
 package main
 
 type claimBinding struct {
-	ID           string   `json:"id"`
-	Statement    string   `json:"statement"`
-	Loop         string   `json:"loop"`
-	Files        []string `json:"files"`
-	Verifiers    []string `json:"verifiers"`
-	GeneratedDoc []string `json:"generated_docs"`
-	SemanticHash string   `json:"semantic_hash"`
+	ID             string   `json:"id"`
+	Statement      string   `json:"statement"`
+	Loop           string   `json:"loop"`
+	CoversVerifies []string `json:"covers_verifies,omitempty"`
+	Files          []string `json:"files"`
+	Verifiers      []string `json:"verifiers"`
+	GeneratedDoc   []string `json:"generated_docs"`
+	SemanticHash   string   `json:"semantic_hash"`
 }
 
 type graphEdge struct {
@@ -63,6 +64,7 @@ type claimSurface struct {
 	TestPaths        []string `json:"test_paths"`
 	ManifestPaths    []string `json:"manifest_paths"`
 	GeneratedDocs    []string `json:"generated_docs"`
+	CoversVerifies   []string `json:"covers_verifies"`
 	Verifiers        []string `json:"verifiers"`
 	VerifierCommands []string `json:"verifier_commands"`
 	EvidenceChainIDs []string `json:"evidence_chain_ids"`
