@@ -8,7 +8,8 @@ func taskThreadProgressMessages(thread AIAgentTaskThreadRecord) []AIAgentTaskThr
 	}
 	out := make([]AIAgentTaskThreadHistoryMessage, 0, len(thread.Lines))
 	for _, line := range thread.Lines {
-		if line.Message == "" {
+		body := clientVisibleTaskThreadText(line.Message)
+		if body == "" {
 			continue
 		}
 		out = append(out, AIAgentTaskThreadHistoryMessage{
@@ -18,7 +19,7 @@ func taskThreadProgressMessages(thread AIAgentTaskThreadRecord) []AIAgentTaskThr
 			AssignmentID: thread.AssignmentID,
 			RunID:        thread.RunID,
 			Seq:          line.Seq,
-			Body:         line.Message,
+			Body:         body,
 			ObservedAt:   taskThreadProgressObservedAt(thread, line),
 		})
 	}

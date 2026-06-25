@@ -4,7 +4,11 @@ func copyTaskThreadHistoryMessages(in []AIAgentTaskThreadHistoryMessage) []AIAge
 	if len(in) == 0 {
 		return nil
 	}
-	return append([]AIAgentTaskThreadHistoryMessage(nil), in...)
+	out := make([]AIAgentTaskThreadHistoryMessage, len(in))
+	for i, message := range in {
+		out[i] = clientVisibleTaskThreadHistoryMessage(message)
+	}
+	return out
 }
 
 func retainLatestThreadHistoryMessages(in []AIAgentTaskThreadHistoryMessage) []AIAgentTaskThreadHistoryMessage {
