@@ -14,12 +14,18 @@ func verifyCandidateFile(root string, m manifest, path string) (verifyResult, er
 		return verifyResult{}, err
 	}
 	result := verifyResult{CandidateCount: candidate.CandidateCount}
+	sourceIDs := []string{}
 	for _, item := range candidate.Candidates {
-		if err := verifyCandidateItem(m, item); err != nil {
+		source, err := verifyCandidateItem(m, item)
+		if err != nil {
 			return result, err
 		}
+		sourceIDs = append(sourceIDs, source.ID)
 		result.CandidateIDs = append(result.CandidateIDs, item.ID)
 		result.CandidateEdges = append(result.CandidateEdges, item.PromotionEdge)
+	}
+	result.ConsumedCandidateArtifacts = []consumedCandidateArtifact{
+		consumedArtifact(path, candidate, result.CandidateIDs, sourceIDs),
 	}
 	return result, nil
 }
@@ -35,4 +41,22 @@ func verifyCandidateEnvelope(candidate candidateEvidence, data []byte) error {
 		return fmt.Errorf("candidate artifact must be redacted")
 	}
 	return verifyNoRawLeak(data)
+}
+
+func consumedArtifact(
+	path string,
+	candidate candidateEvidence,
+	ids []string,
+	sources []string,
+) consumedCandidateArtifact {
+	return consumedCandidateArtifact{
+		InputPath:         path,
+		SourceWorkflow:    candidate.SourceWorkflow,
+		LiveStatus:        candidate.LiveStatus,
+		SourceGeneratedAt: candidate.SourceGeneratedAt,
+		SourceExpiresAt:   candidate.SourceExpiresAt,
+		CandidateCount:    candidate.CandidateCount,
+		CandidateIDs:      append([]string(nil), ids...),
+		SourceIDs:         uniqueStrings(sources),
+	}
 }

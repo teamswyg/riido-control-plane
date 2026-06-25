@@ -26,6 +26,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - candidate decision fixture promotion must pin the harness promotion clock so deterministic samples do not fail after real-time expiry
 - candidate decision must reject consumed candidate artifacts whose source_expires_at has passed
 - candidate decision evidence must publish generated_at and expires_at
+- candidate decision evidence must expose consumed candidate artifact path, source workflow, freshness window, and candidate ids
 
 ## Decisions
 

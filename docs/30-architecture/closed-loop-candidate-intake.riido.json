@@ -54,7 +54,8 @@
     "candidate intake workflow path triggers must include linked producer, loop registry, and evidence graph manifests",
     "candidate intake fixture promotion must pin the harness promotion clock so deterministic samples do not fail after real-time expiry",
     "candidate intake must reject consumed candidate artifacts whose source_expires_at has passed",
-    "candidate intake evidence must publish generated_at and expires_at"
+    "candidate intake evidence must publish generated_at and expires_at",
+    "candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids"
   ],
   "loop": {
     "observation": "Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.",
