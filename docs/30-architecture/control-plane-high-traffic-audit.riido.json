@@ -75,7 +75,7 @@
   "assertions": [
     "This audit must not change endpoint paths, request bodies, response fields, or status semantics.",
     "Every high-traffic surface must bind source files, static patterns, and a next optimization candidate.",
-    "Open-loop pressure evidence must record throughput, latency, allocation, heap, and goroutine deltas.",
+    "Open-loop pressure evidence must record throughput, latency, allocation, heap, CPU, and goroutine deltas.",
     "pprof evidence must remain loopback-only and must cover CPU, heap, and goroutine views.",
     "Repeated bottlenecks found by this audit should be promoted into closed-loop candidates, not fixed from intuition alone."
   ],

@@ -33,8 +33,8 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 
 ## Loop
 
-- Observe: Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates and local resource deltas are not emitted from one executable performance loop.
+- Observe: Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates and local CPU/resource deltas are not emitted from one executable performance loop.
 - Hypothesis: A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts.
-- Execute: Verify hot-path files and benchmark functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/goroutine evidence, expose pprof and live-load commands, and generate candidate optimization rows.
+- Execute: Verify hot-path files and benchmark functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine evidence, expose pprof and live-load commands, and generate candidate optimization rows.
 - Evaluate: The verifier fails on missing benchmark coverage, missing local pressure evidence, missing pprof loopback contract, missing aiagentload live command, stale generated docs, or non-strict workflow artifacts.
 - Retrospective: This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates.

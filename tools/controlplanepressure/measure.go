@@ -8,12 +8,13 @@ import (
 type resourceSample struct {
 	mem        runtime.MemStats
 	goroutines int
+	cpu        cpuSample
 }
 
 func sampleResources() resourceSample {
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)
-	return resourceSample{mem: mem, goroutines: runtime.NumGoroutine()}
+	return resourceSample{mem: mem, goroutines: runtime.NumGoroutine(), cpu: sampleCPU()}
 }
 
 func diffResources(before, after resourceSample, ops int64) resourceDelta {
@@ -24,8 +25,10 @@ func diffResources(before, after resourceSample, ops int64) resourceDelta {
 		Frees:           int64(after.mem.Frees) - int64(before.mem.Frees),
 		Goroutines:      after.goroutines - before.goroutines,
 	}
+	addCPUDelta(&delta, before.cpu, after.cpu)
 	if ops > 0 {
 		delta.TotalAllocPerOp = float64(delta.TotalAllocBytes) / float64(ops)
+		delta.CPUSecondsPerOp = delta.ActiveCPUSeconds / float64(ops)
 	}
 	return delta
 }
