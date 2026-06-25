@@ -19,7 +19,12 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "- evidence graph edges: `%d`\n", result.GraphEdges)
 	fmt.Fprintf(&b, "- max evidence expiry hours: `%d`\n\n", result.MaxExpiryHours)
 	renderLoops(&b, m.Loops, result)
-	renderRefreshPlans(&b, refreshPlans(m.Loops, result.RefreshCadenceMinutes))
+	renderRefreshPlans(&b, refreshPlans(
+		m.Loops,
+		m.Claims,
+		result.ClaimSurfaces,
+		result.RefreshCadenceMinutes,
+	))
 	renderClaims(&b, m.Claims)
 	renderClaimSurfaces(&b, result.ClaimSurfaces)
 	renderGraph(&b, m.EvidenceGraph)
@@ -30,12 +35,13 @@ func renderDoc(m manifest, result verifyResult) string {
 func renderRefreshPlans(b *strings.Builder, plans []refreshPlan) {
 	fmt.Fprintln(b, "## Refresh Plans")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Loop | Workflow | Cadence | Expires | Command | Evidence |")
-	fmt.Fprintln(b, "| --- | --- | ---: | ---: | --- | ---: |")
+	fmt.Fprintln(b, "| Loop | Workflow | Cadence | Expires | Command | Claims | Verifiers | Evidence |")
+	fmt.Fprintln(b, "| --- | --- | ---: | ---: | --- | ---: | ---: | ---: |")
 	for _, plan := range plans {
-		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%d` | `%s` | `%d` |\n",
+		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%d` | `%s` | `%d` | `%d` | `%d` |\n",
 			plan.LoopID, plan.WorkflowFile, plan.CadenceMinutes,
-			plan.ExpiresAfterHours, plan.ManualRefreshCommand, len(plan.EvidenceArtifacts))
+			plan.ExpiresAfterHours, plan.ManualRefreshCommand,
+			len(plan.ClaimIDs), len(plan.VerifierCommands), len(plan.EvidenceArtifacts))
 	}
 	fmt.Fprintln(b)
 }
