@@ -6,48 +6,25 @@ func TestAIThreadHistoryClaimsHaveCoverageTokens(t *testing.T) {
 	requireNoClaimCoverageGapForLoop(t, "ai_thread_history")
 }
 
-func TestHarnessPromotionClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "harness_promotion_must_run_after_failure")
-}
-
-func TestClaimSurfaceEvidenceClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "claim_surface_evidence_must_expose_code_test_doc_binding")
-}
-
-func TestCandidateDecisionNextArtifactClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "candidate_decision_next_artifact_must_be_required")
-}
-
-func TestClaimBoundFileReasoningChainClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "claim_bound_file_changes_require_reasoning_chain")
-}
-
-func TestClaimBoundPathsTriggerClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "claim_bound_paths_must_trigger_loop_registry")
-}
-
-func TestClaimImpactChangedFilesClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "claim_impact_evidence_must_expose_changed_files")
-}
-
-func TestClaimMeaningCodeSurfaceClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "claim_meaning_changes_require_code_or_test_surface")
-}
-
-func TestClaimMeaningReasoningChainClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "claim_meaning_changes_require_reasoning_chain")
-}
-
-func TestClaimVerifierAnnotationClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "claim_verifier_commands_must_surface_as_ci_annotations")
-}
-
-func TestExpiredCandidateConsumerClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "closed_loop_candidate_consumers_must_reject_expired_candidates")
-}
-
-func TestCandidateEvidenceExpiryClaimHasCoverageTokens(t *testing.T) {
-	requireNoClaimCoverageGapForClaim(t, "closed_loop_candidate_evidence_must_self_expire")
+func TestRepairedClaimsHaveCoverageTokens(t *testing.T) {
+	for _, claim := range []string{
+		"harness_promotion_must_run_after_failure",
+		"claim_surface_evidence_must_expose_code_test_doc_binding",
+		"candidate_decision_next_artifact_must_be_required",
+		"claim_bound_file_changes_require_reasoning_chain",
+		"claim_bound_paths_must_trigger_loop_registry",
+		"claim_impact_evidence_must_expose_changed_files",
+		"claim_meaning_changes_require_code_or_test_surface",
+		"claim_meaning_changes_require_reasoning_chain",
+		"claim_verifier_commands_must_surface_as_ci_annotations",
+		"closed_loop_candidate_consumers_must_reject_expired_candidates",
+		"closed_loop_candidate_evidence_must_self_expire",
+		"closed_loop_candidates_must_carry_adoption_plan",
+	} {
+		t.Run(claim, func(t *testing.T) {
+			requireNoClaimCoverageGapForClaim(t, claim)
+		})
+	}
 }
 
 func requireNoClaimCoverageGapForLoop(t *testing.T, loop string) {

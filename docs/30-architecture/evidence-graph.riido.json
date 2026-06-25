@@ -1374,8 +1374,8 @@
     },
     {
       "id": "loop_closure_audit_loop",
-      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed proof checks but claim coverage token gaps still needed to become closed-loop candidate artifacts; candidate-loop evidence expiry also needed a named regression check so the already-implemented generated_at/expires_at proof could not disappear from the audit surface.",
-      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, or claim coverage token drifts, and publish residual gap candidates plus claim coverage gap candidates with structured subject fields for claim id, loop, missing dimensions, source refs, promotion edges, adoption commands, and claim-specific regression tests for repaired coverage gaps.",
+      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed proof checks but claim coverage token gaps still needed to become closed-loop candidate artifacts; candidate-loop evidence expiry and candidate adoption-plan coverage also needed named regression coverage so already-implemented expiry and adoption command proofs could not disappear from the audit surface.",
+      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, or claim coverage token drifts, and publish residual gap candidates plus claim coverage gap candidates with structured subject fields for claim id, loop, missing dimensions, source refs, promotion edges, adoption commands, and table-driven claim-specific regression tests for repaired coverage gaps.",
       "claims": ["loop_closure_audit_must_prove_human_exit_requirements"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-closure-audit.riido.json"},
@@ -1411,7 +1411,7 @@
         {"kind": "artifact", "path": "loop-closure-audit-closed-loop-candidates", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/loop-closure-audit.md"}
       ],
-      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, while claim coverage repairs now remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, claim-bound workflow trigger, claim-impact changed-files, expired candidate consumer, or candidate evidence expiry coverage gaps in the backlog.",
+      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, while claim coverage repairs now remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, claim-bound workflow trigger, claim-impact changed-files, expired candidate consumer, candidate evidence expiry, or candidate adoption-plan coverage gaps in the backlog.",
       "next_loop": "closed_loop_candidate"
     },
     {
