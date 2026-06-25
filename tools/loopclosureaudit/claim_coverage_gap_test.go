@@ -59,3 +59,12 @@ func TestClaimSurfaceEvidenceClaimHasCoverageTokens(t *testing.T) {
 		}
 	}
 }
+
+func TestCandidateDecisionNextArtifactClaimHasCoverageTokens(t *testing.T) {
+	_, deps := loadForTest(t)
+	for _, gap := range claimCoverageGaps(deps) {
+		if gap.ClaimID == "candidate_decision_next_artifact_must_be_required" {
+			t.Fatalf("candidate decision next artifact coverage gap remains: %+v", gap)
+		}
+	}
+}
