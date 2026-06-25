@@ -1165,11 +1165,13 @@
         {"kind": "tool", "path": "tools/closedloopcandidateintake/candidate_freshness.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision/candidate_freshness.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/candidate_test.go"},
-        {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_test.go"}
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/closedloopcandidateintake/candidate_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -1180,7 +1182,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Candidate artifact freshness is now verified at the consumer boundary for smoke, load, and performance candidates, not only at promotion time, so closed-loop candidate intake and decision evidence cannot be produced from expired harness artifacts.",
+      "decision": "Candidate artifact freshness is now verified at the consumer boundary for smoke, load, and performance candidates, and the claim coverage tokens keep the expired-candidate rejection rule visible to loop-closure audit so closed-loop candidate intake and decision evidence cannot be produced from expired harness artifacts.",
       "next_loop": "closed_loop_candidate"
     },
     {
