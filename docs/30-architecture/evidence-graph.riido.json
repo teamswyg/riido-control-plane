@@ -148,7 +148,9 @@
       "claims": ["control_plane_performance_hot_paths_must_emit_evidence"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/control-plane-performance.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/control-plane-high-traffic-audit.riido.json"},
         {"kind": "workflow", "path": ".github/workflows/control-plane-performance.yml"},
+        {"kind": "tool", "path": "tools/controlplaneaudit"},
         {"kind": "tool", "path": "tools/controlplaneperf"},
         {"kind": "tool", "path": "tools/controlplanepressure"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -156,20 +158,24 @@
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/controlplaneperf/main_test.go"},
+        {"kind": "test", "path": "tools/controlplaneaudit/main_test.go"},
         {"kind": "benchmark", "path": "internal/riidoaiserver/http_transaction_metrics_benchmark_test.go"},
         {"kind": "benchmark", "path": "internal/riidoaiserver/store_operation_metrics_benchmark_test.go"},
         {"kind": "benchmark", "path": "internal/riidoaiserver/progress_messages_benchmark_test.go"},
         {"kind": "benchmark", "path": "internal/riidoaiserver/ai_agent_client_stream_targets_test.go"},
         {"kind": "tool", "path": "tools/controlplaneperf"},
+        {"kind": "tool", "path": "tools/controlplaneaudit"},
         {"kind": "tool", "path": "tools/controlplanepressure"}
       ],
       "evidence": [
       {"kind": "artifact", "path": "control-plane-performance-evidence", "redacted": true},
+      {"kind": "artifact", "path": "control-plane-high-traffic-audit", "redacted": true},
       {"kind": "artifact", "path": "control-plane-performance-bench", "redacted": true},
       {"kind": "artifact", "path": "control-plane-local-pressure", "redacted": true},
       {"kind": "artifact", "path": "control-plane-performance-redacted-summary", "redacted": true},
       {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
-      {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"}
+      {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"},
+      {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-high-traffic-audit.md"}
     ],
       "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, local pressure resource deltas, and pprof/load commands identify hot paths and candidates before repeated regressions are promoted into closed-loop gates.",
       "next_loop": "closed_loop_candidate"

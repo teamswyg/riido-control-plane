@@ -9,10 +9,13 @@ on:
       - ".github/workflows/control-plane-performance.yml"
       - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/control-plane-performance.riido.json"
+      - "docs/30-architecture/control-plane-high-traffic-audit.md"
+      - "docs/30-architecture/control-plane-high-traffic-audit.riido.json"
       - "docs/30-architecture/loop-registry.md"
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/evidence-graph.md"
       - "docs/30-architecture/evidence-graph.riido.json"
+      - "tools/controlplaneaudit/**"
       - "tools/controlplaneperf/**"
       - "tools/controlplanepressure/**"
       - "tools/aiagentload/**"
@@ -25,6 +28,9 @@ on:
       - ".github/workflows/control-plane-performance.yml"
       - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/control-plane-performance.riido.json"
+      - "docs/30-architecture/control-plane-high-traffic-audit.md"
+      - "docs/30-architecture/control-plane-high-traffic-audit.riido.json"
+      - "tools/controlplaneaudit/**"
       - "tools/controlplaneperf/**"
       - "tools/controlplanepressure/**"
       - "internal/riidoaiserver/**"
@@ -47,6 +53,13 @@ jobs:
           go run ./tools/controlplaneperf \
             -check-doc \
             -evidence-out out/control-plane-performance-evidence.json
+      - name: Verify high-traffic audit evidence
+        run: |
+          mkdir -p out
+          go test ./tools/controlplaneaudit -count=1
+          go run ./tools/controlplaneaudit \
+            -check-doc \
+            -evidence-out out/control-plane-high-traffic-audit.json
       - name: Run lightweight hot-path benchmarks
         run: |
           go test ./internal/riidoaiserver \
@@ -85,6 +98,12 @@ jobs:
         with:
           name: control-plane-performance-evidence
           path: out/control-plane-performance-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: control-plane-high-traffic-audit
+          path: out/control-plane-high-traffic-audit.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()

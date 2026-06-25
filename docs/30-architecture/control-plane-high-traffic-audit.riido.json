@@ -1,0 +1,89 @@
+{
+  "schema_version": "riido-control-plane-high-traffic-audit.v1",
+  "id": "control-plane-high-traffic-audit",
+  "title": "Control Plane High Traffic Audit",
+  "generated_doc": "docs/30-architecture/control-plane-high-traffic-audit.md",
+  "workflow": ".github/workflows/control-plane-performance.yml",
+  "evidence_artifact": "control-plane-high-traffic-audit",
+  "evidence_tool": "tools/controlplaneaudit",
+  "benchmark_command": "go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1",
+  "local_pressure_command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json",
+  "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti)' -count=1",
+  "pprof_commands": [
+    "go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30",
+    "go tool pprof -top http://127.0.0.1:6060/debug/pprof/heap",
+    "curl -fsS http://127.0.0.1:6060/debug/pprof/goroutine?debug=1"
+  ],
+  "surfaces": [
+    {
+      "id": "http_endpoint_dispatch",
+      "category": "endpoint_hot_path",
+      "risk": "High request volume crosses the same handler middleware, route matching, authorization, and JSON response path.",
+      "files": ["internal/riidoaiserver/server_handler.go", "internal/riidoaiserver/server.go", "internal/riidoaiserver/server_json.go"],
+      "patterns": ["mux.HandleFunc", "withHTTPTransactionMetrics", "writeJSON"],
+      "candidate": "Keep route pattern metrics bounded, avoid per-request dynamic route labels, and benchmark response helpers before changing endpoint shapes."
+    },
+    {
+      "id": "store_actor_polling",
+      "category": "assignment_scheduling",
+      "risk": "Daemon poll, long-poll waiters, and assignment lease decisions can add channel and timer pressure under many idle agents.",
+      "files": ["internal/riidoaiserver/store_type.go", "internal/riidoaiserver/store_poll_api.go", "internal/riidoaiserver/store_wait_assignment_api.go"],
+      "patterns": ["commands            chan any", "make(chan pollResult", "time.NewTimer"],
+      "candidate": "Keep long-poll waiters outside the actor critical path and track goroutine deltas in local pressure evidence."
+    },
+    {
+      "id": "sse_event_streaming",
+      "category": "sse_event_streaming",
+      "risk": "Workspace SSE can accumulate subscribers and copy active thread filters while many clients watch the same task.",
+      "files": ["internal/riidoaiserver/server_client_sse.go", "internal/riidoaiserver/ai_agent_client_development_type_ai_agent_client_subscriber.go", "internal/riidoaiserver/ai_agent_client_development_method_get_ai_agent_task_thread_stream_subscription.go"],
+      "patterns": ["fmt.Fprintf", "events    chan ClientStreamEvent", "GetAIAgentTaskThreadStreamSubscription"],
+      "candidate": "Prefer active stream target projection and add leak checks before increasing SSE fanout."
+    },
+    {
+      "id": "thread_history_v3_projection",
+      "category": "read_model_projection",
+      "risk": "Thread history v3 reconstructs historical user, progress, and agent messages, so refresh cost can grow with long conversations.",
+      "files": ["internal/riidoaiserver/ai_agent_client_thread_history_projection.go", "internal/riidoaiserver/ai_agent_client_thread_history_messages.go", "internal/riidoaiserver/ai_agent_client_thread_history_sort.go"],
+      "patterns": ["Messages", "sort", "AssignmentID"],
+      "candidate": "Measure per-thread message copy cost, keep agent snapshots by id, and cap projection work before adding richer timelines."
+    },
+    {
+      "id": "progress_ingest",
+      "category": "runtime_progress_ingest",
+      "risk": "Fine-grained provider output can create many normalize, merge, render, and fanout operations.",
+      "files": ["internal/riidoaiserver/ai_agent_client_development_method_record_ai_agent_thread_progress.go", "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go", "internal/riidoaiserver/progress_messages_render.go"],
+      "patterns": ["RecordAIAgentThreadProgress", "normalize", "renderProgressMessage"],
+      "candidate": "Batch tiny provider fragments into line or frame sized updates while preserving v2/v3 response shapes."
+    },
+    {
+      "id": "dynamodb_snapshot_and_journal",
+      "category": "db_query_transaction",
+      "risk": "Snapshot, split snapshot, assignment journal, active assignment, and stream relay paths drive RCU/WCU and transaction contention.",
+      "files": ["internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_load.go", "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_save.go", "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_api.go"],
+      "patterns": ["load", "save", "claim"],
+      "candidate": "Attribute costs by operation vocabulary and keep snapshot read models split from write-command models."
+    },
+    {
+      "id": "metrics_aggregation",
+      "category": "lock_contention",
+      "risk": "HTTP and store metric windows are intentionally bounded but still run on every hot path.",
+      "files": ["internal/riidoaiserver/http_transaction_metrics_observe.go", "internal/riidoaiserver/store_operation_metrics_observe.go", "internal/riidoaiserver/metrics_window.go"],
+      "patterns": ["Lock", "Observe", "metricsObservedAt"],
+      "candidate": "Keep lock scope copy-only, preserve top-N output, and watch allocation per operation in benchmarks."
+    }
+  ],
+  "assertions": [
+    "This audit must not change endpoint paths, request bodies, response fields, or status semantics.",
+    "Every high-traffic surface must bind source files, static patterns, and a next optimization candidate.",
+    "Open-loop pressure evidence must record throughput, latency, allocation, heap, and goroutine deltas.",
+    "pprof evidence must remain loopback-only and must cover CPU, heap, and goroutine views.",
+    "Repeated bottlenecks found by this audit should be promoted into closed-loop candidates, not fixed from intuition alone."
+  ],
+  "loop": {
+    "observation": "Control-plane performance work already emits benchmarks and local pressure, but the risky source surfaces are not compiled into one auditable map.",
+    "hypothesis": "A static high-traffic audit can connect endpoint, store, SSE, scheduling, progress, DynamoDB, and metric hot paths to executable evidence before any API-neutral optimization.",
+    "execute": "Scan declared surfaces for high-risk primitives, verify pprof and stress commands, publish redacted audit evidence, and keep generated docs in sync.",
+    "evaluate": "The verifier fails on missing files, missing patterns, missing candidates, unsafe pprof commands, missing workflow artifact upload, or generated doc drift.",
+    "retrospective": "This keeps the first slice open-loop: observe pressure and source risk, then decide which bottlenecks deserve closed-loop gates."
+  }
+}
