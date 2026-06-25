@@ -616,11 +616,13 @@
         {"kind": "tool", "path": "tools/loopregistry/github_annotation_impact.go"},
         {"kind": "tool", "path": "tools/loopregistry/github_annotation_escape.go"},
         {"kind": "tool", "path": "tools/loopregistry/main.go"},
-        {"kind": "tool", "path": "tools/loopregistry/run.go"}
+        {"kind": "tool", "path": "tools/loopregistry/run.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/github_annotation_test.go"},
         {"kind": "test", "path": "tools/loopregistry/github_annotation_workflow_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -628,7 +630,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
-      "decision": "Loop-registry PR checks now surface claim verifier commands, impact changed files, changed claim ids, and bound claim surfaces as GitHub annotations, keeping QA and touched semantic scope visible even when artifacts and prose are skipped.",
+      "decision": "Loop-registry PR checks now surface claim verifier commands, impact changed files, changed claim ids, and bound claim surfaces as GitHub annotations, and the claim coverage tokens keep that annotation requirement visible to loop-closure audit even when artifacts and prose are skipped.",
       "next_loop": "closed_loop_candidate"
     },
     {
