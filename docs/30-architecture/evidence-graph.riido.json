@@ -964,8 +964,8 @@
     },
     {
       "id": "expired_loop_refresh_command_selection_loop",
-      "observation": "Loop registry evidence could expose ordered next_commands while still leaving scheduled automation to decide which commands to select and publish after the evidence artifact expires, and the selected command queue itself could be timeless.",
-      "hypothesis": "A refresh command selection mode in the scheduled workflow that reads existing loop-registry evidence, emits only expired refresh plan commands, and uploads a strict command artifact with its own generated_at/expires_at window turns stale evidence into a machine-executable QA queue without creating immortal commands.",
+      "observation": "Loop registry evidence could expose ordered next_commands while still leaving scheduled automation to decide which commands to select and publish after the evidence artifact expires, the selected command queue itself could be timeless, and the claim surface did not expose observe/verify/fail coverage tokens for that expired-evidence command selection gate.",
+      "hypothesis": "A refresh command selection mode in the scheduled workflow that reads existing loop-registry evidence, emits only expired refresh plan commands, uploads a strict command artifact with its own generated_at/expires_at window, and binds the claim coverage tokens turns stale evidence into a machine-executable QA queue without creating immortal commands.",
       "claims": ["expired_loop_evidence_must_select_refresh_commands"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -976,10 +976,12 @@
         {"kind": "tool", "path": "tools/loopregistry/refresh_command_run.go"},
         {"kind": "tool", "path": "tools/loopregistry/refresh_command_types.go"},
         {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -987,7 +989,7 @@
         {"kind": "artifact", "path": "loop-refresh-commands", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Expired loop-registry evidence can now be consumed as input and transformed into an uploaded ordered refresh command artifact with its own 24-hour freshness window, without reopening manifests or hand-composing commands.",
+      "decision": "Expired loop-registry evidence can be consumed as input and transformed into an uploaded ordered refresh command artifact with its own 24-hour freshness window, and loopclosureaudit now keeps that expired-evidence command selection rule claim-bound through explicit observe/verify/fail coverage tokens.",
       "next_loop": "closed_loop_candidate"
     },
     {
