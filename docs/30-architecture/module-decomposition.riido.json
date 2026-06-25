@@ -50,6 +50,7 @@
     {"path":"tools/knowledgecoverage","kind":"meta-evidence-tool","role":"Executable knowledge coverage verifier.","must_not_own":"domain-specific verification semantics"},
     {"path":"tools/liveworkflowevidence","kind":"meta-evidence-tool","role":"Live workflow redacted summary evidence verifier.","must_not_own":"raw endpoint responses, token values, AWS topology, or deployment execution"},
     {"path":"tools/loopregistry","kind":"meta-evidence-tool","role":"Loop registry, claim binding, semantic hash, and harness promotion verifier.","must_not_own":"runtime behavior or harness execution"},
+    {"path":"tools/looprefreshdispatch","kind":"meta-evidence-tool","role":"Loop refresh command artifact dispatcher and safe workflow dispatch plan verifier.","must_not_own":"loop registry selection semantics, raw shell execution, or workflow priority"},
     {"path":"tools/migrationledger","kind":"evidence-tool","role":"Control-plane migration ledger generated reader and verifier.","must_not_own":"runtime migration behavior or private repository source contents"},
     {"path":"tools/metricshttpadapter","kind":"evidence-tool","role":"Metrics HTTP adapter generated reader and verifier.","must_not_own":"runtime metrics implementation"},
     {"path":"tools/moduledecomposition","kind":"meta-evidence-tool","role":"Go package surface and module boundary verifier.","must_not_own":"runtime package behavior"},

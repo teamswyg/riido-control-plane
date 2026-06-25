@@ -1,0 +1,88 @@
+name: loop-refresh-dispatch
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 20 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/loop-refresh-dispatch.yml"
+      - "tools/looprefreshdispatch/**"
+      - "docs/30-architecture/loop-registry.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/evidence-graph.md"
+      - "docs/30-architecture/evidence-graph.riido.json"
+      - "docs/30-architecture/module-decomposition.md"
+      - "docs/30-architecture/module-decomposition.riido.json"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: closed_loop_candidate
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify dispatcher and sample evidence
+        run: |
+          mkdir -p out
+          go test ./tools/looprefreshdispatch -count=1
+          cat > out/sample-loop-refresh-commands.json <<'JSON'
+          {
+            "schema_version": "riido-control-plane-loop-refresh-commands.v1",
+            "status": "refresh_required",
+            "command_count": 1,
+            "commands": [
+              {
+                "loop_id": "closed_loop_candidate",
+                "kind": "refresh_workflow",
+                "command": "gh workflow run loop-registry.yml --ref main"
+              }
+            ]
+          }
+          JSON
+          go run ./tools/looprefreshdispatch \
+            -commands-in out/sample-loop-refresh-commands.json \
+            -evidence-out out/loop-refresh-dispatch-plan.json
+      - name: Download live loop refresh commands
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p out/live-loop-refresh
+          run_id="$(gh run list --workflow loop-registry.yml --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+          test -n "$run_id"
+          gh run download "$run_id" --name loop-refresh-commands --dir out/live-loop-refresh
+          live_commands="$(find out/live-loop-refresh -type f -name 'loop-refresh-commands.json' | head -n 1)"
+          test -n "$live_commands"
+          go run ./tools/looprefreshdispatch \
+            -commands-in "$live_commands" \
+            -evidence-out out/loop-refresh-dispatch-plan.json
+      - name: Dispatch expired refresh workflows
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          count="$(jq -r '.dispatch_count' out/loop-refresh-dispatch-plan.json)"
+          if [ "$count" = "0" ]; then
+            exit 0
+          fi
+          jq -r '.dispatches[].workflow_file' out/loop-refresh-dispatch-plan.json |
+            while IFS= read -r workflow; do
+              gh workflow run "$workflow" --ref main
+            done
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: loop-refresh-dispatch-plan
+          path: out/loop-refresh-dispatch-plan.json
+          if-no-files-found: error
