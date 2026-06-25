@@ -16,6 +16,15 @@
   "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1",
   "pprof_command": "RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30",
   "live_load_command": "go run ./tools/aiagentload -base-url \"$TESTNET_BASE_URL\" -token \"$TESTNET_TOKEN\" -workspace-id \"$TESTNET_WORKSPACE_ID\" -scenario client-read -duration 60s -concurrency 64 -evidence-out out/ai-agent-client-testnet-load.json",
+  "local_pressure_scenarios": [
+    "http_endpoint_threads_v3",
+    "http_metrics_observe",
+    "store_metrics_observe",
+    "progress_ingest_fragment",
+    "thread_stream_subscription",
+    "client_event_subscriber_fanout",
+    "thread_history_v3"
+  ],
   "hot_paths": [
     {
       "id": "http_transaction_metrics",
@@ -77,6 +86,7 @@
   "assertions": [
     "endpoint/API contracts must not change for performance evidence work",
     "lightweight benchmark evidence must run without live credentials",
+    "local pressure evidence must include httptest coverage for the v3 thread history endpoint hot path",
     "local pressure evidence must emit measured allocation, latency, CPU, goroutine, subscriber-fanout findings, and per-scenario capacity estimates",
     "local pressure findings must carry closed-loop candidate required artifacts and adoption commands",
     "live load evidence must stay redacted and use aiagentload rather than ad-hoc curl loops",

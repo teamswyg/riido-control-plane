@@ -41,6 +41,14 @@ func TestControlPlanePerformanceRequiresManualPressure(t *testing.T) {
 	}
 }
 
+func TestControlPlanePerformanceRejectsMissingLocalPressureScenario(t *testing.T) {
+	m := loadManifestForTest(t)
+	m.LocalPressureScenarios = append(m.LocalPressureScenarios, "missing_pressure_scenario")
+	if err := verifyLocalPressureScenarios("../..", m.LocalPressureScenarios); err == nil {
+		t.Fatal("expected missing local pressure scenario to fail")
+	}
+}
+
 func loadManifestForTest(t *testing.T) manifest {
 	t.Helper()
 	var m manifest

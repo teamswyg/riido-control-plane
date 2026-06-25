@@ -18,6 +18,7 @@ type scenario struct {
 
 func scenarios() []scenario {
 	return []scenario{
+		{"http_endpoint_threads_v3", "v3 thread history endpoint covers auth, route metrics, reconcile, projection, and JSON response pressure", "track refresh pressure before changing v3 history projection internals", buildHTTPEndpointThreadsV3},
 		{"http_metrics_observe", "route metrics lock/allocation pressure on endpoint hot paths", "watch lock cost before adding route dimensions", buildHTTPMetrics},
 		{"store_metrics_observe", "store operation metrics lock/allocation pressure on DB hot paths", "keep operation vocabulary bounded and compare with live EMF", buildStoreMetrics},
 		{"progress_ingest_fragment", "fine-grained provider fragments can amplify normalize, merge, event, and fanout cost", "measure fragment cost before changing provider batching", buildProgressIngest},
