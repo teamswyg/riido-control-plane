@@ -1258,27 +1258,31 @@
     },
     {
       "id": "closed_loop_verifier_alias_loop",
-      "observation": "Closed-loop tools used different verification flags, leaving agents to remember tool-specific commands.",
-      "hypothesis": "A shared -verify intent lets agents and pre-commit invoke closed-loop verification without reading each tool's prose usage.",
+      "observation": "Closed-loop tools used different verification flags, leaving agents to remember tool-specific commands, and the shared verifier intent claim did not expose the operator-decision and claim-coverage failure semantics it closes.",
+      "hypothesis": "A shared -verify intent, backed by claim coverage tokens and regression tests, lets agents and pre-commit invoke closed-loop verification without reading each tool's prose usage or relying on human command memory.",
       "claims": ["loop_verifiers_must_accept_verify_intent"],
       "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"},
         {"kind": "tool", "path": "tools/harnesspromotion"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
-        {"kind": "tool", "path": "tools/closedloopcandidatedecision"}
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/main_test.go"},
         {"kind": "test", "path": "tools/evidencegraph/main_test.go"},
         {"kind": "test", "path": "tools/harnesspromotion/main_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/main_test.go"},
-        {"kind": "test", "path": "tools/closedloopcandidatedecision/main_test.go"}
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/main_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Closed-loop verifier tools expose a common -verify intent so execution can be driven by policy instead of human command memory.",
+      "decision": "Closed-loop verifier tools expose a common -verify intent, and loop-closure audit keeps that intent bound to operator-decision and claim-coverage failure semantics so execution can be driven by policy instead of human command memory.",
       "next_loop": "closed_loop_candidate"
     },
     {
