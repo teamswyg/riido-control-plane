@@ -5,7 +5,7 @@ import "testing"
 func TestCandidateDecisionRejectsUnknownNextArtifact(t *testing.T) {
 	root := repoRootForTest(t)
 	out := t.TempDir() + "/candidates.json"
-	if err := generateCandidate(root, out); err != nil {
+	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
 	m := loadDecisionManifestForTest(t)
@@ -18,7 +18,7 @@ func TestCandidateDecisionRejectsUnknownNextArtifact(t *testing.T) {
 func TestCandidateDecisionEvidenceBindsNextArtifactCommand(t *testing.T) {
 	root := repoRootForTest(t)
 	out := t.TempDir() + "/candidates.json"
-	if err := generateCandidate(root, out); err != nil {
+	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
 	result, err := verifyCandidateDecisions(root, loadDecisionManifestForTest(t), out)
@@ -40,7 +40,7 @@ func TestCandidateDecisionEvidenceFileIncludesNextArtifactCommand(t *testing.T) 
 	root := repoRootForTest(t)
 	out := t.TempDir() + "/candidates.json"
 	evidenceOut := t.TempDir() + "/evidence.json"
-	if err := generateCandidate(root, out); err != nil {
+	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
 	if err := run(options{Repo: "../..", Manifest: defaultManifest, CandidateIn: out, EvidenceOut: evidenceOut}); err != nil {

@@ -15,13 +15,16 @@ type decisionArtifactEvidence struct {
 }
 
 type candidateEvidence struct {
-	SchemaVersion  string                `json:"schema_version"`
-	ID             string                `json:"id"`
-	Status         string                `json:"status"`
-	LiveStatus     string                `json:"live_status"`
-	CandidateCount int                   `json:"candidate_count"`
-	Candidates     []closedLoopCandidate `json:"candidates"`
-	Redaction      candidateRedaction    `json:"redaction"`
+	SchemaVersion     string                `json:"schema_version"`
+	ID                string                `json:"id"`
+	Status            string                `json:"status"`
+	SourceWorkflow    string                `json:"source_workflow"`
+	LiveStatus        string                `json:"live_status"`
+	SourceGeneratedAt string                `json:"source_generated_at"`
+	SourceExpiresAt   string                `json:"source_expires_at"`
+	CandidateCount    int                   `json:"candidate_count"`
+	Candidates        []closedLoopCandidate `json:"candidates"`
+	Redaction         candidateRedaction    `json:"redaction"`
 }
 
 type closedLoopCandidate struct {

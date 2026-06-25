@@ -19,7 +19,7 @@ func TestCandidateDecisionRejectsOrphanDecision(t *testing.T) {
 		t.Fatal(err)
 	}
 	out := t.TempDir() + "/candidates.json"
-	if err := generateCandidate(root, out); err != nil {
+	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := verifyCandidateDecisions(root, m, out); err == nil {

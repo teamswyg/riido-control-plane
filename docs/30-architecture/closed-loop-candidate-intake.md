@@ -28,6 +28,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - scheduled candidate intake must download the latest live candidate artifacts from each producer harness workflow instead of validating only a fixture
 - candidate intake workflow path triggers must include linked producer, loop registry, and evidence graph manifests
 - candidate intake fixture promotion must pin the harness promotion clock so deterministic samples do not fail after real-time expiry
+- candidate intake must reject consumed candidate artifacts whose source_expires_at has passed
 - candidate intake evidence must publish generated_at and expires_at
 
 ## Evidence Loop
@@ -35,5 +36,5 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - Observation: Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.
 - Hypothesis: A candidate intake sidecar can verify redacted candidate shape, adoption artifact requirements, producer wiring, and graph linkage before humans choose implementation order.
 - Execute: Generate this reader from the intake manifest, run a deterministic redacted candidate fixture through harness promotion, validate the candidate artifact through explicit input, download latest live producer candidate artifacts on non-PR runs, and publish intake evidence in CI.
-- Evaluate: The verifier fails on missing candidate input, missing producer linkage, missing loop-registry target, missing evidence-graph next loop, missing adoption artifacts, raw endpoint or secret leakage, stale docs, missing live artifact download wiring, or missing scheduled workflow evidence.
+- Evaluate: The verifier fails on missing candidate input, missing producer linkage, missing loop-registry target, missing evidence-graph next loop, missing adoption artifacts, expired candidate artifacts, raw endpoint or secret leakage, stale docs, missing live artifact download wiring, or missing scheduled workflow evidence.
 - Retrospective: This moves candidate triage one step out of the human loop: failures become structured intake records that already know what artifacts are required for adoption.

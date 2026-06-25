@@ -686,6 +686,35 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "closed_loop_candidate_freshness_consumption_loop",
+      "observation": "Closed-loop candidate artifacts carry source_generated_at and source_expires_at, but candidate intake and decision consumers could still verify an expired candidate artifact if it was supplied later.",
+      "hypothesis": "Parsing candidate artifact source timestamps and rejecting expired artifacts in both intake and decision consumers keeps stale harness failures from being reintroduced as fresh closed-loop work.",
+      "claims": ["closed_loop_candidate_consumers_must_reject_expired_candidates"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake/candidate_freshness.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/candidate_freshness.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/candidate_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/closedloopcandidateintake/candidate_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Candidate artifact freshness is now verified at the consumer boundary, not only at promotion time, so closed-loop candidate intake and decision evidence cannot be produced from expired harness artifacts.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "pre_commit_claim_binding_loop",
       "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier.",
       "hypothesis": "A pre-commit hook can run loop registry claim/doc/impact verification before PR creation.",

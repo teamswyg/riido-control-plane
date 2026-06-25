@@ -51,7 +51,8 @@ jobs:
             go run ./tools/harnesspromotion \
             -summary docs/30-architecture/fixtures/harness-failure-summary.fixture.json \
             -candidate-out out/sample-closed-loop-candidates.json
-          go run ./tools/closedloopcandidateintake \
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidateintake \
             -check-doc \
             -candidate-in out/sample-closed-loop-candidates.json \
             -evidence-out out/closed-loop-candidate-intake-evidence.json

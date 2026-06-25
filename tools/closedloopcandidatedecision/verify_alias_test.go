@@ -5,7 +5,7 @@ import "testing"
 func TestCandidateDecisionManifestVerifies(t *testing.T) {
 	root := repoRootForTest(t)
 	out := t.TempDir() + "/candidates.json"
-	if err := generateCandidate(root, out); err != nil {
+	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
 	if err := run(options{
@@ -22,7 +22,7 @@ func TestCandidateDecisionManifestVerifies(t *testing.T) {
 func TestCandidateDecisionVerifyAlias(t *testing.T) {
 	root := repoRootForTest(t)
 	out := t.TempDir() + "/candidates.json"
-	if err := generateCandidate(root, out); err != nil {
+	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
 	if err := mainRun([]string{
