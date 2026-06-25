@@ -45,6 +45,25 @@
         "decision_record",
         "evidence_graph_edge"
       ]
+    },
+    {
+      "id": "control-plane-performance",
+      "harness_loop": "control_plane_performance_harness",
+      "source_workflow": ".github/workflows/control-plane-performance.yml",
+      "summary_artifact": "control-plane-performance-redacted-summary",
+      "summary_path": "out/control-plane-performance-redacted-summary.json",
+      "candidate_artifact": "control-plane-performance-closed-loop-candidates",
+      "candidate_path": "out/control-plane-performance-closed-loop-candidates.json",
+      "promotion_target": "closed_loop_candidate",
+      "failure_statuses": ["failure", "cancelled", "timed_out", "unknown"],
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
     }
   ],
   "assertions": [

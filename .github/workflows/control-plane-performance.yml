@@ -1,0 +1,96 @@
+name: control-plane-performance
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "53 21 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/control-plane-performance.yml"
+      - "docs/30-architecture/control-plane-performance.md"
+      - "docs/30-architecture/control-plane-performance.riido.json"
+      - "docs/30-architecture/loop-registry.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/evidence-graph.md"
+      - "docs/30-architecture/evidence-graph.riido.json"
+      - "tools/controlplaneperf/**"
+      - "tools/aiagentload/**"
+      - "internal/riidoaiserver/**"
+      - "go.mod"
+      - "go.sum"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/control-plane-performance.yml"
+      - "docs/30-architecture/control-plane-performance.md"
+      - "docs/30-architecture/control-plane-performance.riido.json"
+      - "tools/controlplaneperf/**"
+      - "internal/riidoaiserver/**"
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: control_plane_performance_harness
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify control-plane performance evidence loop
+        run: |
+          mkdir -p out
+          go test ./tools/controlplaneperf -count=1
+          go run ./tools/controlplaneperf \
+            -check-doc \
+            -evidence-out out/control-plane-performance-evidence.json
+      - name: Run lightweight hot-path benchmarks
+        run: |
+          go test ./internal/riidoaiserver \
+            -run '^$' \
+            -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|AIAgentTaskThreadStreamSubscriptionTargets)' \
+            -benchmem \
+            -benchtime=100ms \
+            -count=1 | tee out/control-plane-performance-bench.txt
+      - name: Publish redacted performance summary evidence
+        if: always()
+        env:
+          RIIDO_LIVE_CHECK_STATUS: ${{ job.status }}
+        run: |
+          mkdir -p out
+          go run ./tools/liveworkflowevidence \
+            -workflow control-plane-performance \
+            -live-status "$RIIDO_LIVE_CHECK_STATUS" \
+            -evidence-out out/control-plane-performance-redacted-summary.json
+      - name: Promote performance harness failures to closed-loop candidates
+        if: always()
+        run: |
+          mkdir -p out
+          go run ./tools/harnesspromotion \
+            -summary out/control-plane-performance-redacted-summary.json \
+            -candidate-out out/control-plane-performance-closed-loop-candidates.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: control-plane-performance-evidence
+          path: out/control-plane-performance-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: control-plane-performance-bench
+          path: out/control-plane-performance-bench.txt
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: control-plane-performance-redacted-summary
+          path: out/control-plane-performance-redacted-summary.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: control-plane-performance-closed-loop-candidates
+          path: out/control-plane-performance-closed-loop-candidates.json
+          if-no-files-found: error

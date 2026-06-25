@@ -1,0 +1,72 @@
+{
+  "schema_version": "riido-control-plane-performance.v1",
+  "id": "control-plane-performance",
+  "title": "Control Plane Performance Evidence",
+  "generated_doc": "docs/30-architecture/control-plane-performance.md",
+  "workflow": ".github/workflows/control-plane-performance.yml",
+  "evidence_artifact": "control-plane-performance-evidence",
+  "benchmark_artifact": "control-plane-performance-bench",
+  "summary_artifact": "control-plane-performance-redacted-summary",
+  "candidate_artifact": "control-plane-performance-closed-loop-candidates",
+  "evidence_tool": "tools/controlplaneperf",
+  "benchmark_command": "go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1",
+  "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti)' -count=1",
+  "pprof_command": "RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30",
+  "live_load_command": "go run ./tools/aiagentload -base-url \"$TESTNET_BASE_URL\" -token \"$TESTNET_TOKEN\" -workspace-id \"$TESTNET_WORKSPACE_ID\" -scenario client-read -duration 60s -concurrency 64 -evidence-out out/ai-agent-client-testnet-load.json",
+  "hot_paths": [
+    {
+      "id": "http_transaction_metrics",
+      "category": "endpoint_hot_path",
+      "risk": "high route volume can contend on transaction metric aggregation",
+      "files": ["internal/riidoaiserver/http_transaction_metrics_observe.go", "internal/riidoaiserver/http_transaction_metrics_snapshot.go"],
+      "benchmarks": ["BenchmarkHTTPTransactionMetricsObserve", "BenchmarkHTTPTransactionMetricsSnapshot"],
+      "candidate": "keep route-pattern cardinality bounded and watch allocation/lock cost"
+    },
+    {
+      "id": "store_operation_metrics",
+      "category": "db_cost_attribution",
+      "risk": "poll, lease, and append metrics run on assignment/store hot paths",
+      "files": ["internal/riidoaiserver/store_operation_metrics_observe.go", "internal/riidoaiserver/store_operation_metrics_snapshot.go"],
+      "benchmarks": ["BenchmarkStoreOperationMetricsObserve", "BenchmarkStoreOperationMetricsSnapshot"],
+      "candidate": "keep store metric aggregation bounded and compare operation-level cost before optimizing"
+    },
+    {
+      "id": "thread_stream_targets",
+      "category": "sse_event_streaming",
+      "risk": "task screens with many historical threads can over-copy progress lines while computing active SSE filters",
+      "files": ["internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go", "internal/riidoaiserver/ai_agent_client_development_method_active_task_thread_stream_targets_locked.go"],
+      "benchmarks": ["BenchmarkAIAgentTaskThreadStreamSubscriptionTargets"],
+      "candidate": "prefer active stream target projection over full visible thread copies for subscription paths"
+    },
+    {
+      "id": "progress_message_rendering",
+      "category": "runtime_progress_ingest",
+      "risk": "fine-grained provider progress can create many render/normalize calls",
+      "files": ["internal/riidoaiserver/progress_messages_render.go", "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go"],
+      "benchmarks": ["BenchmarkRenderProgressMessage"],
+      "candidate": "batch provider progress before rendering and preserve structured fallback behavior"
+    },
+    {
+      "id": "assignment_poll_and_wait",
+      "category": "assignment_scheduling",
+      "risk": "polling and long-poll waiters can create goroutine pressure or stale busy state",
+      "files": ["internal/riidoaiserver/store_poll_api.go", "internal/riidoaiserver/store_wait_assignment_api.go", "internal/riidoaiserver/store_wait_assignment_pressure.go"],
+      "tests": ["TestWaitForAssignmentReturnsImmediatelyWhenQueued", "TestWaitForAssignmentDoesNotBlockActor"],
+      "candidate": "keep long-poll waiters off the actor critical path and watch waiter/goroutine count"
+    }
+  ],
+  "assertions": [
+    "endpoint/API contracts must not change for performance evidence work",
+    "lightweight benchmark evidence must run without live credentials",
+    "live load evidence must stay redacted and use aiagentload rather than ad-hoc curl loops",
+    "pprof collection must use loopback-only RIIDO_AI_SERVER_PPROF_ADDR",
+    "performance candidates must name the hot path, risk, existing evidence, and next verifier candidate"
+  ],
+  "loop": {
+    "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates are not emitted from one executable performance loop.",
+    "hypothesis": "A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts.",
+    "execute": "Verify hot-path files and benchmark functions, publish lightweight benchmark output, expose pprof and live-load commands, and generate candidate optimization rows.",
+    "evaluate": "The verifier fails on missing benchmark coverage, missing pprof loopback contract, missing aiagentload live command, stale generated docs, or non-strict workflow artifacts.",
+    "retrospective": "This keeps performance work in an open loop first: measure and rank hot paths before promoting repeated bottlenecks into closed-loop gates."
+  }
+}

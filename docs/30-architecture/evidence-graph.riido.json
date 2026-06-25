@@ -142,6 +142,36 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_performance_evidence_loop",
+      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, and live load tooling, but no single executable loop emitted hot-path coverage and optimization candidates without changing endpoint contracts.",
+      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark functions, pprof loopback command, redacted aiagentload command, and a strict benchmark workflow, then publish candidate evidence for architect review.",
+      "claims": ["control_plane_performance_hot_paths_must_emit_evidence"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/control-plane-performance.riido.json"},
+        {"kind": "workflow", "path": ".github/workflows/control-plane-performance.yml"},
+        {"kind": "tool", "path": "tools/controlplaneperf"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/module-decomposition.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/controlplaneperf/main_test.go"},
+        {"kind": "benchmark", "path": "internal/riidoaiserver/http_transaction_metrics_benchmark_test.go"},
+        {"kind": "benchmark", "path": "internal/riidoaiserver/store_operation_metrics_benchmark_test.go"},
+        {"kind": "benchmark", "path": "internal/riidoaiserver/progress_messages_benchmark_test.go"},
+        {"kind": "benchmark", "path": "internal/riidoaiserver/ai_agent_client_stream_targets_test.go"},
+        {"kind": "tool", "path": "tools/controlplaneperf"}
+      ],
+      "evidence": [
+      {"kind": "artifact", "path": "control-plane-performance-evidence", "redacted": true},
+      {"kind": "artifact", "path": "control-plane-performance-bench", "redacted": true},
+      {"kind": "artifact", "path": "control-plane-performance-redacted-summary", "redacted": true},
+      {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
+      {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"}
+    ],
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks and pprof/load commands identify hot paths and candidates before repeated regressions are promoted into closed-loop gates.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "harness_failure_always_promotion_loop",
       "observation": "A harness workflow can run harnesspromotion in the happy path but skip promotion or candidate artifact upload after the smoke/load step fails.",
       "hypothesis": "Verifying that both the harnesspromotion step and closed-loop candidate artifact upload step run under if: always() keeps failed harness runs from becoming silent artifacts.",
