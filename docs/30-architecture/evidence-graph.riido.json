@@ -568,8 +568,8 @@
     },
     {
       "id": "loop_evidence_source_coverage_loop",
-      "observation": "Loop manifests declared evidence source paths, but those paths could remain artifact labels that were not mapped to a concrete claim and evidence surface.",
-      "hypothesis": "Adding covers_evidence to claim bindings and rejecting uncovered or unknown evidence paths lets the loop registry derive artifact-to-claim meaning from the manifest instead of relying on a human to interpret artifact names.",
+      "observation": "Loop manifests declared evidence source paths, but those paths could remain artifact labels that were not mapped to a concrete claim and evidence surface, or the claim could lack observe/fail tokens that tell agents this is an evidence-expiry and regression-pattern rule.",
+      "hypothesis": "Adding covers_evidence to claim bindings, rejecting uncovered or unknown evidence paths, and binding the claim to evidence_expired/regression_pattern observations lets the loop registry derive artifact-to-claim meaning from the manifest instead of relying on a human to interpret artifact names.",
       "claims": ["loop_evidence_sources_must_be_claim_covered"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -580,11 +580,13 @@
         {"kind": "tool", "path": "tools/loopregistry/claim_surface.go"},
         {"kind": "tool", "path": "tools/loopregistry/render_more.go"},
         {"kind": "test", "path": "tools/loopregistry/verify_loop_evidence_test.go"},
-        {"kind": "test", "path": "tools/loopregistry/claim_surface_evidence_source_test.go"}
+        {"kind": "test", "path": "tools/loopregistry/claim_surface_evidence_source_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/verify_loop_evidence_test.go"},
         {"kind": "test", "path": "tools/loopregistry/claim_surface_evidence_source_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -592,7 +594,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Loop evidence source paths are now executable coverage requirements: every path must be claimed by a business claim in the same loop, and claim surfaces expose which evidence artifacts they close.",
+      "decision": "Loop evidence source paths are now executable coverage requirements: every path must be claimed by a business claim in the same loop, claim surfaces expose which evidence artifacts they close, and loopclosureaudit keeps the rule bound to explicit evidence-expiry observe/fail tokens.",
       "next_loop": "closed_loop_candidate"
     },
     {
