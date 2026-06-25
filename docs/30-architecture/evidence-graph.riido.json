@@ -212,8 +212,8 @@
     },
     {
       "id": "closed_loop_candidate_adoption_plan_loop",
-      "observation": "Closed-loop candidates named required artifact types, but the candidate artifact did not itself carry executable commands for producing or verifying those artifacts; later producer-source growth also showed adoption plans can become passive if intake and decision loops do not consume every producer source, and intake evidence did not expose adoption commands without reopening the candidate artifact.",
-      "hypothesis": "Embedding an adoption_plan in each candidate, exposing candidate_adoption_plans in intake evidence, and verifying producer-source coverage in intake plus decision seed coverage lets agents act from evidence artifacts even if they do not read the surrounding documentation.",
+      "observation": "Closed-loop candidates named required artifact types, but the candidate artifact did not itself carry executable commands for producing or verifying those artifacts; later producer-source growth also showed adoption plans can become passive if intake and decision loops do not consume every producer source, intake evidence did not expose adoption commands without reopening the candidate artifact, and producer workflow changes could avoid the intake or decision verifier path.",
+      "hypothesis": "Embedding an adoption_plan in each candidate, exposing candidate_adoption_plans in intake evidence, verifying producer-source coverage in intake plus decision seed coverage, and binding each source workflow to intake/decision path triggers lets agents act from evidence artifacts even if they do not read the surrounding documentation.",
       "claims": ["closed_loop_candidates_must_carry_adoption_plan"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
@@ -222,16 +222,22 @@
         {"kind": "tool", "path": "tools/harnesspromotion"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake/adoption_plan_evidence.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake/workflow_path_triggers.go"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake/run.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/adoption_plan_evidence_test.go"},
-        {"kind": "tool", "path": "tools/closedloopcandidatedecision"}
+        {"kind": "test", "path": "tools/closedloopcandidateintake/workflow_path_triggers_test.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/workflow_path_triggers.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/workflow_path_triggers_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/harnesspromotion/adoption_plan_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/adoption_plan_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/adoption_plan_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/producer_coverage_test.go"},
-        {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"}
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/workflow_path_triggers_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/workflow_path_triggers_test.go"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
@@ -240,7 +246,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
-      "decision": "Candidate artifacts now carry an adoption_plan, intake evidence exposes candidate_adoption_plans, intake must cover every closed_loop_candidate producer source, and decision verification requires an owned seed for every intake source while still rejecting candidates whose plan does not cover every required next artifact.",
+      "decision": "Candidate artifacts now carry an adoption_plan, intake evidence exposes candidate_adoption_plans, intake must cover every closed_loop_candidate producer source, decision verification requires an owned seed for every intake source, and producer workflow changes must trigger intake plus decision verification while still rejecting candidates whose plan does not cover every required next artifact.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

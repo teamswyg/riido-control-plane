@@ -16,6 +16,7 @@ type manifest struct {
 type intakeSource struct {
 	ID                    string   `json:"id"`
 	CandidateArtifact     string   `json:"candidate_artifact"`
+	SourceWorkflow        string   `json:"source_workflow"`
 	ProducerManifest      string   `json:"producer_manifest"`
 	LoopRegistryManifest  string   `json:"loop_registry_manifest"`
 	EvidenceGraphManifest string   `json:"evidence_graph_manifest"`
