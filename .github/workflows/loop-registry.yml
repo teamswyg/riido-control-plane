@@ -277,9 +277,18 @@ jobs:
             -github-annotations \
             "${impact_args[@]}" \
             -evidence-out out/loop-registry-evidence.json
+          go run ./tools/loopregistry \
+            -refresh-plan-in out/loop-registry-evidence.json \
+            -refresh-commands-out out/loop-refresh-commands.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: loop-registry-evidence
           path: out/loop-registry-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: loop-refresh-commands
+          path: out/loop-refresh-commands.json
           if-no-files-found: error

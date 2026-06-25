@@ -61,7 +61,7 @@
 | `.github/workflows/harness-promotion.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/health-ready-cmd.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/integration-matrix.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
-| `.github/workflows/loop-registry.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/loop-registry.yml` | `covered` | `1` | `1/1` | `true` | `2/2` | `0` | - |
 | `.github/workflows/metrics-http-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/migration-ledger.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/module-decomposition.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
