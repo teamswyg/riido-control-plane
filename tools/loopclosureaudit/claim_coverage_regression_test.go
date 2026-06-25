@@ -10,6 +10,7 @@ func TestRepairedClaimsHaveCoverageTokens(t *testing.T) {
 	for _, claim := range []string{
 		"harness_promotion_must_run_after_failure",
 		"claim_surface_evidence_must_expose_code_test_doc_binding",
+		"candidate_decision_evidence_must_expose_next_command",
 		"candidate_decision_next_artifact_must_be_required",
 		"claim_bound_file_changes_require_reasoning_chain",
 		"claim_bound_paths_must_trigger_loop_registry",
