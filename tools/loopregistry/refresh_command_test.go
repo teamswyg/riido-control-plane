@@ -26,6 +26,9 @@ func TestLoopRegistrySelectsExpiredRefreshCommands(t *testing.T) {
 	if got.Status != "refresh_required" || got.CommandCount != 1 || got.Commands[0].LoopID != "expired" {
 		t.Fatalf("refresh commands = %+v", got)
 	}
+	if got.GeneratedAt != "2026-06-25T00:00:00Z" || got.ExpiresAt != "2026-06-26T00:00:00Z" {
+		t.Fatalf("refresh command freshness = %+v", got)
+	}
 }
 
 func TestLoopRegistryRefreshCommandModeWritesEvidence(t *testing.T) {
@@ -51,7 +54,7 @@ func TestLoopRegistryRefreshCommandModeWritesEvidence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if written.CommandCount != 1 || written.SchemaVersion != refreshCommandsSchema {
+	if written.CommandCount != 1 || written.SchemaVersion != refreshCommandsSchema || written.ExpiresAt == "" {
 		t.Fatalf("written refresh command evidence = %+v", written)
 	}
 }

@@ -582,7 +582,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "1d247fc7bd3c81b007adcfe8e0dbabd5ae7e77495c18a04669863fc01f35a539"
+      "semantic_hash": "ac4b0fd7fb7b43f4eb60be2568f692ce3be3ee5d703a11ec52d319b4fbb2fb89"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -692,7 +692,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "fb9aa45457361b4c4a5643cba6e56d21cac13a0d8e26703c3c0eb42d4c196194"
+      "semantic_hash": "53da6a8afe8ac08567894e07e7882bb16dbd3392c7f197e5f95c19c3133f8db8"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -737,7 +737,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3cc92921e8f10741fa12305d3fb07cbceb05e8da678c16d80ba3f7bdc06f4312"
+      "semantic_hash": "0c88b36d1ee21bcf6842ffa6be158b6471996d28361fde8e70a2fa481e2385eb"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -796,7 +796,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0c5b4f9b93bd186adb779f60a8de5a31d57aa18c997ce95489e481bd6459741f"
+      "semantic_hash": "7a3450379eb15c294cff059a56d62fae8ce5f5509c4266ce852484304521949a"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -936,7 +936,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "6bae450b5c86cee292ea28a148ba88e3cbd476a5464e7aa647a10847e464f898"
+      "semantic_hash": "c1e5fcca2d42b8f97ca4cdec54f3582ef402085962cf7480b17edc9816eb0ec6"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -1242,7 +1242,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1c1a47d013f2b9cebf565aff5df48c222511c2d62087d197348e192d5631c77a"
+      "semantic_hash": "48e36d78b8aadf499fff6c8d1d09af19df22b06591a37ac0c46ebde9edc059da"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -1266,7 +1266,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "487ae02b2ce30a334bee5d95b71fd648eb38d6f651ad9e506ab91b51dc154bd9"
+      "semantic_hash": "6a857eb53e480fd3e8a7a3db17bbcfd680b177a5945249009bbace7447aa5309"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -1286,7 +1286,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9f9c25a39ad7b5507ccae5c8daa10b8190bf67e33e7f06e90f95b7d8ffd3404a"
+      "semantic_hash": "4d205b6fe7a4bd813fccee1494350fb55e3402448c07d4a75700c2ddbb88356e"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -1410,7 +1410,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d47f0623f132c763f144d1f415c2343c27c1022c28453a1f5b803d353cb74b64"
+      "semantic_hash": "904f40f08034cabbcc05d956181ffa3d9996018b67900127f424e3973cc09d7b"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -1543,7 +1543,7 @@
     },
     {
       "id": "expired_loop_evidence_must_select_refresh_commands",
-      "statement": "Loop registry must convert expired refresh_plans from existing evidence into ordered refresh command evidence and publish that evidence as a strict loop-refresh-commands artifact so scheduled automation can run expired QA without a human composing commands.",
+      "statement": "Loop registry must convert expired refresh_plans from existing evidence into ordered refresh command evidence, publish that evidence as a strict loop-refresh-commands artifact, and include generated_at/expires_at freshness so scheduled automation can run expired QA without a human composing commands or trusting timeless command queues.",
       "loop": "closed_loop_candidate",
       "covers_evidence": [
         "loop-registry-evidence"
@@ -1571,11 +1571,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f4d2cba577ced1a8c87f9b159d5f4e4de502839c16bc6f2c29743c610a64e50f"
+      "semantic_hash": "2f4cb237d33521c2ef3d907a5bd7ebb7f3764df92baaa5453d172ceeb8911b35"
     },
     {
       "id": "expired_loop_refresh_commands_must_dispatch_safe_workflows",
-      "statement": "Loop refresh automation must consume loop-refresh-commands without shell-evaluating command strings, derive a validated workflow dispatch plan, publish that plan as strict evidence, and dispatch only existing workflow basenames on non-PR runs.",
+      "statement": "Loop refresh automation must consume loop-refresh-commands without shell-evaluating command strings, derive a validated workflow dispatch plan, publish that plan as strict generated_at/expires_at evidence linked to the source command evidence window, and dispatch only existing workflow basenames on non-PR runs.",
       "loop": "closed_loop_candidate",
       "covers_evidence": [
         "loop-refresh-commands",
@@ -1586,6 +1586,7 @@
         ".github/workflows/loop-registry.yml",
         "tools/looprefreshdispatch/constants.go",
         "tools/looprefreshdispatch/types.go",
+        "tools/looprefreshdispatch/time.go",
         "tools/looprefreshdispatch/command.go",
         "tools/looprefreshdispatch/plan.go",
         "tools/looprefreshdispatch/run.go",
@@ -1608,7 +1609,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "1e38557e075c84c8a8bf3203b671806a2eba957fd625f68221949c693236eb76"
+      "semantic_hash": "73b8860b2fa455a93151c09da76abea531f3a8187ef96227f985b770c457dace"
     },
     {
       "id": "loop_registry_evidence_must_expose_graph_edges",

@@ -7,10 +7,12 @@ import (
 
 func selectExpiredRefreshCommands(source evidence) (refreshCommandEvidence, error) {
 	now := evidenceNow()
+	generatedAt, expiresAt := evidenceWindowAt(now, loopRegistryEvidenceTTLHours)
 	out := refreshCommandEvidence{
 		SchemaVersion:     refreshCommandsSchema,
 		Status:            "fresh",
-		GeneratedAt:       formatEvidenceTime(now),
+		GeneratedAt:       generatedAt,
+		ExpiresAt:         expiresAt,
 		SourceGeneratedAt: source.GeneratedAt,
 		SourceExpiresAt:   source.ExpiresAt,
 	}
