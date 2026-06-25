@@ -1,6 +1,26 @@
 package riidoaiserver
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
+)
+
+const providerLimitFailureCategory = "provider_limit"
+
+func clientVisibleFailureMessage(metadata map[string]string, message string) string {
+	if clientVisibleProviderLimitCategory(metadata) {
+		return clientMessageCloudCreditInsufficient
+	}
+	return clientVisibleTaskThreadText(message)
+}
+
+func clientVisibleProviderLimitCategory(metadata map[string]string) bool {
+	if metadata == nil {
+		return false
+	}
+	return strings.TrimSpace(metadata[metadatakeys.AssignmentFailureCategory.String()]) == providerLimitFailureCategory
+}
 
 func clientVisibleProviderLimitMessage(message string) (string, bool) {
 	normalized := strings.ToLower(strings.TrimSpace(message))

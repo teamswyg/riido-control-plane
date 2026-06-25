@@ -530,7 +530,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "a309a6ef3ff24c8099942e237b709d34119ef717e6be71389e04208ed603afd4"
+      "semantic_hash": "e828ebdbf2c2cfafa0367820fb2c07d01906cbe2e25a369a445969843bfba17c"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -640,7 +640,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "47e2d2567cc3a388c3f86eda36dd4c5928fcd4a2793b5d5989fc9178b7bd62e2"
+      "semantic_hash": "6514016b4190b13d3fc2fde834837a7de8688f7b509994b6cebed44b95a0231e"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -699,7 +699,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5b36b0cf235524797d65e2dcb4f8de700b17fd66fbc8d1870d131cc3e27facff"
+      "semantic_hash": "ec747ab1eed188564cb7634a2638147427588a742a9ab9d9fdf1782ca9d7f8e7"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -779,6 +779,8 @@
         "TestAIAgentIntentDialogueCanHandoffAfterProviderLimit",
         "TestClientVisibleTaskThreadTextLocalizesProviderLimitMessages",
         "TestFailureDiagnosticsLocalizesProviderLimitMessages",
+        "TestFailureDiagnosticsUsesProviderLimitCategory",
+        "TestAssignmentEventResponseUsesProviderLimitCategory",
         "TestClientVisibleTaskThreadTextConvertsLocalApprovalDialog",
         "TestFailureDiagnosticsConvertsLocalApprovalDialog",
         "TestHTTPAIAgentIntentGateUsesMetadataWhenDocumentMissing",
@@ -790,7 +792,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "1a56cee065bc100d24b62c644a39819e1fc43102b67a5424495556a11b666e1a"
+      "semantic_hash": "a2aa530470c152619d8b8029b994f800105543c3baedfba3b16d17f8dcac0a89"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
@@ -834,7 +836,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b5d81bdfed90e55e79cd013b34fc38237c8547b4da58c2bf4f6787d7c518dead"
+      "semantic_hash": "c1afa4321e71d8c462573fda6dae3b7d34aa104d2db71a357b602f11ed5317a3"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -1116,7 +1118,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e572a8d6c52705ae579ccf634824efdb7db3e7d1c04c0bd828ddeedef0a645b5"
+      "semantic_hash": "de4ac06d30b14031ea9abcfd1fbad2db049c83276dcb51ed230b2afdf9b795f3"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -1140,7 +1142,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ab9a33206c8c5d536181820b541fc5dbf7b2f6d3252dbcd5abccb23e268a7dd4"
+      "semantic_hash": "93c0eac504a901fb61334a4d0d49cfd1b4d17e1dd24afda06a964f2f2db8161c"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -1160,7 +1162,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ff23441627046ca2b3570da8759e23a8fa70b72219ecab7949680ca6a35c7f10"
+      "semantic_hash": "5df5979a9fac4f25d227d4f2a23dc613bc4a0082e16e9221fa2e56dc978e27fd"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -1276,7 +1278,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "501e5cbe61629e80f2988d3d04d90722f92df196b00c4e9697b0ab295c9510b5"
+      "semantic_hash": "dcb213fcf0bcb21b33ccff47cb77cbf3b09e2ea09727a06eab6702ddaabd9b96"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
