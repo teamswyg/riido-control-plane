@@ -823,11 +823,12 @@
     },
     {
       "id": "closed_loop_candidate_intake_loop",
-      "observation": "Closed-loop candidate artifacts could be produced without a scheduled intake verifier that reads them, and new producer sources such as control-plane performance could remain passive if intake only consumed older smoke/load artifacts.",
-      "hypothesis": "A candidate intake tool can require explicit redacted candidate input, verify producer, loop registry, graph, adoption artifact requirements, and fail when any closed_loop_candidate producer source is missing from intake.",
+      "observation": "Closed-loop candidate artifacts could be produced without a scheduled intake verifier that reads them, new producer sources such as control-plane performance could remain passive if intake only consumed older smoke/load artifacts, and PR checks could miss whether performance-shaped candidates are actually consumed.",
+      "hypothesis": "A candidate intake tool can require explicit redacted candidate input, verify producer, loop registry, graph, adoption artifact requirements, fail when any closed_loop_candidate producer source is missing from intake, and consume a performance-specific candidate fixture in PR checks.",
       "claims": ["candidate_intake_must_consume_candidate_artifact"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "fixture", "path": "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-intake.yml"}
       ],
@@ -840,9 +841,10 @@
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
-        {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true}
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-performance-sample-evidence", "redacted": true}
       ],
-      "decision": "Candidate intake is scheduled and cannot produce evidence without explicit candidate input, redaction, producer linkage, graph linkage, adoption artifact requirements, semantic workflow trigger coverage, and full producer-source coverage.",
+      "decision": "Candidate intake is scheduled and cannot produce evidence without explicit candidate input, redaction, producer linkage, graph linkage, adoption artifact requirements, semantic workflow trigger coverage, full producer-source coverage, and a performance-specific sample candidate consumption path.",
       "next_loop": "closed_loop_candidate_intake"
     },
     {
@@ -1014,11 +1016,12 @@
     },
     {
       "id": "closed_loop_candidate_decision_loop",
-      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, or without an owned decision seed for each intake source.",
-      "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale decision records for the consumed source, and fail when workflow path triggers omit linked manifests.",
+      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, or without PR evidence that performance-shaped candidates reach decision.",
+      "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale decision records for the consumed source, fail when workflow path triggers omit linked manifests, and consume a performance-specific candidate fixture in PR checks.",
       "claims": ["candidate_decisions_must_match_consumed_candidates"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "fixture", "path": "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"}
       ],
@@ -1031,9 +1034,10 @@
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
-        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-performance-sample-evidence", "redacted": true}
       ],
-      "decision": "Candidate decisions are scheduled and cannot verify without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, or drift away from linked manifest workflow triggers.",
+      "decision": "Candidate decisions are scheduled and cannot verify without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, or skip performance-specific sample decision evidence.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

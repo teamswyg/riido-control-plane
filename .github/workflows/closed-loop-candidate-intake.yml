@@ -19,6 +19,7 @@ on:
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
       - "docs/30-architecture/closed-loop-candidate-intake.md"
       - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
+      - "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"
       - "tools/closedloopcandidateintake/**"
       - "tools/harnesspromotion/**"
       - "tools/loopclosureaudit/**"
@@ -36,6 +37,7 @@ on:
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
       - "docs/30-architecture/closed-loop-candidate-intake.md"
       - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
+      - "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"
       - "tools/closedloopcandidateintake/**"
       - "tools/harnesspromotion/**"
       - "tools/loopclosureaudit/**"
@@ -68,6 +70,14 @@ jobs:
             -check-doc \
             -candidate-in out/sample-closed-loop-candidates.json \
             -evidence-out out/closed-loop-candidate-intake-evidence.json
+          RIIDO_HARNESS_PROMOTION_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/harnesspromotion \
+            -summary docs/30-architecture/fixtures/performance-failure-summary.fixture.json \
+            -candidate-out out/sample-performance-closed-loop-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidateintake \
+            -candidate-in out/sample-performance-closed-loop-candidates.json \
+            -evidence-out out/sample-performance-intake-evidence.json
           RIIDO_LOOP_CLOSURE_AUDIT_NOW=2026-06-24T12:00:00Z \
             go run ./tools/loopclosureaudit \
             -candidate-out out/sample-loop-closure-audit-candidates.json
@@ -153,6 +163,12 @@ jobs:
         with:
           name: closed-loop-candidate-intake-loop-closure-sample-evidence
           path: out/sample-loop-closure-audit-intake-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-intake-performance-sample-evidence
+          path: out/sample-performance-intake-evidence.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always() && github.event_name != 'pull_request'

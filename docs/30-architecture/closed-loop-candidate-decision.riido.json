@@ -101,7 +101,8 @@
     "candidate decision evidence must publish generated_at and expires_at",
     "candidate decision evidence must expose consumed candidate artifact path, source workflow, freshness window, and candidate ids",
     "candidate decision records must include at least one owned seed decision for every intake source so new harness sources cannot be passive",
-    "candidate decision workflow path triggers must include every producer source workflow from intake"
+    "candidate decision workflow path triggers must include every producer source workflow from intake",
+    "candidate decision PR verification must consume a performance-specific candidate fixture"
   ],
   "loop": {
     "observation": "Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.",

@@ -18,6 +18,8 @@ on:
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.md"
+      - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
+      - "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"
       - "tools/closedloopcandidatedecision/**"
       - "tools/closedloopcandidateintake/**"
       - "tools/harnesspromotion/**"
@@ -35,6 +37,8 @@ on:
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.md"
+      - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
+      - "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"
       - "tools/closedloopcandidatedecision/**"
       - "tools/closedloopcandidateintake/**"
       - "tools/harnesspromotion/**"
@@ -72,6 +76,14 @@ jobs:
             -check-doc \
             -candidate-in out/sample-closed-loop-candidates.json \
             -evidence-out out/closed-loop-candidate-decision-evidence.json
+          RIIDO_HARNESS_PROMOTION_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/harnesspromotion \
+            -summary docs/30-architecture/fixtures/performance-failure-summary.fixture.json \
+            -candidate-out out/sample-performance-closed-loop-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidatedecision \
+            -candidate-in out/sample-performance-closed-loop-candidates.json \
+            -evidence-out out/sample-performance-decision-evidence.json
           RIIDO_LOOP_CLOSURE_AUDIT_NOW=2026-06-24T12:00:00Z \
             go run ./tools/loopclosureaudit \
             -candidate-out out/sample-loop-closure-audit-candidates.json
@@ -177,6 +189,12 @@ jobs:
         with:
           name: closed-loop-candidate-decision-loop-closure-sample-evidence
           path: out/sample-loop-closure-audit-decision-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-decision-performance-sample-evidence
+          path: out/sample-performance-decision-evidence.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
