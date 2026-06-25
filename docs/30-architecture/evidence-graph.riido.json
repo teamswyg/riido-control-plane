@@ -774,8 +774,8 @@
     },
     {
       "id": "expired_loop_refresh_command_selection_loop",
-      "observation": "Loop registry evidence could expose ordered next_commands while still leaving scheduled automation to decide which commands to select after the evidence artifact expires.",
-      "hypothesis": "A refresh command selection mode that reads existing loop-registry evidence and emits only expired refresh plan commands turns stale evidence into a machine-executable QA queue.",
+      "observation": "Loop registry evidence could expose ordered next_commands while still leaving scheduled automation to decide which commands to select and publish after the evidence artifact expires.",
+      "hypothesis": "A refresh command selection mode in the scheduled workflow that reads existing loop-registry evidence, emits only expired refresh plan commands, and uploads a strict command artifact turns stale evidence into a machine-executable QA queue.",
       "claims": ["expired_loop_evidence_must_select_refresh_commands"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -784,7 +784,8 @@
         {"kind": "tool", "path": "tools/loopregistry/run.go"},
         {"kind": "tool", "path": "tools/loopregistry/refresh_command_select.go"},
         {"kind": "tool", "path": "tools/loopregistry/refresh_command_run.go"},
-        {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"}
+        {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"},
@@ -792,10 +793,10 @@
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
       "evidence": [
-        {"kind": "artifact", "path": "loop-registry-refresh-commands", "redacted": true},
+        {"kind": "artifact", "path": "loop-refresh-commands", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Expired loop-registry evidence can now be consumed as input and transformed into ordered refresh command evidence without reopening manifests or hand-composing commands.",
+      "decision": "Expired loop-registry evidence can now be consumed as input and transformed into an uploaded ordered refresh command artifact without reopening manifests or hand-composing commands.",
       "next_loop": "closed_loop_candidate"
     },
     {
