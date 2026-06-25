@@ -50,10 +50,17 @@ jobs:
           go test ./tools/loopclosureaudit -count=1
           go run ./tools/loopclosureaudit \
             -check-doc \
-            -evidence-out out/loop-closure-audit-evidence.json
+            -evidence-out out/loop-closure-audit-evidence.json \
+            -candidate-out out/loop-closure-audit-closed-loop-candidates.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: loop-closure-audit-evidence
           path: out/loop-closure-audit-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: loop-closure-audit-closed-loop-candidates
+          path: out/loop-closure-audit-closed-loop-candidates.json
           if-no-files-found: error

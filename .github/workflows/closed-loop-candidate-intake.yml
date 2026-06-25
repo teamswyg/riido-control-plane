@@ -8,7 +8,9 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/closed-loop-candidate-intake.yml"
+      - ".github/workflows/loop-closure-audit.yml"
       - "docs/30-architecture/harness-promotion.riido.json"
+      - "docs/30-architecture/loop-closure-audit.riido.json"
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/evidence-graph.riido.json"
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
@@ -16,10 +18,13 @@ on:
       - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
       - "tools/closedloopcandidateintake/**"
       - "tools/harnesspromotion/**"
+      - "tools/loopclosureaudit/**"
   pull_request:
     paths:
       - ".github/workflows/closed-loop-candidate-intake.yml"
+      - ".github/workflows/loop-closure-audit.yml"
       - "docs/30-architecture/harness-promotion.riido.json"
+      - "docs/30-architecture/loop-closure-audit.riido.json"
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/evidence-graph.riido.json"
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
@@ -27,6 +32,7 @@ on:
       - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
       - "tools/closedloopcandidateintake/**"
       - "tools/harnesspromotion/**"
+      - "tools/loopclosureaudit/**"
 
 permissions:
   contents: read
@@ -56,6 +62,13 @@ jobs:
             -check-doc \
             -candidate-in out/sample-closed-loop-candidates.json \
             -evidence-out out/closed-loop-candidate-intake-evidence.json
+          RIIDO_LOOP_CLOSURE_AUDIT_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/loopclosureaudit \
+            -candidate-out out/sample-loop-closure-audit-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidateintake \
+            -candidate-in out/sample-loop-closure-audit-candidates.json \
+            -evidence-out out/sample-loop-closure-audit-intake-evidence.json
       - name: Download latest live candidate artifacts
         if: github.event_name != 'pull_request'
         env:
@@ -93,6 +106,10 @@ jobs:
             control-plane-performance.yml \
             control-plane-performance-closed-loop-candidates \
             out/live-candidates/performance
+          download_candidate_artifact \
+            loop-closure-audit.yml \
+            loop-closure-audit-closed-loop-candidates \
+            out/live-candidates/loop-closure-audit
           test -s out/live-candidate-files.txt
       - name: Verify live candidate intake
         if: github.event_name != 'pull_request'
@@ -102,9 +119,11 @@ jobs:
           smoke_candidate="$(find out/live-candidates/smoke -type f -name '*.json' | head -n 1)"
           load_candidate="$(find out/live-candidates/load -type f -name '*.json' | head -n 1)"
           performance_candidate="$(find out/live-candidates/performance -type f -name '*.json' | head -n 1)"
+          loop_closure_candidate="$(find out/live-candidates/loop-closure-audit -type f -name '*.json' | head -n 1)"
           test -n "$smoke_candidate"
           test -n "$load_candidate"
           test -n "$performance_candidate"
+          test -n "$loop_closure_candidate"
           go run ./tools/closedloopcandidateintake \
             -candidate-in "$smoke_candidate" \
             -evidence-out out/live-intake-smoke-evidence.json
@@ -114,11 +133,20 @@ jobs:
           go run ./tools/closedloopcandidateintake \
             -candidate-in "$performance_candidate" \
             -evidence-out out/live-intake-performance-evidence.json
+          go run ./tools/closedloopcandidateintake \
+            -candidate-in "$loop_closure_candidate" \
+            -evidence-out out/live-intake-loop-closure-audit-evidence.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: closed-loop-candidate-intake-evidence
           path: out/closed-loop-candidate-intake-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-intake-loop-closure-sample-evidence
+          path: out/sample-loop-closure-audit-intake-evidence.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always() && github.event_name != 'pull_request'
@@ -128,4 +156,5 @@ jobs:
             out/live-intake-smoke-evidence.json
             out/live-intake-load-evidence.json
             out/live-intake-performance-evidence.json
+            out/live-intake-loop-closure-audit-evidence.json
           if-no-files-found: error

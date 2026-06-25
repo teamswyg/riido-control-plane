@@ -9,6 +9,24 @@
   "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
   "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
   "pre_commit_manifest": "docs/30-architecture/pre-commit-baseline.riido.json",
+  "sources": [
+    {
+      "id": "loop-closure-audit",
+      "source_workflow": ".github/workflows/loop-closure-audit.yml",
+      "summary_artifact": "loop-closure-audit-evidence",
+      "candidate_artifact": "loop-closure-audit-closed-loop-candidates",
+      "harness_loop": "loop_closure_audit",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    }
+  ],
   "requirements": [
     {
       "id": "expired_evidence_dispatches_refresh",
@@ -82,6 +100,7 @@
     "retrospective": "This keeps the objective executable: agents can ignore the prose, but the audit still proves whether the loop system lets humans leave the inner loop."
   },
   "assertions": [
-    "loop closure audit evidence must expose each requirement's check details, not only check kinds"
+    "loop closure audit evidence must expose each requirement's check details, not only check kinds",
+    "loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts"
   ]
 }

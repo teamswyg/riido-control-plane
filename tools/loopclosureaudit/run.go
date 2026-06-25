@@ -17,7 +17,12 @@ func run(opt options) error {
 		return err
 	}
 	if opt.EvidenceOut != "" {
-		return writeJSON(opt.EvidenceOut, e)
+		if err := writeJSON(opt.EvidenceOut, e); err != nil {
+			return err
+		}
+	}
+	if opt.CandidateOut != "" {
+		return writeJSON(repoPath(root, opt.CandidateOut), newCandidateEvidence(m))
 	}
 	return nil
 }
