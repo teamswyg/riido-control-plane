@@ -53,44 +53,44 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `ai_thread_history` | `7` | `5` | `febe48b3ee92` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `f31da27c369c` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `df5174dec789` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `60d42e94d449` |
-| `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `28` | `6` | `92ffcdcc23df` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `f41b3a8300cc` |
+| `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `32` | `6` | `b9d656f4679e` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `6` | `4` | `a394d2fa717e` |
 | `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `17` | `6` | `2545bb22d0d0` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `21` | `5` | `494a39771ace` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `df49d292bf79` |
-| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `a3ace97370a0` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `12df321b2e93` |
+| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `e5c2e3619d40` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `371bebdb7588` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `ae36eb1595ce` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `76fddf31afdd` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `63` | `25` | `07530b8f1a57` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `044f993767bc` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `16f8d7345114` |
 | `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `af2fab895ef6` |
 | `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `759ffeb80d39` |
 | `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `115a5da29c24` |
 | `loop_evidence_sources_must_be_claim_covered` | `closed_loop_candidate` | `9` | `4` | `0102de34d6c2` |
-| `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `9` | `5` | `be5374c88ca8` |
-| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `15` | `8` | `a760111dc1f6` |
+| `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `9` | `5` | `de8be0d027e6` |
+| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `15` | `8` | `b7a041caefe0` |
 | `claim_meaning_changes_require_reasoning_chain` | `closed_loop_candidate` | `4` | `2` | `0f1cd9ed9117` |
 | `claim_bound_file_changes_require_reasoning_chain` | `closed_loop_candidate` | `5` | `3` | `060866720ee0` |
 | `claim_impact_evidence_must_expose_changed_files` | `closed_loop_candidate` | `4` | `1` | `284bbb26f598` |
-| `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `dc26f0c7f1ef` |
+| `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `bdd866dbb007` |
 | `semantic_hash_metadata_must_not_affect_claim_meaning` | `closed_loop_candidate` | `5` | `2` | `ded70199102f` |
-| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `8517bb36489b` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `0bdff65c547a` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `08c817fd6227` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `c48d4cf21e0f` |
+| `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `4d34e8ac080b` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `68ebc59328a3` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `9bcd5ea4fca0` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `4236cc4069cf` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `12` | `2` | `733d18031d76` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `13` | `6` | `6847e0022a37` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `2554559bf928` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `883b80d6911d` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `67411b2dc649` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `10` | `5` | `15c53091eb0e` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `68d2b171fd9c` |
-| `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `982fc472836d` |
+| `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `ccdd8bceca43` |
 | `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `13` | `4` | `c2b0eb3d83b1` |
-| `expired_loop_evidence_must_select_refresh_commands` | `closed_loop_candidate` | `12` | `3` | `5450d79f5072` |
-| `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `closed_loop_candidate` | `17` | `13` | `896d9303dfb5` |
+| `expired_loop_evidence_must_select_refresh_commands` | `closed_loop_candidate` | `12` | `3` | `489b12aa8bb4` |
+| `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `closed_loop_candidate` | `17` | `13` | `a3a913362573` |
 | `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `6` | `3` | `313224bb56d9` |
-| `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `99b396dc9c6c` |
+| `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `342ca940a453` |
 | `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `13` | `5` | `f114d5dd7e46` |
 | `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `134e82e519db` |
 | `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `6` | `2` | `8ba47e3f7528` |
@@ -109,7 +109,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `expired_harness_evidence_must_not_promote_candidates` | `12` | `3` | `2` | `3` | `0` | `0` | `1` | `1` | `3` | `2` | `1` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `1` | `2` | `2` | `2` | `3` | `3` | `2` | `1` | `6` | `2` | `1` |
 | `load_harness_failures_must_promote_candidates` | `2` | `2` | `4` | `3` | `4` | `4` | `4` | `3` | `3` | `3` | `1` |
-| `control_plane_performance_hot_paths_must_emit_evidence` | `18` | `7` | `3` | `5` | `8` | `6` | `6` | `8` | `6` | `3` | `1` |
+| `control_plane_performance_hot_paths_must_emit_evidence` | `21` | `8` | `3` | `5` | `9` | `7` | `6` | `8` | `6` | `3` | `1` |
 | `harness_promotion_must_run_after_failure` | `2` | `2` | `2` | `2` | `1` | `0` | `1` | `0` | `4` | `1` | `1` |
 | `loop_closure_audit_must_prove_human_exit_requirements` | `11` | `4` | `2` | `3` | `5` | `6` | `5` | `2` | `6` | `1` | `1` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `14` | `4` | `3` | `4` | `1` | `0` | `0` | `0` | `5` | `3` | `1` |

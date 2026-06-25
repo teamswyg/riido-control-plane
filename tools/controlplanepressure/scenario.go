@@ -20,6 +20,7 @@ func scenarios() []scenario {
 	return []scenario{
 		{"http_metrics_observe", "route metrics lock/allocation pressure on endpoint hot paths", "watch lock cost before adding route dimensions", buildHTTPMetrics},
 		{"store_metrics_observe", "store operation metrics lock/allocation pressure on DB hot paths", "keep operation vocabulary bounded and compare with live EMF", buildStoreMetrics},
+		{"progress_ingest_fragment", "fine-grained provider fragments can amplify normalize, merge, event, and fanout cost", "measure fragment cost before changing provider batching", buildProgressIngest},
 		{"thread_stream_subscription", "SSE filter computation can copy active thread state under task fanout", "prefer active target projection over full thread projection", buildThreadSubscription},
 		{"thread_history_v3", "v3 thread history can copy historical messages during refresh/recovery", "split immutable snapshots and cap per-refresh projection work", buildThreadHistory},
 	}

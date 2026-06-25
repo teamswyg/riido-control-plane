@@ -23,6 +23,7 @@ func run(cfg config) (pressureReport, error) {
 			report.Candidates = append(report.Candidates, row.Candidate)
 		}
 	}
+	report.Findings = pressureFindings(report.Runs)
 	report.EndedAt = time.Now().UTC()
 	report.DurationMs = report.EndedAt.Sub(started).Milliseconds()
 	return report, nil

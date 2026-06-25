@@ -12,6 +12,7 @@ type pressureReport struct {
 	Fixture       fixtureSummary   `json:"fixture"`
 	Runs          []pressureRun    `json:"runs"`
 	Candidates    []candidateEntry `json:"candidates"`
+	Findings      []findingEntry   `json:"findings"`
 }
 
 type fixtureSummary struct {

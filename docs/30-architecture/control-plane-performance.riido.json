@@ -10,7 +10,7 @@
   "summary_artifact": "control-plane-performance-redacted-summary",
   "candidate_artifact": "control-plane-performance-closed-loop-candidates",
   "evidence_tool": "tools/controlplaneperf",
-  "benchmark_command": "go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1",
+  "benchmark_command": "go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1",
   "local_pressure_command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json",
   "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti)' -count=1",
   "pprof_command": "RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30",
@@ -45,7 +45,7 @@
       "category": "runtime_progress_ingest",
       "risk": "fine-grained provider progress can create many render/normalize calls",
       "files": ["internal/riidoaiserver/progress_messages_render.go", "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go"],
-      "benchmarks": ["BenchmarkRenderProgressMessage"],
+      "benchmarks": ["BenchmarkRenderProgressMessage", "BenchmarkRecordAIAgentThreadProgress"],
       "candidate": "batch provider progress before rendering and preserve structured fallback behavior"
     },
     {
@@ -60,6 +60,7 @@
   "assertions": [
     "endpoint/API contracts must not change for performance evidence work",
     "lightweight benchmark evidence must run without live credentials",
+    "local pressure evidence must emit measured allocation, latency, CPU, and goroutine findings",
     "live load evidence must stay redacted and use aiagentload rather than ad-hoc curl loops",
     "pprof collection must use loopback-only RIIDO_AI_SERVER_PPROF_ADDR",
     "performance candidates must name the hot path, risk, existing evidence, and next verifier candidate"
@@ -67,7 +68,7 @@
   "loop": {
     "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates and local CPU/resource deltas are not emitted from one executable performance loop.",
     "hypothesis": "A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts.",
-    "execute": "Verify hot-path files and benchmark functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine evidence, expose pprof and live-load commands, and generate candidate optimization rows.",
+    "execute": "Verify hot-path files and benchmark functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine evidence with measured findings, expose pprof and live-load commands, and generate candidate optimization rows.",
     "evaluate": "The verifier fails on missing benchmark coverage, missing local pressure evidence, missing pprof loopback contract, missing aiagentload live command, stale generated docs, or non-strict workflow artifacts.",
     "retrospective": "This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates."
   }

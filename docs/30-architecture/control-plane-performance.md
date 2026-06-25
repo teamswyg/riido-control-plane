@@ -7,7 +7,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 ## Evidence Surface
 
 - hot paths: `5`
-- benchmarks: `6`
+- benchmarks: `7`
 - concurrency tests: `2`
 - optimization candidates: `5`
 - local pressure artifact: `control-plane-local-pressure`
@@ -15,7 +15,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 
 ## Commands
 
-- lightweight benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
+- lightweight benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
 - local pressure: `go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json`
 - race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti)' -count=1`
 - loopback pprof: `RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30`
@@ -28,13 +28,13 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 | `http_transaction_metrics` | `endpoint_hot_path` | `BenchmarkHTTPTransactionMetricsObserve, BenchmarkHTTPTransactionMetricsSnapshot` | keep route-pattern cardinality bounded and watch allocation/lock cost |
 | `store_operation_metrics` | `db_cost_attribution` | `BenchmarkStoreOperationMetricsObserve, BenchmarkStoreOperationMetricsSnapshot` | keep store metric aggregation bounded and compare operation-level cost before optimizing |
 | `thread_stream_targets` | `sse_event_streaming` | `BenchmarkAIAgentTaskThreadStreamSubscriptionTargets` | prefer active stream target projection over full visible thread copies for subscription paths |
-| `progress_message_rendering` | `runtime_progress_ingest` | `BenchmarkRenderProgressMessage` | batch provider progress before rendering and preserve structured fallback behavior |
+| `progress_message_rendering` | `runtime_progress_ingest` | `BenchmarkRenderProgressMessage, BenchmarkRecordAIAgentThreadProgress` | batch provider progress before rendering and preserve structured fallback behavior |
 | `assignment_poll_and_wait` | `assignment_scheduling` | `TestWaitForAssignmentReturnsImmediatelyWhenQueued, TestWaitForAssignmentDoesNotBlockActor` | keep long-poll waiters off the actor critical path and watch waiter/goroutine count |
 
 ## Loop
 
 - Observe: Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates and local CPU/resource deltas are not emitted from one executable performance loop.
 - Hypothesis: A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts.
-- Execute: Verify hot-path files and benchmark functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine evidence, expose pprof and live-load commands, and generate candidate optimization rows.
+- Execute: Verify hot-path files and benchmark functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine evidence with measured findings, expose pprof and live-load commands, and generate candidate optimization rows.
 - Evaluate: The verifier fails on missing benchmark coverage, missing local pressure evidence, missing pprof loopback contract, missing aiagentload live command, stale generated docs, or non-strict workflow artifacts.
 - Retrospective: This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates.

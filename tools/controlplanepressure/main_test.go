@@ -30,6 +30,9 @@ func TestControlPlanePressureProducesEvidence(t *testing.T) {
 	if got.SchemaVersion != evidenceSchema || len(got.Runs) != len(scenarios())*2 {
 		t.Fatalf("report shape = %+v", got)
 	}
+	if len(got.Findings) != 4 {
+		t.Fatalf("findings = %+v", got.Findings)
+	}
 	for _, run := range got.Runs {
 		if run.Operations == 0 || run.Candidate.Next == "" {
 			t.Fatalf("run missing evidence: %+v", run)
