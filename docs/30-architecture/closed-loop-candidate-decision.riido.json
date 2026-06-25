@@ -80,16 +80,6 @@
       "reason": "Candidate decision freshness gaps need an owned decision record so adoption does not rely on human memory."
     },
     {
-      "candidate_id": "loop-closure-audit:claim_coverage:claim_meaning_changes_require_reasoning_chain",
-      "disposition": "triage_required",
-      "priority": "P2",
-      "owner": "agent-platform-loop",
-      "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
-      "reason": "Claim coverage gap candidates need owned claim-binding triage before they become durable closed-loop gates."
-    },
-    {
       "candidate_id": "loop-closure-audit:claim_coverage:claim_verifier_commands_must_surface_as_ci_annotations",
       "disposition": "triage_required",
       "priority": "P2",

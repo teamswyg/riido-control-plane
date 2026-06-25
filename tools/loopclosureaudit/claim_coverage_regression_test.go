@@ -34,6 +34,10 @@ func TestClaimMeaningCodeSurfaceClaimHasCoverageTokens(t *testing.T) {
 	requireNoClaimCoverageGapForClaim(t, "claim_meaning_changes_require_code_or_test_surface")
 }
 
+func TestClaimMeaningReasoningChainClaimHasCoverageTokens(t *testing.T) {
+	requireNoClaimCoverageGapForClaim(t, "claim_meaning_changes_require_reasoning_chain")
+}
+
 func requireNoClaimCoverageGapForLoop(t *testing.T, loop string) {
 	t.Helper()
 	_, deps := loadForTest(t)

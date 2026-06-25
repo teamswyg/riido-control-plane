@@ -370,10 +370,12 @@
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
         {"kind": "tool", "path": "tools/loopregistry/impact_more.go"},
-        {"kind": "test", "path": "tools/loopregistry/impact_test.go"}
+        {"kind": "test", "path": "tools/loopregistry/impact_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/impact_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -381,7 +383,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Claim meaning impact now requires reasoning evidence movement, preventing code/test-only claim edits from bypassing the evidence graph.",
+      "decision": "Claim meaning impact now requires reasoning evidence movement, preventing code/test-only claim edits from bypassing the evidence graph, and its claim coverage tokens make that reasoning-chain requirement visible to the loop-closure audit.",
       "next_loop": "closed_loop_candidate"
     },
     {
