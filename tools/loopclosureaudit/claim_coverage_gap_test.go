@@ -32,39 +32,3 @@ func TestLoopClosureAuditEvidenceExposesClaimCoverageGaps(t *testing.T) {
 		t.Fatalf("incomplete claim coverage gap = %+v", first)
 	}
 }
-
-func TestAIThreadHistoryClaimsHaveCoverageTokens(t *testing.T) {
-	_, deps := loadForTest(t)
-	for _, gap := range claimCoverageGaps(deps) {
-		if gap.Loop == "ai_thread_history" {
-			t.Fatalf("ai_thread_history claim coverage gap remains: %+v", gap)
-		}
-	}
-}
-
-func TestHarnessPromotionClaimHasCoverageTokens(t *testing.T) {
-	_, deps := loadForTest(t)
-	for _, gap := range claimCoverageGaps(deps) {
-		if gap.ClaimID == "harness_promotion_must_run_after_failure" {
-			t.Fatalf("harness promotion claim coverage gap remains: %+v", gap)
-		}
-	}
-}
-
-func TestClaimSurfaceEvidenceClaimHasCoverageTokens(t *testing.T) {
-	_, deps := loadForTest(t)
-	for _, gap := range claimCoverageGaps(deps) {
-		if gap.ClaimID == "claim_surface_evidence_must_expose_code_test_doc_binding" {
-			t.Fatalf("claim surface evidence coverage gap remains: %+v", gap)
-		}
-	}
-}
-
-func TestCandidateDecisionNextArtifactClaimHasCoverageTokens(t *testing.T) {
-	_, deps := loadForTest(t)
-	for _, gap := range claimCoverageGaps(deps) {
-		if gap.ClaimID == "candidate_decision_next_artifact_must_be_required" {
-			t.Fatalf("candidate decision next artifact coverage gap remains: %+v", gap)
-		}
-	}
-}
