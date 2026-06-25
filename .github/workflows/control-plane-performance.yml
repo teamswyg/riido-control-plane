@@ -19,6 +19,9 @@ on:
       - "tools/controlplaneperf/**"
       - "tools/controlplanepressure/**"
       - "tools/aiagentload/**"
+      - "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_live_fanout.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_subscriber_locked.go"
       - "internal/riidoaiserver/**"
       - "go.mod"
       - "go.sum"
@@ -33,6 +36,10 @@ on:
       - "tools/controlplaneaudit/**"
       - "tools/controlplaneperf/**"
       - "tools/controlplanepressure/**"
+      - "tools/aiagentload/**"
+      - "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_live_fanout.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_subscriber_locked.go"
       - "internal/riidoaiserver/**"
 
 jobs:
