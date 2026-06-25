@@ -29,6 +29,14 @@
   ],
   "surfaces": [
     {
+      "id": "v3_thread_history_endpoint",
+      "category": "endpoint_hot_path",
+      "risk": "Task refreshes and recovery screens hit the v3 thread history endpoint, which combines auth, route metrics, reconcile, read-model projection, sorting, and JSON encoding.",
+      "files": ["internal/riidoaiserver/server_ai_agent_client_task_v3.go", "internal/riidoaiserver/server_assignment_action.go", "internal/riidoaiserver/server_json.go"],
+      "patterns": ["handleAIAgentClientTaskThreadsV3", "reconcileAIAgentTaskThreadProjections", "writeJSON"],
+      "candidate": "Keep v3 history endpoint pressure in local evidence and optimize projection/encoding only after before-after pressure data."
+    },
+    {
       "id": "http_endpoint_dispatch",
       "category": "endpoint_hot_path",
       "risk": "High request volume crosses the same handler middleware, route matching, authorization, and JSON response path.",

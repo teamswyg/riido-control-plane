@@ -14,6 +14,7 @@ func verifyWorkflow(root string, m manifest) error {
 		"schedule:",
 		"go run ./tools/controlplaneperf",
 		"go test ./tools/aiagentload",
+		"go test ./tools/controlplanepressure",
 		"go run ./tools/controlplanepressure",
 		"go test ./internal/riidoaiserver",
 		"-benchmem",
