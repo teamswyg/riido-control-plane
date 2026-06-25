@@ -22,7 +22,7 @@ func TestAggregatorReportRedactsToken(t *testing.T) {
 	agg := newAggregator()
 	agg.add(result{Endpoint: "/healthz", Status: 200, Latency: time.Millisecond})
 	cfg := config{Scenario: "client-read", Token: "secret-token", WorkspaceID: "workspace-a", Concurrency: 1}
-	report := agg.report(cfg, "staging.ai-api.riido.io", time.Unix(0, 0), time.Unix(1, 0), resourceDelta{})
+	report := agg.report(cfg, "staging.ai-api.riido.io", time.Unix(0, 0), time.Unix(1, 0), resourceDelta{}, pprofEvidence{})
 	if report.Total != 1 || report.Success != 1 || report.BaseHost != "staging.ai-api.riido.io" {
 		t.Fatalf("report = %+v", report)
 	}
@@ -34,7 +34,7 @@ func TestAggregatorReportIncludesCapacityEvidence(t *testing.T) {
 	agg.add(result{Endpoint: "/readyz", Status: 503, Latency: 50 * time.Millisecond})
 	cfg := config{Scenario: "public", WorkspaceID: "workspace-a", Concurrency: 2}
 	resources := resourceDelta{TotalAllocBytes: 1200, TotalAllocPerRequest: 600, Goroutines: 1}
-	report := agg.report(cfg, "example.test", time.Unix(0, 0), time.Unix(2, 0), resources)
+	report := agg.report(cfg, "example.test", time.Unix(0, 0), time.Unix(2, 0), resources, pprofEvidence{})
 	if report.RequestsPerSec != 1 || report.SuccessPerSec != 0.5 || report.FailureRatePct != 50 {
 		t.Fatalf("rate evidence = rps %v success %v failure %v", report.RequestsPerSec, report.SuccessPerSec, report.FailureRatePct)
 	}

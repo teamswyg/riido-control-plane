@@ -3,14 +3,16 @@ package main
 import "time"
 
 type config struct {
-	BaseURL     string
-	Token       string
-	WorkspaceID string
-	Scenario    string
-	Duration    time.Duration
-	Concurrency int
-	Timeout     time.Duration
-	OutputPath  string
+	BaseURL             string
+	Token               string
+	WorkspaceID         string
+	Scenario            string
+	Duration            time.Duration
+	Concurrency         int
+	Timeout             time.Duration
+	OutputPath          string
+	PprofBaseURL        string
+	PprofProfileSeconds int
 }
 
 type endpoint struct {
@@ -48,6 +50,7 @@ type report struct {
 	Endpoints      map[string]endpointSummary `json:"endpoints"`
 	Resource       resourceDelta              `json:"load_generator_resource_delta"`
 	Capacity       capacityEstimate           `json:"capacity_estimate"`
+	Pprof          pprofEvidence              `json:"pprof"`
 	Findings       []findingEntry             `json:"findings"`
 }
 
