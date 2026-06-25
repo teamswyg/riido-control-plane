@@ -18,11 +18,51 @@
       "next_artifact": "claim_binding",
       "review_by": "2026-07-01",
       "reason": "Provider smoke failures need an owned claim/verifier decision before becoming durable closed loops."
+    },
+    {
+      "candidate_id": "ai-agent-client-testnet-load:load_harness_client_read_pressure",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-08",
+      "reason": "Load harness client-read pressure failures need a claim-bound verifier before they become recurring performance gates."
+    },
+    {
+      "candidate_id": "ai-agent-client-testnet-load:load_harness_closed_loop_promotion",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-08",
+      "reason": "Load harness promotion failures must not remain isolated workflow reports without a decision owner."
+    },
+    {
+      "candidate_id": "control-plane-performance:control_plane_performance_hot_path_benchmarks",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-08",
+      "reason": "Control-plane hot-path benchmark failures need an owned adoption decision before becoming closed-loop gates."
+    },
+    {
+      "candidate_id": "control-plane-performance:control_plane_performance_closed_loop_promotion",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-08",
+      "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership."
     }
   ],
   "assertions": [
     "every candidate consumed by intake must have exactly one decision record",
-    "decision records without a matching consumed candidate are stale loop residue and must fail verification",
+    "decision records for the consumed candidate source without a matching candidate are stale loop residue and must fail verification",
     "decision records must name owner, priority, disposition, next loop, and next artifact",
     "decision next_artifact must be one of the required_next_artifacts declared by the consumed candidate artifact",
     "decision verification must reject candidates whose adoption_plan does not cover every required_next_artifact",
@@ -39,7 +79,8 @@
     "candidate decision fixture promotion must pin the harness promotion clock so deterministic samples do not fail after real-time expiry",
     "candidate decision must reject consumed candidate artifacts whose source_expires_at has passed",
     "candidate decision evidence must publish generated_at and expires_at",
-    "candidate decision evidence must expose consumed candidate artifact path, source workflow, freshness window, and candidate ids"
+    "candidate decision evidence must expose consumed candidate artifact path, source workflow, freshness window, and candidate ids",
+    "candidate decision records must include at least one owned seed decision for every intake source so new harness sources cannot be passive"
   ],
   "loop": {
     "observation": "Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.",

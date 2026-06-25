@@ -40,6 +40,23 @@
         "decision_record",
         "evidence_graph_edge"
       ]
+    },
+    {
+      "id": "control-plane-performance",
+      "candidate_artifact": "control-plane-performance-closed-loop-candidates",
+      "producer_manifest": "docs/30-architecture/harness-promotion.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
     }
   ],
   "assertions": [
@@ -57,7 +74,8 @@
     "candidate intake fixture promotion must pin the harness promotion clock so deterministic samples do not fail after real-time expiry",
     "candidate intake must reject consumed candidate artifacts whose source_expires_at has passed",
     "candidate intake evidence must publish generated_at and expires_at",
-    "candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids"
+    "candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids",
+    "candidate intake sources must cover every closed_loop_candidate producer source from the harness promotion manifest"
   ],
   "loop": {
     "observation": "Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.",
