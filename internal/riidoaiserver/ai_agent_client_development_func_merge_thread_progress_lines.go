@@ -1,7 +1,7 @@
 package riidoaiserver
 
 func mergeThreadProgressLines(existing, incoming []AgentThreadProgressLine) []AgentThreadProgressLine {
-	out := copyProgressLines(existing)
+	out := existing
 	for _, line := range incoming {
 		if progressLineReplacesPrevious(line) {
 			replaced := false

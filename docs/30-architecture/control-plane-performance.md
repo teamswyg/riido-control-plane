@@ -8,7 +8,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 
 - hot paths: `7`
 - benchmarks: `7`
-- concurrency tests: `4`
+- concurrency tests: `6`
 - optimization candidates: `7`
 - assertions: `10`
 - local pressure artifact: `control-plane-local-pressure`
@@ -33,7 +33,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 | `thread_stream_targets` | `sse_event_streaming` | `BenchmarkAIAgentTaskThreadStreamSubscriptionTargets` | prefer active stream target projection over full visible thread copies for subscription paths |
 | `progress_message_rendering` | `runtime_progress_ingest` | `BenchmarkRenderProgressMessage, BenchmarkRecordAIAgentThreadProgress` | batch provider progress before rendering and preserve structured fallback behavior |
 | `assignment_poll_and_wait` | `assignment_scheduling` | `TestWaitForAssignmentReturnsImmediatelyWhenQueued, TestWaitForAssignmentDoesNotBlockActor` | keep long-poll waiters off the actor critical path and watch waiter/goroutine count |
-| `client_event_subscriber_fanout` | `sse_event_streaming` | `TestDevelopmentAIAgentClientStoreThreadProgressFanout` | measure subscriber fanout in local pressure before expanding live event payloads |
+| `client_event_subscriber_fanout` | `sse_event_streaming` | `TestDevelopmentAIAgentClientStoreThreadProgressFanout, TestFilterUnseenProgressLinesKeepsStrictlyNewLines, TestMergeThreadProgressLinesAppendsWithoutDroppingExisting` | measure subscriber fanout in local pressure before expanding live event payloads |
 | `tool_approval_waiters` | `assignment_scheduling` | `TestHTTPToolApprovalRoundTrip` | keep approval waits bounded and watch goroutine/timer deltas under stalled approvals |
 
 ## Loop

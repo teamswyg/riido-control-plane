@@ -54,7 +54,13 @@
       "id": "progress_message_rendering",
       "category": "runtime_progress_ingest",
       "risk": "fine-grained provider progress can create many render/normalize calls",
-      "files": ["internal/riidoaiserver/progress_messages_render.go", "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go"],
+      "files": [
+        "internal/riidoaiserver/progress_messages_render.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go"
+      ],
       "benchmarks": ["BenchmarkRenderProgressMessage", "BenchmarkRecordAIAgentThreadProgress"],
       "candidate": "batch provider progress before rendering and preserve structured fallback behavior"
     },
@@ -70,8 +76,18 @@
       "id": "client_event_subscriber_fanout",
       "category": "sse_event_streaming",
       "risk": "workspace SSE subscribers can amplify each progress event into visibility checks and non-blocking channel sends",
-      "files": ["internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go", "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go"],
-      "tests": ["TestDevelopmentAIAgentClientStoreThreadProgressFanout"],
+      "files": [
+        "internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go"
+      ],
+      "tests": [
+        "TestDevelopmentAIAgentClientStoreThreadProgressFanout",
+        "TestFilterUnseenProgressLinesKeepsStrictlyNewLines",
+        "TestMergeThreadProgressLinesAppendsWithoutDroppingExisting"
+      ],
       "candidate": "measure subscriber fanout in local pressure before expanding live event payloads"
     },
     {
