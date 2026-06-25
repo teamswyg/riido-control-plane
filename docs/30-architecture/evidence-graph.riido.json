@@ -63,6 +63,30 @@
       "next_loop": "provider_acceptance_harness"
     },
     {
+      "id": "provider_acceptance_observation_coverage_loop",
+      "observation": "The provider acceptance harness declared codex_provider_qa, openclaw_provider_qa, and daemon_runtime_snapshot observations, but the redacted smoke summary could omit those observations while still reporting generic contract coverage.",
+      "hypothesis": "Binding those observations to workflow source phrases and summary claims lets agents see which provider/runtime paths were verified without reading raw live output or exporting secrets.",
+      "claims": ["provider_acceptance_summary_must_cover_declared_observations"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-smoke.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/live-workflow-redaction.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "test", "path": "tools/liveworkflowevidence/main_claims_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/liveworkflowevidence/main_claims_test.go"},
+        {"kind": "tool", "path": "tools/liveworkflowevidence"},
+        {"kind": "tool", "path": "tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-redacted-summary", "redacted": true},
+        {"kind": "artifact", "path": "live-workflow-redaction-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Provider acceptance evidence now exposes codex, OpenClaw, and daemon runtime snapshot claim coverage in the safe redacted summary; missing workflow source coverage fails before merge.",
+      "next_loop": "provider_acceptance_harness"
+    },
+    {
       "id": "load_harness_closed_loop_promotion_loop",
       "observation": "The AI Agent load harness produced useful stress evidence, but failures could remain a standalone load artifact instead of becoming a closed-loop adoption candidate.",
       "hypothesis": "Scheduling the load harness and routing its redacted live summary through harness promotion lets performance or reliability failures enter the same candidate intake path as smoke failures.",

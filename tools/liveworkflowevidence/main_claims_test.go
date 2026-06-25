@@ -45,6 +45,9 @@ func assertSummaryOmitsSecrets(t *testing.T, text string) {
 func smokeSummaryClaimPhrases() []string {
 	return []string{
 		"\"evidence_claims\"",
+		"\"codex_provider_qa\"",
+		"\"openclaw_provider_qa\"",
+		"\"daemon_runtime_snapshot\"",
 		"\"v2_threads_active_stream_href\"",
 		"\"v3_history_message_retention\"",
 		"\"status\": \"verified\"",
