@@ -38,7 +38,7 @@ func runOne(cfg config, sc scenario, concurrency int) (pressureRun, error) {
 	samples, ops, errors := runWorkers(op, concurrency, cfg.Duration)
 	after := sampleResources()
 	return pressureRun{
-		Scenario: sc.name, Concurrency: concurrency, Operations: ops, Errors: errors,
+		Scenario: sc.name, Concurrency: concurrency, ConcurrentUsers: concurrency, Operations: ops, Errors: errors,
 		OpsPerSec: float64(ops) / cfg.Duration.Seconds(), Latency: summarize(samples),
 		LatencyUS: summarizeMicros(samples),
 		Resources: diffResources(before, after, ops),

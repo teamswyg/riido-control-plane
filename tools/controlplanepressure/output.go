@@ -21,8 +21,9 @@ func writeReport(path string, report pressureReport) error {
 
 func printSummary(report pressureReport) {
 	for _, run := range report.Runs {
-		fmt.Fprintf(os.Stderr, "scenario=%s concurrency=%d ops=%d errors=%d p95_us=%d alloc_per_op=%.1f goroutines_delta=%d\n",
+		fmt.Fprintf(os.Stderr, "scenario=%s concurrency=%d ops=%d errors=%d p95_us=%d alloc_per_op=%.1f cpu_pct=%.1f cpu_s_per_op=%.9f goroutines_delta=%d\n",
 			run.Scenario, run.Concurrency, run.Operations, run.Errors, run.LatencyUS.P95,
-			run.Resources.TotalAllocPerOp, run.Resources.Goroutines)
+			run.Resources.TotalAllocPerOp, run.Resources.CPUUtilizationPct, run.Resources.CPUSecondsPerOp,
+			run.Resources.Goroutines)
 	}
 }

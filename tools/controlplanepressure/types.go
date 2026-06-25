@@ -20,15 +20,16 @@ type fixtureSummary struct {
 }
 
 type pressureRun struct {
-	Scenario    string         `json:"scenario"`
-	Concurrency int            `json:"concurrency"`
-	Operations  int64          `json:"operations"`
-	Errors      int64          `json:"errors"`
-	OpsPerSec   float64        `json:"ops_per_sec"`
-	Latency     latencySummary `json:"latency_ms"`
-	LatencyUS   latencySummary `json:"latency_us"`
-	Resources   resourceDelta  `json:"resource_delta"`
-	Candidate   candidateEntry `json:"candidate"`
+	Scenario        string         `json:"scenario"`
+	Concurrency     int            `json:"concurrency"`
+	ConcurrentUsers int            `json:"concurrent_users"`
+	Operations      int64          `json:"operations"`
+	Errors          int64          `json:"errors"`
+	OpsPerSec       float64        `json:"ops_per_sec"`
+	Latency         latencySummary `json:"latency_ms"`
+	LatencyUS       latencySummary `json:"latency_us"`
+	Resources       resourceDelta  `json:"resource_delta"`
+	Candidate       candidateEntry `json:"candidate"`
 }
 
 type latencySummary struct {
@@ -41,12 +42,20 @@ type latencySummary struct {
 }
 
 type resourceDelta struct {
-	HeapAllocBytes  int64   `json:"heap_alloc_bytes"`
-	TotalAllocBytes int64   `json:"total_alloc_bytes"`
-	TotalAllocPerOp float64 `json:"total_alloc_bytes_per_op"`
-	Mallocs         int64   `json:"mallocs"`
-	Frees           int64   `json:"frees"`
-	Goroutines      int     `json:"goroutines"`
+	HeapAllocBytes      int64   `json:"heap_alloc_bytes"`
+	TotalAllocBytes     int64   `json:"total_alloc_bytes"`
+	TotalAllocPerOp     float64 `json:"total_alloc_bytes_per_op"`
+	Mallocs             int64   `json:"mallocs"`
+	Frees               int64   `json:"frees"`
+	Goroutines          int     `json:"goroutines"`
+	UserCPUSeconds      float64 `json:"user_cpu_seconds"`
+	SystemCPUSeconds    float64 `json:"system_cpu_seconds"`
+	GCCPUSeconds        float64 `json:"gc_cpu_seconds"`
+	ScavengeCPUSeconds  float64 `json:"scavenge_cpu_seconds"`
+	ActiveCPUSeconds    float64 `json:"active_cpu_seconds"`
+	AvailableCPUSeconds float64 `json:"available_cpu_seconds"`
+	CPUUtilizationPct   float64 `json:"cpu_utilization_pct"`
+	CPUSecondsPerOp     float64 `json:"cpu_seconds_per_op"`
 }
 
 type candidateEntry struct {

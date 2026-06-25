@@ -34,6 +34,12 @@ func TestControlPlanePressureProducesEvidence(t *testing.T) {
 		if run.Operations == 0 || run.Candidate.Next == "" {
 			t.Fatalf("run missing evidence: %+v", run)
 		}
+		if run.ConcurrentUsers != run.Concurrency {
+			t.Fatalf("concurrent_users = %d, want %d", run.ConcurrentUsers, run.Concurrency)
+		}
+		if run.Resources.CPUSecondsPerOp < 0 || run.Resources.CPUUtilizationPct < 0 {
+			t.Fatalf("run has invalid CPU evidence: %+v", run.Resources)
+		}
 	}
 }
 

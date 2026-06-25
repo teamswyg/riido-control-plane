@@ -143,7 +143,7 @@
     },
     {
       "id": "control_plane_performance_evidence_loop",
-      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, and live load tooling, but no single executable loop emitted hot-path coverage, local pressure resource deltas, and optimization candidates without changing endpoint contracts.",
+      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, and live load tooling, but no single executable loop emitted hot-path coverage, local pressure CPU/resource deltas, and optimization candidates without changing endpoint contracts.",
       "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark functions, local open-loop pressure evidence, pprof loopback command, redacted aiagentload command, and a strict benchmark workflow, then publish candidate evidence for architect review.",
       "claims": ["control_plane_performance_hot_paths_must_emit_evidence"],
       "changes": [
@@ -153,6 +153,7 @@
         {"kind": "tool", "path": "tools/controlplaneaudit"},
         {"kind": "tool", "path": "tools/controlplaneperf"},
         {"kind": "tool", "path": "tools/controlplanepressure"},
+        {"kind": "tool", "path": "tools/controlplanepressure/measure_cpu.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/module-decomposition.riido.json"}
       ],
@@ -177,7 +178,7 @@
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-high-traffic-audit.md"}
     ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, local pressure resource deltas, and pprof/load commands identify hot paths and candidates before repeated regressions are promoted into closed-loop gates.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, local pressure CPU/resource deltas, and pprof/load commands identify hot paths and candidates before repeated regressions are promoted into closed-loop gates.",
       "next_loop": "closed_loop_candidate"
     },
     {
