@@ -39,6 +39,7 @@ func refreshPlansAt(
 			ManualRefreshCommand: refreshCommand(loop.RefreshWorkflow),
 			ClaimIDs:             claims.ClaimIDs,
 			VerifierCommands:     claims.VerifierCommands,
+			NextCommands:         refreshPlanNextCommands(loop, claims),
 			EvidenceArtifacts:    redactedEvidenceArtifacts(loop.Evidence),
 			EvidenceRefreshes:    evidenceRefreshes(loop),
 		})

@@ -41,8 +41,14 @@ type refreshPlan struct {
 	ManualRefreshCommand string                    `json:"manual_refresh_command"`
 	ClaimIDs             []string                  `json:"claim_ids"`
 	VerifierCommands     []string                  `json:"verifier_commands"`
+	NextCommands         []refreshPlanCommand      `json:"next_commands"`
 	EvidenceArtifacts    []string                  `json:"evidence_artifacts"`
 	EvidenceRefreshes    []evidenceArtifactRefresh `json:"evidence_refreshes"`
+}
+
+type refreshPlanCommand struct {
+	Kind    string `json:"kind"`
+	Command string `json:"command"`
 }
 
 type evidenceArtifactRefresh struct {

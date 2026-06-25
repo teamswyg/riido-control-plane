@@ -35,13 +35,14 @@ func renderDoc(m manifest, result verifyResult) string {
 func renderRefreshPlans(b *strings.Builder, plans []refreshPlan) {
 	fmt.Fprintln(b, "## Refresh Plans")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Loop | Workflow | Cadence | Expires | Command | Claims | Verifiers | Evidence |")
-	fmt.Fprintln(b, "| --- | --- | ---: | ---: | --- | ---: | ---: | ---: |")
+	fmt.Fprintln(b, "| Loop | Workflow | Cadence | Expires | Command | Claims | Verifiers | Next | Evidence |")
+	fmt.Fprintln(b, "| --- | --- | ---: | ---: | --- | ---: | ---: | ---: | ---: |")
 	for _, plan := range plans {
-		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%d` | `%s` | `%d` | `%d` | `%d` |\n",
+		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%d` | `%s` | `%d` | `%d` | `%d` | `%d` |\n",
 			plan.LoopID, plan.WorkflowFile, plan.CadenceMinutes,
 			plan.ExpiresAfterHours, plan.ManualRefreshCommand,
-			len(plan.ClaimIDs), len(plan.VerifierCommands), len(plan.EvidenceArtifacts))
+			len(plan.ClaimIDs), len(plan.VerifierCommands),
+			len(plan.NextCommands), len(plan.EvidenceArtifacts))
 	}
 	fmt.Fprintln(b)
 }
