@@ -18,6 +18,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 - loop closure audit evidence must expose each requirement's check details, not only check kinds
 - loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts
 - loop closure audit evidence must expose concrete claim coverage token gaps with claim id, loop, and missing dimensions
+- loop closure audit claim coverage gaps must be exported as redacted closed-loop candidate artifacts with adoption commands
 
 ## Requirements
 

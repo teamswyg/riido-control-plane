@@ -22,7 +22,7 @@ func run(opt options) error {
 		}
 	}
 	if opt.CandidateOut != "" {
-		return writeJSON(repoPath(root, opt.CandidateOut), newCandidateEvidence(m))
+		return writeJSON(repoPath(root, opt.CandidateOut), newCandidateEvidence(m, deps))
 	}
 	return nil
 }

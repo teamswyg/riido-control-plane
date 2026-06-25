@@ -6,8 +6,9 @@ import (
 	"testing"
 )
 
-func TestLoopClosureAuditExportsResidualGapCandidates(t *testing.T) {
+func TestLoopClosureAuditExportsAuditGapCandidates(t *testing.T) {
 	t.Setenv("RIIDO_LOOP_CLOSURE_AUDIT_NOW", "2026-06-24T12:00:00Z")
+	m, deps := loadForTest(t)
 	out := t.TempDir() + "/candidates.json"
 	if err := run(options{Repo: "../..", Manifest: defaultManifest, CandidateOut: out}); err != nil {
 		t.Fatal(err)
@@ -23,7 +24,26 @@ func TestLoopClosureAuditExportsResidualGapCandidates(t *testing.T) {
 	if got.SchemaVersion != candidateSchema || got.CandidateCount != len(got.Candidates) {
 		t.Fatalf("candidate artifact shape = %+v", got)
 	}
+	want := len(m.ResidualGaps) + len(claimCoverageGaps(deps))
+	if got.CandidateCount != want {
+		t.Fatalf("candidate_count = %d, want %d", got.CandidateCount, want)
+	}
 	if got.CandidateCount < 2 || got.Candidates[0].PromotionTarget != "closed_loop_candidate" {
 		t.Fatalf("candidate artifact content = %+v", got)
 	}
+	if !hasCandidatePrefix(got.Candidates, "loop-closure-audit:claim_coverage:") {
+		t.Fatalf("candidate artifact missing claim coverage candidates = %+v", got.Candidates)
+	}
+	if got.LiveStatus != candidateLiveStatus {
+		t.Fatalf("live_status = %q", got.LiveStatus)
+	}
+}
+
+func hasCandidatePrefix(candidates []closedLoopCandidate, prefix string) bool {
+	for _, candidate := range candidates {
+		if len(candidate.ID) >= len(prefix) && candidate.ID[:len(prefix)] == prefix {
+			return true
+		}
+	}
+	return false
 }
