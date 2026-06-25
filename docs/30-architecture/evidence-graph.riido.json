@@ -835,8 +835,8 @@
     },
     {
       "id": "loop_evidence_expiry_loop",
-      "observation": "Loop registry and evidence graph evidence could prove shape but not freshness because the artifacts lacked generated_at and expires_at, and the evidence graph workflow did not run unless code changed.",
-      "hypothesis": "Self-expiring evidence artifacts plus a scheduled evidence graph workflow whose cadence fits the TTL and publishes strict evidence let tools detect stale reasoning evidence and refresh it without a human reminder.",
+      "observation": "Loop registry and evidence graph evidence could prove shape but not freshness because the artifacts lacked generated_at and expires_at, the evidence graph workflow did not run unless code changed, or the claim lacked observe/verify/fail tokens that classify it as an evidence-expiry closed-loop rule.",
+      "hypothesis": "Self-expiring evidence artifacts plus a scheduled evidence graph workflow whose cadence fits the TTL, publishes strict evidence, and keeps the claim bound to evidence_expired observations let tools detect stale reasoning evidence and refresh it without a human reminder.",
       "claims": ["loop_evidence_artifacts_must_self_expire"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
@@ -847,19 +847,21 @@
         {"kind": "tool", "path": "tools/evidencegraph/workflow_cadence_step.go"},
         {"kind": "tool", "path": "tools/evidencegraph/workflow_refresh.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
-        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"}
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/evidence_time_test.go"},
         {"kind": "test", "path": "tools/evidencegraph/evidence_time_test.go"},
         {"kind": "test", "path": "tools/evidencegraph/workflow_refresh_test.go"},
-        {"kind": "test", "path": "tools/evidencegraph/workflow_schedule_test.go"}
+        {"kind": "test", "path": "tools/evidencegraph/workflow_schedule_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Core loop reasoning evidence now carries a 24h freshness window, exposes its manual refresh command and cadence, and verifies that the scheduled evidence graph workflow uploads the evidence artifact strictly before it can be treated as fresh.",
+      "decision": "Core loop reasoning evidence now carries a 24h freshness window, exposes its manual refresh command and cadence, verifies that the scheduled evidence graph workflow uploads the evidence artifact strictly before it can be treated as fresh, and loopclosureaudit keeps the rule bound to explicit evidence-expiry observe/verify/fail tokens.",
       "next_loop": "closed_loop_candidate"
     },
     {
