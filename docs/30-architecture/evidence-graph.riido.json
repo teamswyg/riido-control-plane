@@ -272,7 +272,7 @@
     {
       "id": "closed_loop_candidate_promotion_edge_loop",
       "observation": "Closed-loop candidate artifacts required an evidence_graph_edge follow-up, but the candidate record did not name the concrete harness-to-closed-loop edge it was created from.",
-      "hypothesis": "Embedding promotion_edge in the candidate and exposing it through intake and decision evidence lets agents follow the failure-to-closed-loop path without reading narrative docs.",
+      "hypothesis": "Embedding promotion_edge in the candidate, exposing it through intake and decision evidence, and binding the claim to harness-failure observation plus verifier and CI coverage lets agents follow the failure-to-closed-loop path without reading narrative docs.",
       "claims": ["closed_loop_candidates_must_carry_promotion_edge"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
@@ -291,7 +291,8 @@
         {"kind": "test", "path": "tools/harnesspromotion/candidate_edge_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/candidate_edge_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_edge_test.go"},
-        {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_artifact_test.go"}
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_artifact_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
@@ -300,7 +301,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
-      "decision": "Candidate artifacts now carry promotion_edge, intake consumes smoke/load/performance producer sources, and decision verification rejects drift between the candidate edge and its source harness target.",
+      "decision": "Candidate artifacts now carry promotion_edge, intake consumes smoke/load/performance producer sources, decision verification rejects drift between the candidate edge and its source harness target, and loop closure audit regression keeps the promotion-edge claim from returning as an unbound coverage gap.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
@@ -1374,7 +1375,7 @@
     },
     {
       "id": "loop_closure_audit_loop",
-      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed proof checks but claim coverage token gaps still needed to become closed-loop candidate artifacts; candidate-loop evidence expiry and candidate adoption-plan coverage also needed named regression coverage so already-implemented expiry and adoption command proofs could not disappear from the audit surface.",
+      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed proof checks but claim coverage token gaps still needed to become closed-loop candidate artifacts; candidate-loop evidence expiry, candidate adoption-plan coverage, and candidate promotion-edge coverage also needed named regression coverage so already-implemented expiry, adoption command, and failure-promotion edge proofs could not disappear from the audit surface.",
       "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, or claim coverage token drifts, and publish residual gap candidates plus claim coverage gap candidates with structured subject fields for claim id, loop, missing dimensions, source refs, promotion edges, adoption commands, and table-driven claim-specific regression tests for repaired coverage gaps.",
       "claims": ["loop_closure_audit_must_prove_human_exit_requirements"],
       "changes": [
@@ -1411,7 +1412,7 @@
         {"kind": "artifact", "path": "loop-closure-audit-closed-loop-candidates", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/loop-closure-audit.md"}
       ],
-      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, while claim coverage repairs now remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, claim-bound workflow trigger, claim-impact changed-files, expired candidate consumer, candidate evidence expiry, or candidate adoption-plan coverage gaps in the backlog.",
+      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, while claim coverage repairs now remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, claim-bound workflow trigger, claim-impact changed-files, expired candidate consumer, candidate evidence expiry, candidate adoption-plan, or candidate promotion-edge coverage gaps in the backlog.",
       "next_loop": "closed_loop_candidate"
     },
     {
