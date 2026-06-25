@@ -22,3 +22,10 @@ func verifyCandidateSourceRef(
 	}
 	return nil
 }
+
+func sourceRefEvidence(item closedLoopCandidate) candidateSourceRefEvidence {
+	return candidateSourceRefEvidence{
+		CandidateID: item.ID,
+		SourceRef:   item.SourceRef,
+	}
+}

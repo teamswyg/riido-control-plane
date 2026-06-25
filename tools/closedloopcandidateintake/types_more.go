@@ -1,12 +1,13 @@
 package main
 
 type verifyResult struct {
-	SourceCount                int                         `json:"source_count"`
-	RequiredRefs               int                         `json:"required_refs"`
-	CandidateCount             int                         `json:"candidate_count"`
-	CandidateIDs               []string                    `json:"candidate_ids"`
-	CandidateEdges             []graphEdge                 `json:"candidate_edges"`
-	ConsumedCandidateArtifacts []consumedCandidateArtifact `json:"consumed_candidate_artifacts"`
+	SourceCount                int                          `json:"source_count"`
+	RequiredRefs               int                          `json:"required_refs"`
+	CandidateCount             int                          `json:"candidate_count"`
+	CandidateIDs               []string                     `json:"candidate_ids"`
+	CandidateEdges             []graphEdge                  `json:"candidate_edges"`
+	CandidateSourceRefs        []candidateSourceRefEvidence `json:"candidate_source_refs"`
+	ConsumedCandidateArtifacts []consumedCandidateArtifact  `json:"consumed_candidate_artifacts"`
 }
 
 type candidateEvidence struct {

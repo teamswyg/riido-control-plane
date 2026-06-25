@@ -16,3 +16,10 @@ func verifyCandidateSourceRef(item closedLoopCandidate, artifact candidateEviden
 	}
 	return nil
 }
+
+func sourceRefEvidence(item closedLoopCandidate) candidateSourceRefEvidence {
+	return candidateSourceRefEvidence{
+		CandidateID: item.ID,
+		SourceRef:   item.SourceRef,
+	}
+}

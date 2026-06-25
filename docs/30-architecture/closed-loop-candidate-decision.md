@@ -18,6 +18,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - decision evidence must expose the executable command selected from the consumed candidate adoption_plan
 - decision evidence must expose the consumed candidate promotion_edge for the selected next artifact
 - decision verification must reject candidates whose source_ref drifts from the consumed candidate artifact envelope
+- candidate decision evidence must expose candidate_source_refs for every consumed candidate item
 - triage-required or deferred candidates must name a non-expired review_by date
 - triage-required candidates must stay redacted and carry enough context for a follow-up claim binding
 - candidate decision verification must run on a schedule so decision ownership does not rely on memory
