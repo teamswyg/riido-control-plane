@@ -366,7 +366,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "021d3b7039314d9acd2aa7e33dee393cda300d3f7334df29c6afca9ae9de2c69"
+      "semantic_hash": "c044052e33c4affb7553520d24dab66402d2b4bdbbde43713da4b2a8deed34a7"
     },
     {
       "id": "expired_harness_evidence_must_not_promote_candidates",
@@ -688,7 +688,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "9b102d12cbb21bf905ce3ec04a4e71bbfb350d73ffbf7d40f57725f4baa1f33e"
+      "semantic_hash": "97c16772e7ddab0bffe5dc64ce8eb790173eb1a14e0dddda877e941e1478a003"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",

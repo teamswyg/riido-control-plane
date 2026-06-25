@@ -44,7 +44,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `deleted_agent_threads_must_remain_visible` | `ai_thread_history` | `4` | `3` | `090a4a1be855` |
 | `thread_history_must_keep_user_followups` | `ai_thread_history` | `4` | `2` | `b750489076ff` |
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `92594cfc172f` |
-| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `021d3b703931` |
+| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `12` | `3` | `c044052e33c4` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `8a396cf21bb2` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `3` | `2` | `98bd60e8d892` |
 | `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `7c7835881b39` |
@@ -53,7 +53,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `ab3e9f9339c1` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `0ae2db74267a` |
 | `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `88dd1cf3045f` |
-| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `52` | `20` | `9b102d12cbb2` |
+| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `52` | `20` | `97c16772e7dd` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `cfa69845fadc` |
 | `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `7` | `3` | `44bf5250fe21` |
 | `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `15` | `8` | `bbc63176a64b` |
