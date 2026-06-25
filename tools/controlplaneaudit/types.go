@@ -13,6 +13,7 @@ type manifest struct {
 	ManualPressureCommand string    `json:"manual_pressure_command"`
 	RaceCommand           string    `json:"race_command"`
 	PprofCommands         []string  `json:"pprof_commands"`
+	RequiredCategories    []string  `json:"required_categories"`
 	Surfaces              []surface `json:"surfaces"`
 	Assertions            []string  `json:"assertions"`
 	Loop                  loopSpec  `json:"loop"`

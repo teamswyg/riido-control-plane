@@ -1,10 +1,6 @@
 package main
 
-import (
-	"encoding/json"
-	"os"
-	"testing"
-)
+import "testing"
 
 func TestControlPlaneHighTrafficAuditVerifies(t *testing.T) {
 	out := t.TempDir() + "/evidence.json"
@@ -16,6 +12,7 @@ func TestControlPlaneHighTrafficAuditVerifies(t *testing.T) {
 	if got.SurfaceCount < 7 || got.CandidateCount != got.SurfaceCount {
 		t.Fatalf("audit coverage = %+v", got)
 	}
+	assertRequiredCategoriesCovered(t, got.CategoryCounts)
 }
 
 func TestControlPlaneHighTrafficAuditRejectsUnsafePprof(t *testing.T) {
@@ -42,24 +39,19 @@ func TestControlPlaneHighTrafficAuditRejectsMissingPattern(t *testing.T) {
 	}
 }
 
-func loadManifestForTest(t *testing.T) manifest {
-	t.Helper()
-	var m manifest
-	if err := readJSON("../../"+defaultManifest, &m); err != nil {
-		t.Fatal(err)
+func TestControlPlaneHighTrafficAuditRejectsMissingRequiredCategory(t *testing.T) {
+	m := loadManifestForTest(t)
+	m.RequiredCategories = append(m.RequiredCategories, "missing_traffic_surface")
+	if err := verifyRequiredCategories(m.RequiredCategories, m.Surfaces); err == nil {
+		t.Fatal("expected missing required category to fail")
 	}
-	return m
 }
 
-func readEvidence(t *testing.T, path string) evidence {
+func assertRequiredCategoriesCovered(t *testing.T, counts map[string]int) {
 	t.Helper()
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
+	for _, category := range loadManifestForTest(t).RequiredCategories {
+		if counts[category] == 0 {
+			t.Fatalf("category %s missing from evidence counts: %+v", category, counts)
+		}
 	}
-	var got evidence
-	if err := json.Unmarshal(data, &got); err != nil {
-		t.Fatal(err)
-	}
-	return got
 }

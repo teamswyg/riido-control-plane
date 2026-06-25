@@ -143,14 +143,16 @@
     },
     {
       "id": "control_plane_performance_evidence_loop",
-      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows; pressure output could also promote a zero goroutine delta as if it were an actionable leak signal, and heavy local stress needed to stay separate from the lightweight CI pressure command.",
-      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, manual high-concurrency pressure evidence commands, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, and finding-level closed-loop adoption plans, then publish candidate evidence for architect review.",
+      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows; pressure output could also promote a zero goroutine delta as if it were an actionable leak signal, heavy local stress needed to stay separate from the lightweight CI pressure command, and the static audit could lose an entire endpoint, DB, SSE, scheduling, fanout, waiter, progress, lock, read-model, or goroutine-risk category while still reporting a non-empty surface list.",
+      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, manual high-concurrency pressure evidence commands, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, required high-traffic category coverage, and finding-level closed-loop adoption plans, then publish candidate evidence for architect review.",
       "claims": ["control_plane_performance_hot_paths_must_emit_evidence"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/control-plane-performance.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/control-plane-high-traffic-audit.riido.json"},
         {"kind": "workflow", "path": ".github/workflows/control-plane-performance.yml"},
         {"kind": "tool", "path": "tools/controlplaneaudit"},
+        {"kind": "tool", "path": "tools/controlplaneaudit/verify_category.go"},
+        {"kind": "tool", "path": "tools/controlplaneaudit/render_category.go"},
         {"kind": "tool", "path": "tools/controlplaneperf"},
         {"kind": "tool", "path": "tools/controlplanepressure"},
         {"kind": "tool", "path": "tools/controlplanepressure/measure_cpu.go"},
@@ -191,7 +193,7 @@
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-high-traffic-audit.md"}
     ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, capacity estimates, subscriber fanout pressure, measured positive findings, and pprof/load commands identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, capacity estimates, subscriber fanout pressure, measured positive findings, pprof/load commands, and required high-traffic category coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories fail before merge.",
       "next_loop": "closed_loop_candidate"
     },
     {

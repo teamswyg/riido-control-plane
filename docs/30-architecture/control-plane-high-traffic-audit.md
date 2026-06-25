@@ -20,6 +20,21 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 - pprof: `go tool pprof -top http://127.0.0.1:6060/debug/pprof/heap`
 - pprof: `curl -fsS http://127.0.0.1:6060/debug/pprof/goroutine?debug=1`
 
+## Required Category Coverage
+
+| Category | Surfaces |
+| --- | --- |
+| `endpoint_hot_path` | `1` |
+| `db_query_transaction` | `1` |
+| `lock_contention` | `1` |
+| `sse_event_streaming` | `1` |
+| `assignment_scheduling` | `1` |
+| `in_memory_fanout` | `1` |
+| `busy_worker_polling` | `2` |
+| `zombie_goroutine_risk` | `1` |
+| `runtime_progress_ingest` | `1` |
+| `read_model_projection` | `1` |
+
 ## High-Traffic Surfaces
 
 | ID | Category | Files | Signals | Candidate |

@@ -11,6 +11,7 @@ func renderDoc(m manifest, e evidence) string {
 	b.WriteString("Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-high-traffic-audit.riido.json).\n\n")
 	renderSummary(&b, e)
 	renderCommands(&b, m)
+	renderCategoryCoverage(&b, m.RequiredCategories, e.CategoryCounts)
 	renderSurfaces(&b, e.Surfaces)
 	renderLoop(&b, m.Loop)
 	return strings.TrimRight(b.String(), "\n") + "\n"
