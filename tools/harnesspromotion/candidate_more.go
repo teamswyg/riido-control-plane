@@ -2,16 +2,30 @@ package main
 
 import "strings"
 
-func newCandidate(source promotionSource, claimID, summary string) closedLoopCandidate {
+func newCandidate(source promotionSource, summary liveSummary, claimID, claimSummary string) closedLoopCandidate {
 	return closedLoopCandidate{
 		ID:                    source.ID + ":" + sanitizeID(claimID),
+		SourceRef:             sourceRefForCandidate(source, summary),
 		HarnessLoop:           source.HarnessLoop,
 		PromotionTarget:       source.PromotionTarget,
 		PromotionEdge:         promotionEdge(source),
 		Observation:           "Harness " + source.ID + " reported unverified claim " + claimID + ".",
-		Hypothesis:            summary,
+		Hypothesis:            claimSummary,
 		RequiredNextArtifacts: append([]string(nil), source.RequiredNextArtifacts...),
 		AdoptionPlan:          adoptionPlan(source),
+	}
+}
+
+func sourceRefForCandidate(source promotionSource, summary liveSummary) candidateSourceRef {
+	return candidateSourceRef{
+		HarnessLoop:       source.HarnessLoop,
+		SourceWorkflow:    source.SourceWorkflow,
+		SummaryArtifact:   source.SummaryArtifact,
+		CandidateArtifact: source.CandidateArtifact,
+		LiveStatus:        summary.LiveStatus,
+		SourceGeneratedAt: summary.GeneratedAt,
+		SourceExpiresAt:   summary.ExpiresAt,
+		Run:               summary.Run,
 	}
 }
 

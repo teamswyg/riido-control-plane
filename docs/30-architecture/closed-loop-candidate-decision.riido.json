@@ -28,6 +28,7 @@
     "decision verification must reject candidates whose adoption_plan does not cover every required_next_artifact",
     "decision evidence must expose the executable command selected from the consumed candidate adoption_plan",
     "decision evidence must expose the consumed candidate promotion_edge for the selected next artifact",
+    "decision verification must reject candidates whose source_ref drifts from the consumed candidate artifact envelope",
     "triage-required or deferred candidates must name a non-expired review_by date",
     "triage-required candidates must stay redacted and carry enough context for a follow-up claim binding",
     "candidate decision verification must run on a schedule so decision ownership does not rely on memory",

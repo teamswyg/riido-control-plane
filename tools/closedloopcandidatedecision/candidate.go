@@ -17,6 +17,9 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 	result := verifyResult{CandidateCount: candidate.CandidateCount}
 	candidateIDs := []string{}
 	for _, item := range candidate.Candidates {
+		if err := verifyCandidateSourceRef(item, candidate); err != nil {
+			return result, err
+		}
 		if err := verifyAdoptionPlan(item); err != nil {
 			return result, err
 		}

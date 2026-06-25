@@ -5,13 +5,16 @@ import (
 	"strings"
 )
 
-func verifyCandidateItem(m manifest, item closedLoopCandidate) (intakeSource, error) {
+func verifyCandidateItem(m manifest, artifact candidateEvidence, item closedLoopCandidate) (intakeSource, error) {
 	if strings.TrimSpace(item.ID) == "" || strings.TrimSpace(item.Observation) == "" {
 		return intakeSource{}, fmt.Errorf("candidate item must bind id and observation")
 	}
 	source, ok := findSourceForCandidate(m.Sources, item)
 	if !ok {
 		return intakeSource{}, fmt.Errorf("candidate %s targets unknown harness/loop edge", item.ID)
+	}
+	if err := verifyCandidateSourceRef(item, artifact, source); err != nil {
+		return intakeSource{}, err
 	}
 	if err := verifyCandidatePromotionEdge(item, source); err != nil {
 		return intakeSource{}, err

@@ -10,11 +10,11 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `43`
-- claim refs: `42`
-- change refs: `276`
-- verifier refs: `166`
-- evidence refs: `88`
+- chains: `44`
+- claim refs: `43`
+- change refs: `283`
+- verifier refs: `169`
+- evidence refs: `91`
 
 ## Evidence Chains
 
@@ -27,6 +27,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `harness_failure_always_promotion_loop` | `1` | `5` | `4` | `3` | `closed_loop_candidate` |
 | `closed_loop_candidate_adoption_plan_loop` | `1` | `6` | `3` | `3` | `closed_loop_candidate_decision` |
 | `closed_loop_candidate_promotion_edge_loop` | `1` | `7` | `4` | `3` | `closed_loop_candidate_decision` |
+| `closed_loop_candidate_source_ref_loop` | `1` | `7` | `3` | `3` | `closed_loop_candidate_decision` |
 | `claim_binding_impact_loop` | `1` | `10` | `6` | `1` | `ai_thread_history` |
 | `claim_reasoning_impact_loop` | `1` | `4` | `3` | `2` | `closed_loop_candidate` |
 | `claim_impact_changed_files_evidence_loop` | `1` | `6` | `3` | `2` | `closed_loop_candidate` |
