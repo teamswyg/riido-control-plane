@@ -667,6 +667,37 @@
       "next_loop": "ai_thread_history"
     },
     {
+      "id": "stop_reassign_thread_consistency_loop",
+      "observation": "On staging, stopping an AI Agent task and immediately assigning again could make the just-stopped agent appear to keep working, and a stop call without an active assignment could create a synthetic stopped thread with no assignment_id.",
+      "hypothesis": "Separating stop target selection from unassign target selection keeps user stop strongly scoped to active assignment threads, while preserving participant-removal history semantics for unassign.",
+      "claims": ["stop_reassign_must_not_revive_or_mutate_inactive_threads"],
+      "changes": [
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_stop_ai_agent_task.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_task_thread_for_stop_target_locked.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_unassign_ai_agent_task.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_stop_requires_active_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_stop_active_stream_response_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_stop_fence_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_stop_peer_active_test.go"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_stop_requires_active_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_stop_active_stream_response_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_stop_fence_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_stop_peer_active_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Stop/reassign consistency is now a closed-loop invariant: stop cannot invent synthetic thread history or rewrite completed history when no active assignment exists, and unassign keeps the separate participant-removal behavior.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "loop_evidence_expiry_loop",
       "observation": "Loop registry and evidence graph evidence could prove shape but not freshness because the artifacts lacked generated_at and expires_at, and the evidence graph workflow did not run unless code changed.",
       "hypothesis": "Self-expiring evidence artifacts plus a scheduled evidence graph workflow whose cadence fits the TTL and publishes strict evidence let tools detect stale reasoning evidence and refresh it without a human reminder.",
@@ -1086,8 +1117,8 @@
     },
     {
       "id": "ambiguous_task_context_thread_interaction_loop",
-      "observation": "Marketing, analysis, intent-oriented, or non-command component documents can be misread as executable instructions, while token, quota, rate-limit, or cloud-credit exhaustion can leak provider wording into the AI Agent thread even when daemon metadata already identifies the provider-limit category.",
-      "hypothesis": "A prompt interaction policy, explicit-action classifier, and metadata-aware visible-message normalization can keep the existing thread conversational: ambiguous task context asks for intent first before daemon work, concrete follow-up instructions become authoritative, provider-limit metadata or known provider wording renders as a stable user-facing result, and a later handoff to another agent creates a separate conversation without changing API shape.",
+      "observation": "Marketing, analysis, intent-oriented, or non-command component documents can be misread as executable instructions, while token, quota, rate-limit, cloud-credit exhaustion, approval-dialog wording, or runtime cancellation strings can leak provider/runtime wording into the AI Agent thread.",
+      "hypothesis": "A prompt interaction policy, explicit-action classifier, and metadata-aware visible-message normalization can keep the existing thread conversational: ambiguous task context asks for intent first before daemon work, concrete follow-up instructions become authoritative, provider-limit or runtime-cancel wording renders as a stable user-facing result, and a later handoff to another agent creates a separate conversation without changing API shape.",
       "claims": ["ambiguous_task_context_must_ask_before_work"],
       "changes": [
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_explicit_markers.go"},
@@ -1101,6 +1132,7 @@
         {"kind": "code", "path": "internal/riidoaiserver/server_task_context_compose.go"},
         {"kind": "code", "path": "internal/riidoaiserver/server_task_context_request.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_client_visible_task_thread_text.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_apply_assignment_metadata_action_response.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_assignment_event_action_response.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_failure_diagnostics_from_assignment_event.go"},
@@ -1121,6 +1153,8 @@
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_message_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_visible_message_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go"}
       ],
       "verifiers": [
@@ -1135,6 +1169,8 @@
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_message_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_visible_message_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
@@ -1142,7 +1178,7 @@
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Ambiguous task intent handling now includes non-command component documents and provider-limit category evidence: without explicit action signals, the first visible agent response asks what to do before durable daemon assignment; provider-limit metadata or wording normalizes to the same client result, and post-limit agent handoff remains enforced while preserving existing endpoint input and output fields. The prompt-classification tests are split by component intent, metadata fallback, explicit instruction, and shared assertion surface so claim-bound files expose the exact co-change scope instead of hiding multiple intent rules in one test file.",
+      "decision": "Ambiguous task intent handling now includes non-command component documents and visible-message normalization evidence: without explicit action signals, the first visible agent response asks what to do before durable daemon assignment; provider-limit metadata, provider wording, approval-dialog wording, and runtime cancellation wording normalize to stable client-facing thread results; and post-limit agent handoff remains enforced while preserving existing endpoint input and output fields.",
       "next_loop": "ai_thread_history"
     },
     {

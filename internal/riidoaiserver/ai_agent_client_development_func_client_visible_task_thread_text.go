@@ -31,7 +31,9 @@ func clientVisibleLocalizedTaskThreadText(message string) string {
 	case "agent work was stopped",
 		"agent work was stopped by user request",
 		"agent work was stopped by task participant removal",
-		"agent assignment was replaced by a participant change":
+		"agent assignment was replaced by a participant change",
+		"context canceled",
+		"context cancelled":
 		return clientMessageTaskStopped
 	case "agent work was stopped by agent delete":
 		return clientMessageAgentDeleted
