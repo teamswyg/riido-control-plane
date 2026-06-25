@@ -12,6 +12,7 @@ type producerManifest struct {
 
 type producerSource struct {
 	ID                    string   `json:"id"`
+	SourceWorkflow        string   `json:"source_workflow"`
 	CandidateArtifact     string   `json:"candidate_artifact"`
 	HarnessLoop           string   `json:"harness_loop"`
 	PromotionTarget       string   `json:"promotion_target"`
@@ -33,6 +34,7 @@ func verifyProducer(root string, source intakeSource) error {
 
 func verifyProducerSource(source intakeSource, producer producerSource) error {
 	if producer.CandidateArtifact != source.CandidateArtifact ||
+		producer.SourceWorkflow != source.SourceWorkflow ||
 		producer.HarnessLoop != source.HarnessLoop ||
 		producer.PromotionTarget != source.PromotionTarget {
 		return fmt.Errorf("producer source %s does not match intake source", source.ID)

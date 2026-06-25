@@ -10,6 +10,7 @@
     {
       "id": "ai-agent-client-testnet-smoke",
       "candidate_artifact": "ai-agent-client-testnet-smoke-closed-loop-candidates",
+      "source_workflow": ".github/workflows/ai-agent-client-testnet-smoke.yml",
       "producer_manifest": "docs/30-architecture/harness-promotion.riido.json",
       "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
       "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
@@ -27,6 +28,7 @@
     {
       "id": "ai-agent-client-testnet-load",
       "candidate_artifact": "ai-agent-client-testnet-load-closed-loop-candidates",
+      "source_workflow": ".github/workflows/ai-agent-client-testnet-load.yml",
       "producer_manifest": "docs/30-architecture/harness-promotion.riido.json",
       "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
       "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
@@ -44,6 +46,7 @@
     {
       "id": "control-plane-performance",
       "candidate_artifact": "control-plane-performance-closed-loop-candidates",
+      "source_workflow": ".github/workflows/control-plane-performance.yml",
       "producer_manifest": "docs/30-architecture/harness-promotion.riido.json",
       "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
       "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
@@ -61,6 +64,7 @@
     {
       "id": "loop-closure-audit",
       "candidate_artifact": "loop-closure-audit-closed-loop-candidates",
+      "source_workflow": ".github/workflows/loop-closure-audit.yml",
       "producer_manifest": "docs/30-architecture/loop-closure-audit.riido.json",
       "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
       "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
@@ -94,7 +98,8 @@
     "candidate intake evidence must publish generated_at and expires_at",
     "candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids",
     "candidate intake sources must cover every closed_loop_candidate producer source from the harness promotion manifest",
-    "candidate intake sources must include loop-closure-audit residual gap candidates"
+    "candidate intake sources must include loop-closure-audit residual gap candidates",
+    "candidate intake workflow path triggers must include every producer source workflow"
   ],
   "loop": {
     "observation": "Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.",

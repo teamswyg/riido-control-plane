@@ -11,6 +11,26 @@ func TestCandidateIntakeRequiresEveryProducerSource(t *testing.T) {
 	}
 }
 
+func TestCandidateIntakeSourceWorkflowMustMatchProducer(t *testing.T) {
+	source := intakeSource{
+		ID:                "control-plane-performance",
+		CandidateArtifact: "control-plane-performance-closed-loop-candidates",
+		SourceWorkflow:    ".github/workflows/wrong.yml",
+		HarnessLoop:       "control_plane_performance_harness",
+		PromotionTarget:   "closed_loop_candidate",
+	}
+	producer := producerSource{
+		ID:                source.ID,
+		CandidateArtifact: source.CandidateArtifact,
+		SourceWorkflow:    ".github/workflows/control-plane-performance.yml",
+		HarnessLoop:       source.HarnessLoop,
+		PromotionTarget:   source.PromotionTarget,
+	}
+	if err := verifyProducerSource(source, producer); err == nil {
+		t.Fatal("expected producer source workflow drift to fail")
+	}
+}
+
 func withoutIntakeSource(sources []intakeSource, id string) []intakeSource {
 	out := make([]intakeSource, 0, len(sources))
 	for _, source := range sources {

@@ -8,6 +8,9 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/closed-loop-candidate-decision.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - ".github/workflows/ai-agent-client-testnet-load.yml"
+      - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-closure-audit.yml"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "docs/30-architecture/loop-closure-audit.riido.json"
@@ -22,6 +25,9 @@ on:
   pull_request:
     paths:
       - ".github/workflows/closed-loop-candidate-decision.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - ".github/workflows/ai-agent-client-testnet-load.yml"
+      - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-closure-audit.yml"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "docs/30-architecture/loop-closure-audit.riido.json"

@@ -18,6 +18,7 @@ func workflowPathTriggers(m manifest) []string {
 	paths := []string{m.Workflow, m.GeneratedDoc}
 	for _, source := range m.Sources {
 		paths = append(paths,
+			source.SourceWorkflow,
 			source.ProducerManifest,
 			source.LoopRegistryManifest,
 			source.EvidenceGraphManifest,

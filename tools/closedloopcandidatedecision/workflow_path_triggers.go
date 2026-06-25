@@ -23,6 +23,7 @@ func workflowPathTriggers(m manifest, intake intakeManifest) []string {
 	}
 	for _, source := range intake.Sources {
 		paths = append(paths,
+			source.SourceWorkflow,
 			source.ProducerManifest,
 			source.LoopRegistryManifest,
 		)

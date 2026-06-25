@@ -38,6 +38,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids
 - candidate intake sources must cover every closed_loop_candidate producer source from the harness promotion manifest
 - candidate intake sources must include loop-closure-audit residual gap candidates
+- candidate intake workflow path triggers must include every producer source workflow
 
 ## Evidence Loop
 
