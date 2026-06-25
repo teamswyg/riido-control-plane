@@ -20,9 +20,9 @@ func run(cfg config) (pressureReport, error) {
 				return pressureReport{}, err
 			}
 			report.Runs = append(report.Runs, row)
-			report.Candidates = append(report.Candidates, row.Candidate)
 		}
 	}
+	report.Candidates = uniqueCandidates(report.Runs)
 	report.Findings = pressureFindings(report.Runs)
 	report.EndedAt = time.Now().UTC()
 	report.DurationMs = report.EndedAt.Sub(started).Milliseconds()
@@ -43,7 +43,7 @@ func runOne(cfg config, sc scenario, concurrency int) (pressureRun, error) {
 		OpsPerSec: float64(ops) / cfg.Duration.Seconds(), Latency: summarize(samples),
 		LatencyUS: summarizeMicros(samples),
 		Resources: diffResources(before, after, ops),
-		Candidate: candidateEntry{Scenario: sc.name, Risk: sc.risk, Next: sc.next},
+		Candidate: candidateForScenario(sc),
 	}, nil
 }
 
