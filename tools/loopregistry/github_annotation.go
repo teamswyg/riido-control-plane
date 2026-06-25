@@ -7,10 +7,11 @@ import (
 	"strings"
 )
 
-func writeGitHubAnnotations(w io.Writer, result verifyResult) {
+func writeGitHubAnnotations(w io.Writer, result verifyResult, impact *impactEvidence) {
 	if w == nil {
 		w = os.Stdout
 	}
+	writeImpactAnnotation(w, impact)
 	for _, surface := range result.ClaimSurfaces {
 		if len(surface.VerifierCommands) == 0 {
 			continue

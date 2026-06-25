@@ -41,9 +41,6 @@ func run(opt options) error {
 	if err != nil {
 		return err
 	}
-	if opt.GitHubAnnotations {
-		writeGitHubAnnotations(opt.AnnotationOut, result)
-	}
 	doc := renderDoc(m, result)
 	if err := maybeDoc(root, m.GeneratedDoc, doc, opt.WriteDoc, opt.CheckDoc); err != nil {
 		return err
@@ -51,6 +48,9 @@ func run(opt options) error {
 	impact, err := maybeVerifyImpact(root, opt.Manifest, opt.ImpactBase, m)
 	if err != nil {
 		return err
+	}
+	if opt.GitHubAnnotations {
+		writeGitHubAnnotations(opt.AnnotationOut, result, impact)
 	}
 	if opt.EvidenceOut != "" {
 		return writeJSON(opt.EvidenceOut, newEvidence(m, result, impact))
