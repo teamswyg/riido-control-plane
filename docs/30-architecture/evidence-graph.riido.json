@@ -1445,8 +1445,8 @@
     },
     {
       "id": "evidence_graph_chain_impact_loop",
-      "observation": "Evidence graph chains could change their observation, hypothesis, decision, or next loop while no referenced executable change or verifier surface moved in the same pull request.",
-      "hypothesis": "Adding an evidence graph impact gate keeps reasoning updates attached to executable surfaces, so agents cannot treat prose-only reasoning edits as closed-loop progress.",
+      "observation": "Evidence graph chains could change their observation, hypothesis, decision, or next loop while no referenced executable change or verifier surface moved in the same pull request, and the claim surface did not expose the machine-readable observe/verify/fail tokens for that gate.",
+      "hypothesis": "Adding an evidence graph impact gate and binding its observe/verify/fail tokens to the loop registry keeps reasoning updates attached to executable surfaces, so agents cannot treat prose-only reasoning edits as closed-loop progress.",
       "claims": ["evidence_graph_chain_changes_require_executable_surface"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
@@ -1456,10 +1456,12 @@
         {"kind": "tool", "path": "tools/evidencegraph/impact_capture.go"},
         {"kind": "tool", "path": "tools/evidencegraph/impact_chain.go"},
         {"kind": "tool", "path": "tools/evidencegraph/impact_refs.go"},
-        {"kind": "test", "path": "tools/evidencegraph/impact_test.go"}
+        {"kind": "test", "path": "tools/evidencegraph/impact_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/evidencegraph/impact_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/evidencegraph"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"}
@@ -1468,7 +1470,7 @@
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Evidence graph PR verification now rejects added, changed, or removed chains when the diff only changes manifests or generated docs; at least one referenced executable change or verifier path must move.",
+      "decision": "Evidence graph PR verification rejects added, changed, or removed chains when the diff only changes manifests or generated docs; the loop registry claim now also exposes the observation, verifier, and failure tokens that let loopclosureaudit keep this gate claim-bound.",
       "next_loop": "closed_loop_candidate"
     },
     {

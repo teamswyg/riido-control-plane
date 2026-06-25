@@ -22,6 +22,7 @@ func TestRepairedClaimsHaveCoverageTokens(t *testing.T) {
 		"closed_loop_candidates_must_carry_adoption_plan",
 		"closed_loop_candidates_must_carry_promotion_edge",
 		"closed_loop_candidates_must_carry_source_ref",
+		"evidence_graph_chain_changes_require_executable_surface",
 	} {
 		t.Run(claim, func(t *testing.T) {
 			requireNoClaimCoverageGapForClaim(t, claim)
