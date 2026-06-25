@@ -488,8 +488,8 @@
     },
     {
       "id": "loop_verify_token_coverage_loop",
-      "observation": "Loop manifests declared verifies labels, but those labels could remain prose-like tokens that were not mapped to a concrete claim and verifier surface.",
-      "hypothesis": "Adding covers_verifies to claim bindings and rejecting uncovered or unknown tokens lets the loop registry derive QA scope from the manifest instead of relying on a human to interpret loop labels.",
+      "observation": "Loop manifests declared verifies labels, but those labels could remain prose-like tokens that were not mapped to a concrete claim, verifier surface, or machine-readable failure condition.",
+      "hypothesis": "Adding covers_verifies, covers_observes, and covers_fails_when to claim bindings, then rejecting uncovered or unknown tokens, lets the loop registry derive QA scope and regression semantics from the manifest instead of relying on a human to interpret loop labels.",
       "claims": ["loop_verify_tokens_must_be_claim_covered"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -499,10 +499,12 @@
         {"kind": "tool", "path": "tools/loopregistry/hash.go"},
         {"kind": "tool", "path": "tools/loopregistry/claim_surface.go"},
         {"kind": "tool", "path": "tools/loopregistry/render_more.go"},
-        {"kind": "test", "path": "tools/loopregistry/verify_loop_coverage_test.go"}
+        {"kind": "test", "path": "tools/loopregistry/verify_loop_coverage_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/verify_loop_coverage_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -510,7 +512,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Loop verifies tokens are now executable coverage requirements: every token must be claimed by a business claim in the same loop, and claim surfaces expose which verifies tokens they close.",
+      "decision": "Loop verifies tokens are now executable coverage requirements: every token must be claimed by a business claim in the same loop, claim surfaces expose which verifies tokens they close, and loop-closure audit keeps the verifies coverage claim from returning as a claim-coverage candidate.",
       "next_loop": "closed_loop_candidate"
     },
     {
