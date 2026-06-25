@@ -18,7 +18,10 @@ func verifyEvidenceGraph(m manifest, loopIDs map[string]bool) error {
 			return fmt.Errorf("evidence graph edge references unknown node: %+v", edge)
 		}
 	}
-	return verifyHarnessPromotionGraphEdges(m)
+	if err := verifyHarnessPromotionGraphEdges(m); err != nil {
+		return err
+	}
+	return verifyClaimEnforcementGraphEdges(m)
 }
 
 func verifyHarnessPromotionGraphEdges(m manifest) error {
