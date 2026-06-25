@@ -34,6 +34,7 @@ func TestRepairedClaimsHaveCoverageTokens(t *testing.T) {
 		"loop_evidence_artifacts_must_self_expire",
 		"loop_evidence_sources_must_be_claim_covered",
 		"loop_failure_conditions_must_be_claim_covered",
+		"loop_observation_tokens_must_be_claim_covered",
 	} {
 		t.Run(claim, func(t *testing.T) {
 			requireNoClaimCoverageGapForClaim(t, claim)
