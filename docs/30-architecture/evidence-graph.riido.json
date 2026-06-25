@@ -958,6 +958,10 @@
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_thread_history_sort.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_thread_message_policy.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_assert_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_component_intent_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_explicit_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_metadata_intent_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go"},
@@ -968,6 +972,10 @@
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_assert_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_component_intent_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_explicit_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_metadata_intent_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go"},
@@ -982,7 +990,7 @@
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Ambiguous task intent handling now includes non-command component documents and provider-limit category evidence: without explicit action signals, the first visible agent response asks what to do before durable daemon assignment; provider-limit metadata or wording normalizes to the same client result, and post-limit agent handoff remains enforced while preserving existing endpoint input and output fields.",
+      "decision": "Ambiguous task intent handling now includes non-command component documents and provider-limit category evidence: without explicit action signals, the first visible agent response asks what to do before durable daemon assignment; provider-limit metadata or wording normalizes to the same client result, and post-limit agent handoff remains enforced while preserving existing endpoint input and output fields. The prompt-classification tests are split by component intent, metadata fallback, explicit instruction, and shared assertion surface so claim-bound files expose the exact co-change scope instead of hiding multiple intent rules in one test file.",
       "next_loop": "ai_thread_history"
     },
     {
