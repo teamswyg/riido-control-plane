@@ -18,6 +18,7 @@ func run(ctx context.Context, cfg config) (report, error) {
 	results := make(chan result, cfg.Concurrency*8)
 	var wg sync.WaitGroup
 	client := newHTTPClient(cfg)
+	before := sampleResources()
 	for workerID := range cfg.Concurrency {
 		wg.Add(1)
 		go func() {
@@ -34,7 +35,8 @@ func run(ctx context.Context, cfg config) (report, error) {
 		agg.add(res)
 	}
 	endedAt := time.Now().UTC()
-	return agg.report(cfg, baseHost(cfg.BaseURL), startedAt, endedAt), nil
+	resources := diffResources(before, sampleResources(), len(agg.all))
+	return agg.report(cfg, baseHost(cfg.BaseURL), startedAt, endedAt, resources), nil
 }
 
 func stopAfter(ctx context.Context, duration time.Duration) <-chan struct{} {

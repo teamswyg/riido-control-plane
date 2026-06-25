@@ -28,21 +28,27 @@ type result struct {
 }
 
 type report struct {
-	SchemaVersion string                     `json:"schema_version"`
-	Scenario      string                     `json:"scenario"`
-	BaseHost      string                     `json:"base_host"`
-	WorkspaceID   string                     `json:"workspace_id,omitempty"`
-	StartedAt     time.Time                  `json:"started_at"`
-	EndedAt       time.Time                  `json:"ended_at"`
-	DurationMs    int64                      `json:"duration_ms"`
-	Concurrency   int                        `json:"concurrency"`
-	Total         int                        `json:"total"`
-	Success       int                        `json:"success"`
-	Failures      int                        `json:"failures"`
-	StatusCounts  map[string]int             `json:"status_counts"`
-	ErrorCounts   map[string]int             `json:"error_counts,omitempty"`
-	Latency       latencySummary             `json:"latency_ms"`
-	Endpoints     map[string]endpointSummary `json:"endpoints"`
+	SchemaVersion  string                     `json:"schema_version"`
+	Scenario       string                     `json:"scenario"`
+	BaseHost       string                     `json:"base_host"`
+	WorkspaceID    string                     `json:"workspace_id,omitempty"`
+	StartedAt      time.Time                  `json:"started_at"`
+	EndedAt        time.Time                  `json:"ended_at"`
+	DurationMs     int64                      `json:"duration_ms"`
+	Concurrency    int                        `json:"concurrency"`
+	Total          int                        `json:"total"`
+	Success        int                        `json:"success"`
+	Failures       int                        `json:"failures"`
+	RequestsPerSec float64                    `json:"requests_per_second"`
+	SuccessPerSec  float64                    `json:"success_per_second"`
+	FailureRatePct float64                    `json:"failure_rate_pct"`
+	StatusCounts   map[string]int             `json:"status_counts"`
+	ErrorCounts    map[string]int             `json:"error_counts,omitempty"`
+	Latency        latencySummary             `json:"latency_ms"`
+	Endpoints      map[string]endpointSummary `json:"endpoints"`
+	Resource       resourceDelta              `json:"load_generator_resource_delta"`
+	Capacity       capacityEstimate           `json:"capacity_estimate"`
+	Findings       []findingEntry             `json:"findings"`
 }
 
 type latencySummary struct {
@@ -55,10 +61,12 @@ type latencySummary struct {
 }
 
 type endpointSummary struct {
-	Total        int            `json:"total"`
-	Success      int            `json:"success"`
-	Failures     int            `json:"failures"`
-	StatusCounts map[string]int `json:"status_counts"`
-	ErrorCounts  map[string]int `json:"error_counts,omitempty"`
-	Latency      latencySummary `json:"latency_ms"`
+	Total          int            `json:"total"`
+	Success        int            `json:"success"`
+	Failures       int            `json:"failures"`
+	RequestsPerSec float64        `json:"requests_per_second"`
+	FailureRatePct float64        `json:"failure_rate_pct"`
+	StatusCounts   map[string]int `json:"status_counts"`
+	ErrorCounts    map[string]int `json:"error_counts,omitempty"`
+	Latency        latencySummary `json:"latency_ms"`
 }

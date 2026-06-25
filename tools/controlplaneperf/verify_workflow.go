@@ -13,6 +13,7 @@ func verifyWorkflow(root string, m manifest) error {
 	required := []string{
 		"schedule:",
 		"go run ./tools/controlplaneperf",
+		"go test ./tools/aiagentload",
 		"go run ./tools/controlplanepressure",
 		"go test ./internal/riidoaiserver",
 		"-benchmem",
