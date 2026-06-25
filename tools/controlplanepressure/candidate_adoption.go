@@ -2,11 +2,11 @@ package main
 
 func pressureAdoptionPlan(scenario string) []adoptionStep {
 	return []adoptionStep{
-		{"claim_binding", "update docs/30-architecture/loop-registry.riido.json for " + scenario},
-		{"verifier", "add or extend a focused verifier for " + scenario},
-		{"ci_gate", "bind the verifier to a lightweight CI or pre-commit gate"},
-		{"redacted_evidence", "publish before/after pressure evidence for " + scenario},
-		{"decision_record", "record the observation, hypothesis, decision, and next loop"},
-		{"evidence_graph_edge", "update docs/30-architecture/evidence-graph.riido.json"},
+		{"claim_binding", "go run ./tools/loopregistry -check-doc -github-annotations"},
+		{"verifier", "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"},
+		{"ci_gate", "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"},
+		{"redacted_evidence", "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"},
+		{"decision_record", "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"},
+		{"evidence_graph_edge", "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"},
 	}
 }

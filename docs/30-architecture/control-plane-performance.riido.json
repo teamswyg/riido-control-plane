@@ -104,7 +104,7 @@
     "lightweight benchmark evidence must run without live credentials",
     "local pressure evidence must include httptest coverage for the v3 thread history endpoint hot path",
     "local pressure evidence must emit measured allocation, latency, CPU, goroutine, subscriber-fanout findings, and per-scenario capacity estimates",
-    "local pressure findings must carry closed-loop candidate required artifacts and adoption commands",
+    "local pressure findings must carry closed-loop candidate required artifacts and executable adoption commands",
     "live load evidence must stay redacted and use aiagentload rather than ad-hoc curl loops",
     "live load evidence must emit requests_per_second, success_per_second, failure_rate_pct, endpoint findings, capacity_estimate, and load_generator_resource_delta",
     "live load evidence may attach opt-in pprof sample metadata but must never persist pprof profile bodies",
