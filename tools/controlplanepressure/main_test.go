@@ -30,7 +30,7 @@ func TestControlPlanePressureProducesEvidence(t *testing.T) {
 	if got.SchemaVersion != evidenceSchema || len(got.Runs) != len(scenarios())*2 {
 		t.Fatalf("report shape = %+v", got)
 	}
-	if len(got.Findings) != 4 {
+	if len(got.Findings) < 3 {
 		t.Fatalf("findings = %+v", got.Findings)
 	}
 	if len(got.Candidates) != len(scenarios()) {
@@ -53,6 +53,11 @@ func TestControlPlanePressureProducesEvidence(t *testing.T) {
 	for _, row := range got.Capacity {
 		if !row.ErrorFree || row.MaxConcurrentUsers == 0 || row.P95LatencyUS < 0 {
 			t.Fatalf("invalid capacity estimate: %+v", row)
+		}
+	}
+	for _, finding := range got.Findings {
+		if finding.Value <= 0 {
+			t.Fatalf("non-actionable finding: %+v", finding)
 		}
 	}
 	assertPressureCandidatesActionable(t, got)

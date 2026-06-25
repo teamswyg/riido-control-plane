@@ -143,8 +143,8 @@
     },
     {
       "id": "control_plane_performance_evidence_loop",
-      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows.",
-      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, per-scenario capacity estimates, measured alloc/latency/cpu/goroutine/subscriber findings, pprof loopback command, redacted aiagentload command, and finding-level closed-loop adoption plans, then publish candidate evidence for architect review.",
+      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows; pressure output could also promote a zero goroutine delta as if it were an actionable leak signal.",
+      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, and finding-level closed-loop adoption plans, then publish candidate evidence for architect review.",
       "claims": ["control_plane_performance_hot_paths_must_emit_evidence"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/control-plane-performance.riido.json"},
@@ -191,7 +191,7 @@
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-high-traffic-audit.md"}
     ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, local pressure CPU/resource deltas, capacity estimates, subscriber fanout pressure, measured findings, and pprof/load commands identify hot paths, while each finding carries a closed-loop candidate adoption path before repeated regressions are promoted into gates.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, local pressure CPU/resource deltas, capacity estimates, subscriber fanout pressure, measured positive findings, and pprof/load commands identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates.",
       "next_loop": "closed_loop_candidate"
     },
     {
