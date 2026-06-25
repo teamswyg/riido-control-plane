@@ -50,7 +50,8 @@ jobs:
             ]
           }
           JSON
-          go run ./tools/looprefreshdispatch \
+          RIIDO_EVIDENCE_NOW=2026-06-25T00:00:00Z \
+            go run ./tools/looprefreshdispatch \
             -commands-in out/sample-loop-refresh-commands.json \
             -evidence-out out/loop-refresh-dispatch-plan.json
       - name: Download live loop refresh commands

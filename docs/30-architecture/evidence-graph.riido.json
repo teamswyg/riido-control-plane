@@ -946,8 +946,8 @@
     },
     {
       "id": "expired_loop_refresh_dispatch_loop",
-      "observation": "Expired loop refresh command artifacts could name runnable GitHub workflow commands, but executing raw command strings would make the automation boundary depend on shell parsing rather than verified dispatch intent. If the dispatcher runs before the command producer, it can also consume stale previous artifacts while still publishing a fresh-looking plan.",
-      "hypothesis": "A dispatcher can treat command strings as evidence only, accept the exact refresh_workflow shape, validate the workflow basename exists, verify its scheduled run follows the command-producing loop-registry workflow, publish a generated_at/expires_at dispatch plan artifact linked to the source command window, and dispatch only the structured workflow_file values outside pull requests.",
+      "observation": "Expired loop refresh command artifacts could name runnable GitHub workflow commands, but executing raw command strings would make the automation boundary depend on shell parsing rather than verified dispatch intent. If the dispatcher runs before the command producer or reuses an expired command artifact, it can also consume stale previous artifacts while still publishing a fresh-looking plan.",
+      "hypothesis": "A dispatcher can treat command strings as evidence only, require the source command evidence freshness window to still be valid, accept the exact refresh_workflow shape, validate the workflow basename exists, verify its scheduled run follows the command-producing loop-registry workflow, publish a generated_at/expires_at dispatch plan artifact linked to the source command window, and dispatch only the structured workflow_file values outside pull requests.",
       "claims": ["expired_loop_refresh_commands_must_dispatch_safe_workflows"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/loop-refresh-dispatch.yml"},
@@ -955,12 +955,15 @@
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/module-decomposition.riido.json"},
-        {"kind": "tool", "path": "tools/looprefreshdispatch"}
+        {"kind": "tool", "path": "tools/looprefreshdispatch"},
+        {"kind": "tool", "path": "tools/looprefreshdispatch/source_freshness.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/source_freshness_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/looprefreshdispatch/command_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/plan_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/run_test.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/source_freshness_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/workflow_schedule_test.go"},
         {"kind": "tool", "path": "tools/looprefreshdispatch"},
         {"kind": "tool", "path": "tools/workflowevidence"},
@@ -970,7 +973,7 @@
         {"kind": "artifact", "path": "loop-refresh-commands", "redacted": true},
         {"kind": "artifact", "path": "loop-refresh-dispatch-plan", "redacted": true}
       ],
-      "decision": "Expired evidence can now move from selected refresh command evidence to a validated workflow dispatch plan without eval; the dispatcher schedule is verified to run after command production, both artifacts carry explicit freshness windows, while PRs produce evidence only and main/scheduled runs perform dispatch.",
+      "decision": "Expired evidence can now move from selected refresh command evidence to a validated workflow dispatch plan without eval only while the source command evidence is still fresh; the dispatcher schedule is verified to run after command production, both artifacts carry explicit freshness windows, while PRs produce evidence only and main/scheduled runs perform dispatch.",
       "next_loop": "closed_loop_candidate"
     },
     {
