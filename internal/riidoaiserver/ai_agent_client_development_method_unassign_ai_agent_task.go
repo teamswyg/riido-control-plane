@@ -35,7 +35,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
 		Message:         clientMessageTaskStopped,
 	}
-	if thread, ok := s.taskThreadForStopTargetLocked(taskID, agent.AgentID, req.AssignmentID); ok {
+	if thread, ok := s.taskThreadForUnassignTargetLocked(taskID, agent.AgentID, req.AssignmentID); ok {
 		response.ThreadID = thread.ThreadID
 		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID

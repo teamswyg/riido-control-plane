@@ -40,7 +40,7 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	} else if req.AssignmentID != "" {
 		return AIAgentTaskActionResponse{}, errors.New("assignment_id does not belong to task agent")
 	} else {
-		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
+		return AIAgentTaskActionResponse{}, errors.New("active ai agent assignment not found")
 	}
 	if req.AssignmentID != "" {
 		s.markTaskAgentAssignmentThreadStopProjectionLocked(taskID, agent.AgentID, req.AssignmentID, response, completed)
