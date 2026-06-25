@@ -3,9 +3,12 @@ package main
 import "testing"
 
 func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
+	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-25T00:00:00Z")
 	got, err := buildDispatchPlan(repoRootForTest(t), refreshCommandEvidence{
 		SchemaVersion: refreshCommandsSchema,
 		Status:        "refresh_required",
+		GeneratedAt:   "2026-06-24T00:00:00Z",
+		ExpiresAt:     "2026-06-25T00:00:00Z",
 		Commands: []selectedRefreshCommand{{
 			LoopID:  "ai_thread_history",
 			Kind:    "refresh_workflow",
@@ -25,6 +28,12 @@ func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
 	}
 	if got.Status != "dispatch_required" || got.DispatchCount != 1 {
 		t.Fatalf("plan status/count = %+v", got)
+	}
+	if got.GeneratedAt != "2026-06-25T00:00:00Z" || got.ExpiresAt != "2026-06-26T00:00:00Z" {
+		t.Fatalf("plan freshness = %+v", got)
+	}
+	if got.SourceGeneratedAt == "" || got.SourceExpiresAt == "" {
+		t.Fatalf("source freshness missing = %+v", got)
 	}
 	dispatch := got.Dispatches[0]
 	if dispatch.WorkflowFile != "loop-registry.yml" || dispatch.CommandCount != 2 {

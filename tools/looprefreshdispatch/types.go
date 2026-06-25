@@ -3,6 +3,8 @@ package main
 type refreshCommandEvidence struct {
 	SchemaVersion string                   `json:"schema_version"`
 	Status        string                   `json:"status"`
+	GeneratedAt   string                   `json:"generated_at,omitempty"`
+	ExpiresAt     string                   `json:"expires_at,omitempty"`
 	CommandCount  int                      `json:"command_count"`
 	Commands      []selectedRefreshCommand `json:"commands"`
 }
@@ -16,7 +18,11 @@ type selectedRefreshCommand struct {
 type dispatchPlan struct {
 	SchemaVersion       string             `json:"schema_version"`
 	Status              string             `json:"status"`
+	GeneratedAt         string             `json:"generated_at"`
+	ExpiresAt           string             `json:"expires_at"`
 	SourceStatus        string             `json:"source_status"`
+	SourceGeneratedAt   string             `json:"source_generated_at,omitempty"`
+	SourceExpiresAt     string             `json:"source_expires_at,omitempty"`
 	DispatchCount       int                `json:"dispatch_count"`
 	Dispatches          []workflowDispatch `json:"dispatches"`
 	IgnoredCommandCount int                `json:"ignored_command_count"`

@@ -774,8 +774,8 @@
     },
     {
       "id": "expired_loop_refresh_command_selection_loop",
-      "observation": "Loop registry evidence could expose ordered next_commands while still leaving scheduled automation to decide which commands to select and publish after the evidence artifact expires.",
-      "hypothesis": "A refresh command selection mode in the scheduled workflow that reads existing loop-registry evidence, emits only expired refresh plan commands, and uploads a strict command artifact turns stale evidence into a machine-executable QA queue.",
+      "observation": "Loop registry evidence could expose ordered next_commands while still leaving scheduled automation to decide which commands to select and publish after the evidence artifact expires, and the selected command queue itself could be timeless.",
+      "hypothesis": "A refresh command selection mode in the scheduled workflow that reads existing loop-registry evidence, emits only expired refresh plan commands, and uploads a strict command artifact with its own generated_at/expires_at window turns stale evidence into a machine-executable QA queue without creating immortal commands.",
       "claims": ["expired_loop_evidence_must_select_refresh_commands"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -784,6 +784,7 @@
         {"kind": "tool", "path": "tools/loopregistry/run.go"},
         {"kind": "tool", "path": "tools/loopregistry/refresh_command_select.go"},
         {"kind": "tool", "path": "tools/loopregistry/refresh_command_run.go"},
+        {"kind": "tool", "path": "tools/loopregistry/refresh_command_types.go"},
         {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
@@ -796,13 +797,13 @@
         {"kind": "artifact", "path": "loop-refresh-commands", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Expired loop-registry evidence can now be consumed as input and transformed into an uploaded ordered refresh command artifact without reopening manifests or hand-composing commands.",
+      "decision": "Expired loop-registry evidence can now be consumed as input and transformed into an uploaded ordered refresh command artifact with its own 24-hour freshness window, without reopening manifests or hand-composing commands.",
       "next_loop": "closed_loop_candidate"
     },
     {
       "id": "expired_loop_refresh_dispatch_loop",
-      "observation": "Expired loop refresh command artifacts could name runnable GitHub workflow commands, but executing raw command strings would make the automation boundary depend on shell parsing rather than verified dispatch intent.",
-      "hypothesis": "A dispatcher can treat command strings as evidence only, accept the exact refresh_workflow shape, validate the workflow basename exists, publish a dispatch plan artifact, and dispatch only the structured workflow_file values outside pull requests.",
+      "observation": "Expired loop refresh command artifacts could name runnable GitHub workflow commands, but executing raw command strings would make the automation boundary depend on shell parsing rather than verified dispatch intent, and a dispatch plan without its own freshness would be weak evidence.",
+      "hypothesis": "A dispatcher can treat command strings as evidence only, accept the exact refresh_workflow shape, validate the workflow basename exists, publish a generated_at/expires_at dispatch plan artifact linked to the source command window, and dispatch only the structured workflow_file values outside pull requests.",
       "claims": ["expired_loop_refresh_commands_must_dispatch_safe_workflows"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/loop-refresh-dispatch.yml"},
@@ -824,7 +825,7 @@
         {"kind": "artifact", "path": "loop-refresh-commands", "redacted": true},
         {"kind": "artifact", "path": "loop-refresh-dispatch-plan", "redacted": true}
       ],
-      "decision": "Expired evidence can now move from selected refresh command evidence to a validated workflow dispatch plan without eval, while PRs produce evidence only and main/scheduled runs perform dispatch.",
+      "decision": "Expired evidence can now move from selected refresh command evidence to a validated workflow dispatch plan without eval; both artifacts carry explicit freshness windows, while PRs produce evidence only and main/scheduled runs perform dispatch.",
       "next_loop": "closed_loop_candidate"
     },
     {

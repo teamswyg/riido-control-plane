@@ -6,10 +6,15 @@ import (
 )
 
 func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan, error) {
+	generatedAt, expiresAt := evidenceWindow()
 	out := dispatchPlan{
-		SchemaVersion: dispatchPlanSchema,
-		Status:        "no_dispatch_required",
-		SourceStatus:  strings.TrimSpace(source.Status),
+		SchemaVersion:     dispatchPlanSchema,
+		Status:            "no_dispatch_required",
+		GeneratedAt:       generatedAt,
+		ExpiresAt:         expiresAt,
+		SourceStatus:      strings.TrimSpace(source.Status),
+		SourceGeneratedAt: strings.TrimSpace(source.GeneratedAt),
+		SourceExpiresAt:   strings.TrimSpace(source.ExpiresAt),
 	}
 	byWorkflow := map[string]map[string]int{}
 	ignoredKinds := map[string]bool{}

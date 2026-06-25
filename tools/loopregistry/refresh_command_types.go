@@ -4,6 +4,7 @@ type refreshCommandEvidence struct {
 	SchemaVersion     string                   `json:"schema_version"`
 	Status            string                   `json:"status"`
 	GeneratedAt       string                   `json:"generated_at"`
+	ExpiresAt         string                   `json:"expires_at"`
 	SourceGeneratedAt string                   `json:"source_generated_at"`
 	SourceExpiresAt   string                   `json:"source_expires_at"`
 	SelectedLoopCount int                      `json:"selected_loop_count"`

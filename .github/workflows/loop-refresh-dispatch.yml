@@ -38,6 +38,8 @@ jobs:
           {
             "schema_version": "riido-control-plane-loop-refresh-commands.v1",
             "status": "refresh_required",
+            "generated_at": "2026-06-25T00:00:00Z",
+            "expires_at": "2026-06-26T00:00:00Z",
             "command_count": 1,
             "commands": [
               {

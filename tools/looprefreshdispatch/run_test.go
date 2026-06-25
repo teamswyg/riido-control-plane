@@ -8,6 +8,7 @@ import (
 )
 
 func TestLoopRefreshDispatchCLIWritesPlan(t *testing.T) {
+	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-25T00:00:00Z")
 	root := repoRootForTest(t)
 	dir := t.TempDir()
 	in := filepath.Join(dir, "commands.json")
@@ -15,6 +16,8 @@ func TestLoopRefreshDispatchCLIWritesPlan(t *testing.T) {
 	err := writeJSON(in, refreshCommandEvidence{
 		SchemaVersion: refreshCommandsSchema,
 		Status:        "refresh_required",
+		GeneratedAt:   "2026-06-24T00:00:00Z",
+		ExpiresAt:     "2026-06-25T00:00:00Z",
 		Commands: []selectedRefreshCommand{{
 			LoopID:  "closed_loop_candidate",
 			Kind:    "refresh_workflow",
@@ -31,6 +34,9 @@ func TestLoopRefreshDispatchCLIWritesPlan(t *testing.T) {
 	if got.SchemaVersion != dispatchPlanSchema ||
 		got.Dispatches[0].WorkflowFile != "closed-loop-candidate-intake.yml" {
 		t.Fatalf("dispatch plan = %+v", got)
+	}
+	if got.GeneratedAt != "2026-06-25T00:00:00Z" || got.ExpiresAt == "" {
+		t.Fatalf("dispatch plan freshness = %+v", got)
 	}
 }
 
