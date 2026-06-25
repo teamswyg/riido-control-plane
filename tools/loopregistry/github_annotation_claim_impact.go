@@ -43,5 +43,8 @@ func boundSurfaceSummary(surface impactBoundSurface) string {
 	if len(surface.ChangedEvidence) > 0 {
 		parts = append(parts, "evidence: "+strings.Join(surface.ChangedEvidence, ", "))
 	}
+	if len(surface.ChangedReasoningEvidence) > 0 {
+		parts = append(parts, "reasoning: "+strings.Join(surface.ChangedReasoningEvidence, ", "))
+	}
 	return strings.Join(parts, " ")
 }

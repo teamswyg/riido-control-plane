@@ -48,6 +48,10 @@ func verifyBoundSurfaceImpact(claim claimBinding, changed map[string]bool) (impa
 	if len(record.ChangedEvidence) == 0 {
 		return record, fmt.Errorf("claim %s bound files changed without claim evidence change", claim.ID)
 	}
+	record.ChangedReasoningEvidence = changedValues(claimReasoningEvidenceFiles(), changed)
+	if len(record.ChangedReasoningEvidence) == 0 {
+		return record, fmt.Errorf("claim %s bound files changed without evidence graph reasoning change", claim.ID)
+	}
 	return record, nil
 }
 

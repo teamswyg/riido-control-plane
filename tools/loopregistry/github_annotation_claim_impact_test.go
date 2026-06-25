@@ -16,9 +16,10 @@ func TestGitHubAnnotationsIncludeClaimImpactScope(t *testing.T) {
 		Claims:           []impactClaim{{ID: "claim_changed"}},
 		RemovedClaims:    []impactClaim{{ID: "claim_removed"}},
 		BoundSurfaces: []impactBoundSurface{{
-			ID:                "claim_bound",
-			ChangedBoundFiles: []string{"internal/example.go"},
-			ChangedEvidence:   []string{"docs/claim.md"},
+			ID:                       "claim_bound",
+			ChangedBoundFiles:        []string{"internal/example.go"},
+			ChangedEvidence:          []string{"docs/claim.md"},
+			ChangedReasoningEvidence: []string{"docs/reasoning.riido.json"},
 		}},
 	})
 	got := out.String()
@@ -26,7 +27,7 @@ func TestGitHubAnnotationsIncludeClaimImpactScope(t *testing.T) {
 		"added claims: claim_added",
 		"changed claims: claim_changed",
 		"removed claims: claim_removed",
-		"bound surfaces: claim_bound files: internal/example.go evidence: docs/claim.md",
+		"bound surfaces: claim_bound files: internal/example.go evidence: docs/claim.md reasoning: docs/reasoning.riido.json",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("annotation missing %q: %s", want, got)

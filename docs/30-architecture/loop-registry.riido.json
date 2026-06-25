@@ -582,7 +582,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c66498767ce8acd914034a4a326c72e250b5782b0bcb5d3351ec57bb745378ed"
+      "semantic_hash": "e15a49ac7bc2f7f604e87faba9f16df9b89f4fbb6cbd8301a303c4901b039cca"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -692,7 +692,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "53da6a8afe8ac08567894e07e7882bb16dbd3392c7f197e5f95c19c3133f8db8"
+      "semantic_hash": "5ef7acd6e8dd13229e0cfe450797fb7011f99f536c5c455fdfc6beac32a785b4"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -737,7 +737,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "0c88b36d1ee21bcf6842ffa6be158b6471996d28361fde8e70a2fa481e2385eb"
+      "semantic_hash": "56c8d4d4b92b9669736b932a4a9708167da49b2ff5b4666b4277fe580a0d20ee"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -796,7 +796,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "7a3450379eb15c294cff059a56d62fae8ce5f5509c4266ce852484304521949a"
+      "semantic_hash": "d78583914f73ea138931c668317b61711a32471d12c078461412a051b01f0ce4"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -936,7 +936,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c1e5fcca2d42b8f97ca4cdec54f3582ef402085962cf7480b17edc9816eb0ec6"
+      "semantic_hash": "4333b3faba49042eb4f4cc0bed2fcd612297908ccb62a8fe2b09ff766b93b411"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -1090,7 +1090,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1e8dca76e030c14c97e5f3f4766ed4774f2cb05922d6cef944bb4a7a3b00f18b"
+      "semantic_hash": "a4262a3263e184e5022f8993559b86b5f9bc8127850db03e9845b16a4c4dc2be"
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
@@ -1127,7 +1127,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e22b2a7906810acd578117d5feb0155e8b850b7e18ac94c9865129943b53c9a3"
+      "semantic_hash": "2bb8314d7e4289536925ded92cbbce7aeafd68996c98ffce62615be8d41662d4"
     },
     {
       "id": "claim_meaning_changes_require_reasoning_chain",
@@ -1147,7 +1147,29 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d5743bbe9aadd672652c7c5cebddad3b01566cd1a1cbc2a11b325ecb743f6ebc"
+      "semantic_hash": "0f1cd9ed9117147aeaabf48c26206847839885f289f701743e09714359b4389a"
+    },
+    {
+      "id": "claim_bound_file_changes_require_reasoning_chain",
+      "statement": "When a claim-bound code or test path changes in a pull request, the impact verifier must require evidence graph reasoning movement in addition to claim manifest or generated-doc evidence so executable behavior changes keep Observation, Hypothesis, Decision, and Next Loop aligned.",
+      "loop": "closed_loop_candidate",
+      "files": [
+        "tools/loopregistry/impact_more.go",
+        "tools/loopregistry/impact_bound_surface_test.go",
+        "tools/loopregistry/impact_types.go",
+        "tools/loopregistry/github_annotation_claim_impact.go",
+        "tools/loopregistry/github_annotation_claim_impact_test.go"
+      ],
+      "verifiers": [
+        "TestBoundFileImpactRequiresReasoningEvidenceChange",
+        "TestBoundFileImpactAllowsGeneratedDocChange",
+        "TestGitHubAnnotationsIncludeClaimImpactScope"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "060866720ee04dfff7f5c5102d84843781096c49d3625dc09e55c5a1fed7c181"
     },
     {
       "id": "claim_impact_evidence_must_expose_changed_files",
@@ -1166,7 +1188,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0d3f47e08f8b21f7dd5ca6e24fffc447b2e974bb536939c52bcaa422344c7738"
+      "semantic_hash": "284bbb26f598052ac43fabff63e321ccd06aea33fe77366f3f3b12ef945eb38a"
     },
     {
       "id": "pre_commit_must_run_claim_binding_impact",
@@ -1242,7 +1264,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "48e36d78b8aadf499fff6c8d1d09af19df22b06591a37ac0c46ebde9edc059da"
+      "semantic_hash": "a9f04a9d17bf3c8bcad76a0884723f163e637addb46547c034bd51a2f6850d31"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -1266,7 +1288,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "6a857eb53e480fd3e8a7a3db17bbcfd680b177a5945249009bbace7447aa5309"
+      "semantic_hash": "a486d0fa654b8fb77918d3e7d2b1a8e4ff32c454ad02d8f47db4326dc15bc19b"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -1286,7 +1308,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "4d205b6fe7a4bd813fccee1494350fb55e3402448c07d4a75700c2ddbb88356e"
+      "semantic_hash": "fcab90de9c56f5988da1efc13cfff6484f2fd87d4ca4f90578ea1afdb21ca9dd"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -1410,7 +1432,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "904f40f08034cabbcc05d956181ffa3d9996018b67900127f424e3973cc09d7b"
+      "semantic_hash": "eda149d75775b1f1adc863462d8efd7b628abc234aee4bb05caa975b7eb9f07d"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -1927,6 +1949,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "claim_meaning_changes_require_reasoning_chain",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "claim_bound_file_changes_require_reasoning_chain",
       "relation": "enforces"
     },
     {

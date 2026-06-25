@@ -276,6 +276,33 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "claim_bound_surface_reasoning_impact_loop",
+      "observation": "A claim-bound code or test path could change with claim manifest or generated-doc evidence while leaving the evidence graph reasoning chain stale.",
+      "hypothesis": "Requiring evidence graph reasoning movement for claim-bound executable surface changes keeps Observation, Hypothesis, Decision, and Next Loop aligned even when the claim statement itself does not change.",
+      "claims": ["claim_bound_file_changes_require_reasoning_chain"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/impact_more.go"},
+        {"kind": "tool", "path": "tools/loopregistry/impact_types.go"},
+        {"kind": "tool", "path": "tools/loopregistry/github_annotation_claim_impact.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_bound_surface_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/github_annotation_claim_impact_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/impact_bound_surface_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/github_annotation_claim_impact_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Bound executable surface changes now require reasoning evidence movement in addition to claim evidence, preventing code/test-only drift from bypassing the evidence graph.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "claim_impact_changed_files_evidence_loop",
       "observation": "Loop registry impact evidence exposed changed_file_count but not the actual changed repository paths, forcing agents and reviewers to rerun git diff before understanding PR impact scope.",
       "hypothesis": "Publishing a sorted changed_files list in the impact evidence makes the impact verifier output self-contained and lets downstream agents infer semantic scope from evidence alone.",

@@ -9,8 +9,8 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `7`
 - harness loops: `2`
 - closed loops: `5`
-- claim bindings: `45`
-- evidence graph edges: `51`
+- claim bindings: `46`
+- evidence graph edges: `52`
 - max evidence expiry hours: `168`
 
 ## Loops
@@ -32,7 +32,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `ai_thread_history` | `loop-registry.yml` | `1440` | `24` | `gh workflow run loop-registry.yml --ref main` | `6` | `8` | `9` | `1` |
 | `provider_acceptance_harness` | `ai-agent-client-testnet-smoke.yml` | `1440` | `24` | `gh workflow run ai-agent-client-testnet-smoke.yml --ref main` | `2` | `3` | `4` | `2` |
 | `ai_agent_load_harness` | `ai-agent-client-testnet-load.yml` | `1440` | `24` | `gh workflow run ai-agent-client-testnet-load.yml --ref main` | `1` | `3` | `4` | `3` |
-| `closed_loop_candidate` | `loop-registry.yml` | `1440` | `24` | `gh workflow run loop-registry.yml --ref main` | `31` | `45` | `46` | `4` |
+| `closed_loop_candidate` | `loop-registry.yml` | `1440` | `24` | `gh workflow run loop-registry.yml --ref main` | `32` | `46` | `47` | `4` |
 | `closed_loop_candidate_intake` | `closed-loop-candidate-intake.yml` | `1440` | `24` | `gh workflow run closed-loop-candidate-intake.yml --ref main` | `1` | `1` | `2` | `1` |
 | `closed_loop_candidate_decision` | `closed-loop-candidate-decision.yml` | `1440` | `24` | `gh workflow run closed-loop-candidate-decision.yml --ref main` | `3` | `3` | `4` | `1` |
 | `open_decision_queue` | `open-questions.yml` | `1440` | `168` | `gh workflow run open-questions.yml --ref main` | `1` | `1` | `2` | `1` |
@@ -48,32 +48,33 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `thread_history_v3_must_preserve_run_identity_and_message_order` | `ai_thread_history` | `7` | `2` | `a1f46bad310e` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `856d5ff20c30` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `3` | `2` | `da1de8237916` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `c66498767ce8` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `e15a49ac7bc2` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `6` | `4` | `a394d2fa717e` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `16` | `3` | `9130bfbf47a2` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `53da6a8afe8a` |
-| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `0c88b36d1ee2` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `5ef7acd6e8dd` |
+| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `56c8d4d4b92b` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `371bebdb7588` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `7a3450379eb1` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `d78583914f73` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `59` | `23` | `65159d881dc5` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `c1e5fcca2d42` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `4333b3faba49` |
 | `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `af2fab895ef6` |
 | `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `759ffeb80d39` |
 | `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `115a5da29c24` |
 | `loop_evidence_sources_must_be_claim_covered` | `closed_loop_candidate` | `9` | `4` | `0102de34d6c2` |
-| `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `9` | `5` | `1e8dca76e030` |
-| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `15` | `8` | `e22b2a790681` |
-| `claim_meaning_changes_require_reasoning_chain` | `closed_loop_candidate` | `4` | `2` | `d5743bbe9aad` |
-| `claim_impact_evidence_must_expose_changed_files` | `closed_loop_candidate` | `4` | `1` | `0d3f47e08f8b` |
+| `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `9` | `5` | `a4262a3263e1` |
+| `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `15` | `8` | `2bb8314d7e42` |
+| `claim_meaning_changes_require_reasoning_chain` | `closed_loop_candidate` | `4` | `2` | `0f1cd9ed9117` |
+| `claim_bound_file_changes_require_reasoning_chain` | `closed_loop_candidate` | `5` | `3` | `060866720ee0` |
+| `claim_impact_evidence_must_expose_changed_files` | `closed_loop_candidate` | `4` | `1` | `284bbb26f598` |
 | `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `4e2ee23fff4b` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `efcdfb72c6b6` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `48e36d78b8aa` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `6a857eb53e48` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `4d205b6fe7a4` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `a9f04a9d17bf` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `a486d0fa654b` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `fcab90de9c56` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `12` | `2` | `73568a33d146` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `13` | `6` | `90658a5f8285` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `df38943a642c` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `904f40f08034` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `eda149d75775` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `10` | `5` | `7cc025e32ac5` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `68d2b171fd9c` |
 | `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `ccba94625ae9` |
@@ -114,6 +115,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `claim_verifier_commands_must_surface_as_ci_annotations` | `6` | `2` | `1` | `2` | `0` | `0` | `0` | `0` | `5` | `1` | `1` |
 | `claim_meaning_changes_require_code_or_test_surface` | `8` | `6` | `1` | `2` | `0` | `0` | `0` | `0` | `8` | `1` | `1` |
 | `claim_meaning_changes_require_reasoning_chain` | `3` | `1` | `0` | `2` | `0` | `0` | `0` | `0` | `2` | `1` | `1` |
+| `claim_bound_file_changes_require_reasoning_chain` | `3` | `2` | `0` | `2` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
 | `claim_impact_evidence_must_expose_changed_files` | `3` | `1` | `0` | `2` | `0` | `0` | `0` | `0` | `1` | `1` | `1` |
 | `pre_commit_must_run_claim_binding_impact` | `3` | `2` | `3` | `3` | `0` | `1` | `0` | `0` | `4` | `1` | `1` |
 | `claim_bound_paths_must_trigger_loop_registry` | `3` | `1` | `1` | `1` | `0` | `0` | `0` | `0` | `4` | `1` | `1` |
@@ -163,6 +165,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `closed_loop_candidate` --enforces--> `claim_bound_paths_must_trigger_loop_registry`
 - `closed_loop_candidate` --enforces--> `pre_commit_must_run_claim_binding_impact`
 - `closed_loop_candidate` --enforces--> `claim_meaning_changes_require_reasoning_chain`
+- `closed_loop_candidate` --enforces--> `claim_bound_file_changes_require_reasoning_chain`
 - `closed_loop_candidate` --enforces--> `claim_meaning_changes_require_code_or_test_surface`
 - `closed_loop_candidate` --enforces--> `claim_impact_evidence_must_expose_changed_files`
 - `closed_loop_candidate` --enforces--> `claim_surface_evidence_must_expose_code_test_doc_binding`
