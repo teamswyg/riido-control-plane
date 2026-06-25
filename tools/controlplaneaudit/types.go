@@ -1,20 +1,21 @@
 package main
 
 type manifest struct {
-	SchemaVersion        string    `json:"schema_version"`
-	ID                   string    `json:"id"`
-	Title                string    `json:"title"`
-	GeneratedDoc         string    `json:"generated_doc"`
-	Workflow             string    `json:"workflow"`
-	EvidenceArtifact     string    `json:"evidence_artifact"`
-	EvidenceTool         string    `json:"evidence_tool"`
-	BenchmarkCommand     string    `json:"benchmark_command"`
-	LocalPressureCommand string    `json:"local_pressure_command"`
-	RaceCommand          string    `json:"race_command"`
-	PprofCommands        []string  `json:"pprof_commands"`
-	Surfaces             []surface `json:"surfaces"`
-	Assertions           []string  `json:"assertions"`
-	Loop                 loopSpec  `json:"loop"`
+	SchemaVersion         string    `json:"schema_version"`
+	ID                    string    `json:"id"`
+	Title                 string    `json:"title"`
+	GeneratedDoc          string    `json:"generated_doc"`
+	Workflow              string    `json:"workflow"`
+	EvidenceArtifact      string    `json:"evidence_artifact"`
+	EvidenceTool          string    `json:"evidence_tool"`
+	BenchmarkCommand      string    `json:"benchmark_command"`
+	LocalPressureCommand  string    `json:"local_pressure_command"`
+	ManualPressureCommand string    `json:"manual_pressure_command"`
+	RaceCommand           string    `json:"race_command"`
+	PprofCommands         []string  `json:"pprof_commands"`
+	Surfaces              []surface `json:"surfaces"`
+	Assertions            []string  `json:"assertions"`
+	Loop                  loopSpec  `json:"loop"`
 }
 
 type surface struct {

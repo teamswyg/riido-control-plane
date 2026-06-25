@@ -33,6 +33,14 @@ func TestControlPlanePerformanceRequiresLoopbackPprof(t *testing.T) {
 	}
 }
 
+func TestControlPlanePerformanceRequiresManualPressure(t *testing.T) {
+	m := loadManifestForTest(t)
+	m.ManualPressureCommand = m.LocalPressureCommand
+	if err := verifyCommands(m); err == nil {
+		t.Fatal("expected missing manual high-concurrency pressure command to fail")
+	}
+}
+
 func loadManifestForTest(t *testing.T) manifest {
 	t.Helper()
 	var m manifest

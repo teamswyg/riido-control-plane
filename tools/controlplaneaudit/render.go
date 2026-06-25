@@ -27,6 +27,7 @@ func renderCommands(b *strings.Builder, m manifest) {
 	b.WriteString("## Commands\n\n")
 	fmt.Fprintf(b, "- benchmark: `%s`\n", m.BenchmarkCommand)
 	fmt.Fprintf(b, "- local pressure: `%s`\n", m.LocalPressureCommand)
+	fmt.Fprintf(b, "- manual pressure: `%s`\n", m.ManualPressureCommand)
 	fmt.Fprintf(b, "- race/concurrency: `%s`\n", m.RaceCommand)
 	for _, command := range m.PprofCommands {
 		fmt.Fprintf(b, "- pprof: `%s`\n", command)

@@ -29,9 +29,10 @@ func verifyAll(root string, m manifest) error {
 
 func verifyCommands(m manifest) error {
 	required := map[string]string{
-		m.BenchmarkCommand:     "-benchmem",
-		m.LocalPressureCommand: "go run ./tools/controlplanepressure",
-		m.RaceCommand:          "go test -race",
+		m.BenchmarkCommand:      "-benchmem",
+		m.LocalPressureCommand:  "go run ./tools/controlplanepressure",
+		m.ManualPressureCommand: "-concurrency 1,8,32,128",
+		m.RaceCommand:           "go test -race",
 	}
 	for command, needle := range required {
 		if !strings.Contains(command, needle) {

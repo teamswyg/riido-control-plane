@@ -8,6 +8,7 @@
   "evidence_tool": "tools/controlplaneaudit",
   "benchmark_command": "go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1",
   "local_pressure_command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json",
+  "manual_pressure_command": "go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -evidence-out out/control-plane-local-pressure-manual.json",
   "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1",
   "pprof_commands": [
     "go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30",

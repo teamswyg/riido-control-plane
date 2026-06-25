@@ -26,6 +26,14 @@ func TestControlPlaneHighTrafficAuditRejectsUnsafePprof(t *testing.T) {
 	}
 }
 
+func TestControlPlaneHighTrafficAuditRequiresManualPressure(t *testing.T) {
+	m := loadManifestForTest(t)
+	m.ManualPressureCommand = m.LocalPressureCommand
+	if err := verifyCommands(m); err == nil {
+		t.Fatal("expected missing manual high-concurrency pressure command to fail")
+	}
+}
+
 func TestControlPlaneHighTrafficAuditRejectsMissingPattern(t *testing.T) {
 	m := loadManifestForTest(t)
 	m.Surfaces[0].Patterns = []string{"definitely_missing_hot_path_marker"}
