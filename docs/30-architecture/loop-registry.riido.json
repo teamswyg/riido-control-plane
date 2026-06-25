@@ -582,7 +582,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ac4b0fd7fb7b43f4eb60be2568f692ce3be3ee5d703a11ec52d319b4fbb2fb89"
+      "semantic_hash": "c66498767ce8acd914034a4a326c72e250b5782b0bcb5d3351ec57bb745378ed"
     },
     {
       "id": "harness_promotion_must_run_after_failure",

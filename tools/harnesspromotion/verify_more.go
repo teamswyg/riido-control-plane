@@ -19,6 +19,13 @@ func verifySource(root string, source promotionSource) error {
 	if err != nil {
 		return err
 	}
+	if err := verifySourceWorkflow(text, source); err != nil {
+		return err
+	}
+	return nil
+}
+
+func verifySourceWorkflow(text string, source promotionSource) error {
 	required := []string{
 		"./tools/harnesspromotion",
 		"-summary " + source.SummaryPath,
@@ -30,6 +37,12 @@ func verifySource(root string, source promotionSource) error {
 		if !strings.Contains(text, needle) {
 			return fmt.Errorf("source %s workflow missing %q", source.ID, needle)
 		}
+	}
+	if !workflowHasAlwaysStep(text, "./tools/harnesspromotion", "-summary "+source.SummaryPath, "-candidate-out "+source.CandidatePath) {
+		return fmt.Errorf("source %s promotion step must run with if: always()", source.ID)
+	}
+	if !workflowHasAlwaysStep(text, "actions/upload-artifact", "name: "+source.CandidateArtifact, "path: "+source.CandidatePath, "if-no-files-found: error") {
+		return fmt.Errorf("source %s candidate artifact upload must run with if: always()", source.ID)
 	}
 	return nil
 }
