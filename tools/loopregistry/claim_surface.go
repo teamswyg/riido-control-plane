@@ -27,6 +27,7 @@ func claimSurfaceFor(
 		GeneratedDocs:    sortedCopy(claim.GeneratedDoc),
 		CoversObserves:   sortedCopy(claim.CoversObserves),
 		CoversVerifies:   sortedCopy(claim.CoversVerifies),
+		CoversFails:      sortedCopy(claim.CoversFails),
 		Verifiers:        sortedCopy(claim.Verifiers),
 		VerifierCommands: []string{},
 		EvidenceChainIDs: sortedCopy(chains[claim.ID]),

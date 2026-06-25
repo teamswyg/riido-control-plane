@@ -6,6 +6,7 @@ type claimBinding struct {
 	Loop           string   `json:"loop"`
 	CoversObserves []string `json:"covers_observes,omitempty"`
 	CoversVerifies []string `json:"covers_verifies,omitempty"`
+	CoversFails    []string `json:"covers_fails_when,omitempty"`
 	Files          []string `json:"files"`
 	Verifiers      []string `json:"verifiers"`
 	GeneratedDoc   []string `json:"generated_docs"`
@@ -67,6 +68,7 @@ type claimSurface struct {
 	GeneratedDocs    []string `json:"generated_docs"`
 	CoversObserves   []string `json:"covers_observes"`
 	CoversVerifies   []string `json:"covers_verifies"`
+	CoversFails      []string `json:"covers_fails_when"`
 	Verifiers        []string `json:"verifiers"`
 	VerifierCommands []string `json:"verifier_commands"`
 	EvidenceChainIDs []string `json:"evidence_chain_ids"`
