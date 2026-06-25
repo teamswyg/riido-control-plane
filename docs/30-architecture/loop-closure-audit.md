@@ -8,6 +8,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 - requirements: `4`
 - checks: `21`
+- residual gaps: `2`
 - evidence artifact: `loop-closure-audit-evidence`
 - workflow: `.github/workflows/loop-closure-audit.yml`
 
@@ -23,6 +24,13 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 | `meaning_bound_changes_fail_without_claim_evidence` | `5` | Claim-bound code, tests, docs, and reasoning must co-change so agents cannot merge semantic drift after skipping documents. |
 | `harness_failures_promote_to_closed_loop` | `5` | Harnesses increase exploration space, and failures must become closed-loop candidates instead of isolated artifacts. |
 | `reasoning_graph_connects_claims_to_evidence` | `7` | Observation, hypothesis, change, verifier, evidence, decision, and next-loop links must be machine-checkable. |
+
+## Residual Gaps
+
+| ID | Next Loop | Next Artifact | Next Command |
+| --- | --- | --- | --- |
+| `claim_coverage_token_completeness` | `closed_loop_candidate` | `closed-loop-candidate-intake` | `go run ./tools/loopregistry -check-doc -evidence-out out/loop-registry-evidence.json` |
+| `candidate_adoption_decision_freshness` | `closed_loop_candidate_decision` | `closed-loop-candidate-decision-evidence` | `go run ./tools/closedloopcandidatedecision -check-doc -evidence-out out/closed-loop-candidate-decision-evidence.json` |
 
 ## Loop
 

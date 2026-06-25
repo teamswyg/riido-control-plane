@@ -22,6 +22,9 @@ func verifyAll(root string, m manifest, deps dependencies) error {
 		return err
 	}
 	idx := newIndexes(deps)
+	if err := verifyResidualGaps(m.ResidualGaps, idx); err != nil {
+		return err
+	}
 	for _, req := range m.Requirements {
 		if err := verifyRequirement(root, req, idx); err != nil {
 			return err
