@@ -45,8 +45,8 @@
 | `.github/workflows/assignment-store-actor.yml` | `covered` | `1` | `1/1` | `true` | `4/4` | `0` | - |
 | `.github/workflows/aws-adapters-facade.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/ci.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
-| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `7` | `7/7` | `true` | `4/4` | `0` | - |
-| `.github/workflows/closed-loop-candidate-intake.yml` | `covered` | `6` | `6/6` | `true` | `3/3` | `0` | - |
+| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `8` | `8/8` | `true` | `5/5` | `0` | - |
+| `.github/workflows/closed-loop-candidate-intake.yml` | `covered` | `7` | `7/7` | `true` | `4/4` | `0` | - |
 | `.github/workflows/cloudwatch-emf.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/config-reference.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/container-image-contract.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |

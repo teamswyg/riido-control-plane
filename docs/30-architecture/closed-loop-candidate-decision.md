@@ -31,6 +31,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - candidate decision evidence must expose consumed candidate artifact path, source workflow, freshness window, and candidate ids
 - candidate decision records must include at least one owned seed decision for every intake source so new harness sources cannot be passive
 - candidate decision workflow path triggers must include every producer source workflow from intake
+- candidate decision PR verification must consume a performance-specific candidate fixture
 
 ## Decisions
 
