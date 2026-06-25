@@ -29,6 +29,7 @@ func TestRepairedClaimsHaveCoverageTokens(t *testing.T) {
 		"expiring_loops_must_schedule_refresh",
 		"expired_loop_evidence_must_select_refresh_commands",
 		"expired_loop_refresh_commands_must_dispatch_safe_workflows",
+		"harness_like_workflows_must_be_registered_or_excluded",
 	} {
 		t.Run(claim, func(t *testing.T) {
 			requireNoClaimCoverageGapForClaim(t, claim)

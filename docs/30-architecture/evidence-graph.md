@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `51`
 - claim refs: `50`
-- change refs: `422`
-- verifier refs: `239`
+- change refs: `423`
+- verifier refs: `240`
 - evidence refs: `127`
 
 ## Evidence Chains
@@ -41,7 +41,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `loop_evidence_source_coverage_loop` | `1` | `9` | `4` | `2` | `closed_loop_candidate` |
 | `loop_registry_graph_edge_evidence_loop` | `1` | `8` | `5` | `2` | `closed_loop_candidate` |
 | `claim_verifier_annotation_loop` | `1` | `9` | `5` | `2` | `closed_loop_candidate` |
-| `harness_workflow_coverage_loop` | `1` | `5` | `4` | `2` | `closed_loop_candidate` |
+| `harness_workflow_coverage_loop` | `1` | `6` | `5` | `2` | `closed_loop_candidate` |
 | `deleted_agent_thread_retention_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `thread_history_user_followup_retention_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
