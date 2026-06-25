@@ -249,6 +249,31 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "claim_impact_changed_files_evidence_loop",
+      "observation": "Loop registry impact evidence exposed changed_file_count but not the actual changed repository paths, forcing agents and reviewers to rerun git diff before understanding PR impact scope.",
+      "hypothesis": "Publishing a sorted changed_files list in the impact evidence makes the impact verifier output self-contained and lets downstream agents infer semantic scope from evidence alone.",
+      "claims": ["claim_impact_evidence_must_expose_changed_files"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/impact_changed_files.go"},
+        {"kind": "tool", "path": "tools/loopregistry/impact.go"},
+        {"kind": "tool", "path": "tools/loopregistry/impact_types.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_changed_files_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/impact_changed_files_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Impact evidence now includes changed_files alongside changed_file_count, so PR impact scope is executable evidence rather than an implicit git-diff side channel.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "claim_surface_evidence_loop",
       "observation": "The loop registry could reject semantic drift internally while its evidence artifact did not show each claim's code, test, manifest, generated doc, verifier, target command, and evidence-chain surface to downstream agents.",
       "hypothesis": "Publishing per-claim surface evidence with target verifier commands and evidence graph chain ids, then rejecting manifest-only claims without code or test paths, lets agents infer the required co-change, QA, and reasoning scope from machine evidence instead of relying on narrative docs or memory.",
