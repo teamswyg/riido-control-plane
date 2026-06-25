@@ -10,11 +10,11 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `47`
-- claim refs: `46`
-- change refs: `311`
-- verifier refs: `182`
-- evidence refs: `97`
+- chains: `48`
+- claim refs: `47`
+- change refs: `319`
+- verifier refs: `189`
+- evidence refs: `99`
 
 ## Evidence Chains
 
@@ -45,6 +45,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `ai_thread_history_conversation_grouping_loop` | `1` | `6` | `4` | `2` | `ai_thread_history` |
 | `ai_thread_history_run_identity_ordering_loop` | `1` | `8` | `5` | `2` | `ai_thread_history` |
+| `stop_reassign_thread_consistency_loop` | `1` | `8` | `7` | `2` | `ai_thread_history` |
 | `loop_evidence_expiry_loop` | `1` | `9` | `4` | `2` | `closed_loop_candidate` |
 | `closed_loop_candidate_intake_loop` | `1` | `3` | `2` | `1` | `closed_loop_candidate_intake` |
 | `expiring_loop_refresh_scope_loop` | `1` | `5` | `4` | `2` | `closed_loop_candidate` |
