@@ -985,7 +985,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b76bf6fab058aeeb2731e5eb3600399f56ade8989572f097733c895ae13fd111"
+      "semantic_hash": "a471b44d5c9e6a34d92e984fc5b01cae534848cb8679b69d8c3539636bad5ba5"
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
@@ -1022,7 +1022,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f777c403c60b5aef7964c0ac0eef1bd09f94eec0ac94907fc67e24acf3286c05"
+      "semantic_hash": "543b3b63ab578919a25338f7d4532a7eaf326cc7240842f0111f31574da04269"
     },
     {
       "id": "claim_meaning_changes_require_reasoning_chain",
@@ -1072,7 +1072,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "6ffed19f53274f08b1e1270fe2709095607ffac57c08cbec7d45c22c8639ef90"
+      "semantic_hash": "46e2fc378f10aa01b6817970e51e2452469087eddcf346e94159a4343671bc77"
     },
     {
       "id": "claim_bound_paths_must_trigger_loop_registry",
@@ -1094,7 +1094,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "99015d27ca2eadd3afc408039466d4c1f847ce4fea41abae8068da100ea1f5f5"
+      "semantic_hash": "9e05da6f5fb38a39b39735241e58f7a85c0a1f5ef4ae3ab2d3850aa9819b0e6e"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -1376,7 +1376,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "002c7ecdaaafcc567605f853ef52de210e45833ca11ba48cf00ce9d90ee2ba32"
+      "semantic_hash": "5255ad8e2f8f3e5b6bd94523977046981a35907a5c4164a9f61fec30c4965bd4"
     },
     {
       "id": "loop_registry_evidence_must_expose_refresh_plans",
@@ -1443,7 +1443,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2be8f6c2bcd2bfe298f633610d4eb07326d858fa0d06ccb2d61b26efd5898827"
+      "semantic_hash": "e3baa269a8b0e89effba699e44482aefcba9a5d41f03a85d2342e46407426d54"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
