@@ -9,13 +9,14 @@ func TestClientVisibleTaskThreadTextLocalizesSystemMessages(t *testing.T) {
 		"agent work was stopped by user request":               clientMessageTaskStopped,
 		"agent work was stopped by task participant removal":   clientMessageTaskStopped,
 		"agent work was stopped by agent delete":               clientMessageAgentDeleted,
+		"context canceled":                                     clientMessageTaskStopped,
 		"agent is busy; task assignment was queued":            clientMessageAgentBusyQueued,
 		"agent is busy; task comment was queued":               clientMessageAgentBusyQueued,
 		"agent is busy; task thread message was queued":        clientMessageAgentBusyQueued,
 		"agent progress updated":                               clientMessageTaskRunning,
 		"agent work failed":                                    clientMessageTaskFailed,
 		"agent assignment timed out after runtime went silent": clientMessageTaskTimeout,
-		recoveryBlocked: clientMessageRecoveryBlocked,
+		recoveryBlocked:                                        clientMessageRecoveryBlocked,
 	}
 	for input, want := range cases {
 		if got := clientVisibleTaskThreadText(input); got != want {
