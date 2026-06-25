@@ -17,6 +17,7 @@ func verifyWorkflow(root string, m manifest) error {
 		"schedule:",
 		"gh run download",
 		"live-candidate-files.txt",
+		"RIIDO_HARNESS_PROMOTION_NOW=2026-06-24T12:00:00Z",
 		"go run ./tools/harnesspromotion",
 		"go run ./tools/closedloopcandidateintake",
 		"-candidate-in",
@@ -34,5 +35,5 @@ func verifyWorkflow(root string, m manifest) error {
 			return fmt.Errorf("candidate intake workflow missing live artifact %q", source.CandidateArtifact)
 		}
 	}
-	return nil
+	return verifyWorkflowPathTriggers(text, m)
 }

@@ -427,7 +427,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ac7aeaa7873b1d029c1343cab950e8a55063228a188588bbf7b1c2d50fde2f4a"
+      "semantic_hash": "10f1a52dbbcd00f8613eda0cd9c8ee0f5df36a06381c8674ecb927ec992dfa59"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -486,7 +486,7 @@
         "docs/30-architecture/closed-loop-candidate-decision.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "fe549fd473468f7a106a36a9f935147fcbf89a9ad3e73b7c927122cca4931dd0"
+      "semantic_hash": "fe6cc6c9acf9130c87fc000d15c3e755ac475f00e95e2d815bf28f4e1dbaac6d"
     },
     {
       "id": "closed_loop_candidates_must_carry_promotion_edge",
@@ -528,7 +528,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c0b4f2dfdf82a36faa93baf69b1e8703bc0aaf0bb996b4dbdcb341e72ed4be11"
+      "semantic_hash": "5503ac90619abe19a93960f63df7d0893ea01f870dead016a46f48e3579a10a1"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -583,7 +583,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0d3f632ade43fe54ce7f6ecba49585a4e7b92f6c066992508daedb70891d67d2"
+      "semantic_hash": "8457c5244a4c1b0c18d82018d47636b418aabbb137a169b2051800e7cb362445"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -706,7 +706,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ad0c11d65bc2baf905c14348f70024faae002dcdf0ae2edd7a84ab11ecb9e404"
+      "semantic_hash": "740e12692b7f12cb5151cd9ed85894a6ae66e8218d2a8967519f900f01f3102f"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -859,7 +859,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c72907282829f6b619142f03161f2d15ef37894ff776c90046873b14f28af788"
+      "semantic_hash": "14c154935a18265614e8dbc4631a14bed346fcf57249884a628d641f3bb114da"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -883,7 +883,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a0e7464af8b835e42fd94bdb65641d5afb4657d3320d22e8a7c354b8ca4ac6d2"
+      "semantic_hash": "ff896bbdaa2ad9dfb54c81802a6bb68f7be2016afdbfbf8e05f57499ed828997"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -903,7 +903,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a3bcf7e9dfd56a870de844bb99b8bb4221f1be8fb9c02e13a3f5b116d13e67c4"
+      "semantic_hash": "83b3dc9196812506860d8e19a60f04d047e742d25efe1733a780db73ebbc8943"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -988,32 +988,37 @@
         "docs/30-architecture/closed-loop-candidate-intake.md",
         "docs/30-architecture/closed-loop-candidate-decision.md"
       ],
-      "semantic_hash": "f8046a39ad1417c3b862e6c48fe1a67eb39696617655f6d6f68c1016bc5e2a0a"
+      "semantic_hash": "b991c3e03a3fc91e8b2540097c84942ade8ae20c50a109d938a63039c921f156"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
-      "statement": "Closed-loop candidate intake verification must consume a candidate artifact before producing intake evidence, so harness failures cannot become passive manifest-only reports.",
+      "statement": "Closed-loop candidate intake verification must consume a candidate artifact before producing intake evidence, and its workflow must trigger when linked producer, loop registry, or evidence graph manifests change, so harness failures cannot become passive manifest-only reports.",
       "loop": "closed_loop_candidate_intake",
       "files": [
         "docs/30-architecture/closed-loop-candidate-intake.riido.json",
+        ".github/workflows/closed-loop-candidate-intake.yml",
         "tools/closedloopcandidateintake/candidate.go",
         "tools/closedloopcandidateintake/errors.go",
         "tools/closedloopcandidateintake/run.go",
+        "tools/closedloopcandidateintake/workflow.go",
+        "tools/closedloopcandidateintake/workflow_path_triggers.go",
         "tools/closedloopcandidateintake/main_test.go",
-        "tools/closedloopcandidateintake/candidate_test.go"
+        "tools/closedloopcandidateintake/candidate_test.go",
+        "tools/closedloopcandidateintake/workflow_path_triggers_test.go"
       ],
       "verifiers": [
         "TestClosedLoopCandidateIntakeManifestVerifies",
         "TestClosedLoopCandidateIntakeVerifyAlias",
         "TestClosedLoopCandidateIntakeRequiresCandidateInput",
-        "TestCandidateFixtureIntakeVerifiesGeneratedCandidate"
+        "TestCandidateFixtureIntakeVerifiesGeneratedCandidate",
+        "TestCandidateIntakeRequiresSemanticWorkflowPathTriggers"
       ],
       "generated_docs": [
         "docs/30-architecture/closed-loop-candidate-intake.md",
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "72a38909879b30f7f489d885306dc1eeaf7bcf92d4e2e6f27e97e7fa0b138310"
+      "semantic_hash": "999eefb8ad94cd79060dfd2ff55bc4ee35fab8db3224481fbdc751a06278fb23"
     },
     {
       "id": "expiring_loops_must_schedule_refresh",
@@ -1060,7 +1065,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f79ffb0f08986aa5d267e1bd265dff89088d2020e05cafa1fe047cb82cf56c33"
+      "semantic_hash": "aa3000baae75d9d55a5af0124e5772d6c705466e778b73166917dc3c11a5de42"
     },
     {
       "id": "loop_registry_evidence_must_expose_refresh_plans",
@@ -1128,30 +1133,36 @@
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
-      "statement": "Closed-loop candidate decision verification must consume a candidate artifact, and decision records must match that artifact exactly: every candidate needs one decision, and every decision must point to a current candidate.",
+      "statement": "Closed-loop candidate decision verification must consume a candidate artifact, decision records must match that artifact exactly, and its workflow must trigger when linked intake, producer, or loop registry manifests change: every candidate needs one decision, and every decision must point to a current candidate.",
       "loop": "closed_loop_candidate_decision",
       "files": [
         "docs/30-architecture/closed-loop-candidate-decision.riido.json",
+        ".github/workflows/closed-loop-candidate-decision.yml",
         "tools/closedloopcandidatedecision/candidate.go",
         "tools/closedloopcandidatedecision/errors.go",
+        "tools/closedloopcandidatedecision/linked_manifests.go",
         "tools/closedloopcandidatedecision/run.go",
+        "tools/closedloopcandidatedecision/workflow.go",
+        "tools/closedloopcandidatedecision/workflow_path_triggers.go",
         "tools/closedloopcandidatedecision/candidate_input_test.go",
         "tools/closedloopcandidatedecision/candidate_orphan_test.go",
         "tools/closedloopcandidatedecision/candidate_test.go",
-        "tools/closedloopcandidatedecision/verify_alias_test.go"
+        "tools/closedloopcandidatedecision/verify_alias_test.go",
+        "tools/closedloopcandidatedecision/workflow_path_triggers_test.go"
       ],
       "verifiers": [
         "TestCandidateDecisionCoversGeneratedCandidate",
         "TestCandidateDecisionRejectsOrphanDecision",
         "TestCandidateDecisionVerifyRequiresCandidateInput",
-        "TestCandidateDecisionVerifyAlias"
+        "TestCandidateDecisionVerifyAlias",
+        "TestCandidateDecisionRequiresSemanticWorkflowPathTriggers"
       ],
       "generated_docs": [
         "docs/30-architecture/closed-loop-candidate-decision.md",
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "04de7a802c8908cab101e9b6604e44c76064799d6020704c6a1a5af7fef8bb5c"
+      "semantic_hash": "81597b8aaea5272fec313fff28a1271714776ce3e325c305656946773e7fbe5f"
     },
     {
       "id": "candidate_decision_next_artifact_must_be_required",
@@ -1176,7 +1187,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9bdbb2724691cb95a9f88225b5ca966b27090ce49b710ef6a691a5c3700065dc"
+      "semantic_hash": "a1f4c524f5fae59c2d33e51037a020a03c79bf91909ed9c13aaea18062d3cd51"
     },
     {
       "id": "candidate_decision_evidence_must_expose_next_command",
@@ -1199,7 +1210,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2b822755ffd361891ac8b19b9af1d9f0371458f0c04ead9a78271e4a7d6af1de"
+      "semantic_hash": "2b891b04518b251554807091cdeb686d66c9fa0f7b8d6b1184241f87b12b4a8f"
     }
   ],
   "evidence_graph": [
