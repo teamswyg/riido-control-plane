@@ -14,6 +14,7 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 
 - benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
 - local pressure: `go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json`
+- manual pressure: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -evidence-out out/control-plane-local-pressure-manual.json`
 - race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1`
 - pprof: `go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30`
 - pprof: `go tool pprof -top http://127.0.0.1:6060/debug/pprof/heap`
