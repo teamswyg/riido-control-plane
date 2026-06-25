@@ -9,30 +9,30 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - loops: `7`
 - harness loops: `2`
 - closed loops: `5`
-- claim bindings: `47`
-- evidence graph edges: `53`
+- claim bindings: `48`
+- evidence graph edges: `54`
 - max evidence expiry hours: `168`
 
 ## Loops
 
-| Loop | Kind | Expires | Refresh Minutes | Refresh Workflow | Promotion Evidence | Evidence |
-| --- | --- | ---: | ---: | --- | --- | ---: |
-| `ai_thread_history` | `closed_loop` | `24` | `1440` | `.github/workflows/loop-registry.yml` | `` | `2` |
-| `provider_acceptance_harness` | `harness` | `24` | `1440` | `.github/workflows/ai-agent-client-testnet-smoke.yml` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `2` |
-| `ai_agent_load_harness` | `harness` | `24` | `1440` | `.github/workflows/ai-agent-client-testnet-load.yml` | `ai-agent-client-testnet-load-closed-loop-candidates` | `3` |
-| `closed_loop_candidate` | `closed_loop` | `24` | `1440` | `.github/workflows/loop-registry.yml` | `` | `4` |
-| `closed_loop_candidate_intake` | `closed_loop` | `24` | `1440` | `.github/workflows/closed-loop-candidate-intake.yml` | `` | `2` |
-| `closed_loop_candidate_decision` | `closed_loop` | `24` | `1440` | `.github/workflows/closed-loop-candidate-decision.yml` | `` | `2` |
-| `open_decision_queue` | `closed_loop` | `168` | `1440` | `.github/workflows/open-questions.yml` | `` | `2` |
+| Loop | Kind | Providers | Expires | Refresh Minutes | Refresh Workflow | Promotion Evidence | Evidence |
+| --- | --- | --- | ---: | ---: | --- | --- | ---: |
+| `ai_thread_history` | `closed_loop` | `` | `24` | `1440` | `.github/workflows/loop-registry.yml` | `` | `2` |
+| `provider_acceptance_harness` | `harness` | `codex, openclaw` | `24` | `1440` | `.github/workflows/ai-agent-client-testnet-smoke.yml` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `2` |
+| `ai_agent_load_harness` | `harness` | `` | `24` | `1440` | `.github/workflows/ai-agent-client-testnet-load.yml` | `ai-agent-client-testnet-load-closed-loop-candidates` | `3` |
+| `closed_loop_candidate` | `closed_loop` | `` | `24` | `1440` | `.github/workflows/loop-registry.yml` | `` | `4` |
+| `closed_loop_candidate_intake` | `closed_loop` | `` | `24` | `1440` | `.github/workflows/closed-loop-candidate-intake.yml` | `` | `2` |
+| `closed_loop_candidate_decision` | `closed_loop` | `` | `24` | `1440` | `.github/workflows/closed-loop-candidate-decision.yml` | `` | `2` |
+| `open_decision_queue` | `closed_loop` | `` | `168` | `1440` | `.github/workflows/open-questions.yml` | `` | `2` |
 
 ## Refresh Plans
 
 | Loop | Workflow | Cadence | Expires | Command | Claims | Verifiers | Next | Evidence |
 | --- | --- | ---: | ---: | --- | ---: | ---: | ---: | ---: |
 | `ai_thread_history` | `loop-registry.yml` | `1440` | `24` | `gh workflow run loop-registry.yml --ref main` | `7` | `9` | `10` | `1` |
-| `provider_acceptance_harness` | `ai-agent-client-testnet-smoke.yml` | `1440` | `24` | `gh workflow run ai-agent-client-testnet-smoke.yml --ref main` | `2` | `3` | `4` | `2` |
+| `provider_acceptance_harness` | `ai-agent-client-testnet-smoke.yml` | `1440` | `24` | `gh workflow run ai-agent-client-testnet-smoke.yml --ref main` | `2` | `4` | `5` | `2` |
 | `ai_agent_load_harness` | `ai-agent-client-testnet-load.yml` | `1440` | `24` | `gh workflow run ai-agent-client-testnet-load.yml --ref main` | `1` | `3` | `4` | `3` |
-| `closed_loop_candidate` | `loop-registry.yml` | `1440` | `24` | `gh workflow run loop-registry.yml --ref main` | `32` | `46` | `47` | `4` |
+| `closed_loop_candidate` | `loop-registry.yml` | `1440` | `24` | `gh workflow run loop-registry.yml --ref main` | `33` | `47` | `48` | `4` |
 | `closed_loop_candidate_intake` | `closed-loop-candidate-intake.yml` | `1440` | `24` | `gh workflow run closed-loop-candidate-intake.yml --ref main` | `1` | `1` | `2` | `1` |
 | `closed_loop_candidate_decision` | `closed-loop-candidate-decision.yml` | `1440` | `24` | `gh workflow run closed-loop-candidate-decision.yml --ref main` | `3` | `3` | `4` | `1` |
 | `open_decision_queue` | `open-questions.yml` | `1440` | `168` | `gh workflow run open-questions.yml --ref main` | `1` | `1` | `2` | `1` |
@@ -48,16 +48,16 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `thread_history_v3_must_preserve_run_identity_and_message_order` | `ai_thread_history` | `7` | `2` | `a1f46bad310e` |
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `ai_thread_history` | `7` | `5` | `febe48b3ee92` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `856d5ff20c30` |
-| `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `3` | `2` | `da1de8237916` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `9c4789e33b0e` |
+| `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `5aa28cc9c7a1` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `142de3132e48` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `6` | `4` | `a394d2fa717e` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `16` | `3` | `9130bfbf47a2` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `b91f6486342e` |
-| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `c9665fa7ab85` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `10f50558669e` |
+| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `58f6e20d9d3e` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `371bebdb7588` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `5d4ee4e0cf07` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `83d5088ef677` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `63` | `25` | `07530b8f1a57` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `f00468513901` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `98a3f001fe56` |
 | `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `af2fab895ef6` |
 | `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `759ffeb80d39` |
 | `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `115a5da29c24` |
@@ -68,21 +68,22 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `claim_bound_file_changes_require_reasoning_chain` | `closed_loop_candidate` | `5` | `3` | `060866720ee0` |
 | `claim_impact_evidence_must_expose_changed_files` | `closed_loop_candidate` | `4` | `1` | `284bbb26f598` |
 | `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `d63ab6b939ef` |
+| `semantic_hash_metadata_must_not_affect_claim_meaning` | `closed_loop_candidate` | `5` | `2` | `ded70199102f` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `9df084223f2f` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `fe6e1613477d` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `b68ff8c5d986` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `4ff072d729d3` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `42bf8b781f06` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `cdfffaade4e0` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `a6b375138deb` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `12` | `2` | `73568a33d146` |
-| `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `13` | `6` | `90658a5f8285` |
+| `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `13` | `6` | `b9bd754e1173` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `df38943a642c` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `138715ab15c3` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `ab5c2b716ae3` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `10` | `5` | `7cc025e32ac5` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `68d2b171fd9c` |
 | `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `60c94030fd40` |
-| `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `13` | `4` | `71e2b458dd47` |
-| `expired_loop_evidence_must_select_refresh_commands` | `closed_loop_candidate` | `12` | `3` | `e07078e11aeb` |
+| `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `13` | `4` | `c2b0eb3d83b1` |
+| `expired_loop_evidence_must_select_refresh_commands` | `closed_loop_candidate` | `12` | `3` | `ad2d854a3f72` |
 | `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `closed_loop_candidate` | `13` | `6` | `a543bb15954b` |
-| `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `6` | `3` | `40d54abad703` |
+| `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `6` | `3` | `313224bb56d9` |
 | `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `c7233b70705d` |
 | `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `13` | `5` | `9b0fed1fe340` |
 | `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `9b375896b125` |
@@ -100,7 +101,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `thread_history_v3_must_preserve_run_identity_and_message_order` | `5` | `2` | `0` | `1` | `3` | `2` | `2` | `0` | `2` | `1` | `1` |
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `3` | `4` | `0` | `1` | `4` | `3` | `2` | `0` | `5` | `1` | `1` |
 | `expired_harness_evidence_must_not_promote_candidates` | `12` | `3` | `2` | `3` | `0` | `0` | `1` | `1` | `3` | `2` | `1` |
-| `provider_acceptance_summary_must_cover_declared_observations` | `0` | `1` | `2` | `2` | `3` | `3` | `2` | `1` | `2` | `1` | `1` |
+| `provider_acceptance_summary_must_cover_declared_observations` | `1` | `2` | `2` | `2` | `3` | `3` | `2` | `1` | `6` | `2` | `1` |
 | `load_harness_failures_must_promote_candidates` | `2` | `2` | `4` | `3` | `4` | `4` | `4` | `3` | `3` | `3` | `1` |
 | `harness_promotion_must_run_after_failure` | `2` | `2` | `2` | `2` | `1` | `0` | `1` | `0` | `4` | `1` | `1` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `10` | `3` | `3` | `4` | `1` | `0` | `0` | `0` | `3` | `3` | `1` |
@@ -120,6 +121,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `claim_bound_file_changes_require_reasoning_chain` | `3` | `2` | `0` | `2` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
 | `claim_impact_evidence_must_expose_changed_files` | `3` | `1` | `0` | `2` | `0` | `0` | `0` | `0` | `1` | `1` | `1` |
 | `pre_commit_must_run_claim_binding_impact` | `3` | `2` | `3` | `3` | `0` | `1` | `0` | `0` | `4` | `1` | `1` |
+| `semantic_hash_metadata_must_not_affect_claim_meaning` | `4` | `1` | `0` | `1` | `0` | `0` | `0` | `0` | `2` | `1` | `1` |
 | `claim_bound_paths_must_trigger_loop_registry` | `3` | `1` | `1` | `1` | `0` | `0` | `0` | `0` | `4` | `1` | `1` |
 | `evidence_graph_must_cover_loop_registry_claims` | `5` | `1` | `1` | `2` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
 | `evidence_graph_refs_must_trigger_evidence_workflow` | `3` | `1` | `2` | `2` | `0` | `0` | `0` | `0` | `4` | `1` | `1` |
@@ -195,6 +197,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 - `closed_loop_candidate` --enforces--> `loop_observation_tokens_must_be_claim_covered`
 - `closed_loop_candidate` --enforces--> `loop_failure_conditions_must_be_claim_covered`
 - `closed_loop_candidate` --enforces--> `loop_evidence_sources_must_be_claim_covered`
+- `closed_loop_candidate` --enforces--> `semantic_hash_metadata_must_not_affect_claim_meaning`
 - `closed_loop_candidate` --enforces--> `closed_loop_candidate_consumers_must_reject_expired_candidates`
 
 ## Evidence Loop

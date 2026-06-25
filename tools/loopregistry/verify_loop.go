@@ -54,6 +54,9 @@ func verifyLoop(root string, m manifest, loop loopRecord) error {
 		if err := verifyHarnessTargets(m, loop); err != nil {
 			return err
 		}
+		if err := verifyHarnessProviderCoverage(loop); err != nil {
+			return err
+		}
 	}
 	return verifyLoopSchedule(root, m, loop)
 }

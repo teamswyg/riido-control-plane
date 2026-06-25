@@ -65,17 +65,20 @@
     },
     {
       "id": "provider_acceptance_observation_coverage_loop",
-      "observation": "The provider acceptance harness declared codex_provider_qa, openclaw_provider_qa, and daemon_runtime_snapshot observations, but the redacted smoke summary could omit those observations while still reporting generic contract coverage.",
-      "hypothesis": "Binding those observations to workflow source phrases and summary claims lets agents see which provider/runtime paths were verified without reading raw live output or exporting secrets.",
+      "observation": "The provider acceptance harness declared codex_provider_qa, openclaw_provider_qa, and daemon_runtime_snapshot observations, but the redacted smoke summary or loop manifest could omit structured provider coverage while still reporting generic contract coverage.",
+      "hypothesis": "Binding those observations to workflow source phrases, summary claims, and machine-readable provider coverage lets agents see which provider/runtime paths were verified without reading raw live output or exporting secrets.",
       "claims": ["provider_acceptance_summary_must_cover_declared_observations"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-smoke.yml"},
         {"kind": "manifest", "path": "docs/30-architecture/live-workflow-redaction.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
-        {"kind": "test", "path": "tools/liveworkflowevidence/main_claims_test.go"}
+        {"kind": "test", "path": "tools/liveworkflowevidence/main_claims_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry/verify_loop_provider.go"},
+        {"kind": "test", "path": "tools/loopregistry/verify_loop_provider_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/liveworkflowevidence/main_claims_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/verify_loop_provider_test.go"},
         {"kind": "tool", "path": "tools/liveworkflowevidence"},
         {"kind": "tool", "path": "tools/loopregistry"}
       ],
@@ -84,8 +87,32 @@
         {"kind": "artifact", "path": "live-workflow-redaction-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Provider acceptance evidence now exposes codex, OpenClaw, and daemon runtime snapshot claim coverage in the safe redacted summary; missing workflow source coverage fails before merge.",
+      "decision": "Provider acceptance evidence now exposes codex, OpenClaw, and daemon runtime snapshot claim coverage in the safe redacted summary, while loop-registry evidence exposes codex/openclaw provider coverage and rejects observation/provider drift before merge.",
       "next_loop": "provider_acceptance_harness"
+    },
+    {
+      "id": "semantic_hash_metadata_normalization_loop",
+      "observation": "Claim semantic hashes can become self-referential if semantic_hash metadata values inside bound generated files are treated as semantic input.",
+      "hypothesis": "Normalizing semantic_hash metadata values before hashing preserves real statement, policy, verifier, and bound-file meaning changes while preventing evidence refresh metadata from becoming its own meaning change.",
+      "claims": ["semantic_hash_metadata_must_not_affect_claim_meaning"],
+      "changes": [
+        {"kind": "tool", "path": "tools/loopregistry/hash.go"},
+        {"kind": "tool", "path": "tools/loopregistry/hash_more.go"},
+        {"kind": "tool", "path": "tools/loopregistry/hash_normalized_text.go"},
+        {"kind": "tool", "path": "tools/loopregistry/io.go"},
+        {"kind": "test", "path": "tools/loopregistry/hash_normalized_text_test.go"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/hash_normalized_text_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Semantic hash metadata is now hash-inert evidence metadata; claim hashes still move when semantic content or bound executable surfaces move.",
+      "next_loop": "closed_loop_candidate"
     },
     {
       "id": "load_harness_closed_loop_promotion_loop",
