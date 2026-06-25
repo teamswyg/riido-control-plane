@@ -22,6 +22,10 @@ func TestClaimBoundFileReasoningChainClaimHasCoverageTokens(t *testing.T) {
 	requireNoClaimCoverageGapForClaim(t, "claim_bound_file_changes_require_reasoning_chain")
 }
 
+func TestClaimBoundPathsTriggerClaimHasCoverageTokens(t *testing.T) {
+	requireNoClaimCoverageGapForClaim(t, "claim_bound_paths_must_trigger_loop_registry")
+}
+
 func requireNoClaimCoverageGapForLoop(t *testing.T, loop string) {
 	t.Helper()
 	_, deps := loadForTest(t)
