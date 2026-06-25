@@ -50,3 +50,12 @@ func TestHarnessPromotionClaimHasCoverageTokens(t *testing.T) {
 		}
 	}
 }
+
+func TestClaimSurfaceEvidenceClaimHasCoverageTokens(t *testing.T) {
+	_, deps := loadForTest(t)
+	for _, gap := range claimCoverageGaps(deps) {
+		if gap.ClaimID == "claim_surface_evidence_must_expose_code_test_doc_binding" {
+			t.Fatalf("claim surface evidence coverage gap remains: %+v", gap)
+		}
+	}
+}

@@ -9,7 +9,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 - requirements: `4`
 - checks: `21`
 - residual gaps: `2`
-- claim coverage gaps: `35`
+- claim coverage gaps: `34`
 - evidence artifact: `loop-closure-audit-evidence`
 - workflow: `.github/workflows/loop-closure-audit.yml`
 
@@ -45,7 +45,6 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 | `claim_impact_evidence_must_expose_changed_files` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `claim_meaning_changes_require_reasoning_chain` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `covers_observes` |
 | `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
