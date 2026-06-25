@@ -22,6 +22,7 @@ func renderSummary(b *strings.Builder, m manifest, e evidence) {
 	fmt.Fprintf(b, "- benchmarks: `%d`\n", e.BenchmarkCount)
 	fmt.Fprintf(b, "- concurrency tests: `%d`\n", e.TestCount)
 	fmt.Fprintf(b, "- optimization candidates: `%d`\n", e.CandidateCount)
+	fmt.Fprintf(b, "- assertions: `%d`\n", e.AssertionCount)
 	fmt.Fprintf(b, "- local pressure artifact: `%s`\n", m.LocalPressureArtifact)
 	fmt.Fprintf(b, "- local pressure scenarios: `%d`\n", len(m.LocalPressureScenarios))
 	fmt.Fprintf(b, "- candidate artifact: `%s`\n\n", m.CandidateArtifact)

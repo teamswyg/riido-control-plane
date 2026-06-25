@@ -8,6 +8,9 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 
 - surfaces: `12`
 - candidates: `12`
+- assertions: `7`
+- required categories: `10`
+- missing categories: `0`
 - pprof commands: `3`
 
 ## Commands

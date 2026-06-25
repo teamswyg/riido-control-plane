@@ -5,11 +5,15 @@ type evidence struct {
 	Status                string            `json:"status"`
 	SurfaceCount          int               `json:"surface_count"`
 	CandidateCount        int               `json:"candidate_count"`
+	AssertionCount        int               `json:"assertion_count"`
 	BenchmarkCommand      string            `json:"benchmark_command"`
 	LocalPressureCommand  string            `json:"local_pressure_command"`
 	ManualPressureCommand string            `json:"manual_pressure_command"`
 	RaceCommand           string            `json:"race_command"`
 	PprofCommands         []string          `json:"pprof_commands"`
+	RequiredCategories    []string          `json:"required_categories"`
+	MissingCategories     []string          `json:"missing_categories"`
+	Assertions            []string          `json:"assertions"`
 	CategoryCounts        map[string]int    `json:"category_counts"`
 	Surfaces              []surfaceEvidence `json:"surfaces"`
 }
@@ -32,17 +36,22 @@ func newEvidence(root string, m manifest) (evidence, error) {
 	if err != nil {
 		return evidence{}, err
 	}
+	counts := categoryCounts(rows)
 	return evidence{
 		SchemaVersion:         evidenceSchema,
 		Status:                "verified",
 		SurfaceCount:          len(rows),
 		CandidateCount:        len(rows),
+		AssertionCount:        len(m.Assertions),
 		BenchmarkCommand:      m.BenchmarkCommand,
 		LocalPressureCommand:  m.LocalPressureCommand,
 		ManualPressureCommand: m.ManualPressureCommand,
 		RaceCommand:           m.RaceCommand,
 		PprofCommands:         m.PprofCommands,
-		CategoryCounts:        categoryCounts(rows),
+		RequiredCategories:    append([]string(nil), m.RequiredCategories...),
+		MissingCategories:     missingCategories(m.RequiredCategories, counts),
+		Assertions:            append([]string(nil), m.Assertions...),
+		CategoryCounts:        counts,
 		Surfaces:              rows,
 	}, nil
 }
@@ -53,4 +62,14 @@ func categoryCounts(rows []surfaceEvidence) map[string]int {
 		counts[row.Category]++
 	}
 	return counts
+}
+
+func missingCategories(required []string, counts map[string]int) []string {
+	missing := []string{}
+	for _, category := range required {
+		if counts[category] == 0 {
+			missing = append(missing, category)
+		}
+	}
+	return missing
 }
