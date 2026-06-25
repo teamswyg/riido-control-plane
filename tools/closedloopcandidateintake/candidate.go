@@ -16,7 +16,7 @@ func verifyCandidateFile(root string, m manifest, path string) (verifyResult, er
 	result := verifyResult{CandidateCount: candidate.CandidateCount}
 	sourceIDs := []string{}
 	for _, item := range candidate.Candidates {
-		source, err := verifyCandidateItem(m, item)
+		source, err := verifyCandidateItem(m, candidate, item)
 		if err != nil {
 			return result, err
 		}

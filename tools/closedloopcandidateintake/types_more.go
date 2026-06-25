@@ -23,14 +23,15 @@ type candidateEvidence struct {
 }
 
 type closedLoopCandidate struct {
-	ID                    string         `json:"id"`
-	HarnessLoop           string         `json:"harness_loop"`
-	PromotionTarget       string         `json:"promotion_target"`
-	PromotionEdge         graphEdge      `json:"promotion_edge"`
-	Observation           string         `json:"observation"`
-	Hypothesis            string         `json:"hypothesis"`
-	RequiredNextArtifacts []string       `json:"required_next_artifacts"`
-	AdoptionPlan          []adoptionStep `json:"adoption_plan"`
+	ID                    string             `json:"id"`
+	SourceRef             candidateSourceRef `json:"source_ref"`
+	HarnessLoop           string             `json:"harness_loop"`
+	PromotionTarget       string             `json:"promotion_target"`
+	PromotionEdge         graphEdge          `json:"promotion_edge"`
+	Observation           string             `json:"observation"`
+	Hypothesis            string             `json:"hypothesis"`
+	RequiredNextArtifacts []string           `json:"required_next_artifacts"`
+	AdoptionPlan          []adoptionStep     `json:"adoption_plan"`
 }
 
 type graphEdge struct {

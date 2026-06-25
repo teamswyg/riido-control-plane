@@ -195,6 +195,33 @@
       "next_loop": "closed_loop_candidate_decision"
     },
     {
+      "id": "closed_loop_candidate_source_ref_loop",
+      "observation": "Closed-loop candidate artifacts exposed source freshness at the artifact envelope, but an individual candidate item could be copied without its source workflow, run, and expiry context.",
+      "hypothesis": "Embedding source_ref in each candidate and verifying it in intake and decision keeps harness evidence context attached even when agents consume candidate items without reading surrounding docs.",
+      "claims": ["closed_loop_candidates_must_carry_source_ref"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/harnesspromotion/source_ref_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/source_ref_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/source_ref_test.go"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
+      ],
+      "decision": "Candidate artifacts now carry per-candidate source_ref, and intake plus decision verification reject source_ref drift or missing source run identity.",
+      "next_loop": "closed_loop_candidate_decision"
+    },
+    {
       "id": "claim_binding_impact_loop",
       "observation": "Added business claims, changed claims, generated-doc bindings, or removed claims could change without bound code or tests changing in the same pull request.",
       "hypothesis": "Comparing the PR diff against the loop registry can force claim additions, claim meaning changes, generated-doc binding changes, and claim removals to co-change bound code or test paths, not just manifests or generated docs.",

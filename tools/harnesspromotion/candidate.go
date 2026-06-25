@@ -22,12 +22,12 @@ func candidatesForSummary(source promotionSource, summary liveSummary) []closedL
 		return nil
 	}
 	if len(summary.EvidenceClaims) == 0 {
-		return []closedLoopCandidate{newCandidate(source, "workflow", "workflow failed")}
+		return []closedLoopCandidate{newCandidate(source, summary, "workflow", "workflow failed")}
 	}
 	candidates := []closedLoopCandidate{}
 	for _, claim := range summary.EvidenceClaims {
 		if claim.Status != "verified" {
-			candidates = append(candidates, newCandidate(source, claim.ID, claim.Summary))
+			candidates = append(candidates, newCandidate(source, summary, claim.ID, claim.Summary))
 		}
 	}
 	return candidates
