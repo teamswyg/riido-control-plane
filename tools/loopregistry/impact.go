@@ -25,7 +25,12 @@ func verifyClaimImpact(
 ) (*impactEvidence, error) {
 	baseByID := claimsByID(baseClaims)
 	currentByID := claimsByID(currentClaims)
-	evidence := &impactEvidence{Enabled: true, BaseRef: baseRef, ChangedFileCount: len(changed)}
+	evidence := &impactEvidence{
+		Enabled:          true,
+		BaseRef:          baseRef,
+		ChangedFileCount: len(changed),
+		ChangedFiles:     changedFileList(changed),
+	}
 	for _, claim := range currentClaims {
 		base, ok := baseByID[claim.ID]
 		if !ok {
