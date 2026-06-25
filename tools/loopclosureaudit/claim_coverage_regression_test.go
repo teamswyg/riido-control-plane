@@ -26,6 +26,7 @@ func TestRepairedClaimsHaveCoverageTokens(t *testing.T) {
 		"evidence_graph_evidence_must_expose_full_chain",
 		"evidence_graph_must_cover_loop_registry_claims",
 		"evidence_graph_refs_must_trigger_evidence_workflow",
+		"expiring_loops_must_schedule_refresh",
 		"expired_loop_evidence_must_select_refresh_commands",
 		"expired_loop_refresh_commands_must_dispatch_safe_workflows",
 	} {

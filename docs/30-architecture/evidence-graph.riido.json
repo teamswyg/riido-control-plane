@@ -888,19 +888,21 @@
     },
     {
       "id": "expiring_loop_refresh_scope_loop",
-      "observation": "The loop registry verifier was upgraded to check every expiring loop, but the registry wording could still describe only 24h loops and mislead future agents.",
-      "hypothesis": "Promoting the refresh-scope rule to a claim and rejecting stale 24h-only wording keeps the SSOT, verifier, and generated reader aligned.",
+      "observation": "The loop registry verifier was upgraded to check every expiring loop, but the registry wording could still describe only 24h loops, or the claim could lack observe/verify/fail tokens that tell agents this is an evidence-expiry closed-loop rule.",
+      "hypothesis": "Promoting the refresh-scope rule to a claim, rejecting stale 24h-only wording, and binding the claim to evidence_expired/regression_pattern observations with verifier and failure tokens keeps the SSOT, verifier, and generated reader aligned.",
       "claims": ["expiring_loops_must_schedule_refresh"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "tool", "path": "tools/loopregistry/verify_assertions.go"},
         {"kind": "tool", "path": "tools/loopregistry/verify_schedule.go"},
         {"kind": "test", "path": "tools/loopregistry/refresh_workflow_test.go"},
-        {"kind": "test", "path": "tools/loopregistry/main_test.go"}
+        {"kind": "test", "path": "tools/loopregistry/main_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/refresh_workflow_test.go"},
         {"kind": "test", "path": "tools/loopregistry/main_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -908,7 +910,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "All expiring loops, including long-expiry queues, are now covered by scheduled refresh verification and stale 24h-only SSOT language fails.",
+      "decision": "All expiring loops, including long-expiry queues, are now covered by scheduled refresh verification, stale 24h-only SSOT language fails, and loopclosureaudit keeps the claim bound to explicit evidence-expiry observe/verify/fail tokens.",
       "next_loop": "closed_loop_candidate"
     },
     {
