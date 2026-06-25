@@ -1357,7 +1357,7 @@
     {
       "id": "loop_closure_audit_loop",
       "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed proof checks but claim coverage token gaps still needed to become closed-loop candidate artifacts.",
-      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, or claim coverage token drifts, and publish residual gap candidates plus claim coverage gap candidates with concrete claim id, loop, missing dimension fields, source refs, promotion edges, and adoption commands.",
+      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, or claim coverage token drifts, and publish residual gap candidates plus claim coverage gap candidates with structured subject fields for claim id, loop, missing dimensions, source refs, promotion edges, and adoption commands.",
       "claims": ["loop_closure_audit_must_prove_human_exit_requirements"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-closure-audit.riido.json"},
@@ -1391,7 +1391,7 @@
         {"kind": "artifact", "path": "loop-closure-audit-closed-loop-candidates", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/loop-closure-audit.md"}
       ],
-      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory, and the audit candidate artifact now exports both residual gaps and claim coverage token gaps for closed-loop intake.",
+      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory, and the audit candidate artifact now exports both residual gaps and structured claim coverage token gaps for closed-loop intake.",
       "next_loop": "closed_loop_candidate"
     },
     {

@@ -14,6 +14,7 @@ func claimCoverageCandidates(
 		out = append(out, closedLoopCandidate{
 			ID:                    claimCoverageCandidateID(source, gap),
 			SourceRef:             candidateRef(source, generatedAt, expiresAt),
+			Subject:               claimCoverageSubject(gap),
 			HarnessLoop:           source.HarnessLoop,
 			PromotionTarget:       source.PromotionTarget,
 			PromotionEdge:         graphEdge{source.HarnessLoop, source.PromotionTarget, "promotes_failure_to"},
@@ -28,6 +29,15 @@ func claimCoverageCandidates(
 
 func claimCoverageCandidateID(source candidateSource, gap claimCoverageGap) string {
 	return source.ID + ":claim_coverage:" + gap.ClaimID
+}
+
+func claimCoverageSubject(gap claimCoverageGap) *candidateSubject {
+	return &candidateSubject{
+		Kind:              "claim_coverage_gap",
+		ClaimID:           gap.ClaimID,
+		Loop:              gap.Loop,
+		MissingDimensions: append([]string(nil), gap.MissingDimensions...),
+	}
 }
 
 func claimCoverageObservation(gap claimCoverageGap) string {
