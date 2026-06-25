@@ -143,8 +143,8 @@
     },
     {
       "id": "control_plane_performance_evidence_loop",
-      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, and live load tooling, but no single executable loop emitted hot-path coverage, local pressure CPU/resource deltas, measured pressure findings, and optimization candidates without changing endpoint contracts.",
-      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark functions, local open-loop pressure evidence, measured alloc/latency/cpu/goroutine findings, pprof loopback command, redacted aiagentload command, and a strict benchmark workflow, then publish candidate evidence for architect review.",
+      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, and live load tooling, but no single executable loop emitted endpoint, store, SSE, subscriber fanout, waiter, shutdown, local pressure CPU/resource deltas, measured pressure findings, and optimization candidates without changing endpoint contracts.",
+      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, measured alloc/latency/cpu/goroutine/subscriber findings, pprof loopback command, redacted aiagentload command, and a strict benchmark workflow, then publish candidate evidence for architect review.",
       "claims": ["control_plane_performance_hot_paths_must_emit_evidence"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/control-plane-performance.riido.json"},
@@ -156,6 +156,8 @@
         {"kind": "tool", "path": "tools/controlplanepressure/measure_cpu.go"},
         {"kind": "tool", "path": "tools/controlplanepressure/findings.go"},
         {"kind": "tool", "path": "tools/controlplanepressure/progress_ingest.go"},
+        {"kind": "tool", "path": "tools/controlplanepressure/client_event_fanout.go"},
+        {"kind": "test", "path": "tools/controlplanepressure/scenario_test.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/module-decomposition.riido.json"}
       ],
@@ -167,6 +169,9 @@
         {"kind": "benchmark", "path": "internal/riidoaiserver/progress_messages_benchmark_test.go"},
         {"kind": "benchmark", "path": "internal/riidoaiserver/ai_agent_thread_progress_benchmark_test.go"},
         {"kind": "benchmark", "path": "internal/riidoaiserver/ai_agent_client_stream_targets_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_store_progress_fanout_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/tool_approval_http_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/assignment_sse_test.go"},
         {"kind": "tool", "path": "tools/controlplaneperf"},
         {"kind": "tool", "path": "tools/controlplaneaudit"},
         {"kind": "tool", "path": "tools/controlplanepressure"}
@@ -181,7 +186,7 @@
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-high-traffic-audit.md"}
     ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, local pressure CPU/resource deltas, measured findings, and pprof/load commands identify hot paths and candidates before repeated regressions are promoted into closed-loop gates.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, local pressure CPU/resource deltas, subscriber fanout pressure, measured findings, and pprof/load commands identify hot paths and candidates before repeated regressions are promoted into closed-loop gates.",
       "next_loop": "closed_loop_candidate"
     },
     {

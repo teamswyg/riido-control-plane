@@ -12,7 +12,7 @@
   "evidence_tool": "tools/controlplaneperf",
   "benchmark_command": "go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1",
   "local_pressure_command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json",
-  "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti)' -count=1",
+  "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1",
   "pprof_command": "RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30",
   "live_load_command": "go run ./tools/aiagentload -base-url \"$TESTNET_BASE_URL\" -token \"$TESTNET_TOKEN\" -workspace-id \"$TESTNET_WORKSPACE_ID\" -scenario client-read -duration 60s -concurrency 64 -evidence-out out/ai-agent-client-testnet-load.json",
   "hot_paths": [
@@ -55,12 +55,28 @@
       "files": ["internal/riidoaiserver/store_poll_api.go", "internal/riidoaiserver/store_wait_assignment_api.go", "internal/riidoaiserver/store_wait_assignment_pressure.go"],
       "tests": ["TestWaitForAssignmentReturnsImmediatelyWhenQueued", "TestWaitForAssignmentDoesNotBlockActor"],
       "candidate": "keep long-poll waiters off the actor critical path and watch waiter/goroutine count"
+    },
+    {
+      "id": "client_event_subscriber_fanout",
+      "category": "sse_event_streaming",
+      "risk": "workspace SSE subscribers can amplify each progress event into visibility checks and non-blocking channel sends",
+      "files": ["internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go", "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go"],
+      "tests": ["TestDevelopmentAIAgentClientStoreThreadProgressFanout"],
+      "candidate": "measure subscriber fanout in local pressure before expanding live event payloads"
+    },
+    {
+      "id": "tool_approval_waiters",
+      "category": "assignment_scheduling",
+      "risk": "tool approval long-poll waiters can add timer and waiter-map pressure when provider tools request human decisions",
+      "files": ["internal/riidoaiserver/tool_approval_http.go", "internal/riidoaiserver/store_tool_approval.go"],
+      "tests": ["TestHTTPToolApprovalRoundTrip"],
+      "candidate": "keep approval waits bounded and watch goroutine/timer deltas under stalled approvals"
     }
   ],
   "assertions": [
     "endpoint/API contracts must not change for performance evidence work",
     "lightweight benchmark evidence must run without live credentials",
-    "local pressure evidence must emit measured allocation, latency, CPU, and goroutine findings",
+    "local pressure evidence must emit measured allocation, latency, CPU, goroutine, and subscriber-fanout findings",
     "live load evidence must stay redacted and use aiagentload rather than ad-hoc curl loops",
     "pprof collection must use loopback-only RIIDO_AI_SERVER_PPROF_ADDR",
     "performance candidates must name the hot path, risk, existing evidence, and next verifier candidate"
@@ -68,7 +84,7 @@
   "loop": {
     "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates and local CPU/resource deltas are not emitted from one executable performance loop.",
     "hypothesis": "A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts.",
-    "execute": "Verify hot-path files and benchmark functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine evidence with measured findings, expose pprof and live-load commands, and generate candidate optimization rows.",
+    "execute": "Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings, expose pprof and live-load commands, and generate candidate optimization rows.",
     "evaluate": "The verifier fails on missing benchmark coverage, missing local pressure evidence, missing pprof loopback contract, missing aiagentload live command, stale generated docs, or non-strict workflow artifacts.",
     "retrospective": "This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates."
   }
