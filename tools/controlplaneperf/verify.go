@@ -12,8 +12,9 @@ func verifyAll(root string, m manifest) error {
 	if m.GeneratedDoc == "" || m.Workflow == "" || m.EvidenceTool != "tools/controlplaneperf" {
 		return fmt.Errorf("performance manifest must bind doc, workflow, and tool")
 	}
-	if m.EvidenceArtifact == "" || m.BenchmarkArtifact == "" || m.SummaryArtifact == "" || m.CandidateArtifact == "" {
-		return fmt.Errorf("performance manifest must bind evidence, benchmark, summary, and candidate artifacts")
+	if m.EvidenceArtifact == "" || m.BenchmarkArtifact == "" || m.LocalPressureArtifact == "" ||
+		m.SummaryArtifact == "" || m.CandidateArtifact == "" {
+		return fmt.Errorf("performance manifest must bind evidence, benchmark, pressure, summary, and candidate artifacts")
 	}
 	if len(m.HotPaths) == 0 || len(m.Assertions) == 0 {
 		return fmt.Errorf("performance manifest must declare hot paths and assertions")
@@ -32,10 +33,11 @@ func verifyAll(root string, m manifest) error {
 
 func verifyCommands(m manifest) error {
 	required := map[string]string{
-		m.BenchmarkCommand: "-benchmem",
-		m.RaceCommand:      "go test -race",
-		m.PprofCommand:     "127.0.0.1:6060",
-		m.LiveLoadCommand:  "go run ./tools/aiagentload",
+		m.BenchmarkCommand:     "-benchmem",
+		m.LocalPressureCommand: "go run ./tools/controlplanepressure",
+		m.RaceCommand:          "go test -race",
+		m.PprofCommand:         "127.0.0.1:6060",
+		m.LiveLoadCommand:      "go run ./tools/aiagentload",
 	}
 	for command, needle := range required {
 		if !strings.Contains(command, needle) {

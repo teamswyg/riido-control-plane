@@ -22,12 +22,14 @@ func renderSummary(b *strings.Builder, m manifest, e evidence) {
 	fmt.Fprintf(b, "- benchmarks: `%d`\n", e.BenchmarkCount)
 	fmt.Fprintf(b, "- concurrency tests: `%d`\n", e.TestCount)
 	fmt.Fprintf(b, "- optimization candidates: `%d`\n", e.CandidateCount)
+	fmt.Fprintf(b, "- local pressure artifact: `%s`\n", m.LocalPressureArtifact)
 	fmt.Fprintf(b, "- candidate artifact: `%s`\n\n", m.CandidateArtifact)
 }
 
 func renderCommands(b *strings.Builder, m manifest) {
 	b.WriteString("## Commands\n\n")
 	fmt.Fprintf(b, "- lightweight benchmark: `%s`\n", m.BenchmarkCommand)
+	fmt.Fprintf(b, "- local pressure: `%s`\n", m.LocalPressureCommand)
 	fmt.Fprintf(b, "- race/concurrency: `%s`\n", m.RaceCommand)
 	fmt.Fprintf(b, "- loopback pprof: `%s`\n", m.PprofCommand)
 	fmt.Fprintf(b, "- live load evidence: `%s`\n\n", m.LiveLoadCommand)

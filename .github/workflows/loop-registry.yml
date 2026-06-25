@@ -145,6 +145,7 @@ on:
       - "tools/openquestions/**"
       - "tools/precommitbaseline/**"
       - "tools/controlplaneperf/**"
+      - "tools/controlplanepressure/**"
       - "go.mod"
       - "go.sum"
   pull_request:
@@ -287,6 +288,7 @@ on:
       - "tools/openquestions/**"
       - "tools/precommitbaseline/**"
       - "tools/controlplaneperf/**"
+      - "tools/controlplanepressure/**"
       - "go.mod"
       - "go.sum"
 

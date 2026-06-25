@@ -52,6 +52,7 @@ on:
       - "tools/openquestions/**"
       - "tools/precommitbaseline/**"
       - "tools/controlplaneperf/**"
+      - "tools/controlplanepressure/**"
       - "tools/workflowevidence/**"
   push:
     branches: [main]
@@ -102,6 +103,7 @@ on:
       - "tools/openquestions/**"
       - "tools/precommitbaseline/**"
       - "tools/controlplaneperf/**"
+      - "tools/controlplanepressure/**"
       - "tools/workflowevidence/**"
 
 jobs:
