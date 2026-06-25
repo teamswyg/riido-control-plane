@@ -30,6 +30,10 @@ func TestClaimImpactChangedFilesClaimHasCoverageTokens(t *testing.T) {
 	requireNoClaimCoverageGapForClaim(t, "claim_impact_evidence_must_expose_changed_files")
 }
 
+func TestClaimMeaningCodeSurfaceClaimHasCoverageTokens(t *testing.T) {
+	requireNoClaimCoverageGapForClaim(t, "claim_meaning_changes_require_code_or_test_surface")
+}
+
 func requireNoClaimCoverageGapForLoop(t *testing.T, loop string) {
 	t.Helper()
 	_, deps := loadForTest(t)

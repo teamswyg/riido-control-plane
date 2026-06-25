@@ -343,6 +343,7 @@
         {"kind": "test", "path": "tools/loopregistry/impact_generated_doc_test.go"},
         {"kind": "test", "path": "tools/loopregistry/impact_removed_claim_test.go"},
         {"kind": "test", "path": "tools/loopregistry/impact_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
       "verifiers": [
@@ -350,13 +351,14 @@
         {"kind": "test", "path": "tools/loopregistry/impact_generated_doc_test.go"},
         {"kind": "test", "path": "tools/loopregistry/impact_removed_claim_test.go"},
         {"kind": "test", "path": "tools/loopregistry/impact_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "PR impact verification rejects claim additions, claim meaning changes, generated-doc binding changes, and claim removals when the diff only changes manifests or generated docs; at least one bound code or test path must move.",
+      "decision": "PR impact verification rejects claim additions, claim meaning changes, generated-doc binding changes, and claim removals when the diff only changes manifests or generated docs; at least one bound code or test path must move, and the claim coverage tokens now make that enforcement visible to the loop-closure audit.",
       "next_loop": "ai_thread_history"
     },
     {
