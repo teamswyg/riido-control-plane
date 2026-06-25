@@ -12,7 +12,7 @@ func run(opt options) error {
 	if err := verifyAll(root, m, deps); err != nil {
 		return err
 	}
-	e := newEvidence(m)
+	e := newEvidence(m, deps)
 	if err := maybeDoc(root, m, renderDoc(m, e), opt.WriteDoc, opt.CheckDoc); err != nil {
 		return err
 	}
