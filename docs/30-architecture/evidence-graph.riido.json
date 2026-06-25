@@ -309,8 +309,8 @@
     },
     {
       "id": "closed_loop_candidate_source_ref_loop",
-      "observation": "Closed-loop candidate artifacts exposed source freshness at the artifact envelope, but an individual candidate item could be copied without its source workflow, run, and expiry context.",
-      "hypothesis": "Embedding source_ref in each candidate, exposing candidate_source_refs in intake and decision evidence, and verifying source_ref drift keeps harness evidence context attached even when agents consume candidate items without reading surrounding docs.",
+      "observation": "Closed-loop candidate artifacts exposed source freshness at the artifact envelope, but an individual candidate item could be copied without its source workflow, run, expiry context, or claim-coverage dimensions.",
+      "hypothesis": "Embedding source_ref in each candidate, exposing candidate_source_refs in intake and decision evidence, verifying source_ref drift, and binding the source_ref claim to observe/verify/fail coverage keeps harness evidence context attached even when agents consume candidate items without reading surrounding docs.",
       "claims": ["closed_loop_candidates_must_carry_source_ref"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
@@ -323,7 +323,8 @@
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/producer_coverage_test.go"},
-        {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"}
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/harnesspromotion/source_ref_test.go"},
@@ -337,7 +338,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
-      "decision": "Candidate artifacts now carry per-candidate source_ref, intake and decision evidence expose candidate_source_refs for every consumed producer source, and verification rejects source_ref drift or missing source run identity.",
+      "decision": "Candidate artifacts now carry per-candidate source_ref, intake and decision evidence expose candidate_source_refs for every consumed producer source, verification rejects source_ref drift or missing source run identity, and loop closure audit regression keeps the source-ref claim from returning as an unbound coverage gap.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

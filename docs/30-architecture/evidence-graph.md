@@ -12,7 +12,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `51`
 - claim refs: `50`
-- change refs: `408`
+- change refs: `409`
 - verifier refs: `230`
 - evidence refs: `127`
 
@@ -29,7 +29,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `harness_failure_always_promotion_loop` | `1` | `5` | `4` | `3` | `closed_loop_candidate` |
 | `closed_loop_candidate_adoption_plan_loop` | `1` | `13` | `7` | `5` | `closed_loop_candidate_decision` |
 | `closed_loop_candidate_promotion_edge_loop` | `1` | `11` | `5` | `5` | `closed_loop_candidate_decision` |
-| `closed_loop_candidate_source_ref_loop` | `1` | `11` | `3` | `5` | `closed_loop_candidate_decision` |
+| `closed_loop_candidate_source_ref_loop` | `1` | `12` | `3` | `5` | `closed_loop_candidate_decision` |
 | `claim_binding_impact_loop` | `1` | `11` | `7` | `1` | `ai_thread_history` |
 | `claim_reasoning_impact_loop` | `1` | `5` | `4` | `2` | `closed_loop_candidate` |
 | `claim_bound_surface_reasoning_impact_loop` | `1` | `7` | `4` | `2` | `closed_loop_candidate` |
