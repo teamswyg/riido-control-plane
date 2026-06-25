@@ -32,6 +32,8 @@ on:
       - "docs/30-architecture/pre-commit-baseline.riido.json"
       - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/control-plane-performance.riido.json"
+      - "docs/30-architecture/control-plane-high-traffic-audit.md"
+      - "docs/30-architecture/control-plane-high-traffic-audit.riido.json"
       - "docs/50-roadmap/open-questions.riido.json"
       - "internal/riidoaiserver/**"
       - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
@@ -52,6 +54,7 @@ on:
       - "tools/openquestions/**"
       - "tools/precommitbaseline/**"
       - "tools/controlplaneperf/**"
+      - "tools/controlplaneaudit/**"
       - "tools/controlplanepressure/**"
       - "tools/workflowevidence/**"
   push:
@@ -83,6 +86,8 @@ on:
       - "docs/30-architecture/pre-commit-baseline.riido.json"
       - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/control-plane-performance.riido.json"
+      - "docs/30-architecture/control-plane-high-traffic-audit.md"
+      - "docs/30-architecture/control-plane-high-traffic-audit.riido.json"
       - "docs/50-roadmap/open-questions.riido.json"
       - "internal/riidoaiserver/**"
       - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
@@ -103,6 +108,7 @@ on:
       - "tools/openquestions/**"
       - "tools/precommitbaseline/**"
       - "tools/controlplaneperf/**"
+      - "tools/controlplaneaudit/**"
       - "tools/controlplanepressure/**"
       - "tools/workflowevidence/**"
 
