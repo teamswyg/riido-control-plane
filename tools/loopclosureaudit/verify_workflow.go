@@ -16,7 +16,9 @@ func verifyWorkflow(root string, m manifest) error {
 		"go run ./tools/loopclosureaudit",
 		"-check-doc",
 		"-evidence-out out/loop-closure-audit-evidence.json",
+		"-candidate-out out/loop-closure-audit-closed-loop-candidates.json",
 		"name: " + m.EvidenceArtifact,
+		"name: " + m.Sources[0].CandidateArtifact,
 		"if-no-files-found: error",
 	}
 	for _, needle := range required {

@@ -6,7 +6,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `5`
+- decisions: `7`
 
 ## Assertions
 
@@ -40,6 +40,8 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `ai-agent-client-testnet-load:load_harness_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `control-plane-performance:control_plane_performance_hot_path_benchmarks` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `control-plane-performance:control_plane_performance_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `loop-closure-audit:claim_coverage_token_completeness` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `loop-closure-audit:candidate_adoption_decision_freshness` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `decision_record` |
 
 ## Evidence Loop
 

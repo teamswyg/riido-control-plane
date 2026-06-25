@@ -21,7 +21,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `provider_acceptance_harness` | `harness` | `codex, openclaw` | `24` | `1440` | `.github/workflows/ai-agent-client-testnet-smoke.yml` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `2` |
 | `ai_agent_load_harness` | `harness` | `` | `24` | `1440` | `.github/workflows/ai-agent-client-testnet-load.yml` | `ai-agent-client-testnet-load-closed-loop-candidates` | `3` |
 | `control_plane_performance_harness` | `harness` | `` | `24` | `1440` | `.github/workflows/control-plane-performance.yml` | `control-plane-performance-closed-loop-candidates` | `8` |
-| `loop_closure_audit` | `closed_loop` | `` | `24` | `1440` | `.github/workflows/loop-closure-audit.yml` | `` | `2` |
+| `loop_closure_audit` | `closed_loop` | `` | `24` | `1440` | `.github/workflows/loop-closure-audit.yml` | `` | `3` |
 | `closed_loop_candidate` | `closed_loop` | `` | `24` | `1440` | `.github/workflows/loop-registry.yml` | `` | `4` |
 | `closed_loop_candidate_intake` | `closed_loop` | `` | `24` | `1440` | `.github/workflows/closed-loop-candidate-intake.yml` | `` | `2` |
 | `closed_loop_candidate_decision` | `closed_loop` | `` | `24` | `1440` | `.github/workflows/closed-loop-candidate-decision.yml` | `` | `2` |
@@ -35,7 +35,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `provider_acceptance_harness` | `ai-agent-client-testnet-smoke.yml` | `1440` | `24` | `gh workflow run ai-agent-client-testnet-smoke.yml --ref main` | `2` | `4` | `5` | `2` |
 | `ai_agent_load_harness` | `ai-agent-client-testnet-load.yml` | `1440` | `24` | `gh workflow run ai-agent-client-testnet-load.yml --ref main` | `1` | `3` | `4` | `3` |
 | `control_plane_performance_harness` | `control-plane-performance.yml` | `1440` | `24` | `gh workflow run control-plane-performance.yml --ref main` | `1` | `3` | `4` | `6` |
-| `loop_closure_audit` | `loop-closure-audit.yml` | `1440` | `24` | `gh workflow run loop-closure-audit.yml --ref main` | `1` | `1` | `2` | `1` |
+| `loop_closure_audit` | `loop-closure-audit.yml` | `1440` | `24` | `gh workflow run loop-closure-audit.yml --ref main` | `1` | `1` | `2` | `2` |
 | `closed_loop_candidate` | `loop-registry.yml` | `1440` | `24` | `gh workflow run loop-registry.yml --ref main` | `33` | `47` | `48` | `4` |
 | `closed_loop_candidate_intake` | `closed-loop-candidate-intake.yml` | `1440` | `24` | `gh workflow run closed-loop-candidate-intake.yml --ref main` | `1` | `1` | `2` | `1` |
 | `closed_loop_candidate_decision` | `closed-loop-candidate-decision.yml` | `1440` | `24` | `gh workflow run closed-loop-candidate-decision.yml --ref main` | `3` | `3` | `4` | `1` |
@@ -53,17 +53,17 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `ai_thread_history` | `7` | `5` | `febe48b3ee92` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `3` | `f31da27c369c` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `df5174dec789` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `f41b3a8300cc` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `dc99d31ceebf` |
 | `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `32` | `6` | `b9d656f4679e` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `6` | `4` | `a394d2fa717e` |
-| `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `17` | `6` | `2545bb22d0d0` |
-| `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `21` | `5` | `494a39771ace` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `12df321b2e93` |
-| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `e5c2e3619d40` |
+| `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `25` | `7` | `3b2a72b1cadc` |
+| `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `21` | `5` | `901d2d0f2346` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `4b2afc525675` |
+| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `8df0d9b72e9d` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `371bebdb7588` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `76fddf31afdd` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `ab3f77b3a236` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `63` | `25` | `07530b8f1a57` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `16f8d7345114` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `e75472c2457b` |
 | `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `af2fab895ef6` |
 | `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `759ffeb80d39` |
 | `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `115a5da29c24` |
@@ -76,24 +76,24 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `8` | `4` | `bdd866dbb007` |
 | `semantic_hash_metadata_must_not_affect_claim_meaning` | `closed_loop_candidate` | `5` | `2` | `ded70199102f` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `4d34e8ac080b` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `68ebc59328a3` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `9bcd5ea4fca0` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `4236cc4069cf` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `7` | `3` | `8112ff1e8f37` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `b7ed1eb30217` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `bb9af446bd06` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `12` | `2` | `733d18031d76` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `13` | `6` | `6847e0022a37` |
-| `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `2554559bf928` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `67411b2dc649` |
-| `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `10` | `5` | `15c53091eb0e` |
+| `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `30482e29dc93` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `2` | `205e43a10c88` |
+| `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `14` | `5` | `80f30891c459` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `68d2b171fd9c` |
-| `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `ccdd8bceca43` |
+| `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `d64f5677b98c` |
 | `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `13` | `4` | `c2b0eb3d83b1` |
 | `expired_loop_evidence_must_select_refresh_commands` | `closed_loop_candidate` | `12` | `3` | `489b12aa8bb4` |
 | `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `closed_loop_candidate` | `17` | `13` | `a3a913362573` |
 | `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `6` | `3` | `313224bb56d9` |
 | `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `342ca940a453` |
-| `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `13` | `5` | `f114d5dd7e46` |
-| `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `134e82e519db` |
-| `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `6` | `2` | `8ba47e3f7528` |
+| `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `17` | `5` | `b522d8e8ab02` |
+| `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `a73de6d06ac7` |
+| `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `6` | `2` | `c2700bb631ba` |
 | `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `open_decision_queue` | `6` | `2` | `797239731d4f` |
 
 ## Claim Surface Evidence
@@ -111,7 +111,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `load_harness_failures_must_promote_candidates` | `2` | `2` | `4` | `3` | `4` | `4` | `4` | `3` | `3` | `3` | `1` |
 | `control_plane_performance_hot_paths_must_emit_evidence` | `21` | `8` | `3` | `5` | `9` | `7` | `6` | `8` | `6` | `3` | `1` |
 | `harness_promotion_must_run_after_failure` | `2` | `2` | `2` | `2` | `1` | `0` | `1` | `0` | `4` | `1` | `1` |
-| `loop_closure_audit_must_prove_human_exit_requirements` | `11` | `4` | `2` | `3` | `5` | `6` | `5` | `2` | `6` | `1` | `1` |
+| `loop_closure_audit_must_prove_human_exit_requirements` | `18` | `5` | `2` | `3` | `6` | `7` | `5` | `3` | `7` | `1` | `1` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `14` | `4` | `3` | `4` | `1` | `0` | `0` | `0` | `5` | `3` | `1` |
 | `closed_loop_candidates_must_carry_promotion_edge` | `12` | `4` | `4` | `5` | `0` | `0` | `0` | `0` | `5` | `3` | `1` |
 | `closed_loop_candidates_must_carry_source_ref` | `15` | `3` | `4` | `5` | `0` | `0` | `0` | `0` | `6` | `3` | `1` |
@@ -138,7 +138,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `loop_evidence_artifacts_must_self_expire` | `8` | `4` | `1` | `2` | `0` | `0` | `0` | `0` | `6` | `2` | `1` |
 | `closed_loop_candidate_evidence_must_self_expire` | `6` | `3` | `3` | `5` | `0` | `0` | `0` | `0` | `3` | `3` | `1` |
 | `closed_loop_candidate_consumers_must_reject_expired_candidates` | `6` | `4` | `3` | `4` | `0` | `0` | `0` | `0` | `2` | `2` | `1` |
-| `candidate_intake_must_consume_candidate_artifact` | `5` | `3` | `2` | `3` | `4` | `3` | `4` | `2` | `5` | `1` | `1` |
+| `candidate_intake_must_consume_candidate_artifact` | `6` | `4` | `4` | `3` | `4` | `3` | `4` | `2` | `5` | `1` | `1` |
 | `expiring_loops_must_schedule_refresh` | `3` | `2` | `0` | `1` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
 | `refresh_workflows_must_declare_loop_identity` | `2` | `1` | `6` | `2` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
 | `loop_registry_evidence_must_expose_refresh_plans` | `9` | `4` | `0` | `2` | `0` | `0` | `0` | `0` | `4` | `1` | `1` |
@@ -146,7 +146,7 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 | `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `9` | `6` | `2` | `3` | `0` | `0` | `0` | `2` | `13` | `1` | `1` |
 | `loop_registry_evidence_must_expose_graph_edges` | `3` | `3` | `0` | `2` | `0` | `0` | `0` | `0` | `3` | `1` | `1` |
 | `harness_like_workflows_must_be_registered_or_excluded` | `4` | `1` | `1` | `2` | `0` | `0` | `0` | `0` | `4` | `1` | `1` |
-| `candidate_decisions_must_match_consumed_candidates` | `6` | `5` | `2` | `3` | `4` | `2` | `2` | `1` | `5` | `1` | `1` |
+| `candidate_decisions_must_match_consumed_candidates` | `7` | `6` | `4` | `3` | `4` | `2` | `2` | `1` | `5` | `1` | `1` |
 | `candidate_decision_next_artifact_must_be_required` | `5` | `1` | `1` | `3` | `0` | `1` | `1` | `0` | `3` | `1` | `1` |
 | `candidate_decision_evidence_must_expose_next_command` | `4` | `1` | `1` | `3` | `0` | `0` | `0` | `1` | `2` | `1` | `1` |
 | `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `3` | `1` | `2` | `3` | `3` | `3` | `3` | `2` | `2` | `1` | `1` |

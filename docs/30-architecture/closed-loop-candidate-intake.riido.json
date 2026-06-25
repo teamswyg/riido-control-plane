@@ -57,6 +57,23 @@
         "decision_record",
         "evidence_graph_edge"
       ]
+    },
+    {
+      "id": "loop-closure-audit",
+      "candidate_artifact": "loop-closure-audit-closed-loop-candidates",
+      "producer_manifest": "docs/30-architecture/loop-closure-audit.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "loop_closure_audit",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
     }
   ],
   "assertions": [
@@ -76,7 +93,8 @@
     "candidate intake must reject consumed candidate artifacts whose source_expires_at has passed",
     "candidate intake evidence must publish generated_at and expires_at",
     "candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids",
-    "candidate intake sources must cover every closed_loop_candidate producer source from the harness promotion manifest"
+    "candidate intake sources must cover every closed_loop_candidate producer source from the harness promotion manifest",
+    "candidate intake sources must include loop-closure-audit residual gap candidates"
   ],
   "loop": {
     "observation": "Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.",

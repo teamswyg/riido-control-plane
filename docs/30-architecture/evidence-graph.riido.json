@@ -1346,6 +1346,8 @@
         {"kind": "tool", "path": "tools/loopclosureaudit/evidence_check.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/evidence_check_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/assertions_test.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/candidate_export.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/candidate_export_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/verify_residual_gap.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/residual_gap_test.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -1358,6 +1360,7 @@
       ],
       "evidence": [
         {"kind": "artifact", "path": "loop-closure-audit-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-closure-audit-closed-loop-candidates", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/loop-closure-audit.md"}
       ],
       "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory, and the audit evidence exposes concrete proof checks plus residual gap candidates.",
