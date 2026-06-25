@@ -1395,7 +1395,7 @@
         {"kind": "artifact", "path": "loop-closure-audit-closed-loop-candidates", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/loop-closure-audit.md"}
       ],
-      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, while claim coverage repairs now remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, or claim-bound workflow trigger coverage gaps in the backlog.",
+      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, while claim coverage repairs now remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, claim-bound workflow trigger, or claim-impact changed-files coverage gaps in the backlog.",
       "next_loop": "closed_loop_candidate"
     },
     {
