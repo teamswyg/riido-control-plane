@@ -8,8 +8,9 @@ func (s *DevelopmentAIAgentClientStore) appendClientEventLocked(eventType string
 	}
 	s.events = append(s.events, event)
 	s.pruneClientReplayEventsLocked()
+	fanoutEvent, progressFanout := clientEventForLiveFanout(event)
 	for _, subscriber := range s.subscribers {
-		visible, ok := clientEventForPrincipalLocked(s, subscriber.principal, event)
+		visible, ok := clientEventForSubscriberLocked(s, subscriber.principal, event, fanoutEvent, progressFanout)
 		if !ok {
 			continue
 		}

@@ -143,7 +143,7 @@
     },
     {
       "id": "control_plane_performance_evidence_loop",
-      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows; pressure output could also promote a zero goroutine delta as if it were an actionable leak signal, heavy local stress needed to stay separate from the lightweight CI pressure command, the static audit could lose an entire endpoint, DB, SSE, scheduling, fanout, waiter, progress, lock, read-model, or goroutine-risk category while still reporting a non-empty surface list, live HTTP load evidence lacked direct throughput, failure-rate, endpoint-finding, load-generator resource rows, and opt-in pprof sample metadata, and the v3 thread history endpoint needed httptest pressure coverage rather than only internal projection timing.",
+      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows; pressure output could also promote a zero goroutine delta as if it were an actionable leak signal, heavy local stress needed to stay separate from the lightweight CI pressure command, the static audit could lose an entire endpoint, DB, SSE, scheduling, fanout, waiter, progress, lock, read-model, or goroutine-risk category while still reporting a non-empty surface list, live HTTP load evidence lacked direct throughput, failure-rate, endpoint-finding, load-generator resource rows, and opt-in pprof sample metadata, the v3 thread history endpoint needed httptest pressure coverage rather than only internal projection timing, and local pressure showed client event subscriber fanout as a measurable allocation/cpu hotspot before any endpoint contract change.",
       "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, explicit local pressure scenario names, manual high-concurrency pressure evidence commands, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, live aiagentload throughput/capacity/resource findings, opt-in pprof sample metadata without profile bodies, required high-traffic category coverage, and finding-level closed-loop adoption plans, then publish candidate evidence for architect review.",
       "claims": ["control_plane_performance_hot_paths_must_emit_evidence"],
       "changes": [
@@ -175,6 +175,9 @@
         {"kind": "tool", "path": "tools/aiagentload/report.go"},
         {"kind": "tool", "path": "tools/aiagentload/resource.go"},
         {"kind": "tool", "path": "tools/aiagentload/types.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_live_fanout.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_subscriber_locked.go"},
         {"kind": "test", "path": "tools/controlplanepressure/scenario_test.go"},
         {"kind": "test", "path": "tools/controlplanepressure/http_endpoint_threads_v3_test.go"},
         {"kind": "test", "path": "tools/aiagentload/aggregate_test.go"},
@@ -212,7 +215,7 @@
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-high-traffic-audit.md"}
     ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, and required high-traffic category coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories or missing local pressure scenarios fail before merge.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, and required high-traffic category coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories or missing local pressure scenarios fail before merge. Live progress fanout also precomputes the client-visible progress payload once per event before subscriber visibility checks, preserving v2/v3 contracts while reducing repeated subscriber-side normalization work.",
       "next_loop": "closed_loop_candidate"
     },
     {
