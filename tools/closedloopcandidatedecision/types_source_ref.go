@@ -11,6 +11,11 @@ type candidateSourceRef struct {
 	Run               runRecord `json:"run"`
 }
 
+type candidateSourceRefEvidence struct {
+	CandidateID string             `json:"candidate_id"`
+	SourceRef   candidateSourceRef `json:"source_ref"`
+}
+
 type runRecord struct {
 	ID      string `json:"id,omitempty"`
 	Attempt string `json:"attempt,omitempty"`

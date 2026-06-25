@@ -39,6 +39,7 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		}
 		result.DecisionIDs = append(result.DecisionIDs, item.ID)
 		candidateIDs = append(candidateIDs, item.ID)
+		result.CandidateSourceRefs = append(result.CandidateSourceRefs, sourceRefEvidence(item))
 		result.DecisionArtifacts = append(result.DecisionArtifacts, decisionArtifactEvidence{
 			CandidateID:   item.ID,
 			NextArtifact:  decision.NextArtifact,

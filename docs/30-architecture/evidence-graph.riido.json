@@ -197,7 +197,7 @@
     {
       "id": "closed_loop_candidate_source_ref_loop",
       "observation": "Closed-loop candidate artifacts exposed source freshness at the artifact envelope, but an individual candidate item could be copied without its source workflow, run, and expiry context.",
-      "hypothesis": "Embedding source_ref in each candidate and verifying it in intake and decision keeps harness evidence context attached even when agents consume candidate items without reading surrounding docs.",
+      "hypothesis": "Embedding source_ref in each candidate, exposing candidate_source_refs in intake and decision evidence, and verifying source_ref drift keeps harness evidence context attached even when agents consume candidate items without reading surrounding docs.",
       "claims": ["closed_loop_candidates_must_carry_source_ref"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
@@ -218,7 +218,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
-      "decision": "Candidate artifacts now carry per-candidate source_ref, and intake plus decision verification reject source_ref drift or missing source run identity.",
+      "decision": "Candidate artifacts now carry per-candidate source_ref, intake and decision evidence expose candidate_source_refs, and verification rejects source_ref drift or missing source run identity.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
