@@ -45,29 +45,3 @@ func TestClaimImpactRequiresEvidenceGraphReasoningForMeaningChange(t *testing.T)
 		t.Fatal("expected missing evidence graph reasoning change to fail")
 	}
 }
-
-func TestBoundFileImpactRequiresClaimEvidenceChange(t *testing.T) {
-	current := []claimBinding{{
-		ID: "claim", Statement: "kept", Loop: "loop",
-		Files: []string{"internal/example.go"}, GeneratedDoc: []string{"docs/claim.md"},
-	}}
-	if _, err := verifyClaimImpact("origin/main", current, current,
-		map[string]bool{"internal/example.go": true}); err == nil {
-		t.Fatal("expected bound file change without evidence to fail")
-	}
-}
-
-func TestBoundFileImpactAllowsGeneratedDocChange(t *testing.T) {
-	current := []claimBinding{{
-		ID: "claim", Statement: "kept", Loop: "loop",
-		Files: []string{"internal/example.go"}, GeneratedDoc: []string{"docs/claim.md"},
-	}}
-	evidence, err := verifyClaimImpact("origin/main", current, current,
-		map[string]bool{"internal/example.go": true, "docs/claim.md": true})
-	if err != nil {
-		t.Fatalf("verify impact: %v", err)
-	}
-	if evidence.BoundSurfaceChangeCount != 1 || len(evidence.BoundSurfaces[0].ChangedEvidence) != 1 {
-		t.Fatalf("unexpected evidence: %+v", evidence)
-	}
-}

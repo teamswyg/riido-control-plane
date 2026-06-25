@@ -16,11 +16,12 @@ func TestClaimImpactEvidenceExposesChangedFiles(t *testing.T) {
 	evidence, err := verifyClaimImpact("origin/main", current, current, map[string]bool{
 		"internal/example.go": true,
 		"docs/claim.md":       true,
+		evidenceGraphManifest: true,
 	})
 	if err != nil {
 		t.Fatalf("verify impact: %v", err)
 	}
-	want := []string{"docs/claim.md", "internal/example.go"}
+	want := []string{"docs/30-architecture/evidence-graph.riido.json", "docs/claim.md", "internal/example.go"}
 	if !reflect.DeepEqual(evidence.ChangedFiles, want) {
 		t.Fatalf("changed files = %#v, want %#v", evidence.ChangedFiles, want)
 	}
