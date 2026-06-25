@@ -35,6 +35,7 @@ func TestRepairedClaimsHaveCoverageTokens(t *testing.T) {
 		"loop_evidence_sources_must_be_claim_covered",
 		"loop_failure_conditions_must_be_claim_covered",
 		"loop_observation_tokens_must_be_claim_covered",
+		"loop_registry_evidence_must_expose_graph_edges",
 		"loop_verify_tokens_must_be_claim_covered",
 		"pre_commit_must_run_claim_binding_impact",
 	} {
