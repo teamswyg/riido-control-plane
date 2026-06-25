@@ -78,8 +78,12 @@ jobs:
             | jq -e --arg device_id "$device_id" '.schema_version == "riido-ai-server.v1" and .daemon.device_id == $device_id and (.daemon.supported_actions | length) >= 1' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/agents/agent-owned-codex/daemon" \
             | jq -e '.schema_version == "riido-ai-server.v1" and .daemon.device_id == "device-dev-macbook" and (.daemon.supported_actions | length) > 0' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/agents/agent-public-openclaw/daemon" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .daemon.device_id == "device-shared-studio" and (.daemon.supported_actions | length) > 0' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/assignable-agents" \
             | jq -e '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == "agent-owned-codex")' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/assignable-agents" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == "agent-public-openclaw")' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/task-1/threads" \
             | jq -e '.schema_version == "riido-ai-server.v1" and (.threads | length) >= 1' >/dev/null
           created_v1_agent="$(

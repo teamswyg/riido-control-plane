@@ -26,6 +26,21 @@
           "source_phrases": ["/v1/client/ai-agent/tasks/$smoke_task_id/stop", ".comment_kind == \"stopped_by_user_request\" and .assignment_state == \"stopped\""]
         },
         {
+          "id": "codex_provider_qa",
+          "summary": "testnet smoke verifies the Codex provider path through agent daemon lookup and assignable-agent visibility.",
+          "source_phrases": ["/v1/client/ai-agent/agents/agent-owned-codex/daemon", "any(.agents[]; .agent_id == \"agent-owned-codex\")"]
+        },
+        {
+          "id": "openclaw_provider_qa",
+          "summary": "testnet smoke verifies the OpenClaw provider path through agent daemon lookup and assignable-agent visibility.",
+          "source_phrases": ["/v1/client/ai-agent/agents/agent-public-openclaw/daemon", "any(.agents[]; .agent_id == \"agent-public-openclaw\")"]
+        },
+        {
+          "id": "daemon_runtime_snapshot",
+          "summary": "testnet smoke verifies device daemon runtime snapshots on v1 and v2 client surfaces without exposing endpoint or token values.",
+          "source_phrases": ["/v1/client/ai-agent/devices/$device_id/daemon", "/v2/client/workspaces/$workspace_id/ai-agent/devices/$device_id_v2/daemon", ".daemon.supported_actions"]
+        },
+        {
           "id": "v2_thread_message_post",
           "summary": "v2 task-scoped thread message POST accepts a selected thread_id and returns that thread_id.",
           "source_phrases": ["/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/threads/$thread_id_v2/messages", "source_message_id"]
