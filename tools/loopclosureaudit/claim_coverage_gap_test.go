@@ -32,3 +32,12 @@ func TestLoopClosureAuditEvidenceExposesClaimCoverageGaps(t *testing.T) {
 		t.Fatalf("incomplete claim coverage gap = %+v", first)
 	}
 }
+
+func TestAIThreadHistoryClaimsHaveCoverageTokens(t *testing.T) {
+	_, deps := loadForTest(t)
+	for _, gap := range claimCoverageGaps(deps) {
+		if gap.Loop == "ai_thread_history" {
+			t.Fatalf("ai_thread_history claim coverage gap remains: %+v", gap)
+		}
+	}
+}

@@ -80,36 +80,6 @@
       "reason": "Candidate decision freshness gaps need an owned decision record so adoption does not rely on human memory."
     },
     {
-      "candidate_id": "loop-closure-audit:claim_coverage:ambiguous_task_context_must_ask_before_work",
-      "disposition": "triage_required",
-      "priority": "P2",
-      "owner": "agent-platform-loop",
-      "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
-      "reason": "Claim coverage gap candidates need owned claim-binding triage before they become durable closed-loop gates."
-    },
-    {
-      "candidate_id": "loop-closure-audit:claim_coverage:same_provider_agents_must_keep_distinct_threads",
-      "disposition": "triage_required",
-      "priority": "P2",
-      "owner": "agent-platform-loop",
-      "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
-      "reason": "Claim coverage gap candidates need owned claim-binding triage before they become durable closed-loop gates."
-    },
-    {
-      "candidate_id": "loop-closure-audit:claim_coverage:thread_history_must_keep_user_followups",
-      "disposition": "triage_required",
-      "priority": "P2",
-      "owner": "agent-platform-loop",
-      "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
-      "reason": "Claim coverage gap candidates need owned claim-binding triage before they become durable closed-loop gates."
-    },
-    {
       "candidate_id": "loop-closure-audit:claim_coverage:claim_bound_file_changes_require_reasoning_chain",
       "disposition": "triage_required",
       "priority": "P2",
