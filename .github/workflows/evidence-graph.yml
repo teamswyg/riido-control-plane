@@ -13,6 +13,7 @@ on:
       - ".github/workflows/ai-agent-client-testnet-smoke.yml"
       - ".github/workflows/ai-agent-client-testnet-load.yml"
       - ".github/workflows/ai-agent-client-api.yml"
+      - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-registry.yml"
       - ".github/workflows/loop-refresh-dispatch.yml"
       - ".github/workflows/open-questions.yml"
@@ -29,6 +30,8 @@ on:
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/module-decomposition.riido.json"
       - "docs/30-architecture/pre-commit-baseline.riido.json"
+      - "docs/30-architecture/control-plane-performance.md"
+      - "docs/30-architecture/control-plane-performance.riido.json"
       - "docs/50-roadmap/open-questions.riido.json"
       - "internal/riidoaiserver/**"
       - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
@@ -48,6 +51,7 @@ on:
       - "tools/moduledecomposition/**"
       - "tools/openquestions/**"
       - "tools/precommitbaseline/**"
+      - "tools/controlplaneperf/**"
       - "tools/workflowevidence/**"
   push:
     branches: [main]
@@ -59,6 +63,7 @@ on:
       - ".github/workflows/ai-agent-client-testnet-smoke.yml"
       - ".github/workflows/ai-agent-client-testnet-load.yml"
       - ".github/workflows/ai-agent-client-api.yml"
+      - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-registry.yml"
       - ".github/workflows/loop-refresh-dispatch.yml"
       - ".github/workflows/open-questions.yml"
@@ -75,6 +80,8 @@ on:
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/module-decomposition.riido.json"
       - "docs/30-architecture/pre-commit-baseline.riido.json"
+      - "docs/30-architecture/control-plane-performance.md"
+      - "docs/30-architecture/control-plane-performance.riido.json"
       - "docs/50-roadmap/open-questions.riido.json"
       - "internal/riidoaiserver/**"
       - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
@@ -94,6 +101,7 @@ on:
       - "tools/moduledecomposition/**"
       - "tools/openquestions/**"
       - "tools/precommitbaseline/**"
+      - "tools/controlplaneperf/**"
       - "tools/workflowevidence/**"
 
 jobs:

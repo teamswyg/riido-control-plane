@@ -6,8 +6,8 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 
 ## Summary
 
-- promotion sources: `2`
-- required next artifact refs: `12`
+- promotion sources: `3`
+- required next artifact refs: `18`
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 
@@ -17,6 +17,7 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 | --- | --- | --- | --- | ---: |
 | `ai-agent-client-testnet-smoke` | `provider_acceptance_harness` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `ai-agent-client-testnet-load` | `ai_agent_load_harness` | `ai-agent-client-testnet-load-closed-loop-candidates` | `closed_loop_candidate` | `6` |
+| `control-plane-performance` | `control_plane_performance_harness` | `control-plane-performance-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 
 ## Assertions
 
