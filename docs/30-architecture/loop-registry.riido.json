@@ -892,7 +892,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3414a9db7d5db03506ee6d2e99ccb5a69e6f3a914a7289f7722b2e3d94934c7c"
+      "semantic_hash": "65159d881dc5a2cf9a5a10141be835a3e251233f13ebbcccc51b2c37f1a8ca52"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",

@@ -28,6 +28,7 @@ func TestHTTPAIAgentIntentDialogueV3KeepsScenarioTimeline(t *testing.T) {
 	assertNestedConversationFollowup(t, history, root.ThreadID, draft.ThreadID, research.ThreadID)
 	assertConversationReassignment(t, history, root.ThreadID, handoff.ThreadID)
 	assertPostLimitHandoffKeepsPriorConversation(t, history, research.ThreadID, handoff.ThreadID)
+	assertHTTPDraftReadsBodyBeforeCompletion(t, historyThreadByID(t, history, draft.ThreadID))
 	assertDraftCopywritingComplete(t, historyThreadByID(t, history, draft.ThreadID))
 	assertFollowupResearchLimit(t, historyThreadByID(t, history, research.ThreadID))
 }
