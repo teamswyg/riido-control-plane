@@ -28,7 +28,8 @@ type evidence struct {
 }
 
 func newEvidence(m manifest, result verifyResult, impact *impactEvidence) evidence {
-	generatedAt, expiresAt := evidenceWindow(loopRegistryEvidenceTTLHours)
+	now := evidenceNow()
+	generatedAt, expiresAt := evidenceWindowAt(now, loopRegistryEvidenceTTLHours)
 	return evidence{
 		SchemaVersion:             evidenceSchema,
 		ID:                        m.ID,
@@ -46,7 +47,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		ClaimSurfaces:             result.ClaimSurfaces,
 		RefreshWorkflows:          refreshWorkflows(m.Loops),
 		RefreshCadenceMinutes:     result.RefreshCadenceMinutes,
-		RefreshPlans:              refreshPlans(m.Loops, result.RefreshCadenceMinutes),
+		RefreshPlans:              refreshPlansAt(m.Loops, result.RefreshCadenceMinutes, now),
 		HarnessPromotionWorkflows: result.HarnessPromotionWorkflows,
 		HarnessCandidateArtifacts: result.HarnessCandidateArtifacts,
 		Workflow:                  m.Workflow,

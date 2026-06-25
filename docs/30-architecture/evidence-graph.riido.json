@@ -715,16 +715,20 @@
     },
     {
       "id": "loop_registry_refresh_plan_evidence_loop",
-      "observation": "Loop registry evidence exposed refresh workflow maps and cadence maps, but an agent still had to compose the manual QA refresh command and evidence artifact set itself.",
-      "hypothesis": "A per-loop refresh_plans evidence surface lets agents and reviewers identify expired-evidence QA commands directly from machine evidence.",
+      "observation": "Loop registry evidence exposed refresh workflow maps and cadence maps, but an agent still had to compose the manual QA refresh command, evidence artifact set, and next refresh/expiry timestamps itself.",
+      "hypothesis": "A per-loop refresh_plans evidence surface with generated_at, next_refresh_due_at, evidence_expires_at, artifacts, and commands lets agents and reviewers identify expired-evidence QA actions directly from machine evidence.",
       "claims": ["loop_registry_evidence_must_expose_refresh_plans"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "tool", "path": "tools/loopregistry"},
-        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"}
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence_time.go"},
+        {"kind": "tool", "path": "tools/loopregistry/refresh_plan_time.go"},
+        {"kind": "test", "path": "tools/loopregistry/refresh_plan_due_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/refresh_plan_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/refresh_plan_due_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -732,7 +736,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Loop registry evidence now exposes refresh_plans with workflow, cadence, expiry, evidence artifacts, and manual refresh commands for every loop.",
+      "decision": "Loop registry evidence now exposes refresh_plans with workflow, cadence, expiry, next refresh due time, evidence expiry time, evidence artifacts, and manual refresh commands for every loop.",
       "next_loop": "closed_loop_candidate"
     },
     {

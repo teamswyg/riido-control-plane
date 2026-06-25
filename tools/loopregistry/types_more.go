@@ -35,6 +35,9 @@ type refreshPlan struct {
 	WorkflowFile         string                    `json:"workflow_file"`
 	CadenceMinutes       int                       `json:"cadence_minutes"`
 	ExpiresAfterHours    int                       `json:"expires_after_hours"`
+	EvidenceGeneratedAt  string                    `json:"evidence_generated_at,omitempty"`
+	NextRefreshDueAt     string                    `json:"next_refresh_due_at,omitempty"`
+	EvidenceExpiresAt    string                    `json:"evidence_expires_at,omitempty"`
 	ManualRefreshCommand string                    `json:"manual_refresh_command"`
 	EvidenceArtifacts    []string                  `json:"evidence_artifacts"`
 	EvidenceRefreshes    []evidenceArtifactRefresh `json:"evidence_refreshes"`
