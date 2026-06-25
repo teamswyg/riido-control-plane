@@ -39,6 +39,8 @@ type refreshPlan struct {
 	NextRefreshDueAt     string                    `json:"next_refresh_due_at,omitempty"`
 	EvidenceExpiresAt    string                    `json:"evidence_expires_at,omitempty"`
 	ManualRefreshCommand string                    `json:"manual_refresh_command"`
+	ClaimIDs             []string                  `json:"claim_ids"`
+	VerifierCommands     []string                  `json:"verifier_commands"`
 	EvidenceArtifacts    []string                  `json:"evidence_artifacts"`
 	EvidenceRefreshes    []evidenceArtifactRefresh `json:"evidence_refreshes"`
 }
