@@ -56,12 +56,17 @@
       "risk": "fine-grained provider progress can create many render/normalize calls",
       "files": [
         "internal/riidoaiserver/progress_messages_render.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_record_ai_agent_thread_progress.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_progress_lookup.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_thread_progress_locked.go",
         "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go",
         "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
         "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
-        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go"
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go"
       ],
       "benchmarks": ["BenchmarkRenderProgressMessage", "BenchmarkRecordAIAgentThreadProgress"],
+      "tests": ["TestRecordAIAgentThreadProgressRetainsLatestLines"],
       "candidate": "batch provider progress before rendering and preserve structured fallback behavior"
     },
     {
@@ -79,12 +84,16 @@
       "files": [
         "internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go",
         "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_progress_lookup.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_thread_progress_locked.go",
         "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
         "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
-        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go"
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go"
       ],
       "tests": [
         "TestDevelopmentAIAgentClientStoreThreadProgressFanout",
+        "TestRecordAIAgentThreadProgressRetainsLatestLines",
         "TestFilterUnseenProgressLinesKeepsStrictlyNewLines",
         "TestMergeThreadProgressLinesAppendsWithoutDroppingExisting"
       ],

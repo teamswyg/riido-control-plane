@@ -30,7 +30,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		if len(event.Lines) > 0 {
 			threads[i].Message = event.Lines[len(event.Lines)-1].Message
 		}
-		threads[i].Lines = mergeThreadProgressLines(threads[i].Lines, event.Lines)
+		threads[i].Lines = retainLatestThreadProgressLines(mergeThreadProgressLines(threads[i].Lines, event.Lines))
 		s.taskThreads[event.TaskID] = threads
 		return
 	}
@@ -49,7 +49,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		CommentKind:     event.CommentKind,
 		Message:         message,
 		StartedAt:       now,
-		Lines:           copyProgressLines(event.Lines),
+		Lines:           retainLatestThreadProgressLines(copyProgressLines(event.Lines)),
 	}
 	s.ensureTaskThreadAgentSnapshotLocked(&thread, now)
 	s.taskThreads[event.TaskID] = append(threads, thread)

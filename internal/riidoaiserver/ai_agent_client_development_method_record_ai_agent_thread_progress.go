@@ -16,7 +16,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 	if !ok {
 		return AgentThreadProgressBatchResponse{}, ErrAIAgentNotFound
 	}
-	if existing, found := s.taskThreadForAssignmentLocked(input.Request.TaskID, input.AgentID, input.Request.AssignmentID); found {
+	if existing, found := s.rawTaskThreadForAssignmentLocked(input.Request.TaskID, input.AgentID, input.Request.AssignmentID); found {
 		if !agentAssignmentStateAcceptsRuntimeProgress(existing.AssignmentState) {
 			return AgentThreadProgressBatchResponse{SchemaVersion: SchemaVersion, AcceptedLines: 0}, nil
 		}
@@ -26,12 +26,12 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 		}
 		input.GeneratedThreadID = false
 	}
-	if active, ok := s.activeTaskThreadForAgentLocked(input.Request.TaskID, input.AgentID); ok &&
+	if active, ok := s.rawActiveTaskThreadForAgentLocked(input.Request.TaskID, input.AgentID); ok &&
 		active.ThreadID != input.Request.ThreadID &&
 		input.GeneratedThreadID {
 		input.Request.ThreadID = active.ThreadID
 	}
-	if existing, ok := s.taskThreadByIDLocked(input.Request.TaskID, input.Request.ThreadID); ok &&
+	if existing, ok := s.rawTaskThreadByIDLocked(input.Request.TaskID, input.Request.ThreadID); ok &&
 		existing.AssignmentID == input.Request.AssignmentID {
 		input.Lines = filterUnseenProgressLines(existing.Lines, input.Lines)
 		if len(input.Lines) == 0 {

@@ -68,9 +68,12 @@
         "internal/riidoaiserver/ai_agent_client_development_type_development_ai_agent_client_store.go",
         "internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go",
         "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_progress_lookup.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_thread_progress_locked.go",
         "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
         "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
-        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go"
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go"
       ],
       "patterns": ["subscribers             map[int]aiAgentClientSubscriber", "make(chan ClientStreamEvent, 32)", "subscriber.events <- visible"],
       "candidate": "Measure subscriber fanout pressure before adding richer realtime event types or per-message metadata."
@@ -105,14 +108,19 @@
       "risk": "Fine-grained provider output can create many normalize, merge, render, and fanout operations.",
       "files": [
         "internal/riidoaiserver/ai_agent_client_development_method_record_ai_agent_thread_progress.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_progress_lookup.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_thread_progress_locked.go",
         "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go",
         "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
         "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
         "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go",
         "internal/riidoaiserver/progress_messages_render.go"
       ],
       "patterns": [
         "RecordAIAgentThreadProgress",
+        "rawTaskThreadForAssignmentLocked",
+        "retainLatestThreadProgressLines",
         "normalize",
         "renderProgressMessage",
         "progressLinesAreStrictlyAfter",
