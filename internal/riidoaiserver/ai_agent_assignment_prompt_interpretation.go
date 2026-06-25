@@ -23,20 +23,6 @@ func writePromptTaskInterpretation(
 	builder.WriteString("\n")
 }
 
-func classifyTaskContextIntent(
-	component AIAgentTaskContextComponent,
-	document AIAgentTaskContextDocument,
-) string {
-	text := strings.ToLower(component.Title + "\n" + document.Content)
-	if containsAny(text, intentOrientedTaskMarkers()) {
-		return taskIntentIntentOriented
-	}
-	if strings.TrimSpace(document.Content) == "" {
-		return taskIntentMetadataOnly
-	}
-	return taskIntentExplicit
-}
-
 func firstResponsePolicy(intentClass string) string {
 	switch intentClass {
 	case taskIntentIntentOriented:
