@@ -25,6 +25,7 @@ func TestRepairedClaimsHaveCoverageTokens(t *testing.T) {
 		"evidence_graph_chain_changes_require_executable_surface",
 		"evidence_graph_evidence_must_expose_full_chain",
 		"evidence_graph_must_cover_loop_registry_claims",
+		"evidence_graph_refs_must_trigger_evidence_workflow",
 	} {
 		t.Run(claim, func(t *testing.T) {
 			requireNoClaimCoverageGapForClaim(t, claim)
