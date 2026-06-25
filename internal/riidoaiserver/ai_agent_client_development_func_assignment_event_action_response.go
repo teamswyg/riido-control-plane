@@ -12,7 +12,7 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		WorkStatus:      AgentWorkStatusRunning,
 		AssignmentState: AgentAssignmentStateRunning,
 		CommentKind:     AgentTaskCommentRuntimeProgress,
-		Message:         clientVisibleTaskThreadText(message),
+		Message:         clientVisibleFailureMessage(metadata, message),
 	}
 	applyAssignmentStateActionResponse(&response, state)
 	applyAssignmentMetadataActionResponse(&response, metadata)

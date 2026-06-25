@@ -10,7 +10,7 @@ func failureDiagnosticsFromAssignmentEvent(metadata map[string]string, message s
 	diagnostics := AIAgentTaskThreadFailureDiagnostics{
 		ResultStatus:    strings.TrimSpace(metadata[metadatakeys.AssignmentResultStatus.String()]),
 		FailureCategory: strings.TrimSpace(metadata[metadatakeys.AssignmentFailureCategory.String()]),
-		Message:         clientVisibleTaskThreadText(message),
+		Message:         clientVisibleFailureMessage(metadata, message),
 	}
 	if diagnostics.ResultStatus == "" && diagnostics.FailureCategory == "" && diagnostics.Message == "" {
 		return nil

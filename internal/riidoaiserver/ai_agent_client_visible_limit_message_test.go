@@ -1,6 +1,10 @@
 package riidoaiserver
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
+)
 
 func TestClientVisibleTaskThreadTextLocalizesProviderLimitMessages(t *testing.T) {
 	t.Parallel()
@@ -27,5 +31,31 @@ func TestFailureDiagnosticsLocalizesProviderLimitMessages(t *testing.T) {
 	}
 	if diagnostics.Message != clientMessageCloudCreditInsufficient {
 		t.Fatalf("diagnostics message = %q, want %q", diagnostics.Message, clientMessageCloudCreditInsufficient)
+	}
+}
+
+func TestFailureDiagnosticsUsesProviderLimitCategory(t *testing.T) {
+	t.Parallel()
+	metadata := map[string]string{
+		metadatakeys.AssignmentFailureCategory.String(): providerLimitFailureCategory,
+	}
+	diagnostics := failureDiagnosticsFromAssignmentEvent(metadata, "provider returned hard stop")
+	if diagnostics == nil {
+		t.Fatal("expected diagnostics")
+	}
+	if diagnostics.Message != clientMessageCloudCreditInsufficient {
+		t.Fatalf("diagnostics message = %q, want %q", diagnostics.Message, clientMessageCloudCreditInsufficient)
+	}
+}
+
+func TestAssignmentEventResponseUsesProviderLimitCategory(t *testing.T) {
+	t.Parallel()
+	metadata := map[string]string{
+		metadatakeys.AssignmentFailureCategory.String(): providerLimitFailureCategory,
+	}
+	response := assignmentEventActionResponse(AIAgentTaskThreadRecord{}, AssignmentFailed, "provider returned hard stop", metadata)
+	if response.Message != clientMessageCloudCreditInsufficient ||
+		response.ResultMessage != clientMessageCloudCreditInsufficient {
+		t.Fatalf("response message/result = %q/%q", response.Message, response.ResultMessage)
 	}
 }
