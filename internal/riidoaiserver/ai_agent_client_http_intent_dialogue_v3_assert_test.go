@@ -20,27 +20,16 @@ func assertHTTPRootIntentQuestion(t *testing.T, thread AIAgentTaskThreadHistoryR
 	if thread.WorkStatus != AgentWorkStatusWaitingForUser || !historyAgentMessageContains(thread, "어떤 작업부터") {
 		t.Fatalf("root thread did not ask for intent: %+v", thread)
 	}
-}
-
-func assertIntentDialoguePollNone(t *testing.T, store *Store, action AIAgentTaskActionResponse) {
-	t.Helper()
-	pollNone, err := store.PollAgent(t.Context(), action.AgentID, intentDialoguePollRequest())
-	if err != nil {
-		t.Fatalf("PollAgent before followup: %v", err)
-	}
-	if pollNone.Action != PollNone || pollNone.Assignment != nil {
-		t.Fatalf("intent-gated assignment must not reach daemon before user reply: %+v", pollNone)
+	if historyMessagesContainProgressBody(thread.Messages, "본문을 먼저 읽겠습니다.") {
+		t.Fatalf("intent-gated root thread reached runtime before user intent: %+v", thread.Messages)
 	}
 }
 
-func assertIntentDialoguePollWork(t *testing.T, store *Store, action AIAgentTaskActionResponse) {
+func assertHTTPDraftReadsBodyBeforeCompletion(t *testing.T, thread AIAgentTaskThreadHistoryRecord) {
 	t.Helper()
-	pollWork, err := store.PollAgent(t.Context(), action.AgentID, intentDialoguePollRequest())
-	if err != nil {
-		t.Fatalf("PollAgent after followup: %v", err)
-	}
-	if pollWork.Assignment == nil || (pollWork.Action != PollStart && pollWork.Action != PollActive) {
-		t.Fatalf("followup assignment was not durable: %+v", pollWork)
+	if !historyMessagesContainProgressBody(thread.Messages, "본문을 먼저 읽겠습니다.") ||
+		!historyMessagesContainProgressBody(thread.Messages, "파악 완료.") {
+		t.Fatalf("draft thread did not preserve body-reading progress: %+v", thread.Messages)
 	}
 }
 
@@ -58,13 +47,5 @@ func assertPostLimitHandoffKeepsPriorConversation(
 	}
 	if handoff.ConversationID == "" || handoff.ConversationID == limited.ConversationID {
 		t.Fatalf("post-limit handoff reused limited conversation: limited=%+v handoff=%+v", limited, handoff)
-	}
-}
-
-func intentDialoguePollRequest() PollRequest {
-	return PollRequest{
-		DaemonID:  "daemon-dev-macbook",
-		DeviceID:  "device-dev-macbook",
-		RuntimeID: "runtime-codex-dev",
 	}
 }
