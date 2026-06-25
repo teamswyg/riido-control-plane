@@ -42,6 +42,10 @@ func TestClaimVerifierAnnotationClaimHasCoverageTokens(t *testing.T) {
 	requireNoClaimCoverageGapForClaim(t, "claim_verifier_commands_must_surface_as_ci_annotations")
 }
 
+func TestExpiredCandidateConsumerClaimHasCoverageTokens(t *testing.T) {
+	requireNoClaimCoverageGapForClaim(t, "closed_loop_candidate_consumers_must_reject_expired_candidates")
+}
+
 func requireNoClaimCoverageGapForLoop(t *testing.T, loop string) {
 	t.Helper()
 	_, deps := loadForTest(t)
