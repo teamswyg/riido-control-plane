@@ -6,7 +6,7 @@ func candidateRef(source candidateSource, generatedAt, expiresAt string) candida
 		SourceWorkflow:    source.SourceWorkflow,
 		SummaryArtifact:   source.SummaryArtifact,
 		CandidateArtifact: source.CandidateArtifact,
-		LiveStatus:        "residual_gaps",
+		LiveStatus:        candidateLiveStatus,
 		SourceGeneratedAt: generatedAt,
 		SourceExpiresAt:   expiresAt,
 		Run:               newCandidateRun(),

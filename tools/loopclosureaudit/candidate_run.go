@@ -4,7 +4,7 @@ import "os"
 
 func newCandidateRun() runRecord {
 	return runRecord{
-		ID:      getenvDefault("GITHUB_RUN_ID", "loop-closure-audit-residual-gaps"),
+		ID:      getenvDefault("GITHUB_RUN_ID", "loop-closure-audit-audit-gaps"),
 		Attempt: getenvDefault("GITHUB_RUN_ATTEMPT", "1"),
 		SHA:     getenvDefault("GITHUB_SHA", "local"),
 		RefName: getenvDefault("GITHUB_REF_NAME", "local"),

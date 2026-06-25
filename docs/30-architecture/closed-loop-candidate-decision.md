@@ -6,7 +6,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `7`
+- decisions: `46`
 
 ## Assertions
 
@@ -44,6 +44,45 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `control-plane-performance:control_plane_performance_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `loop-closure-audit:claim_coverage_token_completeness` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `loop-closure-audit:candidate_adoption_decision_freshness` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `decision_record` |
+| `loop-closure-audit:claim_coverage:ambiguous_task_context_must_ask_before_work` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:same_provider_agents_must_keep_distinct_threads` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:thread_history_must_keep_user_followups` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:claim_bound_file_changes_require_reasoning_chain` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:claim_bound_paths_must_trigger_loop_registry` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:claim_impact_evidence_must_expose_changed_files` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:claim_meaning_changes_require_code_or_test_surface` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:claim_meaning_changes_require_reasoning_chain` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:claim_surface_evidence_must_expose_code_test_doc_binding` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:claim_verifier_commands_must_surface_as_ci_annotations` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:closed_loop_candidate_consumers_must_reject_expired_candidates` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:closed_loop_candidate_evidence_must_self_expire` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:closed_loop_candidates_must_carry_adoption_plan` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:closed_loop_candidates_must_carry_promotion_edge` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:closed_loop_candidates_must_carry_source_ref` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:evidence_graph_chain_changes_require_executable_surface` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:evidence_graph_evidence_must_expose_full_chain` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:evidence_graph_must_cover_loop_registry_claims` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:evidence_graph_refs_must_trigger_evidence_workflow` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:expired_loop_evidence_must_select_refresh_commands` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:expired_loop_refresh_commands_must_dispatch_safe_workflows` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:expiring_loops_must_schedule_refresh` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:harness_like_workflows_must_be_registered_or_excluded` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:harness_promotion_must_run_after_failure` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:loop_evidence_artifacts_must_have_refresh_owners` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:loop_evidence_artifacts_must_self_expire` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:loop_evidence_sources_must_be_claim_covered` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:loop_failure_conditions_must_be_claim_covered` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:loop_observation_tokens_must_be_claim_covered` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:loop_registry_evidence_must_expose_graph_edges` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:loop_registry_evidence_must_expose_refresh_plans` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:loop_verifiers_must_accept_verify_intent` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:loop_verify_tokens_must_be_claim_covered` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:pre_commit_must_run_claim_binding_impact` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:refresh_workflows_must_declare_loop_identity` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:semantic_hash_metadata_must_not_affect_claim_meaning` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:candidate_decision_evidence_must_expose_next_command` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:candidate_decision_next_artifact_must_be_required` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `loop-closure-audit:claim_coverage:expired_harness_evidence_must_not_promote_candidates` | `triage_required` | `P2` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
 
 ## Evidence Loop
 

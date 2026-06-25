@@ -1,17 +1,20 @@
 package main
 
-const candidateSchema = "riido-control-plane-closed-loop-candidates.v1"
+const (
+	candidateSchema     = "riido-control-plane-closed-loop-candidates.v1"
+	candidateLiveStatus = "audit_gaps"
+)
 
-func newCandidateEvidence(m manifest) candidateEvidence {
+func newCandidateEvidence(m manifest, deps dependencies) candidateEvidence {
 	source := m.Sources[0]
 	generatedAt, expiresAt := candidateWindow()
-	candidates := residualGapCandidates(source, m.ResidualGaps, generatedAt, expiresAt)
+	candidates := auditCandidates(source, m, deps, generatedAt, expiresAt)
 	return candidateEvidence{
 		SchemaVersion:     candidateSchema,
 		ID:                source.ID,
 		Status:            "verified",
 		SourceWorkflow:    source.SourceWorkflow,
-		LiveStatus:        "residual_gaps",
+		LiveStatus:        candidateLiveStatus,
 		SourceGeneratedAt: generatedAt,
 		SourceExpiresAt:   expiresAt,
 		CandidateCount:    len(candidates),
@@ -20,20 +23,14 @@ func newCandidateEvidence(m manifest) candidateEvidence {
 	}
 }
 
-func residualGapCandidates(source candidateSource, gaps []residualGap, generatedAt, expiresAt string) []closedLoopCandidate {
-	out := make([]closedLoopCandidate, 0, len(gaps))
-	for _, gap := range gaps {
-		out = append(out, closedLoopCandidate{
-			ID:                    source.ID + ":" + gap.ID,
-			SourceRef:             candidateRef(source, generatedAt, expiresAt),
-			HarnessLoop:           source.HarnessLoop,
-			PromotionTarget:       source.PromotionTarget,
-			PromotionEdge:         graphEdge{source.HarnessLoop, source.PromotionTarget, "promotes_failure_to"},
-			Observation:           gap.Observation,
-			Hypothesis:            gap.Risk,
-			RequiredNextArtifacts: append([]string(nil), source.RequiredNextArtifacts...),
-			AdoptionPlan:          adoptionPlan(source, gap),
-		})
-	}
+func auditCandidates(
+	source candidateSource,
+	m manifest,
+	deps dependencies,
+	generatedAt string,
+	expiresAt string,
+) []closedLoopCandidate {
+	out := residualGapCandidates(source, m.ResidualGaps, generatedAt, expiresAt)
+	out = append(out, claimCoverageCandidates(source, deps, generatedAt, expiresAt)...)
 	return out
 }
