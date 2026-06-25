@@ -9,7 +9,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 - requirements: `4`
 - checks: `21`
 - residual gaps: `2`
-- claim coverage gaps: `9`
+- claim coverage gaps: `8`
 - evidence artifact: `loop-closure-audit-evidence`
 - workflow: `.github/workflows/loop-closure-audit.yml`
 
@@ -43,7 +43,6 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 | `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
-| `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `covers_observes, covers_fails_when` |
 | `pre_commit_must_run_claim_binding_impact` | `closed_loop_candidate` | `covers_observes, covers_fails_when` |
 | `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
 | `semantic_hash_metadata_must_not_affect_claim_meaning` | `closed_loop_candidate` | `covers_observes, covers_verifies, covers_fails_when` |
