@@ -36,6 +36,7 @@ func TestRepairedClaimsHaveCoverageTokens(t *testing.T) {
 		"loop_failure_conditions_must_be_claim_covered",
 		"loop_observation_tokens_must_be_claim_covered",
 		"loop_verify_tokens_must_be_claim_covered",
+		"pre_commit_must_run_claim_binding_impact",
 	} {
 		t.Run(claim, func(t *testing.T) {
 			requireNoClaimCoverageGapForClaim(t, claim)

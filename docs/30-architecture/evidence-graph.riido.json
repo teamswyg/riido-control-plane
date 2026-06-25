@@ -1223,20 +1223,24 @@
     },
     {
       "id": "pre_commit_claim_binding_loop",
-      "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier.",
-      "hypothesis": "A pre-commit hook can run loop registry claim/doc/impact verification before PR creation.",
+      "observation": "CI could catch claim binding drift, but local commits still depended on humans remembering the verifier and the claim did not expose the regression/failure semantics it closes.",
+      "hypothesis": "A pre-commit hook that runs loop registry claim/doc/impact verification before PR creation, and declares regression_pattern plus claim_without_verifier coverage, makes claim-code-test-doc drift an executable local failure rather than a review-time memory task.",
       "claims": ["pre_commit_must_run_claim_binding_impact"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
         {"kind": "workflow", "path": ".github/workflows/pre-commit-baseline.yml"},
         {"kind": "manifest", "path": "docs/30-architecture/pre-commit-baseline.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
         {"kind": "tool", "path": "tools/precommitbaseline"},
         {"kind": "script", "path": "tools/loopregistry/precommit.sh"},
         {"kind": "config", "path": ".pre-commit-config.yaml"},
-        {"kind": "test", "path": "tools/precommitbaseline/loopregistry_hook_test.go"}
+        {"kind": "test", "path": "tools/precommitbaseline/loopregistry_hook_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/precommitbaseline/loopregistry_hook_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/precommitbaseline"},
         {"kind": "script", "path": "tools/loopregistry/precommit.sh"},
         {"kind": "tool", "path": "tools/loopregistry"}
@@ -1245,7 +1249,7 @@
         {"kind": "artifact", "path": "pre-commit-baseline-evidence", "redacted": true},
         {"kind": "artifact", "path": "riido-loop-registry-precommit-evidence.json", "redacted": true}
       ],
-      "decision": "Local pre-commit now blocks claim binding drift before review.",
+      "decision": "Local pre-commit now blocks claim binding drift before review, and loop-closure audit keeps that drift gate bound to its regression/failure coverage so the pre-commit claim cannot silently fall back into prose.",
       "next_loop": "closed_loop_candidate"
     },
     {
