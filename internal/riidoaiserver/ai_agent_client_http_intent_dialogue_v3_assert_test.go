@@ -44,6 +44,23 @@ func assertIntentDialoguePollWork(t *testing.T, store *Store, action AIAgentTask
 	}
 }
 
+func assertPostLimitHandoffKeepsPriorConversation(
+	t *testing.T,
+	history AIAgentTaskThreadHistoryCollectionResponse,
+	limitedThreadID string,
+	handoffThreadID string,
+) {
+	t.Helper()
+	limited := historyThreadByID(t, history, limitedThreadID)
+	handoff := historyThreadByID(t, history, handoffThreadID)
+	if !historyAgentResultContains(limited, clientMessageCloudCreditInsufficient) {
+		t.Fatalf("provider limit result disappeared after handoff: %+v", limited)
+	}
+	if handoff.ConversationID == "" || handoff.ConversationID == limited.ConversationID {
+		t.Fatalf("post-limit handoff reused limited conversation: limited=%+v handoff=%+v", limited, handoff)
+	}
+}
+
 func intentDialoguePollRequest() PollRequest {
 	return PollRequest{
 		DaemonID:  "daemon-dev-macbook",

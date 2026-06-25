@@ -819,7 +819,8 @@
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go"},
-        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"}
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go"},
@@ -829,6 +830,7 @@
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
