@@ -15,9 +15,10 @@ type loopRecord struct {
 }
 
 type verifyResult struct {
-	Chains       int `json:"chains"`
-	ClaimRefs    int `json:"claim_refs"`
-	ChangeRefs   int `json:"change_refs"`
-	VerifierRefs int `json:"verifier_refs"`
-	EvidenceRefs int `json:"evidence_refs"`
+	Chains                int `json:"chains"`
+	ClaimRefs             int `json:"claim_refs"`
+	ChangeRefs            int `json:"change_refs"`
+	VerifierRefs          int `json:"verifier_refs"`
+	EvidenceRefs          int `json:"evidence_refs"`
+	RefreshCadenceMinutes int `json:"refresh_cadence_minutes"`
 }

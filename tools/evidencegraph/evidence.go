@@ -12,6 +12,9 @@ type evidence struct {
 	VerifierRefs     int             `json:"verifier_ref_count"`
 	EvidenceRefs     int             `json:"evidence_ref_count"`
 	Workflow         string          `json:"workflow"`
+	WorkflowFile     string          `json:"workflow_file"`
+	CadenceMinutes   int             `json:"cadence_minutes"`
+	ManualRefresh    string          `json:"manual_refresh_command"`
 	GeneratedDoc     string          `json:"generated_doc"`
 	EvidenceArtifact string          `json:"evidence_artifact"`
 	LoopRegistry     string          `json:"loop_registry_manifest"`
@@ -34,6 +37,9 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		VerifierRefs:     result.VerifierRefs,
 		EvidenceRefs:     result.EvidenceRefs,
 		Workflow:         m.Workflow,
+		WorkflowFile:     workflowFile(m.Workflow),
+		CadenceMinutes:   result.RefreshCadenceMinutes,
+		ManualRefresh:    manualRefreshCommand(m.Workflow),
 		GeneratedDoc:     m.GeneratedDoc,
 		EvidenceArtifact: m.Evidence,
 		LoopRegistry:     m.LoopRegistry,
