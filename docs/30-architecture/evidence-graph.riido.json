@@ -338,10 +338,12 @@
         {"kind": "tool", "path": "tools/loopregistry/hash.go"},
         {"kind": "tool", "path": "tools/loopregistry/claim_surface.go"},
         {"kind": "tool", "path": "tools/loopregistry/render_more.go"},
-        {"kind": "test", "path": "tools/loopregistry/verify_loop_failure_test.go"}
+        {"kind": "test", "path": "tools/loopregistry/verify_loop_failure_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/claim_surface_failure_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/verify_loop_failure_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/claim_surface_failure_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],

@@ -515,7 +515,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "53ebfa1ded7aeeb6db5d8cabf1c9902e3356f9a17f4c41d53b0f483ac9b21307"
+      "semantic_hash": "acddfece8387a1268bf5e5c692c7bf5e885d5f74d72e022e67f0a4fe7ae8e513"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -625,7 +625,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "12087f6b094d24c0c4953fe59194f7883d815f4fe833f13e38473c82a3855afd"
+      "semantic_hash": "322a8eb72d01ceb2290b5c7a229ed2608c42f7988eb3620ee6fe164795325afa"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -680,7 +680,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "3abfa26780e457ea306904cb58add21e22309b641c4d997a0c33e923b878aa6f"
+      "semantic_hash": "59176c7223169cab8b47b8320fe72ab60890f5cf9087ecd97e0de6ad65d9f7bb"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -815,7 +815,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "d96cdceea4b8ea7ffaef2c45187382885117e03a921ffd9139adb036d4e9c687"
+      "semantic_hash": "20e7233ccd0e579c4f79bd6ec4c9776ca19ea46846eb5cd9e1c2fa3a582a3d15"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -890,19 +890,21 @@
         "tools/loopregistry/types_more.go",
         "tools/loopregistry/hash.go",
         "tools/loopregistry/claim_surface.go",
+        "tools/loopregistry/claim_surface_failure_test.go",
         "tools/loopregistry/render_more.go",
         "tools/loopregistry/verify.go"
       ],
       "verifiers": [
         "TestLoopFailureCoverageRejectsUncoveredToken",
         "TestLoopFailureCoverageRejectsUnknownClaimToken",
-        "TestLoopFailureCoverageAcceptsClaimCoveredToken"
+        "TestLoopFailureCoverageAcceptsClaimCoveredToken",
+        "TestClaimSurfaceEvidenceIncludesFailureCoverage"
       ],
       "generated_docs": [
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "84b32f58ad81c4b2c0a0eba4006168019744b07395e3d2da7c6611d1d0d82adb"
+      "semantic_hash": "20d82d90d65ed355cb3cbc2f38d200f78d27a89c616b304deda0d521c9f020b2"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -1058,7 +1060,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "b631b743d20a2d8d378ffa719003ae1d45da4906acba034d0a8a698ce049a1b3"
+      "semantic_hash": "34c1bb35a84c246e7ce3760ad3f413cd35d767978cc8200406f840fec777277b"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -1082,7 +1084,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "6388d1844515421533c742d28903a2dbda31fc07deb07cadb3776b0d16f490a4"
+      "semantic_hash": "ec8444f2d904281bb12b0e86e24a44fd4ee0fe8843ba26ce349037b0ba5aedd7"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -1102,7 +1104,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "b2e682971852a75fdb8bca9b6e58ca363ff61833f2280fe6baeef25cd7a304f5"
+      "semantic_hash": "eeef198a6ed72b3397ef8cbfc4ce313200450a318b8f42e0db20492fc49e54a4"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -1218,7 +1220,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ac2a617b845f592bf9293382e7e71e30e7d4b132da7a0d918a958b29c6be174a"
+      "semantic_hash": "7fd46c7cd2c2b96b458f838dea814edc174396e72c890d0811e93ee9743b980e"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
