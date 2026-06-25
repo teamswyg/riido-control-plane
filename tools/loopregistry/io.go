@@ -41,6 +41,18 @@ func loadManifest(path string) (manifest, error) {
 	return decodeManifest(strings.NewReader(string(data)))
 }
 
+func loadLoopRegistryEvidence(path string) (evidence, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return evidence{}, err
+	}
+	var got evidence
+	if err := json.Unmarshal(data, &got); err != nil {
+		return evidence{}, err
+	}
+	return got, nil
+}
+
 func decodeManifest(r io.Reader) (manifest, error) {
 	var m manifest
 	if err := json.NewDecoder(r).Decode(&m); err != nil {

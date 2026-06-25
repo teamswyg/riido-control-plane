@@ -14,11 +14,16 @@ type options struct {
 	WriteHashes bool
 	ImpactBase  string
 
-	GitHubAnnotations bool
-	AnnotationOut     io.Writer
+	GitHubAnnotations  bool
+	AnnotationOut      io.Writer
+	RefreshPlanIn      string
+	RefreshCommandsOut string
 }
 
 func run(opt options) error {
+	if opt.RefreshPlanIn != "" {
+		return writeRefreshCommandEvidence(opt)
+	}
 	root, err := findRepoRoot(opt.Repo)
 	if err != nil {
 		return err

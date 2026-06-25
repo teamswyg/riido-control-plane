@@ -773,6 +773,32 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "expired_loop_refresh_command_selection_loop",
+      "observation": "Loop registry evidence could expose ordered next_commands while still leaving scheduled automation to decide which commands to select after the evidence artifact expires.",
+      "hypothesis": "A refresh command selection mode that reads existing loop-registry evidence and emits only expired refresh plan commands turns stale evidence into a machine-executable QA queue.",
+      "claims": ["expired_loop_evidence_must_select_refresh_commands"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/main.go"},
+        {"kind": "tool", "path": "tools/loopregistry/run.go"},
+        {"kind": "tool", "path": "tools/loopregistry/refresh_command_select.go"},
+        {"kind": "tool", "path": "tools/loopregistry/refresh_command_run.go"},
+        {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-refresh-commands", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Expired loop-registry evidence can now be consumed as input and transformed into ordered refresh command evidence without reopening manifests or hand-composing commands.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "loop_evidence_artifact_refresh_owner_loop",
       "observation": "A loop can declare multiple redacted evidence artifacts while its loop-level refresh workflow only publishes one of them, leaving the remaining evidence to expire even though the refresh plan looks healthy.",
       "hypothesis": "Artifact-level refresh workflow ownership lets each redacted evidence artifact name the scheduled workflow that produces it, and verification can require exact strict artifact uploads for every declared evidence source.",
