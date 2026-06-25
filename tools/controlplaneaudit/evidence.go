@@ -10,6 +10,7 @@ type evidence struct {
 	ManualPressureCommand string            `json:"manual_pressure_command"`
 	RaceCommand           string            `json:"race_command"`
 	PprofCommands         []string          `json:"pprof_commands"`
+	CategoryCounts        map[string]int    `json:"category_counts"`
 	Surfaces              []surfaceEvidence `json:"surfaces"`
 }
 
@@ -41,6 +42,15 @@ func newEvidence(root string, m manifest) (evidence, error) {
 		ManualPressureCommand: m.ManualPressureCommand,
 		RaceCommand:           m.RaceCommand,
 		PprofCommands:         m.PprofCommands,
+		CategoryCounts:        categoryCounts(rows),
 		Surfaces:              rows,
 	}, nil
+}
+
+func categoryCounts(rows []surfaceEvidence) map[string]int {
+	counts := map[string]int{}
+	for _, row := range rows {
+		counts[row.Category]++
+	}
+	return counts
 }

@@ -15,10 +15,16 @@ func verifyAll(root string, m manifest) error {
 	if m.EvidenceArtifact == "" || len(m.Surfaces) == 0 || len(m.Assertions) == 0 {
 		return fmt.Errorf("audit manifest must bind artifact, surfaces, and assertions")
 	}
+	if len(m.RequiredCategories) == 0 {
+		return fmt.Errorf("audit manifest must declare required categories")
+	}
 	if err := verifyCommands(m); err != nil {
 		return err
 	}
 	if err := verifySurfaces(root, m.Surfaces); err != nil {
+		return err
+	}
+	if err := verifyRequiredCategories(m.RequiredCategories, m.Surfaces); err != nil {
 		return err
 	}
 	if err := verifyWorkflow(root, m); err != nil {

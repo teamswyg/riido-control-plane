@@ -15,6 +15,18 @@
     "go tool pprof -top http://127.0.0.1:6060/debug/pprof/heap",
     "curl -fsS http://127.0.0.1:6060/debug/pprof/goroutine?debug=1"
   ],
+  "required_categories": [
+    "endpoint_hot_path",
+    "db_query_transaction",
+    "lock_contention",
+    "sse_event_streaming",
+    "assignment_scheduling",
+    "in_memory_fanout",
+    "busy_worker_polling",
+    "zombie_goroutine_risk",
+    "runtime_progress_ingest",
+    "read_model_projection"
+  ],
   "surfaces": [
     {
       "id": "http_endpoint_dispatch",
