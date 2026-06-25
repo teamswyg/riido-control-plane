@@ -753,7 +753,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "d9f7c016c88059a48541e6199834cf3adf93451439e99e7438821fd63f136d13"
+      "semantic_hash": "fbe4334d7b1af2e59a969b522c831cbffd70b2782abfac70df296fe9f30812a6"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
@@ -999,7 +999,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "fd1399f3c27d88d88c6f225d4e1ca68efdf829c7dc0e87ce7b80ea9782af1c25"
+      "semantic_hash": "8e706a2ee534e4b88014906b0f8be42100e55e9bea75b6053494aa01a41bf301"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1044,7 +1044,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "2ae9958f7930707a69d8773a0baaf2c97c3f000f9698a2eab87525d0a0d7df55"
+      "semantic_hash": "595c8899d3660decbe374d3f28da22d54128a294fd6e0aa15eefbf9c617da26a"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -1103,7 +1103,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9af5d6b60fd80c8e95e6253883a65846d70813323b8ef434802b2b3e4ffeb729"
+      "semantic_hash": "1d6d05853e8fef2c4a593321ee4e74ea420637e92b831f75be5ec9acfd6e4d17"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -1249,7 +1249,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ec3039d438ecaa84513943b42a21dfec42b67da1fe02e342cd1ec9c905c6dabd"
+      "semantic_hash": "fab4bb09b3d231948b769df3a6449a25347d715deaed87d65720ca99a7a50d90"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -1597,7 +1597,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f2608abc3e54413e5d2282e408161d03256eac0f798ac08362f40aa50f7820f2"
+      "semantic_hash": "c76638305c59de005b3f738ffb18d2cc54bbcd0454a872cb0011b2ce97de513f"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -1621,7 +1621,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "edb98cd8dcc0d16b373505f6d7b58367a803d7990803494edf6dc30cd2890e3f"
+      "semantic_hash": "4d5be20ab657f8aa7516d3765a9f64fa9ff73eb7401f26ed007325a806e43379"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -1641,7 +1641,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "228220a48ef282dc79ae961ab9d81bf57697ac70167de44078f98f79298aca8d"
+      "semantic_hash": "7657aa34da43792f500d32fa14c4b50fa8a9a44e04bb2ad3856dd3d1e5c02d16"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -1765,7 +1765,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "6a71e0896ed706a1052829bfb18a58cbe55f5f78694d43fd3675dc4059f1a020"
+      "semantic_hash": "d241f20a24547a07123865f277a2ed2232078a1cbe5c8bf494dce9cf8a39abd2"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -1930,7 +1930,7 @@
     },
     {
       "id": "expired_loop_refresh_commands_must_dispatch_safe_workflows",
-      "statement": "Loop refresh automation must consume only non-expired loop-refresh-commands after the command-producing workflow has run, avoid shell-evaluating command strings, derive a validated workflow dispatch plan, publish that plan as strict generated_at/expires_at evidence linked to the source command evidence window, and dispatch only existing workflow basenames on non-PR runs.",
+      "statement": "Loop refresh automation must consume only loop-refresh-commands whose generated_at/expires_at window is sane and currently valid after the command-producing workflow has run, avoid shell-evaluating command strings, derive a validated workflow dispatch plan, publish that plan as strict generated_at/expires_at evidence linked to the source command evidence window, and dispatch only existing workflow basenames on non-PR runs.",
       "loop": "closed_loop_candidate",
       "covers_evidence": [
         "loop-refresh-commands",
@@ -1962,6 +1962,8 @@
         "TestBuildDispatchPlanRejectsUnsafeRefreshWorkflow",
         "TestBuildDispatchPlanRejectsExpiredSourceCommands",
         "TestBuildDispatchPlanRequiresSourceFreshnessWindow",
+        "TestBuildDispatchPlanRejectsFutureSourceCommands",
+        "TestBuildDispatchPlanRejectsInvertedSourceWindow",
         "TestLoopRefreshDispatchCLIWritesPlan",
         "TestLoopRefreshDispatchWorkflowDoesNotEvalCommands",
         "TestLoopRefreshDispatchRunsAfterCommandProducer",
@@ -1973,7 +1975,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "03a99eaec70c103d7854d05e9fe34c6ef9eaa8a86b6f5607007d9fc8f6bb4389"
+      "semantic_hash": "896d9303dfb5f0a04f8f73abec4e1cafce97da63fb4d351adafa0870e9f499b2"
     },
     {
       "id": "loop_registry_evidence_must_expose_graph_edges",

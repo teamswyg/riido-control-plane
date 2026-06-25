@@ -32,3 +32,29 @@ func TestBuildDispatchPlanRequiresSourceFreshnessWindow(t *testing.T) {
 		t.Fatalf("expected missing source freshness rejection, got %v", err)
 	}
 }
+
+func TestBuildDispatchPlanRejectsFutureSourceCommands(t *testing.T) {
+	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-25T00:00:00Z")
+	_, err := buildDispatchPlan(repoRootForTest(t), refreshCommandEvidence{
+		SchemaVersion: refreshCommandsSchema,
+		Status:        "refresh_required",
+		GeneratedAt:   "2026-06-26T00:00:00Z",
+		ExpiresAt:     "2026-06-27T00:00:00Z",
+	})
+	if err == nil || !strings.Contains(err.Error(), "future") {
+		t.Fatalf("expected future source command rejection, got %v", err)
+	}
+}
+
+func TestBuildDispatchPlanRejectsInvertedSourceWindow(t *testing.T) {
+	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-25T00:00:00Z")
+	_, err := buildDispatchPlan(repoRootForTest(t), refreshCommandEvidence{
+		SchemaVersion: refreshCommandsSchema,
+		Status:        "refresh_required",
+		GeneratedAt:   "2026-06-26T00:00:00Z",
+		ExpiresAt:     "2026-06-26T00:00:00Z",
+	})
+	if err == nil || !strings.Contains(err.Error(), "before expires_at") {
+		t.Fatalf("expected inverted source window rejection, got %v", err)
+	}
+}
