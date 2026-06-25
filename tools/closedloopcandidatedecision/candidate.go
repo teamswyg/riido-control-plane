@@ -15,6 +15,7 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 	}
 	decisionByID := decisionsByID(m.Decisions)
 	result := verifyResult{CandidateCount: candidate.CandidateCount}
+	candidateIDs := []string{}
 	for _, item := range candidate.Candidates {
 		if err := verifyAdoptionPlan(item); err != nil {
 			return result, err
@@ -34,6 +35,7 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 			return result, fmt.Errorf("candidate %s has no command for next_artifact %s", item.ID, decision.NextArtifact)
 		}
 		result.DecisionIDs = append(result.DecisionIDs, item.ID)
+		candidateIDs = append(candidateIDs, item.ID)
 		result.DecisionArtifacts = append(result.DecisionArtifacts, decisionArtifactEvidence{
 			CandidateID:   item.ID,
 			NextArtifact:  decision.NextArtifact,
@@ -43,6 +45,9 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 	}
 	if err := verifyNoOrphanDecisions(m.Decisions, candidate.Candidates); err != nil {
 		return result, err
+	}
+	result.ConsumedCandidateArtifacts = []consumedCandidateArtifact{
+		consumedArtifact(path, candidate, candidateIDs),
 	}
 	return result, nil
 }

@@ -1,11 +1,12 @@
 package main
 
 type verifyResult struct {
-	SourceCount    int         `json:"source_count"`
-	RequiredRefs   int         `json:"required_refs"`
-	CandidateCount int         `json:"candidate_count"`
-	CandidateIDs   []string    `json:"candidate_ids"`
-	CandidateEdges []graphEdge `json:"candidate_edges"`
+	SourceCount                int                         `json:"source_count"`
+	RequiredRefs               int                         `json:"required_refs"`
+	CandidateCount             int                         `json:"candidate_count"`
+	CandidateIDs               []string                    `json:"candidate_ids"`
+	CandidateEdges             []graphEdge                 `json:"candidate_edges"`
+	ConsumedCandidateArtifacts []consumedCandidateArtifact `json:"consumed_candidate_artifacts"`
 }
 
 type candidateEvidence struct {
@@ -48,4 +49,15 @@ type candidateRedaction struct {
 type adoptionStep struct {
 	Artifact string `json:"artifact"`
 	Command  string `json:"command"`
+}
+
+type consumedCandidateArtifact struct {
+	InputPath         string   `json:"input_path"`
+	SourceWorkflow    string   `json:"source_workflow"`
+	LiveStatus        string   `json:"live_status"`
+	SourceGeneratedAt string   `json:"source_generated_at"`
+	SourceExpiresAt   string   `json:"source_expires_at"`
+	CandidateCount    int      `json:"candidate_count"`
+	CandidateIDs      []string `json:"candidate_ids"`
+	SourceIDs         []string `json:"source_ids"`
 }

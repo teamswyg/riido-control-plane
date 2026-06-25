@@ -30,6 +30,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - candidate intake fixture promotion must pin the harness promotion clock so deterministic samples do not fail after real-time expiry
 - candidate intake must reject consumed candidate artifacts whose source_expires_at has passed
 - candidate intake evidence must publish generated_at and expires_at
+- candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids
 
 ## Evidence Loop
 

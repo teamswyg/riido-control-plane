@@ -15,7 +15,7 @@ func TestCandidateIntakeRejectsMissingAdoptionPlan(t *testing.T) {
 		},
 		RequiredNextArtifacts: m.Sources[0].RequiredNextArtifacts,
 	}
-	err := verifyCandidateItem(m, item)
+	_, err := verifyCandidateItem(m, item)
 	if err == nil || !strings.Contains(err.Error(), "adoption plan") {
 		t.Fatalf("expected adoption plan failure, got %v", err)
 	}

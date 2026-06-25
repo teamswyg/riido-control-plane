@@ -1,10 +1,11 @@
 package main
 
 type verifyResult struct {
-	DecisionCount     int                        `json:"decision_count"`
-	CandidateCount    int                        `json:"candidate_count"`
-	DecisionIDs       []string                   `json:"decision_ids"`
-	DecisionArtifacts []decisionArtifactEvidence `json:"decision_artifacts"`
+	DecisionCount              int                         `json:"decision_count"`
+	CandidateCount             int                         `json:"candidate_count"`
+	DecisionIDs                []string                    `json:"decision_ids"`
+	DecisionArtifacts          []decisionArtifactEvidence  `json:"decision_artifacts"`
+	ConsumedCandidateArtifacts []consumedCandidateArtifact `json:"consumed_candidate_artifacts"`
 }
 
 type decisionArtifactEvidence struct {
@@ -53,4 +54,14 @@ type candidateRedaction struct {
 type adoptionStep struct {
 	Artifact string `json:"artifact"`
 	Command  string `json:"command"`
+}
+
+type consumedCandidateArtifact struct {
+	InputPath         string   `json:"input_path"`
+	SourceWorkflow    string   `json:"source_workflow"`
+	LiveStatus        string   `json:"live_status"`
+	SourceGeneratedAt string   `json:"source_generated_at"`
+	SourceExpiresAt   string   `json:"source_expires_at"`
+	CandidateCount    int      `json:"candidate_count"`
+	CandidateIDs      []string `json:"candidate_ids"`
 }
