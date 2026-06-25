@@ -64,7 +64,14 @@
       "id": "client_event_subscriber_fanout",
       "category": "in_memory_fanout",
       "risk": "Workspace client events fan out under one store lock, so many open task screens can add per-event visibility and channel-send cost.",
-      "files": ["internal/riidoaiserver/ai_agent_client_development_type_development_ai_agent_client_store.go", "internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go", "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go"],
+      "files": [
+        "internal/riidoaiserver/ai_agent_client_development_type_development_ai_agent_client_store.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go"
+      ],
       "patterns": ["subscribers             map[int]aiAgentClientSubscriber", "make(chan ClientStreamEvent, 32)", "subscriber.events <- visible"],
       "candidate": "Measure subscriber fanout pressure before adding richer realtime event types or per-message metadata."
     },
@@ -96,8 +103,21 @@
       "id": "progress_ingest",
       "category": "runtime_progress_ingest",
       "risk": "Fine-grained provider output can create many normalize, merge, render, and fanout operations.",
-      "files": ["internal/riidoaiserver/ai_agent_client_development_method_record_ai_agent_thread_progress.go", "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go", "internal/riidoaiserver/progress_messages_render.go"],
-      "patterns": ["RecordAIAgentThreadProgress", "normalize", "renderProgressMessage"],
+      "files": [
+        "internal/riidoaiserver/ai_agent_client_development_method_record_ai_agent_thread_progress.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
+        "internal/riidoaiserver/progress_messages_render.go"
+      ],
+      "patterns": [
+        "RecordAIAgentThreadProgress",
+        "normalize",
+        "renderProgressMessage",
+        "progressLinesAreStrictlyAfter",
+        "mergeThreadProgressLines"
+      ],
       "candidate": "Batch tiny provider fragments into line or frame sized updates while preserving v2/v3 response shapes."
     },
     {

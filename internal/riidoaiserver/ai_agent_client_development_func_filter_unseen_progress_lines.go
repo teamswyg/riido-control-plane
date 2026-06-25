@@ -4,6 +4,9 @@ func filterUnseenProgressLines(existing, incoming []AgentThreadProgressLine) []A
 	if len(existing) == 0 || len(incoming) == 0 {
 		return incoming
 	}
+	if progressLinesAreStrictlyAfter(existing, incoming) {
+		return incoming
+	}
 	seen := make(map[int]struct{}, len(existing))
 	for _, line := range existing {
 		if line.Seq > 0 {

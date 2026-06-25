@@ -22,6 +22,11 @@ on:
       - "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go"
       - "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_live_fanout.go"
       - "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_subscriber_locked.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines_test.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines_test.go"
       - "internal/riidoaiserver/**"
       - "go.mod"
       - "go.sum"
@@ -40,6 +45,11 @@ on:
       - "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go"
       - "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_live_fanout.go"
       - "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_subscriber_locked.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines_test.go"
+      - "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines_test.go"
       - "internal/riidoaiserver/**"
 
 jobs:
