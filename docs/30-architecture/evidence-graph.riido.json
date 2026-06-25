@@ -556,6 +556,35 @@
       "next_loop": "ai_thread_history"
     },
     {
+      "id": "ai_thread_history_run_identity_ordering_loop",
+      "observation": "Thread history consumers can misread a completed run followed by a queued follow-up if the response reuses execution identity or leaves same-timestamp messages in an unstable order.",
+      "hypothesis": "Binding follow-up replies to a new assignment-scoped run identity, then sorting user, progress seq, and agent result messages deterministically, keeps v3 history replayable after refresh without frontend heuristics.",
+      "claims": ["thread_history_v3_must_preserve_run_identity_and_message_order"],
+      "changes": [
+        {"kind": "api", "path": "internal/riidoaiserver/ai_agent_client_thread_history_api.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_thread_history_sort.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_message_run_id.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_func_thread_id_for_run.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_sort_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_run_identity_test.go"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_sort_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_run_identity_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "AI Thread History v3 execution identity and message ordering are closed-loop invariants: follow-up work gets a fresh assignment/run axis, and same-timestamp messages sort by user intent, progress sequence, then agent result.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "loop_evidence_expiry_loop",
       "observation": "Loop registry and evidence graph evidence could prove shape but not freshness because the artifacts lacked generated_at and expires_at, and the evidence graph workflow did not run unless code changed.",
       "hypothesis": "Self-expiring evidence artifacts plus a scheduled evidence graph workflow let tools detect stale reasoning evidence and refresh it without a human reminder.",
