@@ -76,7 +76,7 @@
   "assertions": [
     "endpoint/API contracts must not change for performance evidence work",
     "lightweight benchmark evidence must run without live credentials",
-    "local pressure evidence must emit measured allocation, latency, CPU, goroutine, and subscriber-fanout findings",
+    "local pressure evidence must emit measured allocation, latency, CPU, goroutine, subscriber-fanout findings, and per-scenario capacity estimates",
     "local pressure findings must carry closed-loop candidate required artifacts and adoption commands",
     "live load evidence must stay redacted and use aiagentload rather than ad-hoc curl loops",
     "pprof collection must use loopback-only RIIDO_AI_SERVER_PPROF_ADDR",
@@ -85,8 +85,8 @@
   "loop": {
     "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates and local CPU/resource deltas are not emitted from one executable performance loop.",
     "hypothesis": "A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts.",
-    "execute": "Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings, expose pprof and live-load commands, and generate candidate optimization rows whose findings carry closed-loop adoption commands.",
-    "evaluate": "The verifier fails on missing benchmark coverage, missing local pressure evidence, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, or non-strict workflow artifacts.",
+    "execute": "Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose pprof and live-load commands, and generate candidate optimization rows whose findings carry closed-loop adoption commands.",
+    "evaluate": "The verifier fails on missing benchmark coverage, missing local pressure evidence, missing capacity estimates, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, or non-strict workflow artifacts.",
     "retrospective": "This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates."
   }
 }

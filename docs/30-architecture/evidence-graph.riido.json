@@ -143,8 +143,8 @@
     },
     {
       "id": "control_plane_performance_evidence_loop",
-      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, and local pressure findings, but pressure findings needed direct closed-loop candidate adoption paths so agents can act without rereading narrative docs.",
-      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, measured alloc/latency/cpu/goroutine/subscriber findings, pprof loopback command, redacted aiagentload command, and finding-level closed-loop adoption plans, then publish candidate evidence for architect review.",
+      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows.",
+      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, per-scenario capacity estimates, measured alloc/latency/cpu/goroutine/subscriber findings, pprof loopback command, redacted aiagentload command, and finding-level closed-loop adoption plans, then publish candidate evidence for architect review.",
       "claims": ["control_plane_performance_hot_paths_must_emit_evidence"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/control-plane-performance.riido.json"},
@@ -154,6 +154,7 @@
         {"kind": "tool", "path": "tools/controlplaneperf"},
         {"kind": "tool", "path": "tools/controlplanepressure"},
         {"kind": "tool", "path": "tools/controlplanepressure/measure_cpu.go"},
+        {"kind": "tool", "path": "tools/controlplanepressure/capacity.go"},
         {"kind": "tool", "path": "tools/controlplanepressure/findings.go"},
         {"kind": "tool", "path": "tools/controlplanepressure/progress_ingest.go"},
         {"kind": "tool", "path": "tools/controlplanepressure/client_event_fanout.go"},
@@ -190,7 +191,7 @@
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-high-traffic-audit.md"}
     ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, local pressure CPU/resource deltas, subscriber fanout pressure, measured findings, and pprof/load commands identify hot paths, while each finding carries a closed-loop candidate adoption path before repeated regressions are promoted into gates.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, local pressure CPU/resource deltas, capacity estimates, subscriber fanout pressure, measured findings, and pprof/load commands identify hot paths, while each finding carries a closed-loop candidate adoption path before repeated regressions are promoted into gates.",
       "next_loop": "closed_loop_candidate"
     },
     {
