@@ -4,8 +4,8 @@
 
 - workflow count: `52`
 - evidence covered: `52`
-- evidence tools covered: `43/43`
-- evidence tools bound to artifacts: `43/43`
+- evidence tools covered: `44/44`
+- evidence tools bound to artifacts: `44/44`
 - accepted gaps: `0`
 - non-strict artifact uploads: `0`
 - missing evidence uploads: `0`
@@ -51,7 +51,7 @@
 | `.github/workflows/config-reference.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/container-image-contract.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/context-map.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
-| `.github/workflows/control-plane-performance.yml` | `covered` | `2` | `2/2` | `true` | `4/4` | `0` | - |
+| `.github/workflows/control-plane-performance.yml` | `covered` | `3` | `3/3` | `true` | `5/5` | `0` | - |
 | `.github/workflows/deploy-ai-agent-testnet.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/dynamodb-eventbridge-adapters.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/evidence-graph.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |

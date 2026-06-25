@@ -13,6 +13,7 @@ func verifyWorkflow(root string, m manifest) error {
 	required := []string{
 		"schedule:",
 		"go run ./tools/controlplaneperf",
+		"go run ./tools/controlplanepressure",
 		"go test ./internal/riidoaiserver",
 		"-benchmem",
 		"benchtime=100ms",
@@ -20,6 +21,7 @@ func verifyWorkflow(root string, m manifest) error {
 		"go run ./tools/harnesspromotion",
 		"name: " + m.EvidenceArtifact,
 		"name: " + m.BenchmarkArtifact,
+		"name: " + m.LocalPressureArtifact,
 		"name: " + m.SummaryArtifact,
 		"name: " + m.CandidateArtifact,
 		"if-no-files-found: error",

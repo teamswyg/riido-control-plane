@@ -14,6 +14,7 @@ on:
       - "docs/30-architecture/evidence-graph.md"
       - "docs/30-architecture/evidence-graph.riido.json"
       - "tools/controlplaneperf/**"
+      - "tools/controlplanepressure/**"
       - "tools/aiagentload/**"
       - "internal/riidoaiserver/**"
       - "go.mod"
@@ -25,6 +26,7 @@ on:
       - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/control-plane-performance.riido.json"
       - "tools/controlplaneperf/**"
+      - "tools/controlplanepressure/**"
       - "internal/riidoaiserver/**"
 
 jobs:
@@ -53,6 +55,14 @@ jobs:
             -benchmem \
             -benchtime=100ms \
             -count=1 > out/control-plane-performance-bench.txt
+      - name: Run local open-loop pressure evidence
+        run: |
+          go run ./tools/controlplanepressure \
+            -duration 500ms \
+            -concurrency 1,8,32 \
+            -threads 24 \
+            -lines 40 \
+            -evidence-out out/control-plane-local-pressure.json
       - name: Publish redacted performance summary evidence
         if: always()
         env:
@@ -81,6 +91,12 @@ jobs:
         with:
           name: control-plane-performance-bench
           path: out/control-plane-performance-bench.txt
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: control-plane-local-pressure
+          path: out/control-plane-local-pressure.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
