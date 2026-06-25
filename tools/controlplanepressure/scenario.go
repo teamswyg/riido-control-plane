@@ -22,6 +22,7 @@ func scenarios() []scenario {
 		{"store_metrics_observe", "store operation metrics lock/allocation pressure on DB hot paths", "keep operation vocabulary bounded and compare with live EMF", buildStoreMetrics},
 		{"progress_ingest_fragment", "fine-grained provider fragments can amplify normalize, merge, event, and fanout cost", "measure fragment cost before changing provider batching", buildProgressIngest},
 		{"thread_stream_subscription", "SSE filter computation can copy active thread state under task fanout", "prefer active target projection over full thread projection", buildThreadSubscription},
+		{"client_event_subscriber_fanout", "workspace SSE subscribers add per-event visibility and channel-send work", "measure subscriber fanout before adding richer live events", buildClientSubscriberFanout},
 		{"thread_history_v3", "v3 thread history can copy historical messages during refresh/recovery", "split immutable snapshots and cap per-refresh projection work", buildThreadHistory},
 	}
 }

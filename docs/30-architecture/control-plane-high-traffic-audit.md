@@ -6,15 +6,15 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 
 ## Evidence Surface
 
-- surfaces: `7`
-- candidates: `7`
+- surfaces: `11`
+- candidates: `11`
 - pprof commands: `3`
 
 ## Commands
 
 - benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
 - local pressure: `go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json`
-- race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti)' -count=1`
+- race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1`
 - pprof: `go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30`
 - pprof: `go tool pprof -top http://127.0.0.1:6060/debug/pprof/heap`
 - pprof: `curl -fsS http://127.0.0.1:6060/debug/pprof/goroutine?debug=1`
@@ -26,15 +26,19 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 | `http_endpoint_dispatch` | `endpoint_hot_path` | `3` | `chan =1, select {=1, time.NewTicker=1, map[=3, Query=2` | Keep route pattern metrics bounded, avoid per-request dynamic route labels, and benchmark response helpers before changing endpoint shapes. |
 | `store_actor_polling` | `assignment_scheduling` | `3` | `make(chan=1, chan =4, select {=2, time.NewTimer=1, time.NewTicker=1` | Keep long-poll waiters outside the actor critical path and track goroutine deltas in local pressure evidence. |
 | `sse_event_streaming` | `sse_event_streaming` | `3` | `Lock()=1, chan =1` | Prefer active stream target projection and add leak checks before increasing SSE fanout. |
+| `client_event_subscriber_fanout` | `in_memory_fanout` | `3` | `sync.Mutex=1, Lock()=2, make(chan=1, chan =2, select {=1, map[=6, append(=1` | Measure subscriber fanout pressure before adding richer realtime event types or per-message metadata. |
+| `store_waiter_lifecycle` | `busy_worker_polling` | `3` | `make(chan=3, chan =7, select {=3, time.NewTimer=1, time.NewTicker=1, map[=1` | Keep waiter release mandatory and promote repeated waiter leaks into a closed-loop goroutine verifier. |
+| `tool_approval_waiters` | `busy_worker_polling` | `3` | `make(chan=7, chan =17, select {=7, time.NewTimer=1, time.NewTicker=1, map[=1, append(=1` | Measure approval waiter timeout pressure and keep web approval waits bounded by long-poll limits. |
 | `thread_history_v3_projection` | `read_model_projection` | `3` | `Lock()=1, map[=1, append(=4` | Measure per-thread message copy cost, keep agent snapshots by id, and cap projection work before adding richer timelines. |
 | `progress_ingest` | `runtime_progress_ingest` | `3` | `Lock()=1, map[=5, append(=1` | Batch tiny provider fragments into line or frame sized updates while preserving v2/v3 response shapes. |
 | `dynamodb_snapshot_and_journal` | `db_query_transaction` | `3` | `make(chan=1, chan =1, select {=1, map[=6, Query=1` | Attribute costs by operation vocabulary and keep snapshot read models split from write-command models. |
 | `metrics_aggregation` | `lock_contention` | `3` | `Lock()=2, map[=1` | Keep lock scope copy-only, preserve top-N output, and watch allocation per operation in benchmarks. |
+| `actor_shutdown_paths` | `zombie_goroutine_risk` | `3` | `make(chan=9, chan =16, select {=8, map[=12, append(=1, GetItem=1, PutItem=1` | Keep actor close paths covered by race tests before adding more background workers or buffered queues. |
 
 ## Loop
 
-- Observe: Control-plane performance work already emits benchmarks and local pressure, but the risky source surfaces are not compiled into one auditable map.
-- Hypothesis: A static high-traffic audit can connect endpoint, store, SSE, scheduling, progress, DynamoDB, and metric hot paths to executable evidence before any API-neutral optimization.
-- Execute: Scan declared surfaces for high-risk primitives, verify pprof and stress commands, publish redacted audit evidence, and keep generated docs in sync.
+- Observe: Control-plane performance work already emits benchmarks and local pressure, but waiter, subscriber, shutdown, and source-risk surfaces need to be compiled into one auditable map.
+- Hypothesis: A static high-traffic audit can connect endpoint, store, SSE, scheduling, progress, DynamoDB, metrics, waiter, fanout, and actor lifecycle hot paths to executable evidence before any API-neutral optimization.
+- Execute: Scan declared surfaces for high-risk primitives, verify pprof, race, and stress commands, publish redacted audit evidence, and keep generated docs in sync.
 - Evaluate: The verifier fails on missing files, missing patterns, missing candidates, unsafe pprof commands, missing workflow artifact upload, or generated doc drift.
 - Retrospective: This keeps the first slice open-loop: observe pressure and source risk, then decide which bottlenecks deserve closed-loop gates.

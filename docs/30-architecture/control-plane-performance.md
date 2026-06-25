@@ -6,10 +6,10 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 
 ## Evidence Surface
 
-- hot paths: `5`
+- hot paths: `7`
 - benchmarks: `7`
-- concurrency tests: `2`
-- optimization candidates: `5`
+- concurrency tests: `4`
+- optimization candidates: `7`
 - local pressure artifact: `control-plane-local-pressure`
 - candidate artifact: `control-plane-performance-closed-loop-candidates`
 
@@ -17,7 +17,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 
 - lightweight benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
 - local pressure: `go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json`
-- race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti)' -count=1`
+- race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1`
 - loopback pprof: `RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30`
 - live load evidence: `go run ./tools/aiagentload -base-url "$TESTNET_BASE_URL" -token "$TESTNET_TOKEN" -workspace-id "$TESTNET_WORKSPACE_ID" -scenario client-read -duration 60s -concurrency 64 -evidence-out out/ai-agent-client-testnet-load.json`
 
@@ -30,11 +30,13 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 | `thread_stream_targets` | `sse_event_streaming` | `BenchmarkAIAgentTaskThreadStreamSubscriptionTargets` | prefer active stream target projection over full visible thread copies for subscription paths |
 | `progress_message_rendering` | `runtime_progress_ingest` | `BenchmarkRenderProgressMessage, BenchmarkRecordAIAgentThreadProgress` | batch provider progress before rendering and preserve structured fallback behavior |
 | `assignment_poll_and_wait` | `assignment_scheduling` | `TestWaitForAssignmentReturnsImmediatelyWhenQueued, TestWaitForAssignmentDoesNotBlockActor` | keep long-poll waiters off the actor critical path and watch waiter/goroutine count |
+| `client_event_subscriber_fanout` | `sse_event_streaming` | `TestDevelopmentAIAgentClientStoreThreadProgressFanout` | measure subscriber fanout in local pressure before expanding live event payloads |
+| `tool_approval_waiters` | `assignment_scheduling` | `TestHTTPToolApprovalRoundTrip` | keep approval waits bounded and watch goroutine/timer deltas under stalled approvals |
 
 ## Loop
 
 - Observe: Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates and local CPU/resource deltas are not emitted from one executable performance loop.
 - Hypothesis: A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts.
-- Execute: Verify hot-path files and benchmark functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine evidence with measured findings, expose pprof and live-load commands, and generate candidate optimization rows.
+- Execute: Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings, expose pprof and live-load commands, and generate candidate optimization rows.
 - Evaluate: The verifier fails on missing benchmark coverage, missing local pressure evidence, missing pprof loopback contract, missing aiagentload live command, stale generated docs, or non-strict workflow artifacts.
 - Retrospective: This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates.
