@@ -12,6 +12,7 @@ func renderDoc(m manifest, e evidence) string {
 	renderSummary(&b, m, e)
 	renderAssertions(&b, m.Assertions)
 	renderRequirements(&b, m.Requirements)
+	renderResidualGaps(&b, m.ResidualGaps)
 	renderLoop(&b, m.Loop)
 	return strings.TrimRight(b.String(), "\n") + "\n"
 }
@@ -20,6 +21,7 @@ func renderSummary(b *strings.Builder, m manifest, e evidence) {
 	b.WriteString("## Evidence Surface\n\n")
 	fmt.Fprintf(b, "- requirements: `%d`\n", e.RequirementCount)
 	fmt.Fprintf(b, "- checks: `%d`\n", e.CheckCount)
+	fmt.Fprintf(b, "- residual gaps: `%d`\n", e.ResidualGapCount)
 	fmt.Fprintf(b, "- evidence artifact: `%s`\n", m.EvidenceArtifact)
 	fmt.Fprintf(b, "- workflow: `%s`\n\n", m.Workflow)
 }
@@ -37,6 +39,16 @@ func renderRequirements(b *strings.Builder, requirements []requirement) {
 	b.WriteString("| ID | Checks | Statement |\n| --- | ---: | --- |\n")
 	for _, req := range requirements {
 		fmt.Fprintf(b, "| `%s` | `%d` | %s |\n", req.ID, len(req.Checks), req.Statement)
+	}
+	b.WriteString("\n")
+}
+
+func renderResidualGaps(b *strings.Builder, gaps []residualGap) {
+	b.WriteString("## Residual Gaps\n\n")
+	b.WriteString("| ID | Next Loop | Next Artifact | Next Command |\n| --- | --- | --- | --- |\n")
+	for _, gap := range gaps {
+		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%s` |\n",
+			gap.ID, gap.NextLoop, gap.NextArtifact, gap.NextCommand)
 	}
 	b.WriteString("\n")
 }

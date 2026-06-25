@@ -13,6 +13,7 @@ type manifest struct {
 	PreCommitManifest     string        `json:"pre_commit_manifest"`
 	Requirements          []requirement `json:"requirements"`
 	Assertions            []string      `json:"assertions"`
+	ResidualGaps          []residualGap `json:"residual_gaps"`
 	Loop                  loopSpec      `json:"loop"`
 }
 
@@ -34,6 +35,15 @@ type check struct {
 	Providers     []string `json:"providers,omitempty"`
 	Claims        []string `json:"claims,omitempty"`
 	MustExpire    bool     `json:"must_expire,omitempty"`
+}
+
+type residualGap struct {
+	ID           string `json:"id"`
+	Observation  string `json:"observation"`
+	Risk         string `json:"risk"`
+	NextLoop     string `json:"next_loop"`
+	NextArtifact string `json:"next_artifact"`
+	NextCommand  string `json:"next_command"`
 }
 
 type loopSpec struct {
