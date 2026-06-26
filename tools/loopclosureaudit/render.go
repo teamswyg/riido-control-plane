@@ -24,6 +24,9 @@ func renderSummary(b *strings.Builder, m manifest, e evidence) {
 	fmt.Fprintf(b, "- checks: `%d`\n", e.CheckCount)
 	fmt.Fprintf(b, "- residual gaps: `%d`\n", e.ResidualGapCount)
 	fmt.Fprintf(b, "- claim coverage gaps: `%d`\n", e.ClaimCoverageGapCount)
+	fmt.Fprintf(b, "- candidate count: `%d`\n", e.CandidateCount)
+	fmt.Fprintf(b, "- candidate artifact: `%s`\n", e.CandidateArtifact)
+	fmt.Fprintf(b, "- candidate promotion target: `%s`\n", e.CandidateTarget)
 	fmt.Fprintf(b, "- evidence artifact: `%s`\n", m.EvidenceArtifact)
 	fmt.Fprintf(b, "- workflow: `%s`\n\n", m.Workflow)
 }
