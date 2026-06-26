@@ -45,8 +45,8 @@
 | `.github/workflows/assignment-store-actor.yml` | `covered` | `1` | `1/1` | `true` | `4/4` | `0` | - |
 | `.github/workflows/aws-adapters-facade.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/ci.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
-| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `11` | `11/11` | `true` | `6/6` | `0` | - |
-| `.github/workflows/closed-loop-candidate-intake.yml` | `covered` | `10` | `10/10` | `true` | `5/5` | `0` | - |
+| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `14` | `14/14` | `true` | `7/7` | `0` | - |
+| `.github/workflows/closed-loop-candidate-intake.yml` | `covered` | `13` | `13/13` | `true` | `6/6` | `0` | - |
 | `.github/workflows/cloudwatch-emf.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/config-reference.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/container-image-contract.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
@@ -63,7 +63,7 @@
 | `.github/workflows/health-ready-cmd.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/integration-matrix.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/loop-closure-audit.yml` | `covered` | `1` | `1/1` | `true` | `2/2` | `0` | - |
-| `.github/workflows/loop-refresh-dispatch.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/loop-refresh-dispatch.yml` | `covered` | `1` | `1/1` | `true` | `2/2` | `0` | - |
 | `.github/workflows/loop-registry.yml` | `covered` | `1` | `1/1` | `true` | `2/2` | `0` | - |
 | `.github/workflows/metrics-http-adapter.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/migration-ledger.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |

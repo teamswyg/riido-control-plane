@@ -6,6 +6,12 @@
   "workflow": ".github/workflows/closed-loop-candidate-intake.yml",
   "evidence_artifact": "closed-loop-candidate-intake-evidence",
   "evidence_tool": "tools/closedloopcandidateintake",
+  "producer_manifests": [
+    "docs/30-architecture/harness-promotion.riido.json",
+    "docs/30-architecture/control-plane-performance.riido.json",
+    "docs/30-architecture/loop-closure-audit.riido.json",
+    "docs/30-architecture/loop-refresh-dispatch.riido.json"
+  ],
   "sources": [
     {
       "id": "ai-agent-client-testnet-smoke",
@@ -96,6 +102,24 @@
         "decision_record",
         "evidence_graph_edge"
       ]
+    },
+    {
+      "id": "loop-refresh-dispatch",
+      "candidate_artifact": "loop-refresh-dispatch-closed-loop-candidates",
+      "source_workflow": ".github/workflows/loop-refresh-dispatch.yml",
+      "producer_manifest": "docs/30-architecture/loop-refresh-dispatch.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "closed_loop_candidate",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
     }
   ],
   "assertions": [
@@ -118,6 +142,7 @@
     "candidate intake sources must cover every closed_loop_candidate producer source from the harness promotion manifest",
     "candidate intake sources must include loop-closure-audit residual gap candidates",
     "candidate intake sources must include control-plane pressure measured finding candidates",
+    "candidate intake sources must include loop-refresh-dispatch ignored command candidates",
     "candidate intake workflow path triggers must include every producer source workflow",
     "candidate intake PR verification must consume a performance-specific candidate fixture"
   ],

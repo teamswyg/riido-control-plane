@@ -1,0 +1,34 @@
+{
+  "schema_version": "riido-control-plane-loop-refresh-dispatch.v1",
+  "id": "loop-refresh-dispatch",
+  "title": "Loop Refresh Dispatch",
+  "workflow": ".github/workflows/loop-refresh-dispatch.yml",
+  "evidence_artifact": "loop-refresh-dispatch-plan",
+  "candidate_artifact": "loop-refresh-dispatch-closed-loop-candidates",
+  "evidence_tool": "tools/looprefreshdispatch",
+  "sources": [
+    {
+      "id": "loop-refresh-dispatch",
+      "source_workflow": ".github/workflows/loop-refresh-dispatch.yml",
+      "summary_artifact": "loop-refresh-dispatch-plan",
+      "candidate_artifact": "loop-refresh-dispatch-closed-loop-candidates",
+      "harness_loop": "closed_loop_candidate",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    }
+  ],
+  "loop": {
+    "observation": "Loop refresh dispatch can discover non-workflow refresh commands that safe GitHub workflow dispatch cannot execute.",
+    "hypothesis": "Ignored refresh commands should be emitted as redacted closed-loop candidates with source_ref, run, adoption_plan, and verifier command binding.",
+    "execute": "Generate a dispatch plan and optional candidate artifact from loop-refresh-commands without shell-evaluating command strings.",
+    "evaluate": "The verifier fails on stale source evidence, unsafe workflow command parsing, missing ignored command details, missing candidate source refs, or missing adoption commands.",
+    "retrospective": "This keeps workflow dispatch safe while preventing target verifier commands from falling back into human memory."
+  }
+}

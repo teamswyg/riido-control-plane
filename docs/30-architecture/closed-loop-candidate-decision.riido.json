@@ -158,6 +158,16 @@
       "next_artifact": "decision_record",
       "review_by": "2026-07-15",
       "reason": "Loop closure audit is an intake source even when current residual and claim coverage gaps are closed, so it keeps a seed decision for source coverage."
+    },
+    {
+      "candidate_id": "loop-refresh-dispatch:01:control_plane_pressure_candidate:target_verifier",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "verifier",
+      "review_by": "2026-07-15",
+      "reason": "Loop refresh dispatch can discover target_verifier commands that workflow dispatch cannot run, so ignored verifier commands need an owned decision before they become durable closed-loop gates."
     }
   ],
   "assertions": [

@@ -3,9 +3,10 @@ package main
 import "fmt"
 
 type options struct {
-	Repo        string
-	CommandsIn  string
-	DispatchOut string
+	Repo         string
+	CommandsIn   string
+	DispatchOut  string
+	CandidateOut string
 }
 
 func run(opt options) error {
@@ -30,5 +31,11 @@ func run(opt options) error {
 	if err != nil {
 		return err
 	}
-	return writeJSON(repoPath(root, opt.DispatchOut), plan)
+	if err := writeJSON(repoPath(root, opt.DispatchOut), plan); err != nil {
+		return err
+	}
+	if opt.CandidateOut != "" {
+		return writeJSON(repoPath(root, opt.CandidateOut), candidateEvidenceFromPlan(plan))
+	}
+	return nil
 }
