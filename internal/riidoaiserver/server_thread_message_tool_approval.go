@@ -28,8 +28,15 @@ func (s Server) createThreadMessageToolApprovalDecision(
 		return AIAgentTaskActionResponse{}, true, err
 	}
 	approval, ok, err := pendingThreadToolApproval(ctx, store, taskID, thread)
-	if err != nil || !ok {
-		return AIAgentTaskActionResponse{}, ok, err
+	if err != nil {
+		return AIAgentTaskActionResponse{}, true, err
+	}
+	if !ok {
+		req.AssignmentID = thread.AssignmentID
+		req.toolApproval = true
+		req.toolApprovalWithoutPending = true
+		response, err := s.aiAgent.CreateAIAgentTaskThreadMessage(ctx, principal, taskID, thread.ThreadID, req)
+		return response, true, err
 	}
 	decision := ToolApprovalDecision{
 		ApprovalID:   approval.ApprovalID,

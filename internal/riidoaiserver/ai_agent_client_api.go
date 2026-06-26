@@ -396,11 +396,12 @@ type SubmitAIAgentTaskCommentRequest struct {
 }
 
 type CreateAIAgentTaskThreadMessageRequest struct {
-	Body            string `json:"body"`
-	SourceMessageID string `json:"source_message_id,omitempty"`
-	AssignmentID    string `json:"-"`
-	toolApproval    bool
-	durableState    AssignmentState
+	Body                       string `json:"body"`
+	SourceMessageID            string `json:"source_message_id,omitempty"`
+	AssignmentID               string `json:"-"`
+	toolApproval               bool
+	toolApprovalWithoutPending bool
+	durableState               AssignmentState
 }
 
 type StopAIAgentTaskRequest struct {
