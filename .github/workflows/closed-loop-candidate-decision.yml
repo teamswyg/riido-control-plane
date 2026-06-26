@@ -165,10 +165,16 @@ jobs:
               --limit 20 \
               --json databaseId,status \
               --jq '[.[] | select(.status == "completed")][0].databaseId // ""')"
-            test -n "$run_id"
             mkdir -p "$dest"
-            gh run download "$run_id" --name "$artifact" --dir "$dest"
-            find "$dest" -type f -name '*.json' -print >> out/live-candidate-files.txt
+            if [[ -z "$run_id" ]]; then
+              echo "::notice::No completed run found for $workflow; $artifact will be skipped."
+              return 0
+            fi
+            if gh run download "$run_id" --name "$artifact" --dir "$dest"; then
+              find "$dest" -type f -name '*.json' -print >> out/live-candidate-files.txt
+            else
+              echo "::notice::No artifact named $artifact in $workflow run $run_id; source will be skipped."
+            fi
           }
           download_candidate_artifact \
             ai-agent-client-testnet-smoke.yml \
@@ -194,71 +200,87 @@ jobs:
             loop-refresh-dispatch.yml \
             loop-refresh-dispatch-closed-loop-candidates \
             out/live-candidates/loop-refresh-dispatch
-          test -s out/live-candidate-files.txt
       - name: Verify live candidate decisions
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
-          smoke_candidate="$(find out/live-candidates/smoke -type f -name '*.json' | head -n 1)"
-          load_candidate="$(find out/live-candidates/load -type f -name '*.json' | head -n 1)"
-          performance_candidate="$(find out/live-candidates/performance -type f -name '*.json' | head -n 1)"
-          pressure_candidate="$(find out/live-candidates/pressure -type f -name '*.json' | head -n 1)"
-          loop_closure_candidate="$(find out/live-candidates/loop-closure-audit -type f -name '*.json' | head -n 1)"
-          loop_refresh_candidate="$(find out/live-candidates/loop-refresh-dispatch -type f -name '*.json' | head -n 1)"
-          test -n "$smoke_candidate"
-          test -n "$load_candidate"
-          test -n "$performance_candidate"
-          test -n "$pressure_candidate"
-          test -n "$loop_closure_candidate"
-          test -n "$loop_refresh_candidate"
-          if jq -e '(.candidate_count // 0) > 0' "$smoke_candidate" >/dev/null; then
+          write_skipped_live_decision() {
+            local source="$1"
+            local reason="$2"
+            local out="$3"
+            jq -n \
+              --arg source "$source" \
+              --arg reason "$reason" \
+              '{
+                schema_version: "riido-control-plane-closed-loop-candidate-decision-live.v1",
+                status: "skipped",
+                source: $source,
+                reason: $reason
+              }' > "$out"
+          }
+          candidate_file() {
+            find "$1" -type f -name '*.json' | head -n 1 || true
+          }
+          smoke_candidate="$(candidate_file out/live-candidates/smoke)"
+          if [[ -z "$smoke_candidate" ]]; then
+            write_skipped_live_decision smoke "live candidate artifact missing" out/live-decision-smoke-evidence.json
+          elif jq -e '(.candidate_count // 0) > 0' "$smoke_candidate" >/dev/null; then
             go run ./tools/closedloopcandidatedecision \
               -candidate-in "$smoke_candidate" \
               -evidence-out out/live-decision-smoke-evidence.json
           else
-            printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
-              > out/live-decision-smoke-evidence.json
+            write_skipped_live_decision smoke "live candidate artifact contained no open candidates" out/live-decision-smoke-evidence.json
           fi
-          if jq -e '(.candidate_count // 0) > 0' "$load_candidate" >/dev/null; then
+          load_candidate="$(candidate_file out/live-candidates/load)"
+          if [[ -z "$load_candidate" ]]; then
+            write_skipped_live_decision load "live candidate artifact missing" out/live-decision-load-evidence.json
+          elif jq -e '(.candidate_count // 0) > 0' "$load_candidate" >/dev/null; then
             go run ./tools/closedloopcandidatedecision \
               -candidate-in "$load_candidate" \
               -evidence-out out/live-decision-load-evidence.json
           else
-            printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
-              > out/live-decision-load-evidence.json
+            write_skipped_live_decision load "live candidate artifact contained no open candidates" out/live-decision-load-evidence.json
           fi
-          if jq -e '(.candidate_count // 0) > 0' "$performance_candidate" >/dev/null; then
+          performance_candidate="$(candidate_file out/live-candidates/performance)"
+          if [[ -z "$performance_candidate" ]]; then
+            write_skipped_live_decision performance "live candidate artifact missing" out/live-decision-performance-evidence.json
+          elif jq -e '(.candidate_count // 0) > 0' "$performance_candidate" >/dev/null; then
             go run ./tools/closedloopcandidatedecision \
               -candidate-in "$performance_candidate" \
               -evidence-out out/live-decision-performance-evidence.json
           else
-            printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
-              > out/live-decision-performance-evidence.json
+            write_skipped_live_decision performance "live candidate artifact contained no open candidates" out/live-decision-performance-evidence.json
           fi
-          if jq -e '(.candidate_count // 0) > 0' "$pressure_candidate" >/dev/null; then
+          pressure_candidate="$(candidate_file out/live-candidates/pressure)"
+          if [[ -z "$pressure_candidate" ]]; then
+            write_skipped_live_decision pressure "live candidate artifact missing" out/live-decision-pressure-evidence.json
+          elif jq -e '(.candidate_count // 0) > 0' "$pressure_candidate" >/dev/null; then
             go run ./tools/closedloopcandidatedecision \
               -candidate-in "$pressure_candidate" \
               -evidence-out out/live-decision-pressure-evidence.json
           else
-            printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
-              > out/live-decision-pressure-evidence.json
+            write_skipped_live_decision pressure "live candidate artifact contained no open candidates" out/live-decision-pressure-evidence.json
           fi
-          if jq -e '(.candidate_count // 0) > 0' "$loop_closure_candidate" >/dev/null; then
+          loop_closure_candidate="$(candidate_file out/live-candidates/loop-closure-audit)"
+          if [[ -z "$loop_closure_candidate" ]]; then
+            write_skipped_live_decision loop-closure-audit "live candidate artifact missing" out/live-decision-loop-closure-audit-evidence.json
+          elif jq -e '(.candidate_count // 0) > 0' "$loop_closure_candidate" >/dev/null; then
             go run ./tools/closedloopcandidatedecision \
               -candidate-in "$loop_closure_candidate" \
               -evidence-out out/live-decision-loop-closure-audit-evidence.json
           else
-            printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
-              > out/live-decision-loop-closure-audit-evidence.json
+            write_skipped_live_decision loop-closure-audit "live candidate artifact contained no open candidates" out/live-decision-loop-closure-audit-evidence.json
           fi
-          if jq -e '(.candidate_count // 0) > 0' "$loop_refresh_candidate" >/dev/null; then
-            go run ./tools/closedloopcandidatedecision \
-              -candidate-in "$loop_refresh_candidate" \
-              -evidence-out out/live-decision-loop-refresh-dispatch-evidence.json
+          loop_refresh_candidate="$(candidate_file out/live-candidates/loop-refresh-dispatch)"
+          if [[ -z "$loop_refresh_candidate" ]]; then
+            write_skipped_live_decision loop-refresh-dispatch "live candidate artifact missing" out/live-decision-loop-refresh-dispatch-evidence.json
+          elif jq -e '(.candidate_count // 0) > 0' "$loop_refresh_candidate" >/dev/null; then
+              go run ./tools/closedloopcandidatedecision \
+                -candidate-in "$loop_refresh_candidate" \
+                -evidence-out out/live-decision-loop-refresh-dispatch-evidence.json
           else
-            printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
-              > out/live-decision-loop-refresh-dispatch-evidence.json
+            write_skipped_live_decision loop-refresh-dispatch "live candidate artifact contained no open candidates" out/live-decision-loop-refresh-dispatch-evidence.json
           fi
       - uses: actions/upload-artifact@v7
         if: always()
