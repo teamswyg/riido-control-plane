@@ -34,6 +34,12 @@ func TestCandidateDecisionEvidenceBindsNextArtifactCommand(t *testing.T) {
 	if result.DecisionArtifacts[0].NextCommand == "" {
 		t.Fatalf("next command missing: %+v", result.DecisionArtifacts[0])
 	}
+	if result.DecisionArtifacts[0].Owner == "" ||
+		result.DecisionArtifacts[0].Priority == "" ||
+		result.DecisionArtifacts[0].Disposition == "" ||
+		result.DecisionArtifacts[0].ReviewBy == "" {
+		t.Fatalf("decision ownership missing: %+v", result.DecisionArtifacts[0])
+	}
 }
 
 func TestCandidateDecisionEvidenceFileIncludesNextArtifactCommand(t *testing.T) {
@@ -55,6 +61,12 @@ func TestCandidateDecisionEvidenceFileIncludesNextArtifactCommand(t *testing.T) 
 	}
 	if got.DecisionArtifacts[0].NextCommand == "" {
 		t.Fatalf("next command missing: %+v", got.DecisionArtifacts[0])
+	}
+	if got.DecisionArtifacts[0].Owner == "" ||
+		got.DecisionArtifacts[0].Priority == "" ||
+		got.DecisionArtifacts[0].Disposition == "" ||
+		got.DecisionArtifacts[0].ReviewBy == "" {
+		t.Fatalf("decision ownership missing: %+v", got.DecisionArtifacts[0])
 	}
 	if got.DecisionArtifacts[0].PromotionEdge.Relation != "promotes_failure_to" {
 		t.Fatalf("promotion edge missing: %+v", got.DecisionArtifacts[0])
