@@ -6,8 +6,8 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 ## Evidence Surface
 
-- requirements: `4`
-- checks: `21`
+- requirements: `5`
+- checks: `33`
 - residual gaps: `0`
 - claim coverage gaps: `0`
 - evidence artifact: `loop-closure-audit-evidence`
@@ -24,6 +24,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 | ID | Checks | Statement |
 | --- | ---: | --- |
+| `loop_registry_ssot_defines_executable_loop_manifests` | `12` | Loop Registry SSOT must make each loop executable through observation, verification, evidence, expiry, failure, refresh, and evidence-plan coverage rather than relying on narrative memory. |
 | `expired_evidence_dispatches_refresh` | `4` | Expired evidence must produce executable refresh commands and a scheduled dispatcher must run those refresh workflows without human memory. |
 | `meaning_bound_changes_fail_without_claim_evidence` | `5` | Claim-bound code, tests, docs, and reasoning must co-change so agents cannot merge semantic drift after skipping documents. |
 | `harness_failures_promote_to_closed_loop` | `5` | Harnesses increase exploration space, and failures must become closed-loop candidates instead of isolated artifacts. |
