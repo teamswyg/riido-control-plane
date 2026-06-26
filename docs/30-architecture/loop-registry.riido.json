@@ -819,11 +819,11 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "04f282f880bc2a870ae678bad6387fd3706e788a27eca9ff41c71431d40d5cba"
+      "semantic_hash": "43ec6ebd266bb09af177dc10677c0f7800849488c0120498d14f5f11ab6defa8"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
-      "statement": "Control-plane high-traffic risk work must keep endpoint, store, SSE, subscriber fanout, assignment/tool-approval waiters, runtime progress, actor shutdown, local pressure, pprof, and live load surfaces bound to lightweight benchmark evidence, local resource delta evidence, local CPU/heap/goroutine profile metadata, per-scenario capacity estimates, measured pressure findings, loopback-only profiling commands, redacted live-load commands, and explicit optimization candidates with closed-loop adoption paths without changing public API contracts.",
+      "statement": "Control-plane high-traffic risk work must keep endpoint, store, SSE, subscriber fanout, assignment/tool-approval waiters, runtime progress, actor shutdown, local pressure, pprof, and live load surfaces bound to lightweight benchmark evidence, local resource delta evidence, local CPU/heap/goroutine profile metadata, per-scenario capacity estimates, measured pressure findings, loopback-only profiling commands, redacted live-load commands, and explicit optimization candidates with closed-loop adoption paths and measured capacity/latency/allocation/cpu summaries without changing public API contracts.",
       "loop": "control_plane_performance_harness",
       "covers_observes": [
         "endpoint_hot_path",
@@ -897,6 +897,7 @@
         "tools/controlplaneaudit/verify_surface.go",
         "tools/controlplaneaudit/workflow.go",
         "tools/controlplaneaudit/evidence.go",
+        "tools/controlplaneaudit/evidence_category.go",
         "tools/controlplaneaudit/scan.go",
         "tools/controlplaneaudit/render.go",
         "tools/controlplaneaudit/render_category.go",
@@ -941,6 +942,8 @@
         "tools/controlplanepressure/candidate_artifact_run.go",
         "tools/controlplanepressure/candidate_artifact_time.go",
         "tools/controlplanepressure/candidate_artifact_types.go",
+        "tools/controlplanepressure/candidate_measurement.go",
+        "tools/controlplanepressure/candidate_measurement_types.go",
         "tools/controlplanepressure/candidate_artifact_test.go",
         "internal/riidoaiserver/http_transaction_metrics_benchmark_test.go",
         "internal/riidoaiserver/store_operation_metrics_benchmark_test.go",
@@ -1021,7 +1024,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "5b2aaf738201ffd95cd42507622e2b1d9ca3d33791898d0c942f8936be1fd8de"
+      "semantic_hash": "0c15235b176f688dd16d84b12c7654f2966b0b437a214b7e022fba47ad125b20"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -1272,7 +1275,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e1aee7193aa6f96aeaca7c6997fab99d527ae5eb151109d2b5b73e17d6f6051e"
+      "semantic_hash": "965294b7cab21c2387a258ac97d7c22e5023ef8b6c965c615fdaac0c75ae7e80"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1332,7 +1335,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "db4d1d3105fcad57e9a57616339afa758bbc867de6d50586a8c13ec8ef4cf7b6"
+      "semantic_hash": "f17717fbf07bf9ec1c39ce749d63087c5cb5fe197796f10ce66e020a73590393"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -1415,7 +1418,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8d8b8c418806904db018d21460b1272935321415b10edc4e88cf2bc8c034274c"
+      "semantic_hash": "7fd4db5bc73bd283ad266a37312e0dc973cc55c8b05419bc9093ae3937267814"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -1580,7 +1583,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "498cd9cabe6525bcd6d5c6b0a03b19c991594133f388143c7efc3d7183ce8ce9"
+      "semantic_hash": "034492f9f56efe35c733501b37c69c9661ab6db2bd0201e80e59696b8cf80abc"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -2094,7 +2097,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "4a70d6a8cbb5d55e35d2ea2aab8eec0ca600d92a6b1af26d44da61c406be5d13"
+      "semantic_hash": "47e8b87c1156e71b2272d7c353d3587819b008685cb4e25ffdb345ad179a1147"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -2133,7 +2136,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "50320285ed230539ad734f11b5b3aaf999fee8e79d4b0242a5b910e76cd6dd04"
+      "semantic_hash": "7407b452b686afe7b4a2a97099d94065f284ea27f29c40cbb035c83aa5ed614f"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -2168,7 +2171,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9612b3d72ccb3600db43fa60196ce7e717b21d9ac6e98a1bc388065304fd7353"
+      "semantic_hash": "6bf67e62d8d88c57c28f634486c30e42e506df56487eae9b563952850ba31848"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -2342,7 +2345,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "afff762a9203b3d4fa112934c28c71973c0c4f06c969185afa9d34ba0081b1d6"
+      "semantic_hash": "dc02d744dabca46254a94c27eac40e26f3c373d049a24c16796a8afceb1fc49d"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",

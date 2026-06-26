@@ -40,5 +40,8 @@ func assertPressureCandidateEvidence(t *testing.T, got pressureCandidateEvidence
 		if candidate.SourceRef.Run.ID == "" || candidate.PromotionEdge.Relation != "promotes_failure_to" {
 			t.Fatalf("candidate missing closed-loop metadata: %+v", candidate)
 		}
+		if candidate.Measured.MaxConcurrentUsers == 0 || !candidate.Measured.ErrorFree {
+			t.Fatalf("candidate missing pressure measurement: %+v", candidate)
+		}
 	}
 }

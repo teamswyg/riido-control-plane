@@ -18,6 +18,9 @@ func TestControlPlaneHighTrafficAuditVerifies(t *testing.T) {
 	if len(got.RequiredCategories) == 0 || len(got.MissingCategories) != 0 {
 		t.Fatalf("audit category coverage missing from evidence: %+v", got)
 	}
+	if got.Loop.Observation == "" || got.Loop.Evaluate == "" {
+		t.Fatalf("audit loop context missing from evidence: %+v", got.Loop)
+	}
 	assertRequiredCategoriesCovered(t, got.CategoryCounts)
 }
 
