@@ -1019,8 +1019,8 @@
     },
     {
       "id": "closed_loop_candidate_intake_loop",
-      "observation": "Closed-loop candidate artifacts could be produced without a scheduled intake verifier that reads them, new producer sources such as control-plane performance could remain passive if intake only consumed older smoke/load artifacts, and PR checks could miss whether performance-shaped candidates are actually consumed.",
-      "hypothesis": "A candidate intake tool can require explicit redacted candidate input, verify producer, loop registry, graph, adoption artifact requirements, fail when any closed_loop_candidate producer source is missing from intake, and consume a performance-specific candidate fixture in PR checks.",
+      "observation": "Closed-loop candidate artifacts could be produced without a scheduled intake verifier that reads them, new producer sources such as control-plane performance could remain passive if intake only consumed older smoke/load artifacts, PR checks could miss whether performance-shaped candidates are actually consumed, and live scheduled runs could fail before publishing evidence when a producer had no candidate artifact for that cycle.",
+      "hypothesis": "A candidate intake tool can require explicit redacted candidate input for verifier runs, verify producer, loop registry, graph, adoption artifact requirements, fail when any closed_loop_candidate producer source is missing from intake, consume a performance-specific candidate fixture in PR checks, and let scheduled live aggregation emit skipped evidence for missing producer artifacts instead of dropping the evidence file.",
       "claims": ["candidate_intake_must_consume_candidate_artifact"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
@@ -1043,9 +1043,10 @@
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
-        {"kind": "artifact", "path": "closed-loop-candidate-intake-performance-sample-evidence", "redacted": true}
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-performance-sample-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-live-evidence", "redacted": true}
       ],
-      "decision": "Candidate intake is scheduled and cannot produce evidence without explicit candidate input, redaction, producer linkage, graph linkage, adoption artifact requirements, semantic workflow trigger coverage, full producer-source coverage, and a performance-specific sample candidate consumption path.",
+      "decision": "Candidate intake is scheduled and cannot produce verifier evidence without explicit candidate input, redaction, producer linkage, graph linkage, adoption artifact requirements, semantic workflow trigger coverage, full producer-source coverage, and a performance-specific sample candidate consumption path; scheduled live candidate aggregation now treats an absent producer artifact as skipped source evidence so missing work remains machine-visible instead of failing before artifact upload.",
       "next_loop": "closed_loop_candidate_intake"
     },
     {
@@ -1258,8 +1259,8 @@
     },
     {
       "id": "closed_loop_candidate_decision_loop",
-      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, or with a source seed incorrectly treated as a stale live candidate decision.",
-      "hypothesis": "A candidate decision tool can require an explicit candidate artifact, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale non-seed decision records for the consumed source, allow source coverage seeds when a source currently has no open candidates, fail when workflow path triggers omit linked manifests, and consume a performance-specific candidate fixture in PR checks.",
+      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, with a source seed incorrectly treated as a stale live candidate decision, or with live scheduled artifact download failing before it records that a source had no candidate artifact.",
+      "hypothesis": "A candidate decision tool can require an explicit candidate artifact for verifier runs, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale non-seed decision records for the consumed source, allow source coverage seeds when a source currently has no open candidates, fail when workflow path triggers omit linked manifests, consume a performance-specific candidate fixture in PR checks, and emit skipped live evidence for missing or empty producer artifacts.",
       "claims": ["candidate_decisions_must_match_consumed_candidates"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
@@ -1283,9 +1284,10 @@
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-live-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-performance-sample-evidence", "redacted": true}
       ],
-      "decision": "Candidate decisions are scheduled and cannot verify without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, or skip performance-specific sample decision evidence.",
+      "decision": "Candidate decisions are scheduled and cannot produce verifier evidence without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, or skip performance-specific sample decision evidence; scheduled live decisions now publish skipped evidence when a source has no candidate artifact or no open candidates.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
