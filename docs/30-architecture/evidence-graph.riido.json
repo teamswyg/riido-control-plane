@@ -1536,8 +1536,8 @@
     },
     {
       "id": "ambiguous_task_context_thread_interaction_loop",
-      "observation": "Marketing, analysis, intent-oriented, or non-command component documents can be misread as executable instructions, while token, quota, rate-limit, cloud-credit exhaustion, approval-dialog wording, local command-permission text, or runtime cancellation strings can leak provider/runtime wording into the AI Agent thread.",
-      "hypothesis": "A prompt interaction policy, explicit-action classifier, and metadata-aware visible-message normalization can keep the existing thread conversational: ambiguous task context asks for intent first before daemon work, concrete follow-up instructions become authoritative, file/shell/tool permission uses the structured approval channel rather than conversational approval loops, provider-limit or runtime-cancel wording renders as a stable user-facing result, and a later handoff to another agent creates a separate conversation without changing API shape.",
+      "observation": "Marketing, analysis, intent-oriented, or non-command component documents can be misread as executable instructions, while token, quota, rate-limit, cloud-credit exhaustion, approval-dialog wording, local command-permission text, or runtime cancellation strings such as supervisor: stopped can leak provider/runtime wording into the AI Agent thread.",
+      "hypothesis": "A prompt interaction policy, explicit-action classifier, and metadata-aware visible-message normalization can keep the existing thread conversational: ambiguous task context asks for intent first before daemon work, concrete follow-up instructions become authoritative, file/shell/tool permission uses the structured approval channel rather than conversational approval loops, provider-limit or runtime-cancel wording renders as a stable user-facing result, supervisor stop reasons render as stopped UI copy, and a later handoff to another agent creates a separate conversation without changing API shape.",
       "claims": ["ambiguous_task_context_must_ask_before_work"],
       "changes": [
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_explicit_markers.go"},
@@ -1605,7 +1605,7 @@
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Ambiguous task intent handling now includes non-command component documents and visible-message normalization evidence: without explicit action signals, the first visible agent response asks what to do before durable daemon assignment; tool permission wording is routed to structured approval rather than repeated conversational approval prompts; provider-limit metadata, provider wording, approval-dialog wording, local command-permission wording, and runtime cancellation wording normalize to stable client-facing thread results; and post-limit agent handoff remains enforced while preserving existing endpoint input and output fields.",
+      "decision": "Ambiguous task intent handling now includes non-command component documents and visible-message normalization evidence: without explicit action signals, the first visible agent response asks what to do before durable daemon assignment; tool permission wording is routed to structured approval rather than repeated conversational approval prompts; provider-limit metadata, provider wording, approval-dialog wording, local command-permission wording, context cancellation, and supervisor stop wording normalize to stable client-facing thread results; and post-limit agent handoff remains enforced while preserving existing endpoint input and output fields.",
       "next_loop": "ai_thread_history"
     },
     {

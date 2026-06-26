@@ -4,42 +4,44 @@ import "testing"
 
 func TestAIAgentTaskThreadHistoryLocalizesStoppedContextCanceled(t *testing.T) {
 	t.Parallel()
-	message, ok := taskThreadProjectionMessage(AIAgentTaskThreadRecord{
-		ThreadID:        "thread-stopped-context",
-		TaskID:          "task-stopped-context",
-		AssignmentID:    "asn-stopped-context",
-		AgentID:         "agent-public-openclaw",
-		RunID:           "run-stopped-context",
-		AssignmentState: AgentAssignmentStateStopped,
-		CommentKind:     AgentTaskCommentStoppedByUserRequest,
-		Message:         "context canceled",
-		ResultMessage:   "context canceled",
-	})
-	if !ok {
-		t.Fatal("expected stopped projection message")
-	}
-	if message.Body != clientMessageTaskStopped {
-		t.Fatalf("body = %q, want %q", message.Body, clientMessageTaskStopped)
-	}
-	if message.ResultMessage != clientMessageTaskStopped {
-		t.Fatalf("result_message = %q, want %q", message.ResultMessage, clientMessageTaskStopped)
+	for _, raw := range []string{"context canceled", "supervisor: stopped"} {
+		message, ok := taskThreadProjectionMessage(AIAgentTaskThreadRecord{
+			ThreadID:        "thread-stopped-context",
+			TaskID:          "task-stopped-context",
+			AssignmentID:    "asn-stopped-context",
+			AgentID:         "agent-public-openclaw",
+			RunID:           "run-stopped-context",
+			AssignmentState: AgentAssignmentStateStopped,
+			CommentKind:     AgentTaskCommentStoppedByUserRequest,
+			Message:         raw,
+			ResultMessage:   raw,
+		})
+		if !ok {
+			t.Fatalf("expected stopped projection message for %q", raw)
+		}
+		if message.Body != clientMessageTaskStopped {
+			t.Fatalf("body for %q = %q, want %q", raw, message.Body, clientMessageTaskStopped)
+		}
+		if message.ResultMessage != clientMessageTaskStopped {
+			t.Fatalf("result_message for %q = %q, want %q", raw, message.ResultMessage, clientMessageTaskStopped)
+		}
 	}
 }
 
-func TestAIAgentTaskThreadHistoryLocalizesStoredAgentContextCanceled(t *testing.T) {
+func TestAIAgentTaskThreadHistoryLocalizesStoredAgentStoppedMessages(t *testing.T) {
 	t.Parallel()
 	messages := copyTaskThreadHistoryMessages([]AIAgentTaskThreadHistoryMessage{
 		{
 			MessageID:     "msg-agent-stopped",
 			Role:          AIAgentTaskThreadMessageRoleAgent,
 			CommentKind:   AgentTaskCommentStoppedByUserRequest,
-			Body:          "context canceled",
-			ResultMessage: "context canceled",
+			Body:          "supervisor: stopped",
+			ResultMessage: "supervisor: stopped",
 		},
 		{
 			MessageID: "msg-user-literal",
 			Role:      AIAgentTaskThreadMessageRoleUser,
-			Body:      "context canceled",
+			Body:      "supervisor: stopped",
 		},
 	})
 	if messages[0].Body != clientMessageTaskStopped {
@@ -48,7 +50,7 @@ func TestAIAgentTaskThreadHistoryLocalizesStoredAgentContextCanceled(t *testing.
 	if messages[0].ResultMessage != clientMessageTaskStopped {
 		t.Fatalf("stored agent result_message = %q, want %q", messages[0].ResultMessage, clientMessageTaskStopped)
 	}
-	if messages[1].Body != "context canceled" {
+	if messages[1].Body != "supervisor: stopped" {
 		t.Fatalf("user body = %q, want literal user text", messages[1].Body)
 	}
 }
