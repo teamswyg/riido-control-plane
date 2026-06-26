@@ -35,5 +35,23 @@ func TestOpenQuestionsBindOwnerNextArtifactAndReader(t *testing.T) {
 		if item.Status == "open" && item.NextArtifact == "" {
 			t.Fatalf("open question %s missing next artifact", item.ID)
 		}
+		if item.Status == "open" && item.NextCommand == "" {
+			t.Fatalf("open question %s missing next command", item.ID)
+		}
+	}
+}
+
+func TestOpenQuestionsEvidenceExposesNextCommands(t *testing.T) {
+	m, err := loadManifest(repoPath(filepath.Join("..", ".."), defaultManifest))
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := verifyAll(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := newEvidence(m, result)
+	if len(got.OpenCommands) != result.OpenCount {
+		t.Fatalf("open command count = %d, want %d", len(got.OpenCommands), result.OpenCount)
 	}
 }

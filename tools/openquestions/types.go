@@ -21,6 +21,7 @@ type question struct {
 	Stance       string `json:"stance"`
 	Resolution   string `json:"resolution,omitempty"`
 	NextArtifact string `json:"next_artifact"`
+	NextCommand  string `json:"next_command,omitempty"`
 }
 
 type loopRecord struct {

@@ -22,6 +22,7 @@ Questions: `8`; open: `7`; resolved: `1`.
 - question: Should public control-plane ever adopt an external AWS SDK?
 - stance: No. Stdlib-only adapters remain until an ADR accepts the dependency.
 - next artifact: dependency allowlist ADR or continued stdlib adapter evidence
+- next command: `gh issue create --repo teamswyg/riido-control-plane --title "Q-CP-001 AWS SDK dependency decision" --body "Produce dependency allowlist ADR or continued stdlib adapter evidence."`
 
 ### Q-CP-002
 
@@ -31,6 +32,7 @@ Questions: `8`; open: `7`; resolved: `1`.
 - question: Should final production persistence use assignment operation journals, separate catalog journals, or a DynamoDB single-table projection?
 - stance: AI Agent client development state now uses a durable DynamoDB snapshot item plus bounded recent client stream replay events. Full production projection, agent catalog durability, and rotation/revocation topology remain future slices.
 - next artifact: production persistence projection manifest
+- next command: `gh issue create --repo teamswyg/riido-control-plane --title "Q-CP-002 production persistence projection" --body "Produce production persistence projection manifest for agent catalog durability and rotation topology."`
 
 ### Q-CP-003
 
@@ -40,6 +42,7 @@ Questions: `8`; open: `7`; resolved: `1`.
 - question: Which IdP/JWKS claim mapping becomes the production authorizer contract?
 - stance: External authorizer port is stable; tenant claim mapping remains outside public defaults.
 - next artifact: identity claim mapping contract
+- next command: `gh issue create --repo teamswyg/riido-control-plane --title "Q-CP-003 identity claim mapping contract" --body "Produce identity claim mapping contract for production authorizer integration."`
 
 ### Q-CP-004
 
@@ -49,6 +52,7 @@ Questions: `8`; open: `7`; resolved: `1`.
 - question: Should stdout EMF remain the only public metrics publisher, or should Prometheus/OpenTelemetry become a contract?
 - stance: Stdout EMF is the only public publisher. Dashboards and exporters stay infra-owned.
 - next artifact: observability exporter policy manifest
+- next command: `gh issue create --repo teamswyg/riido-control-plane --title "Q-CP-004 observability exporter policy" --body "Produce observability exporter policy manifest for EMF, Prometheus, or OpenTelemetry boundaries."`
 
 ### Q-CP-005
 
@@ -58,6 +62,7 @@ Questions: `8`; open: `7`; resolved: `1`.
 - question: Should DynamoDB stream relay run in cmd/riido_ai_server or as a separate worker process?
 - stance: Adapter core is public; runtime topology is infra/deployment-owned until decided.
 - next artifact: stream relay topology decision manifest
+- next command: `gh issue create --repo teamswyg/riido-control-plane --title "Q-CP-005 stream relay topology decision" --body "Produce stream relay topology decision manifest for in-process versus worker deployment ownership."`
 
 ### Q-CP-006
 
@@ -67,6 +72,7 @@ Questions: `8`; open: `7`; resolved: `1`.
 - question: How are review/demo accounts rotated, disabled, and audited in production?
 - stance: Public repo stores only safe seed shape and token-hash provisioning; operations lifecycle is private evidence.
 - next artifact: review account lifecycle policy
+- next command: `gh issue create --repo teamswyg/riido-control-plane --title "Q-CP-006 review account lifecycle policy" --body "Produce review account lifecycle policy for rotation, disablement, and audit evidence."`
 
 ### Q-CP-008
 
@@ -76,6 +82,7 @@ Questions: `8`; open: `7`; resolved: `1`.
 - question: Should a desktop-managed daemon stop on app quit for every environment profile, or should staging/development/production daemon instances have profile-scoped lifecycle ownership that can stay online independently?
 - stance: Current evidence shows desktop app quit can gracefully stop the desktop-managed daemon, leaving SaaS runtime settings to show the device offline. Public control-plane should expose daemon state and stop-source evidence but must not infer local launcher intent. The ownership rule belongs in the desktop/daemon lifecycle contract.
 - next artifact: desktop daemon lifecycle/profile ownership manifest with stop-source evidence
+- next command: `gh issue create --repo teamswyg/riido-desktop --title "Q-CP-008 desktop daemon profile lifecycle ownership" --body "Produce desktop daemon lifecycle/profile ownership manifest with stop-source evidence."`
 
 ### Q-CP-007
 
@@ -91,8 +98,8 @@ Questions: `8`; open: `7`; resolved: `1`.
 
 | Step | Evidence |
 | --- | --- |
-| Observe | The open questions page was a hand-maintained table, so unresolved decisions had no machine-checkable owner or next artifact. |
-| Hypothesis | A decision queue manifest can generate the reader and verify that every open question has an owner and next executable artifact. |
-| Execute | Generate this reader from the open questions manifest and run the openquestions verifier in CI. |
-| Evaluate | The verifier fails on duplicate ids, unknown statuses, missing owners, missing next artifacts for open questions, or stale generated docs. |
+| Observe | The open questions page was a hand-maintained table, so unresolved decisions had no machine-checkable owner, next artifact, or executable next command. |
+| Hypothesis | A decision queue manifest can generate the reader and verify that every open question has an owner, next executable artifact, and bounded next command. |
+| Execute | Generate this reader from the open questions manifest, publish open command evidence, and run the openquestions verifier in CI. |
+| Evaluate | The verifier fails on duplicate ids, unknown statuses, missing owners, missing next artifacts, missing or unsafe next commands for open questions, or stale generated docs. |
 | Retrospective | This keeps planning uncertainty visible without treating prose as the source of truth. |
