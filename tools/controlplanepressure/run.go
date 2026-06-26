@@ -35,9 +35,10 @@ func runOne(cfg config, sc scenario, concurrency int) (pressureRun, error) {
 	if err != nil {
 		return pressureRun{}, err
 	}
+	defer op.close()
 	runtimeGC()
 	before := sampleResources()
-	samples, ops, errors := runWorkers(op, concurrency, cfg.Duration)
+	samples, ops, errors := runWorkers(op.run, concurrency, cfg.Duration)
 	after := sampleResources()
 	return pressureRun{
 		Scenario: sc.name, Concurrency: concurrency, ConcurrentUsers: concurrency, Operations: ops, Errors: errors,

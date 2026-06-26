@@ -13,7 +13,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - assertions: `12`
 - local pressure artifact: `control-plane-local-pressure`
 - pressure candidate artifact: `control-plane-pressure-closed-loop-candidates`
-- local pressure scenarios: `7`
+- local pressure scenarios: `9`
 - candidate artifact: `control-plane-performance-closed-loop-candidates`
 
 ## Commands

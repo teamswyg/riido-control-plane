@@ -45,7 +45,9 @@
     "progress_ingest_fragment",
     "thread_stream_subscription",
     "client_event_subscriber_fanout",
-    "thread_history_v3"
+    "thread_history_v3",
+    "assignment_long_poll_wait",
+    "tool_approval_waiters"
   ],
   "hot_paths": [
     {

@@ -6,7 +6,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `13`
+- decisions: `15`
 
 ## Assertions
 
@@ -33,6 +33,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - candidate decision records must include at least one owned seed decision for every intake source so new harness sources cannot be passive
 - candidate decision workflow path triggers must include every producer source workflow from intake
 - candidate decision PR verification must consume a performance-specific candidate fixture
+- candidate decision PR verification must publish explicit skipped evidence when a sampled candidate artifact has zero open candidates
 
 ## Decisions
 
@@ -50,12 +51,14 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `control-plane-pressure:thread_stream_subscription` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `control-plane-pressure:client_event_subscriber_fanout` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
 | `control-plane-pressure:thread_history_v3` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `control-plane-pressure:assignment_long_poll_wait` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
+| `control-plane-pressure:tool_approval_waiters` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `loop-closure-audit:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
 
 ## Evidence Loop
 
 - Observation: Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.
 - Hypothesis: A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, next artifact, and review expiry.
-- Execute: Generate this reader from the decision manifest, generate a deterministic candidate fixture, verify intake, verify candidate decisions with an explicit candidate artifact, download latest live candidate artifacts on non-PR runs, verify non-empty live candidate sets, and publish decision evidence in CI.
-- Evaluate: The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, expired candidate artifacts, stale docs, missing live artifact download wiring, missing scheduled workflow evidence, or unredacted candidate content.
+- Execute: Generate this reader from the decision manifest, generate deterministic candidate fixtures, verify intake, verify candidate decisions with explicit candidate artifacts, publish skipped evidence for sampled artifacts with zero candidates, download latest live candidate artifacts on non-PR runs, verify non-empty live candidate sets, and publish decision evidence in CI.
+- Evaluate: The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, expired candidate artifacts, stale docs, missing live artifact download wiring, missing scheduled workflow evidence, missing sampled skip evidence, or unredacted candidate content.
 - Retrospective: This moves prioritization metadata into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition and review deadline.

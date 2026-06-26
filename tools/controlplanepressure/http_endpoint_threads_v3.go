@@ -10,10 +10,10 @@ import (
 
 const pressureTokenHeader = "X-Riido-Ai-Agent-Token"
 
-func buildHTTPEndpointThreadsV3(cfg config) (func() error, error) {
+func buildHTTPEndpointThreadsV3(cfg config) (pressureOperation, error) {
 	store, principal, taskID, err := pressureFixture(cfg)
 	if err != nil {
-		return nil, err
+		return pressureOperation{}, err
 	}
 	authorizer, err := srv.NewStaticTokenAuthorizer([]srv.StaticTokenCredential{{
 		PrincipalID: principal.PrincipalID,
@@ -21,7 +21,7 @@ func buildHTTPEndpointThreadsV3(cfg config) (func() error, error) {
 		Scopes:      []string{"ai-agent:*"},
 	}})
 	if err != nil {
-		return nil, err
+		return pressureOperation{}, err
 	}
 	handler := srv.NewServer(srv.ServerConfig{
 		AIAgentClient:    store,
@@ -29,7 +29,7 @@ func buildHTTPEndpointThreadsV3(cfg config) (func() error, error) {
 		HTTPTransactions: srv.NewHTTPTransactionMetrics(),
 	}).Handler()
 	path := "/v3/client/workspaces/" + fixtureWorkspaceID + "/ai-agent/tasks/" + taskID + "/threads"
-	return func() error {
+	return newPressureOperation(func() error {
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, path, nil)
 		req.Header.Set(pressureTokenHeader, "pressure-token")
 		resp := httptest.NewRecorder()
@@ -38,5 +38,5 @@ func buildHTTPEndpointThreadsV3(cfg config) (func() error, error) {
 			return errUnexpectedStatus(resp.Code)
 		}
 		return nil
-	}, nil
+	}), nil
 }
