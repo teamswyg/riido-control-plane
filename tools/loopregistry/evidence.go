@@ -14,6 +14,7 @@ type evidence struct {
 	MaxExpiryHours            int                 `json:"max_expiry_hours"`
 	SemanticHashes            map[string]string   `json:"semantic_hashes"`
 	EvidenceKinds             []evidenceKind      `json:"evidence_kinds"`
+	LoopSurfaces              []loopSurface       `json:"loop_surfaces"`
 	EvidenceGraph             []graphEdge         `json:"evidence_graph"`
 	ClaimSurfaces             []claimSurface      `json:"claim_surfaces"`
 	RefreshWorkflows          map[string]string   `json:"refresh_workflows"`
@@ -46,6 +47,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		MaxExpiryHours:        result.MaxExpiryHours,
 		SemanticHashes:        result.Hashes,
 		EvidenceKinds:         m.EvidenceKinds,
+		LoopSurfaces:          loopSurfaces(m.Loops),
 		EvidenceGraph:         m.EvidenceGraph,
 		ClaimSurfaces:         result.ClaimSurfaces,
 		RefreshWorkflows:      refreshWorkflows(m.Loops),
