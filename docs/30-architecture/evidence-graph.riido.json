@@ -895,8 +895,8 @@
     },
     {
       "id": "ai_thread_history_conversation_grouping_loop",
-      "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card, and later observed stale queued_by_busy_agent status text appearing next to newer progress or running state in the same conversation. A running thread state can be known before a delayed queued status message receives a later observed_at timestamp, so timestamp ordering alone is not a sufficient suppression rule.",
-      "hypothesis": "Binding conversation_id, parent_thread_id, and queued-status current-only filtering to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations and prevents stale queue hints from rendering as durable agent replies once progress, active running state, or result history exists, including when event timestamps arrive out of order.",
+      "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card, later observed stale queued_by_busy_agent status text appearing next to newer progress or running state in the same conversation, and staging showed a task screen keeping an optimistic running spinner even though daemon status had running_tasks=0, v2 thread-stream-subscription returned active_thread_filters=[], and v3 history contained only terminal threads. A running thread state can be known before a delayed queued status message receives a later observed_at timestamp, and terminal server truth must be able to clear stale client session state.",
+      "hypothesis": "Binding conversation_id, parent_thread_id, queued-status current-only filtering, and terminal active_stream closure to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations, prevents stale queue hints from rendering as durable agent replies once progress, active running state, or result history exists, and lets refresh/refetch clear local running UI when every server-side thread is terminal.",
       "claims": ["thread_history_v3_must_expose_stable_conversation_grouping"],
       "changes": [
         {"kind": "manifest", "path": "docs/20-domain/ai-agent-client-api.riido.json"},
@@ -911,7 +911,8 @@
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_clock_skew_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_state_test.go"},
-        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go"}
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"}
       ],
       "verifiers": [
         {"kind": "tool", "path": "tools/aiagentclientapi"},
@@ -923,7 +924,7 @@
         {"kind": "artifact", "path": "ai-agent-client-api-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, and queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps.",
+      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI.",
       "next_loop": "ai_thread_history"
     },
     {

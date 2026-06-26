@@ -133,7 +133,8 @@
       {"name":"message-row-ordering","detail":"Within one thread record, render messages by observed_at, then role order user -> progress -> agent, then seq, then message_id. Use message_id as the stable row key, not body text."},
       {"name":"queued-status-current-only","detail":"comment_kind=queued_by_busy_agent means the assignment is currently waiting behind busy work. If the same conversation_id has an active running thread state, newer progress, or result messages, v3 history omits that stale queued status from messages[] while preserving the user's follow-up message. Running conversation state wins even when event timestamps arrive out of order."},
       {"name":"progress-dedupe-ordering","detail":"For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility."},
-      {"name":"late-terminal-guard","detail":"If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running."}
+      {"name":"late-terminal-guard","detail":"If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running."},
+      {"name":"terminal-active-stream-closure","detail":"When every v3 thread for a task is terminal, omit both the top-level active_stream and each per-thread active_stream. A client refresh or v3 refetch must be able to clear stale optimistic running UI from this server truth."}
     ],
     "mutation_rules": [
       {"name":"assign-agent","detail":"POST the v2 agent-assignments endpoint with agent_id. Same provider or same agent_id can still produce a distinct conversation when the user performs a new participant-dropdown assignment."},
@@ -146,7 +147,8 @@
       "Filter payloads by task_id, agent_id, thread_id, and run_id.",
       "Use assignment_id + run_id + seq as the progress dedupe key when assignment_id is present.",
       "SSE is a live update input; v3 thread history remains the refresh recovery truth.",
-      "Do not revive a terminal assignment when a late runtime progress event arrives."
+      "Do not revive a terminal assignment when a late runtime progress event arrives.",
+      "If v3 thread history has no active_stream, the client must not keep a local running spinner for that task."
     ],
     "terminal_states": ["completed","failed","stopped","cancelled","timeout"],
     "checklist": [
@@ -161,6 +163,7 @@
       "progress-dedupe",
       "queued-status-current-only",
       "terminal-late-event-guard",
+      "terminal-active-stream-closure",
       "deleted-agent-history-retention"
     ]
   },
@@ -181,6 +184,7 @@
     {"name":"thread-history-v3-intent-chain-test","file":"internal/riidoaiserver/ai_agent_intent_dialogue_full_chain_assert_test.go","contains":["assertNestedConversationFollowup","assertDraftCopywritingComplete"]},
     {"name":"thread-history-v3-intent-handoff-test","file":"internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go","contains":["TestAIAgentIntentDialogueCanHandoffAfterProviderLimit","assertConversationReassignment","assertFollowupResearchLimit"]},
     {"name":"thread-history-v3-http-intent-dialogue","file":"internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go","contains":["TestHTTPAIAgentIntentDialogueV3KeepsScenarioTimeline","postIntentDialogueThreadMessage","recordIntentDialogueCompleted","assertFollowupResearchLimit"]},
+    {"name":"thread-history-v3-terminal-active-stream-test","file":"internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go","contains":["TestHTTPAIAgentClientV3TerminalHistoryOmitsActiveStream","terminal-only v3 history must not expose active_stream","terminal thread must not carry per-thread active_stream"]},
     {"name":"non-command-component-intent-gate-test","file":"internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go","contains":["TestAssignmentPromptAsksForIntentOnNonCommandComponentDocument","TestAssignmentPromptKeepsExplicitTitleWithPreferenceDocumentExecutable"]},
     {"name":"thread-history-v3-http","file":"internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go","contains":["/v3/client/workspaces/","conversation_id missing"]},
     {"name":"thread-history-v3-handoff-types","file":"tools/aiagentclientapi/types_thread_history_v3.go","contains":["ImplementationSteps","ResponseShapes","OrderingRules","MutationRules"]},
