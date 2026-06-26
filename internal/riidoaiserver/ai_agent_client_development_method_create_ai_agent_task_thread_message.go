@@ -48,7 +48,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	threadWasActive := taskThreadHasActiveStream(thread)
 	conversationID := taskThreadConversationID(thread)
 	parentThreadID := ""
-	if taskThreadMessageStartsNewExecution(thread) {
+	if !req.toolApproval && taskThreadMessageStartsNewExecution(thread) {
 		parentThreadID = thread.ThreadID
 		response.AssignmentID = strings.TrimSpace(req.AssignmentID)
 		response.RunID = taskThreadMessageRunID(taskID, response.AssignmentID, len(s.taskThreads[taskID])+1)
