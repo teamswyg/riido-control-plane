@@ -35,6 +35,10 @@ func TestLoopRefreshDispatchCLIWritesPlan(t *testing.T) {
 		got.Dispatches[0].WorkflowFile != "closed-loop-candidate-intake.yml" {
 		t.Fatalf("dispatch plan = %+v", got)
 	}
+	if got.Dispatches[0].VerifiedCommand !=
+		"gh workflow run closed-loop-candidate-intake.yml --ref main" {
+		t.Fatalf("verified command = %q", got.Dispatches[0].VerifiedCommand)
+	}
 	if got.GeneratedAt != "2026-06-25T00:00:00Z" || got.ExpiresAt == "" {
 		t.Fatalf("dispatch plan freshness = %+v", got)
 	}

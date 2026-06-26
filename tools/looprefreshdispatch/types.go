@@ -30,7 +30,8 @@ type dispatchPlan struct {
 }
 
 type workflowDispatch struct {
-	WorkflowFile string   `json:"workflow_file"`
-	LoopIDs      []string `json:"loop_ids"`
-	CommandCount int      `json:"command_count"`
+	WorkflowFile    string   `json:"workflow_file"`
+	VerifiedCommand string   `json:"verified_command"`
+	LoopIDs         []string `json:"loop_ids"`
+	CommandCount    int      `json:"command_count"`
 }
