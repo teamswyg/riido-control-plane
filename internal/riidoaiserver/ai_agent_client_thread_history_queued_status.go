@@ -4,8 +4,11 @@ import "time"
 
 func suppressSupersededQueuedHistoryMessages(threads []AIAgentTaskThreadHistoryRecord) {
 	latest := latestConversationNonQueuedMessageTime(threads)
+	running := runningTaskThreadHistoryConversations(threads)
 	for i := range threads {
-		threads[i].Messages = withoutSupersededQueuedMessages(threads[i].ConversationID, threads[i].Messages, latest)
+		threads[i].Messages = withoutSupersededQueuedMessages(
+			threads[i].ConversationID, threads[i].Messages, latest, running,
+		)
 	}
 }
 
@@ -32,14 +35,16 @@ func withoutSupersededQueuedMessages(
 	conversationID string,
 	messages []AIAgentTaskThreadHistoryMessage,
 	latest map[string]time.Time,
+	running map[string]struct{},
 ) []AIAgentTaskThreadHistoryMessage {
 	cutoff, ok := latest[conversationID]
-	if !ok {
+	hasRunning := taskThreadHistoryConversationIsRunning(conversationID, running)
+	if !ok && !hasRunning {
 		return messages
 	}
 	out := messages[:0]
 	for _, message := range messages {
-		if historyMessageIsQueuedStatus(message) && !cutoff.Before(message.ObservedAt) {
+		if historyQueuedStatusIsSuperseded(message, cutoff, ok, hasRunning) {
 			continue
 		}
 		out = append(out, message)
