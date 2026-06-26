@@ -12,6 +12,10 @@ func verifyRemovedClaimImpact(claim claimBinding, changed map[string]bool) (impa
 	if len(record.ChangedBoundFiles) == 0 {
 		return record, fmt.Errorf("claim %s removed without a bound code or test file change", claim.ID)
 	}
+	record.ChangedEvidence = changedValues(claimEvidenceFiles(claim), changed)
+	if len(record.ChangedEvidence) == 0 {
+		return record, fmt.Errorf("claim %s removed without generated claim evidence change", claim.ID)
+	}
 	record.ChangedReasoningEvidence = changedValues(claimReasoningEvidenceFiles(), changed)
 	if len(record.ChangedReasoningEvidence) == 0 {
 		return record, fmt.Errorf("claim %s removed without evidence graph reasoning change", claim.ID)

@@ -31,6 +31,10 @@ func verifyChangedClaimImpact(claim claimBinding, changed map[string]bool) (impa
 	if len(record.ChangedBoundFiles) == 0 {
 		return record, fmt.Errorf("claim %s changed without a bound code or test file change", claim.ID)
 	}
+	record.ChangedEvidence = changedValues(claimEvidenceFiles(claim), changed)
+	if len(record.ChangedEvidence) == 0 {
+		return record, fmt.Errorf("claim %s changed without generated claim evidence change", claim.ID)
+	}
 	record.ChangedReasoningEvidence = changedValues(claimReasoningEvidenceFiles(), changed)
 	if len(record.ChangedReasoningEvidence) == 0 {
 		return record, fmt.Errorf("claim %s changed without evidence graph reasoning change", claim.ID)
@@ -56,9 +60,7 @@ func verifyBoundSurfaceImpact(claim claimBinding, changed map[string]bool) (impa
 }
 
 func claimEvidenceFiles(claim claimBinding) []string {
-	values := []string{defaultManifest}
-	values = append(values, claim.GeneratedDoc...)
-	return values
+	return claim.GeneratedDoc
 }
 
 func claimReasoningEvidenceFiles() []string {

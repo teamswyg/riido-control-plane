@@ -819,7 +819,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "8335c9e73ccb90368e5f7c2a4f1612ed9d11b835214e6c00824238343bea53d0"
+      "semantic_hash": "d184ecfc1bfac28e71303c72ac6f4d113b0e058ffd7428fc2dffa9e92652f71f"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
@@ -1275,7 +1275,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3fa5963f31626e27b09765d12b54048e31011005f81d2dcdc459bfed672f24fe"
+      "semantic_hash": "6f4a8187800cc0b1c7a2e6ea15078c1d8490a28585b02daf1e565d672c394fc7"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1335,7 +1335,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "2f9cd942eddfec2a81b50859f109eaa9ee2d31423cbf9b4905be75c35155a8c2"
+      "semantic_hash": "a2f16e4c2086405a1bc9212b9c1df7fef91ec02e36cbd875f360c461e446c168"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -1418,7 +1418,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "56076fd0249245e8b0589111b472948c510923f110e24ef7ba0496468dca4eef"
+      "semantic_hash": "6d353506221f7b95285c34151db9b3d3826da2ff12080e3884ff6eceb6664e6c"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -1583,7 +1583,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "0fd8002e2ea9cf63cc9a9c8fd4dde7bc7764f9e22f36fe41e86132b044f9e43b"
+      "semantic_hash": "d3d4b3e7600de8fe9d7316a13078122fc1f609ffa0e81391241438492760a114"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -1738,7 +1738,7 @@
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
-      "statement": "Loop registry CI must emit GitHub Actions annotations for claim verifier commands, PR impact changed files, changed claim ids, and claim-bound surface scope so reviewers and agents can see target QA commands and touched semantic surfaces directly in the check output without opening generated artifacts or narrative docs.",
+      "statement": "Loop registry CI must emit GitHub Actions annotations for claim verifier commands, PR impact changed files, changed claim ids, changed claim generated evidence, reasoning evidence, and claim-bound surface scope so reviewers and agents can see target QA commands and touched semantic surfaces directly in the check output without opening generated artifacts or narrative docs.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "operator_decision",
@@ -1774,7 +1774,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c5a03b62cf971d0340a877b54f03160dff16bfd1d464ac9d70d097a54cd2992c"
+      "semantic_hash": "ea23679f583547a1a2d0419f923d0bee9c7982d8656a21300a9723ae832dc441"
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
@@ -1823,11 +1823,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "865f699f990e2dc478883771e5e3c2f3cfbefe723cf4c00d88c1e19af3a0e6c7"
+      "semantic_hash": "96337c32cad81e0d61316e6e7ac1137aaf7128aa33756f6c3d8d922c5c5b41f3"
     },
     {
       "id": "claim_meaning_changes_require_reasoning_chain",
-      "statement": "When a business claim meaning changes in a pull request, the impact verifier must also require the evidence graph reasoning manifest to change so Observation, Hypothesis, Decision, and Next Loop stay aligned with the changed claim.",
+      "statement": "When a business claim meaning changes in a pull request, the impact verifier must require generated claim evidence and the evidence graph reasoning manifest to change so human-readable generated surfaces, Observation, Hypothesis, Decision, and Next Loop stay aligned with the changed claim.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "operator_decision",
@@ -1843,11 +1843,18 @@
       ],
       "files": [
         "tools/loopregistry/impact_more.go",
+        "tools/loopregistry/impact_added_claim.go",
+        "tools/loopregistry/impact_added_claim_test.go",
+        "tools/loopregistry/impact_removed_claim.go",
+        "tools/loopregistry/impact_removed_claim_test.go",
         "tools/loopregistry/impact_test.go",
         "tools/loopregistry/impact_types.go",
         "tools/loopregistry/impact_values.go"
       ],
       "verifiers": [
+        "TestAddedClaimImpactAllowsBoundFileAndReasoningChange",
+        "TestRemovedClaimImpactAllowsBoundFileAndReasoningChange",
+        "TestClaimImpactRequiresGeneratedEvidenceForMeaningChange",
         "TestClaimImpactRequiresEvidenceGraphReasoningForMeaningChange",
         "TestClaimImpactAllowsBoundFileChange"
       ],
@@ -1855,11 +1862,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a98f17ba2c0b8fd51ba6547c168a13b490cbbb3d3febec1487e6a9a6fd361b6b"
+      "semantic_hash": "92c01004cb71dfe13bac0e574b9d8deb95ca91aefb907e011b966dac0b6ef359"
     },
     {
       "id": "claim_bound_file_changes_require_reasoning_chain",
-      "statement": "When a claim-bound code or test path changes in a pull request, the impact verifier must require evidence graph reasoning movement in addition to claim manifest or generated-doc evidence so executable behavior changes keep Observation, Hypothesis, Decision, and Next Loop aligned.",
+      "statement": "When a claim-bound code or test path changes in a pull request, the impact verifier must require evidence graph reasoning movement in addition to generated-doc evidence so executable behavior changes keep human-readable generated surfaces, Observation, Hypothesis, Decision, and Next Loop aligned.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "operator_decision",
@@ -1889,7 +1896,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e21154ff2bb83a2ce016efcbc31632438d4d318dc9690d334c734777fa5092a3"
+      "semantic_hash": "e1d7379ecc60a81ed9bee6a39806d6b77a9212d2357d059ec029db702bc01ac4"
     },
     {
       "id": "claim_impact_evidence_must_expose_changed_files",
@@ -1920,7 +1927,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "6d0d30c789c4fd7827bf70ad16e897d46b6b37e9fdae13654dceaa05f031576a"
+      "semantic_hash": "7eeed89bc88aa06acd94b7485c1eea89df5c1b690dc07f45acd403ebb24eeeea"
     },
     {
       "id": "pre_commit_must_run_claim_binding_impact",
@@ -2097,7 +2104,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "833030e49445fc1d5bb21c3759ca0b4306f76ace17cc624e15faf117abc15dd1"
+      "semantic_hash": "568e038399efc8555b02918231c3245a77316cb7f6a7da453597a15985d9e227"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -2136,7 +2143,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "66871992e026aed05229f75fdc0ab8d6469aca2882aec35950374b33ad39d8ca"
+      "semantic_hash": "edc7a0c8cf19338b98fe3b4b37b374ba64f6857d84eb699cfa696f69b5b85521"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -2171,7 +2178,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1fd853731ee40d2ae38c9464067e13f11a8f48fc813b4785f122790c28a59e69"
+      "semantic_hash": "0c694d2c9ceebfc39e46ff8b0647bd3f4c0bfa80c000b79291d1e819af5ccf19"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -2345,7 +2352,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "53089f5cec4d5235540a504446426365677447c2aa50f11130c7da4327499d5b"
+      "semantic_hash": "9749b43a3562a2dac62ef9cb28de1d5581da8d99f0226f06483b09ab6f06f869"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",

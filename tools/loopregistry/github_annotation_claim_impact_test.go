@@ -12,9 +12,21 @@ func TestGitHubAnnotationsIncludeClaimImpactScope(t *testing.T) {
 		Enabled:          true,
 		ChangedFileCount: 1,
 		ChangedFiles:     []string{"internal/example.go"},
-		AddedClaims:      []impactClaim{{ID: "claim_added"}},
-		Claims:           []impactClaim{{ID: "claim_changed"}},
-		RemovedClaims:    []impactClaim{{ID: "claim_removed"}},
+		AddedClaims: []impactClaim{{
+			ID:                       "claim_added",
+			ChangedEvidence:          []string{"docs/added.md"},
+			ChangedReasoningEvidence: []string{"docs/reasoning.riido.json"},
+		}},
+		Claims: []impactClaim{{
+			ID:                       "claim_changed",
+			ChangedEvidence:          []string{"docs/changed.md"},
+			ChangedReasoningEvidence: []string{"docs/reasoning.riido.json"},
+		}},
+		RemovedClaims: []impactClaim{{
+			ID:                       "claim_removed",
+			ChangedEvidence:          []string{"docs/removed.md"},
+			ChangedReasoningEvidence: []string{"docs/reasoning.riido.json"},
+		}},
 		BoundSurfaces: []impactBoundSurface{{
 			ID:                       "claim_bound",
 			ChangedBoundFiles:        []string{"internal/example.go"},
@@ -24,9 +36,9 @@ func TestGitHubAnnotationsIncludeClaimImpactScope(t *testing.T) {
 	})
 	got := out.String()
 	for _, want := range []string{
-		"added claims: claim_added",
-		"changed claims: claim_changed",
-		"removed claims: claim_removed",
+		"added claims: claim_added evidence: docs/added.md reasoning: docs/reasoning.riido.json",
+		"changed claims: claim_changed evidence: docs/changed.md reasoning: docs/reasoning.riido.json",
+		"removed claims: claim_removed evidence: docs/removed.md reasoning: docs/reasoning.riido.json",
 		"bound surfaces: claim_bound files: internal/example.go evidence: docs/claim.md reasoning: docs/reasoning.riido.json",
 	} {
 		if !strings.Contains(got, want) {

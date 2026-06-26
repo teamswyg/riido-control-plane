@@ -24,5 +24,6 @@ func manifestOnlyImpactClaim(statement string) claimBinding {
 			"internal/example.go",
 			"internal/example_test.go",
 		},
+		GeneratedDoc: []string{"docs/domain.md"},
 	}
 }

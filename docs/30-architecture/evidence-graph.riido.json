@@ -441,17 +441,24 @@
     },
     {
       "id": "claim_reasoning_impact_loop",
-      "observation": "A business claim meaning change could co-change bound code or tests while leaving the evidence graph reasoning chain stale.",
-      "hypothesis": "Requiring the evidence graph reasoning manifest to change with claim meaning changes keeps Observation, Hypothesis, Decision, and Next Loop aligned with the changed claim.",
+      "observation": "A business claim meaning change could co-change bound code or tests while leaving generated claim evidence or the evidence graph reasoning chain stale.",
+      "hypothesis": "Requiring generated claim evidence and the evidence graph reasoning manifest to change with claim meaning changes keeps human-readable generated surfaces, Observation, Hypothesis, Decision, and Next Loop aligned with the changed claim.",
       "claims": ["claim_meaning_changes_require_reasoning_chain"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/impact_added_claim.go"},
+        {"kind": "tool", "path": "tools/loopregistry/impact_removed_claim.go"},
         {"kind": "tool", "path": "tools/loopregistry/impact_more.go"},
+        {"kind": "tool", "path": "tools/loopregistry/impact_types.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_added_claim_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_removed_claim_test.go"},
         {"kind": "test", "path": "tools/loopregistry/impact_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/impact_added_claim_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_removed_claim_test.go"},
         {"kind": "test", "path": "tools/loopregistry/impact_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
@@ -461,13 +468,13 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Claim meaning impact now requires reasoning evidence movement, preventing code/test-only claim edits from bypassing the evidence graph, and its claim coverage tokens make that reasoning-chain requirement visible to the loop-closure audit.",
+      "decision": "Claim meaning impact now requires generated claim evidence and reasoning evidence movement, preventing code/test-only claim edits from bypassing generated docs or the evidence graph, and its claim coverage tokens make that generated-evidence and reasoning-chain requirement visible to the loop-closure audit.",
       "next_loop": "closed_loop_candidate"
     },
     {
       "id": "claim_bound_surface_reasoning_impact_loop",
-      "observation": "A claim-bound code or test path could change with claim manifest or generated-doc evidence while leaving the evidence graph reasoning chain stale.",
-      "hypothesis": "Requiring evidence graph reasoning movement for claim-bound executable surface changes keeps Observation, Hypothesis, Decision, and Next Loop aligned even when the claim statement itself does not change.",
+      "observation": "A claim-bound code or test path could change with only manifest evidence, or with generated-doc evidence while leaving the evidence graph reasoning chain stale.",
+      "hypothesis": "Requiring generated-doc evidence and evidence graph reasoning movement for claim-bound executable surface changes keeps human-readable generated surfaces, Observation, Hypothesis, Decision, and Next Loop aligned even when the claim statement itself does not change.",
       "claims": ["claim_bound_file_changes_require_reasoning_chain"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -693,8 +700,8 @@
     },
     {
       "id": "claim_verifier_annotation_loop",
-      "observation": "Claim verifier commands, PR impact changed files, changed claim ids, and claim-bound surface scope existed in the loop-registry evidence artifact, but a reviewer or agent still had to open artifacts or run jq before seeing the exact target QA command or changed semantic surfaces in a PR check.",
-      "hypothesis": "Emitting GitHub Actions annotations from the same loop-registry evidence surface makes target verifier commands, impact changed files, changed claims, and claim-bound surfaces visible in CI without adding another narrative handoff.",
+      "observation": "Claim verifier commands, PR impact changed files, changed claim ids, changed claim generated evidence, reasoning evidence, and claim-bound surface scope existed in the loop-registry evidence artifact, but a reviewer or agent still had to open artifacts or run jq before seeing the exact target QA command or changed semantic surfaces in a PR check.",
+      "hypothesis": "Emitting GitHub Actions annotations from the same loop-registry evidence surface makes target verifier commands, impact changed files, changed claims, changed claim generated evidence, reasoning evidence, and claim-bound surfaces visible in CI without adding another narrative handoff.",
       "claims": ["claim_verifier_commands_must_surface_as_ci_annotations"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
@@ -705,9 +712,11 @@
         {"kind": "tool", "path": "tools/loopregistry/github_annotation_escape.go"},
         {"kind": "tool", "path": "tools/loopregistry/main.go"},
         {"kind": "tool", "path": "tools/loopregistry/run.go"},
+        {"kind": "test", "path": "tools/loopregistry/github_annotation_claim_impact_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/github_annotation_claim_impact_test.go"},
         {"kind": "test", "path": "tools/loopregistry/github_annotation_test.go"},
         {"kind": "test", "path": "tools/loopregistry/github_annotation_workflow_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
@@ -718,7 +727,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
-      "decision": "Loop-registry PR checks now surface claim verifier commands, impact changed files, changed claim ids, and bound claim surfaces as GitHub annotations, and the claim coverage tokens keep that annotation requirement visible to loop-closure audit even when artifacts and prose are skipped.",
+      "decision": "Loop-registry PR checks now surface claim verifier commands, impact changed files, changed claim ids, changed claim generated evidence, reasoning evidence, and bound claim surfaces as GitHub annotations, and the claim coverage tokens keep that annotation requirement visible to loop-closure audit even when artifacts and prose are skipped.",
       "next_loop": "closed_loop_candidate"
     },
     {
