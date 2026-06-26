@@ -1332,6 +1332,35 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "pre_commit_evidence_graph_impact_loop",
+      "observation": "CI could catch evidence graph chain drift, but local commits still depended on humans remembering the evidencegraph impact verifier before opening a PR.",
+      "hypothesis": "A pre-commit hook that runs evidence graph generated-doc and impact verification before PR creation makes Observation-to-Next-Loop reasoning drift an executable local failure rather than a review-time memory task.",
+      "claims": ["pre_commit_must_run_evidence_graph_impact"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
+        {"kind": "workflow", "path": ".github/workflows/pre-commit-baseline.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/pre-commit-baseline.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/precommitbaseline"},
+        {"kind": "script", "path": "tools/evidencegraph/precommit.sh"},
+        {"kind": "config", "path": ".pre-commit-config.yaml"},
+        {"kind": "test", "path": "tools/precommitbaseline/evidencegraph_hook_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/precommitbaseline/evidencegraph_hook_test.go"},
+        {"kind": "tool", "path": "tools/precommitbaseline"},
+        {"kind": "script", "path": "tools/evidencegraph/precommit.sh"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "pre-commit-baseline-evidence", "redacted": true},
+        {"kind": "artifact", "path": "riido-evidence-graph-precommit-evidence.json", "redacted": true}
+      ],
+      "decision": "Local pre-commit now blocks evidence graph reasoning drift before review, so chains cannot change Observation, Hypothesis, Change, Verifier, Evidence, Decision, or Next Loop semantics without an executable surface moving too.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "closed_loop_verifier_alias_loop",
       "observation": "Closed-loop tools used different verification flags, leaving agents to remember tool-specific commands, and the shared verifier intent claim did not expose the operator-decision and claim-coverage failure semantics it closes.",
       "hypothesis": "A shared -verify intent, backed by claim coverage tokens and regression tests, lets agents and pre-commit invoke closed-loop verification without reading each tool's prose usage or relying on human command memory.",
