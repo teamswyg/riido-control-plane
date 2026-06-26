@@ -12,10 +12,12 @@ on:
       - ".github/workflows/ai-agent-client-testnet-load.yml"
       - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-closure-audit.yml"
+      - ".github/workflows/loop-refresh-dispatch.yml"
       - "docs/30-architecture/control-plane-performance.riido.json"
       - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "docs/30-architecture/loop-closure-audit.riido.json"
+      - "docs/30-architecture/loop-refresh-dispatch.riido.json"
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
@@ -27,6 +29,7 @@ on:
       - "tools/controlplanepressure/**"
       - "tools/harnesspromotion/**"
       - "tools/loopclosureaudit/**"
+      - "tools/looprefreshdispatch/**"
   pull_request:
     paths:
       - ".github/workflows/closed-loop-candidate-decision.yml"
@@ -34,10 +37,12 @@ on:
       - ".github/workflows/ai-agent-client-testnet-load.yml"
       - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-closure-audit.yml"
+      - ".github/workflows/loop-refresh-dispatch.yml"
       - "docs/30-architecture/control-plane-performance.riido.json"
       - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "docs/30-architecture/loop-closure-audit.riido.json"
+      - "docs/30-architecture/loop-refresh-dispatch.riido.json"
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
@@ -49,6 +54,7 @@ on:
       - "tools/controlplanepressure/**"
       - "tools/harnesspromotion/**"
       - "tools/loopclosureaudit/**"
+      - "tools/looprefreshdispatch/**"
 
 permissions:
   contents: read
@@ -113,6 +119,31 @@ jobs:
             printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-sample.v1","status":"skipped","reason":"sample candidate artifact contained no open candidates"}\n' \
               > out/sample-loop-closure-audit-decision-evidence.json
           fi
+          cat > out/sample-loop-refresh-commands.json <<'JSON'
+          {
+            "schema_version": "riido-control-plane-loop-refresh-commands.v1",
+            "status": "refresh_required",
+            "generated_at": "2026-06-24T00:00:00Z",
+            "expires_at": "2026-06-25T00:00:00Z",
+            "command_count": 1,
+            "commands": [
+              {
+                "loop_id": "control_plane_pressure_candidate",
+                "kind": "target_verifier",
+                "command": "go test ./tools/controlplaneperf"
+              }
+            ]
+          }
+          JSON
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/looprefreshdispatch \
+            -commands-in out/sample-loop-refresh-commands.json \
+            -evidence-out out/sample-loop-refresh-dispatch-plan.json \
+            -candidate-out out/sample-loop-refresh-dispatch-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidatedecision \
+            -candidate-in out/sample-loop-refresh-dispatch-candidates.json \
+            -evidence-out out/sample-loop-refresh-dispatch-decision-evidence.json
       - name: Download latest live candidate artifacts
         if: github.event_name != 'pull_request'
         env:
@@ -158,6 +189,10 @@ jobs:
             loop-closure-audit.yml \
             loop-closure-audit-closed-loop-candidates \
             out/live-candidates/loop-closure-audit
+          download_candidate_artifact \
+            loop-refresh-dispatch.yml \
+            loop-refresh-dispatch-closed-loop-candidates \
+            out/live-candidates/loop-refresh-dispatch
           test -s out/live-candidate-files.txt
       - name: Verify live candidate decisions
         if: github.event_name != 'pull_request'
@@ -169,11 +204,13 @@ jobs:
           performance_candidate="$(find out/live-candidates/performance -type f -name '*.json' | head -n 1)"
           pressure_candidate="$(find out/live-candidates/pressure -type f -name '*.json' | head -n 1)"
           loop_closure_candidate="$(find out/live-candidates/loop-closure-audit -type f -name '*.json' | head -n 1)"
+          loop_refresh_candidate="$(find out/live-candidates/loop-refresh-dispatch -type f -name '*.json' | head -n 1)"
           test -n "$smoke_candidate"
           test -n "$load_candidate"
           test -n "$performance_candidate"
           test -n "$pressure_candidate"
           test -n "$loop_closure_candidate"
+          test -n "$loop_refresh_candidate"
           if jq -e '(.candidate_count // 0) > 0' "$smoke_candidate" >/dev/null; then
             go run ./tools/closedloopcandidatedecision \
               -candidate-in "$smoke_candidate" \
@@ -214,6 +251,14 @@ jobs:
             printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
               > out/live-decision-loop-closure-audit-evidence.json
           fi
+          if jq -e '(.candidate_count // 0) > 0' "$loop_refresh_candidate" >/dev/null; then
+            go run ./tools/closedloopcandidatedecision \
+              -candidate-in "$loop_refresh_candidate" \
+              -evidence-out out/live-decision-loop-refresh-dispatch-evidence.json
+          else
+            printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
+              > out/live-decision-loop-refresh-dispatch-evidence.json
+          fi
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -225,6 +270,15 @@ jobs:
         with:
           name: closed-loop-candidate-decision-loop-closure-sample-evidence
           path: out/sample-loop-closure-audit-decision-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-decision-loop-refresh-sample-evidence
+          path: |
+            out/sample-loop-refresh-dispatch-plan.json
+            out/sample-loop-refresh-dispatch-candidates.json
+            out/sample-loop-refresh-dispatch-decision-evidence.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
@@ -256,4 +310,5 @@ jobs:
             out/live-decision-performance-evidence.json
             out/live-decision-pressure-evidence.json
             out/live-decision-loop-closure-audit-evidence.json
+            out/live-decision-loop-refresh-dispatch-evidence.json
           if-no-files-found: error

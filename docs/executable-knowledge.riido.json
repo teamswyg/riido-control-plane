@@ -109,6 +109,11 @@
       "path": "internal/riidoaiserver/review_account_seed.riido.json",
       "owner_manifest": "docs/30-architecture/review-account-seed.riido.json",
       "owner_key": "seed_ssot"
+    },
+    {
+      "path": "docs/30-architecture/loop-refresh-dispatch.riido.json",
+      "owner_manifest": "docs/30-architecture/closed-loop-candidate-intake.riido.json",
+      "owner_key": "producer_manifests"
     }
   ],
   "manual_groups": [],

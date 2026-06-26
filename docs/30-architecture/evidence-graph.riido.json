@@ -1159,13 +1159,16 @@
     {
       "id": "expired_loop_refresh_dispatch_loop",
       "observation": "Expired loop refresh command artifacts could name runnable GitHub workflow commands, but executing raw command strings would make the automation boundary depend on shell parsing rather than verified dispatch intent, while a dispatch plan that keeps only workflow_file loses the visible link back to the verified command. The plan also used to expose only ignored command counts and kinds, so target_verifier commands selected by expired evidence were not actionable without opening upstream artifacts. If the dispatcher runs before the command producer, reuses an expired command artifact, trusts a future generated_at timestamp, accepts an inverted generated_at/expires_at window, trusts a fresh source that still carries dispatch commands, accepts a mismatched command_count, or leaves its claim without observe/verify/fail coverage tokens, it can also consume stale, inconsistent, or temporally impossible evidence while still publishing a fresh-looking plan.",
-      "hypothesis": "A dispatcher can treat command strings as evidence only, require the source command evidence freshness window to be internally ordered and currently valid, require source status and command_count to match the command payload, accept the exact refresh_workflow shape, validate the workflow basename exists, publish a canonical verified_command next to each structured workflow_file, preserve ignored non-workflow commands with loop_id, kind, and command detail for follow-up agents, verify its scheduled run follows the command-producing loop-registry workflow, publish a generated_at/expires_at dispatch plan artifact linked to the source command window, dispatch only the structured workflow_file values outside pull requests, and keep the dispatch claim routable through loop vocabulary coverage tokens.",
+      "hypothesis": "A dispatcher can treat command strings as evidence only, require the source command evidence freshness window to be internally ordered and currently valid, require source status and command_count to match the command payload, accept the exact refresh_workflow shape, validate the workflow basename exists, publish a canonical verified_command next to each structured workflow_file, preserve ignored non-workflow commands with loop_id, kind, and command detail for follow-up agents, promote those ignored commands into a redacted closed-loop candidate artifact, verify its scheduled run follows the command-producing loop-registry workflow, publish a generated_at/expires_at dispatch plan artifact linked to the source command window, dispatch only the structured workflow_file values outside pull requests, and keep the dispatch claim routable through loop vocabulary coverage tokens.",
       "claims": ["expired_loop_refresh_commands_must_dispatch_safe_workflows"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/loop-refresh-dispatch.yml"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-intake.yml"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-refresh-dispatch.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/module-decomposition.riido.json"},
         {"kind": "tool", "path": "tools/looprefreshdispatch"},
         {"kind": "tool", "path": "tools/looprefreshdispatch/command_render.go"},
@@ -1176,6 +1179,7 @@
         {"kind": "test", "path": "tools/looprefreshdispatch/source_freshness_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/weekly_workflow_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/workflow_safety_plan_test.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/candidate_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
@@ -1187,17 +1191,20 @@
         {"kind": "test", "path": "tools/looprefreshdispatch/source_freshness_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/weekly_workflow_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/workflow_safety_plan_test.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/candidate_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/workflow_schedule_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/looprefreshdispatch"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake"},
         {"kind": "tool", "path": "tools/workflowevidence"},
         {"kind": "tool", "path": "tools/moduledecomposition"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "loop-refresh-commands", "redacted": true},
-        {"kind": "artifact", "path": "loop-refresh-dispatch-plan", "redacted": true}
+        {"kind": "artifact", "path": "loop-refresh-dispatch-plan", "redacted": true},
+        {"kind": "artifact", "path": "loop-refresh-dispatch-closed-loop-candidates", "redacted": true}
       ],
-      "decision": "Expired evidence can now move from selected refresh command evidence to a validated workflow dispatch plan without eval only while the source command evidence has generated_at < expires_at, generated_at <= now < expires_at, a supported status, and a command_count matching the payload; fresh sources dispatch nothing, refresh_required sources must carry commands, ignored non-workflow commands remain visible as loop_id/kind/command evidence, the dispatcher schedule is verified to run after command production, both artifacts carry explicit freshness windows, PRs produce evidence only and main/scheduled runs perform dispatch, weekly open-question refresh workflows are covered by the same safe basename dispatch path, and loopclosureaudit keeps the dispatch safety rule claim-bound through explicit observe/verify/fail coverage tokens.",
+      "decision": "Expired evidence can now move from selected refresh command evidence to a validated workflow dispatch plan without eval only while the source command evidence has generated_at < expires_at, generated_at <= now < expires_at, a supported status, and a command_count matching the payload; fresh sources dispatch nothing, refresh_required sources must carry commands, ignored non-workflow commands remain visible as loop_id/kind/command evidence and are also emitted as redacted closed-loop candidates with source_ref, run, adoption_plan, and verifier command binding, the dispatcher schedule is verified to run after command production, all artifacts carry explicit freshness windows, PRs produce evidence only and main/scheduled runs perform dispatch, weekly open-question refresh workflows are covered by the same safe basename dispatch path, and loopclosureaudit keeps the dispatch safety rule claim-bound through explicit observe/verify/fail coverage tokens.",
       "next_loop": "closed_loop_candidate"
     },
     {

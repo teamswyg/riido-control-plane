@@ -6,7 +6,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `15`
+- decisions: `16`
 
 ## Assertions
 
@@ -54,6 +54,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `control-plane-pressure:assignment_long_poll_wait` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `control-plane-pressure:tool_approval_waiters` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `loop-closure-audit:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
+| `loop-refresh-dispatch:01:control_plane_pressure_candidate:target_verifier` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `verifier` |
 
 ## Evidence Loop
 

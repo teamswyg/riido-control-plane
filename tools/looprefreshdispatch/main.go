@@ -20,6 +20,7 @@ func mainRun(args []string) error {
 	fs.StringVar(&opt.CommandsIn, "commands-in", "", "loop refresh commands evidence")
 	fs.StringVar(&opt.DispatchOut, "dispatch-out", "", "dispatch plan evidence output")
 	fs.StringVar(&opt.DispatchOut, "evidence-out", "", "dispatch plan evidence output")
+	fs.StringVar(&opt.CandidateOut, "candidate-out", "", "closed-loop candidate output")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}

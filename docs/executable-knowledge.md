@@ -26,10 +26,10 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Contract artifacts with owner evidence | 4 |
 | Imported manifests | 1 |
 | Imported manifests with projection evidence | 1 |
-| Owned manifests | 7 |
-| Owned manifests with owner evidence | 7 |
-| Executable manifest inventory | 54 |
-| Tracked executable manifests | 54 |
+| Owned manifests | 8 |
+| Owned manifests with owner evidence | 8 |
+| Executable manifest inventory | 55 |
+| Tracked executable manifests | 55 |
 | Registered manual docs | 0 |
 | Scanned docs | 40 |
 
@@ -37,7 +37,7 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Group | Count | Sample paths |
 | --- | ---: | --- |
-| `docs` | 46 | `docs/20-domain/agent-catalog-rbac.riido.json`<br>`docs/20-domain/agent-runtime-binding.riido.json`<br>`docs/20-domain/ai-agent-client-api.riido.json` |
+| `docs` | 47 | `docs/20-domain/agent-catalog-rbac.riido.json`<br>`docs/20-domain/agent-runtime-binding.riido.json`<br>`docs/20-domain/ai-agent-client-api.riido.json` |
 | `contracts` | 4 | `contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json`<br>`contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json`<br>`contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json` |
 | `.` | 2 | `README.riido.json`<br>`dependency_allowlist.riido.json` |
 | `internal` | 1 | `internal/riidoaiserver/review_account_seed.riido.json` |
@@ -45,8 +45,8 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 ## Manifest Loop Inventory
 
-- Complete manifest loops: `54`
-- Direct manifest loops: `43`
+- Complete manifest loops: `55`
+- Direct manifest loops: `44`
 - Delegated manifest loops: `11`
 - Missing manifest loops: `0`
 - Missing loop budget: `0`
