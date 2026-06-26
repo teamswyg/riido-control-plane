@@ -46,5 +46,14 @@ func verifyCommands(m manifest) error {
 			return fmt.Errorf("audit command missing %q: %s", needle, command)
 		}
 	}
+	for _, command := range []string{
+		m.LocalPressureCommand,
+		m.ManualPressureCommand,
+		m.LocalPprofCommand,
+	} {
+		if !strings.Contains(command, "-candidate-out") {
+			return fmt.Errorf("audit pressure command missing candidate output: %s", command)
+		}
+	}
 	return verifyPprofCommands(m.PprofCommands)
 }

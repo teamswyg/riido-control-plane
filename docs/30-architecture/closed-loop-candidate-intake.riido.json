@@ -62,6 +62,24 @@
       ]
     },
     {
+      "id": "control-plane-pressure",
+      "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+      "source_workflow": ".github/workflows/control-plane-performance.yml",
+      "producer_manifest": "docs/30-architecture/control-plane-performance.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    },
+    {
       "id": "loop-closure-audit",
       "candidate_artifact": "loop-closure-audit-closed-loop-candidates",
       "source_workflow": ".github/workflows/loop-closure-audit.yml",
@@ -99,6 +117,7 @@
     "candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids",
     "candidate intake sources must cover every closed_loop_candidate producer source from the harness promotion manifest",
     "candidate intake sources must include loop-closure-audit residual gap candidates",
+    "candidate intake sources must include control-plane pressure measured finding candidates",
     "candidate intake workflow path triggers must include every producer source workflow",
     "candidate intake PR verification must consume a performance-specific candidate fixture"
   ],

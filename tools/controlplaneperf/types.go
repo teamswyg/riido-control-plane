@@ -1,28 +1,40 @@
 package main
 
 type manifest struct {
-	SchemaVersion          string    `json:"schema_version"`
-	ID                     string    `json:"id"`
-	Title                  string    `json:"title"`
-	GeneratedDoc           string    `json:"generated_doc"`
-	Workflow               string    `json:"workflow"`
-	EvidenceArtifact       string    `json:"evidence_artifact"`
-	BenchmarkArtifact      string    `json:"benchmark_artifact"`
-	LocalPressureArtifact  string    `json:"local_pressure_artifact"`
-	SummaryArtifact        string    `json:"summary_artifact"`
-	CandidateArtifact      string    `json:"candidate_artifact"`
-	EvidenceTool           string    `json:"evidence_tool"`
-	BenchmarkCommand       string    `json:"benchmark_command"`
-	LocalPressureCommand   string    `json:"local_pressure_command"`
-	ManualPressureCommand  string    `json:"manual_pressure_command"`
-	LocalPprofCommand      string    `json:"local_pprof_command"`
-	RaceCommand            string    `json:"race_command"`
-	PprofCommand           string    `json:"pprof_command"`
-	LiveLoadCommand        string    `json:"live_load_command"`
-	LocalPressureScenarios []string  `json:"local_pressure_scenarios"`
-	HotPaths               []hotPath `json:"hot_paths"`
-	Assertions             []string  `json:"assertions"`
-	Loop                   loopSpec  `json:"loop"`
+	SchemaVersion             string           `json:"schema_version"`
+	ID                        string           `json:"id"`
+	Title                     string           `json:"title"`
+	GeneratedDoc              string           `json:"generated_doc"`
+	Workflow                  string           `json:"workflow"`
+	EvidenceArtifact          string           `json:"evidence_artifact"`
+	BenchmarkArtifact         string           `json:"benchmark_artifact"`
+	LocalPressureArtifact     string           `json:"local_pressure_artifact"`
+	SummaryArtifact           string           `json:"summary_artifact"`
+	CandidateArtifact         string           `json:"candidate_artifact"`
+	PressureCandidateArtifact string           `json:"pressure_candidate_artifact"`
+	EvidenceTool              string           `json:"evidence_tool"`
+	BenchmarkCommand          string           `json:"benchmark_command"`
+	LocalPressureCommand      string           `json:"local_pressure_command"`
+	ManualPressureCommand     string           `json:"manual_pressure_command"`
+	LocalPprofCommand         string           `json:"local_pprof_command"`
+	RaceCommand               string           `json:"race_command"`
+	PprofCommand              string           `json:"pprof_command"`
+	LiveLoadCommand           string           `json:"live_load_command"`
+	LocalPressureScenarios    []string         `json:"local_pressure_scenarios"`
+	Sources                   []pressureSource `json:"sources"`
+	HotPaths                  []hotPath        `json:"hot_paths"`
+	Assertions                []string         `json:"assertions"`
+	Loop                      loopSpec         `json:"loop"`
+}
+
+type pressureSource struct {
+	ID                    string   `json:"id"`
+	SourceWorkflow        string   `json:"source_workflow"`
+	SummaryArtifact       string   `json:"summary_artifact"`
+	CandidateArtifact     string   `json:"candidate_artifact"`
+	HarnessLoop           string   `json:"harness_loop"`
+	PromotionTarget       string   `json:"promotion_target"`
+	RequiredNextArtifacts []string `json:"required_next_artifacts"`
 }
 
 type hotPath struct {

@@ -6,8 +6,8 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 
 ## Summary
 
-- sources: `4`
-- required refs: `24`
+- sources: `5`
+- required refs: `30`
 
 ## Sources
 
@@ -16,6 +16,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 | `ai-agent-client-testnet-smoke` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `ai-agent-client-testnet-load` | `ai-agent-client-testnet-load-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `control-plane-performance` | `control-plane-performance-closed-loop-candidates` | `closed_loop_candidate` | `6` |
+| `control-plane-pressure` | `control-plane-pressure-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `loop-closure-audit` | `loop-closure-audit-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 
 ## Assertions
@@ -38,6 +39,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids
 - candidate intake sources must cover every closed_loop_candidate producer source from the harness promotion manifest
 - candidate intake sources must include loop-closure-audit residual gap candidates
+- candidate intake sources must include control-plane pressure measured finding candidates
 - candidate intake workflow path triggers must include every producer source workflow
 - candidate intake PR verification must consume a performance-specific candidate fixture
 

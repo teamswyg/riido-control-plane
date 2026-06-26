@@ -1,10 +1,6 @@
 package main
 
-import (
-	"encoding/json"
-	"os"
-	"testing"
-)
+import "testing"
 
 func TestControlPlanePerformanceManifestVerifies(t *testing.T) {
 	out := t.TempDir() + "/evidence.json"
@@ -50,26 +46,4 @@ func TestControlPlanePerformanceRejectsMissingLocalPressureScenario(t *testing.T
 	if err := verifyLocalPressureScenarios("../..", m.LocalPressureScenarios); err == nil {
 		t.Fatal("expected missing local pressure scenario to fail")
 	}
-}
-
-func loadManifestForTest(t *testing.T) manifest {
-	t.Helper()
-	var m manifest
-	if err := readJSON("../../"+defaultManifest, &m); err != nil {
-		t.Fatal(err)
-	}
-	return m
-}
-
-func readEvidence(t *testing.T, path string) evidence {
-	t.Helper()
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var got evidence
-	if err := json.Unmarshal(data, &got); err != nil {
-		t.Fatal(err)
-	}
-	return got
 }

@@ -45,13 +45,13 @@
 | `.github/workflows/assignment-store-actor.yml` | `covered` | `1` | `1/1` | `true` | `4/4` | `0` | - |
 | `.github/workflows/aws-adapters-facade.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/ci.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
-| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `8` | `8/8` | `true` | `5/5` | `0` | - |
-| `.github/workflows/closed-loop-candidate-intake.yml` | `covered` | `7` | `7/7` | `true` | `4/4` | `0` | - |
+| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `11` | `11/11` | `true` | `6/6` | `0` | - |
+| `.github/workflows/closed-loop-candidate-intake.yml` | `covered` | `10` | `10/10` | `true` | `5/5` | `0` | - |
 | `.github/workflows/cloudwatch-emf.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/config-reference.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/container-image-contract.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/context-map.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
-| `.github/workflows/control-plane-performance.yml` | `covered` | `4` | `4/4` | `true` | `6/6` | `0` | - |
+| `.github/workflows/control-plane-performance.yml` | `covered` | `4` | `4/4` | `true` | `7/7` | `0` | - |
 | `.github/workflows/deploy-ai-agent-testnet.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/dynamodb-eventbridge-adapters.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/evidence-graph.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |

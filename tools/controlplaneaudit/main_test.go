@@ -37,6 +37,14 @@ func TestControlPlaneHighTrafficAuditRequiresManualPressure(t *testing.T) {
 	}
 }
 
+func TestControlPlaneHighTrafficAuditRequiresPressureCandidateOutput(t *testing.T) {
+	m := loadManifestForTest(t)
+	m.LocalPressureCommand = "go run ./tools/controlplanepressure -duration 500ms"
+	if err := verifyCommands(m); err == nil {
+		t.Fatal("expected missing pressure candidate output to fail")
+	}
+}
+
 func TestControlPlaneHighTrafficAuditRejectsMissingPattern(t *testing.T) {
 	m := loadManifestForTest(t)
 	m.Surfaces[0].Patterns = []string{"definitely_missing_hot_path_marker"}

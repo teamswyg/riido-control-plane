@@ -12,6 +12,8 @@ on:
       - ".github/workflows/ai-agent-client-testnet-load.yml"
       - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-closure-audit.yml"
+      - "docs/30-architecture/control-plane-performance.riido.json"
+      - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "docs/30-architecture/loop-closure-audit.riido.json"
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
@@ -22,6 +24,7 @@ on:
       - "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"
       - "tools/closedloopcandidatedecision/**"
       - "tools/closedloopcandidateintake/**"
+      - "tools/controlplanepressure/**"
       - "tools/harnesspromotion/**"
       - "tools/loopclosureaudit/**"
   pull_request:
@@ -31,6 +34,8 @@ on:
       - ".github/workflows/ai-agent-client-testnet-load.yml"
       - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-closure-audit.yml"
+      - "docs/30-architecture/control-plane-performance.riido.json"
+      - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "docs/30-architecture/loop-closure-audit.riido.json"
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
@@ -41,6 +46,7 @@ on:
       - "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"
       - "tools/closedloopcandidatedecision/**"
       - "tools/closedloopcandidateintake/**"
+      - "tools/controlplanepressure/**"
       - "tools/harnesspromotion/**"
       - "tools/loopclosureaudit/**"
 
@@ -84,6 +90,17 @@ jobs:
             go run ./tools/closedloopcandidatedecision \
             -candidate-in out/sample-performance-closed-loop-candidates.json \
             -evidence-out out/sample-performance-decision-evidence.json
+          go run ./tools/controlplanepressure \
+            -duration 20ms \
+            -concurrency 1 \
+            -threads 2 \
+            -lines 1 \
+            -candidate-out out/sample-pressure-closed-loop-candidates.json \
+            -evidence-out out/sample-pressure-local-pressure.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidatedecision \
+            -candidate-in out/sample-pressure-closed-loop-candidates.json \
+            -evidence-out out/sample-pressure-decision-evidence.json
           RIIDO_LOOP_CLOSURE_AUDIT_NOW=2026-06-24T12:00:00Z \
             go run ./tools/loopclosureaudit \
             -candidate-out out/sample-loop-closure-audit-candidates.json
@@ -129,6 +146,10 @@ jobs:
             control-plane-performance-closed-loop-candidates \
             out/live-candidates/performance
           download_candidate_artifact \
+            control-plane-performance.yml \
+            control-plane-pressure-closed-loop-candidates \
+            out/live-candidates/pressure
+          download_candidate_artifact \
             loop-closure-audit.yml \
             loop-closure-audit-closed-loop-candidates \
             out/live-candidates/loop-closure-audit
@@ -141,10 +162,12 @@ jobs:
           smoke_candidate="$(find out/live-candidates/smoke -type f -name '*.json' | head -n 1)"
           load_candidate="$(find out/live-candidates/load -type f -name '*.json' | head -n 1)"
           performance_candidate="$(find out/live-candidates/performance -type f -name '*.json' | head -n 1)"
+          pressure_candidate="$(find out/live-candidates/pressure -type f -name '*.json' | head -n 1)"
           loop_closure_candidate="$(find out/live-candidates/loop-closure-audit -type f -name '*.json' | head -n 1)"
           test -n "$smoke_candidate"
           test -n "$load_candidate"
           test -n "$performance_candidate"
+          test -n "$pressure_candidate"
           test -n "$loop_closure_candidate"
           if jq -e '(.candidate_count // 0) > 0' "$smoke_candidate" >/dev/null; then
             go run ./tools/closedloopcandidatedecision \
@@ -169,6 +192,14 @@ jobs:
           else
             printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
               > out/live-decision-performance-evidence.json
+          fi
+          if jq -e '(.candidate_count // 0) > 0' "$pressure_candidate" >/dev/null; then
+            go run ./tools/closedloopcandidatedecision \
+              -candidate-in "$pressure_candidate" \
+              -evidence-out out/live-decision-pressure-evidence.json
+          else
+            printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-live.v1","status":"skipped","reason":"live candidate artifact contained no open candidates"}\n' \
+              > out/live-decision-pressure-evidence.json
           fi
           if jq -e '(.candidate_count // 0) > 0' "$loop_closure_candidate" >/dev/null; then
             go run ./tools/closedloopcandidatedecision \
@@ -199,6 +230,14 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
+          name: closed-loop-candidate-decision-pressure-sample-evidence
+          path: |
+            out/sample-pressure-local-pressure.json
+            out/sample-pressure-decision-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
           name: closed-loop-candidate-decision-intake-evidence
           path: out/sample-candidate-intake-evidence.json
           if-no-files-found: error
@@ -210,5 +249,6 @@ jobs:
             out/live-decision-smoke-evidence.json
             out/live-decision-load-evidence.json
             out/live-decision-performance-evidence.json
+            out/live-decision-pressure-evidence.json
             out/live-decision-loop-closure-audit-evidence.json
           if-no-files-found: error
