@@ -24,3 +24,21 @@ func TestLoopRefreshDispatchWorkflowDoesNotEvalCommands(t *testing.T) {
 		t.Fatalf("workflow must dispatch only structured workflow_file values")
 	}
 }
+
+func TestLoopRefreshDispatchWorkflowConsumesDecisionCommands(t *testing.T) {
+	path := filepath.Join(repoRootForTest(t), ".github", "workflows", "loop-refresh-dispatch.yml")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+	if !strings.Contains(text, "closed-loop-candidate-decision-commands") {
+		t.Fatal("workflow must download candidate decision command evidence")
+	}
+	if !strings.Contains(text, "-commands-in \"$decision_commands\"") {
+		t.Fatal("workflow must pass candidate decision commands into dispatcher")
+	}
+	if strings.Count(text, "-commands-in") < 4 {
+		t.Fatal("workflow must cover repeated command inputs in sample and live runs")
+	}
+}

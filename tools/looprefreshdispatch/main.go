@@ -17,7 +17,7 @@ func mainRun(args []string) error {
 	fs := flag.NewFlagSet("looprefreshdispatch", flag.ContinueOnError)
 	opt := options{}
 	fs.StringVar(&opt.Repo, "repo", ".", "repository root or child path")
-	fs.StringVar(&opt.CommandsIn, "commands-in", "", "loop refresh commands evidence")
+	fs.Var(&opt.CommandsIn, "commands-in", "loop refresh commands evidence; may be repeated")
 	fs.StringVar(&opt.DispatchOut, "dispatch-out", "", "dispatch plan evidence output")
 	fs.StringVar(&opt.DispatchOut, "evidence-out", "", "dispatch plan evidence output")
 	fs.StringVar(&opt.CandidateOut, "candidate-out", "", "closed-loop candidate output")
