@@ -20,6 +20,10 @@ func latestConversationNonQueuedMessageTime(threads []AIAgentTaskThreadHistoryRe
 				latest[thread.ConversationID] = message.ObservedAt
 			}
 		}
+		if observedAt, ok := threadStatusSupersedesQueuedStatus(thread); ok &&
+			latest[thread.ConversationID].Before(observedAt) {
+			latest[thread.ConversationID] = observedAt
+		}
 	}
 	return latest
 }
