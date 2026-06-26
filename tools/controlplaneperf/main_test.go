@@ -14,6 +14,12 @@ func TestControlPlanePerformanceManifestVerifies(t *testing.T) {
 	if got.AssertionCount == 0 || len(got.Assertions) != got.AssertionCount {
 		t.Fatalf("performance assertions missing from evidence: %+v", got)
 	}
+	if len(got.Sources) == 0 || got.Sources[0].HarnessLoop == "" {
+		t.Fatalf("performance source context missing from evidence: %+v", got.Sources)
+	}
+	if got.Loop.Observation == "" || got.Loop.Evaluate == "" {
+		t.Fatalf("performance loop context missing from evidence: %+v", got.Loop)
+	}
 }
 
 func TestControlPlanePerformanceRejectsMissingBenchmark(t *testing.T) {

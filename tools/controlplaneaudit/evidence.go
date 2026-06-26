@@ -16,6 +16,7 @@ type evidence struct {
 	Assertions            []string          `json:"assertions"`
 	CategoryCounts        map[string]int    `json:"category_counts"`
 	Surfaces              []surfaceEvidence `json:"surfaces"`
+	Loop                  loopSpec          `json:"loop"`
 }
 
 type surfaceEvidence struct {
@@ -53,23 +54,6 @@ func newEvidence(root string, m manifest) (evidence, error) {
 		Assertions:            append([]string(nil), m.Assertions...),
 		CategoryCounts:        counts,
 		Surfaces:              rows,
+		Loop:                  m.Loop,
 	}, nil
-}
-
-func categoryCounts(rows []surfaceEvidence) map[string]int {
-	counts := map[string]int{}
-	for _, row := range rows {
-		counts[row.Category]++
-	}
-	return counts
-}
-
-func missingCategories(required []string, counts map[string]int) []string {
-	missing := []string{}
-	for _, category := range required {
-		if counts[category] == 0 {
-			missing = append(missing, category)
-		}
-	}
-	return missing
 }

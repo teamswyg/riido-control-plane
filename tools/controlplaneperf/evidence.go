@@ -17,9 +17,11 @@ type evidence struct {
 	PprofCommand              string              `json:"pprof_command"`
 	LiveLoadCommand           string              `json:"live_load_command"`
 	LocalPressureScenarios    []string            `json:"local_pressure_scenarios"`
+	Sources                   []pressureSource    `json:"sources"`
 	Assertions                []string            `json:"assertions"`
 	HotPaths                  []hotPathEvidence   `json:"hot_paths"`
 	Candidates                []candidateEvidence `json:"candidates"`
+	Loop                      loopSpec            `json:"loop"`
 }
 
 type hotPathEvidence struct {
@@ -54,8 +56,10 @@ func newEvidence(m manifest) evidence {
 		PprofCommand:              m.PprofCommand,
 		LiveLoadCommand:           m.LiveLoadCommand,
 		LocalPressureScenarios:    append([]string(nil), m.LocalPressureScenarios...),
+		Sources:                   append([]pressureSource(nil), m.Sources...),
 		Assertions:                append([]string(nil), m.Assertions...),
 		HotPaths:                  hotPathEvidenceRows(m.HotPaths),
 		Candidates:                candidateEvidenceRows(m.HotPaths),
+		Loop:                      m.Loop,
 	}
 }
