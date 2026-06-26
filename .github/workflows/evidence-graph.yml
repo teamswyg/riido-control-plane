@@ -147,6 +147,7 @@ jobs:
           fi
           go run ./tools/evidencegraph \
             -check-doc \
+            -github-annotations \
             "${impact_args[@]}" \
             -evidence-out out/evidence-graph-evidence.json
       - uses: actions/upload-artifact@v7

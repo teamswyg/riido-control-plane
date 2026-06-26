@@ -23,6 +23,7 @@ func mainRun(args []string) error {
 	fs.StringVar(&opt.ImpactBase, "impact-base", "", "optional git base ref for PR impact verification")
 	fs.BoolVar(&opt.WriteDoc, "write-doc", false, "write generated reader doc")
 	fs.BoolVar(&opt.CheckDoc, "check-doc", false, "verify generated reader doc")
+	fs.BoolVar(&opt.GitHubAnnotations, "github-annotations", false, "emit GitHub Actions evidence graph annotations")
 	verify := fs.Bool("verify", false, "alias for -check-doc")
 	if err := fs.Parse(args); err != nil {
 		return err

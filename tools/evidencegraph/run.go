@@ -20,6 +20,9 @@ func run(opt options) error {
 	if err != nil {
 		return err
 	}
+	if opt.GitHubAnnotations {
+		writeGitHubAnnotations(opt.AnnotationOut, impact)
+	}
 	if opt.EvidenceOut != "" {
 		return writeJSON(opt.EvidenceOut, newEvidence(m, result, impact))
 	}
