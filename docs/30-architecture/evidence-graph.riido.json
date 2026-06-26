@@ -1024,11 +1024,13 @@
         {"kind": "tool", "path": "tools/loopregistry/refresh_command_select.go"},
         {"kind": "tool", "path": "tools/loopregistry/refresh_command_run.go"},
         {"kind": "tool", "path": "tools/loopregistry/refresh_command_types.go"},
+        {"kind": "test", "path": "tools/loopregistry/refresh_command_manifest_test.go"},
         {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/refresh_command_manifest_test.go"},
         {"kind": "test", "path": "tools/loopregistry/refresh_command_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
@@ -1038,7 +1040,7 @@
         {"kind": "artifact", "path": "loop-refresh-commands", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Expired loop-registry evidence can be consumed as input and transformed into an uploaded ordered refresh command artifact with its own 24-hour freshness window, and loopclosureaudit now keeps that expired-evidence command selection rule claim-bound through explicit observe/verify/fail coverage tokens.",
+      "decision": "Expired loop-registry evidence can be consumed as input and transformed into an uploaded ordered refresh command artifact with its own 24-hour freshness window; a manifest-level regression now proves every declared loop, including longer-cadence weekly loops, becomes selected when its evidence window expires, and loopclosureaudit keeps that expired-evidence command selection rule claim-bound through explicit observe/verify/fail coverage tokens.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -1055,6 +1057,7 @@
         {"kind": "tool", "path": "tools/looprefreshdispatch"},
         {"kind": "tool", "path": "tools/looprefreshdispatch/source_freshness.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/source_freshness_test.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/weekly_workflow_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
@@ -1062,6 +1065,7 @@
         {"kind": "test", "path": "tools/looprefreshdispatch/plan_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/run_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/source_freshness_test.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/weekly_workflow_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/workflow_schedule_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/looprefreshdispatch"},
@@ -1072,7 +1076,7 @@
         {"kind": "artifact", "path": "loop-refresh-commands", "redacted": true},
         {"kind": "artifact", "path": "loop-refresh-dispatch-plan", "redacted": true}
       ],
-      "decision": "Expired evidence can now move from selected refresh command evidence to a validated workflow dispatch plan without eval only while the source command evidence has generated_at < expires_at and generated_at <= now < expires_at; the dispatcher schedule is verified to run after command production, both artifacts carry explicit freshness windows, PRs produce evidence only and main/scheduled runs perform dispatch, and loopclosureaudit keeps the dispatch safety rule claim-bound through explicit observe/verify/fail coverage tokens.",
+      "decision": "Expired evidence can now move from selected refresh command evidence to a validated workflow dispatch plan without eval only while the source command evidence has generated_at < expires_at and generated_at <= now < expires_at; the dispatcher schedule is verified to run after command production, both artifacts carry explicit freshness windows, PRs produce evidence only and main/scheduled runs perform dispatch, weekly open-question refresh workflows are covered by the same safe basename dispatch path, and loopclosureaudit keeps the dispatch safety rule claim-bound through explicit observe/verify/fail coverage tokens.",
       "next_loop": "closed_loop_candidate"
     },
     {
