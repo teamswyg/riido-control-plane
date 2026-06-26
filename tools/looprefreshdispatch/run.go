@@ -4,13 +4,13 @@ import "fmt"
 
 type options struct {
 	Repo         string
-	CommandsIn   string
+	CommandsIn   commandInputPaths
 	DispatchOut  string
 	CandidateOut string
 }
 
 func run(opt options) error {
-	if opt.CommandsIn == "" {
+	if len(opt.CommandsIn) == 0 {
 		return fmt.Errorf("-commands-in is required")
 	}
 	if opt.DispatchOut == "" {
@@ -20,12 +20,13 @@ func run(opt options) error {
 	if err != nil {
 		return err
 	}
-	source, err := loadRefreshCommands(repoPath(root, opt.CommandsIn))
+	sources, err := loadRefreshCommandSources(root, opt.CommandsIn)
 	if err != nil {
 		return err
 	}
-	if source.SchemaVersion != refreshCommandsSchema {
-		return fmt.Errorf("unsupported schema_version %q", source.SchemaVersion)
+	source, err := mergeRefreshCommandSources(sources)
+	if err != nil {
+		return err
 	}
 	plan, err := buildDispatchPlan(root, source)
 	if err != nil {
