@@ -11,9 +11,10 @@ type loopRegistry struct {
 }
 
 type registeredLoop struct {
-	ID         string   `json:"id"`
-	Kind       string   `json:"kind"`
-	PromotesTo []string `json:"promotes_to,omitempty"`
+	ID              string   `json:"id"`
+	Kind            string   `json:"kind"`
+	RefreshWorkflow string   `json:"refresh_workflow"`
+	PromotesTo      []string `json:"promotes_to,omitempty"`
 }
 
 func loadLoopRegistry(root, path string) (loopRegistry, error) {

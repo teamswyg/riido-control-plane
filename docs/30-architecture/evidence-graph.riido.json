@@ -238,19 +238,24 @@
     },
     {
       "id": "harness_failure_always_promotion_loop",
-      "observation": "A harness workflow can run harnesspromotion in the happy path but skip promotion or candidate artifact upload after the smoke/load step fails.",
-      "hypothesis": "Verifying that both the harnesspromotion step and closed-loop candidate artifact upload step run under if: always() keeps failed harness runs from becoming silent artifacts.",
+      "observation": "A harness workflow can run harnesspromotion in the happy path but skip promotion or candidate artifact upload after the smoke/load step fails, and a newly registered harness loop can be omitted from the harness-promotion source manifest entirely.",
+      "hypothesis": "Verifying that both the harnesspromotion step and closed-loop candidate artifact upload step run under if: always(), and that every registered harness loop has exactly one promotion source with the same refresh workflow, keeps failed harness runs from becoming silent artifacts.",
       "claims": ["harness_promotion_must_run_after_failure"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-smoke.yml"},
         {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "tool", "path": "tools/harnesspromotion/source_coverage.go"},
+        {"kind": "test", "path": "tools/harnesspromotion/source_coverage_test.go"},
         {"kind": "tool", "path": "tools/loopregistry/harness_promotion.go"},
         {"kind": "tool", "path": "tools/loopregistry/workflow_step.go"},
         {"kind": "test", "path": "tools/loopregistry/harness_promotion_always_test.go"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/harnesspromotion/source_coverage_test.go"},
         {"kind": "test", "path": "tools/loopregistry/harness_promotion_always_test.go"},
         {"kind": "test", "path": "tools/loopregistry/harness_promotion_test.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
@@ -259,7 +264,7 @@
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true}
       ],
-      "decision": "Harness promotion is now verified as a failure-path behavior: smoke/load failures must still produce closed-loop candidate evidence.",
+      "decision": "Harness promotion is now verified as a failure-path behavior and a source-coverage contract: registered harness failures must still produce closed-loop candidate evidence, and new harness loops cannot skip harness-promotion source coverage.",
       "next_loop": "closed_loop_candidate"
     },
     {

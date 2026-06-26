@@ -73,6 +73,7 @@
     "candidate artifacts must include an adoption_plan with executable commands for every required next artifact",
     "candidate artifacts must include a promotion_edge that names the harness loop, closed-loop target, and promotes_failure_to relation",
     "each candidate must include a source_ref with source workflow, summary artifact, candidate artifact, run id, and freshness window",
+    "every registered harness loop must have exactly one harness promotion source with the same refresh workflow",
     "expired redacted summaries must be rejected before closed-loop candidate generation",
     "harness workflows that produce expiring evidence must be runnable without a human trigger",
     "harness promotion evidence must publish generated_at and expires_at"
@@ -80,8 +81,8 @@
   "loop": {
     "observation": "Provider and smoke harnesses can find failures, but a failed run can still end as an isolated artifact unless it is converted into a closed-loop candidate.",
     "hypothesis": "A promotion sidecar can transform redacted harness summaries into candidate records that name the next artifacts required for a durable closed loop and bind them to the loop registry target.",
-    "execute": "Verify harness workflows call this tool after redacted summaries, reject expired summaries before promotion, upload candidate artifacts with strict missing-file behavior, verify source-to-loop-registry target bindings, and generate reader/evidence outputs in CI.",
-    "evaluate": "The verifier fails on missing promotion wiring, missing candidate uploads, expired or malformed summary freshness metadata, missing strict upload behavior, missing adoption artifacts, loop-registry target drift, stale generated docs, or unsupported manifest identity.",
+    "execute": "Verify harness workflows call this tool after redacted summaries, reject expired summaries before promotion, upload candidate artifacts with strict missing-file behavior, verify source-to-loop-registry target bindings, verify every registered harness loop has exactly one source, and generate reader/evidence outputs in CI.",
+    "evaluate": "The verifier fails on missing promotion wiring, missing candidate uploads, expired or malformed summary freshness metadata, missing strict upload behavior, missing adoption artifacts, loop-registry target drift, missing or duplicate harness source coverage, stale generated docs, or unsupported manifest identity.",
     "retrospective": "Harnesses now increase exploration space while failed observations automatically enter the closed-loop backlog instead of relying on human memory."
   }
 }
