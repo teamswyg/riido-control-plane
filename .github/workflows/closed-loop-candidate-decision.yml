@@ -104,10 +104,15 @@ jobs:
           RIIDO_LOOP_CLOSURE_AUDIT_NOW=2026-06-24T12:00:00Z \
             go run ./tools/loopclosureaudit \
             -candidate-out out/sample-loop-closure-audit-candidates.json
-          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
-            go run ./tools/closedloopcandidatedecision \
-            -candidate-in out/sample-loop-closure-audit-candidates.json \
-            -evidence-out out/sample-loop-closure-audit-decision-evidence.json
+          if jq -e '(.candidate_count // 0) > 0' out/sample-loop-closure-audit-candidates.json >/dev/null; then
+            RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+              go run ./tools/closedloopcandidatedecision \
+              -candidate-in out/sample-loop-closure-audit-candidates.json \
+              -evidence-out out/sample-loop-closure-audit-decision-evidence.json
+          else
+            printf '{"schema_version":"riido-control-plane-closed-loop-candidate-decision-sample.v1","status":"skipped","reason":"sample candidate artifact contained no open candidates"}\n' \
+              > out/sample-loop-closure-audit-decision-evidence.json
+          fi
       - name: Download latest live candidate artifacts
         if: github.event_name != 'pull_request'
         env:

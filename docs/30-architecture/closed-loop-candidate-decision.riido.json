@@ -130,6 +130,26 @@
       "reason": "Thread history v3 projection is a measured refresh pressure surface and needs a claim-bound projection/copy-cost decision."
     },
     {
+      "candidate_id": "control-plane-pressure:assignment_long_poll_wait",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-15",
+      "reason": "Assignment long-poll waiters are now directly measured with bounded goroutine delta, so keep trend evidence before adopting a new optimization gate."
+    },
+    {
+      "candidate_id": "control-plane-pressure:tool_approval_waiters",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-15",
+      "reason": "Tool approval waiters are now directly measured with bounded goroutine delta, so keep redacted pressure evidence before expanding approval UX gates."
+    },
+    {
       "candidate_id": "loop-closure-audit:source_coverage_seed",
       "disposition": "deferred",
       "priority": "P2",
@@ -163,13 +183,14 @@
     "candidate decision evidence must expose consumed candidate artifact path, source workflow, freshness window, and candidate ids",
     "candidate decision records must include at least one owned seed decision for every intake source so new harness sources cannot be passive",
     "candidate decision workflow path triggers must include every producer source workflow from intake",
-    "candidate decision PR verification must consume a performance-specific candidate fixture"
+    "candidate decision PR verification must consume a performance-specific candidate fixture",
+    "candidate decision PR verification must publish explicit skipped evidence when a sampled candidate artifact has zero open candidates"
   ],
   "loop": {
     "observation": "Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.",
     "hypothesis": "A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, next artifact, and review expiry.",
-    "execute": "Generate this reader from the decision manifest, generate a deterministic candidate fixture, verify intake, verify candidate decisions with an explicit candidate artifact, download latest live candidate artifacts on non-PR runs, verify non-empty live candidate sets, and publish decision evidence in CI.",
-    "evaluate": "The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, expired candidate artifacts, stale docs, missing live artifact download wiring, missing scheduled workflow evidence, or unredacted candidate content.",
+    "execute": "Generate this reader from the decision manifest, generate deterministic candidate fixtures, verify intake, verify candidate decisions with explicit candidate artifacts, publish skipped evidence for sampled artifacts with zero candidates, download latest live candidate artifacts on non-PR runs, verify non-empty live candidate sets, and publish decision evidence in CI.",
+    "evaluate": "The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, expired candidate artifacts, stale docs, missing live artifact download wiring, missing scheduled workflow evidence, missing sampled skip evidence, or unredacted candidate content.",
     "retrospective": "This moves prioritization metadata into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition and review deadline."
   }
 }

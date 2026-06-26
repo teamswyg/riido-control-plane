@@ -7,7 +7,7 @@ import (
 	srv "github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
-func buildProgressIngest(config) (func() error, error) {
+func buildProgressIngest(config) (pressureOperation, error) {
 	ctx := context.Background()
 	store := srv.NewDevelopmentAIAgentClientStore()
 	principal := srv.AuthorizationResult{PrincipalID: "user-1", WorkspaceID: fixtureWorkspaceID}
@@ -15,10 +15,10 @@ func buildProgressIngest(config) (func() error, error) {
 		AgentID: fixtureAgentID,
 	})
 	if err != nil {
-		return nil, err
+		return pressureOperation{}, err
 	}
 	var seq atomic.Int64
-	return func() error {
+	return newPressureOperation(func() error {
 		next := int(seq.Add(1))
 		_, err := store.RecordAIAgentThreadProgress(ctx, assigned.AgentID, srv.AgentThreadProgressBatchRequest{
 			AssignmentID: assigned.AssignmentID,
@@ -31,7 +31,7 @@ func buildProgressIngest(config) (func() error, error) {
 			}},
 		})
 		return err
-	}, nil
+	}), nil
 }
 
 func progressFragment(seq int) string {

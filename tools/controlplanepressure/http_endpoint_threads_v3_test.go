@@ -18,8 +18,9 @@ func TestControlPlanePressureCoversV3ThreadHistoryEndpoint(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer op.close()
 	for range 3 {
-		if err := op(); err != nil {
+		if err := op.run(); err != nil {
 			t.Fatal(err)
 		}
 	}
