@@ -589,6 +589,15 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	response, handled, err := s.createThreadMessageToolApprovalDecision(r.Context(), principal, taskID, threadID, req)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	if handled {
+		writeJSON(w, http.StatusAccepted, response)
+		return
+	}
 	assignmentReq, err := s.assignRequestFromAIAgentTaskThreadMessage(r.Context(), principal, bearerToken, taskID, threadID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
@@ -601,7 +610,7 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 	}
 	req.AssignmentID = assignment.ID
 	req.durableState = assignment.State
-	response, err := s.aiAgent.CreateAIAgentTaskThreadMessage(r.Context(), principal, taskID, threadID, req)
+	response, err = s.aiAgent.CreateAIAgentTaskThreadMessage(r.Context(), principal, taskID, threadID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return

@@ -1,0 +1,32 @@
+package riidoaiserver
+
+import "strings"
+
+func threadMessageApprovesToolApproval(body string) bool {
+	text := strings.ToLower(strings.TrimSpace(body))
+	if text == "" || threadMessageRejectsToolApproval(text) {
+		return false
+	}
+	for _, phrase := range []string{
+		"승인할게", "승인합니다", "승인해", "허용할게", "허용합니다",
+		"직접 진행", "계속 진행", "진행해줘", "진행해", "approve",
+		"approved", "allow", "go ahead", "proceed",
+	} {
+		if strings.Contains(text, phrase) {
+			return true
+		}
+	}
+	return false
+}
+
+func threadMessageRejectsToolApproval(text string) bool {
+	for _, phrase := range []string{
+		"승인하지", "승인 안", "허용하지", "허용 안", "거절", "하지마",
+		"하지 마", "deny", "denied", "reject", "rejected", "do not",
+	} {
+		if strings.Contains(text, phrase) {
+			return true
+		}
+	}
+	return false
+}

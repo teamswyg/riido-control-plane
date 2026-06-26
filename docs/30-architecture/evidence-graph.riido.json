@@ -840,24 +840,27 @@
     },
     {
       "id": "thread_history_user_followup_retention_loop",
-      "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status.",
-      "hypothesis": "Persisting user follow-up messages as thread history rows and replaying them into v3 history preserves human-agent 티키타카 after reload.",
+      "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status, and a conversational approval reply can accidentally create new work instead of deciding the pending tool approval it answers.",
+      "hypothesis": "Persisting user follow-up messages as thread history rows, replaying them into v3 history, and routing affirmative replies only to same-assignment pending tool approvals preserves human-agent 티키타카 after reload without turning approval chat into a new assignment.",
       "claims": ["thread_history_must_keep_user_followups"],
       "changes": [
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_append_thread_history_message.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"},
-        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"}
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/tool_approval_thread_message_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/tool_approval_thread_message_assert_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/tool_approval_thread_message_test.go"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory.",
+      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory, and approval replies now close existing pending tool approvals without creating replacement assignment history.",
       "next_loop": "ai_thread_history"
     },
     {

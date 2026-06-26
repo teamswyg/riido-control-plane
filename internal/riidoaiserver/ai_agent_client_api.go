@@ -399,6 +399,7 @@ type CreateAIAgentTaskThreadMessageRequest struct {
 	Body            string `json:"body"`
 	SourceMessageID string `json:"source_message_id,omitempty"`
 	AssignmentID    string `json:"-"`
+	toolApproval    bool
 	durableState    AssignmentState
 }
 
