@@ -42,6 +42,10 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		result.CandidateSourceRefs = append(result.CandidateSourceRefs, sourceRefEvidence(item))
 		result.DecisionArtifacts = append(result.DecisionArtifacts, decisionArtifactEvidence{
 			CandidateID:   item.ID,
+			Disposition:   decision.Disposition,
+			Priority:      decision.Priority,
+			Owner:         decision.Owner,
+			ReviewBy:      decision.ReviewBy,
 			NextArtifact:  decision.NextArtifact,
 			NextCommand:   command,
 			PromotionEdge: item.PromotionEdge,

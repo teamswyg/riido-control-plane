@@ -11,6 +11,10 @@ type verifyResult struct {
 
 type decisionArtifactEvidence struct {
 	CandidateID   string    `json:"candidate_id"`
+	Disposition   string    `json:"disposition"`
+	Priority      string    `json:"priority"`
+	Owner         string    `json:"owner"`
+	ReviewBy      string    `json:"review_by,omitempty"`
 	NextArtifact  string    `json:"next_artifact"`
 	NextCommand   string    `json:"next_command"`
 	PromotionEdge graphEdge `json:"promotion_edge"`

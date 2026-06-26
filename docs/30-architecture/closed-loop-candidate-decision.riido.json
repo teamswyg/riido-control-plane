@@ -147,6 +147,7 @@
     "decision next_artifact must be one of the required_next_artifacts declared by the consumed candidate artifact",
     "decision verification must reject candidates whose adoption_plan does not cover every required_next_artifact",
     "decision evidence must expose the executable command selected from the consumed candidate adoption_plan",
+    "decision evidence must expose owner, priority, disposition, and review_by next to the selected executable command",
     "decision evidence must expose the consumed candidate promotion_edge for the selected next artifact",
     "decision verification must reject candidates whose source_ref drifts from the consumed candidate artifact envelope",
     "candidate decision evidence must expose candidate_source_refs for every consumed candidate item",
