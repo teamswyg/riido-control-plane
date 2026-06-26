@@ -20,6 +20,7 @@ on:
       - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
       - "docs/30-architecture/loop-refresh-dispatch.riido.json"
+      - "docs/30-architecture/fixtures/loop-refresh-commands.fixture.json"
       - "docs/30-architecture/module-decomposition.md"
       - "docs/30-architecture/module-decomposition.riido.json"
 
@@ -42,32 +43,8 @@ jobs:
         run: |
           mkdir -p out
           go test ./tools/looprefreshdispatch -count=1
-          cat > out/sample-loop-refresh-commands.json <<'JSON'
-          {
-            "schema_version": "riido-control-plane-loop-refresh-commands.v1",
-            "status": "refresh_required",
-            "generated_at": "2026-06-25T00:00:00Z",
-            "expires_at": "2026-06-26T00:00:00Z",
-            "command_count": 3,
-            "commands": [
-              {
-                "loop_id": "closed_loop_candidate",
-                "kind": "refresh_workflow",
-                "command": "gh workflow run loop-registry.yml --ref main"
-              },
-              {
-                "loop_id": "open_decision_queue",
-                "kind": "refresh_workflow",
-                "command": "gh workflow run open-questions.yml --ref main"
-              },
-              {
-                "loop_id": "control_plane_pressure_candidate",
-                "kind": "target_verifier",
-                "command": "go test ./tools/controlplaneperf"
-              }
-            ]
-          }
-          JSON
+          cp docs/30-architecture/fixtures/loop-refresh-commands.fixture.json \
+            out/sample-loop-refresh-commands.json
           RIIDO_HARNESS_PROMOTION_NOW=2026-06-24T12:00:00Z \
             go run ./tools/harnesspromotion \
             -summary docs/30-architecture/fixtures/harness-failure-summary.fixture.json \

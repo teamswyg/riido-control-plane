@@ -46,3 +46,18 @@ func TestLoopRefreshDispatchWorkflowConsumesDecisionCommands(t *testing.T) {
 		t.Fatal("workflow must cover repeated command inputs in sample and live runs")
 	}
 }
+
+func TestLoopRefreshDispatchWorkflowUsesCommandFixture(t *testing.T) {
+	path := filepath.Join(repoRootForTest(t), ".github", "workflows", "loop-refresh-dispatch.yml")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+	if !strings.Contains(text, "loop-refresh-commands.fixture.json") {
+		t.Fatal("workflow sample must consume the command fixture")
+	}
+	if strings.Contains(text, "cat > out/sample-loop-refresh-commands.json") {
+		t.Fatal("workflow must not embed loop refresh command JSON inline")
+	}
+}
