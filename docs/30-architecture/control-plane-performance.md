@@ -10,7 +10,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - benchmarks: `7`
 - concurrency tests: `8`
 - optimization candidates: `7`
-- assertions: `10`
+- assertions: `11`
 - local pressure artifact: `control-plane-local-pressure`
 - local pressure scenarios: `7`
 - candidate artifact: `control-plane-performance-closed-loop-candidates`
@@ -20,6 +20,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - lightweight benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
 - local pressure: `go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json`
 - manual pressure: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -evidence-out out/control-plane-local-pressure-manual.json`
+- local pressure pprof: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -pprof-dir out/control-plane-local-pprof -evidence-out out/control-plane-local-pressure-pprof.json`
 - race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1`
 - loopback pprof: `RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30`
 - live load evidence: `go run ./tools/aiagentload -base-url "$TESTNET_BASE_URL" -token "$TESTNET_TOKEN" -workspace-id "$TESTNET_WORKSPACE_ID" -scenario client-read -duration 60s -concurrency 64 -evidence-out out/ai-agent-client-testnet-load.json`
@@ -40,6 +41,6 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 
 - Observe: Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates, local CPU/resource deltas, and opt-in pprof sample metadata are not emitted from one executable performance loop.
 - Hypothesis: A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts or persisting profile bodies.
-- Execute: Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings plus opt-in pprof sample metadata, and generate candidate optimization rows whose findings carry closed-loop adoption commands.
-- Evaluate: The verifier fails on missing benchmark coverage, missing local pressure evidence, missing capacity estimates, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource/pprof fields.
+- Execute: Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose local pressure pprof metadata, expose loopback pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings plus opt-in pprof sample metadata, and generate candidate optimization rows whose findings carry closed-loop adoption commands.
+- Evaluate: The verifier fails on missing benchmark coverage, missing local pressure evidence, missing capacity estimates, missing local pprof command/profile metadata path, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource/pprof fields.
 - Retrospective: This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates.

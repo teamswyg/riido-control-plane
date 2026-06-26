@@ -17,10 +17,19 @@ func mainRun(args []string) error {
 	if err != nil {
 		return err
 	}
-	report, err := run(cfg)
+	profiler, err := startProfiler(cfg.PprofDir)
 	if err != nil {
 		return err
 	}
+	report, err := run(cfg)
+	profiles, profileErr := profiler.Stop()
+	if err != nil {
+		return err
+	}
+	if profileErr != nil {
+		return profileErr
+	}
+	report.Profiles = profiles
 	printSummary(report)
 	return writeReport(cfg.EvidenceOut, report)
 }
