@@ -9,9 +9,21 @@ import (
 	"time"
 )
 
-const approvalChatBody = "<p>너가 직접 진행해줘 승인할게</p>"
+const (
+	approvalChatBody          = "<p>너가 직접 진행해줘 승인할게</p>"
+	approvalExecutionChatBody = "<p>go 명령 실행도 해줘</p>"
+)
 
 func TestHTTPThreadMessageApprovesPendingToolApproval(t *testing.T) {
+	assertHTTPThreadMessageApprovesPendingToolApproval(t, approvalChatBody)
+}
+
+func TestHTTPThreadMessageApprovesPendingToolApprovalExecutionReply(t *testing.T) {
+	assertHTTPThreadMessageApprovesPendingToolApproval(t, approvalExecutionChatBody)
+}
+
+func assertHTTPThreadMessageApprovesPendingToolApproval(t *testing.T, body string) {
+	t.Helper()
 	server := newApprovalChatTestServer(t)
 	assigned := assignApprovalRoundTripTask(t, server)
 	pollApprovalRoundTripTask(t, server, assigned.AssignmentID)
@@ -23,12 +35,12 @@ func TestHTTPThreadMessageApprovesPendingToolApproval(t *testing.T) {
 	}()
 	time.Sleep(50 * time.Millisecond)
 
-	reply := postApprovalChatThreadMessage(t, server, assigned)
+	reply := postApprovalChatThreadMessage(t, server, assigned, body)
 	if reply.AssignmentID != assigned.AssignmentID || reply.ThreadID != assigned.ThreadID {
 		t.Fatalf("approval reply created new work: assigned=%+v reply=%+v", assigned, reply)
 	}
 	assertApprovalChatWaitApproved(t, waitDone)
-	assertApprovalChatHistoryMessage(t, server, assigned.ThreadID)
+	assertApprovalChatHistoryMessage(t, server, assigned.ThreadID, body)
 }
 
 func newApprovalChatTestServer(t *testing.T) http.Handler {
@@ -44,9 +56,10 @@ func postApprovalChatThreadMessage(
 	t *testing.T,
 	server http.Handler,
 	assigned AIAgentTaskActionResponse,
+	chatBody string,
 ) AIAgentTaskActionResponse {
 	t.Helper()
-	body := `{"body":"` + approvalChatBody + `","source_message_id":"approval-chat-1"}`
+	body := `{"body":"` + chatBody + `","source_message_id":"approval-chat-1"}`
 	path := "/v2/client/workspaces/workspace-dev-riid/ai-agent/tasks/task-approval/threads/" + assigned.ThreadID + "/messages"
 	req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
 	req.Header.Set("Authorization", "Bearer round-trip-token")

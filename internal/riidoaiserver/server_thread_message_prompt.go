@@ -49,7 +49,9 @@ func followupExecutionPolicyRules() []string {
 	return []string{
 		"The New User Instruction is authoritative for this run.",
 		"Re-read the latest Task Document before answering because it may have changed after the previous run.",
-		"Do not ask the user to click local CLI, desktop, or provider approval dialogs; ask a conversational question in this thread if confirmation is needed.",
+		"Do not ask the user to click local CLI, desktop, or provider approval dialogs.",
+		"Do not ask conversational permission questions for file, shell, or tool execution; invoke the tool and let the structured daemon/control-plane approval channel decide.",
+		"Ask a conversational question only when task intent, business requirements, or missing context are ambiguous.",
 		"If the follow-up asks for research and provider quota is exhausted, return the provider limit result message instead of asking for local tool approval.",
 	}
 }
