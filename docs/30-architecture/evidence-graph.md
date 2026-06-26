@@ -12,7 +12,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `52`
 - claim refs: `51`
-- change refs: `517`
+- change refs: `518`
 - verifier refs: `281`
 - evidence refs: `137`
 
@@ -21,7 +21,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | Chain | Claims | Changes | Verifiers | Evidence | Next Loop |
 | --- | ---: | ---: | ---: | ---: | --- |
 | `harness_failure_promotion_loop` | `0` | `3` | `2` | `2` | `closed_loop_candidate` |
-| `harness_evidence_expiry_gate_loop` | `1` | `5` | `3` | `3` | `provider_acceptance_harness` |
+| `harness_evidence_expiry_gate_loop` | `1` | `6` | `3` | `3` | `provider_acceptance_harness` |
 | `provider_acceptance_observation_coverage_loop` | `1` | `6` | `4` | `3` | `provider_acceptance_harness` |
 | `semantic_hash_metadata_normalization_loop` | `1` | `6` | `3` | `1` | `closed_loop_candidate` |
 | `load_harness_closed_loop_promotion_loop` | `1` | `5` | `4` | `4` | `closed_loop_candidate` |

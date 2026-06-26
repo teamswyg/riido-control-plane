@@ -17,7 +17,7 @@ func verifyCandidateFresh(candidate candidateEvidence, now time.Time) error {
 	if !expiresAt.After(generatedAt) {
 		return fmt.Errorf("candidate artifact %s source_expires_at must be after source_generated_at", candidate.ID)
 	}
-	if now.After(expiresAt) {
+	if !now.Before(expiresAt) {
 		return fmt.Errorf("candidate artifact %s expired at %s", candidate.ID, candidate.SourceExpiresAt)
 	}
 	return nil

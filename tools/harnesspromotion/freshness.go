@@ -15,10 +15,10 @@ func verifySummaryFresh(summary liveSummary, now time.Time) error {
 	if err != nil {
 		return err
 	}
-	if expiresAt.Before(generatedAt) {
+	if !expiresAt.After(generatedAt) {
 		return fmt.Errorf("summary %s expires before it was generated", summary.ID)
 	}
-	if now.UTC().After(expiresAt) {
+	if !now.UTC().Before(expiresAt) {
 		return fmt.Errorf("summary %s expired at %s", summary.ID, summary.ExpiresAt)
 	}
 	return nil

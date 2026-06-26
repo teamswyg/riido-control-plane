@@ -39,6 +39,22 @@ func TestCandidateIntakeRejectsExpiredCandidateArtifact(t *testing.T) {
 	}
 }
 
+func TestCandidateIntakeRejectsCandidateArtifactAtExpiryBoundary(t *testing.T) {
+	root, err := findRepoRoot("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := t.TempDir() + "/candidates.json"
+	if err := promoteSummary(root, "docs/30-architecture/fixtures/harness-failure-summary.fixture.json", out); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-25T00:00:00Z")
+	_, err = verifyCandidateFile(root, loadIntakeManifestForTest(t), out)
+	if err == nil || !strings.Contains(err.Error(), "expired") {
+		t.Fatalf("expected exact-expiry candidate artifact failure, got %v", err)
+	}
+}
+
 func promoteSummary(root, summary, out string) error {
 	cmd := exec.Command("go", "run", "./tools/harnesspromotion",
 		"-summary", summary, "-candidate-out", out)

@@ -40,14 +40,15 @@
     },
     {
       "id": "harness_evidence_expiry_gate_loop",
-      "observation": "Redacted live workflow summaries could be reused after their evidence window expired, allowing stale harness output to create fresh closed-loop candidates.",
-      "hypothesis": "Stamping generated_at and expires_at in the redacted summary, then rejecting expired summaries in harness promotion, prevents stale observations from entering the closed-loop backlog.",
+      "observation": "Redacted live workflow summaries could be reused after or exactly at their evidence expiry boundary, allowing stale harness output to create fresh closed-loop candidates.",
+      "hypothesis": "Stamping generated_at and expires_at in the redacted summary, then requiring generated_at < expires_at and now < expires_at in harness promotion, prevents stale observations from entering the closed-loop backlog.",
       "claims": ["expired_harness_evidence_must_not_promote_candidates"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/live-workflow-redaction.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
         {"kind": "tool", "path": "tools/liveworkflowevidence"},
         {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "test", "path": "tools/harnesspromotion/freshness_test.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
       ],
       "verifiers": [
@@ -60,7 +61,7 @@
         {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Harness promotion now treats evidence freshness as a merge gate: expired or malformed summary freshness metadata cannot produce closed-loop candidate evidence.",
+      "decision": "Harness promotion now treats evidence freshness as a strict merge gate: malformed windows, zero-length windows, expired summaries, and exact-expiry summaries cannot produce closed-loop candidate evidence.",
       "next_loop": "provider_acceptance_harness"
     },
     {
@@ -1286,8 +1287,8 @@
     },
     {
       "id": "closed_loop_candidate_freshness_consumption_loop",
-      "observation": "Closed-loop candidate artifacts carry source_generated_at and source_expires_at, but candidate intake and decision consumers could still verify an expired candidate artifact if it was supplied later.",
-      "hypothesis": "Parsing candidate artifact source timestamps and rejecting expired artifacts in both intake and decision consumers keeps stale harness failures from being reintroduced as fresh closed-loop work.",
+      "observation": "Closed-loop candidate artifacts carry source_generated_at and source_expires_at, but candidate intake and decision consumers could still verify an expired candidate artifact if it was supplied later or exactly at its expiry boundary.",
+      "hypothesis": "Parsing candidate artifact source timestamps and requiring source_generated_at < source_expires_at and now < source_expires_at in both intake and decision consumers keeps stale harness failures from being reintroduced as fresh closed-loop work.",
       "claims": ["closed_loop_candidate_consumers_must_reject_expired_candidates"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
@@ -1318,7 +1319,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Candidate artifact freshness is now verified at the consumer boundary for smoke, load, and performance candidates, and the claim coverage tokens keep the expired-candidate rejection rule visible to loop-closure audit so closed-loop candidate intake and decision evidence cannot be produced from expired harness artifacts.",
+      "decision": "Candidate artifact freshness is now verified at the consumer boundary for smoke, load, and performance candidates with exact-expiry rejection, and the claim coverage tokens keep the expired-candidate rejection rule visible to loop-closure audit so closed-loop candidate intake and decision evidence cannot be produced from expired harness artifacts.",
       "next_loop": "closed_loop_candidate"
     },
     {
