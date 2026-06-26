@@ -19,6 +19,9 @@ func verifyRef(root, chainID, group string, item ref) error {
 	if item.Kind == "" || item.Path == "" {
 		return fmt.Errorf("%s %s ref kind and path are required", chainID, group)
 	}
+	if !knownEvidenceRefKind(item.Kind) {
+		return fmt.Errorf("%s %s ref %s has unsupported kind %q", chainID, group, item.Path, item.Kind)
+	}
 	if item.Kind == "artifact" {
 		return verifyArtifactRef(chainID, item)
 	}
