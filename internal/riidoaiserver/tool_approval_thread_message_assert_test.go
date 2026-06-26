@@ -20,7 +20,7 @@ func assertApprovalChatWaitApproved(t *testing.T, waitDone <-chan ToolApprovalWa
 	}
 }
 
-func assertApprovalChatHistoryMessage(t *testing.T, server http.Handler, threadID string) {
+func assertApprovalChatHistoryMessage(t *testing.T, server http.Handler, threadID, body string) {
 	t.Helper()
 	req := httptest.NewRequest(
 		http.MethodGet,
@@ -38,7 +38,7 @@ func assertApprovalChatHistoryMessage(t *testing.T, server http.Handler, threadI
 		t.Fatalf("history json: %v", err)
 	}
 	thread := historyThreadByID(t, out, threadID)
-	if !historyMessagesContainUserBody(thread.Messages, approvalChatBody) {
+	if !historyMessagesContainUserBody(thread.Messages, body) {
 		t.Fatalf("history missed approval reply: %+v", thread.Messages)
 	}
 }
