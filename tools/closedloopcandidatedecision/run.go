@@ -30,6 +30,11 @@ func run(opt options) error {
 	if err := maybeDoc(root, m.GeneratedDoc, renderDoc(m, result), opt.WriteDoc, opt.CheckDoc); err != nil {
 		return err
 	}
+	if opt.CommandsOut != "" {
+		if err := writeJSON(opt.CommandsOut, newRefreshCommandEvidence(result)); err != nil {
+			return err
+		}
+	}
 	if opt.EvidenceOut != "" {
 		return writeJSON(opt.EvidenceOut, newEvidence(m, result))
 	}
@@ -37,7 +42,7 @@ func run(opt options) error {
 }
 
 func requireCandidateInput(opt options) error {
-	if opt.CandidateIn != "" || (!opt.CheckDoc && opt.EvidenceOut == "") {
+	if opt.CandidateIn != "" || (!opt.CheckDoc && opt.EvidenceOut == "" && opt.CommandsOut == "") {
 		return nil
 	}
 	return errMissingCandidateInput

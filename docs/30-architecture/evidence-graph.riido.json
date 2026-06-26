@@ -1289,17 +1289,19 @@
     },
     {
       "id": "candidate_decision_next_command_loop",
-      "observation": "Candidate decision evidence selected a next_artifact and next_command, but agents still had to rejoin the full decisions array to know the owner, priority, disposition, and review expiry for that executable action.",
-      "hypothesis": "Copying the selected adoption command and decision ownership metadata into decision_artifacts lets agents continue from the evidence artifact without reopening narrative docs, candidate JSON, or global decision records by hand.",
+      "observation": "Candidate decision evidence selected a next_artifact and next_command, but agents still had to rejoin the full decisions array or copy commands by hand before the next loop could consume that executable action.",
+      "hypothesis": "Copying the selected adoption command and decision ownership metadata into decision_artifacts, then exporting those selected commands as loop refresh command evidence, lets agents continue without reopening narrative docs, candidate JSON, or global decision records by hand.",
       "claims": ["candidate_decision_evidence_must_expose_next_command"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_artifact_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/refresh_command_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
@@ -1307,9 +1309,10 @@
       ],
       "evidence": [
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-commands", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Candidate decision evidence now exposes next_command plus owner, priority, disposition, and review_by for the chosen next_artifact, and the guard claim covers the ownership and review-expiry tokens needed to keep the executable follow-up path out of human memory.",
+      "decision": "Candidate decision evidence now exposes next_command plus owner, priority, disposition, and review_by for the chosen next_artifact, and the verifier can publish those selected next commands as loop refresh command evidence so the executable follow-up path is no longer trapped in human memory.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

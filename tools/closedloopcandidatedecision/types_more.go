@@ -15,6 +15,7 @@ type decisionArtifactEvidence struct {
 	Priority      string    `json:"priority"`
 	Owner         string    `json:"owner"`
 	ReviewBy      string    `json:"review_by,omitempty"`
+	NextLoop      string    `json:"next_loop"`
 	NextArtifact  string    `json:"next_artifact"`
 	NextCommand   string    `json:"next_command"`
 	PromotionEdge graphEdge `json:"promotion_edge"`

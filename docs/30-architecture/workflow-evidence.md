@@ -45,7 +45,7 @@
 | `.github/workflows/assignment-store-actor.yml` | `covered` | `1` | `1/1` | `true` | `4/4` | `0` | - |
 | `.github/workflows/aws-adapters-facade.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/ci.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
-| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `14` | `14/14` | `true` | `7/7` | `0` | - |
+| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `14` | `14/14` | `true` | `8/8` | `0` | - |
 | `.github/workflows/closed-loop-candidate-intake.yml` | `covered` | `13` | `13/13` | `true` | `6/6` | `0` | - |
 | `.github/workflows/cloudwatch-emf.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/config-reference.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |

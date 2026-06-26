@@ -28,8 +28,8 @@ func verifyIdentity(m manifest) error {
 	if m.EvidenceTool != "tools/closedloopcandidatedecision" {
 		return fmt.Errorf("candidate decision evidence_tool must be tools/closedloopcandidatedecision")
 	}
-	if m.GeneratedDoc == "" || m.Workflow == "" || m.EvidenceArtifact == "" {
-		return fmt.Errorf("candidate decision must bind generated doc, workflow, and artifact")
+	if m.GeneratedDoc == "" || m.Workflow == "" || m.EvidenceArtifact == "" || m.CommandArtifact == "" {
+		return fmt.Errorf("candidate decision must bind generated doc, workflow, evidence artifact, and command artifact")
 	}
 	return nil
 }
