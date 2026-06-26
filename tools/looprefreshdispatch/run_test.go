@@ -18,6 +18,7 @@ func TestLoopRefreshDispatchCLIWritesPlan(t *testing.T) {
 		Status:        "refresh_required",
 		GeneratedAt:   "2026-06-24T00:00:00Z",
 		ExpiresAt:     "2026-06-26T00:00:00Z",
+		CommandCount:  1,
 		Commands: []selectedRefreshCommand{{
 			LoopID:  "closed_loop_candidate",
 			Kind:    "refresh_workflow",

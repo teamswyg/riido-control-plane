@@ -9,15 +9,22 @@ func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan
 	if err := verifySourceFresh(source, evidenceNow()); err != nil {
 		return dispatchPlan{}, err
 	}
+	if err := verifySourceCommands(source); err != nil {
+		return dispatchPlan{}, err
+	}
 	generatedAt, expiresAt := evidenceWindow()
 	out := dispatchPlan{
-		SchemaVersion:     dispatchPlanSchema,
-		Status:            "no_dispatch_required",
-		GeneratedAt:       generatedAt,
-		ExpiresAt:         expiresAt,
-		SourceStatus:      strings.TrimSpace(source.Status),
-		SourceGeneratedAt: strings.TrimSpace(source.GeneratedAt),
-		SourceExpiresAt:   strings.TrimSpace(source.ExpiresAt),
+		SchemaVersion:      dispatchPlanSchema,
+		Status:             "no_dispatch_required",
+		GeneratedAt:        generatedAt,
+		ExpiresAt:          expiresAt,
+		SourceStatus:       strings.TrimSpace(source.Status),
+		SourceGeneratedAt:  strings.TrimSpace(source.GeneratedAt),
+		SourceExpiresAt:    strings.TrimSpace(source.ExpiresAt),
+		SourceCommandCount: source.CommandCount,
+	}
+	if out.SourceStatus == "fresh" {
+		return out, nil
 	}
 	byWorkflow := map[string]map[string]int{}
 	ignoredKinds := map[string]bool{}

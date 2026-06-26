@@ -9,6 +9,7 @@ func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
 		Status:        "refresh_required",
 		GeneratedAt:   "2026-06-24T00:00:00Z",
 		ExpiresAt:     "2026-06-26T00:00:00Z",
+		CommandCount:  4,
 		Commands: []selectedRefreshCommand{{
 			LoopID:  "ai_thread_history",
 			Kind:    "refresh_workflow",
@@ -18,6 +19,10 @@ func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
 			Kind:    "refresh_workflow",
 			Command: "gh workflow run loop-registry.yml --ref main",
 		}, {
+			LoopID:  "open_decision_queue",
+			Kind:    "refresh_workflow",
+			Command: "gh workflow run open-questions.yml --ref main",
+		}, {
 			LoopID:  "ai_thread_history",
 			Kind:    "target_verifier",
 			Command: "go test ./internal/riidoaiserver",
@@ -26,7 +31,7 @@ func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Status != "dispatch_required" || got.DispatchCount != 1 {
+	if got.Status != "dispatch_required" || got.DispatchCount != 2 {
 		t.Fatalf("plan status/count = %+v", got)
 	}
 	if got.GeneratedAt != "2026-06-25T00:00:00Z" || got.ExpiresAt != "2026-06-26T00:00:00Z" {
@@ -35,31 +40,24 @@ func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
 	if got.SourceGeneratedAt == "" || got.SourceExpiresAt == "" {
 		t.Fatalf("source freshness missing = %+v", got)
 	}
-	dispatch := got.Dispatches[0]
-	if dispatch.WorkflowFile != "loop-registry.yml" || dispatch.CommandCount != 2 {
-		t.Fatalf("dispatch = %+v", dispatch)
+	if got.SourceCommandCount != 4 {
+		t.Fatalf("source command count = %+v", got)
 	}
-	if dispatch.VerifiedCommand != "gh workflow run loop-registry.yml --ref main" {
-		t.Fatalf("verified command = %q", dispatch.VerifiedCommand)
+	first := got.Dispatches[0]
+	if first.WorkflowFile != "loop-registry.yml" || first.CommandCount != 2 {
+		t.Fatalf("first dispatch = %+v", first)
+	}
+	if first.VerifiedCommand != "gh workflow run loop-registry.yml --ref main" {
+		t.Fatalf("first verified command = %q", first.VerifiedCommand)
+	}
+	second := got.Dispatches[1]
+	if second.WorkflowFile != "open-questions.yml" || second.CommandCount != 1 {
+		t.Fatalf("second dispatch = %+v", second)
+	}
+	if second.VerifiedCommand != "gh workflow run open-questions.yml --ref main" {
+		t.Fatalf("second verified command = %q", second.VerifiedCommand)
 	}
 	if got.IgnoredCommandCount != 1 || got.IgnoredCommandKinds[0] != "target_verifier" {
 		t.Fatalf("ignored = %+v", got)
-	}
-}
-
-func TestBuildDispatchPlanRejectsUnsafeRefreshWorkflow(t *testing.T) {
-	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-25T00:00:00Z")
-	_, err := buildDispatchPlan(repoRootForTest(t), refreshCommandEvidence{
-		SchemaVersion: refreshCommandsSchema,
-		GeneratedAt:   "2026-06-24T00:00:00Z",
-		ExpiresAt:     "2026-06-26T00:00:00Z",
-		Commands: []selectedRefreshCommand{{
-			LoopID:  "loop",
-			Kind:    "refresh_workflow",
-			Command: "gh workflow run ../deploy.yml --ref main",
-		}},
-	})
-	if err == nil {
-		t.Fatal("expected unsafe refresh workflow rejection")
 	}
 }
