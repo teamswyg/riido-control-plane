@@ -3,6 +3,9 @@ package main
 import "fmt"
 
 func verifyLoops(root string, m manifest) (map[string]bool, verifyResult, error) {
+	if err := verifyEvidenceKinds(m); err != nil {
+		return nil, verifyResult{}, err
+	}
 	ids := map[string]bool{}
 	result := verifyResult{
 		RefreshCadenceMinutes:     map[string]int{},

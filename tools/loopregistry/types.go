@@ -9,6 +9,7 @@ type manifest struct {
 	EvidenceArtifact          string                     `json:"evidence_artifact"`
 	EvidenceTool              string                     `json:"evidence_tool"`
 	Assertions                []string                   `json:"assertions"`
+	EvidenceKinds             []evidenceKind             `json:"evidence_kinds,omitempty"`
 	Loops                     []loopRecord               `json:"loops"`
 	HarnessWorkflowExclusions []harnessWorkflowExclusion `json:"harness_workflow_exclusions,omitempty"`
 	Claims                    []claimBinding             `json:"claim_bindings"`
@@ -34,6 +35,11 @@ type evidenceSource struct {
 	Path            string `json:"path"`
 	Redacted        bool   `json:"redacted,omitempty"`
 	RefreshWorkflow string `json:"refresh_workflow,omitempty"`
+}
+
+type evidenceKind struct {
+	Kind        string `json:"kind"`
+	Description string `json:"description"`
 }
 
 type harnessWorkflowExclusion struct {
