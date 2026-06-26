@@ -6,6 +6,7 @@ type evidence struct {
 	SurfaceCount          int               `json:"surface_count"`
 	CandidateCount        int               `json:"candidate_count"`
 	AssertionCount        int               `json:"assertion_count"`
+	RaceArtifact          string            `json:"race_artifact"`
 	BenchmarkCommand      string            `json:"benchmark_command"`
 	LocalPressureCommand  string            `json:"local_pressure_command"`
 	ManualPressureCommand string            `json:"manual_pressure_command"`
@@ -44,6 +45,7 @@ func newEvidence(root string, m manifest) (evidence, error) {
 		SurfaceCount:          len(rows),
 		CandidateCount:        len(rows),
 		AssertionCount:        len(m.Assertions),
+		RaceArtifact:          m.RaceArtifact,
 		BenchmarkCommand:      m.BenchmarkCommand,
 		LocalPressureCommand:  m.LocalPressureCommand,
 		ManualPressureCommand: m.ManualPressureCommand,

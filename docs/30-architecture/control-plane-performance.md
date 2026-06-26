@@ -10,8 +10,9 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - benchmarks: `7`
 - concurrency tests: `8`
 - optimization candidates: `7`
-- assertions: `12`
+- assertions: `13`
 - local pressure artifact: `control-plane-local-pressure`
+- race artifact: `control-plane-race`
 - pressure candidate artifact: `control-plane-pressure-closed-loop-candidates`
 - local pressure scenarios: `9`
 - candidate artifact: `control-plane-performance-closed-loop-candidates`
@@ -42,6 +43,6 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 
 - Observe: Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates, local CPU/resource deltas, and opt-in pprof sample metadata are not emitted from one executable performance loop.
 - Hypothesis: A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts or persisting profile bodies.
-- Execute: Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose local pressure pprof metadata, export pressure scenario candidates as a closed-loop candidate artifact, expose loopback pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings plus opt-in pprof sample metadata, and generate candidate optimization rows whose findings carry closed-loop adoption commands.
-- Evaluate: The verifier fails on missing benchmark coverage, missing local pressure evidence, missing capacity estimates, missing local pressure candidate artifact, missing local pprof command/profile metadata path, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource/pprof fields.
+- Execute: Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish lightweight race/concurrency output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose local pressure pprof metadata, export pressure scenario candidates as a closed-loop candidate artifact, expose loopback pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings plus opt-in pprof sample metadata, and generate candidate optimization rows whose findings carry closed-loop adoption commands.
+- Evaluate: The verifier fails on missing benchmark coverage, missing race artifact wiring, missing local pressure evidence, missing capacity estimates, missing local pressure candidate artifact, missing local pprof command/profile metadata path, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource/pprof fields.
 - Retrospective: This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates.

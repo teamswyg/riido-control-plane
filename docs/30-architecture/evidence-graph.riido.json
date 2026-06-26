@@ -826,15 +826,17 @@
     },
     {
       "id": "ai_thread_history_conversation_grouping_loop",
-      "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card.",
-      "hypothesis": "Binding conversation_id and parent_thread_id to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations.",
+      "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card, and later observed stale queued_by_busy_agent status text appearing next to newer progress in the same conversation.",
+      "hypothesis": "Binding conversation_id, parent_thread_id, and queued-status current-only filtering to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations and prevents stale queue hints from rendering as durable agent replies.",
       "claims": ["thread_history_v3_must_expose_stable_conversation_grouping"],
       "changes": [
         {"kind": "manifest", "path": "docs/20-domain/ai-agent-client-api.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "api", "path": "internal/riidoaiserver/ai_agent_client_thread_history_api.go"},
         {"kind": "projection", "path": "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"},
+        {"kind": "projection", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go"}
       ],
       "verifiers": [
@@ -847,7 +849,7 @@
         {"kind": "artifact", "path": "ai-agent-client-api-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, and same-agent reassignment receives a distinct conversation.",
+      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, and queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has newer progress or result history.",
       "next_loop": "ai_thread_history"
     },
     {

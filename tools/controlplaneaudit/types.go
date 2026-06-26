@@ -7,6 +7,7 @@ type manifest struct {
 	GeneratedDoc          string    `json:"generated_doc"`
 	Workflow              string    `json:"workflow"`
 	EvidenceArtifact      string    `json:"evidence_artifact"`
+	RaceArtifact          string    `json:"race_artifact"`
 	EvidenceTool          string    `json:"evidence_tool"`
 	BenchmarkCommand      string    `json:"benchmark_command"`
 	LocalPressureCommand  string    `json:"local_pressure_command"`

@@ -30,6 +30,7 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreadHistory(ctx context
 			response.AgentSnapshots[record.AgentSnapshotID] = *copyTaskThreadAgentSnapshot(thread.AgentSnapshot)
 		}
 	}
+	suppressSupersededQueuedHistoryMessages(response.Threads)
 	response.ActiveStream = taskThreadHistoryActiveStream(response.Threads)
 	if len(response.AgentSnapshots) == 0 {
 		response.AgentSnapshots = nil

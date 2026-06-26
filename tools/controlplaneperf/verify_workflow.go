@@ -23,6 +23,7 @@ func verifyWorkflow(root string, m manifest) error {
 		"go run ./tools/harnesspromotion",
 		"name: " + m.EvidenceArtifact,
 		"name: " + m.BenchmarkArtifact,
+		"name: " + m.RaceArtifact,
 		"name: " + m.LocalPressureArtifact,
 		"name: " + m.SummaryArtifact,
 		"name: " + m.CandidateArtifact,
