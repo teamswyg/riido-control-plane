@@ -8,7 +8,7 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 
 - surfaces: `12`
 - candidates: `12`
-- assertions: `7`
+- assertions: `8`
 - required categories: `10`
 - missing categories: `0`
 - pprof commands: `3`
@@ -18,6 +18,7 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 - benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
 - local pressure: `go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json`
 - manual pressure: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -evidence-out out/control-plane-local-pressure-manual.json`
+- local pressure pprof: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -pprof-dir out/control-plane-local-pprof -evidence-out out/control-plane-local-pressure-pprof.json`
 - race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1`
 - pprof: `go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30`
 - pprof: `go tool pprof -top http://127.0.0.1:6060/debug/pprof/heap`
@@ -59,6 +60,6 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 
 - Observe: Control-plane performance work already emits benchmarks and local pressure, but waiter, subscriber, shutdown, and source-risk surfaces need to be compiled into one auditable map.
 - Hypothesis: A static high-traffic audit can connect endpoint, store, SSE, scheduling, progress, DynamoDB, metrics, waiter, fanout, and actor lifecycle hot paths to executable evidence before any API-neutral optimization.
-- Execute: Scan declared surfaces for high-risk primitives, verify pprof, race, and stress commands, publish redacted audit evidence, and keep generated docs in sync.
-- Evaluate: The verifier fails on missing files, missing patterns, missing candidates, unsafe pprof commands, missing workflow artifact upload, or generated doc drift.
+- Execute: Scan declared surfaces for high-risk primitives, verify pprof, race, stress, and local profile commands, publish redacted audit evidence, and keep generated docs in sync.
+- Evaluate: The verifier fails on missing files, missing patterns, missing candidates, unsafe pprof commands, missing local pressure profile command, missing workflow artifact upload, or generated doc drift.
 - Retrospective: This keeps the first slice open-loop: observe pressure and source risk, then decide which bottlenecks deserve closed-loop gates.

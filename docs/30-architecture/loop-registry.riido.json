@@ -161,6 +161,7 @@
         "subscriber_fanout_pressure",
         "actor_lifecycle_shutdown",
         "local_pressure_resource_delta",
+        "local_pressure_profile_metadata",
         "local_pressure_capacity_estimate",
         "measured_pressure_finding",
         "live_load_capacity_estimate",
@@ -174,6 +175,7 @@
         "lightweight_benchmark_coverage",
         "static_hot_path_audit",
         "local_pressure_evidence",
+        "local_profile_generation",
         "capacity_estimate_generation",
         "measured_finding_generation",
         "live_load_capacity_generation",
@@ -230,6 +232,7 @@
         "benchmark_missing",
         "static_audit_missing",
         "local_pressure_missing",
+        "local_profile_metadata_missing",
         "capacity_estimate_missing",
         "pprof_not_loopback",
         "pprof_profile_body_persisted",
@@ -802,11 +805,11 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "f2af9d45400b7f2d5527182d04e343432f20ff7d3a173f6ed4336926e0459263"
+      "semantic_hash": "0453c51c74e7bba62ba6705ae7ee17bda3d6d2356775ebac528bbf03bbd4a2fe"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
-      "statement": "Control-plane high-traffic risk work must keep endpoint, store, SSE, subscriber fanout, assignment/tool-approval waiters, runtime progress, actor shutdown, local pressure, pprof, and live load surfaces bound to lightweight benchmark evidence, local resource delta evidence, per-scenario capacity estimates, measured pressure findings, loopback-only profiling commands, redacted live-load commands, and explicit optimization candidates with closed-loop adoption paths without changing public API contracts.",
+      "statement": "Control-plane high-traffic risk work must keep endpoint, store, SSE, subscriber fanout, assignment/tool-approval waiters, runtime progress, actor shutdown, local pressure, pprof, and live load surfaces bound to lightweight benchmark evidence, local resource delta evidence, local CPU/heap/goroutine profile metadata, per-scenario capacity estimates, measured pressure findings, loopback-only profiling commands, redacted live-load commands, and explicit optimization candidates with closed-loop adoption paths without changing public API contracts.",
       "loop": "control_plane_performance_harness",
       "covers_observes": [
         "endpoint_hot_path",
@@ -816,6 +819,7 @@
         "subscriber_fanout_pressure",
         "actor_lifecycle_shutdown",
         "local_pressure_resource_delta",
+        "local_pressure_profile_metadata",
         "local_pressure_capacity_estimate",
         "measured_pressure_finding",
         "live_load_capacity_estimate",
@@ -830,6 +834,7 @@
         "static_hot_path_audit",
         "local_pressure_evidence",
         "capacity_estimate_generation",
+        "local_profile_generation",
         "measured_finding_generation",
         "live_load_capacity_generation",
         "live_load_resource_delta_generation",
@@ -844,6 +849,7 @@
         "static_audit_missing",
         "local_pressure_missing",
         "capacity_estimate_missing",
+        "local_profile_metadata_missing",
         "pprof_not_loopback",
         "pprof_profile_body_persisted",
         "hot_path_unbound",
@@ -883,8 +889,11 @@
         "tools/controlplaneperf/verify_workflow.go",
         "tools/controlplaneperf/evidence.go",
         "tools/controlplanepressure/main.go",
+        "tools/controlplanepressure/config.go",
         "tools/controlplanepressure/run.go",
         "tools/controlplanepressure/scenario.go",
+        "tools/controlplanepressure/profiler.go",
+        "tools/controlplanepressure/profile_artifacts.go",
         "tools/controlplanepressure/http_endpoint_threads_v3.go",
         "tools/controlplanepressure/errors.go",
         "tools/controlplanepressure/client_event_fanout.go",
@@ -896,6 +905,7 @@
         "tools/controlplanepressure/output.go",
         "tools/controlplanepressure/types.go",
         "tools/controlplanepressure/main_test.go",
+        "tools/controlplanepressure/profiler_test.go",
         "tools/controlplanepressure/scenario_test.go",
         "tools/controlplanepressure/http_endpoint_threads_v3_test.go",
         "internal/riidoaiserver/http_transaction_metrics_benchmark_test.go",
@@ -948,6 +958,7 @@
         "TestControlPlaneHighTrafficAuditRejectsUnsafePprof",
         "TestControlPlaneHighTrafficAuditRejectsMissingRequiredCategory",
         "TestControlPlanePressureProducesEvidence",
+        "TestControlPlanePressureCanWriteLocalProfiles",
         "TestControlPlanePressureCoversV3ThreadHistoryEndpoint",
         "TestScenariosIncludeSubscriberFanout",
         "TestDevelopmentAIAgentClientStoreThreadProgressFanout",
@@ -972,7 +983,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "988c7c8cc9b7d5b39d8b45785221147ca4b538d6be418d7ba836aa1aed8dfea1"
+      "semantic_hash": "0fa6669ca06a79a5c68ef5690a29df0767f6b689eff08c7c67bc0f28a276e069"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -1221,7 +1232,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "5858a23e6b4f202fd376d6f4f7ddd7932eaa0feb37f1d2a0e5865d725a4eb854"
+      "semantic_hash": "c56909e4937389c2e2bd59be5a95d3684b8b9613e70900e00913d887819c265c"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1281,7 +1292,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e1abeafe6f15fedf960ade0afa3f6259c8b24faad3c9fecde5091f2efad3bcb9"
+      "semantic_hash": "b351cb5966428547513d4f4a0e780e209cbe6372d1d80e09c78f5eb80c89c292"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -1364,7 +1375,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "75651ca78cd435efc30ad5c008078edabe6e3bfc3254fa9059d87d9b3c4b3e1d"
+      "semantic_hash": "19ee271f1d55dd94f673064ae941abea2d491f1a20b3bab06b9f5ae25e4adb5a"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -1529,7 +1540,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "2f5f4dde24e8ec47c9b9488ebd891e329d4aa6202dd1f2044bb50ec3ac661288"
+      "semantic_hash": "c9aa241a9b352723cf7c687b63eba3e6f0c59affeeb7280989cb40aae23fd8af"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -2004,7 +2015,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "7dd0d412e145f04a137b7453fbf1d083b97ec2602176b8ce1e77a1b9c08f533c"
+      "semantic_hash": "684f4b4960d6f2d4b993f99e132b111e82f4196bf31d8ca46a99cd4b31603e19"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -2043,7 +2054,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "eed8878caac1bec3884a5c77307fc3ab6621a6af90124fe0ff67b0893b8c5185"
+      "semantic_hash": "aed14b45d9b305d216cef5df845b434eebd8e1fec6d4bfaa645d7d91af7d6c2f"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -2078,7 +2089,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "6babf10c9acb57eeca47493bda08765f5117569ea1b156df1b4b21b59f641430"
+      "semantic_hash": "6e44624141c6dd3564a40ca2ddfd9b8affb0c5a323583f58b58f96ad8ce041e6"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -2252,7 +2263,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f2d3313798c6ce155fe2eaecd237b28290ceff9ecc16511296ede4d1482efa91"
+      "semantic_hash": "519a90f1756b21b36d5809eebee7e6bc3ccd478c971536eb6c7f4709e5c981d9"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",

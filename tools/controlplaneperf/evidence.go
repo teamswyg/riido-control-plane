@@ -11,6 +11,7 @@ type evidence struct {
 	BenchmarkCommand       string              `json:"benchmark_command"`
 	LocalPressureCommand   string              `json:"local_pressure_command"`
 	ManualPressureCommand  string              `json:"manual_pressure_command"`
+	LocalPprofCommand      string              `json:"local_pprof_command"`
 	RaceCommand            string              `json:"race_command"`
 	PprofCommand           string              `json:"pprof_command"`
 	LiveLoadCommand        string              `json:"live_load_command"`
@@ -46,6 +47,7 @@ func newEvidence(m manifest) evidence {
 		BenchmarkCommand:       m.BenchmarkCommand,
 		LocalPressureCommand:   m.LocalPressureCommand,
 		ManualPressureCommand:  m.ManualPressureCommand,
+		LocalPprofCommand:      m.LocalPprofCommand,
 		RaceCommand:            m.RaceCommand,
 		PprofCommand:           m.PprofCommand,
 		LiveLoadCommand:        m.LiveLoadCommand,

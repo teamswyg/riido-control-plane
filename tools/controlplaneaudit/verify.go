@@ -38,6 +38,7 @@ func verifyCommands(m manifest) error {
 		m.BenchmarkCommand:      "-benchmem",
 		m.LocalPressureCommand:  "go run ./tools/controlplanepressure",
 		m.ManualPressureCommand: "-concurrency 1,8,32,128",
+		m.LocalPprofCommand:     "-pprof-dir",
 		m.RaceCommand:           "go test -race",
 	}
 	for command, needle := range required {

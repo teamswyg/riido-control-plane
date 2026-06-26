@@ -11,6 +11,7 @@ type manifest struct {
 	BenchmarkCommand      string    `json:"benchmark_command"`
 	LocalPressureCommand  string    `json:"local_pressure_command"`
 	ManualPressureCommand string    `json:"manual_pressure_command"`
+	LocalPprofCommand     string    `json:"local_pprof_command"`
 	RaceCommand           string    `json:"race_command"`
 	PprofCommands         []string  `json:"pprof_commands"`
 	RequiredCategories    []string  `json:"required_categories"`

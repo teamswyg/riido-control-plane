@@ -13,6 +13,7 @@
   "benchmark_command": "go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1",
   "local_pressure_command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json",
   "manual_pressure_command": "go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -evidence-out out/control-plane-local-pressure-manual.json",
+  "local_pprof_command": "go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -pprof-dir out/control-plane-local-pprof -evidence-out out/control-plane-local-pressure-pprof.json",
   "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1",
   "pprof_command": "RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30",
   "live_load_command": "go run ./tools/aiagentload -base-url \"$TESTNET_BASE_URL\" -token \"$TESTNET_TOKEN\" -workspace-id \"$TESTNET_WORKSPACE_ID\" -scenario client-read -duration 60s -concurrency 64 -evidence-out out/ai-agent-client-testnet-load.json",
@@ -113,6 +114,7 @@
     "lightweight benchmark evidence must run without live credentials",
     "local pressure evidence must include httptest coverage for the v3 thread history endpoint hot path",
     "local pressure evidence must emit measured allocation, latency, CPU, goroutine, subscriber-fanout findings, and per-scenario capacity estimates",
+    "manual local pressure pprof must emit CPU, heap, and goroutine profile file metadata without changing endpoint contracts",
     "local pressure findings must carry closed-loop candidate required artifacts and executable adoption commands",
     "live load evidence must stay redacted and use aiagentload rather than ad-hoc curl loops",
     "live load evidence must emit requests_per_second, success_per_second, failure_rate_pct, endpoint findings, capacity_estimate, and load_generator_resource_delta",
@@ -123,8 +125,8 @@
   "loop": {
     "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates, local CPU/resource deltas, and opt-in pprof sample metadata are not emitted from one executable performance loop.",
     "hypothesis": "A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts or persisting profile bodies.",
-    "execute": "Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings plus opt-in pprof sample metadata, and generate candidate optimization rows whose findings carry closed-loop adoption commands.",
-    "evaluate": "The verifier fails on missing benchmark coverage, missing local pressure evidence, missing capacity estimates, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource/pprof fields.",
+    "execute": "Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose local pressure pprof metadata, expose loopback pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings plus opt-in pprof sample metadata, and generate candidate optimization rows whose findings carry closed-loop adoption commands.",
+    "evaluate": "The verifier fails on missing benchmark coverage, missing local pressure evidence, missing capacity estimates, missing local pprof command/profile metadata path, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource/pprof fields.",
     "retrospective": "This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates."
   }
 }

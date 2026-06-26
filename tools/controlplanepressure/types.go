@@ -14,11 +14,18 @@ type pressureReport struct {
 	Capacity      []capacityEstimate `json:"capacity_estimates"`
 	Candidates    []candidateEntry   `json:"candidates"`
 	Findings      []findingEntry     `json:"findings"`
+	Profiles      []profileArtifact  `json:"profiles,omitempty"`
 }
 
 type fixtureSummary struct {
 	Threads int `json:"threads"`
 	Lines   int `json:"lines_per_thread"`
+}
+
+type profileArtifact struct {
+	Kind  string `json:"kind"`
+	Path  string `json:"path"`
+	Bytes int64  `json:"bytes"`
 }
 
 type pressureRun struct {
