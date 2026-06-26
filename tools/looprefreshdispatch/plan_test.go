@@ -60,4 +60,14 @@ func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
 	if got.IgnoredCommandCount != 1 || got.IgnoredCommandKinds[0] != "target_verifier" {
 		t.Fatalf("ignored = %+v", got)
 	}
+	if len(got.IgnoredCommands) != 1 {
+		t.Fatalf("ignored command details missing = %+v", got)
+	}
+	ignored := got.IgnoredCommands[0]
+	if ignored.LoopID != "ai_thread_history" || ignored.Kind != "target_verifier" {
+		t.Fatalf("ignored command identity = %+v", ignored)
+	}
+	if ignored.Command != "go test ./internal/riidoaiserver" {
+		t.Fatalf("ignored command string = %q", ignored.Command)
+	}
 }

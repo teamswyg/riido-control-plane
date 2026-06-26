@@ -32,6 +32,7 @@ func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan
 		if command.Kind != "refresh_workflow" {
 			out.IgnoredCommandCount++
 			ignoredKinds[command.Kind] = true
+			out.IgnoredCommands = append(out.IgnoredCommands, command)
 			continue
 		}
 		workflow, err := parseRefreshWorkflowCommand(root, command.Command)
