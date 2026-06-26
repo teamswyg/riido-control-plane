@@ -15,6 +15,9 @@ func renderQuestions(b *strings.Builder, questions []question) {
 		fmt.Fprintf(b, "- question: %s\n", item.Question)
 		fmt.Fprintf(b, "- stance: %s\n", item.Stance)
 		fmt.Fprintf(b, "- next artifact: %s\n", item.NextArtifact)
+		if item.NextCommand != "" {
+			fmt.Fprintf(b, "- next command: `%s`\n", item.NextCommand)
+		}
 		if item.Resolution != "" {
 			fmt.Fprintf(b, "- resolution: %s\n", item.Resolution)
 		}

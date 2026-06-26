@@ -17,6 +17,9 @@ func verifyQuestion(item question, seen map[string]bool, result *verifyResult) e
 		if item.NextArtifact == "" || item.NextArtifact == "none" {
 			return fmt.Errorf("open question %s requires a next artifact", item.ID)
 		}
+		if err := verifyNextCommand(item); err != nil {
+			return err
+		}
 	case "resolved-no-diff", "resolved":
 		result.ResolvedCount++
 		if item.Resolution == "" {

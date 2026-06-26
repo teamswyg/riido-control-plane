@@ -1358,13 +1358,15 @@
     },
     {
       "id": "desktop_daemon_lifecycle_decision_queue_loop",
-      "observation": "A staging runtime settings page can show a local daemon offline after the desktop app gracefully stops its desktop-managed daemon on app quit.",
-      "hypothesis": "Cross-repository daemon lifecycle ambiguity should be captured as an owned executable open question instead of staying in operator memory or being patched in the public control-plane runtime path.",
+      "observation": "A staging runtime settings page can show a local daemon offline after the desktop app gracefully stops its desktop-managed daemon on app quit, and open decisions can still strand humans if the queue names only a next artifact without a bounded next command.",
+      "hypothesis": "Cross-repository daemon lifecycle ambiguity should be captured as an owned executable open question whose next artifact and next command are both machine-checkable instead of staying in operator memory or being patched in the public control-plane runtime path.",
       "claims": ["open_decision_questions_must_bind_owner_next_artifact_and_reader"],
       "changes": [
         {"kind": "manifest", "path": "docs/50-roadmap/open-questions.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "tool", "path": "tools/openquestions"},
+        {"kind": "tool", "path": "tools/openquestions/evidence_command.go"},
+        {"kind": "tool", "path": "tools/openquestions/verify_command.go"},
         {"kind": "test", "path": "tools/openquestions/main_test.go"},
         {"kind": "workflow", "path": ".github/workflows/open-questions.yml"}
       ],
@@ -1378,7 +1380,7 @@
         {"kind": "artifact", "path": "open-questions-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Desktop daemon lifecycle/profile ownership remains an executable open decision until a desktop-owned manifest defines app quit, profile isolation, and stop-source evidence behavior.",
+      "decision": "Desktop daemon lifecycle/profile ownership remains an executable open decision until a desktop-owned manifest defines app quit, profile isolation, and stop-source evidence behavior; every open decision now also exposes a bounded next command in evidence so the follow-up action is not trapped in operator memory.",
       "next_loop": "open_decision_queue"
     },
     {
