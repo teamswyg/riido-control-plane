@@ -38,6 +38,10 @@ func TestLoopRefreshDispatchWorkflowConsumesDecisionCommands(t *testing.T) {
 	if !strings.Contains(text, "-commands-in \"$decision_commands\"") {
 		t.Fatal("workflow must pass candidate decision commands into dispatcher")
 	}
+	if !strings.Contains(text, "go run ./tools/closedloopcandidatedecision") ||
+		!strings.Contains(text, "-commands-out out/sample-decision-refresh-commands.json") {
+		t.Fatal("workflow sample must use the real candidate decision command producer")
+	}
 	if strings.Count(text, "-commands-in") < 4 {
 		t.Fatal("workflow must cover repeated command inputs in sample and live runs")
 	}
