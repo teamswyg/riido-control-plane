@@ -144,6 +144,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | `queued-status-current-only` | comment_kind=queued_by_busy_agent means the assignment is currently waiting behind busy work. If the same conversation_id has an active running thread state, newer progress, or result messages, v3 history omits that stale queued status from messages[] while preserving the user's follow-up message. Running conversation state wins even when event timestamps arrive out of order. |
 | `progress-dedupe-ordering` | For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility. |
 | `late-terminal-guard` | If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running. |
+| `terminal-active-stream-closure` | When every v3 thread for a task is terminal, omit both the top-level active_stream and each per-thread active_stream. A client refresh or v3 refetch must be able to clear stale optimistic running UI from this server truth. |
 
 ### Thread History v3 Mutation Rules
 
@@ -161,6 +162,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 - Use assignment_id + run_id + seq as the progress dedupe key when assignment_id is present.
 - SSE is a live update input; v3 thread history remains the refresh recovery truth.
 - Do not revive a terminal assignment when a late runtime progress event arrives.
+- If v3 thread history has no active_stream, the client must not keep a local running spinner for that task.
 
 ## Thread History v3 Terminal States
 
@@ -179,6 +181,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 - progress-dedupe
 - queued-status-current-only
 - terminal-late-event-guard
+- terminal-active-stream-closure
 - deleted-agent-history-retention
 
 ## Evidence Loop
