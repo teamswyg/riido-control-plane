@@ -27,6 +27,28 @@ func TestHarnessPromotionRejectsExpiredSummary(t *testing.T) {
 	}
 }
 
+func TestHarnessPromotionRejectsSummaryAtExpiryBoundary(t *testing.T) {
+	err := verifySummaryFresh(liveSummary{
+		ID:          "smoke",
+		GeneratedAt: "2026-06-24T00:00:00Z",
+		ExpiresAt:   "2026-06-24T01:00:00Z",
+	}, mustParseTimeForTest(t, "2026-06-24T01:00:00Z"))
+	if err == nil || !strings.Contains(err.Error(), "expired") {
+		t.Fatalf("expected exact-expiry summary failure, got %v", err)
+	}
+}
+
+func TestHarnessPromotionRejectsZeroLengthFreshnessWindow(t *testing.T) {
+	err := verifySummaryFresh(liveSummary{
+		ID:          "smoke",
+		GeneratedAt: "2026-06-24T00:00:00Z",
+		ExpiresAt:   "2026-06-24T00:00:00Z",
+	}, mustParseTimeForTest(t, "2026-06-24T00:00:00Z"))
+	if err == nil || !strings.Contains(err.Error(), "expires") {
+		t.Fatalf("expected zero-length freshness failure, got %v", err)
+	}
+}
+
 func TestHarnessPromotionRejectsMissingExpiry(t *testing.T) {
 	err := verifySummaryFresh(liveSummary{
 		ID:          "smoke",

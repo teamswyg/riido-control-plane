@@ -27,7 +27,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - scheduled candidate decision must download live candidate artifacts from every intake source and verify non-empty candidate sets against decision records
 - candidate decision workflow path triggers must include linked intake, producer, and loop registry manifests
 - candidate decision fixture promotion must pin the harness promotion clock so deterministic samples do not fail after real-time expiry
-- candidate decision must reject consumed candidate artifacts whose source_expires_at has passed
+- candidate decision must reject consumed candidate artifacts unless source_generated_at < source_expires_at and now < source_expires_at
 - candidate decision evidence must publish generated_at and expires_at
 - candidate decision evidence must expose consumed candidate artifact path, source workflow, freshness window, and candidate ids
 - candidate decision records must include at least one owned seed decision for every intake source so new harness sources cannot be passive
@@ -60,5 +60,5 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - Observation: Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.
 - Hypothesis: A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, next artifact, and review expiry.
 - Execute: Generate this reader from the decision manifest, generate deterministic candidate fixtures, verify intake, verify candidate decisions with explicit candidate artifacts, publish skipped evidence for sampled artifacts with zero candidates, download latest live candidate artifacts on non-PR runs, verify non-empty live candidate sets, and publish decision evidence in CI.
-- Evaluate: The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, expired candidate artifacts, stale docs, missing live artifact download wiring, missing scheduled workflow evidence, missing sampled skip evidence, or unredacted candidate content.
+- Evaluate: The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, expired or exact-expiry candidate artifacts, stale docs, missing live artifact download wiring, missing scheduled workflow evidence, missing sampled skip evidence, or unredacted candidate content.
 - Retrospective: This moves prioritization metadata into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition and review deadline.
