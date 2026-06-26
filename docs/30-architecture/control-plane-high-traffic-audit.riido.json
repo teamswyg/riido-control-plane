@@ -7,9 +7,9 @@
   "evidence_artifact": "control-plane-high-traffic-audit",
   "evidence_tool": "tools/controlplaneaudit",
   "benchmark_command": "go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1",
-  "local_pressure_command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json",
-  "manual_pressure_command": "go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -evidence-out out/control-plane-local-pressure-manual.json",
-  "local_pprof_command": "go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -pprof-dir out/control-plane-local-pprof -evidence-out out/control-plane-local-pressure-pprof.json",
+  "local_pressure_command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -candidate-out out/control-plane-pressure-closed-loop-candidates.json -evidence-out out/control-plane-local-pressure.json",
+  "manual_pressure_command": "go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -candidate-out out/control-plane-pressure-closed-loop-candidates-manual.json -evidence-out out/control-plane-local-pressure-manual.json",
+  "local_pprof_command": "go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -pprof-dir out/control-plane-local-pprof -candidate-out out/control-plane-pressure-closed-loop-candidates-pprof.json -evidence-out out/control-plane-local-pressure-pprof.json",
   "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1",
   "pprof_commands": [
     "go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30",
@@ -159,6 +159,7 @@
     "Every high-traffic surface must bind source files, static patterns, and a next optimization candidate.",
     "Open-loop pressure evidence must record throughput, latency, allocation, heap, CPU, and goroutine deltas.",
     "Open-loop pressure evidence must rank measured allocation, latency, CPU, and goroutine findings.",
+    "Open-loop pressure evidence must export closed-loop candidate artifacts for stable pressure scenarios.",
     "Manual local pressure pprof must record CPU, heap, and goroutine profile metadata without uploading profile bodies by default.",
     "pprof evidence must remain loopback-only and must cover CPU, heap, and goroutine views.",
     "Repeated bottlenecks found by this audit should be promoted into closed-loop candidates, not fixed from intuition alone.",
@@ -167,8 +168,8 @@
   "loop": {
     "observation": "Control-plane performance work already emits benchmarks and local pressure, but waiter, subscriber, shutdown, and source-risk surfaces need to be compiled into one auditable map.",
     "hypothesis": "A static high-traffic audit can connect endpoint, store, SSE, scheduling, progress, DynamoDB, metrics, waiter, fanout, and actor lifecycle hot paths to executable evidence before any API-neutral optimization.",
-    "execute": "Scan declared surfaces for high-risk primitives, verify pprof, race, stress, and local profile commands, publish redacted audit evidence, and keep generated docs in sync.",
-    "evaluate": "The verifier fails on missing files, missing patterns, missing candidates, unsafe pprof commands, missing local pressure profile command, missing workflow artifact upload, or generated doc drift.",
+    "execute": "Scan declared surfaces for high-risk primitives, verify pprof, race, stress, local profile, and pressure candidate commands, publish redacted audit evidence, and keep generated docs in sync.",
+    "evaluate": "The verifier fails on missing files, missing patterns, missing candidates, unsafe pprof commands, missing local pressure profile command, missing local pressure candidate command, missing workflow artifact upload, or generated doc drift.",
     "retrospective": "This keeps the first slice open-loop: observe pressure and source risk, then decide which bottlenecks deserve closed-loop gates."
   }
 }

@@ -30,6 +30,9 @@ func mainRun(args []string) error {
 		return profileErr
 	}
 	report.Profiles = profiles
+	if err := writePressureCandidateEvidence(cfg.CandidateOut, report); err != nil {
+		return err
+	}
 	printSummary(report)
 	return writeReport(cfg.EvidenceOut, report)
 }

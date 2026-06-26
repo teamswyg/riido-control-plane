@@ -15,6 +15,7 @@ type config struct {
 	Lines         int
 	EvidenceOut   string
 	PprofDir      string
+	CandidateOut  string
 }
 
 func parseConfig(args []string) (config, error) {
@@ -27,6 +28,7 @@ func parseConfig(args []string) (config, error) {
 	fs.IntVar(&cfg.Lines, "lines", 40, "fixture progress lines per thread")
 	fs.StringVar(&cfg.EvidenceOut, "evidence-out", "", "optional evidence JSON path")
 	fs.StringVar(&cfg.PprofDir, "pprof-dir", "", "optional directory for local CPU, heap, and goroutine profiles")
+	fs.StringVar(&cfg.CandidateOut, "candidate-out", "", "optional closed-loop candidate JSON path")
 	if err := fs.Parse(args); err != nil {
 		return config{}, err
 	}

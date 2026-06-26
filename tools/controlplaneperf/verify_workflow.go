@@ -26,6 +26,7 @@ func verifyWorkflow(root string, m manifest) error {
 		"name: " + m.LocalPressureArtifact,
 		"name: " + m.SummaryArtifact,
 		"name: " + m.CandidateArtifact,
+		"name: " + m.PressureCandidateArtifact,
 		"if-no-files-found: error",
 	}
 	for _, needle := range required {

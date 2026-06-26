@@ -235,6 +235,7 @@
       {"kind": "artifact", "path": "control-plane-local-pressure", "redacted": true},
       {"kind": "artifact", "path": "control-plane-performance-redacted-summary", "redacted": true},
       {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
+      {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-high-traffic-audit.md"}
     ],
@@ -286,7 +287,11 @@
         {"kind": "tool", "path": "tools/closedloopcandidateintake/adoption_plan_evidence.go"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake/workflow_path_triggers.go"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake/run.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake/candidate_more.go"},
+        {"kind": "tool", "path": "tools/controlplanepressure/candidate_artifact.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/adoption_plan_evidence_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/source_selection_test.go"},
+        {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/workflow_path_triggers_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision/workflow_path_triggers.go"},
@@ -297,7 +302,9 @@
         {"kind": "test", "path": "tools/closedloopcandidateintake/adoption_plan_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/adoption_plan_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/producer_coverage_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/source_selection_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
+        {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/workflow_path_triggers_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/workflow_path_triggers_test.go"}
       ],
@@ -305,6 +312,7 @@
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
@@ -325,8 +333,12 @@
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"},
         {"kind": "tool", "path": "tools/harnesspromotion"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake/candidate_more.go"},
+        {"kind": "tool", "path": "tools/controlplanepressure/candidate_artifact_item.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/producer_coverage_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/source_selection_test.go"},
+        {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"}
       ],
       "verifiers": [
@@ -340,6 +352,7 @@
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
@@ -360,8 +373,12 @@
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"},
         {"kind": "tool", "path": "tools/harnesspromotion"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake/candidate_more.go"},
+        {"kind": "tool", "path": "tools/controlplanepressure/candidate_artifact_item.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/producer_coverage_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/source_selection_test.go"},
+        {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
@@ -374,6 +391,7 @@
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
@@ -914,6 +932,10 @@
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
         {"kind": "fixture", "path": "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake/candidate_more.go"},
+        {"kind": "tool", "path": "tools/controlplanepressure/candidate_artifact.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/source_selection_test.go"},
+        {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-intake.yml"}
       ],
       "verifiers": [
@@ -925,6 +947,7 @@
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-intake-performance-sample-evidence", "redacted": true}
       ],
@@ -1123,7 +1146,9 @@
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
         {"kind": "fixture", "path": "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "tool", "path": "tools/controlplanepressure/candidate_artifact.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision/source_coverage_seed.go"},
+        {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_orphan_test.go"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"}
       ],
@@ -1137,6 +1162,7 @@
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "ai-agent-client-testnet-load-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-performance-sample-evidence", "redacted": true}
       ],
@@ -1206,6 +1232,8 @@
         {"kind": "tool", "path": "tools/harnesspromotion/evidence.go"},
         {"kind": "tool", "path": "tools/harnesspromotion/evidence_time.go"},
         {"kind": "test", "path": "tools/harnesspromotion/evidence_time_test.go"},
+        {"kind": "tool", "path": "tools/controlplanepressure/candidate_artifact.go"},
+        {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake/evidence.go"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake/evidence_time.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/evidence_time_test.go"},
@@ -1223,6 +1251,7 @@
       "evidence": [
         {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true},
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
@@ -1241,8 +1270,10 @@
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-intake.yml"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"},
+        {"kind": "tool", "path": "tools/controlplanepressure/candidate_artifact.go"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake/candidate_freshness.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision/candidate_freshness.go"},
+        {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/candidate_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
@@ -1256,6 +1287,7 @@
       ],
       "evidence": [
         {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},

@@ -29,10 +29,20 @@ func verifyCandidateItem(m manifest, artifact candidateEvidence, item closedLoop
 }
 
 func findSourceForCandidate(sources []intakeSource, item closedLoopCandidate) (intakeSource, bool) {
+	var fallback intakeSource
+	fallbackOK := false
 	for _, source := range sources {
-		if source.PromotionTarget == item.PromotionTarget && source.HarnessLoop == item.HarnessLoop {
+		if source.PromotionTarget != item.PromotionTarget || source.HarnessLoop != item.HarnessLoop {
+			continue
+		}
+		if item.SourceRef.CandidateArtifact != "" &&
+			source.CandidateArtifact == item.SourceRef.CandidateArtifact {
 			return source, true
 		}
+		if !fallbackOK {
+			fallback = source
+			fallbackOK = true
+		}
 	}
-	return intakeSource{}, false
+	return fallback, fallbackOK
 }

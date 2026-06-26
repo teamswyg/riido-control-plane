@@ -60,6 +60,76 @@
       "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership."
     },
     {
+      "candidate_id": "control-plane-pressure:http_endpoint_threads_v3",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "The v3 thread history endpoint is a measured local pressure hotspot and needs a claim-bound optimization decision before it becomes a recurring gate."
+    },
+    {
+      "candidate_id": "control-plane-pressure:http_metrics_observe",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-15",
+      "reason": "HTTP metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately."
+    },
+    {
+      "candidate_id": "control-plane-pressure:store_metrics_observe",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-15",
+      "reason": "Store metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately."
+    },
+    {
+      "candidate_id": "control-plane-pressure:progress_ingest_fragment",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "Fine-grained provider progress remains a measured allocation hotspot and needs a claim-bound batching or retention verifier decision."
+    },
+    {
+      "candidate_id": "control-plane-pressure:thread_stream_subscription",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-15",
+      "reason": "Thread stream subscription targets are measured but currently low allocation, so keep trend evidence before adding a new gate."
+    },
+    {
+      "candidate_id": "control-plane-pressure:client_event_subscriber_fanout",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "Client event subscriber fanout is a measured allocation and CPU hotspot and needs an owned claim-bound optimization decision."
+    },
+    {
+      "candidate_id": "control-plane-pressure:thread_history_v3",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "Thread history v3 projection is a measured refresh pressure surface and needs a claim-bound projection/copy-cost decision."
+    },
+    {
       "candidate_id": "loop-closure-audit:source_coverage_seed",
       "disposition": "deferred",
       "priority": "P2",

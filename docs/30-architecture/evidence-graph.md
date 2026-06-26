@@ -12,9 +12,9 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `51`
 - claim refs: `50`
-- change refs: `465`
-- verifier refs: `268`
-- evidence refs: `127`
+- change refs: `487`
+- verifier refs: `270`
+- evidence refs: `135`
 
 ## Evidence Chains
 
@@ -25,11 +25,11 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `provider_acceptance_observation_coverage_loop` | `1` | `6` | `4` | `3` | `provider_acceptance_harness` |
 | `semantic_hash_metadata_normalization_loop` | `1` | `6` | `3` | `1` | `closed_loop_candidate` |
 | `load_harness_closed_loop_promotion_loop` | `1` | `5` | `4` | `4` | `closed_loop_candidate` |
-| `control_plane_performance_evidence_loop` | `1` | `52` | `26` | `8` | `closed_loop_candidate` |
+| `control_plane_performance_evidence_loop` | `1` | `52` | `26` | `9` | `closed_loop_candidate` |
 | `harness_failure_always_promotion_loop` | `1` | `8` | `6` | `3` | `closed_loop_candidate` |
-| `closed_loop_candidate_adoption_plan_loop` | `1` | `13` | `7` | `5` | `closed_loop_candidate_decision` |
-| `closed_loop_candidate_promotion_edge_loop` | `1` | `11` | `5` | `5` | `closed_loop_candidate_decision` |
-| `closed_loop_candidate_source_ref_loop` | `1` | `12` | `3` | `5` | `closed_loop_candidate_decision` |
+| `closed_loop_candidate_adoption_plan_loop` | `1` | `17` | `9` | `6` | `closed_loop_candidate_decision` |
+| `closed_loop_candidate_promotion_edge_loop` | `1` | `15` | `5` | `6` | `closed_loop_candidate_decision` |
+| `closed_loop_candidate_source_ref_loop` | `1` | `16` | `3` | `6` | `closed_loop_candidate_decision` |
 | `claim_binding_impact_loop` | `1` | `11` | `7` | `1` | `ai_thread_history` |
 | `claim_reasoning_impact_loop` | `1` | `5` | `4` | `2` | `closed_loop_candidate` |
 | `claim_bound_surface_reasoning_impact_loop` | `1` | `7` | `4` | `2` | `closed_loop_candidate` |
@@ -49,18 +49,18 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `ai_thread_history_run_identity_ordering_loop` | `1` | `8` | `5` | `2` | `ai_thread_history` |
 | `stop_reassign_thread_consistency_loop` | `1` | `8` | `7` | `2` | `ai_thread_history` |
 | `loop_evidence_expiry_loop` | `1` | `10` | `5` | `2` | `closed_loop_candidate` |
-| `closed_loop_candidate_intake_loop` | `1` | `4` | `3` | `5` | `closed_loop_candidate_intake` |
+| `closed_loop_candidate_intake_loop` | `1` | `8` | `3` | `6` | `closed_loop_candidate_intake` |
 | `expiring_loop_refresh_scope_loop` | `1` | `6` | `5` | `2` | `closed_loop_candidate` |
 | `refresh_workflow_identity_loop` | `1` | `10` | `4` | `2` | `closed_loop_candidate` |
 | `loop_registry_refresh_plan_evidence_loop` | `1` | `12` | `5` | `2` | `closed_loop_candidate` |
 | `expired_loop_refresh_command_selection_loop` | `1` | `11` | `5` | `2` | `closed_loop_candidate` |
 | `expired_loop_refresh_dispatch_loop` | `1` | `10` | `10` | `2` | `closed_loop_candidate` |
 | `loop_evidence_artifact_refresh_owner_loop` | `1` | `4` | `5` | `2` | `closed_loop_candidate` |
-| `closed_loop_candidate_decision_loop` | `1` | `6` | `4` | `5` | `closed_loop_candidate_decision` |
+| `closed_loop_candidate_decision_loop` | `1` | `8` | `4` | `6` | `closed_loop_candidate_decision` |
 | `candidate_decision_next_artifact_loop` | `1` | `3` | `4` | `2` | `closed_loop_candidate_decision` |
 | `candidate_decision_next_command_loop` | `1` | `4` | `5` | `2` | `closed_loop_candidate_decision` |
-| `closed_loop_candidate_evidence_expiry_loop` | `1` | `15` | `5` | `5` | `closed_loop_candidate` |
-| `closed_loop_candidate_freshness_consumption_loop` | `1` | `10` | `5` | `5` | `closed_loop_candidate` |
+| `closed_loop_candidate_evidence_expiry_loop` | `1` | `17` | `5` | `6` | `closed_loop_candidate` |
+| `closed_loop_candidate_freshness_consumption_loop` | `1` | `12` | `5` | `6` | `closed_loop_candidate` |
 | `pre_commit_claim_binding_loop` | `1` | `10` | `5` | `2` | `closed_loop_candidate` |
 | `closed_loop_verifier_alias_loop` | `1` | `8` | `6` | `1` | `closed_loop_candidate` |
 | `desktop_daemon_lifecycle_decision_queue_loop` | `1` | `5` | `4` | `2` | `open_decision_queue` |
