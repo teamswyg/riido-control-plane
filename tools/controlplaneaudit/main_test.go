@@ -15,6 +15,9 @@ func TestControlPlaneHighTrafficAuditVerifies(t *testing.T) {
 	if got.AssertionCount == 0 || len(got.Assertions) != got.AssertionCount {
 		t.Fatalf("audit assertions missing from evidence: %+v", got)
 	}
+	if got.RaceArtifact == "" || got.RaceCommand == "" {
+		t.Fatalf("race evidence contract missing from audit: %+v", got)
+	}
 	if len(got.RequiredCategories) == 0 || len(got.MissingCategories) != 0 {
 		t.Fatalf("audit category coverage missing from evidence: %+v", got)
 	}
@@ -61,14 +64,5 @@ func TestControlPlaneHighTrafficAuditRejectsMissingRequiredCategory(t *testing.T
 	m.RequiredCategories = append(m.RequiredCategories, "missing_traffic_surface")
 	if err := verifyRequiredCategories(m.RequiredCategories, m.Surfaces); err == nil {
 		t.Fatal("expected missing required category to fail")
-	}
-}
-
-func assertRequiredCategoriesCovered(t *testing.T, counts map[string]int) {
-	t.Helper()
-	for _, category := range loadManifestForTest(t).RequiredCategories {
-		if counts[category] == 0 {
-			t.Fatalf("category %s missing from evidence counts: %+v", category, counts)
-		}
 	}
 }

@@ -8,9 +8,10 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 
 - surfaces: `12`
 - candidates: `12`
-- assertions: `9`
+- assertions: `10`
 - required categories: `10`
 - missing categories: `0`
+- race artifact: `control-plane-race`
 - pprof commands: `3`
 
 ## Commands
@@ -60,6 +61,6 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 
 - Observe: Control-plane performance work already emits benchmarks and local pressure, but waiter, subscriber, shutdown, and source-risk surfaces need to be compiled into one auditable map.
 - Hypothesis: A static high-traffic audit can connect endpoint, store, SSE, scheduling, progress, DynamoDB, metrics, waiter, fanout, and actor lifecycle hot paths to executable evidence before any API-neutral optimization.
-- Execute: Scan declared surfaces for high-risk primitives, verify pprof, race, stress, local profile, and pressure candidate commands, publish redacted audit evidence, and keep generated docs in sync.
-- Evaluate: The verifier fails on missing files, missing patterns, missing candidates, unsafe pprof commands, missing local pressure profile command, missing local pressure candidate command, missing workflow artifact upload, or generated doc drift.
+- Execute: Scan declared surfaces for high-risk primitives, verify pprof, race, stress, local profile, and pressure candidate commands, publish redacted audit evidence, publish race/concurrency evidence artifact, and keep generated docs in sync.
+- Evaluate: The verifier fails on missing files, missing patterns, missing candidates, unsafe pprof commands, missing local pressure profile command, missing local pressure candidate command, missing race artifact upload, missing workflow artifact upload, or generated doc drift.
 - Retrospective: This keeps the first slice open-loop: observe pressure and source risk, then decide which bottlenecks deserve closed-loop gates.

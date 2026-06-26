@@ -14,6 +14,7 @@ func verifyWorkflow(root string, m manifest) error {
 		"go run ./tools/controlplaneaudit",
 		"-evidence-out out/control-plane-high-traffic-audit.json",
 		"name: " + m.EvidenceArtifact,
+		"name: " + m.RaceArtifact,
 		"if-no-files-found: error",
 	}
 	for _, needle := range required {

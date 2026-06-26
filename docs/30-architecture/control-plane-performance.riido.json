@@ -6,6 +6,7 @@
   "workflow": ".github/workflows/control-plane-performance.yml",
   "evidence_artifact": "control-plane-performance-evidence",
   "benchmark_artifact": "control-plane-performance-bench",
+  "race_artifact": "control-plane-race",
   "local_pressure_artifact": "control-plane-local-pressure",
   "pressure_candidate_artifact": "control-plane-pressure-closed-loop-candidates",
   "summary_artifact": "control-plane-performance-redacted-summary",
@@ -135,6 +136,7 @@
   "assertions": [
     "endpoint/API contracts must not change for performance evidence work",
     "lightweight benchmark evidence must run without live credentials",
+    "race/concurrency evidence must be emitted as a workflow artifact before high-traffic fixes are accepted",
     "local pressure evidence must include httptest coverage for the v3 thread history endpoint hot path",
     "local pressure evidence must emit measured allocation, latency, CPU, goroutine, subscriber-fanout findings, and per-scenario capacity estimates",
     "local pressure evidence must emit stable closed-loop candidate artifacts for measured pressure scenarios",
@@ -149,8 +151,8 @@
   "loop": {
     "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates, local CPU/resource deltas, and opt-in pprof sample metadata are not emitted from one executable performance loop.",
     "hypothesis": "A performance evidence sidecar can bind endpoint, DB/store, SSE, scheduling, progress, local pressure, pprof, and load surfaces into one generated audit and lightweight benchmark workflow without changing external contracts or persisting profile bodies.",
-    "execute": "Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose local pressure pprof metadata, export pressure scenario candidates as a closed-loop candidate artifact, expose loopback pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings plus opt-in pprof sample metadata, and generate candidate optimization rows whose findings carry closed-loop adoption commands.",
-    "evaluate": "The verifier fails on missing benchmark coverage, missing local pressure evidence, missing capacity estimates, missing local pressure candidate artifact, missing local pprof command/profile metadata path, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource/pprof fields.",
+    "execute": "Verify hot-path files and benchmark/test functions, publish lightweight benchmark output, publish lightweight race/concurrency output, publish local pressure throughput/latency/allocation/CPU/goroutine/subscriber-fanout evidence with measured findings and capacity estimates, expose local pressure pprof metadata, export pressure scenario candidates as a closed-loop candidate artifact, expose loopback pprof and live-load commands, make aiagentload emit throughput/failure/capacity/resource findings plus opt-in pprof sample metadata, and generate candidate optimization rows whose findings carry closed-loop adoption commands.",
+    "evaluate": "The verifier fails on missing benchmark coverage, missing race artifact wiring, missing local pressure evidence, missing capacity estimates, missing local pressure candidate artifact, missing local pprof command/profile metadata path, missing finding-level closed-loop candidate adoption paths, missing pprof loopback contract, missing aiagentload live command, stale generated docs, non-strict workflow artifacts, or aiagentload tests that lose throughput/capacity/resource/pprof fields.",
     "retrospective": "This keeps performance work in an open loop first: measure resource pressure and rank hot paths before promoting repeated bottlenecks into closed-loop gates."
   }
 }

@@ -11,6 +11,9 @@ func TestControlPlanePerformanceManifestVerifies(t *testing.T) {
 	if got.HotPathCount < 5 || got.BenchmarkCount < 5 || got.CandidateCount != got.HotPathCount {
 		t.Fatalf("evidence coverage = %+v", got)
 	}
+	if got.RaceArtifact == "" || got.RaceCommand == "" {
+		t.Fatalf("race evidence contract missing: %+v", got)
+	}
 	if got.AssertionCount == 0 || len(got.Assertions) != got.AssertionCount {
 		t.Fatalf("performance assertions missing from evidence: %+v", got)
 	}

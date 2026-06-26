@@ -87,6 +87,11 @@ jobs:
             -benchmem \
             -benchtime=100ms \
             -count=1 > out/control-plane-performance-bench.txt
+      - name: Run lightweight race/concurrency evidence
+        run: |
+          go test -race ./internal/riidoaiserver \
+            -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' \
+            -count=1 > out/control-plane-race.txt 2>&1
       - name: Run local open-loop pressure evidence
         run: |
           go run ./tools/controlplanepressure \
@@ -130,6 +135,12 @@ jobs:
         with:
           name: control-plane-performance-bench
           path: out/control-plane-performance-bench.txt
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: control-plane-race
+          path: out/control-plane-race.txt
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()

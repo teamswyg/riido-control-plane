@@ -117,7 +117,7 @@
     "message_roles": [
       {"role":"user","meaning":"User follow-up instruction inside the AI thread"},
       {"role":"progress","meaning":"Runtime progress log, ordered by seq inside assignment_id and run_id"},
-      {"role":"agent","meaning":"Agent status or final result message"}
+      {"role":"agent","meaning":"Agent status or final result message. queued_by_busy_agent is a current status hint, not a durable agent reply; v3 suppresses it when the same conversation has newer progress, running, or result messages."}
     ],
     "interaction_scenarios": [
       {"name":"intent-clarification-before-deliverable","detail":"When the task title/document is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the agent's first visible answer should ask a concise clarification question in the existing thread before producing deliverables."},
@@ -131,6 +131,7 @@
     "ordering_rules": [
       {"name":"conversation-card-ordering","detail":"First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root."},
       {"name":"message-row-ordering","detail":"Within one thread record, render messages by observed_at, then role order user -> progress -> agent, then seq, then message_id. Use message_id as the stable row key, not body text."},
+      {"name":"queued-status-current-only","detail":"comment_kind=queued_by_busy_agent means the assignment is currently waiting behind busy work. If the same conversation_id already has newer progress, running, or result messages, v3 history omits that stale queued status from messages[] while preserving the user's follow-up message."},
       {"name":"progress-dedupe-ordering","detail":"For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility."},
       {"name":"late-terminal-guard","detail":"If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running."}
     ],
@@ -158,6 +159,7 @@
       "v2-sse",
       "optimistic-then-v3-refetch",
       "progress-dedupe",
+      "queued-status-current-only",
       "terminal-late-event-guard",
       "deleted-agent-history-retention"
     ]
@@ -171,6 +173,8 @@
     {"name":"black-box-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2","TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI"]},
     {"name":"thread-history-v3-api","file":"internal/riidoaiserver/ai_agent_client_thread_history_api.go","contains":["ConversationID","ParentThreadID","AgentSnapshotID","Messages","AgentSnapshots"]},
     {"name":"thread-history-v3-projection","file":"internal/riidoaiserver/ai_agent_client_thread_history_projection.go","contains":["taskThreadConversationID","taskThreadParentThreadID","taskThreadHistoryMessagesLocked","AgentSnapshots"]},
+    {"name":"thread-history-v3-queued-status-filter","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go","contains":["suppressSupersededQueuedHistoryMessages","AgentTaskCommentQueuedByBusyAgent","historyMessageSupersedesQueuedStatus"]},
+    {"name":"thread-history-v3-queued-status-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go","contains":["TestAIAgentTaskThreadHistoryHidesSupersededBusyQueuedMessage","TestAIAgentTaskThreadHistoryKeepsCurrentBusyQueuedMessage"]},
     {"name":"thread-history-v3-conversation-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go","contains":["assertConversationFollowup","ConversationID","ParentThreadID","assertConversationReassignment"]},
     {"name":"thread-history-v3-intent-chain-test","file":"internal/riidoaiserver/ai_agent_intent_dialogue_full_chain_assert_test.go","contains":["assertNestedConversationFollowup","assertDraftCopywritingComplete"]},
     {"name":"thread-history-v3-intent-handoff-test","file":"internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go","contains":["TestAIAgentIntentDialogueCanHandoffAfterProviderLimit","assertConversationReassignment","assertFollowupResearchLimit"]},

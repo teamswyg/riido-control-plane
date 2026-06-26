@@ -24,6 +24,7 @@ func renderSummary(b *strings.Builder, e evidence) {
 	fmt.Fprintf(b, "- assertions: `%d`\n", e.AssertionCount)
 	fmt.Fprintf(b, "- required categories: `%d`\n", len(e.RequiredCategories))
 	fmt.Fprintf(b, "- missing categories: `%d`\n", len(e.MissingCategories))
+	fmt.Fprintf(b, "- race artifact: `%s`\n", e.RaceArtifact)
 	fmt.Fprintf(b, "- pprof commands: `%d`\n\n", len(e.PprofCommands))
 }
 

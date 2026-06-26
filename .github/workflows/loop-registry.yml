@@ -100,6 +100,8 @@ on:
       - "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go"
+      - "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_conversation_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go"
       - "internal/riidoaiserver/ai_agent_client_thread_history_run_identity_test.go"
