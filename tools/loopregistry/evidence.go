@@ -13,6 +13,7 @@ type evidence struct {
 	GraphEdgeCount            int                 `json:"graph_edge_count"`
 	MaxExpiryHours            int                 `json:"max_expiry_hours"`
 	SemanticHashes            map[string]string   `json:"semantic_hashes"`
+	EvidenceKinds             []evidenceKind      `json:"evidence_kinds"`
 	EvidenceGraph             []graphEdge         `json:"evidence_graph"`
 	ClaimSurfaces             []claimSurface      `json:"claim_surfaces"`
 	RefreshWorkflows          map[string]string   `json:"refresh_workflows"`
@@ -44,6 +45,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		GraphEdgeCount:        result.GraphEdges,
 		MaxExpiryHours:        result.MaxExpiryHours,
 		SemanticHashes:        result.Hashes,
+		EvidenceKinds:         m.EvidenceKinds,
 		EvidenceGraph:         m.EvidenceGraph,
 		ClaimSurfaces:         result.ClaimSurfaces,
 		RefreshWorkflows:      refreshWorkflows(m.Loops),
@@ -64,12 +66,4 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		Loop:                      m.Loop,
 		Impact:                    impact,
 	}
-}
-
-func refreshWorkflows(loops []loopRecord) map[string]string {
-	out := map[string]string{}
-	for _, loop := range loops {
-		out[loop.ID] = loop.RefreshWorkflow
-	}
-	return out
 }

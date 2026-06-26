@@ -18,6 +18,7 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "- claim bindings: `%d`\n", result.Claims)
 	fmt.Fprintf(&b, "- evidence graph edges: `%d`\n", result.GraphEdges)
 	fmt.Fprintf(&b, "- max evidence expiry hours: `%d`\n\n", result.MaxExpiryHours)
+	renderEvidenceKinds(&b, m.EvidenceKinds)
 	renderLoops(&b, m.Loops, result)
 	renderRefreshPlans(&b, refreshPlans(
 		m.Loops,

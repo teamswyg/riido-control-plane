@@ -669,6 +669,32 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "loop_evidence_kind_vocabulary_loop",
+      "observation": "Loop evidence sources had machine-readable paths, but their kind field could drift into free-form values before product QA evidence such as API snapshots or screenshots became first-class evidence modalities.",
+      "hypothesis": "Declaring evidence kinds as a Loop Registry vocabulary and rejecting unknown kinds makes QA modalities executable: agents can add json, workflow artifact, generated doc, API snapshot, or screenshot evidence only through known system language.",
+      "claims": ["loop_evidence_kinds_must_use_vocabulary"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/types.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence_kind.go"},
+        {"kind": "tool", "path": "tools/loopregistry/render.go"},
+        {"kind": "tool", "path": "tools/loopregistry/render_evidence_kind.go"},
+        {"kind": "test", "path": "tools/loopregistry/evidence_kind_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/evidence_kind_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Loop evidence kinds are now an executable vocabulary, including future product QA modalities api_snapshot and screenshot, and loopregistry verification rejects unknown free-form evidence kind values.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "loop_registry_graph_edge_evidence_loop",
       "observation": "Loop registry evidence exposed graph edge counts, but not the actual loop-to-claim or harness-to-candidate edge list, and the graph-edge claim did not expose the harness failure and claim coverage failure semantics it closes.",
       "hypothesis": "Publishing executable evidence_graph edges, verifying each harness promotes_to target has a matching promotes_failure_to edge, requiring every claim to have a loop-owned enforces edge, and declaring harness_failure/regression/failure coverage lets agents infer claim enforcement and harness promotion paths directly from machine evidence.",
