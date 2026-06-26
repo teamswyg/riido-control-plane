@@ -1632,17 +1632,21 @@
     },
     {
       "id": "evidence_graph_claim_coverage_loop",
-      "observation": "Loop-registry business claims can exist without an evidence graph chain that explains the observation, hypothesis, change, verifier, evidence, decision, and next loop behind that claim, and the claim coverage surface did not expose the observe/verify/fail tokens for that graph coverage gate.",
-      "hypothesis": "Adding explicit claim references to evidence graph chains, verifying full claim coverage, and binding the coverage gate to loop-registry observe/verify/fail tokens keeps claim meaning connected to executable reasoning instead of narrative memory.",
+      "observation": "Loop-registry business claims can exist without an evidence graph chain that explains the observation, hypothesis, change, verifier, evidence, decision, and next loop behind that claim. Even when chains exist, arbitrary evidence ref kinds would let agents invent graph vocabulary that downstream verifiers cannot interpret consistently.",
+      "hypothesis": "Adding explicit claim references to evidence graph chains, verifying full claim coverage, and constraining reference kinds to an executable vocabulary keeps claim meaning connected to machine-checkable reasoning instead of narrative memory.",
       "claims": ["evidence_graph_must_cover_loop_registry_claims"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
         {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "code", "path": "tools/evidencegraph/ref_kind.go"},
+        {"kind": "code", "path": "tools/evidencegraph/verify_ref.go"},
+        {"kind": "test", "path": "tools/evidencegraph/ref_kind_test.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
         {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "test", "path": "tools/evidencegraph/ref_kind_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"}
@@ -1651,7 +1655,7 @@
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Evidence graph verification fails when any loop-registry claim lacks a chain or any chain references an unknown claim, and loopclosureaudit now keeps that graph-coverage requirement claim-bound through explicit observe/verify/fail coverage tokens.",
+      "decision": "Evidence graph verification fails when any loop-registry claim lacks a chain, any chain references an unknown claim, or any evidence reference uses a kind outside the executable vocabulary. This keeps claim coverage and graph vocabulary machine-checkable for agents that did not read narrative docs.",
       "next_loop": "closed_loop_candidate"
     },
     {
