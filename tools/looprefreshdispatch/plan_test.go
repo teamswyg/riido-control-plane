@@ -39,6 +39,9 @@ func TestBuildDispatchPlanGroupsSafeWorkflowRuns(t *testing.T) {
 	if dispatch.WorkflowFile != "loop-registry.yml" || dispatch.CommandCount != 2 {
 		t.Fatalf("dispatch = %+v", dispatch)
 	}
+	if dispatch.VerifiedCommand != "gh workflow run loop-registry.yml --ref main" {
+		t.Fatalf("verified command = %q", dispatch.VerifiedCommand)
+	}
 	if got.IgnoredCommandCount != 1 || got.IgnoredCommandKinds[0] != "target_verifier" {
 		t.Fatalf("ignored = %+v", got)
 	}

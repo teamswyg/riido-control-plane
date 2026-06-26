@@ -1078,8 +1078,8 @@
     },
     {
       "id": "expired_loop_refresh_dispatch_loop",
-      "observation": "Expired loop refresh command artifacts could name runnable GitHub workflow commands, but executing raw command strings would make the automation boundary depend on shell parsing rather than verified dispatch intent. If the dispatcher runs before the command producer, reuses an expired command artifact, trusts a future generated_at timestamp, accepts an inverted generated_at/expires_at window, or leaves its claim without observe/verify/fail coverage tokens, it can also consume stale or temporally impossible evidence while still publishing a fresh-looking plan.",
-      "hypothesis": "A dispatcher can treat command strings as evidence only, require the source command evidence freshness window to be internally ordered and currently valid, accept the exact refresh_workflow shape, validate the workflow basename exists, verify its scheduled run follows the command-producing loop-registry workflow, publish a generated_at/expires_at dispatch plan artifact linked to the source command window, dispatch only the structured workflow_file values outside pull requests, and keep the dispatch claim routable through loop vocabulary coverage tokens.",
+      "observation": "Expired loop refresh command artifacts could name runnable GitHub workflow commands, but executing raw command strings would make the automation boundary depend on shell parsing rather than verified dispatch intent, while a dispatch plan that keeps only workflow_file loses the visible link back to the verified command. If the dispatcher runs before the command producer, reuses an expired command artifact, trusts a future generated_at timestamp, accepts an inverted generated_at/expires_at window, or leaves its claim without observe/verify/fail coverage tokens, it can also consume stale or temporally impossible evidence while still publishing a fresh-looking plan.",
+      "hypothesis": "A dispatcher can treat command strings as evidence only, require the source command evidence freshness window to be internally ordered and currently valid, accept the exact refresh_workflow shape, validate the workflow basename exists, publish a canonical verified_command next to each structured workflow_file, verify its scheduled run follows the command-producing loop-registry workflow, publish a generated_at/expires_at dispatch plan artifact linked to the source command window, dispatch only the structured workflow_file values outside pull requests, and keep the dispatch claim routable through loop vocabulary coverage tokens.",
       "claims": ["expired_loop_refresh_commands_must_dispatch_safe_workflows"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/loop-refresh-dispatch.yml"},
@@ -1088,6 +1088,7 @@
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/module-decomposition.riido.json"},
         {"kind": "tool", "path": "tools/looprefreshdispatch"},
+        {"kind": "tool", "path": "tools/looprefreshdispatch/command_render.go"},
         {"kind": "tool", "path": "tools/looprefreshdispatch/source_freshness.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/source_freshness_test.go"},
         {"kind": "test", "path": "tools/looprefreshdispatch/weekly_workflow_test.go"},

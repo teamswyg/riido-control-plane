@@ -55,9 +55,10 @@ func dispatchesFromWorkflowMap(byWorkflow map[string]map[string]int) []workflowD
 	for _, workflow := range workflows {
 		loopIDs := sortedKeysInt(byWorkflow[workflow])
 		out = append(out, workflowDispatch{
-			WorkflowFile: workflow,
-			LoopIDs:      loopIDs,
-			CommandCount: commandCount(byWorkflow[workflow]),
+			WorkflowFile:    workflow,
+			VerifiedCommand: refreshWorkflowCommand(workflow),
+			LoopIDs:         loopIDs,
+			CommandCount:    commandCount(byWorkflow[workflow]),
 		})
 	}
 	return out
