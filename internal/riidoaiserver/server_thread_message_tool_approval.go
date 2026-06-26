@@ -32,6 +32,9 @@ func (s Server) createThreadMessageToolApprovalDecision(
 		return AIAgentTaskActionResponse{}, true, err
 	}
 	if !ok {
+		if threadAcceptsApprovalLikeFollowup(thread) {
+			return AIAgentTaskActionResponse{}, false, nil
+		}
 		req.AssignmentID = thread.AssignmentID
 		req.toolApproval = true
 		req.toolApprovalWithoutPending = true
@@ -56,4 +59,8 @@ func (s Server) createThreadMessageToolApprovalDecision(
 	req.toolApproval = true
 	response, err := s.aiAgent.CreateAIAgentTaskThreadMessage(ctx, principal, taskID, thread.ThreadID, req)
 	return response, true, err
+}
+
+func threadAcceptsApprovalLikeFollowup(thread AIAgentTaskThreadRecord) bool {
+	return thread.WorkStatus == AgentWorkStatusWaitingForUser
 }
