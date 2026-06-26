@@ -8,10 +8,23 @@ func TestThreadMessageApprovesToolApprovalExecutionPhrases(t *testing.T) {
 		"<p>go 명령 실행도 해줘</p>",
 		"실행해줘",
 		"직접 실행해 주세요",
-		"이어서 진행해줘",
+		"승인할게 진행해줘",
 	} {
 		if !threadMessageApprovesToolApproval(body) {
 			t.Fatalf("threadMessageApprovesToolApproval(%q) = false", body)
+		}
+	}
+}
+
+func TestThreadMessageRejectsGenericFollowupPhrases(t *testing.T) {
+	t.Parallel()
+	for _, body := range []string{
+		"다음 작업을 이어서 진행해 주세요.",
+		"이어서 진행해줘",
+		"계속 진행해줘",
+	} {
+		if threadMessageApprovesToolApproval(body) {
+			t.Fatalf("threadMessageApprovesToolApproval(%q) = true", body)
 		}
 	}
 }

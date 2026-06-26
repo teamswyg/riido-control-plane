@@ -840,16 +840,20 @@
     },
     {
       "id": "thread_history_user_followup_retention_loop",
-      "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status, and conversational execution-approval replies such as go command requests can accidentally create new work instead of deciding the pending tool approval they answer.",
-      "hypothesis": "Persisting user follow-up messages as thread history rows, replaying them into v3 history, and routing affirmative execution replies only to same-assignment pending tool approvals preserves human-agent 티키타카 after reload without turning approval chat into a new assignment.",
+      "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status, and conversational execution-approval replies such as go command requests can accidentally create new work when there is no pending tool approval to decide.",
+      "hypothesis": "Persisting user follow-up messages as thread history rows, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent 티키타카 after reload without turning approval chat into replacement assignment history.",
       "claims": ["thread_history_must_keep_user_followups"],
       "changes": [
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_append_thread_history_message.go"},
         {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_tool_approval_action_response.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/server_thread_message_tool_approval.go"},
         {"kind": "code", "path": "internal/riidoaiserver/thread_message_tool_approval_intent.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/thread_history_message_body_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/thread_message_tool_approval_intent_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/tool_approval_thread_message_no_pending_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/tool_approval_thread_message_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/tool_approval_thread_message_assert_test.go"}
       ],
@@ -857,13 +861,14 @@
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_persistence_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/thread_message_tool_approval_intent_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/tool_approval_thread_message_no_pending_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/tool_approval_thread_message_test.go"},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory, and approval replies including explicit command-execution follow-ups now close existing pending tool approvals without creating replacement assignment history.",
+      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory. Explicit command-execution replies close existing pending tool approvals, generic follow-up phrases remain normal work messages, and approval-shaped replies without a pending approval are recorded as terminal guidance instead of creating replacement assignment history.",
       "next_loop": "ai_thread_history"
     },
     {

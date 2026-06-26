@@ -8,11 +8,10 @@ func threadMessageApprovesToolApproval(body string) bool {
 		return false
 	}
 	for _, phrase := range []string{
-		"승인할게", "승인합니다", "승인해", "허용할게", "허용합니다",
-		"직접 진행", "직접 실행", "계속 진행", "이어서 진행", "진행해줘",
-		"진행해", "실행해줘", "실행해 주세요", "실행해", "실행도 해줘",
-		"명령 실행", "go 명령 실행", "approve", "approved", "allow",
-		"go ahead", "proceed",
+		"승인", "허용", "직접 실행", "실행해줘", "실행해 주세요",
+		"실행해", "실행도 해줘", "명령 실행", "go 명령",
+		"go run", "approve", "approved", "allow", "allowed",
+		"go ahead",
 	} {
 		if strings.Contains(text, phrase) {
 			return true

@@ -12,13 +12,13 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `54`; runtime: `1`; internal: `3`; tools: `49`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `89`; max file lines: `1107`.
+File line budget target: `75`; files over target: `88`; max file lines: `1107`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 89 | 97 | 8 |
+| Files over target | 88 | 97 | 9 |
 | Max file lines | 1107 | 2481 | 1374 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
@@ -27,7 +27,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 87 | 85 | 1107 | 2481 | 14625 | 23713 |
+| `internal/riidoaiserver` | 86 | 85 | 1107 | 2481 | 14625 | 23713 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
 | `tools/containercontract` | 2 | 2 | 85 | 597 | 11 | 663 |
@@ -50,7 +50,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 687 |
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
 | `internal/riidoaiserver/ai_agent_client_persistence_test.go` | 661 |
-| `internal/riidoaiserver/ai_agent_client_api.go` | 621 |
+| `internal/riidoaiserver/ai_agent_client_api.go` | 622 |
 | `internal/riidoaiserver/store.go` | 537 |
 | `internal/riidoaiserver/dynamodb_stream_relay.go` | 519 |
 
@@ -58,7 +58,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 87 | 1107 | 14625 |
+| `internal/riidoaiserver` | 86 | 1107 | 14625 |
 | `tools/containercontract` | 2 | 85 | 11 |
 
 ## Packages
