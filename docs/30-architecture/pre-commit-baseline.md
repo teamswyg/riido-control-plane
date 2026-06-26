@@ -7,9 +7,9 @@ Executable SSOT: [`pre-commit-baseline.riido.json`](pre-commit-baseline.riido.js
 - pre-commit config: `.pre-commit-config.yaml`
 - workflow: `.github/workflows/pre-commit-baseline.yml`
 - evidence artifact: `pre-commit-baseline-evidence`
-- hooks: `6`
-- scripts: `1`
-- phrase checks: `14`
+- hooks: `7`
+- scripts: `2`
+- phrase checks: `23`
 
 ## Hooks
 
@@ -21,19 +21,21 @@ Executable SSOT: [`pre-commit-baseline.riido.json`](pre-commit-baseline.riido.js
 | `golangci-lint` | run pinned repository golangci-lint before commit | `1` |
 | `go-test` | run repository Go tests before commit | `1` |
 | `loop-registry-claim-binding` | block claim binding drift before commit | `4` |
+| `evidence-graph-chain-binding` | block evidence graph chain drift before commit | `4` |
 
 ## Scripts
 
 | Script | Summary | Phrases |
 | --- | --- | ---: |
 | `tools/loopregistry/precommit.sh` | runs loopregistry claim/doc/impact verification against the configured base ref | `5` |
+| `tools/evidencegraph/precommit.sh` | runs evidencegraph chain/doc/impact verification against the configured base ref | `5` |
 
 ## Evidence Loop
 
 | Step | Evidence |
 | --- | --- |
-| Observe | CI caught claim binding drift, but local commits could still rely on a developer remembering to run the loop registry verifier before opening a PR. |
-| Hypothesis | A pre-commit baseline manifest can make local formatting, tests, lint, and claim binding impact checks executable before the PR loop starts. |
-| Execute | Verify the pre-commit config and loopregistry hook script from this manifest, generate this reader, and publish pre-commit-baseline evidence in CI. |
-| Evaluate | The verifier fails when required hooks disappear, the loopregistry hook stops using impact verification, the generated reader drifts, or strict evidence upload is removed. |
-| Retrospective | This moves another human reminder into the loop: AI agents can skip the prose, but commits cannot skip the local claim binding verifier. |
+| Observe | CI caught claim binding and evidence graph drift, but local commits could still rely on a developer remembering to run the loop registry and evidence graph impact verifiers before opening a PR. |
+| Hypothesis | A pre-commit baseline manifest can make local formatting, tests, lint, claim binding impact checks, and evidence graph chain impact checks executable before the PR loop starts. |
+| Execute | Verify the pre-commit config plus loopregistry and evidencegraph hook scripts from this manifest, generate this reader, and publish pre-commit-baseline evidence in CI. |
+| Evaluate | The verifier fails when required hooks disappear, the loopregistry or evidencegraph hook stops using impact verification, the generated reader drifts, or strict evidence upload is removed. |
+| Retrospective | This moves another human reminder into the loop: AI agents can skip the prose, but commits cannot skip the local claim binding and evidence graph chain verifiers. |

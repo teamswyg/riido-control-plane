@@ -11,6 +11,7 @@ on:
       - "docs/30-architecture/pre-commit-baseline.riido.json"
       - "tools/precommitbaseline/**"
       - "tools/loopregistry/precommit.sh"
+      - "tools/evidencegraph/precommit.sh"
       - "go.mod"
       - "go.sum"
   pull_request:
@@ -21,6 +22,7 @@ on:
       - "docs/30-architecture/pre-commit-baseline.riido.json"
       - "tools/precommitbaseline/**"
       - "tools/loopregistry/precommit.sh"
+      - "tools/evidencegraph/precommit.sh"
       - "go.mod"
       - "go.sum"
 

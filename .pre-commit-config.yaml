@@ -14,3 +14,8 @@ repos:
         entry: tools/loopregistry/precommit.sh
         language: script
         pass_filenames: false
+      - id: evidence-graph-chain-binding
+        name: evidence-graph chain binding
+        entry: tools/evidencegraph/precommit.sh
+        language: script
+        pass_filenames: false
