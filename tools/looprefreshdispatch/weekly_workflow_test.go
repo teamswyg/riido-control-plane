@@ -9,6 +9,7 @@ func TestBuildDispatchPlanIncludesWeeklyOpenQuestionsRefreshWorkflow(t *testing.
 		Status:        "refresh_required",
 		GeneratedAt:   "2026-07-03T00:00:00Z",
 		ExpiresAt:     "2026-07-05T00:00:00Z",
+		CommandCount:  2,
 		Commands: []selectedRefreshCommand{{
 			LoopID:  "open_decision_queue",
 			Kind:    "refresh_workflow",

@@ -23,6 +23,7 @@ type dispatchPlan struct {
 	SourceStatus        string             `json:"source_status"`
 	SourceGeneratedAt   string             `json:"source_generated_at,omitempty"`
 	SourceExpiresAt     string             `json:"source_expires_at,omitempty"`
+	SourceCommandCount  int                `json:"source_command_count"`
 	DispatchCount       int                `json:"dispatch_count"`
 	Dispatches          []workflowDispatch `json:"dispatches"`
 	IgnoredCommandCount int                `json:"ignored_command_count"`
