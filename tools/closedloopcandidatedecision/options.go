@@ -5,6 +5,7 @@ type options struct {
 	Manifest    string
 	CandidateIn string
 	EvidenceOut string
+	CommandsOut string
 	WriteDoc    bool
 	CheckDoc    bool
 }

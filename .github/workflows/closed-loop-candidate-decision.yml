@@ -87,7 +87,8 @@ jobs:
             go run ./tools/closedloopcandidatedecision \
             -check-doc \
             -candidate-in out/sample-closed-loop-candidates.json \
-            -evidence-out out/closed-loop-candidate-decision-evidence.json
+            -evidence-out out/closed-loop-candidate-decision-evidence.json \
+            -commands-out out/closed-loop-candidate-decision-commands.json
           RIIDO_HARNESS_PROMOTION_NOW=2026-06-24T12:00:00Z \
             go run ./tools/harnesspromotion \
             -summary docs/30-architecture/fixtures/performance-failure-summary.fixture.json \
@@ -264,6 +265,12 @@ jobs:
         with:
           name: closed-loop-candidate-decision-evidence
           path: out/closed-loop-candidate-decision-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-decision-commands
+          path: out/closed-loop-candidate-decision-commands.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()

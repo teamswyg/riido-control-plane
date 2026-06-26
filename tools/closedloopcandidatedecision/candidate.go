@@ -46,6 +46,7 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 			Priority:      decision.Priority,
 			Owner:         decision.Owner,
 			ReviewBy:      decision.ReviewBy,
+			NextLoop:      decision.NextLoop,
 			NextArtifact:  decision.NextArtifact,
 			NextCommand:   command,
 			PromotionEdge: item.PromotionEdge,
