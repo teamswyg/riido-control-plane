@@ -4,24 +4,38 @@ import "strings"
 
 func changedClaimImpactMessage(impact *impactEvidence) string {
 	parts := make([]string, 0, 3)
-	if ids := impactClaimIDs(impact.AddedClaims); len(ids) > 0 {
-		parts = append(parts, "added claims: "+strings.Join(ids, ", "))
+	if claims := impactClaimSummaries(impact.AddedClaims); len(claims) > 0 {
+		parts = append(parts, "added claims: "+strings.Join(claims, "; "))
 	}
-	if ids := impactClaimIDs(impact.Claims); len(ids) > 0 {
-		parts = append(parts, "changed claims: "+strings.Join(ids, ", "))
+	if claims := impactClaimSummaries(impact.Claims); len(claims) > 0 {
+		parts = append(parts, "changed claims: "+strings.Join(claims, "; "))
 	}
-	if ids := impactClaimIDs(impact.RemovedClaims); len(ids) > 0 {
-		parts = append(parts, "removed claims: "+strings.Join(ids, ", "))
+	if claims := impactClaimSummaries(impact.RemovedClaims); len(claims) > 0 {
+		parts = append(parts, "removed claims: "+strings.Join(claims, "; "))
 	}
 	return strings.Join(parts, "; ")
 }
 
-func impactClaimIDs(claims []impactClaim) []string {
-	ids := make([]string, 0, len(claims))
+func impactClaimSummaries(claims []impactClaim) []string {
+	out := make([]string, 0, len(claims))
 	for _, claim := range claims {
-		ids = append(ids, claim.ID)
+		out = append(out, impactClaimSummary(claim))
 	}
-	return ids
+	return out
+}
+
+func impactClaimSummary(claim impactClaim) string {
+	parts := []string{claim.ID}
+	if len(claim.ChangedBoundFiles) > 0 {
+		parts = append(parts, "files: "+strings.Join(claim.ChangedBoundFiles, ", "))
+	}
+	if len(claim.ChangedEvidence) > 0 {
+		parts = append(parts, "evidence: "+strings.Join(claim.ChangedEvidence, ", "))
+	}
+	if len(claim.ChangedReasoningEvidence) > 0 {
+		parts = append(parts, "reasoning: "+strings.Join(claim.ChangedReasoningEvidence, ", "))
+	}
+	return strings.Join(parts, " ")
 }
 
 func boundSurfaceImpactMessage(impact *impactEvidence) string {
