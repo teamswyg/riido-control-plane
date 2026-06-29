@@ -5,8 +5,8 @@ import "testing"
 func TestLoopCoverageDimensionRegistryHasExecutableHandlers(t *testing.T) {
 	seen := map[string]bool{}
 	for _, dim := range loopCoverageDimensions {
-		if dim.id == "" || dim.loopTokenLabel == "" ||
-			dim.claimTokenLabel == "" || dim.loopTokens == nil ||
+		if dim.id == "" || dim.loopField == "" || dim.claimField == "" ||
+			dim.loopTokenLabel == "" || dim.claimTokenLabel == "" || dim.loopTokens == nil ||
 			dim.claimTokens == nil {
 			t.Fatalf("incomplete loop coverage dimension: %+v", dim)
 		}

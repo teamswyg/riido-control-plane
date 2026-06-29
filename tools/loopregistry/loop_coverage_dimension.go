@@ -2,6 +2,8 @@ package main
 
 type loopCoverageDimension struct {
 	id              string
+	loopField       string
+	claimField      string
 	loopTokenLabel  string
 	claimTokenLabel string
 	loopTokens      func(loopRecord) []string
@@ -11,6 +13,8 @@ type loopCoverageDimension struct {
 var loopCoverageDimensions = []loopCoverageDimension{
 	{
 		id:              "observes",
+		loopField:       "loops[].observes",
+		claimField:      "claim_bindings[].covers_observes",
 		loopTokenLabel:  "observe token",
 		claimTokenLabel: "observe token",
 		loopTokens:      func(loop loopRecord) []string { return loop.Observes },
@@ -18,6 +22,8 @@ var loopCoverageDimensions = []loopCoverageDimension{
 	},
 	{
 		id:              "verifies",
+		loopField:       "loops[].verifies",
+		claimField:      "claim_bindings[].covers_verifies",
 		loopTokenLabel:  "verify token",
 		claimTokenLabel: "verify token",
 		loopTokens:      func(loop loopRecord) []string { return loop.Verifies },
@@ -25,6 +31,8 @@ var loopCoverageDimensions = []loopCoverageDimension{
 	},
 	{
 		id:              "fails_when",
+		loopField:       "loops[].fails_when",
+		claimField:      "claim_bindings[].covers_fails_when",
 		loopTokenLabel:  "fail token",
 		claimTokenLabel: "fail token",
 		loopTokens:      func(loop loopRecord) []string { return loop.FailsWhen },
@@ -32,6 +40,8 @@ var loopCoverageDimensions = []loopCoverageDimension{
 	},
 	{
 		id:              "evidence",
+		loopField:       "loops[].evidence[].path",
+		claimField:      "claim_bindings[].covers_evidence",
 		loopTokenLabel:  "evidence source",
 		claimTokenLabel: "evidence source",
 		loopTokens:      loopEvidenceSourcePaths,
