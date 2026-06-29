@@ -176,7 +176,7 @@
       "priority": "P1",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
+      "next_artifact": "infra_cloudwatch_alarm_by_client_surface",
       "review_by": "2026-07-15",
       "reason": "Client-surface monitoring is stale partial readiness evidence and needs an owned alarm/evidence decision before release readiness can be claimed."
     },
@@ -186,7 +186,7 @@
       "priority": "P1",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
+      "next_artifact": "daemon_network_disconnect_release_evidence",
       "review_by": "2026-07-15",
       "reason": "Daemon network-disconnect waiting is stale partial readiness evidence and needs a release-grade reconnect verifier decision."
     },
@@ -196,7 +196,7 @@
       "priority": "P1",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
+      "next_artifact": "single_pc_agent_capacity_evidence",
       "review_by": "2026-07-15",
       "reason": "One-PC agent capacity is stale partial readiness evidence and needs product acceptance ownership before beta capacity claims."
     },
@@ -206,7 +206,7 @@
       "priority": "P1",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
+      "next_artifact": "cold_start_packet_burst_evidence",
       "review_by": "2026-07-15",
       "reason": "Boot burst capacity is stale partial readiness evidence and needs a cold-start storm verifier before launch readiness."
     },
@@ -216,7 +216,7 @@
       "priority": "P1",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
+      "next_artifact": "ecs_service_recovery_chaos_evidence",
       "review_by": "2026-07-15",
       "reason": "Server crash recovery is stale partial readiness evidence and needs measured recovery timing before launch readiness."
     },
@@ -226,7 +226,7 @@
       "priority": "P1",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
+      "next_artifact": "scale_out_timing_evidence",
       "review_by": "2026-07-15",
       "reason": "Scale-out recovery is stale partial readiness evidence and needs autoscaling timing evidence before capacity claims."
     },
@@ -236,7 +236,7 @@
       "priority": "P1",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
+      "next_artifact": "daemon_reconnect_storm_evidence",
       "review_by": "2026-07-15",
       "reason": "All-server-down daemon behavior is stale partial readiness evidence and needs reconnect storm evidence before launch readiness."
     },
@@ -246,7 +246,7 @@
       "priority": "P1",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
+      "next_artifact": "desktop_body_only_golden_evidence",
       "review_by": "2026-07-15",
       "reason": "Desktop body-only change acceptance is stale partial readiness evidence and needs local product acceptance evidence before beta signoff."
     }
@@ -256,6 +256,7 @@
     "decision records for the consumed candidate source without a matching candidate are stale loop residue and must fail verification",
     "decision records must name owner, priority, disposition, next loop, and next artifact",
     "decision next_artifact must be one of the required_next_artifacts declared by the consumed candidate artifact",
+    "decision next_artifact must equal subject.next_artifact when the consumed candidate subject declares a machine-routable next artifact",
     "decision verification must reject candidates whose adoption_plan does not cover every required_next_artifact",
     "decision evidence must expose the executable command selected from the consumed candidate adoption_plan",
     "decision verification must export selected next commands as loop refresh command evidence when requested",

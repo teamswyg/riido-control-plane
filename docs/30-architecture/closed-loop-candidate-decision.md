@@ -15,6 +15,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - decision records for the consumed candidate source without a matching candidate are stale loop residue and must fail verification
 - decision records must name owner, priority, disposition, next loop, and next artifact
 - decision next_artifact must be one of the required_next_artifacts declared by the consumed candidate artifact
+- decision next_artifact must equal subject.next_artifact when the consumed candidate subject declares a machine-routable next artifact
 - decision verification must reject candidates whose adoption_plan does not cover every required_next_artifact
 - decision evidence must expose the executable command selected from the consumed candidate adoption_plan
 - decision verification must export selected next commands as loop refresh command evidence when requested
@@ -58,14 +59,14 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `control-plane-pressure:tool_approval_waiters` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `loop-closure-audit:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
 | `loop-refresh-dispatch:01:control_plane_pressure_candidate:target_verifier` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `verifier` |
-| `operational-readiness:otel_xray_client_surface` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
-| `operational-readiness:daemon_network_disconnect_waiting` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
-| `operational-readiness:single_pc_agent_limit` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
-| `operational-readiness:boot_burst_capacity` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
-| `operational-readiness:server_crash_recovery` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
-| `operational-readiness:scale_out_recovery` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
-| `operational-readiness:all_servers_down_daemon_behavior` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
-| `operational-readiness:desktop_body_only_change` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `operational-readiness:otel_xray_client_surface` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `infra_cloudwatch_alarm_by_client_surface` |
+| `operational-readiness:daemon_network_disconnect_waiting` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `daemon_network_disconnect_release_evidence` |
+| `operational-readiness:single_pc_agent_limit` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `single_pc_agent_capacity_evidence` |
+| `operational-readiness:boot_burst_capacity` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `cold_start_packet_burst_evidence` |
+| `operational-readiness:server_crash_recovery` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `ecs_service_recovery_chaos_evidence` |
+| `operational-readiness:scale_out_recovery` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `scale_out_timing_evidence` |
+| `operational-readiness:all_servers_down_daemon_behavior` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `daemon_reconnect_storm_evidence` |
+| `operational-readiness:desktop_body_only_change` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `desktop_body_only_golden_evidence` |
 
 ## Evidence Loop
 
