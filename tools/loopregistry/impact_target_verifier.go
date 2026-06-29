@@ -21,6 +21,7 @@ func attachTargetVerifierPlan(
 		)
 	}
 	plan.CommandCount = len(plan.VerifierCommands)
+	plan.CommandUnits = targetVerifierCommands(plan.Paths)
 	impact.TargetVerifierPlan = &plan
 }
 

@@ -6,8 +6,20 @@ type targetVerifierPlan struct {
 	ComponentCount   int                       `json:"component_count"`
 	CommandCount     int                       `json:"command_count"`
 	VerifierCommands []string                  `json:"verifier_commands"`
+	CommandUnits     []targetVerifierCommand   `json:"command_units"`
 	Components       []targetVerifierComponent `json:"components"`
 	Paths            []targetVerifierPath      `json:"paths"`
+}
+
+type targetVerifierCommand struct {
+	Command          string   `json:"command"`
+	PathCount        int      `json:"path_count"`
+	ComponentCount   int      `json:"component_count"`
+	Paths            []string `json:"paths"`
+	Components       []string `json:"components"`
+	LoopIDs          []string `json:"loop_ids"`
+	ClaimIDs         []string `json:"claim_ids"`
+	EvidenceChainIDs []string `json:"evidence_chain_ids"`
 }
 
 type targetVerifierComponent struct {
