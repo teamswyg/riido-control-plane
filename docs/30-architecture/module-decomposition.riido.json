@@ -10,7 +10,7 @@
   "source_roots":["awsadapters","cmd","internal","tools"],
   "forbidden_imports":["riido-daemon","riido_daemon","riido-infra"],
   "file_line_budget":{"target_lines":75,"sample_limit":10,"hotspot_limit":8,"max_files_over_target":97,"max_file_lines":2481,"hotspot_limits":[
-    {"path":"internal/riidoaiserver","max_files":85,"max_lines":2481,"max_total_over_target_lines":23713},
+    {"path":"internal/riidoaiserver","max_files":85,"max_lines":838,"max_total_over_target_lines":13604},
     {"path":"tools/reactquerygen","max_files":3,"max_lines":1395,"max_total_over_target_lines":2766},
     {"path":"cmd/riido_ai_server","max_files":3,"max_lines":791,"max_total_over_target_lines":1474},
     {"path":"tools/containercontract","max_files":0,"max_lines":75,"max_total_over_target_lines":0},

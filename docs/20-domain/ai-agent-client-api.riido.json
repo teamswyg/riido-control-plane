@@ -190,7 +190,7 @@
     {"name":"thread-history-v3-handoff-types","file":"tools/aiagentclientapi/types_thread_history_v3.go","contains":["ImplementationSteps","ResponseShapes","OrderingRules","MutationRules"]},
     {"name":"thread-history-v3-handoff-renderer","file":"tools/aiagentclientapi/render_thread_history_v3.go","contains":["Thread History v3 Frontend Flow","Thread History v3 Response Model","Thread History v3 Message Ordering"]},
     {"name":"thread-history-v3-handoff-verifier-rules","file":"tools/aiagentclientapi/verify_thread_history_v3_rules.go","contains":["requireNamedRules","requireShape","hasString"]},
-    {"name":"thread-history-v2-actions","file":"internal/riidoaiserver/server.go","contains":["agent-assignments","thread-stream-subscription","threads/","/messages"]},
+    {"name":"thread-history-v2-actions","file":"internal/riidoaiserver/ai_agent_client_task_router_handler.go","contains":["agent-assignments","thread-stream-subscription","threads/","/messages"]},
     {"name":"runtime-env","file":"cmd/riido_ai_server/env_names.go","contains":["envAIAgentClientDev","RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"]},
     {"name":"workflow","file":".github/workflows/ai-agent-client-api.yml","contains":["Verify React Query generation drift","Verify generated client handoff","Verify React Query generator command"]}
   ],

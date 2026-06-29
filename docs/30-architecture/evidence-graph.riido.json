@@ -2162,6 +2162,62 @@
       ],
       "decision": "Performance, high-traffic audit, and loop-closure audit evidence now carry generated_at/expires_at in JSON evidence only; generated docs remain deterministic while refresh automation can expire stale proof artifacts after 24h.",
       "next_loop": "loop_closure_audit"
+    },
+    {
+      "id": "server_route_handler_decomposition_loop",
+      "observation": "The control-plane HTTP server entrypoint had accumulated AI Agent client routes, daemon routes, component-task routes, SSE streaming, and progress ingestion in one 1107-line file, forcing agents to load unrelated concepts before changing a single endpoint surface.",
+      "hypothesis": "A mechanical semantic split can preserve every endpoint and handler body while lowering inference cost: each route family gets its own file, progress ingestion gets request/event/response helpers, and module-decomposition ratchets make the reduction observable.",
+      "claims": ["server_route_handlers_must_stay_semantically_split", "ambiguous_task_context_must_ask_before_work"],
+      "changes": [
+        {"kind": "code", "path": "internal/riidoaiserver/server.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/agent_event_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/agent_heartbeat_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/agent_poll_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/agent_routes_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/agent_thread_progress_events.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/agent_thread_progress_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/agent_thread_progress_request.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/agent_thread_progress_response.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_agent_config_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_agent_daemon_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_agent_routes_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_bootstrap_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_device_daemon_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_event_stream.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_events_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_onboarding_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_task_agent_assignment_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_task_assign_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_task_assignable_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_task_router_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_task_thread_read_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_task_unassign_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_thumbnail_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_workspace_profiles_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/component_task_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/provider_status_handler.go"},
+        {"kind": "manifest", "path": "docs/20-domain/ai-agent-client-api.riido.json"},
+        {"kind": "manifest", "path": "docs/20-domain/provider-status.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/module-decomposition.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"}
+      ],
+      "verifiers": [
+        {"kind": "tool", "path": "tools/moduledecomposition"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "test", "path": "internal/riidoaiserver/server_test.go"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "module-decomposition-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "The server route surface is now represented as bounded semantic handler files instead of one monolithic server.go; the split files are claim-bound, workflow-triggered, and covered by module-decomposition evidence so future route work cannot bypass the same verifier surface.",
+      "next_loop": "closed_loop_candidate"
     }
 
   ],
