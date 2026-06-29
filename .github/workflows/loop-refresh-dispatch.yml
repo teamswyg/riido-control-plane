@@ -97,8 +97,20 @@ jobs:
           if [ "$count" = "0" ]; then
             exit 0
           fi
-          jq -r '.dispatches[].workflow_file' out/loop-refresh-dispatch-plan.json |
-            while IFS= read -r workflow; do
+          {
+            echo "## Loop refresh dispatch"
+            echo
+            jq -r '.dispatches[] |
+              "- `" + .workflow_file + "` loops=`" + (.loop_ids // [] | join(",")) +
+              "` claims=`" + (.claim_ids // [] | join(",")) +
+              "` evidence_chains=`" + (.evidence_chain_ids // [] | join(",")) + "`"' \
+              out/loop-refresh-dispatch-plan.json
+          } >> "$GITHUB_STEP_SUMMARY"
+          jq -r '.dispatches[] |
+            [.workflow_file, (.loop_ids // [] | join(",")), (.claim_ids // [] | join(",")), (.evidence_chain_ids // [] | join(","))] |
+            @tsv' out/loop-refresh-dispatch-plan.json |
+            while IFS=$'\t' read -r workflow loops claims chains; do
+              echo "::notice title=Loop refresh dispatch::workflow=${workflow} loops=${loops} claims=${claims} evidence_chains=${chains}"
               gh workflow run "$workflow" --ref main
             done
       - uses: actions/upload-artifact@v7
