@@ -14,14 +14,16 @@ func TestTargetVerifierSummaryUsesImpactPlan(t *testing.T) {
 			CommandCount:     3,
 			Components: []targetVerifierComponent{
 				{
-					Component: "docs/30-architecture",
-					LoopIDs:   []string{"ai_thread_history"},
-					ClaimIDs:  []string{"claim-a"},
+					Component:        "docs/30-architecture",
+					LoopIDs:          []string{"ai_thread_history"},
+					ClaimIDs:         []string{"claim-a"},
+					EvidenceChainIDs: []string{"chain-a"},
 				},
 				{
-					Component: "tools/loopregistry",
-					LoopIDs:   []string{"closed_loop_candidate"},
-					ClaimIDs:  []string{"claim-b"},
+					Component:        "tools/loopregistry",
+					LoopIDs:          []string{"closed_loop_candidate"},
+					ClaimIDs:         []string{"claim-b"},
+					EvidenceChainIDs: []string{"chain-b"},
 				},
 			},
 			VerifierCommands: []string{
@@ -36,6 +38,7 @@ func TestTargetVerifierSummaryUsesImpactPlan(t *testing.T) {
 		"components: docs/30-architecture, tools/loopregistry",
 		"loops: ai_thread_history, closed_loop_candidate",
 		"claims: claim-a, claim-b",
+		"chains: chain-a, chain-b",
 		"go test ./tools/a -count=1",
 		"go test ./tools/b -count=1",
 		"+1 more in .git/riido-loop-registry-precommit-evidence.json",
