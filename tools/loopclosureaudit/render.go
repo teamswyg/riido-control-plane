@@ -11,7 +11,7 @@ func renderDoc(m manifest, e evidence) string {
 	b.WriteString("Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json).\n\n")
 	renderSummary(&b, m, e)
 	renderAssertions(&b, m.Assertions)
-	renderRequirements(&b, m.Requirements)
+	renderRequirementProofs(&b, e.Requirements)
 	renderResidualGaps(&b, m.ResidualGaps)
 	renderClaimCoverageGaps(&b, e.ClaimCoverageGaps)
 	renderLoop(&b, m.Loop)
@@ -35,15 +35,6 @@ func renderAssertions(b *strings.Builder, assertions []string) {
 	b.WriteString("## Assertions\n\n")
 	for _, assertion := range assertions {
 		fmt.Fprintf(b, "- %s\n", assertion)
-	}
-	b.WriteString("\n")
-}
-
-func renderRequirements(b *strings.Builder, requirements []requirement) {
-	b.WriteString("## Requirements\n\n")
-	b.WriteString("| ID | Checks | Statement |\n| --- | ---: | --- |\n")
-	for _, req := range requirements {
-		fmt.Fprintf(b, "| `%s` | `%d` | %s |\n", req.ID, len(req.Checks), req.Statement)
 	}
 	b.WriteString("\n")
 }

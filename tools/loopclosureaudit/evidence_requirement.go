@@ -11,10 +11,14 @@ func checkCount(requirements []requirement) int {
 func requirementEvidenceRows(requirements []requirement) []requirementEvidence {
 	rows := make([]requirementEvidence, 0, len(requirements))
 	for _, req := range requirements {
+		proofs := requirementProofs(req.Checks)
 		rows = append(rows, requirementEvidence{
 			ID:         req.ID,
 			Statement:  req.Statement,
+			Status:     "verified",
 			CheckKinds: evidenceCheckKinds(req.Checks),
+			ProofCount: len(proofs),
+			Proofs:     proofs,
 			Checks:     evidenceChecks(req.Checks),
 		})
 	}

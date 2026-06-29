@@ -23,7 +23,10 @@ type evidence struct {
 type requirementEvidence struct {
 	ID         string   `json:"id"`
 	Statement  string   `json:"statement"`
+	Status     string   `json:"status"`
 	CheckKinds []string `json:"check_kinds"`
+	ProofCount int      `json:"proof_count"`
+	Proofs     []proof  `json:"proofs"`
 	Checks     []check  `json:"checks"`
 }
 
