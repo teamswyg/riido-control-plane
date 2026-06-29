@@ -10,6 +10,8 @@ func deployWorkflowRequiredPhrases() []string {
 		"redacted=(",
 		"echo \"::add-mask::${!name}\"",
 		"if [ \"$image_tag\" = \"latest\" ]",
+		"existing_digest=\"$(",
+		"image tag already exists; reusing immutable image digest",
 		"workflow_dispatch",
 		"deployment_target",
 		"ai-agent-development",
