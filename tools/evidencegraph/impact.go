@@ -25,7 +25,12 @@ func verifyChainImpact(
 ) (*impactEvidence, error) {
 	baseByID := chainsByID(baseChains)
 	currentByID := chainsByID(currentChains)
-	evidence := &impactEvidence{Enabled: true, BaseRef: baseRef, ChangedFileCount: len(changed)}
+	evidence := &impactEvidence{
+		Enabled:          true,
+		BaseRef:          baseRef,
+		ChangedFileCount: len(changed),
+		ChangedFiles:     changedFileList(changed),
+	}
 	if err := captureCurrentChainImpact(evidence, baseByID, currentChains, changed); err != nil {
 		return nil, err
 	}
