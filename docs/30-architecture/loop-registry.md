@@ -68,7 +68,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 
 | Components | Paths | Claim bindings | Verifier commands |
 | ---: | ---: | ---: | ---: |
-| `24` | `749` | `1113` | `2101` |
+| `24` | `752` | `1116` | `2104` |
 
 ### Architecture Components
 
@@ -83,7 +83,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `packaging` | `2` | `closed_loop_candidate` | `container_image_contract_must_bind_runtime_shape` | `go test ./tools/containercontract -run '^(TestRunWritesCheckJSON\|TestRunWritesEvidenceOutJSON\|Te...` | `container_image_contract_runtime_shape_loop` |
 | `tools/aiagentclientapi` | `6` | `ai_thread_history` | `ambiguous_task_context_must_ask_before_work`<br>`thread_history_v3_must_expose_stable_conversation_grouping` | `go test ./internal/riidoaiserver -run '^(TestAIAgentIntentDialogueCanHandoffAfterProviderLimit\|T...`<br>`go test ./internal/riidoaiserver -run '^(TestAIAgentTaskThreadHistoryConversationGrouping\|TestAI...`<br>+2 | `ai_thread_history_conversation_grouping_loop`<br>`ambiguous_task_context_thread_interaction_loop`<br>+1 |
 | `tools/aiagentload` | `15` | `control_plane_performance_harness` | `control_plane_performance_hot_paths_must_emit_evidence` | `go test ./internal/riidoaiserver -run '^(TestDevelopmentAIAgentClientStoreThreadProgressFanout\|T...`<br>`go test ./tools/aiagentload -run '^(TestAggregatorReportIncludesCapacityEvidence\|TestPprofCaptur...`<br>+3 | `control_plane_performance_evidence_loop` |
-| `tools/closedloopcandidatedecision` | `36` | `closed_loop_candidate`<br>`closed_loop_candidate_decision` | `candidate_decision_evidence_must_expose_next_command`<br>`candidate_decision_next_artifact_must_be_required`<br>+8 | `go test ./tools/closedloopcandidatedecision -run '^(TestCandidateDecisionAllowsSourceCoverageSee...`<br>`go test ./tools/closedloopcandidatedecision -run '^(TestCandidateDecisionCommandsOutWritesRefres...`<br>+21 | `candidate_decision_next_artifact_loop`<br>`candidate_decision_next_command_loop`<br>+8 |
+| `tools/closedloopcandidatedecision` | `39` | `closed_loop_candidate`<br>`closed_loop_candidate_decision` | `candidate_decision_evidence_must_expose_next_command`<br>`candidate_decision_next_artifact_must_be_required`<br>+8 | `go test ./tools/closedloopcandidatedecision -run '^(TestCandidateDecisionAllowsSourceCoverageSee...`<br>`go test ./tools/closedloopcandidatedecision -run '^(TestCandidateDecisionCommandsOutWritesRefres...`<br>+21 | `candidate_decision_next_artifact_loop`<br>`candidate_decision_next_command_loop`<br>+8 |
 | `tools/closedloopcandidateintake` | `31` | `closed_loop_candidate`<br>`closed_loop_candidate_intake` | `candidate_intake_must_consume_candidate_artifact`<br>`closed_loop_candidate_consumers_must_reject_expired_candidates`<br>+5 | `go test ./tools/closedloopcandidatedecision -run '^(TestCandidateDecisionEvidenceCarriesExpiry)$...`<br>`go test ./tools/closedloopcandidatedecision -run '^(TestCandidateDecisionEvidenceExposesSourceRe...`<br>+18 | `closed_loop_candidate_adoption_plan_loop`<br>`closed_loop_candidate_evidence_expiry_loop`<br>+5 |
 | `tools/containercontract` | `10` | `closed_loop_candidate` | `container_image_contract_must_bind_runtime_shape` | `go test ./tools/containercontract -run '^(TestRunWritesCheckJSON\|TestRunWritesEvidenceOutJSON\|Te...` | `container_image_contract_runtime_shape_loop` |
 | `tools/controlplaneaudit` | `12` | `control_plane_performance_harness` | `control_plane_performance_hot_paths_must_emit_evidence` | `go test ./internal/riidoaiserver -run '^(TestDevelopmentAIAgentClientStoreThreadProgressFanout\|T...`<br>`go test ./tools/aiagentload -run '^(TestAggregatorReportIncludesCapacityEvidence\|TestPprofCaptur...`<br>+3 | `control_plane_performance_evidence_loop` |
@@ -111,26 +111,26 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `ai_thread_history` | `7` | `5` | `febe48b3ee92` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `5` | `077645d15b6c` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `54b14a3217bb` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `d2ed90cabc7f` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `6cfb02e13db2` |
 | `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `101` | `29` | `b9d3600b0580` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `11` | `7` | `4e72f17001a2` |
 | `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `55` | `26` | `3d90ddcc1e16` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `21` | `5` | `47d3ed602987` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `23` | `6` | `a2fe844aa8e9` |
-| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `8aacd26d6c99` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `23` | `6` | `40888c805f98` |
+| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `22c69fe733f3` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `3529e9e16688` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `8b8f6f3d2d92` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `69fe2c16f2ea` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `84` | `30` | `799991ae5e5b` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `926a3932770b` |
-| `loop_registry_evidence_must_expose_loop_surfaces` | `closed_loop_candidate` | `5` | `1` | `5d8b0990d185` |
-| `loop_registry_evidence_must_expose_architecture_index` | `closed_loop_candidate` | `16` | `7` | `ffdea02d3bc3` |
-| `loop_registry_impact_must_expose_target_verifier_plan` | `closed_loop_candidate` | `33` | `18` | `ac155abab9b3` |
-| `loop_coverage_dimensions_must_use_static_registry` | `closed_loop_candidate` | `20` | `7` | `1982646e73fd` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `d8c30e70bca4` |
+| `loop_registry_evidence_must_expose_loop_surfaces` | `closed_loop_candidate` | `5` | `1` | `e996fb05ddf9` |
+| `loop_registry_evidence_must_expose_architecture_index` | `closed_loop_candidate` | `16` | `7` | `42a50303e86f` |
+| `loop_registry_impact_must_expose_target_verifier_plan` | `closed_loop_candidate` | `33` | `18` | `c07c46898d62` |
+| `loop_coverage_dimensions_must_use_static_registry` | `closed_loop_candidate` | `20` | `7` | `472d7226e617` |
 | `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `6f8e7d3feea3` |
 | `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `ebb75334f82e` |
 | `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `2cee23e52505` |
 | `loop_evidence_sources_must_be_claim_covered` | `closed_loop_candidate` | `9` | `4` | `4702d9697746` |
-| `loop_evidence_kinds_must_use_vocabulary` | `closed_loop_candidate` | `7` | `3` | `2bcb7e43b097` |
+| `loop_evidence_kinds_must_use_vocabulary` | `closed_loop_candidate` | `7` | `3` | `a676aaf125d0` |
 | `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `10` | `5` | `876b795ba836` |
 | `evidence_graph_impact_must_surface_as_ci_annotations` | `closed_loop_candidate` | `11` | `4` | `3ff5eb6e6edb` |
 | `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `15` | `8` | `df2d1d99479c` |
@@ -142,24 +142,24 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `pre_commit_baseline_evidence_must_self_expire` | `closed_loop_candidate` | `11` | `4` | `274e8a1b0081` |
 | `semantic_hash_metadata_must_not_affect_claim_meaning` | `closed_loop_candidate` | `5` | `2` | `344c5eb1a791` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `3d28ad9f06e0` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `10` | `4` | `b8419d7afd54` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `9404c744d9a2` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `c55862f09ae8` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `10` | `4` | `4a1776faf8c5` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `a6f6fcf3516e` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `a0cd49b90a59` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `15` | `3` | `16a603691cac` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `13` | `6` | `a8d8383e164c` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `95f0b27e7f02` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `4` | `0a022c36102c` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `4` | `0573706c4c87` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `19` | `7` | `67a74c517a75` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `34af7b442aa7` |
 | `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `9591bf4cfd33` |
 | `loop_registry_evidence_must_expose_refresh_plans` | `closed_loop_candidate` | `13` | `4` | `b68bc032b794` |
 | `expired_loop_evidence_must_select_refresh_commands` | `closed_loop_candidate` | `13` | `4` | `2c9a880efd6d` |
-| `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `closed_loop_candidate` | `53` | `28` | `527eb2c95316` |
+| `expired_loop_refresh_commands_must_dispatch_safe_workflows` | `closed_loop_candidate` | `53` | `28` | `1eed2d68f33b` |
 | `loop_registry_evidence_must_expose_graph_edges` | `closed_loop_candidate` | `6` | `3` | `b51616a00999` |
 | `harness_like_workflows_must_be_registered_or_excluded` | `closed_loop_candidate` | `6` | `4` | `5c0f5a10c9f1` |
 | `candidate_decisions_must_match_consumed_candidates` | `closed_loop_candidate_decision` | `25` | `8` | `afe1708264a4` |
 | `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `7` | `3` | `f52b2346c28b` |
-| `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `8` | `4` | `2f5e4c836a47` |
+| `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `11` | `5` | `4656ee34d24d` |
 | `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `open_decision_queue` | `8` | `3` | `e362d54b6f38` |
 | `operational_readiness_checks_must_bind_release_items_to_evidence` | `operational_readiness_release_harness` | `39` | `14` | `dfb2efd14d13` |
 | `container_image_contract_must_bind_runtime_shape` | `closed_loop_candidate` | `14` | `5` | `b77bc8c711a9` |
@@ -225,7 +225,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `harness_like_workflows_must_be_registered_or_excluded` | `4` | `1` | `1` | `2` | `2` | `3` | `2` | `0` | `4` | `1` | `1` |
 | `candidate_decisions_must_match_consumed_candidates` | `14` | `7` | `4` | `3` | `4` | `3` | `2` | `1` | `8` | `1` | `1` |
 | `candidate_decision_next_artifact_must_be_required` | `5` | `1` | `1` | `3` | `1` | `1` | `1` | `0` | `3` | `1` | `1` |
-| `candidate_decision_evidence_must_expose_next_command` | `5` | `2` | `1` | `3` | `4` | `4` | `3` | `2` | `4` | `1` | `1` |
+| `candidate_decision_evidence_must_expose_next_command` | `7` | `3` | `1` | `3` | `4` | `4` | `3` | `2` | `5` | `1` | `1` |
 | `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `5` | `1` | `2` | `3` | `4` | `4` | `5` | `2` | `3` | `1` | `1` |
 | `operational_readiness_checks_must_bind_release_items_to_evidence` | `29` | `8` | `2` | `3` | `12` | `16` | `12` | `3` | `14` | `2` | `2` |
 | `container_image_contract_must_bind_runtime_shape` | `9` | `2` | `3` | `4` | `2` | `3` | `2` | `0` | `5` | `1` | `1` |

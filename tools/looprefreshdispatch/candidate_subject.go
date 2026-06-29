@@ -2,10 +2,12 @@ package main
 
 func ignoredCommandSubject(command selectedRefreshCommand) *candidateSubject {
 	return &candidateSubject{
-		Kind:        "loop_refresh_ignored_command",
-		LoopID:      command.LoopID,
-		CommandKind: command.Kind,
-		Command:     command.Command,
+		Kind:              "loop_refresh_ignored_command",
+		LoopID:            command.LoopID,
+		CommandKind:       command.Kind,
+		Command:           command.Command,
+		SourceCandidateID: command.CandidateID,
+		SourceSubjectKind: command.SubjectKind,
 	}
 }
 
