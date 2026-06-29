@@ -11,16 +11,15 @@ func renderArchitectureComponents(
 ) {
 	fmt.Fprintln(b, "### Architecture Components")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Component | Paths | Claims | Loops | Verifiers | Evidence chains |")
-	fmt.Fprintln(b, "| --- | ---: | ---: | ---: | ---: | ---: |")
+	fmt.Fprintln(b, "| Component | Paths | Claim sample | Verifier sample | Evidence sample |")
+	fmt.Fprintln(b, "| --- | ---: | --- | --- | --- |")
 	for _, component := range components {
-		fmt.Fprintf(b, "| `%s` | `%d` | `%d` | `%d` | `%d` | `%d` |\n",
+		fmt.Fprintf(b, "| `%s` | `%d` | %s | %s | %s |\n",
 			component.Component,
 			component.PathCount,
-			len(component.ClaimIDs),
-			len(component.LoopIDs),
-			len(component.VerifierCommands),
-			len(component.EvidenceChainIDs),
+			architectureComponentDocSample(component.ClaimIDs),
+			architectureComponentDocSample(component.VerifierCommands),
+			architectureComponentDocSample(component.EvidenceChainIDs),
 		)
 	}
 	fmt.Fprintln(b)
