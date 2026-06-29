@@ -2165,11 +2165,14 @@
     },
     {
       "id": "server_route_handler_decomposition_loop",
-      "observation": "The control-plane HTTP server entrypoint had accumulated AI Agent client routes, daemon routes, component-task routes, SSE streaming, and progress ingestion in one 1107-line file, forcing agents to load unrelated concepts before changing a single endpoint surface.",
-      "hypothesis": "A mechanical semantic split can preserve every endpoint and handler body while lowering inference cost: each route family gets its own file, progress ingestion gets request/event/response helpers, and module-decomposition ratchets make the reduction observable.",
+      "observation": "The control-plane HTTP server entrypoint had accumulated AI Agent client routes, daemon routes, component-task routes, SSE streaming, and progress ingestion in one 1107-line file, and its top-level route registration was still a hand-written HandleFunc list, forcing agents to load unrelated concepts before changing a single endpoint surface.",
+      "hypothesis": "A mechanical semantic split plus a verified static route registry can preserve every endpoint and handler body while lowering inference cost: each route family gets its own file, progress ingestion gets request/event/response helpers, route patterns become data, and module-decomposition ratchets make the reduction observable.",
       "claims": ["server_route_handlers_must_stay_semantically_split", "ambiguous_task_context_must_ask_before_work"],
       "changes": [
         {"kind": "code", "path": "internal/riidoaiserver/server.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/server_handler.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/server_route_registry.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/server_route_registry_test.go"},
         {"kind": "code", "path": "internal/riidoaiserver/agent_event_handler.go"},
         {"kind": "code", "path": "internal/riidoaiserver/agent_heartbeat_handler.go"},
         {"kind": "code", "path": "internal/riidoaiserver/agent_poll_handler.go"},
@@ -2209,14 +2212,15 @@
         {"kind": "tool", "path": "tools/moduledecomposition"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"},
-        {"kind": "test", "path": "internal/riidoaiserver/server_test.go"}
+        {"kind": "test", "path": "internal/riidoaiserver/server_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/server_route_registry_test.go"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "module-decomposition-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "The server route surface is now represented as bounded semantic handler files instead of one monolithic server.go; the split files are claim-bound, workflow-triggered, and covered by module-decomposition evidence so future route work cannot bypass the same verifier surface.",
+      "decision": "The server route surface is now represented as bounded semantic handler files and a verified static route registry instead of one monolithic server.go and hand-written mux registration; the split files are claim-bound, workflow-triggered, and covered by module-decomposition evidence so future route work cannot bypass the same verifier surface.",
       "next_loop": "closed_loop_candidate"
     }
 

@@ -45,7 +45,7 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 | ID | Category | Files | Signals | Candidate |
 | --- | --- | --- | --- | --- |
 | `v3_thread_history_endpoint` | `endpoint_hot_path` | `3` | `map[=3` | Keep v3 history endpoint pressure in local evidence and optimize projection/encoding only after before-after pressure data. |
-| `http_endpoint_dispatch` | `endpoint_hot_path` | `3` | `map[=3` | Keep route pattern metrics bounded, avoid per-request dynamic route labels, and benchmark response helpers before changing endpoint shapes. |
+| `http_endpoint_dispatch` | `endpoint_hot_path` | `4` | `map[=3` | Keep route pattern metrics bounded, avoid per-request dynamic route labels, and benchmark response helpers before changing endpoint shapes. |
 | `store_actor_polling` | `assignment_scheduling` | `3` | `make(chan=1, chan =4, select {=2, time.NewTimer=1, time.NewTicker=1` | Keep long-poll waiters outside the actor critical path and track goroutine deltas in local pressure evidence. |
 | `sse_event_streaming` | `sse_event_streaming` | `3` | `Lock()=1, chan =1` | Prefer active stream target projection and add leak checks before increasing SSE fanout. |
 | `client_event_subscriber_fanout` | `in_memory_fanout` | `9` | `sync.Mutex=1, Lock()=2, make(chan=1, chan =2, select {=1, map[=7, append(=5` | Measure subscriber fanout pressure before adding richer realtime event types or per-message metadata. |

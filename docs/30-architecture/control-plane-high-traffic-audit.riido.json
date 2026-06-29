@@ -42,8 +42,8 @@
       "id": "http_endpoint_dispatch",
       "category": "endpoint_hot_path",
       "risk": "High request volume crosses the same handler middleware, route matching, authorization, and JSON response path.",
-      "files": ["internal/riidoaiserver/server_handler.go", "internal/riidoaiserver/server.go", "internal/riidoaiserver/server_json.go"],
-      "patterns": ["mux.HandleFunc", "withHTTPTransactionMetrics", "writeJSON"],
+      "files": ["internal/riidoaiserver/server_handler.go", "internal/riidoaiserver/server_route_registry.go", "internal/riidoaiserver/server.go", "internal/riidoaiserver/server_json.go"],
+      "patterns": ["registerServerRoutes", "mux.HandleFunc", "withHTTPTransactionMetrics", "writeJSON"],
       "candidate": "Keep route pattern metrics bounded, avoid per-request dynamic route labels, and benchmark response helpers before changing endpoint shapes."
     },
     {
