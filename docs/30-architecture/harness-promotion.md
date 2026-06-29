@@ -28,6 +28,7 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 - candidate artifacts must include an adoption_plan with executable commands for every required next artifact
 - candidate artifacts must include a promotion_edge that names the harness loop, closed-loop target, and promotes_failure_to relation
 - each candidate must include a source_ref with source workflow, summary artifact, candidate artifact, run id, and freshness window
+- each harness failure candidate must include a machine-routable subject with kind, harness loop, source workflow, summary artifact, candidate artifact, live status, and claim id
 - every registered harness loop must have exactly one harness promotion source with the same refresh workflow
 - redacted summary freshness must satisfy generated_at < expires_at and now < expires_at before closed-loop candidate generation
 - harness workflows that produce expiring evidence must be runnable without a human trigger

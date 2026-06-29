@@ -411,6 +411,43 @@
       "next_loop": "closed_loop_candidate_decision"
     },
     {
+      "id": "closed_loop_candidate_subject_loop",
+      "observation": "Harness failure candidates had source_ref and adoption_plan, but the candidate item still required agents to parse observation or hypothesis prose to know which harness failure claim it represented.",
+      "hypothesis": "Embedding a redacted machine-routable subject in harness-promoted candidates, then preserving candidate_subjects through intake, decision, and decision refresh command evidence lets follow-up agents route harness failures without reopening raw harness summaries or interpreting prose.",
+      "claims": ["closed_loop_candidates_must_carry_subject"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/harnesspromotion/types_candidate.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/types_subject.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/candidate_subject.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/candidate_more.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake/subject.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/refresh_command_subject.go"},
+        {"kind": "test", "path": "tools/harnesspromotion/candidate_subject_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/generated_subject_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/generated_subject_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/harnesspromotion/candidate_subject_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidateintake/generated_subject_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/generated_subject_test.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
+        {"kind": "artifact", "path": "closed-loop-candidate-decision-commands", "redacted": true}
+      ],
+      "decision": "Harness-promoted closed-loop candidates now carry a redacted harness_failure subject, intake and decision evidence preserve that subject, and decision refresh command evidence exposes subject_kind so follow-up agents can route the failure without parsing observation or hypothesis prose.",
+      "next_loop": "closed_loop_candidate_decision"
+    },
+    {
       "id": "claim_binding_impact_loop",
       "observation": "Added business claims, changed claims, generated-doc bindings, or removed claims could change without bound code or tests changing in the same pull request.",
       "hypothesis": "Comparing the PR diff against the loop registry can force claim additions, claim meaning changes, generated-doc binding changes, and claim removals to co-change bound code or test paths, not just manifests or generated docs.",

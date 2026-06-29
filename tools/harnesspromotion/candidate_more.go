@@ -6,6 +6,7 @@ func newCandidate(source promotionSource, summary liveSummary, claimID, claimSum
 	return closedLoopCandidate{
 		ID:                    source.ID + ":" + sanitizeID(claimID),
 		SourceRef:             sourceRefForCandidate(source, summary),
+		Subject:               subjectForCandidate(source, summary, claimID),
 		HarnessLoop:           source.HarnessLoop,
 		PromotionTarget:       source.PromotionTarget,
 		PromotionEdge:         promotionEdge(source),
