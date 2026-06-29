@@ -284,8 +284,8 @@
     },
     {
       "id": "closed_loop_candidate_adoption_plan_loop",
-      "observation": "Closed-loop candidates named required artifact types, but the candidate artifact did not itself carry executable commands for producing or verifying those artifacts; later producer-source growth also showed adoption plans can become passive if intake and decision loops do not consume every producer source, intake evidence did not expose adoption commands without reopening the candidate artifact, and producer workflow changes could avoid the intake or decision verifier path.",
-      "hypothesis": "Embedding an adoption_plan in each candidate, exposing candidate_adoption_plans and producer-emitted candidate_subjects in intake evidence, verifying producer-source coverage in intake plus decision seed coverage, and binding each source workflow to intake/decision path triggers lets agents act from evidence artifacts even if they do not read the surrounding documentation.",
+      "observation": "Closed-loop candidates named required artifact types, but the candidate artifact did not itself carry executable commands for producing or verifying those artifacts; later producer-source growth also showed adoption plans can become passive if intake and decision loops do not consume every producer source, intake evidence did not expose adoption commands without reopening the candidate artifact, producer workflow changes could avoid the intake or decision verifier path, and loop refresh ignored-command candidates needed a subject-level next_artifact to avoid falling back to generic claim work.",
+      "hypothesis": "Embedding an adoption_plan in each candidate, exposing candidate_adoption_plans and producer-emitted candidate_subjects in intake evidence, allowing subject-bound candidates to name their intended next_artifact, verifying producer-source coverage in intake plus decision seed coverage, and binding each source workflow to intake/decision path triggers lets agents act from evidence artifacts even if they do not read the surrounding documentation.",
       "claims": ["closed_loop_candidates_must_carry_adoption_plan"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
@@ -304,7 +304,9 @@
         {"kind": "test", "path": "tools/closedloopcandidateintake/workflow_path_triggers_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision/workflow_path_triggers.go"},
-        {"kind": "test", "path": "tools/closedloopcandidatedecision/workflow_path_triggers_test.go"}
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/workflow_path_triggers_test.go"},
+        {"kind": "tool", "path": "tools/looprefreshdispatch/candidate_subject.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/candidate_subject_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/harnesspromotion/adoption_plan_test.go"},
@@ -315,7 +317,8 @@
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
         {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/workflow_path_triggers_test.go"},
-        {"kind": "test", "path": "tools/closedloopcandidatedecision/workflow_path_triggers_test.go"}
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/workflow_path_triggers_test.go"},
+        {"kind": "test", "path": "tools/looprefreshdispatch/candidate_subject_test.go"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
@@ -325,7 +328,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
-      "decision": "Candidate artifacts now carry an adoption_plan, intake evidence exposes candidate_adoption_plans, candidate intake and decision evidence preserve producer-emitted candidate_subjects beside adoption and decision metadata, intake must cover every closed_loop_candidate producer source, decision verification requires an owned seed for every intake source, and producer workflow changes must trigger intake plus decision verification while still rejecting candidates whose plan does not cover every required next artifact.",
+      "decision": "Candidate artifacts now carry an adoption_plan, intake evidence exposes candidate_adoption_plans, candidate intake and decision evidence preserve producer-emitted candidate_subjects beside adoption and decision metadata, loop refresh ignored-command subjects pin verifier as their machine-routable next artifact, intake must cover every closed_loop_candidate producer source, decision verification requires an owned seed for every intake source, and producer workflow changes must trigger intake plus decision verification while still rejecting candidates whose plan does not cover every required next artifact.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
@@ -1386,8 +1389,8 @@
     },
     {
       "id": "closed_loop_candidate_decision_loop",
-      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, with a source seed incorrectly treated as a stale live candidate decision, or with live scheduled artifact download failing before it records that a source had no candidate artifact.",
-      "hypothesis": "A candidate decision tool can require an explicit candidate artifact for verifier runs, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale non-seed decision records for the consumed source, allow source coverage seeds when a source currently has no open candidates, fail when workflow path triggers omit linked manifests, consume a performance-specific candidate fixture in PR checks, and emit skipped live evidence for missing or empty producer artifacts.",
+      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, with a source seed incorrectly treated as a stale live candidate decision, with live scheduled artifact download failing before it records that a source had no candidate artifact, or with dynamic loop-refresh ignored-command candidates requiring manual per-id decision records.",
+      "hypothesis": "A candidate decision tool can require an explicit candidate artifact for verifier runs, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale non-seed decision records for the consumed source, allow source coverage seeds when a source currently has no open candidates, synthesize decisions from subject-kind templates for redacted machine-routable candidates, fail when workflow path triggers omit linked manifests, consume a performance-specific candidate fixture in PR checks, and emit skipped live evidence for missing or empty producer artifacts.",
       "claims": ["candidate_decisions_must_match_consumed_candidates"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
@@ -1395,12 +1398,16 @@
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "tool", "path": "tools/controlplanepressure/candidate_artifact.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision/source_coverage_seed.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/decision_template.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/decision_template_verify.go"},
         {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_template_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_orphan_test.go"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_template_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_orphan_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"}
@@ -1414,23 +1421,25 @@
         {"kind": "artifact", "path": "closed-loop-candidate-decision-live-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-performance-sample-evidence", "redacted": true}
       ],
-      "decision": "Candidate decisions are scheduled and cannot produce verifier evidence without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, or skip performance-specific sample decision evidence; scheduled live decisions now publish skipped evidence when a source has no candidate artifact or no open candidates.",
+      "decision": "Candidate decisions are scheduled and cannot produce verifier evidence without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, skip performance-specific sample decision evidence, or leave loop-refresh ignored-command subjects without a verifier decision template; scheduled live decisions now publish skipped evidence when a source has no candidate artifact or no open candidates.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
       "id": "candidate_decision_next_artifact_loop",
-      "observation": "Closed-loop candidate decisions could name an arbitrary next_artifact even when the consumed candidate artifact declared a bounded adoption artifact set; operational readiness candidates also carried subject.next_artifact but the decision loop still selected generic claim_binding, forcing agents to infer the real next action.",
-      "hypothesis": "Comparing each decision next_artifact against required_next_artifacts and subject.next_artifact keeps every source-scoped or readiness-scoped candidate on its machine-routable executable adoption path.",
+      "observation": "Closed-loop candidate decisions could name an arbitrary next_artifact even when the consumed candidate artifact declared a bounded adoption artifact set; operational readiness and loop-refresh ignored-command candidates also carried subject.next_artifact but the decision loop could still select generic claim_binding or require manual per-id decisions, forcing agents to infer the real next action.",
+      "hypothesis": "Comparing each explicit or template-synthesized decision next_artifact against required_next_artifacts and subject.next_artifact keeps every source-scoped, readiness-scoped, or ignored-command candidate on its machine-routable executable adoption path.",
       "claims": ["candidate_decision_next_artifact_must_be_required"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/decision_template.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision/subject_next_artifact.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_artifact_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/operational_readiness_decision_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_template_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "tool", "path": "tools/loopregistry"}
@@ -1439,7 +1448,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Candidate decisions now prove that the selected next artifact is one of the candidate's required executable adoption artifacts, and subject-bound readiness candidates must select the subject-declared first adoption artifact instead of a generic claim_binding fallback.",
+      "decision": "Candidate decisions now prove that the selected next artifact is one of the candidate's required executable adoption artifacts, and subject-bound readiness or ignored-command candidates must select the subject-declared first adoption artifact instead of a generic claim_binding fallback.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

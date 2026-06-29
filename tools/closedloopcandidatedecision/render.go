@@ -17,6 +17,7 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "- command artifact: `%s`\n\n", m.CommandArtifact)
 	renderAssertions(&b, m.Assertions)
 	renderDecisions(&b, m.Decisions)
+	renderDecisionTemplates(&b, m.DecisionTemplates)
 	renderLoop(&b, m.Loop)
 	return b.String()
 }

@@ -26,7 +26,10 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		if err := verifyCandidatePromotionEdge(item); err != nil {
 			return result, err
 		}
-		decision, ok := decisionByID[item.ID]
+		decision, ok, err := decisionForCandidate(decisionByID, m.DecisionTemplates, item)
+		if err != nil {
+			return result, err
+		}
 		if !ok {
 			return result, fmt.Errorf("candidate %s has no decision record", item.ID)
 		}

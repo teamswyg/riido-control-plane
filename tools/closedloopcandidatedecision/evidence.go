@@ -20,6 +20,7 @@ type evidence struct {
 	Assertions          []string                     `json:"assertions"`
 	Loop                evidenceLoop                 `json:"loop"`
 	Decisions           []decisionRecord             `json:"decisions"`
+	DecisionTemplates   []decisionTemplate           `json:"decision_templates,omitempty"`
 }
 
 func newEvidence(m manifest, result verifyResult) evidence {
@@ -44,5 +45,6 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		Assertions:          m.Assertions,
 		Loop:                m.Loop,
 		Decisions:           m.Decisions,
+		DecisionTemplates:   m.DecisionTemplates,
 	}
 }
