@@ -8,6 +8,7 @@ func mergeHTTPTransactionBucketState(
 		current := byKey[key]
 		current.metric.Method = state.metric.Method
 		current.metric.Route = state.metric.Route
+		current.metric.ClientSurface = state.metric.ClientSurface
 		current.metric.StatusCode = state.metric.StatusCode
 		current.metric.RequestsTotal += state.metric.RequestsTotal
 		current.metric.LatencySamplesTotal += state.metric.LatencySamplesTotal

@@ -38,4 +38,8 @@ func assertCloudWatchEMFHTTPCounters(t *testing.T, envelope cloudWatchEMFEnvelop
 		len(envelope.HTTPTransactions) != 1 || envelope.HTTPTransactions[0].Route != "/healthz" {
 		t.Fatalf("emf http latency/routes = %+v", envelope)
 	}
+	if envelope.HTTPRequestsDaemonTotal != 5 || envelope.HTTPRequestsClientAppTotal != 12 ||
+		envelope.HTTPRequestsDesktopTotal != 3 || envelope.HTTPRequestsComponentIntegrationTotal != 2 {
+		t.Fatalf("emf http client surfaces = %+v", envelope)
+	}
 }

@@ -20,10 +20,11 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 		next.ServeHTTP(recorder, r)
 		route := httpMetricRoute(r.Method, r.URL.Path, r.Pattern, recorder.statusCode)
 		metrics.ObserveHTTPTransaction(HTTPTransactionObservation{
-			Method:     r.Method,
-			Route:      route,
-			StatusCode: recorder.statusCode,
-			Duration:   time.Since(startedAt),
+			Method:        r.Method,
+			Route:         route,
+			ClientSurface: traceHTTPClientSurface(route, r.URL.Path, r.UserAgent()),
+			StatusCode:    recorder.statusCode,
+			Duration:      time.Since(startedAt),
 		})
 	})
 }

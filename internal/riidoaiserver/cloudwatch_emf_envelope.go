@@ -41,6 +41,12 @@ type cloudWatchEMFEnvelope struct {
 	HTTPRequestLatencyTotalMilliseconds               int64                   `json:"http_request_latency_total_ms"`
 	HTTPRequestLatencyMaxMilliseconds                 int64                   `json:"http_request_latency_max_ms"`
 	HTTPRequestLatencyLastMilliseconds                int64                   `json:"http_request_latency_last_ms"`
+	HTTPRequestsDaemonTotal                           int64                   `json:"http_requests_daemon_total"`
+	HTTPRequestsClientAppTotal                        int64                   `json:"http_requests_client_app_total"`
+	HTTPRequestsDesktopTotal                          int64                   `json:"http_requests_desktop_total"`
+	HTTPRequestsDesktopCandidateTotal                 int64                   `json:"http_requests_desktop_candidate_total"`
+	HTTPRequestsComponentIntegrationTotal             int64                   `json:"http_requests_component_integration_total"`
+	HTTPRequestsUnknownSurfaceTotal                   int64                   `json:"http_requests_unknown_surface_total"`
 	HTTPTransactions                                  []HTTPTransactionMetric `json:"http_transactions,omitempty"`
 	StoreOperationCallsTotal                          int64                   `json:"store_operation_calls_total"`
 	StoreOperationErrorsTotal                         int64                   `json:"store_operation_errors_total"`

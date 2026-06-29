@@ -12,8 +12,24 @@ on:
       - "docs/30-architecture/loop-registry.md"
       - "docs/30-architecture/loop-registry.riido.json"
       - "tools/operationalreadiness/**"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/cloudwatch_emf_assert_counters_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_assert_units_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_envelope.go"
+      - "internal/riidoaiserver/cloudwatch_emf_envelope_http.go"
+      - "internal/riidoaiserver/cloudwatch_emf_fixture_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_metric_specs.go"
+      - "internal/riidoaiserver/cloudwatch_emf_write_test.go"
       - "internal/riidoaiserver/http_client_surface.go"
+      - "internal/riidoaiserver/http_client_surface_metrics.go"
       - "internal/riidoaiserver/http_client_surface_test.go"
+      - "internal/riidoaiserver/http_transaction_metrics_middleware.go"
+      - "internal/riidoaiserver/http_transaction_metrics_observe.go"
+      - "internal/riidoaiserver/http_transaction_metrics_snapshot.go"
+      - "internal/riidoaiserver/http_transaction_metrics_sort.go"
+      - "internal/riidoaiserver/http_transaction_metrics_state.go"
+      - "internal/riidoaiserver/http_transaction_metrics_surface_test.go"
+      - "internal/riidoaiserver/http_transaction_metrics_types.go"
       - "internal/riidoaiserver/http_tracing.go"
       - "go.mod"
       - "go.sum"
@@ -24,8 +40,24 @@ on:
       - "docs/30-architecture/operational-readiness.md"
       - "docs/30-architecture/operational-readiness.riido.json"
       - "tools/operationalreadiness/**"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/cloudwatch_emf_assert_counters_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_assert_units_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_envelope.go"
+      - "internal/riidoaiserver/cloudwatch_emf_envelope_http.go"
+      - "internal/riidoaiserver/cloudwatch_emf_fixture_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_metric_specs.go"
+      - "internal/riidoaiserver/cloudwatch_emf_write_test.go"
       - "internal/riidoaiserver/http_client_surface.go"
+      - "internal/riidoaiserver/http_client_surface_metrics.go"
       - "internal/riidoaiserver/http_client_surface_test.go"
+      - "internal/riidoaiserver/http_transaction_metrics_middleware.go"
+      - "internal/riidoaiserver/http_transaction_metrics_observe.go"
+      - "internal/riidoaiserver/http_transaction_metrics_snapshot.go"
+      - "internal/riidoaiserver/http_transaction_metrics_sort.go"
+      - "internal/riidoaiserver/http_transaction_metrics_state.go"
+      - "internal/riidoaiserver/http_transaction_metrics_surface_test.go"
+      - "internal/riidoaiserver/http_transaction_metrics_types.go"
       - "internal/riidoaiserver/http_tracing.go"
 
 jobs:
@@ -43,7 +75,7 @@ jobs:
         run: |
           mkdir -p out
           go test ./tools/operationalreadiness -count=1
-          go test ./internal/riidoaiserver -run 'TestTraceHTTPClientSurface|TestHTTPTracingRecordsClientSurface' -count=1
+          go test ./internal/riidoaiserver -run 'TestTraceHTTPClientSurface|TestHTTPTracingRecordsClientSurface|TestHTTPTransactionMetricsTrackClientSurfaceTotals|TestWriteCloudWatchEMF' -count=1
           go run ./tools/operationalreadiness \
             -check-doc \
             -evidence-out out/operational-readiness-evidence.json

@@ -21,10 +21,12 @@
       "date": "2026-06-26",
       "category": "monitoring",
       "status": "partial",
-      "title": "OTel/X-Ray separates daemon, client app, desktop candidate, and component traffic",
+      "title": "OTel/X-Ray and EMF separate daemon, client app, desktop, and component traffic",
       "evidence_refs": [
         {"kind": "code", "path": "internal/riidoaiserver/http_client_surface.go"},
         {"kind": "test", "path": "internal/riidoaiserver/http_client_surface_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/http_transaction_metrics_surface_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/cloudwatch_emf_write_test.go"},
         {"kind": "external", "path": "riido-infra:terraform/riido_ai_server/observability.tf"}
       ],
       "next_artifact": "infra_cloudwatch_alarm_by_client_surface",

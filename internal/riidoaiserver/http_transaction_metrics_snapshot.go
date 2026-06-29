@@ -6,9 +6,10 @@ func (m *HTTPTransactionMetrics) ApplyToMetricsSnapshot(snapshot MetricsSnapshot
 	if m == nil {
 		return snapshot
 	}
-	requestsTotal, responsesByStatus, latency, transactions := m.snapshot()
+	requestsTotal, responsesByStatus, clientSurfaces, latency, transactions := m.snapshot()
 	snapshot.HTTPRequestsTotal = requestsTotal
 	snapshot.HTTPResponsesByStatus = responsesByStatus
+	applyHTTPClientSurfaceTotals(&snapshot, clientSurfaces)
 	snapshot.HTTPRequestLatencySamplesTotal = latency.samplesTotal
 	snapshot.HTTPRequestLatencyTotalMilliseconds = latency.totalMilliseconds
 	snapshot.HTTPRequestLatencyMaxMilliseconds = latency.maxMilliseconds
@@ -17,10 +18,11 @@ func (m *HTTPTransactionMetrics) ApplyToMetricsSnapshot(snapshot MetricsSnapshot
 	return snapshot
 }
 
-func (m *HTTPTransactionMetrics) snapshot() (int64, map[int]int64, httpTransactionLatencyMetrics, []HTTPTransactionMetric) {
+func (m *HTTPTransactionMetrics) snapshot() (int64, map[int]int64, map[string]int64, httpTransactionLatencyMetrics, []HTTPTransactionMetric) {
 	buckets := m.snapshotBuckets(time.Now())
 	requestsTotal := int64(0)
 	responsesByStatus := map[int]int64{}
+	clientSurfaces := map[string]int64{}
 	latency := httpTransactionLatencyMetrics{}
 	latencyLastObservedAt := time.Time{}
 	byKey := map[httpTransactionKey]httpTransactionMetricState{}
@@ -42,11 +44,12 @@ func (m *HTTPTransactionMetrics) snapshot() (int64, map[int]int64, httpTransacti
 	}
 	transactions := make([]HTTPTransactionMetric, 0, len(byKey))
 	for _, state := range byKey {
+		clientSurfaces[state.metric.ClientSurface] += state.metric.RequestsTotal
 		transactions = append(transactions, state.metric)
 	}
 	sortHTTPTransactionMetrics(transactions)
 	if len(transactions) > metricsBreakdownLimit {
 		transactions = transactions[:metricsBreakdownLimit]
 	}
-	return requestsTotal, responsesByStatus, latency, transactions
+	return requestsTotal, responsesByStatus, clientSurfaces, latency, transactions
 }
