@@ -8,12 +8,18 @@ func newEvidence(m manifest) evidence {
 
 func newEvidenceAt(m manifest, now time.Time) evidence {
 	categoryCounts := map[string]int{}
+	measurementKinds := map[string]int{}
 	statusCounts := map[string]int{}
 	partials := []partialCheck{}
+	measurementCount := 0
 	stalePartials := 0
 	for _, check := range m.Checks {
 		categoryCounts[check.Category]++
 		statusCounts[check.Status]++
+		for _, measurement := range check.Measurements {
+			measurementCount++
+			measurementKinds[measurement.Kind]++
+		}
 		if check.Status == "partial" {
 			ageDays := partialAgeDays(check.Date, now)
 			stale := ageDays >= stalePartialAfterDays
@@ -30,12 +36,13 @@ func newEvidenceAt(m manifest, now time.Time) evidence {
 	return evidence{
 		SchemaVersion: manifestSchemaToEvidence(m.SchemaVersion),
 		Status:        "verified", GeneratedAt: now.UTC().Format(time.RFC3339),
-		CheckCount: len(m.Checks), CoveredCount: statusCounts["covered"],
+		CheckCount: len(m.Checks), MeasurementCount: measurementCount, CoveredCount: statusCounts["covered"],
 		PartialCount: statusCounts["partial"], StalePartialCount: stalePartials,
 		StaleAfterDays:     stalePartialAfterDays,
 		RequiredCategories: append([]string(nil), m.RequiredCategories...),
 		MissingCategories:  missingCategories(m.RequiredCategories, categoryCounts),
-		CategoryCounts:     categoryCounts, StatusCounts: statusCounts,
+		CategoryCounts:     categoryCounts, MeasurementKinds: measurementKinds,
+		StatusCounts:  statusCounts,
 		PartialChecks: partials, Loop: m.Loop,
 	}
 }

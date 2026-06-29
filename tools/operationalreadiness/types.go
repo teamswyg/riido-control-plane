@@ -19,9 +19,17 @@ type readinessCheck struct {
 	Category     string        `json:"category"`
 	Status       string        `json:"status"`
 	Title        string        `json:"title"`
+	Measurements []measurement `json:"measurements"`
 	EvidenceRefs []evidenceRef `json:"evidence_refs"`
 	NextArtifact string        `json:"next_artifact"`
 	NextCommand  string        `json:"next_command"`
+}
+
+type measurement struct {
+	ID          string `json:"id"`
+	Kind        string `json:"kind"`
+	Signal      string `json:"signal"`
+	EvidenceRef string `json:"evidence_ref,omitempty"`
 }
 
 type evidenceRef struct {

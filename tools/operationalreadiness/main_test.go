@@ -16,6 +16,9 @@ func TestOperationalReadinessVerifies(t *testing.T) {
 	if got.CheckCount < 10 || got.PartialCount == 0 || got.CoveredCount == 0 {
 		t.Fatalf("unexpected readiness counts: %+v", got)
 	}
+	if got.MeasurementCount < got.CheckCount {
+		t.Fatalf("measurement count should cover checks: %+v", got)
+	}
 	if len(got.MissingCategories) != 0 {
 		t.Fatalf("missing categories: %+v", got.MissingCategories)
 	}
