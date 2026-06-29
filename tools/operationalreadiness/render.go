@@ -44,11 +44,12 @@ func renderPartials(b *strings.Builder, partials []partialCheck) {
 		b.WriteString("No partial checks.\n\n")
 		return
 	}
-	b.WriteString("| Check | Category | Next Artifact | Next Command |\n")
-	b.WriteString("| --- | --- | --- | --- |\n")
+	b.WriteString("| Check | Category | Age | Stale | Next Artifact | Next Command |\n")
+	b.WriteString("| --- | --- | --- | --- | --- | --- |\n")
 	for _, check := range partials {
-		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%s` |\n",
-			check.ID, check.Category, check.NextArtifact, check.NextCommand)
+		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%t` | `%s` | `%s` |\n",
+			check.ID, check.Category, check.AgeDays, check.Stale,
+			check.NextArtifact, check.NextCommand)
 	}
 	b.WriteString("\n")
 }

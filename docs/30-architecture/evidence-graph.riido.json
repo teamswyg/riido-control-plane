@@ -1847,16 +1847,19 @@
     {
       "id": "loop_registry_loop_surface_evidence_loop",
       "observation": "Loop Registry manifest records already define observes, verifies, evidence, refresh workflow, expiry, fails_when, promotions, and providers, but the evidence artifact exposed claim surfaces and refresh plans without a direct loop surface for agents that skip the manifest.",
-      "hypothesis": "Publishing loop_surfaces in loop-registry evidence lets agents derive QA scope directly from evidence JSON while claim binding and generated-doc checks still prevent drift from the executable manifest.",
+      "hypothesis": "Publishing loop_surfaces in loop-registry evidence lets agents derive QA scope directly from evidence JSON, including newly added verify tokens such as stale partial candidate subject checks, while claim binding and generated-doc checks still prevent drift from the executable manifest.",
       "claims": ["loop_registry_evidence_must_expose_loop_surfaces"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/operationalreadiness/candidate_subject.go"},
         {"kind": "tool", "path": "tools/loopregistry/evidence.go"},
         {"kind": "tool", "path": "tools/loopregistry/evidence_loop_surface.go"},
         {"kind": "tool", "path": "tools/loopregistry/types_loop_surface.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/candidate_subject_test.go"},
         {"kind": "test", "path": "tools/loopregistry/evidence_loop_surface_test.go"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/operationalreadiness/candidate_subject_test.go"},
         {"kind": "test", "path": "tools/loopregistry/evidence_loop_surface_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
@@ -1865,7 +1868,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/loop-registry.md"}
       ],
-      "decision": "Loop Registry evidence now carries loop_surfaces so an agent can inspect each loop's observes/verifies/evidence/expires/fails_when contract directly from evidence JSON, not by rereading prose or reopening the manifest.",
+      "decision": "Loop Registry evidence now carries loop_surfaces so an agent can inspect each loop's observes/verifies/evidence/expires/fails_when contract directly from evidence JSON, including operational-readiness stale partial subject verification, not by rereading prose or reopening the manifest.",
       "next_loop": "closed_loop_candidate"
     },
     {

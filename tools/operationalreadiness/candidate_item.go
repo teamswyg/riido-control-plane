@@ -10,6 +10,7 @@ func newStalePartialCandidate(
 	return closedLoopCandidate{
 		ID:                    source.ID + ":" + partial.ID,
 		SourceRef:             readinessSourceRef(source, generatedAt, expiresAt, run),
+		Subject:               partialSubject(partial),
 		HarnessLoop:           source.HarnessLoop,
 		PromotionTarget:       source.PromotionTarget,
 		PromotionEdge:         readinessPromotionEdge(source),
