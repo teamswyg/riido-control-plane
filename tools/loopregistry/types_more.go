@@ -47,8 +47,10 @@ type refreshPlan struct {
 }
 
 type refreshPlanCommand struct {
-	Kind    string `json:"kind"`
-	Command string `json:"command"`
+	Kind             string   `json:"kind"`
+	Command          string   `json:"command"`
+	ClaimIDs         []string `json:"claim_ids,omitempty"`
+	EvidenceChainIDs []string `json:"evidence_chain_ids,omitempty"`
 }
 
 type evidenceArtifactRefresh struct {
