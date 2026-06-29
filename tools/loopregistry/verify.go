@@ -21,16 +21,7 @@ func verifyAll(root string, m manifest, hashes map[string]string) (verifyResult,
 	if err := verifyClaims(root, m, loopIDs, hashes, tests); err != nil {
 		return verifyResult{}, err
 	}
-	if err := verifyLoopVerifyCoverage(m); err != nil {
-		return verifyResult{}, err
-	}
-	if err := verifyLoopObservationCoverage(m); err != nil {
-		return verifyResult{}, err
-	}
-	if err := verifyLoopFailureCoverage(m); err != nil {
-		return verifyResult{}, err
-	}
-	if err := verifyLoopEvidenceCoverage(m); err != nil {
+	if err := verifyLoopCoverageDimensions(m); err != nil {
 		return verifyResult{}, err
 	}
 	if err := verifyClaimEvidenceChains(m.Claims, chains); err != nil {
