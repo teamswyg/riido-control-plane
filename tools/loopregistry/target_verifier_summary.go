@@ -37,6 +37,11 @@ func targetVerifierSummary(
 		plan.ComponentCount,
 		plan.CommandCount,
 	)}
+	if componentSummary := targetVerifierComponentSummaryFor(
+		plan, evidenceOut,
+	); componentSummary != "" {
+		parts = append(parts, "riido target verifier "+componentSummary)
+	}
 	if commandSummary := targetVerifierCommandSummaryFor(
 		plan, evidenceOut,
 	); commandSummary != "" {
