@@ -20,6 +20,15 @@ func sortedKeysInt(values map[string]int) []string {
 	return out
 }
 
+func sortedCopy(values []string) []string {
+	if len(values) == 0 {
+		return nil
+	}
+	out := append([]string(nil), values...)
+	sort.Strings(out)
+	return out
+}
+
 func commandCount(values map[string]int) int {
 	count := 0
 	for _, value := range values {

@@ -8,6 +8,8 @@ func ignoredCommandSubject(command selectedRefreshCommand) *candidateSubject {
 		Command:           command.Command,
 		SourceCandidateID: command.CandidateID,
 		SourceSubjectKind: command.SubjectKind,
+		ClaimIDs:          sortedCopy(command.ClaimIDs),
+		EvidenceChainIDs:  sortedCopy(command.EvidenceChainIDs),
 	}
 }
 
