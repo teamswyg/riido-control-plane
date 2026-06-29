@@ -17,6 +17,7 @@ func TestGitHubAnnotationsIncludeChainImpactScope(t *testing.T) {
 			ID:                    "chain:one",
 			ChangedExecutableRefs: []string{"tools/evidencegraph/run.go"},
 			Claims:                []string{"claim:one"},
+			VerifierCommands:      []string{"go test ./tools/evidencegraph -count=1"},
 			NextLoop:              "closed_loop_candidate",
 		}},
 	})
@@ -25,7 +26,7 @@ func TestGitHubAnnotationsIncludeChainImpactScope(t *testing.T) {
 		"::notice title=Riido evidence graph impact::",
 		"2 changed files (docs/30-architecture/evidence-graph.riido.json, tools/evidencegraph/run.go)",
 		"::notice title=Riido evidence chain impact::",
-		"chain:one executable refs: tools/evidencegraph/run.go claims: claim:one next_loop: closed_loop_candidate",
+		"chain:one executable refs: tools/evidencegraph/run.go claims: claim:one verifier_commands: go test ./tools/evidencegraph -count=1 next_loop: closed_loop_candidate",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("annotation missing %q: %s", want, got)

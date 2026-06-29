@@ -25,6 +25,7 @@ func TestChainImpactAllowsExecutableRefChange(t *testing.T) {
 	chain := evidence.ChangedChains[0]
 	if chain.Claims[0] != "claim" ||
 		chain.VerifierRefs[0] != "tools/evidencegraph/impact_test.go" ||
+		chain.VerifierCommands[0] != "go test ./tools/evidencegraph -count=1" ||
 		chain.EvidenceRefs[0] != "evidence-graph-evidence" ||
 		chain.NextLoop != "loop" {
 		t.Fatalf("chain scope = %+v", chain)
