@@ -2,7 +2,9 @@ package main
 
 type refreshPlanClaimSet struct {
 	ClaimIDs         []string
+	EvidenceChainIDs []string
 	VerifierCommands []string
+	CommandScopes    map[string]refreshCommandScope
 }
 
 func refreshPlanClaimCoverage(
@@ -12,12 +14,16 @@ func refreshPlanClaimCoverage(
 	byClaim := claimSurfacesByID(surfaces)
 	out := map[string]refreshPlanClaimSet{}
 	for _, claim := range claims {
+		surface := byClaim[claim.ID]
 		set := out[claim.Loop]
+		set.CommandScopes = ensureRefreshCommandScopes(set.CommandScopes)
 		set.ClaimIDs = append(set.ClaimIDs, claim.ID)
 		set.VerifierCommands = appendMissingStrings(
 			set.VerifierCommands,
-			byClaim[claim.ID].VerifierCommands,
+			surface.VerifierCommands,
 		)
+		set.EvidenceChainIDs = appendMissingStrings(set.EvidenceChainIDs, surface.EvidenceChainIDs)
+		addRefreshCommandScopes(set.CommandScopes, claim.ID, surface)
 		out[claim.Loop] = set
 	}
 	return out

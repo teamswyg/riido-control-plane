@@ -10,8 +10,10 @@ func selectedLoop(plan refreshPlan) selectedRefreshLoop {
 
 func selectedCommand(loopID string, command refreshPlanCommand) selectedRefreshCommand {
 	return selectedRefreshCommand{
-		LoopID:  loopID,
-		Kind:    command.Kind,
-		Command: command.Command,
+		LoopID:           loopID,
+		Kind:             command.Kind,
+		Command:          command.Command,
+		ClaimIDs:         sortedCopy(command.ClaimIDs),
+		EvidenceChainIDs: sortedCopy(command.EvidenceChainIDs),
 	}
 }

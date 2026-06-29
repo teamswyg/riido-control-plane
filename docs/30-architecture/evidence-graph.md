@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `65`
 - claim refs: `64`
-- change refs: `814`
-- verifier refs: `381`
+- change refs: `816`
+- verifier refs: `382`
 - evidence refs: `175`
 
 ## Evidence Chains
@@ -56,8 +56,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `closed_loop_candidate_intake_loop` | `1` | `8` | `3` | `7` | `closed_loop_candidate_intake` |
 | `expiring_loop_refresh_scope_loop` | `1` | `6` | `5` | `2` | `closed_loop_candidate` |
 | `refresh_workflow_identity_loop` | `1` | `10` | `4` | `2` | `closed_loop_candidate` |
-| `loop_registry_refresh_plan_evidence_loop` | `1` | `12` | `5` | `2` | `closed_loop_candidate` |
-| `expired_loop_refresh_command_selection_loop` | `1` | `11` | `5` | `2` | `closed_loop_candidate` |
+| `loop_registry_refresh_plan_evidence_loop` | `1` | `13` | `5` | `2` | `closed_loop_candidate` |
+| `expired_loop_refresh_command_selection_loop` | `1` | `12` | `6` | `2` | `closed_loop_candidate` |
 | `expired_loop_refresh_dispatch_loop` | `1` | `39` | `21` | `4` | `closed_loop_candidate` |
 | `loop_evidence_artifact_refresh_owner_loop` | `1` | `4` | `5` | `2` | `closed_loop_candidate` |
 | `closed_loop_candidate_decision_loop` | `1` | `8` | `4` | `7` | `closed_loop_candidate_decision` |
