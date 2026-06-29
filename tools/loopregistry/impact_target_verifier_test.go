@@ -16,7 +16,7 @@ func TestImpactTargetVerifierPlanUsesArchitectureIndex(t *testing.T) {
 			VerifierCommands: []string{"go test ./tools/example -count=1"},
 			EvidenceChainIDs: []string{"chain-a"},
 		}},
-	})
+	}, nil)
 	plan := impact.TargetVerifierPlan
 	if plan == nil || plan.ChangedPathCount != 2 ||
 		plan.MatchedPathCount != 1 || plan.ComponentCount != 1 ||

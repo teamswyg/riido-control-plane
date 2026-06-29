@@ -46,6 +46,9 @@ func TestGitHubAnnotationsIncludeImpactScope(t *testing.T) {
 			EntrypointCommands: []string{
 				"go test ./tools/b -count=1",
 			},
+			FocusedCommands: []string{
+				"go test ./tools/focused -count=1",
+			},
 		},
 	})
 	got := out.String()
@@ -54,6 +57,7 @@ func TestGitHubAnnotationsIncludeImpactScope(t *testing.T) {
 		"2 changed files: docs/claim.md, internal/example.go",
 		"target verifiers: 1 matched paths, 4 commands",
 		"::notice title=Riido target verifier plan::",
+		"focused: go test ./tools/focused -count=1",
 		"entrypoints: go test ./tools/b -count=1",
 		"commands: go test ./tools/a -count=1",
 		"go test ./tools/b -count=1",

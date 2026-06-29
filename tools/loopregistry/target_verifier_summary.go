@@ -37,33 +37,7 @@ func targetVerifierSummary(
 		plan.ComponentCount,
 		plan.CommandCount,
 	)}
-	if pathSummary := targetVerifierPathSummaryFor(plan, evidenceOut); pathSummary != "" {
-		parts = append(parts, "riido target verifier "+pathSummary)
-	}
-	if componentSummary := targetVerifierComponentSummaryFor(
-		plan, evidenceOut,
-	); componentSummary != "" {
-		parts = append(parts, "riido target verifier "+componentSummary)
-	}
-	if loopSummary := targetVerifierLoopSummaryFor(plan, evidenceOut); loopSummary != "" {
-		parts = append(parts, "riido target verifier "+loopSummary)
-	}
-	if claimSummary := targetVerifierClaimSummaryFor(plan, evidenceOut); claimSummary != "" {
-		parts = append(parts, "riido target verifier "+claimSummary)
-	}
-	if chainSummary := targetVerifierChainSummaryFor(plan, evidenceOut); chainSummary != "" {
-		parts = append(parts, "riido target verifier "+chainSummary)
-	}
-	if entrypointSummary := targetVerifierEntrypointSummaryFor(
-		plan, evidenceOut,
-	); entrypointSummary != "" {
-		parts = append(parts, "riido target verifier "+entrypointSummary)
-	}
-	if commandSummary := targetVerifierCommandSummaryFor(
-		plan, evidenceOut,
-	); commandSummary != "" {
-		parts = append(parts, "riido target verifier "+commandSummary)
-	}
+	parts = append(parts, targetVerifierSummaryParts(plan, evidenceOut)...)
 	if evidenceOut != "" {
 		parts = append(parts, "riido target verifier full_plan: "+evidenceOut)
 	}

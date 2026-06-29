@@ -3,6 +3,7 @@ package main
 func attachTargetVerifierPlan(
 	impact *impactEvidence,
 	index architectureIndex,
+	surfaces []claimSurface,
 ) {
 	if impact == nil || !impact.Enabled {
 		return
@@ -22,6 +23,7 @@ func attachTargetVerifierPlan(
 	}
 	plan.CommandCount = len(plan.VerifierCommands)
 	plan.CommandUnits = targetVerifierCommands(plan.Paths)
+	attachFocusedTargetVerifierPlan(&plan, impact, surfaces)
 	plan.EntrypointCommands = targetVerifierEntrypointCommands(plan.CommandUnits)
 	impact.TargetVerifierPlan = &plan
 }
