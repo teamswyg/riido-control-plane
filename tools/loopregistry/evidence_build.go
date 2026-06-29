@@ -6,7 +6,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 	now := evidenceNow()
 	generatedAt, expiresAt := evidenceWindowAt(now, loopRegistryEvidenceTTLHours)
 	index := architectureIndexFor(m.Claims, result.ClaimSurfaces)
-	attachTargetVerifierPlan(impact, index)
+	attachTargetVerifierPlan(impact, index, result.ClaimSurfaces)
 	return evidence{
 		SchemaVersion:             evidenceSchema,
 		ID:                        m.ID,

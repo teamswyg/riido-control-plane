@@ -39,6 +39,9 @@ func TestTargetVerifierSummaryUsesImpactPlan(t *testing.T) {
 				"go test ./tools/b -count=1",
 				"go test ./tools/a -count=1",
 			},
+			FocusedCommands: []string{
+				"go test ./tools/focused -count=1",
+			},
 		},
 	}, ".git/riido-loop-registry-precommit-evidence.json")
 	for _, want := range []string{
@@ -48,6 +51,7 @@ func TestTargetVerifierSummaryUsesImpactPlan(t *testing.T) {
 		"loops: ai_thread_history, closed_loop_candidate",
 		"claims: claim-a, claim-b",
 		"chains: chain-a, chain-b",
+		"focused: go test ./tools/focused -count=1",
 		"entrypoints: go test ./tools/b -count=1",
 		"go test ./tools/a -count=1",
 		"go test ./tools/b -count=1",
