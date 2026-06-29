@@ -15,6 +15,7 @@ type evidence struct {
 	SemanticHashes            map[string]string   `json:"semantic_hashes"`
 	EvidenceKinds             []evidenceKind      `json:"evidence_kinds"`
 	LoopSurfaces              []loopSurface       `json:"loop_surfaces"`
+	ArchitectureIndex         architectureIndex   `json:"architecture_index"`
 	EvidenceGraph             []graphEdge         `json:"evidence_graph"`
 	ClaimSurfaces             []claimSurface      `json:"claim_surfaces"`
 	RefreshWorkflows          map[string]string   `json:"refresh_workflows"`
@@ -48,6 +49,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		SemanticHashes:        result.Hashes,
 		EvidenceKinds:         m.EvidenceKinds,
 		LoopSurfaces:          loopSurfaces(m.Loops),
+		ArchitectureIndex:     architectureIndexFor(m.Claims, result.ClaimSurfaces),
 		EvidenceGraph:         m.EvidenceGraph,
 		ClaimSurfaces:         result.ClaimSurfaces,
 		RefreshWorkflows:      refreshWorkflows(m.Loops),
