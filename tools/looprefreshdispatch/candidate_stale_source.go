@@ -11,6 +11,7 @@ func candidateFromStaleSource(
 	return closedLoopCandidate{
 		ID:                    fmt.Sprintf("%s:stale-source:%02d", dispatchSourceID, index+1),
 		SourceRef:             sourceRefForCandidate(plan, liveStatus),
+		Subject:               staleSourceSubject(source),
 		HarnessLoop:           dispatchHarnessLoop,
 		PromotionTarget:       dispatchPromotionTarget,
 		PromotionEdge:         graphEdge{dispatchHarnessLoop, dispatchPromotionTarget, "promotes_failure_to"},
