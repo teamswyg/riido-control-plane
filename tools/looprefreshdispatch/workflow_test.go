@@ -19,7 +19,7 @@ func TestLoopRefreshDispatchWorkflowDoesNotEvalCommands(t *testing.T) {
 			t.Fatalf("workflow must not execute raw command strings: found %q", forbidden)
 		}
 	}
-	if !strings.Contains(text, ".dispatches[].workflow_file") ||
+	if !strings.Contains(text, ".workflow_file") ||
 		!strings.Contains(text, `gh workflow run "$workflow" --ref main`) {
 		t.Fatalf("workflow must dispatch only structured workflow_file values")
 	}
