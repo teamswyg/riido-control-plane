@@ -34,6 +34,7 @@ func TestPreCommitBaselineLoopRegistryScriptRequiresImpactEvidence(t *testing.T)
 		"go run ./tools/loopregistry",
 		"-check-doc",
 		"-impact-base",
+		"-target-verifier-summary",
 		"-evidence-out",
 	}
 	if err := requirePhrases(text, phrases, "loopregistry pre-commit script", &verifyResult{}); err != nil {

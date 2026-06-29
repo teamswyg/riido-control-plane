@@ -38,12 +38,13 @@
   "scripts": [
     {
       "path": "tools/loopregistry/precommit.sh",
-      "summary": "runs loopregistry claim/doc/impact verification against the configured base ref",
+      "summary": "runs loopregistry claim/doc/impact verification and local target verifier summary against the configured base ref",
       "contains": [
         "RIIDO_LOOP_REGISTRY_IMPACT_BASE",
         "go run ./tools/loopregistry",
         "-check-doc",
         "-impact-base",
+        "-target-verifier-summary",
         "-evidence-out"
       ]
     },
@@ -61,9 +62,9 @@
   ],
   "loop": {
     "observation": "CI caught claim binding and evidence graph drift, but local commits could still rely on a developer remembering to run the loop registry and evidence graph impact verifiers before opening a PR.",
-    "hypothesis": "A pre-commit baseline manifest can make local formatting, tests, lint, claim binding impact checks, and evidence graph chain impact checks executable before the PR loop starts.",
+    "hypothesis": "A pre-commit baseline manifest can make local formatting, tests, lint, claim binding impact checks, target verifier routing, and evidence graph chain impact checks executable before the PR loop starts.",
     "execute": "Verify the pre-commit config plus loopregistry and evidencegraph hook scripts from this manifest, generate this reader, and publish pre-commit-baseline evidence in CI.",
-    "evaluate": "The verifier fails when required hooks disappear, the loopregistry or evidencegraph hook stops using impact verification, the generated reader drifts, or strict evidence upload is removed.",
-    "retrospective": "This moves another human reminder into the loop: AI agents can skip the prose, but commits cannot skip the local claim binding and evidence graph chain verifiers."
+    "evaluate": "The verifier fails when required hooks disappear, the loopregistry hook stops exposing target verifier summary, loopregistry or evidencegraph impact verification is removed, the generated reader drifts, or strict evidence upload is removed.",
+    "retrospective": "This moves another human reminder into the loop: AI agents can skip the prose, but commits cannot skip the local claim binding, target verifier routing, and evidence graph chain verifiers."
   }
 }

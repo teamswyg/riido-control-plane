@@ -25,6 +25,7 @@ func mainRun(args []string) error {
 	writeHashes := fs.Bool("write-hashes", false, "update claim semantic hashes")
 	impactBase := fs.String("impact-base", "", "optional git base ref for PR impact verification")
 	githubAnnotations := fs.Bool("github-annotations", false, "emit GitHub Actions claim verifier annotations")
+	targetSummary := fs.Bool("target-verifier-summary", false, "emit local target verifier plan summary")
 	refreshPlanIn := fs.String("refresh-plan-in", "", "existing loop registry evidence JSON")
 	refreshCommandsOut := fs.String("refresh-commands-out", "", "selected refresh command JSON output")
 	if err := fs.Parse(args); err != nil {
@@ -39,6 +40,7 @@ func mainRun(args []string) error {
 		WriteHashes:        *writeHashes,
 		ImpactBase:         *impactBase,
 		GitHubAnnotations:  *githubAnnotations,
+		TargetSummary:      *targetSummary,
 		RefreshPlanIn:      *refreshPlanIn,
 		RefreshCommandsOut: *refreshCommandsOut,
 	})
