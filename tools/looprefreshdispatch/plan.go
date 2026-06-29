@@ -1,11 +1,11 @@
 package main
 
-import (
-	"sort"
-	"strings"
-)
+import "strings"
 
 func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan, error) {
+	if source.Status == "source_stale" {
+		return staleSourceDispatchPlan(source), nil
+	}
 	if err := verifySourceFresh(source, evidenceNow()); err != nil {
 		return dispatchPlan{}, err
 	}
@@ -53,23 +53,4 @@ func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan
 		out.Status = "dispatch_required"
 	}
 	return out, nil
-}
-
-func dispatchesFromWorkflowMap(byWorkflow map[string]map[string]int) []workflowDispatch {
-	workflows := make([]string, 0, len(byWorkflow))
-	for workflow := range byWorkflow {
-		workflows = append(workflows, workflow)
-	}
-	sort.Strings(workflows)
-	out := make([]workflowDispatch, 0, len(workflows))
-	for _, workflow := range workflows {
-		loopIDs := sortedKeysInt(byWorkflow[workflow])
-		out = append(out, workflowDispatch{
-			WorkflowFile:    workflow,
-			VerifiedCommand: refreshWorkflowCommand(workflow),
-			LoopIDs:         loopIDs,
-			CommandCount:    commandCount(byWorkflow[workflow]),
-		})
-	}
-	return out
 }

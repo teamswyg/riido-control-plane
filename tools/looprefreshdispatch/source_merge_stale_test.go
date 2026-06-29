@@ -19,13 +19,16 @@ func TestMergeRefreshCommandsSkipsStaleSourceWhenFreshSourceExists(t *testing.T)
 	}
 }
 
-func TestMergeRefreshCommandsRejectsWhenAllSourcesAreStale(t *testing.T) {
+func TestMergeRefreshCommandsReportsWhenAllSourcesAreStale(t *testing.T) {
 	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-29T00:00:00Z")
-	_, err := mergeRefreshCommandSources([]refreshCommandEvidence{
+	got, err := mergeRefreshCommandSources([]refreshCommandEvidence{
 		staleDecisionCommandSource(),
 	})
-	if err == nil {
-		t.Fatal("expected all-stale source rejection")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Status != "source_stale" || len(got.StaleSources) != 1 {
+		t.Fatalf("all-stale source evidence = %+v", got)
 	}
 }
 
