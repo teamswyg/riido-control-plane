@@ -40,6 +40,13 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		result.DecisionIDs = append(result.DecisionIDs, item.ID)
 		candidateIDs = append(candidateIDs, item.ID)
 		result.CandidateSourceRefs = append(result.CandidateSourceRefs, sourceRefEvidence(item))
+		subject, ok, err := subjectEvidence(item)
+		if err != nil {
+			return result, err
+		}
+		if ok {
+			result.CandidateSubjects = append(result.CandidateSubjects, subject)
+		}
 		result.DecisionArtifacts = append(result.DecisionArtifacts, decisionArtifactEvidence{
 			CandidateID:   item.ID,
 			Disposition:   decision.Disposition,
@@ -59,11 +66,4 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		consumedArtifact(path, candidate, candidateIDs),
 	}
 	return result, nil
-}
-
-func verifyDecisionNextArtifact(candidate closedLoopCandidate, decision decisionRecord) error {
-	if !containsString(candidate.RequiredNextArtifacts, decision.NextArtifact) {
-		return fmt.Errorf("candidate %s decision next_artifact %s is not required by candidate artifact", candidate.ID, decision.NextArtifact)
-	}
-	return nil
 }

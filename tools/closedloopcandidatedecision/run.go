@@ -25,6 +25,7 @@ func run(opt options) error {
 		result.DecisionIDs = candidateResult.DecisionIDs
 		result.DecisionArtifacts = candidateResult.DecisionArtifacts
 		result.CandidateSourceRefs = candidateResult.CandidateSourceRefs
+		result.CandidateSubjects = candidateResult.CandidateSubjects
 		result.ConsumedCandidateArtifacts = candidateResult.ConsumedCandidateArtifacts
 	}
 	if err := maybeDoc(root, m.GeneratedDoc, renderDoc(m, result), opt.WriteDoc, opt.CheckDoc); err != nil {
