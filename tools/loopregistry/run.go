@@ -55,17 +55,5 @@ func run(opt options) error {
 	if err != nil {
 		return err
 	}
-	attachTargetVerifierPlan(impact,
-		architectureIndexFor(m.Claims, result.ClaimSurfaces),
-		result.ClaimSurfaces)
-	if opt.GitHubAnnotations {
-		writeGitHubAnnotations(opt.AnnotationOut, result, impact)
-	}
-	if opt.TargetSummary {
-		writeTargetVerifierSummary(opt.AnnotationOut, impact, opt.EvidenceOut)
-	}
-	if opt.EvidenceOut != "" {
-		return writeJSON(opt.EvidenceOut, newEvidence(m, result, impact))
-	}
-	return nil
+	return writeRunOutputs(opt, m, result, impact)
 }

@@ -45,7 +45,7 @@ func TestTargetVerifierSummaryUsesImpactPlan(t *testing.T) {
 		},
 	}, ".git/riido-loop-registry-precommit-evidence.json")
 	for _, want := range []string{
-		"3 changed paths, 2 matched paths, 2 components, 3 commands",
+		"3 changed paths, 2 matched paths, 0 exact, 0 component-routed, 2 components, 3 commands",
 		"paths: docs/30-architecture/loop-registry.riido.json, tools/loopregistry/b.go",
 		"components: docs/30-architecture, tools/loopregistry",
 		"loops: ai_thread_history, closed_loop_candidate",

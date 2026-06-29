@@ -3,6 +3,8 @@ package main
 type targetVerifierPlan struct {
 	ChangedPathCount    int                       `json:"changed_path_count"`
 	MatchedPathCount    int                       `json:"matched_path_count"`
+	ExactPathCount      int                       `json:"exact_path_count"`
+	ComponentRouteCount int                       `json:"component_route_count"`
 	ComponentCount      int                       `json:"component_count"`
 	CommandCount        int                       `json:"command_count"`
 	FocusedClaimIDs     []string                  `json:"focused_claim_ids,omitempty"`
@@ -39,6 +41,7 @@ type targetVerifierPath struct {
 	Path             string   `json:"path"`
 	Component        string   `json:"component"`
 	Kind             string   `json:"kind"`
+	MatchKind        string   `json:"match_kind"`
 	LoopIDs          []string `json:"loop_ids"`
 	ClaimIDs         []string `json:"claim_ids"`
 	VerifierCommands []string `json:"verifier_commands"`
