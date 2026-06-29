@@ -8,9 +8,9 @@ import (
 func TestTargetVerifierAnnotationSummaryIncludesComponents(t *testing.T) {
 	got := targetVerifierAnnotationSummary(&targetVerifierPlan{
 		Components: []targetVerifierComponent{
-			{Component: "docs/30-architecture"},
-			{Component: "internal/riidoaiserver"},
-			{Component: "tools/loopregistry"},
+			{Component: "docs/30-architecture", LoopIDs: []string{"loop-b"}},
+			{Component: "internal/riidoaiserver", LoopIDs: []string{"loop-a"}},
+			{Component: "tools/loopregistry", LoopIDs: []string{"loop-c"}},
 		},
 		CommandCount: 3,
 		VerifierCommands: []string{
@@ -22,6 +22,7 @@ func TestTargetVerifierAnnotationSummaryIncludesComponents(t *testing.T) {
 	for _, want := range []string{
 		"components: docs/30-architecture, internal/riidoaiserver",
 		"+1 more in loop-registry-evidence",
+		"loops: loop-a, loop-b",
 		"commands: go test ./tools/a -count=1",
 	} {
 		if !strings.Contains(got, want) {
