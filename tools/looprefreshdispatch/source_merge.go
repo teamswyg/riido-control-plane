@@ -31,7 +31,11 @@ func mergeRefreshCommandSources(sources []refreshCommandEvidence) (refreshComman
 		commands = append(commands, source.Commands...)
 	}
 	if freshCount == 0 {
-		return refreshCommandEvidence{}, fmt.Errorf("all refresh command evidence sources are stale")
+		return refreshCommandEvidence{
+			SchemaVersion: refreshCommandsSchema,
+			Status:        "source_stale",
+			StaleSources:  staleSources,
+		}, nil
 	}
 	return refreshCommandEvidence{
 		SchemaVersion: refreshCommandsSchema,

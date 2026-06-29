@@ -25,10 +25,10 @@
     }
   ],
   "loop": {
-    "observation": "Loop refresh dispatch can discover non-workflow refresh commands from multiple command evidence sources that safe GitHub workflow dispatch cannot execute.",
-    "hypothesis": "Merging fresh command evidence sources and emitting ignored refresh commands as redacted closed-loop candidates lets registry refresh commands and candidate-decision next commands share the same safe dispatch path.",
-    "execute": "Generate a dispatch plan and optional candidate artifact from one or more loop-refresh command evidence files without shell-evaluating command strings, and verify the sample path with real closed-loop candidate decision command output.",
-    "evaluate": "The verifier fails on stale source evidence, unsafe workflow command parsing, missing ignored command details, missing repeated command input coverage, missing candidate-decision producer coverage, missing candidate source refs, or missing adoption commands.",
-    "retrospective": "This keeps workflow dispatch safe while preventing target verifier commands from either loop-registry or candidate-decision evidence from falling back into human memory."
+    "observation": "Loop refresh dispatch can discover non-workflow refresh commands or all-stale command evidence sources that safe GitHub workflow dispatch cannot execute.",
+    "hypothesis": "Merging fresh command evidence sources, emitting ignored refresh commands as redacted closed-loop candidates, and converting all-stale inputs into source_stale candidates lets registry refresh commands and candidate-decision next commands share the same safe dispatch path without losing expired-evidence failures.",
+    "execute": "Generate a dispatch plan and optional candidate artifact from one or more loop-refresh command evidence files without shell-evaluating command strings, preserve stale source diagnostics as source_stale evidence when no fresh source remains, and verify the sample path with real closed-loop candidate decision command output.",
+    "evaluate": "The verifier fails on unsafe workflow command parsing, missing ignored command details, missing repeated command input coverage, missing candidate-decision producer coverage, missing candidate source refs, missing stale-source candidate evidence, or missing adoption commands.",
+    "retrospective": "This keeps workflow dispatch safe while preventing target verifier commands or expired command evidence from either loop-registry or candidate-decision evidence from falling back into human memory."
   }
 }

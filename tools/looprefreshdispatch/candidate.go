@@ -2,7 +2,9 @@ package main
 
 func candidateEvidenceFromPlan(plan dispatchPlan) candidateEvidence {
 	liveStatus := "no_ignored_commands"
-	if len(plan.IgnoredCommands) > 0 {
+	if plan.Status == "source_stale" {
+		liveStatus = "stale_sources"
+	} else if len(plan.IgnoredCommands) > 0 {
 		liveStatus = "ignored_commands"
 	}
 	candidates := candidatesFromPlan(plan, liveStatus)
@@ -22,7 +24,10 @@ func candidateEvidenceFromPlan(plan dispatchPlan) candidateEvidence {
 }
 
 func candidatesFromPlan(plan dispatchPlan, liveStatus string) []closedLoopCandidate {
-	out := make([]closedLoopCandidate, 0, len(plan.IgnoredCommands))
+	out := make([]closedLoopCandidate, 0, len(plan.IgnoredCommands)+len(plan.SourceStaleSources))
+	for index, source := range plan.SourceStaleSources {
+		out = append(out, candidateFromStaleSource(plan, liveStatus, source, index))
+	}
 	for index, command := range plan.IgnoredCommands {
 		out = append(out, candidateFromIgnoredCommand(plan, liveStatus, command, index))
 	}
