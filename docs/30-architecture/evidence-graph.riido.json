@@ -806,8 +806,8 @@
     },
     {
       "id": "evidence_graph_annotation_loop",
-      "observation": "Evidence graph impact verification could fail or pass while reviewers and agents still had to open artifacts to see which observation-hypothesis-change-verifier-evidence chain ids and executable refs were in scope.",
-      "hypothesis": "Emitting GitHub Actions annotations from the evidence graph impact surface makes changed evidence chain ids and executable refs visible in the PR check output, so agents can repair the executable reasoning graph without reading narrative docs first.",
+      "observation": "Evidence graph impact verification could fail or pass while reviewers and agents still had to open artifacts to see which observation-hypothesis-change-verifier-evidence chain ids, executable refs, claims, and next-loop targets were in scope.",
+      "hypothesis": "Emitting GitHub Actions annotations from the evidence graph impact surface makes changed evidence chain ids, executable refs, claim ids, and next-loop targets visible in the PR check output, so agents can repair the executable reasoning graph without reading narrative docs first.",
       "claims": ["evidence_graph_impact_must_surface_as_ci_annotations"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
@@ -833,7 +833,7 @@
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true},
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"}
       ],
-      "decision": "Evidence graph PR checks now emit redacted GitHub annotations for changed chain impact and executable refs, keeping reasoning drift actionable in the check output itself.",
+      "decision": "Evidence graph PR checks now emit redacted GitHub annotations for changed chain impact, executable refs, claim ids, and next-loop targets, keeping reasoning drift actionable in the check output itself.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -1967,8 +1967,8 @@
     },
     {
       "id": "evidence_graph_chain_impact_loop",
-      "observation": "Evidence graph chains could change their observation, hypothesis, decision, or next loop while no referenced executable change or verifier surface moved in the same pull request, and the claim surface did not expose the machine-readable observe/verify/fail tokens for that gate.",
-      "hypothesis": "Adding an evidence graph impact gate and binding its observe/verify/fail tokens to the loop registry keeps reasoning updates attached to executable surfaces, so agents cannot treat prose-only reasoning edits as closed-loop progress.",
+      "observation": "Evidence graph chains could change their observation, hypothesis, decision, or next loop while no referenced executable change or verifier surface moved in the same pull request, and the impact record did not carry enough claim/verifier/evidence/next-loop scope for follow-up agents to continue without rejoining the manifest.",
+      "hypothesis": "Adding an evidence graph impact gate, binding its observe/verify/fail tokens to the loop registry, and emitting impacted chain claims, verifier refs, evidence refs, and next-loop targets keeps reasoning updates attached to executable surfaces so agents cannot treat prose-only reasoning edits as closed-loop progress.",
       "claims": ["evidence_graph_chain_changes_require_executable_surface"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
@@ -1976,8 +1976,10 @@
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
         {"kind": "tool", "path": "tools/evidencegraph/impact.go"},
         {"kind": "tool", "path": "tools/evidencegraph/impact_capture.go"},
+        {"kind": "tool", "path": "tools/evidencegraph/impact_chain_scope.go"},
         {"kind": "tool", "path": "tools/evidencegraph/impact_chain.go"},
         {"kind": "tool", "path": "tools/evidencegraph/impact_refs.go"},
+        {"kind": "tool", "path": "tools/evidencegraph/impact_types.go"},
         {"kind": "test", "path": "tools/evidencegraph/impact_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
@@ -1992,7 +1994,7 @@
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Evidence graph PR verification rejects added, changed, or removed chains when the diff only changes manifests or generated docs; the loop registry claim now also exposes the observation, verifier, and failure tokens that let loopclosureaudit keep this gate claim-bound.",
+      "decision": "Evidence graph PR verification rejects added, changed, or removed chains when the diff only changes manifests or generated docs; impact records also expose the impacted chain's claims, verifier refs, evidence refs, and next-loop target, and the loop registry claim exposes the observation, verifier, and failure tokens that let loopclosureaudit keep this gate claim-bound.",
       "next_loop": "closed_loop_candidate"
     },
     {

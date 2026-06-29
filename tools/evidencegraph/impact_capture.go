@@ -50,7 +50,14 @@ func captureRemovedChainImpact(
 }
 
 func verifyChainSurfaceChanged(item chain, changed map[string]bool, action string) (impactChain, error) {
-	record := impactChain{ID: item.ID, ChangedExecutableRefs: changedChainExecutableRefs(item, changed)}
+	record := impactChain{
+		ID:                    item.ID,
+		ChangedExecutableRefs: changedChainExecutableRefs(item, changed),
+		Claims:                sortedValues(item.Claims),
+		VerifierRefs:          refPaths(item.Verifiers),
+		EvidenceRefs:          refPaths(item.Evidence),
+		NextLoop:              item.NextLoop,
+	}
 	if len(record.ChangedExecutableRefs) == 0 {
 		return record, fmt.Errorf("chain %s %s without executable ref change", item.ID, action)
 	}

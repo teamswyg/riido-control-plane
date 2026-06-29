@@ -15,4 +15,8 @@ type impactEvidence struct {
 type impactChain struct {
 	ID                    string   `json:"id"`
 	ChangedExecutableRefs []string `json:"changed_executable_refs"`
+	Claims                []string `json:"claims,omitempty"`
+	VerifierRefs          []string `json:"verifier_refs,omitempty"`
+	EvidenceRefs          []string `json:"evidence_refs,omitempty"`
+	NextLoop              string   `json:"next_loop,omitempty"`
 }
