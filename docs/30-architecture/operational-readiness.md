@@ -7,8 +7,8 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 ## Evidence Surface
 
 - checks: `12`
-- covered: `3`
-- partial: `9`
+- covered: `4`
+- partial: `8`
 - required categories: `7`
 - missing categories: `0`
 
@@ -18,7 +18,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | --- | --- | --- | --- | --- | --- |
 | `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `3` | `infra_cloudwatch_alarm_by_client_surface` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `2` | `frontend_screenshot_regression_case` |
-| `2026-06-26` | `usability` | `partial` | `agent_rename_snapshot_policy` | `2` | `agent_rename_product_decision` |
+| `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `2` | `agent_rename_snapshot_regression_evidence` |
 | `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `2` | `daemon_network_disconnect_release_evidence` |
 | `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `4` | `capacity_result_annotation` |
 | `2026-06-26` | `stress` | `partial` | `single_pc_agent_limit` | `2` | `single_pc_agent_capacity_evidence` |
@@ -34,7 +34,6 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | Check | Category | Next Artifact | Next Command |
 | --- | --- | --- | --- |
 | `otel_xray_client_surface` | `monitoring` | `infra_cloudwatch_alarm_by_client_surface` | `terraform -chdir=terraform/riido_ai_server plan` |
-| `agent_rename_snapshot_policy` | `usability` | `agent_rename_product_decision` | `go test ./internal/riidoaiserver -run 'Test.*Agent.*Snapshot|Test.*Conversation' -count=1` |
 | `daemon_network_disconnect_waiting` | `exception` | `daemon_network_disconnect_release_evidence` | `go test ./cmd/riido -run 'TestDaemon.*(LongPoll|Validation|Retry)' -count=1` |
 | `single_pc_agent_limit` | `stress` | `single_pc_agent_capacity_evidence` | `go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1` |
 | `boot_burst_capacity` | `stress` | `cold_start_packet_burst_evidence` | `gh workflow run ai-agent-client-testnet-load.yml -f scenario=public -f duration=120s -f concurrency=128` |
