@@ -12,6 +12,8 @@ func attachTargetVerifierPlan(
 		Paths:            targetVerifierPaths(impact.ChangedFiles, index),
 	}
 	plan.MatchedPathCount = len(plan.Paths)
+	plan.Components = targetVerifierComponents(plan.Paths)
+	plan.ComponentCount = len(plan.Components)
 	for _, path := range plan.Paths {
 		plan.VerifierCommands = appendUnique(
 			plan.VerifierCommands,
@@ -35,6 +37,7 @@ func targetVerifierPaths(
 		}
 		out = append(out, targetVerifierPath{
 			Path:             binding.Path,
+			Component:        architectureComponentID(binding.Path),
 			Kind:             binding.Kind,
 			LoopIDs:          sortedCopy(binding.LoopIDs),
 			ClaimIDs:         sortedCopy(binding.ClaimIDs),

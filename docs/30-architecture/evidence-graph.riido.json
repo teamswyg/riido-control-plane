@@ -1893,7 +1893,7 @@
     {
       "id": "loop_registry_target_verifier_plan_loop",
       "observation": "Loop Registry evidence could map any bound path to claims and verifier commands, but PR impact evidence still exposed changed files separately from the target verifier commands that should run for those files.",
-      "hypothesis": "Enriching impact evidence from architecture_index with target_verifier_plan, then publishing bounded command samples in both GitHub annotations and local pre-commit summaries, makes changed-path QA scope executable before and during the PR check while keeping the full command list in the evidence artifact.",
+      "hypothesis": "Enriching impact evidence from architecture_index with target_verifier_plan path and component scope, then publishing bounded command samples in both GitHub annotations and local pre-commit summaries, makes changed-path QA scope executable before and during the PR check while keeping the full command list in the evidence artifact.",
       "claims": ["loop_registry_impact_must_expose_target_verifier_plan"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -1902,7 +1902,9 @@
         {"kind": "tool", "path": "tools/loopregistry/run.go"},
         {"kind": "tool", "path": "tools/loopregistry/impact_types.go"},
         {"kind": "tool", "path": "tools/loopregistry/impact_target_verifier.go"},
+        {"kind": "tool", "path": "tools/loopregistry/impact_target_verifier_component.go"},
         {"kind": "tool", "path": "tools/loopregistry/impact_target_verifier_types.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence_architecture_component_id.go"},
         {"kind": "tool", "path": "tools/loopregistry/github_annotation.go"},
         {"kind": "tool", "path": "tools/loopregistry/github_annotation_impact.go"},
         {"kind": "tool", "path": "tools/loopregistry/github_annotation_target_verifier.go"},
@@ -1922,7 +1924,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-check-output", "redacted": true}
       ],
-      "decision": "Loop Registry impact evidence now includes target_verifier_plan, and separate target verifier annotations plus local summaries publish bounded verifier command samples with a pointer to the full loop-registry evidence artifact, so changed files can be routed to verifier commands from generated evidence without unbounded output noise.",
+      "decision": "Loop Registry impact evidence now includes target_verifier_plan path and component scope, and separate target verifier annotations plus local summaries publish bounded verifier command samples with a pointer to the full loop-registry evidence artifact, so changed files can be routed to verifier commands from generated evidence without unbounded output noise.",
       "next_loop": "closed_loop_candidate"
     },
     {
