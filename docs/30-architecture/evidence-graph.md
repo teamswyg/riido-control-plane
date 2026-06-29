@@ -10,11 +10,11 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `55`
-- claim refs: `54`
-- change refs: `581`
-- verifier refs: `302`
-- evidence refs: `148`
+- chains: `56`
+- claim refs: `55`
+- change refs: `589`
+- verifier refs: `306`
+- evidence refs: `150`
 
 ## Evidence Chains
 
@@ -75,6 +75,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `loop_registry_loop_surface_evidence_loop` | `1` | `5` | `3` | `2` | `closed_loop_candidate` |
 | `evidence_graph_chain_impact_loop` | `1` | `9` | `5` | `2` | `closed_loop_candidate` |
 | `evidence_graph_workflow_trigger_coverage_loop` | `1` | `6` | `6` | `2` | `closed_loop_candidate` |
+| `operational_readiness_release_loop` | `1` | `8` | `4` | `2` | `operational_readiness_release_harness` |
 
 ## Loop
 

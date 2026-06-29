@@ -1,0 +1,186 @@
+{
+  "schema_version": "riido-control-plane-operational-readiness.v1",
+  "id": "operational-readiness",
+  "title": "Operational Readiness Evidence",
+  "generated_doc": "docs/30-architecture/operational-readiness.md",
+  "workflow": ".github/workflows/operational-readiness.yml",
+  "evidence_artifact": "operational-readiness-evidence",
+  "evidence_tool": "tools/operationalreadiness",
+  "required_categories": [
+    "monitoring",
+    "usability",
+    "exception",
+    "stress",
+    "chaos",
+    "scenario",
+    "desktop"
+  ],
+  "checks": [
+    {
+      "id": "otel_xray_client_surface",
+      "date": "2026-06-26",
+      "category": "monitoring",
+      "status": "partial",
+      "title": "OTel/X-Ray separates daemon, client app, desktop candidate, and component traffic",
+      "evidence_refs": [
+        {"kind": "code", "path": "internal/riidoaiserver/http_client_surface.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/http_client_surface_test.go"},
+        {"kind": "external", "path": "riido-infra:terraform/riido_ai_server/observability.tf"}
+      ],
+      "next_artifact": "infra_cloudwatch_alarm_by_client_surface",
+      "next_command": "terraform -chdir=terraform/riido_ai_server plan"
+    },
+    {
+      "id": "real_screen_wording",
+      "date": "2026-06-26",
+      "category": "usability",
+      "status": "covered",
+      "title": "User-visible AI Agent wording is verified through visible message tests",
+      "evidence_refs": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_visible_message_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_visible_message_test.go"}
+      ],
+      "next_artifact": "frontend_screenshot_regression_case",
+      "next_command": "go test ./internal/riidoaiserver -run 'Test.*Visible.*Message' -count=1"
+    },
+    {
+      "id": "agent_rename_snapshot_policy",
+      "date": "2026-06-26",
+      "category": "usability",
+      "status": "partial",
+      "title": "Agent rename behavior is captured as snapshot policy rather than inferred UI state",
+      "evidence_refs": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_test.go"}
+      ],
+      "next_artifact": "agent_rename_product_decision",
+      "next_command": "go test ./internal/riidoaiserver -run 'Test.*Agent.*Snapshot|Test.*Conversation' -count=1"
+    },
+    {
+      "id": "daemon_network_disconnect_waiting",
+      "date": "2026-06-26",
+      "category": "exception",
+      "status": "partial",
+      "title": "Daemon internet disconnect behavior has local daemon evidence but no release chaos run yet",
+      "evidence_refs": [
+        {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_control_plane_long_poll_test.go"},
+        {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_saas_validation_test.go"}
+      ],
+      "next_artifact": "daemon_network_disconnect_release_evidence",
+      "next_command": "go test ./cmd/riido -run 'TestDaemon.*(LongPoll|Validation|Retry)' -count=1"
+    },
+    {
+      "id": "testnet_load_capacity",
+      "date": "2026-06-26",
+      "category": "stress",
+      "status": "covered",
+      "title": "Control-plane user capacity is measured by testnet load workflow and local pressure harness",
+      "evidence_refs": [
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"},
+        {"kind": "workflow", "path": ".github/workflows/control-plane-performance.yml"},
+        {"kind": "tool", "path": "tools/aiagentload/main.go"},
+        {"kind": "tool", "path": "tools/controlplanepressure/main.go"}
+      ],
+      "next_artifact": "capacity_result_annotation",
+      "next_command": "go run ./tools/aiagentload -scenario public -base-url https://staging.ai-api.riido.io -duration 60s -concurrency 64 -evidence-out out/load.json"
+    },
+    {
+      "id": "single_pc_agent_limit",
+      "date": "2026-06-26",
+      "category": "stress",
+      "status": "partial",
+      "title": "One-PC agent capacity is owned by daemon local acceptance and runtime actor evidence",
+      "evidence_refs": [
+        {"kind": "external", "path": "riido-daemon:.github/workflows/local-qa-runner.yml"},
+        {"kind": "external", "path": "riido-daemon:internal/agentbridge/runtimeactor/actor_slot_limit_test.go"}
+      ],
+      "next_artifact": "single_pc_agent_capacity_evidence",
+      "next_command": "go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1"
+    },
+    {
+      "id": "boot_burst_capacity",
+      "date": "2026-06-26",
+      "category": "stress",
+      "status": "partial",
+      "title": "Server boot burst capacity can reuse load evidence but lacks cold-start storm run",
+      "evidence_refs": [
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"},
+        {"kind": "tool", "path": "tools/aiagentload/run.go"}
+      ],
+      "next_artifact": "cold_start_packet_burst_evidence",
+      "next_command": "gh workflow run ai-agent-client-testnet-load.yml -f scenario=public -f duration=120s -f concurrency=128"
+    },
+    {
+      "id": "server_crash_recovery",
+      "date": "2026-06-26",
+      "category": "chaos",
+      "status": "partial",
+      "title": "Server crash and recovery are modeled by ECS/runtime ownership, but chaos timing is not yet measured",
+      "evidence_refs": [
+        {"kind": "workflow", "path": ".github/workflows/control-plane-performance.yml"},
+        {"kind": "generated_doc", "path": "docs/30-architecture/runtime-cd-ownership.md"}
+      ],
+      "next_artifact": "ecs_service_recovery_chaos_evidence",
+      "next_command": "aws ecs describe-services --cluster riido-ai-server-testnet --services riido-ai-server-testnet"
+    },
+    {
+      "id": "scale_out_recovery",
+      "date": "2026-06-26",
+      "category": "chaos",
+      "status": "partial",
+      "title": "Scale-out behavior is an infra/runtime evidence item and must not be inferred from code alone",
+      "evidence_refs": [
+        {"kind": "external", "path": "riido-infra:deploy/aws/riido_ai_server/riido_ai_server_scaling_policy.json"},
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"}
+      ],
+      "next_artifact": "scale_out_timing_evidence",
+      "next_command": "aws application-autoscaling describe-scaling-policies --service-namespace ecs"
+    },
+    {
+      "id": "all_servers_down_daemon_behavior",
+      "date": "2026-06-26",
+      "category": "chaos",
+      "status": "partial",
+      "title": "All-server-down daemon behavior needs daemon reconnect and backoff evidence",
+      "evidence_refs": [
+        {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_control_plane_long_poll_server_test.go"},
+        {"kind": "external", "path": "riido-daemon:docs/30-architecture/product-loop-evidence.riido.json"}
+      ],
+      "next_artifact": "daemon_reconnect_storm_evidence",
+      "next_command": "go test ./cmd/riido -run 'TestDaemon.*Server|TestDaemon.*Poll' -count=1"
+    },
+    {
+      "id": "scenario_message_policy",
+      "date": "2026-06-26",
+      "category": "scenario",
+      "status": "covered",
+      "title": "Non-command documents ask for intent while explicit command messages execute",
+      "evidence_refs": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"}
+      ],
+      "next_artifact": "weekend_open_scenario_result",
+      "next_command": "go test ./internal/riidoaiserver -run 'Test.*Intent.*Dialogue|Test.*NonCommand' -count=1"
+    },
+    {
+      "id": "desktop_body_only_change",
+      "date": "2026-06-27",
+      "category": "desktop",
+      "status": "partial",
+      "title": "Hello World to Say World body-only scenario belongs to daemon local product acceptance",
+      "evidence_refs": [
+        {"kind": "external", "path": "riido-daemon:tools/localproductacceptance/task_fixture_flow.go"},
+        {"kind": "external", "path": "riido-daemon:docs/30-architecture/local-acceptance-coverage.riido.json"}
+      ],
+      "next_artifact": "desktop_body_only_golden_evidence",
+      "next_command": "RIIDO_E2E_TASK_ID=<task> go run ./tools/localproductacceptance -run-task-mutations"
+    }
+  ],
+  "loop": {
+    "observation": "Release-prep work was split across monitoring, usability, exception, stress, chaos, scenario, and desktop checks, so readiness could be overestimated from whichever loop was green.",
+    "hypothesis": "A release readiness sidecar can make covered and partial evidence visible in one executable manifest while leaving endpoint contracts unchanged.",
+    "execute": "Verify every release-prep check has a category, status, evidence reference, next artifact, next command, generated reader, and claim binding.",
+    "evaluate": "The verifier fails on missing category coverage, stale generated docs, unknown statuses, missing evidence files for local refs, or partial checks without next executable work.",
+    "retrospective": "This loop does not claim release completeness; it prevents partial operational evidence from hiding behind unrelated green CI checks."
+  }
+}

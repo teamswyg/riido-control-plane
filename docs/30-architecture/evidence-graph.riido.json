@@ -1817,6 +1817,34 @@
       ],
       "decision": "Evidence graph workflow trigger coverage is part of graph verification: referenced non-artifact surfaces must be covered by direct paths or directory globs, and loopclosureaudit now keeps that workflow-trigger requirement claim-bound through explicit observe/verify/fail coverage tokens.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "operational_readiness_release_loop",
+      "observation": "Release readiness work spans monitoring, usability, exception, stress, chaos, scenario, and desktop checks, but those checks can otherwise remain scattered across unrelated green workflows.",
+      "hypothesis": "Binding the release-prep checklist to an executable readiness manifest, server-side client-surface tracing, a verifier, and generated evidence keeps covered and partial readiness visible without changing endpoint contracts.",
+      "claims": ["operational_readiness_checks_must_bind_release_items_to_evidence"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/operational-readiness.riido.json"},
+        {"kind": "generated_doc", "path": "docs/30-architecture/operational-readiness.md"},
+        {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
+        {"kind": "code", "path": "internal/riidoaiserver/http_client_surface.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/http_tracing.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness"},
+        {"kind": "test", "path": "internal/riidoaiserver/http_client_surface_test.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/main_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/operationalreadiness/main_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/http_client_surface_test.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness"},
+        {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "operational-readiness-evidence", "redacted": true},
+        {"kind": "generated_doc", "path": "docs/30-architecture/operational-readiness.md"}
+      ],
+      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and command are declared; OTel/X-Ray spans now include a low-cardinality server-side client surface for daemon/client/desktop-candidate traffic analysis.",
+      "next_loop": "operational_readiness_release_harness"
     }
   ],
   "loop": {

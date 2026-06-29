@@ -1,0 +1,55 @@
+name: operational-readiness
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "29 22 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/operational-readiness.yml"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "docs/30-architecture/loop-registry.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "tools/operationalreadiness/**"
+      - "internal/riidoaiserver/http_client_surface.go"
+      - "internal/riidoaiserver/http_client_surface_test.go"
+      - "internal/riidoaiserver/http_tracing.go"
+      - "go.mod"
+      - "go.sum"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/operational-readiness.yml"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "tools/operationalreadiness/**"
+      - "internal/riidoaiserver/http_client_surface.go"
+      - "internal/riidoaiserver/http_client_surface_test.go"
+      - "internal/riidoaiserver/http_tracing.go"
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: operational_readiness_release_harness
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify operational readiness evidence
+        run: |
+          mkdir -p out
+          go test ./tools/operationalreadiness -count=1
+          go test ./internal/riidoaiserver -run 'TestTraceHTTPClientSurface|TestHTTPTracingRecordsClientSurface' -count=1
+          go run ./tools/operationalreadiness \
+            -check-doc \
+            -evidence-out out/operational-readiness-evidence.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-evidence
+          path: out/operational-readiness-evidence.json
+          if-no-files-found: error
