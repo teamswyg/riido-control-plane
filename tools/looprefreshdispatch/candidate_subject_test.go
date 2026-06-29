@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 func TestIgnoredCommandCandidateCarriesSubject(t *testing.T) {
 	plan := dispatchPlan{
@@ -12,6 +15,14 @@ func TestIgnoredCommandCandidateCarriesSubject(t *testing.T) {
 			Command:     "go test ./tools/controlplaneperf",
 			CandidateID: "candidate_one",
 			SubjectKind: "claim_coverage_gap",
+			ClaimIDs: []string{
+				"control_plane_pressure_claim",
+				"ai_thread_history_claim",
+			},
+			EvidenceChainIDs: []string{
+				"target_verifier_chain",
+				"control_plane_pressure_chain",
+			},
 		}},
 	}
 	item := candidateEvidenceFromPlan(plan).Candidates[0]
@@ -22,6 +33,18 @@ func TestIgnoredCommandCandidateCarriesSubject(t *testing.T) {
 		item.Subject.SourceCandidateID != "candidate_one" ||
 		item.Subject.SourceSubjectKind != "claim_coverage_gap" {
 		t.Fatalf("subject = %+v", item.Subject)
+	}
+	if !slices.Equal(item.Subject.ClaimIDs, []string{
+		"ai_thread_history_claim",
+		"control_plane_pressure_claim",
+	}) {
+		t.Fatalf("claim ids = %+v", item.Subject.ClaimIDs)
+	}
+	if !slices.Equal(item.Subject.EvidenceChainIDs, []string{
+		"control_plane_pressure_chain",
+		"target_verifier_chain",
+	}) {
+		t.Fatalf("evidence chain ids = %+v", item.Subject.EvidenceChainIDs)
 	}
 }
 
