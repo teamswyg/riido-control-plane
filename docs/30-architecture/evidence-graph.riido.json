@@ -2090,6 +2090,46 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "container_image_contract_runtime_shape_loop",
+      "observation": "The container image contract manifest and verifier were executable, but they were not bound into the loop registry or evidence graph, so changes under tools/containercontract could bypass target verifier routing and force agents to infer runtime image ownership from scattered files.",
+      "hypothesis": "Binding the container image contract, Dockerfile, verifier helpers, module-decomposition ratchet, and integration matrix evidence into one claim lets changed-path QA route container runtime shape edits to the exact verifier commands without asking agents to read prose.",
+      "claims": ["container_image_contract_must_bind_runtime_shape"],
+      "changes": [
+        {"kind": "manifest", "path": "packaging/containers/riido_ai_server_container.riido.json"},
+        {"kind": "code", "path": "packaging/containers/riido_ai_server.Dockerfile"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/module-decomposition.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/integration-matrix.riido.json"},
+        {"kind": "tool", "path": "tools/containercontract/validate.go"},
+        {"kind": "tool", "path": "tools/containercontract/validate_required_fields.go"},
+        {"kind": "tool", "path": "tools/containercontract/validate_final.go"},
+        {"kind": "tool", "path": "tools/containercontract/verify.go"},
+        {"kind": "tool", "path": "tools/containercontract/verify_build_stage.go"},
+        {"kind": "tool", "path": "tools/containercontract/verify_build_commands.go"},
+        {"kind": "tool", "path": "tools/containercontract/verify_more.go"},
+        {"kind": "tool", "path": "tools/containercontract/task_ir_verify.go"},
+        {"kind": "test", "path": "tools/containercontract/run_test.go"},
+        {"kind": "test", "path": "tools/containercontract/verify_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/containercontract/run_test.go"},
+        {"kind": "test", "path": "tools/containercontract/verify_test.go"},
+        {"kind": "tool", "path": "tools/containercontract"},
+        {"kind": "tool", "path": "tools/moduledecomposition"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "container-image-contract", "redacted": true},
+        {"kind": "artifact", "path": "module-decomposition-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Container image contract ownership is now routed through executable evidence: containercontract validation and verification helpers are split below the 75-line budget, required fields are a static registry, tools/containercontract has a zero-over-budget ratchet, and changed-path impact evidence can select container contract verifiers from the loop registry instead of agent memory.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "control_plane_meta_evidence_expiry_loop",
       "observation": "Control-plane performance, high-traffic audit, and loop-closure audit evidence were machine-readable but lacked generated_at/expires_at windows, so refresh automation could not distinguish fresh open-loop measurements from stale proof artifacts.",
       "hypothesis": "Giving these meta-evidence sidecars the same 24h evidence window as core loop evidence lets refresh dispatch and downstream agents reject stale performance, audit, and closure evidence without embedding dynamic timestamps in generated prose.",
