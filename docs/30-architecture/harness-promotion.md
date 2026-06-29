@@ -7,6 +7,7 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 ## Summary
 
 - promotion sources: `3`
+- promotion edges: `3`
 - required next artifact refs: `18`
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
@@ -30,7 +31,7 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 - every registered harness loop must have exactly one harness promotion source with the same refresh workflow
 - redacted summary freshness must satisfy generated_at < expires_at and now < expires_at before closed-loop candidate generation
 - harness workflows that produce expiring evidence must be runnable without a human trigger
-- harness promotion evidence must publish generated_at and expires_at
+- harness promotion evidence must publish generated_at, expires_at, promotion_edge_count, and promotion_edges
 
 ## Evidence Loop
 
