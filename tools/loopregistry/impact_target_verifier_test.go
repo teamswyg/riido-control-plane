@@ -20,7 +20,8 @@ func TestImpactTargetVerifierPlanUsesArchitectureIndex(t *testing.T) {
 	plan := impact.TargetVerifierPlan
 	if plan == nil || plan.ChangedPathCount != 2 ||
 		plan.MatchedPathCount != 1 || plan.ComponentCount != 1 ||
-		plan.CommandCount != 1 {
+		plan.CommandCount != 1 || plan.ExactPathCount != 1 ||
+		plan.ComponentRouteCount != 0 {
 		t.Fatalf("target verifier plan = %+v", plan)
 	}
 	if plan.VerifierCommands[0] != "go test ./tools/example -count=1" {
@@ -38,6 +39,7 @@ func TestImpactTargetVerifierPlanUsesArchitectureIndex(t *testing.T) {
 	path := plan.Paths[0]
 	if path.Path != "tools/example/a.go" ||
 		path.Component != "tools/example" ||
+		path.MatchKind != "exact" ||
 		path.ClaimIDs[0] != "claim-a" ||
 		path.VerifierCommands[0] != "go test ./tools/example -count=1" {
 		t.Fatalf("target verifier path = %+v", path)
