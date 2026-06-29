@@ -6,8 +6,8 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 
 ## Summary
 
-- sources: `6`
-- required refs: `36`
+- sources: `7`
+- required refs: `42`
 
 ## Sources
 
@@ -19,6 +19,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 | `control-plane-pressure` | `control-plane-pressure-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `loop-closure-audit` | `loop-closure-audit-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `loop-refresh-dispatch` | `loop-refresh-dispatch-closed-loop-candidates` | `closed_loop_candidate` | `6` |
+| `operational-readiness` | `operational-readiness-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 
 ## Assertions
 
@@ -42,6 +43,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - candidate intake sources must include loop-closure-audit residual gap candidates
 - candidate intake sources must include control-plane pressure measured finding candidates
 - candidate intake sources must include loop-refresh-dispatch ignored command candidates
+- candidate intake sources must include operational readiness stale partial candidates
 - candidate intake workflow path triggers must include every producer source workflow
 - candidate intake PR verification must consume a performance-specific candidate fixture
 

@@ -2,10 +2,6 @@ package main
 
 import "time"
 
-func newEvidence(m manifest) evidence {
-	return newEvidenceAt(m, time.Now().UTC())
-}
-
 func newEvidenceAt(m manifest, now time.Time) evidence {
 	categoryCounts := map[string]int{}
 	measurementKinds := map[string]int{}

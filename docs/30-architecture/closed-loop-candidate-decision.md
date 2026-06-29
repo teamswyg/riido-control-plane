@@ -6,7 +6,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `16`
+- decisions: `24`
 - command artifact: `closed-loop-candidate-decision-commands`
 
 ## Assertions
@@ -57,6 +57,14 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `control-plane-pressure:tool_approval_waiters` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `loop-closure-audit:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
 | `loop-refresh-dispatch:01:control_plane_pressure_candidate:target_verifier` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `verifier` |
+| `operational-readiness:otel_xray_client_surface` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `operational-readiness:daemon_network_disconnect_waiting` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `operational-readiness:single_pc_agent_limit` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `operational-readiness:boot_burst_capacity` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `operational-readiness:server_crash_recovery` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `operational-readiness:scale_out_recovery` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `operational-readiness:all_servers_down_daemon_behavior` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `operational-readiness:desktop_body_only_change` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
 
 ## Evidence Loop
 

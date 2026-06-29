@@ -45,8 +45,8 @@
 | `.github/workflows/assignment-store-actor.yml` | `covered` | `1` | `1/1` | `true` | `4/4` | `0` | - |
 | `.github/workflows/aws-adapters-facade.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/ci.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
-| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `14` | `14/14` | `true` | `8/8` | `0` | - |
-| `.github/workflows/closed-loop-candidate-intake.yml` | `covered` | `13` | `13/13` | `true` | `6/6` | `0` | - |
+| `.github/workflows/closed-loop-candidate-decision.yml` | `covered` | `16` | `16/16` | `true` | `9/9` | `0` | - |
+| `.github/workflows/closed-loop-candidate-intake.yml` | `covered` | `15` | `15/15` | `true` | `7/7` | `0` | - |
 | `.github/workflows/cloudwatch-emf.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/config-reference.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/container-image-contract.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
@@ -69,7 +69,7 @@
 | `.github/workflows/migration-ledger.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/module-decomposition.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/open-questions.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
-| `.github/workflows/operational-readiness.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
+| `.github/workflows/operational-readiness.yml` | `covered` | `1` | `1/1` | `true` | `2/2` | `0` | - |
 | `.github/workflows/pre-commit-baseline.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/provider-status.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/repository-readme.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |

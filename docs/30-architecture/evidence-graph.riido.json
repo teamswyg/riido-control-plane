@@ -1826,6 +1826,37 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "operational_readiness_stale_partial_promotion_loop",
+      "observation": "Operational readiness evidence can identify stale partial release-prep checks, but those stale checks still require a candidate artifact before intake and decision loops can prioritize them.",
+      "hypothesis": "The operational readiness sidecar can convert stale partial checks into redacted closed-loop candidates while preserving covered checks as readiness evidence only.",
+      "claims": ["operational_readiness_checks_must_bind_release_items_to_evidence"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/operational-readiness.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json"},
+        {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-intake.yml"},
+        {"kind": "tool", "path": "tools/operationalreadiness/candidate.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness/candidate_item.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness/candidate_source.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness/candidate_adoption.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness/verify_sources.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/candidate_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/operationalreadiness/candidate_test.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness"},
+        {"kind": "tool", "path": "tools/closedloopcandidateintake"},
+        {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
+        {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-intake.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "operational-readiness-evidence", "redacted": true},
+        {"kind": "artifact", "path": "operational-readiness-closed-loop-candidates", "redacted": true}
+      ],
+      "decision": "Operational readiness stale partials now become redacted closed-loop candidate artifacts with source refs, promotion edges, freshness windows, and adoption plans, while fresh partials remain visible but are not automatically promoted.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "operational_readiness_release_loop",
       "observation": "Release readiness work spans monitoring, usability, exception, stress, chaos, scenario, and desktop checks, but those checks can otherwise remain scattered across unrelated green workflows, partial checks can age, and readiness can be claimed without naming the metric, trace, test, workflow, infra, profile, or artifact signal that proves it.",
       "hypothesis": "Binding the release-prep checklist to an executable readiness manifest, server-side client-surface tracing and EMF metrics, partial age/stale evidence, measurement signals, a verifier, and generated evidence keeps covered, partial, stale, and unmeasured readiness visible without changing endpoint contracts.",

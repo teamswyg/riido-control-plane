@@ -6,6 +6,23 @@
   "workflow": ".github/workflows/operational-readiness.yml",
   "evidence_artifact": "operational-readiness-evidence",
   "evidence_tool": "tools/operationalreadiness",
+  "sources": [
+    {
+      "id": "operational-readiness",
+      "source_workflow": ".github/workflows/operational-readiness.yml",
+      "candidate_artifact": "operational-readiness-closed-loop-candidates",
+      "harness_loop": "operational_readiness_release_harness",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    }
+  ],
   "required_categories": [
     "monitoring",
     "usability",

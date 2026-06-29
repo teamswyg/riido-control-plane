@@ -13,11 +13,14 @@ on:
       - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-closure-audit.yml"
       - ".github/workflows/loop-refresh-dispatch.yml"
+      - ".github/workflows/operational-readiness.yml"
       - "docs/30-architecture/control-plane-performance.riido.json"
       - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "docs/30-architecture/loop-closure-audit.riido.json"
       - "docs/30-architecture/loop-refresh-dispatch.riido.json"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "docs/30-architecture/operational-readiness.md"
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
@@ -30,6 +33,7 @@ on:
       - "tools/harnesspromotion/**"
       - "tools/loopclosureaudit/**"
       - "tools/looprefreshdispatch/**"
+      - "tools/operationalreadiness/**"
   pull_request:
     paths:
       - ".github/workflows/closed-loop-candidate-decision.yml"
@@ -38,11 +42,14 @@ on:
       - ".github/workflows/control-plane-performance.yml"
       - ".github/workflows/loop-closure-audit.yml"
       - ".github/workflows/loop-refresh-dispatch.yml"
+      - ".github/workflows/operational-readiness.yml"
       - "docs/30-architecture/control-plane-performance.riido.json"
       - "docs/30-architecture/control-plane-performance.md"
       - "docs/30-architecture/harness-promotion.riido.json"
       - "docs/30-architecture/loop-closure-audit.riido.json"
       - "docs/30-architecture/loop-refresh-dispatch.riido.json"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "docs/30-architecture/operational-readiness.md"
       - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
       - "docs/30-architecture/loop-registry.riido.json"
       - "docs/30-architecture/closed-loop-candidate-decision.riido.json"
@@ -55,6 +62,7 @@ on:
       - "tools/harnesspromotion/**"
       - "tools/loopclosureaudit/**"
       - "tools/looprefreshdispatch/**"
+      - "tools/operationalreadiness/**"
 
 permissions:
   contents: read
@@ -145,6 +153,13 @@ jobs:
             go run ./tools/closedloopcandidatedecision \
             -candidate-in out/sample-loop-refresh-dispatch-candidates.json \
             -evidence-out out/sample-loop-refresh-dispatch-decision-evidence.json
+          RIIDO_OPERATIONAL_READINESS_NOW=2026-06-29T12:00:00Z \
+            go run ./tools/operationalreadiness \
+            -candidate-out out/sample-operational-readiness-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-29T12:00:00Z \
+            go run ./tools/closedloopcandidatedecision \
+            -candidate-in out/sample-operational-readiness-candidates.json \
+            -evidence-out out/sample-operational-readiness-decision-evidence.json
       - name: Download latest live candidate artifacts
         if: github.event_name != 'pull_request'
         env:
@@ -200,6 +215,10 @@ jobs:
             loop-refresh-dispatch.yml \
             loop-refresh-dispatch-closed-loop-candidates \
             out/live-candidates/loop-refresh-dispatch
+          download_candidate_artifact \
+            operational-readiness.yml \
+            operational-readiness-closed-loop-candidates \
+            out/live-candidates/operational-readiness
       - name: Verify live candidate decisions
         if: github.event_name != 'pull_request'
         shell: bash
@@ -282,6 +301,16 @@ jobs:
           else
             write_skipped_live_decision loop-refresh-dispatch "live candidate artifact contained no open candidates" out/live-decision-loop-refresh-dispatch-evidence.json
           fi
+          operational_readiness_candidate="$(candidate_file out/live-candidates/operational-readiness)"
+          if [[ -z "$operational_readiness_candidate" ]]; then
+            write_skipped_live_decision operational-readiness "live candidate artifact missing" out/live-decision-operational-readiness-evidence.json
+          elif jq -e '(.candidate_count // 0) > 0' "$operational_readiness_candidate" >/dev/null; then
+            go run ./tools/closedloopcandidatedecision \
+              -candidate-in "$operational_readiness_candidate" \
+              -evidence-out out/live-decision-operational-readiness-evidence.json
+          else
+            write_skipped_live_decision operational-readiness "live candidate artifact contained no open candidates" out/live-decision-operational-readiness-evidence.json
+          fi
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -308,6 +337,14 @@ jobs:
             out/sample-loop-refresh-dispatch-plan.json
             out/sample-loop-refresh-dispatch-candidates.json
             out/sample-loop-refresh-dispatch-decision-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-decision-operational-readiness-sample-evidence
+          path: |
+            out/sample-operational-readiness-candidates.json
+            out/sample-operational-readiness-decision-evidence.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
@@ -340,4 +377,5 @@ jobs:
             out/live-decision-pressure-evidence.json
             out/live-decision-loop-closure-audit-evidence.json
             out/live-decision-loop-refresh-dispatch-evidence.json
+            out/live-decision-operational-readiness-evidence.json
           if-no-files-found: error
