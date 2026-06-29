@@ -47,10 +47,16 @@ type dispatchPlan struct {
 }
 
 type workflowDispatch struct {
-	WorkflowFile     string   `json:"workflow_file"`
-	VerifiedCommand  string   `json:"verified_command"`
-	LoopIDs          []string `json:"loop_ids"`
-	CommandCount     int      `json:"command_count"`
-	ClaimIDs         []string `json:"claim_ids,omitempty"`
-	EvidenceChainIDs []string `json:"evidence_chain_ids,omitempty"`
+	WorkflowFile     string          `json:"workflow_file"`
+	VerifiedCommand  string          `json:"verified_command"`
+	Inputs           []workflowInput `json:"inputs,omitempty"`
+	LoopIDs          []string        `json:"loop_ids"`
+	CommandCount     int             `json:"command_count"`
+	ClaimIDs         []string        `json:"claim_ids,omitempty"`
+	EvidenceChainIDs []string        `json:"evidence_chain_ids,omitempty"`
+}
+
+type workflowInput struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }

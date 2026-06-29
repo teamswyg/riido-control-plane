@@ -8,22 +8,32 @@ import (
 )
 
 func parseRefreshWorkflowCommand(root, command string) (string, error) {
+	workflow, _, _, err := parseRefreshWorkflowDispatch(root, command)
+	return workflow, err
+}
+
+func parseRefreshWorkflowDispatch(root, command string) (
+	string,
+	string,
+	[]workflowInput,
+	error,
+) {
 	fields := strings.Fields(command)
-	if len(fields) != 6 {
-		return "", fmt.Errorf("unsupported refresh command shape")
+	if len(fields) < 4 || fields[0] != "gh" || fields[1] != "workflow" || fields[2] != "run" {
+		return "", "", nil, fmt.Errorf("unsupported refresh command shape")
 	}
-	if fields[0] != "gh" || fields[1] != "workflow" || fields[2] != "run" ||
-		fields[4] != "--ref" || fields[5] != "main" {
-		return "", fmt.Errorf("unsupported refresh workflow command")
-	}
-	workflow := fields[3]
+	workflow, args := fields[3], fields[4:]
 	if !safeWorkflowFile(workflow) {
-		return "", fmt.Errorf("unsafe workflow file %q", workflow)
+		return "", "", nil, fmt.Errorf("unsafe workflow file %q", workflow)
 	}
 	if err := workflowExists(root, workflow); err != nil {
-		return "", err
+		return "", "", nil, err
 	}
-	return workflow, nil
+	verifiedArgs, inputs, err := verifiedWorkflowArgs(args)
+	if err != nil {
+		return "", "", nil, err
+	}
+	return workflow, refreshWorkflowCommand(workflow, verifiedArgs), inputs, nil
 }
 
 func safeWorkflowFile(value string) bool {

@@ -1,13 +1,19 @@
 package main
 
 type workflowScope struct {
+	workflowFile     string
+	verifiedCommand  string
+	inputs           []workflowInput
 	loopCounts       map[string]int
 	claimIDs         map[string]bool
 	evidenceChainIDs map[string]bool
 }
 
-func newWorkflowScope() workflowScope {
+func newWorkflowScope(workflowFile, verifiedCommand string, inputs []workflowInput) workflowScope {
 	return workflowScope{
+		workflowFile:     workflowFile,
+		verifiedCommand:  verifiedCommand,
+		inputs:           inputs,
 		loopCounts:       map[string]int{},
 		claimIDs:         map[string]bool{},
 		evidenceChainIDs: map[string]bool{},

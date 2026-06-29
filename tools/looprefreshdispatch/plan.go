@@ -28,7 +28,7 @@ func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan
 	if out.SourceStatus == "fresh" {
 		return out, nil
 	}
-	byWorkflow := map[string]workflowScope{}
+	byCommand := map[string]workflowScope{}
 	ignoredKinds := map[string]bool{}
 	for _, command := range source.Commands {
 		if command.Kind != "refresh_workflow" {
@@ -37,19 +37,19 @@ func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan
 			out.IgnoredCommands = append(out.IgnoredCommands, command)
 			continue
 		}
-		workflow, err := parseRefreshWorkflowCommand(root, command.Command)
+		workflow, verified, inputs, err := parseRefreshWorkflowDispatch(root, command.Command)
 		if err != nil {
 			return dispatchPlan{}, err
 		}
-		scope, ok := byWorkflow[workflow]
+		scope, ok := byCommand[verified]
 		if !ok {
-			scope = newWorkflowScope()
+			scope = newWorkflowScope(workflow, verified, inputs)
 		}
 		scope.add(command)
-		byWorkflow[workflow] = scope
+		byCommand[verified] = scope
 	}
 	out.IgnoredCommandKinds = sortedKeys(ignoredKinds)
-	out.Dispatches = dispatchesFromWorkflowMap(byWorkflow)
+	out.Dispatches = dispatchesFromWorkflowMap(byCommand)
 	out.DispatchCount = len(out.Dispatches)
 	if out.DispatchCount > 0 {
 		out.Status = "dispatch_required"
