@@ -10,6 +10,7 @@ func loadRefreshCommandSources(root string, paths []string) ([]refreshCommandEvi
 		if source.SchemaVersion != refreshCommandsSchema {
 			return nil, unsupportedRefreshCommandSchema(source.SchemaVersion)
 		}
+		source.SourcePath = path
 		out = append(out, source)
 	}
 	return out, nil

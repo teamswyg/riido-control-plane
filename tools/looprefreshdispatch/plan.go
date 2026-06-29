@@ -22,6 +22,8 @@ func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan
 		SourceGeneratedAt:  strings.TrimSpace(source.GeneratedAt),
 		SourceExpiresAt:    strings.TrimSpace(source.ExpiresAt),
 		SourceCommandCount: source.CommandCount,
+		SourceStaleCount:   len(source.StaleSources),
+		SourceStaleSources: source.StaleSources,
 	}
 	if out.SourceStatus == "fresh" {
 		return out, nil

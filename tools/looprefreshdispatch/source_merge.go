@@ -9,16 +9,29 @@ func mergeRefreshCommandSources(sources []refreshCommandEvidence) (refreshComman
 	commands := []selectedRefreshCommand{}
 	generatedAt := ""
 	expiresAt := ""
+	staleSources := []staleRefreshSource{}
+	freshCount := 0
+	now := evidenceNow()
 	for _, source := range sources {
-		if err := verifySourceFresh(source, evidenceNow()); err != nil {
-			return refreshCommandEvidence{}, err
+		if err := verifySourceFresh(source, now); err != nil {
+			staleSources = append(staleSources, staleRefreshSource{
+				SourcePath:  source.SourcePath,
+				GeneratedAt: source.GeneratedAt,
+				ExpiresAt:   source.ExpiresAt,
+				Reason:      err.Error(),
+			})
+			continue
 		}
 		if err := verifySourceCommands(source); err != nil {
 			return refreshCommandEvidence{}, err
 		}
+		freshCount++
 		generatedAt = latestEvidenceTime(generatedAt, source.GeneratedAt)
 		expiresAt = earliestEvidenceTime(expiresAt, source.ExpiresAt)
 		commands = append(commands, source.Commands...)
+	}
+	if freshCount == 0 {
+		return refreshCommandEvidence{}, fmt.Errorf("all refresh command evidence sources are stale")
 	}
 	return refreshCommandEvidence{
 		SchemaVersion: refreshCommandsSchema,
@@ -27,6 +40,7 @@ func mergeRefreshCommandSources(sources []refreshCommandEvidence) (refreshComman
 		ExpiresAt:     expiresAt,
 		CommandCount:  len(commands),
 		Commands:      commands,
+		StaleSources:  staleSources,
 	}, nil
 }
 

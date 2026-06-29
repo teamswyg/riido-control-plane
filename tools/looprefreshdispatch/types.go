@@ -7,12 +7,21 @@ type refreshCommandEvidence struct {
 	ExpiresAt     string                   `json:"expires_at,omitempty"`
 	CommandCount  int                      `json:"command_count"`
 	Commands      []selectedRefreshCommand `json:"commands"`
+	SourcePath    string                   `json:"-"`
+	StaleSources  []staleRefreshSource     `json:"stale_sources,omitempty"`
 }
 
 type selectedRefreshCommand struct {
 	LoopID  string `json:"loop_id"`
 	Kind    string `json:"kind"`
 	Command string `json:"command"`
+}
+
+type staleRefreshSource struct {
+	SourcePath  string `json:"source_path,omitempty"`
+	GeneratedAt string `json:"generated_at,omitempty"`
+	ExpiresAt   string `json:"expires_at,omitempty"`
+	Reason      string `json:"reason"`
 }
 
 type dispatchPlan struct {
@@ -24,6 +33,8 @@ type dispatchPlan struct {
 	SourceGeneratedAt   string                   `json:"source_generated_at,omitempty"`
 	SourceExpiresAt     string                   `json:"source_expires_at,omitempty"`
 	SourceCommandCount  int                      `json:"source_command_count"`
+	SourceStaleCount    int                      `json:"source_stale_count,omitempty"`
+	SourceStaleSources  []staleRefreshSource     `json:"source_stale_sources,omitempty"`
 	DispatchCount       int                      `json:"dispatch_count"`
 	Dispatches          []workflowDispatch       `json:"dispatches"`
 	IgnoredCommandCount int                      `json:"ignored_command_count"`
