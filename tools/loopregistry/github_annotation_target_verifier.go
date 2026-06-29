@@ -15,7 +15,7 @@ func writeTargetVerifierAnnotation(
 	if impact == nil || impact.TargetVerifierPlan == nil {
 		return
 	}
-	message := targetVerifierCommandSummary(impact.TargetVerifierPlan)
+	message := targetVerifierAnnotationSummary(impact.TargetVerifierPlan)
 	if message == "" {
 		return
 	}
