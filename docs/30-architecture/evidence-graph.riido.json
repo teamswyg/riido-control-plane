@@ -1415,16 +1415,18 @@
     },
     {
       "id": "candidate_decision_next_artifact_loop",
-      "observation": "Closed-loop candidate decisions could name an arbitrary next_artifact even when the consumed candidate artifact declared a bounded adoption artifact set; source-seeded decisions must keep that same bound across smoke, load, and performance candidates.",
-      "hypothesis": "Comparing each decision next_artifact against the candidate required_next_artifacts keeps every source-scoped harness failure on an executable adoption path.",
+      "observation": "Closed-loop candidate decisions could name an arbitrary next_artifact even when the consumed candidate artifact declared a bounded adoption artifact set; operational readiness candidates also carried subject.next_artifact but the decision loop still selected generic claim_binding, forcing agents to infer the real next action.",
+      "hypothesis": "Comparing each decision next_artifact against required_next_artifacts and subject.next_artifact keeps every source-scoped or readiness-scoped candidate on its machine-routable executable adoption path.",
       "claims": ["candidate_decision_next_artifact_must_be_required"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/subject_next_artifact.go"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_artifact_test.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/operational_readiness_decision_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/source_coverage_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "tool", "path": "tools/loopregistry"}
@@ -1433,7 +1435,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Candidate decisions now prove that the selected next artifact is one of the candidate's required executable adoption artifacts, including source-seeded load and performance candidates.",
+      "decision": "Candidate decisions now prove that the selected next artifact is one of the candidate's required executable adoption artifacts, and subject-bound readiness candidates must select the subject-declared first adoption artifact instead of a generic claim_binding fallback.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
