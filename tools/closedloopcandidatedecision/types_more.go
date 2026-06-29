@@ -11,15 +11,17 @@ type verifyResult struct {
 }
 
 type decisionArtifactEvidence struct {
-	CandidateID   string    `json:"candidate_id"`
-	Disposition   string    `json:"disposition"`
-	Priority      string    `json:"priority"`
-	Owner         string    `json:"owner"`
-	ReviewBy      string    `json:"review_by,omitempty"`
-	NextLoop      string    `json:"next_loop"`
-	NextArtifact  string    `json:"next_artifact"`
-	NextCommand   string    `json:"next_command"`
-	PromotionEdge graphEdge `json:"promotion_edge"`
+	CandidateID                 string    `json:"candidate_id"`
+	Disposition                 string    `json:"disposition"`
+	Priority                    string    `json:"priority"`
+	Owner                       string    `json:"owner"`
+	ReviewBy                    string    `json:"review_by,omitempty"`
+	NextLoop                    string    `json:"next_loop"`
+	NextArtifact                string    `json:"next_artifact"`
+	NextCommand                 string    `json:"next_command"`
+	DecisionSource              string    `json:"decision_source"`
+	DecisionTemplateSubjectKind string    `json:"decision_template_subject_kind,omitempty"`
+	PromotionEdge               graphEdge `json:"promotion_edge"`
 }
 
 type candidateEvidence struct {
