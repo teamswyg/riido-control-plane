@@ -107,11 +107,18 @@ jobs:
               out/loop-refresh-dispatch-plan.json
           } >> "$GITHUB_STEP_SUMMARY"
           jq -r '.dispatches[] |
-            [.workflow_file, (.loop_ids // [] | join(",")), (.claim_ids // [] | join(",")), (.evidence_chain_ids // [] | join(","))] |
+            [.workflow_file, (.inputs // [] | map(.name + "=" + .value) | join("\u001f")), (.loop_ids // [] | join(",")), (.claim_ids // [] | join(",")), (.evidence_chain_ids // [] | join(","))] |
             @tsv' out/loop-refresh-dispatch-plan.json |
-            while IFS=$'\t' read -r workflow loops claims chains; do
+            while IFS=$'\t' read -r workflow inputs loops claims chains; do
               echo "::notice title=Loop refresh dispatch::workflow=${workflow} loops=${loops} claims=${claims} evidence_chains=${chains}"
-              gh workflow run "$workflow" --ref main
+              args=()
+              if [ -n "$inputs" ]; then
+                IFS=$'\037' read -r -a pairs <<< "$inputs"
+                for pair in "${pairs[@]}"; do
+                  args+=("-f" "$pair")
+                done
+              fi
+              gh workflow run "$workflow" --ref main "${args[@]}"
             done
       - uses: actions/upload-artifact@v7
         if: always()

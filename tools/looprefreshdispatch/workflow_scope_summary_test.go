@@ -14,6 +14,8 @@ func TestWorkflowDispatchPublishesScopeSummary(t *testing.T) {
 		"::notice title=Loop refresh dispatch::",
 		".claim_ids",
 		".evidence_chain_ids",
+		".inputs",
+		"args+=(\"-f\" \"$pair\")",
 		"evidence_chains=",
 	} {
 		if !strings.Contains(text, required) {
