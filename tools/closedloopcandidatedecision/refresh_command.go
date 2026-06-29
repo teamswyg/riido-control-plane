@@ -6,7 +6,7 @@ const refreshCommandSchema = "riido-control-plane-loop-refresh-commands.v1"
 
 func newRefreshCommandEvidence(result verifyResult) refreshCommandEvidence {
 	generatedAt, expiresAt := evidenceWindow(candidateDecisionEvidenceTTLHours)
-	commands := selectedRefreshCommands(result.DecisionArtifacts)
+	commands := selectedRefreshCommands(result)
 	return refreshCommandEvidence{
 		SchemaVersion:     refreshCommandSchema,
 		Status:            refreshCommandStatus(commands),
@@ -21,17 +21,20 @@ func newRefreshCommandEvidence(result verifyResult) refreshCommandEvidence {
 	}
 }
 
-func selectedRefreshCommands(items []decisionArtifactEvidence) []selectedRefreshCommand {
+func selectedRefreshCommands(result verifyResult) []selectedRefreshCommand {
 	commands := []selectedRefreshCommand{}
-	for _, item := range items {
+	subjectKinds := subjectKindsByCandidate(result.CandidateSubjects)
+	for _, item := range result.DecisionArtifacts {
 		command := strings.TrimSpace(item.NextCommand)
 		if command == "" {
 			continue
 		}
 		commands = append(commands, selectedRefreshCommand{
-			LoopID:  refreshLoopID(item),
-			Kind:    refreshCommandKind(command),
-			Command: command,
+			LoopID:      refreshLoopID(item),
+			Kind:        refreshCommandKind(command),
+			Command:     command,
+			CandidateID: item.CandidateID,
+			SubjectKind: subjectKinds[item.CandidateID],
 		})
 	}
 	return commands
