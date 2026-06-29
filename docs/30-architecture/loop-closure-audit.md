@@ -8,6 +8,9 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 - requirements: `5`
 - checks: `35`
+- proofs: `35`
+- proof surfaces: `35`
+- proof surface gaps: `0`
 - residual gaps: `0`
 - claim coverage gaps: `0`
 - candidate count: `0`
@@ -20,7 +23,8 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 - loop closure audit evidence must expose each requirement's check details, not only check kinds
 - loop closure audit evidence must expose each requirement's verified proof status, proof count, and proof keys
-- loop closure audit evidence must expose proof surfaces for claims, loops, workflows, and graph chains
+- loop closure audit evidence must expose proof surfaces for claims, loops, workflows, graph chains, graph edges, and pre-commit hooks
+- loop closure audit evidence must expose proof surface coverage counts and keep proof surface gaps at zero
 - loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts when present
 - loop closure audit summary evidence must expose candidate artifact, promotion target, and candidate count
 - loop closure audit evidence must expose concrete claim coverage token gaps with claim id, loop, and missing dimensions
@@ -28,13 +32,13 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 
 ## Requirements
 
-| ID | Status | Proofs | Statement |
-| --- | --- | ---: | --- |
-| `loop_registry_ssot_defines_executable_loop_manifests` | `verified` | `14` | Loop Registry SSOT must make each loop executable through observation, verification, evidence, expiry, failure, refresh, and evidence-plan coverage rather than relying on narrative memory. |
-| `expired_evidence_dispatches_refresh` | `verified` | `4` | Expired evidence must produce executable refresh commands and a scheduled dispatcher must run those refresh workflows without human memory. |
-| `meaning_bound_changes_fail_without_claim_evidence` | `verified` | `5` | Claim-bound code, tests, docs, and reasoning must co-change so agents cannot merge semantic drift after skipping documents. |
-| `harness_failures_promote_to_closed_loop` | `verified` | `5` | Harnesses increase exploration space, and failures must become closed-loop candidates instead of isolated artifacts. |
-| `reasoning_graph_connects_claims_to_evidence` | `verified` | `7` | Observation, hypothesis, change, verifier, evidence, decision, and next-loop links must be machine-checkable. |
+| ID | Status | Proofs | Surfaces | Statement |
+| --- | --- | ---: | ---: | --- |
+| `loop_registry_ssot_defines_executable_loop_manifests` | `verified` | `14` | `14` | Loop Registry SSOT must make each loop executable through observation, verification, evidence, expiry, failure, refresh, and evidence-plan coverage rather than relying on narrative memory. |
+| `expired_evidence_dispatches_refresh` | `verified` | `4` | `4` | Expired evidence must produce executable refresh commands and a scheduled dispatcher must run those refresh workflows without human memory. |
+| `meaning_bound_changes_fail_without_claim_evidence` | `verified` | `5` | `5` | Claim-bound code, tests, docs, and reasoning must co-change so agents cannot merge semantic drift after skipping documents. |
+| `harness_failures_promote_to_closed_loop` | `verified` | `5` | `5` | Harnesses increase exploration space, and failures must become closed-loop candidates instead of isolated artifacts. |
+| `reasoning_graph_connects_claims_to_evidence` | `verified` | `7` | `7` | Observation, hypothesis, change, verifier, evidence, decision, and next-loop links must be machine-checkable. |
 
 ## Residual Gaps
 

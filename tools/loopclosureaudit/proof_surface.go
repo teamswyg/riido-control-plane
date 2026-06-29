@@ -10,6 +10,10 @@ func proofSurfaceFor(c check, idx indexes) *proofSurface {
 		return &proofSurface{Workflow: c.Path, Contains: append([]string(nil), c.Contains...)}
 	case "graph_chain":
 		return graphChainProofSurface(c.ID, idx)
+	case "graph_edge":
+		return graphEdgeProofSurface(c)
+	case "pre_commit_hook":
+		return preCommitHookProofSurface(c.ID, idx)
 	default:
 		return nil
 	}
@@ -41,5 +45,21 @@ func loopProofSurface(id string, idx indexes) *proofSurface {
 		ExpiresAfterHours: loop.ExpiresAfterHours,
 		Providers:         append([]string(nil), loop.Providers...),
 		PromotesTo:        append([]string(nil), loop.PromotesTo...),
+	}
+}
+
+func graphEdgeProofSurface(c check) *proofSurface {
+	return &proofSurface{From: c.From, To: c.To, Relation: c.Relation}
+}
+
+func preCommitHookProofSurface(id string, idx indexes) *proofSurface {
+	hook, ok := idx.hooks[id]
+	if !ok {
+		return nil
+	}
+	return &proofSurface{
+		PreCommitHook: hook.ID,
+		Summary:       hook.Summary,
+		Contains:      append([]string(nil), hook.Contains...),
 	}
 }

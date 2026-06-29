@@ -10,11 +10,12 @@ func renderRequirementProofs(
 	requirements []requirementEvidence,
 ) {
 	b.WriteString("## Requirements\n\n")
-	b.WriteString("| ID | Status | Proofs | Statement |\n")
-	b.WriteString("| --- | --- | ---: | --- |\n")
+	b.WriteString("| ID | Status | Proofs | Surfaces | Statement |\n")
+	b.WriteString("| --- | --- | ---: | ---: | --- |\n")
 	for _, req := range requirements {
-		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | %s |\n",
-			req.ID, req.Status, req.ProofCount, req.Statement)
+		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%d` | %s |\n",
+			req.ID, req.Status, req.ProofCount,
+			req.ProofSurfaceCount, req.Statement)
 	}
 	b.WriteString("\n")
 }

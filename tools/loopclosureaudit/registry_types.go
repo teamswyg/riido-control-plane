@@ -51,5 +51,7 @@ type preCommitManifest struct {
 }
 
 type preCommitHook struct {
-	ID string `json:"id"`
+	ID       string   `json:"id"`
+	Summary  string   `json:"summary"`
+	Contains []string `json:"contains"`
 }

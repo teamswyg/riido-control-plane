@@ -26,3 +26,24 @@ func TestLoopClosureAuditEvidenceExposesLoopProofSurface(t *testing.T) {
 		t.Fatalf("incomplete loop proof surface: %+v", proof.Surface)
 	}
 }
+
+func TestLoopClosureAuditEvidenceExposesGraphEdgeProofSurface(t *testing.T) {
+	m, deps := loadForTest(t)
+	got := newEvidence(m, deps)
+	proof := findProof(t, got,
+		"graph_edge:provider_acceptance_harness:promotes_failure_to:closed_loop_candidate")
+	if proof.Surface == nil || proof.Surface.From == "" ||
+		proof.Surface.To == "" || proof.Surface.Relation == "" {
+		t.Fatalf("incomplete graph edge proof surface: %+v", proof.Surface)
+	}
+}
+
+func TestLoopClosureAuditEvidenceExposesPreCommitHookProofSurface(t *testing.T) {
+	m, deps := loadForTest(t)
+	got := newEvidence(m, deps)
+	proof := findProof(t, got, "pre_commit_hook:loop-registry-claim-binding")
+	if proof.Surface == nil || proof.Surface.PreCommitHook == "" ||
+		len(proof.Surface.Contains) == 0 {
+		t.Fatalf("incomplete pre-commit hook proof surface: %+v", proof.Surface)
+	}
+}
