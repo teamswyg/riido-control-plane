@@ -43,6 +43,9 @@ func TestGitHubAnnotationsIncludeImpactScope(t *testing.T) {
 				"go test ./tools/c -count=1",
 				"go test ./tools/d -count=1",
 			},
+			EntrypointCommands: []string{
+				"go test ./tools/b -count=1",
+			},
 		},
 	})
 	got := out.String()
@@ -51,6 +54,7 @@ func TestGitHubAnnotationsIncludeImpactScope(t *testing.T) {
 		"2 changed files: docs/claim.md, internal/example.go",
 		"target verifiers: 1 matched paths, 4 commands",
 		"::notice title=Riido target verifier plan::",
+		"entrypoints: go test ./tools/b -count=1",
 		"commands: go test ./tools/a -count=1",
 		"go test ./tools/b -count=1",
 		"+2 more in loop-registry-evidence",
@@ -58,15 +62,5 @@ func TestGitHubAnnotationsIncludeImpactScope(t *testing.T) {
 		if !strings.Contains(got, want) {
 			t.Fatalf("annotation missing %q: %s", want, got)
 		}
-	}
-}
-
-func TestGitHubAnnotationEscapesWorkflowSyntax(t *testing.T) {
-	got := githubAnnotationProperty("title: one,two")
-	if got != "title%3A one%2Ctwo" {
-		t.Fatalf("property escape = %q", got)
-	}
-	if got := githubAnnotationMessage("a%b\nc"); got != "a%25b%0Ac" {
-		t.Fatalf("message escape = %q", got)
 	}
 }

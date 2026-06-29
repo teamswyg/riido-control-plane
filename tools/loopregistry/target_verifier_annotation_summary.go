@@ -29,6 +29,11 @@ func targetVerifierAnnotationSummary(plan *targetVerifierPlan) string {
 	); chainSummary != "" {
 		parts = append(parts, chainSummary)
 	}
+	if entrypointSummary := targetVerifierEntrypointSummaryFor(
+		plan, "loop-registry-evidence",
+	); entrypointSummary != "" {
+		parts = append(parts, entrypointSummary)
+	}
 	if commandSummary := targetVerifierCommandSummary(plan); commandSummary != "" {
 		parts = append(parts, commandSummary)
 	}

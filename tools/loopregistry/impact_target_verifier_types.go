@@ -1,14 +1,15 @@
 package main
 
 type targetVerifierPlan struct {
-	ChangedPathCount int                       `json:"changed_path_count"`
-	MatchedPathCount int                       `json:"matched_path_count"`
-	ComponentCount   int                       `json:"component_count"`
-	CommandCount     int                       `json:"command_count"`
-	VerifierCommands []string                  `json:"verifier_commands"`
-	CommandUnits     []targetVerifierCommand   `json:"command_units"`
-	Components       []targetVerifierComponent `json:"components"`
-	Paths            []targetVerifierPath      `json:"paths"`
+	ChangedPathCount   int                       `json:"changed_path_count"`
+	MatchedPathCount   int                       `json:"matched_path_count"`
+	ComponentCount     int                       `json:"component_count"`
+	CommandCount       int                       `json:"command_count"`
+	EntrypointCommands []string                  `json:"entrypoint_commands"`
+	VerifierCommands   []string                  `json:"verifier_commands"`
+	CommandUnits       []targetVerifierCommand   `json:"command_units"`
+	Components         []targetVerifierComponent `json:"components"`
+	Paths              []targetVerifierPath      `json:"paths"`
 }
 
 type targetVerifierCommand struct {

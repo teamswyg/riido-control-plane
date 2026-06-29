@@ -54,6 +54,11 @@ func targetVerifierSummary(
 	if chainSummary := targetVerifierChainSummaryFor(plan, evidenceOut); chainSummary != "" {
 		parts = append(parts, "riido target verifier "+chainSummary)
 	}
+	if entrypointSummary := targetVerifierEntrypointSummaryFor(
+		plan, evidenceOut,
+	); entrypointSummary != "" {
+		parts = append(parts, "riido target verifier "+entrypointSummary)
+	}
 	if commandSummary := targetVerifierCommandSummaryFor(
 		plan, evidenceOut,
 	); commandSummary != "" {
