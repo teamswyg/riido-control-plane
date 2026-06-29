@@ -30,11 +30,13 @@ func selectedRefreshCommands(result verifyResult) []selectedRefreshCommand {
 			continue
 		}
 		commands = append(commands, selectedRefreshCommand{
-			LoopID:      refreshLoopID(item),
-			Kind:        refreshCommandKind(command),
-			Command:     command,
-			CandidateID: item.CandidateID,
-			SubjectKind: subjectKinds[item.CandidateID],
+			LoopID:                      refreshLoopID(item),
+			Kind:                        refreshCommandKind(command),
+			Command:                     command,
+			CandidateID:                 item.CandidateID,
+			SubjectKind:                 subjectKinds[item.CandidateID],
+			DecisionSource:              item.DecisionSource,
+			DecisionTemplateSubjectKind: item.DecisionTemplateSubjectKind,
 		})
 	}
 	return commands

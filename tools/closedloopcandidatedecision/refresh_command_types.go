@@ -20,9 +20,11 @@ type selectedRefreshLoop struct {
 }
 
 type selectedRefreshCommand struct {
-	LoopID      string `json:"loop_id"`
-	Kind        string `json:"kind"`
-	Command     string `json:"command"`
-	CandidateID string `json:"candidate_id,omitempty"`
-	SubjectKind string `json:"subject_kind,omitempty"`
+	LoopID                      string `json:"loop_id"`
+	Kind                        string `json:"kind"`
+	Command                     string `json:"command"`
+	CandidateID                 string `json:"candidate_id,omitempty"`
+	SubjectKind                 string `json:"subject_kind,omitempty"`
+	DecisionSource              string `json:"decision_source,omitempty"`
+	DecisionTemplateSubjectKind string `json:"decision_template_subject_kind,omitempty"`
 }

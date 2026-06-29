@@ -26,13 +26,14 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		if err := verifyCandidatePromotionEdge(item); err != nil {
 			return result, err
 		}
-		decision, ok, err := decisionForCandidate(decisionByID, m.DecisionTemplates, item)
+		resolved, ok, err := decisionForCandidate(decisionByID, m.DecisionTemplates, item)
 		if err != nil {
 			return result, err
 		}
 		if !ok {
 			return result, fmt.Errorf("candidate %s has no decision record", item.ID)
 		}
+		decision := resolved.Record
 		if err := verifyDecisionNextArtifact(item, decision); err != nil {
 			return result, err
 		}
@@ -50,17 +51,7 @@ func verifyCandidateDecisions(root string, m manifest, path string) (verifyResul
 		if ok {
 			result.CandidateSubjects = append(result.CandidateSubjects, subject)
 		}
-		result.DecisionArtifacts = append(result.DecisionArtifacts, decisionArtifactEvidence{
-			CandidateID:   item.ID,
-			Disposition:   decision.Disposition,
-			Priority:      decision.Priority,
-			Owner:         decision.Owner,
-			ReviewBy:      decision.ReviewBy,
-			NextLoop:      decision.NextLoop,
-			NextArtifact:  decision.NextArtifact,
-			NextCommand:   command,
-			PromotionEdge: item.PromotionEdge,
-		})
+		result.DecisionArtifacts = append(result.DecisionArtifacts, decisionArtifactFor(item, resolved, command))
 	}
 	if err := verifyNoOrphanDecisions(m.Decisions, candidate.Candidates, candidate.ID); err != nil {
 		return result, err

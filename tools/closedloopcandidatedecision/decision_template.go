@@ -4,20 +4,24 @@ func decisionForCandidate(
 	decisions map[string]decisionRecord,
 	templates []decisionTemplate,
 	item closedLoopCandidate,
-) (decisionRecord, bool, error) {
+) (resolvedDecision, bool, error) {
 	if decision, ok := decisions[item.ID]; ok {
-		return decision, true, nil
+		return resolvedDecision{Record: decision, Source: decisionSourceRecord}, true, nil
 	}
 	subject, ok, err := subjectEvidence(item)
 	if err != nil || !ok {
-		return decisionRecord{}, false, err
+		return resolvedDecision{}, false, err
 	}
 	for _, template := range templates {
 		if template.SubjectKind == subject.Kind {
-			return decisionFromTemplate(item.ID, template), true, nil
+			return resolvedDecision{
+				Record:              decisionFromTemplate(item.ID, template),
+				Source:              decisionSourceTemplate,
+				TemplateSubjectKind: template.SubjectKind,
+			}, true, nil
 		}
 	}
-	return decisionRecord{}, false, nil
+	return resolvedDecision{}, false, nil
 }
 
 func decisionFromTemplate(candidateID string, template decisionTemplate) decisionRecord {
