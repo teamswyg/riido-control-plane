@@ -47,6 +47,6 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - Observe: Release-prep work was split across monitoring, usability, exception, stress, chaos, scenario, and desktop checks, so readiness could be overestimated from whichever loop was green.
 - Hypothesis: A release readiness sidecar can make covered and partial evidence visible in one executable manifest while leaving endpoint contracts unchanged.
-- Execute: Verify every release-prep check has a category, status, evidence reference, next artifact, next command, generated reader, and claim binding.
-- Evaluate: The verifier fails on missing category coverage, stale generated docs, unknown statuses, missing evidence files for local refs, or partial checks without next executable work.
+- Execute: Verify every release-prep check has a category, status, evidence reference, next artifact, next command, generated reader, claim binding, and stale-partial candidate adoption step.
+- Evaluate: The verifier fails on missing category coverage, stale generated docs, unknown statuses, missing evidence files for local refs, or partial checks whose candidates do not expose the check-specific next artifact and command before generic adoption work.
 - Retrospective: This loop does not claim release completeness; it prevents partial operational evidence from hiding behind unrelated green CI checks.

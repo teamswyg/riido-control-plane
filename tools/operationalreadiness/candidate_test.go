@@ -39,7 +39,7 @@ func TestOperationalReadinessCandidatesUseOnlyStalePartials(t *testing.T) {
 	item := got.Candidates[0]
 	if item.SourceRef.CandidateArtifact != readinessCandidateArtifact ||
 		item.PromotionEdge.To != readinessPromotionTarget ||
-		len(item.AdoptionPlan) != len(candidateRequiredArtifacts()) {
+		len(item.AdoptionPlan) != len(candidateRequiredArtifacts())+1 {
 		t.Fatalf("candidate item = %+v", item)
 	}
 }
@@ -62,16 +62,5 @@ func TestOperationalReadinessCandidateArtifactIsFresh(t *testing.T) {
 	}
 	if got.CandidateCount == 0 || got.SourceExpiresAt == "" {
 		t.Fatalf("candidate artifact = %+v", got)
-	}
-}
-
-func testCandidateSource() producerSource {
-	return producerSource{
-		ID:                    readinessCandidateSourceID,
-		SourceWorkflow:        ".github/workflows/operational-readiness.yml",
-		CandidateArtifact:     readinessCandidateArtifact,
-		HarnessLoop:           readinessHarnessLoop,
-		PromotionTarget:       readinessPromotionTarget,
-		RequiredNextArtifacts: candidateRequiredArtifacts(),
 	}
 }

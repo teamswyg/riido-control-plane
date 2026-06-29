@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `65`
 - claim refs: `64`
-- change refs: `821`
-- verifier refs: `388`
+- change refs: `826`
+- verifier refs: `390`
 - evidence refs: `175`
 
 ## Evidence Chains
@@ -53,7 +53,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `ai_thread_history_run_identity_ordering_loop` | `1` | `8` | `5` | `2` | `ai_thread_history` |
 | `stop_reassign_thread_consistency_loop` | `1` | `8` | `7` | `2` | `ai_thread_history` |
 | `loop_evidence_expiry_loop` | `1` | `10` | `5` | `2` | `closed_loop_candidate` |
-| `closed_loop_candidate_intake_loop` | `1` | `8` | `3` | `7` | `closed_loop_candidate_intake` |
+| `closed_loop_candidate_intake_loop` | `1` | `11` | `4` | `7` | `closed_loop_candidate_intake` |
 | `expiring_loop_refresh_scope_loop` | `1` | `6` | `5` | `2` | `closed_loop_candidate` |
 | `refresh_workflow_identity_loop` | `1` | `10` | `4` | `2` | `closed_loop_candidate` |
 | `loop_registry_refresh_plan_evidence_loop` | `1` | `13` | `5` | `2` | `closed_loop_candidate` |
@@ -80,7 +80,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `loop_registry_target_verifier_plan_loop` | `1` | `42` | `10` | `2` | `closed_loop_candidate` |
 | `evidence_graph_chain_impact_loop` | `1` | `15` | `6` | `2` | `closed_loop_candidate` |
 | `evidence_graph_workflow_trigger_coverage_loop` | `1` | `6` | `6` | `2` | `closed_loop_candidate` |
-| `operational_readiness_stale_partial_promotion_loop` | `1` | `10` | `5` | `2` | `closed_loop_candidate` |
+| `operational_readiness_stale_partial_promotion_loop` | `1` | `12` | `6` | `2` | `closed_loop_candidate` |
 | `operational_readiness_release_loop` | `1` | `19` | `9` | `2` | `operational_readiness_release_harness` |
 | `container_image_contract_runtime_shape_loop` | `1` | `16` | `6` | `4` | `closed_loop_candidate` |
 | `control_plane_meta_evidence_expiry_loop` | `0` | `10` | `7` | `4` | `loop_closure_audit` |
