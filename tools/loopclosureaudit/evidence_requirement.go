@@ -8,10 +8,10 @@ func checkCount(requirements []requirement) int {
 	return count
 }
 
-func requirementEvidenceRows(requirements []requirement) []requirementEvidence {
+func requirementEvidenceRows(requirements []requirement, idxOpt ...indexes) []requirementEvidence {
 	rows := make([]requirementEvidence, 0, len(requirements))
 	for _, req := range requirements {
-		proofs := requirementProofs(req.Checks)
+		proofs := requirementProofs(req.Checks, idxOpt...)
 		rows = append(rows, requirementEvidence{
 			ID:         req.ID,
 			Statement:  req.Statement,

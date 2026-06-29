@@ -2,20 +2,18 @@ package main
 
 import "strings"
 
-type proof struct {
-	Kind   string `json:"kind"`
-	Key    string `json:"key"`
-	Status string `json:"status"`
-}
-
-func requirementProofs(checks []check) []proof {
+func requirementProofs(checks []check, idxOpt ...indexes) []proof {
 	out := make([]proof, 0, len(checks))
 	for _, c := range checks {
-		out = append(out, proof{
+		row := proof{
 			Kind:   c.Kind,
 			Key:    proofKey(c),
 			Status: "verified",
-		})
+		}
+		if len(idxOpt) > 0 {
+			row.Surface = proofSurfaceFor(c, idxOpt[0])
+		}
+		out = append(out, row)
 	}
 	return out
 }

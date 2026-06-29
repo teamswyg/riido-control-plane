@@ -105,6 +105,7 @@
   "assertions": [
     "loop closure audit evidence must expose each requirement's check details, not only check kinds",
     "loop closure audit evidence must expose each requirement's verified proof status, proof count, and proof keys",
+    "loop closure audit evidence must expose proof surfaces for claims, loops, workflows, and graph chains",
     "loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts when present",
     "loop closure audit summary evidence must expose candidate artifact, promotion target, and candidate count",
     "loop closure audit evidence must expose concrete claim coverage token gaps with claim id, loop, and missing dimensions",
