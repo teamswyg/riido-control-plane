@@ -11,6 +11,7 @@ func candidateFromIgnoredCommand(
 	return closedLoopCandidate{
 		ID:              fmt.Sprintf("%s:%02d:%s:%s", dispatchSourceID, index+1, command.LoopID, command.Kind),
 		SourceRef:       sourceRefForCandidate(plan, liveStatus),
+		Subject:         ignoredCommandSubject(command),
 		HarnessLoop:     dispatchHarnessLoop,
 		PromotionTarget: dispatchPromotionTarget,
 		PromotionEdge:   graphEdge{dispatchHarnessLoop, dispatchPromotionTarget, "promotes_failure_to"},

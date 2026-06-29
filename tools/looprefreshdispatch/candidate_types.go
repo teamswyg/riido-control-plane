@@ -17,6 +17,7 @@ type candidateEvidence struct {
 type closedLoopCandidate struct {
 	ID                    string             `json:"id"`
 	SourceRef             candidateSourceRef `json:"source_ref"`
+	Subject               *candidateSubject  `json:"subject,omitempty"`
 	HarnessLoop           string             `json:"harness_loop"`
 	PromotionTarget       string             `json:"promotion_target"`
 	PromotionEdge         graphEdge          `json:"promotion_edge"`
