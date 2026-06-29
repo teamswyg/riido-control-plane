@@ -15,6 +15,7 @@ type options struct {
 	ImpactBase  string
 
 	GitHubAnnotations  bool
+	TargetSummary      bool
 	AnnotationOut      io.Writer
 	RefreshPlanIn      string
 	RefreshCommandsOut string
@@ -58,6 +59,9 @@ func run(opt options) error {
 		architectureIndexFor(m.Claims, result.ClaimSurfaces))
 	if opt.GitHubAnnotations {
 		writeGitHubAnnotations(opt.AnnotationOut, result, impact)
+	}
+	if opt.TargetSummary {
+		writeTargetVerifierSummary(opt.AnnotationOut, impact, opt.EvidenceOut)
 	}
 	if opt.EvidenceOut != "" {
 		return writeJSON(opt.EvidenceOut, newEvidence(m, result, impact))

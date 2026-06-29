@@ -16,4 +16,5 @@ evidence_out="${RIIDO_LOOP_REGISTRY_EVIDENCE_OUT:-$default_evidence_out}"
 go run ./tools/loopregistry \
   -check-doc \
   -impact-base "$base_ref" \
+  -target-verifier-summary \
   -evidence-out "$evidence_out"

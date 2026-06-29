@@ -28,8 +28,18 @@ func writeTargetVerifierAnnotation(
 }
 
 func targetVerifierCommandSummary(plan *targetVerifierPlan) string {
+	return targetVerifierCommandSummaryFor(plan, "loop-registry-evidence")
+}
+
+func targetVerifierCommandSummaryFor(
+	plan *targetVerifierPlan,
+	evidenceRef string,
+) string {
 	if plan == nil || len(plan.VerifierCommands) == 0 {
 		return ""
+	}
+	if evidenceRef == "" {
+		evidenceRef = "loop-registry-evidence"
 	}
 	limit := targetVerifierAnnotationCommandLimit
 	if len(plan.VerifierCommands) < limit {
@@ -39,7 +49,7 @@ func targetVerifierCommandSummary(plan *targetVerifierPlan) string {
 	remaining := plan.CommandCount - limit
 	if remaining > 0 {
 		parts = append(parts,
-			fmt.Sprintf("+%d more in loop-registry-evidence", remaining))
+			fmt.Sprintf("+%d more in %s", remaining, evidenceRef))
 	}
 	return "commands: " + strings.Join(parts, " ; ")
 }
