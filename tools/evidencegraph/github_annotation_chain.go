@@ -7,5 +7,12 @@ func chainImpactMessage(chain impactChain) string {
 	if refs == "" {
 		refs = "no executable refs captured"
 	}
-	return chain.ID + " executable refs: " + refs
+	message := chain.ID + " executable refs: " + refs
+	if claims := strings.Join(chain.Claims, ", "); claims != "" {
+		message += " claims: " + claims
+	}
+	if chain.NextLoop != "" {
+		message += " next_loop: " + chain.NextLoop
+	}
+	return message
 }
