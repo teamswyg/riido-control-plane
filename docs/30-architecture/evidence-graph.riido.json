@@ -1862,7 +1862,7 @@
     {
       "id": "loop_registry_architecture_index_loop",
       "observation": "Path-level architecture_index bindings forced agents to scan hundreds of path rows before they could infer the component-level architecture surface and likely verifier scope for a changed file.",
-      "hypothesis": "Publishing derived architecture components beside path bindings in loop-registry evidence and bounded component samples in generated docs turns the claim surface join into bounded machine evidence, so agents can map a changed path to a component, claim ids, loop ids, verifier commands, and evidence chain ids without rereading the full manifest or generated prose.",
+      "hypothesis": "Publishing derived architecture components beside path bindings in loop-registry evidence and bounded component loop samples in generated docs turns the claim surface join into bounded machine evidence, so agents can map a changed path to a component, loop id, claim ids, verifier commands, and evidence chain ids without rereading the full manifest or generated prose.",
       "claims": ["loop_registry_evidence_must_expose_architecture_index"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -1875,6 +1875,7 @@
         {"kind": "tool", "path": "tools/loopregistry/types_architecture_index.go"},
         {"kind": "tool", "path": "tools/loopregistry/render_architecture_index.go"},
         {"kind": "tool", "path": "tools/loopregistry/render_architecture_component.go"},
+        {"kind": "test", "path": "tools/loopregistry/render_architecture_component_test.go"},
         {"kind": "tool", "path": "tools/loopregistry/render_architecture_component_sample.go"},
         {"kind": "test", "path": "tools/loopregistry/evidence_architecture_index_test_helpers.go"},
         {"kind": "test", "path": "tools/loopregistry/evidence_architecture_index_test.go"},
@@ -1882,6 +1883,7 @@
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/evidence_architecture_index_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/render_architecture_component_test.go"},
         {"kind": "test", "path": "tools/loopregistry/render_architecture_component_sample_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
