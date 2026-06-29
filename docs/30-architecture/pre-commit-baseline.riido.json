@@ -6,6 +6,7 @@
   "workflow": ".github/workflows/pre-commit-baseline.yml",
   "evidence_artifact": "pre-commit-baseline-evidence",
   "evidence_tool": "tools/precommitbaseline",
+  "evidence_ttl_hours": 24,
   "pre_commit_config": ".pre-commit-config.yaml",
   "hooks": [
     {"id": "go-fmt", "summary": "format Go sources before commit", "contains": ["id: go-fmt"]},

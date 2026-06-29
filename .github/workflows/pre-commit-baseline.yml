@@ -2,6 +2,8 @@ name: pre-commit-baseline
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "43 20 * * *"
   push:
     branches: [main]
     paths:

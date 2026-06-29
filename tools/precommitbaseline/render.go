@@ -12,6 +12,8 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "- pre-commit config: `%s`\n", m.PreCommitConfig)
 	fmt.Fprintf(&b, "- workflow: `%s`\n", m.Workflow)
 	fmt.Fprintf(&b, "- evidence artifact: `%s`\n", m.Evidence)
+	fmt.Fprintf(&b, "- evidence ttl hours: `%d`\n", m.EvidenceTTL)
+	fmt.Fprintf(&b, "- workflow scheduled: `%t`\n", result.WorkflowScheduled)
 	fmt.Fprintf(&b, "- hooks: `%d`\n", result.Hooks)
 	fmt.Fprintf(&b, "- scripts: `%d`\n", result.Scripts)
 	fmt.Fprintf(&b, "- phrase checks: `%d`\n\n", result.PhraseChecks)

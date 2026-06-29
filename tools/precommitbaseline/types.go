@@ -7,6 +7,7 @@ type manifest struct {
 	GeneratedDoc    string       `json:"generated_doc"`
 	Workflow        string       `json:"workflow"`
 	Evidence        string       `json:"evidence_artifact"`
+	EvidenceTTL     int          `json:"evidence_ttl_hours"`
 	PreCommitConfig string       `json:"pre_commit_config"`
 	Hooks           []checkBlock `json:"hooks"`
 	Scripts         []scriptSpec `json:"scripts"`
