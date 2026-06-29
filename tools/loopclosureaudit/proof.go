@@ -1,7 +1,5 @@
 package main
 
-import "strings"
-
 func requirementProofs(checks []check, idxOpt ...indexes) []proof {
 	out := make([]proof, 0, len(checks))
 	for _, c := range checks {
@@ -19,14 +17,9 @@ func requirementProofs(checks []check, idxOpt ...indexes) []proof {
 }
 
 func proofKey(c check) string {
-	switch c.Kind {
-	case "loop", "claim", "graph_chain", "pre_commit_hook":
-		return c.Kind + ":" + c.ID
-	case "workflow":
-		return "workflow:" + c.Path + ":" + strings.Join(c.Contains, ",")
-	case "graph_edge":
-		return "graph_edge:" + c.From + ":" + c.Relation + ":" + c.To
-	default:
+	spec, ok := checkKindByName(c.Kind)
+	if !ok {
 		return c.Kind
 	}
+	return spec.key(c)
 }

@@ -3,22 +3,11 @@ package main
 import "fmt"
 
 func verifyCheck(root string, c check, idx indexes) error {
-	switch c.Kind {
-	case "loop":
-		return verifyLoopCheck(c, idx)
-	case "claim":
-		return verifyClaimCheck(c, idx)
-	case "workflow":
-		return verifyWorkflowCheck(root, c)
-	case "graph_edge":
-		return verifyGraphEdgeCheck(c, idx)
-	case "graph_chain":
-		return verifyGraphChainCheck(c, idx)
-	case "pre_commit_hook":
-		return verifyPreCommitHookCheck(c, idx)
-	default:
+	spec, ok := checkKindByName(c.Kind)
+	if !ok {
 		return fmt.Errorf("unknown check kind %q", c.Kind)
 	}
+	return spec.verify(root, c, idx)
 }
 
 func verifyLoopCheck(c check, idx indexes) error {

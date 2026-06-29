@@ -1,22 +1,11 @@
 package main
 
 func proofSurfaceFor(c check, idx indexes) *proofSurface {
-	switch c.Kind {
-	case "claim":
-		return claimProofSurface(c.ID, idx)
-	case "loop":
-		return loopProofSurface(c.ID, idx)
-	case "workflow":
-		return &proofSurface{Workflow: c.Path, Contains: append([]string(nil), c.Contains...)}
-	case "graph_chain":
-		return graphChainProofSurface(c.ID, idx)
-	case "graph_edge":
-		return graphEdgeProofSurface(c)
-	case "pre_commit_hook":
-		return preCommitHookProofSurface(c.ID, idx)
-	default:
+	spec, ok := checkKindByName(c.Kind)
+	if !ok {
 		return nil
 	}
+	return spec.surface(c, idx)
 }
 
 func claimProofSurface(id string, idx indexes) *proofSurface {
