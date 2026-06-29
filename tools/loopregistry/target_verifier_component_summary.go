@@ -20,6 +20,11 @@ func targetVerifierAnnotationSummary(plan *targetVerifierPlan) string {
 	); loopSummary != "" {
 		parts = append(parts, loopSummary)
 	}
+	if claimSummary := targetVerifierClaimSummaryFor(
+		plan, "loop-registry-evidence",
+	); claimSummary != "" {
+		parts = append(parts, claimSummary)
+	}
 	if commandSummary := targetVerifierCommandSummary(plan); commandSummary != "" {
 		parts = append(parts, commandSummary)
 	}
