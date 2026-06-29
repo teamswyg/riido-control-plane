@@ -12,12 +12,21 @@ func run(opt options) error {
 	if err := verifyAll(root, m); err != nil {
 		return err
 	}
-	e := newEvidence(m)
+	now, err := readinessNow()
+	if err != nil {
+		return err
+	}
+	e := newEvidenceAt(m, now)
 	if err := maybeDoc(root, m, renderDoc(m, e), opt.WriteDoc, opt.CheckDoc); err != nil {
 		return err
 	}
 	if opt.EvidenceOut != "" {
-		return writeJSON(opt.EvidenceOut, e)
+		if err := writeJSON(opt.EvidenceOut, e); err != nil {
+			return err
+		}
+	}
+	if opt.CandidateOut != "" {
+		return writeJSON(opt.CandidateOut, newCandidateEvidence(m, e, now))
 	}
 	return nil
 }

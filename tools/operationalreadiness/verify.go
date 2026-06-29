@@ -18,6 +18,12 @@ func verifyAll(root string, m manifest) error {
 	if err := requireLocalFile(root, m.Workflow); err != nil {
 		return err
 	}
+	if err := verifyCandidateSources(m); err != nil {
+		return err
+	}
+	if err := verifyOperationalWorkflow(root, m); err != nil {
+		return err
+	}
 	if err := verifyChecks(root, m); err != nil {
 		return err
 	}

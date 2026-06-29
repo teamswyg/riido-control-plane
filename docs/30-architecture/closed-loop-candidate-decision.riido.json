@@ -169,6 +169,86 @@
       "next_artifact": "verifier",
       "review_by": "2026-07-15",
       "reason": "Loop refresh dispatch can discover target_verifier commands that workflow dispatch cannot run, so ignored verifier commands need an owned decision before they become durable closed-loop gates."
+    },
+    {
+      "candidate_id": "operational-readiness:otel_xray_client_surface",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "Client-surface monitoring is stale partial readiness evidence and needs an owned alarm/evidence decision before release readiness can be claimed."
+    },
+    {
+      "candidate_id": "operational-readiness:daemon_network_disconnect_waiting",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "Daemon network-disconnect waiting is stale partial readiness evidence and needs a release-grade reconnect verifier decision."
+    },
+    {
+      "candidate_id": "operational-readiness:single_pc_agent_limit",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "One-PC agent capacity is stale partial readiness evidence and needs product acceptance ownership before beta capacity claims."
+    },
+    {
+      "candidate_id": "operational-readiness:boot_burst_capacity",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "Boot burst capacity is stale partial readiness evidence and needs a cold-start storm verifier before launch readiness."
+    },
+    {
+      "candidate_id": "operational-readiness:server_crash_recovery",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "Server crash recovery is stale partial readiness evidence and needs measured recovery timing before launch readiness."
+    },
+    {
+      "candidate_id": "operational-readiness:scale_out_recovery",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "Scale-out recovery is stale partial readiness evidence and needs autoscaling timing evidence before capacity claims."
+    },
+    {
+      "candidate_id": "operational-readiness:all_servers_down_daemon_behavior",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "All-server-down daemon behavior is stale partial readiness evidence and needs reconnect storm evidence before launch readiness."
+    },
+    {
+      "candidate_id": "operational-readiness:desktop_body_only_change",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-15",
+      "reason": "Desktop body-only change acceptance is stale partial readiness evidence and needs local product acceptance evidence before beta signoff."
     }
   ],
   "assertions": [

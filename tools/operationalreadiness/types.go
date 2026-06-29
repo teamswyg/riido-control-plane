@@ -10,6 +10,7 @@ type manifest struct {
 	EvidenceTool       string           `json:"evidence_tool"`
 	RequiredCategories []string         `json:"required_categories"`
 	Checks             []readinessCheck `json:"checks"`
+	Sources            []producerSource `json:"sources,omitempty"`
 	Loop               loopSpec         `json:"loop"`
 }
 
@@ -35,6 +36,15 @@ type measurement struct {
 type evidenceRef struct {
 	Kind string `json:"kind"`
 	Path string `json:"path"`
+}
+
+type producerSource struct {
+	ID                    string   `json:"id"`
+	SourceWorkflow        string   `json:"source_workflow"`
+	CandidateArtifact     string   `json:"candidate_artifact"`
+	HarnessLoop           string   `json:"harness_loop"`
+	PromotionTarget       string   `json:"promotion_target"`
+	RequiredNextArtifacts []string `json:"required_next_artifacts"`
 }
 
 type loopSpec struct {

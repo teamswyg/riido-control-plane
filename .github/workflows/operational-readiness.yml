@@ -78,10 +78,17 @@ jobs:
           go test ./internal/riidoaiserver -run 'TestTraceHTTPClientSurface|TestHTTPTracingRecordsClientSurface|TestHTTPTransactionMetricsTrackClientSurfaceTotals|TestWriteCloudWatchEMF' -count=1
           go run ./tools/operationalreadiness \
             -check-doc \
-            -evidence-out out/operational-readiness-evidence.json
+            -evidence-out out/operational-readiness-evidence.json \
+            -candidate-out out/operational-readiness-closed-loop-candidates.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: operational-readiness-evidence
           path: out/operational-readiness-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-closed-loop-candidates
+          path: out/operational-readiness-closed-loop-candidates.json
           if-no-files-found: error
