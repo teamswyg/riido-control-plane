@@ -17,6 +17,7 @@ func TestTraceHTTPClientSurfaceClassifiesKnownSurfaces(t *testing.T) {
 		{name: "daemon snapshot", route: "/v1/daemon/runtime-snapshot", want: "daemon"},
 		{name: "client v3", route: "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads", want: "client_app"},
 		{name: "desktop explicit user agent", route: "/v2/client/workspaces/{workspace_id}/ai-agent/bootstrap", userAgent: "Riido-Desktop/0.0.15", want: "desktop"},
+		{name: "desktop electron shell", route: "/v2/client/workspaces/{workspace_id}/ai-agent/bootstrap", userAgent: "Mozilla/5.0 Electron/37.2.0 Chrome/138.0.0.0", want: "desktop"},
 		{name: "desktop candidate devices", route: "/v2/client/workspaces/{workspace_id}/ai-agent/devices", want: "desktop_candidate"},
 		{name: "component", route: "/v1/component-tasks/{task_id}", want: "component_integration"},
 	}

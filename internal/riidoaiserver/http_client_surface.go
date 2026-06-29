@@ -15,6 +15,8 @@ func traceHTTPClientSurface(route, path, userAgent string) string {
 		return "daemon"
 	case strings.Contains(userAgent, "riido-desktop"):
 		return "desktop"
+	case strings.Contains(userAgent, "electron/"):
+		return "desktop"
 	case strings.Contains(route, "/ai-agent/devices"):
 		return "desktop_candidate"
 	case strings.HasPrefix(route, "/v1/client/"):

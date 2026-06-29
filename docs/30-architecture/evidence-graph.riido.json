@@ -1843,7 +1843,7 @@
         {"kind": "artifact", "path": "operational-readiness-evidence", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/operational-readiness.md"}
       ],
-      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and command are declared; OTel/X-Ray spans now include a low-cardinality server-side client surface for daemon/client/desktop-candidate traffic analysis.",
+      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and command are declared; OTel/X-Ray spans now include a low-cardinality server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis.",
       "next_loop": "operational_readiness_release_harness"
     }
   ],
