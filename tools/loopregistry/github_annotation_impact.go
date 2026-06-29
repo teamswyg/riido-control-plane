@@ -26,6 +26,9 @@ func impactAnnotationMessage(impact *impactEvidence) string {
 	if surfaceSummary := boundSurfaceImpactMessage(impact); surfaceSummary != "" {
 		parts = append(parts, surfaceSummary)
 	}
+	if targetSummary := targetVerifierImpactMessage(impact); targetSummary != "" {
+		parts = append(parts, targetSummary)
+	}
 	return strings.Join(parts, " | ")
 }
 
@@ -36,4 +39,15 @@ func changedFilesImpactMessage(impact *impactEvidence) string {
 	return fmt.Sprintf("%d changed files: %s",
 		impact.ChangedFileCount,
 		strings.Join(impact.ChangedFiles, ", "))
+}
+
+func targetVerifierImpactMessage(impact *impactEvidence) string {
+	if impact.TargetVerifierPlan == nil {
+		return ""
+	}
+	plan := impact.TargetVerifierPlan
+	return fmt.Sprintf("target verifiers: %d matched paths, %d commands",
+		plan.MatchedPathCount,
+		plan.CommandCount,
+	)
 }

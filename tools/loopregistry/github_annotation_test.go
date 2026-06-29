@@ -34,11 +34,16 @@ func TestGitHubAnnotationsIncludeImpactScope(t *testing.T) {
 		Enabled:          true,
 		ChangedFileCount: 2,
 		ChangedFiles:     []string{"docs/claim.md", "internal/example.go"},
+		TargetVerifierPlan: &targetVerifierPlan{
+			MatchedPathCount: 1,
+			CommandCount:     2,
+		},
 	})
 	got := out.String()
 	for _, want := range []string{
 		"::notice title=Riido impact scope::",
 		"2 changed files: docs/claim.md, internal/example.go",
+		"target verifiers: 1 matched paths, 2 commands",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("annotation missing %q: %s", want, got)
