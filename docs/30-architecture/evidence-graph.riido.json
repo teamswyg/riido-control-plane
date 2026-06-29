@@ -806,8 +806,8 @@
     },
     {
       "id": "evidence_graph_annotation_loop",
-      "observation": "Evidence graph impact verification could fail or pass while reviewers and agents still had to open artifacts to see which observation-hypothesis-change-verifier-evidence chain ids, executable refs, claims, and next-loop targets were in scope.",
-      "hypothesis": "Emitting GitHub Actions annotations from the evidence graph impact surface makes changed evidence chain ids, executable refs, claim ids, and next-loop targets visible in the PR check output, so agents can repair the executable reasoning graph without reading narrative docs first.",
+      "observation": "Evidence graph impact verification could fail or pass while reviewers and agents still had to open artifacts to see which changed files, observation-hypothesis-change-verifier-evidence chain ids, executable refs, claims, and next-loop targets were in scope.",
+      "hypothesis": "Emitting GitHub Actions annotations from the evidence graph impact surface makes changed files, changed evidence chain ids, executable refs, claim ids, and next-loop targets visible in the PR check output, so agents can repair the executable reasoning graph without reading narrative docs first.",
       "claims": ["evidence_graph_impact_must_surface_as_ci_annotations"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
@@ -816,6 +816,7 @@
         {"kind": "tool", "path": "tools/evidencegraph/github_annotation.go"},
         {"kind": "tool", "path": "tools/evidencegraph/github_annotation_chain.go"},
         {"kind": "tool", "path": "tools/evidencegraph/github_annotation_escape.go"},
+        {"kind": "tool", "path": "tools/evidencegraph/github_annotation_files.go"},
         {"kind": "tool", "path": "tools/evidencegraph/github_annotation_impact.go"},
         {"kind": "tool", "path": "tools/evidencegraph/main.go"},
         {"kind": "tool", "path": "tools/evidencegraph/options.go"},
@@ -833,7 +834,7 @@
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true},
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"}
       ],
-      "decision": "Evidence graph PR checks now emit redacted GitHub annotations for changed chain impact, executable refs, claim ids, and next-loop targets, keeping reasoning drift actionable in the check output itself.",
+      "decision": "Evidence graph PR checks now emit redacted GitHub annotations for changed file samples, changed chain impact, executable refs, claim ids, and next-loop targets, keeping reasoning drift actionable in the check output itself.",
       "next_loop": "closed_loop_candidate"
     },
     {

@@ -11,6 +11,7 @@ func TestGitHubAnnotationsIncludeChainImpactScope(t *testing.T) {
 	writeGitHubAnnotations(&out, &impactEvidence{
 		Enabled:           true,
 		ChangedFileCount:  2,
+		ChangedFiles:      []string{"docs/30-architecture/evidence-graph.riido.json", "tools/evidencegraph/run.go"},
 		ChangedChainCount: 1,
 		ChangedChains: []impactChain{{
 			ID:                    "chain:one",
@@ -22,7 +23,7 @@ func TestGitHubAnnotationsIncludeChainImpactScope(t *testing.T) {
 	got := out.String()
 	for _, want := range []string{
 		"::notice title=Riido evidence graph impact::",
-		"2 changed files, 0 added chains, 1 changed chains, 0 removed chains",
+		"2 changed files (docs/30-architecture/evidence-graph.riido.json, tools/evidencegraph/run.go)",
 		"::notice title=Riido evidence chain impact::",
 		"chain:one executable refs: tools/evidencegraph/run.go claims: claim:one next_loop: closed_loop_candidate",
 	} {
@@ -39,5 +40,13 @@ func TestGitHubAnnotationEscapesWorkflowSyntax(t *testing.T) {
 	}
 	if got := githubAnnotationMessage("a%b\nc"); got != "a%25b%0Ac" {
 		t.Fatalf("message escape = %q", got)
+	}
+}
+
+func TestChangedFileAnnotationSuffixLimitsLongLists(t *testing.T) {
+	got := changedFileAnnotationSuffix([]string{"a", "b", "c", "d", "e", "f"})
+	want := " (a, b, c, d, e (+1 more))"
+	if got != want {
+		t.Fatalf("suffix = %q, want %q", got, want)
 	}
 }
