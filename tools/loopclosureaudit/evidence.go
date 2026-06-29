@@ -38,8 +38,10 @@ type claimCoverageGap struct {
 
 func newEvidence(m manifest, depsOpt ...dependencies) evidence {
 	coverageGaps := []claimCoverageGap{}
+	reqs := requirementEvidenceRows(m.Requirements)
 	if len(depsOpt) > 0 {
 		coverageGaps = claimCoverageGaps(depsOpt[0])
+		reqs = requirementEvidenceRows(m.Requirements, newIndexes(depsOpt[0]))
 	}
 	generatedAt, expiresAt := evidenceWindow(loopClosureAuditEvidenceTTLHours)
 	return evidence{
@@ -55,7 +57,7 @@ func newEvidence(m manifest, depsOpt ...dependencies) evidence {
 		CandidateArtifact:     candidateArtifactForEvidence(m),
 		CandidateSourceID:     candidateSourceIDForEvidence(m),
 		CandidateTarget:       candidateTargetForEvidence(m),
-		Requirements:          requirementEvidenceRows(m.Requirements),
+		Requirements:          reqs,
 		Assertions:            append([]string(nil), m.Assertions...),
 		ResidualGaps:          append([]residualGap(nil), m.ResidualGaps...),
 		ClaimCoverageGaps:     coverageGaps,
