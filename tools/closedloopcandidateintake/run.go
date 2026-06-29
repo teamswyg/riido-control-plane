@@ -25,6 +25,7 @@ func run(opt options) error {
 		result.CandidateIDs = candidateResult.CandidateIDs
 		result.CandidateEdges = candidateResult.CandidateEdges
 		result.CandidateSourceRefs = candidateResult.CandidateSourceRefs
+		result.CandidateSubjects = candidateResult.CandidateSubjects
 		result.CandidateAdoptionPlans = candidateResult.CandidateAdoptionPlans
 		result.ConsumedCandidateArtifacts = candidateResult.ConsumedCandidateArtifacts
 	}

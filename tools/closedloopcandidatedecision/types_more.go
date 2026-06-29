@@ -6,6 +6,7 @@ type verifyResult struct {
 	DecisionIDs                []string                     `json:"decision_ids"`
 	DecisionArtifacts          []decisionArtifactEvidence   `json:"decision_artifacts"`
 	CandidateSourceRefs        []candidateSourceRefEvidence `json:"candidate_source_refs"`
+	CandidateSubjects          []candidateSubjectEvidence   `json:"candidate_subjects"`
 	ConsumedCandidateArtifacts []consumedCandidateArtifact  `json:"consumed_candidate_artifacts"`
 }
 
@@ -37,6 +38,7 @@ type candidateEvidence struct {
 type closedLoopCandidate struct {
 	ID                    string             `json:"id"`
 	SourceRef             candidateSourceRef `json:"source_ref"`
+	Subject               rawSubject         `json:"subject,omitempty"`
 	HarnessLoop           string             `json:"harness_loop"`
 	PromotionTarget       string             `json:"promotion_target"`
 	PromotionEdge         graphEdge          `json:"promotion_edge"`
@@ -61,14 +63,4 @@ type candidateRedaction struct {
 type adoptionStep struct {
 	Artifact string `json:"artifact"`
 	Command  string `json:"command"`
-}
-
-type consumedCandidateArtifact struct {
-	InputPath         string   `json:"input_path"`
-	SourceWorkflow    string   `json:"source_workflow"`
-	LiveStatus        string   `json:"live_status"`
-	SourceGeneratedAt string   `json:"source_generated_at"`
-	SourceExpiresAt   string   `json:"source_expires_at"`
-	CandidateCount    int      `json:"candidate_count"`
-	CandidateIDs      []string `json:"candidate_ids"`
 }

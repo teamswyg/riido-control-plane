@@ -11,6 +11,7 @@ type evidence struct {
 	DecisionIDs         []string                     `json:"decision_ids"`
 	DecisionArtifacts   []decisionArtifactEvidence   `json:"decision_artifacts"`
 	CandidateSourceRefs []candidateSourceRefEvidence `json:"candidate_source_refs"`
+	CandidateSubjects   []candidateSubjectEvidence   `json:"candidate_subjects"`
 	ConsumedArtifacts   []consumedCandidateArtifact  `json:"consumed_candidate_artifacts"`
 	Workflow            string                       `json:"workflow"`
 	GeneratedDoc        string                       `json:"generated_doc"`
@@ -34,6 +35,7 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		DecisionIDs:         result.DecisionIDs,
 		DecisionArtifacts:   result.DecisionArtifacts,
 		CandidateSourceRefs: result.CandidateSourceRefs,
+		CandidateSubjects:   result.CandidateSubjects,
 		ConsumedArtifacts:   result.ConsumedCandidateArtifacts,
 		Workflow:            m.Workflow,
 		GeneratedDoc:        m.GeneratedDoc,
