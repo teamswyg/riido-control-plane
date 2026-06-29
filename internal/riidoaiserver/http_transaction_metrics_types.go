@@ -13,6 +13,7 @@ const (
 type HTTPTransactionMetric struct {
 	Method                   string `json:"method"`
 	Route                    string `json:"route"`
+	ClientSurface            string `json:"client_surface,omitempty"`
 	StatusCode               int    `json:"status_code"`
 	RequestsTotal            int64  `json:"requests_total"`
 	LatencySamplesTotal      int64  `json:"latency_samples_total"`
@@ -22,11 +23,12 @@ type HTTPTransactionMetric struct {
 }
 
 type HTTPTransactionObservation struct {
-	Method     string
-	Route      string
-	StatusCode int
-	Duration   time.Duration
-	ObservedAt time.Time
+	Method        string
+	Route         string
+	ClientSurface string
+	StatusCode    int
+	Duration      time.Duration
+	ObservedAt    time.Time
 }
 
 type HTTPTransactionMetrics struct {
@@ -35,9 +37,10 @@ type HTTPTransactionMetrics struct {
 }
 
 type httpTransactionKey struct {
-	method     string
-	route      string
-	statusCode int
+	method        string
+	route         string
+	clientSurface string
+	statusCode    int
 }
 
 type httpTransactionBucket struct {

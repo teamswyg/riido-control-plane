@@ -14,6 +14,7 @@ func (m *HTTPTransactionMetrics) ObserveHTTPTransaction(obs HTTPTransactionObser
 	}
 	method := normalizeHTTPMetricValue(obs.Method, http.MethodGet)
 	route := normalizeHTTPMetricValue(obs.Route, unknownHTTPRoute)
+	clientSurface := normalizeHTTPMetricValue(obs.ClientSurface, "unknown")
 	statusCode := obs.StatusCode
 	if statusCode <= 0 {
 		statusCode = http.StatusOK
@@ -21,7 +22,7 @@ func (m *HTTPTransactionMetrics) ObserveHTTPTransaction(obs HTTPTransactionObser
 	observedAt := metricsObservedAt(obs.ObservedAt)
 	bucketStart := metricsBucketStart(observedAt)
 	elapsedMS := durationMilliseconds(obs.Duration)
-	key := httpTransactionKey{method: method, route: route, statusCode: statusCode}
+	key := httpTransactionKey{method: method, route: route, clientSurface: clientSurface, statusCode: statusCode}
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -37,6 +38,7 @@ func (m *HTTPTransactionMetrics) ObserveHTTPTransaction(obs HTTPTransactionObser
 	metric := state.metric
 	metric.Method = method
 	metric.Route = route
+	metric.ClientSurface = clientSurface
 	metric.StatusCode = statusCode
 	metric.RequestsTotal++
 	metric.LatencySamplesTotal++

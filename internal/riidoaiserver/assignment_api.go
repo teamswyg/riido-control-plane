@@ -48,6 +48,12 @@ type MetricsSnapshot struct {
 	HTTPRequestLatencyTotalMilliseconds               int64                   `json:"http_request_latency_total_ms,omitempty"`
 	HTTPRequestLatencyMaxMilliseconds                 int64                   `json:"http_request_latency_max_ms,omitempty"`
 	HTTPRequestLatencyLastMilliseconds                int64                   `json:"http_request_latency_last_ms,omitempty"`
+	HTTPRequestsDaemonTotal                           int64                   `json:"http_requests_daemon_total,omitempty"`
+	HTTPRequestsClientAppTotal                        int64                   `json:"http_requests_client_app_total,omitempty"`
+	HTTPRequestsDesktopTotal                          int64                   `json:"http_requests_desktop_total,omitempty"`
+	HTTPRequestsDesktopCandidateTotal                 int64                   `json:"http_requests_desktop_candidate_total,omitempty"`
+	HTTPRequestsComponentIntegrationTotal             int64                   `json:"http_requests_component_integration_total,omitempty"`
+	HTTPRequestsUnknownSurfaceTotal                   int64                   `json:"http_requests_unknown_surface_total,omitempty"`
 	HTTPTransactions                                  []HTTPTransactionMetric `json:"http_transactions,omitempty"`
 	StoreOperationCallsTotal                          int64                   `json:"store_operation_calls_total,omitempty"`
 	StoreOperationErrorsTotal                         int64                   `json:"store_operation_errors_total,omitempty"`

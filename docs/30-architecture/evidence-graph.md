@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `56`
 - claim refs: `55`
-- change refs: `596`
-- verifier refs: `309`
+- change refs: `600`
+- verifier refs: `311`
 - evidence refs: `150`
 
 ## Evidence Chains
@@ -75,7 +75,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `loop_registry_loop_surface_evidence_loop` | `1` | `5` | `3` | `2` | `closed_loop_candidate` |
 | `evidence_graph_chain_impact_loop` | `1` | `9` | `5` | `2` | `closed_loop_candidate` |
 | `evidence_graph_workflow_trigger_coverage_loop` | `1` | `6` | `6` | `2` | `closed_loop_candidate` |
-| `operational_readiness_release_loop` | `1` | `10` | `5` | `2` | `operational_readiness_release_harness` |
+| `operational_readiness_release_loop` | `1` | `14` | `7` | `2` | `operational_readiness_release_harness` |
 
 ## Loop
 

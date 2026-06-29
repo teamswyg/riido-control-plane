@@ -16,7 +16,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 | Date | Category | Status | Check | Evidence | Next |
 | --- | --- | --- | --- | --- | --- |
-| `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `3` | `infra_cloudwatch_alarm_by_client_surface` |
+| `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `5` | `infra_cloudwatch_alarm_by_client_surface` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `2` | `frontend_screenshot_regression_case` |
 | `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `2` | `agent_rename_snapshot_regression_evidence` |
 | `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `2` | `daemon_network_disconnect_release_evidence` |

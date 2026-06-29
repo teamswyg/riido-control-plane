@@ -10,6 +10,12 @@ func applyCloudWatchEMFHTTP(envelope *cloudWatchEMFEnvelope, snapshot MetricsSna
 	envelope.HTTPRequestLatencyTotalMilliseconds = snapshot.HTTPRequestLatencyTotalMilliseconds
 	envelope.HTTPRequestLatencyMaxMilliseconds = snapshot.HTTPRequestLatencyMaxMilliseconds
 	envelope.HTTPRequestLatencyLastMilliseconds = snapshot.HTTPRequestLatencyLastMilliseconds
+	envelope.HTTPRequestsDaemonTotal = snapshot.HTTPRequestsDaemonTotal
+	envelope.HTTPRequestsClientAppTotal = snapshot.HTTPRequestsClientAppTotal
+	envelope.HTTPRequestsDesktopTotal = snapshot.HTTPRequestsDesktopTotal
+	envelope.HTTPRequestsDesktopCandidateTotal = snapshot.HTTPRequestsDesktopCandidateTotal
+	envelope.HTTPRequestsComponentIntegrationTotal = snapshot.HTTPRequestsComponentIntegrationTotal
+	envelope.HTTPRequestsUnknownSurfaceTotal = snapshot.HTTPRequestsUnknownSurfaceTotal
 	envelope.HTTPTransactions = snapshot.HTTPTransactions
 }
 
