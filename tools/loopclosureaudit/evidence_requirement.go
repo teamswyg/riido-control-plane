@@ -13,13 +13,14 @@ func requirementEvidenceRows(requirements []requirement, idxOpt ...indexes) []re
 	for _, req := range requirements {
 		proofs := requirementProofs(req.Checks, idxOpt...)
 		rows = append(rows, requirementEvidence{
-			ID:         req.ID,
-			Statement:  req.Statement,
-			Status:     "verified",
-			CheckKinds: evidenceCheckKinds(req.Checks),
-			ProofCount: len(proofs),
-			Proofs:     proofs,
-			Checks:     evidenceChecks(req.Checks),
+			ID:                req.ID,
+			Statement:         req.Statement,
+			Status:            "verified",
+			CheckKinds:        evidenceCheckKinds(req.Checks),
+			ProofCount:        len(proofs),
+			ProofSurfaceCount: proofSurfaceCountFor(proofs),
+			Proofs:            proofs,
+			Checks:            evidenceChecks(req.Checks),
 		})
 	}
 	return rows

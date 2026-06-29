@@ -7,6 +7,9 @@ type evidence struct {
 	ExpiresAt             string                `json:"expires_at"`
 	RequirementCount      int                   `json:"requirement_count"`
 	CheckCount            int                   `json:"check_count"`
+	ProofCount            int                   `json:"proof_count"`
+	ProofSurfaceCount     int                   `json:"proof_surface_count"`
+	ProofSurfaceGapCount  int                   `json:"proof_surface_gap_count"`
 	ResidualGapCount      int                   `json:"residual_gap_count"`
 	ClaimCoverageGapCount int                   `json:"claim_coverage_gap_count"`
 	CandidateCount        int                   `json:"candidate_count"`
@@ -21,13 +24,14 @@ type evidence struct {
 }
 
 type requirementEvidence struct {
-	ID         string   `json:"id"`
-	Statement  string   `json:"statement"`
-	Status     string   `json:"status"`
-	CheckKinds []string `json:"check_kinds"`
-	ProofCount int      `json:"proof_count"`
-	Proofs     []proof  `json:"proofs"`
-	Checks     []check  `json:"checks"`
+	ID                string   `json:"id"`
+	Statement         string   `json:"statement"`
+	Status            string   `json:"status"`
+	CheckKinds        []string `json:"check_kinds"`
+	ProofCount        int      `json:"proof_count"`
+	ProofSurfaceCount int      `json:"proof_surface_count"`
+	Proofs            []proof  `json:"proofs"`
+	Checks            []check  `json:"checks"`
 }
 
 type claimCoverageGap struct {
@@ -51,6 +55,9 @@ func newEvidence(m manifest, depsOpt ...dependencies) evidence {
 		ExpiresAt:             expiresAt,
 		RequirementCount:      len(m.Requirements),
 		CheckCount:            checkCount(m.Requirements),
+		ProofCount:            proofCount(reqs),
+		ProofSurfaceCount:     proofSurfaceCount(reqs),
+		ProofSurfaceGapCount:  proofSurfaceGapCount(reqs),
 		ResidualGapCount:      len(m.ResidualGaps),
 		ClaimCoverageGapCount: len(coverageGaps),
 		CandidateCount:        candidateCountForEvidence(m, coverageGaps),

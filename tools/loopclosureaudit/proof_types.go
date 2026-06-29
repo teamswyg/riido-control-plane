@@ -22,4 +22,9 @@ type proofSurface struct {
 	ExpiresAfterHours int      `json:"expires_after_hours,omitempty"`
 	Providers         []string `json:"providers,omitempty"`
 	PromotesTo        []string `json:"promotes_to,omitempty"`
+	From              string   `json:"from,omitempty"`
+	To                string   `json:"to,omitempty"`
+	Relation          string   `json:"relation,omitempty"`
+	PreCommitHook     string   `json:"pre_commit_hook,omitempty"`
+	Summary           string   `json:"summary,omitempty"`
 }
