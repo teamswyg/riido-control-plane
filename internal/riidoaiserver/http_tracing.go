@@ -24,6 +24,7 @@ func withHTTPTracing(next http.Handler, recorder TraceRecorder) http.Handler {
 				StringTraceAttribute(metadatakeys.HTTPRequestMethod.String(), r.Method),
 				StringTraceAttribute(metadatakeys.HTTPRoute.String(), route),
 				StringTraceAttribute(metadatakeys.RiidoTraceSurface.String(), "control_plane_http"),
+				StringTraceAttribute(riidoClientSurfaceTraceKey, traceHTTPClientSurface(route, r.URL.Path, r.UserAgent())),
 			},
 		})
 		recorderResponse := &httpStatusRecorder{ResponseWriter: w, statusCode: http.StatusOK}
