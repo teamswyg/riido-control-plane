@@ -1827,8 +1827,8 @@
     },
     {
       "id": "operational_readiness_release_loop",
-      "observation": "Release readiness work spans monitoring, usability, exception, stress, chaos, scenario, and desktop checks, but those checks can otherwise remain scattered across unrelated green workflows, and partial checks can age without an artifact exposing which unresolved items are stale.",
-      "hypothesis": "Binding the release-prep checklist to an executable readiness manifest, server-side client-surface tracing and EMF metrics, partial age/stale evidence, a verifier, and generated evidence keeps covered, partial, and stale readiness visible without changing endpoint contracts.",
+      "observation": "Release readiness work spans monitoring, usability, exception, stress, chaos, scenario, and desktop checks, but those checks can otherwise remain scattered across unrelated green workflows, partial checks can age, and readiness can be claimed without naming the metric, trace, test, workflow, infra, profile, or artifact signal that proves it.",
+      "hypothesis": "Binding the release-prep checklist to an executable readiness manifest, server-side client-surface tracing and EMF metrics, partial age/stale evidence, measurement signals, a verifier, and generated evidence keeps covered, partial, stale, and unmeasured readiness visible without changing endpoint contracts.",
       "claims": ["operational_readiness_checks_must_bind_release_items_to_evidence"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/operational-readiness.riido.json"},
@@ -1840,15 +1840,18 @@
         {"kind": "code", "path": "internal/riidoaiserver/http_tracing.go"},
         {"kind": "tool", "path": "tools/operationalreadiness/age.go"},
         {"kind": "tool", "path": "tools/operationalreadiness"},
+        {"kind": "tool", "path": "tools/operationalreadiness/verify_measurements.go"},
         {"kind": "test", "path": "internal/riidoaiserver/http_client_surface_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/http_transaction_metrics_surface_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/cloudwatch_emf_write_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/age_test.go"},
-        {"kind": "test", "path": "tools/operationalreadiness/main_test.go"}
+        {"kind": "test", "path": "tools/operationalreadiness/main_test.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/measurement_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/operationalreadiness/main_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/age_test.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/measurement_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/http_client_surface_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/http_transaction_metrics_surface_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/cloudwatch_emf_write_test.go"},
@@ -1859,7 +1862,7 @@
         {"kind": "artifact", "path": "operational-readiness-evidence", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/operational-readiness.md"}
       ],
-      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and command are declared, exposes stale partial age in JSON evidence, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis.",
+      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and command are declared, requires each readiness check to name at least one measurement signal, exposes stale partial age and measurement-kind distribution in JSON evidence, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis.",
       "next_loop": "operational_readiness_release_harness"
     }
   ],

@@ -5,6 +5,7 @@ type evidence struct {
 	Status             string         `json:"status"`
 	GeneratedAt        string         `json:"generated_at"`
 	CheckCount         int            `json:"check_count"`
+	MeasurementCount   int            `json:"measurement_count"`
 	CoveredCount       int            `json:"covered_count"`
 	PartialCount       int            `json:"partial_count"`
 	StalePartialCount  int            `json:"stale_partial_count"`
@@ -12,6 +13,7 @@ type evidence struct {
 	RequiredCategories []string       `json:"required_categories"`
 	MissingCategories  []string       `json:"missing_categories"`
 	CategoryCounts     map[string]int `json:"category_counts"`
+	MeasurementKinds   map[string]int `json:"measurement_kinds"`
 	StatusCounts       map[string]int `json:"status_counts"`
 	PartialChecks      []partialCheck `json:"partial_checks"`
 	Loop               loopSpec       `json:"loop"`

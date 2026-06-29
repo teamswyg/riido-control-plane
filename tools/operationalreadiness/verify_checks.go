@@ -40,6 +40,9 @@ func verifyCheck(root string, check readinessCheck) error {
 	if len(check.EvidenceRefs) == 0 || check.NextArtifact == "" || check.NextCommand == "" {
 		return fmt.Errorf("readiness check %s must bind evidence, next artifact, and command", check.ID)
 	}
+	if err := verifyMeasurements(check.ID, check.Measurements); err != nil {
+		return err
+	}
 	for _, ref := range check.EvidenceRefs {
 		if err := verifyEvidenceRef(root, ref); err != nil {
 			return fmt.Errorf("readiness check %s: %w", check.ID, err)

@@ -19,6 +19,7 @@ func renderDoc(m manifest, e evidence) string {
 func renderSummary(b *strings.Builder, e evidence) {
 	b.WriteString("## Evidence Surface\n\n")
 	fmt.Fprintf(b, "- checks: `%d`\n", e.CheckCount)
+	fmt.Fprintf(b, "- measurements: `%d`\n", e.MeasurementCount)
 	fmt.Fprintf(b, "- covered: `%d`\n", e.CoveredCount)
 	fmt.Fprintf(b, "- partial: `%d`\n", e.PartialCount)
 	fmt.Fprintf(b, "- required categories: `%d`\n", len(e.RequiredCategories))
@@ -27,12 +28,12 @@ func renderSummary(b *strings.Builder, e evidence) {
 
 func renderChecks(b *strings.Builder, checks []readinessCheck) {
 	b.WriteString("## Release Prep Checks\n\n")
-	b.WriteString("| Date | Category | Status | Check | Evidence | Next |\n")
-	b.WriteString("| --- | --- | --- | --- | --- | --- |\n")
+	b.WriteString("| Date | Category | Status | Check | Measurements | Evidence | Next |\n")
+	b.WriteString("| --- | --- | --- | --- | --- | --- | --- |\n")
 	for _, check := range checks {
-		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%s` | `%d` | `%s` |\n",
+		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%s` | `%d` | `%d` | `%s` |\n",
 			check.Date, check.Category, check.Status, check.ID,
-			len(check.EvidenceRefs), check.NextArtifact)
+			len(check.Measurements), len(check.EvidenceRefs), check.NextArtifact)
 	}
 	b.WriteString("\n")
 }
