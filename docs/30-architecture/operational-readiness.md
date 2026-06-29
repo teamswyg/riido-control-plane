@@ -35,12 +35,12 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | Check | Category | Next Artifact | Next Command |
 | --- | --- | --- | --- |
 | `otel_xray_client_surface` | `monitoring` | `infra_cloudwatch_alarm_by_client_surface` | `terraform -chdir=terraform/riido_ai_server plan` |
-| `daemon_network_disconnect_waiting` | `exception` | `daemon_network_disconnect_release_evidence` | `go test ./cmd/riido -run 'TestDaemon.*(LongPoll|Validation|Retry)' -count=1` |
+| `daemon_network_disconnect_waiting` | `exception` | `daemon_network_disconnect_release_evidence` | `go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
 | `single_pc_agent_limit` | `stress` | `single_pc_agent_capacity_evidence` | `go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1` |
 | `boot_burst_capacity` | `stress` | `cold_start_packet_burst_evidence` | `gh workflow run ai-agent-client-testnet-load.yml -f scenario=public -f duration=120s -f concurrency=128` |
 | `server_crash_recovery` | `chaos` | `ecs_service_recovery_chaos_evidence` | `aws ecs describe-services --cluster riido-ai-server-testnet --services riido-ai-server-testnet` |
 | `scale_out_recovery` | `chaos` | `scale_out_timing_evidence` | `aws application-autoscaling describe-scaling-policies --service-namespace ecs` |
-| `all_servers_down_daemon_behavior` | `chaos` | `daemon_reconnect_storm_evidence` | `go test ./cmd/riido -run 'TestDaemon.*Server|TestDaemon.*Poll' -count=1` |
+| `all_servers_down_daemon_behavior` | `chaos` | `daemon_reconnect_storm_evidence` | `go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
 | `desktop_body_only_change` | `desktop` | `desktop_body_only_golden_evidence` | `RIIDO_E2E_TASK_ID=<task> go run ./tools/localproductacceptance -run-task-mutations` |
 
 ## Loop
