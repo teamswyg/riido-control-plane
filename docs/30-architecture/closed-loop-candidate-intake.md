@@ -30,6 +30,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - each candidate promotion_edge must match the source harness loop and closed-loop promotion target
 - each candidate source_ref must match the producer source, candidate artifact, source workflow, run id, and freshness window
 - candidate intake evidence must expose candidate_source_refs for every consumed candidate item
+- candidate intake evidence must expose candidate_subjects for every consumed candidate item that carries a subject
 - intake sources must be backed by the producer manifest, loop registry, and evidence graph
 - candidate intake must run on a schedule so stale candidates do not rely on human memory
 - candidate intake verification must fail when no candidate artifact is supplied
