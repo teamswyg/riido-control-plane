@@ -3,6 +3,8 @@ package main
 type evidence struct {
 	SchemaVersion         string            `json:"schema_version"`
 	Status                string            `json:"status"`
+	GeneratedAt           string            `json:"generated_at"`
+	ExpiresAt             string            `json:"expires_at"`
 	SurfaceCount          int               `json:"surface_count"`
 	CandidateCount        int               `json:"candidate_count"`
 	AssertionCount        int               `json:"assertion_count"`
@@ -38,10 +40,13 @@ func newEvidence(root string, m manifest) (evidence, error) {
 	if err != nil {
 		return evidence{}, err
 	}
+	generatedAt, expiresAt := evidenceWindow(controlPlaneAuditEvidenceTTLHours)
 	counts := categoryCounts(rows)
 	return evidence{
 		SchemaVersion:         evidenceSchema,
 		Status:                "verified",
+		GeneratedAt:           generatedAt,
+		ExpiresAt:             expiresAt,
 		SurfaceCount:          len(rows),
 		CandidateCount:        len(rows),
 		AssertionCount:        len(m.Assertions),
