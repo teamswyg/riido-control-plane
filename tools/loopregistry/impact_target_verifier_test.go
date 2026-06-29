@@ -26,6 +26,11 @@ func TestImpactTargetVerifierPlanUsesArchitectureIndex(t *testing.T) {
 	if plan.VerifierCommands[0] != "go test ./tools/example -count=1" {
 		t.Fatalf("plan verifier commands = %#v", plan.VerifierCommands)
 	}
+	if len(plan.CommandUnits) != 1 ||
+		plan.CommandUnits[0].PathCount != 1 ||
+		plan.CommandUnits[0].ClaimIDs[0] != "claim-a" {
+		t.Fatalf("plan command units = %+v", plan.CommandUnits)
+	}
 	path := plan.Paths[0]
 	if path.Path != "tools/example/a.go" ||
 		path.Component != "tools/example" ||
