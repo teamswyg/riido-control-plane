@@ -9,19 +9,22 @@ func TestTargetVerifierAnnotationSummaryIncludesComponents(t *testing.T) {
 	got := targetVerifierAnnotationSummary(&targetVerifierPlan{
 		Components: []targetVerifierComponent{
 			{
-				Component: "docs/30-architecture",
-				LoopIDs:   []string{"loop-b"},
-				ClaimIDs:  []string{"claim-b"},
+				Component:        "docs/30-architecture",
+				LoopIDs:          []string{"loop-b"},
+				ClaimIDs:         []string{"claim-b"},
+				EvidenceChainIDs: []string{"chain-b"},
 			},
 			{
-				Component: "internal/riidoaiserver",
-				LoopIDs:   []string{"loop-a"},
-				ClaimIDs:  []string{"claim-a"},
+				Component:        "internal/riidoaiserver",
+				LoopIDs:          []string{"loop-a"},
+				ClaimIDs:         []string{"claim-a"},
+				EvidenceChainIDs: []string{"chain-a"},
 			},
 			{
-				Component: "tools/loopregistry",
-				LoopIDs:   []string{"loop-c"},
-				ClaimIDs:  []string{"claim-c"},
+				Component:        "tools/loopregistry",
+				LoopIDs:          []string{"loop-c"},
+				ClaimIDs:         []string{"claim-c"},
+				EvidenceChainIDs: []string{"chain-c"},
 			},
 		},
 		CommandCount: 3,
@@ -36,6 +39,7 @@ func TestTargetVerifierAnnotationSummaryIncludesComponents(t *testing.T) {
 		"+1 more in loop-registry-evidence",
 		"loops: loop-a, loop-b",
 		"claims: claim-a, claim-b",
+		"chains: chain-a, chain-b",
 		"commands: go test ./tools/a -count=1",
 	} {
 		if !strings.Contains(got, want) {

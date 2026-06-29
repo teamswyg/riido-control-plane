@@ -48,6 +48,9 @@ func targetVerifierSummary(
 	if claimSummary := targetVerifierClaimSummaryFor(plan, evidenceOut); claimSummary != "" {
 		parts = append(parts, "riido target verifier "+claimSummary)
 	}
+	if chainSummary := targetVerifierChainSummaryFor(plan, evidenceOut); chainSummary != "" {
+		parts = append(parts, "riido target verifier "+chainSummary)
+	}
 	if commandSummary := targetVerifierCommandSummaryFor(
 		plan, evidenceOut,
 	); commandSummary != "" {
