@@ -16,8 +16,8 @@ func newStalePartialCandidate(
 		PromotionEdge:         readinessPromotionEdge(source),
 		Observation:           partialObservation(partial),
 		Hypothesis:            partialHypothesis(partial),
-		RequiredNextArtifacts: append([]string(nil), source.RequiredNextArtifacts...),
-		AdoptionPlan:          readinessAdoptionPlan(source),
+		RequiredNextArtifacts: partialRequiredArtifacts(source, partial),
+		AdoptionPlan:          partialAdoptionPlan(source, partial),
 	}
 }
 

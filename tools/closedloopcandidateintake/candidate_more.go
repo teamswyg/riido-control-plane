@@ -19,7 +19,7 @@ func verifyCandidateItem(m manifest, artifact candidateEvidence, item closedLoop
 	if err := verifyCandidatePromotionEdge(item, source); err != nil {
 		return intakeSource{}, err
 	}
-	if err := verifyRequiredNextArtifacts(item.RequiredNextArtifacts, source.ID); err != nil {
+	if err := verifyCandidateRequiredNextArtifacts(item, source.ID); err != nil {
 		return intakeSource{}, err
 	}
 	if err := verifyAdoptionPlan(item); err != nil {

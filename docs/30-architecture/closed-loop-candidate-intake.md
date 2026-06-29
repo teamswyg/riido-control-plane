@@ -27,6 +27,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - each candidate must name the adoption artifacts required to become a closed loop
 - each candidate must include an adoption_plan that covers every required next artifact with an executable command
 - candidate intake evidence must expose candidate_adoption_plans so agents can see required next artifacts and commands without reopening candidate artifacts
+- candidate-specific adoption artifacts must be accepted only when they match the machine-routable subject next_artifact
 - each candidate promotion_edge must match the source harness loop and closed-loop promotion target
 - each candidate source_ref must match the producer source, candidate artifact, source workflow, run id, and freshness window
 - candidate intake evidence must expose candidate_source_refs for every consumed candidate item
@@ -53,5 +54,5 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 - Observation: Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.
 - Hypothesis: A candidate intake sidecar can verify redacted candidate shape, adoption artifact requirements, producer wiring, and graph linkage before humans choose implementation order.
 - Execute: Generate this reader from the intake manifest, run a deterministic redacted candidate fixture through harness promotion, validate the candidate artifact through explicit input, download latest live producer candidate artifacts on non-PR runs, and publish intake evidence in CI.
-- Evaluate: The verifier fails on missing candidate input, missing producer linkage, missing loop-registry target, missing evidence-graph next loop, missing adoption artifacts, expired or exact-expiry candidate artifacts, raw endpoint or secret leakage, stale docs, missing live artifact download wiring, or missing scheduled workflow evidence.
+- Evaluate: The verifier fails on missing candidate input, missing producer linkage, missing loop-registry target, missing evidence-graph next loop, missing adoption artifacts, candidate-specific adoption artifacts not bound to subject next_artifact, expired or exact-expiry candidate artifacts, raw endpoint or secret leakage, stale docs, missing live artifact download wiring, or missing scheduled workflow evidence.
 - Retrospective: This moves candidate triage one step out of the human loop: failures become structured intake records that already know what artifacts are required for adoption.
