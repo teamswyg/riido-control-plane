@@ -7,6 +7,11 @@ import (
 
 func TestTargetVerifierAnnotationSummaryIncludesComponents(t *testing.T) {
 	got := targetVerifierAnnotationSummary(&targetVerifierPlan{
+		Paths: []targetVerifierPath{
+			{Path: "tools/loopregistry/b.go"},
+			{Path: "docs/30-architecture/loop-registry.riido.json"},
+			{Path: "tools/loopregistry/a.go"},
+		},
 		Components: []targetVerifierComponent{
 			{
 				Component:        "docs/30-architecture",
@@ -35,6 +40,7 @@ func TestTargetVerifierAnnotationSummaryIncludesComponents(t *testing.T) {
 		},
 	})
 	for _, want := range []string{
+		"paths: docs/30-architecture/loop-registry.riido.json, tools/loopregistry/a.go",
 		"components: docs/30-architecture, internal/riidoaiserver",
 		"+1 more in loop-registry-evidence",
 		"loops: loop-a, loop-b",

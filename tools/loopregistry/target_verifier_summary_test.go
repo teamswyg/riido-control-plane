@@ -12,6 +12,10 @@ func TestTargetVerifierSummaryUsesImpactPlan(t *testing.T) {
 			MatchedPathCount: 2,
 			ComponentCount:   2,
 			CommandCount:     3,
+			Paths: []targetVerifierPath{
+				{Path: "tools/loopregistry/b.go"},
+				{Path: "docs/30-architecture/loop-registry.riido.json"},
+			},
 			Components: []targetVerifierComponent{
 				{
 					Component:        "docs/30-architecture",
@@ -35,6 +39,7 @@ func TestTargetVerifierSummaryUsesImpactPlan(t *testing.T) {
 	}, ".git/riido-loop-registry-precommit-evidence.json")
 	for _, want := range []string{
 		"3 changed paths, 2 matched paths, 2 components, 3 commands",
+		"paths: docs/30-architecture/loop-registry.riido.json, tools/loopregistry/b.go",
 		"components: docs/30-architecture, tools/loopregistry",
 		"loops: ai_thread_history, closed_loop_candidate",
 		"claims: claim-a, claim-b",

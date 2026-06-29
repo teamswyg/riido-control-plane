@@ -37,6 +37,9 @@ func targetVerifierSummary(
 		plan.ComponentCount,
 		plan.CommandCount,
 	)}
+	if pathSummary := targetVerifierPathSummaryFor(plan, evidenceOut); pathSummary != "" {
+		parts = append(parts, "riido target verifier "+pathSummary)
+	}
 	if componentSummary := targetVerifierComponentSummaryFor(
 		plan, evidenceOut,
 	); componentSummary != "" {
