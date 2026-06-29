@@ -14,7 +14,9 @@ func architectureIndexFor(
 		addArchitecturePaths(byPath, surface.GeneratedDocs, "generated_doc", surface, loopID)
 	}
 	out := architectureIndex{Paths: architecturePathBindings(byPath)}
+	out.Components = architectureComponents(out.Paths)
 	out.PathCount = len(out.Paths)
+	out.ComponentCount = len(out.Components)
 	for _, binding := range out.Paths {
 		out.BindingCount += len(binding.ClaimIDs)
 		out.VerifierCommandCount += len(binding.VerifierCommands)

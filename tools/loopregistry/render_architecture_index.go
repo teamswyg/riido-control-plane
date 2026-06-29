@@ -15,12 +15,14 @@ func renderArchitectureIndex(
 	fmt.Fprintln(b)
 	fmt.Fprintln(b, "Machine-readable path bindings are emitted in `architecture_index` evidence.")
 	fmt.Fprintln(b)
-	fmt.Fprintln(b, "| Paths | Claim bindings | Verifier commands |")
-	fmt.Fprintln(b, "| ---: | ---: | ---: |")
-	fmt.Fprintf(b, "| `%d` | `%d` | `%d` |\n",
+	fmt.Fprintln(b, "| Components | Paths | Claim bindings | Verifier commands |")
+	fmt.Fprintln(b, "| ---: | ---: | ---: | ---: |")
+	fmt.Fprintf(b, "| `%d` | `%d` | `%d` | `%d` |\n",
+		index.ComponentCount,
 		index.PathCount,
 		index.BindingCount,
 		index.VerifierCommandCount,
 	)
 	fmt.Fprintln(b)
+	renderArchitectureComponents(b, index.Components)
 }

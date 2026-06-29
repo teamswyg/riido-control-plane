@@ -66,9 +66,36 @@ Executable SSOT: [`loop-registry.riido.json`](loop-registry.riido.json).
 
 Machine-readable path bindings are emitted in `architecture_index` evidence.
 
-| Paths | Claim bindings | Verifier commands |
-| ---: | ---: | ---: |
-| `652` | `990` | `1883` |
+| Components | Paths | Claim bindings | Verifier commands |
+| ---: | ---: | ---: | ---: |
+| `22` | `656` | `994` | `1887` |
+
+### Architecture Components
+
+| Component | Paths | Claims | Loops | Verifiers | Evidence chains |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `.github/workflows` | `13` | `24` | `9` | `35` | `25` |
+| `.pre-commit-config.yaml` | `1` | `2` | `1` | `3` | `2` |
+| `docs/20-domain` | `2` | `2` | `1` | `4` | `2` |
+| `docs/30-architecture` | `26` | `59` | `10` | `86` | `60` |
+| `docs/50-roadmap` | `2` | `1` | `1` | `1` | `1` |
+| `internal/riidoaiserver` | `137` | `9` | `3` | `16` | `10` |
+| `tools/aiagentclientapi` | `6` | `2` | `1` | `4` | `2` |
+| `tools/aiagentload` | `15` | `1` | `1` | `5` | `1` |
+| `tools/closedloopcandidatedecision` | `32` | `10` | `2` | `23` | `10` |
+| `tools/closedloopcandidateintake` | `28` | `7` | `2` | `20` | `7` |
+| `tools/controlplaneaudit` | `12` | `1` | `1` | `5` | `1` |
+| `tools/controlplaneperf` | `10` | `1` | `1` | `5` | `1` |
+| `tools/controlplanepressure` | `39` | `1` | `1` | `5` | `1` |
+| `tools/evidencegraph` | `40` | `8` | `1` | `13` | `8` |
+| `tools/harnesspromotion` | `21` | `9` | `3` | `25` | `9` |
+| `tools/liveworkflowevidence` | `10` | `3` | `2` | `7` | `3` |
+| `tools/loopclosureaudit` | `52` | `3` | `3` | `3` | `3` |
+| `tools/looprefreshdispatch` | `34` | `1` | `1` | `1` | `1` |
+| `tools/loopregistry` | `137` | `29` | `2` | `37` | `29` |
+| `tools/openquestions` | `5` | `1` | `1` | `1` | `1` |
+| `tools/operationalreadiness` | `21` | `1` | `1` | `2` | `2` |
+| `tools/precommitbaseline` | `13` | `3` | `1` | `4` | `3` |
 
 ## Claim Bindings
 
@@ -82,26 +109,26 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `ai_thread_history` | `7` | `5` | `febe48b3ee92` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `5` | `f8767ffd5ad7` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `54b14a3217bb` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `539470e025ac` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `c6f2e39302ab` |
 | `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `101` | `29` | `7466e65de491` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `11` | `7` | `a22dc4529664` |
 | `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `55` | `26` | `3d90ddcc1e16` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `21` | `5` | `ee118291ea06` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `967cad7d544f` |
-| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `b323caec22d5` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `20` | `5` | `bdf27e403659` |
+| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `b94227dd610b` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `10` | `5` | `3529e9e16688` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `fa97dcda3c99` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `ae2f9606ca10` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `74` | `30` | `e6cefeececee` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `0e3b06df8035` |
-| `loop_registry_evidence_must_expose_loop_surfaces` | `closed_loop_candidate` | `5` | `1` | `7ababf882d79` |
-| `loop_registry_evidence_must_expose_architecture_index` | `closed_loop_candidate` | `9` | `2` | `aa9ea491ec2e` |
-| `loop_registry_impact_must_expose_target_verifier_plan` | `closed_loop_candidate` | `14` | `4` | `ac6a324767c3` |
-| `loop_coverage_dimensions_must_use_static_registry` | `closed_loop_candidate` | `20` | `7` | `0f84770f69a2` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `62e53b1a831c` |
+| `loop_registry_evidence_must_expose_loop_surfaces` | `closed_loop_candidate` | `5` | `1` | `836b9779501a` |
+| `loop_registry_evidence_must_expose_architecture_index` | `closed_loop_candidate` | `13` | `4` | `96537887b871` |
+| `loop_registry_impact_must_expose_target_verifier_plan` | `closed_loop_candidate` | `14` | `4` | `931b2be3892c` |
+| `loop_coverage_dimensions_must_use_static_registry` | `closed_loop_candidate` | `20` | `7` | `ac3ea3c12edf` |
 | `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `6f8e7d3feea3` |
 | `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `ebb75334f82e` |
 | `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `2cee23e52505` |
 | `loop_evidence_sources_must_be_claim_covered` | `closed_loop_candidate` | `9` | `4` | `4702d9697746` |
-| `loop_evidence_kinds_must_use_vocabulary` | `closed_loop_candidate` | `7` | `3` | `e0b7857cc9d1` |
+| `loop_evidence_kinds_must_use_vocabulary` | `closed_loop_candidate` | `7` | `3` | `0905ce3ae7ee` |
 | `claim_verifier_commands_must_surface_as_ci_annotations` | `closed_loop_candidate` | `9` | `5` | `d7665ed06fef` |
 | `evidence_graph_impact_must_surface_as_ci_annotations` | `closed_loop_candidate` | `10` | `3` | `a12453e3c2d9` |
 | `claim_meaning_changes_require_code_or_test_surface` | `closed_loop_candidate` | `15` | `8` | `d7f16d687f7f` |
@@ -113,13 +140,13 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `pre_commit_baseline_evidence_must_self_expire` | `closed_loop_candidate` | `11` | `4` | `274e8a1b0081` |
 | `semantic_hash_metadata_must_not_affect_claim_meaning` | `closed_loop_candidate` | `5` | `2` | `344c5eb1a791` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `7a60c3314867` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `10` | `4` | `78e883bbc22f` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `6a71b6a2ff3b` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `67cd41fefc78` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `10` | `4` | `0363ac85a71c` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `de6a13d49657` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `4` | `2` | `8fbd9576e7a6` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `12` | `2` | `74d216cf747e` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `13` | `6` | `bbc2aaa93881` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `f723175708c8` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `4` | `7bc014daa79b` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `4` | `b86b1e5df17d` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `14` | `5` | `30e301486ae4` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `34af7b442aa7` |
 | `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `87ee895883f3` |
@@ -158,7 +185,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `ambiguous_task_context_must_ask_before_work` | `42` | `31` | `1` | `2` | `4` | `3` | `3` | `0` | `30` | `2` | `1` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `12` | `4` | `1` | `1` | `1` | `2` | `1` | `0` | `7` | `1` | `1` |
 | `loop_registry_evidence_must_expose_loop_surfaces` | `3` | `1` | `1` | `2` | `2` | `3` | `2` | `1` | `1` | `1` | `1` |
-| `loop_registry_evidence_must_expose_architecture_index` | `6` | `1` | `2` | `2` | `2` | `3` | `2` | `1` | `2` | `1` | `1` |
+| `loop_registry_evidence_must_expose_architecture_index` | `10` | `1` | `2` | `2` | `2` | `3` | `2` | `1` | `4` | `1` | `1` |
 | `loop_registry_impact_must_expose_target_verifier_plan` | `9` | `3` | `2` | `2` | `2` | `3` | `2` | `1` | `4` | `1` | `1` |
 | `loop_coverage_dimensions_must_use_static_registry` | `16` | `2` | `2` | `2` | `1` | `2` | `1` | `1` | `7` | `1` | `1` |
 | `loop_verify_tokens_must_be_claim_covered` | `6` | `1` | `0` | `2` | `1` | `2` | `1` | `0` | `3` | `1` | `1` |

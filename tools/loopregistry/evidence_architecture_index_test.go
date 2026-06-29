@@ -9,7 +9,8 @@ func TestLoopRegistryEvidenceExposesArchitectureIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := newEvidence(m, result, nil).ArchitectureIndex
-	if got.PathCount == 0 || got.BindingCount == 0 || got.VerifierCommandCount == 0 {
+	if got.ComponentCount == 0 || got.PathCount == 0 ||
+		got.BindingCount == 0 || got.VerifierCommandCount == 0 {
 		t.Fatalf("empty architecture index: %+v", got)
 	}
 	binding := architectureBindingByPath(got.Paths, "tools/loopregistry/evidence.go")
@@ -19,6 +20,23 @@ func TestLoopRegistryEvidenceExposesArchitectureIndex(t *testing.T) {
 	if len(binding.ClaimIDs) == 0 || len(binding.LoopIDs) == 0 ||
 		len(binding.VerifierCommands) == 0 || len(binding.EvidenceChainIDs) == 0 {
 		t.Fatalf("incomplete architecture binding: %+v", binding)
+	}
+}
+
+func TestArchitectureIndexExposesComponentSummary(t *testing.T) {
+	m, hashes := loadLoopRegistryForTest(t)
+	result, err := verifyAll("../..", m, hashes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := newEvidence(m, result, nil).ArchitectureIndex
+	component := architectureComponentByName(got.Components, "tools/loopregistry")
+	if component.Component == "" {
+		t.Fatal("tools/loopregistry component missing from architecture index")
+	}
+	if component.PathCount == 0 || len(component.ClaimIDs) == 0 ||
+		len(component.VerifierCommands) == 0 || len(component.EvidenceChainIDs) == 0 {
+		t.Fatalf("incomplete architecture component: %+v", component)
 	}
 }
 
@@ -39,14 +57,17 @@ func TestArchitectureIndexIncludesGeneratedDocs(t *testing.T) {
 	}
 }
 
-func architectureBindingByPath(
-	bindings []architecturePathBinding,
-	path string,
-) architecturePathBinding {
-	for _, binding := range bindings {
-		if binding.Path == path {
-			return binding
+func TestArchitectureComponentIDUsesStablePathGrammar(t *testing.T) {
+	cases := map[string]string{
+		".github/workflows/loop-registry.yml": ".github/workflows",
+		"tools/loopregistry/evidence.go":      "tools/loopregistry",
+		"internal/riidoaiserver/server.go":    "internal/riidoaiserver",
+		"docs/30-architecture/loop.md":        "docs/30-architecture",
+		"go.mod":                              "go.mod",
+	}
+	for path, want := range cases {
+		if got := architectureComponentID(path); got != want {
+			t.Fatalf("architectureComponentID(%q) = %q, want %q", path, got, want)
 		}
 	}
-	return architecturePathBinding{}
 }
