@@ -9,6 +9,7 @@ type impactEvidence struct {
 	ChangedClaimCount       int                  `json:"changed_claim_count"`
 	RemovedClaimCount       int                  `json:"removed_claim_count"`
 	BoundSurfaceChangeCount int                  `json:"bound_surface_change_count"`
+	TargetVerifierPlan      *targetVerifierPlan  `json:"target_verifier_plan,omitempty"`
 	AddedClaims             []impactClaim        `json:"added_claims,omitempty"`
 	Claims                  []impactClaim        `json:"claims,omitempty"`
 	RemovedClaims           []impactClaim        `json:"removed_claims,omitempty"`

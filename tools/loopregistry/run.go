@@ -54,6 +54,8 @@ func run(opt options) error {
 	if err != nil {
 		return err
 	}
+	attachTargetVerifierPlan(impact,
+		architectureIndexFor(m.Claims, result.ClaimSurfaces))
 	if opt.GitHubAnnotations {
 		writeGitHubAnnotations(opt.AnnotationOut, result, impact)
 	}
