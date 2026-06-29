@@ -579,8 +579,8 @@
     },
     {
       "id": "loop_coverage_dimension_registry_loop",
-      "observation": "Loop coverage verification for observes, verifies, fails_when, and evidence used separate per-dimension algorithms, so a future coverage axis or behavior change required agents to remember multiple files instead of reading one executable semantic table.",
-      "hypothesis": "A static loop coverage dimension registry can bind each axis to loop token extraction, claim token extraction, completion checking, and top-level verification dispatch, while registry tests prove every axis has executable handlers.",
+      "observation": "Loop coverage verification for observes, verifies, fails_when, and evidence used separate per-dimension algorithms, and the resulting coverage axes were not exposed as first-class evidence, so a future coverage axis or behavior change required agents to remember multiple files instead of reading one executable semantic table.",
+      "hypothesis": "A static loop coverage dimension registry can bind each axis to loop token extraction, claim token extraction, completion checking, top-level verification dispatch, evidence JSON, and generated docs, while registry and evidence tests prove every axis has executable handlers and a machine-readable surface.",
       "claims": ["loop_coverage_dimensions_must_use_static_registry"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -590,15 +590,23 @@
         {"kind": "tool", "path": "tools/loopregistry/loop_coverage_dimension_complete.go"},
         {"kind": "tool", "path": "tools/loopregistry/loop_coverage_dimension_tokens.go"},
         {"kind": "tool", "path": "tools/loopregistry/loop_coverage_dimension_verify.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence_build.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence_loop_coverage_dimension.go"},
+        {"kind": "tool", "path": "tools/loopregistry/types_loop_coverage_dimension.go"},
+        {"kind": "tool", "path": "tools/loopregistry/render.go"},
+        {"kind": "tool", "path": "tools/loopregistry/render_coverage_dimension.go"},
         {"kind": "tool", "path": "tools/loopregistry/verify.go"},
         {"kind": "tool", "path": "tools/loopregistry/verify_loop_observation.go"},
         {"kind": "tool", "path": "tools/loopregistry/verify_loop_coverage.go"},
         {"kind": "tool", "path": "tools/loopregistry/verify_loop_failure.go"},
         {"kind": "tool", "path": "tools/loopregistry/verify_loop_evidence.go"},
-        {"kind": "test", "path": "tools/loopregistry/loop_coverage_dimension_test.go"}
+        {"kind": "test", "path": "tools/loopregistry/loop_coverage_dimension_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/evidence_loop_coverage_dimension_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/loop_coverage_dimension_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/evidence_loop_coverage_dimension_test.go"},
         {"kind": "test", "path": "tools/loopregistry/verify_loop_observation_test.go"},
         {"kind": "test", "path": "tools/loopregistry/verify_loop_coverage_test.go"},
         {"kind": "test", "path": "tools/loopregistry/verify_loop_failure_test.go"},
@@ -610,7 +618,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Loop coverage dimensions now share one executable registry; observes, verifies, fails_when, and evidence coverage still keep their public verifier wrappers, but behavior changes must co-change through the registry and registry tests instead of scattered per-axis implementations.",
+      "decision": "Loop coverage dimensions now share one executable registry; observes, verifies, fails_when, and evidence coverage still keep their public verifier wrappers, but behavior changes must co-change through the registry, evidence JSON, generated docs, and registry/evidence tests instead of scattered per-axis implementations.",
       "next_loop": "closed_loop_candidate"
     },
     {

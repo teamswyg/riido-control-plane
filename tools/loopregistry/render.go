@@ -20,6 +20,7 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "- max evidence expiry hours: `%d`\n\n", result.MaxExpiryHours)
 	renderEvidenceKinds(&b, m.EvidenceKinds)
 	renderLoops(&b, m.Loops, result)
+	renderCoverageDimensions(&b, loopCoverageDimensionSurfaces())
 	renderRefreshPlans(&b, refreshPlans(
 		m.Loops,
 		m.Claims,
