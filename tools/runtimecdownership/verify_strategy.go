@@ -31,6 +31,9 @@ func verifyCurrentStrategy(root string, strategy currentStrategy) error {
 	if !containsText(strategy.Allowed, "profile thumbnail upload-intent smoke") {
 		return fmt.Errorf("deploy smoke must cover profile thumbnail upload-intent")
 	}
+	if !containsText(strategy.Allowed, "resolving its digest instead of overwriting the tag") {
+		return fmt.Errorf("deploy workflow must reuse existing immutable image tags by digest")
+	}
 	return nil
 }
 

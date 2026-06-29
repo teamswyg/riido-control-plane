@@ -18,6 +18,7 @@
       "select the configured development, testnet, or production GitHub environment for manual dispatch without accepting live URL inputs",
       "build checked-in container contract",
       "push immutable ECR image tag",
+      "reuse an existing immutable ECR image tag by resolving its digest instead of overwriting the tag",
       "resolve image digest",
       "preserve infra-owned runtime task-definition shape by copying the live ECS task definition and replacing only the configured container image",
       "register ECS task-definition revision",

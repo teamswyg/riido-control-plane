@@ -44,6 +44,7 @@ func assertRuntimeCDCurrentStrategy(t *testing.T, current currentStrategy) {
 	requireContains(t, current.Status, "development")
 	requireContains(t, current.Status, "production")
 	requireSliceContains(t, current.Allowed, "select the configured development, testnet, or production GitHub environment for manual dispatch without accepting live URL inputs")
+	requireSliceContains(t, current.Allowed, "reuse an existing immutable ECR image tag by resolving its digest instead of overwriting the tag")
 	if len(current.Allowed) < 5 {
 		t.Fatalf("current CD allowed actions are underspecified: %#v", current.Allowed)
 	}

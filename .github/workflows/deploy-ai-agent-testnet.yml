@@ -142,10 +142,26 @@ jobs:
           echo "::add-mask::$aws_account_id"
           echo "::add-mask::$registry"
 
+          tagged_image="${registry}/${ECR_REPOSITORY}:${image_tag}"
+          existing_digest="$(
+            aws ecr describe-images \
+              --repository-name "$ECR_REPOSITORY" \
+              --image-ids imageTag="$image_tag" \
+              --query 'imageDetails[0].imageDigest' \
+              --output text 2>/dev/null || true
+          )"
+          if [ -n "${existing_digest:-}" ] && [ "$existing_digest" != "None" ]; then
+            image_uri="${registry}/${ECR_REPOSITORY}@${existing_digest}"
+            echo "::add-mask::$image_uri"
+            echo "image tag already exists; reusing immutable image digest"
+            printf '%s' "$image_uri" > "$RUNNER_TEMP/riido-image-uri"
+            chmod 600 "$RUNNER_TEMP/riido-image-uri"
+            exit 0
+          fi
+
           aws ecr get-login-password --region "$AWS_REGION" \
             | docker login --username AWS --password-stdin "$registry"
 
-          tagged_image="${registry}/${ECR_REPOSITORY}:${image_tag}"
           cache_scope="riido-ai-server-${DEPLOYMENT_TARGET:-testnet}"
           docker buildx create --use --name riido-runtime-builder
           docker buildx build \
