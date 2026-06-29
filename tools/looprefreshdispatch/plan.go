@@ -28,7 +28,7 @@ func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan
 	if out.SourceStatus == "fresh" {
 		return out, nil
 	}
-	byWorkflow := map[string]map[string]int{}
+	byWorkflow := map[string]workflowScope{}
 	ignoredKinds := map[string]bool{}
 	for _, command := range source.Commands {
 		if command.Kind != "refresh_workflow" {
@@ -41,10 +41,12 @@ func buildDispatchPlan(root string, source refreshCommandEvidence) (dispatchPlan
 		if err != nil {
 			return dispatchPlan{}, err
 		}
-		if byWorkflow[workflow] == nil {
-			byWorkflow[workflow] = map[string]int{}
+		scope, ok := byWorkflow[workflow]
+		if !ok {
+			scope = newWorkflowScope()
 		}
-		byWorkflow[workflow][command.LoopID]++
+		scope.add(command)
+		byWorkflow[workflow] = scope
 	}
 	out.IgnoredCommandKinds = sortedKeys(ignoredKinds)
 	out.Dispatches = dispatchesFromWorkflowMap(byWorkflow)
