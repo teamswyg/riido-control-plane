@@ -31,6 +31,9 @@ func verifyCheck(root string, check readinessCheck) error {
 	if check.ID == "" || check.Date == "" || check.Category == "" || check.Title == "" {
 		return fmt.Errorf("readiness check must bind id, date, category, and title")
 	}
+	if _, err := readinessDate(check.Date); err != nil {
+		return fmt.Errorf("readiness check %s has invalid date %q", check.ID, check.Date)
+	}
 	if check.Status != "covered" && check.Status != "partial" {
 		return fmt.Errorf("readiness check %s has unknown status %s", check.ID, check.Status)
 	}

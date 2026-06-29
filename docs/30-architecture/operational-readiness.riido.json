@@ -47,13 +47,13 @@
       "id": "agent_rename_snapshot_policy",
       "date": "2026-06-26",
       "category": "usability",
-      "status": "partial",
-      "title": "Agent rename behavior is captured as snapshot policy rather than inferred UI state",
+      "status": "covered",
+      "title": "Agent rename behavior is closed as historical thread snapshot preservation",
       "evidence_refs": [
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_test.go"}
       ],
-      "next_artifact": "agent_rename_product_decision",
+      "next_artifact": "agent_rename_snapshot_regression_evidence",
       "next_command": "go test ./internal/riidoaiserver -run 'Test.*Agent.*Snapshot|Test.*Conversation' -count=1"
     },
     {
