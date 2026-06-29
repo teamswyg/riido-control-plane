@@ -1,19 +1,20 @@
 package main
 
 type manifest struct {
-	SchemaVersion        string           `json:"schema_version"`
-	ID                   string           `json:"id"`
-	Title                string           `json:"title"`
-	GeneratedDoc         string           `json:"generated_doc"`
-	Workflow             string           `json:"workflow"`
-	EvidenceArtifact     string           `json:"evidence_artifact"`
-	CommandArtifact      string           `json:"command_artifact"`
-	EvidenceTool         string           `json:"evidence_tool"`
-	IntakeManifest       string           `json:"intake_manifest"`
-	LoopRegistryManifest string           `json:"loop_registry_manifest"`
-	Decisions            []decisionRecord `json:"decisions"`
-	Assertions           []string         `json:"assertions"`
-	Loop                 evidenceLoop     `json:"loop"`
+	SchemaVersion        string             `json:"schema_version"`
+	ID                   string             `json:"id"`
+	Title                string             `json:"title"`
+	GeneratedDoc         string             `json:"generated_doc"`
+	Workflow             string             `json:"workflow"`
+	EvidenceArtifact     string             `json:"evidence_artifact"`
+	CommandArtifact      string             `json:"command_artifact"`
+	EvidenceTool         string             `json:"evidence_tool"`
+	IntakeManifest       string             `json:"intake_manifest"`
+	LoopRegistryManifest string             `json:"loop_registry_manifest"`
+	Decisions            []decisionRecord   `json:"decisions"`
+	DecisionTemplates    []decisionTemplate `json:"decision_templates,omitempty"`
+	Assertions           []string           `json:"assertions"`
+	Loop                 evidenceLoop       `json:"loop"`
 }
 
 type decisionRecord struct {

@@ -32,5 +32,10 @@ func verifyLinkedManifests(root string, m manifest) error {
 			return fmt.Errorf("candidate %s references unknown next loop %s", decision.CandidateID, decision.NextLoop)
 		}
 	}
+	for _, template := range m.DecisionTemplates {
+		if !registryHasLoop(registry, template.NextLoop) {
+			return fmt.Errorf("decision template %s references unknown next loop %s", template.SubjectKind, template.NextLoop)
+		}
+	}
 	return verifyDecisionSourceCoverage(intake.Sources, m.Decisions)
 }

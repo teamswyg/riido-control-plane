@@ -14,6 +14,8 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - every candidate consumed by intake must have exactly one decision record
 - decision records for the consumed candidate source without a matching candidate are stale loop residue and must fail verification
 - decision records must name owner, priority, disposition, next loop, and next artifact
+- decision templates must name subject kind, owner, priority, disposition, next loop, review date, and next artifact
+- decision verification may synthesize a decision from a template only when a consumed candidate subject kind matches that template
 - decision next_artifact must be one of the required_next_artifacts declared by the consumed candidate artifact
 - decision next_artifact must equal subject.next_artifact when the consumed candidate subject declares a machine-routable next artifact
 - decision verification must reject candidates whose adoption_plan does not cover every required_next_artifact
@@ -58,7 +60,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `control-plane-pressure:assignment_long_poll_wait` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `control-plane-pressure:tool_approval_waiters` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `loop-closure-audit:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
-| `loop-refresh-dispatch:01:control_plane_pressure_candidate:target_verifier` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `verifier` |
+| `loop-refresh-dispatch:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
 | `operational-readiness:otel_xray_client_surface` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `infra_cloudwatch_alarm_by_client_surface` |
 | `operational-readiness:daemon_network_disconnect_waiting` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `daemon_network_disconnect_release_evidence` |
 | `operational-readiness:single_pc_agent_limit` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `single_pc_agent_capacity_evidence` |
@@ -67,6 +69,12 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `operational-readiness:scale_out_recovery` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `scale_out_timing_evidence` |
 | `operational-readiness:all_servers_down_daemon_behavior` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `daemon_reconnect_storm_evidence` |
 | `operational-readiness:desktop_body_only_change` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `desktop_body_only_golden_evidence` |
+
+## Decision Templates
+
+| Subject Kind | Disposition | Priority | Owner | Review By | Next Artifact |
+| --- | --- | --- | --- | --- | --- |
+| `loop_refresh_ignored_command` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `verifier` |
 
 ## Evidence Loop
 

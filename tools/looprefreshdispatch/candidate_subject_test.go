@@ -30,6 +30,7 @@ func TestIgnoredCommandCandidateCarriesSubject(t *testing.T) {
 		item.Subject.Kind != "loop_refresh_ignored_command" ||
 		item.Subject.LoopID != "control_plane_pressure_candidate" ||
 		item.Subject.CommandKind != "target_verifier" ||
+		item.Subject.NextArtifact != "verifier" ||
 		item.Subject.SourceCandidateID != "candidate_one" ||
 		item.Subject.SourceSubjectKind != "claim_coverage_gap" {
 		t.Fatalf("subject = %+v", item.Subject)

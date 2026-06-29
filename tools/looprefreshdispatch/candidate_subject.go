@@ -3,6 +3,7 @@ package main
 func ignoredCommandSubject(command selectedRefreshCommand) *candidateSubject {
 	return &candidateSubject{
 		Kind:              "loop_refresh_ignored_command",
+		NextArtifact:      "verifier",
 		LoopID:            command.LoopID,
 		CommandKind:       command.Kind,
 		Command:           command.Command,

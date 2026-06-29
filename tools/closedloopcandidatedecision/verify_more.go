@@ -29,5 +29,5 @@ func verifyDecisions(m manifest) error {
 			return err
 		}
 	}
-	return nil
+	return verifyDecisionTemplates(m.DecisionTemplates)
 }

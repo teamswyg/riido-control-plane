@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `65`
 - claim refs: `64`
-- change refs: `830`
-- verifier refs: `392`
+- change refs: `836`
+- verifier refs: `395`
 - evidence refs: `175`
 
 ## Evidence Chains
@@ -27,7 +27,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `load_harness_closed_loop_promotion_loop` | `1` | `5` | `4` | `4` | `closed_loop_candidate` |
 | `control_plane_performance_evidence_loop` | `1` | `59` | `27` | `9` | `closed_loop_candidate` |
 | `harness_failure_always_promotion_loop` | `1` | `8` | `6` | `3` | `closed_loop_candidate` |
-| `closed_loop_candidate_adoption_plan_loop` | `1` | `17` | `9` | `6` | `closed_loop_candidate_decision` |
+| `closed_loop_candidate_adoption_plan_loop` | `1` | `19` | `10` | `6` | `closed_loop_candidate_decision` |
 | `closed_loop_candidate_promotion_edge_loop` | `1` | `17` | `6` | `6` | `closed_loop_candidate_decision` |
 | `closed_loop_candidate_source_ref_loop` | `1` | `16` | `3` | `6` | `closed_loop_candidate_decision` |
 | `closed_loop_candidate_subject_loop` | `1` | `13` | `6` | `4` | `closed_loop_candidate_decision` |
@@ -60,8 +60,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `expired_loop_refresh_command_selection_loop` | `1` | `12` | `6` | `2` | `closed_loop_candidate` |
 | `expired_loop_refresh_dispatch_loop` | `1` | `47` | `28` | `4` | `closed_loop_candidate` |
 | `loop_evidence_artifact_refresh_owner_loop` | `1` | `4` | `5` | `2` | `closed_loop_candidate` |
-| `closed_loop_candidate_decision_loop` | `1` | `8` | `4` | `7` | `closed_loop_candidate_decision` |
-| `candidate_decision_next_artifact_loop` | `1` | `4` | `5` | `2` | `closed_loop_candidate_decision` |
+| `closed_loop_candidate_decision_loop` | `1` | `11` | `5` | `7` | `closed_loop_candidate_decision` |
+| `candidate_decision_next_artifact_loop` | `1` | `5` | `6` | `2` | `closed_loop_candidate_decision` |
 | `candidate_decision_next_command_loop` | `1` | `7` | `7` | `3` | `closed_loop_candidate_decision` |
 | `closed_loop_candidate_evidence_expiry_loop` | `1` | `17` | `5` | `6` | `closed_loop_candidate` |
 | `closed_loop_candidate_freshness_consumption_loop` | `1` | `12` | `5` | `6` | `closed_loop_candidate` |
