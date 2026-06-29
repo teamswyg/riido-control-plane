@@ -1796,6 +1796,33 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "loop_registry_architecture_index_loop",
+      "observation": "Agents can inspect claim_surfaces and loop_surfaces, but still have to join paths, claims, loops, verifier commands, and evidence chains mentally when choosing target verification for a changed file.",
+      "hypothesis": "Publishing architecture_index in loop-registry evidence turns that join into generated machine evidence, so agents can map a changed path directly to claim ids, loop ids, verifier commands, and evidence chain ids without rereading the full manifest or generated prose.",
+      "claims": ["loop_registry_evidence_must_expose_architecture_index"],
+      "changes": [
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence_architecture_index.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence_architecture_index_bindings.go"},
+        {"kind": "tool", "path": "tools/loopregistry/types_architecture_index.go"},
+        {"kind": "tool", "path": "tools/loopregistry/render_architecture_index.go"},
+        {"kind": "test", "path": "tools/loopregistry/evidence_architecture_index_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/loopregistry/evidence_architecture_index_test.go"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "generated_doc", "path": "docs/30-architecture/loop-registry.md"}
+      ],
+      "decision": "Loop Registry evidence now carries architecture_index so a changed path can be resolved to the relevant claim, loop, verifier command, and evidence chain from generated JSON rather than agent memory.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "evidence_graph_chain_impact_loop",
       "observation": "Evidence graph chains could change their observation, hypothesis, decision, or next loop while no referenced executable change or verifier surface moved in the same pull request, and the claim surface did not expose the machine-readable observe/verify/fail tokens for that gate.",
       "hypothesis": "Adding an evidence graph impact gate and binding its observe/verify/fail tokens to the loop registry keeps reasoning updates attached to executable surfaces, so agents cannot treat prose-only reasoning edits as closed-loop progress.",

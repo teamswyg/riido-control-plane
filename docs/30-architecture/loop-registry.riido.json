@@ -20,7 +20,8 @@
     "provider acceptance harness loops must declare machine-readable provider coverage that matches provider QA observations",
     "AI agents do not need to read the prose doc when the verifier can enforce the bound surface",
     "loop evidence source kinds must use a machine-readable vocabulary so product QA evidence such as api snapshots and screenshots cannot drift into unverified free-form strings",
-    "loop registry evidence must expose loop surfaces so agents can derive QA scope without reopening the manifest or generated prose"
+    "loop registry evidence must expose loop surfaces so agents can derive QA scope without reopening the manifest or generated prose",
+    "loop registry evidence must expose a path-based architecture index so agents can select target verifiers without rereading the full manifest or generated prose"
   ],
   "evidence_kinds": [
     {
@@ -960,7 +961,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "23a2219b76c68722d7e736c6be8f9a827a1bf29bf71e6e397bf8bcd7bec9ca06"
+      "semantic_hash": "a3e370c8dd6cbd84e1eb28b845595becd79f286065989e89eab6dc1b34ad122b"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
@@ -1420,7 +1421,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "eabeb5db32582d1cdf2b6f88e4b5635fd19368c607fbf0fa5b0729eb0941e9ab"
+      "semantic_hash": "3f51bd3489b52e1c32f02f710210751757e3dd0aae5a14f46a9b326acea047a0"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1480,7 +1481,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "351f510281086d9c0ff302886fdbc62ed27f198016461b8784429f80d4e7be3e"
+      "semantic_hash": "f8fef0ec24a11f4c285570c8b5db4ace72422f588a439b12f2e0fe4340fef6d2"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -1563,7 +1564,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "dc1ceb69d299d6f4d27e396d5605b464c8426b9721e754293a5b59d04f0feb1e"
+      "semantic_hash": "b9679b8dedaf0b2f30a36cb24b6e3438e7ae6702a12c84f079fa96ab349afb7e"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -1744,7 +1745,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "f25264c6706776d0eb59d4d9ac7eb389238125d086b035e386e102de83f6fe16"
+      "semantic_hash": "3a81e2a1f3040dd145f27fbf67be0360f962964e82f8ebc191e62f2634924622"
     },
     {
       "id": "loop_registry_evidence_must_expose_loop_surfaces",
@@ -1780,7 +1781,48 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "758cd91280e1dc7d7e29ab1e28a456aace3744a69a6151cf478d74ae87281769"
+      "semantic_hash": "8573af22b3960372f4c87987887940388103c2ddb2e200a9c7472cb1350dda90"
+    },
+    {
+      "id": "loop_registry_evidence_must_expose_architecture_index",
+      "statement": "Loop registry evidence must expose a generated architecture_index that maps bound paths to claim ids, loop ids, verifier commands, and evidence chain ids so agents can derive target verification from machine evidence without rereading the full manifest or generated prose.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "operator_decision",
+        "evidence_expired"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence"
+      ],
+      "files": [
+        "docs/30-architecture/loop-registry.riido.json",
+        "docs/30-architecture/evidence-graph.riido.json",
+        "tools/loopregistry/evidence.go",
+        "tools/loopregistry/evidence_architecture_index.go",
+        "tools/loopregistry/evidence_architecture_index_bindings.go",
+        "tools/loopregistry/evidence_architecture_index_test.go",
+        "tools/loopregistry/render.go",
+        "tools/loopregistry/render_architecture_index.go",
+        "tools/loopregistry/types_architecture_index.go"
+      ],
+      "verifiers": [
+        "TestLoopRegistryEvidenceExposesArchitectureIndex",
+        "TestArchitectureIndexIncludesGeneratedDocs"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "fa595d68e1eb451b96a4190e3211715e3a817b9173b7a249d100292f73ef50c9"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -1970,7 +2012,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "aeb528d751abd37dacfc510dab1b812f342551602716f1d215568ebc8c74fa5b"
+      "semantic_hash": "2955bb3c7c2e52ecdbea445ff00f20f3daa0ee592aedb9130506077665237152"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -2426,7 +2468,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1eb315693988d8b6ef333ea1b685b957c8ae16bd21d5193af252420847d9bcac"
+      "semantic_hash": "53c1ae6bf3af442ee91d10dced7cbd93c8ac5f5db3e859e0b9b92ade044b1c63"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -2465,7 +2507,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2627ecff276e1a9c86ed4957d56f1d477e34a9828fff993fca05f82033322e09"
+      "semantic_hash": "9b020d47df87eeb9246be999b911e306ae14a6643867dfee5d64c56abc3ae0d9"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -2500,7 +2542,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "172561c9cca37c16ed49528686c987beaacc2553d0e273cef849c6106ee20b9d"
+      "semantic_hash": "3b99010954e9b0c210f3803ad7956491102fc651836f996b98f16a863e0814b5"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -2589,7 +2631,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "dcb1ef97ae870726c7496a96cad476f071a18670ee04049762d4175804790569"
+      "semantic_hash": "da71b4c97f46653e9448e26b7bdaa8044d047e950bb685ce654c65c77ef60aad"
     },
     {
       "id": "closed_loop_candidate_evidence_must_self_expire",
@@ -2676,7 +2718,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "00f6408863f5ca34907bd313bd53f157ce877ada6868efaf4075c1c960ec199e"
+      "semantic_hash": "a8dd83139eb939c6ea98131e38f7776c9ced52e280df1f3f22ace16ba4c99f9b"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -2848,7 +2890,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "b8b3d33047c228ee15dd1841095768b32b845ee63e20e22f1882d67e31d63355"
+      "semantic_hash": "9c3cc4d6afc2ad7e6217367f9c6f4d935dea897f519ee9cc1dcc7bc5cab9e241"
     },
     {
       "id": "expired_loop_evidence_must_select_refresh_commands",
@@ -3037,7 +3079,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1605ae127736edb55d5769afe2cbb296ae673a14547b30d927d883196e9135f1"
+      "semantic_hash": "3323195b66c9659f3cdd16d6ea21a9e2376ff67f715cab6b31b92161c2f8d139"
     },
     {
       "id": "harness_like_workflows_must_be_registered_or_excluded",
@@ -3563,6 +3605,11 @@
     {
       "from": "closed_loop_candidate",
       "to": "loop_registry_evidence_must_expose_loop_surfaces",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "loop_registry_evidence_must_expose_architecture_index",
       "relation": "enforces"
     },
     {

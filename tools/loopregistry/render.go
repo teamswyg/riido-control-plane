@@ -26,6 +26,7 @@ func renderDoc(m manifest, result verifyResult) string {
 		result.ClaimSurfaces,
 		result.RefreshCadenceMinutes,
 	))
+	renderArchitectureIndex(&b, m.Claims, result.ClaimSurfaces)
 	renderClaims(&b, m.Claims)
 	renderClaimSurfaces(&b, result.ClaimSurfaces)
 	renderGraph(&b, m.EvidenceGraph)
