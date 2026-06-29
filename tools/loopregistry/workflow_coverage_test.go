@@ -11,7 +11,7 @@ func TestRegistryWorkflowCoversClaimBoundPaths(t *testing.T) {
 
 func TestRegistryWorkflowCoverageFailsForMissingClaimPath(t *testing.T) {
 	m, _ := loadLoopRegistryForTest(t)
-	m.Claims[0].Files = append(m.Claims[0].Files, "internal/riidoaiserver/missing_bound_surface.go")
+	m.Claims[0].Files = append(m.Claims[0].Files, "uncovered/missing_bound_surface.go")
 	if err := verifyRegistryWorkflowCoversClaims("../..", m); err == nil {
 		t.Fatal("expected missing claim-bound workflow path to fail")
 	}

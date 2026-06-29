@@ -52,7 +52,7 @@
     {"name": "routing-tests", "file": "internal/riidoaiserver/store_safe_routing_test.go", "contains": ["TestStoreSafeRoutingAllowsAvailableProvider", "TestStoreSafeRoutingBlocksUnavailableProviderStatuses", "TestStoreSafeRoutingKeepsLegacyAssignmentWhenNoStatusWasSynced"]},
     {"name": "http-tests", "file": "internal/riidoaiserver/provider_status_http_test.go", "contains": ["TestHTTPProviderStatusSyncAndRead", "TestHTTPProviderStatusRejectsPrivateAndUnknownFields", "TestHTTPProviderStatusRequiresScopedAuthorization"]},
     {"name": "auth-actions", "file": "internal/riidoaiserver/authorization.go", "contains": ["AuthorizationActionProviderStatusRead", "AuthorizationActionProviderStatusWrite"]},
-    {"name": "route-wiring", "file": "internal/riidoaiserver/server.go", "contains": ["handleProviderStatusSync", "handleProviderStatusRead", "provider-status"]}
+    {"name": "route-wiring", "file": "internal/riidoaiserver/agent_routes_handler.go", "contains": ["handleProviderStatusSync", "handleProviderStatusRead", "provider-status"]}
   ],
   "loop": {
     "observation": "Provider status rules were prose with tests, but the doc itself did not emit evidence or bind shared vocabulary to source anchors.",

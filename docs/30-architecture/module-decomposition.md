@@ -12,14 +12,14 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `55`; runtime: `1`; internal: `3`; tools: `50`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `89`; max file lines: `1107`.
+File line budget target: `75`; files over target: `88`; max file lines: `838`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 89 | 97 | 8 |
-| Max file lines | 1107 | 2481 | 1374 |
+| Files over target | 88 | 97 | 9 |
+| Max file lines | 838 | 2481 | 1643 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
 
@@ -27,7 +27,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 88 | 85 | 1107 | 2481 | 14636 | 23713 |
+| `internal/riidoaiserver` | 87 | 85 | 838 | 838 | 13604 | 13604 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
 | `tools/containercontract` | 0 | 0 | 0 | 75 | 0 | 0 |
@@ -44,7 +44,6 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | File | Lines |
 | --- | ---: |
-| `internal/riidoaiserver/server.go` | 1107 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 838 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 777 |
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
@@ -54,12 +53,13 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/ai_agent_client_api.go` | 622 |
 | `internal/riidoaiserver/store.go` | 537 |
 | `internal/riidoaiserver/dynamodb_stream_relay.go` | 519 |
+| `internal/riidoaiserver/ai_agent_client_generated_smoke_test.go` | 480 |
 
 ### Line Budget Hotspots
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 88 | 1107 | 14636 |
+| `internal/riidoaiserver` | 87 | 838 | 13604 |
 | `tools/operationalreadiness` | 1 | 77 | 2 |
 
 ## Packages
