@@ -12,6 +12,7 @@ func writeGitHubAnnotations(w io.Writer, result verifyResult, impact *impactEvid
 		w = os.Stdout
 	}
 	writeImpactAnnotation(w, impact)
+	writeTargetVerifierAnnotation(w, impact)
 	for _, surface := range result.ClaimSurfaces {
 		if len(surface.VerifierCommands) == 0 {
 			continue
