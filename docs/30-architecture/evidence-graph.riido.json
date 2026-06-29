@@ -1489,6 +1489,34 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "pre_commit_baseline_freshness_loop",
+      "observation": "Pre-commit baseline evidence verified the hook shape but did not carry freshness metadata, so stale local-loop evidence could be reused without triggering a scheduled QA refresh.",
+      "hypothesis": "Publishing generated_at/expires_at/evidence_ttl_hours and requiring a scheduled workflow with strict artifact upload makes the pre-commit baseline evidence expire and refresh automatically.",
+      "claims": ["pre_commit_baseline_evidence_must_self_expire"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/pre-commit-baseline.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/pre-commit-baseline.riido.json"},
+        {"kind": "tool", "path": "tools/precommitbaseline/evidence.go"},
+        {"kind": "tool", "path": "tools/precommitbaseline/evidence_time.go"},
+        {"kind": "tool", "path": "tools/precommitbaseline/verify_workflow.go"},
+        {"kind": "test", "path": "tools/precommitbaseline/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/precommitbaseline/workflow_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/precommitbaseline/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/precommitbaseline/workflow_test.go"},
+        {"kind": "tool", "path": "tools/precommitbaseline"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/pre-commit-baseline.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "pre-commit-baseline-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Pre-commit baseline evidence is now a scheduled, self-expiring loop artifact instead of a passive shape check.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "closed_loop_verifier_alias_loop",
       "observation": "Closed-loop tools used different verification flags, leaving agents to remember tool-specific commands, and the shared verifier intent claim did not expose the operator-decision and claim-coverage failure semantics it closes.",
       "hypothesis": "A shared -verify intent, backed by claim coverage tokens and regression tests, lets agents and pre-commit invoke closed-loop verification without reading each tool's prose usage or relying on human command memory.",

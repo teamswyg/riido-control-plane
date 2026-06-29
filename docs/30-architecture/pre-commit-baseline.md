@@ -7,6 +7,8 @@ Executable SSOT: [`pre-commit-baseline.riido.json`](pre-commit-baseline.riido.js
 - pre-commit config: `.pre-commit-config.yaml`
 - workflow: `.github/workflows/pre-commit-baseline.yml`
 - evidence artifact: `pre-commit-baseline-evidence`
+- evidence ttl hours: `24`
+- workflow scheduled: `true`
 - hooks: `7`
 - scripts: `2`
 - phrase checks: `23`

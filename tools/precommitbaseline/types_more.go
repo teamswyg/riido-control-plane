@@ -9,7 +9,8 @@ type loopRecord struct {
 }
 
 type verifyResult struct {
-	Hooks        int
-	Scripts      int
-	PhraseChecks int
+	Hooks             int
+	Scripts           int
+	PhraseChecks      int
+	WorkflowScheduled bool
 }

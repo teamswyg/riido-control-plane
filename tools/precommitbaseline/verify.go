@@ -13,6 +13,9 @@ func verifyAll(root string, m manifest) (verifyResult, error) {
 	if err := verifyScripts(root, m, &result); err != nil {
 		return verifyResult{}, err
 	}
+	if err := verifyWorkflow(root, m, &result); err != nil {
+		return verifyResult{}, err
+	}
 	return result, nil
 }
 
@@ -22,6 +25,9 @@ func verifyManifest(m manifest) error {
 	}
 	if m.ID == "" || m.Title == "" || m.GeneratedDoc == "" || m.Workflow == "" || m.Evidence == "" {
 		return fmt.Errorf("id, title, generated_doc, workflow, and evidence_artifact are required")
+	}
+	if m.EvidenceTTL <= 0 {
+		return fmt.Errorf("evidence_ttl_hours is required")
 	}
 	if m.PreCommitConfig == "" || len(m.Hooks) == 0 || len(m.Scripts) == 0 {
 		return fmt.Errorf("pre_commit_config, hooks, and scripts are required")

@@ -10,11 +10,11 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `57`
-- claim refs: `56`
-- change refs: `615`
-- verifier refs: `318`
-- evidence refs: `152`
+- chains: `58`
+- claim refs: `57`
+- change refs: `622`
+- verifier refs: `323`
+- evidence refs: `154`
 
 ## Evidence Chains
 
@@ -65,6 +65,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `closed_loop_candidate_freshness_consumption_loop` | `1` | `12` | `5` | `6` | `closed_loop_candidate` |
 | `pre_commit_claim_binding_loop` | `1` | `10` | `5` | `2` | `closed_loop_candidate` |
 | `pre_commit_evidence_graph_impact_loop` | `1` | `9` | `4` | `2` | `closed_loop_candidate` |
+| `pre_commit_baseline_freshness_loop` | `1` | `7` | `5` | `2` | `closed_loop_candidate` |
 | `closed_loop_verifier_alias_loop` | `1` | `8` | `6` | `1` | `closed_loop_candidate` |
 | `desktop_daemon_lifecycle_decision_queue_loop` | `1` | `7` | `4` | `2` | `open_decision_queue` |
 | `ambiguous_task_context_thread_interaction_loop` | `1` | `41` | `18` | `1` | `ai_thread_history` |
