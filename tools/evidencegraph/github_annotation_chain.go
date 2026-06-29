@@ -11,6 +11,9 @@ func chainImpactMessage(chain impactChain) string {
 	if claims := strings.Join(chain.Claims, ", "); claims != "" {
 		message += " claims: " + claims
 	}
+	if commands := strings.Join(chain.VerifierCommands, ", "); commands != "" {
+		message += " verifier_commands: " + commands
+	}
 	if chain.NextLoop != "" {
 		message += " next_loop: " + chain.NextLoop
 	}

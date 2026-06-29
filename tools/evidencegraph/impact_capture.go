@@ -55,6 +55,7 @@ func verifyChainSurfaceChanged(item chain, changed map[string]bool, action strin
 		ChangedExecutableRefs: changedChainExecutableRefs(item, changed),
 		Claims:                sortedValues(item.Claims),
 		VerifierRefs:          refPaths(item.Verifiers),
+		VerifierCommands:      verifierCommands(item.Verifiers),
 		EvidenceRefs:          refPaths(item.Evidence),
 		NextLoop:              item.NextLoop,
 	}
