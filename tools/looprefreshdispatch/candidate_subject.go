@@ -2,15 +2,17 @@ package main
 
 func ignoredCommandSubject(command selectedRefreshCommand) *candidateSubject {
 	return &candidateSubject{
-		Kind:              "loop_refresh_ignored_command",
-		NextArtifact:      "verifier",
-		LoopID:            command.LoopID,
-		CommandKind:       command.Kind,
-		Command:           command.Command,
-		SourceCandidateID: command.CandidateID,
-		SourceSubjectKind: command.SubjectKind,
-		ClaimIDs:          sortedCopy(command.ClaimIDs),
-		EvidenceChainIDs:  sortedCopy(command.EvidenceChainIDs),
+		Kind:                        "loop_refresh_ignored_command",
+		NextArtifact:                "verifier",
+		LoopID:                      command.LoopID,
+		CommandKind:                 command.Kind,
+		Command:                     command.Command,
+		SourceCandidateID:           command.CandidateID,
+		SourceSubjectKind:           command.SubjectKind,
+		DecisionSource:              command.DecisionSource,
+		DecisionTemplateSubjectKind: command.DecisionTemplateSubjectKind,
+		ClaimIDs:                    sortedCopy(command.ClaimIDs),
+		EvidenceChainIDs:            sortedCopy(command.EvidenceChainIDs),
 	}
 }
 
