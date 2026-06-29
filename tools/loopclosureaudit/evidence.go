@@ -3,6 +3,8 @@ package main
 type evidence struct {
 	SchemaVersion         string                `json:"schema_version"`
 	Status                string                `json:"status"`
+	GeneratedAt           string                `json:"generated_at"`
+	ExpiresAt             string                `json:"expires_at"`
 	RequirementCount      int                   `json:"requirement_count"`
 	CheckCount            int                   `json:"check_count"`
 	ResidualGapCount      int                   `json:"residual_gap_count"`
@@ -36,9 +38,12 @@ func newEvidence(m manifest, depsOpt ...dependencies) evidence {
 	if len(depsOpt) > 0 {
 		coverageGaps = claimCoverageGaps(depsOpt[0])
 	}
+	generatedAt, expiresAt := evidenceWindow(loopClosureAuditEvidenceTTLHours)
 	return evidence{
 		SchemaVersion:         evidenceSchema,
 		Status:                "verified",
+		GeneratedAt:           generatedAt,
+		ExpiresAt:             expiresAt,
 		RequirementCount:      len(m.Requirements),
 		CheckCount:            checkCount(m.Requirements),
 		ResidualGapCount:      len(m.ResidualGaps),

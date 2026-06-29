@@ -1927,7 +1927,42 @@
       ],
       "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and command are declared, requires each readiness check to name at least one measurement signal, exposes stale partial age and measurement-kind distribution in JSON evidence, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run.",
       "next_loop": "operational_readiness_release_harness"
+    },
+    {
+      "id": "control_plane_meta_evidence_expiry_loop",
+      "observation": "Control-plane performance, high-traffic audit, and loop-closure audit evidence were machine-readable but lacked generated_at/expires_at windows, so refresh automation could not distinguish fresh open-loop measurements from stale proof artifacts.",
+      "hypothesis": "Giving these meta-evidence sidecars the same 24h evidence window as core loop evidence lets refresh dispatch and downstream agents reject stale performance, audit, and closure evidence without embedding dynamic timestamps in generated prose.",
+      "changes": [
+        {"kind": "tool", "path": "tools/controlplaneperf/evidence.go"},
+        {"kind": "tool", "path": "tools/controlplaneperf/evidence_time.go"},
+        {"kind": "test", "path": "tools/controlplaneperf/evidence_time_test.go"},
+        {"kind": "tool", "path": "tools/controlplaneaudit/evidence.go"},
+        {"kind": "tool", "path": "tools/controlplaneaudit/evidence_time.go"},
+        {"kind": "test", "path": "tools/controlplaneaudit/evidence_time_test.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/evidence.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/evidence_time.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/evidence_time_test.go"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/controlplaneperf/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/controlplaneaudit/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/evidence_time_test.go"},
+        {"kind": "tool", "path": "tools/controlplaneperf"},
+        {"kind": "tool", "path": "tools/controlplaneaudit"},
+        {"kind": "tool", "path": "tools/loopclosureaudit"},
+        {"kind": "tool", "path": "tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "control-plane-performance-evidence", "redacted": true},
+        {"kind": "artifact", "path": "control-plane-high-traffic-audit", "redacted": true},
+        {"kind": "artifact", "path": "loop-closure-audit-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Performance, high-traffic audit, and loop-closure audit evidence now carry generated_at/expires_at in JSON evidence only; generated docs remain deterministic while refresh automation can expire stale proof artifacts after 24h.",
+      "next_loop": "loop_closure_audit"
     }
+
   ],
   "loop": {
     "observation": "Evidence artifacts existed, but the reasoning chain from observation to next loop was still scattered across generated readers and PR memory.",

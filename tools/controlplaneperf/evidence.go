@@ -3,6 +3,8 @@ package main
 type evidence struct {
 	SchemaVersion             string              `json:"schema_version"`
 	Status                    string              `json:"status"`
+	GeneratedAt               string              `json:"generated_at"`
+	ExpiresAt                 string              `json:"expires_at"`
 	HotPathCount              int                 `json:"hot_path_count"`
 	BenchmarkCount            int                 `json:"benchmark_count"`
 	TestCount                 int                 `json:"test_count"`
@@ -40,9 +42,12 @@ type candidateEvidence struct {
 }
 
 func newEvidence(m manifest) evidence {
+	generatedAt, expiresAt := evidenceWindow(controlPlanePerformanceEvidenceTTLHours)
 	return evidence{
 		SchemaVersion:             evidenceSchema,
 		Status:                    "verified",
+		GeneratedAt:               generatedAt,
+		ExpiresAt:                 expiresAt,
 		HotPathCount:              len(m.HotPaths),
 		BenchmarkCount:            benchmarkCount(m.HotPaths),
 		TestCount:                 testCount(m.HotPaths),
