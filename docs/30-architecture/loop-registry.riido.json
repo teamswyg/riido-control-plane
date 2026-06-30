@@ -998,7 +998,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "25217ddc9174ea2a044953efbec26a4e63ee1067906d281ea78f7d66b9c9b7c8"
+      "semantic_hash": "0f966cf8f2187496274de59b2dc602d455c5eb767e0c4759d346c3ea9a91a7a1"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
@@ -1316,7 +1316,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "54cfc3069dff42d7af5bbcdb77434119fdd8f3b053aa60301fc9b0a52000ee3b"
+      "semantic_hash": "03e745eb6cd1735f9a69666d080731bc25f4f78c26515b625c41dc09395ca092"
     },
     {
       "id": "loop_closure_audit_must_prove_human_exit_requirements",
@@ -1563,7 +1563,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "9fd3fa482d4df3e691ca9c031fd3eda0c76df21cc8e4c431a870eb8dee2a69ef"
+      "semantic_hash": "0013c10cfb4af20e0a2f1d34a7dd32294555501e4dd8c247ea7f84399c3127e6"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1623,7 +1623,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "53ef74163459ab42f1fc830591f60e0847fd4d486a84648c0276e6f416c57e19"
+      "semantic_hash": "15bc06809af3976c8663589d86e84dfd400d227a75b22592a9042f1da22979bc"
     },
     {
       "id": "closed_loop_candidates_must_carry_subject",
@@ -1675,7 +1675,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "29df5147022b1dc6dc525287c1135e76807e1b6f238a5bfcbf9b8b9e436517d3"
+      "semantic_hash": "ef3a21e837b9744b8840306b58e6bcb6d24c811c183c8176752b2b54596e3b1b"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -1758,7 +1758,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8c397a4f1382e92cbaa5deb15605124a762c1e6066ac454b932d0eb0b1d0e6c2"
+      "semantic_hash": "85c985333a35bf18bd00849dcde3155a3b3508d1d5825a49cf80a1de0537b207"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -1949,7 +1949,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "5919bacb7f130317b773b4c61806ece77a4d35a6f08ad8426df0d50dde5c5afe"
+      "semantic_hash": "92d56a4452c6d2384d6a64e78342e1f8d65f7638d3e352283cf6b867cf27dc3c"
     },
     {
       "id": "loop_registry_evidence_must_expose_loop_surfaces",
@@ -1985,7 +1985,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f8c0d97a6de9d16b7078332cccae9e8bc1dff2130d6418aaa7cf36893d228d1b"
+      "semantic_hash": "79bdadc22a251e4db8d83720e0fbbc0f2dd6a42329cccc137a0eabbd3136143a"
     },
     {
       "id": "loop_registry_evidence_must_expose_architecture_index",
@@ -2038,11 +2038,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e19a1e15589661539e4ab2c13c802c22c987a6b2a26d7ca4079c9fe302cb6447"
+      "semantic_hash": "0df4fffa97dc912698fd9b52f7969d1480b7e3d5111b94078114def723f9f9e4"
     },
     {
       "id": "loop_registry_impact_must_expose_target_verifier_plan",
-      "statement": "Loop registry PR and local pre-commit impact evidence must consume architecture_index and expose a target_verifier_plan that maps changed paths and their derived architecture components to claim ids, loop ids, verifier commands, evidence chain ids, exact or component-routed match_kind, command_units that reverse-index each verifier command back to affected paths, components, loops, claims, and evidence chains, focused_commands that prioritize directly added, changed, removed, or bound-surface claim verifier commands, entrypoint_commands that rank the broadest verifier commands first, runnable_commands that precompute the exact command set a target verifier script will execute, and an optional executable target verifier shell script output that runs runnable_commands instead of asking agents to infer focused-versus-entrypoint policy; component-routed matches must cover new files inside known architecture components so agents do not infer verifier scope from prose or directory names; GitHub annotations plus local summaries must publish bounded target verifier path, component, loop, claim, evidence chain, focused command, entrypoint command, runnable command, and command samples plus the full evidence artifact pointer so agents can start QA without reopening prose.",
+      "statement": "Loop registry PR and local pre-commit impact evidence must consume architecture_index and expose a target_verifier_plan that maps changed paths and their derived architecture components to claim ids, loop ids, verifier commands, evidence chain ids, exact or component-routed match_kind, command_units that reverse-index each verifier command back to affected paths, components, loops, claims, and evidence chains, focused_commands that prioritize directly added, changed, removed, or bound-surface claim verifier commands, entrypoint_commands that rank the broadest verifier commands first, runnable_commands that precompute the exact command set a target verifier script will execute, path-level routing_packets that prejoin each changed path to the runnable commands, claim ids, loop ids, evidence chain ids, direct command count, and fallback policy that apply to that path, and an optional executable target verifier shell script output that runs runnable_commands instead of asking agents to infer focused-versus-entrypoint policy; component-routed matches must cover new files inside known architecture components so agents do not infer verifier scope from prose or directory names; GitHub annotations plus local summaries must publish bounded target verifier path, component, loop, claim, evidence chain, focused command, entrypoint command, runnable command, and command samples plus the full evidence artifact pointer so agents can start QA without reopening prose.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "operator_decision",
@@ -2077,11 +2077,14 @@
         "tools/loopregistry/impact_target_verifier_focus.go",
         "tools/loopregistry/impact_target_verifier_focus_command.go",
         "tools/loopregistry/impact_target_verifier_runnable.go",
+        "tools/loopregistry/impact_target_verifier_route_packet.go",
+        "tools/loopregistry/impact_target_verifier_route_packet_types.go",
         "tools/loopregistry/impact_target_verifier_types.go",
         "tools/loopregistry/impact_target_verifier_command_test.go",
         "tools/loopregistry/impact_target_verifier_entrypoint_test.go",
         "tools/loopregistry/impact_target_verifier_focus_test.go",
         "tools/loopregistry/impact_target_verifier_runnable_test.go",
+        "tools/loopregistry/impact_target_verifier_route_packet_test.go",
         "tools/loopregistry/impact_target_verifier_route_test.go",
         "tools/loopregistry/impact_target_verifier_test.go",
         "tools/loopregistry/github_annotation.go",
@@ -2123,6 +2126,7 @@
         "TestTargetVerifierPlanFocusFallsBackToBoundSurfaces",
         "TestTargetVerifierPlanExposesFocusedRunnableCommands",
         "TestTargetVerifierPlanFallsBackToEntrypointRunnableCommands",
+        "TestTargetVerifierPlanExposesPathRoutingPackets",
         "TestGitHubAnnotationsIncludeImpactScope",
         "TestTargetVerifierAnnotationSummaryIncludesComponents",
         "TestTargetVerifierComponentSummarySkipsMissingPlan",
@@ -2147,7 +2151,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0ca2993e0d9ca42a03e16772fccd56d48b5a90f9761f04c426022aa43a6e32d7"
+      "semantic_hash": "20ec4b101d1d7abcd467074cf49cc504eba57bdd0f2e077675f60a85d84b9e95"
     },
     {
       "id": "loop_coverage_dimensions_must_use_static_registry",
@@ -2201,7 +2205,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d5229077c91aa81584cbe2e760d583f6bf48cef4d2c233fa6a80f98542b67839"
+      "semantic_hash": "e73a8f4a57ada1234a8a0146d6ff52d159f53e5034c26cce35b8c0f9b62952b1"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -2391,7 +2395,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "787bfa848e07952857302640364ef2e0c198c066bfb8f1c516bd5b4477dacd1b"
+      "semantic_hash": "ae70912ca6499487e6517c4ef8671ed73085e9369a295d26b9c7af26e95f2cd2"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -2859,7 +2863,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0a2b3d2358d6dbe3a90606e542cff9cde21929f89fbdec0ff6009d53bf1f332a"
+      "semantic_hash": "7198d6d05b41ca2c042a5ac28d534d089ba8f7f823bb3e74647721dec2e32918"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -2898,7 +2902,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "adfc1487d6c4e3db74864f68e8d8b73f01cfcae7bd6ce05e48209c63c0f1b6a5"
+      "semantic_hash": "685bd8f4c645ad857d55d788d2de570001163dc3e44a9f2ff43969a99be749f6"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -2933,7 +2937,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "bb994dcb03a6267a9752ae11f51617b9c6b9f112100de595af4c30e8f8589d9c"
+      "semantic_hash": "45a0116ce75ed3cded41e87101cdc948b283df533fe7da05f111b59650dc369c"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -3116,7 +3120,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1a21ff845a371722f73c089eb0fd0eaaf0f62b308123919e537e10e922acfb92"
+      "semantic_hash": "162e69afbaf5ff7763ceb188c1865dd5b50aefddf062acd8a94ebe04c8914677"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",

@@ -12,6 +12,7 @@ type targetVerifierPlan struct {
 	FocusedCommandCount  int                       `json:"focused_command_count,omitempty"`
 	FocusedCommands      []string                  `json:"focused_commands,omitempty"`
 	RunnableCommands     []string                  `json:"runnable_commands"`
+	RoutingPackets       []targetVerifierRoute     `json:"routing_packets"`
 	EntrypointCommands   []string                  `json:"entrypoint_commands"`
 	VerifierCommands     []string                  `json:"verifier_commands"`
 	CommandUnits         []targetVerifierCommand   `json:"command_units"`
