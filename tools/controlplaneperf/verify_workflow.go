@@ -13,6 +13,7 @@ func verifyWorkflow(root string, m manifest) error {
 	required := []string{
 		"schedule:",
 		"go run ./tools/controlplaneperf",
+		"-architecture-query-out",
 		"go test ./tools/aiagentload",
 		"go test ./tools/controlplanepressure",
 		"go run ./tools/controlplanepressure",
@@ -28,6 +29,7 @@ func verifyWorkflow(root string, m manifest) error {
 		"name: " + m.SummaryArtifact,
 		"name: " + m.CandidateArtifact,
 		"name: " + m.PressureCandidateArtifact,
+		"name: " + m.ArchitectureQueryArtifact,
 		"if-no-files-found: error",
 	}
 	for _, needle := range required {

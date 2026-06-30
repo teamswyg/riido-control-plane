@@ -17,6 +17,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - local pressure artifact: `control-plane-local-pressure`
 - race artifact: `control-plane-race`
 - pressure candidate artifact: `control-plane-pressure-closed-loop-candidates`
+- architecture query artifact: `control-plane-architecture-query`
 - local pressure scenarios: `9`
 - candidate artifact: `control-plane-performance-closed-loop-candidates`
 

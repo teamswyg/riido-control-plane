@@ -44,3 +44,11 @@ func TestControlPlanePerformanceArchitectureQueryRequiresPath(t *testing.T) {
 		t.Fatal("expected query output without paths to fail")
 	}
 }
+
+func TestControlPlanePerformanceRequiresArchitectureQueryArtifact(t *testing.T) {
+	m := loadManifestForTest(t)
+	m.ArchitectureQueryArtifact = "missing-query-artifact"
+	if err := verifyWorkflow("../..", m); err == nil {
+		t.Fatal("expected missing architecture query artifact upload to fail")
+	}
+}

@@ -9,6 +9,7 @@
   "race_artifact": "control-plane-race",
   "local_pressure_artifact": "control-plane-local-pressure",
   "pressure_candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+  "architecture_query_artifact": "control-plane-architecture-query",
   "summary_artifact": "control-plane-performance-redacted-summary",
   "candidate_artifact": "control-plane-performance-closed-loop-candidates",
   "evidence_tool": "tools/controlplaneperf",

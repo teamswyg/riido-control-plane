@@ -10,7 +10,8 @@ func verifyAll(root string, m manifest) error {
 		return fmt.Errorf("performance manifest must bind doc, workflow, and tool")
 	}
 	if m.EvidenceArtifact == "" || m.BenchmarkArtifact == "" || m.LocalPressureArtifact == "" ||
-		m.SummaryArtifact == "" || m.CandidateArtifact == "" || m.PressureCandidateArtifact == "" {
+		m.SummaryArtifact == "" || m.CandidateArtifact == "" || m.PressureCandidateArtifact == "" ||
+		m.ArchitectureQueryArtifact == "" {
 		return fmt.Errorf("performance manifest must bind evidence, benchmark, pressure, summary, and candidate artifacts")
 	}
 	if err := verifyPressureSources(m); err != nil {
