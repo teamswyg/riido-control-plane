@@ -44,8 +44,10 @@ func newEvidenceAt(m manifest, now time.Time) evidence {
 		RequiredCategories: append([]string(nil), m.RequiredCategories...),
 		MissingCategories:  missingCategories(m.RequiredCategories, categoryCounts),
 		CategoryCounts:     categoryCounts, MeasurementKinds: measurementKinds,
-		StatusCounts:  statusCounts,
-		PartialChecks: partials, Loop: m.Loop,
+		StatusCounts:     statusCounts,
+		PartialPromotion: partialPromotionFor(partials),
+		PartialChecks:    partials,
+		Loop:             m.Loop,
 	}
 }
 

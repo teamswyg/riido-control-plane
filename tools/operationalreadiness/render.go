@@ -12,6 +12,7 @@ func renderDoc(m manifest, e evidence) string {
 	renderSummary(&b, m, e)
 	renderChecks(&b, m.Checks)
 	renderPartials(&b, e.PartialChecks)
+	renderPartialPromotion(&b, e.PartialPromotion)
 	renderLoop(&b, m.Loop)
 	return strings.TrimRight(b.String(), "\n") + "\n"
 }

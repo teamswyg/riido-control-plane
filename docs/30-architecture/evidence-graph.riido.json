@@ -2257,7 +2257,7 @@
     {
       "id": "operational_readiness_stale_partial_promotion_loop",
       "observation": "Operational readiness evidence can identify stale partial release-prep checks, but those stale checks still require a candidate artifact before intake and decision loops can prioritize them.",
-      "hypothesis": "The operational readiness sidecar can convert stale partial checks into redacted closed-loop candidates whose first adoption step is the check-specific next artifact and command, while preserving covered checks as readiness evidence only.",
+      "hypothesis": "The operational readiness sidecar can convert stale partial checks into redacted closed-loop candidates whose first adoption step is the check-specific next artifact and command, while readiness evidence exposes partial_promotion candidate ids/count so agents do not need to reopen the candidate artifact to see what was promoted.",
       "claims": ["operational_readiness_checks_must_bind_release_items_to_evidence"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/operational-readiness.riido.json"},
@@ -2269,12 +2269,19 @@
         {"kind": "tool", "path": "tools/operationalreadiness/candidate_partial_adoption.go"},
         {"kind": "tool", "path": "tools/operationalreadiness/candidate_source.go"},
         {"kind": "tool", "path": "tools/operationalreadiness/candidate_adoption.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness/partial_promotion.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness/types_partial_promotion.go"},
+        {"kind": "tool", "path": "tools/operationalreadiness/render_partial_promotion.go"},
         {"kind": "tool", "path": "tools/operationalreadiness/verify_sources.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/partial_promotion_test.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/render_partial_promotion_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_freshness_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_partial_adoption_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_test.go"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/operationalreadiness/partial_promotion_test.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/render_partial_promotion_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_freshness_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_partial_adoption_test.go"},
@@ -2287,7 +2294,7 @@
         {"kind": "artifact", "path": "operational-readiness-evidence", "redacted": true},
         {"kind": "artifact", "path": "operational-readiness-closed-loop-candidates", "redacted": true}
       ],
-      "decision": "Operational readiness stale partials now become redacted closed-loop candidate artifacts with source refs bound to the manifest evidence artifact, promotion edges, freshness windows, and adoption plans whose first step is the stale check's next artifact and command, while fresh partials remain visible but are not automatically promoted.",
+      "decision": "Operational readiness stale partials now become redacted closed-loop candidate artifacts with source refs bound to the manifest evidence artifact, promotion edges, freshness windows, adoption plans whose first step is the stale check's next artifact and command, and readiness evidence exposes partial_promotion candidate ids/count beside the partial queue while fresh partials remain visible but are not automatically promoted.",
       "next_loop": "closed_loop_candidate"
     },
     {
