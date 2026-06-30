@@ -17,7 +17,8 @@
     {"path":"tools/generatedclienthandoff","max_files":2,"max_lines":601,"max_total_over_target_lines":578},
     {"path":"awsadapters","max_files":1,"max_lines":84,"max_total_over_target_lines":9},
     {"path":"internal/contractscompat","max_files":1,"max_lines":81,"max_total_over_target_lines":6},
-    {"path":"tools/operationalreadiness","max_files":1,"max_lines":77,"max_total_over_target_lines":2}
+    {"path":"tools/operationalreadiness","max_files":1,"max_lines":77,"max_total_over_target_lines":2},
+    {"path":"tools/looprefreshdispatch","max_files":1,"max_lines":79,"max_total_over_target_lines":4}
   ]},
   "packages":[
     {"path":"awsadapters","kind":"public-adapter","role":"Public facade for private infra and evidence tooling that needs selected AWS adapter behavior.","must_not_own":"new adapter behavior, duplicated DTOs, credential storage"},

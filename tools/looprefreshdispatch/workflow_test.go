@@ -39,7 +39,7 @@ func TestLoopRefreshDispatchWorkflowConsumesDecisionCommands(t *testing.T) {
 		t.Fatal("workflow must pass candidate decision commands into dispatcher")
 	}
 	if !strings.Contains(text, "go run ./tools/closedloopcandidatedecision") ||
-		!strings.Contains(text, "-commands-out out/sample-decision-refresh-commands.json") {
+		!strings.Contains(text, "-commands-out out/sample/sample-decision-refresh-commands.json") {
 		t.Fatal("workflow sample must use the real candidate decision command producer")
 	}
 	if strings.Count(text, "-commands-in") < 4 {
@@ -59,5 +59,21 @@ func TestLoopRefreshDispatchWorkflowUsesCommandFixture(t *testing.T) {
 	}
 	if strings.Contains(text, "cat > out/sample-loop-refresh-commands.json") {
 		t.Fatal("workflow must not embed loop refresh command JSON inline")
+	}
+}
+
+func TestLoopRefreshDispatchWorkflowSeparatesSampleAndLiveArtifacts(t *testing.T) {
+	text := loopRefreshDispatchWorkflowText(t)
+	for _, required := range []string{
+		"-evidence-out out/sample/loop-refresh-dispatch-plan.json",
+		"-candidate-out out/sample/loop-refresh-dispatch-closed-loop-candidates.json",
+		"if: github.event_name == 'pull_request'",
+		"cp out/sample/loop-refresh-dispatch-plan.json out/loop-refresh-dispatch-plan.json",
+		"rm -f out/loop-refresh-dispatch-plan.json",
+		"rm -f out/loop-refresh-dispatch-closed-loop-candidates.json",
+	} {
+		if !strings.Contains(text, required) {
+			t.Fatalf("workflow must keep sample evidence away from live artifacts: missing %q", required)
+		}
 	}
 }
