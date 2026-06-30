@@ -206,7 +206,8 @@
         "architecture_component_map",
         "architecture_file_index",
         "pressure_observability_dimension",
-        "optimization_candidate"
+        "optimization_candidate",
+        "evidence_expired"
       ],
       "verifies": [
         "lightweight_benchmark_coverage",
@@ -288,7 +289,8 @@
         "architecture_component_missing",
         "architecture_file_index_missing",
         "pressure_dimension_missing",
-        "candidate_missing"
+        "candidate_missing",
+        "evidence_expired"
       ],
       "promotes_to": [
         "closed_loop_candidate"
@@ -1000,7 +1002,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "55c28920d4dab4f0e260d79e9d7ae75ce21dc9765c216c620345ecb60e89d309"
+      "semantic_hash": "35f224aa2b1e08c96191b92d347ca56c7f69d2c75c4916f933632d6f1be2ec0c"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
@@ -1230,6 +1232,56 @@
       "semantic_hash": "b0b8b2b1c55a8148e1897a5cebaf0832dd0df2796c29eb2c8133556fb0abbb2d"
     },
     {
+      "id": "control_plane_meta_evidence_must_self_expire",
+      "statement": "Control-plane performance and high-traffic audit evidence artifacts must publish generated_at and expires_at so stale pressure and audit evidence cannot be reused as fresh loop input.",
+      "loop": "control_plane_performance_harness",
+      "covers_observes": [
+        "evidence_expired",
+        "local_pressure_resource_delta",
+        "static_high_traffic_surface"
+      ],
+      "covers_verifies": [
+        "local_pressure_evidence",
+        "static_hot_path_audit",
+        "hot_path_candidate_generation"
+      ],
+      "covers_fails_when": [
+        "evidence_expired",
+        "local_pressure_missing",
+        "static_audit_missing"
+      ],
+      "covers_evidence": [
+        "control-plane-performance-evidence",
+        "control-plane-high-traffic-audit"
+      ],
+      "files": [
+        "tools/controlplaneperf/evidence.go",
+        "tools/controlplaneperf/evidence_time.go",
+        "tools/controlplaneperf/evidence_time_test.go",
+        "tools/controlplaneaudit/evidence.go",
+        "tools/controlplaneaudit/evidence_time.go",
+        "tools/controlplaneaudit/evidence_time_test.go",
+        "tools/loopclosureaudit/evidence.go",
+        "tools/loopclosureaudit/evidence_time.go",
+        "tools/loopclosureaudit/evidence_time_test.go",
+        "docs/30-architecture/evidence-graph.riido.json"
+      ],
+      "verifiers": [
+        "TestControlPlanePerformanceEvidenceCarriesExpiry",
+        "TestControlPlaneHighTrafficAuditEvidenceCarriesExpiry",
+        "TestLoopClosureAuditEvidenceCarriesExpiry",
+        "TestEvidenceGraphManifestVerifies"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/control-plane-performance.md",
+        "docs/30-architecture/control-plane-high-traffic-audit.md",
+        "docs/30-architecture/loop-closure-audit.md",
+        "docs/30-architecture/evidence-graph.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "f2c0a5f1825798d355458890aef475f44b0b41da43d4b77f1d04853eddabb8b3"
+    },
+    {
       "id": "harness_promotion_must_run_after_failure",
       "statement": "Harness refresh workflows must run both harnesspromotion and closed-loop candidate artifact upload under if: always(), and every registered harness loop must have exactly one harness-promotion source with the same refresh workflow, so a failing harness run still produces closed-loop candidate evidence.",
       "loop": "closed_loop_candidate",
@@ -1274,7 +1326,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5a474a85004859ef03d87d05161869854cfde6b55dd11fa218cca28e96ffb37c"
+      "semantic_hash": "a075d50582d1b0d6db5949c8f3f915c819fb423f1526a29da131c2b463f473c2"
     },
     {
       "id": "generated_endpoint_smoke_matrix_must_remain_contract_gate",
@@ -1318,7 +1370,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f50f259461e6f37ec679fb414e6f5f331576e0cf722ce2678cc2a8a708397de9"
+      "semantic_hash": "09715e910797adbe7ee03a0634a6b2cb562625e84609e7d2b444595ba722621c"
     },
     {
       "id": "loop_closure_audit_must_prove_human_exit_requirements",
@@ -1590,7 +1642,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3e65dd2dbc3f85906c772292f69a4d086cb58e1a3ff21e100a1330fe95eeff1c"
+      "semantic_hash": "3cb82b35ec540f7f0c865207b41f60338d68f9b255d2c3b6907c2827fc100adf"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1650,7 +1702,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "499661b6dffbf93583fa1b8d2e57f07bfef817dcac504ba1c556df2a2e54a100"
+      "semantic_hash": "05097eaaa51f4a711ca7d06ee762a23fe278c47a768c9b5a7c85978be55d414f"
     },
     {
       "id": "closed_loop_candidates_must_carry_subject",
@@ -1702,7 +1754,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "6d548f1638e323d836747c21e7a52341af4669911d0737c13d710d8734dcecb0"
+      "semantic_hash": "d1decb76bbd46dc8a1e6dce5ab1a0b8100a37f38c4ae75416c3bad85bd12e975"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -1796,7 +1848,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "7be20504656f4698757593c2937cc5be261843d2d6c89a684d0c205fa250964e"
+      "semantic_hash": "dd7480b19920df7019ade364dbb991d5aa43b31d20f66b4825ff474ae757170f"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -1987,7 +2039,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "747770fe6ee1fa43ba0fb65a7eef7388904a6152b786431ea9450170ce926725"
+      "semantic_hash": "f9f2859862aafd5a8633064ea1b068f638acd044beb287db7f69c9d928cf8068"
     },
     {
       "id": "loop_registry_evidence_must_expose_loop_surfaces",
@@ -2023,7 +2075,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2fa10c4d497ab60ceba916ac4d2d7288fa7aa41212b671b8ada6045a1d89a878"
+      "semantic_hash": "6a5443e191e3805bd5656d835af976ab5a3aa8596a768c9cc3bc36cfc2da9b2d"
     },
     {
       "id": "loop_registry_evidence_must_expose_architecture_index",
@@ -2076,7 +2128,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "dfdd07d9517ee6d58d0c71ab7f3412215c4ea7f18434673b32cdc00d3604d3d0"
+      "semantic_hash": "0943ceedb67ed71a8b5460adda8bb66f84950a98df4d43a992b2f7472d28a682"
     },
     {
       "id": "loop_registry_impact_must_expose_target_verifier_plan",
@@ -2192,7 +2244,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e2fe139976e1bac5beadffcc472a19b5bbed431e72bbd9249d14d259203ecb89"
+      "semantic_hash": "2b78b2e61ada67d62417534ef9bb2e118b37b3cd14362294f6adf0b40ec4e79a"
     },
     {
       "id": "loop_coverage_dimensions_must_use_static_registry",
@@ -2246,7 +2298,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "73934c3e0e9228f0d7a548be16f01b2d86f904d4305342b515cfe3837b9def33"
+      "semantic_hash": "445c5f1e97bbc8b8bb3d2e6b2c3a9a8e36db81ddbf98d3a2ad7bd172eb9b24e2"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -2436,7 +2488,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0cf7fe6e423561dfda0a4cc6dd8f5db55625e4c6fef3c2cdf0c76f7f6ac69bb5"
+      "semantic_hash": "465f0d613f80717c94da37a0a04696f4bab5de220e6b3b2187a55867b3a432d9"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -2916,7 +2968,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c5741db272ec9116a5f22576a9992a2189c42d51befceb7ce850d6d4e5f5d146"
+      "semantic_hash": "176b65af0049f6b41ab05dd8d773c74fbc4163de16be3c63959b20193a189e09"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -2955,7 +3007,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ccb4e7d593a3f7a8aadd9103a37e244f2dc221ad52ad0edf7c8147ddd8c1fa5c"
+      "semantic_hash": "7e7083d46b1a07873296fd284b580d254f179579efd0378a4ee8807c233f3466"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -2996,7 +3048,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "88cb7feb9362927ab966e03fc546b4448c56399b596674c906998aa4f3ebf098"
+      "semantic_hash": "338ebd1b4ad649ea40fcef426527659a13f1c62b796dbec312e5cc80fb9b8673"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -3179,7 +3231,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "7a60ab8d0266d735a74a660144261e3e51108f3d6e1de5b7b19e285b90ce5da8"
+      "semantic_hash": "86d18305f6c2d2dc6801881af00a2d461c51202a238cd02e00f2917e63e4f32e"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -4194,6 +4246,11 @@
     {
       "from": "control_plane_performance_harness",
       "to": "control_plane_performance_hot_paths_must_emit_evidence",
+      "relation": "enforces"
+    },
+    {
+      "from": "control_plane_performance_harness",
+      "to": "control_plane_meta_evidence_must_self_expire",
       "relation": "enforces"
     },
     {
