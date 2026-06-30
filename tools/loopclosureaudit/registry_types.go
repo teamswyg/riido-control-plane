@@ -7,15 +7,22 @@ type loopRegistry struct {
 }
 
 type registryLoop struct {
-	ID                string   `json:"id"`
-	Kind              string   `json:"kind"`
-	Observes          []string `json:"observes"`
-	Verifies          []string `json:"verifies"`
-	RefreshWorkflow   string   `json:"refresh_workflow"`
-	FailsWhen         []string `json:"fails_when"`
-	Providers         []string `json:"providers"`
-	PromotesTo        []string `json:"promotes_to"`
-	ExpiresAfterHours int      `json:"expires_after_hours"`
+	ID                string                `json:"id"`
+	Kind              string                `json:"kind"`
+	Observes          []string              `json:"observes"`
+	Verifies          []string              `json:"verifies"`
+	Evidence          []registryEvidenceRef `json:"evidence"`
+	RefreshWorkflow   string                `json:"refresh_workflow"`
+	FailsWhen         []string              `json:"fails_when"`
+	Providers         []string              `json:"providers"`
+	PromotesTo        []string              `json:"promotes_to"`
+	ExpiresAfterHours int                   `json:"expires_after_hours"`
+}
+
+type registryEvidenceRef struct {
+	Kind     string `json:"kind"`
+	Path     string `json:"path"`
+	Redacted bool   `json:"redacted"`
 }
 
 type registryClaim struct {

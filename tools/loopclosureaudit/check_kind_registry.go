@@ -38,6 +38,12 @@ var checkKindSpecs = []checkKindSpec{
 		verify:  verifyGraphSummaryCheckKind,
 	},
 	{
+		kind:    "harness_summary",
+		key:     harnessSummaryCheckProofKey,
+		surface: harnessSummaryCheckProofSurface,
+		verify:  verifyHarnessSummaryCheckKind,
+	},
+	{
 		kind:    "pre_commit_hook",
 		key:     idProofKey,
 		surface: preCommitHookCheckProofSurface,

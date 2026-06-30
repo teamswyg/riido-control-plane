@@ -27,6 +27,10 @@ func graphSummaryCheckProofSurface(_ check, idx indexes) *proofSurface {
 	return graphSummaryProofSurface(idx)
 }
 
+func harnessSummaryCheckProofSurface(_ check, idx indexes) *proofSurface {
+	return harnessSummaryProofSurface(idx)
+}
+
 func preCommitHookCheckProofSurface(c check, idx indexes) *proofSurface {
 	return preCommitHookProofSurface(c.ID, idx)
 }

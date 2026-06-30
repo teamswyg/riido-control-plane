@@ -17,3 +17,7 @@ func graphEdgeProofKey(c check) string {
 func graphSummaryCheckProofKey(c check) string {
 	return graphSummaryProofKey(c)
 }
+
+func harnessSummaryCheckProofKey(c check) string {
+	return harnessSummaryProofKey(c)
+}
