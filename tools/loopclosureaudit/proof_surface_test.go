@@ -38,6 +38,18 @@ func TestLoopClosureAuditEvidenceExposesGraphEdgeProofSurface(t *testing.T) {
 	}
 }
 
+func TestLoopClosureAuditEvidenceExposesGraphSummaryProofSurface(t *testing.T) {
+	m, deps := loadForTest(t)
+	got := newEvidence(m, deps)
+	proof := findProof(t, got, "graph_summary:evidence_graph_chain_summary")
+	if proof.Surface == nil || proof.Surface.GraphChainCount == 0 ||
+		proof.Surface.GraphCompleteChains != proof.Surface.GraphChainCount ||
+		proof.Surface.GraphNextLoopCount == 0 ||
+		len(proof.Surface.GraphNextLoops) == 0 {
+		t.Fatalf("incomplete graph summary proof surface: %+v", proof.Surface)
+	}
+}
+
 func TestLoopClosureAuditEvidenceExposesPreCommitHookProofSurface(t *testing.T) {
 	m, deps := loadForTest(t)
 	got := newEvidence(m, deps)

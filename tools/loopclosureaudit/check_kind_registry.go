@@ -32,6 +32,12 @@ var checkKindSpecs = []checkKindSpec{
 		verify:  verifyGraphEdgeCheckKind,
 	},
 	{
+		kind:    "graph_summary",
+		key:     graphSummaryCheckProofKey,
+		surface: graphSummaryCheckProofSurface,
+		verify:  verifyGraphSummaryCheckKind,
+	},
+	{
 		kind:    "pre_commit_hook",
 		key:     idProofKey,
 		surface: preCommitHookCheckProofSurface,

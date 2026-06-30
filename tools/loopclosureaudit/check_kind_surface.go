@@ -23,6 +23,10 @@ func graphEdgeCheckProofSurface(c check, _ indexes) *proofSurface {
 	return graphEdgeProofSurface(c)
 }
 
+func graphSummaryCheckProofSurface(_ check, idx indexes) *proofSurface {
+	return graphSummaryProofSurface(idx)
+}
+
 func preCommitHookCheckProofSurface(c check, idx indexes) *proofSurface {
 	return preCommitHookProofSurface(c.ID, idx)
 }

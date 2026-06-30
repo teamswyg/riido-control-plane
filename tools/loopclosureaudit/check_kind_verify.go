@@ -20,6 +20,10 @@ func verifyGraphEdgeCheckKind(_ string, c check, idx indexes) error {
 	return verifyGraphEdgeCheck(c, idx)
 }
 
+func verifyGraphSummaryCheckKind(_ string, c check, idx indexes) error {
+	return verifyGraphSummaryCheck(c, idx)
+}
+
 func verifyPreCommitHookCheckKind(_ string, c check, idx indexes) error {
 	return verifyPreCommitHookCheck(c, idx)
 }
