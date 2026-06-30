@@ -13,8 +13,14 @@ func TestOperationalReadinessBindsClientSurfaceAlarmApplyEvidence(t *testing.T) 
 	if !hasMeasurement(check, "client_surface_alarm_topology_pr") {
 		t.Fatal("missing merged infra alarm topology measurement")
 	}
+	if !hasMeasurement(check, "client_surface_alarm_dimension_guard_pr") {
+		t.Fatal("missing merged infra alarm dimension guard measurement")
+	}
 	if !hasEvidenceRef(check, "github:https://github.com/teamswyg/riido-infra/pull/113") {
 		t.Fatal("missing riido-infra PR #113 evidence ref")
+	}
+	if !hasEvidenceRef(check, "github:https://github.com/teamswyg/riido-infra/pull/114") {
+		t.Fatal("missing riido-infra PR #114 evidence ref")
 	}
 }
 
