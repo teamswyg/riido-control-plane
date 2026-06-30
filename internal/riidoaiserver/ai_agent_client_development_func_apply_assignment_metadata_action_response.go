@@ -13,8 +13,8 @@ func applyAssignmentMetadataActionResponse(response *AIAgentTaskActionResponse, 
 		return
 	}
 	response.WorkStatus = AgentWorkStatusWaitingForUser
-	response.AssignmentState = AgentAssignmentStateRunning
-	response.CommentKind = AgentTaskCommentRuntimeProgress
+	response.AssignmentState = AgentAssignmentStateWaiting
+	response.CommentKind = AgentTaskCommentNeedsInput
 	ensureAssignmentResponseMessage(response, clientMessageNeedUserInput)
 }
 

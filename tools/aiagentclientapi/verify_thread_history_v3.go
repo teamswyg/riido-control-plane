@@ -18,7 +18,7 @@ func verifyThreadHistoryV3(v3 threadHistoryV3) error {
 	if err := requireShape(v3.ResponseShapes, "AIAgentTaskThreadHistoryRecord", []string{"conversation_id", "parent_thread_id", "messages[]"}); err != nil {
 		return err
 	}
-	if err := requireShape(v3.ResponseShapes, "AIAgentTaskThreadHistoryMessage", []string{"message_id", "role", "body", "result_message"}); err != nil {
+	if err := requireShape(v3.ResponseShapes, "AIAgentTaskThreadHistoryMessage", []string{"message_id", "role", "author_principal_id", "body", "result_message"}); err != nil {
 		return err
 	}
 	if err := requireIdentity(v3.IdentityRules, "conversation_id"); err != nil {

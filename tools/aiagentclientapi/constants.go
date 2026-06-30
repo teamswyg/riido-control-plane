@@ -35,6 +35,7 @@ var requiredPublicFields = []string{
 	"agent_snapshot_id",
 	"agent_snapshots",
 	"messages",
+	"author_principal_id",
 }
 
 var requiredDeploymentEvidence = []string{
