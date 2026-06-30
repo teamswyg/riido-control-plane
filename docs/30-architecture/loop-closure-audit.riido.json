@@ -76,9 +76,11 @@
         {"kind": "loop", "id": "provider_acceptance_harness", "must_promote_to": "closed_loop_candidate", "providers": ["codex", "openclaw"]},
         {"kind": "loop", "id": "ai_agent_load_harness", "must_promote_to": "closed_loop_candidate"},
         {"kind": "loop", "id": "control_plane_performance_harness", "must_promote_to": "closed_loop_candidate"},
+        {"kind": "loop", "id": "operational_readiness_release_harness", "must_promote_to": "closed_loop_candidate"},
         {"kind": "harness_summary", "id": "closed_loop_candidate_harness_summary"},
         {"kind": "claim", "id": "harness_promotion_must_run_after_failure"},
-        {"kind": "graph_edge", "from": "provider_acceptance_harness", "to": "closed_loop_candidate", "relation": "promotes_failure_to"}
+        {"kind": "graph_edge", "from": "provider_acceptance_harness", "to": "closed_loop_candidate", "relation": "promotes_failure_to"},
+        {"kind": "graph_edge", "from": "operational_readiness_release_harness", "to": "closed_loop_candidate", "relation": "promotes_failure_to"}
       ]
     },
     {
