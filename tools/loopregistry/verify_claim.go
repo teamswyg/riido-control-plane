@@ -10,6 +10,9 @@ func verifyClaims(
 	tests map[string][]string,
 ) error {
 	ids := map[string]bool{}
+	if err := verifyClaimRuleRegistry(claimVerificationRules); err != nil {
+		return fmt.Errorf("claim rule registry: %w", err)
+	}
 	for _, claim := range m.Claims {
 		if ids[claim.ID] || claim.ID == "" {
 			return fmt.Errorf("claim id must be unique and non-empty: %q", claim.ID)
@@ -38,7 +41,7 @@ func verifyClaim(
 	if err := verifyClaimSurface(claim); err != nil {
 		return err
 	}
-	if err := verifyVerifierIntentClaim(root, tests, claim); err != nil {
+	if err := verifyClaimRules(root, tests, claim); err != nil {
 		return err
 	}
 	for _, path := range append(claim.Files, claim.GeneratedDoc...) {

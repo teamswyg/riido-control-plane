@@ -9,9 +9,6 @@ import (
 const verifierIntentClaimID = "loop_verifiers_must_accept_verify_intent"
 
 func verifyVerifierIntentClaim(root string, tests map[string][]string, claim claimBinding) error {
-	if claim.ID != verifierIntentClaimID {
-		return nil
-	}
 	mainFiles := verifierIntentMainFiles(claim)
 	if len(mainFiles) == 0 {
 		return fmt.Errorf("claim %s must bind verifier main files", claim.ID)
