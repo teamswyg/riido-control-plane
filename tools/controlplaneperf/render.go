@@ -32,6 +32,7 @@ func renderSummary(b *strings.Builder, m manifest, e evidence) {
 	fmt.Fprintf(b, "- race artifact: `%s`\n", m.RaceArtifact)
 	fmt.Fprintf(b, "- pressure candidate artifact: `%s`\n", m.PressureCandidateArtifact)
 	fmt.Fprintf(b, "- architecture query artifact: `%s`\n", m.ArchitectureQueryArtifact)
+	fmt.Fprintf(b, "- benchmark history: `%s`\n", m.BenchmarkHistory)
 	fmt.Fprintf(b, "- local pressure scenarios: `%d`\n", len(m.LocalPressureScenarios))
 	fmt.Fprintf(b, "- candidate artifact: `%s`\n\n", m.CandidateArtifact)
 }
@@ -39,6 +40,7 @@ func renderSummary(b *strings.Builder, m manifest, e evidence) {
 func renderCommands(b *strings.Builder, m manifest) {
 	b.WriteString("## Commands\n\n")
 	fmt.Fprintf(b, "- lightweight benchmark: `%s`\n", m.BenchmarkCommand)
+	fmt.Fprintf(b, "- benchmark history append: `%s`\n", m.BenchmarkHistoryCommand)
 	fmt.Fprintf(b, "- local pressure: `%s`\n", m.LocalPressureCommand)
 	fmt.Fprintf(b, "- manual pressure: `%s`\n", m.ManualPressureCommand)
 	fmt.Fprintf(b, "- local pressure pprof: `%s`\n", m.LocalPprofCommand)

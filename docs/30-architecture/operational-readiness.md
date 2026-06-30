@@ -7,10 +7,10 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 ## Evidence Surface
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- checks: `12`
-- measurements: `15`
+- checks: `13`
+- measurements: `20`
 - covered: `4`
-- partial: `8`
+- partial: `9`
 - evidence ttl hours: `24`
 - required categories: `7`
 - missing categories: `0`
@@ -21,6 +21,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | --- | --- | --- | --- | --- | --- | --- |
 | `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `3` | `5` | `infra_cloudwatch_alarm_by_client_surface` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
+| `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `5` | `7` | `staging_client_p0_visual_screenshot_evidence` |
 | `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `1` | `2` | `agent_rename_snapshot_regression_evidence` |
 | `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `1` | `2` | `daemon_network_disconnect_release_evidence` |
 | `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `2` | `4` | `capacity_result_annotation` |
@@ -37,6 +38,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | Check | Category | Age | Stale | Next Artifact | Next Command |
 | --- | --- | --- | --- | --- | --- |
 | `otel_xray_client_surface` | `monitoring` | `4` | `true` | `infra_cloudwatch_alarm_by_client_surface` | `terraform -chdir=terraform/riido_ai_server plan` |
+| `staging_client_p0_visual_retest` | `usability` | `0` | `false` | `staging_client_p0_visual_screenshot_evidence` | `gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments` |
 | `daemon_network_disconnect_waiting` | `exception` | `4` | `true` | `daemon_network_disconnect_release_evidence` | `go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
 | `single_pc_agent_limit` | `stress` | `4` | `true` | `single_pc_agent_capacity_evidence` | `go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1` |
 | `boot_burst_capacity` | `stress` | `4` | `true` | `cold_start_packet_burst_evidence` | `gh workflow run ai-agent-client-testnet-load.yml -f scenario=public -f duration=120s -f concurrency=128` |

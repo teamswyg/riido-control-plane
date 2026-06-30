@@ -7110,7 +7110,7 @@
     {
       "id": "operational_readiness_release_loop",
       "observation": "Release readiness work spans monitoring, usability, exception, stress, chaos, scenario, and desktop checks, but those checks can otherwise remain scattered across unrelated green workflows, partial checks can age, and readiness can be claimed without naming the metric, trace, test, workflow, infra, profile, or artifact signal that proves it.",
-      "hypothesis": "Binding the release-prep checklist to an executable readiness manifest, Loop Registry expiry surface, server-side client-surface tracing and EMF metrics, partial age/stale evidence, measurement signals, a verifier, and self-expiring generated evidence keeps covered, partial, stale, and unmeasured readiness visible without changing endpoint contracts.",
+      "hypothesis": "Binding the release-prep checklist to an executable readiness manifest, Loop Registry expiry surface, server-side client-surface tracing and EMF metrics, partial age/stale evidence, measurement signals, a non-manual partial measurement verifier, and self-expiring generated evidence keeps covered, partial, stale, and unmeasured readiness visible without changing endpoint contracts.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence"
       ],
@@ -7170,6 +7170,14 @@
         {
           "kind": "tool",
           "path": "tools/operationalreadiness/verify_measurements.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/verify_partial.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/verify_partial_test.go"
         },
         {
           "kind": "tool",
@@ -7239,6 +7247,10 @@
         },
         {
           "kind": "test",
+          "path": "tools/operationalreadiness/verify_partial_test.go"
+        },
+        {
+          "kind": "test",
           "path": "internal/riidoaiserver/http_client_surface_test.go"
         },
         {
@@ -7269,7 +7281,7 @@
           "path": "docs/30-architecture/operational-readiness.md"
         }
       ],
-      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, and partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context.",
+      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal and rejects partial checks whose measurements are only manual notes, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, and partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context.",
       "next_loop": "operational_readiness_release_harness"
     },
     {

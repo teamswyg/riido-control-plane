@@ -23,6 +23,9 @@ func verifyAll(root string, m manifest) error {
 	if err := verifyCommands(m); err != nil {
 		return err
 	}
+	if err := verifyBenchmarkHistory(root, m); err != nil {
+		return err
+	}
 	if err := verifyHotPaths(root, m.HotPaths); err != nil {
 		return err
 	}

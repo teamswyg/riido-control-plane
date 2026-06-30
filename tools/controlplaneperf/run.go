@@ -9,6 +9,11 @@ func run(opt options) error {
 	if err := readJSON(repoPath(root, opt.Manifest), &m); err != nil {
 		return err
 	}
+	if opt.AppendBenchmarkLog != "" {
+		if err := appendBenchmarkHistory(root, m, opt.BenchmarkIn, opt.AppendBenchmarkLog); err != nil {
+			return err
+		}
+	}
 	if err := verifyAll(root, m); err != nil {
 		return err
 	}

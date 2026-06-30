@@ -208,6 +208,7 @@
         "hot_path_file_routing",
         "target_verifier_command_index",
         "architecture_query_evidence",
+        "benchmark_history_record",
         "pressure_observability_dimension",
         "optimization_candidate",
         "evidence_expired",
@@ -232,6 +233,9 @@
         "hot_path_file_architecture_coverage",
         "target_verifier_command_generation",
         "architecture_query_generation",
+        "benchmark_history_binding",
+        "benchmark_history_jsonl_schema",
+        "benchmark_history_command",
         "pressure_dimension_coverage",
         "otel_signal_binding",
         "hot_path_candidate_generation",
@@ -281,6 +285,10 @@
           "redacted": true
         },
         {
+          "kind": "json",
+          "path": "docs/30-architecture/control-plane-performance-averages.jsonl"
+        },
+        {
           "kind": "generated_doc",
           "path": "docs/30-architecture/control-plane-performance.md"
         },
@@ -306,6 +314,9 @@
         "hot_path_file_component_missing",
         "target_verifier_command_missing",
         "architecture_query_missing",
+        "benchmark_history_missing",
+        "benchmark_history_command_missing",
+        "benchmark_history_unknown_fields",
         "duplicate_architecture_file",
         "pressure_dimension_missing",
         "candidate_missing",
@@ -323,6 +334,7 @@
       "observes": [
         "otel_xray_client_surface",
         "real_screen_wording",
+        "staging_client_p0_visual_retest",
         "agent_rename_snapshot_policy",
         "daemon_network_disconnect_waiting",
         "testnet_load_capacity",
@@ -350,6 +362,9 @@
         "client_surface_emf_metric",
         "readiness_measurement_binding",
         "readiness_measurement_kind_distribution",
+        "partial_non_manual_measurement",
+        "visual_screenshot_measurement_closure",
+        "visual_issue_detail_command",
         "partial_next_command_no_placeholder",
         "daemon_resilience_next_command_no_test_guard",
         "stale_partial_candidate_generation",
@@ -389,6 +404,9 @@
         "readiness_measurement_missing",
         "readiness_measurement_duplicate",
         "readiness_measurement_unknown_kind",
+        "partial_manual_only_measurement",
+        "covered_visual_without_screenshot",
+        "visual_command_missing_issue_details",
         "partial_next_command_placeholder",
         "daemon_resilience_next_command_wildcard",
         "candidate_source_drift",
@@ -1036,11 +1054,11 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ada43d23c841d0468d86db1a035e3086b254dca174206a8ff2a31d33ca05c5a9"
+      "semantic_hash": "e0c72877ca1694f2cbad6ac20c3ec8a61ddd2e7f3e01583ce639087396ae5779"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
-      "statement": "Control-plane high-traffic risk work must keep endpoint, store, SSE, subscriber fanout, assignment/tool-approval waiters, runtime progress, actor shutdown, local pressure, pprof, live load, architecture component surfaces, generated file architecture indexes, hot-path-to-file routing, executable target verifier commands, exact and directory-fallback file-level architecture query evidence, component role summaries, and direct/fallback/miss query counts bound to lightweight benchmark evidence, local resource delta evidence, local CPU/heap/goroutine profile metadata, OTel/X-Ray/CloudWatch signal names, per-scenario capacity estimates, measured pressure findings, loopback-only profiling commands, redacted live-load commands, and explicit optimization candidates with closed-loop adoption paths and measured capacity/latency/allocation/cpu summaries without changing public API contracts.",
+      "statement": "Control-plane high-traffic risk work must keep endpoint, store, SSE, subscriber fanout, assignment/tool-approval waiters, runtime progress, actor shutdown, local pressure, pprof, live load, architecture component surfaces, generated file architecture indexes, hot-path-to-file routing, executable target verifier commands, exact and directory-fallback file-level architecture query evidence, component role summaries, direct/fallback/miss query counts, and repo benchmark history records bound to lightweight benchmark evidence, local resource delta evidence, local CPU/heap/goroutine profile metadata, OTel/X-Ray/CloudWatch signal names, per-scenario capacity estimates, measured pressure findings, loopback-only profiling commands, redacted live-load commands, and explicit optimization candidates with closed-loop adoption paths and measured capacity/latency/allocation/cpu summaries without changing public API contracts.",
       "loop": "control_plane_performance_harness",
       "covers_observes": [
         "endpoint_hot_path",
@@ -1064,6 +1082,7 @@
         "hot_path_file_routing",
         "target_verifier_command_index",
         "architecture_query_evidence",
+        "benchmark_history_record",
         "pressure_observability_dimension",
         "optimization_candidate",
         "architecture_query_fallback",
@@ -1087,6 +1106,9 @@
         "hot_path_file_architecture_coverage",
         "target_verifier_command_generation",
         "architecture_query_generation",
+        "benchmark_history_binding",
+        "benchmark_history_jsonl_schema",
+        "benchmark_history_command",
         "pressure_dimension_coverage",
         "otel_signal_binding",
         "hot_path_candidate_generation",
@@ -1109,6 +1131,9 @@
         "hot_path_file_component_missing",
         "target_verifier_command_missing",
         "architecture_query_missing",
+        "benchmark_history_missing",
+        "benchmark_history_command_missing",
+        "benchmark_history_unknown_fields",
         "duplicate_architecture_file",
         "pressure_dimension_missing",
         "candidate_missing",
@@ -1124,11 +1149,13 @@
         "control-plane-performance-closed-loop-candidates",
         "control-plane-pressure-closed-loop-candidates",
         "control-plane-architecture-query",
+        "docs/30-architecture/control-plane-performance-averages.jsonl",
         "docs/30-architecture/control-plane-performance.md",
         "docs/30-architecture/control-plane-high-traffic-audit.md"
       ],
       "files": [
         "docs/30-architecture/control-plane-performance.riido.json",
+        "docs/30-architecture/control-plane-performance-averages.jsonl",
         "docs/30-architecture/control-plane-performance.md",
         "docs/30-architecture/control-plane-high-traffic-audit.riido.json",
         "docs/30-architecture/control-plane-high-traffic-audit.md",
@@ -1248,7 +1275,19 @@
         "tools/controlplaneperf/architecture_query_component.go",
         "tools/controlplaneperf/architecture_query_fallback.go",
         "tools/controlplaneperf/architecture_query_merge.go",
-        "tools/controlplaneperf/architecture_query_row.go"
+        "tools/controlplaneperf/architecture_query_row.go",
+        "tools/controlplaneperf/benchmark_history_append.go",
+        "tools/controlplaneperf/benchmark_history_git.go",
+        "tools/controlplaneperf/benchmark_history_line.go",
+        "tools/controlplaneperf/benchmark_history_manifest_test.go",
+        "tools/controlplaneperf/benchmark_history_name.go",
+        "tools/controlplaneperf/benchmark_history_parse.go",
+        "tools/controlplaneperf/benchmark_history_record.go",
+        "tools/controlplaneperf/benchmark_history_scan.go",
+        "tools/controlplaneperf/benchmark_history_test.go",
+        "tools/controlplaneperf/benchmark_history_types.go",
+        "tools/controlplaneperf/benchmark_history_verify.go",
+        "tools/controlplaneperf/benchmark_history_verify_record.go"
       ],
       "verifiers": [
         "TestControlPlanePerformanceManifestVerifies",
@@ -1290,7 +1329,12 @@
         "TestPprofCaptureRecordsRedactedSamples",
         "TestPprofCaptureDisabledByDefault",
         "TestRunAttachesOptInPprofEvidence",
-        "TestControlPlanePerformanceArchitectureQueryRoutesDirectoryFallback"
+        "TestControlPlanePerformanceArchitectureQueryRoutesDirectoryFallback",
+        "TestParseBenchmarkHistory",
+        "TestAppendBenchmarkHistoryRecord",
+        "TestBenchmarkHistoryRejectsUnknownFields",
+        "TestControlPlanePerformanceRejectsMissingBenchmarkHistory",
+        "TestControlPlanePerformanceRejectsWeakBenchmarkHistoryCommand"
       ],
       "generated_docs": [
         "docs/30-architecture/control-plane-performance.md",
@@ -1299,7 +1343,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "b10d650b9f50cd3eb72fb25ca437191cfd115449904a2dcf6bd7ffe636f17f11"
+      "semantic_hash": "bd40755cd9027310005dbc325141af4baa872c977605e79b66d2fd2a0619c786"
     },
     {
       "id": "control_plane_meta_evidence_must_self_expire",
@@ -1349,7 +1393,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "33d1ceb6f4bb2546447ee5d776952a3ec268bb836a64438ea39770706056bd3b"
+      "semantic_hash": "e49bc808132dc5676c2dbd002abf72fb43cc7eac523ef2100b39def9b478a3e5"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -1446,7 +1490,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "73be6f33566be5d81e8c64858bbb1a7e94e1349a0de947b567af77a093d27ee2"
+      "semantic_hash": "44974b5f1b98a80b83da66e2630c0aea083d8470553d76f602a337bf54517694"
     },
     {
       "id": "loop_closure_audit_must_prove_human_exit_requirements",
@@ -1720,7 +1764,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "03e632b9f23d166162c37a5acb07d09c0134b949df6e7484bd2e97c9bfed0396"
+      "semantic_hash": "49668759de3d3a643b9606d13c7c14fcec2ab6f442bb7b063388a99b83d2c89a"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1780,7 +1824,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "96111596424ee8e46714697c4ad1ce88ab3b5c912747068866f45e4691d1d5c8"
+      "semantic_hash": "b5714fd2d900badc2f58b6dfe2ebc0fc344021196c9f23687fd48df516f3402c"
     },
     {
       "id": "closed_loop_candidates_must_carry_subject",
@@ -1832,7 +1876,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "47c6c7a6519e453b04c3b1130ad9b5e75408d25e47d15a243ebea84f083d9c4b"
+      "semantic_hash": "48f4bc04c7c19f417a6f26be1bd1069b0a4f727a5f8c0915dcbec318f2f41700"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -1926,7 +1970,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "7d984f4c59c13caca53284bf6736a29c679de39058f36c8edcf4797af9a4100d"
+      "semantic_hash": "26e1cff69cc61333d328a25101760dcac142b5bdde7204f55d289ce86d5650d4"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -2119,7 +2163,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "4d1ce96bd7fb47a5da26907a25da9acac19f8b4c3203e5b8832c37907372d2e1"
+      "semantic_hash": "ac008c6b106e4187d911a9de662522c4bc6adf892404ee2431bd9dba945208f6"
     },
     {
       "id": "loop_registry_evidence_must_expose_loop_surfaces",
@@ -2155,7 +2199,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9dd6f5c0e21b44404eafd0cdd8ff8f5fd7a9b0539342160026834d39b84c6f8b"
+      "semantic_hash": "48a3470c09b8c2347fe3358a484687b2c7c93cd71524429e4d83abb109c27d3e"
     },
     {
       "id": "loop_registry_evidence_must_expose_architecture_index",
@@ -2208,7 +2252,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "dbb152f12ca2df8176a01d80ebefaabaa9cdbef438a11d6110f5873183ef13de"
+      "semantic_hash": "a38bae0928168807451bb7df89cf9821ef2619fa6365998fb12737854d1dfa32"
     },
     {
       "id": "loop_registry_impact_must_expose_target_verifier_plan",
@@ -2324,7 +2368,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "52197f167ca124c4048eb353e84252318a6354b941f441f7ccba6d10906941d3"
+      "semantic_hash": "0a5cda3a2cb38940a408d86787df31c7152c25c2d9b27f74354983b967e91e1a"
     },
     {
       "id": "loop_coverage_dimensions_must_use_static_registry",
@@ -2378,7 +2422,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e01831f3a4782a2dbf5b6af0fc4abd8026292587d32897d2b8095d7879a96f90"
+      "semantic_hash": "4a3dfb0eb2822910843d55233c94df06f80c5d97e992a82b8149d3e958b47c75"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -2568,7 +2612,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ed86c409518d75a21ad71ae06117659ac9a0c82e90a99b096aa45c7702105e10"
+      "semantic_hash": "75a0627cc8fcee8d021cb466e9d03c2e4d232433ae2d4f910fca101bffc7066c"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -2612,7 +2656,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a6e3cb2d673799901d39fdcd44faca053aec234837a3abf4fdf1b261e39622d2"
+      "semantic_hash": "ebc6e3aa470d04bc94ec5054ae334ed270be92748c0f332dc225c4bb4f1ba5b2"
     },
     {
       "id": "evidence_graph_impact_must_surface_as_ci_annotations",
@@ -2701,7 +2745,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "78968a72b9f22ea60caca810af455ade05745b567558271c4772dc5c6524d52a"
+      "semantic_hash": "c6d4bd4265e08a2d5df4d2d64fb96871159e59487659bcca9813531e05b76577"
     },
     {
       "id": "claim_meaning_changes_require_reasoning_chain",
@@ -2859,7 +2903,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1719df3be64bb32aa7a76cea289a72a838a268e62acc568bb732edaa21e67c23"
+      "semantic_hash": "c39abb9f6c40d4cd8b7c5f9394d2ac8e65c181418735a38190d3b279d13918ea"
     },
     {
       "id": "pre_commit_must_run_evidence_graph_impact",
@@ -3047,7 +3091,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "1924895062e3f6c39265586ecd8df7a52d2444564f59c8be0b003050793a53a4"
+      "semantic_hash": "b3f45cb2cde8509c2a2962bc71ed7947a2f14402d36bdb371299cc8180092cac"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -3090,7 +3134,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "53db71f156d12d63902a2083222e6f4ef381203efddb10b5667f2e39d2c7839a"
+      "semantic_hash": "aa527ca63e6f161466467d722e2dc8f124462331a50be5efc6c61ed7693d24e0"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -3129,7 +3173,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "b81cfb2f9706a1286209b382c0c296a8bc984eea604557b5a0034e21bccdc446"
+      "semantic_hash": "d27bd3d7b2ce8d6326f1807e5f1ddf2f7da901457195c515676f46d2ff946f5b"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -3170,7 +3214,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "779264cfdc43a1ceeb75a39b61f2267312db10f5ffd67b3297096f9f02df1452"
+      "semantic_hash": "65084cda9d6efd1be840fe8d6a08570122e447f6a06137b89de243184fed1803"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -3353,7 +3397,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1b3d94458405e1ee34bf44671273c62b54ab0a8d084e31f10f2ad048f05ef17e"
+      "semantic_hash": "287d8dbee43eb9359b5cb4716ee90c104c09da973671d587fe3ad7ee1e38b6f8"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -3496,7 +3540,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "3193a3539e1d5cd074d740752c462cfbc2fcd91a587770e847d5b9c6282f30f9"
+      "semantic_hash": "98aaaeeb1aedb871dd70eb884fd85246ca599853f412b314f7efbfb4d8d8ad2e"
     },
     {
       "id": "loop_registry_evidence_must_expose_refresh_plans",
@@ -3598,7 +3642,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8f46aeb483854d56b6042391176ff02801636b30e4aede6dda2cc825272cb222"
+      "semantic_hash": "bcea67a878a84b94476c74a605424cb254e528e902bbaa9b389eaf2d04975f72"
     },
     {
       "id": "expired_loop_refresh_commands_must_dispatch_safe_workflows",
@@ -3739,7 +3783,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "cc6db5e1f3f819ce0a0e43b53335cc17c7b854fecb0fc62e2bd330d1b1bac3f2"
+      "semantic_hash": "a94d44748063b056c9416f2e12953253d7cf16d59c0419eeac853d6d66b13b75"
     },
     {
       "id": "loop_registry_evidence_must_expose_graph_edges",
@@ -3818,7 +3862,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "60faa5025f177156921efb05d032d92eb6ce50dde48dc51f96f1e4d43279886e"
+      "semantic_hash": "2a03d828c27365da78f90cce54c28af58f9a4dafae9b3ba7165e0addbb4fb876"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
@@ -4064,11 +4108,12 @@
     },
     {
       "id": "operational_readiness_checks_must_bind_release_items_to_evidence",
-      "statement": "Operational release-prep checks must bind every monitoring, usability, exception, stress, chaos, scenario, and desktop item to executable evidence; readiness evidence must carry its own expiry window, that window must match the Loop Registry expiry, and partial checks must expose their next artifact, placeholder-free executable command, and partial_promotion candidate ids/count as the first closed-loop candidate adoption step so agents do not need to infer unresolved readiness work from prose or reopen the candidate artifact first.",
+      "statement": "Operational release-prep checks must bind every monitoring, usability, exception, stress, chaos, scenario, and desktop item to executable evidence; readiness evidence must carry its own expiry window, that window must match the Loop Registry expiry, partial checks must expose their next artifact, placeholder-free executable command, at least one non-manual measurement signal, and partial_promotion candidate ids/count as the first closed-loop candidate adoption step, and visual screenshot QA checks must use next commands that read issue body/comments while covered visual checks bind screenshot measurement evidence so agents do not infer unresolved readiness work from prose, server-only tests, or a tracking issue.",
       "loop": "operational_readiness_release_harness",
       "covers_observes": [
         "otel_xray_client_surface",
         "real_screen_wording",
+        "staging_client_p0_visual_retest",
         "agent_rename_snapshot_policy",
         "daemon_network_disconnect_waiting",
         "testnet_load_capacity",
@@ -4102,7 +4147,10 @@
         "stale_partial_candidate_subject",
         "stale_partial_candidate_adoption_step",
         "readiness_candidate_source_binding",
-        "readiness_candidate_intake_path"
+        "readiness_candidate_intake_path",
+        "partial_non_manual_measurement",
+        "visual_screenshot_measurement_closure",
+        "visual_issue_detail_command"
       ],
       "covers_fails_when": [
         "readiness_category_missing",
@@ -4121,7 +4169,10 @@
         "daemon_resilience_next_command_wildcard",
         "candidate_source_drift",
         "readiness_candidate_summary_artifact_drift",
-        "readiness_candidate_artifact_missing"
+        "readiness_candidate_artifact_missing",
+        "partial_manual_only_measurement",
+        "covered_visual_without_screenshot",
+        "visual_command_missing_issue_details"
       ],
       "covers_evidence": [
         "operational-readiness-evidence",
@@ -4146,7 +4197,12 @@
         "tools/operationalreadiness/partial_promotion_test.go",
         "tools/operationalreadiness/verify.go",
         "tools/operationalreadiness/verify_checks.go",
+        "tools/operationalreadiness/verify_evidence_ref.go",
         "tools/operationalreadiness/verify_measurements.go",
+        "tools/operationalreadiness/verify_partial.go",
+        "tools/operationalreadiness/verify_partial_test.go",
+        "tools/operationalreadiness/verify_visual.go",
+        "tools/operationalreadiness/verify_visual_test.go",
         "tools/operationalreadiness/verify_next_command.go",
         "tools/operationalreadiness/evidence.go",
         "tools/operationalreadiness/candidate.go",
@@ -4192,6 +4248,10 @@
         "TestOperationalReadinessRejectsPartialWithoutNextWork",
         "TestOperationalReadinessRejectsMissingLocalEvidence",
         "TestOperationalReadinessRejectsMissingMeasurement",
+        "TestOperationalReadinessRejectsManualOnlyPartial",
+        "TestOperationalReadinessRejectsCoveredVisualWithoutScreenshot",
+        "TestOperationalReadinessAcceptsCoveredVisualWithScreenshot",
+        "TestOperationalReadinessRejectsVisualCommandWithoutIssueDetails",
         "TestOperationalReadinessRejectsDuplicateMeasurement",
         "TestOperationalReadinessRejectsDaemonWildcardNoTestCommand",
         "TestOperationalReadinessRejectsPlaceholderNextCommand",
@@ -4210,7 +4270,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "b20565f42cc0d55765110955cf7180b427c28a39b63582001f484b60dc9004f1"
+      "semantic_hash": "af99f5958bb7a5fba54b8d9afa860760aeffc96afcb2c0a461b4603b9ea63ec5"
     },
     {
       "id": "container_image_contract_must_bind_runtime_shape",
