@@ -8,6 +8,9 @@ func classifyTaskContextIntent(
 ) string {
 	text := strings.ToLower(component.Title + "\n" + document.Content)
 	if strings.TrimSpace(document.Content) == "" {
+		if hasExplicitInstructionSignal(text) {
+			return taskIntentExplicit
+		}
 		if containsAny(text, intentOrientedTaskMarkers()) {
 			return taskIntentIntentOriented
 		}

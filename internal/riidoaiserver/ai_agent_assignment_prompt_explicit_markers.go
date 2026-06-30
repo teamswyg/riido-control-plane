@@ -25,6 +25,7 @@ func explicitInstructionMarkers() []string {
 		"조사해",
 		"보고해",
 		"짜줘",
+		"채우",
 		"create",
 		"implement",
 		"fix",
