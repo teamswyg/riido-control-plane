@@ -5,6 +5,8 @@ func attachTargetVerifierRoutingPackets(plan *targetVerifierPlan) {
 		return
 	}
 	plan.RoutingPackets = targetVerifierRoutingPackets(plan)
+	plan.RoutingPacketCount = len(plan.RoutingPackets)
+	attachTargetVerifierRouteCounts(plan)
 }
 
 func targetVerifierRoutingPackets(
@@ -44,18 +46,4 @@ func targetVerifierRouteCommands(
 		return direct, len(direct)
 	}
 	return sortedCopy(runnable), 0
-}
-
-func intersectStrings(left, right []string) []string {
-	allowed := map[string]bool{}
-	for _, value := range right {
-		allowed[value] = true
-	}
-	var out []string
-	for _, value := range left {
-		if allowed[value] {
-			out = appendUnique(out, value)
-		}
-	}
-	return out
 }

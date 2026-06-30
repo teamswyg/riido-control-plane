@@ -11,6 +11,7 @@ func targetVerifierSummaryParts(
 		targetVerifierClaimSummaryFor(plan, evidenceOut),
 		targetVerifierChainSummaryFor(plan, evidenceOut),
 		targetVerifierRunnableSummaryFor(plan, evidenceOut),
+		targetVerifierRouteSummaryFor(plan, evidenceOut),
 		targetVerifierFocusedSummaryFor(plan, evidenceOut),
 		targetVerifierEntrypointSummaryFor(plan, evidenceOut),
 		targetVerifierCommandSummaryFor(plan, evidenceOut),
