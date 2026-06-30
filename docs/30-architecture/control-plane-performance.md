@@ -13,7 +13,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - architecture components: `5`
 - architecture file index entries: `30`
 - architecture target verifier commands: `8`
-- assertions: `14`
+- assertions: `15`
 - local pressure artifact: `control-plane-local-pressure`
 - race artifact: `control-plane-race`
 - pressure candidate artifact: `control-plane-pressure-closed-loop-candidates`
@@ -26,6 +26,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - local pressure: `go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -candidate-out out/control-plane-pressure-closed-loop-candidates.json -evidence-out out/control-plane-local-pressure.json`
 - manual pressure: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -candidate-out out/control-plane-pressure-closed-loop-candidates-manual.json -evidence-out out/control-plane-local-pressure-manual.json`
 - local pressure pprof: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -pprof-dir out/control-plane-local-pprof -candidate-out out/control-plane-pressure-closed-loop-candidates-pprof.json -evidence-out out/control-plane-local-pressure-pprof.json`
+- architecture query: `go run ./tools/controlplaneperf -architecture-query-path internal/riidoaiserver/http_transaction_metrics_observe.go -architecture-query-out out/control-plane-architecture-query.json`
 - race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1`
 - loopback pprof: `RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30`
 - live load evidence: `go run ./tools/aiagentload -base-url "$TESTNET_BASE_URL" -token "$TESTNET_TOKEN" -workspace-id "$TESTNET_WORKSPACE_ID" -scenario client-read -duration 60s -concurrency 64 -evidence-out out/ai-agent-client-testnet-load.json`

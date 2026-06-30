@@ -17,7 +17,18 @@ func run(opt options) error {
 		return err
 	}
 	if opt.EvidenceOut != "" {
-		return writeJSON(opt.EvidenceOut, e)
+		if err := writeJSON(opt.EvidenceOut, e); err != nil {
+			return err
+		}
+	}
+	if opt.ArchitectureQueryOut != "" {
+		if len(opt.ArchitecturePaths) == 0 {
+			return errArchitectureQueryPathRequired()
+		}
+		query := newArchitectureQuery(m, opt.ArchitecturePaths)
+		if err := writeJSON(opt.ArchitectureQueryOut, query); err != nil {
+			return err
+		}
 	}
 	return nil
 }
