@@ -19,7 +19,7 @@ func verifyDecisionReviewBy(decision decisionRecord) error {
 	if err != nil {
 		return fmt.Errorf("candidate %s review_by must be YYYY-MM-DD", decision.CandidateID)
 	}
-	today, err := time.Parse(reviewDateLayout, time.Now().UTC().Format(reviewDateLayout))
+	today, err := time.Parse(reviewDateLayout, evidenceNow().UTC().Format(reviewDateLayout))
 	if err != nil {
 		return fmt.Errorf("parse current review date: %w", err)
 	}
