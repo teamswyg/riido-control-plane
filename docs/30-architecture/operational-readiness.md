@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `25`
+- measurements: `26`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -25,8 +25,8 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 - P0 cycles: `6`
 - P0 partial cycles: `6`
 - partial checks: `9`
-- stale partials: `8`
-- closed-loop candidates: `8`
+- stale partials: `7`
+- closed-loop candidates: `7`
 - next artifact: `public_qa_status_visual_or_pages_publish_evidence`
 
 ## Notion Open Loop Backfill
@@ -51,7 +51,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 | Date | Category | Status | Check | Measurements | Evidence | Next |
 | --- | --- | --- | --- | --- | --- | --- |
-| `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `3` | `5` | `infra_cloudwatch_alarm_by_client_surface` |
+| `2026-07-01` | `monitoring` | `partial` | `otel_xray_client_surface` | `4` | `6` | `client_surface_alarm_plan_apply_evidence` |
 | `2026-07-01` | `monitoring` | `covered` | `public_qa_status_surface` | `5` | `7` | `public_qa_status_visual_or_pages_publish_evidence` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
 | `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `5` | `8` | `staging_client_p0_visual_screenshot_evidence` |
@@ -70,7 +70,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 | Check | Category | Age | Stale | Next Artifact | Next Command |
 | --- | --- | --- | --- | --- | --- |
-| `otel_xray_client_surface` | `monitoring` | `4` | `true` | `infra_cloudwatch_alarm_by_client_surface` | `terraform -chdir=terraform/riido_ai_server plan` |
+| `otel_xray_client_surface` | `monitoring` | `0` | `false` | `client_surface_alarm_plan_apply_evidence` | `gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && terraform -chdir=terraform/riido_ai_server plan -var='enable_client_surface_cloudwatch_alarms=true'` |
 | `staging_client_p0_visual_retest` | `usability` | `0` | `false` | `staging_client_p0_visual_screenshot_evidence` | `gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments` |
 | `daemon_network_disconnect_waiting` | `exception` | `4` | `true` | `daemon_network_disconnect_release_evidence` | `go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
 | `single_pc_agent_limit` | `stress` | `4` | `true` | `single_pc_agent_capacity_evidence` | `go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1` |
@@ -83,13 +83,12 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 ## Partial Promotion
 
 - candidate artifact: `operational-readiness-closed-loop-candidates`
-- candidate count: `8`
-- stale partial count: `8`
+- candidate count: `7`
+- stale partial count: `7`
 - stale after days: `2`
 
 | Candidate | Stale Partial |
 | --- | --- |
-| `operational-readiness:otel_xray_client_surface` | `otel_xray_client_surface` |
 | `operational-readiness:daemon_network_disconnect_waiting` | `daemon_network_disconnect_waiting` |
 | `operational-readiness:single_pc_agent_limit` | `single_pc_agent_limit` |
 | `operational-readiness:boot_burst_capacity` | `boot_burst_capacity` |

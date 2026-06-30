@@ -18,6 +18,9 @@ func TestOperationalReadinessDecisionUsesSubjectNextArtifact(t *testing.T) {
 		t.Fatalf("verify candidate decision: %v", err)
 	}
 	artifactByID := decisionArtifactsByCandidate(result.DecisionArtifacts)
+	if _, ok := artifactByID["operational-readiness:otel_xray_client_surface"]; ok {
+		t.Fatal("fresh client-surface readiness evidence must not leave a stale decision")
+	}
 	for _, item := range candidate.Candidates {
 		next, err := subjectNextArtifact(item)
 		if err != nil {

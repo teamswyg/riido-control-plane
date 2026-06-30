@@ -142,7 +142,7 @@
   "checks": [
     {
       "id": "otel_xray_client_surface",
-      "date": "2026-06-26",
+      "date": "2026-07-01",
       "category": "monitoring",
       "status": "partial",
       "title": "OTel/X-Ray and EMF separate daemon, client app, desktop, and component traffic",
@@ -162,8 +162,14 @@
         {
           "id": "client_surface_alarm_plan",
           "kind": "infra",
-          "signal": "Infra can attach CloudWatch alarms by client surface without changing application contracts.",
+          "signal": "Infra can attach opt-in CloudWatch alarms by client surface without changing application contracts.",
           "evidence_ref": "riido-infra:terraform/riido_ai_server/observability.tf"
+        },
+        {
+          "id": "client_surface_alarm_topology_pr",
+          "kind": "infra",
+          "signal": "riido-infra PR #113 merged service-only client-surface CloudWatch alarm topology; live environments still require reviewed threshold/action apply evidence.",
+          "evidence_ref": "github:https://github.com/teamswyg/riido-infra/pull/113"
         }
       ],
       "evidence_refs": [
@@ -171,10 +177,11 @@
         {"kind": "test", "path": "internal/riidoaiserver/http_client_surface_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/http_transaction_metrics_surface_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/cloudwatch_emf_write_test.go"},
-        {"kind": "external", "path": "riido-infra:terraform/riido_ai_server/observability.tf"}
+        {"kind": "external", "path": "riido-infra:terraform/riido_ai_server/observability.tf"},
+        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/113"}
       ],
-      "next_artifact": "infra_cloudwatch_alarm_by_client_surface",
-      "next_command": "terraform -chdir=terraform/riido_ai_server plan"
+      "next_artifact": "client_surface_alarm_plan_apply_evidence",
+      "next_command": "gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && terraform -chdir=terraform/riido_ai_server plan -var='enable_client_surface_cloudwatch_alarms=true'"
     },
     {
       "id": "public_qa_status_surface",
