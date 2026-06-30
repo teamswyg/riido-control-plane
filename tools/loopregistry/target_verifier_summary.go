@@ -31,13 +31,14 @@ func targetVerifierSummary(
 	}
 	plan := impact.TargetVerifierPlan
 	parts := []string{fmt.Sprintf(
-		"riido target verifier plan: %d changed paths, %d matched paths, %d exact, %d component-routed, %d components, %d commands",
+		"riido target verifier plan: %d changed paths, %d matched paths, %d exact, %d component-routed, %d components, %d indexed commands, %d runnable commands",
 		plan.ChangedPathCount,
 		plan.MatchedPathCount,
 		plan.ExactPathCount,
 		plan.ComponentRouteCount,
 		plan.ComponentCount,
 		plan.CommandCount,
+		plan.RunnableCommandCount,
 	)}
 	parts = append(parts, targetVerifierSummaryParts(plan, evidenceOut)...)
 	if evidenceOut != "" {

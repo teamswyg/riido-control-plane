@@ -35,8 +35,9 @@ func TestGitHubAnnotationsIncludeImpactScope(t *testing.T) {
 		ChangedFileCount: 2,
 		ChangedFiles:     []string{"docs/claim.md", "internal/example.go"},
 		TargetVerifierPlan: &targetVerifierPlan{
-			MatchedPathCount: 1,
-			CommandCount:     4,
+			MatchedPathCount:     1,
+			CommandCount:         4,
+			RunnableCommandCount: 1,
 			VerifierCommands: []string{
 				"go test ./tools/a -count=1",
 				"go test ./tools/b -count=1",
@@ -49,14 +50,18 @@ func TestGitHubAnnotationsIncludeImpactScope(t *testing.T) {
 			FocusedCommands: []string{
 				"go test ./tools/focused -count=1",
 			},
+			RunnableCommands: []string{
+				"go test ./tools/focused -count=1",
+			},
 		},
 	})
 	got := out.String()
 	for _, want := range []string{
 		"::notice title=Riido impact scope::",
 		"2 changed files: docs/claim.md, internal/example.go",
-		"target verifiers: 1 matched paths, 4 commands",
+		"target verifiers: 1 matched paths, 4 indexed commands, 1 runnable commands",
 		"::notice title=Riido target verifier plan::",
+		"runnable: go test ./tools/focused -count=1",
 		"focused: go test ./tools/focused -count=1",
 		"entrypoints: go test ./tools/b -count=1",
 		"commands: go test ./tools/a -count=1",
