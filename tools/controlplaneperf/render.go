@@ -12,6 +12,7 @@ func renderDoc(m manifest, e evidence) string {
 	renderSummary(&b, m, e)
 	renderCommands(&b, m)
 	renderArchitecture(&b, m.ArchitectureComponents)
+	renderArchitectureFileIndex(&b, e.FileArchitectureIndex)
 	renderHotPaths(&b, m.HotPaths)
 	renderLoop(&b, m.Loop)
 	return strings.TrimRight(b.String(), "\n") + "\n"
@@ -24,6 +25,7 @@ func renderSummary(b *strings.Builder, m manifest, e evidence) {
 	fmt.Fprintf(b, "- concurrency tests: `%d`\n", e.TestCount)
 	fmt.Fprintf(b, "- optimization candidates: `%d`\n", e.CandidateCount)
 	fmt.Fprintf(b, "- architecture components: `%d`\n", e.ArchitectureComponentCount)
+	fmt.Fprintf(b, "- architecture file index entries: `%d`\n", e.ArchitectureFileCount)
 	fmt.Fprintf(b, "- assertions: `%d`\n", e.AssertionCount)
 	fmt.Fprintf(b, "- local pressure artifact: `%s`\n", m.LocalPressureArtifact)
 	fmt.Fprintf(b, "- race artifact: `%s`\n", m.RaceArtifact)

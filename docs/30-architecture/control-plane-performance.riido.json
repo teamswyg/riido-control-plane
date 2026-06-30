@@ -217,7 +217,8 @@
     "live load evidence must emit requests_per_second, success_per_second, failure_rate_pct, endpoint findings, capacity_estimate, and load_generator_resource_delta",
     "live load evidence may attach opt-in pprof sample metadata but must never persist pprof profile bodies",
     "pprof collection must use loopback-only RIIDO_AI_SERVER_PPROF_ADDR",
-    "performance candidates must name the hot path, risk, existing evidence, and next verifier candidate"
+    "performance candidates must name the hot path, risk, existing evidence, and next verifier candidate",
+    "performance evidence must expose a generated file_architecture_index that maps hot-path files to architecture components, pressure dimensions, OTel/X-Ray/CloudWatch signal names, and evidence refs"
   ],
   "loop": {
     "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates, local CPU/resource deltas, and opt-in pprof sample metadata are not emitted from one executable performance loop.",

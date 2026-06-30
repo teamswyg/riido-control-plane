@@ -36,3 +36,16 @@ func TestControlPlanePerformanceEvidenceCarriesArchitecture(t *testing.T) {
 		t.Fatalf("architecture evidence missing: %+v", got)
 	}
 }
+
+func TestControlPlanePerformanceEvidenceCarriesFileArchitectureIndex(t *testing.T) {
+	m := loadManifestForTest(t)
+	got := newEvidence(m)
+	if got.ArchitectureFileCount == 0 ||
+		len(got.FileArchitectureIndex) != got.ArchitectureFileCount {
+		t.Fatalf("architecture file index missing: %+v", got)
+	}
+	if got.FileArchitectureIndex[0].Path == "" ||
+		len(got.FileArchitectureIndex[0].PressureDimensions) == 0 {
+		t.Fatalf("architecture file index row incomplete: %+v", got.FileArchitectureIndex[0])
+	}
+}
