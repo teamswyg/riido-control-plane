@@ -1502,13 +1502,20 @@
     },
     {
       "id": "candidate_decision_next_command_loop",
-      "observation": "Candidate decision evidence selected a next_artifact and next_command, but agents still had to rejoin the full decisions array or copy commands by hand before the next loop could consume that executable action; command exports also lost the source candidate subject kind and decision provenance, forcing downstream dispatch candidates to reopen candidate evidence or decision templates to explain why a command exists.",
-      "hypothesis": "Copying the selected adoption command, decision ownership metadata, source candidate id, subject kind, decision_source, and optional decision_template_subject_kind into decision_artifacts and refresh command evidence through a static copied/derived/subject-lookup binding registry lets agents continue without reopening narrative docs, candidate JSON, or global decision records by hand.",
+      "observation": "Candidate decision evidence selected a next_artifact and next_command, but agents still had to rejoin the full decisions array or copy commands by hand before the next loop could consume that executable action; command exports also lost the source candidate subject kind and decision provenance, and reviewers had to reread the decision table to know how many candidates were triage-required, deferred, claim-binding work, or template-generated work.",
+      "hypothesis": "Copying the selected adoption command, decision ownership metadata, source candidate id, subject kind, decision_source, optional decision_template_subject_kind, consumed decision summary counts into decision_artifacts and evidence, and stable registered decision summary counts into generated docs through a static copied/derived/subject-lookup binding registry lets agents continue without reopening narrative docs, candidate JSON, or global decision records by hand.",
       "claims": ["candidate_decision_evidence_must_expose_next_command"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision/decision_artifact.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/decision_summary.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/decision_summary_types.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/decision_source_count.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/summary_count.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/render_summary.go"},
+        {"kind": "tool", "path": "tools/closedloopcandidatedecision/render_summary_text.go"},
+        {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_summary_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/decision_provenance_test.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision/refresh_command_bindings.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/refresh_command_binding_test.go"},
@@ -1537,7 +1544,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-decision-commands", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Candidate decision evidence now exposes next_command plus owner, priority, disposition, review_by, source candidate id, subject kind, decision_source, and decision_template_subject_kind for the chosen next_artifact, and the verifier can publish those selected next commands as loop refresh command evidence through an explicit refresh-command binding registry so the executable follow-up path is no longer trapped in human memory or hidden template inference.",
+      "decision": "Candidate decision evidence now exposes next_command plus owner, priority, disposition, review_by, source candidate id, subject kind, decision_source, decision_template_subject_kind, and consumed decision summary counts for the chosen next_artifact while generated docs expose stable registered decision counts, and the verifier can publish those selected next commands as loop refresh command evidence through an explicit refresh-command binding registry so the executable follow-up path and candidate queue shape are no longer trapped in human memory or hidden template inference.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

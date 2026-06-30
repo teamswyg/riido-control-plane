@@ -22,6 +22,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - decision evidence must expose the executable command selected from the consumed candidate adoption_plan
 - decision verification must export selected next commands as loop refresh command evidence when requested
 - refresh command evidence must bind copied, derived, and candidate-subject lookup fields through a static binding registry
+- decision evidence must expose registered, consumed, disposition, priority, next artifact, and decision-source summary counts while generated docs expose the stable registered decision summary
 - decision evidence must expose owner, priority, disposition, and review_by next to the selected executable command
 - decision evidence and refresh command evidence must expose whether the selected command came from an explicit decision record or a subject-kind decision template
 - decision evidence must expose the consumed candidate promotion_edge for the selected next artifact
@@ -42,6 +43,14 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 - candidate decision workflow path triggers must include every producer source workflow from intake
 - candidate decision PR verification must consume a performance-specific candidate fixture
 - candidate decision PR verification must publish explicit skipped evidence when a sampled candidate artifact has zero open candidates
+
+## Decision Summary
+
+- registered decisions: `24`
+- consumed decisions: `0`
+- disposition counts: `deferred=7`, `triage_required=17`
+- priority counts: `P1=17`, `P2=7`
+- next artifact counts: `claim_binding=9`, `cold_start_packet_burst_evidence=1`, `daemon_network_disconnect_release_evidence=1`, `daemon_reconnect_storm_evidence=1`, `decision_record=2`, `desktop_body_only_golden_evidence=1`, `ecs_service_recovery_chaos_evidence=1`, `infra_cloudwatch_alarm_by_client_surface=1`, `redacted_evidence=5`, `scale_out_timing_evidence=1`, `single_pc_agent_capacity_evidence=1`
 
 ## Decisions
 
@@ -82,6 +91,6 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 - Observation: Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.
 - Hypothesis: A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, next artifact, and review expiry.
-- Execute: Generate this reader from the decision manifest, generate deterministic candidate fixtures, verify intake, verify candidate decisions with explicit candidate artifacts, publish selected next commands with decision provenance as loop refresh command evidence, verify the refresh command binding registry for copied, derived, and candidate-subject lookup fields, publish skipped evidence for sampled artifacts with zero candidates, download latest live candidate artifacts on non-PR runs, verify non-empty live candidate sets, and publish decision evidence in CI.
-- Evaluate: The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, expired or exact-expiry candidate artifacts, stale docs, missing command artifact binding, missing refresh command binding registry coverage, missing live artifact download wiring, missing scheduled workflow evidence, missing sampled skip evidence, or unredacted candidate content.
-- Retrospective: This moves prioritization metadata and selected follow-up commands into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition, review deadline, and machine-readable next command.
+- Execute: Generate this reader from the decision manifest, generate deterministic candidate fixtures, verify intake, verify candidate decisions with explicit candidate artifacts, publish selected next commands with decision provenance as loop refresh command evidence, publish decision summary counts in generated docs and evidence, verify the refresh command binding registry for copied, derived, and candidate-subject lookup fields, publish skipped evidence for sampled artifacts with zero candidates, download latest live candidate artifacts on non-PR runs, verify non-empty live candidate sets, and publish decision evidence in CI.
+- Evaluate: The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates, expired or exact-expiry candidate artifacts, stale docs, missing decision summary evidence, missing command artifact binding, missing refresh command binding registry coverage, missing live artifact download wiring, missing scheduled workflow evidence, missing sampled skip evidence, or unredacted candidate content.
+- Retrospective: This moves prioritization metadata, summary counts, and selected follow-up commands into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition, review deadline, machine-readable queue summary, and machine-readable next command.

@@ -8,6 +8,7 @@ type evidence struct {
 	ExpiresAt           string                       `json:"expires_at"`
 	DecisionCount       int                          `json:"decision_count"`
 	CandidateCount      int                          `json:"candidate_count"`
+	DecisionSummary     decisionSummary              `json:"decision_summary"`
 	DecisionIDs         []string                     `json:"decision_ids"`
 	DecisionArtifacts   []decisionArtifactEvidence   `json:"decision_artifacts"`
 	CandidateSourceRefs []candidateSourceRefEvidence `json:"candidate_source_refs"`
@@ -33,6 +34,7 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		ExpiresAt:           expiresAt,
 		DecisionCount:       result.DecisionCount,
 		CandidateCount:      result.CandidateCount,
+		DecisionSummary:     newDecisionSummary(m, result),
 		DecisionIDs:         result.DecisionIDs,
 		DecisionArtifacts:   result.DecisionArtifacts,
 		CandidateSourceRefs: result.CandidateSourceRefs,

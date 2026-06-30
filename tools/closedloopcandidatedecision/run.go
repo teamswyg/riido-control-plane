@@ -28,7 +28,8 @@ func run(opt options) error {
 		result.CandidateSubjects = candidateResult.CandidateSubjects
 		result.ConsumedCandidateArtifacts = candidateResult.ConsumedCandidateArtifacts
 	}
-	if err := maybeDoc(root, m.GeneratedDoc, renderDoc(m, result), opt.WriteDoc, opt.CheckDoc); err != nil {
+	docResult := verifyResult{DecisionCount: len(m.Decisions)}
+	if err := maybeDoc(root, m.GeneratedDoc, renderDoc(m, docResult), opt.WriteDoc, opt.CheckDoc); err != nil {
 		return err
 	}
 	if opt.CommandsOut != "" {
