@@ -15,6 +15,8 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintln(&b, "## Summary")
 	fmt.Fprintln(&b)
 	fmt.Fprintf(&b, "- promotion sources: `%d`\n", result.SourceCount)
+	fmt.Fprintf(&b, "- sidecar-backed harness sources: `%d`\n", result.SidecarSourceCount)
+	fmt.Fprintf(&b, "- loop-owned candidate producers: `%d`\n", result.LoopOwnedCandidateProducerCount)
 	fmt.Fprintf(&b, "- promotion edges: `%d`\n", len(promotionEdgesForSources(m.Sources)))
 	fmt.Fprintf(&b, "- required next artifact refs: `%d`\n\n", result.ClaimCount)
 	fmt.Fprintf(&b, "- loop registry: `%s`\n\n", m.LoopRegistryManifest)

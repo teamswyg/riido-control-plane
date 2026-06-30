@@ -7,6 +7,8 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 ## Summary
 
 - promotion sources: `3`
+- sidecar-backed harness sources: `3`
+- loop-owned candidate producers: `1`
 - promotion edges: `3`
 - required next artifact refs: `18`
 
@@ -29,15 +31,16 @@ Executable SSOT: [`harness-promotion.riido.json`](harness-promotion.riido.json).
 - candidate artifacts must include a promotion_edge that names the harness loop, closed-loop target, and promotes_failure_to relation
 - each candidate must include a source_ref with source workflow, summary artifact, candidate artifact, run id, and freshness window
 - each harness failure candidate must include a machine-routable subject with kind, harness loop, source workflow, summary artifact, candidate artifact, live status, and claim id
-- every registered harness loop must have exactly one harness promotion source with the same refresh workflow
+- every sidecar-backed harness loop that runs tools/harnesspromotion must have exactly one harness promotion source with the same refresh workflow
+- loop-owned candidate producer harnesses may omit a harness promotion source only when their refresh workflow always writes and uploads their closed-loop candidate artifact
 - redacted summary freshness must satisfy generated_at < expires_at and now < expires_at before closed-loop candidate generation
 - harness workflows that produce expiring evidence must be runnable without a human trigger
 - harness promotion evidence must publish generated_at, expires_at, promotion_edge_count, promotion_edges, and the concrete promotion_result when a summary is promoted
 
 ## Evidence Loop
 
-- Observation: Provider and smoke harnesses can find failures, but a failed run can still end as an isolated artifact unless it is converted into a closed-loop candidate.
-- Hypothesis: A promotion sidecar can transform redacted harness summaries into candidate records that name the next artifacts required for a durable closed loop and bind them to the loop registry target.
-- Execute: Verify harness workflows call this tool after redacted summaries, reject malformed, zero-length, expired, or exact-expiry summaries before promotion, upload candidate artifacts with strict missing-file behavior, verify source-to-loop-registry target bindings, verify every registered harness loop has exactly one source, and generate reader/evidence outputs in CI.
-- Evaluate: The verifier fails on missing promotion wiring, missing candidate uploads, expired or malformed summary freshness metadata, exact-expiry summary reuse, missing strict upload behavior, missing adoption artifacts, loop-registry target drift, missing or duplicate harness source coverage, stale generated docs, or unsupported manifest identity.
+- Observation: Provider, smoke, load, performance, and release-readiness harnesses can find failures or stale partials, but a failed run can still end as an isolated artifact unless it is converted into a closed-loop candidate.
+- Hypothesis: A promotion sidecar can transform redacted harness summaries into candidate records while loop-owned candidate producers can publish their own stale-partial candidate records, and both paths can bind to the loop registry target.
+- Execute: Verify sidecar-backed harness workflows call this tool after redacted summaries, reject malformed, zero-length, expired, or exact-expiry summaries before promotion, upload candidate artifacts with strict missing-file behavior, verify source-to-loop-registry target bindings, distinguish sidecar-backed sources from loop-owned candidate producers, and generate reader/evidence outputs in CI.
+- Evaluate: The verifier fails on missing promotion wiring, missing candidate uploads, expired or malformed summary freshness metadata, exact-expiry summary reuse, missing strict upload behavior, missing adoption artifacts, loop-registry target drift, sidecar source drift, missing loop-owned candidate producer evidence, stale generated docs, or unsupported manifest identity.
 - Retrospective: Harnesses now increase exploration space while failed observations automatically enter the closed-loop backlog instead of relying on human memory.
