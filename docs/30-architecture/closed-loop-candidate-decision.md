@@ -87,6 +87,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | Subject Kind | Disposition | Priority | Owner | Review By | Next Artifact |
 | --- | --- | --- | --- | --- | --- |
 | `loop_refresh_ignored_command` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `verifier` |
+| `loop_refresh_stale_source` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 
 ## Evidence Loop
 

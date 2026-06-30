@@ -261,6 +261,16 @@
       "next_artifact": "verifier",
       "review_by": "2026-07-15",
       "reason": "Loop refresh dispatch can discover target_verifier commands that workflow dispatch cannot run; ignored-command subjects are already redacted and machine-routable, so decision can select the verifier command without a per-candidate manifest edit."
+    },
+    {
+      "subject_kind": "loop_refresh_stale_source",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-15",
+      "reason": "Loop refresh dispatch can discover stale command evidence on scheduled runs; stale-source subjects should route to regenerated redacted refresh evidence without requiring a per-run decision record."
     }
   ],
   "assertions": [
