@@ -21,24 +21,30 @@
   "chains": [
     {
       "id": "harness_failure_promotion_loop",
-      "observation": "Provider and smoke harness failures could previously end as isolated artifacts.",
-      "hypothesis": "Redacted harness summaries can be transformed into closed-loop candidate records.",
+      "observation": "Provider, smoke, load, performance, and release-readiness harness failures or stale partials could previously end as isolated artifacts.",
+      "hypothesis": "Redacted harness summaries or loop-owned stale-partial evidence can be transformed into closed-loop candidate records.",
       "claims": ["harness_promotion_must_run_after_failure"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
         {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "tool", "path": "tools/harnesspromotion/source_coverage.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/source_sidecar.go"},
+        {"kind": "tool", "path": "tools/loopregistry/harness_candidate_producer.go"},
+        {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
         {"kind": "workflow", "path": ".github/workflows/harness-promotion.yml"}
       ],
       "verifiers": [
         {"kind": "tool", "path": "tools/harnesspromotion"},
         {"kind": "test", "path": "tools/harnesspromotion/source_coverage_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/harness_candidate_producer_test.go"},
         {"kind": "workflow", "path": ".github/workflows/harness-promotion.yml"}
       ],
       "evidence": [
         {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true},
-        {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true}
+        {"kind": "artifact", "path": "ai-agent-client-testnet-smoke-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "operational-readiness-closed-loop-candidates", "redacted": true}
       ],
-      "decision": "Harness failures are promoted into closed-loop candidate artifacts that require claim binding, verifier, CI gate, redacted evidence, decision record, and evidence graph edge before adoption.",
+      "decision": "Harness failures and stale partial readiness evidence are promoted into closed-loop candidate artifacts by either the harnesspromotion sidecar or a loop-owned candidate producer; candidates still require claim binding, verifier, CI gate, redacted evidence, decision record, and evidence graph edge before adoption.",
       "next_loop": "closed_loop_candidate"
     },
     {

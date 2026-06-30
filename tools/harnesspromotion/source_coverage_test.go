@@ -10,7 +10,7 @@ func TestPromotionSourcesMustCoverEveryHarnessLoop(t *testing.T) {
 	m := loadPromotionManifestForTest(t)
 	registry := loadPromotionRegistryForTest(t, m)
 	m.Sources = m.Sources[1:]
-	if err := verifySourceCoverage(registry, m.Sources); err == nil {
+	if err := verifySourceCoverage("../..", registry, m.Sources); err == nil {
 		t.Fatal("expected missing promotion source to fail")
 	}
 }
@@ -20,7 +20,7 @@ func TestPromotionSourcesRejectDuplicateHarnessLoop(t *testing.T) {
 	registry := loadPromotionRegistryForTest(t, m)
 	m.Sources = append(m.Sources, m.Sources[0])
 	m.Sources[len(m.Sources)-1].ID = "duplicate"
-	if err := verifySourceCoverage(registry, m.Sources); err == nil {
+	if err := verifySourceCoverage("../..", registry, m.Sources); err == nil {
 		t.Fatal("expected duplicate promotion source to fail")
 	}
 }
@@ -29,7 +29,7 @@ func TestPromotionSourcesRejectWorkflowDrift(t *testing.T) {
 	m := loadPromotionManifestForTest(t)
 	registry := loadPromotionRegistryForTest(t, m)
 	m.Sources[0].SourceWorkflow = ".github/workflows/loop-registry.yml"
-	if err := verifySourceCoverage(registry, m.Sources); err == nil {
+	if err := verifySourceCoverage("../..", registry, m.Sources); err == nil {
 		t.Fatal("expected workflow drift to fail")
 	}
 }

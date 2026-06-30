@@ -24,11 +24,23 @@ func TestOperationalReadinessBindsLoopRegistryArtifacts(t *testing.T) {
 	}
 }
 
+func TestOperationalReadinessRequiresHarnessPromotionLoop(t *testing.T) {
+	m := loadManifestForTest(t)
+	loop := readinessLoopFixture(m)
+	loop.Kind = "closed_loop"
+	registry := readinessLoopRegistry{Loops: []readinessRegistryLoop{loop}}
+	if err := verifyRegisteredReadinessLoop(m, registry); err == nil {
+		t.Fatal("expected readiness loop kind drift to fail")
+	}
+}
+
 func readinessLoopFixture(m manifest) readinessRegistryLoop {
 	return readinessRegistryLoop{
 		ID:                readinessHarnessLoop,
+		Kind:              "harness",
 		RefreshWorkflow:   m.Workflow,
 		ExpiresAfterHours: readinessEvidenceTTLHours,
+		PromotesTo:        []string{"closed_loop_candidate"},
 		Evidence: []readinessRegistryEvidence{
 			{Path: m.EvidenceArtifact},
 			{Path: readinessCandidateArtifact},
