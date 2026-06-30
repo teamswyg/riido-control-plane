@@ -4,32 +4,33 @@ const architectureQuerySchema = "riido-control-plane-performance-architecture-qu
 
 func newArchitectureQuery(m manifest, paths []string) architectureQueryEvidence {
 	index := architectureRowsByPath(architectureFileIndex(m.ArchitectureComponents, m.HotPaths))
+	fallback := architectureFallbackIndex(m.ArchitectureComponents, m.HotPaths)
 	rows := make([]architectureQueryRow, 0, len(paths))
 	hits := 0
+	directHits := 0
+	fallbackHits := 0
 	for _, path := range paths {
-		row := architectureQueryRow{Path: path}
+		row := unmatchedArchitectureQueryRow(path)
 		if indexed, ok := index[path]; ok {
-			row = architectureQueryRow{
-				Path:                   path,
-				Matched:                true,
-				ComponentIDs:           append([]string(nil), indexed.ComponentIDs...),
-				HotPathIDs:             append([]string(nil), indexed.HotPathIDs...),
-				PressureDimensions:     append([]string(nil), indexed.PressureDimensions...),
-				ObservabilitySignals:   append([]string(nil), indexed.ObservabilitySignals...),
-				TargetVerifierCommands: append([]string(nil), indexed.TargetVerifierCommands...),
-				OptimizationCandidates: append([]string(nil), indexed.OptimizationCandidates...),
-			}
+			row = exactArchitectureQueryRow(path, indexed, m.ArchitectureComponents)
 			hits++
+			directHits++
+		} else if indexed, ok := fallback[architecturePathDir(path)]; ok {
+			row = fallbackArchitectureQueryRow(path, indexed, m.ArchitectureComponents)
+			hits++
+			fallbackHits++
 		}
 		rows = append(rows, row)
 	}
 	return architectureQueryEvidence{
-		SchemaVersion: architectureQuerySchema,
-		Status:        queryStatus(len(paths), hits),
-		QueryCount:    len(paths),
-		HitCount:      hits,
-		MissCount:     len(paths) - hits,
-		Queries:       rows,
+		SchemaVersion:    architectureQuerySchema,
+		Status:           queryStatus(len(paths), hits),
+		QueryCount:       len(paths),
+		HitCount:         hits,
+		DirectHitCount:   directHits,
+		FallbackHitCount: fallbackHits,
+		MissCount:        len(paths) - hits,
+		Queries:          rows,
 	}
 }
 
