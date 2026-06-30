@@ -48,7 +48,9 @@
         "internal/riidoaiserver/server_handler.go",
         "internal/riidoaiserver/server_client_sse.go",
         "internal/riidoaiserver/server_ai_agent_client_task_v3.go",
-        "internal/riidoaiserver/server_json.go"
+        "internal/riidoaiserver/server_json.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_visible_task_threads_locked.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_active_task_thread_stream_targets_locked.go"
       ],
       "pressure_dimensions": ["latency", "allocation", "heap_memory", "cpu_busy", "otel_signal"],
       "observability_signals": ["http.route", "riido.trace.surface", "cloudwatch_emf"],
@@ -61,6 +63,7 @@
       "files": [
         "internal/riidoaiserver/store_poll_api.go",
         "internal/riidoaiserver/store_wait_assignment_api.go",
+        "internal/riidoaiserver/store_wait_assignment_pressure.go",
         "internal/riidoaiserver/store_operation_metrics_observe.go",
         "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_api.go"
       ],
@@ -74,8 +77,15 @@
       "hot_path_categories": ["runtime_progress_ingest", "in_memory_fanout", "sse_event_streaming"],
       "files": [
         "internal/riidoaiserver/ai_agent_client_development_method_record_ai_agent_thread_progress.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go",
         "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go",
         "internal/riidoaiserver/ai_agent_client_development_thread_progress_lookup.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_thread_progress_locked.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go",
         "internal/riidoaiserver/progress_messages_render.go"
       ],
       "pressure_dimensions": ["latency", "allocation", "heap_memory", "cpu_busy", "goroutine_delta"],
@@ -102,7 +112,9 @@
       "hot_path_categories": ["endpoint_hot_path", "db_cost_attribution"],
       "files": [
         "internal/riidoaiserver/http_transaction_metrics_observe.go",
+        "internal/riidoaiserver/http_transaction_metrics_snapshot.go",
         "internal/riidoaiserver/store_operation_metrics_observe.go",
+        "internal/riidoaiserver/store_operation_metrics_snapshot.go",
         "internal/riidoaiserver/metrics_window.go"
       ],
       "pressure_dimensions": ["allocation", "heap_memory", "cpu_busy", "otel_signal"],
@@ -218,7 +230,7 @@
     "live load evidence may attach opt-in pprof sample metadata but must never persist pprof profile bodies",
     "pprof collection must use loopback-only RIIDO_AI_SERVER_PPROF_ADDR",
     "performance candidates must name the hot path, risk, existing evidence, and next verifier candidate",
-    "performance evidence must expose a generated file_architecture_index that maps hot-path files to architecture components, pressure dimensions, OTel/X-Ray/CloudWatch signal names, and evidence refs"
+    "performance evidence must expose a generated file_architecture_index that maps hot-path files to architecture components, pressure dimensions, OTel/X-Ray/CloudWatch signal names, evidence refs, hot path ids, and executable target verifier commands"
   ],
   "loop": {
     "observation": "Control-plane already has isolated load, metrics, and benchmark evidence, but high-traffic risk candidates, local CPU/resource deltas, and opt-in pprof sample metadata are not emitted from one executable performance loop.",

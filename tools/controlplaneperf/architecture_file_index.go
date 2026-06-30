@@ -2,15 +2,14 @@ package main
 
 import "sort"
 
-func architectureFileIndex(components []architectureComponent) []architectureFileEvidence {
+func architectureFileIndex(
+	components []architectureComponent,
+	hotPaths []hotPath,
+) []architectureFileEvidence {
 	byPath := map[string]*architectureFileEvidence{}
 	for _, component := range components {
 		for _, path := range component.Files {
-			row := byPath[path]
-			if row == nil {
-				row = &architectureFileEvidence{Path: path}
-				byPath[path] = row
-			}
+			row := architectureFileRow(byPath, path)
 			row.ComponentIDs = appendUnique(row.ComponentIDs, component.ID)
 			row.HotPathCategories = appendAllUnique(row.HotPathCategories, component.HotPathCategories)
 			row.PressureDimensions = appendAllUnique(row.PressureDimensions, component.PressureDimensions)
@@ -18,7 +17,20 @@ func architectureFileIndex(components []architectureComponent) []architectureFil
 			row.EvidenceRefs = appendAllUnique(row.EvidenceRefs, component.EvidenceRefs)
 		}
 	}
+	applyHotPathRows(byPath, hotPaths)
 	return sortedArchitectureFileRows(byPath)
+}
+
+func architectureFileRow(
+	byPath map[string]*architectureFileEvidence,
+	path string,
+) *architectureFileEvidence {
+	row := byPath[path]
+	if row == nil {
+		row = &architectureFileEvidence{Path: path}
+		byPath[path] = row
+	}
+	return row
 }
 
 func appendAllUnique(dst, values []string) []string {
@@ -51,6 +63,11 @@ func sortedArchitectureFileRows(byPath map[string]*architectureFileEvidence) []a
 		sort.Strings(row.PressureDimensions)
 		sort.Strings(row.ObservabilitySignals)
 		sort.Strings(row.EvidenceRefs)
+		sort.Strings(row.HotPathIDs)
+		sort.Strings(row.Benchmarks)
+		sort.Strings(row.Tests)
+		sort.Strings(row.OptimizationCandidates)
+		sort.Strings(row.TargetVerifierCommands)
 		out = append(out, row)
 	}
 	return out

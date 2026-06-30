@@ -49,3 +49,16 @@ func TestControlPlanePerformanceEvidenceCarriesFileArchitectureIndex(t *testing.
 		t.Fatalf("architecture file index row incomplete: %+v", got.FileArchitectureIndex[0])
 	}
 }
+
+func TestControlPlanePerformanceEvidenceCarriesTargetCommands(t *testing.T) {
+	m := loadManifestForTest(t)
+	got := newEvidence(m)
+	if got.ArchitectureTargetCommandCount == 0 {
+		t.Fatalf("target commands missing: %+v", got)
+	}
+	for _, row := range got.FileArchitectureIndex {
+		if len(row.HotPathIDs) > 0 && len(row.TargetVerifierCommands) == 0 {
+			t.Fatalf("hot path row lacks target commands: %+v", row)
+		}
+	}
+}
