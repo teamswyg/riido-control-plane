@@ -10,6 +10,7 @@ type evidence struct {
 	TestCount                  int                             `json:"test_count"`
 	CandidateCount             int                             `json:"candidate_count"`
 	ArchitectureComponentCount int                             `json:"architecture_component_count"`
+	ArchitectureFileCount      int                             `json:"architecture_file_count"`
 	AssertionCount             int                             `json:"assertion_count"`
 	BenchmarkCommand           string                          `json:"benchmark_command"`
 	RaceArtifact               string                          `json:"race_artifact"`
@@ -24,6 +25,7 @@ type evidence struct {
 	Sources                    []pressureSource                `json:"sources"`
 	Assertions                 []string                        `json:"assertions"`
 	ArchitectureComponents     []architectureComponentEvidence `json:"architecture_components"`
+	FileArchitectureIndex      []architectureFileEvidence      `json:"file_architecture_index"`
 	HotPaths                   []hotPathEvidence               `json:"hot_paths"`
 	Candidates                 []candidateEvidence             `json:"candidates"`
 	Loop                       loopSpec                        `json:"loop"`
