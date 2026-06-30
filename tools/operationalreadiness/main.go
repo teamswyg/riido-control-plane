@@ -22,8 +22,10 @@ func mainRun(args []string) error {
 	fs.StringVar(&opt.CandidateOut, "candidate-out", "", "optional closed-loop candidate JSON output")
 	fs.BoolVar(&opt.WriteDoc, "write-doc", false, "write generated doc")
 	fs.BoolVar(&opt.CheckDoc, "check-doc", false, "verify generated doc")
+	verify := fs.Bool("verify", false, "alias for -check-doc")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	opt.CheckDoc = opt.CheckDoc || *verify
 	return run(opt)
 }
