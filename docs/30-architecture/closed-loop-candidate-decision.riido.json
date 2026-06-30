@@ -171,6 +171,16 @@
       "reason": "Loop refresh dispatch is an intake source for ignored command candidates; source coverage stays seeded while dynamic ignored-command subjects are handled by decision templates."
     },
     {
+      "candidate_id": "operational-readiness:otel_xray_client_surface",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "client_surface_alarm_plan_apply_evidence",
+      "review_by": "2026-07-15",
+      "reason": "Client-surface monitoring now has merged riido-infra alarm topology evidence, but remains stale partial readiness until environment-specific threshold/action plan/apply evidence exists."
+    },
+    {
       "candidate_id": "operational-readiness:daemon_network_disconnect_waiting",
       "disposition": "triage_required",
       "priority": "P1",

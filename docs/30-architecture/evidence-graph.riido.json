@@ -4527,7 +4527,7 @@
           "redacted": true
         }
       ],
-      "decision": "Candidate decisions are scheduled and cannot produce verifier evidence without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, skip performance-specific sample decision evidence, or leave loop-refresh ignored-command or stale-source subjects without a template decision; scheduled live decisions now publish skipped evidence when a source has no candidate artifact or no open candidates, stale source candidates route to regenerated redacted evidence, and stale operational-readiness decision records are removed when fresh readiness evidence means the source no longer emits that candidate.",
+      "decision": "Candidate decisions are scheduled and cannot produce verifier evidence without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, skip performance-specific sample decision evidence, or leave loop-refresh ignored-command or stale-source subjects without a template decision; scheduled live decisions now publish skipped evidence when a source has no candidate artifact or no open candidates, stale source candidates route to regenerated redacted evidence, and the stale operational-readiness client-surface decision now routes to the narrower live alarm plan/apply evidence instead of the older topology artifact.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
