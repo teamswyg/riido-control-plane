@@ -41,6 +41,7 @@ func renderCommands(b *strings.Builder, m manifest) {
 	fmt.Fprintf(b, "- local pressure: `%s`\n", m.LocalPressureCommand)
 	fmt.Fprintf(b, "- manual pressure: `%s`\n", m.ManualPressureCommand)
 	fmt.Fprintf(b, "- local pressure pprof: `%s`\n", m.LocalPprofCommand)
+	fmt.Fprintf(b, "- architecture query: `%s`\n", m.ArchitectureQueryCommand)
 	fmt.Fprintf(b, "- race/concurrency: `%s`\n", m.RaceCommand)
 	fmt.Fprintf(b, "- loopback pprof: `%s`\n", m.PprofCommand)
 	fmt.Fprintf(b, "- live load evidence: `%s`\n\n", m.LiveLoadCommand)
