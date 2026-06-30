@@ -4397,8 +4397,8 @@
     },
     {
       "id": "closed_loop_candidate_decision_loop",
-      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, with a source seed incorrectly treated as a stale live candidate decision, with live scheduled artifact download failing before it records that a source had no candidate artifact, or with dynamic loop-refresh ignored-command candidates requiring manual per-id decision records.",
-      "hypothesis": "A candidate decision tool can require an explicit candidate artifact for verifier runs, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale non-seed decision records for the consumed source, allow source coverage seeds when a source currently has no open candidates, synthesize decisions from subject-kind templates for redacted machine-routable candidates, fail when workflow path triggers omit linked manifests, consume a performance-specific candidate fixture in PR checks, and emit skipped live evidence for missing or empty producer artifacts.",
+      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, with a source seed incorrectly treated as a stale live candidate decision, with live scheduled artifact download failing before it records that a source had no candidate artifact, or with dynamic loop-refresh ignored-command and stale-source candidates requiring manual per-id decision records.",
+      "hypothesis": "A candidate decision tool can require an explicit candidate artifact for verifier runs, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale non-seed decision records for the consumed source, allow source coverage seeds when a source currently has no open candidates, synthesize decisions from subject-kind templates for redacted machine-routable candidates including loop-refresh stale sources, fail when workflow path triggers omit linked manifests, consume a performance-specific candidate fixture in PR checks, and emit skipped live evidence for missing or empty producer artifacts.",
       "claims": [
         "candidate_decisions_must_match_consumed_candidates"
       ],
@@ -4441,6 +4441,14 @@
         },
         {
           "kind": "test",
+          "path": "tools/closedloopcandidatedecision/stale_source_template_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/stale_source_adoption_fixture_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/closedloopcandidatedecision/candidate_orphan_test.go"
         },
         {
@@ -4456,6 +4464,10 @@
         {
           "kind": "test",
           "path": "tools/closedloopcandidatedecision/decision_template_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/stale_source_template_test.go"
         },
         {
           "kind": "test",
@@ -4507,13 +4519,13 @@
           "redacted": true
         }
       ],
-      "decision": "Candidate decisions are scheduled and cannot produce verifier evidence without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, skip performance-specific sample decision evidence, or leave loop-refresh ignored-command subjects without a verifier decision template; scheduled live decisions now publish skipped evidence when a source has no candidate artifact or no open candidates.",
+      "decision": "Candidate decisions are scheduled and cannot produce verifier evidence without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, skip performance-specific sample decision evidence, or leave loop-refresh ignored-command or stale-source subjects without a template decision; scheduled live decisions now publish skipped evidence when a source has no candidate artifact or no open candidates, and stale source candidates route to regenerated redacted evidence.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
       "id": "candidate_decision_next_artifact_loop",
-      "observation": "Closed-loop candidate decisions could name an arbitrary next_artifact even when the consumed candidate artifact declared a bounded adoption artifact set; operational readiness and loop-refresh ignored-command candidates also carried subject.next_artifact but the decision loop could still select generic claim_binding or require manual per-id decisions, forcing agents to infer the real next action.",
-      "hypothesis": "Comparing each explicit or template-synthesized decision next_artifact against required_next_artifacts and subject.next_artifact keeps every source-scoped, readiness-scoped, or ignored-command candidate on its machine-routable executable adoption path.",
+      "observation": "Closed-loop candidate decisions could name an arbitrary next_artifact even when the consumed candidate artifact declared a bounded adoption artifact set; operational readiness, loop-refresh ignored-command, and loop-refresh stale-source candidates also carried machine-routable next actions but the decision loop could still select generic claim_binding or require manual per-id decisions.",
+      "hypothesis": "Comparing each explicit or template-synthesized decision next_artifact against required_next_artifacts and subject.next_artifact keeps every source-scoped, readiness-scoped, ignored-command, or stale-source candidate on its machine-routable executable adoption path.",
       "claims": [
         "candidate_decision_next_artifact_must_be_required"
       ],
@@ -4551,6 +4563,10 @@
         {
           "kind": "test",
           "path": "tools/closedloopcandidatedecision/decision_template_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/stale_source_template_test.go"
         },
         {
           "kind": "test",
