@@ -6,23 +6,27 @@ import (
 	"os"
 )
 
-func promoteSummary(root string, m manifest, path, out string) error {
+func promoteSummary(root string, m manifest, path, out string) (candidateEvidence, error) {
 	var summary liveSummary
 	data, err := os.ReadFile(repoPath(root, path))
 	if err != nil {
-		return err
+		return candidateEvidence{}, err
 	}
 	if err := json.Unmarshal(data, &summary); err != nil {
-		return err
+		return candidateEvidence{}, err
 	}
 	source, ok := sourceByID(m, summary.ID)
 	if !ok {
-		return fmt.Errorf("summary %s is not a promotion source", summary.ID)
+		return candidateEvidence{}, fmt.Errorf("summary %s is not a promotion source", summary.ID)
 	}
 	if err := verifySummaryFresh(summary, promotionNow()); err != nil {
-		return err
+		return candidateEvidence{}, err
 	}
-	return writeJSON(repoPath(root, out), buildCandidateEvidence(source, summary))
+	candidates := buildCandidateEvidence(source, summary)
+	if err := writeJSON(repoPath(root, out), candidates); err != nil {
+		return candidateEvidence{}, err
+	}
+	return candidates, nil
 }
 
 func sourceByID(m manifest, id string) (promotionSource, bool) {

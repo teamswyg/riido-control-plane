@@ -342,7 +342,7 @@
     {
       "id": "closed_loop_candidate_promotion_edge_loop",
       "observation": "Closed-loop candidate artifacts required an evidence_graph_edge follow-up, but the candidate record did not name the concrete harness-to-closed-loop edge it was created from.",
-      "hypothesis": "Embedding promotion_edge in candidates, exposing promotion_edges in harness promotion evidence plus intake and decision evidence, and binding the claim to harness-failure observation plus verifier and CI coverage lets agents follow the failure-to-closed-loop path without reading narrative docs.",
+      "hypothesis": "Embedding promotion_edge in candidates, exposing promotion_edges and promotion_result in harness promotion evidence plus intake and decision evidence, and binding the claim to harness-failure observation plus verifier and CI coverage lets agents follow the failure-to-closed-loop path without reading narrative docs or opening the candidate artifact first.",
       "claims": ["closed_loop_candidates_must_carry_promotion_edge"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
@@ -353,11 +353,16 @@
         {"kind": "workflow", "path": ".github/workflows/closed-loop-candidate-decision.yml"},
         {"kind": "tool", "path": "tools/harnesspromotion"},
         {"kind": "tool", "path": "tools/harnesspromotion/evidence_edges.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/evidence_promotion_result.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/promote.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/run.go"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake/candidate_more.go"},
         {"kind": "tool", "path": "tools/controlplanepressure/candidate_artifact_item.go"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
         {"kind": "test", "path": "tools/harnesspromotion/evidence_edges_test.go"},
+        {"kind": "test", "path": "tools/harnesspromotion/evidence_promotion_result_test.go"},
+        {"kind": "test", "path": "tools/harnesspromotion/performance_fixture_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/producer_coverage_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/source_selection_test.go"},
         {"kind": "test", "path": "tools/controlplanepressure/candidate_artifact_test.go"},
@@ -365,6 +370,8 @@
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/harnesspromotion/evidence_edges_test.go"},
+        {"kind": "test", "path": "tools/harnesspromotion/evidence_promotion_result_test.go"},
+        {"kind": "test", "path": "tools/harnesspromotion/performance_fixture_test.go"},
         {"kind": "test", "path": "tools/harnesspromotion/candidate_edge_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/candidate_edge_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/candidate_edge_test.go"},
@@ -379,7 +386,7 @@
         {"kind": "artifact", "path": "closed-loop-candidate-intake-evidence", "redacted": true},
         {"kind": "artifact", "path": "closed-loop-candidate-decision-evidence", "redacted": true}
       ],
-      "decision": "Candidate artifacts now carry promotion_edge, harness promotion evidence carries the deduplicated promotion_edges list, intake consumes smoke/load/performance producer sources, decision verification rejects drift between the candidate edge and its source harness target, and loop closure audit regression keeps the promotion-edge claim from returning as an unbound coverage gap.",
+      "decision": "Candidate artifacts now carry promotion_edge, harness promotion evidence carries the deduplicated promotion_edges list plus promotion_result for concrete summary promotions, intake consumes smoke/load/performance producer sources, decision verification rejects drift between the candidate edge and its source harness target, and loop closure audit regression keeps the promotion-edge claim from returning as an unbound coverage gap.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

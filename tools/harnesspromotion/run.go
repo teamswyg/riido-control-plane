@@ -18,16 +18,19 @@ func run(opt options) error {
 	if err := maybeDoc(root, m.GeneratedDoc, renderDoc(m, result), opt.WriteDoc, opt.CheckDoc); err != nil {
 		return err
 	}
+	var promotion *promotionResult
 	if opt.Summary != "" {
 		if opt.CandidateOut == "" {
 			return fmt.Errorf("candidate-out is required with summary")
 		}
-		if err := promoteSummary(root, m, opt.Summary, opt.CandidateOut); err != nil {
+		candidates, err := promoteSummary(root, m, opt.Summary, opt.CandidateOut)
+		if err != nil {
 			return err
 		}
+		promotion = newPromotionResult(opt.CandidateOut, candidates)
 	}
 	if opt.EvidenceOut != "" {
-		return writeJSON(opt.EvidenceOut, newEvidence(m, result))
+		return writeJSON(opt.EvidenceOut, newEvidence(m, result, promotion))
 	}
 	return nil
 }

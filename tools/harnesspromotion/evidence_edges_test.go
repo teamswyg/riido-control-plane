@@ -8,7 +8,7 @@ func TestHarnessPromotionEvidenceExposesPromotionEdges(t *testing.T) {
 		{HarnessLoop: "provider_acceptance_harness", PromotionTarget: "closed_loop_candidate"},
 		{HarnessLoop: "ai_agent_load_harness", PromotionTarget: "closed_loop_candidate"},
 	}}
-	got := newEvidence(m, verifyResult{})
+	got := newEvidence(m, verifyResult{}, nil)
 	if got.PromotionEdgeCount != 2 || len(got.PromotionEdges) != 2 {
 		t.Fatalf("promotion edges = %+v", got.PromotionEdges)
 	}

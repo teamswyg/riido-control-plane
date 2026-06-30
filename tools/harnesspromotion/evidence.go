@@ -14,11 +14,12 @@ type evidence struct {
 	LoopRegistryManifest string            `json:"loop_registry_manifest"`
 	PromotionEdgeCount   int               `json:"promotion_edge_count"`
 	PromotionEdges       []graphEdge       `json:"promotion_edges"`
+	PromotionResult      *promotionResult  `json:"promotion_result,omitempty"`
 	Loop                 evidenceLoop      `json:"loop"`
 	Sources              []promotionSource `json:"sources"`
 }
 
-func newEvidence(m manifest, result verifyResult) evidence {
+func newEvidence(m manifest, result verifyResult, promotion *promotionResult) evidence {
 	generatedAt, expiresAt := evidenceWindow(harnessPromotionEvidenceTTLHours)
 	edges := promotionEdgesForSources(m.Sources)
 	return evidence{
@@ -35,6 +36,7 @@ func newEvidence(m manifest, result verifyResult) evidence {
 		LoopRegistryManifest: m.LoopRegistryManifest,
 		PromotionEdgeCount:   len(edges),
 		PromotionEdges:       edges,
+		PromotionResult:      promotion,
 		Loop:                 m.Loop,
 		Sources:              m.Sources,
 	}

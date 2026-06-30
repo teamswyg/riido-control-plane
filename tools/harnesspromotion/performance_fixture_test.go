@@ -13,10 +13,14 @@ func TestPerformanceFixturePromotesExpectedCandidates(t *testing.T) {
 		t.Fatal(err)
 	}
 	out := t.TempDir() + "/performance-candidates.json"
-	err = promoteSummary(root, loadPromotionManifestForTest(t),
+	promotion, err := promoteSummary(root, loadPromotionManifestForTest(t),
 		"docs/30-architecture/fixtures/performance-failure-summary.fixture.json", out)
 	if err != nil {
 		t.Fatalf("promote performance fixture: %v", err)
+	}
+	result := newPromotionResult(out, promotion)
+	if result.CandidateCount != 2 || len(result.CandidateIDs) != 2 {
+		t.Fatalf("promotion result = %+v", result)
 	}
 	got := loadCandidateEvidenceForTest(t, out)
 	want := map[string]bool{

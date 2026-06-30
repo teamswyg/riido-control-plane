@@ -21,7 +21,7 @@ func TestHarnessPromotionRejectsExpiredSummary(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	err := promoteSummary(root, m, summaryPath, outPath)
+	_, err := promoteSummary(root, m, summaryPath, outPath)
 	if err == nil || !strings.Contains(err.Error(), "expired") {
 		t.Fatalf("expected expired summary failure, got %v", err)
 	}
