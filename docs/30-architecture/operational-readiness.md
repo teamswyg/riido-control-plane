@@ -15,13 +15,31 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 - required categories: `7`
 - missing categories: `0`
 
+## Notion Open Loop Backfill
+
+- source: [[v1.24] AI Agent QA](https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165)
+- captured at: `2026-06-30T09:29:21Z`
+- cadence hours: `24`
+- cycles: `6`
+- p0 cycles: `6`
+- partial cycles: `6`
+
+| Cycle | Status | Codex | Backfilled Check | Next |
+| --- | --- | --- | --- | --- |
+| `notion_p0_waiting_for_user_spinner` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
+| `notion_p0_queued_by_busy_agent` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
+| `notion_p0_terminal_stop_refresh` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
+| `notion_p0_author_fallback` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
+| `notion_p0_instruction_intent_dialogue` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
+| `notion_p0_gatekeeper_staging_dmg` | `partial` | `[codex][진행중]` | `staging_client_p0_visual_retest` | `staging_desktop_notarized_install_screenshot` |
+
 ## Release Prep Checks
 
 | Date | Category | Status | Check | Measurements | Evidence | Next |
 | --- | --- | --- | --- | --- | --- | --- |
 | `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `3` | `5` | `infra_cloudwatch_alarm_by_client_surface` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
-| `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `5` | `7` | `staging_client_p0_visual_screenshot_evidence` |
+| `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `5` | `8` | `staging_client_p0_visual_screenshot_evidence` |
 | `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `1` | `2` | `agent_rename_snapshot_regression_evidence` |
 | `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `1` | `2` | `daemon_network_disconnect_release_evidence` |
 | `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `2` | `4` | `capacity_result_annotation` |

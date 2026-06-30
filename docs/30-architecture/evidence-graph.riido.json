@@ -7285,6 +7285,92 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "notion_qa_operational_evidence_backfill_loop",
+      "observation": "Notion QA comments contained P0 operating evidence for waiting_for_user, queued_by_busy_agent, terminal stop refresh, author fallback, instruction intent, and staging DMG install issues, but a comment-only record can be missed by agents, cannot expire, and cannot produce closed-loop candidates.",
+      "hypothesis": "Backfilling Notion QA comments into the operational readiness SSOT as P0 cycles, then emitting cycle counts, partial status, codex status tags, next artifacts, and 24h cadence evidence lets daily readiness runs keep product QA partials visible without editing client or endpoint contracts.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/operational-readiness.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/types_notion.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/notion_evidence.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/verify_notion.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/verify_notion_cycle.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/render_notion.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_open_loop_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_open_loop_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/operational-readiness.yml"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/operational-readiness.md"
+        }
+      ],
+      "decision": "Notion QA P0 feedback is now represented as executable operational readiness cycles instead of comment-only memory: the manifest binds the page, codex status tags, six P0 cycles, backfilled readiness check, next artifact, next command, and evidence refs; the verifier rejects missing Notion loops, unbound cycles, missing next work, or cadence drift; readiness evidence emits Notion cycle counts and partial status; and Loop Registry claim evidence exposes the same Notion observe/verify/fail surface for changed-path routing.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "container_image_contract_runtime_shape_loop",
       "observation": "The container image contract manifest and verifier were executable, but they were not bound into the loop registry or evidence graph, so changes under tools/containercontract could bypass target verifier routing and force agents to infer runtime image ownership from scattered files.",
       "hypothesis": "Binding the container image contract, Dockerfile, verifier helpers, module-decomposition ratchet, and integration matrix evidence into one claim lets changed-path QA route container runtime shape edits to the exact verifier commands without asking agents to read prose.",
