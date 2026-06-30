@@ -24,6 +24,10 @@ func verifyGraphSummaryCheckKind(_ string, c check, idx indexes) error {
 	return verifyGraphSummaryCheck(c, idx)
 }
 
+func verifyHarnessSummaryCheckKind(_ string, c check, idx indexes) error {
+	return verifyHarnessSummaryCheck(c, idx)
+}
+
 func verifyPreCommitHookCheckKind(_ string, c check, idx indexes) error {
 	return verifyPreCommitHookCheck(c, idx)
 }

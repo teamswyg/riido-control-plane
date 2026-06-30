@@ -1904,8 +1904,8 @@
     },
     {
       "id": "loop_closure_audit_loop",
-      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed raw proof checks but not verified proof status, proof counts, proof keys, claim-bound files, verifiers, generated docs, semantic hashes, loop surfaces, compiled evidence graph summary surfaces, proof surface coverage, proof surface gap counts, residual gaps, claim coverage token gaps, candidate artifact routing, candidate counts, or the executable-loop-manifest contract as closed-loop artifacts or hard verifier requirements instead of narrative memory.",
-      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks with verified proof rows, proof surfaces, compiled evidence graph summary surfaces, and zero-gap proof surface coverage that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, graph summary, claim coverage token, candidate-summary surface, or Loop Registry observes/verifies/evidence/expires/fails/refresh-plan surface drifts, publish residual or claim coverage candidates only while gaps exist, and keep synthetic candidate fixtures so the candidate export path remains verified even when the live manifest is fully covered.",
+      "observation": "The human-exit objective was distributed across loop registry, evidence graph, harness promotion, pre-commit, refresh dispatch, and performance evidence, while audit evidence exposed raw proof checks but not verified proof status, proof counts, proof keys, claim-bound files, verifiers, generated docs, semantic hashes, loop surfaces, compiled evidence graph summary surfaces, harness candidate artifact surfaces, proof surface coverage, proof surface gap counts, residual gaps, claim coverage token gaps, candidate artifact routing, candidate counts, or the executable-loop-manifest contract as closed-loop artifacts or hard verifier requirements instead of narrative memory.",
+      "hypothesis": "A loop closure audit can compile those scattered requirements into executable checks with verified proof rows, proof surfaces, compiled evidence graph summary surfaces, harness candidate artifact surfaces, and zero-gap proof surface coverage that fail when a loop, claim, workflow, hook, provider coverage, promotion edge, reasoning chain, graph summary, harness candidate artifact, claim coverage token, candidate-summary surface, or Loop Registry observes/verifies/evidence/expires/fails/refresh-plan surface drifts, publish residual or claim coverage candidates only while gaps exist, and keep synthetic candidate fixtures so the candidate export path remains verified even when the live manifest is fully covered.",
       "claims": ["loop_closure_audit_must_prove_human_exit_requirements"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-closure-audit.riido.json"},
@@ -1930,6 +1930,8 @@
         {"kind": "tool", "path": "tools/loopclosureaudit/graph_summary_count.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/graph_summary_next_loop.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/graph_types.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/harness_summary.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/harness_summary_more.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/render_requirement.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/evidence_candidate_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/evidence_check.go"},
@@ -1938,6 +1940,7 @@
         {"kind": "test", "path": "tools/loopclosureaudit/proof_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/proof_surface_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/graph_summary_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/harness_summary_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/proof_surface_coverage_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/assertions_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_export.go"},
@@ -1968,6 +1971,7 @@
         {"kind": "test", "path": "tools/loopclosureaudit/check_kind_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/proof_surface_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/graph_summary_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/harness_summary_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/proof_surface_coverage_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit"},
         {"kind": "workflow", "path": ".github/workflows/loop-closure-audit.yml"}
@@ -1977,7 +1981,7 @@
         {"kind": "artifact", "path": "loop-closure-audit-closed-loop-candidates", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/loop-closure-audit.md"}
       ],
-      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit evidence names each requirement's verified proof status, proof count, proof keys, claim-bound files, verifiers, generated docs, semantic hashes, loop surfaces, compiled evidence graph summary surfaces, proof surface coverage, proof surface gap count, candidate artifact, promotion target, and candidate count; proof check kind behavior is centralized in a static registry so proof key generation, proof surface extraction, and verification handlers co-change from one semantic table instead of separate switches; the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, and the audit directly requires Loop Registry SSOT to expose executable observation, verification, evidence, expiry, failure, refresh, evidence-plan, and graph-summary surfaces; claim coverage repairs remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, claim-bound workflow trigger, claim-impact changed-files, expired candidate consumer, expired harness evidence freshness, candidate evidence expiry, candidate adoption-plan, candidate promotion-edge, or semantic-hash metadata coverage gaps in the backlog.",
+      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit evidence names each requirement's verified proof status, proof count, proof keys, claim-bound files, verifiers, generated docs, semantic hashes, loop surfaces, compiled evidence graph summary surfaces, harness candidate artifact surfaces, proof surface coverage, proof surface gap count, candidate artifact, promotion target, and candidate count; proof check kind behavior is centralized in a static registry so proof key generation, proof surface extraction, and verification handlers co-change from one semantic table instead of separate switches; the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, and the audit directly requires Loop Registry SSOT to expose executable observation, verification, evidence, expiry, failure, refresh, evidence-plan, graph-summary, and harness-summary surfaces; claim coverage repairs remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, claim-bound workflow trigger, claim-impact changed-files, expired candidate consumer, expired harness evidence freshness, candidate evidence expiry, candidate adoption-plan, candidate promotion-edge, or semantic-hash metadata coverage gaps in the backlog.",
       "next_loop": "closed_loop_candidate"
     },
     {

@@ -8,6 +8,7 @@ type indexes struct {
 	hooks           map[string]preCommitHook
 	graphSummary    graphChainSummary
 	nextLoopSummary []graphNextLoopSummary
+	harnessLoops    []registryLoop
 }
 
 func newIndexes(deps dependencies) indexes {
@@ -22,6 +23,9 @@ func newIndexes(deps dependencies) indexes {
 	}
 	for _, loop := range deps.registry.Loops {
 		idx.loops[loop.ID] = loop
+		if loop.Kind == "harness" {
+			idx.harnessLoops = append(idx.harnessLoops, loop)
+		}
 	}
 	for _, claim := range deps.registry.Claims {
 		idx.claims[claim.ID] = claim
