@@ -7285,6 +7285,103 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "public_qa_status_operational_surface_loop",
+      "observation": "Operational QA evidence existed as redacted workflow artifacts and generated docs, but operators still had to inspect the readiness detail to know whether P0 QA, stale partials, and closed-loop candidates made the release status degraded.",
+      "hypothesis": "Emitting a public aggregate QA status from operational readiness evidence, then binding it to redaction tests and Loop Registry claims, gives GitHub-Status-like visibility without publishing raw logs, endpoint details, AWS identifiers, device credentials, or JWT fragments.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate",
+        "loop_registry_evidence_must_expose_loop_surfaces",
+        "loop_registry_evidence_must_expose_architecture_index",
+        "loop_registry_impact_must_expose_target_verifier_plan",
+        "loop_coverage_dimensions_must_use_static_registry",
+        "loop_evidence_kinds_must_use_vocabulary"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/operational-readiness.md"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/public_status.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/types_public_status.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/render_public_status.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/evidence.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/public_status_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/public_status_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/operational-readiness.yml"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-closed-loop-candidates",
+          "redacted": true
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/operational-readiness.md"
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Public QA status is now generated from the operational readiness SSOT as aggregate counts only: degraded when P0 QA partials or stale partials exist, redacted for endpoints, and explicitly marked as containing no raw logs or secrets. The Loop Registry semantic hashes move with this common registry surface so claim-bound agents can see that the registry change is a redacted operational-status publication rather than a silent contract or vocabulary drift.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "notion_qa_operational_evidence_backfill_loop",
       "observation": "Notion QA comments contained P0 operating evidence for waiting_for_user, queued_by_busy_agent, terminal stop refresh, author fallback, instruction intent, and staging DMG install issues, but a comment-only record can be missed by agents, cannot expire, and cannot produce closed-loop candidates.",
       "hypothesis": "Backfilling Notion QA comments into the operational readiness SSOT as P0 cycles, then emitting cycle counts, partial status, codex status tags, next artifacts, and 24h cadence evidence lets daily readiness runs keep product QA partials visible without editing client or endpoint contracts.",
