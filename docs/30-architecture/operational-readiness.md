@@ -45,6 +45,24 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `all_servers_down_daemon_behavior` | `chaos` | `4` | `true` | `daemon_reconnect_storm_evidence` | `go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
 | `desktop_body_only_change` | `desktop` | `3` | `true` | `desktop_body_only_golden_evidence` | `gh issue create --repo teamswyg/riido-daemon --title "Produce desktop body-only golden evidence" --body "Produce desktop_body_only_golden_evidence by running localproductacceptance with a real staging task fixture and publish the evidence artifact."` |
 
+## Partial Promotion
+
+- candidate artifact: `operational-readiness-closed-loop-candidates`
+- candidate count: `8`
+- stale partial count: `8`
+- stale after days: `2`
+
+| Candidate | Stale Partial |
+| --- | --- |
+| `operational-readiness:otel_xray_client_surface` | `otel_xray_client_surface` |
+| `operational-readiness:daemon_network_disconnect_waiting` | `daemon_network_disconnect_waiting` |
+| `operational-readiness:single_pc_agent_limit` | `single_pc_agent_limit` |
+| `operational-readiness:boot_burst_capacity` | `boot_burst_capacity` |
+| `operational-readiness:server_crash_recovery` | `server_crash_recovery` |
+| `operational-readiness:scale_out_recovery` | `scale_out_recovery` |
+| `operational-readiness:all_servers_down_daemon_behavior` | `all_servers_down_daemon_behavior` |
+| `operational-readiness:desktop_body_only_change` | `desktop_body_only_change` |
+
 ## Loop
 
 - Observe: Release-prep work was split across monitoring, usability, exception, stress, chaos, scenario, and desktop checks, so readiness could be overestimated from whichever loop was green.
