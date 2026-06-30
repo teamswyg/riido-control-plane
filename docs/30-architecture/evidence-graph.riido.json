@@ -1975,18 +1975,24 @@
     },
     {
       "id": "evidence_graph_full_chain_evidence_loop",
-      "observation": "The evidence graph manifest carried observation, hypothesis, changes, verifiers, evidence, decision, and next_loop, but the generated evidence artifact exposed only chain id and next_loop, and the loop-registry claim did not expose machine-readable observe/verify/fail coverage for that full-chain evidence requirement.",
-      "hypothesis": "Publishing the same executable chain surface in the evidence artifact and binding the claim coverage tokens lets agents and CI infer reasoning scope from evidence JSON without opening narrative readers.",
+      "observation": "The evidence graph manifest carried observation, hypothesis, changes, verifiers, evidence, decision, and next_loop, but agents still had to scan every chain to infer graph completeness and next-loop routing distribution.",
+      "hypothesis": "Publishing executable chain surfaces plus compiled chain and next-loop summaries lets agents and CI infer reasoning scope and routing pressure from evidence JSON without opening narrative readers or recomputing graph-wide counts.",
       "claims": ["evidence_graph_evidence_must_expose_full_chain"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "generated_doc", "path": "docs/30-architecture/evidence-graph.md"},
+        {"kind": "tool", "path": "tools/evidencegraph/chain_summary.go"},
         {"kind": "tool", "path": "tools/evidencegraph/evidence.go"},
         {"kind": "tool", "path": "tools/evidencegraph/evidence_chain.go"},
+        {"kind": "tool", "path": "tools/evidencegraph/next_loop_summary.go"},
+        {"kind": "tool", "path": "tools/evidencegraph/render_chain_summary.go"},
+        {"kind": "test", "path": "tools/evidencegraph/chain_summary_test.go"},
         {"kind": "test", "path": "tools/evidencegraph/evidence_chain_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/evidencegraph/chain_summary_test.go"},
         {"kind": "test", "path": "tools/evidencegraph/evidence_chain_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
         {"kind": "tool", "path": "tools/evidencegraph"},
@@ -1996,7 +2002,7 @@
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Evidence graph evidence carries full chain surfaces, and loopclosureaudit now keeps that requirement claim-bound through explicit observe/verify/fail coverage tokens.",
+      "decision": "Evidence graph evidence carries full chain surfaces plus compiled chain and next-loop summaries, and loopclosureaudit keeps that requirement claim-bound through explicit observe/verify/fail coverage tokens.",
       "next_loop": "closed_loop_candidate"
     },
     {
