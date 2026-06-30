@@ -2,6 +2,7 @@ package main
 
 func newStalePartialCandidate(
 	source producerSource,
+	summaryArtifact string,
 	partial partialCheck,
 	generatedAt string,
 	expiresAt string,
@@ -9,7 +10,7 @@ func newStalePartialCandidate(
 ) closedLoopCandidate {
 	return closedLoopCandidate{
 		ID:                    source.ID + ":" + partial.ID,
-		SourceRef:             readinessSourceRef(source, generatedAt, expiresAt, run),
+		SourceRef:             readinessSourceRef(source, summaryArtifact, generatedAt, expiresAt, run),
 		Subject:               partialSubject(partial),
 		HarnessLoop:           source.HarnessLoop,
 		PromotionTarget:       source.PromotionTarget,

@@ -18,6 +18,7 @@ func readinessCandidateSource(m manifest) producerSource {
 
 func readinessSourceRef(
 	source producerSource,
+	summaryArtifact string,
 	generatedAt string,
 	expiresAt string,
 	run runRecord,
@@ -25,7 +26,7 @@ func readinessSourceRef(
 	return candidateSourceRef{
 		HarnessLoop:       source.HarnessLoop,
 		SourceWorkflow:    source.SourceWorkflow,
-		SummaryArtifact:   "operational-readiness-evidence",
+		SummaryArtifact:   summaryArtifact,
 		CandidateArtifact: source.CandidateArtifact,
 		LiveStatus:        "stale_partial",
 		SourceGeneratedAt: generatedAt,

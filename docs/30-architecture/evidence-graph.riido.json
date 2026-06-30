@@ -2158,10 +2158,12 @@
         {"kind": "tool", "path": "tools/operationalreadiness/candidate_source.go"},
         {"kind": "tool", "path": "tools/operationalreadiness/candidate_adoption.go"},
         {"kind": "tool", "path": "tools/operationalreadiness/verify_sources.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/candidate_freshness_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_partial_adoption_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_test.go"}
       ],
       "verifiers": [
+        {"kind": "test", "path": "tools/operationalreadiness/candidate_freshness_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/candidate_partial_adoption_test.go"},
         {"kind": "tool", "path": "tools/operationalreadiness"},
@@ -2173,7 +2175,7 @@
         {"kind": "artifact", "path": "operational-readiness-evidence", "redacted": true},
         {"kind": "artifact", "path": "operational-readiness-closed-loop-candidates", "redacted": true}
       ],
-      "decision": "Operational readiness stale partials now become redacted closed-loop candidate artifacts with source refs, promotion edges, freshness windows, and adoption plans whose first step is the stale check's next artifact and command, while fresh partials remain visible but are not automatically promoted.",
+      "decision": "Operational readiness stale partials now become redacted closed-loop candidate artifacts with source refs bound to the manifest evidence artifact, promotion edges, freshness windows, and adoption plans whose first step is the stale check's next artifact and command, while fresh partials remain visible but are not automatically promoted.",
       "next_loop": "closed_loop_candidate"
     },
     {

@@ -1,17 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"os"
 	"testing"
 	"time"
 )
 
 func TestOperationalReadinessCandidatesUseOnlyStalePartials(t *testing.T) {
 	m := manifest{
-		SchemaVersion: manifestSchema,
-		Workflow:      ".github/workflows/operational-readiness.yml",
-		Sources:       []producerSource{testCandidateSource()},
+		SchemaVersion:    manifestSchema,
+		Workflow:         ".github/workflows/operational-readiness.yml",
+		EvidenceArtifact: "custom-readiness-evidence",
+		Sources:          []producerSource{testCandidateSource()},
 		Checks: []readinessCheck{
 			{
 				ID:           "old",
@@ -37,30 +36,10 @@ func TestOperationalReadinessCandidatesUseOnlyStalePartials(t *testing.T) {
 		t.Fatalf("candidate evidence = %+v", got)
 	}
 	item := got.Candidates[0]
-	if item.SourceRef.CandidateArtifact != readinessCandidateArtifact ||
+	if item.SourceRef.SummaryArtifact != m.EvidenceArtifact ||
+		item.SourceRef.CandidateArtifact != readinessCandidateArtifact ||
 		item.PromotionEdge.To != readinessPromotionTarget ||
 		len(item.AdoptionPlan) != len(candidateRequiredArtifacts())+1 {
 		t.Fatalf("candidate item = %+v", item)
-	}
-}
-
-func TestOperationalReadinessCandidateArtifactIsFresh(t *testing.T) {
-	dir := t.TempDir()
-	out := dir + "/candidates.json"
-	t.Setenv(readinessNowEnv, "2026-06-29T12:00:00Z")
-	err := run(options{Repo: "../..", Manifest: defaultManifest, CandidateOut: out})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var got candidateEvidence
-	data, err := os.ReadFile(out)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(data, &got); err != nil {
-		t.Fatal(err)
-	}
-	if got.CandidateCount == 0 || got.SourceExpiresAt == "" {
-		t.Fatalf("candidate artifact = %+v", got)
 	}
 }

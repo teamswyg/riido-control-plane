@@ -23,9 +23,10 @@ func TestOperationalReadinessCandidateAdoptsPartialNextWorkFirst(t *testing.T) {
 
 func candidateManifestWithPartial(id, artifact, command, date string) manifest {
 	return manifest{
-		SchemaVersion: manifestSchema,
-		Workflow:      ".github/workflows/operational-readiness.yml",
-		Sources:       []producerSource{testCandidateSource()},
+		SchemaVersion:    manifestSchema,
+		Workflow:         ".github/workflows/operational-readiness.yml",
+		EvidenceArtifact: "operational-readiness-evidence",
+		Sources:          []producerSource{testCandidateSource()},
 		Checks: []readinessCheck{{
 			ID:           id,
 			Date:         date,

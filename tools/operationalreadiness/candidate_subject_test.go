@@ -29,9 +29,10 @@ func TestOperationalReadinessCandidatesCarryPartialSubject(t *testing.T) {
 
 func candidateSubjectManifest() manifest {
 	return manifest{
-		SchemaVersion: manifestSchema,
-		Workflow:      ".github/workflows/operational-readiness.yml",
-		Sources:       []producerSource{testCandidateSource()},
+		SchemaVersion:    manifestSchema,
+		Workflow:         ".github/workflows/operational-readiness.yml",
+		EvidenceArtifact: "operational-readiness-evidence",
+		Sources:          []producerSource{testCandidateSource()},
 		Checks: []readinessCheck{{
 			ID:           "old",
 			Date:         "2026-06-26",
