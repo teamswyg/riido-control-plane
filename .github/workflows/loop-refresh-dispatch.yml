@@ -42,29 +42,37 @@ jobs:
       - name: Verify dispatcher and sample evidence
         run: |
           mkdir -p out
+          mkdir -p out/sample
           go test ./tools/looprefreshdispatch -count=1
           cp docs/30-architecture/fixtures/loop-refresh-commands.fixture.json \
-            out/sample-loop-refresh-commands.json
+            out/sample/sample-loop-refresh-commands.json
           RIIDO_HARNESS_PROMOTION_NOW=2026-06-24T12:00:00Z \
             go run ./tools/harnesspromotion \
             -summary docs/30-architecture/fixtures/harness-failure-summary.fixture.json \
-            -candidate-out out/sample-closed-loop-candidates.json
+            -candidate-out out/sample/sample-closed-loop-candidates.json
           RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
             go run ./tools/closedloopcandidatedecision \
-            -candidate-in out/sample-closed-loop-candidates.json \
-            -commands-out out/sample-decision-refresh-commands.json
+            -candidate-in out/sample/sample-closed-loop-candidates.json \
+            -commands-out out/sample/sample-decision-refresh-commands.json
           RIIDO_EVIDENCE_NOW=2026-06-25T00:00:00Z \
             go run ./tools/looprefreshdispatch \
-            -commands-in out/sample-loop-refresh-commands.json \
-            -commands-in out/sample-decision-refresh-commands.json \
-            -evidence-out out/loop-refresh-dispatch-plan.json \
-            -candidate-out out/loop-refresh-dispatch-closed-loop-candidates.json
+            -commands-in out/sample/sample-loop-refresh-commands.json \
+            -commands-in out/sample/sample-decision-refresh-commands.json \
+            -evidence-out out/sample/loop-refresh-dispatch-plan.json \
+            -candidate-out out/sample/loop-refresh-dispatch-closed-loop-candidates.json
+      - name: Use sample evidence for pull requests
+        if: github.event_name == 'pull_request'
+        run: |
+          cp out/sample/loop-refresh-dispatch-plan.json out/loop-refresh-dispatch-plan.json
+          cp out/sample/loop-refresh-dispatch-closed-loop-candidates.json out/loop-refresh-dispatch-closed-loop-candidates.json
       - name: Download live loop refresh commands
         if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          rm -f out/loop-refresh-dispatch-plan.json
+          rm -f out/loop-refresh-dispatch-closed-loop-candidates.json
           mkdir -p out/live-loop-refresh
           download_commands() {
             local workflow="$1"

@@ -39,3 +39,20 @@ func TestVariableEvidenceOutBindsConcreteUploadPath(t *testing.T) {
 		t.Fatalf("missing = %#v", missing)
 	}
 }
+
+func TestSampleEvidenceOutBindsThroughCopiedStrictArtifactPath(t *testing.T) {
+	text := "" +
+		"  - run: |\n" +
+		"      go run ./tools/example -evidence-out out/sample/example.json\n" +
+		"  - run: |\n" +
+		"      cp out/sample/example.json out/example.json\n" +
+		"  - uses: actions/upload-artifact@v7\n" +
+		"    with:\n" +
+		"      name: example\n" +
+		"      path: out/example.json\n" +
+		"      if-no-files-found: error\n"
+	paths := evidenceUploadCoveragePaths(text, artifactUploadPathValues(text))
+	if missing := missingEvidenceUploads(evidenceOutPaths(text), paths); len(missing) != 0 {
+		t.Fatalf("missing = %#v", missing)
+	}
+}

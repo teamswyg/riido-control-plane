@@ -44,14 +44,15 @@ func scanWorkflow(root, path string, accepted map[string]acceptedGap, used map[s
 	uploadModes := artifactUploadModes(text)
 	evidenceOut := evidenceOutPaths(text)
 	uploadPaths := artifactUploadPathValues(text)
+	coveragePaths := evidenceUploadCoveragePaths(text, uploadPaths)
 	deprecatedActions := deprecatedWorkflowActions(text)
 	record := workflowRecord{
 		Path:                  rel,
 		HasExecutable:         hasExecutableStep(text),
 		HasEvidenceOut:        len(evidenceOut) > 0,
 		EvidenceOutCount:      len(evidenceOut),
-		UploadedEvidenceOut:   countUploadedEvidenceOut(evidenceOut, uploadPaths),
-		MissingEvidenceOut:    missingEvidenceUploads(evidenceOut, uploadPaths),
+		UploadedEvidenceOut:   countUploadedEvidenceOut(evidenceOut, coveragePaths),
+		MissingEvidenceOut:    missingEvidenceUploads(evidenceOut, coveragePaths),
 		UploadsArtifact:       len(uploadModes) > 0,
 		ArtifactUploadCount:   len(uploadModes),
 		StrictUploadCount:     countUploadMode(uploadModes, "error"),
