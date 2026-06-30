@@ -92,6 +92,56 @@
       "next_command": "go test ./internal/riidoaiserver -run 'Test.*Visible.*Message' -count=1"
     },
     {
+      "id": "staging_client_p0_visual_retest",
+      "date": "2026-06-30",
+      "category": "usability",
+      "status": "partial",
+      "title": "Staging client visual QA must confirm server-side P0 fixes on screen",
+      "measurements": [
+        {
+          "id": "notion_p0_feedback_status_comments",
+          "kind": "manual",
+          "signal": "Notion QA feedback threads carry codex status comments and retest requests for queued/running, terminal stop refresh, waiting_for_user, and author fallback fixes.",
+          "evidence_ref": "notion:v1.24-ai-agent-qa"
+        },
+        {
+          "id": "server_contract_regression_tests",
+          "kind": "test",
+          "signal": "Control-plane tests cover queued status suppression, terminal active-stream closure, and user-message author preservation before client visual retest.",
+          "evidence_ref": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"
+        },
+        {
+          "id": "github_p0_visual_qa_tracking_issue",
+          "kind": "artifact",
+          "signal": "GitHub issue #711 tracks the required staging screenshots and v2/v3 network snapshots, and explicitly gates performance-average repository recording until visual QA evidence is attached.",
+          "evidence_ref": "github:https://github.com/teamswyg/riido-control-plane/issues/711"
+        },
+        {
+          "id": "client_author_null_fallback_ui",
+          "kind": "artifact",
+          "signal": "Client QA confirmed author_principal_id null should render the existing RIID-4508 fallback UI instead of a raw '작성자 미상' label; Codex-owned QA can miss this because fresh comments usually carry an author.",
+          "evidence_ref": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"
+        },
+        {
+          "id": "github_visual_screenshot_gate_comment",
+          "kind": "artifact",
+          "signal": "GitHub issue #711 records that staging_client_p0_visual_retest cannot become covered from server tests or comments alone and requires screenshot measurement evidence.",
+          "evidence_ref": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"
+        }
+      ],
+      "evidence_refs": [
+        {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
+        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"},
+        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"},
+        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_author_test.go"}
+      ],
+      "next_artifact": "staging_client_p0_visual_screenshot_evidence",
+      "next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments"
+    },
+    {
       "id": "agent_rename_snapshot_policy",
       "date": "2026-06-26",
       "category": "usability",

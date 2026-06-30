@@ -18,7 +18,9 @@ type evidence struct {
 	LocalPressureCommand           string                          `json:"local_pressure_command"`
 	PressureCandidateArtifact      string                          `json:"pressure_candidate_artifact"`
 	ArchitectureQueryArtifact      string                          `json:"architecture_query_artifact"`
+	BenchmarkHistory               string                          `json:"benchmark_history"`
 	ManualPressureCommand          string                          `json:"manual_pressure_command"`
+	BenchmarkHistoryCommand        string                          `json:"benchmark_history_command"`
 	LocalPprofCommand              string                          `json:"local_pprof_command"`
 	ArchitectureQueryCommand       string                          `json:"architecture_query_command"`
 	RaceCommand                    string                          `json:"race_command"`

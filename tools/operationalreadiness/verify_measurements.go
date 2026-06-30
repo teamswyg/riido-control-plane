@@ -24,7 +24,7 @@ func verifyMeasurements(checkID string, measurements []measurement) error {
 
 func allowedMeasurementKind(kind string) bool {
 	switch kind {
-	case "artifact", "infra", "manual", "metric", "profile", "test", "trace", "workflow":
+	case "artifact", "infra", "manual", "metric", "profile", "screenshot", "test", "trace", "workflow":
 		return true
 	default:
 		return false

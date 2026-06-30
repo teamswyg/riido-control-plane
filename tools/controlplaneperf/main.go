@@ -20,6 +20,8 @@ func mainRun(args []string) error {
 	fs.StringVar(&opt.Manifest, "manifest", defaultManifest, "performance manifest")
 	fs.StringVar(&opt.EvidenceOut, "evidence-out", "", "optional evidence JSON output")
 	fs.StringVar(&opt.ArchitectureQueryOut, "architecture-query-out", "", "optional architecture query JSON output")
+	fs.StringVar(&opt.BenchmarkIn, "benchmark-in", "", "go test benchmark output to record")
+	fs.StringVar(&opt.AppendBenchmarkLog, "append-benchmark-history", "", "append benchmark history JSONL")
 	fs.Func("architecture-query-path", "architecture file path to route", func(value string) error {
 		opt.ArchitecturePaths = append(opt.ArchitecturePaths, value)
 		return nil

@@ -18,12 +18,14 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - race artifact: `control-plane-race`
 - pressure candidate artifact: `control-plane-pressure-closed-loop-candidates`
 - architecture query artifact: `control-plane-architecture-query`
+- benchmark history: `docs/30-architecture/control-plane-performance-averages.jsonl`
 - local pressure scenarios: `9`
 - candidate artifact: `control-plane-performance-closed-loop-candidates`
 
 ## Commands
 
 - lightweight benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
+- benchmark history append: `go run ./tools/controlplaneperf -benchmark-in out/control-plane-performance-bench.txt -append-benchmark-history docs/30-architecture/control-plane-performance-averages.jsonl`
 - local pressure: `go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -candidate-out out/control-plane-pressure-closed-loop-candidates.json -evidence-out out/control-plane-local-pressure.json`
 - manual pressure: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -candidate-out out/control-plane-pressure-closed-loop-candidates-manual.json -evidence-out out/control-plane-local-pressure-manual.json`
 - local pressure pprof: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -pprof-dir out/control-plane-local-pprof -candidate-out out/control-plane-pressure-closed-loop-candidates-pprof.json -evidence-out out/control-plane-local-pressure-pprof.json`

@@ -14,8 +14,10 @@ type manifest struct {
 	CandidateArtifact         string                  `json:"candidate_artifact"`
 	PressureCandidateArtifact string                  `json:"pressure_candidate_artifact"`
 	ArchitectureQueryArtifact string                  `json:"architecture_query_artifact"`
+	BenchmarkHistory          string                  `json:"benchmark_history"`
 	EvidenceTool              string                  `json:"evidence_tool"`
 	BenchmarkCommand          string                  `json:"benchmark_command"`
+	BenchmarkHistoryCommand   string                  `json:"benchmark_history_command"`
 	LocalPressureCommand      string                  `json:"local_pressure_command"`
 	ManualPressureCommand     string                  `json:"manual_pressure_command"`
 	LocalPprofCommand         string                  `json:"local_pprof_command"`
