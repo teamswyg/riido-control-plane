@@ -46,6 +46,9 @@ func TestTargetVerifierSummaryUsesImpactPlan(t *testing.T) {
 			RunnableCommands: []string{
 				"go test ./tools/focused -count=1",
 			},
+			RoutingPacketCount:   2,
+			RoutingDirectCount:   1,
+			RoutingFallbackCount: 1,
 		},
 	}, ".git/riido-loop-registry-precommit-evidence.json")
 	for _, want := range []string{
@@ -56,6 +59,7 @@ func TestTargetVerifierSummaryUsesImpactPlan(t *testing.T) {
 		"claims: claim-a, claim-b",
 		"chains: chain-a, chain-b",
 		"runnable: go test ./tools/focused -count=1",
+		"routes: 2 packets, 1 direct, 1 fallback",
 		"focused: go test ./tools/focused -count=1",
 		"entrypoints: go test ./tools/b -count=1",
 		"go test ./tools/a -count=1",

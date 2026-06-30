@@ -17,6 +17,11 @@ func TestTargetVerifierPlanExposesPathRoutingPackets(t *testing.T) {
 	if len(routes) != 2 {
 		t.Fatalf("routing packets = %+v", routes)
 	}
+	if impact.TargetVerifierPlan.RoutingPacketCount != 2 ||
+		impact.TargetVerifierPlan.RoutingDirectCount != 1 ||
+		impact.TargetVerifierPlan.RoutingFallbackCount != 1 {
+		t.Fatalf("routing counts = %+v", impact.TargetVerifierPlan)
+	}
 	if routes[0].Path != "tools/a.go" ||
 		!routes[0].UsesEntrypointFallback ||
 		routes[0].DirectCommandCount != 0 ||

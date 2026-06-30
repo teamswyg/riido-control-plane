@@ -8,6 +8,9 @@ type targetVerifierPlan struct {
 	ComponentCount       int                       `json:"component_count"`
 	CommandCount         int                       `json:"command_count"`
 	RunnableCommandCount int                       `json:"runnable_command_count"`
+	RoutingPacketCount   int                       `json:"routing_packet_count"`
+	RoutingDirectCount   int                       `json:"routing_direct_count"`
+	RoutingFallbackCount int                       `json:"routing_fallback_count"`
 	FocusedClaimIDs      []string                  `json:"focused_claim_ids,omitempty"`
 	FocusedCommandCount  int                       `json:"focused_command_count,omitempty"`
 	FocusedCommands      []string                  `json:"focused_commands,omitempty"`
