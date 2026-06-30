@@ -20,16 +20,23 @@ func TestControlPlanePerformanceArchitectureQueryRoutesHotPath(t *testing.T) {
 		t.Fatalf("query status = %+v", got)
 	}
 	row := got.Queries[0]
+	if row.MatchKind != "exact" || got.DirectHitCount != 1 || got.FallbackHitCount != 0 {
+		t.Fatalf("query match kind = %+v", got)
+	}
 	if len(row.TargetVerifierCommands) == 0 || len(row.ObservabilitySignals) == 0 {
 		t.Fatalf("query row lacks routing evidence: %+v", row)
+	}
+	if len(row.Components) == 0 || row.Components[0].Role == "" {
+		t.Fatalf("query row lacks component summary: %+v", row)
 	}
 }
 
 func TestControlPlanePerformanceArchitectureQueryReportsMisses(t *testing.T) {
 	got := newArchitectureQuery(loadManifestForTest(t), []string{
-		"internal/riidoaiserver/not-indexed.go",
+		"cmd/not-indexed.go",
 	})
-	if got.Status != "unmatched" || got.MissCount != 1 || got.Queries[0].Matched {
+	if got.Status != "unmatched" || got.MissCount != 1 ||
+		got.Queries[0].Matched || got.Queries[0].MatchKind != "unmatched" {
 		t.Fatalf("query miss = %+v", got)
 	}
 }

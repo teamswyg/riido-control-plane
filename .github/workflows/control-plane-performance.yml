@@ -73,6 +73,7 @@ jobs:
             -check-doc \
             -evidence-out out/control-plane-performance-evidence.json \
             -architecture-query-path internal/riidoaiserver/http_transaction_metrics_observe.go \
+            -architecture-query-path internal/riidoaiserver/server.go \
             -architecture-query-out out/control-plane-architecture-query.json
       - name: Verify high-traffic audit evidence
         run: |
