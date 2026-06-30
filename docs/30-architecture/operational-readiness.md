@@ -6,6 +6,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 ## Evidence Surface
 
+- loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `12`
 - measurements: `15`
 - covered: `4`

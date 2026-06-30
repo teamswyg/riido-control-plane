@@ -5,6 +5,8 @@ type evidence struct {
 	Status             string         `json:"status"`
 	GeneratedAt        string         `json:"generated_at"`
 	ExpiresAt          string         `json:"expires_at"`
+	EvidenceTTLHours   int            `json:"evidence_ttl_hours"`
+	LoopRegistry       string         `json:"loop_registry_manifest"`
 	CheckCount         int            `json:"check_count"`
 	MeasurementCount   int            `json:"measurement_count"`
 	CoveredCount       int            `json:"covered_count"`

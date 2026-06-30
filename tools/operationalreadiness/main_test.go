@@ -19,6 +19,9 @@ func TestOperationalReadinessVerifies(t *testing.T) {
 	if got.GeneratedAt == "" || got.ExpiresAt == "" || got.GeneratedAt >= got.ExpiresAt {
 		t.Fatalf("readiness evidence freshness window missing: %+v", got)
 	}
+	if got.EvidenceTTLHours != readinessEvidenceTTLHours || got.LoopRegistry == "" {
+		t.Fatalf("readiness evidence registry binding missing: %+v", got)
+	}
 	if got.MeasurementCount < got.CheckCount {
 		t.Fatalf("measurement count should cover checks: %+v", got)
 	}

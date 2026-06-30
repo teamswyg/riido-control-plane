@@ -9,15 +9,16 @@ func renderDoc(m manifest, e evidence) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "# %s\n\n%s\n\n", m.Title, generatedNotice)
 	b.WriteString("Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riido.json).\n\n")
-	renderSummary(&b, e)
+	renderSummary(&b, m, e)
 	renderChecks(&b, m.Checks)
 	renderPartials(&b, e.PartialChecks)
 	renderLoop(&b, m.Loop)
 	return strings.TrimRight(b.String(), "\n") + "\n"
 }
 
-func renderSummary(b *strings.Builder, e evidence) {
+func renderSummary(b *strings.Builder, m manifest, e evidence) {
 	b.WriteString("## Evidence Surface\n\n")
+	fmt.Fprintf(b, "- loop registry: `%s`\n", m.LoopRegistry)
 	fmt.Fprintf(b, "- checks: `%d`\n", e.CheckCount)
 	fmt.Fprintf(b, "- measurements: `%d`\n", e.MeasurementCount)
 	fmt.Fprintf(b, "- covered: `%d`\n", e.CoveredCount)
