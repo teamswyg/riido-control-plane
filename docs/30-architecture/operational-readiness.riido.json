@@ -206,11 +206,18 @@
           "kind": "artifact",
           "signal": "The operational-readiness workflow publishes the redacted Public QA Status markdown to GitHub Actions summary and artifact outputs.",
           "evidence_ref": ".github/workflows/operational-readiness.yml"
+        },
+        {
+          "id": "public_qa_status_visual_page",
+          "kind": "artifact",
+          "signal": "The operational-readiness workflow publishes a redacted static HTML status page artifact for visual QA triage.",
+          "evidence_ref": "tools/operationalreadiness/render_public_status_html.go"
         }
       ],
       "evidence_refs": [
         {"kind": "code", "path": "tools/operationalreadiness/public_status.go"},
         {"kind": "code", "path": "tools/operationalreadiness/render_public_status.go"},
+        {"kind": "code", "path": "tools/operationalreadiness/render_public_status_html.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_output_test.go"},
         {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},

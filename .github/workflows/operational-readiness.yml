@@ -83,7 +83,8 @@ jobs:
             -check-doc \
             -evidence-out out/operational-readiness-evidence.json \
             -candidate-out out/operational-readiness-closed-loop-candidates.json \
-            -public-status-out out/operational-readiness-public-status.md
+            -public-status-out out/operational-readiness-public-status.md \
+            -public-status-html-out out/operational-readiness-public-status.html
       - name: Publish public QA status summary
         if: always()
         run: cat out/operational-readiness-public-status.md >> "$GITHUB_STEP_SUMMARY"
@@ -104,4 +105,10 @@ jobs:
         with:
           name: operational-readiness-public-status
           path: out/operational-readiness-public-status.md
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-public-status-page
+          path: out/operational-readiness-public-status.html
           if-no-files-found: error
