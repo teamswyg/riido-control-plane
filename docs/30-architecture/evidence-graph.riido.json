@@ -1938,6 +1938,7 @@
         {"kind": "tool", "path": "tools/loopclosureaudit/registry_types.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/evidence.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/evidence_candidate.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/evidence_candidate_summary.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/evidence_requirement.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/evidence_proof_surface.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/check_kind.go"},
@@ -1969,9 +1970,11 @@
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_export.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_residual.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_claim_coverage.go"},
+        {"kind": "tool", "path": "tools/loopclosureaudit/types_candidate_summary.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/candidate_claim_coverage_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/candidate_claim_coverage_plan.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/candidate_export_test.go"},
+        {"kind": "test", "path": "tools/loopclosureaudit/evidence_candidate_summary_test.go"},
         {"kind": "tool", "path": "tools/loopclosureaudit/verify_residual_gap.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/candidate_residual_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/residual_gap_test.go"},
@@ -2004,7 +2007,7 @@
         {"kind": "artifact", "path": "loop-closure-audit-closed-loop-candidates", "redacted": true},
         {"kind": "generated_doc", "path": "docs/30-architecture/loop-closure-audit.md"}
       ],
-      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit evidence names each requirement's verified proof status, proof count, proof keys, claim-bound files, verifiers, generated docs, semantic hashes, loop surfaces, compiled evidence graph summary surfaces, harness candidate artifact surfaces, proof surface coverage, proof surface gap count, candidate artifact, promotion target, and candidate count; proof check kind behavior is centralized in a static registry so proof key generation, proof surface extraction, and verification handlers co-change from one semantic table instead of separate switches; the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, and the audit directly requires Loop Registry SSOT to expose executable observation, verification, evidence, expiry, failure, refresh, evidence-plan, graph-summary, and harness-summary surfaces; claim coverage repairs remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, claim-bound workflow trigger, claim-impact changed-files, expired candidate consumer, expired harness evidence freshness, candidate evidence expiry, candidate adoption-plan, candidate promotion-edge, or semantic-hash metadata coverage gaps in the backlog.",
+      "decision": "Human-exit loop closure is now verified as a meta-loop instead of relying on scattered narrative memory: the audit evidence names each requirement's verified proof status, proof count, proof keys, claim-bound files, verifiers, generated docs, semantic hashes, loop surfaces, compiled evidence graph summary surfaces, harness candidate artifact surfaces, proof surface coverage, proof surface gap count, candidate artifact, promotion target, candidate count, and candidate ids; proof check kind behavior is centralized in a static registry so proof key generation, proof surface extraction, and verification handlers co-change from one semantic table instead of separate switches; the audit candidate artifact exports residual gaps and structured claim coverage token gaps for intake, and the audit directly requires Loop Registry SSOT to expose executable observation, verification, evidence, expiry, failure, refresh, evidence-plan, graph-summary, and harness-summary surfaces; claim coverage repairs remove the corresponding candidates and stale decision records instead of leaving already-closed AI thread history, harness promotion, claim surface, candidate decision next-artifact, claim-bound file reasoning, claim-bound workflow trigger, claim-impact changed-files, expired candidate consumer, expired harness evidence freshness, candidate evidence expiry, candidate adoption-plan, candidate promotion-edge, or semantic-hash metadata coverage gaps in the backlog.",
       "next_loop": "closed_loop_candidate"
     },
     {
