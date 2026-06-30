@@ -46,6 +46,16 @@ type refreshPlan struct {
 	EvidenceRefreshes    []evidenceArtifactRefresh `json:"evidence_refreshes"`
 }
 
+type refreshPlanSummary struct {
+	PlanCount             int `json:"plan_count"`
+	RefreshWorkflowCount  int `json:"refresh_workflow_count"`
+	EvidenceArtifactCount int `json:"evidence_artifact_count"`
+	NextCommandCount      int `json:"next_command_count"`
+	VerifierCommandCount  int `json:"verifier_command_count"`
+	ClaimBindingCount     int `json:"claim_binding_count"`
+	ManualCommandCount    int `json:"manual_command_count"`
+}
+
 type refreshPlanCommand struct {
 	Kind             string   `json:"kind"`
 	Command          string   `json:"command"`

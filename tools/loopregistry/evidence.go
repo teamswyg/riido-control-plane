@@ -21,6 +21,7 @@ type evidence struct {
 	ClaimSurfaces             []claimSurface                 `json:"claim_surfaces"`
 	RefreshWorkflows          map[string]string              `json:"refresh_workflows"`
 	RefreshCadenceMinutes     map[string]int                 `json:"refresh_cadence_minutes"`
+	RefreshPlanSummary        refreshPlanSummary             `json:"refresh_plan_summary"`
 	RefreshPlans              []refreshPlan                  `json:"refresh_plans"`
 	ProviderCoverage          map[string][]string            `json:"provider_coverage,omitempty"`
 	HarnessWorkflowExclusions []harnessWorkflowExclusion     `json:"harness_workflow_exclusions,omitempty"`

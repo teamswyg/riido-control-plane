@@ -7,6 +7,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 	generatedAt, expiresAt := evidenceWindowAt(now, loopRegistryEvidenceTTLHours)
 	index := architectureIndexFor(m.Claims, result.ClaimSurfaces)
 	attachTargetVerifierPlan(impact, index, result.ClaimSurfaces)
+	refreshPlans := evidenceRefreshPlans(m, result, now)
 	return evidence{
 		SchemaVersion:             evidenceSchema,
 		ID:                        m.ID,
@@ -28,7 +29,8 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		ClaimSurfaces:             result.ClaimSurfaces,
 		RefreshWorkflows:          refreshWorkflows(m.Loops),
 		RefreshCadenceMinutes:     result.RefreshCadenceMinutes,
-		RefreshPlans:              evidenceRefreshPlans(m, result, now),
+		RefreshPlanSummary:        summarizeRefreshPlans(refreshPlans),
+		RefreshPlans:              refreshPlans,
 		ProviderCoverage:          providerCoverage(m.Loops),
 		HarnessWorkflowExclusions: m.HarnessWorkflowExclusions,
 		HarnessPromotionWorkflows: result.HarnessPromotionWorkflows,
