@@ -7303,7 +7303,7 @@
     {
       "id": "public_qa_status_operational_surface_loop",
       "observation": "Operational QA evidence existed as redacted workflow artifacts and generated docs, but operators still had to inspect the readiness detail to know whether P0 QA, stale partials, and closed-loop candidates made the release status degraded.",
-      "hypothesis": "Emitting a public aggregate QA status from operational readiness evidence into generated docs, workflow artifacts, and GitHub Actions summaries, then binding it to redaction tests and Loop Registry claims, gives GitHub-Status-like visibility without publishing raw logs, endpoint details, AWS identifiers, device credentials, or JWT fragments.",
+      "hypothesis": "Emitting a public aggregate QA status from operational readiness evidence into generated docs, workflow artifacts, GitHub Actions summaries, and a static HTML status page, then binding it to redaction tests and Loop Registry claims, gives GitHub-Status-like visibility without publishing raw logs, endpoint details, AWS identifiers, device credentials, or JWT fragments.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence",
         "generated_endpoint_smoke_matrix_must_remain_contract_gate",
@@ -7344,11 +7344,23 @@
         },
         {
           "kind": "tool",
+          "path": "tools/operationalreadiness/render_public_status_html.go"
+        },
+        {
+          "kind": "tool",
           "path": "tools/operationalreadiness/evidence.go"
         },
         {
           "kind": "test",
           "path": "tools/operationalreadiness/public_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/public_status_output_test.go"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/operational-readiness.yml"
         }
       ],
       "verifiers": [
@@ -7398,6 +7410,11 @@
           "redacted": true
         },
         {
+          "kind": "artifact",
+          "path": "operational-readiness-public-status-page",
+          "redacted": true
+        },
+        {
           "kind": "generated_doc",
           "path": "docs/30-architecture/operational-readiness.md"
         },
@@ -7407,7 +7424,7 @@
           "redacted": true
         }
       ],
-      "decision": "Public QA status is now generated from the operational readiness SSOT as aggregate counts only: degraded when P0 QA partials or stale partials exist, redacted for endpoints, and explicitly marked as containing no raw logs or secrets. The operational readiness workflow publishes the same redacted Markdown to the GitHub Actions summary and an artifact so QA operators can see release health without opening raw logs. The Loop Registry semantic hashes move with this common registry surface so claim-bound agents can see that the registry change is a redacted operational-status publication rather than a silent contract or vocabulary drift.",
+      "decision": "Public QA status is now generated from the operational readiness SSOT as aggregate counts only: degraded when P0 QA partials or stale partials exist, redacted for endpoints, and explicitly marked as containing no raw logs or secrets. The operational readiness workflow publishes the same redacted Markdown to the GitHub Actions summary and an artifact, plus a static HTML status page artifact, so QA operators can see release health without opening raw logs. The Loop Registry semantic hashes move with this common registry surface so claim-bound agents can see that the registry change is a redacted operational-status publication rather than a silent contract or vocabulary drift.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
