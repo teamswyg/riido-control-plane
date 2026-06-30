@@ -19,3 +19,9 @@ func renderPublicStatus(b *strings.Builder, status publicStatus) {
 	fmt.Fprintf(b, "- closed-loop candidates: `%d`\n", status.ClosedLoopCandidates)
 	fmt.Fprintf(b, "- next artifact: `%s`\n\n", status.NextArtifact)
 }
+
+func renderPublicStatusDoc(status publicStatus) string {
+	var b strings.Builder
+	renderPublicStatus(&b, status)
+	return strings.TrimRight(b.String(), "\n") + "\n"
+}

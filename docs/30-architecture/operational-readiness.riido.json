@@ -200,12 +200,20 @@
           "kind": "artifact",
           "signal": "The generated operational-readiness reader doc includes a Public QA Status section suitable for public aggregate evidence.",
           "evidence_ref": "docs/30-architecture/operational-readiness.md"
+        },
+        {
+          "id": "public_qa_status_actions_summary",
+          "kind": "artifact",
+          "signal": "The operational-readiness workflow publishes the redacted Public QA Status markdown to GitHub Actions summary and artifact outputs.",
+          "evidence_ref": ".github/workflows/operational-readiness.yml"
         }
       ],
       "evidence_refs": [
         {"kind": "code", "path": "tools/operationalreadiness/public_status.go"},
         {"kind": "code", "path": "tools/operationalreadiness/render_public_status.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_test.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/public_status_output_test.go"},
+        {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
         {"kind": "doc", "path": "docs/30-architecture/operational-readiness.md"}
       ],
       "next_artifact": "public_qa_status_visual_or_pages_publish_evidence",
