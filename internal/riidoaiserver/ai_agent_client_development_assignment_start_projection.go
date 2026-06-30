@@ -23,8 +23,8 @@ func applyAssignmentStartProjection(
 ) {
 	if req.intentGateRequired {
 		response.WorkStatus = AgentWorkStatusWaitingForUser
-		response.AssignmentState = AgentAssignmentStateRunning
-		response.CommentKind = AgentTaskCommentRuntimeProgress
+		response.AssignmentState = AgentAssignmentStateWaiting
+		response.CommentKind = AgentTaskCommentNeedsInput
 		response.Message = clientMessageNeedUserInput
 		return
 	}

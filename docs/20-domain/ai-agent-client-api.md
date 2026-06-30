@@ -38,7 +38,7 @@ Canonical domain changes start in `riido-contracts`; this repo verifies the exec
 
 ## Public Field And Endpoint Signals
 
-- `workspace_id`, `profile_thumbnail_url`, `provider_version`, `assigned-agent-profiles`, `agent-assignments`, `thread-stream-subscription`, `conversation_id`, `parent_thread_id`, `agent_snapshot_id`, `agent_snapshots`, `messages`
+- `workspace_id`, `profile_thumbnail_url`, `provider_version`, `assigned-agent-profiles`, `agent-assignments`, `thread-stream-subscription`, `conversation_id`, `parent_thread_id`, `agent_snapshot_id`, `agent_snapshots`, `messages`, `author_principal_id`
 
 ## Deployment Evidence Phrases
 
@@ -84,9 +84,9 @@ One persisted AI thread/run record in the task timeline. Multiple records may sh
 
 #### `AIAgentTaskThreadHistoryMessage`
 
-One stable timeline row inside a thread history record. message_id is the React row key; body can contain sanitized HTML from a user reply.
+One stable timeline row inside a thread history record. message_id is the React row key; body can contain sanitized HTML from a user reply; author_principal_id identifies the user who wrote role=user messages.
 
-- Fields: `message_id`, `role`, `comment_kind`, `assignment_id`, `run_id`, `source_message_id`, `seq`, `body`, `result_message`, `observed_at`
+- Fields: `message_id`, `role`, `comment_kind`, `assignment_id`, `run_id`, `source_message_id`, `author_principal_id`, `seq`, `body`, `result_message`, `observed_at`
 
 ### Identity Rules
 
@@ -99,6 +99,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | `assignment_id` | Durable work assignment | Manage execution status and stop/delete targeting |
 | `run_id` | Runtime execution flow | Deduplicate live progress together with assignment_id and seq |
 | `message_id` | Stable v3 timeline row key | Render messages without collapsing repeated user bodies or repeated progress text |
+| `author_principal_id` | User reply author identity | Render role=user messages with the actual author instead of falling back to the current viewer |
 
 ## Thread History v3 Grouping Rules
 
@@ -119,7 +120,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 
 | Role | Meaning |
 | --- | --- |
-| `user` | User follow-up instruction inside the AI thread |
+| `user` | User follow-up instruction inside the AI thread. Use author_principal_id for the writer when present. |
 | `progress` | Runtime progress log, ordered by seq inside assignment_id and run_id |
 | `agent` | Agent status or final result message. queued_by_busy_agent is a current status hint, not a durable agent reply; v3 suppresses it when the same conversation has newer progress, running, or result messages. |
 
@@ -129,7 +130,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | --- | --- |
 | `intent-clarification-before-deliverable` | When the task title/document is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the agent's first visible answer should ask a concise clarification question in the existing thread before producing deliverables. |
 | `non-command-component-document-asks-first` | When a project, milestone, task, or subtask has document content but no explicit action signal, classify it as intent-oriented and ask what to do first before the daemon receives runnable work. |
-| `intent-clarification-waits-for-user` | When the runtime reports assignment_result_status=needs_input, v3 history keeps the agent question in the same conversation with work_status=waiting_for_user; a user reply to that thread creates a follow-up run under the same conversation_id without changing endpoint shape. |
+| `intent-clarification-waits-for-user` | When the runtime reports assignment_result_status=needs_input, v3 history keeps the agent question in the same conversation with work_status=waiting_for_user, assignment_state=waiting_for_user, comment_kind=needs_input, and no active_stream; a user reply to that thread creates a follow-up run under the same conversation_id without changing endpoint shape. |
 | `concrete-followup-authoritative` | When the user replies in that thread with a concrete instruction, render the user message in the same conversation_id and let the follow-up run treat that latest message as the current directive while re-reading the latest task document. |
 | `draft-then-research-limit-in-same-conversation` | A marketing-copy task can first ask what to do, then complete a copywriting draft from the user's concrete follow-up, then accept another follow-up for research in the same conversation_id. If provider quota is exhausted during that research run, only the latest run fails with the normalized cloud-credit message; the prior draft result remains visible. |
 | `provider-limit-result` | When provider token, quota, or cloud-credit exhaustion stops the run, keep the same conversation and render the normalized result message: 보유하신 크레딧이 부족합니다. 더 깊은 리서치를 진행하려면 추가 Cloud AI 자원이 필요합니다. |

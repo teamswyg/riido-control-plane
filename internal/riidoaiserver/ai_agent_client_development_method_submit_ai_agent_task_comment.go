@@ -48,7 +48,7 @@ func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Con
 		response.Message = clientMessageAgentBusyQueued
 	}
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
-	s.appendThreadUserMessageLocked(response, req.Body, req.SourceCommentID)
+	s.appendThreadUserMessageLocked(response, principal, req.Body, req.SourceCommentID)
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
 	s.appendAgentTaskActionEvent(response)
 	return response, nil

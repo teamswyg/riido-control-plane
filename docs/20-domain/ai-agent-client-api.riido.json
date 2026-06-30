@@ -15,7 +15,7 @@
   "operation_counts": {"total":55,"v1":25,"v2":30,"smoke_matrix":55},
   "required_generated_paths": ["aiAgent.bootstrap","aiAgent.profileThumbnails.uploads.create","aiAgent.tasks.assign","aiAgent.tasks.threadMessages.create","v2.aiAgent.bootstrap","v2.aiAgent.agents.create","v2.aiAgent.profileThumbnails.uploads.create","v2.aiAgent.tasks.assignedAgentProfiles","v2.aiAgent.tasks.agentAssignments.create","v2.aiAgent.tasks.threadStreamSubscription"],
   "runtime_config_keys": ["RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"],
-  "public_fields": ["workspace_id","profile_thumbnail_url","provider_version","assigned-agent-profiles","agent-assignments","thread-stream-subscription","conversation_id","parent_thread_id","agent_snapshot_id","agent_snapshots","messages"],
+  "public_fields": ["workspace_id","profile_thumbnail_url","provider_version","assigned-agent-profiles","agent-assignments","thread-stream-subscription","conversation_id","parent_thread_id","agent_snapshot_id","agent_snapshots","messages","author_principal_id"],
   "deployment_evidence": ["not from a manual","The workflow masks both values"],
   "thread_history_v3_frontend": {
     "read_endpoint": {
@@ -51,8 +51,8 @@
       },
       {
         "name":"AIAgentTaskThreadHistoryMessage",
-        "purpose":"One stable timeline row inside a thread history record. message_id is the React row key; body can contain sanitized HTML from a user reply.",
-        "fields":["message_id","role","comment_kind","assignment_id","run_id","source_message_id","seq","body","result_message","observed_at"]
+        "purpose":"One stable timeline row inside a thread history record. message_id is the React row key; body can contain sanitized HTML from a user reply; author_principal_id identifies the user who wrote role=user messages.",
+        "fields":["message_id","role","comment_kind","assignment_id","run_id","source_message_id","author_principal_id","seq","body","result_message","observed_at"]
       }
     ],
     "action_endpoints": [
@@ -99,7 +99,8 @@
       {"name":"parent_thread_id","meaning":"Source thread for a follow-up run","use":"Nest a follow-up run under the original Agent comment when present"},
       {"name":"assignment_id","meaning":"Durable work assignment","use":"Manage execution status and stop/delete targeting"},
       {"name":"run_id","meaning":"Runtime execution flow","use":"Deduplicate live progress together with assignment_id and seq"},
-      {"name":"message_id","meaning":"Stable v3 timeline row key","use":"Render messages without collapsing repeated user bodies or repeated progress text"}
+      {"name":"message_id","meaning":"Stable v3 timeline row key","use":"Render messages without collapsing repeated user bodies or repeated progress text"},
+      {"name":"author_principal_id","meaning":"User reply author identity","use":"Render role=user messages with the actual author instead of falling back to the current viewer"}
     ],
     "grouping_rules": [
       "Task screen scope is task_id.",
@@ -115,14 +116,14 @@
       "Historical cards must keep the captured snapshot even if the current agent settings change."
     ],
     "message_roles": [
-      {"role":"user","meaning":"User follow-up instruction inside the AI thread"},
+      {"role":"user","meaning":"User follow-up instruction inside the AI thread. Use author_principal_id for the writer when present."},
       {"role":"progress","meaning":"Runtime progress log, ordered by seq inside assignment_id and run_id"},
       {"role":"agent","meaning":"Agent status or final result message. queued_by_busy_agent is a current status hint, not a durable agent reply; v3 suppresses it when the same conversation has newer progress, running, or result messages."}
     ],
     "interaction_scenarios": [
       {"name":"intent-clarification-before-deliverable","detail":"When the task title/document is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the agent's first visible answer should ask a concise clarification question in the existing thread before producing deliverables."},
       {"name":"non-command-component-document-asks-first","detail":"When a project, milestone, task, or subtask has document content but no explicit action signal, classify it as intent-oriented and ask what to do first before the daemon receives runnable work."},
-      {"name":"intent-clarification-waits-for-user","detail":"When the runtime reports assignment_result_status=needs_input, v3 history keeps the agent question in the same conversation with work_status=waiting_for_user; a user reply to that thread creates a follow-up run under the same conversation_id without changing endpoint shape."},
+      {"name":"intent-clarification-waits-for-user","detail":"When the runtime reports assignment_result_status=needs_input, v3 history keeps the agent question in the same conversation with work_status=waiting_for_user, assignment_state=waiting_for_user, comment_kind=needs_input, and no active_stream; a user reply to that thread creates a follow-up run under the same conversation_id without changing endpoint shape."},
       {"name":"concrete-followup-authoritative","detail":"When the user replies in that thread with a concrete instruction, render the user message in the same conversation_id and let the follow-up run treat that latest message as the current directive while re-reading the latest task document."},
       {"name":"draft-then-research-limit-in-same-conversation","detail":"A marketing-copy task can first ask what to do, then complete a copywriting draft from the user's concrete follow-up, then accept another follow-up for research in the same conversation_id. If provider quota is exhausted during that research run, only the latest run fails with the normalized cloud-credit message; the prior draft result remains visible."},
       {"name":"provider-limit-result","detail":"When provider token, quota, or cloud-credit exhaustion stops the run, keep the same conversation and render the normalized result message: 보유하신 크레딧이 부족합니다. 더 깊은 리서치를 진행하려면 추가 Cloud AI 자원이 필요합니다."},
@@ -174,7 +175,7 @@
     {"name":"generated-client-handoff-files","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","assertGeneratedClientHandoffFiles"]},
     {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/branch_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
     {"name":"black-box-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2","TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI"]},
-    {"name":"thread-history-v3-api","file":"internal/riidoaiserver/ai_agent_client_thread_history_api.go","contains":["ConversationID","ParentThreadID","AgentSnapshotID","Messages","AgentSnapshots"]},
+    {"name":"thread-history-v3-api","file":"internal/riidoaiserver/ai_agent_client_thread_history_api.go","contains":["ConversationID","ParentThreadID","AgentSnapshotID","AuthorPrincipalID","Messages","AgentSnapshots"]},
     {"name":"thread-history-v3-projection","file":"internal/riidoaiserver/ai_agent_client_thread_history_projection.go","contains":["taskThreadConversationID","taskThreadParentThreadID","taskThreadHistoryMessagesLocked","AgentSnapshots"]},
     {"name":"thread-history-v3-queued-status-filter","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go","contains":["suppressSupersededQueuedHistoryMessages","AgentTaskCommentQueuedByBusyAgent","historyMessageSupersedesQueuedStatus"]},
     {"name":"thread-history-v3-queued-status-state","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_state.go","contains":["threadStatusSupersedesQueuedStatus","AgentWorkStatusRunning","AgentAssignmentStateRunning"]},

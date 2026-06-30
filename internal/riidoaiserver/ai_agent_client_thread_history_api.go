@@ -11,16 +11,17 @@ const (
 )
 
 type AIAgentTaskThreadHistoryMessage struct {
-	MessageID       string                       `json:"message_id"`
-	Role            AIAgentTaskThreadMessageRole `json:"role"`
-	CommentKind     AgentTaskCommentKind         `json:"comment_kind,omitempty"`
-	AssignmentID    string                       `json:"assignment_id,omitempty"`
-	RunID           string                       `json:"run_id,omitempty"`
-	SourceMessageID string                       `json:"source_message_id,omitempty"`
-	Seq             int                          `json:"seq,omitempty"`
-	Body            string                       `json:"body,omitempty"`
-	ResultMessage   string                       `json:"result_message,omitempty"`
-	ObservedAt      time.Time                    `json:"observed_at,omitempty"`
+	MessageID         string                       `json:"message_id"`
+	Role              AIAgentTaskThreadMessageRole `json:"role"`
+	CommentKind       AgentTaskCommentKind         `json:"comment_kind,omitempty"`
+	AssignmentID      string                       `json:"assignment_id,omitempty"`
+	RunID             string                       `json:"run_id,omitempty"`
+	SourceMessageID   string                       `json:"source_message_id,omitempty"`
+	AuthorPrincipalID string                       `json:"author_principal_id,omitempty"`
+	Seq               int                          `json:"seq,omitempty"`
+	Body              string                       `json:"body,omitempty"`
+	ResultMessage     string                       `json:"result_message,omitempty"`
+	ObservedAt        time.Time                    `json:"observed_at,omitempty"`
 }
 
 type AIAgentTaskThreadHistoryRecord struct {

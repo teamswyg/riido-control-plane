@@ -33,6 +33,9 @@ func TestAIAgentTaskThreadHistoryKeepsUserFollowupMessages(t *testing.T) {
 	if !historyMessagesContainUserBody(thread.Messages, `<p>다시 해줘</p>`) {
 		t.Fatalf("history messages missing user body: %+v", thread.Messages)
 	}
+	if !historyMessagesContainUserAuthor(thread.Messages, `<p>다시 해줘</p>`, principal.PrincipalID) {
+		t.Fatalf("history messages missing user author: %+v", thread.Messages)
+	}
 }
 
 func historyThreadByID(t *testing.T, history AIAgentTaskThreadHistoryCollectionResponse, threadID string) AIAgentTaskThreadHistoryRecord {

@@ -51,9 +51,10 @@ func TestHTTPAIAgentIntentGateWaitsForUserBeforeDurableAssignment(t *testing.T) 
 func assertIntentGateAction(t *testing.T, assigned AIAgentTaskActionResponse) {
 	t.Helper()
 	if assigned.WorkStatus != AgentWorkStatusWaitingForUser ||
-		assigned.AssignmentState != AgentAssignmentStateRunning ||
-		assigned.CommentKind != AgentTaskCommentRuntimeProgress ||
+		assigned.AssignmentState != AgentAssignmentStateWaiting ||
+		assigned.CommentKind != AgentTaskCommentNeedsInput ||
 		assigned.Message != clientMessageNeedUserInput ||
+		assigned.ActiveStream != nil ||
 		!isIntentGateAssignmentID(assigned.AssignmentID) {
 		t.Fatalf("intent gate action = %+v", assigned)
 	}

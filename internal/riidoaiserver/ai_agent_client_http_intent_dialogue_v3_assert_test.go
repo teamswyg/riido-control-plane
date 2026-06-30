@@ -17,7 +17,10 @@ func getIntentDialogueV3Thread(
 
 func assertHTTPRootIntentQuestion(t *testing.T, thread AIAgentTaskThreadHistoryRecord) {
 	t.Helper()
-	if thread.WorkStatus != AgentWorkStatusWaitingForUser || !historyAgentMessageContains(thread, "어떤 작업부터") {
+	if thread.WorkStatus != AgentWorkStatusWaitingForUser ||
+		thread.AssignmentState != AgentAssignmentStateWaiting ||
+		thread.ActiveStream != nil ||
+		!historyAgentMessageContains(thread, "어떤 작업부터") {
 		t.Fatalf("root thread did not ask for intent: %+v", thread)
 	}
 	if historyMessagesContainProgressBody(thread.Messages, "본문을 먼저 읽겠습니다.") {
