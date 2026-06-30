@@ -13,8 +13,11 @@ fi
 
 default_evidence_out="$(git rev-parse --git-path riido-loop-registry-precommit-evidence.json)"
 evidence_out="${RIIDO_LOOP_REGISTRY_EVIDENCE_OUT:-$default_evidence_out}"
+default_target_script_out="$(git rev-parse --git-path riido-target-verifiers.sh)"
+target_script_out="${RIIDO_LOOP_REGISTRY_TARGET_SCRIPT_OUT:-$default_target_script_out}"
 go run ./tools/loopregistry \
   -check-doc \
   -impact-base "$base_ref" \
   -target-verifier-summary \
+  -target-verifier-script-out "$target_script_out" \
   -evidence-out "$evidence_out"

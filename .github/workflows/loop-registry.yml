@@ -450,8 +450,10 @@ jobs:
         run: |
           mkdir -p out
           impact_args=()
+          target_script_args=()
           if [ -n "$RIIDO_LOOP_REGISTRY_IMPACT_BASE" ]; then
             impact_args=(-impact-base "$RIIDO_LOOP_REGISTRY_IMPACT_BASE")
+            target_script_args=(-target-verifier-script-out out/loop-target-verifiers.sh)
           fi
           go test ./tools/loopregistry -count=1
           go test ./tools/aiagentclientapi -run 'Test(GeneratedDocMatchesManifest|RunWritesEvidence)$' -count=1
@@ -463,6 +465,7 @@ jobs:
             -check-doc \
             -github-annotations \
             "${impact_args[@]}" \
+            "${target_script_args[@]}" \
             -evidence-out out/loop-registry-evidence.json
           go run ./tools/loopregistry \
             -refresh-plan-in out/loop-registry-evidence.json \
@@ -478,4 +481,10 @@ jobs:
         with:
           name: loop-refresh-commands
           path: out/loop-refresh-commands.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always() && github.event_name == 'pull_request'
+        with:
+          name: loop-target-verifiers
+          path: out/loop-target-verifiers.sh
           if-no-files-found: error

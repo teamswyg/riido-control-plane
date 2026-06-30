@@ -31,10 +31,12 @@ func TestPreCommitBaselineLoopRegistryScriptRequiresImpactEvidence(t *testing.T)
 	phrases := []string{
 		"RIIDO_LOOP_REGISTRY_IMPACT_BASE",
 		"RIIDO_LOOP_REGISTRY_EVIDENCE_OUT",
+		"RIIDO_LOOP_REGISTRY_TARGET_SCRIPT_OUT",
 		"go run ./tools/loopregistry",
 		"-check-doc",
 		"-impact-base",
 		"-target-verifier-summary",
+		"-target-verifier-script-out",
 		"-evidence-out",
 	}
 	if err := requirePhrases(text, phrases, "loopregistry pre-commit script", &verifyResult{}); err != nil {
