@@ -4,6 +4,13 @@ import "slices"
 
 func taskThreadHistoryActiveStream(threads []AIAgentTaskThreadHistoryRecord) *AIAgentTaskThreadStreamLink {
 	for _, thread := range slices.Backward(threads) {
+		if thread.ActiveStream == nil || !threadIsActivelyRunning(thread) {
+			continue
+		}
+		stream := *thread.ActiveStream
+		return &stream
+	}
+	for _, thread := range slices.Backward(threads) {
 		if thread.ActiveStream == nil {
 			continue
 		}

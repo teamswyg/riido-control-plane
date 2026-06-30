@@ -27,7 +27,7 @@ func verifyThreadHistoryV3(v3 threadHistoryV3) error {
 	if err := requireIdentity(v3.IdentityRules, "thread_id"); err != nil {
 		return err
 	}
-	if err := requireNamedRules("thread history v3 ordering rule", v3.OrderingRules, []string{"conversation-card-ordering", "message-row-ordering", "queued-status-current-only", "late-terminal-guard", "terminal-active-stream-closure"}); err != nil {
+	if err := requireNamedRules("thread history v3 ordering rule", v3.OrderingRules, []string{"conversation-card-ordering", "message-row-ordering", "queued-status-current-only", "queued-stream-current-only", "late-terminal-guard", "terminal-active-stream-closure"}); err != nil {
 		return err
 	}
 	if err := requireNamedRules("thread history v3 mutation rule", v3.MutationRules, []string{"assign-agent", "send-thread-message", "stop-agent", "delete-agent"}); err != nil {
@@ -46,7 +46,7 @@ func verifyThreadHistoryV3(v3 threadHistoryV3) error {
 	if err := requireStrings("thread history v3 terminal state", v3.TerminalStates, []string{"completed", "failed", "stopped", "cancelled", "timeout"}); err != nil {
 		return err
 	}
-	return requireStrings("thread history v3 checklist", v3.Checklist, []string{"v3-read-model", "conversation-id-card-key", "v2-mutations", "v2-sse", "queued-status-current-only", "terminal-late-event-guard", "terminal-active-stream-closure"})
+	return requireStrings("thread history v3 checklist", v3.Checklist, []string{"v3-read-model", "conversation-id-card-key", "v2-mutations", "v2-sse", "queued-status-current-only", "queued-stream-current-only", "terminal-late-event-guard", "terminal-active-stream-closure"})
 }
 
 func requireIdentity(rules []identityRule, name string) error {

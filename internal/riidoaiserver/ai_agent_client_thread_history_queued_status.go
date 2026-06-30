@@ -9,6 +9,9 @@ func suppressSupersededQueuedHistoryMessages(threads []AIAgentTaskThreadHistoryR
 		threads[i].Messages = withoutSupersededQueuedMessages(
 			threads[i].ConversationID, threads[i].Messages, latest, running,
 		)
+		if queuedThreadIsSupersededByRunningConversation(threads[i], running) {
+			threads[i].ActiveStream = nil
+		}
 	}
 }
 
