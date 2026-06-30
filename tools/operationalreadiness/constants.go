@@ -13,5 +13,6 @@ const (
 	readinessCandidateArtifact = "operational-readiness-closed-loop-candidates"
 	readinessHarnessLoop       = "operational_readiness_release_harness"
 	readinessPromotionTarget   = "closed_loop_candidate"
+	readinessEvidenceTTLHours  = 24
 	readinessNowEnv            = "RIIDO_OPERATIONAL_READINESS_NOW"
 )

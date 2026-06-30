@@ -10,6 +10,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 - measurements: `15`
 - covered: `4`
 - partial: `8`
+- evidence ttl hours: `24`
 - required categories: `7`
 - missing categories: `0`
 
