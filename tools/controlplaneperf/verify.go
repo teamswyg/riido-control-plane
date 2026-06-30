@@ -25,6 +25,9 @@ func verifyAll(root string, m manifest) error {
 	if err := verifyHotPaths(root, m.HotPaths); err != nil {
 		return err
 	}
+	if err := verifyArchitectureComponents(root, m); err != nil {
+		return err
+	}
 	if err := verifyLocalPressureScenarios(root, m.LocalPressureScenarios); err != nil {
 		return err
 	}

@@ -10,6 +10,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - benchmarks: `7`
 - concurrency tests: `8`
 - optimization candidates: `7`
+- architecture components: `5`
 - assertions: `13`
 - local pressure artifact: `control-plane-local-pressure`
 - race artifact: `control-plane-race`
@@ -26,6 +27,16 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - race/concurrency: `go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1`
 - loopback pprof: `RIIDO_AI_SERVER_PPROF_ADDR=127.0.0.1:6060 riido-ai-server; go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30`
 - live load evidence: `go run ./tools/aiagentload -base-url "$TESTNET_BASE_URL" -token "$TESTNET_TOKEN" -workspace-id "$TESTNET_WORKSPACE_ID" -scenario client-read -duration 60s -concurrency 64 -evidence-out out/ai-agent-client-testnet-load.json`
+
+## Architecture Components
+
+| ID | Categories | Pressure | Signals | Evidence |
+| --- | --- | --- | --- | --- |
+| `client_http_surface` | `endpoint_hot_path, sse_event_streaming, read_model_projection` | `latency, allocation, heap_memory, cpu_busy, otel_signal` | `http.route, riido.trace.surface, cloudwatch_emf` | `control-plane-performance-bench, control-plane-local-pressure, control-plane-high-traffic-audit` |
+| `store_assignment_scheduler` | `assignment_scheduling, db_cost_attribution` | `latency, allocation, goroutine_delta, race_condition, otel_signal` | `riido.store.operation, aws.operation, xray_subsegment` | `control-plane-race, control-plane-local-pressure, control-plane-pressure-closed-loop-candidates` |
+| `runtime_progress_fanout` | `runtime_progress_ingest, in_memory_fanout, sse_event_streaming` | `latency, allocation, heap_memory, cpu_busy, goroutine_delta` | `agent_thread_progress, riido.trace.surface, cloudwatch_emf` | `control-plane-local-pressure, control-plane-performance-bench, control-plane-pressure-closed-loop-candidates` |
+| `waiter_and_tool_approval_lifecycle` | `assignment_scheduling` | `goroutine_delta, race_condition, cpu_busy, latency` | `tool_approval_wait, assignment_poll_wait, cloudwatch_emf` | `control-plane-race, control-plane-local-pressure, control-plane-high-traffic-audit` |
+| `bounded_observability_metrics` | `endpoint_hot_path, db_cost_attribution` | `allocation, heap_memory, cpu_busy, otel_signal` | `http.route, riido.store.operation, aws.operation, cloudwatch_emf` | `control-plane-performance-bench, control-plane-high-traffic-audit, control-plane-performance-evidence` |
 
 ## Hot Paths
 
