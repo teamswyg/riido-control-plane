@@ -6,7 +6,8 @@ func writeRunOutputs(
 	result verifyResult,
 	impact *impactEvidence,
 ) error {
-	if !opt.GitHubAnnotations && !opt.TargetSummary && opt.EvidenceOut == "" {
+	if !opt.GitHubAnnotations && !opt.TargetSummary &&
+		opt.TargetScriptOut == "" && opt.EvidenceOut == "" {
 		return nil
 	}
 	ev := newEvidence(m, result, impact)
@@ -15,6 +16,11 @@ func writeRunOutputs(
 	}
 	if opt.TargetSummary {
 		writeTargetVerifierSummary(opt.AnnotationOut, ev.Impact, opt.EvidenceOut)
+	}
+	if opt.TargetScriptOut != "" {
+		if err := writeTargetVerifierScript(opt.TargetScriptOut, ev.Impact); err != nil {
+			return err
+		}
 	}
 	if opt.EvidenceOut != "" {
 		return writeJSON(opt.EvidenceOut, ev)

@@ -17,6 +17,7 @@ type options struct {
 	GitHubAnnotations  bool
 	TargetSummary      bool
 	AnnotationOut      io.Writer
+	TargetScriptOut    string
 	RefreshPlanIn      string
 	RefreshCommandsOut string
 }
