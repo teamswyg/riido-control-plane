@@ -467,6 +467,9 @@ jobs:
             "${impact_args[@]}" \
             "${target_script_args[@]}" \
             -evidence-out out/loop-registry-evidence.json
+          if [ -f out/loop-target-verifiers.sh ]; then
+            bash out/loop-target-verifiers.sh
+          fi
           go run ./tools/loopregistry \
             -refresh-plan-in out/loop-registry-evidence.json \
             -refresh-commands-out out/loop-refresh-commands.json
