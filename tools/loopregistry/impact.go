@@ -31,44 +31,21 @@ func verifyClaimImpact(
 		ChangedFileCount: len(changed),
 		ChangedFiles:     changedFileList(changed),
 	}
-	for _, claim := range currentClaims {
-		base, ok := baseByID[claim.ID]
-		if !ok {
-			record, err := verifyAddedClaimImpact(claim, changed)
-			if err != nil {
-				return nil, err
-			}
-			evidence.AddedClaims = append(evidence.AddedClaims, record)
-			continue
-		}
-		if ok && claimSignature(base) != claimSignature(claim) {
-			record, err := verifyChangedClaimImpact(claim, changed)
-			if err != nil {
-				return nil, err
-			}
-			evidence.Claims = append(evidence.Claims, record)
-		}
-		record, err := verifyBoundSurfaceImpact(claim, changed)
-		if err != nil {
-			return nil, err
-		}
-		if len(record.ChangedBoundFiles) > 0 {
-			evidence.BoundSurfaces = append(evidence.BoundSurfaces, record)
-		}
-	}
-	for _, claim := range baseClaims {
-		if _, ok := currentByID[claim.ID]; ok {
-			continue
-		}
-		record, err := verifyRemovedClaimImpact(claim, changed)
-		if err != nil {
-			return nil, err
-		}
-		evidence.RemovedClaims = append(evidence.RemovedClaims, record)
-	}
+	var firstErr error
+	firstErr = rememberImpactError(firstErr,
+		verifyCurrentClaimImpacts(evidence, baseByID, currentClaims, changed))
+	firstErr = rememberImpactError(firstErr,
+		verifyRemovedClaimImpacts(evidence, currentByID, baseClaims, changed))
 	evidence.AddedClaimCount = len(evidence.AddedClaims)
 	evidence.ChangedClaimCount = len(evidence.Claims)
 	evidence.RemovedClaimCount = len(evidence.RemovedClaims)
 	evidence.BoundSurfaceChangeCount = len(evidence.BoundSurfaces)
-	return evidence, nil
+	return evidence, firstErr
+}
+
+func rememberImpactError(firstErr, err error) error {
+	if firstErr != nil {
+		return firstErr
+	}
+	return err
 }
