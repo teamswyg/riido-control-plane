@@ -15,10 +15,16 @@ func newEvidence(m manifest, result auditResult) evidence {
 	missingEvidenceToolBindings := append([]string{}, result.MissingEvidenceToolBindings...)
 	acceptedUnused := append([]string{}, result.AcceptedUnused...)
 	deprecatedActions := append([]string{}, result.DeprecatedActions...)
+	generatedAt, expiresAt := evidenceWindow(workflowEvidenceTTLHours)
 	return evidence{
 		SchemaVersion:               evidenceSchema,
 		ID:                          m.ID,
 		Status:                      status,
+		GeneratedAt:                 generatedAt,
+		ExpiresAt:                   expiresAt,
+		EvidenceTTLHours:            workflowEvidenceTTLHours,
+		WorkflowScheduled:           true,
+		StrictArtifactUpload:        true,
 		WorkflowCount:               len(result.Records),
 		CoveredCount:                result.Covered,
 		AcceptedGapCount:            result.Accepted,

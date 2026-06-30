@@ -1768,6 +1768,40 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "workflow_evidence_expiry_loop",
+      "observation": "Workflow coverage evidence could be verified but reused after becoming stale because the artifact did not publish generated_at/expires_at and the verifier did not require a scheduled refresh workflow.",
+      "hypothesis": "Publishing a 24 hour freshness window and requiring the workflow-evidence workflow to run on a schedule with strict artifact upload makes workflow coverage evidence expire and refresh automatically instead of relying on humans to notice stale green checks.",
+      "claims": ["workflow_evidence_must_self_expire"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/workflow-evidence.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/workflow-evidence.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "tool", "path": "tools/workflowevidence/evidence.go"},
+        {"kind": "tool", "path": "tools/workflowevidence/evidence_time.go"},
+        {"kind": "tool", "path": "tools/workflowevidence/evidence_types.go"},
+        {"kind": "tool", "path": "tools/workflowevidence/run.go"},
+        {"kind": "tool", "path": "tools/workflowevidence/verify_workflow.go"},
+        {"kind": "test", "path": "tools/workflowevidence/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/workflowevidence/workflow_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/workflowevidence/evidence_time_test.go"},
+        {"kind": "test", "path": "tools/workflowevidence/workflow_test.go"},
+        {"kind": "tool", "path": "tools/workflowevidence"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "workflow", "path": ".github/workflows/workflow-evidence.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "workflow-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
+      ],
+      "decision": "Workflow evidence is now a scheduled, self-expiring architecture coverage artifact: it carries generated_at/expires_at/evidence_ttl_hours/workflow_scheduled/strict_artifact_upload and fails verification when its workflow loses scheduled refresh or strict artifact upload.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "closed_loop_verifier_alias_loop",
       "observation": "Closed-loop tools used different verification flags, leaving agents to remember tool-specific commands, and the shared verifier intent claim did not expose the operator-decision and claim-coverage failure semantics it closes.",
       "hypothesis": "A shared -verify intent, backed by claim coverage tokens and regression tests, lets agents and pre-commit invoke closed-loop verification without reading each tool's prose usage or relying on human command memory.",

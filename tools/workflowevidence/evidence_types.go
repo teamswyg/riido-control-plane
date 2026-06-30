@@ -4,6 +4,11 @@ type evidence struct {
 	SchemaVersion               string           `json:"schema_version"`
 	ID                          string           `json:"id"`
 	Status                      string           `json:"status"`
+	GeneratedAt                 string           `json:"generated_at"`
+	ExpiresAt                   string           `json:"expires_at"`
+	EvidenceTTLHours            int              `json:"evidence_ttl_hours"`
+	WorkflowScheduled           bool             `json:"workflow_scheduled"`
+	StrictArtifactUpload        bool             `json:"strict_artifact_upload"`
 	WorkflowCount               int              `json:"workflow_count"`
 	CoveredCount                int              `json:"covered_count"`
 	AcceptedGapCount            int              `json:"accepted_gap_count"`

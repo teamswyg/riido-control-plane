@@ -36,3 +36,11 @@ func writeText(path, text string) error {
 	}
 	return os.WriteFile(path, []byte(text), 0o644)
 }
+
+func readText(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
