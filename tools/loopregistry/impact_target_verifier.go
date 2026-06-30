@@ -26,5 +26,6 @@ func attachTargetVerifierPlan(
 	plan.CommandUnits = targetVerifierCommands(plan.Paths)
 	attachFocusedTargetVerifierPlan(&plan, impact, surfaces)
 	plan.EntrypointCommands = targetVerifierEntrypointCommands(plan.CommandUnits)
+	attachRunnableTargetVerifierCommands(&plan)
 	impact.TargetVerifierPlan = &plan
 }

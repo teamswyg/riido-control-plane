@@ -38,6 +38,9 @@ func targetVerifierScriptCommands(plan *targetVerifierPlan) []string {
 	if plan == nil {
 		return nil
 	}
+	if len(plan.RunnableCommands) > 0 {
+		return append([]string(nil), plan.RunnableCommands...)
+	}
 	if len(plan.FocusedCommands) > 0 {
 		return append([]string(nil), plan.FocusedCommands...)
 	}

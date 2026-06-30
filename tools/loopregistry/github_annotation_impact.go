@@ -46,9 +46,10 @@ func targetVerifierImpactMessage(impact *impactEvidence) string {
 		return ""
 	}
 	plan := impact.TargetVerifierPlan
-	summary := fmt.Sprintf("target verifiers: %d matched paths, %d commands",
+	summary := fmt.Sprintf("target verifiers: %d matched paths, %d indexed commands, %d runnable commands",
 		plan.MatchedPathCount,
 		plan.CommandCount,
+		plan.RunnableCommandCount,
 	)
 	return summary
 }
