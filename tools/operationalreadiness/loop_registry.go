@@ -8,8 +8,10 @@ type readinessLoopRegistry struct {
 
 type readinessRegistryLoop struct {
 	ID                string                      `json:"id"`
+	Kind              string                      `json:"kind"`
 	RefreshWorkflow   string                      `json:"refresh_workflow"`
 	ExpiresAfterHours int                         `json:"expires_after_hours"`
+	PromotesTo        []string                    `json:"promotes_to,omitempty"`
 	Evidence          []readinessRegistryEvidence `json:"evidence"`
 }
 
@@ -39,6 +41,9 @@ func verifyRegisteredReadinessLoop(m manifest, registry readinessLoopRegistry) e
 }
 
 func verifyReadinessLoopSurface(m manifest, loop readinessRegistryLoop) error {
+	if loop.Kind != "harness" || !containsString(loop.PromotesTo, "closed_loop_candidate") {
+		return fmt.Errorf("readiness loop must be a harness that promotes closed-loop candidates")
+	}
 	if loop.RefreshWorkflow != m.Workflow {
 		return fmt.Errorf("readiness loop refresh workflow drift")
 	}

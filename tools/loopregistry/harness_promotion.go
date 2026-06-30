@@ -19,8 +19,9 @@ func captureHarnessPromotion(root string, loop loopRecord, result *verifyResult)
 		return err
 	}
 	text := string(data)
-	if !harnessWorkflowPromotesCandidates(text, artifact) {
-		return fmt.Errorf("harness loop %s refresh workflow must run harnesspromotion and upload %s", loop.ID, artifact)
+	if !harnessWorkflowPromotesCandidates(text, artifact) &&
+		!harnessWorkflowProducesCandidates(text, artifact) {
+		return fmt.Errorf("harness loop %s refresh workflow must produce and upload %s", loop.ID, artifact)
 	}
 	result.HarnessPromotionWorkflows[loop.ID] = loop.RefreshWorkflow
 	result.HarnessCandidateArtifacts[loop.ID] = artifact

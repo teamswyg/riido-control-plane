@@ -71,11 +71,14 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - name: Verify operational readiness evidence
+      - name: Run operational readiness checks
         run: |
-          mkdir -p out
           go test ./tools/operationalreadiness -count=1
           go test ./internal/riidoaiserver -run 'TestTraceHTTPClientSurface|TestHTTPTracingRecordsClientSurface|TestHTTPTransactionMetricsTrackClientSurfaceTotals|TestWriteCloudWatchEMF' -count=1
+      - name: Generate operational readiness evidence
+        if: always()
+        run: |
+          mkdir -p out
           go run ./tools/operationalreadiness \
             -check-doc \
             -evidence-out out/operational-readiness-evidence.json \

@@ -13,7 +13,7 @@ func verifyAll(root string, m manifest) (verifyResult, error) {
 	if err != nil {
 		return verifyResult{}, err
 	}
-	if err := verifySourceCoverage(registry, m.Sources); err != nil {
+	if err := verifySourceCoverage(root, registry, m.Sources); err != nil {
 		return verifyResult{}, err
 	}
 	claimCount := 0
