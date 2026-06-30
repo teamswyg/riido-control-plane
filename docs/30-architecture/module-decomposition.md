@@ -12,13 +12,13 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `55`; runtime: `1`; internal: `3`; tools: `50`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `88`; max file lines: `838`.
+File line budget target: `75`; files over target: `87`; max file lines: `838`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 88 | 97 | 9 |
+| Files over target | 87 | 97 | 10 |
 | Max file lines | 838 | 2481 | 1643 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
@@ -35,7 +35,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 | `awsadapters` | 0 | 1 | 0 | 84 | 0 | 9 |
 | `internal/contractscompat` | 0 | 1 | 0 | 81 | 0 | 6 |
 | `tools/operationalreadiness` | 0 | 1 | 0 | 77 | 0 | 2 |
-| `tools/looprefreshdispatch` | 1 | 1 | 79 | 79 | 4 | 4 |
+| `tools/looprefreshdispatch` | 0 | 0 | 0 | 75 | 0 | 0 |
 
 Files limit is informational; a split is acceptable when max lines and total over-target lines do not regress.
 
@@ -61,7 +61,6 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
 | `internal/riidoaiserver` | 87 | 838 | 13604 |
-| `tools/looprefreshdispatch` | 1 | 79 | 4 |
 
 ## Packages
 
