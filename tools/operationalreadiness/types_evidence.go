@@ -4,6 +4,7 @@ type evidence struct {
 	SchemaVersion      string         `json:"schema_version"`
 	Status             string         `json:"status"`
 	GeneratedAt        string         `json:"generated_at"`
+	ExpiresAt          string         `json:"expires_at"`
 	CheckCount         int            `json:"check_count"`
 	MeasurementCount   int            `json:"measurement_count"`
 	CoveredCount       int            `json:"covered_count"`

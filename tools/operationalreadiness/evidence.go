@@ -3,6 +3,8 @@ package main
 import "time"
 
 func newEvidenceAt(m manifest, now time.Time) evidence {
+	generatedAt := now.UTC()
+	expiresAt := generatedAt.Add(time.Duration(readinessEvidenceTTLHours) * time.Hour)
 	categoryCounts := map[string]int{}
 	measurementKinds := map[string]int{}
 	statusCounts := map[string]int{}
@@ -31,8 +33,10 @@ func newEvidenceAt(m manifest, now time.Time) evidence {
 	}
 	return evidence{
 		SchemaVersion: manifestSchemaToEvidence(m.SchemaVersion),
-		Status:        "verified", GeneratedAt: now.UTC().Format(time.RFC3339),
-		CheckCount: len(m.Checks), MeasurementCount: measurementCount, CoveredCount: statusCounts["covered"],
+		Status:        "verified",
+		GeneratedAt:   generatedAt.Format(time.RFC3339),
+		ExpiresAt:     expiresAt.Format(time.RFC3339),
+		CheckCount:    len(m.Checks), MeasurementCount: measurementCount, CoveredCount: statusCounts["covered"],
 		PartialCount: statusCounts["partial"], StalePartialCount: stalePartials,
 		StaleAfterDays:     stalePartialAfterDays,
 		RequiredCategories: append([]string(nil), m.RequiredCategories...),

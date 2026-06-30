@@ -22,6 +22,7 @@ func renderSummary(b *strings.Builder, e evidence) {
 	fmt.Fprintf(b, "- measurements: `%d`\n", e.MeasurementCount)
 	fmt.Fprintf(b, "- covered: `%d`\n", e.CoveredCount)
 	fmt.Fprintf(b, "- partial: `%d`\n", e.PartialCount)
+	fmt.Fprintf(b, "- evidence ttl hours: `%d`\n", readinessEvidenceTTLHours)
 	fmt.Fprintf(b, "- required categories: `%d`\n", len(e.RequiredCategories))
 	fmt.Fprintf(b, "- missing categories: `%d`\n\n", len(e.MissingCategories))
 }
