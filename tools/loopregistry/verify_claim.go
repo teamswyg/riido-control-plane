@@ -38,6 +38,9 @@ func verifyClaim(
 	if err := verifyClaimSurface(claim); err != nil {
 		return err
 	}
+	if err := verifyVerifierIntentClaim(root, tests, claim); err != nil {
+		return err
+	}
 	for _, path := range append(claim.Files, claim.GeneratedDoc...) {
 		if err := requireFile(root, path); err != nil {
 			return fmt.Errorf("claim %s: %w", claim.ID, err)
