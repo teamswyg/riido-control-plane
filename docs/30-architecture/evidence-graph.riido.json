@@ -827,8 +827,8 @@
     },
     {
       "id": "claim_verifier_annotation_loop",
-      "observation": "Claim verifier commands, PR impact changed files, changed claim ids, changed claim generated evidence, reasoning evidence, and claim-bound surface scope existed in the loop-registry evidence artifact, but a reviewer or agent still had to open artifacts or run jq before seeing the exact target QA command or changed semantic surfaces in a PR check.",
-      "hypothesis": "Emitting GitHub Actions annotations from the same loop-registry evidence surface makes target verifier commands, impact changed files, changed claims, changed claim generated evidence, reasoning evidence, and claim-bound surfaces visible in CI without adding another narrative handoff.",
+      "observation": "Claim verifier commands, PR impact changed files, changed claim ids, changed claim generated evidence, reasoning evidence, claim-bound surface scope, and failed impact violation repair scope existed in the loop-registry evidence artifact, but a reviewer or agent still had to open artifacts or run jq before seeing the exact target QA command, changed semantic surfaces, or required co-change repair in a PR check.",
+      "hypothesis": "Emitting GitHub Actions annotations from the same loop-registry evidence surface makes target verifier commands, impact changed files, changed claims, changed claim generated evidence, reasoning evidence, claim-bound surfaces, and failed impact violation repair scope visible in CI without adding another narrative handoff.",
       "claims": ["claim_verifier_commands_must_surface_as_ci_annotations"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
@@ -836,7 +836,9 @@
         {"kind": "tool", "path": "tools/loopregistry/github_annotation_claim_impact.go"},
         {"kind": "tool", "path": "tools/loopregistry/github_annotation.go"},
         {"kind": "tool", "path": "tools/loopregistry/github_annotation_impact.go"},
+        {"kind": "tool", "path": "tools/loopregistry/github_annotation_impact_violation.go"},
         {"kind": "tool", "path": "tools/loopregistry/github_annotation_escape.go"},
+        {"kind": "test", "path": "tools/loopregistry/github_annotation_impact_violation_test.go"},
         {"kind": "test", "path": "tools/loopregistry/github_annotation_escape_test.go"},
         {"kind": "tool", "path": "tools/loopregistry/main.go"},
         {"kind": "tool", "path": "tools/loopregistry/run.go"},
@@ -846,6 +848,7 @@
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/github_annotation_claim_impact_test.go"},
         {"kind": "test", "path": "tools/loopregistry/github_annotation_escape_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/github_annotation_impact_violation_test.go"},
         {"kind": "test", "path": "tools/loopregistry/github_annotation_test.go"},
         {"kind": "test", "path": "tools/loopregistry/github_annotation_workflow_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"},
@@ -856,7 +859,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
-      "decision": "Loop-registry PR checks now surface claim verifier commands, impact changed files, changed claim ids, changed claim generated evidence, reasoning evidence, and bound claim surfaces as GitHub annotations, and the claim coverage tokens keep that annotation requirement visible to loop-closure audit even when artifacts and prose are skipped.",
+      "decision": "Loop-registry PR checks now surface claim verifier commands, impact changed files, changed claim ids, changed claim generated evidence, reasoning evidence, bound claim surfaces, and failed impact violation repair scope as GitHub annotations, and the claim coverage tokens keep that annotation requirement visible to loop-closure audit even when artifacts and prose are skipped.",
       "next_loop": "closed_loop_candidate"
     },
     {
