@@ -30,6 +30,9 @@ func verifyArchitectureComponents(root string, m manifest) error {
 			return fmt.Errorf("hot path category %s lacks architecture component", path.Category)
 		}
 	}
+	if err := verifyArchitectureHotPathFiles(m); err != nil {
+		return err
+	}
 	for _, dimension := range requiredPressureDimensions {
 		if !dimensions[dimension] {
 			return fmt.Errorf("pressure dimension %s lacks architecture component", dimension)
@@ -47,6 +50,9 @@ func verifyArchitectureComponent(root string, c architectureComponent, seen map[
 		len(c.PressureDimensions) == 0 || len(c.ObservabilitySignals) == 0 ||
 		len(c.EvidenceRefs) == 0 {
 		return fmt.Errorf("architecture component %s missing semantic bindings", c.ID)
+	}
+	if err := verifyArchitectureComponentFileSet(c); err != nil {
+		return err
 	}
 	for _, file := range c.Files {
 		if _, err := os.Stat(repoPath(root, file)); err != nil {
