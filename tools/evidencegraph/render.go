@@ -7,6 +7,8 @@ import (
 
 func renderDoc(m manifest, result verifyResult) string {
 	var b strings.Builder
+	chainSummary := summarizeChains(m.Chains)
+	nextLoopSummary := summarizeNextLoops(m.Chains)
 	fmt.Fprintf(&b, "# %s\n\n%s\n\n", m.Title, generatedNotice)
 	fmt.Fprintln(&b, "Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).")
 	fmt.Fprintln(&b)
@@ -21,6 +23,7 @@ func renderDoc(m manifest, result verifyResult) string {
 	fmt.Fprintf(&b, "- change refs: `%d`\n", result.ChangeRefs)
 	fmt.Fprintf(&b, "- verifier refs: `%d`\n", result.VerifierRefs)
 	fmt.Fprintf(&b, "- evidence refs: `%d`\n\n", result.EvidenceRefs)
+	renderChainSummary(&b, chainSummary, nextLoopSummary)
 	renderChains(&b, m.Chains)
 	renderLoop(&b, m.Loop)
 	return strings.TrimRight(b.String(), "\n") + "\n"

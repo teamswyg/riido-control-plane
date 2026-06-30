@@ -12,9 +12,27 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `66`
 - claim refs: `65`
-- change refs: `898`
-- verifier refs: `418`
+- change refs: `903`
+- verifier refs: `419`
 - evidence refs: `179`
+
+## Compiled Chain Summary
+
+- complete chains: `66` / `66`
+- claim-bound chains: `64`
+- unclaimed chains: `2`
+- next-loop targets: `8`
+
+| Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `closed_loop_candidate` | `45` | `45` | `636` | `287` | `113` |
+| `ai_thread_history` | `8` | `8` | `102` | `53` | `11` |
+| `closed_loop_candidate_decision` | `7` | `7` | `101` | `46` | `34` |
+| `provider_acceptance_harness` | `2` | `2` | `12` | `7` | `6` |
+| `closed_loop_candidate_intake` | `1` | `1` | `11` | `4` | `7` |
+| `loop_closure_audit` | `1` | `0` | `10` | `7` | `4` |
+| `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
+| `operational_readiness_release_harness` | `1` | `1` | `24` | `11` | `2` |
 
 ## Evidence Chains
 
@@ -75,7 +93,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `claim_workflow_trigger_coverage_loop` | `1` | `3` | `2` | `1` | `closed_loop_candidate` |
 | `evidence_graph_claim_coverage_loop` | `1` | `7` | `5` | `2` | `closed_loop_candidate` |
 | `loop_closure_audit_loop` | `1` | `43` | `11` | `3` | `closed_loop_candidate` |
-| `evidence_graph_full_chain_evidence_loop` | `1` | `6` | `4` | `2` | `closed_loop_candidate` |
+| `evidence_graph_full_chain_evidence_loop` | `1` | `11` | `5` | `2` | `closed_loop_candidate` |
 | `loop_registry_loop_surface_evidence_loop` | `1` | `7` | `4` | `2` | `closed_loop_candidate` |
 | `loop_registry_architecture_index_loop` | `1` | `15` | `5` | `2` | `closed_loop_candidate` |
 | `loop_registry_target_verifier_plan_loop` | `1` | `56` | `15` | `2` | `closed_loop_candidate` |
