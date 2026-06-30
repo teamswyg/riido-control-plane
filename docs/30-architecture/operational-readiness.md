@@ -43,7 +43,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `server_crash_recovery` | `chaos` | `4` | `true` | `ecs_service_recovery_chaos_evidence` | `aws ecs describe-services --cluster riido-ai-server-testnet --services riido-ai-server-testnet` |
 | `scale_out_recovery` | `chaos` | `4` | `true` | `scale_out_timing_evidence` | `aws application-autoscaling describe-scaling-policies --service-namespace ecs` |
 | `all_servers_down_daemon_behavior` | `chaos` | `4` | `true` | `daemon_reconnect_storm_evidence` | `go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
-| `desktop_body_only_change` | `desktop` | `3` | `true` | `desktop_body_only_golden_evidence` | `RIIDO_E2E_TASK_ID=<task> go run ./tools/localproductacceptance -run-task-mutations` |
+| `desktop_body_only_change` | `desktop` | `3` | `true` | `desktop_body_only_golden_evidence` | `gh issue create --repo teamswyg/riido-daemon --title "Produce desktop body-only golden evidence" --body "Produce desktop_body_only_golden_evidence by running localproductacceptance with a real staging task fixture and publish the evidence artifact."` |
 
 ## Loop
 

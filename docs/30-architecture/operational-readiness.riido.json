@@ -307,7 +307,7 @@
         {"kind": "external", "path": "riido-daemon:docs/30-architecture/local-acceptance-coverage.riido.json"}
       ],
       "next_artifact": "desktop_body_only_golden_evidence",
-      "next_command": "RIIDO_E2E_TASK_ID=<task> go run ./tools/localproductacceptance -run-task-mutations"
+      "next_command": "gh issue create --repo teamswyg/riido-daemon --title \"Produce desktop body-only golden evidence\" --body \"Produce desktop_body_only_golden_evidence by running localproductacceptance with a real staging task fixture and publish the evidence artifact.\""
     }
   ],
   "loop": {

@@ -2,10 +2,16 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
+var nextCommandPlaceholderPattern = regexp.MustCompile(`<[A-Za-z][A-Za-z0-9_.:-]*>`)
+
 func verifyNextCommand(check readinessCheck) error {
+	if nextCommandPlaceholderPattern.MatchString(check.NextCommand) {
+		return fmt.Errorf("readiness check %s next command must not contain placeholder tokens", check.ID)
+	}
 	if !daemonResilienceCheck(check.ID) {
 		return nil
 	}
