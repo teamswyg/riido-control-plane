@@ -14,6 +14,7 @@ type impactEvidence struct {
 	Claims                  []impactClaim        `json:"claims,omitempty"`
 	RemovedClaims           []impactClaim        `json:"removed_claims,omitempty"`
 	BoundSurfaces           []impactBoundSurface `json:"bound_surfaces,omitempty"`
+	Violations              []impactViolation    `json:"violations,omitempty"`
 }
 
 type impactClaim struct {
@@ -28,4 +29,16 @@ type impactBoundSurface struct {
 	ChangedBoundFiles        []string `json:"changed_bound_files"`
 	ChangedEvidence          []string `json:"changed_evidence"`
 	ChangedReasoningEvidence []string `json:"changed_reasoning_evidence"`
+}
+
+type impactViolation struct {
+	ClaimID                   string   `json:"claim_id"`
+	Scope                     string   `json:"scope"`
+	Reason                    string   `json:"reason"`
+	RequiredBoundFiles        []string `json:"required_bound_files"`
+	RequiredEvidence          []string `json:"required_evidence"`
+	RequiredReasoningEvidence []string `json:"required_reasoning_evidence"`
+	ChangedBoundFiles         []string `json:"changed_bound_files,omitempty"`
+	ChangedEvidence           []string `json:"changed_evidence,omitempty"`
+	ChangedReasoningEvidence  []string `json:"changed_reasoning_evidence,omitempty"`
 }

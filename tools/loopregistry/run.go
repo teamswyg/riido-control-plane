@@ -52,9 +52,9 @@ func run(opt options) error {
 	if err := maybeDoc(root, m.GeneratedDoc, doc, opt.WriteDoc, opt.CheckDoc); err != nil {
 		return err
 	}
-	impact, err := maybeVerifyImpact(root, opt.Manifest, opt.ImpactBase, m)
-	if err != nil {
+	impact, impactErr := maybeVerifyImpact(root, opt.Manifest, opt.ImpactBase, m)
+	if err := writeRunOutputs(opt, m, result, impact); err != nil {
 		return err
 	}
-	return writeRunOutputs(opt, m, result, impact)
+	return impactErr
 }

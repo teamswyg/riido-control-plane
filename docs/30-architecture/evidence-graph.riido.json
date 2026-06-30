@@ -552,8 +552,8 @@
     },
     {
       "id": "claim_impact_changed_files_evidence_loop",
-      "observation": "Loop registry impact evidence exposed changed_file_count but not the actual changed repository paths, forcing agents and reviewers to rerun git diff before understanding PR impact scope.",
-      "hypothesis": "Publishing a sorted changed_files list in the impact evidence makes the impact verifier output self-contained and lets downstream agents infer semantic scope from evidence alone.",
+      "observation": "Loop registry impact evidence exposed changed_file_count without the actual changed repository paths, and co-change failures returned an error before writing a machine-readable repair record, forcing agents and reviewers to rerun git diff or infer missing bound files, generated docs, and reasoning evidence from prose.",
+      "hypothesis": "Publishing a sorted changed_files list plus failed co-change violation records in impact evidence makes PR impact failure output self-contained and lets downstream agents infer semantic scope and repair actions from evidence alone.",
       "claims": ["claim_impact_evidence_must_expose_changed_files"],
       "changes": [
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
@@ -561,10 +561,15 @@
         {"kind": "tool", "path": "tools/loopregistry/impact_changed_files.go"},
         {"kind": "tool", "path": "tools/loopregistry/impact.go"},
         {"kind": "tool", "path": "tools/loopregistry/impact_types.go"},
-        {"kind": "test", "path": "tools/loopregistry/impact_changed_files_test.go"}
+        {"kind": "tool", "path": "tools/loopregistry/impact_violation.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence_build.go"},
+        {"kind": "tool", "path": "tools/loopregistry/run.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_changed_files_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_violation_test.go"}
       ],
       "verifiers": [
         {"kind": "test", "path": "tools/loopregistry/impact_changed_files_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/impact_violation_test.go"},
         {"kind": "tool", "path": "tools/loopregistry"},
         {"kind": "tool", "path": "tools/evidencegraph"}
       ],
@@ -572,7 +577,7 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Impact evidence now includes changed_files alongside changed_file_count, so PR impact scope is executable evidence rather than an implicit git-diff side channel.",
+      "decision": "Impact evidence now includes changed_files alongside changed_file_count and failed co-change violations with required bound files, generated evidence, reasoning evidence, and observed changed surfaces, so PR impact scope and repair actions are executable evidence rather than implicit git-diff or prose side channels.",
       "next_loop": "closed_loop_candidate"
     },
     {

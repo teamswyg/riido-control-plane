@@ -11,7 +11,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 	return evidence{
 		SchemaVersion:             evidenceSchema,
 		ID:                        m.ID,
-		Status:                    "verified",
+		Status:                    evidenceStatus(impact),
 		GeneratedAt:               generatedAt,
 		ExpiresAt:                 expiresAt,
 		LoopCount:                 result.Loops,
@@ -41,6 +41,13 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		Loop:                      m.Loop,
 		Impact:                    impact,
 	}
+}
+
+func evidenceStatus(impact *impactEvidence) string {
+	if impact != nil && len(impact.Violations) > 0 {
+		return "failed"
+	}
+	return "verified"
 }
 
 func evidenceRefreshPlans(m manifest, result verifyResult, now time.Time) []refreshPlan {
