@@ -1738,7 +1738,9 @@
         {"kind": "tool", "path": "tools/operationalreadiness"},
         {"kind": "tool", "path": "tools/closedloopcandidateintake"},
         {"kind": "tool", "path": "tools/closedloopcandidatedecision"},
+        {"kind": "tool", "path": "tools/loopregistry/verify_claim_intent.go"},
         {"kind": "test", "path": "tools/operationalreadiness/verify_alias_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/verify_claim_intent_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "verifiers": [
@@ -1748,6 +1750,7 @@
         {"kind": "test", "path": "tools/operationalreadiness/verify_alias_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidateintake/main_test.go"},
         {"kind": "test", "path": "tools/closedloopcandidatedecision/main_test.go"},
+        {"kind": "test", "path": "tools/loopregistry/verify_claim_intent_test.go"},
         {"kind": "test", "path": "tools/loopclosureaudit/claim_coverage_regression_test.go"}
       ],
       "evidence": [
