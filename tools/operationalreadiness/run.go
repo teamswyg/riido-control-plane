@@ -25,6 +25,11 @@ func run(opt options) error {
 			return err
 		}
 	}
+	if opt.PublicStatusOut != "" {
+		if err := writeText(opt.PublicStatusOut, renderPublicStatusDoc(e.PublicStatus)); err != nil {
+			return err
+		}
+	}
 	if opt.CandidateOut != "" {
 		return writeJSON(opt.CandidateOut, newCandidateEvidence(m, e, now))
 	}
