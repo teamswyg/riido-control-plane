@@ -16,6 +16,10 @@ func verifyAll(root string, m manifest) (verifyResult, error) {
 	if err := verifySourceCoverage(root, registry, m.Sources); err != nil {
 		return verifyResult{}, err
 	}
+	coverage, err := sourceCoverageSummary(root, registry)
+	if err != nil {
+		return verifyResult{}, err
+	}
 	claimCount := 0
 	for _, source := range m.Sources {
 		if err := verifySource(root, source); err != nil {
@@ -29,7 +33,11 @@ func verifyAll(root string, m manifest) (verifyResult, error) {
 		}
 		claimCount += len(source.RequiredNextArtifacts)
 	}
-	return verifyResult{SourceCount: len(m.Sources), ClaimCount: claimCount}, nil
+	return verifyResult{
+		SourceCount: len(m.Sources), ClaimCount: claimCount,
+		SidecarSourceCount:              coverage.SidecarSourceCount,
+		LoopOwnedCandidateProducerCount: coverage.LoopOwnedCandidateProducerCount,
+	}, nil
 }
 
 func verifyIdentity(m manifest) error {

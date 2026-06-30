@@ -25,6 +25,8 @@ type runRecord struct {
 }
 
 type verifyResult struct {
-	SourceCount int `json:"source_count"`
-	ClaimCount  int `json:"claim_count"`
+	SourceCount                     int `json:"source_count"`
+	SidecarSourceCount              int `json:"sidecar_source_count"`
+	LoopOwnedCandidateProducerCount int `json:"loop_owned_candidate_producer_count"`
+	ClaimCount                      int `json:"claim_count"`
 }

@@ -28,7 +28,10 @@
         {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
         {"kind": "tool", "path": "tools/harnesspromotion"},
         {"kind": "tool", "path": "tools/harnesspromotion/source_coverage.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/source_coverage_summary.go"},
         {"kind": "tool", "path": "tools/harnesspromotion/source_sidecar.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/evidence.go"},
+        {"kind": "tool", "path": "tools/harnesspromotion/render.go"},
         {"kind": "tool", "path": "tools/loopregistry/harness_candidate_producer.go"},
         {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
         {"kind": "workflow", "path": ".github/workflows/harness-promotion.yml"}
@@ -36,6 +39,7 @@
       "verifiers": [
         {"kind": "tool", "path": "tools/harnesspromotion"},
         {"kind": "test", "path": "tools/harnesspromotion/source_coverage_test.go"},
+        {"kind": "test", "path": "tools/harnesspromotion/source_scope_test.go"},
         {"kind": "test", "path": "tools/loopregistry/harness_candidate_producer_test.go"},
         {"kind": "workflow", "path": ".github/workflows/harness-promotion.yml"}
       ],
