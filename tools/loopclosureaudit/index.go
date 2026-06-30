@@ -1,20 +1,24 @@
 package main
 
 type indexes struct {
-	loops  map[string]registryLoop
-	claims map[string]registryClaim
-	edges  map[graphEdge]struct{}
-	chains map[string]evidenceChain
-	hooks  map[string]preCommitHook
+	loops           map[string]registryLoop
+	claims          map[string]registryClaim
+	edges           map[graphEdge]struct{}
+	chains          map[string]evidenceChain
+	hooks           map[string]preCommitHook
+	graphSummary    graphChainSummary
+	nextLoopSummary []graphNextLoopSummary
 }
 
 func newIndexes(deps dependencies) indexes {
 	idx := indexes{
-		loops:  map[string]registryLoop{},
-		claims: map[string]registryClaim{},
-		edges:  map[graphEdge]struct{}{},
-		chains: map[string]evidenceChain{},
-		hooks:  map[string]preCommitHook{},
+		loops:           map[string]registryLoop{},
+		claims:          map[string]registryClaim{},
+		edges:           map[graphEdge]struct{}{},
+		chains:          map[string]evidenceChain{},
+		hooks:           map[string]preCommitHook{},
+		graphSummary:    summarizeGraphChains(deps.graph.Chains),
+		nextLoopSummary: summarizeGraphNextLoops(deps.graph.Chains),
 	}
 	for _, loop := range deps.registry.Loops {
 		idx.loops[loop.ID] = loop

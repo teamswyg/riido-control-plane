@@ -37,13 +37,17 @@ type graphEdge struct {
 	Relation string `json:"relation"`
 }
 
-type evidenceGraph struct {
-	Chains []evidenceChain `json:"chains"`
+type graphChainSummary struct {
+	ChainCount       int `json:"chain_count"`
+	CompleteChains   int `json:"complete_chain_count"`
+	ClaimBoundChains int `json:"claim_bound_chain_count"`
+	UnclaimedChains  int `json:"unclaimed_chain_count"`
+	NextLoopCount    int `json:"next_loop_count"`
 }
 
-type evidenceChain struct {
-	ID     string   `json:"id"`
-	Claims []string `json:"claims"`
+type graphNextLoopSummary struct {
+	NextLoop   string `json:"next_loop"`
+	ChainCount int    `json:"chain_count"`
 }
 
 type preCommitManifest struct {

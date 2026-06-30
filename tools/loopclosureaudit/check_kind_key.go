@@ -13,3 +13,7 @@ func workflowProofKey(c check) string {
 func graphEdgeProofKey(c check) string {
 	return "graph_edge:" + c.From + ":" + c.Relation + ":" + c.To
 }
+
+func graphSummaryCheckProofKey(c check) string {
+	return graphSummaryProofKey(c)
+}

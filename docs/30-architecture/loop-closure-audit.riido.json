@@ -89,6 +89,7 @@
         {"kind": "claim", "id": "loop_closure_audit_must_prove_human_exit_requirements"},
         {"kind": "graph_chain", "id": "evidence_graph_claim_coverage_loop", "claims": ["evidence_graph_must_cover_loop_registry_claims"]},
         {"kind": "graph_chain", "id": "loop_closure_audit_loop", "claims": ["loop_closure_audit_must_prove_human_exit_requirements"]},
+        {"kind": "graph_summary", "id": "evidence_graph_chain_summary"},
         {"kind": "graph_edge", "from": "loop_closure_audit", "to": "loop_closure_audit_must_prove_human_exit_requirements", "relation": "enforces"},
         {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml", "contains": ["-impact-base", "evidence-graph-evidence"]}
       ]
@@ -106,6 +107,7 @@
     "loop closure audit evidence must expose each requirement's check details, not only check kinds",
     "loop closure audit evidence must expose each requirement's verified proof status, proof count, and proof keys",
     "loop closure audit evidence must expose proof surfaces for claims, loops, workflows, graph chains, graph edges, and pre-commit hooks",
+    "loop closure audit evidence must expose evidence graph compiled chain summary as a proof surface",
     "loop closure audit evidence must expose proof surface coverage counts and keep proof surface gaps at zero",
     "loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts when present",
     "loop closure audit summary evidence must expose candidate artifact, promotion target, and candidate count",
