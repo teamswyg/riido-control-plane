@@ -10,11 +10,11 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `65`
-- claim refs: `64`
-- change refs: `865`
-- verifier refs: `408`
-- evidence refs: `177`
+- chains: `66`
+- claim refs: `65`
+- change refs: `876`
+- verifier refs: `413`
+- evidence refs: `179`
 
 ## Evidence Chains
 
@@ -45,7 +45,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `loop_registry_graph_edge_evidence_loop` | `1` | `9` | `6` | `2` | `closed_loop_candidate` |
 | `claim_verifier_annotation_loop` | `1` | `11` | `7` | `2` | `closed_loop_candidate` |
 | `evidence_graph_annotation_loop` | `1` | `13` | `4` | `2` | `closed_loop_candidate` |
-| `harness_workflow_coverage_loop` | `1` | `6` | `5` | `2` | `closed_loop_candidate` |
+| `harness_workflow_coverage_loop` | `1` | `10` | `5` | `2` | `closed_loop_candidate` |
+| `generated_endpoint_smoke_matrix_exclusion_loop` | `1` | `7` | `5` | `2` | `closed_loop_candidate` |
 | `deleted_agent_thread_retention_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `thread_history_user_followup_retention_loop` | `1` | `12` | `6` | `1` | `ai_thread_history` |
 | `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |

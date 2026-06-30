@@ -889,12 +889,16 @@
     },
     {
       "id": "harness_workflow_coverage_loop",
-      "observation": "Harness-like workflow names could be added without being registered as harness loops, explicitly excluded from harness ownership, or bound to observe/verify/fail tokens that tell agents this is a harness-failure promotion rule.",
-      "hypothesis": "Scanning smoke, load, and harness workflow filenames, requiring either a harness loop registration or a reasoned exclusion, and binding the claim to harness_failure/regression_pattern observations keeps new QA workflows bound to closed-loop promotion semantics.",
+      "observation": "Harness-like workflow names could be added without being registered as harness loops, explicitly excluded from harness ownership, or bound to observe/verify/fail tokens that tell agents this is a harness-failure promotion rule; reason-only exclusions still forced humans to infer which executable surface replaced the harness loop.",
+      "hypothesis": "Scanning smoke, load, and harness workflow filenames, requiring either a harness loop registration or an exclusion with replacement claim and replacement evidence, and binding the claim to harness_failure/regression_pattern observations keeps new QA workflows bound to closed-loop promotion semantics without relying on prose interpretation.",
       "claims": ["harness_like_workflows_must_be_registered_or_excluded"],
       "changes": [
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
         {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence.go"},
+        {"kind": "tool", "path": "tools/loopregistry/evidence_build.go"},
+        {"kind": "tool", "path": "tools/loopregistry/render.go"},
+        {"kind": "tool", "path": "tools/loopregistry/render_harness_workflow_exclusion.go"},
         {"kind": "tool", "path": "tools/loopregistry/harness_workflow_coverage.go"},
         {"kind": "tool", "path": "tools/loopregistry/harness_workflow_exclusion.go"},
         {"kind": "test", "path": "tools/loopregistry/harness_workflow_coverage_test.go"},
@@ -911,7 +915,35 @@
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
         {"kind": "artifact", "path": "evidence-graph-evidence", "redacted": true}
       ],
-      "decision": "Smoke, load, and harness workflow additions now fail loop-registry verification unless they are registered as failure-promoting harness loops or explicitly excluded with a machine-readable reason, and loopclosureaudit keeps that rule bound to explicit harness failure observe/verify/fail tokens.",
+      "decision": "Smoke, load, and harness workflow additions now fail loop-registry verification unless they are registered as failure-promoting harness loops or explicitly excluded with a machine-readable reason plus replacement claim/evidence; loop registry evidence exposes those exclusions so agents can follow the executable replacement surface directly.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "generated_endpoint_smoke_matrix_exclusion_loop",
+      "observation": "The generated endpoint smoke matrix workflow looked harness-like by filename, but it is intended to be a contract and generator gate; without a replacement claim/evidence binding, agents had to trust prose to know why it was excluded from harness failure promotion.",
+      "hypothesis": "Binding the workflow to a dedicated contract-gate claim, smoke matrix manifest, generated doc, OpenAPI parity tests, generated endpoint smoke tests, and uploaded evidence artifact makes the exclusion executable and keeps future workflow changes from silently becoming unpromoted QA harnesses.",
+      "claims": ["generated_endpoint_smoke_matrix_must_remain_contract_gate"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-generated-endpoint-smoke-matrix.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/ai-agent-generated-endpoint-smoke-matrix.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json"},
+        {"kind": "tool", "path": "tools/aigeneratedsmokematrix/verify.go"},
+        {"kind": "test", "path": "tools/aigeneratedsmokematrix/main_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "tools/aigeneratedsmokematrix/main_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_test.go"},
+        {"kind": "tool", "path": "tools/aigeneratedsmokematrix"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-generated-endpoint-smoke-matrix.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "ai-agent-generated-endpoint-smoke-matrix-evidence", "redacted": true},
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
+      ],
+      "decision": "Generated endpoint smoke matrix remains excluded from harness promotion only as long as its contract/generator claim, tests, generated docs, workflow, and evidence artifact stay connected.",
       "next_loop": "closed_loop_candidate"
     },
     {

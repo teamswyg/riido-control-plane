@@ -23,6 +23,7 @@ type evidence struct {
 	RefreshCadenceMinutes     map[string]int                 `json:"refresh_cadence_minutes"`
 	RefreshPlans              []refreshPlan                  `json:"refresh_plans"`
 	ProviderCoverage          map[string][]string            `json:"provider_coverage,omitempty"`
+	HarnessWorkflowExclusions []harnessWorkflowExclusion     `json:"harness_workflow_exclusions,omitempty"`
 	HarnessPromotionWorkflows map[string]string              `json:"harness_promotion_workflows"`
 	HarnessCandidateArtifacts map[string]string              `json:"harness_candidate_artifacts"`
 	Workflow                  string                         `json:"workflow"`

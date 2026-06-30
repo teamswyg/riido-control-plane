@@ -1,6 +1,8 @@
 name: ai-agent-generated-endpoint-smoke-matrix
 
 on:
+  schedule:
+    - cron: "42 20 * * *"
   push:
     branches: [main]
     paths:
@@ -28,6 +30,8 @@ on:
 jobs:
   smoke-matrix:
     runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: closed_loop_candidate
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
