@@ -1,19 +1,12 @@
 package main
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
 
 func TestLoopRefreshDispatchWorkflowDoesNotEvalCommands(t *testing.T) {
-	path := filepath.Join(repoRootForTest(t), ".github", "workflows", "loop-refresh-dispatch.yml")
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	text := string(data)
+	text := loopRefreshDispatchWorkflowText(t)
 	for _, forbidden := range []string{"eval ", ".commands[].command", "bash -c"} {
 		if strings.Contains(text, forbidden) {
 			t.Fatalf("workflow must not execute raw command strings: found %q", forbidden)
@@ -26,12 +19,7 @@ func TestLoopRefreshDispatchWorkflowDoesNotEvalCommands(t *testing.T) {
 }
 
 func TestLoopRefreshDispatchWorkflowConsumesDecisionCommands(t *testing.T) {
-	path := filepath.Join(repoRootForTest(t), ".github", "workflows", "loop-refresh-dispatch.yml")
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	text := string(data)
+	text := loopRefreshDispatchWorkflowText(t)
 	if !strings.Contains(text, "closed-loop-candidate-decision-commands") {
 		t.Fatal("workflow must download candidate decision command evidence")
 	}
@@ -48,32 +36,11 @@ func TestLoopRefreshDispatchWorkflowConsumesDecisionCommands(t *testing.T) {
 }
 
 func TestLoopRefreshDispatchWorkflowUsesCommandFixture(t *testing.T) {
-	path := filepath.Join(repoRootForTest(t), ".github", "workflows", "loop-refresh-dispatch.yml")
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	text := string(data)
+	text := loopRefreshDispatchWorkflowText(t)
 	if !strings.Contains(text, "loop-refresh-commands.fixture.json") {
 		t.Fatal("workflow sample must consume the command fixture")
 	}
 	if strings.Contains(text, "cat > out/sample-loop-refresh-commands.json") {
 		t.Fatal("workflow must not embed loop refresh command JSON inline")
-	}
-}
-
-func TestLoopRefreshDispatchWorkflowSeparatesSampleAndLiveArtifacts(t *testing.T) {
-	text := loopRefreshDispatchWorkflowText(t)
-	for _, required := range []string{
-		"-evidence-out out/sample/loop-refresh-dispatch-plan.json",
-		"-candidate-out out/sample/loop-refresh-dispatch-closed-loop-candidates.json",
-		"if: github.event_name == 'pull_request'",
-		"cp out/sample/loop-refresh-dispatch-plan.json out/loop-refresh-dispatch-plan.json",
-		"rm -f out/loop-refresh-dispatch-plan.json",
-		"rm -f out/loop-refresh-dispatch-closed-loop-candidates.json",
-	} {
-		if !strings.Contains(text, required) {
-			t.Fatalf("workflow must keep sample evidence away from live artifacts: missing %q", required)
-		}
 	}
 }
