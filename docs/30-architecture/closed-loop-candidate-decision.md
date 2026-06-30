@@ -6,7 +6,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `24`
+- decisions: `28`
 - command artifact: `closed-loop-candidate-decision-commands`
 
 ## Assertions
@@ -46,11 +46,11 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Decision Summary
 
-- registered decisions: `24`
+- registered decisions: `28`
 - consumed decisions: `0`
-- disposition counts: `deferred=7`, `triage_required=17`
-- priority counts: `P1=17`, `P2=7`
-- next artifact counts: `claim_binding=9`, `cold_start_packet_burst_evidence=1`, `daemon_network_disconnect_release_evidence=1`, `daemon_reconnect_storm_evidence=1`, `decision_record=2`, `desktop_body_only_golden_evidence=1`, `ecs_service_recovery_chaos_evidence=1`, `infra_cloudwatch_alarm_by_client_surface=1`, `redacted_evidence=5`, `scale_out_timing_evidence=1`, `single_pc_agent_capacity_evidence=1`
+- disposition counts: `deferred=7`, `triage_required=21`
+- priority counts: `P0=3`, `P1=18`, `P2=7`
+- next artifact counts: `claim_binding=13`, `cold_start_packet_burst_evidence=1`, `daemon_network_disconnect_release_evidence=1`, `daemon_reconnect_storm_evidence=1`, `decision_record=2`, `desktop_body_only_golden_evidence=1`, `ecs_service_recovery_chaos_evidence=1`, `infra_cloudwatch_alarm_by_client_surface=1`, `redacted_evidence=5`, `scale_out_timing_evidence=1`, `single_pc_agent_capacity_evidence=1`
 
 ## Decisions
 
@@ -59,6 +59,10 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `ai-agent-client-testnet-smoke:provider_smoke` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-01` | `claim_binding` |
 | `ai-agent-client-testnet-load:load_harness_client_read_pressure` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `ai-agent-client-testnet-load:load_harness_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `ai-agent-intent-gate-contract:intent_gate_waiting_for_user_no_stream_contract` | `triage_required` | `P0` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `ai-agent-intent-gate-contract:intent_gate_metadata_fallback_contract` | `triage_required` | `P0` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `ai-agent-intent-gate-contract:intent_gate_v3_conversation_timeline_contract` | `triage_required` | `P0` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `ai-agent-intent-gate-contract:intent_gate_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `control-plane-performance:control_plane_performance_hot_path_benchmarks` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `control-plane-performance:control_plane_performance_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `control-plane-pressure:http_endpoint_threads_v3` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |

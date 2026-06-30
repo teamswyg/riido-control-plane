@@ -6,8 +6,8 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 
 ## Summary
 
-- sources: `7`
-- required refs: `42`
+- sources: `8`
+- required refs: `48`
 
 ## Sources
 
@@ -15,6 +15,7 @@ Executable SSOT: [`closed-loop-candidate-intake.riido.json`](closed-loop-candida
 | --- | --- | --- | ---: |
 | `ai-agent-client-testnet-smoke` | `ai-agent-client-testnet-smoke-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `ai-agent-client-testnet-load` | `ai-agent-client-testnet-load-closed-loop-candidates` | `closed_loop_candidate` | `6` |
+| `ai-agent-intent-gate-contract` | `ai-agent-intent-gate-contract-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `control-plane-performance` | `control-plane-performance-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `control-plane-pressure` | `control-plane-pressure-closed-loop-candidates` | `closed_loop_candidate` | `6` |
 | `loop-closure-audit` | `loop-closure-audit-closed-loop-candidates` | `closed_loop_candidate` | `6` |

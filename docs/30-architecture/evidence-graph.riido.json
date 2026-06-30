@@ -1943,10 +1943,50 @@
         {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"}
       ],
       "evidence": [
+        {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true},
+        {"kind": "artifact", "path": "staging-waiting-for-user-live-smoke-redacted-summary", "redacted": true}
+      ],
+      "decision": "Ambiguous task intent handling now includes non-command component documents, visible-message normalization evidence, and a redacted staging live API snapshot: without explicit action signals, the first visible agent response asks what to do before durable daemon assignment, returns waiting_for_user/needs_input without active_stream, and keeps v2 stream subscription active filters empty; tool permission wording is routed to structured approval rather than repeated conversational approval prompts; provider-limit metadata, provider wording, approval-dialog wording, local command-permission wording, context cancellation, and supervisor stop wording normalize to stable client-facing thread results; post-limit agent handoff remains enforced while preserving existing endpoint input and output fields; and the staging snapshot stays marked as redacted live evidence until a scheduled smoke can honestly create a task-context-backed intent-gate fixture and publish a strict artifact.",
+      "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "intent_gate_contract_harness_loop",
+      "observation": "The staging waiting_for_user check proved the frontend-facing P0 behavior once, but a one-time live snapshot can go stale and does not by itself create a recurring candidate when the intent-gate contract regresses.",
+      "hypothesis": "A scheduled intent-gate contract harness can run the focused HTTP and v3 conversation tests daily, publish only a redacted summary, and promote failed, cancelled, timed-out, or unknown runs into closed-loop candidates without pretending to be live staging evidence.",
+      "claims": ["intent_gate_contract_harness_must_refresh_evidence", "ambiguous_task_context_must_ask_before_work"],
+      "changes": [
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-intent-gate-contract.yml"},
+        {"kind": "workflow", "path": ".github/workflows/harness-promotion.yml"},
+        {"kind": "workflow", "path": ".github/workflows/loop-registry.yml"},
+        {"kind": "workflow", "path": ".github/workflows/evidence-graph.yml"},
+        {"kind": "workflow", "path": ".github/workflows/architecture-docs.yml"},
+        {"kind": "manifest", "path": "docs/30-architecture/live-workflow-redaction.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/harness-promotion.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/loop-registry.riido.json"},
+        {"kind": "manifest", "path": "docs/30-architecture/evidence-graph.riido.json"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_metadata_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_gate_metadata_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go"},
+        {"kind": "tool", "path": "tools/liveworkflowevidence"},
+        {"kind": "tool", "path": "tools/harnesspromotion"},
+        {"kind": "tool", "path": "tools/loopregistry"},
+        {"kind": "tool", "path": "tools/evidencegraph"},
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-intent-gate-contract.yml"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "ai-agent-intent-gate-contract-redacted-summary", "redacted": true},
+        {"kind": "artifact", "path": "ai-agent-intent-gate-contract-closed-loop-candidates", "redacted": true},
+        {"kind": "artifact", "path": "live-workflow-redaction-evidence", "redacted": true},
+        {"kind": "artifact", "path": "harness-promotion-evidence", "redacted": true},
         {"kind": "artifact", "path": "loop-registry-evidence", "redacted": true}
       ],
-      "decision": "Ambiguous task intent handling now includes non-command component documents and visible-message normalization evidence: without explicit action signals, the first visible agent response asks what to do before durable daemon assignment; tool permission wording is routed to structured approval rather than repeated conversational approval prompts; provider-limit metadata, provider wording, approval-dialog wording, local command-permission wording, context cancellation, and supervisor stop wording normalize to stable client-facing thread results; and post-limit agent handoff remains enforced while preserving existing endpoint input and output fields.",
-      "next_loop": "ai_thread_history"
+      "decision": "The waiting_for_user P0 behavior now has a scheduled contract harness: the workflow runs the focused intent-gate and v3 conversation tests, emits a 24 hour redacted summary artifact, and always converts non-success summary claims into a redacted closed-loop candidate artifact. The manual staging snapshot remains the live product proof, while this harness prevents the contract from silently regressing between live QA passes.",
+      "next_loop": "closed_loop_candidate"
     },
     {
       "id": "claim_workflow_trigger_coverage_loop",

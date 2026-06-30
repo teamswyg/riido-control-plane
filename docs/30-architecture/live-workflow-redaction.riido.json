@@ -84,6 +84,37 @@
       ]
     },
     {
+      "id": "ai-agent-intent-gate-contract",
+      "path": ".github/workflows/ai-agent-intent-gate-contract.yml",
+      "summary_artifact": "ai-agent-intent-gate-contract-redacted-summary",
+      "summary_path": "out/ai-agent-intent-gate-contract-redacted-summary.json",
+      "evidence_ttl_hours": 24,
+      "sensitive_inputs": ["RIIDO_LIVE_CHECK_STATUS"],
+      "allowed_summary_fields": ["schema_version", "id", "status", "workflow", "run", "generated_at", "expires_at", "live_status", "evidence_claims", "redaction"],
+      "evidence_claims": [
+        {
+          "id": "intent_gate_waiting_for_user_no_stream_contract",
+          "summary": "intent-gate contract tests verify that ambiguous task context returns waiting_for_user/needs_input without opening active_stream before durable daemon assignment.",
+          "source_phrases": ["TestHTTPAIAgentIntentGateWaitsForUserBeforeDurableAssignment", "Verify AI Agent intent-gate contract"]
+        },
+        {
+          "id": "intent_gate_metadata_fallback_contract",
+          "summary": "intent-gate contract tests verify that metadata-only non-command task context asks for user intent when document content is missing.",
+          "source_phrases": ["TestHTTPAIAgentIntentGateUsesMetadataWhenDocumentMissing", "Verify AI Agent intent-gate contract"]
+        },
+        {
+          "id": "intent_gate_v3_conversation_timeline_contract",
+          "summary": "intent-gate contract tests verify the v3 conversation timeline keeps the root question, follow-up work, provider-limit result, and handoff history in the expected conversation structure.",
+          "source_phrases": ["TestHTTPAIAgentIntentDialogueV3KeepsScenarioTimeline", "Verify AI Agent intent-gate contract"]
+        },
+        {
+          "id": "intent_gate_closed_loop_promotion",
+          "summary": "intent-gate contract workflow publishes redacted summary evidence and promotes failed runs into closed-loop candidates.",
+          "source_phrases": ["ai-agent-intent-gate-contract-redacted-summary", "ai-agent-intent-gate-contract-closed-loop-candidates", "go run ./tools/harnesspromotion"]
+        }
+      ]
+    },
+    {
       "id": "control-plane-performance",
       "path": ".github/workflows/control-plane-performance.yml",
       "summary_artifact": "control-plane-performance-redacted-summary",

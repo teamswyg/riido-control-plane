@@ -19,7 +19,7 @@ func TestManifestEvidence(t *testing.T) {
 	text := string(data)
 	for _, phrase := range []string{
 		"\"status\": \"verified\"",
-		"\"workflow_count\": 4",
+		"\"workflow_count\": 5",
 		"\"id\": \"control-plane-performance\"",
 	} {
 		if !strings.Contains(text, phrase) {

@@ -41,6 +41,46 @@
       "reason": "Load harness promotion failures must not remain isolated workflow reports without a decision owner."
     },
     {
+      "candidate_id": "ai-agent-intent-gate-contract:intent_gate_waiting_for_user_no_stream_contract",
+      "disposition": "triage_required",
+      "priority": "P0",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-08",
+      "reason": "Waiting-for-user regressions directly affect P0 frontend QA, so a failed contract harness needs claim-bound ownership before it can be closed."
+    },
+    {
+      "candidate_id": "ai-agent-intent-gate-contract:intent_gate_metadata_fallback_contract",
+      "disposition": "triage_required",
+      "priority": "P0",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-08",
+      "reason": "Metadata-only task context fallback decides whether an agent asks or starts work, so failures need an owned verifier decision."
+    },
+    {
+      "candidate_id": "ai-agent-intent-gate-contract:intent_gate_v3_conversation_timeline_contract",
+      "disposition": "triage_required",
+      "priority": "P0",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-08",
+      "reason": "The v3 conversation timeline is the frontend refresh contract for user/agent messages, so regressions must become owned closed-loop work."
+    },
+    {
+      "candidate_id": "ai-agent-intent-gate-contract:intent_gate_closed_loop_promotion",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-08",
+      "reason": "Intent-gate harness promotion must stay connected to candidate intake and decision ownership instead of becoming a standalone report."
+    },
+    {
       "candidate_id": "control-plane-performance:control_plane_performance_hot_path_benchmarks",
       "disposition": "triage_required",
       "priority": "P1",

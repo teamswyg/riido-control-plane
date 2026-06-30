@@ -47,6 +47,25 @@
       ]
     },
     {
+      "id": "ai-agent-intent-gate-contract",
+      "harness_loop": "intent_gate_contract_harness",
+      "source_workflow": ".github/workflows/ai-agent-intent-gate-contract.yml",
+      "summary_artifact": "ai-agent-intent-gate-contract-redacted-summary",
+      "summary_path": "out/ai-agent-intent-gate-contract-redacted-summary.json",
+      "candidate_artifact": "ai-agent-intent-gate-contract-closed-loop-candidates",
+      "candidate_path": "out/ai-agent-intent-gate-contract-closed-loop-candidates.json",
+      "promotion_target": "closed_loop_candidate",
+      "failure_statuses": ["failure", "cancelled", "timed_out", "unknown"],
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    },
+    {
       "id": "control-plane-performance",
       "harness_loop": "control_plane_performance_harness",
       "source_workflow": ".github/workflows/control-plane-performance.yml",

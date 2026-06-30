@@ -50,6 +50,24 @@
       ]
     },
     {
+      "id": "ai-agent-intent-gate-contract",
+      "candidate_artifact": "ai-agent-intent-gate-contract-closed-loop-candidates",
+      "source_workflow": ".github/workflows/ai-agent-intent-gate-contract.yml",
+      "producer_manifest": "docs/30-architecture/harness-promotion.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "intent_gate_contract_harness",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    },
+    {
       "id": "control-plane-performance",
       "candidate_artifact": "control-plane-performance-closed-loop-candidates",
       "source_workflow": ".github/workflows/control-plane-performance.yml",

@@ -1,0 +1,92 @@
+name: ai-agent-intent-gate-contract
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 19 * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ai-agent-intent-gate-contract.yml"
+      - "internal/riidoaiserver/ai_agent_assignment_prompt*.go"
+      - "internal/riidoaiserver/ai_agent_client_http_intent*.go"
+      - "internal/riidoaiserver/server_assignment_request.go"
+      - "internal/riidoaiserver/server_task_context_*.go"
+      - "docs/30-architecture/live-workflow-redaction.riido.json"
+      - "docs/30-architecture/harness-promotion.riido.json"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "tools/liveworkflowevidence/**"
+      - "tools/harnesspromotion/**"
+      - "go.mod"
+      - "go.sum"
+  pull_request:
+    paths:
+      - ".github/workflows/ai-agent-intent-gate-contract.yml"
+      - "internal/riidoaiserver/ai_agent_assignment_prompt*.go"
+      - "internal/riidoaiserver/ai_agent_client_http_intent*.go"
+      - "internal/riidoaiserver/server_assignment_request.go"
+      - "internal/riidoaiserver/server_task_context_*.go"
+      - "docs/30-architecture/live-workflow-redaction.riido.json"
+      - "docs/30-architecture/harness-promotion.riido.json"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "tools/liveworkflowevidence/**"
+      - "tools/harnesspromotion/**"
+      - "go.mod"
+      - "go.sum"
+
+concurrency:
+  group: ai-agent-intent-gate-contract
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      RIIDO_LOOP_IDS: intent_gate_contract_harness ai_thread_history closed_loop_candidate
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Verify AI Agent intent-gate contract
+        run: |
+          go test ./internal/riidoaiserver \
+            -run 'TestHTTPAIAgentIntentGateWaitsForUserBeforeDurableAssignment|TestHTTPAIAgentIntentGateUsesMetadataWhenDocumentMissing|TestHTTPAIAgentIntentDialogueV3KeepsScenarioTimeline' \
+            -count=1
+
+      - name: Publish redacted intent-gate summary evidence
+        if: always()
+        env:
+          RIIDO_LIVE_CHECK_STATUS: ${{ job.status }}
+        run: |
+          mkdir -p out
+          go run ./tools/liveworkflowevidence \
+            -workflow ai-agent-intent-gate-contract \
+            -live-status "$RIIDO_LIVE_CHECK_STATUS" \
+            -evidence-out out/ai-agent-intent-gate-contract-redacted-summary.json
+
+      - name: Promote intent-gate failures to closed-loop candidates
+        if: always()
+        run: |
+          mkdir -p out
+          go run ./tools/harnesspromotion \
+            -summary out/ai-agent-intent-gate-contract-redacted-summary.json \
+            -candidate-out out/ai-agent-intent-gate-contract-closed-loop-candidates.json
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ai-agent-intent-gate-contract-redacted-summary
+          path: out/ai-agent-intent-gate-contract-redacted-summary.json
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ai-agent-intent-gate-contract-closed-loop-candidates
+          path: out/ai-agent-intent-gate-contract-closed-loop-candidates.json
+          if-no-files-found: error
