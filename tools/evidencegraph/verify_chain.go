@@ -26,6 +26,9 @@ func verifyChain(
 	if len(c.Changes) == 0 || len(c.Verifiers) == 0 || len(c.Evidence) == 0 {
 		return fmt.Errorf("%s changes, verifiers, and evidence are required", c.ID)
 	}
+	if len(c.Claims) == 0 {
+		return fmt.Errorf("%s must reference at least one loop registry claim", c.ID)
+	}
 	for _, claim := range c.Claims {
 		if !registry.Claims[claim] {
 			return fmt.Errorf("%s claim %s is not in loop registry", c.ID, claim)
