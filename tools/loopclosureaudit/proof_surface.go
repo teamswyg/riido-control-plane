@@ -37,6 +37,13 @@ func loopProofSurface(id string, idx indexes) *proofSurface {
 	}
 }
 
+func workflowProofSurface(c check) *proofSurface {
+	return &proofSurface{
+		Workflow: c.Path,
+		Contains: append([]string(nil), c.Contains...),
+	}
+}
+
 func graphEdgeProofSurface(c check) *proofSurface {
 	return &proofSurface{From: c.From, To: c.To, Relation: c.Relation}
 }
