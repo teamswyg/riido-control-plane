@@ -20,6 +20,7 @@ func newEvidence(m manifest) evidence {
 		RaceArtifact:                   m.RaceArtifact,
 		LocalPressureCommand:           m.LocalPressureCommand,
 		PressureCandidateArtifact:      m.PressureCandidateArtifact,
+		ArchitectureQueryArtifact:      m.ArchitectureQueryArtifact,
 		ManualPressureCommand:          m.ManualPressureCommand,
 		LocalPprofCommand:              m.LocalPprofCommand,
 		ArchitectureQueryCommand:       m.ArchitectureQueryCommand,

@@ -71,7 +71,9 @@ jobs:
           go test ./tools/controlplanepressure -count=1
           go run ./tools/controlplaneperf \
             -check-doc \
-            -evidence-out out/control-plane-performance-evidence.json
+            -evidence-out out/control-plane-performance-evidence.json \
+            -architecture-query-path internal/riidoaiserver/http_transaction_metrics_observe.go \
+            -architecture-query-out out/control-plane-architecture-query.json
       - name: Verify high-traffic audit evidence
         run: |
           mkdir -p out
@@ -123,6 +125,12 @@ jobs:
         with:
           name: control-plane-performance-evidence
           path: out/control-plane-performance-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: control-plane-architecture-query
+          path: out/control-plane-architecture-query.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()

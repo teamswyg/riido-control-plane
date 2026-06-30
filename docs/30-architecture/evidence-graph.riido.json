@@ -277,6 +277,7 @@
       {"kind": "artifact", "path": "control-plane-performance-redacted-summary", "redacted": true},
       {"kind": "artifact", "path": "control-plane-performance-closed-loop-candidates", "redacted": true},
       {"kind": "artifact", "path": "control-plane-pressure-closed-loop-candidates", "redacted": true},
+      {"kind": "artifact", "path": "control-plane-architecture-query", "redacted": true},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-performance.md"},
       {"kind": "generated_doc", "path": "docs/30-architecture/control-plane-high-traffic-audit.md"}
     ],

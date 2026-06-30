@@ -31,6 +31,7 @@ func renderSummary(b *strings.Builder, m manifest, e evidence) {
 	fmt.Fprintf(b, "- local pressure artifact: `%s`\n", m.LocalPressureArtifact)
 	fmt.Fprintf(b, "- race artifact: `%s`\n", m.RaceArtifact)
 	fmt.Fprintf(b, "- pressure candidate artifact: `%s`\n", m.PressureCandidateArtifact)
+	fmt.Fprintf(b, "- architecture query artifact: `%s`\n", m.ArchitectureQueryArtifact)
 	fmt.Fprintf(b, "- local pressure scenarios: `%d`\n", len(m.LocalPressureScenarios))
 	fmt.Fprintf(b, "- candidate artifact: `%s`\n\n", m.CandidateArtifact)
 }
