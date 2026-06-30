@@ -16,6 +16,7 @@ type evidence struct {
 	CandidateArtifact     string                `json:"candidate_artifact,omitempty"`
 	CandidateSourceID     string                `json:"candidate_source_id,omitempty"`
 	CandidateTarget       string                `json:"candidate_promotion_target,omitempty"`
+	CandidateSummary      candidateSummary      `json:"candidate_summary"`
 	Requirements          []requirementEvidence `json:"requirements"`
 	Assertions            []string              `json:"assertions"`
 	ResidualGaps          []residualGap         `json:"residual_gaps"`
@@ -64,6 +65,7 @@ func newEvidence(m manifest, depsOpt ...dependencies) evidence {
 		CandidateArtifact:     candidateArtifactForEvidence(m),
 		CandidateSourceID:     candidateSourceIDForEvidence(m),
 		CandidateTarget:       candidateTargetForEvidence(m),
+		CandidateSummary:      candidateSummaryForEvidence(m, coverageGaps),
 		Requirements:          reqs,
 		Assertions:            append([]string(nil), m.Assertions...),
 		ResidualGaps:          append([]residualGap(nil), m.ResidualGaps...),

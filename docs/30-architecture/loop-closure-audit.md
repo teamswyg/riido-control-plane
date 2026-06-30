@@ -28,7 +28,7 @@ Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json
 - loop closure audit evidence must expose harness promotion candidate artifacts as a proof surface
 - loop closure audit evidence must expose proof surface coverage counts and keep proof surface gaps at zero
 - loop closure audit residual gaps must be exported as redacted closed-loop candidate artifacts when present
-- loop closure audit summary evidence must expose candidate artifact, promotion target, and candidate count
+- loop closure audit summary evidence must expose candidate artifact, promotion target, candidate count, and candidate ids
 - loop closure audit evidence must expose concrete claim coverage token gaps with claim id, loop, and missing dimensions
 - loop closure audit claim coverage gaps must be exported as redacted closed-loop candidate artifacts with adoption commands when present
 
