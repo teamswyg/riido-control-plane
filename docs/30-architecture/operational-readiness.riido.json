@@ -4,6 +4,7 @@
   "title": "Operational Readiness Evidence",
   "generated_doc": "docs/30-architecture/operational-readiness.md",
   "workflow": ".github/workflows/operational-readiness.yml",
+  "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
   "evidence_artifact": "operational-readiness-evidence",
   "evidence_tool": "tools/operationalreadiness",
   "sources": [

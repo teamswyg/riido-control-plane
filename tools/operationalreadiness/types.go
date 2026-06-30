@@ -6,6 +6,7 @@ type manifest struct {
 	Title              string           `json:"title"`
 	GeneratedDoc       string           `json:"generated_doc"`
 	Workflow           string           `json:"workflow"`
+	LoopRegistry       string           `json:"loop_registry_manifest"`
 	EvidenceArtifact   string           `json:"evidence_artifact"`
 	EvidenceTool       string           `json:"evidence_tool"`
 	RequiredCategories []string         `json:"required_categories"`

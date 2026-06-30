@@ -14,4 +14,7 @@ func TestOperationalReadinessEvidenceCarriesExpiry(t *testing.T) {
 	if got.ExpiresAt != "2026-06-25T00:00:00Z" {
 		t.Fatalf("expires_at = %q", got.ExpiresAt)
 	}
+	if got.EvidenceTTLHours != readinessEvidenceTTLHours || got.LoopRegistry == "" {
+		t.Fatalf("freshness binding = %+v", got)
+	}
 }

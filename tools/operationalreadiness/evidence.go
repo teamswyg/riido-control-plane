@@ -32,11 +32,13 @@ func newEvidenceAt(m manifest, now time.Time) evidence {
 		}
 	}
 	return evidence{
-		SchemaVersion: manifestSchemaToEvidence(m.SchemaVersion),
-		Status:        "verified",
-		GeneratedAt:   generatedAt.Format(time.RFC3339),
-		ExpiresAt:     expiresAt.Format(time.RFC3339),
-		CheckCount:    len(m.Checks), MeasurementCount: measurementCount, CoveredCount: statusCounts["covered"],
+		SchemaVersion:    manifestSchemaToEvidence(m.SchemaVersion),
+		Status:           "verified",
+		GeneratedAt:      generatedAt.Format(time.RFC3339),
+		ExpiresAt:        expiresAt.Format(time.RFC3339),
+		EvidenceTTLHours: readinessEvidenceTTLHours,
+		LoopRegistry:     m.LoopRegistry,
+		CheckCount:       len(m.Checks), MeasurementCount: measurementCount, CoveredCount: statusCounts["covered"],
 		PartialCount: statusCounts["partial"], StalePartialCount: stalePartials,
 		StaleAfterDays:     stalePartialAfterDays,
 		RequiredCategories: append([]string(nil), m.RequiredCategories...),
