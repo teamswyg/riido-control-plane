@@ -30,6 +30,16 @@ func TestHarnessCandidateArtifactUploadRequiresAlways(t *testing.T) {
 	}
 }
 
+func TestHarnessPromotionWorkflowPublishesEvidenceArtifact(t *testing.T) {
+	text := workflowTextForTest(t, ".github/workflows/harness-promotion.yml")
+	if !refreshWorkflowDeclaresLoopID(text, "closed_loop_candidate") {
+		t.Fatal("harness-promotion workflow must declare closed_loop_candidate loop identity")
+	}
+	if !workflowUploadsStrictArtifact(text, "harness-promotion-evidence") {
+		t.Fatal("harness-promotion workflow must publish strict harness-promotion-evidence artifact")
+	}
+}
+
 func harnessWorkflowFixtureForTest(t *testing.T) (loopRecord, string, string) {
 	t.Helper()
 	m, _ := loadLoopRegistryForTest(t)
@@ -43,11 +53,16 @@ func harnessWorkflowFixtureForTest(t *testing.T) (loopRecord, string, string) {
 
 func harnessWorkflowTextForTest(t *testing.T, loop loopRecord) string {
 	t.Helper()
+	return workflowTextForTest(t, loop.RefreshWorkflow)
+}
+
+func workflowTextForTest(t *testing.T, workflow string) string {
+	t.Helper()
 	root, err := findRepoRoot("../..")
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := os.ReadFile(repoPath(root, loop.RefreshWorkflow))
+	data, err := os.ReadFile(repoPath(root, workflow))
 	if err != nil {
 		t.Fatalf("read harness workflow: %v", err)
 	}

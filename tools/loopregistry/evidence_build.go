@@ -30,6 +30,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		RefreshCadenceMinutes:     result.RefreshCadenceMinutes,
 		RefreshPlans:              evidenceRefreshPlans(m, result, now),
 		ProviderCoverage:          providerCoverage(m.Loops),
+		HarnessWorkflowExclusions: m.HarnessWorkflowExclusions,
 		HarnessPromotionWorkflows: result.HarnessPromotionWorkflows,
 		HarnessCandidateArtifacts: result.HarnessCandidateArtifacts,
 		Workflow:                  m.Workflow,

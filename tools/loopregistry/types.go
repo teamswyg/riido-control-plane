@@ -43,6 +43,8 @@ type evidenceKind struct {
 }
 
 type harnessWorkflowExclusion struct {
-	Workflow string `json:"workflow"`
-	Reason   string `json:"reason"`
+	Workflow            string `json:"workflow"`
+	Reason              string `json:"reason"`
+	ReplacementClaim    string `json:"replacement_claim"`
+	ReplacementEvidence string `json:"replacement_evidence"`
 }
