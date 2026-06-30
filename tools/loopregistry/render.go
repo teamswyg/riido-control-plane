@@ -22,12 +22,14 @@ func renderDoc(m manifest, result verifyResult) string {
 	renderLoops(&b, m.Loops, result)
 	renderHarnessWorkflowExclusions(&b, m.HarnessWorkflowExclusions)
 	renderCoverageDimensions(&b, loopCoverageDimensionSurfaces())
-	renderRefreshPlans(&b, refreshPlans(
+	plans := refreshPlans(
 		m.Loops,
 		m.Claims,
 		result.ClaimSurfaces,
 		result.RefreshCadenceMinutes,
-	))
+	)
+	renderRefreshPlanSummary(&b, summarizeRefreshPlans(plans))
+	renderRefreshPlans(&b, plans)
 	renderArchitectureIndex(&b, m.Claims, result.ClaimSurfaces)
 	renderClaims(&b, m.Claims)
 	renderClaimSurfaces(&b, result.ClaimSurfaces)
