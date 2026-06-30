@@ -6,7 +6,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `23`
+- decisions: `24`
 - command artifact: `closed-loop-candidate-decision-commands`
 
 ## Assertions
@@ -47,11 +47,11 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Decision Summary
 
-- registered decisions: `23`
+- registered decisions: `24`
 - consumed decisions: `0`
-- disposition counts: `deferred=7`, `triage_required=16`
-- priority counts: `P1=16`, `P2=7`
-- next artifact counts: `claim_binding=9`, `cold_start_packet_burst_evidence=1`, `daemon_network_disconnect_release_evidence=1`, `daemon_reconnect_storm_evidence=1`, `decision_record=2`, `desktop_body_only_golden_evidence=1`, `ecs_service_recovery_chaos_evidence=1`, `redacted_evidence=5`, `scale_out_timing_evidence=1`, `single_pc_agent_capacity_evidence=1`
+- disposition counts: `deferred=7`, `triage_required=17`
+- priority counts: `P1=17`, `P2=7`
+- next artifact counts: `claim_binding=9`, `client_surface_alarm_plan_apply_evidence=1`, `cold_start_packet_burst_evidence=1`, `daemon_network_disconnect_release_evidence=1`, `daemon_reconnect_storm_evidence=1`, `decision_record=2`, `desktop_body_only_golden_evidence=1`, `ecs_service_recovery_chaos_evidence=1`, `redacted_evidence=5`, `scale_out_timing_evidence=1`, `single_pc_agent_capacity_evidence=1`
 
 ## Decisions
 
@@ -73,6 +73,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `control-plane-pressure:tool_approval_waiters` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `loop-closure-audit:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
 | `loop-refresh-dispatch:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
+| `operational-readiness:otel_xray_client_surface` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `client_surface_alarm_plan_apply_evidence` |
 | `operational-readiness:daemon_network_disconnect_waiting` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `daemon_network_disconnect_release_evidence` |
 | `operational-readiness:single_pc_agent_limit` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `single_pc_agent_capacity_evidence` |
 | `operational-readiness:boot_burst_capacity` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `cold_start_packet_burst_evidence` |

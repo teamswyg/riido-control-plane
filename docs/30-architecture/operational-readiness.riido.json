@@ -142,7 +142,7 @@
   "checks": [
     {
       "id": "otel_xray_client_surface",
-      "date": "2026-07-01",
+      "date": "2026-06-26",
       "category": "monitoring",
       "status": "partial",
       "title": "OTel/X-Ray and EMF separate daemon, client app, desktop, and component traffic",
