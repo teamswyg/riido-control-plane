@@ -18,6 +18,7 @@ type evidence struct {
 	CategoryCounts     map[string]int   `json:"category_counts"`
 	MeasurementKinds   map[string]int   `json:"measurement_kinds"`
 	StatusCounts       map[string]int   `json:"status_counts"`
+	NotionOpenLoop     notionEvidence   `json:"notion_open_loop,omitempty"`
 	PartialPromotion   partialPromotion `json:"partial_promotion"`
 	PartialChecks      []partialCheck   `json:"partial_checks"`
 	Loop               loopSpec         `json:"loop"`

@@ -344,7 +344,8 @@
         "scale_out_recovery",
         "all_servers_down_daemon_behavior",
         "scenario_message_policy",
-        "desktop_body_only_change"
+        "desktop_body_only_change",
+        "notion_qa_p0_backfill"
       ],
       "verifies": [
         "required_category_coverage",
@@ -371,7 +372,11 @@
         "stale_partial_candidate_subject",
         "stale_partial_candidate_adoption_step",
         "readiness_candidate_source_binding",
-        "readiness_candidate_intake_path"
+        "readiness_candidate_intake_path",
+        "notion_open_loop_backfill",
+        "notion_p0_cycle_check_binding",
+        "notion_p0_cycle_next_artifact",
+        "notion_open_loop_cadence"
       ],
       "evidence": [
         {
@@ -411,7 +416,11 @@
         "daemon_resilience_next_command_wildcard",
         "candidate_source_drift",
         "readiness_candidate_summary_artifact_drift",
-        "readiness_candidate_artifact_missing"
+        "readiness_candidate_artifact_missing",
+        "notion_open_loop_missing",
+        "notion_cycle_unbound",
+        "notion_cycle_next_artifact_missing",
+        "notion_open_loop_cadence_drift"
       ],
       "promotes_to": [
         "closed_loop_candidate"
@@ -1054,7 +1063,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e0c72877ca1694f2cbad6ac20c3ec8a61ddd2e7f3e01583ce639087396ae5779"
+      "semantic_hash": "42b6728cd6d91ba0b0520c266f6ef890a628fd28a9fa3033fbd9e16ea053e9bf"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
@@ -1393,7 +1402,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e49bc808132dc5676c2dbd002abf72fb43cc7eac523ef2100b39def9b478a3e5"
+      "semantic_hash": "b88ff63ab19618fd2853038ab6e1652a43dd8c0c5964021481e566d2ef8622c3"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -1490,7 +1499,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "44974b5f1b98a80b83da66e2630c0aea083d8470553d76f602a337bf54517694"
+      "semantic_hash": "0f6700f3638e7700db679ae66721b3002652d0b76409d13eb7caad459206e12b"
     },
     {
       "id": "loop_closure_audit_must_prove_human_exit_requirements",
@@ -1764,7 +1773,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "49668759de3d3a643b9606d13c7c14fcec2ab6f442bb7b063388a99b83d2c89a"
+      "semantic_hash": "39cbbd5c851ad8f4b72f3cfd160b6c8b4e5bc2ccb88d648a3132b3a644d04ee4"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1824,7 +1833,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b5714fd2d900badc2f58b6dfe2ebc0fc344021196c9f23687fd48df516f3402c"
+      "semantic_hash": "05843922831788f5d4c68a9878d5bd2dda9848163ffd976616f4a94463665b7d"
     },
     {
       "id": "closed_loop_candidates_must_carry_subject",
@@ -1876,7 +1885,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "48f4bc04c7c19f417a6f26be1bd1069b0a4f727a5f8c0915dcbec318f2f41700"
+      "semantic_hash": "0e33b1b7ff0ceb163ea69e923ff1139f5e19921be92e2315e214ae35b3a9a89c"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -1970,7 +1979,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "26e1cff69cc61333d328a25101760dcac142b5bdde7204f55d289ce86d5650d4"
+      "semantic_hash": "92e9c106b5b6c4541d9c23998c346f03f9af74fbb2a0f785be9cf497c4ec7b14"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -2163,7 +2172,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ac008c6b106e4187d911a9de662522c4bc6adf892404ee2431bd9dba945208f6"
+      "semantic_hash": "7fc7fb48e7282e17f9a9e69a98f00537f9c02d414b0536850eb49bee34f3190f"
     },
     {
       "id": "loop_registry_evidence_must_expose_loop_surfaces",
@@ -2199,7 +2208,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "48a3470c09b8c2347fe3358a484687b2c7c93cd71524429e4d83abb109c27d3e"
+      "semantic_hash": "0cca0a5f265d1bbed6ecd90001fdf9a19349c9e6049d5e2c3545c7ed63312f3d"
     },
     {
       "id": "loop_registry_evidence_must_expose_architecture_index",
@@ -2252,7 +2261,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a38bae0928168807451bb7df89cf9821ef2619fa6365998fb12737854d1dfa32"
+      "semantic_hash": "10ba26bf7f3869fbcf212b0efabe0bc4d4cc3db2b29b45dee56787ec526fbf8b"
     },
     {
       "id": "loop_registry_impact_must_expose_target_verifier_plan",
@@ -2368,7 +2377,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0a5cda3a2cb38940a408d86787df31c7152c25c2d9b27f74354983b967e91e1a"
+      "semantic_hash": "22b9f632221eb3721605d04b68b7191b299e613d04ee16b7a5371d5f411dc91d"
     },
     {
       "id": "loop_coverage_dimensions_must_use_static_registry",
@@ -2422,7 +2431,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "4a3dfb0eb2822910843d55233c94df06f80c5d97e992a82b8149d3e958b47c75"
+      "semantic_hash": "9cf3ede83979ee32f22b04b34c3b967d6ebd6b845426523ae0b6c64981e792cc"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -2612,7 +2621,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "75a0627cc8fcee8d021cb466e9d03c2e4d232433ae2d4f910fca101bffc7066c"
+      "semantic_hash": "a3a18047f8345f9c12011c1651c2e5b03bd5ae32122760c83a65bdcbda6631f6"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -2696,7 +2705,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8d89b3e0a8210489e5805abdb26c1abe2717e7d743277f1851077796ba42d302"
+      "semantic_hash": "e88f6c4ba8a33a945ee002ea87cc15461a3f7fd7469b3c364cef333aa0954e68"
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
@@ -2942,7 +2951,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "4158032367a94fa2168dd6597ad3a4a54acf9cc255303f0bacae1b51fa442a55"
+      "semantic_hash": "daae95ba578b2c4499513659863972ee8c7a0e696798aa7ec58f697857a33402"
     },
     {
       "id": "pre_commit_baseline_evidence_must_self_expire",
@@ -3134,7 +3143,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "aa527ca63e6f161466467d722e2dc8f124462331a50be5efc6c61ed7693d24e0"
+      "semantic_hash": "55dbd737a0ddd3da72d7d680db03603a2355bf8fdb94dd813135f0fa15aea976"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -3173,7 +3182,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d27bd3d7b2ce8d6326f1807e5f1ddf2f7da901457195c515676f46d2ff946f5b"
+      "semantic_hash": "d542d8515c9d33878ddfbb4a1cea84847339c248cf11e646fc79c7ffaf69c992"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -3214,7 +3223,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "65084cda9d6efd1be840fe8d6a08570122e447f6a06137b89de243184fed1803"
+      "semantic_hash": "ca5f0071d12b53ca6940f4b97b7e0accc5cf5f7bef5731977a2685f8c66f8ebb"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -3264,7 +3273,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "97649cc09c8b75905a66f0b05a2f819c515bfde5bae3ef781b1a561c1d247f00"
+      "semantic_hash": "9534cb59c7bdb157b5ad260fa0b22002d6b66c40187188144d0db03ca0315142"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -3310,7 +3319,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2527a021b5ae7eb54e9eff3c77b2b18af4385c04dda60a1375abf878a28819fc"
+      "semantic_hash": "0efdcf8754fe64942eb45ff555dabd188908e334dfa075db8ce2a54fd66365b4"
     },
     {
       "id": "closed_loop_candidate_evidence_must_self_expire",
@@ -3397,7 +3406,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "287d8dbee43eb9359b5cb4716ee90c104c09da973671d587fe3ad7ee1e38b6f8"
+      "semantic_hash": "04adec559bf951a937de29a8ce7d045a8b758d63e5ffacfc214ab45f4ed3ccd3"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -4108,7 +4117,7 @@
     },
     {
       "id": "operational_readiness_checks_must_bind_release_items_to_evidence",
-      "statement": "Operational release-prep checks must bind every monitoring, usability, exception, stress, chaos, scenario, and desktop item to executable evidence; readiness evidence must carry its own expiry window, that window must match the Loop Registry expiry, partial checks must expose their next artifact, placeholder-free executable command, at least one non-manual measurement signal, and partial_promotion candidate ids/count as the first closed-loop candidate adoption step, and visual screenshot QA checks must use next commands that read issue body/comments while covered visual checks bind screenshot measurement evidence so agents do not infer unresolved readiness work from prose, server-only tests, or a tracking issue.",
+      "statement": "Operational release-prep checks must bind every monitoring, usability, exception, stress, chaos, scenario, desktop, and Notion QA P0 backfill item to executable evidence; readiness evidence must carry its own expiry window, that window must match the Loop Registry expiry, partial checks must expose their next artifact, placeholder-free executable command, at least one non-manual measurement signal, Notion QA cycles must bind page source, P0 priority, backfilled readiness check, next artifact, executable next command, and 24h workflow cadence, partial_promotion candidate ids/count as the first closed-loop candidate adoption step, and visual screenshot QA checks must use next commands that read issue body/comments while covered visual checks bind screenshot measurement evidence so agents do not infer unresolved readiness work from prose, server-only tests, a tracking issue, or unstructured Notion comments.",
       "loop": "operational_readiness_release_harness",
       "covers_observes": [
         "otel_xray_client_surface",
@@ -4123,7 +4132,8 @@
         "scale_out_recovery",
         "all_servers_down_daemon_behavior",
         "scenario_message_policy",
-        "desktop_body_only_change"
+        "desktop_body_only_change",
+        "notion_qa_p0_backfill"
       ],
       "covers_verifies": [
         "required_category_coverage",
@@ -4150,7 +4160,11 @@
         "readiness_candidate_intake_path",
         "partial_non_manual_measurement",
         "visual_screenshot_measurement_closure",
-        "visual_issue_detail_command"
+        "visual_issue_detail_command",
+        "notion_open_loop_backfill",
+        "notion_p0_cycle_check_binding",
+        "notion_p0_cycle_next_artifact",
+        "notion_open_loop_cadence"
       ],
       "covers_fails_when": [
         "readiness_category_missing",
@@ -4172,7 +4186,11 @@
         "readiness_candidate_artifact_missing",
         "partial_manual_only_measurement",
         "covered_visual_without_screenshot",
-        "visual_command_missing_issue_details"
+        "visual_command_missing_issue_details",
+        "notion_open_loop_missing",
+        "notion_cycle_unbound",
+        "notion_cycle_next_artifact_missing",
+        "notion_open_loop_cadence_drift"
       ],
       "covers_evidence": [
         "operational-readiness-evidence",
@@ -4192,6 +4210,7 @@
         "tools/operationalreadiness/next_command_test.go",
         "tools/operationalreadiness/types.go",
         "tools/operationalreadiness/types_evidence.go",
+        "tools/operationalreadiness/types_notion.go",
         "tools/operationalreadiness/types_partial_promotion.go",
         "tools/operationalreadiness/partial_promotion.go",
         "tools/operationalreadiness/partial_promotion_test.go",
@@ -4199,12 +4218,16 @@
         "tools/operationalreadiness/verify_checks.go",
         "tools/operationalreadiness/verify_evidence_ref.go",
         "tools/operationalreadiness/verify_measurements.go",
+        "tools/operationalreadiness/verify_notion.go",
+        "tools/operationalreadiness/verify_notion_cycle.go",
         "tools/operationalreadiness/verify_partial.go",
         "tools/operationalreadiness/verify_partial_test.go",
         "tools/operationalreadiness/verify_visual.go",
         "tools/operationalreadiness/verify_visual_test.go",
         "tools/operationalreadiness/verify_next_command.go",
         "tools/operationalreadiness/evidence.go",
+        "tools/operationalreadiness/notion_evidence.go",
+        "tools/operationalreadiness/notion_open_loop_test.go",
         "tools/operationalreadiness/candidate.go",
         "tools/operationalreadiness/candidate_adoption.go",
         "tools/operationalreadiness/candidate_partial_adoption.go",
@@ -4222,6 +4245,7 @@
         "tools/operationalreadiness/verify_workflow.go",
         "tools/operationalreadiness/constants.go",
         "tools/operationalreadiness/render.go",
+        "tools/operationalreadiness/render_notion.go",
         "tools/operationalreadiness/render_partial_promotion.go",
         "tools/operationalreadiness/render_partial_promotion_test.go",
         "internal/riidoaiserver/assignment_api.go",
@@ -4255,6 +4279,8 @@
         "TestOperationalReadinessRejectsDuplicateMeasurement",
         "TestOperationalReadinessRejectsDaemonWildcardNoTestCommand",
         "TestOperationalReadinessRejectsPlaceholderNextCommand",
+        "TestOperationalReadinessBackfillsNotionP0Cycles",
+        "TestOperationalReadinessRejectsNotionCycleWithoutCheck",
         "TestOperationalReadinessCandidatesUseOnlyStalePartials",
         "TestOperationalReadinessCandidatesCarryPartialSubject",
         "TestOperationalReadinessCandidateAdoptsPartialNextWorkFirst",
@@ -4270,7 +4296,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "af99f5958bb7a5fba54b8d9afa860760aeffc96afcb2c0a461b4603b9ea63ec5"
+      "semantic_hash": "6ff21024c7dbe772cf9d450c043daeb59d4bb17fb2f30284be100339d1f65dec"
     },
     {
       "id": "container_image_contract_must_bind_runtime_shape",

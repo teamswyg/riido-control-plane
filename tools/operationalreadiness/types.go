@@ -12,6 +12,7 @@ type manifest struct {
 	RequiredCategories []string         `json:"required_categories"`
 	Checks             []readinessCheck `json:"checks"`
 	Sources            []producerSource `json:"sources,omitempty"`
+	NotionOpenLoop     *notionOpenLoop  `json:"notion_open_loop,omitempty"`
 	Loop               loopSpec         `json:"loop"`
 }
 

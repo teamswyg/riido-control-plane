@@ -24,6 +24,112 @@
       ]
     }
   ],
+  "notion_open_loop": {
+    "page_id": "38e20241cf7f804dbbdbfdddb2bef165",
+    "page_title": "[v1.24] AI Agent QA",
+    "page_url": "https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165",
+    "captured_at": "2026-06-30T09:29:21Z",
+    "refresh_workflow": ".github/workflows/operational-readiness.yml",
+    "cadence_hours": 24,
+    "status_tags": [
+      "[codex][계획중]",
+      "[codex][진행중]",
+      "[codex][완료]",
+      "[codex][전달요청]"
+    ],
+    "cycles": [
+      {
+        "id": "notion_p0_waiting_for_user_spinner",
+        "priority": "P0",
+        "status": "partial",
+        "codex_status": "[codex][완료][전달요청]",
+        "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#waiting-for-user-spinner",
+        "summary": "Question-state replies must stop showing thinking/progress UI; server live smoke is proven but client visual confirmation remains the release evidence.",
+        "backfilled_check": "staging_client_p0_visual_retest",
+        "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
+        "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
+        "evidence_refs": [
+          {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
+          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"}
+        ]
+      },
+      {
+        "id": "notion_p0_queued_by_busy_agent",
+        "priority": "P0",
+        "status": "partial",
+        "codex_status": "[codex][완료][전달요청]",
+        "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#queued-by-busy-agent",
+        "summary": "Superseded queued_by_busy_agent guidance must not render as an active reply once the conversation has newer running/progress/result evidence.",
+        "backfilled_check": "staging_client_p0_visual_retest",
+        "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
+        "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
+        "evidence_refs": [
+          {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"}
+        ]
+      },
+      {
+        "id": "notion_p0_terminal_stop_refresh",
+        "priority": "P0",
+        "status": "partial",
+        "codex_status": "[codex][완료][전달요청]",
+        "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#terminal-stop-refresh",
+        "summary": "Stopped/deleted terminal work must not revive after refresh or late daemon events; server live smoke is proven and needs visual confirmation.",
+        "backfilled_check": "staging_client_p0_visual_retest",
+        "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
+        "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
+        "evidence_refs": [
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
+          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"}
+        ]
+      },
+      {
+        "id": "notion_p0_author_fallback",
+        "priority": "P0",
+        "status": "partial",
+        "codex_status": "[codex][완료][전달요청]",
+        "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#author-principal-fallback",
+        "summary": "Old user messages can have null author_principal_id; client confirmed RIID-4508 fallback UI instead of a raw unknown-author label.",
+        "backfilled_check": "staging_client_p0_visual_retest",
+        "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
+        "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
+        "evidence_refs": [
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_author_test.go"},
+          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"}
+        ]
+      },
+      {
+        "id": "notion_p0_instruction_intent_dialogue",
+        "priority": "P0",
+        "status": "partial",
+        "codex_status": "[codex][완료][전달요청]",
+        "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#instruction-intent-dialogue",
+        "summary": "Explicit command replies should execute while non-command component text asks for intent; server PR evidence exists and client QA still supplies product proof.",
+        "backfilled_check": "staging_client_p0_visual_retest",
+        "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
+        "required_next_command": "go test ./internal/riidoaiserver -run 'Test.*Intent.*Dialogue|Test.*NonCommand' -count=1",
+        "evidence_refs": [
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go"},
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"}
+        ]
+      },
+      {
+        "id": "notion_p0_gatekeeper_staging_dmg",
+        "priority": "P0",
+        "status": "partial",
+        "codex_status": "[codex][진행중]",
+        "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#gatekeeper-staging-dmg",
+        "summary": "Staging desktop must be Apple Developer signed/notarized and distributed from the CDN before team QA can trust install results.",
+        "backfilled_check": "staging_client_p0_visual_retest",
+        "required_next_artifact": "staging_desktop_notarized_install_screenshot",
+        "required_next_command": "curl -I https://cdn.riido.io/releases/latest/staging/Riido-Staging-arm64.dmg",
+        "evidence_refs": [
+          {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
+          {"kind": "external", "path": "riido-desktop:.github/workflows"}
+        ]
+      }
+    ]
+  },
   "required_categories": [
     "monitoring",
     "usability",
@@ -100,7 +206,7 @@
       "measurements": [
         {
           "id": "notion_p0_feedback_status_comments",
-          "kind": "manual",
+          "kind": "notion",
           "signal": "Notion QA feedback threads carry codex status comments and retest requests for queued/running, terminal stop refresh, waiting_for_user, and author fallback fixes.",
           "evidence_ref": "notion:v1.24-ai-agent-qa"
         },
@@ -131,6 +237,7 @@
       ],
       "evidence_refs": [
         {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
+        {"kind": "external", "path": "notion:comment:38f20241-cf7f-8102-b25c-001d1975a504"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"},

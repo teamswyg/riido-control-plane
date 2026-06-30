@@ -24,6 +24,9 @@ func verifyAll(root string, m manifest) error {
 	if err := verifyCandidateSources(m); err != nil {
 		return err
 	}
+	if err := verifyNotionOpenLoop(root, m); err != nil {
+		return err
+	}
 	if err := verifyOperationalWorkflow(root, m); err != nil {
 		return err
 	}
