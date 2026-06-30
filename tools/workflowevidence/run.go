@@ -11,6 +11,9 @@ func run(opt options) error {
 	if err != nil {
 		return err
 	}
+	if err := verifyWorkflow(root, m); err != nil {
+		return err
+	}
 	result, err := auditWorkflows(root, m)
 	if err != nil {
 		return err

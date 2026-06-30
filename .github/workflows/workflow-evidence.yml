@@ -2,6 +2,8 @@ name: workflow-evidence
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "47 20 * * *"
   push:
     branches: [main]
     paths:
@@ -23,6 +25,8 @@ on:
 jobs:
   workflow-evidence:
     runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: closed_loop_candidate
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
