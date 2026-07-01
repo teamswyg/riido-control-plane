@@ -93,6 +93,41 @@ jobs:
       - name: Publish public QA status annotation
         if: always()
         run: cat out/operational-readiness-public-status.annotation
+      - name: Capture GitHub Pages status evidence
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          if gh api "repos/${GITHUB_REPOSITORY}/pages" > out/github-pages.raw.json 2>/dev/null; then
+            jq \
+              --arg generated_at "$generated_at" \
+              '{
+                schema_version: "riido-public-qa-pages-evidence.v1",
+                generated_at: $generated_at,
+                status: "enabled",
+                visibility: "public_repository",
+                html_url: (.html_url // ""),
+                build_type: (.build_type // ""),
+                raw_response_included: false,
+                secrets_included: false
+              }' \
+              out/github-pages.raw.json > out/operational-readiness-pages-status.json
+          else
+            jq -n \
+              --arg generated_at "$generated_at" \
+              '{
+                schema_version: "riido-public-qa-pages-evidence.v1",
+                generated_at: $generated_at,
+                status: "disabled_or_unavailable",
+                visibility: "public_repository",
+                html_url: "",
+                build_type: "",
+                raw_response_included: false,
+                secrets_included: false
+              }' > out/operational-readiness-pages-status.json
+          fi
+          rm -f out/github-pages.raw.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -128,4 +163,10 @@ jobs:
         with:
           name: operational-readiness-public-status-annotation
           path: out/operational-readiness-public-status.annotation
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-pages-status
+          path: out/operational-readiness-pages-status.json
           if-no-files-found: error
