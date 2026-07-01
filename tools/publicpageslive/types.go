@@ -14,9 +14,15 @@ type record struct {
 	StatusRawLogsIncluded    bool      `json:"status_raw_logs_included"`
 	StatusSecretsIncluded    bool      `json:"status_secrets_included"`
 	StatusEndpointDetails    string    `json:"status_endpoint_details"`
+	StatusSourceCommit       string    `json:"status_source_commit"`
+	StatusSourceRunID        string    `json:"status_source_run_id"`
+	StatusSourceRunURL       string    `json:"status_source_run_url"`
 	PagesStatus              string    `json:"pages_status"`
 	PagesVisibility          string    `json:"pages_visibility"`
 	PagesBuildType           string    `json:"pages_build_type"`
+	PagesSourceCommit        string    `json:"pages_source_commit"`
+	PagesSourceRunID         string    `json:"pages_source_run_id"`
+	PagesSourceRunURL        string    `json:"pages_source_run_url"`
 	PagesRawResponseIncluded bool      `json:"pages_raw_response_included"`
 	PagesSecretsIncluded     bool      `json:"pages_secrets_included"`
 	RawBodiesIncluded        bool      `json:"raw_bodies_included"`

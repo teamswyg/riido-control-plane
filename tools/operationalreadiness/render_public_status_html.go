@@ -33,6 +33,9 @@ main{max-width:880px;margin:0 auto;padding:40px 20px}
 <p><span class="badge {{.BadgeClass}}">{{.Overall}}</span></p>
 <p>Generated at: <code>{{.GeneratedAt}}</code></p>
 <p>Expires at: <code>{{.ExpiresAt}}</code></p>
+<p>Source workflow: <code>{{.SourceWorkflow}}</code></p>
+<p>Source commit: <code>{{.SourceCommit}}</code></p>
+<p>Source run: <code>{{.SourceRunID}}</code></p>
 <div class="grid">
 <div class="card"><div class="label">Visibility</div><div class="value">{{.Visibility}}</div></div>
 <div class="card"><div class="label">TTL Hours</div><div class="value">{{.EvidenceTTLHours}}</div></div>

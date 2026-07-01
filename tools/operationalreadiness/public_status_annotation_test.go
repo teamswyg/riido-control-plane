@@ -7,6 +7,7 @@ import (
 )
 
 func TestOperationalReadinessWritesPublicStatusGitHubAnnotation(t *testing.T) {
+	t.Setenv("GITHUB_RUN_ID", "456")
 	out := t.TempDir() + "/public-status.annotation"
 	err := run(options{
 		Repo:                      "../..",
@@ -27,6 +28,9 @@ func TestOperationalReadinessWritesPublicStatusGitHubAnnotation(t *testing.T) {
 	}
 	if !strings.Contains(got, "generated_at=") || !strings.Contains(got, "expires_at=") {
 		t.Fatalf("public status annotation freshness missing: %s", got)
+	}
+	if !strings.Contains(got, "run_id=456") {
+		t.Fatalf("public status annotation source missing: %s", got)
 	}
 	if strings.Contains(got, "eyJ") || strings.Contains(got, "RIIDO_DEVICE_SECRET") {
 		t.Fatalf("public status annotation leaked secret marker: %s", got)

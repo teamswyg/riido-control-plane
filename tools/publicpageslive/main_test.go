@@ -26,6 +26,9 @@ func TestRunWritesRedactedLiveEvidence(t *testing.T) {
 		rec.StatusVisibility != "public_aggregate" || rec.PagesBuildType != "workflow" {
 		t.Fatalf("record = %+v", rec)
 	}
+	if rec.StatusSourceCommit != "abc123" || rec.PagesSourceRunID != "456" {
+		t.Fatalf("record source = %+v", rec)
+	}
 }
 
 func TestRunRejectsSecretMarker(t *testing.T) {
@@ -47,9 +50,9 @@ func testServer(t *testing.T, secret bool) *httptest.Server {
 			}
 			_, _ = w.Write([]byte(html))
 		case "/status.json":
-			_, _ = w.Write([]byte(`{"overall":"degraded","visibility":"public_aggregate","raw_logs_included":false,"secrets_included":false,"endpoint_details":"redacted"}`))
+			_, _ = w.Write([]byte(`{"overall":"degraded","visibility":"public_aggregate","source_commit":"abc123","source_run_id":"456","source_run_url":"https://github.com/teamswyg/riido-control-plane/actions/runs/456","raw_logs_included":false,"secrets_included":false,"endpoint_details":"redacted"}`))
 		case "/pages-status.json":
-			_, _ = w.Write([]byte(`{"status":"published","visibility":"public_repository","build_type":"workflow","raw_response_included":false,"secrets_included":false}`))
+			_, _ = w.Write([]byte(`{"status":"published","visibility":"public_repository","build_type":"workflow","source_commit":"abc123","source_run_id":"456","source_run_url":"https://github.com/teamswyg/riido-control-plane/actions/runs/456","raw_response_included":false,"secrets_included":false}`))
 		default:
 			http.NotFound(w, r)
 		}

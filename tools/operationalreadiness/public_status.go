@@ -10,6 +10,7 @@ func newPublicStatus(
 	expiresAt string,
 ) publicStatus {
 	notion := newNotionEvidence(m.NotionOpenLoop)
+	source := currentPublicStatusSource()
 	overall := "operational"
 	if notion.PartialCount > 0 || staleCount > 0 {
 		overall = "degraded"
@@ -21,6 +22,10 @@ func newPublicStatus(
 		GeneratedAt:          generatedAt,
 		ExpiresAt:            expiresAt,
 		EvidenceTTLHours:     readinessEvidenceTTLHours,
+		SourceWorkflow:       source.Workflow,
+		SourceCommit:         source.Commit,
+		SourceRunID:          source.RunID,
+		SourceRunURL:         source.RunURL,
 		EndpointDetails:      "redacted",
 		P0CycleCount:         notion.P0Count,
 		P0PartialCount:       notion.PartialCount,

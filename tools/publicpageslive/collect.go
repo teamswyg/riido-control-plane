@@ -39,8 +39,14 @@ func collect(base string, now time.Time, client *http.Client) (record, error) {
 		StatusRawLogsIncluded: status.RawLogsIncluded,
 		StatusSecretsIncluded: status.SecretsIncluded,
 		StatusEndpointDetails: status.EndpointDetails,
+		StatusSourceCommit:    status.SourceCommit,
+		StatusSourceRunID:     status.SourceRunID,
+		StatusSourceRunURL:    status.SourceRunURL,
 		PagesStatus:           pages.Status, PagesVisibility: pages.Visibility,
 		PagesBuildType:           pages.BuildType,
+		PagesSourceCommit:        pages.SourceCommit,
+		PagesSourceRunID:         pages.SourceRunID,
+		PagesSourceRunURL:        pages.SourceRunURL,
 		PagesRawResponseIncluded: pages.RawResponseIncluded,
 		PagesSecretsIncluded:     pages.SecretsIncluded,
 	}
@@ -56,5 +62,7 @@ func liveStatusPassed(rec record) bool {
 		!rec.StatusRawLogsIncluded && !rec.StatusSecretsIncluded &&
 		rec.StatusEndpointDetails == "redacted" && rec.PagesStatus == "published" &&
 		rec.PagesBuildType == "workflow" && !rec.PagesRawResponseIncluded &&
+		rec.StatusSourceCommit != "" && rec.StatusSourceRunID != "" &&
+		rec.PagesSourceCommit != "" && rec.PagesSourceRunID != "" &&
 		!rec.PagesSecretsIncluded && !rec.RawBodiesIncluded && !rec.SecretsIncluded
 }
