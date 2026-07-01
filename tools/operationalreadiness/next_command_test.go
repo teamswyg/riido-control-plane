@@ -19,6 +19,15 @@ func TestOperationalReadinessRejectsPlaceholderNextCommand(t *testing.T) {
 	}
 }
 
+func TestOperationalReadinessRejectsDaemonGoTestWithoutRepoScope(t *testing.T) {
+	m := loadManifestForTest(t)
+	m.Checks[0].EvidenceRefs = []evidenceRef{{Kind: "external", Path: "riido-daemon:cmd/riido/test.go"}}
+	m.Checks[0].NextCommand = "go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1"
+	if err := verifyChecks("../..", m); err == nil {
+		t.Fatal("expected daemon go test without repo scope to fail")
+	}
+}
+
 func TestOperationalReadinessAllowsShellRedirectNextCommand(t *testing.T) {
 	m := loadManifestForTest(t)
 	m.Checks[0].NextCommand = "printf ok > /tmp/riido-readiness.txt"

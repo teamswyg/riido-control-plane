@@ -400,7 +400,7 @@
         {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_saas_validation_test.go"}
       ],
       "next_artifact": "daemon_network_disconnect_release_evidence",
-      "next_command": "go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1"
+      "next_command": "sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run \"TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout\" -count=1'"
     },
     {
       "id": "testnet_load_capacity",
@@ -450,7 +450,7 @@
         {"kind": "external", "path": "riido-daemon:internal/agentbridge/runtimeactor/actor_slot_limit_test.go"}
       ],
       "next_artifact": "single_pc_agent_capacity_evidence",
-      "next_command": "go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1"
+      "next_command": "sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./internal/agentbridge/runtimeactor -run \"Test.*Slot|Test.*Goroutine|Test.*Leak\" -count=1'"
     },
     {
       "id": "boot_burst_capacity",
@@ -534,7 +534,7 @@
         {"kind": "external", "path": "riido-daemon:docs/30-architecture/product-loop-evidence.riido.json"}
       ],
       "next_artifact": "daemon_reconnect_storm_evidence",
-      "next_command": "go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1"
+      "next_command": "sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./internal/agentbridge/controlplane/saasplane -run \"TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout\" -count=1'"
     },
     {
       "id": "scenario_message_policy",
