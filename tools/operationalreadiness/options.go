@@ -8,6 +8,7 @@ type options struct {
 	PublicStatusOut           string
 	PublicStatusJSON          string
 	PublicStatusHTML          string
+	PublicStatusBadgeJSON     string
 	PublicStatusAnnotationOut string
 	WriteDoc                  bool
 	CheckDoc                  bool

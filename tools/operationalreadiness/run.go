@@ -44,6 +44,11 @@ func run(opt options) error {
 			return err
 		}
 	}
+	if opt.PublicStatusBadgeJSON != "" {
+		if err := writeJSON(opt.PublicStatusBadgeJSON, newPublicStatusBadge(e.PublicStatus)); err != nil {
+			return err
+		}
+	}
 	if opt.PublicStatusAnnotationOut != "" {
 		body := renderPublicStatusGitHubAnnotation(e.PublicStatus)
 		if err := writeText(opt.PublicStatusAnnotationOut, body); err != nil {

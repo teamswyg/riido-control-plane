@@ -53,6 +53,7 @@ jobs:
             -evidence-out out/public-qa-status-pages-evidence.json \
             -public-status-html-out site/index.html \
             -public-status-json-out site/status.json \
+            -public-status-badge-json-out site/status-badge.json \
             -public-status-out site/status.md \
             -public-status-github-annotation-out out/status.annotation
           generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
