@@ -268,17 +268,20 @@
         {
           "id": "public_qa_status_pages_live_smoke",
           "kind": "workflow",
-          "signal": "The public-qa-status-pages deploy job fetches the live GitHub Pages HTML, status JSON, and pages-status JSON after deployment and writes a redacted live evidence artifact without raw response bodies.",
+          "signal": "The public-qa-status-pages deploy job fetches the live GitHub Pages HTML, status JSON, and pages-status JSON after deployment and writes redacted live evidence for source provenance and blocking category distribution without raw response bodies.",
           "evidence_ref": "tools/publicpageslive"
         }
       ],
       "evidence_refs": [
         {"kind": "code", "path": "tools/operationalreadiness/public_status.go"},
+        {"kind": "code", "path": "tools/operationalreadiness/public_status_category.go"},
         {"kind": "code", "path": "tools/operationalreadiness/render_public_status.go"},
+        {"kind": "code", "path": "tools/operationalreadiness/render_public_status_annotation.go"},
         {"kind": "code", "path": "tools/operationalreadiness/render_public_status_html.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_json_output_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_output_test.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/public_status_html_output_test.go"},
         {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
         {"kind": "workflow", "path": ".github/workflows/public-qa-status-pages.yml"},
         {"kind": "doc", "path": "docs/30-architecture/operational-readiness.md"},

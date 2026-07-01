@@ -43,6 +43,9 @@ func TestOperationalReadinessWritesPublicStatusJSON(t *testing.T) {
 	if got.SourceRunID != "456" || !strings.Contains(got.SourceRunURL, "/actions/runs/456") {
 		t.Fatalf("public status json run source missing: %+v", got)
 	}
+	if len(got.BlockingCategories) == 0 || got.BlockingCategories[0].PartialCount == 0 {
+		t.Fatalf("public status json blocking categories missing: %+v", got)
+	}
 	if strings.Contains(string(data), "eyJ") || strings.Contains(string(data), "RIIDO_DEVICE_SECRET") {
 		t.Fatalf("public status json leaked secret marker: %s", data)
 	}

@@ -3,14 +3,21 @@ package main
 import "encoding/json"
 
 type statusPayload struct {
-	Overall         string `json:"overall"`
-	Visibility      string `json:"visibility"`
-	RawLogsIncluded bool   `json:"raw_logs_included"`
-	SecretsIncluded bool   `json:"secrets_included"`
-	EndpointDetails string `json:"endpoint_details"`
-	SourceCommit    string `json:"source_commit"`
-	SourceRunID     string `json:"source_run_id"`
-	SourceRunURL    string `json:"source_run_url"`
+	Overall            string           `json:"overall"`
+	Visibility         string           `json:"visibility"`
+	RawLogsIncluded    bool             `json:"raw_logs_included"`
+	SecretsIncluded    bool             `json:"secrets_included"`
+	EndpointDetails    string           `json:"endpoint_details"`
+	SourceCommit       string           `json:"source_commit"`
+	SourceRunID        string           `json:"source_run_id"`
+	SourceRunURL       string           `json:"source_run_url"`
+	BlockingCategories []statusCategory `json:"blocking_categories"`
+}
+
+type statusCategory struct {
+	Category          string `json:"category"`
+	PartialCount      int    `json:"partial_count"`
+	StalePartialCount int    `json:"stale_partial_count"`
 }
 
 type pagesPayload struct {
