@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `26`
+- measurements: `27`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -51,7 +51,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 | Date | Category | Status | Check | Measurements | Evidence | Next |
 | --- | --- | --- | --- | --- | --- | --- |
-| `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `4` | `6` | `client_surface_alarm_plan_apply_evidence` |
+| `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `5` | `7` | `client_surface_alarm_plan_apply_evidence` |
 | `2026-07-01` | `monitoring` | `covered` | `public_qa_status_surface` | `5` | `7` | `public_qa_status_visual_or_pages_publish_evidence` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
 | `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `5` | `8` | `staging_client_p0_visual_screenshot_evidence` |
@@ -70,15 +70,15 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 | Check | Category | Age | Stale | Next Artifact | Next Command |
 | --- | --- | --- | --- | --- | --- |
-| `otel_xray_client_surface` | `monitoring` | `4` | `true` | `client_surface_alarm_plan_apply_evidence` | `gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && terraform -chdir=terraform/riido_ai_server plan -var='enable_client_surface_cloudwatch_alarms=true'` |
-| `staging_client_p0_visual_retest` | `usability` | `0` | `false` | `staging_client_p0_visual_screenshot_evidence` | `gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments` |
-| `daemon_network_disconnect_waiting` | `exception` | `4` | `true` | `daemon_network_disconnect_release_evidence` | `go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
-| `single_pc_agent_limit` | `stress` | `4` | `true` | `single_pc_agent_capacity_evidence` | `go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1` |
-| `boot_burst_capacity` | `stress` | `4` | `true` | `cold_start_packet_burst_evidence` | `gh workflow run ai-agent-client-testnet-load.yml -f scenario=public -f duration=120s -f concurrency=128` |
-| `server_crash_recovery` | `chaos` | `4` | `true` | `ecs_service_recovery_chaos_evidence` | `aws ecs describe-services --cluster riido-ai-server-testnet --services riido-ai-server-testnet` |
-| `scale_out_recovery` | `chaos` | `4` | `true` | `scale_out_timing_evidence` | `aws application-autoscaling describe-scaling-policies --service-namespace ecs` |
-| `all_servers_down_daemon_behavior` | `chaos` | `4` | `true` | `daemon_reconnect_storm_evidence` | `go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
-| `desktop_body_only_change` | `desktop` | `3` | `true` | `desktop_body_only_golden_evidence` | `gh issue create --repo teamswyg/riido-daemon --title "Produce desktop body-only golden evidence" --body "Produce desktop_body_only_golden_evidence by running localproductacceptance with a real staging task fixture and publish the evidence artifact."` |
+| `otel_xray_client_surface` | `monitoring` | `5` | `true` | `client_surface_alarm_plan_apply_evidence` | `gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 114 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && terraform -chdir=terraform/riido_ai_server plan -var='enable_client_surface_cloudwatch_alarms=true'` |
+| `staging_client_p0_visual_retest` | `usability` | `1` | `false` | `staging_client_p0_visual_screenshot_evidence` | `gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments` |
+| `daemon_network_disconnect_waiting` | `exception` | `5` | `true` | `daemon_network_disconnect_release_evidence` | `go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
+| `single_pc_agent_limit` | `stress` | `5` | `true` | `single_pc_agent_capacity_evidence` | `go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1` |
+| `boot_burst_capacity` | `stress` | `5` | `true` | `cold_start_packet_burst_evidence` | `gh workflow run ai-agent-client-testnet-load.yml -f scenario=public -f duration=120s -f concurrency=128` |
+| `server_crash_recovery` | `chaos` | `5` | `true` | `ecs_service_recovery_chaos_evidence` | `aws ecs describe-services --cluster riido-ai-server-testnet --services riido-ai-server-testnet` |
+| `scale_out_recovery` | `chaos` | `5` | `true` | `scale_out_timing_evidence` | `aws application-autoscaling describe-scaling-policies --service-namespace ecs` |
+| `all_servers_down_daemon_behavior` | `chaos` | `5` | `true` | `daemon_reconnect_storm_evidence` | `go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
+| `desktop_body_only_change` | `desktop` | `4` | `true` | `desktop_body_only_golden_evidence` | `gh issue create --repo teamswyg/riido-daemon --title "Produce desktop body-only golden evidence" --body "Produce desktop_body_only_golden_evidence by running localproductacceptance with a real staging task fixture and publish the evidence artifact."` |
 
 ## Partial Promotion
 

@@ -7309,11 +7309,15 @@
           "redacted": true
         },
         {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
           "kind": "generated_doc",
           "path": "docs/30-architecture/operational-readiness.md"
         }
       ],
-      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal and rejects partial checks whose measurements are only manual notes, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context, and the client-surface monitoring partial now cites the merged riido-infra alarm topology while still requiring environment-specific threshold/action plan/apply evidence before claiming live alarm coverage.",
+      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal and rejects partial checks whose measurements are only manual notes, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context, and the client-surface monitoring partial now cites merged riido-infra alarm topology plus the dimension regression guard while still requiring environment-specific threshold/action plan/apply evidence before claiming live alarm coverage.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
