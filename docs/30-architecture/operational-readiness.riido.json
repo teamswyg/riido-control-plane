@@ -176,6 +176,12 @@
           "kind": "infra",
           "signal": "riido-infra PR #114 merged a Terraform evidence verifier that fails if client-surface CloudWatch alarms gain endpoint, user, device, token, authorization, agent, thread, or other high-cardinality dimensions.",
           "evidence_ref": "github:https://github.com/teamswyg/riido-infra/pull/114"
+        },
+        {
+          "id": "client_surface_alarm_live_evidence_collector_pr",
+          "kind": "infra",
+          "signal": "riido-infra PR #115 merged a redacted CloudWatch describe-alarms collector that proves live client-surface alarms keep service-only dimensions and omit raw action ARNs/account identifiers.",
+          "evidence_ref": "github:https://github.com/teamswyg/riido-infra/pull/115"
         }
       ],
       "evidence_refs": [
@@ -185,10 +191,11 @@
         {"kind": "test", "path": "internal/riidoaiserver/cloudwatch_emf_write_test.go"},
         {"kind": "external", "path": "riido-infra:terraform/riido_ai_server/observability.tf"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/113"},
-        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/114"}
+        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/114"},
+        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/115"}
       ],
       "next_artifact": "client_surface_alarm_plan_apply_evidence",
-      "next_command": "gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 114 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && terraform -chdir=terraform/riido_ai_server plan -var='enable_client_surface_cloudwatch_alarms=true'"
+      "next_command": "gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 114 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 115 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && terraform -chdir=terraform/riido_ai_server plan -var='enable_client_surface_cloudwatch_alarms=true' && mkdir -p .riido-local/terraform && aws cloudwatch describe-alarms --alarm-name-prefix riido-ai-server-client-surface --output json > .riido-local/terraform/client-surface-alarms.json && go run ./tools/clientalarmevidence -workspace testnet -alarms-json .riido-local/terraform/client-surface-alarms.json -out .riido-local/terraform/client-surface-alarms.evidence.json"
     },
     {
       "id": "public_qa_status_surface",

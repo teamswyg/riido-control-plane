@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `28`
+- measurements: `29`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -51,7 +51,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 | Date | Category | Status | Check | Measurements | Evidence | Next |
 | --- | --- | --- | --- | --- | --- | --- |
-| `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `5` | `7` | `client_surface_alarm_plan_apply_evidence` |
+| `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `6` | `8` | `client_surface_alarm_plan_apply_evidence` |
 | `2026-07-01` | `monitoring` | `covered` | `public_qa_status_surface` | `6` | `7` | `public_qa_status_visual_or_pages_publish_evidence` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
 | `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `5` | `8` | `staging_client_p0_visual_screenshot_evidence` |
@@ -70,7 +70,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 | Check | Category | Age | Stale | Next Artifact | Next Command |
 | --- | --- | --- | --- | --- | --- |
-| `otel_xray_client_surface` | `monitoring` | `5` | `true` | `client_surface_alarm_plan_apply_evidence` | `gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 114 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && terraform -chdir=terraform/riido_ai_server plan -var='enable_client_surface_cloudwatch_alarms=true'` |
+| `otel_xray_client_surface` | `monitoring` | `5` | `true` | `client_surface_alarm_plan_apply_evidence` | `gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 114 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 115 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && terraform -chdir=terraform/riido_ai_server plan -var='enable_client_surface_cloudwatch_alarms=true' && mkdir -p .riido-local/terraform && aws cloudwatch describe-alarms --alarm-name-prefix riido-ai-server-client-surface --output json > .riido-local/terraform/client-surface-alarms.json && go run ./tools/clientalarmevidence -workspace testnet -alarms-json .riido-local/terraform/client-surface-alarms.json -out .riido-local/terraform/client-surface-alarms.evidence.json` |
 | `staging_client_p0_visual_retest` | `usability` | `1` | `false` | `staging_client_p0_visual_screenshot_evidence` | `gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments` |
 | `daemon_network_disconnect_waiting` | `exception` | `5` | `true` | `daemon_network_disconnect_release_evidence` | `go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1` |
 | `single_pc_agent_limit` | `stress` | `5` | `true` | `single_pc_agent_capacity_evidence` | `go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1` |
