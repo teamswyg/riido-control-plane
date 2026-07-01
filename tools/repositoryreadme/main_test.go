@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -22,5 +23,15 @@ func TestRunWritesEvidence(t *testing.T) {
 	}
 	if got.Status != "verified" || got.FragmentCount == 0 || got.DocLinkCount == 0 || got.EndpointCount == 0 {
 		t.Fatalf("unexpected evidence: %+v", got)
+	}
+	if got.RequiredMarkerCount < 8 {
+		t.Fatalf("public entrypoint markers missing: %+v", got)
+	}
+	readme, err := os.ReadFile("../../README.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(readme), "actions/workflows/operational-readiness.yml/badge.svg") {
+		t.Fatalf("README public QA status badge missing")
 	}
 }
