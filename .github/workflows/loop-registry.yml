@@ -20,8 +20,13 @@ on:
       - ".github/workflows/pre-commit-baseline.yml"
       - ".github/workflows/workflow-evidence.yml"
       - ".pre-commit-config.yaml"
+      - "README.md"
+      - "README.riido.json"
       - "docs/20-domain/ai-agent-client-api.md"
       - "docs/20-domain/ai-agent-client-api.riido.json"
+      - "docs/readme/**"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
       - "docs/20-domain/provider-status.md"
       - "docs/20-domain/provider-status.riido.json"
       - "docs/30-architecture/evidence-graph.md"
@@ -225,6 +230,8 @@ on:
       - "tools/controlplaneaudit/**"
       - "tools/controlplanepressure/**"
       - "tools/operationalreadiness/**"
+      - "tools/repositoryreadme/**"
+      - "tools/knowledgecoverage/**"
       - "tools/loopclosureaudit/**"
       - "go.mod"
       - "go.sum"
@@ -242,8 +249,13 @@ on:
       - ".github/workflows/open-questions.yml"
       - ".github/workflows/pre-commit-baseline.yml"
       - ".pre-commit-config.yaml"
+      - "README.md"
+      - "README.riido.json"
       - "docs/20-domain/ai-agent-client-api.md"
       - "docs/20-domain/ai-agent-client-api.riido.json"
+      - "docs/readme/**"
+      - "docs/executable-knowledge.md"
+      - "docs/executable-knowledge.riido.json"
       - "docs/20-domain/provider-status.md"
       - "docs/20-domain/provider-status.riido.json"
       - "docs/30-architecture/evidence-graph.md"
@@ -441,6 +453,9 @@ on:
       - "tools/controlplaneperf/**"
       - "tools/controlplaneaudit/**"
       - "tools/controlplanepressure/**"
+      - "tools/operationalreadiness/**"
+      - "tools/repositoryreadme/**"
+      - "tools/knowledgecoverage/**"
       - "tools/loopclosureaudit/**"
       - "go.mod"
       - "go.sum"
@@ -470,6 +485,7 @@ jobs:
             target_script_args=(-target-verifier-script-out out/loop-target-verifiers.sh)
           fi
           go test ./tools/loopregistry -count=1
+          go test ./tools/repositoryreadme ./tools/knowledgecoverage -run '^TestRunWritesEvidence$' -count=1
           go test ./tools/aiagentclientapi -run 'Test(GeneratedDocMatchesManifest|RunWritesEvidence)$' -count=1
           go test ./tools/evidencegraph ./tools/harnesspromotion ./tools/liveworkflowevidence ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision ./tools/precommitbaseline -count=1
           go test ./internal/riidoaiserver \

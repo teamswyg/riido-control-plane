@@ -10,6 +10,8 @@ Executable SSOT: [`README.riido.json`](README.riido.json).
 
 이 레포는 provider CLI를 실행하지 않습니다. 런타임 실행과 로컬 디바이스 제어는 `riido-daemon`의 책임이고, Terraform과 AWS 배포 구성은 `riido-infra`의 책임입니다. 이 레포는 공개 가능한 서버 코드와 검증 가능한 API surface만 담습니다.
 
+Public QA Status는 `operational-readiness.yml`에서 생성되는 redacted aggregate입니다. GitHub Actions summary, annotation, Markdown artifact, HTML artifact, and `operational-readiness-public-status-json` artifact로 공개 가능한 상태만 보여주며 raw logs, endpoint details, credentials, JWT fragments, AWS identifiers는 포함하지 않습니다.
+
 ## 이 레포가 하는 일
 
 - Riido SaaS HTTP/SSE endpoint 구현
@@ -50,6 +52,7 @@ Executable SSOT: [`README.riido.json`](README.riido.json).
 | public runtime과 deploy boundary | [`docs/30-architecture/runtime-deployment-boundary.md`](docs/30-architecture/runtime-deployment-boundary.md) |
 | runtime artifact CD 소유권과 CodeDeploy 전환 경계 | [`docs/30-architecture/runtime-cd-ownership.md`](docs/30-architecture/runtime-cd-ownership.md) |
 | 마이그레이션 히스토리 | [`docs/migration/control-plane.md`](docs/migration/control-plane.md) |
+| Public QA Status와 operational readiness evidence | [`docs/30-architecture/operational-readiness.md`](docs/30-architecture/operational-readiness.md) |
 
 ## AI Agent Development Testnet
 
@@ -121,6 +124,7 @@ docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control
 
 ## Rules
 
+- Public QA Status는 GitHub Actions artifact/summary/annotation에서 먼저 확인합니다. GitHub Pages가 활성화되지 않은 동안에는 README가 공개 entrypoint이고 `operational-readiness-public-status-page`는 HTML artifact로만 배포됩니다.
 - OpenAPI와 generated client는 사람이 임의로 고치는 SSOT가 아닙니다. API surface 계약이 바뀌면 control-plane API sub-DSL을 먼저 바꾸고 projection과 generated client를 다시 생성해야 합니다.
 - `riido-client`로 React Query 코드를 전달하는 cross-repo workflow는 `docs/30-architecture/api-client-delivery.md`의 Riido work `branchName` delivery 정책을 따라야 합니다.
 - CI는 public repo에서 가벼운 검증을 돌리기 위한 경계입니다. 배포 비용이 생기는 동작은 pull request에서 실행하지 않습니다.
