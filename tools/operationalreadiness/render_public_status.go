@@ -25,6 +25,12 @@ func renderPublicStatusWithFreshness(
 		fmt.Fprintf(b, "- generated at: `%s`\n", status.GeneratedAt)
 		fmt.Fprintf(b, "- expires at: `%s`\n", status.ExpiresAt)
 		fmt.Fprintf(b, "- evidence ttl hours: `%d`\n", status.EvidenceTTLHours)
+		fmt.Fprintf(b, "- source workflow: `%s`\n", status.SourceWorkflow)
+		fmt.Fprintf(b, "- source commit: `%s`\n", status.SourceCommit)
+		fmt.Fprintf(b, "- source run id: `%s`\n", status.SourceRunID)
+		if status.SourceRunURL != "" {
+			fmt.Fprintf(b, "- source run: `%s`\n", status.SourceRunURL)
+		}
 	}
 	fmt.Fprintf(b, "- raw logs included: `%t`\n", status.RawLogsIncluded)
 	fmt.Fprintf(b, "- secrets included: `%t`\n", status.SecretsIncluded)

@@ -11,11 +11,12 @@ func renderPublicStatusGitHubAnnotation(status publicStatus) string {
 		level = "warning"
 	}
 	message := fmt.Sprintf(
-		"overall=%s visibility=%s generated_at=%s expires_at=%s p0_partial=%d partial=%d stale=%d candidates=%d next=%s",
+		"overall=%s visibility=%s generated_at=%s expires_at=%s run_id=%s p0_partial=%d partial=%d stale=%d candidates=%d next=%s",
 		status.Overall,
 		status.Visibility,
 		status.GeneratedAt,
 		status.ExpiresAt,
+		status.SourceRunID,
 		status.P0PartialCount,
 		status.PartialCount,
 		status.StalePartialCount,

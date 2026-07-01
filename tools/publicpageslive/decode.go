@@ -8,12 +8,18 @@ type statusPayload struct {
 	RawLogsIncluded bool   `json:"raw_logs_included"`
 	SecretsIncluded bool   `json:"secrets_included"`
 	EndpointDetails string `json:"endpoint_details"`
+	SourceCommit    string `json:"source_commit"`
+	SourceRunID     string `json:"source_run_id"`
+	SourceRunURL    string `json:"source_run_url"`
 }
 
 type pagesPayload struct {
 	Status              string `json:"status"`
 	Visibility          string `json:"visibility"`
 	BuildType           string `json:"build_type"`
+	SourceCommit        string `json:"source_commit"`
+	SourceRunID         string `json:"source_run_id"`
+	SourceRunURL        string `json:"source_run_url"`
 	RawResponseIncluded bool   `json:"raw_response_included"`
 	SecretsIncluded     bool   `json:"secrets_included"`
 }

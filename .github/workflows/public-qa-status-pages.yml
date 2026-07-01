@@ -62,6 +62,10 @@ jobs:
             --arg generated_at "$generated_at" \
             --arg html_url "$page_url" \
             --arg build_type "$build_type" \
+            --arg source_workflow "$GITHUB_WORKFLOW" \
+            --arg source_commit "$GITHUB_SHA" \
+            --arg source_run_id "$GITHUB_RUN_ID" \
+            --arg source_run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             '{
               schema_version: "riido-public-qa-pages-publish.v1",
               generated_at: $generated_at,
@@ -69,6 +73,10 @@ jobs:
               visibility: "public_repository",
               html_url: $html_url,
               build_type: $build_type,
+              source_workflow: $source_workflow,
+              source_commit: $source_commit,
+              source_run_id: $source_run_id,
+              source_run_url: $source_run_url,
               raw_response_included: false,
               secrets_included: false
             }' > site/pages-status.json
