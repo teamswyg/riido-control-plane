@@ -84,10 +84,14 @@ jobs:
             -evidence-out out/operational-readiness-evidence.json \
             -candidate-out out/operational-readiness-closed-loop-candidates.json \
             -public-status-out out/operational-readiness-public-status.md \
-            -public-status-html-out out/operational-readiness-public-status.html
+            -public-status-html-out out/operational-readiness-public-status.html \
+            -public-status-github-annotation-out out/operational-readiness-public-status.annotation
       - name: Publish public QA status summary
         if: always()
         run: cat out/operational-readiness-public-status.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish public QA status annotation
+        if: always()
+        run: cat out/operational-readiness-public-status.annotation
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -111,4 +115,10 @@ jobs:
         with:
           name: operational-readiness-public-status-page
           path: out/operational-readiness-public-status.html
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-public-status-annotation
+          path: out/operational-readiness-public-status.annotation
           if-no-files-found: error

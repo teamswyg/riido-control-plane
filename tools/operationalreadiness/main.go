@@ -22,6 +22,12 @@ func mainRun(args []string) error {
 	fs.StringVar(&opt.CandidateOut, "candidate-out", "", "optional closed-loop candidate JSON output")
 	fs.StringVar(&opt.PublicStatusOut, "public-status-out", "", "optional public status Markdown output")
 	fs.StringVar(&opt.PublicStatusHTML, "public-status-html-out", "", "optional public status HTML output")
+	fs.StringVar(
+		&opt.PublicStatusAnnotationOut,
+		"public-status-github-annotation-out",
+		"",
+		"optional public status GitHub annotation output",
+	)
 	fs.BoolVar(&opt.WriteDoc, "write-doc", false, "write generated doc")
 	fs.BoolVar(&opt.CheckDoc, "check-doc", false, "verify generated doc")
 	verify := fs.Bool("verify", false, "alias for -check-doc")

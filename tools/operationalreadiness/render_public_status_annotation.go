@@ -1,0 +1,38 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func renderPublicStatusGitHubAnnotation(status publicStatus) string {
+	level := "notice"
+	if status.Overall != "operational" {
+		level = "warning"
+	}
+	message := fmt.Sprintf(
+		"overall=%s visibility=%s p0_partial=%d partial=%d stale=%d candidates=%d next=%s",
+		status.Overall,
+		status.Visibility,
+		status.P0PartialCount,
+		status.PartialCount,
+		status.StalePartialCount,
+		status.ClosedLoopCandidates,
+		status.NextArtifact,
+	)
+	return fmt.Sprintf(
+		"::%s title=%s::%s\n",
+		level,
+		githubAnnotationEscape("Riido Public QA Status"),
+		githubAnnotationEscape(message),
+	)
+}
+
+func githubAnnotationEscape(value string) string {
+	value = strings.ReplaceAll(value, "%", "%25")
+	value = strings.ReplaceAll(value, "\r", "%0D")
+	value = strings.ReplaceAll(value, "\n", "%0A")
+	value = strings.ReplaceAll(value, ":", "%3A")
+	value = strings.ReplaceAll(value, ",", "%2C")
+	return value
+}

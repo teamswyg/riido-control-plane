@@ -69,7 +69,7 @@
 | `.github/workflows/migration-ledger.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/module-decomposition.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/open-questions.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
-| `.github/workflows/operational-readiness.yml` | `covered` | `1` | `1/1` | `true` | `4/4` | `0` | - |
+| `.github/workflows/operational-readiness.yml` | `covered` | `1` | `1/1` | `true` | `5/5` | `0` | - |
 | `.github/workflows/pre-commit-baseline.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/provider-status.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/repository-readme.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
