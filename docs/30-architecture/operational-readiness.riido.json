@@ -222,6 +222,12 @@
           "evidence_ref": ".github/workflows/operational-readiness.yml"
         },
         {
+          "id": "public_qa_status_github_annotation",
+          "kind": "artifact",
+          "signal": "The operational-readiness workflow emits a redacted GitHub Actions notice or warning annotation from the Public QA Status aggregate so degraded QA health is visible from the check UI without opening raw artifacts.",
+          "evidence_ref": ".github/workflows/operational-readiness.yml"
+        },
+        {
           "id": "public_qa_status_visual_page",
           "kind": "artifact",
           "signal": "The operational-readiness workflow publishes a redacted static HTML status page artifact for visual QA triage.",

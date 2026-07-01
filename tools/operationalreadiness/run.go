@@ -39,6 +39,12 @@ func run(opt options) error {
 			return err
 		}
 	}
+	if opt.PublicStatusAnnotationOut != "" {
+		body := renderPublicStatusGitHubAnnotation(e.PublicStatus)
+		if err := writeText(opt.PublicStatusAnnotationOut, body); err != nil {
+			return err
+		}
+	}
 	if opt.CandidateOut != "" {
 		return writeJSON(opt.CandidateOut, newCandidateEvidence(m, e, now))
 	}

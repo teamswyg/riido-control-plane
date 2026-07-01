@@ -7368,11 +7368,19 @@
         },
         {
           "kind": "tool",
+          "path": "tools/operationalreadiness/render_public_status_annotation.go"
+        },
+        {
+          "kind": "tool",
           "path": "tools/operationalreadiness/evidence.go"
         },
         {
           "kind": "test",
           "path": "tools/operationalreadiness/public_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/public_status_annotation_test.go"
         },
         {
           "kind": "test",
@@ -7387,6 +7395,10 @@
         {
           "kind": "test",
           "path": "tools/operationalreadiness/public_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/public_status_annotation_test.go"
         },
         {
           "kind": "test",
@@ -7435,6 +7447,11 @@
           "redacted": true
         },
         {
+          "kind": "artifact",
+          "path": "operational-readiness-public-status-annotation",
+          "redacted": true
+        },
+        {
           "kind": "generated_doc",
           "path": "docs/30-architecture/operational-readiness.md"
         },
@@ -7444,7 +7461,7 @@
           "redacted": true
         }
       ],
-      "decision": "Public QA status is now generated from the operational readiness SSOT as aggregate counts only: degraded when P0 QA partials or stale partials exist, redacted for endpoints, and explicitly marked as containing no raw logs or secrets. The operational readiness workflow publishes the same redacted Markdown to the GitHub Actions summary and an artifact, plus a static HTML status page artifact, so QA operators can see release health without opening raw logs. The Loop Registry semantic hashes move with this common registry surface so claim-bound agents can see that the registry change is a redacted operational-status publication rather than a silent contract or vocabulary drift.",
+      "decision": "Public QA status is now generated from the operational readiness SSOT as aggregate counts only: degraded when P0 QA partials or stale partials exist, redacted for endpoints, and explicitly marked as containing no raw logs or secrets. The operational readiness workflow publishes the same redacted Markdown to the GitHub Actions summary and an artifact, a static HTML status page artifact, and a GitHub Actions notice/warning annotation so QA operators can see release health from the check UI without opening raw logs. The Loop Registry semantic hashes move with this common registry surface so claim-bound agents can see that the registry change is a redacted operational-status publication rather than a silent contract or vocabulary drift.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
