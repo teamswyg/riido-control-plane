@@ -13,10 +13,19 @@ func verifyNextCommand(check readinessCheck) error {
 		return fmt.Errorf("readiness check %s next command must not contain placeholder tokens", check.ID)
 	}
 	if !daemonResilienceCheck(check.ID) {
-		return nil
+		return verifyExternalRepoTestCommand(check)
 	}
 	if strings.Contains(check.NextCommand, "TestDaemon.*") {
 		return fmt.Errorf("readiness check %s uses daemon test wildcard that can pass with no tests", check.ID)
+	}
+	return verifyExternalRepoTestCommand(check)
+}
+
+func verifyExternalRepoTestCommand(check readinessCheck) error {
+	if referencesDaemonRepo(check) &&
+		strings.Contains(check.NextCommand, "go test") &&
+		!strings.Contains(check.NextCommand, "cd ../riido-daemon") {
+		return fmt.Errorf("readiness check %s must run daemon go tests from ../riido-daemon", check.ID)
 	}
 	return nil
 }
@@ -28,4 +37,13 @@ func daemonResilienceCheck(id string) bool {
 	default:
 		return false
 	}
+}
+
+func referencesDaemonRepo(check readinessCheck) bool {
+	for _, ref := range check.EvidenceRefs {
+		if strings.HasPrefix(ref.Path, "riido-daemon:") {
+			return true
+		}
+	}
+	return false
 }
