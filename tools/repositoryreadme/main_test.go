@@ -24,7 +24,7 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.Status != "verified" || got.FragmentCount == 0 || got.DocLinkCount == 0 || got.EndpointCount == 0 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
-	if got.RequiredMarkerCount < 8 {
+	if got.RequiredMarkerCount < 9 {
 		t.Fatalf("public entrypoint markers missing: %+v", got)
 	}
 	readme, err := os.ReadFile("../../README.md")
@@ -33,5 +33,8 @@ func TestRunWritesEvidence(t *testing.T) {
 	}
 	if !strings.Contains(string(readme), "actions/workflows/operational-readiness.yml/badge.svg") {
 		t.Fatalf("README public QA status badge missing")
+	}
+	if !strings.Contains(string(readme), "https://teamswyg.github.io/riido-control-plane/") {
+		t.Fatalf("README public QA Pages URL missing")
 	}
 }

@@ -9,12 +9,13 @@
     {"topic": "Public QA Status와 operational readiness evidence", "path": "docs/30-architecture/operational-readiness.md"}
   ],
   "rules": [
-    "Public QA Status는 GitHub Actions artifact/summary/annotation에서 먼저 확인합니다. GitHub Pages가 활성화되지 않은 동안에는 README가 공개 entrypoint이고 `operational-readiness-public-status-page`는 HTML artifact로만 배포됩니다."
+    "Public QA Status는 GitHub Actions artifact/summary/annotation과 GitHub Pages에서 확인합니다. GitHub Pages entrypoint는 `https://teamswyg.github.io/riido-control-plane/`이며, 배포 workflow는 redacted status 파일만 Pages artifact에 포함해야 합니다."
   ],
   "required_markers": [
     "Public QA Status",
     "operational-readiness.yml",
     "operational-readiness-public-status-json",
-    "actions/workflows/operational-readiness.yml/badge.svg"
+    "actions/workflows/operational-readiness.yml/badge.svg",
+    "https://teamswyg.github.io/riido-control-plane/"
   ]
 }

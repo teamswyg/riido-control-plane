@@ -1,6 +1,6 @@
 package main
 
-const publicStatusNextArtifact = "public_qa_status_visual_or_pages_publish_evidence"
+const publicStatusNextArtifact = "public_qa_status_pages_live_evidence"
 
 func newPublicStatus(
 	m manifest,
