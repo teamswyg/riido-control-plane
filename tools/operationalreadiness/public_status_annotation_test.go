@@ -25,6 +25,9 @@ func TestOperationalReadinessWritesPublicStatusGitHubAnnotation(t *testing.T) {
 	if !strings.Contains(got, "::warning title=Riido Public QA Status::") {
 		t.Fatalf("public status annotation missing warning: %s", got)
 	}
+	if !strings.Contains(got, "generated_at=") || !strings.Contains(got, "expires_at=") {
+		t.Fatalf("public status annotation freshness missing: %s", got)
+	}
 	if strings.Contains(got, "eyJ") || strings.Contains(got, "RIIDO_DEVICE_SECRET") {
 		t.Fatalf("public status annotation leaked secret marker: %s", got)
 	}

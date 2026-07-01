@@ -4,6 +4,9 @@ type publicStatus struct {
 	Overall              string `json:"overall"`
 	Visibility           string `json:"visibility"`
 	StatusPage           string `json:"status_page"`
+	GeneratedAt          string `json:"generated_at"`
+	ExpiresAt            string `json:"expires_at"`
+	EvidenceTTLHours     int    `json:"evidence_ttl_hours"`
 	RawLogsIncluded      bool   `json:"raw_logs_included"`
 	SecretsIncluded      bool   `json:"secrets_included"`
 	EndpointDetails      string `json:"endpoint_details"`

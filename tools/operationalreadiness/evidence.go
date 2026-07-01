@@ -31,11 +31,13 @@ func newEvidenceAt(m manifest, now time.Time) evidence {
 			})
 		}
 	}
+	generated := generatedAt.Format(time.RFC3339)
+	expires := expiresAt.Format(time.RFC3339)
 	return evidence{
 		SchemaVersion:    manifestSchemaToEvidence(m.SchemaVersion),
 		Status:           "verified",
-		GeneratedAt:      generatedAt.Format(time.RFC3339),
-		ExpiresAt:        expiresAt.Format(time.RFC3339),
+		GeneratedAt:      generated,
+		ExpiresAt:        expires,
 		EvidenceTTLHours: readinessEvidenceTTLHours,
 		LoopRegistry:     m.LoopRegistry,
 		CheckCount:       len(m.Checks), MeasurementCount: measurementCount, CoveredCount: statusCounts["covered"],
@@ -46,7 +48,7 @@ func newEvidenceAt(m manifest, now time.Time) evidence {
 		CategoryCounts:     categoryCounts, MeasurementKinds: measurementKinds,
 		StatusCounts:     statusCounts,
 		NotionOpenLoop:   newNotionEvidence(m.NotionOpenLoop),
-		PublicStatus:     newPublicStatus(m, partials, stalePartials),
+		PublicStatus:     newPublicStatus(m, partials, stalePartials, generated, expires),
 		PartialPromotion: partialPromotionFor(partials),
 		PartialChecks:    partials,
 		Loop:             m.Loop,
