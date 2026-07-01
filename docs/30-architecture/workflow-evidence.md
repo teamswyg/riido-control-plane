@@ -72,7 +72,7 @@
 | `.github/workflows/operational-readiness.yml` | `covered` | `1` | `1/1` | `true` | `7/7` | `0` | - |
 | `.github/workflows/pre-commit-baseline.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/provider-status.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
-| `.github/workflows/public-qa-status-pages.yml` | `covered` | `1` | `1/1` | `true` | `2/2` | `0` | - |
+| `.github/workflows/public-qa-status-pages.yml` | `covered` | `1` | `1/1` | `true` | `3/3` | `0` | - |
 | `.github/workflows/repository-readme.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
 | `.github/workflows/review-account-seed.yml` | `covered` | `1` | `1/1` | `true` | `1/1` | `0` | - |
 | `.github/workflows/runtime-deployment-boundary.yml` | `covered` | `2` | `2/2` | `true` | `1/1` | `0` | - |
