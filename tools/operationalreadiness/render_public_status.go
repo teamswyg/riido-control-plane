@@ -40,7 +40,28 @@ func renderPublicStatusWithFreshness(
 	fmt.Fprintf(b, "- partial checks: `%d`\n", status.PartialCount)
 	fmt.Fprintf(b, "- stale partials: `%d`\n", status.StalePartialCount)
 	fmt.Fprintf(b, "- closed-loop candidates: `%d`\n", status.ClosedLoopCandidates)
+	renderPublicBlockingCategories(b, status.BlockingCategories)
 	fmt.Fprintf(b, "- next artifact: `%s`\n\n", status.NextArtifact)
+}
+
+func renderPublicBlockingCategories(
+	b *strings.Builder,
+	categories []publicStatusCategory,
+) {
+	if len(categories) == 0 {
+		b.WriteString("- blocking categories: `none`\n")
+		return
+	}
+	b.WriteString("- blocking categories:\n")
+	for _, category := range categories {
+		fmt.Fprintf(
+			b,
+			"  - `%s`: partial `%d`, stale `%d`\n",
+			category.Category,
+			category.PartialCount,
+			category.StalePartialCount,
+		)
+	}
 }
 
 func renderPublicStatusDoc(status publicStatus) string {

@@ -19,6 +19,9 @@ func TestOperationalReadinessPublicStatusIsRedacted(t *testing.T) {
 	if status.P0CycleCount == 0 || status.P0PartialCount == 0 || status.Overall != "degraded" {
 		t.Fatalf("public status should expose open P0 QA risk: %+v", status)
 	}
+	if len(status.BlockingCategories) == 0 || status.BlockingCategories[0].Category == "" {
+		t.Fatalf("public status blocking categories missing: %+v", status)
+	}
 	if status.GeneratedAt != got.GeneratedAt || status.ExpiresAt != got.ExpiresAt {
 		t.Fatalf("public status freshness mismatch: %+v evidence=%+v", status, got)
 	}

@@ -29,6 +29,10 @@ func TestRunWritesRedactedLiveEvidence(t *testing.T) {
 	if rec.StatusSourceCommit != "abc123" || rec.PagesSourceRunID != "456" {
 		t.Fatalf("record source = %+v", rec)
 	}
+	if len(rec.StatusBlockingCategories) != 1 ||
+		rec.StatusBlockingCategories[0].Category != "usability" {
+		t.Fatalf("record blocking categories = %+v", rec.StatusBlockingCategories)
+	}
 }
 
 func TestRunRejectsSecretMarker(t *testing.T) {
@@ -50,7 +54,7 @@ func testServer(t *testing.T, secret bool) *httptest.Server {
 			}
 			_, _ = w.Write([]byte(html))
 		case "/status.json":
-			_, _ = w.Write([]byte(`{"overall":"degraded","visibility":"public_aggregate","source_commit":"abc123","source_run_id":"456","source_run_url":"https://github.com/teamswyg/riido-control-plane/actions/runs/456","raw_logs_included":false,"secrets_included":false,"endpoint_details":"redacted"}`))
+			_, _ = w.Write([]byte(`{"overall":"degraded","visibility":"public_aggregate","source_commit":"abc123","source_run_id":"456","source_run_url":"https://github.com/teamswyg/riido-control-plane/actions/runs/456","raw_logs_included":false,"secrets_included":false,"endpoint_details":"redacted","blocking_categories":[{"category":"usability","partial_count":1,"stale_partial_count":1}]}`))
 		case "/pages-status.json":
 			_, _ = w.Write([]byte(`{"status":"published","visibility":"public_repository","build_type":"workflow","source_commit":"abc123","source_run_id":"456","source_run_url":"https://github.com/teamswyg/riido-control-plane/actions/runs/456","raw_response_included":false,"secrets_included":false}`))
 		default:

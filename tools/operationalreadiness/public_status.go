@@ -32,6 +32,7 @@ func newPublicStatus(
 		PartialCount:         len(partials),
 		StalePartialCount:    staleCount,
 		ClosedLoopCandidates: staleCount,
+		BlockingCategories:   publicBlockingCategories(m.RequiredCategories, partials),
 		NextArtifact:         publicStatusNextArtifact,
 	}
 }

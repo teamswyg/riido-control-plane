@@ -45,6 +45,8 @@ main{max-width:880px;margin:0 auto;padding:40px 20px}
 <div class="card"><div class="label">Stale Partials</div><div class="value">{{.StalePartialCount}}</div></div>
 <div class="card"><div class="label">Candidates</div><div class="value">{{.ClosedLoopCandidates}}</div></div>
 </div>
+<h2>Blocking categories</h2>
+<ul>{{range .BlockingCategories}}<li><code>{{.Category}}</code>: partial {{.PartialCount}}, stale {{.StalePartialCount}}</li>{{else}}<li>none</li>{{end}}</ul>
 <p>Raw logs included: <strong>{{.RawLogsIncluded}}</strong></p>
 <p>Secrets included: <strong>{{.SecretsIncluded}}</strong></p>
 <p>Endpoint details: <strong>{{.EndpointDetails}}</strong></p>

@@ -32,6 +32,9 @@ func TestOperationalReadinessWritesPublicStatusGitHubAnnotation(t *testing.T) {
 	if !strings.Contains(got, "run_id=456") {
 		t.Fatalf("public status annotation source missing: %s", got)
 	}
+	if !strings.Contains(got, "categories=") {
+		t.Fatalf("public status annotation category summary missing: %s", got)
+	}
 	if strings.Contains(got, "eyJ") || strings.Contains(got, "RIIDO_DEVICE_SECRET") {
 		t.Fatalf("public status annotation leaked secret marker: %s", got)
 	}
