@@ -21,6 +21,7 @@ func mainRun(args []string) error {
 	fs.StringVar(&opt.EvidenceOut, "evidence-out", "", "optional evidence JSON output")
 	fs.StringVar(&opt.CandidateOut, "candidate-out", "", "optional closed-loop candidate JSON output")
 	fs.StringVar(&opt.PublicStatusOut, "public-status-out", "", "optional public status Markdown output")
+	fs.StringVar(&opt.PublicStatusJSON, "public-status-json-out", "", "optional public status JSON output")
 	fs.StringVar(&opt.PublicStatusHTML, "public-status-html-out", "", "optional public status HTML output")
 	fs.StringVar(
 		&opt.PublicStatusAnnotationOut,

@@ -6,6 +6,7 @@ type options struct {
 	EvidenceOut               string
 	CandidateOut              string
 	PublicStatusOut           string
+	PublicStatusJSON          string
 	PublicStatusHTML          string
 	PublicStatusAnnotationOut string
 	WriteDoc                  bool
