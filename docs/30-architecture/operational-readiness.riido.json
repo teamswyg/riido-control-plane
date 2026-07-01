@@ -182,6 +182,12 @@
           "kind": "infra",
           "signal": "riido-infra PR #115 merged a redacted CloudWatch describe-alarms collector that proves live client-surface alarms keep service-only dimensions and omit raw action ARNs/account identifiers.",
           "evidence_ref": "github:https://github.com/teamswyg/riido-infra/pull/115"
+        },
+        {
+          "id": "client_surface_alarm_preflight_collector_pr",
+          "kind": "infra",
+          "signal": "riido-infra PR #116 merged a redacted preflight collector that records missing operator tfvars or required Terraform inputs without storing raw plan logs, tfvars values, ARNs, tokens, endpoint hosts, or principal identifiers.",
+          "evidence_ref": "github:https://github.com/teamswyg/riido-infra/pull/116"
         }
       ],
       "evidence_refs": [
@@ -192,10 +198,11 @@
         {"kind": "external", "path": "riido-infra:terraform/riido_ai_server/observability.tf"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/113"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/114"},
-        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/115"}
+        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/115"},
+        {"kind": "external", "path": "github:https://github.com/teamswyg/riido-infra/pull/116"}
       ],
       "next_artifact": "client_surface_alarm_plan_apply_evidence",
-      "next_command": "gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 114 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 115 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && sh -lc 'workspace=$(terraform -chdir=terraform/riido_ai_server workspace show) && service=$(terraform -chdir=terraform/riido_ai_server output -raw service_name) && vars=.riido-local/terraform/riido_ai_server-${workspace}.tfvars && mkdir -p .riido-local/terraform && test -f \"$vars\" && set +e; terraform -chdir=terraform/riido_ai_server plan -input=false -detailed-exitcode -var-file=\"../../$vars\" -var=\"enable_client_surface_cloudwatch_alarms=true\" -out=\"../../.riido-local/terraform/client-surface-alarms-${workspace}.tfplan\" > \".riido-local/terraform/client-surface-alarms-${workspace}.plan.log\" 2>&1; code=$?; echo \"$code\" > \".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit\"; test \"$code\" = \"0\" -o \"$code\" = \"2\"; aws cloudwatch describe-alarms --alarm-name-prefix \"${service}-client-surface\" --output json > \".riido-local/terraform/client-surface-alarms-${workspace}.json\" && go run ./tools/clientalarmevidence -workspace \"$workspace\" -alarms-json \".riido-local/terraform/client-surface-alarms-${workspace}.json\" -out \".riido-local/terraform/client-surface-alarms-${workspace}.evidence.json\"'"
+      "next_command": "gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 114 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 115 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 116 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && sh -lc 'workspace=$(terraform -chdir=terraform/riido_ai_server workspace show) && vars=.riido-local/terraform/riido_ai_server-${workspace}.tfvars && mkdir -p .riido-local/terraform && if ! test -f \"$vars\"; then go run ./tools/clientalarmpreflight -workspace \"$workspace\" -tfvars \"$vars\" -plan-log \".riido-local/terraform/client-surface-alarms-${workspace}.plan.log\" -plan-exit \".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit\" -out \".riido-local/terraform/client-surface-alarms-${workspace}.preflight.evidence.json\"; exit 0; fi; set +e; terraform -chdir=terraform/riido_ai_server plan -input=false -detailed-exitcode -var-file=\"../../$vars\" -var=\"enable_client_surface_cloudwatch_alarms=true\" -out=\"../../.riido-local/terraform/client-surface-alarms-${workspace}.tfplan\" > \".riido-local/terraform/client-surface-alarms-${workspace}.plan.log\" 2>&1; code=$?; echo \"$code\" > \".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit\"; case \"$code\" in 0|2) ;; *) go run ./tools/clientalarmpreflight -workspace \"$workspace\" -tfvars \"$vars\" -plan-log \".riido-local/terraform/client-surface-alarms-${workspace}.plan.log\" -plan-exit \".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit\" -out \".riido-local/terraform/client-surface-alarms-${workspace}.preflight.evidence.json\"; exit 0;; esac; service=$(terraform -chdir=terraform/riido_ai_server output -raw service_name) && aws cloudwatch describe-alarms --alarm-name-prefix \"${service}-client-surface\" --output json > \".riido-local/terraform/client-surface-alarms-${workspace}.json\" && go run ./tools/clientalarmevidence -workspace \"$workspace\" -alarms-json \".riido-local/terraform/client-surface-alarms-${workspace}.json\" -out \".riido-local/terraform/client-surface-alarms-${workspace}.evidence.json\"'"
     },
     {
       "id": "public_qa_status_surface",

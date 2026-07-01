@@ -19,6 +19,9 @@ func TestOperationalReadinessBindsClientSurfaceAlarmApplyEvidence(t *testing.T) 
 	if !hasMeasurement(check, "client_surface_alarm_live_evidence_collector_pr") {
 		t.Fatal("missing merged infra alarm live evidence collector measurement")
 	}
+	if !hasMeasurement(check, "client_surface_alarm_preflight_collector_pr") {
+		t.Fatal("missing merged infra alarm preflight collector measurement")
+	}
 	if !hasEvidenceRef(check, "github:https://github.com/teamswyg/riido-infra/pull/113") {
 		t.Fatal("missing riido-infra PR #113 evidence ref")
 	}
@@ -27,6 +30,9 @@ func TestOperationalReadinessBindsClientSurfaceAlarmApplyEvidence(t *testing.T) 
 	}
 	if !hasEvidenceRef(check, "github:https://github.com/teamswyg/riido-infra/pull/115") {
 		t.Fatal("missing riido-infra PR #115 evidence ref")
+	}
+	if !hasEvidenceRef(check, "github:https://github.com/teamswyg/riido-infra/pull/116") {
+		t.Fatal("missing riido-infra PR #116 evidence ref")
 	}
 }
 
