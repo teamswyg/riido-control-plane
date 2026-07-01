@@ -229,6 +229,12 @@
           "evidence_ref": ".github/workflows/operational-readiness.yml"
         },
         {
+          "id": "public_qa_status_json_artifact",
+          "kind": "artifact",
+          "signal": "The operational-readiness workflow publishes the redacted Public QA Status JSON artifact for dashboard and automation consumers that must not parse full readiness evidence.",
+          "evidence_ref": "tools/operationalreadiness/public_status_json_output_test.go"
+        },
+        {
           "id": "public_qa_status_github_annotation",
           "kind": "artifact",
           "signal": "The operational-readiness workflow emits a redacted GitHub Actions notice or warning annotation from the Public QA Status aggregate so degraded QA health is visible from the check UI without opening raw artifacts.",
@@ -246,6 +252,7 @@
         {"kind": "code", "path": "tools/operationalreadiness/render_public_status.go"},
         {"kind": "code", "path": "tools/operationalreadiness/render_public_status_html.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_test.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/public_status_json_output_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_output_test.go"},
         {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
         {"kind": "doc", "path": "docs/30-architecture/operational-readiness.md"}

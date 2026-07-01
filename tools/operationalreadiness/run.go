@@ -30,6 +30,11 @@ func run(opt options) error {
 			return err
 		}
 	}
+	if opt.PublicStatusJSON != "" {
+		if err := writeJSON(opt.PublicStatusJSON, e.PublicStatus); err != nil {
+			return err
+		}
+	}
 	if opt.PublicStatusHTML != "" {
 		html, err := renderPublicStatusHTML(e.PublicStatus)
 		if err != nil {

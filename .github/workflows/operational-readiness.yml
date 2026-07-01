@@ -84,6 +84,7 @@ jobs:
             -evidence-out out/operational-readiness-evidence.json \
             -candidate-out out/operational-readiness-closed-loop-candidates.json \
             -public-status-out out/operational-readiness-public-status.md \
+            -public-status-json-out out/operational-readiness-public-status.json \
             -public-status-html-out out/operational-readiness-public-status.html \
             -public-status-github-annotation-out out/operational-readiness-public-status.annotation
       - name: Publish public QA status summary
@@ -109,6 +110,12 @@ jobs:
         with:
           name: operational-readiness-public-status
           path: out/operational-readiness-public-status.md
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-public-status-json
+          path: out/operational-readiness-public-status.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
