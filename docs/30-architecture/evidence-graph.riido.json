@@ -7229,6 +7229,10 @@
         },
         {
           "kind": "test",
+          "path": "tools/operationalreadiness/infra_alarm_command_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/operationalreadiness/evidence_time_test.go"
         },
         {
@@ -7260,6 +7264,10 @@
         {
           "kind": "test",
           "path": "tools/operationalreadiness/infra_alarm_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/infra_alarm_command_test.go"
         },
         {
           "kind": "test",
@@ -7317,7 +7325,7 @@
           "path": "docs/30-architecture/operational-readiness.md"
         }
       ],
-      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal and rejects partial checks whose measurements are only manual notes, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context, and the client-surface monitoring partial now cites merged riido-infra alarm topology, dimension regression guard, and redacted live CloudWatch alarm evidence collector while still requiring environment-specific threshold/action plan/apply evidence before claiming live alarm coverage.",
+      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal and rejects partial checks whose measurements are only manual notes, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context, and the client-surface monitoring partial now cites merged riido-infra alarm topology, dimension regression guard, and redacted live CloudWatch alarm evidence collector while still requiring environment-specific threshold/action plan/apply evidence before claiming live alarm coverage. Local operator dry-run showed the old adoption command was not executable because required Terraform variables are intentionally private and live client-surface alarms were absent, so the next command now derives workspace/service from Terraform, requires a private local tfvars file, captures detailed-exitcode plan evidence, and then runs the redacted CloudWatch alarm evidence collector.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
