@@ -2,7 +2,13 @@ package main
 
 const publicStatusNextArtifact = "public_qa_status_visual_or_pages_publish_evidence"
 
-func newPublicStatus(m manifest, partials []partialCheck, staleCount int) publicStatus {
+func newPublicStatus(
+	m manifest,
+	partials []partialCheck,
+	staleCount int,
+	generatedAt string,
+	expiresAt string,
+) publicStatus {
 	notion := newNotionEvidence(m.NotionOpenLoop)
 	overall := "operational"
 	if notion.PartialCount > 0 || staleCount > 0 {
@@ -12,6 +18,9 @@ func newPublicStatus(m manifest, partials []partialCheck, staleCount int) public
 		Overall:              overall,
 		Visibility:           "public_aggregate",
 		StatusPage:           m.GeneratedDoc,
+		GeneratedAt:          generatedAt,
+		ExpiresAt:            expiresAt,
+		EvidenceTTLHours:     readinessEvidenceTTLHours,
 		EndpointDetails:      "redacted",
 		P0CycleCount:         notion.P0Count,
 		P0PartialCount:       notion.PartialCount,

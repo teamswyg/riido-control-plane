@@ -31,8 +31,11 @@ main{max-width:880px;margin:0 auto;padding:40px 20px}
 <main>
 <h1>Riido Public QA Status</h1>
 <p><span class="badge {{.BadgeClass}}">{{.Overall}}</span></p>
+<p>Generated at: <code>{{.GeneratedAt}}</code></p>
+<p>Expires at: <code>{{.ExpiresAt}}</code></p>
 <div class="grid">
 <div class="card"><div class="label">Visibility</div><div class="value">{{.Visibility}}</div></div>
+<div class="card"><div class="label">TTL Hours</div><div class="value">{{.EvidenceTTLHours}}</div></div>
 <div class="card"><div class="label">P0 Cycles</div><div class="value">{{.P0CycleCount}}</div></div>
 <div class="card"><div class="label">P0 Partial</div><div class="value">{{.P0PartialCount}}</div></div>
 <div class="card"><div class="label">Partial Checks</div><div class="value">{{.PartialCount}}</div></div>
