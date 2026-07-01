@@ -16,6 +16,8 @@ func verifyOperationalWorkflow(root string, m manifest) error {
 		"-candidate-out out/operational-readiness-closed-loop-candidates.json",
 		"name: operational-readiness-closed-loop-candidates",
 		"out/operational-readiness-closed-loop-candidates.json",
+		"name: operational-readiness-pages-status",
+		"out/operational-readiness-pages-status.json",
 		"if-no-files-found: error",
 	}
 	for _, needle := range required {

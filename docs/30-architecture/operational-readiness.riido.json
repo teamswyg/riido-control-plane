@@ -245,6 +245,12 @@
           "kind": "artifact",
           "signal": "The operational-readiness workflow publishes a redacted static HTML status page artifact for visual QA triage.",
           "evidence_ref": "tools/operationalreadiness/render_public_status_html.go"
+        },
+        {
+          "id": "public_qa_status_pages_status_artifact",
+          "kind": "artifact",
+          "signal": "The operational-readiness workflow captures whether GitHub Pages is enabled as a redacted JSON artifact, so Pages publication remains evidence-backed instead of operator memory.",
+          "evidence_ref": ".github/workflows/operational-readiness.yml"
         }
       ],
       "evidence_refs": [
@@ -257,7 +263,7 @@
         {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
         {"kind": "doc", "path": "docs/30-architecture/operational-readiness.md"}
       ],
-      "next_artifact": "public_qa_status_visual_or_pages_publish_evidence",
+      "next_artifact": "public_qa_status_pages_publish_evidence",
       "next_command": "go test ./tools/operationalreadiness -run 'TestOperationalReadinessPublicStatus' -count=1"
     },
     {
