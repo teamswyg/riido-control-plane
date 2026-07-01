@@ -10,6 +10,7 @@ on:
       - "docs/30-architecture/operational-readiness.md"
       - "docs/30-architecture/operational-readiness.riido.json"
       - "tools/operationalreadiness/**"
+      - "tools/publicpageslive/**"
       - "go.mod"
       - "go.sum"
   push:
@@ -19,6 +20,9 @@ on:
       - "docs/30-architecture/operational-readiness.md"
       - "docs/30-architecture/operational-readiness.riido.json"
       - "tools/operationalreadiness/**"
+      - "tools/publicpageslive/**"
+      - "go.mod"
+      - "go.sum"
 
 permissions:
   contents: read
@@ -94,5 +98,22 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify live public QA status page
+        run: |
+          mkdir -p out
+          go test ./tools/publicpageslive -count=1
+          go run ./tools/publicpageslive \
+            -base-url "${{ steps.deployment.outputs.page_url }}" \
+            -out out/public-qa-status-pages-live-evidence.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: public-qa-status-pages-live-evidence
+          path: out/public-qa-status-pages-live-evidence.json
+          if-no-files-found: error

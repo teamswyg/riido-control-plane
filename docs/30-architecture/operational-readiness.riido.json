@@ -257,6 +257,12 @@
           "kind": "workflow",
           "signal": "The public-qa-status-pages workflow publishes only the redacted public QA status HTML, Markdown, JSON, and pages status JSON to GitHub Pages.",
           "evidence_ref": ".github/workflows/public-qa-status-pages.yml"
+        },
+        {
+          "id": "public_qa_status_pages_live_smoke",
+          "kind": "workflow",
+          "signal": "The public-qa-status-pages deploy job fetches the live GitHub Pages HTML, status JSON, and pages-status JSON after deployment and writes a redacted live evidence artifact without raw response bodies.",
+          "evidence_ref": "tools/publicpageslive"
         }
       ],
       "evidence_refs": [
@@ -268,10 +274,12 @@
         {"kind": "test", "path": "tools/operationalreadiness/public_status_output_test.go"},
         {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
         {"kind": "workflow", "path": ".github/workflows/public-qa-status-pages.yml"},
-        {"kind": "doc", "path": "docs/30-architecture/operational-readiness.md"}
+        {"kind": "doc", "path": "docs/30-architecture/operational-readiness.md"},
+        {"kind": "code", "path": "tools/publicpageslive/collect.go"},
+        {"kind": "test", "path": "tools/publicpageslive/main_test.go"}
       ],
       "next_artifact": "public_qa_status_pages_live_evidence",
-      "next_command": "gh api 'repos/teamswyg/riido-control-plane/pages' --jq '{html_url,build_type,public,https_enforced}' && curl -fsSL https://teamswyg.github.io/riido-control-plane/status.json | jq 'select(.visibility == \"public_aggregate\" and .raw_logs_included == false and .secrets_included == false)' && curl -fsSL https://teamswyg.github.io/riido-control-plane/pages-status.json | jq 'select(.status == \"published\" and .raw_response_included == false and .secrets_included == false)'"
+      "next_command": "go run ./tools/publicpageslive -base-url https://teamswyg.github.io/riido-control-plane/ -out /tmp/public-qa-status-pages-live-evidence.json && jq 'select(.passed == true and .raw_bodies_included == false and .secrets_included == false)' /tmp/public-qa-status-pages-live-evidence.json"
     },
     {
       "id": "real_screen_wording",
