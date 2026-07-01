@@ -12,6 +12,8 @@ Executable SSOT: [`README.riido.json`](README.riido.json).
 
 Public QA Status는 `operational-readiness.yml`에서 생성되는 redacted aggregate입니다. GitHub Actions summary, annotation, Markdown artifact, HTML artifact, and `operational-readiness-public-status-json` artifact로 공개 가능한 상태만 보여주며 raw logs, endpoint details, credentials, JWT fragments, AWS identifiers는 포함하지 않습니다.
 
+[![Operational Readiness](https://github.com/teamswyg/riido-control-plane/actions/workflows/operational-readiness.yml/badge.svg)](https://github.com/teamswyg/riido-control-plane/actions/workflows/operational-readiness.yml) 배지는 redacted QA status artifact 생성 루프가 최신 main에서 실행되는지 보여주는 공개 진입점입니다. 이 배지는 artifact 생성 freshness gate이고, 모든 QA가 operational이라는 의미로 해석하면 안 됩니다.
+
 ## 이 레포가 하는 일
 
 - Riido SaaS HTTP/SSE endpoint 구현
