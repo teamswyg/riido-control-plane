@@ -262,7 +262,7 @@
         {
           "id": "public_qa_status_pages_publish_workflow",
           "kind": "workflow",
-          "signal": "The public-qa-status-pages workflow publishes only the redacted public QA status HTML, Markdown, JSON, and pages status JSON to GitHub Pages.",
+          "signal": "The public-qa-status-pages workflow publishes only the redacted public QA status HTML, Markdown, JSON, badge JSON, and pages status JSON to GitHub Pages.",
           "evidence_ref": ".github/workflows/public-qa-status-pages.yml"
         },
         {
@@ -274,11 +274,13 @@
       ],
       "evidence_refs": [
         {"kind": "code", "path": "tools/operationalreadiness/public_status.go"},
+        {"kind": "code", "path": "tools/operationalreadiness/public_status_badge.go"},
         {"kind": "code", "path": "tools/operationalreadiness/public_status_category.go"},
         {"kind": "code", "path": "tools/operationalreadiness/render_public_status.go"},
         {"kind": "code", "path": "tools/operationalreadiness/render_public_status_annotation.go"},
         {"kind": "code", "path": "tools/operationalreadiness/render_public_status_html.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_test.go"},
+        {"kind": "test", "path": "tools/operationalreadiness/public_status_badge_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_json_output_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_output_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_html_output_test.go"},
@@ -286,6 +288,7 @@
         {"kind": "workflow", "path": ".github/workflows/public-qa-status-pages.yml"},
         {"kind": "doc", "path": "docs/30-architecture/operational-readiness.md"},
         {"kind": "code", "path": "tools/publicpageslive/collect.go"},
+        {"kind": "code", "path": "tools/publicpageslive/record.go"},
         {"kind": "test", "path": "tools/publicpageslive/main_test.go"}
       ],
       "next_artifact": "public_qa_status_pages_live_evidence",

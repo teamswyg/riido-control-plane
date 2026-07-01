@@ -24,6 +24,7 @@ func verifyPublicStatusPagesWorkflow(root string) error {
 		"out/public-qa-status-pages-evidence.json",
 		"name: public-qa-status-pages-site",
 		"site/status.json",
+		"site/status-badge.json",
 		"site/pages-status.json",
 		"source_workflow",
 		"source_commit",

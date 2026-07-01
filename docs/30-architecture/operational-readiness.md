@@ -59,7 +59,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | Date | Category | Status | Check | Measurements | Evidence | Next |
 | --- | --- | --- | --- | --- | --- | --- |
 | `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `7` | `9` | `client_surface_alarm_plan_apply_evidence` |
-| `2026-07-01` | `monitoring` | `covered` | `public_qa_status_surface` | `10` | `14` | `public_qa_status_pages_live_evidence` |
+| `2026-07-01` | `monitoring` | `covered` | `public_qa_status_surface` | `10` | `17` | `public_qa_status_pages_live_evidence` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
 | `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `5` | `8` | `staging_client_p0_visual_screenshot_evidence` |
 | `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `1` | `2` | `agent_rename_snapshot_regression_evidence` |

@@ -24,6 +24,12 @@ func mainRun(args []string) error {
 	fs.StringVar(&opt.PublicStatusJSON, "public-status-json-out", "", "optional public status JSON output")
 	fs.StringVar(&opt.PublicStatusHTML, "public-status-html-out", "", "optional public status HTML output")
 	fs.StringVar(
+		&opt.PublicStatusBadgeJSON,
+		"public-status-badge-json-out",
+		"",
+		"optional public status badge JSON output",
+	)
+	fs.StringVar(
 		&opt.PublicStatusAnnotationOut,
 		"public-status-github-annotation-out",
 		"",

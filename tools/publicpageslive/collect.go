@@ -12,6 +12,7 @@ func collect(base string, now time.Time, client *http.Client) (record, error) {
 	htmlURL := base
 	statusURL := base + "status.json"
 	pagesURL := base + "pages-status.json"
+	badgeURL := base + "status-badge.json"
 	html, err := get(client, htmlURL)
 	if err != nil {
 		return record{}, err
@@ -24,33 +25,18 @@ func collect(base string, now time.Time, client *http.Client) (record, error) {
 	if err != nil {
 		return record{}, err
 	}
-	if err := assertNoSecretMarkers(html, statusBody, pagesBody); err != nil {
-		return record{}, err
-	}
-	status, pages, err := decodeStatus(statusBody, pagesBody)
+	badgeBody, err := get(client, badgeURL)
 	if err != nil {
 		return record{}, err
 	}
-	rec := record{
-		SchemaVersion: schemaVersion, ObservedAt: now.UTC(),
-		BaseURL: base, StatusURL: statusURL, PagesStatusURL: pagesURL,
-		HTMLReachable: true, RawBodiesIncluded: false, SecretsIncluded: false,
-		StatusOverall: status.Overall, StatusVisibility: status.Visibility,
-		StatusRawLogsIncluded:    status.RawLogsIncluded,
-		StatusSecretsIncluded:    status.SecretsIncluded,
-		StatusEndpointDetails:    status.EndpointDetails,
-		StatusSourceCommit:       status.SourceCommit,
-		StatusSourceRunID:        status.SourceRunID,
-		StatusSourceRunURL:       status.SourceRunURL,
-		StatusBlockingCategories: status.BlockingCategories,
-		PagesStatus:              pages.Status, PagesVisibility: pages.Visibility,
-		PagesBuildType:           pages.BuildType,
-		PagesSourceCommit:        pages.SourceCommit,
-		PagesSourceRunID:         pages.SourceRunID,
-		PagesSourceRunURL:        pages.SourceRunURL,
-		PagesRawResponseIncluded: pages.RawResponseIncluded,
-		PagesSecretsIncluded:     pages.SecretsIncluded,
+	if err := assertNoSecretMarkers(html, statusBody, pagesBody, badgeBody); err != nil {
+		return record{}, err
 	}
+	status, pages, badge, err := decodeStatus(statusBody, pagesBody, badgeBody)
+	if err != nil {
+		return record{}, err
+	}
+	rec := newRecord(base, now, statusURL, pagesURL, badgeURL, status, pages, badge)
 	rec.Passed = liveStatusPassed(rec)
 	if !rec.Passed {
 		return record{}, fmt.Errorf("public pages live evidence failed validation")
@@ -66,5 +52,6 @@ func liveStatusPassed(rec record) bool {
 		rec.StatusSourceCommit != "" && rec.StatusSourceRunID != "" &&
 		(rec.StatusOverall != "degraded" || len(rec.StatusBlockingCategories) > 0) &&
 		rec.PagesSourceCommit != "" && rec.PagesSourceRunID != "" &&
+		rec.BadgeSchemaVersion == 1 && rec.BadgeLabel != "" && rec.BadgeMessage != "" &&
 		!rec.PagesSecretsIncluded && !rec.RawBodiesIncluded && !rec.SecretsIncluded
 }

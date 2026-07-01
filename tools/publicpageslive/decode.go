@@ -31,14 +31,27 @@ type pagesPayload struct {
 	SecretsIncluded     bool   `json:"secrets_included"`
 }
 
-func decodeStatus(statusBody, pagesBody []byte) (statusPayload, pagesPayload, error) {
+type badgePayload struct {
+	SchemaVersion int    `json:"schemaVersion"`
+	Label         string `json:"label"`
+	Message       string `json:"message"`
+	Color         string `json:"color"`
+}
+
+func decodeStatus(
+	statusBody, pagesBody, badgeBody []byte,
+) (statusPayload, pagesPayload, badgePayload, error) {
 	var status statusPayload
 	if err := json.Unmarshal(statusBody, &status); err != nil {
-		return statusPayload{}, pagesPayload{}, err
+		return statusPayload{}, pagesPayload{}, badgePayload{}, err
 	}
 	var pages pagesPayload
 	if err := json.Unmarshal(pagesBody, &pages); err != nil {
-		return statusPayload{}, pagesPayload{}, err
+		return statusPayload{}, pagesPayload{}, badgePayload{}, err
 	}
-	return status, pages, nil
+	var badge badgePayload
+	if err := json.Unmarshal(badgeBody, &badge); err != nil {
+		return statusPayload{}, pagesPayload{}, badgePayload{}, err
+	}
+	return status, pages, badge, nil
 }
