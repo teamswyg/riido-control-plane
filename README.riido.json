@@ -13,6 +13,7 @@
     "docs/readme/overview.riido.json",
     "docs/readme/navigation.riido.json",
     "docs/readme/development.riido.json",
+    "docs/readme/public-qa-status.riido.json",
     "docs/readme/runtime-cd.riido.json",
     "docs/readme/verification.riido.json",
     "docs/readme/evidence-loop.riido.json"

@@ -91,6 +91,11 @@
       "owner_key": "fragments"
     },
     {
+      "path": "docs/readme/public-qa-status.riido.json",
+      "owner_manifest": "README.riido.json",
+      "owner_key": "fragments"
+    },
+    {
       "path": "docs/readme/runtime-cd.riido.json",
       "owner_manifest": "README.riido.json",
       "owner_key": "fragments"

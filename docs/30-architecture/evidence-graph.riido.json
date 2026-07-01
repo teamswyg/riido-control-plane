@@ -7351,12 +7351,32 @@
           "path": "docs/30-architecture/loop-registry.riido.json"
         },
         {
+          "kind": "manifest",
+          "path": "README.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/readme/public-qa-status.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/executable-knowledge.riido.json"
+        },
+        {
           "kind": "generated_doc",
           "path": "docs/30-architecture/operational-readiness.md"
         },
         {
           "kind": "generated_doc",
           "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "README.md"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/executable-knowledge.md"
         },
         {
           "kind": "tool",
@@ -7401,6 +7421,18 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/operational-readiness.yml"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/loop-registry.yml"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/repositoryreadme"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/knowledgecoverage"
         }
       ],
       "verifiers": [
@@ -7425,8 +7457,28 @@
           "path": ".github/workflows/operational-readiness.yml"
         },
         {
+          "kind": "workflow",
+          "path": ".github/workflows/loop-registry.yml"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/knowledgecoverage/main_test.go"
+        },
+        {
           "kind": "tool",
           "path": "tools/operationalreadiness"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/repositoryreadme"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/knowledgecoverage"
         },
         {
           "kind": "tool",
@@ -7477,12 +7529,16 @@
           "path": "docs/30-architecture/operational-readiness.md"
         },
         {
+          "kind": "generated_doc",
+          "path": "README.md"
+        },
+        {
           "kind": "artifact",
           "path": "loop-registry-evidence",
           "redacted": true
         }
       ],
-      "decision": "Public QA status is now generated from the operational readiness SSOT as aggregate counts only: degraded when P0 QA partials or stale partials exist, redacted for endpoints, and explicitly marked as containing no raw logs or secrets. The operational readiness workflow publishes the same redacted Markdown to the GitHub Actions summary and an artifact, a static HTML status page artifact, a minimal JSON artifact, and a GitHub Actions notice/warning annotation so QA operators and automation consumers can see release health without opening raw evidence logs. Public status payloads now include generated_at, expires_at, and evidence_ttl_hours in JSON, Markdown, HTML, and GitHub annotation outputs so operators can distinguish fresh degraded status from stale evidence without reading private artifacts, while generated architecture docs keep runtime freshness out to remain deterministic. The Loop Registry semantic hashes move with this common registry surface so claim-bound agents can see that the registry change is a redacted operational-status publication rather than a silent contract or vocabulary drift.",
+      "decision": "Public QA status is now generated from the operational readiness SSOT as aggregate counts only: degraded when P0 QA partials or stale partials exist, redacted for endpoints, and explicitly marked as containing no raw logs or secrets. The operational readiness workflow publishes the same redacted Markdown to the GitHub Actions summary and an artifact, a static HTML status page artifact, a minimal JSON artifact, and a GitHub Actions notice/warning annotation so QA operators and automation consumers can see release health without opening raw evidence logs. Public status payloads now include generated_at, expires_at, and evidence_ttl_hours in JSON, Markdown, HTML, and GitHub annotation outputs so operators can distinguish fresh degraded status from stale evidence without reading private artifacts, while generated architecture docs keep runtime freshness out to remain deterministic. Because GitHub Pages is not enabled for this repository, README is now the public entrypoint that points readers to the operational readiness generated doc and Actions artifacts; the repository README fragment, executable-knowledge coverage, loop-registry workflow routing, and repositoryreadme/knowledgecoverage verifiers co-change so agents cannot add or remove the public QA entrypoint without executable evidence. The Loop Registry semantic hashes move with this common registry surface so claim-bound agents can see that the registry change is a redacted operational-status publication rather than a silent contract or vocabulary drift.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
