@@ -251,6 +251,12 @@
           "kind": "artifact",
           "signal": "The operational-readiness workflow captures whether GitHub Pages is enabled as a redacted JSON artifact, so Pages publication remains evidence-backed instead of operator memory.",
           "evidence_ref": ".github/workflows/operational-readiness.yml"
+        },
+        {
+          "id": "public_qa_status_pages_publish_workflow",
+          "kind": "workflow",
+          "signal": "The public-qa-status-pages workflow publishes only the redacted public QA status HTML, Markdown, JSON, and pages status JSON to GitHub Pages.",
+          "evidence_ref": ".github/workflows/public-qa-status-pages.yml"
         }
       ],
       "evidence_refs": [
@@ -261,10 +267,11 @@
         {"kind": "test", "path": "tools/operationalreadiness/public_status_json_output_test.go"},
         {"kind": "test", "path": "tools/operationalreadiness/public_status_output_test.go"},
         {"kind": "workflow", "path": ".github/workflows/operational-readiness.yml"},
+        {"kind": "workflow", "path": ".github/workflows/public-qa-status-pages.yml"},
         {"kind": "doc", "path": "docs/30-architecture/operational-readiness.md"}
       ],
-      "next_artifact": "public_qa_status_pages_publish_evidence",
-      "next_command": "go test ./tools/operationalreadiness -run 'TestOperationalReadinessPublicStatus' -count=1"
+      "next_artifact": "public_qa_status_pages_live_evidence",
+      "next_command": "gh api 'repos/teamswyg/riido-control-plane/pages' --jq '{html_url,build_type,public,https_enforced}' && curl -fsSL https://teamswyg.github.io/riido-control-plane/status.json | jq 'select(.visibility == \"public_aggregate\" and .raw_logs_included == false and .secrets_included == false)' && curl -fsSL https://teamswyg.github.io/riido-control-plane/pages-status.json | jq 'select(.status == \"published\" and .raw_response_included == false and .secrets_included == false)'"
     },
     {
       "id": "real_screen_wording",

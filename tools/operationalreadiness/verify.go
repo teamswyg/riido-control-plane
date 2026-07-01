@@ -30,6 +30,9 @@ func verifyAll(root string, m manifest) error {
 	if err := verifyOperationalWorkflow(root, m); err != nil {
 		return err
 	}
+	if err := verifyPublicStatusPagesWorkflow(root); err != nil {
+		return err
+	}
 	if err := verifyChecks(root, m); err != nil {
 		return err
 	}

@@ -1,0 +1,98 @@
+name: public-qa-status-pages
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "39 22 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/public-qa-status-pages.yml"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "tools/operationalreadiness/**"
+      - "go.mod"
+      - "go.sum"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/public-qa-status-pages.yml"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "tools/operationalreadiness/**"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: public-qa-status-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Generate redacted public QA status site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p out site
+          go test ./tools/operationalreadiness -count=1
+          go run ./tools/operationalreadiness \
+            -check-doc \
+            -evidence-out out/public-qa-status-pages-evidence.json \
+            -public-status-html-out site/index.html \
+            -public-status-json-out site/status.json \
+            -public-status-out site/status.md \
+            -public-status-github-annotation-out out/status.annotation
+          generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          page_url="$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq '.html_url // ""' 2>/dev/null || true)"
+          build_type="$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq '.build_type // ""' 2>/dev/null || true)"
+          jq -n \
+            --arg generated_at "$generated_at" \
+            --arg html_url "$page_url" \
+            --arg build_type "$build_type" \
+            '{
+              schema_version: "riido-public-qa-pages-publish.v1",
+              generated_at: $generated_at,
+              status: (if $html_url == "" then "pages_unavailable" else "published" end),
+              visibility: "public_repository",
+              html_url: $html_url,
+              build_type: $build_type,
+              raw_response_included: false,
+              secrets_included: false
+            }' > site/pages-status.json
+          cat site/status.md >> "$GITHUB_STEP_SUMMARY"
+          cat out/status.annotation
+          ! grep -R -E 'eyJ|AKIA|RIIDO_DEVICE_SECRET|device_secret|Bearer |arn:aws:|amazonaws.com/|cloudfront.net/|execute-api\.' site
+      - uses: actions/upload-artifact@v7
+        with:
+          name: public-qa-status-pages-evidence
+          path: out/public-qa-status-pages-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        with:
+          name: public-qa-status-pages-site
+          path: site
+          if-no-files-found: error
+      - uses: actions/upload-pages-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          path: site
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
