@@ -33,11 +33,18 @@ func TestOperationalReadinessBindsCWFeedbackInventory(t *testing.T) {
 
 func TestOperationalReadinessBindsCWFeedbackNotionCycle(t *testing.T) {
 	m := loadManifestForTest(t)
-	for _, cycle := range m.NotionOpenLoop.Cycles {
-		if cycle.ID == "notion_p0_cw_feedback_inventory" &&
-			cycle.BackfilledCheck == "staging_client_p0_visual_retest" {
-			return
-		}
+	cycle := findNotionCycle(t, m, "notion_p0_cw_feedback_inventory")
+	if cycle.BackfilledCheck != "staging_client_p0_visual_retest" {
+		t.Fatalf("CW backfilled check = %q", cycle.BackfilledCheck)
 	}
-	t.Fatal("missing CW feedback Notion backfill cycle")
+	if cycle.CodexStatus != "[codex][완료][전달요청]" {
+		t.Fatalf("CW codex_status = %q", cycle.CodexStatus)
+	}
+	if cycle.Status != "partial" {
+		t.Fatalf("CW status = %q, want partial until visual evidence", cycle.Status)
+	}
+	want := evidenceRef{Kind: "external", Path: "notion-comment:39120241-cf7f-8110-ac53-001d16e97a80"}
+	if !notionCycleHasEvidenceRef(cycle, want) {
+		t.Fatalf("CW cycle missing handoff ref %+v", want)
+	}
 }

@@ -10,23 +10,23 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `76`
-- claim refs: `89`
-- change refs: `1066`
-- verifier refs: `497`
-- evidence refs: `219`
+- chains: `77`
+- claim refs: `90`
+- change refs: `1068`
+- verifier refs: `500`
+- evidence refs: `221`
 
 ## Compiled Chain Summary
 
-- complete chains: `76` / `76`
-- claim-bound chains: `76`
+- complete chains: `77` / `77`
+- claim-bound chains: `77`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `closed_loop_candidate` | `46` | `47` | `702` | `309` | `119` |
-| `operational_readiness_release_harness` | `10` | `21` | `104` | `59` | `35` |
+| `operational_readiness_release_harness` | `11` | `22` | `106` | `62` | `37` |
 | `ai_thread_history` | `8` | `8` | `110` | `55` | `11` |
 | `closed_loop_candidate_decision` | `7` | `7` | `110` | `52` | `35` |
 | `provider_acceptance_harness` | `2` | `2` | `12` | `7` | `6` |
@@ -111,6 +111,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `ai_thread_history_queued_state_only_loop` | `1` | `5` | `1` | `1` | `operational_readiness_release_harness` |
 | `operational_readiness_queued_state_only_staging_evidence_loop` | `2` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `operational_readiness_staging_dmg_gatekeeper_evidence_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
+| `operational_readiness_cw_feedback_transfer_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `container_image_contract_runtime_shape_loop` | `1` | `16` | `6` | `4` | `closed_loop_candidate` |
 | `control_plane_meta_evidence_expiry_loop` | `2` | `10` | `7` | `4` | `loop_closure_audit` |
 | `server_route_handler_decomposition_loop` | `2` | `38` | `5` | `3` | `closed_loop_candidate` |
