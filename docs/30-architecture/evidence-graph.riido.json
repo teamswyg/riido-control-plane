@@ -7252,12 +7252,20 @@
           "kind": "test",
           "path": "tools/operationalreadiness/infra_alarm_test.go"
         },
-        {
-          "kind": "test",
-          "path": "tools/operationalreadiness/infra_alarm_command_test.go"
-        },
-        {
-          "kind": "test",
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/infra_alarm_command_test.go"
+    },
+    {
+      "kind": "manifest",
+      "path": "docs/30-architecture/evidence/client-surface-alarm-preflight-development-2026-07-02.json"
+    },
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/client_surface_alarm_preflight_evidence_test.go"
+    },
+    {
+      "kind": "test",
           "path": "tools/operationalreadiness/evidence_time_test.go"
         },
         {
@@ -7290,12 +7298,16 @@
           "kind": "test",
           "path": "tools/operationalreadiness/infra_alarm_test.go"
         },
-        {
-          "kind": "test",
-          "path": "tools/operationalreadiness/infra_alarm_command_test.go"
-        },
-        {
-          "kind": "test",
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/infra_alarm_command_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/client_surface_alarm_preflight_evidence_test.go"
+    },
+    {
+      "kind": "test",
           "path": "tools/operationalreadiness/evidence_time_test.go"
         },
         {
@@ -7345,12 +7357,17 @@
           "kind": "manifest",
           "path": "docs/30-architecture/operational-readiness.riido.json"
         },
-        {
-          "kind": "generated_doc",
-          "path": "docs/30-architecture/operational-readiness.md"
-        }
-      ],
-      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal and rejects partial checks whose measurements are only manual notes, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, daemon-owned go test next commands must enter ../riido-daemon before running so external evidence refs cannot be misexecuted from the control-plane repo, partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context, and the client-surface monitoring partial now cites merged riido-infra alarm topology, dimension regression guard, redacted live CloudWatch alarm evidence collector, and redacted preflight evidence collector while still requiring environment-specific threshold/action plan/apply evidence before claiming live alarm coverage. Local operator dry-run showed the old adoption command was not executable because required Terraform variables are intentionally private and live client-surface alarms were absent, so the next command now derives workspace/service from Terraform, records missing tfvars or required Terraform inputs as redacted preflight evidence instead of storing raw plan logs or tfvars values, captures detailed-exitcode plan evidence when private inputs exist, and then runs the redacted CloudWatch alarm evidence collector.",
+    {
+      "kind": "generated_doc",
+      "path": "docs/30-architecture/operational-readiness.md"
+    },
+    {
+      "kind": "artifact",
+      "path": "client-surface-alarm-preflight-development-2026-07-02",
+      "redacted": true
+    }
+  ],
+  "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal and rejects partial checks whose measurements are only manual notes, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, daemon-owned go test next commands must enter ../riido-daemon before running so external evidence refs cannot be misexecuted from the control-plane repo, partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context, and the client-surface monitoring partial now cites merged riido-infra alarm topology, dimension regression guard, redacted live CloudWatch alarm evidence collector, and redacted preflight evidence collector while still requiring environment-specific threshold/action plan/apply evidence before claiming live alarm coverage. Local operator dry-run showed the old adoption command was not executable because required Terraform variables are intentionally private and live client-surface alarms were absent, so the next command now derives workspace/service from Terraform, records missing tfvars or required Terraform inputs as redacted preflight evidence instead of storing raw plan logs or tfvars values, captures detailed-exitcode plan evidence when private inputs exist, and then runs the redacted CloudWatch alarm evidence collector. A fresh development preflight now records `blocked_missing_operator_tfvars` with missing protected reference and region input kinds, keeps raw plan logs/tfvars/secrets out of the artifact, and intentionally leaves otel_xray_client_surface partial until operator tfvars allow live plan/apply evidence.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
