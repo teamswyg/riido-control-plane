@@ -13,7 +13,8 @@
     "token_handling": "reads bearer token from an environment variable and does not serialize token values",
     "default_token_env": "RIIDO_PRIVATE_JWT",
     "redaction_policy": "message bodies, result messages, progress line text, and bearer-token request headers are excluded from the generated JSON report",
-    "capture_window": "5s default SSE window"
+    "capture_window": "5s default SSE window",
+    "terminal_live_conflict_detection": "reports terminal_active_stream_count and decision=captured_terminal_live_conflict when a completed/stopped/failed/cancelled/timeout thread has active_stream or a matching live SSE event"
   },
   "captures": [
     "GET /v3 task threads",
@@ -24,6 +25,6 @@
   "command_template": "go run ./tools/aiagentthreadsnapshot -base-url https://staging.ai-api.riido.io -workspace-id 1IFsD2c8Mnk2VstqJ4iNo -task-id uNYpHxDOzMp3vMy_urWsu -conversation-id \"$RIIDO_CONVERSATION_ID\" -output docs/30-architecture/evidence/manual/reproduced-completion-progress-$(date -u +%Y%m%dT%H%M%SZ).json",
   "decision": {
     "status": "partial",
-    "summary": "The reproduction is not captured here. This artifact makes the next required evidence executable so a future tester can capture same-moment API and SSE summaries without placing bearer tokens or message bodies into repo evidence."
+    "summary": "The reproduction is not captured here. This artifact makes the next required evidence executable so a future tester can capture same-moment API and SSE summaries without placing bearer tokens or message bodies into repo evidence. The capture tool now separates ordinary historical progress from a terminal/live conflict so the reported completed-but-still-progressing race can be identified directly when it recurs."
   }
 }

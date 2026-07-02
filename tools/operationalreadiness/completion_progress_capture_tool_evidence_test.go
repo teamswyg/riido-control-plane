@@ -23,7 +23,8 @@ func TestCompletionProgressCaptureToolEvidenceIsRedacted(t *testing.T) {
 			Status string `json:"status"`
 		} `json:"decision"`
 		Tool struct {
-			Path string `json:"path"`
+			Path                          string `json:"path"`
+			TerminalLiveConflictDetection string `json:"terminal_live_conflict_detection"`
 		} `json:"tool"`
 	}
 	if err := json.Unmarshal(body, &evidence); err != nil {
@@ -34,5 +35,8 @@ func TestCompletionProgressCaptureToolEvidenceIsRedacted(t *testing.T) {
 	}
 	if evidence.Tool.Path != "tools/aiagentthreadsnapshot" {
 		t.Fatalf("unexpected tool path %q", evidence.Tool.Path)
+	}
+	if !strings.Contains(evidence.Tool.TerminalLiveConflictDetection, "captured_terminal_live_conflict") {
+		t.Fatal("capture tool evidence must describe terminal/live conflict detection")
 	}
 }

@@ -16,12 +16,13 @@ type lineRecord struct {
 }
 
 type threadSummary struct {
-	ThreadCount        int             `json:"thread_count"`
-	RunningCount       int             `json:"running_count"`
-	QueuedCount        int             `json:"queued_count"`
-	TerminalCount      int             `json:"terminal_count"`
-	ActiveStream       bool            `json:"active_stream"`
-	HighlightedThreads []threadSurface `json:"highlighted_threads"`
+	ThreadCount               int             `json:"thread_count"`
+	RunningCount              int             `json:"running_count"`
+	QueuedCount               int             `json:"queued_count"`
+	TerminalCount             int             `json:"terminal_count"`
+	TerminalActiveStreamCount int             `json:"terminal_active_stream_count"`
+	ActiveStream              bool            `json:"active_stream"`
+	HighlightedThreads        []threadSurface `json:"highlighted_threads"`
 }
 
 type threadSurface struct {
