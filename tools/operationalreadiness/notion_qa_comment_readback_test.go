@@ -12,6 +12,9 @@ func TestNotionQACommentReadbackLimitIsRecorded(t *testing.T) {
 		t.Fatal("missing Notion comment readback observations")
 	}
 	observation := evidence.ReadbackObservations[len(evidence.ReadbackObservations)-1]
+	if observation.ObservedAt != "2026-07-02T21:53:12Z" {
+		t.Fatalf("latest readback observation = %q", observation.ObservedAt)
+	}
 	if observation.VisiblePageLevelCommentCount != 31 {
 		t.Fatalf("visible page-level count = %d", observation.VisiblePageLevelCommentCount)
 	}
@@ -59,6 +62,7 @@ type notionQAReadbackEvidence struct {
 }
 
 type notionReadbackObservation struct {
+	ObservedAt                   string   `json:"observed_at"`
 	VisiblePageLevelCommentCount int      `json:"visible_page_level_comment_count"`
 	LatestVisibleCommentID       string   `json:"latest_visible_comment_id"`
 	WriteConfirmedNotVisible     []string `json:"write_confirmed_comment_ids_not_visible"`
