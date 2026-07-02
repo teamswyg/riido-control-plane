@@ -17,7 +17,10 @@ type pressureResources struct {
 }
 
 type capacitySummary struct {
-	Scenario string `json:"scenario"`
+	Scenario        string  `json:"scenario"`
+	AllocBytesPerOp float64 `json:"alloc_bytes_per_op"`
+	GoroutineDelta  int     `json:"goroutine_delta"`
+	ErrorFree       bool    `json:"error_free"`
 }
 
 type pressureFinding struct {

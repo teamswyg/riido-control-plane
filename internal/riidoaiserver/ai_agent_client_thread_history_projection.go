@@ -63,8 +63,10 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(principal 
 }
 
 func (s *DevelopmentAIAgentClientStore) taskThreadHistoryMessagesLocked(thread AIAgentTaskThreadRecord) []AIAgentTaskThreadHistoryMessage {
-	out := copyTaskThreadHistoryMessages(s.taskThreadMessages[thread.ThreadID])
-	out = append(out, taskThreadProgressMessages(thread)...)
+	out := buildTaskThreadHistoryMessages(
+		s.taskThreadMessages[thread.ThreadID],
+		thread,
+	)
 	if message, ok := taskThreadProjectionMessage(thread); ok {
 		out = append(out, message)
 	}
