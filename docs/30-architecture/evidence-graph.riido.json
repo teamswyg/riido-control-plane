@@ -8455,6 +8455,56 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "operational_readiness_deploy_overlap_burst_loop",
+      "observation": "The first staging public burst evidence was warm-only, so it could not prove behavior while ECS deployment was actively replacing runtime tasks.",
+      "hypothesis": "Starting the testnet deploy workflow and then starting a 300s concurrency-128 public load run against staging records whether health/ready traffic stays available while image build, task definition registration, ECS rolling deploy wait, and deploy smoke are in progress.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/staging-deploy-overlap-burst-evidence-2026-07-02.json"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/boot_burst_evidence_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/main.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/boot_burst_evidence_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph/main.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "staging-deploy-overlap-burst-evidence-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The deploy-overlap run paired deploy workflow 28573541816 with load workflow 28573547140. The load ran from 07:37:19Z to 07:42:19Z while the deploy ran from 07:36:45Z to 07:41:34Z, fully covering image build, task registration, ECS deploy wait, and smoke. It served 189,043 public health/ready requests with 0 failures, p95 211ms, p99 625ms. boot_burst_capacity remains partial only for true per-task cold-start attribution, because the evidence does not prove whether requests hit old or new ECS tasks before load-balancer health routing.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "notion_backfill_review_loop",
       "observation": "The backfilled v1.24 AI Agent QA Notion page now contains both older page-body guidance and newer comment/repo evidence; for example the page body still mentions pre-notarization staging desktop workarounds while later comments and readiness evidence prove a notarized CDN DMG, and a page-level server-deploy property can be misread as backend deploy truth.",
       "hypothesis": "A redacted Notion backfill review artifact can make the latest truth machine-readable without changing product code: stale body guidance, property scope, generated P0 cycle count, and visual-partial status are separated into reviewed signals and bound to operational readiness.",
