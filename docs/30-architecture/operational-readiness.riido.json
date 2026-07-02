@@ -733,6 +733,12 @@
           "evidence_ref": "docs/30-architecture/evidence/control-plane-small-progress-filter-after-2026-07-03.json"
         },
         {
+          "id": "local_pressure_agent_snapshot_pointer_map_2026_07_03",
+          "kind": "artifact",
+          "signal": "After v3 thread history agent snapshots switched from map value copies to pointer values, local pressure reduced thread_history_v3 allocation from about 0.95KB/op to about 0.75KB/op and kept the v3 HTTP endpoint error-free with zero goroutine delta.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-agent-snapshot-pointer-map-after-2026-07-03.json"
+        },
+        {
           "id": "local_pressure_tool_approval_signal_only_2026_07_03",
           "kind": "artifact",
           "signal": "After pending tool approval waits skip polling ticks when the approval cannot expire during the hold window, local pressure measured zero errors, zero goroutine deltas, and lower allocation/CPU per operation for tool_approval_waiters.",
@@ -770,6 +776,7 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-cache-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-thread-metadata-cache-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-small-progress-filter-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-agent-snapshot-pointer-map-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-before-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"},

@@ -1,0 +1,11 @@
+goroutine profile: total 1
+1 @ 0x100e2ff7c 0x100e6bba4 0x1010134c4 0x1010132f0 0x101010af4 0x1010267cc 0x101026614 0x1010253d0 0x1010251f0 0x100e39e04 0x100e73d24
+#	0x1010134c3	runtime/pprof.writeRuntimeProfile+0xb3	/Users/teddy/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.2.darwin-arm64/src/runtime/pprof/pprof.go:851
+#	0x1010132ef	runtime/pprof.writeGoroutine+0x4f	/Users/teddy/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.2.darwin-arm64/src/runtime/pprof/pprof.go:784
+#	0x101010af3	runtime/pprof.(*Profile).WriteTo+0x143	/Users/teddy/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.2.darwin-arm64/src/runtime/pprof/pprof.go:408
+#	0x1010267cb	main.writeProfile+0xfb			/Users/teddy/agent-space/riido-control-plane/tools/controlplanepressure/profiler.go:59
+#	0x101026613	main.profiler.Stop+0xb3			/Users/teddy/agent-space/riido-control-plane/tools/controlplanepressure/profiler.go:44
+#	0x1010253cf	main.mainRun+0x15f			/Users/teddy/agent-space/riido-control-plane/tools/controlplanepressure/main.go:25
+#	0x1010251ef	main.main+0x4f				/Users/teddy/agent-space/riido-control-plane/tools/controlplanepressure/main.go:9
+#	0x100e39e03	runtime.main+0x2b3			/Users/teddy/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.2.darwin-arm64/src/runtime/proc.go:290
+

@@ -5,10 +5,10 @@ import "strings"
 func (s *DevelopmentAIAgentClientStore) visibleTaskThreadHistoryRecordsLocked(
 	principal AuthorizationResult,
 	taskID string,
-) ([]AIAgentTaskThreadHistoryRecord, map[string]AIAgentTaskThreadAgentSnapshot) {
+) ([]AIAgentTaskThreadHistoryRecord, map[string]*AIAgentTaskThreadAgentSnapshot) {
 	source := s.taskThreads[taskID]
 	records := make([]AIAgentTaskThreadHistoryRecord, 0, len(source))
-	var snapshots map[string]AIAgentTaskThreadAgentSnapshot
+	var snapshots map[string]*AIAgentTaskThreadAgentSnapshot
 	streamHref := aiAgentClientEventStreamHref(strings.TrimSpace(principal.WorkspaceID))
 	for i := range source {
 		s.ensureTaskThreadAgentSnapshotLocked(&source[i], source[i].StartedAt)
@@ -24,16 +24,16 @@ func (s *DevelopmentAIAgentClientStore) visibleTaskThreadHistoryRecordsLocked(
 }
 
 func appendTaskThreadHistorySnapshot(
-	snapshots map[string]AIAgentTaskThreadAgentSnapshot,
+	snapshots map[string]*AIAgentTaskThreadAgentSnapshot,
 	record AIAgentTaskThreadHistoryRecord,
 	thread AIAgentTaskThreadRecord,
-) map[string]AIAgentTaskThreadAgentSnapshot {
+) map[string]*AIAgentTaskThreadAgentSnapshot {
 	if record.AgentSnapshotID == "" || thread.AgentSnapshot == nil {
 		return snapshots
 	}
 	if snapshots == nil {
-		snapshots = map[string]AIAgentTaskThreadAgentSnapshot{}
+		snapshots = map[string]*AIAgentTaskThreadAgentSnapshot{}
 	}
-	snapshots[record.AgentSnapshotID] = *thread.AgentSnapshot
+	snapshots[record.AgentSnapshotID] = thread.AgentSnapshot
 	return snapshots
 }

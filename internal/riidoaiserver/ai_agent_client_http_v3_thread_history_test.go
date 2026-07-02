@@ -33,6 +33,10 @@ func TestHTTPAIAgentClientV3ThreadHistory(t *testing.T) {
 	if err := json.Unmarshal(historyResp.Body.Bytes(), &history); err != nil {
 		t.Fatalf("v3 history json: %v", err)
 	}
+	if body := historyResp.Body.String(); !strings.Contains(body, `"agent_snapshots"`) ||
+		!strings.Contains(body, `"agent_id"`) {
+		t.Fatalf("v3 history snapshot json shape changed: %s", body)
+	}
 	if len(history.Threads) != 1 {
 		t.Fatalf("v3 history = %+v", history)
 	}

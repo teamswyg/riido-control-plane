@@ -760,7 +760,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "0b189d354fa06bd061d356db9f03c109658ab9f05add1448ed4585da969234e8"
+      "semantic_hash": "88b3b4d451a0c12ef1063e397e4d599dbef2415b56f2d17dd15c0470a69dbe66"
     },
     {
       "id": "same_provider_agents_must_keep_distinct_threads",
@@ -862,7 +862,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "522a93d49da3492d4adec42de10398e380f90411404c49c37ae5febc64701f26"
+      "semantic_hash": "04affa8ae37c1574e9f4dac914f86514ff754e78b9a87bc4900bfc724c4af6a5"
     },
     {
       "id": "thread_history_v3_must_preserve_run_identity_and_message_order",
@@ -897,7 +897,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "2b563e98b61571f75a169d6630f9828d6ae7cd672c5a16c39f569c23c3c4cb22"
+      "semantic_hash": "b8759591dddaca92a38fb79eeb56fc783fbe8488c76b5bd9b778db744370a1da"
     },
     {
       "id": "stop_reassign_must_not_revive_or_mutate_inactive_threads",
@@ -1394,7 +1394,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "35da336098beecaedacc2e7aa50027e9ba42ec81ed80c4f8d7d2c88555d355aa"
+      "semantic_hash": "b5249370f87b61e4fe26d1665d7c2a0475293f3dee01570b2c9450173a327bff"
     },
     {
       "id": "control_plane_meta_evidence_must_self_expire",
@@ -4374,7 +4374,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "91582a72c41477a468189034e2a88ed61a2c868bf9747834d8c4c6f8d5fed5ce"
+      "semantic_hash": "a76b48e8a77669fb72b784f6b9cfb5697610c174a6d60af00b44f8c6d07c8f8a"
     },
     {
       "id": "container_image_contract_must_bind_runtime_shape",
