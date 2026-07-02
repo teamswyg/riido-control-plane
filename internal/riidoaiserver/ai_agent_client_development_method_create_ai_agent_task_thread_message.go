@@ -32,19 +32,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
-	response := AIAgentTaskActionResponse{
-		SchemaVersion:   SchemaVersion,
-		TaskID:          taskID,
-		AssignmentID:    thread.AssignmentID,
-		AgentID:         agent.AgentID,
-		AgentSnapshot:   copyTaskThreadAgentSnapshot(thread.AgentSnapshot),
-		ThreadID:        threadID,
-		RunID:           thread.RunID,
-		WorkStatus:      AgentWorkStatusRunning,
-		AssignmentState: AgentAssignmentStateRunning,
-		CommentKind:     AgentTaskCommentRuntimeProgress,
-		Message:         clientMessageTaskRunning,
-	}
+	response := taskThreadMessageInitialResponse(taskID, threadID, thread, agent)
 	threadWasActive := taskThreadHasActiveStream(thread)
 	conversationID := taskThreadConversationID(thread)
 	parentThreadID := ""
@@ -67,6 +55,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	if req.toolApprovalWithoutPending {
 		applyToolApprovalWithoutPendingActionResponse(&response)
 	}
+	hideQueuedThreadReplyMessage(&response)
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.appendThreadUserMessageLocked(response, principal, req.Body, req.SourceMessageID)
 	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID, conversationID, parentThreadID)

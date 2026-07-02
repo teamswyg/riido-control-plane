@@ -8012,6 +8012,51 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "ai_thread_history_queued_state_only_loop",
+      "observation": "A staging screenshot still showed the queued_by_busy_agent copy as an agent reply next to a newer thinking/progress block. Even when stale replay is filtered, a thread-message mutation can return queued copy for optimistic UI and v3 can treat a current queued projection as a timeline message.",
+      "hypothesis": "Treating queued_by_busy_agent as state-only keeps queued work_status, assignment_state, and active_stream available while removing the copy from v3 messages[] and thread-reply mutation messages, so queued text cannot persist as a normal agent reply after progress starts.",
+      "claims": [
+        "thread_history_v3_must_expose_stable_conversation_grouping"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_messages.go"
+        },
+        {
+          "kind": "projection",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_queued_reply_message.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-test-riidoaiserver",
+          "redacted": true
+        }
+      ],
+      "decision": "queued_by_busy_agent is no longer a v3 timeline row. Clients can still see queued state on the thread, but the copy should not be appended as an agent reply.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "container_image_contract_runtime_shape_loop",
       "observation": "The container image contract manifest and verifier were executable, but they were not bound into the loop registry or evidence graph, so changes under tools/containercontract could bypass target verifier routing and force agents to infer runtime image ownership from scattered files.",
       "hypothesis": "Binding the container image contract, Dockerfile, verifier helpers, module-decomposition ratchet, and integration matrix evidence into one claim lets changed-path QA route container runtime shape edits to the exact verifier commands without asking agents to read prose.",

@@ -118,7 +118,7 @@
     "message_roles": [
       {"role":"user","meaning":"User follow-up instruction inside the AI thread. Use author_principal_id for the writer when present."},
       {"role":"progress","meaning":"Runtime progress log, ordered by seq inside assignment_id and run_id"},
-      {"role":"agent","meaning":"Agent status or final result message. queued_by_busy_agent is a current status hint, not a durable agent reply; v3 suppresses it when the same conversation has newer progress, running, or result messages."}
+      {"role":"agent","meaning":"Agent status or final result message. queued_by_busy_agent is exposed through thread state fields, not v3 messages[]; the server removes queued status rows from the timeline so they are not rendered as agent replies."}
     ],
     "interaction_scenarios": [
       {"name":"intent-clarification-before-deliverable","detail":"When the task title/document is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the agent's first visible answer should ask a concise clarification question in the existing thread before producing deliverables."},
@@ -132,7 +132,7 @@
     "ordering_rules": [
       {"name":"conversation-card-ordering","detail":"First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root."},
       {"name":"message-row-ordering","detail":"Within one thread record, render messages by observed_at, then role order user -> progress -> agent, then seq, then message_id. Use message_id as the stable row key, not body text."},
-      {"name":"queued-status-current-only","detail":"comment_kind=queued_by_busy_agent means the assignment is currently waiting behind busy work. If the same conversation_id has an active running thread state, newer progress, or result messages, v3 history omits that stale queued status from messages[] while preserving the user's follow-up message. Running conversation state wins even when event timestamps arrive out of order."},
+      {"name":"queued-status-current-only","detail":"comment_kind=queued_by_busy_agent means the assignment is currently waiting behind busy work, but v3 history must not expose that copy as a timeline message. Preserve work_status, assignment_state, active_stream, and the user's follow-up message; render queued UI from state fields instead of messages[]."},
       {"name":"queued-stream-current-only","detail":"If the same conversation_id has an active running thread, a superseded queued thread must not expose per-thread active_stream and must not win the collection active_stream. This prevents a stale queued hint from keeping the UI in a thinking/progress state while the conversation is already running."},
       {"name":"progress-dedupe-ordering","detail":"For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility."},
       {"name":"late-terminal-guard","detail":"If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running."},
@@ -182,7 +182,7 @@
     {"name":"thread-history-v3-queued-status-filter","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go","contains":["suppressSupersededQueuedHistoryMessages","AgentTaskCommentQueuedByBusyAgent","historyMessageSupersedesQueuedStatus"]},
     {"name":"thread-history-v3-queued-status-state","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_state.go","contains":["threadStatusSupersedesQueuedStatus","AgentWorkStatusRunning","AgentAssignmentStateRunning"]},
     {"name":"thread-history-v3-queued-stream-filter","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_stream.go","contains":["queuedThreadIsSupersededByRunningConversation","AgentAssignmentStateQueued","taskThreadHistoryConversationIsRunning"]},
-    {"name":"thread-history-v3-queued-status-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go","contains":["TestAIAgentTaskThreadHistoryHidesSupersededBusyQueuedMessage","TestAIAgentTaskThreadHistoryKeepsCurrentBusyQueuedMessage"]},
+    {"name":"thread-history-v3-queued-status-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go","contains":["TestAIAgentTaskThreadHistoryHidesSupersededBusyQueuedMessage","TestAIAgentTaskThreadHistoryHidesCurrentBusyQueuedMessage"]},
     {"name":"thread-history-v3-queued-status-state-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_state_test.go","contains":["TestAIAgentTaskThreadHistoryHidesQueuedMessageWhenConversationIsRunning"]},
     {"name":"thread-history-v3-queued-stream-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go","contains":["TestAIAgentTaskThreadHistoryClearsQueuedStreamWhenConversationRuns","TestAIAgentTaskThreadHistoryActiveStreamPrefersRunning"]},
     {"name":"thread-history-v3-conversation-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go","contains":["assertConversationFollowup","ConversationID","ParentThreadID","assertConversationReassignment"]},

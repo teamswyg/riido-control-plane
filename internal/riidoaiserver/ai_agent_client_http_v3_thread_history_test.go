@@ -33,8 +33,12 @@ func TestHTTPAIAgentClientV3ThreadHistory(t *testing.T) {
 	if err := json.Unmarshal(historyResp.Body.Bytes(), &history); err != nil {
 		t.Fatalf("v3 history json: %v", err)
 	}
-	if len(history.Threads) != 1 || len(history.Threads[0].Messages) == 0 {
+	if len(history.Threads) != 1 {
 		t.Fatalf("v3 history = %+v", history)
+	}
+	if history.Threads[0].AssignmentState != AgentAssignmentStateQueued ||
+		history.Threads[0].ActiveStream == nil {
+		t.Fatalf("v3 history queued thread state = %+v", history.Threads[0])
 	}
 	if history.Threads[0].ConversationID == "" {
 		t.Fatalf("v3 history conversation_id missing: %+v", history.Threads[0])

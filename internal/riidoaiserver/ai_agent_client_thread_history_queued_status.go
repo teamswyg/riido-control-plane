@@ -42,11 +42,11 @@ func withoutSupersededQueuedMessages(
 ) []AIAgentTaskThreadHistoryMessage {
 	cutoff, ok := latest[conversationID]
 	hasRunning := taskThreadHistoryConversationIsRunning(conversationID, running)
-	if !ok && !hasRunning {
-		return messages
-	}
 	out := messages[:0]
 	for _, message := range messages {
+		if historyMessageIsQueuedStatus(message) {
+			continue
+		}
 		if historyQueuedStatusIsSuperseded(message, cutoff, ok, hasRunning) {
 			continue
 		}
