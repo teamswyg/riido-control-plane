@@ -528,11 +528,18 @@
           "kind": "artifact",
           "signal": "Local daemon evidence reran long-poll default wait plus transient/permanent poll retry and transport-error retry tests on the current QA runner branch.",
           "evidence_ref": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"
+        },
+        {
+          "id": "daemon_reconnect_runtimeactor_2026_07_02",
+          "kind": "artifact",
+          "signal": "Current daemon QA branch evidence reran long-poll wait and SaaS-plane retry tests at commit eb7976f, preserving network-disconnect waiting behavior as local pre-chaos proof.",
+          "evidence_ref": "docs/30-architecture/evidence/daemon-reconnect-runtimeactor-evidence-2026-07-02.json"
         }
       ],
       "evidence_refs": [
         {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_control_plane_long_poll_test.go"},
         {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_saas_validation_test.go"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/daemon-reconnect-runtimeactor-evidence-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"}
       ],
       "next_artifact": "daemon_network_disconnect_release_evidence",
@@ -585,11 +592,18 @@
           "kind": "artifact",
           "signal": "Local daemon evidence reran runtimeactor Slot/Goroutine/Leak focused tests for one-PC local capacity.",
           "evidence_ref": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"
+        },
+        {
+          "id": "single_pc_runtimeactor_current_branch_2026_07_02",
+          "kind": "artifact",
+          "signal": "Current daemon QA branch evidence reran runtime actor slot and goroutine release tests at commit eb7976f for one-PC agent capacity baseline.",
+          "evidence_ref": "docs/30-architecture/evidence/daemon-reconnect-runtimeactor-evidence-2026-07-02.json"
         }
       ],
       "evidence_refs": [
         {"kind": "external", "path": "riido-daemon:.github/workflows/local-qa-runner.yml"},
         {"kind": "external", "path": "riido-daemon:internal/agentbridge/runtimeactor/actor_slot_limit_test.go"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/daemon-reconnect-runtimeactor-evidence-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"}
       ],
       "next_artifact": "single_pc_agent_capacity_evidence",
@@ -704,11 +718,18 @@
           "kind": "artifact",
           "signal": "Local daemon evidence reran transient poll, transport-error retry, permanent failure non-retry, and long-poll timeout tests as the current pre-chaos reconnect baseline.",
           "evidence_ref": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"
+        },
+        {
+          "id": "daemon_reconnect_runtimeactor_2026_07_02",
+          "kind": "artifact",
+          "signal": "Current daemon QA branch evidence reran SaaS-plane retry and transport-error retry tests at commit eb7976f, preserving the all-server-down reconnect baseline before a live chaos drill.",
+          "evidence_ref": "docs/30-architecture/evidence/daemon-reconnect-runtimeactor-evidence-2026-07-02.json"
         }
       ],
       "evidence_refs": [
         {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_control_plane_long_poll_server_test.go"},
         {"kind": "external", "path": "riido-daemon:docs/30-architecture/product-loop-evidence.riido.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/daemon-reconnect-runtimeactor-evidence-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"}
       ],
       "next_artifact": "daemon_reconnect_storm_evidence",
