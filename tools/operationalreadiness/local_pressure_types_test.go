@@ -19,6 +19,7 @@ type pressureResources struct {
 type capacitySummary struct {
 	Scenario        string  `json:"scenario"`
 	AllocBytesPerOp float64 `json:"alloc_bytes_per_op"`
+	CPUSecondsPerOp float64 `json:"cpu_seconds_per_op"`
 	GoroutineDelta  int     `json:"goroutine_delta"`
 	ErrorFree       bool    `json:"error_free"`
 }

@@ -3,6 +3,9 @@ package riidoaiserver
 import "time"
 
 func suppressSupersededQueuedHistoryMessages(threads []AIAgentTaskThreadHistoryRecord) {
+	if !taskThreadHistoryNeedsQueuedSuppression(threads) {
+		return
+	}
 	latest := latestConversationNonQueuedMessageTime(threads)
 	running := runningTaskThreadHistoryConversations(threads)
 	for i := range threads {

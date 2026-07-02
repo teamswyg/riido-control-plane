@@ -384,7 +384,7 @@
     {
       "id": "control_plane_performance_evidence_loop",
       "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows; pressure output could also promote a zero goroutine delta as if it were an actionable leak signal, heavy local stress needed to stay separate from the lightweight CI pressure command, the static audit could lose an entire endpoint, DB, SSE, scheduling, fanout, waiter, progress, lock, read-model, or goroutine-risk category while still reporting a non-empty surface list, live HTTP load evidence lacked direct throughput, failure-rate, endpoint-finding, load-generator resource rows, and opt-in pprof sample metadata, local pressure had resource deltas but no same-command CPU/heap/goroutine profile metadata path for manual hotspot inspection, the v3 thread history endpoint needed httptest pressure coverage rather than only internal projection timing, local pressure showed client event subscriber fanout as a measurable allocation/cpu hotspot before any endpoint contract change, the generated evidence artifacts did not directly expose assertion/category coverage even though the manifest verified those rules, follow-up pressure showed progress ingest repeatedly allocating around 590KB/op while appending monotonically increasing lines, benchmark profiling showed runtime progress lookups copying client-visible thread lines before internal state checks, pressure candidates still carried human TODO wording instead of executable next-step commands, assignment long-poll/tool-approval waiter risks were claimed as hot paths without direct local pressure scenarios measuring waiter timer/goroutine behavior, candidate artifacts did not carry the measured capacity/latency/allocation/cpu summary needed for the next loop to prioritize without reopening the raw pressure report, the performance manifest did not expose an architecture component map that binds code paths to heap, CPU, goroutine, race, and OTel/X-Ray/CloudWatch evidence dimensions, agents still had to infer a touched file's performance architecture context from component prose instead of a generated file index, hot-path files could be listed without component coverage or executable target commands in the file index, a follow-up agent still needed to reread generated prose to query one touched file's pressure and target-verifier scope, and exact-only architecture queries returned unmatched for central or newly split files that live beside registered performance components. benchmark evidence then showed RecordAIAgentThreadProgress at 6.7us/75KB/23 allocs before the fix and 1.4us/1.1KB/19 allocs after append-retained progress/replay buffers, with pprof shifting remaining allocation pressure to live fanout and progress text normalization. A later local pressure baseline identified v3 thread history projection as the top remaining allocation hotspot, with thread_history_v3 at about 52.7KB/op and the v3 thread-history HTTP endpoint at about 79.5KB/op before the projection slice-builder change. The latest open-loop evidence found two remaining API-neutral hot paths: inactive-heavy thread stream target construction still allocated like all threads had active streams, and client event fanout repeated the same visibility decision for subscribers that shared the same principal/workspace/role key.",
-      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, explicit local pressure scenario names, manual high-concurrency pressure evidence commands, optional local CPU/heap/goroutine profile metadata with 0600 profile files, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, live aiagentload throughput/capacity/resource findings, opt-in pprof sample metadata without profile bodies, required high-traffic category coverage, architecture component coverage, generated file architecture index rows, file-to-hot-path routing rows, executable per-file target verifier commands, file-level architecture query JSON with exact and directory-fallback routing plus component role summaries, heap/cpu/goroutine/race/OTel dimension coverage, assertion/category coverage fields in the evidence artifact, allocation-aware progress merge/filter surfaces, runtime progress raw lookup surfaces, line-retention regression tests, bounded assignment/tool-approval waiter pressure scenarios, finding-level closed-loop adoption plans whose commands are directly executable, and candidate measurement summaries that carry max concurrent users, ops/sec, p95 latency, alloc/op, cpu/op, goroutine delta, and error-free status, then publish candidate evidence for architect review. A retained append helper for append-only progress and replay tails can reduce hot-path heap pressure without changing endpoint payloads, SSE semantics, or replay limits. A pre-sized v3 history message builder can append stored messages, progress lines, and projection results into one response slice, reducing refresh allocation pressure while preserving v3 response shape and message ordering. Counting active stream targets only when the first thread proves the list is not all-active can remove inactive-heavy allocation without changing subscription response shape, and a per-fanout visibility cache keyed by principal/workspace/roles can reduce repeated SSE subscriber work while still delegating authorization to the same subscriber visibility function.",
+      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, explicit local pressure scenario names, manual high-concurrency pressure evidence commands, optional local CPU/heap/goroutine profile metadata with 0600 profile files, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, live aiagentload throughput/capacity/resource findings, opt-in pprof sample metadata without profile bodies, required high-traffic category coverage, architecture component coverage, generated file architecture index rows, file-to-hot-path routing rows, executable per-file target verifier commands, file-level architecture query JSON with exact and directory-fallback routing plus component role summaries, heap/cpu/goroutine/race/OTel dimension coverage, assertion/category coverage fields in the evidence artifact, allocation-aware progress merge/filter surfaces, runtime progress raw lookup surfaces, line-retention regression tests, bounded assignment/tool-approval waiter pressure scenarios, finding-level closed-loop adoption plans whose commands are directly executable, and candidate measurement summaries that carry max concurrent users, ops/sec, p95 latency, alloc/op, cpu/op, goroutine delta, and error-free status, then publish candidate evidence for architect review. A retained append helper for append-only progress and replay tails can reduce hot-path heap pressure without changing endpoint payloads, SSE semantics, or replay limits. A pre-sized v3 history message builder can append stored messages, progress lines, and projection results into one response slice, reducing refresh allocation pressure while preserving v3 response shape and message ordering. Counting active stream targets only when the first thread proves the list is not all-active can remove inactive-heavy allocation without changing subscription response shape, and a per-fanout visibility cache keyed by principal/workspace/roles can reduce repeated SSE subscriber work while still delegating authorization to the same subscriber visibility function. Plain progress text can bypass regex-heavy local-path, approval, and provider-limit rewrites only after marker checks prove the message has no sensitive or localized rewrite surface.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
@@ -682,12 +682,36 @@
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_message_id.go"
         },
         {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_client_visible_task_thread_text.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_visible_plain_text.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_sort.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_suppression.go"
+        },
+        {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go"
         },
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_message_id_test.go"
+        },
+        {
+          "kind": "benchmark",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_benchmark_test.go"
         },
         {
           "kind": "test",
@@ -752,6 +776,10 @@
         {
           "kind": "test",
           "path": "tools/operationalreadiness/client_event_fanout_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/local_pressure_v3_history_plain_text_fastpath_test.go"
         },
         {
           "kind": "manifest",
@@ -894,6 +922,10 @@
         {
           "kind": "test",
           "path": "tools/operationalreadiness/client_event_fanout_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/local_pressure_v3_history_plain_text_fastpath_test.go"
         }
       ],
       "evidence": [
@@ -950,6 +982,10 @@
         },
         {
           "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-plain-text-fastpath-after-2026-07-03.json"
+        },
+        {
+          "kind": "manifest",
           "path": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"
         },
         {
@@ -974,7 +1010,7 @@
           "path": "docs/30-architecture/control-plane-performance-averages.jsonl"
         }
       ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, optional local CPU/heap/goroutine profile metadata with 0600 profile files, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, assignment long-poll waiter pressure, tool-approval waiter pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, required high-traffic category coverage, architecture component coverage, generated file architecture index coverage, exact and directory-fallback architecture query routing, heap/cpu/goroutine/race/OTel signal coverage, and assertion coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories, missing assertions, missing architecture components, missing file architecture index rows, missing pressure dimensions, missing local profile command, or missing local pressure scenarios fail before merge. Live progress fanout also precomputes the client-visible progress payload once per event before subscriber visibility checks, progress line ingestion avoids copying the whole existing line slice or allocating a seen-seq map for strictly increasing line batches, runtime progress lookup avoids client-visible thread copies on internal hot paths, runtime thread lines are retained before snapshot persistence, pressure operations can now clean up scenario-owned resources, pressure candidate adoption plans now expose executable go run/go test commands for each required next artifact, and candidate artifacts now carry measured capacity/latency/allocation/cpu summaries for the next loop, preserving v2/v3 contracts while reducing repeated progress allocation work and keeping next-loop handoff machine-runnable. Runtime progress ingest now retains bounded append-only progress lines and client replay events in place; benchmark history records the reduction from roughly 6.7us/75KB/23 allocs to roughly 1.4us/1.1KB/19 allocs, while pprof identifies live fanout and progress normalization as the next safe candidate rather than expanding this slice. V3 thread history projection now builds stored, progress, and projection messages through one pre-sized response slice; follow-up local pressure evidence shows thread_history_v3 allocation falling below the prior baseline by more than 10% and the HTTP v3 thread-history endpoint by more than 5%, with zero errors and zero goroutine delta. V3 history message IDs keep the same SHA-256 legacy keys, verified by a sidecar test, while avoiding intermediate joined strings; follow-up pressure shows thread_history_v3 allocation falling further from about 44.5KB/op to about 40.0KB/op and the HTTP v3 thread-history endpoint from about 71.0KB/op to about 66.7KB/op with zero errors and zero goroutine delta. Thread stream subscription targets now pre-size for inactive-heavy task histories only when needed, reducing the inactive-heavy benchmark from 2688 B/op to 96 B/op while preserving all-active allocation behavior and the v2 subscription contract. Client SSE event fanout now caches visibility decisions per subscriber visibility key inside one fanout pass, reducing local fanout evidence from roughly 1792 alloc/op to roughly 1584 alloc/op and CPU/op by about 29%, with no endpoint, payload, or authorization contract change.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, optional local CPU/heap/goroutine profile metadata with 0600 profile files, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, assignment long-poll waiter pressure, tool-approval waiter pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, required high-traffic category coverage, architecture component coverage, generated file architecture index coverage, exact and directory-fallback architecture query routing, heap/cpu/goroutine/race/OTel signal coverage, and assertion coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories, missing assertions, missing architecture components, missing file architecture index rows, missing pressure dimensions, missing local profile command, or missing local pressure scenarios fail before merge. Live progress fanout also precomputes the client-visible progress payload once per event before subscriber visibility checks, progress line ingestion avoids copying the whole existing line slice or allocating a seen-seq map for strictly increasing line batches, runtime progress lookup avoids client-visible thread copies on internal hot paths, runtime thread lines are retained before snapshot persistence, pressure operations can now clean up scenario-owned resources, pressure candidate adoption plans now expose executable go run/go test commands for each required next artifact, and candidate artifacts now carry measured capacity/latency/allocation/cpu summaries for the next loop, preserving v2/v3 contracts while reducing repeated progress allocation work and keeping next-loop handoff machine-runnable. Runtime progress ingest now retains bounded append-only progress lines and client replay events in place; benchmark history records the reduction from roughly 6.7us/75KB/23 allocs to roughly 1.4us/1.1KB/19 allocs, while pprof identifies live fanout and progress normalization as the next safe candidate rather than expanding this slice. V3 thread history projection now builds stored, progress, and projection messages through one pre-sized response slice; follow-up local pressure evidence shows thread_history_v3 allocation falling below the prior baseline by more than 10% and the HTTP v3 thread-history endpoint by more than 5%, with zero errors and zero goroutine delta. V3 history message IDs keep the same SHA-256 legacy keys, verified by a sidecar test, while avoiding intermediate joined strings; follow-up pressure shows thread_history_v3 allocation falling further from about 44.5KB/op to about 40.0KB/op and the HTTP v3 thread-history endpoint from about 71.0KB/op to about 66.7KB/op with zero errors and zero goroutine delta. Thread stream subscription targets now pre-size for inactive-heavy task histories only when needed, reducing the inactive-heavy benchmark from 2688 B/op to 96 B/op while preserving all-active allocation behavior and the v2 subscription contract. Client SSE event fanout now caches visibility decisions per subscriber visibility key inside one fanout pass, reducing local fanout evidence from roughly 1792 alloc/op to roughly 1584 alloc/op and CPU/op by about 29%, with no endpoint, payload, or authorization contract change. V3 history plain-text fast paths now avoid regex-heavy rewrite and unnecessary queued suppression scans for the common no-queued progress case; local pressure shows thread_history_v3 allocation falling from about 40.0KB/op to about 23.4KB/op and CPU/op from about 66us to about 36us, while the HTTP v3 thread-history endpoint falls from about 66.7KB/op to about 49.9KB/op with zero errors and zero goroutine delta.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -3233,7 +3269,7 @@
     {
       "id": "ai_thread_history_conversation_grouping_loop",
       "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card, later observed stale queued_by_busy_agent status text and active stream state appearing next to newer progress or running state in the same conversation, and staging showed a task screen keeping an optimistic running spinner even though daemon status had running_tasks=0, v2 thread-stream-subscription returned active_thread_filters=[], and v3 history contained only terminal threads. A reopened Notion P0 report also described a stopped agent looking active after refresh, so the server proof must include the HTTP stop path plus a late daemon progress event, not only a direct store unit test. A running thread state can be known before a delayed queued status message receives a later observed_at timestamp, queued thread active_stream can otherwise keep the card looking alive, and terminal server truth must be able to clear stale client session state.",
-      "hypothesis": "Binding conversation_id, parent_thread_id, queued-status current-only filtering, queued active_stream suppression, running-over-queued active_stream priority, and terminal active_stream closure to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations, prevents stale queue hints from rendering as durable agent replies or active progress streams once progress, active running state, or result history exists, and lets refresh/refetch clear local running UI when every server-side thread is terminal.",
+      "hypothesis": "Binding conversation_id, parent_thread_id, queued-status current-only filtering, queued active_stream suppression, running-over-queued active_stream priority, and terminal active_stream closure to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations, prevents stale queue hints from rendering as durable agent replies or active progress streams once progress, active running state, or result history exists, and lets refresh/refetch clear local running UI when every server-side thread is terminal. A queued-suppression fast path is safe only when it first proves that no thread or message carries queued state, so the same current-only queued rule still runs for every conversation where it can affect UI semantics.",
       "claims": [
         "thread_history_v3_must_expose_stable_conversation_grouping"
       ],
@@ -3265,6 +3301,10 @@
         {
           "kind": "projection",
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go"
+        },
+        {
+          "kind": "projection",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_suppression.go"
         },
         {
           "kind": "projection",
@@ -3309,6 +3349,10 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_benchmark_test.go"
         }
       ],
       "verifiers": [
@@ -3341,7 +3385,7 @@
           "redacted": true
         }
       ],
-      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI. The HTTP stop-refresh proof also verifies that late daemon thread-progress after stop is rejected by the durable FSM and cannot leak into v3 history.",
+      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI. The HTTP stop-refresh proof also verifies that late daemon thread-progress after stop is rejected by the durable FSM and cannot leak into v3 history. The performance fast path preserves this decision by returning early only for histories that contain no queued state to suppress.",
       "next_loop": "ai_thread_history"
     },
     {
@@ -3379,6 +3423,10 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_run_identity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_benchmark_test.go"
         },
         {
           "kind": "manifest",
@@ -3419,7 +3467,7 @@
           "redacted": true
         }
       ],
-      "decision": "AI Thread History v3 execution identity and message ordering are closed-loop invariants: follow-up work gets a fresh assignment/run axis, and same-timestamp messages sort by user intent, progress sequence, then agent result.",
+      "decision": "AI Thread History v3 execution identity and message ordering are closed-loop invariants: follow-up work gets a fresh assignment/run axis, and same-timestamp messages sort by user intent, progress sequence, then agent result. The sorted-input fast path is allowed because it uses the exact same comparator before deciding to skip sort.SliceStable, so already-sorted histories avoid work without changing replay order.",
       "next_loop": "ai_thread_history"
     },
     {
