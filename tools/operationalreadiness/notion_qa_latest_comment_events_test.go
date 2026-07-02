@@ -7,6 +7,7 @@ func TestNotionQACommentEventsIncludeLatestBackfillDiff(t *testing.T) {
 	want := map[string]string{
 		"39120241-cf7f-81d5-9c0f-001d26c153a0": "queued_by_busy_agent",
 		"39120241-cf7f-8119-b377-001d66282634": "completion_progress_after_terminal",
+		"39120241-cf7f-81fe-8a5f-001d4070221f": "completion_progress_after_terminal",
 		"39120241-cf7f-816e-9523-001d6a184fdc": "page_level_backfill_diff",
 	}
 	for id, discussion := range want {

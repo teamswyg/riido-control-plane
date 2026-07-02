@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-02T11:35:00Z",
+  "captured_at": "2026-07-02T12:05:00Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -119,6 +119,15 @@
       "decision": "Repo/CI evidence is strengthened, but the P0 remains partial because the reproduction moment has not been captured."
     },
     {
+      "id": "39120241-cf7f-81fe-8a5f-001d4070221f",
+      "discussion": "completion_progress_after_terminal",
+      "observed_at": "2026-07-02T12:05:00Z",
+      "event_type": "real_screen_non_reproduction",
+      "status_tag": "[codex][진행중][리얼화면재확인]",
+      "signal": "A live Chrome check of the staging task currently has visible queued/running/thinking counts at zero.",
+      "decision": "This is product-screen evidence for the current state, but it remains non-reproduction evidence and does not close the reported race without same-moment API and SSE captures."
+    },
+    {
       "id": "39120241-cf7f-81d5-9c0f-001d26c153a0",
       "discussion": "queued_by_busy_agent",
       "observed_at": "2026-07-02T10:08:16.163Z",
@@ -174,7 +183,8 @@
         "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go",
         "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json",
         "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json",
-        "notion-comment:39120241-cf7f-8119-b377-001d66282634"
+        "notion-comment:39120241-cf7f-8119-b377-001d66282634",
+        "notion-comment:39120241-cf7f-81fe-8a5f-001d4070221f"
       ],
       "decision": "Backfill as a distinct P0 visual/event-order cycle. Existing terminal and queued tests plus two read-only staging baselines reduce backend risk but do not prove this user-visible symptom; next evidence must capture v3 history, v2 task threads, thread-stream-subscription, SSE events, and screenshot state for the same completed conversation at the reproduction moment. The endpoint contract approval gate discussed in the thread is a separate P-3 candidate, not this P0 fix."
     },
@@ -239,6 +249,11 @@
       "id": "39120241-cf7f-8119-b377-001d66282634",
       "target": "completion_progress_after_terminal_discussion",
       "status": "[codex][완료][증적강화]"
+    },
+    {
+      "id": "39120241-cf7f-81fe-8a5f-001d4070221f",
+      "target": "completion_progress_after_terminal_discussion",
+      "status": "[codex][진행중][리얼화면재확인]"
     }
   ],
   "next_actions": [
