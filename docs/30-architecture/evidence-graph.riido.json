@@ -666,8 +666,16 @@
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_messages.go"
         },
         {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_message_id.go"
+        },
+        {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_message_id_test.go"
         },
         {
           "kind": "test",
@@ -712,6 +720,10 @@
         {
           "kind": "test",
           "path": "tools/operationalreadiness/local_pressure_v3_history_allocation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/local_pressure_v3_history_message_id_allocation_test.go"
         },
         {
           "kind": "manifest",
@@ -889,6 +901,14 @@
           "path": "docs/30-architecture/evidence/control-plane-v3-history-allocation-candidates-after-2026-07-02.json"
         },
         {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-after-2026-07-02.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-candidates-after-2026-07-02.json"
+        },
+        {
           "kind": "artifact",
           "path": "control-plane-architecture-query",
           "redacted": true
@@ -906,7 +926,7 @@
           "path": "docs/30-architecture/control-plane-performance-averages.jsonl"
         }
       ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, optional local CPU/heap/goroutine profile metadata with 0600 profile files, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, assignment long-poll waiter pressure, tool-approval waiter pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, required high-traffic category coverage, architecture component coverage, generated file architecture index coverage, exact and directory-fallback architecture query routing, heap/cpu/goroutine/race/OTel signal coverage, and assertion coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories, missing assertions, missing architecture components, missing file architecture index rows, missing pressure dimensions, missing local profile command, or missing local pressure scenarios fail before merge. Live progress fanout also precomputes the client-visible progress payload once per event before subscriber visibility checks, progress line ingestion avoids copying the whole existing line slice or allocating a seen-seq map for strictly increasing line batches, runtime progress lookup avoids client-visible thread copies on internal hot paths, runtime thread lines are retained before snapshot persistence, pressure operations can now clean up scenario-owned resources, pressure candidate adoption plans now expose executable go run/go test commands for each required next artifact, and candidate artifacts now carry measured capacity/latency/allocation/cpu summaries for the next loop, preserving v2/v3 contracts while reducing repeated progress allocation work and keeping next-loop handoff machine-runnable. Runtime progress ingest now retains bounded append-only progress lines and client replay events in place; benchmark history records the reduction from roughly 6.7us/75KB/23 allocs to roughly 1.4us/1.1KB/19 allocs, while pprof identifies live fanout and progress normalization as the next safe candidate rather than expanding this slice. V3 thread history projection now builds stored, progress, and projection messages through one pre-sized response slice; follow-up local pressure evidence shows thread_history_v3 allocation falling below the prior baseline by more than 10% and the HTTP v3 thread-history endpoint by more than 5%, with zero errors and zero goroutine delta.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, optional local CPU/heap/goroutine profile metadata with 0600 profile files, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, assignment long-poll waiter pressure, tool-approval waiter pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, required high-traffic category coverage, architecture component coverage, generated file architecture index coverage, exact and directory-fallback architecture query routing, heap/cpu/goroutine/race/OTel signal coverage, and assertion coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories, missing assertions, missing architecture components, missing file architecture index rows, missing pressure dimensions, missing local profile command, or missing local pressure scenarios fail before merge. Live progress fanout also precomputes the client-visible progress payload once per event before subscriber visibility checks, progress line ingestion avoids copying the whole existing line slice or allocating a seen-seq map for strictly increasing line batches, runtime progress lookup avoids client-visible thread copies on internal hot paths, runtime thread lines are retained before snapshot persistence, pressure operations can now clean up scenario-owned resources, pressure candidate adoption plans now expose executable go run/go test commands for each required next artifact, and candidate artifacts now carry measured capacity/latency/allocation/cpu summaries for the next loop, preserving v2/v3 contracts while reducing repeated progress allocation work and keeping next-loop handoff machine-runnable. Runtime progress ingest now retains bounded append-only progress lines and client replay events in place; benchmark history records the reduction from roughly 6.7us/75KB/23 allocs to roughly 1.4us/1.1KB/19 allocs, while pprof identifies live fanout and progress normalization as the next safe candidate rather than expanding this slice. V3 thread history projection now builds stored, progress, and projection messages through one pre-sized response slice; follow-up local pressure evidence shows thread_history_v3 allocation falling below the prior baseline by more than 10% and the HTTP v3 thread-history endpoint by more than 5%, with zero errors and zero goroutine delta. V3 history message IDs keep the same SHA-256 legacy keys, verified by a sidecar test, while avoiding intermediate joined strings; follow-up pressure shows thread_history_v3 allocation falling further from about 44.5KB/op to about 40.0KB/op and the HTTP v3 thread-history endpoint from about 71.0KB/op to about 66.7KB/op with zero errors and zero goroutine delta.",
       "next_loop": "closed_loop_candidate"
     },
     {

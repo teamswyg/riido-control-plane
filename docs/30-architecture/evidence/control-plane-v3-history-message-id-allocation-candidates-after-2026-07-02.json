@@ -1,0 +1,624 @@
+{
+  "schema_version": "riido-control-plane-closed-loop-candidates.v1",
+  "id": "control-plane-pressure",
+  "status": "verified",
+  "source_workflow": ".github/workflows/control-plane-performance.yml",
+  "live_status": "measured",
+  "source_generated_at": "2026-07-02T13:51:02Z",
+  "source_expires_at": "2026-07-03T13:51:02Z",
+  "run": {
+    "id": "local"
+  },
+  "candidate_count": 9,
+  "candidates": [
+    {
+      "id": "control-plane-pressure:http_endpoint_threads_v3",
+      "source_ref": {
+        "harness_loop": "control_plane_performance_harness",
+        "source_workflow": ".github/workflows/control-plane-performance.yml",
+        "summary_artifact": "control-plane-local-pressure",
+        "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-02T13:51:02Z",
+        "source_expires_at": "2026-07-03T13:51:02Z",
+        "run": {
+          "id": "local"
+        }
+      },
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "control_plane_performance_harness",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Local pressure harness measured http_endpoint_threads_v3 as an optimization candidate.",
+      "hypothesis": "v3 thread history endpoint covers auth, route metrics, reconcile, projection, and JSON response pressure Next: track refresh pressure before changing v3 history projection internals",
+      "measured": {
+        "max_concurrent_users": 32,
+        "ops_per_sec": 16412,
+        "p95_latency_us": 2124,
+        "alloc_bytes_per_op": 66696.50012186205,
+        "cpu_seconds_per_op": 0.00010242395807945406,
+        "goroutine_delta": 0,
+        "error_free": true
+      },
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:http_metrics_observe",
+      "source_ref": {
+        "harness_loop": "control_plane_performance_harness",
+        "source_workflow": ".github/workflows/control-plane-performance.yml",
+        "summary_artifact": "control-plane-local-pressure",
+        "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-02T13:51:02Z",
+        "source_expires_at": "2026-07-03T13:51:02Z",
+        "run": {
+          "id": "local"
+        }
+      },
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "control_plane_performance_harness",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Local pressure harness measured http_metrics_observe as an optimization candidate.",
+      "hypothesis": "route metrics lock/allocation pressure on endpoint hot paths Next: watch lock cost before adding route dimensions",
+      "measured": {
+        "max_concurrent_users": 32,
+        "ops_per_sec": 2287598,
+        "p95_latency_us": 90,
+        "alloc_bytes_per_op": 0.6303555082667497,
+        "cpu_seconds_per_op": 0.0000018755576810261248,
+        "goroutine_delta": 0,
+        "error_free": true
+      },
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:store_metrics_observe",
+      "source_ref": {
+        "harness_loop": "control_plane_performance_harness",
+        "source_workflow": ".github/workflows/control-plane-performance.yml",
+        "summary_artifact": "control-plane-local-pressure",
+        "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-02T13:51:02Z",
+        "source_expires_at": "2026-07-03T13:51:02Z",
+        "run": {
+          "id": "local"
+        }
+      },
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "control_plane_performance_harness",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Local pressure harness measured store_metrics_observe as an optimization candidate.",
+      "hypothesis": "store operation metrics lock/allocation pressure on DB hot paths Next: keep operation vocabulary bounded and compare with live EMF",
+      "measured": {
+        "max_concurrent_users": 32,
+        "ops_per_sec": 2616156,
+        "p95_latency_us": 78,
+        "alloc_bytes_per_op": 0.5350200829002552,
+        "cpu_seconds_per_op": 0.0000016519534767804365,
+        "goroutine_delta": 0,
+        "error_free": true
+      },
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:progress_ingest_fragment",
+      "source_ref": {
+        "harness_loop": "control_plane_performance_harness",
+        "source_workflow": ".github/workflows/control-plane-performance.yml",
+        "summary_artifact": "control-plane-local-pressure",
+        "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-02T13:51:02Z",
+        "source_expires_at": "2026-07-03T13:51:02Z",
+        "run": {
+          "id": "local"
+        }
+      },
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "control_plane_performance_harness",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Local pressure harness measured progress_ingest_fragment as an optimization candidate.",
+      "hypothesis": "fine-grained provider fragments can amplify normalize, merge, event, and fanout cost Next: measure fragment cost before changing provider batching",
+      "measured": {
+        "max_concurrent_users": 32,
+        "ops_per_sec": 427398,
+        "p95_latency_us": 897,
+        "alloc_bytes_per_op": 1494.603868057408,
+        "cpu_seconds_per_op": 0.000003754570681191773,
+        "goroutine_delta": 0,
+        "error_free": true
+      },
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:thread_stream_subscription",
+      "source_ref": {
+        "harness_loop": "control_plane_performance_harness",
+        "source_workflow": ".github/workflows/control-plane-performance.yml",
+        "summary_artifact": "control-plane-local-pressure",
+        "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-02T13:51:02Z",
+        "source_expires_at": "2026-07-03T13:51:02Z",
+        "run": {
+          "id": "local"
+        }
+      },
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "control_plane_performance_harness",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Local pressure harness measured thread_stream_subscription as an optimization candidate.",
+      "hypothesis": "SSE filter computation can copy active thread state under task fanout Next: prefer active target projection over full thread projection",
+      "measured": {
+        "max_concurrent_users": 32,
+        "ops_per_sec": 2498418,
+        "p95_latency_us": 87,
+        "alloc_bytes_per_op": 112.55867673063514,
+        "cpu_seconds_per_op": 0.0000017626113804815684,
+        "goroutine_delta": 0,
+        "error_free": true
+      },
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:client_event_subscriber_fanout",
+      "source_ref": {
+        "harness_loop": "control_plane_performance_harness",
+        "source_workflow": ".github/workflows/control-plane-performance.yml",
+        "summary_artifact": "control-plane-local-pressure",
+        "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-02T13:51:02Z",
+        "source_expires_at": "2026-07-03T13:51:02Z",
+        "run": {
+          "id": "local"
+        }
+      },
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "control_plane_performance_harness",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Local pressure harness measured client_event_subscriber_fanout as an optimization candidate.",
+      "hypothesis": "workspace SSE subscribers add per-event visibility and channel-send work Next: measure subscriber fanout before adding richer live events",
+      "measured": {
+        "max_concurrent_users": 32,
+        "ops_per_sec": 236834,
+        "p95_latency_us": 1018,
+        "alloc_bytes_per_op": 1792.4416933379498,
+        "cpu_seconds_per_op": 0.000006772980230879007,
+        "goroutine_delta": 0,
+        "error_free": true
+      },
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:thread_history_v3",
+      "source_ref": {
+        "harness_loop": "control_plane_performance_harness",
+        "source_workflow": ".github/workflows/control-plane-performance.yml",
+        "summary_artifact": "control-plane-local-pressure",
+        "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-02T13:51:02Z",
+        "source_expires_at": "2026-07-03T13:51:02Z",
+        "run": {
+          "id": "local"
+        }
+      },
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "control_plane_performance_harness",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Local pressure harness measured thread_history_v3 as an optimization candidate.",
+      "hypothesis": "v3 thread history can copy historical messages during refresh/recovery Next: split immutable snapshots and cap per-refresh projection work",
+      "measured": {
+        "max_concurrent_users": 32,
+        "ops_per_sec": 18164,
+        "p95_latency_us": 2336,
+        "alloc_bytes_per_op": 40022.62761506276,
+        "cpu_seconds_per_op": 0.00006627934375688187,
+        "goroutine_delta": 0,
+        "error_free": true
+      },
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:assignment_long_poll_wait",
+      "source_ref": {
+        "harness_loop": "control_plane_performance_harness",
+        "source_workflow": ".github/workflows/control-plane-performance.yml",
+        "summary_artifact": "control-plane-local-pressure",
+        "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-02T13:51:02Z",
+        "source_expires_at": "2026-07-03T13:51:02Z",
+        "run": {
+          "id": "local"
+        }
+      },
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "control_plane_performance_harness",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Local pressure harness measured assignment_long_poll_wait as an optimization candidate.",
+      "hypothesis": "daemon long-poll waiters can add timer/goroutine pressure while no work is available Next: keep waiters bounded and verify actor commands stay responsive",
+      "measured": {
+        "max_concurrent_users": 32,
+        "ops_per_sec": 14672,
+        "p95_latency_us": 2617,
+        "alloc_bytes_per_op": 2935.690294438386,
+        "cpu_seconds_per_op": 0.00004637499999999993,
+        "goroutine_delta": 0,
+        "error_free": true
+      },
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:tool_approval_waiters",
+      "source_ref": {
+        "harness_loop": "control_plane_performance_harness",
+        "source_workflow": ".github/workflows/control-plane-performance.yml",
+        "summary_artifact": "control-plane-local-pressure",
+        "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-02T13:51:02Z",
+        "source_expires_at": "2026-07-03T13:51:02Z",
+        "run": {
+          "id": "local"
+        }
+      },
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "control_plane_performance_harness",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Local pressure harness measured tool_approval_waiters as an optimization candidate.",
+      "hypothesis": "tool approval waits can add timer and waiter-map pressure under stalled human decisions Next: keep approval waits bounded and promote leak checks before expanding approval UX",
+      "measured": {
+        "max_concurrent_users": 32,
+        "ops_per_sec": 14592,
+        "p95_latency_us": 2353,
+        "alloc_bytes_per_op": 2289.120614035088,
+        "cpu_seconds_per_op": 0.00004283442982456118,
+        "goroutine_delta": 0,
+        "error_free": true
+      },
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    }
+  ],
+  "redaction": {
+    "summary_only": true,
+    "no_raw_secrets": true,
+    "no_raw_endpoints": true,
+    "no_raw_aws_resource_ids": true
+  }
+}
