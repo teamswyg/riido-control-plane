@@ -45,4 +45,12 @@ func BenchmarkAIAgentTaskThreadStreamSubscriptionTargets(b *testing.B) {
 			store.mu.Unlock()
 		}
 	})
+	b.Run("subscription_targets_inactive_heavy", func(b *testing.B) {
+		store := inactiveHeavyStreamTargetFixtureStore(50, 2, 200)
+		for range b.N {
+			store.mu.Lock()
+			_ = store.activeTaskThreadStreamTargetsLocked(principal, "task-load-read")
+			store.mu.Unlock()
+		}
+	})
 }

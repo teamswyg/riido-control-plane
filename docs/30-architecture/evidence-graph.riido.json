@@ -383,8 +383,8 @@
     },
     {
       "id": "control_plane_performance_evidence_loop",
-      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows; pressure output could also promote a zero goroutine delta as if it were an actionable leak signal, heavy local stress needed to stay separate from the lightweight CI pressure command, the static audit could lose an entire endpoint, DB, SSE, scheduling, fanout, waiter, progress, lock, read-model, or goroutine-risk category while still reporting a non-empty surface list, live HTTP load evidence lacked direct throughput, failure-rate, endpoint-finding, load-generator resource rows, and opt-in pprof sample metadata, local pressure had resource deltas but no same-command CPU/heap/goroutine profile metadata path for manual hotspot inspection, the v3 thread history endpoint needed httptest pressure coverage rather than only internal projection timing, local pressure showed client event subscriber fanout as a measurable allocation/cpu hotspot before any endpoint contract change, the generated evidence artifacts did not directly expose assertion/category coverage even though the manifest verified those rules, follow-up pressure showed progress ingest repeatedly allocating around 590KB/op while appending monotonically increasing lines, benchmark profiling showed runtime progress lookups copying client-visible thread lines before internal state checks, pressure candidates still carried human TODO wording instead of executable next-step commands, assignment long-poll/tool-approval waiter risks were claimed as hot paths without direct local pressure scenarios measuring waiter timer/goroutine behavior, candidate artifacts did not carry the measured capacity/latency/allocation/cpu summary needed for the next loop to prioritize without reopening the raw pressure report, the performance manifest did not expose an architecture component map that binds code paths to heap, CPU, goroutine, race, and OTel/X-Ray/CloudWatch evidence dimensions, agents still had to infer a touched file's performance architecture context from component prose instead of a generated file index, hot-path files could be listed without component coverage or executable target commands in the file index, a follow-up agent still needed to reread generated prose to query one touched file's pressure and target-verifier scope, and exact-only architecture queries returned unmatched for central or newly split files that live beside registered performance components. benchmark evidence then showed RecordAIAgentThreadProgress at 6.7us/75KB/23 allocs before the fix and 1.4us/1.1KB/19 allocs after append-retained progress/replay buffers, with pprof shifting remaining allocation pressure to live fanout and progress text normalization. A later local pressure baseline identified v3 thread history projection as the top remaining allocation hotspot, with thread_history_v3 at about 52.7KB/op and the v3 thread-history HTTP endpoint at about 79.5KB/op before the projection slice-builder change.",
-      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, explicit local pressure scenario names, manual high-concurrency pressure evidence commands, optional local CPU/heap/goroutine profile metadata with 0600 profile files, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, live aiagentload throughput/capacity/resource findings, opt-in pprof sample metadata without profile bodies, required high-traffic category coverage, architecture component coverage, generated file architecture index rows, file-to-hot-path routing rows, executable per-file target verifier commands, file-level architecture query JSON with exact and directory-fallback routing plus component role summaries, heap/cpu/goroutine/race/OTel dimension coverage, assertion/category coverage fields in the evidence artifact, allocation-aware progress merge/filter surfaces, runtime progress raw lookup surfaces, line-retention regression tests, bounded assignment/tool-approval waiter pressure scenarios, finding-level closed-loop adoption plans whose commands are directly executable, and candidate measurement summaries that carry max concurrent users, ops/sec, p95 latency, alloc/op, cpu/op, goroutine delta, and error-free status, then publish candidate evidence for architect review. A retained append helper for append-only progress and replay tails can reduce hot-path heap pressure without changing endpoint payloads, SSE semantics, or replay limits. A pre-sized v3 history message builder can append stored messages, progress lines, and projection results into one response slice, reducing refresh allocation pressure while preserving v3 response shape and message ordering.",
+      "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows; pressure output could also promote a zero goroutine delta as if it were an actionable leak signal, heavy local stress needed to stay separate from the lightweight CI pressure command, the static audit could lose an entire endpoint, DB, SSE, scheduling, fanout, waiter, progress, lock, read-model, or goroutine-risk category while still reporting a non-empty surface list, live HTTP load evidence lacked direct throughput, failure-rate, endpoint-finding, load-generator resource rows, and opt-in pprof sample metadata, local pressure had resource deltas but no same-command CPU/heap/goroutine profile metadata path for manual hotspot inspection, the v3 thread history endpoint needed httptest pressure coverage rather than only internal projection timing, local pressure showed client event subscriber fanout as a measurable allocation/cpu hotspot before any endpoint contract change, the generated evidence artifacts did not directly expose assertion/category coverage even though the manifest verified those rules, follow-up pressure showed progress ingest repeatedly allocating around 590KB/op while appending monotonically increasing lines, benchmark profiling showed runtime progress lookups copying client-visible thread lines before internal state checks, pressure candidates still carried human TODO wording instead of executable next-step commands, assignment long-poll/tool-approval waiter risks were claimed as hot paths without direct local pressure scenarios measuring waiter timer/goroutine behavior, candidate artifacts did not carry the measured capacity/latency/allocation/cpu summary needed for the next loop to prioritize without reopening the raw pressure report, the performance manifest did not expose an architecture component map that binds code paths to heap, CPU, goroutine, race, and OTel/X-Ray/CloudWatch evidence dimensions, agents still had to infer a touched file's performance architecture context from component prose instead of a generated file index, hot-path files could be listed without component coverage or executable target commands in the file index, a follow-up agent still needed to reread generated prose to query one touched file's pressure and target-verifier scope, and exact-only architecture queries returned unmatched for central or newly split files that live beside registered performance components. benchmark evidence then showed RecordAIAgentThreadProgress at 6.7us/75KB/23 allocs before the fix and 1.4us/1.1KB/19 allocs after append-retained progress/replay buffers, with pprof shifting remaining allocation pressure to live fanout and progress text normalization. A later local pressure baseline identified v3 thread history projection as the top remaining allocation hotspot, with thread_history_v3 at about 52.7KB/op and the v3 thread-history HTTP endpoint at about 79.5KB/op before the projection slice-builder change. The latest open-loop evidence found two remaining API-neutral hot paths: inactive-heavy thread stream target construction still allocated like all threads had active streams, and client event fanout repeated the same visibility decision for subscribers that shared the same principal/workspace/role key.",
+      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, explicit local pressure scenario names, manual high-concurrency pressure evidence commands, optional local CPU/heap/goroutine profile metadata with 0600 profile files, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, live aiagentload throughput/capacity/resource findings, opt-in pprof sample metadata without profile bodies, required high-traffic category coverage, architecture component coverage, generated file architecture index rows, file-to-hot-path routing rows, executable per-file target verifier commands, file-level architecture query JSON with exact and directory-fallback routing plus component role summaries, heap/cpu/goroutine/race/OTel dimension coverage, assertion/category coverage fields in the evidence artifact, allocation-aware progress merge/filter surfaces, runtime progress raw lookup surfaces, line-retention regression tests, bounded assignment/tool-approval waiter pressure scenarios, finding-level closed-loop adoption plans whose commands are directly executable, and candidate measurement summaries that carry max concurrent users, ops/sec, p95 latency, alloc/op, cpu/op, goroutine delta, and error-free status, then publish candidate evidence for architect review. A retained append helper for append-only progress and replay tails can reduce hot-path heap pressure without changing endpoint payloads, SSE semantics, or replay limits. A pre-sized v3 history message builder can append stored messages, progress lines, and projection results into one response slice, reducing refresh allocation pressure while preserving v3 response shape and message ordering. Counting active stream targets only when the first thread proves the list is not all-active can remove inactive-heavy allocation without changing subscription response shape, and a per-fanout visibility cache keyed by principal/workspace/roles can reduce repeated SSE subscriber work while still delegating authorization to the same subscriber visibility function.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
@@ -635,6 +635,18 @@
         },
         {
           "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_subscriber_visibility_key.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_type_subscriber_event_cache.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_active_task_thread_stream_targets_locked.go"
+        },
+        {
+          "kind": "code",
           "path": "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_live_fanout.go"
         },
         {
@@ -676,6 +688,14 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_message_id_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_stream_targets_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_stream_targets_legacy_benchmark_test.go"
         },
         {
           "kind": "test",
@@ -724,6 +744,14 @@
         {
           "kind": "test",
           "path": "tools/operationalreadiness/local_pressure_v3_history_message_id_allocation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/stream_target_capacity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/client_event_fanout_test.go"
         },
         {
           "kind": "manifest",
@@ -778,6 +806,10 @@
         {
           "kind": "benchmark",
           "path": "internal/riidoaiserver/ai_agent_client_stream_targets_test.go"
+        },
+        {
+          "kind": "benchmark",
+          "path": "internal/riidoaiserver/ai_agent_client_stream_targets_legacy_benchmark_test.go"
         },
         {
           "kind": "tool",
@@ -854,6 +886,14 @@
         {
           "kind": "test",
           "path": "tools/aiagentload/pprof_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/stream_target_capacity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/client_event_fanout_test.go"
         }
       ],
       "evidence": [
@@ -909,6 +949,14 @@
           "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-candidates-after-2026-07-02.json"
         },
         {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-client-event-fanout-after-2026-07-02.json"
+        },
+        {
           "kind": "artifact",
           "path": "control-plane-architecture-query",
           "redacted": true
@@ -926,7 +974,7 @@
           "path": "docs/30-architecture/control-plane-performance-averages.jsonl"
         }
       ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, optional local CPU/heap/goroutine profile metadata with 0600 profile files, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, assignment long-poll waiter pressure, tool-approval waiter pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, required high-traffic category coverage, architecture component coverage, generated file architecture index coverage, exact and directory-fallback architecture query routing, heap/cpu/goroutine/race/OTel signal coverage, and assertion coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories, missing assertions, missing architecture components, missing file architecture index rows, missing pressure dimensions, missing local profile command, or missing local pressure scenarios fail before merge. Live progress fanout also precomputes the client-visible progress payload once per event before subscriber visibility checks, progress line ingestion avoids copying the whole existing line slice or allocating a seen-seq map for strictly increasing line batches, runtime progress lookup avoids client-visible thread copies on internal hot paths, runtime thread lines are retained before snapshot persistence, pressure operations can now clean up scenario-owned resources, pressure candidate adoption plans now expose executable go run/go test commands for each required next artifact, and candidate artifacts now carry measured capacity/latency/allocation/cpu summaries for the next loop, preserving v2/v3 contracts while reducing repeated progress allocation work and keeping next-loop handoff machine-runnable. Runtime progress ingest now retains bounded append-only progress lines and client replay events in place; benchmark history records the reduction from roughly 6.7us/75KB/23 allocs to roughly 1.4us/1.1KB/19 allocs, while pprof identifies live fanout and progress normalization as the next safe candidate rather than expanding this slice. V3 thread history projection now builds stored, progress, and projection messages through one pre-sized response slice; follow-up local pressure evidence shows thread_history_v3 allocation falling below the prior baseline by more than 10% and the HTTP v3 thread-history endpoint by more than 5%, with zero errors and zero goroutine delta. V3 history message IDs keep the same SHA-256 legacy keys, verified by a sidecar test, while avoiding intermediate joined strings; follow-up pressure shows thread_history_v3 allocation falling further from about 44.5KB/op to about 40.0KB/op and the HTTP v3 thread-history endpoint from about 71.0KB/op to about 66.7KB/op with zero errors and zero goroutine delta.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, optional local CPU/heap/goroutine profile metadata with 0600 profile files, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, assignment long-poll waiter pressure, tool-approval waiter pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, required high-traffic category coverage, architecture component coverage, generated file architecture index coverage, exact and directory-fallback architecture query routing, heap/cpu/goroutine/race/OTel signal coverage, and assertion coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories, missing assertions, missing architecture components, missing file architecture index rows, missing pressure dimensions, missing local profile command, or missing local pressure scenarios fail before merge. Live progress fanout also precomputes the client-visible progress payload once per event before subscriber visibility checks, progress line ingestion avoids copying the whole existing line slice or allocating a seen-seq map for strictly increasing line batches, runtime progress lookup avoids client-visible thread copies on internal hot paths, runtime thread lines are retained before snapshot persistence, pressure operations can now clean up scenario-owned resources, pressure candidate adoption plans now expose executable go run/go test commands for each required next artifact, and candidate artifacts now carry measured capacity/latency/allocation/cpu summaries for the next loop, preserving v2/v3 contracts while reducing repeated progress allocation work and keeping next-loop handoff machine-runnable. Runtime progress ingest now retains bounded append-only progress lines and client replay events in place; benchmark history records the reduction from roughly 6.7us/75KB/23 allocs to roughly 1.4us/1.1KB/19 allocs, while pprof identifies live fanout and progress normalization as the next safe candidate rather than expanding this slice. V3 thread history projection now builds stored, progress, and projection messages through one pre-sized response slice; follow-up local pressure evidence shows thread_history_v3 allocation falling below the prior baseline by more than 10% and the HTTP v3 thread-history endpoint by more than 5%, with zero errors and zero goroutine delta. V3 history message IDs keep the same SHA-256 legacy keys, verified by a sidecar test, while avoiding intermediate joined strings; follow-up pressure shows thread_history_v3 allocation falling further from about 44.5KB/op to about 40.0KB/op and the HTTP v3 thread-history endpoint from about 71.0KB/op to about 66.7KB/op with zero errors and zero goroutine delta. Thread stream subscription targets now pre-size for inactive-heavy task histories only when needed, reducing the inactive-heavy benchmark from 2688 B/op to 96 B/op while preserving all-active allocation behavior and the v2 subscription contract. Client SSE event fanout now caches visibility decisions per subscriber visibility key inside one fanout pass, reducing local fanout evidence from roughly 1792 alloc/op to roughly 1584 alloc/op and CPU/op by about 29%, with no endpoint, payload, or authorization contract change.",
       "next_loop": "closed_loop_candidate"
     },
     {
