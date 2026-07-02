@@ -110,8 +110,10 @@
           {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"},
           {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"},
           {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json"},
+          {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-readonly-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-followup-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
+          {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-live-screen-uNYpHxDOzMp3vMy_urWsu-2026-07-02T12-10Z.png"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-81ec-99e9-001d90f2fa61"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-8196-a65c-001d664f0e7a"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-8125-bd7a-001d0eff72b8"},
@@ -439,6 +441,12 @@
           "evidence_ref": "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json"
         },
         {
+          "id": "staging_completion_progress_live_screen_2026_07_02",
+          "kind": "screenshot",
+          "signal": "A live logged-in Chrome staging screen pass again shows visible thinking/running/queued counts at zero on the reported task. API capture was not available from the read-only browser scope, so the result is intentionally screen-only partial evidence.",
+          "evidence_ref": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"
+        },
+        {
           "id": "server_contract_regression_tests",
           "kind": "test",
           "signal": "Control-plane tests cover queued status suppression, terminal active-stream closure, and user-message author preservation before client visual retest.",
@@ -549,11 +557,13 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"},
         {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"},
         {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-task-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-waiting-for-user-iaeSDGRQi7jl5QQ_UDNO7-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-readonly-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-followup-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-live-screen-uNYpHxDOzMp3vMy_urWsu-2026-07-02T12-10Z.png"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},

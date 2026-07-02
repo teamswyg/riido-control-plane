@@ -1,0 +1,40 @@
+{
+  "schema_version": "riido-staging-completion-progress-live-screen.v1",
+  "id": "staging_completion_progress_live_screen_2026_07_02",
+  "captured_at": "2026-07-02T12:10:00Z",
+  "redacted": true,
+  "source": {
+    "workspace_id": "1IFsD2c8Mnk2VstqJ4iNo",
+    "task_id": "uNYpHxDOzMp3vMy_urWsu",
+    "app_url": "https://staging.app.riido.io/1IFsD2c8Mnk2VstqJ4iNo/teams/SWYG/tasks/uNYpHxDOzMp3vMy_urWsu",
+    "capture_surface": "chrome_existing_logged_in_staging_tab"
+  },
+  "browser_observation": {
+    "screenshot": "docs/30-architecture/evidence/screenshots/staging-completion-progress-live-screen-uNYpHxDOzMp3vMy_urWsu-2026-07-02T12-10Z.png",
+    "screenshot_sha256": "2adaa40c4c863ae8a129442f2e973b91289fa630db4a2e9c4de06a1316c22194",
+    "screenshot_bytes": 100285,
+    "visible_thinking_count": 0,
+    "visible_running_count": 0,
+    "visible_queued_copy_count": 0,
+    "visible_stopped_copy_count": 14,
+    "visible_completed_copy_count": 0,
+    "visible_failed_copy_count": 1,
+    "visible_request_failed_400_count": 0,
+    "visible_not_found_count": 0
+  },
+  "api_observation": {
+    "status": "not_captured",
+    "reason": "Chrome read-only page scope exposed no fetch, XMLHttpRequest, localStorage, sessionStorage, or cookies during this pass.",
+    "required_for_closure": [
+      "GET /v3 task threads",
+      "GET /v2 task threads",
+      "GET thread-stream-subscription",
+      "SSE agent_thread_progress payload"
+    ]
+  },
+  "decision": {
+    "status": "partial",
+    "summary": "The live logged-in staging screen again shows no visible thinking, running, queued copy, request failure, or not-found error on the reported task. This is useful product-screen non-reproduction evidence, but it is screen-only and cannot close the race without same-moment API/SSE payloads.",
+    "next_artifact": "reproduced_completion_progress_same_conversation_network_snapshot"
+  }
+}
