@@ -667,6 +667,12 @@
           "kind": "artifact",
           "signal": "After v3 history projection slice preallocation, local pressure measured zero errors, zero goroutine deltas, and lower allocation per operation for thread_history_v3 and the v3 thread-history HTTP endpoint.",
           "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-allocation-after-2026-07-02.json"
+        },
+        {
+          "id": "local_pressure_v3_history_message_id_allocation_2026_07_02",
+          "kind": "artifact",
+          "signal": "After v3 history message-id key building removed intermediate joined strings, local pressure again measured zero errors, zero goroutine deltas, and lower allocation per operation for thread_history_v3 and the v3 thread-history HTTP endpoint.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-after-2026-07-02.json"
         }
       ],
       "evidence_refs": [
@@ -677,7 +683,9 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-local-pressure-followup-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-pressure-candidates-followup-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-allocation-after-2026-07-02.json"},
-        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-allocation-candidates-after-2026-07-02.json"}
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-allocation-candidates-after-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-after-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-candidates-after-2026-07-02.json"}
       ],
       "next_artifact": "capacity_result_annotation",
       "next_command": "go run ./tools/aiagentload -scenario public -base-url https://staging.ai-api.riido.io -duration 60s -concurrency 64 -evidence-out out/load.json"
