@@ -8083,6 +8083,14 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_http_agent_event_read_model_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/staging-api-queued-client-projection-real-mutation-2026-07-02.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/evidence-graph.yml"
         }
       ],
       "verifiers": [
@@ -8105,9 +8113,19 @@
           "kind": "artifact",
           "path": "client-readonly-queued-working-evidence",
           "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "staging-api-queued-client-projection-real-mutation-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "deploy-ai-agent-testnet-run-28568193167",
+          "redacted": true
         }
       ],
-      "decision": "queued_by_busy_agent remains durable scheduler state only. Client-facing v2 action/list/SSE projections no longer expose queued as a working thread, status copy, or replayed work-status event.",
+      "decision": "queued_by_busy_agent remains durable scheduler state only. Client-facing v2 action/list/SSE projections no longer expose queued as a working thread, status copy, or replayed work-status event. After PR #749 reached staging, a real double-assignment mutation on the QA task returned the first assignment as running and the second same-assignment response as idle with empty assignment_state, comment_kind, message, and result_message while preserving active_stream; follow-up list and stream-subscription checks showed queued_threads=0, active_stream=false, active_thread_filters=0, and a short SSE sample contained no queued markers.",
       "next_loop": "operational_readiness_release_harness"
     },
     {

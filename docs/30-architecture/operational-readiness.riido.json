@@ -59,7 +59,7 @@
         "status": "partial",
         "codex_status": "[codex][완료][전달요청]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#queued-by-busy-agent",
-        "summary": "queued_by_busy_agent server-side regressions are fixed in v3 history, SSE replay, assignable-agents projection repair, state-only queued timeline handling, and v2 client-visible queued projection hiding. Product readiness remains partial until client visual screenshot evidence confirms the stale queue copy and thinking row are gone together.",
+        "summary": "queued_by_busy_agent server-side regressions are fixed in v3 history, SSE replay, assignable-agents projection repair, state-only queued timeline handling, v2 client-visible queued projection hiding, and staging real double-assignment API evidence. Product readiness remains partial until client visual screenshot evidence confirms the stale queue copy and thinking row are gone together.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
         "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
@@ -70,7 +70,10 @@
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_assignable_repair_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go"},
           {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/pull/745"},
+          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/pull/749"},
           {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/actions/runs/28565727298"},
+          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/actions/runs/28568193167"},
+          {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-api-queued-client-projection-real-mutation-2026-07-02.json"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-81f7-b37a-001dba758d28"}
         ]
       },
