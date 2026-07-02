@@ -8239,6 +8239,72 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "operational_readiness_client_p0_visual_screenshot_loop",
+      "observation": "Server-side queued suppression, terminal stop, waiting_for_user, and author fallback checks were already represented in API and Notion evidence, but the staging_client_p0_visual_retest readiness check still lacked a concrete browser screenshot artifact. Without screenshot evidence, backend agents could treat green server contracts as product visual acceptance and miss stale client cache, optimistic UI, or rendering-only regressions.",
+      "hypothesis": "Binding redacted staging browser screenshots to the readiness manifest, while keeping the parent check partial, proves that sampled P0 server states are visible in the client without falsely closing unrelated CW design/onboarding visual items.",
+      "claims": [
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate",
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"
+        },
+        {
+          "kind": "artifact",
+          "path": "staging-client-p0-task-uNYpHxDOzMp3vMy_urWsu-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "staging-client-p0-waiting-for-user-iaeSDGRQi7jl5QQ_UDNO7-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/verify_visual_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/main.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/verify_visual_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/main.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "staging-client-p0-visual-retest-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-precommit-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The sampled staging client screens now show no queued copy, no thinking/progress spinner on the waiting_for_user task, no v3 queued messages, no terminal active streams, and zero active v2 stream filters for the waiting task. The visual retest stays partial because separate CW design, onboarding, and teammate-install screenshots still need product/client confirmation.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "operational_readiness_staging_dmg_gatekeeper_evidence_loop",
       "observation": "The Notion P0 gatekeeper report said the Riido Staging app could not be opened because Apple could not verify it, while the readiness manifest still marked the staging DMG work as in progress even after a CDN artifact was published.",
       "hypothesis": "A downloaded CDN DMG that passes shasum, spctl, stapler, mount checksum, app codesign, app spctl, and app stapler checks can be transferred to team QA as an install-screenshot gate instead of remaining an unresolved backend/infra packaging task.",
