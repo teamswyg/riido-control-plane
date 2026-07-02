@@ -551,6 +551,41 @@
         }
       ],
       "decision": "A fresh Notion get_comments readback still exposes the same 31-comment page-level snapshot ending at 39120241-cf7f-8148-bd04-001d6cbae868. Treat write-confirmed later comments as authoritative evidence and do not regress the QA status from connector readback alone."
+    },
+    {
+      "observed_at": "2026-07-02T20:34:14Z",
+      "tool": "notion.get_comments",
+      "mode": "include_all_blocks=true, include_resolved=true",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        }
+      ],
+      "decision": "A 2026-07-03 KST readback still exposes the same stale 31-comment page-level snapshot. Keep the write-confirmed later comments and the repo verifier as the evidence boundary until Notion readback pagination or freshness catches up."
     }
   ],
   "next_actions": [
