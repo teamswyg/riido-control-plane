@@ -12,7 +12,7 @@ func TestNotionQACommentReadbackLimitIsRecorded(t *testing.T) {
 		t.Fatal("missing Notion comment readback observations")
 	}
 	observation := evidence.ReadbackObservations[len(evidence.ReadbackObservations)-1]
-	if observation.ObservedAt != "2026-07-02T21:53:12Z" {
+	if observation.ObservedAt != "2026-07-02T21:57:09Z" {
 		t.Fatalf("latest readback observation = %q", observation.ObservedAt)
 	}
 	if observation.VisiblePageLevelCommentCount != 31 {
