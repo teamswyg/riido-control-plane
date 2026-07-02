@@ -9,6 +9,52 @@
     "page_url": "https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165",
     "fetch_mode": "page_body_with_selected_discussion_comments"
   },
+  "inline_discussion_readbacks": [
+    {
+      "observed_at": "2026-07-02T22:21:07Z",
+      "tool": "notion.get_comments",
+      "mode": "discussion_id targeted readback",
+      "decision": "Targeted inline discussion readback exposes newer QA comments even when page-level aggregate readback is stale.",
+      "discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 18,
+          "latest_visible_comment_id": "39120241-cf7f-81d5-9c0f-001d26c153a0",
+          "latest_visible_comment_observed_at": "2026-07-02T10:08:16.163Z"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57",
+          "latest_visible_comment_observed_at": "2026-07-02T01:22:09.543Z"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66",
+          "latest_visible_comment_observed_at": "2026-07-02T00:42:59.595Z"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349",
+          "latest_visible_comment_observed_at": "2026-07-02T00:54:18.769Z"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8",
+          "latest_visible_comment_observed_at": "2026-07-02T10:09:14.555Z"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+          "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
+        }
+      ]
+    }
+  ],
   "comment_events": [
     {
       "id": "38f20241-cf7f-807a-8b67-001d3da31af0",
