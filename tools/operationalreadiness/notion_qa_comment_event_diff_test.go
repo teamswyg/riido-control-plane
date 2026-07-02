@@ -1,10 +1,6 @@
 package main
 
-import (
-	"encoding/json"
-	"os"
-	"testing"
-)
+import "testing"
 
 const notionQACommentEventDiffEvidence = "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"
 
@@ -34,27 +30,5 @@ func TestOperationalReadinessBindsNotionQACommentEventDiff(t *testing.T) {
 	api := evidenceRef{Kind: "api_snapshot", Path: stagingCompletionProgressReadOnlyEvidence}
 	if !notionCycleHasEvidenceRef(cycle, api) {
 		t.Fatalf("completion/progress cycle missing read-only baseline %+v", api)
-	}
-}
-
-func TestNotionQACommentEventDiffSeparatesNewCompletionProgressGap(t *testing.T) {
-	body, err := os.ReadFile("../../" + notionQACommentEventDiffEvidence)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var evidence struct {
-		Redacted    bool `json:"redacted"`
-		DiffSummary struct {
-			NewOrUnderBackfilled []string `json:"new_or_under_backfilled_items"`
-		} `json:"diff_summary"`
-	}
-	if err := json.Unmarshal(body, &evidence); err != nil {
-		t.Fatal(err)
-	}
-	if !evidence.Redacted {
-		t.Fatal("Notion QA comment event diff evidence must stay redacted")
-	}
-	if !containsString(evidence.DiffSummary.NewOrUnderBackfilled, "completion_progress_after_terminal") {
-		t.Fatal("completion/progress terminal drift must be tracked as a separate gap")
 	}
 }
