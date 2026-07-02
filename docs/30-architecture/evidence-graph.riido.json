@@ -7652,12 +7652,20 @@
         {
           "kind": "test",
           "path": "tools/operationalreadiness/notion_open_loop_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_cw_feedback_test.go"
         }
       ],
       "verifiers": [
         {
           "kind": "test",
           "path": "tools/operationalreadiness/notion_open_loop_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_cw_feedback_test.go"
         },
         {
           "kind": "tool",
@@ -7688,7 +7696,7 @@
           "path": "docs/30-architecture/operational-readiness.md"
         }
       ],
-      "decision": "Notion QA P0 feedback is now represented as executable operational readiness cycles instead of comment-only memory: the manifest binds the page, codex status tags, six P0 cycles, backfilled readiness check, next artifact, next command, and evidence refs; the verifier rejects missing Notion loops, unbound cycles, missing next work, or cadence drift; readiness evidence emits Notion cycle counts and partial status; and Loop Registry claim evidence exposes the same Notion observe/verify/fail surface for changed-path routing.",
+      "decision": "Notion QA P0 feedback is represented as executable operational readiness cycles instead of comment-only memory: the manifest binds the source QA page, codex status tags, seven P0 cycles, the CW-AIA-001..011 structured feedback inventory, backfilled readiness check, next artifact, next command, and evidence refs; the verifier rejects missing Notion loops, unbound cycles, missing next work, cadence drift, or missing CW feedback measurement ids; readiness evidence emits Notion cycle counts and partial status while keeping client visual QA partial until screenshot evidence exists; and Loop Registry claim evidence exposes the same Notion observe/verify/fail surface for changed-path routing.",
       "next_loop": "operational_readiness_release_harness"
     },
     {

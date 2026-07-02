@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `34`
+- measurements: `45`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -22,8 +22,8 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 - raw logs included: `false`
 - secrets included: `false`
 - endpoint details: `redacted`
-- P0 cycles: `6`
-- P0 partial cycles: `6`
+- P0 cycles: `7`
+- P0 partial cycles: `7`
 - partial checks: `9`
 - stale partials: `9`
 - closed-loop candidates: `9`
@@ -41,9 +41,9 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 - source: [[v1.24] AI Agent QA](https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165)
 - captured at: `2026-07-02T00:05:27Z`
 - cadence hours: `24`
-- cycles: `6`
-- p0 cycles: `6`
-- partial cycles: `6`
+- cycles: `7`
+- p0 cycles: `7`
+- partial cycles: `7`
 
 | Cycle | Status | Codex | Backfilled Check | Next |
 | --- | --- | --- | --- | --- |
@@ -53,6 +53,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `notion_p0_author_fallback` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
 | `notion_p0_instruction_intent_dialogue` | `partial` | `[codex][진행중]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
 | `notion_p0_gatekeeper_staging_dmg` | `partial` | `[codex][진행중]` | `staging_client_p0_visual_retest` | `staging_desktop_notarized_install_screenshot` |
+| `notion_p0_cw_feedback_inventory` | `partial` | `[codex][진행중]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
 
 ## Release Prep Checks
 
@@ -61,7 +62,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `7` | `9` | `client_surface_alarm_plan_apply_evidence` |
 | `2026-07-01` | `monitoring` | `covered` | `public_qa_status_surface` | `10` | `17` | `public_qa_status_pages_live_evidence` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
-| `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `5` | `9` | `staging_client_p0_visual_screenshot_evidence` |
+| `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `16` | `10` | `staging_client_p0_visual_screenshot_evidence` |
 | `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `1` | `2` | `agent_rename_snapshot_regression_evidence` |
 | `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `1` | `2` | `daemon_network_disconnect_release_evidence` |
 | `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `2` | `4` | `capacity_result_annotation` |
