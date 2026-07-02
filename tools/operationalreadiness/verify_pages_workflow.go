@@ -17,8 +17,10 @@ func verifyPublicStatusPagesWorkflow(root string) error {
 	required := []string{
 		"pages: write",
 		"id-token: write",
+		"cancel-in-progress: true",
 		"actions/upload-pages-artifact@v4",
 		"actions/deploy-pages@v4",
+		"timeout: 1200000",
 		"-evidence-out out/public-qa-status-pages-evidence.json",
 		"name: public-qa-status-pages-evidence",
 		"out/public-qa-status-pages-evidence.json",
