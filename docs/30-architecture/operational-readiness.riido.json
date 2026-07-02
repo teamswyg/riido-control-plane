@@ -28,7 +28,7 @@
     "page_id": "38e20241cf7f804dbbdbfdddb2bef165",
     "page_title": "[v1.24] AI Agent QA",
     "page_url": "https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165",
-    "captured_at": "2026-06-30T09:29:21Z",
+    "captured_at": "2026-07-02T00:05:27Z",
     "refresh_workflow": ".github/workflows/operational-readiness.yml",
     "cadence_hours": 24,
     "status_tags": [
@@ -57,15 +57,16 @@
         "id": "notion_p0_queued_by_busy_agent",
         "priority": "P0",
         "status": "partial",
-        "codex_status": "[codex][완료][전달요청]",
+        "codex_status": "[codex][진행중]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#queued-by-busy-agent",
-        "summary": "Superseded queued_by_busy_agent guidance must not render as an active reply once the conversation has newer running/progress/result evidence.",
+        "summary": "A reopened Notion QA comment reports queued_by_busy_agent still appearing for a workable agent; assignable-agents now reconciles stale durable assignment projections before returning selectable agent state.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
         "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
         "evidence_refs": [
           {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
-          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"}
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"},
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_assignable_repair_test.go"}
         ]
       },
       {

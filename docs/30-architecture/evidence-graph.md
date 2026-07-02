@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `69`
-- claim refs: `77`
-- change refs: `1027`
-- verifier refs: `472`
-- evidence refs: `201`
+- chains: `70`
+- claim refs: `79`
+- change refs: `1034`
+- verifier refs: `476`
+- evidence refs: `204`
 
 ## Compiled Chain Summary
 
-- complete chains: `69` / `69`
-- claim-bound chains: `69`
+- complete chains: `70` / `70`
+- claim-bound chains: `70`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
@@ -28,7 +28,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `closed_loop_candidate` | `46` | `47` | `702` | `309` | `118` |
 | `ai_thread_history` | `8` | `8` | `109` | `55` | `11` |
 | `closed_loop_candidate_decision` | `7` | `7` | `109` | `51` | `34` |
-| `operational_readiness_release_harness` | `3` | `9` | `67` | `35` | `19` |
+| `operational_readiness_release_harness` | `4` | `11` | `74` | `39` | `22` |
 | `provider_acceptance_harness` | `2` | `2` | `12` | `7` | `6` |
 | `closed_loop_candidate_intake` | `1` | `1` | `11` | `4` | `7` |
 | `loop_closure_audit` | `1` | `2` | `10` | `7` | `4` |
@@ -104,6 +104,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `operational_readiness_release_loop` | `1` | `28` | `14` | `3` | `operational_readiness_release_harness` |
 | `public_qa_status_operational_surface_loop` | `7` | `29` | `17` | `13` | `operational_readiness_release_harness` |
 | `notion_qa_operational_evidence_backfill_loop` | `1` | `10` | `4` | `3` | `operational_readiness_release_harness` |
+| `notion_qa_assignable_projection_repair_loop` | `2` | `7` | `4` | `3` | `operational_readiness_release_harness` |
 | `container_image_contract_runtime_shape_loop` | `1` | `16` | `6` | `4` | `closed_loop_candidate` |
 | `control_plane_meta_evidence_expiry_loop` | `2` | `10` | `7` | `4` | `loop_closure_audit` |
 | `server_route_handler_decomposition_loop` | `2` | `38` | `5` | `3` | `closed_loop_candidate` |

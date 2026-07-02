@@ -25,11 +25,11 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 - P0 cycles: `6`
 - P0 partial cycles: `6`
 - partial checks: `9`
-- stale partials: `8`
-- closed-loop candidates: `8`
+- stale partials: `9`
+- closed-loop candidates: `9`
 - blocking categories:
   - `monitoring`: partial `1`, stale `1`
-  - `usability`: partial `1`, stale `0`
+  - `usability`: partial `1`, stale `1`
   - `exception`: partial `1`, stale `1`
   - `stress`: partial `2`, stale `2`
   - `chaos`: partial `3`, stale `3`
@@ -39,7 +39,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 ## Notion Open Loop Backfill
 
 - source: [[v1.24] AI Agent QA](https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165)
-- captured at: `2026-06-30T09:29:21Z`
+- captured at: `2026-07-02T00:05:27Z`
 - cadence hours: `24`
 - cycles: `6`
 - p0 cycles: `6`
@@ -48,7 +48,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | Cycle | Status | Codex | Backfilled Check | Next |
 | --- | --- | --- | --- | --- |
 | `notion_p0_waiting_for_user_spinner` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
-| `notion_p0_queued_by_busy_agent` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
+| `notion_p0_queued_by_busy_agent` | `partial` | `[codex][진행중]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
 | `notion_p0_terminal_stop_refresh` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
 | `notion_p0_author_fallback` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
 | `notion_p0_instruction_intent_dialogue` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
@@ -77,26 +77,27 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 | Check | Category | Age | Stale | Next Artifact | Next Command |
 | --- | --- | --- | --- | --- | --- |
-| `otel_xray_client_surface` | `monitoring` | `5` | `true` | `client_surface_alarm_plan_apply_evidence` | `gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 114 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 115 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 116 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && sh -lc 'workspace=$(terraform -chdir=terraform/riido_ai_server workspace show) && vars=.riido-local/terraform/riido_ai_server-${workspace}.tfvars && mkdir -p .riido-local/terraform && if ! test -f "$vars"; then go run ./tools/clientalarmpreflight -workspace "$workspace" -tfvars "$vars" -plan-log ".riido-local/terraform/client-surface-alarms-${workspace}.plan.log" -plan-exit ".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit" -out ".riido-local/terraform/client-surface-alarms-${workspace}.preflight.evidence.json"; exit 0; fi; set +e; terraform -chdir=terraform/riido_ai_server plan -input=false -detailed-exitcode -var-file="../../$vars" -var="enable_client_surface_cloudwatch_alarms=true" -out="../../.riido-local/terraform/client-surface-alarms-${workspace}.tfplan" > ".riido-local/terraform/client-surface-alarms-${workspace}.plan.log" 2>&1; code=$?; echo "$code" > ".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit"; case "$code" in 0|2) ;; *) go run ./tools/clientalarmpreflight -workspace "$workspace" -tfvars "$vars" -plan-log ".riido-local/terraform/client-surface-alarms-${workspace}.plan.log" -plan-exit ".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit" -out ".riido-local/terraform/client-surface-alarms-${workspace}.preflight.evidence.json"; exit 0;; esac; service=$(terraform -chdir=terraform/riido_ai_server output -raw service_name) && aws cloudwatch describe-alarms --alarm-name-prefix "${service}-client-surface" --output json > ".riido-local/terraform/client-surface-alarms-${workspace}.json" && go run ./tools/clientalarmevidence -workspace "$workspace" -alarms-json ".riido-local/terraform/client-surface-alarms-${workspace}.json" -out ".riido-local/terraform/client-surface-alarms-${workspace}.evidence.json"'` |
-| `staging_client_p0_visual_retest` | `usability` | `1` | `false` | `staging_client_p0_visual_screenshot_evidence` | `gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments` |
-| `daemon_network_disconnect_waiting` | `exception` | `5` | `true` | `daemon_network_disconnect_release_evidence` | `sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run "TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout" -count=1'` |
-| `single_pc_agent_limit` | `stress` | `5` | `true` | `single_pc_agent_capacity_evidence` | `sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./internal/agentbridge/runtimeactor -run "Test.*Slot|Test.*Goroutine|Test.*Leak" -count=1'` |
-| `boot_burst_capacity` | `stress` | `5` | `true` | `cold_start_packet_burst_evidence` | `gh workflow run ai-agent-client-testnet-load.yml -f scenario=public -f duration=120s -f concurrency=128` |
-| `server_crash_recovery` | `chaos` | `5` | `true` | `ecs_service_recovery_chaos_evidence` | `aws ecs describe-services --cluster riido-ai-server-testnet --services riido-ai-server-testnet` |
-| `scale_out_recovery` | `chaos` | `5` | `true` | `scale_out_timing_evidence` | `aws application-autoscaling describe-scaling-policies --service-namespace ecs` |
-| `all_servers_down_daemon_behavior` | `chaos` | `5` | `true` | `daemon_reconnect_storm_evidence` | `sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./internal/agentbridge/controlplane/saasplane -run "TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout" -count=1'` |
-| `desktop_body_only_change` | `desktop` | `4` | `true` | `desktop_body_only_golden_evidence` | `gh issue create --repo teamswyg/riido-daemon --title "Produce desktop body-only golden evidence" --body "Produce desktop_body_only_golden_evidence by running localproductacceptance with a real staging task fixture and publish the evidence artifact."` |
+| `otel_xray_client_surface` | `monitoring` | `6` | `true` | `client_surface_alarm_plan_apply_evidence` | `gh pr view 113 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 114 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 115 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && gh pr view 116 --repo teamswyg/riido-infra --json state,mergedAt,mergeCommit,url && sh -lc 'workspace=$(terraform -chdir=terraform/riido_ai_server workspace show) && vars=.riido-local/terraform/riido_ai_server-${workspace}.tfvars && mkdir -p .riido-local/terraform && if ! test -f "$vars"; then go run ./tools/clientalarmpreflight -workspace "$workspace" -tfvars "$vars" -plan-log ".riido-local/terraform/client-surface-alarms-${workspace}.plan.log" -plan-exit ".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit" -out ".riido-local/terraform/client-surface-alarms-${workspace}.preflight.evidence.json"; exit 0; fi; set +e; terraform -chdir=terraform/riido_ai_server plan -input=false -detailed-exitcode -var-file="../../$vars" -var="enable_client_surface_cloudwatch_alarms=true" -out="../../.riido-local/terraform/client-surface-alarms-${workspace}.tfplan" > ".riido-local/terraform/client-surface-alarms-${workspace}.plan.log" 2>&1; code=$?; echo "$code" > ".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit"; case "$code" in 0|2) ;; *) go run ./tools/clientalarmpreflight -workspace "$workspace" -tfvars "$vars" -plan-log ".riido-local/terraform/client-surface-alarms-${workspace}.plan.log" -plan-exit ".riido-local/terraform/client-surface-alarms-${workspace}.plan.exit" -out ".riido-local/terraform/client-surface-alarms-${workspace}.preflight.evidence.json"; exit 0;; esac; service=$(terraform -chdir=terraform/riido_ai_server output -raw service_name) && aws cloudwatch describe-alarms --alarm-name-prefix "${service}-client-surface" --output json > ".riido-local/terraform/client-surface-alarms-${workspace}.json" && go run ./tools/clientalarmevidence -workspace "$workspace" -alarms-json ".riido-local/terraform/client-surface-alarms-${workspace}.json" -out ".riido-local/terraform/client-surface-alarms-${workspace}.evidence.json"'` |
+| `staging_client_p0_visual_retest` | `usability` | `2` | `true` | `staging_client_p0_visual_screenshot_evidence` | `gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments` |
+| `daemon_network_disconnect_waiting` | `exception` | `6` | `true` | `daemon_network_disconnect_release_evidence` | `sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run "TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout" -count=1'` |
+| `single_pc_agent_limit` | `stress` | `6` | `true` | `single_pc_agent_capacity_evidence` | `sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./internal/agentbridge/runtimeactor -run "Test.*Slot|Test.*Goroutine|Test.*Leak" -count=1'` |
+| `boot_burst_capacity` | `stress` | `6` | `true` | `cold_start_packet_burst_evidence` | `gh workflow run ai-agent-client-testnet-load.yml -f scenario=public -f duration=120s -f concurrency=128` |
+| `server_crash_recovery` | `chaos` | `6` | `true` | `ecs_service_recovery_chaos_evidence` | `aws ecs describe-services --cluster riido-ai-server-testnet --services riido-ai-server-testnet` |
+| `scale_out_recovery` | `chaos` | `6` | `true` | `scale_out_timing_evidence` | `aws application-autoscaling describe-scaling-policies --service-namespace ecs` |
+| `all_servers_down_daemon_behavior` | `chaos` | `6` | `true` | `daemon_reconnect_storm_evidence` | `sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./internal/agentbridge/controlplane/saasplane -run "TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout" -count=1'` |
+| `desktop_body_only_change` | `desktop` | `5` | `true` | `desktop_body_only_golden_evidence` | `gh issue create --repo teamswyg/riido-daemon --title "Produce desktop body-only golden evidence" --body "Produce desktop_body_only_golden_evidence by running localproductacceptance with a real staging task fixture and publish the evidence artifact."` |
 
 ## Partial Promotion
 
 - candidate artifact: `operational-readiness-closed-loop-candidates`
-- candidate count: `8`
-- stale partial count: `8`
+- candidate count: `9`
+- stale partial count: `9`
 - stale after days: `2`
 
 | Candidate | Stale Partial |
 | --- | --- |
 | `operational-readiness:otel_xray_client_surface` | `otel_xray_client_surface` |
+| `operational-readiness:staging_client_p0_visual_retest` | `staging_client_p0_visual_retest` |
 | `operational-readiness:daemon_network_disconnect_waiting` | `daemon_network_disconnect_waiting` |
 | `operational-readiness:single_pc_agent_limit` | `single_pc_agent_limit` |
 | `operational-readiness:boot_burst_capacity` | `boot_burst_capacity` |

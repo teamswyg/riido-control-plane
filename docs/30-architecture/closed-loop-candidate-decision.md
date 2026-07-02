@@ -57,7 +57,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 | Candidate | Disposition | Priority | Owner | Review By | Next Artifact |
 | --- | --- | --- | --- | --- | --- |
-| `ai-agent-client-testnet-smoke:provider_smoke` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-01` | `claim_binding` |
+| `ai-agent-client-testnet-smoke:provider_smoke` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `ai-agent-client-testnet-load:load_harness_client_read_pressure` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `ai-agent-client-testnet-load:load_harness_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `control-plane-performance:control_plane_performance_hot_path_benchmarks` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |

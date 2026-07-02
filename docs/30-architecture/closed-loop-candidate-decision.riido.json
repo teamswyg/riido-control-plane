@@ -17,7 +17,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-01",
+      "review_by": "2026-07-08",
       "reason": "Provider smoke failures need an owned claim/verifier decision before becoming durable closed loops."
     },
     {
