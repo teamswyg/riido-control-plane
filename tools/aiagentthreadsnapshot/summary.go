@@ -14,6 +14,9 @@ func summarizeThreads(payload threadCollection, conversationID string) threadSum
 		}
 		if isTerminal(thread.AssignmentState) {
 			summary.TerminalCount++
+			if len(thread.ActiveStream) > 0 {
+				summary.TerminalActiveStreamCount++
+			}
 		}
 		if shouldHighlight(thread, conversationID) {
 			summary.HighlightedThreads = append(summary.HighlightedThreads, surface(thread))
