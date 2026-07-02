@@ -8,7 +8,7 @@ func TestCandidateDecisionRejectsUnknownNextArtifact(t *testing.T) {
 	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
-	m := loadDecisionManifestForTest(t)
+	m := manifestWithGeneratedCandidateRecord(t)
 	m.Decisions[0].NextArtifact = "spreadsheet"
 	if _, err := verifyCandidateDecisions(root, m, out); err == nil {
 		t.Fatal("expected unknown next_artifact to fail")

@@ -49,15 +49,15 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 - registered decisions: `25`
 - consumed decisions: `0`
-- disposition counts: `deferred=8`, `triage_required=17`
-- priority counts: `P0=1`, `P1=17`, `P2=7`
-- next artifact counts: `claim_binding=9`, `client_surface_alarm_plan_apply_evidence=1`, `cold_start_packet_burst_evidence=1`, `daemon_network_disconnect_release_evidence=1`, `daemon_reconnect_storm_evidence=1`, `decision_record=2`, `desktop_body_only_golden_evidence=1`, `ecs_service_recovery_chaos_evidence=1`, `redacted_evidence=5`, `scale_out_timing_evidence=1`, `single_pc_agent_capacity_evidence=1`, `staging_client_p0_visual_screenshot_evidence=1`
+- disposition counts: `deferred=9`, `triage_required=16`
+- priority counts: `P0=1`, `P1=16`, `P2=8`
+- next artifact counts: `claim_binding=8`, `client_surface_alarm_plan_apply_evidence=1`, `cold_start_packet_burst_evidence=1`, `daemon_network_disconnect_release_evidence=1`, `daemon_reconnect_storm_evidence=1`, `decision_record=3`, `desktop_body_only_golden_evidence=1`, `ecs_service_recovery_chaos_evidence=1`, `redacted_evidence=5`, `scale_out_timing_evidence=1`, `single_pc_agent_capacity_evidence=1`, `staging_client_p0_visual_screenshot_evidence=1`
 
 ## Decisions
 
 | Candidate | Disposition | Priority | Owner | Review By | Next Artifact |
 | --- | --- | --- | --- | --- | --- |
-| `ai-agent-client-testnet-smoke:provider_smoke` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `ai-agent-client-testnet-smoke:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
 | `ai-agent-client-testnet-load:load_harness_client_read_pressure` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `ai-agent-client-testnet-load:load_harness_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `control-plane-performance:control_plane_performance_hot_path_benchmarks` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
@@ -87,6 +87,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 | Subject Kind | Disposition | Priority | Owner | Review By | Next Artifact |
 | --- | --- | --- | --- | --- | --- |
+| `harness_failure` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
 | `loop_refresh_ignored_command` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `verifier` |
 | `loop_refresh_stale_source` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 

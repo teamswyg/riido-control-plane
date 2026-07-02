@@ -14,7 +14,7 @@ func TestCandidateDecisionPreservesCandidateSubject(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeFirstCandidateSubject(t, out, `{"kind":"claim_coverage_gap","claim_id":"claim_one"}`)
-	result, err := verifyCandidateDecisions(root, loadDecisionManifestForTest(t), out)
+	result, err := verifyCandidateDecisions(root, manifestWithGeneratedCandidateRecord(t), out)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,7 +23,7 @@ func TestCandidateDecisionPreservesCandidateSubject(t *testing.T) {
 		!strings.Contains(string(result.CandidateSubjects[0].Subject), "claim_one") {
 		t.Fatalf("candidate subjects = %+v", result.CandidateSubjects)
 	}
-	ev := newEvidence(loadDecisionManifestForTest(t), result)
+	ev := newEvidence(manifestWithGeneratedCandidateRecord(t), result)
 	if len(ev.CandidateSubjects) != 1 {
 		t.Fatalf("evidence subjects = %+v", ev.CandidateSubjects)
 	}
@@ -36,7 +36,7 @@ func TestCandidateDecisionRejectsSubjectWithoutKind(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeFirstCandidateSubject(t, out, `{"claim_id":"claim_one"}`)
-	_, err := verifyCandidateDecisions(root, loadDecisionManifestForTest(t), out)
+	_, err := verifyCandidateDecisions(root, manifestWithGeneratedCandidateRecord(t), out)
 	if err == nil || !strings.Contains(err.Error(), "subject must include kind") {
 		t.Fatalf("expected subject kind failure, got %v", err)
 	}

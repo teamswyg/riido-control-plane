@@ -11,14 +11,14 @@
   "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
   "decisions": [
     {
-      "candidate_id": "ai-agent-client-testnet-smoke:provider_smoke",
-      "disposition": "triage_required",
-      "priority": "P1",
+      "candidate_id": "ai-agent-client-testnet-smoke:source_coverage_seed",
+      "disposition": "deferred",
+      "priority": "P2",
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
-      "next_artifact": "claim_binding",
-      "review_by": "2026-07-08",
-      "reason": "Provider smoke failures need an owned claim/verifier decision before becoming durable closed loops."
+      "next_artifact": "decision_record",
+      "review_by": "2026-07-15",
+      "reason": "Testnet smoke is an intake source even when live claim failures are dynamic, so it keeps a seed decision while harness_failure subjects route through a decision template."
     },
     {
       "candidate_id": "ai-agent-client-testnet-load:load_harness_client_read_pressure",
@@ -262,6 +262,16 @@
     }
   ],
   "decision_templates": [
+    {
+      "subject_kind": "harness_failure",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-08",
+      "reason": "Live smoke, load, and performance harness failures can emit dynamic redacted claim ids; route them to claim binding without requiring a per-run manifest edit."
+    },
     {
       "subject_kind": "loop_refresh_ignored_command",
       "disposition": "triage_required",

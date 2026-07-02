@@ -12,7 +12,12 @@ func TestCandidateDecisionEvidenceExposesDecisionSummary(t *testing.T) {
 	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
-	if err := run(options{Repo: "../..", Manifest: defaultManifest, CandidateIn: out, EvidenceOut: evidenceOut}); err != nil {
+	m := manifestWithGeneratedCandidateRecord(t)
+	manifestPath := t.TempDir() + "/manifest.json"
+	if err := writeJSON(manifestPath, m); err != nil {
+		t.Fatal(err)
+	}
+	if err := run(options{Repo: "../..", Manifest: manifestPath, CandidateIn: out, EvidenceOut: evidenceOut}); err != nil {
 		t.Fatalf("run: %v", err)
 	}
 	var got evidence
