@@ -621,11 +621,18 @@
           "kind": "infra",
           "signal": "ECS service evidence records desired/running task recovery timing after service disruption.",
           "evidence_ref": "docs/30-architecture/runtime-cd-ownership.md"
+        },
+        {
+          "id": "ecs_testnet_recovery_readonly_baseline_2026_07_02",
+          "kind": "artifact",
+          "signal": "Read-only AWS ECS evidence records the current testnet desired/running/pending counts, rolling deployment strategy, steady-state rollout, and missing chaos timing before any destructive recovery drill.",
+          "evidence_ref": "docs/30-architecture/evidence/ecs-testnet-recovery-scale-readonly-baseline-2026-07-02.json"
         }
       ],
       "evidence_refs": [
         {"kind": "workflow", "path": ".github/workflows/control-plane-performance.yml"},
-        {"kind": "generated_doc", "path": "docs/30-architecture/runtime-cd-ownership.md"}
+        {"kind": "generated_doc", "path": "docs/30-architecture/runtime-cd-ownership.md"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/ecs-testnet-recovery-scale-readonly-baseline-2026-07-02.json"}
       ],
       "next_artifact": "ecs_service_recovery_chaos_evidence",
       "next_command": "aws ecs describe-services --cluster riido-ai-server-testnet --services riido-ai-server-testnet"
@@ -642,11 +649,18 @@
           "kind": "infra",
           "signal": "Autoscaling evidence records threshold, scale-out decision time, task ready time, and post-scale error rate.",
           "evidence_ref": "riido-infra:deploy/aws/riido_ai_server/riido_ai_server_scaling_policy.json"
+        },
+        {
+          "id": "ecs_testnet_scale_readonly_baseline_2026_07_02",
+          "kind": "artifact",
+          "signal": "Read-only AWS Application Auto Scaling evidence records the current testnet CPU target tracking policy, target value, cooldowns, and alarm count before a live scale-out timing run.",
+          "evidence_ref": "docs/30-architecture/evidence/ecs-testnet-recovery-scale-readonly-baseline-2026-07-02.json"
         }
       ],
       "evidence_refs": [
         {"kind": "external", "path": "riido-infra:deploy/aws/riido_ai_server/riido_ai_server_scaling_policy.json"},
-        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"}
+        {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/ecs-testnet-recovery-scale-readonly-baseline-2026-07-02.json"}
       ],
       "next_artifact": "scale_out_timing_evidence",
       "next_command": "aws application-autoscaling describe-scaling-policies --service-namespace ecs"
