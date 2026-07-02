@@ -130,6 +130,21 @@
           {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
           {"kind": "external", "path": "riido-desktop:.github/workflows"}
         ]
+      },
+      {
+        "id": "notion_p0_cw_feedback_inventory",
+        "priority": "P0",
+        "status": "partial",
+        "codex_status": "[codex][진행중]",
+        "source": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#cw-ai-agent-feedback",
+        "summary": "CW structured QA feedback is backfilled as CW-AIA-001..011 so unresolved onboarding, layout, copy, logo, and nickname visual risks cannot be hidden behind backend-only green checks.",
+        "backfilled_check": "staging_client_p0_visual_retest",
+        "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
+        "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
+        "evidence_refs": [
+          {"kind": "external", "path": "notion:https://app.notion.com/p/38f20241cf7f813cbe7cddf3c6fd8b65"},
+          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"}
+        ]
       }
     ]
   },
@@ -354,10 +369,77 @@
           "kind": "artifact",
           "signal": "GitHub issue #711 records that staging_client_p0_visual_retest cannot become covered from server tests or comments alone and requires screenshot measurement evidence.",
           "evidence_ref": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"
+        },
+        {
+          "id": "cw_aia_001_existing_user_feature_entry",
+          "kind": "notion",
+          "signal": "CW-AIA-001 remains open: existing desktop users need a new-feature entry page or equivalent product decision before visual QA can close.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-001"
+        },
+        {
+          "id": "cw_aia_002_existing_user_list_redirect",
+          "kind": "notion",
+          "signal": "CW-AIA-002 remains open: existing users currently land on the list screen after login; desired first-run/new-feature routing still needs product and client confirmation.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-002"
+        },
+        {
+          "id": "cw_aia_003_default_agent_selection_confirmed",
+          "kind": "notion",
+          "signal": "CW-AIA-003 is marked confirmed in the structured QA page: the right detail pane no longer incorrectly preselects Riido after signup.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-003"
+        },
+        {
+          "id": "cw_aia_004_description_clamp_open",
+          "kind": "notion",
+          "signal": "CW-AIA-004 remains open: agent description clamping should fill up to three lines rather than cutting around two and a half lines.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-004"
+        },
+        {
+          "id": "cw_aia_005_claude_logo_contrast_open",
+          "kind": "notion",
+          "signal": "CW-AIA-005 remains open: the Claude logo/background contrast in the agent detail pane needs visual verification against design.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-005"
+        },
+        {
+          "id": "cw_aia_006_low_height_cta_overlap_confirmed",
+          "kind": "notion",
+          "signal": "CW-AIA-006 is marked confirmed in the structured QA page: low-height CTA and carousel overlap has been fixed from the QA source perspective.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-006"
+        },
+        {
+          "id": "cw_aia_007_claude_asset_open",
+          "kind": "notion",
+          "signal": "CW-AIA-007 remains open: Claude logo asset mismatch with design still requires client/design-side evidence.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-007"
+        },
+        {
+          "id": "cw_aia_008_screen_composition_open",
+          "kind": "notion",
+          "signal": "CW-AIA-008 remains open: screen composition differs from design and requires screenshot-based comparison evidence.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-008"
+        },
+        {
+          "id": "cw_aia_009_codex_onboarding_runtime_confirmed",
+          "kind": "notion",
+          "signal": "CW-AIA-009 is marked confirmed in the structured QA page: Codex exists and onboarding no longer reports it as disconnected.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-009"
+        },
+        {
+          "id": "cw_aia_010_long_nickname_ellipsis_open",
+          "kind": "notion",
+          "signal": "CW-AIA-010 remains open: long nicknames still need ellipsis behavior visual evidence.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-010"
+        },
+        {
+          "id": "cw_aia_011_right_pane_ai_logo_open",
+          "kind": "notion",
+          "signal": "CW-AIA-011 remains open: the right-pane AI logo presentation still needs design-aligned visual evidence.",
+          "evidence_ref": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-011"
         }
       ],
       "evidence_refs": [
         {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
+        {"kind": "external", "path": "notion:https://app.notion.com/p/38f20241cf7f813cbe7cddf3c6fd8b65"},
         {"kind": "external", "path": "notion:comment:38f20241-cf7f-8102-b25c-001d1975a504"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"},
