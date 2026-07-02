@@ -1394,7 +1394,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "101df8b621c96cdbfeeb47f79ea778c9c194a04d82045f7681f2c5ddee77c4d0"
+      "semantic_hash": "35da336098beecaedacc2e7aa50027e9ba42ec81ed80c4f8d7d2c88555d355aa"
     },
     {
       "id": "control_plane_meta_evidence_must_self_expire",
@@ -4374,7 +4374,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "dd33d4241efcec53acfa8a2033161ccffa2d3850d51aa66096fb96b0f4b2b0d4"
+      "semantic_hash": "91582a72c41477a468189034e2a88ed61a2c868bf9747834d8c4c6f8d5fed5ce"
     },
     {
       "id": "container_image_contract_must_bind_runtime_shape",

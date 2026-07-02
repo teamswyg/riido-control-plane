@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `81`
+- measurements: `82`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -66,7 +66,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `27` | `29` | `staging_client_p0_visual_screenshot_evidence` |
 | `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `1` | `2` | `agent_rename_snapshot_regression_evidence` |
 | `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `3` | `4` | `daemon_network_disconnect_release_evidence` |
-| `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `14` | `21` | `capacity_result_annotation` |
+| `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `15` | `22` | `capacity_result_annotation` |
 | `2026-06-26` | `stress` | `partial` | `single_pc_agent_limit` | `3` | `4` | `single_pc_agent_capacity_evidence` |
 | `2026-06-26` | `stress` | `partial` | `boot_burst_capacity` | `4` | `5` | `cold_start_packet_burst_evidence` |
 | `2026-06-26` | `chaos` | `partial` | `server_crash_recovery` | `2` | `3` | `ecs_service_recovery_chaos_evidence` |
