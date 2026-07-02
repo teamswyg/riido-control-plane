@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-02T12:05:00Z",
+  "captured_at": "2026-07-02T12:38:58Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -137,6 +137,33 @@
       "decision": "Preserve the merge-completion comment as executable evidence so the Notion discussion and repo verifier agree on the latest completion-progress status."
     },
     {
+      "id": "39120241-cf7f-81f1-bcdd-001da708227a",
+      "discussion": "completion_progress_after_terminal",
+      "observed_at": "2026-07-02T12:05:21.137Z",
+      "event_type": "repo_ci_merge_evidence",
+      "status_tag": "[codex][완료][백필diff]",
+      "signal": "PR #769 connected the PR #768 merge-completion comment back into repo evidence and kept the completion-progress P0 partial.",
+      "decision": "Keep merge-chain evidence executable, but do not mark the P0 covered without a same-moment reproduction payload."
+    },
+    {
+      "id": "39120241-cf7f-8112-a42f-001d2d6ed4ec",
+      "discussion": "completion_progress_after_terminal",
+      "observed_at": "2026-07-02T12:20:44.110Z",
+      "event_type": "real_screen_evidence",
+      "status_tag": "[codex][완료][리얼화면증적][partial 유지]",
+      "signal": "PR #770 added a live logged-in Chrome screenshot where queued/running/thinking/error counts are zero, with screenshot SHA256 verification.",
+      "decision": "Treat the screenshot as stronger non-reproduction evidence, not closure, because the API/SSE payloads were unavailable from the read-only page scope."
+    },
+    {
+      "id": "39120241-cf7f-8137-9a8b-001d7a5d1615",
+      "discussion": "completion_progress_after_terminal",
+      "observed_at": "2026-07-02T12:35:59.280Z",
+      "event_type": "capture_tool_evidence",
+      "status_tag": "[codex][완료][증적도구추가][partial 유지]",
+      "signal": "PR #771 added a redacted same-moment v3/v2/subscription/SSE capture tool for the next reproduction of the completion-progress drift.",
+      "decision": "The tool reduces evidence loss on the next reproduction but intentionally leaves the P0 partial until it captures a real failing moment."
+    },
+    {
       "id": "39120241-cf7f-81d5-9c0f-001d26c153a0",
       "discussion": "queued_by_busy_agent",
       "observed_at": "2026-07-02T10:08:16.163Z",
@@ -194,9 +221,12 @@
         "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json",
         "notion-comment:39120241-cf7f-8119-b377-001d66282634",
         "notion-comment:39120241-cf7f-81fe-8a5f-001d4070221f",
-        "notion-comment:39120241-cf7f-813f-aa9b-001dbe8f3a47"
+        "notion-comment:39120241-cf7f-813f-aa9b-001dbe8f3a47",
+        "notion-comment:39120241-cf7f-81f1-bcdd-001da708227a",
+        "notion-comment:39120241-cf7f-8112-a42f-001d2d6ed4ec",
+        "notion-comment:39120241-cf7f-8137-9a8b-001d7a5d1615"
       ],
-      "decision": "Backfill as a distinct P0 visual/event-order cycle. Existing terminal and queued tests plus two read-only staging baselines reduce backend risk but do not prove this user-visible symptom; next evidence must capture v3 history, v2 task threads, thread-stream-subscription, SSE events, and screenshot state for the same completed conversation at the reproduction moment. The endpoint contract approval gate discussed in the thread is a separate P-3 candidate, not this P0 fix."
+      "decision": "Backfill as a distinct P0 visual/event-order cycle. Existing terminal and queued tests plus repeated non-reproduction screen baselines reduce backend risk but do not prove this user-visible symptom. The next failing moment should be captured with the redacted aiagentthreadsnapshot tool plus a screenshot so v3 history, v2 task threads, thread-stream-subscription, SSE events, and screen state share one conversation/time window. The endpoint contract approval gate discussed in the thread is a separate P-3 candidate, not this P0 fix."
     },
     {
       "id": "author_fallback",
@@ -269,6 +299,21 @@
       "id": "39120241-cf7f-813f-aa9b-001dbe8f3a47",
       "target": "completion_progress_after_terminal_discussion",
       "status": "[codex][완료][증적반영]"
+    },
+    {
+      "id": "39120241-cf7f-81f1-bcdd-001da708227a",
+      "target": "completion_progress_after_terminal_discussion",
+      "status": "[codex][완료][백필diff]"
+    },
+    {
+      "id": "39120241-cf7f-8112-a42f-001d2d6ed4ec",
+      "target": "completion_progress_after_terminal_discussion",
+      "status": "[codex][완료][리얼화면증적][partial 유지]"
+    },
+    {
+      "id": "39120241-cf7f-8137-9a8b-001d7a5d1615",
+      "target": "completion_progress_after_terminal_discussion",
+      "status": "[codex][완료][증적도구추가][partial 유지]"
     }
   ],
   "next_actions": [
@@ -278,7 +323,7 @@
     },
     {
       "owner": "qa_or_frontend",
-      "action": "When completion/progress drift recurs, attach a same-conversation screenshot plus v3 threads, v2 task threads, stream subscription, and SSE event payload captures."
+      "action": "When completion/progress drift recurs, run tools/aiagentthreadsnapshot with the same task/conversation and attach the redacted output plus a same-moment screenshot."
     },
     {
       "owner": "control_plane",
