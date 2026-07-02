@@ -125,15 +125,24 @@
         "id": "notion_p0_gatekeeper_staging_dmg",
         "priority": "P0",
         "status": "partial",
-        "codex_status": "[codex][진행중]",
+        "codex_status": "[codex][완료][전달요청]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#gatekeeper-staging-dmg",
-        "summary": "Staging desktop must be Apple Developer signed/notarized and distributed from the CDN before team QA can trust install results.",
+        "summary": "Staging desktop CDN artifact is available and passes macOS Gatekeeper checks: DMG HEAD is 200, SHA-256 is recorded, spctl accepts the DMG and mounted app as Notarized Developer ID, stapler validates both tickets, and the app bundle is signed by Developer ID Application: SWYG Inc. Product readiness remains partial until a teammate install screenshot confirms the distributed app opens on a fresh QA machine.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "staging_desktop_notarized_install_screenshot",
-        "required_next_command": "curl -I https://cdn.riido.io/releases/latest/staging/Riido-Staging-arm64.dmg",
+        "required_next_command": "curl -I https://cdn.riido.io/releases/latest/staging/Riido-Staging-arm64.dmg && spctl --assess --type install --verbose=4 Riido-Staging-arm64.dmg && xcrun stapler validate Riido-Staging-arm64.dmg",
         "evidence_refs": [
           {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
-          {"kind": "external", "path": "riido-desktop:.github/workflows"}
+          {"kind": "external", "path": "riido-desktop:.github/workflows/release-staging.yml"},
+          {"kind": "external", "path": "riido-desktop:scripts/verify-macos-dmg-release.js"},
+          {"kind": "external", "path": "cdn:https://cdn.riido.io/releases/latest/staging/Riido-Staging-arm64.dmg"},
+          {"kind": "external", "path": "sha256:7a20806e75c35fef95a2f680476563b08b37d31c6bc23ae057e67fa0e36fa65a"},
+          {"kind": "external", "path": "spctl:dmg-accepted-source-notarized-developer-id"},
+          {"kind": "external", "path": "spctl:app-accepted-source-notarized-developer-id"},
+          {"kind": "external", "path": "stapler:dmg-validate-action-worked"},
+          {"kind": "external", "path": "stapler:app-validate-action-worked"},
+          {"kind": "external", "path": "codesign:developer-id-application-swyg-inc-3pvv8dqpl6"},
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-81f2-9d54-001d551d544e"}
         ]
       },
       {
