@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `47`
+- measurements: `50`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -64,13 +64,13 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
 | `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `17` | `13` | `staging_client_p0_visual_screenshot_evidence` |
 | `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `1` | `2` | `agent_rename_snapshot_regression_evidence` |
-| `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `1` | `2` | `daemon_network_disconnect_release_evidence` |
+| `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `2` | `3` | `daemon_network_disconnect_release_evidence` |
 | `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `2` | `4` | `capacity_result_annotation` |
-| `2026-06-26` | `stress` | `partial` | `single_pc_agent_limit` | `1` | `2` | `single_pc_agent_capacity_evidence` |
+| `2026-06-26` | `stress` | `partial` | `single_pc_agent_limit` | `2` | `3` | `single_pc_agent_capacity_evidence` |
 | `2026-06-26` | `stress` | `partial` | `boot_burst_capacity` | `1` | `2` | `cold_start_packet_burst_evidence` |
 | `2026-06-26` | `chaos` | `partial` | `server_crash_recovery` | `1` | `2` | `ecs_service_recovery_chaos_evidence` |
 | `2026-06-26` | `chaos` | `partial` | `scale_out_recovery` | `1` | `2` | `scale_out_timing_evidence` |
-| `2026-06-26` | `chaos` | `partial` | `all_servers_down_daemon_behavior` | `1` | `2` | `daemon_reconnect_storm_evidence` |
+| `2026-06-26` | `chaos` | `partial` | `all_servers_down_daemon_behavior` | `2` | `3` | `daemon_reconnect_storm_evidence` |
 | `2026-06-26` | `scenario` | `covered` | `scenario_message_policy` | `2` | `3` | `weekend_open_scenario_result` |
 | `2026-06-27` | `desktop` | `partial` | `desktop_body_only_change` | `1` | `2` | `desktop_body_only_golden_evidence` |
 

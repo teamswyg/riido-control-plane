@@ -8305,6 +8305,56 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "operational_readiness_daemon_local_network_capacity_evidence_loop",
+      "observation": "Release QA still has partial daemon/network items for internet disconnect waiting, one-PC agent capacity, and all-server-down reconnect behavior. The control-plane readiness manifest pointed at daemon tests, but it did not record a current cross-repo run tied to a daemon commit, so agents could not distinguish stale intended coverage from freshly observed local evidence.",
+      "hypothesis": "Recording the current daemon branch, commit, and focused long-poll, poll retry, transport retry, timeout, slot, goroutine, and leak test results gives release QA a fresh pre-chaos baseline while preserving partial status until real release chaos and desktop product acceptance runs exist.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/daemon_local_evidence_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/main.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/daemon_local_evidence_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/main.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "daemon-local-network-capacity-evidence-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Daemon local network and capacity evidence is now fresh and commit-bound: the long-poll default wait, transient/permanent poll retry distinction, transport-error retry, long-poll timeout, and runtime actor slot/goroutine/leak tests passed on the current daemon QA runner branch. Readiness remains partial because this is not a release chaos run, not a server-down storm measurement, and not a desktop body-only product acceptance proof.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "operational_readiness_staging_dmg_gatekeeper_evidence_loop",
       "observation": "The Notion P0 gatekeeper report said the Riido Staging app could not be opened because Apple could not verify it, while the readiness manifest still marked the staging DMG work as in progress even after a CDN artifact was published.",
       "hypothesis": "A downloaded CDN DMG that passes shasum, spctl, stapler, mount checksum, app codesign, app spctl, and app stapler checks can be transferred to team QA as an install-screenshot gate instead of remaining an unresolved backend/infra packaging task.",

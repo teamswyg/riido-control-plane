@@ -515,11 +515,18 @@
           "kind": "test",
           "signal": "Daemon long-poll and SaaS validation paths retry/wait instead of losing work on transient network failure.",
           "evidence_ref": "riido-daemon:cmd/riido/daemon_control_plane_long_poll_test.go"
+        },
+        {
+          "id": "daemon_local_network_retry_2026_07_02",
+          "kind": "artifact",
+          "signal": "Local daemon evidence reran long-poll default wait plus transient/permanent poll retry and transport-error retry tests on the current QA runner branch.",
+          "evidence_ref": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"
         }
       ],
       "evidence_refs": [
         {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_control_plane_long_poll_test.go"},
-        {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_saas_validation_test.go"}
+        {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_saas_validation_test.go"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"}
       ],
       "next_artifact": "daemon_network_disconnect_release_evidence",
       "next_command": "sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1 && go test ./internal/agentbridge/controlplane/saasplane -run \"TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout\" -count=1'"
@@ -565,11 +572,18 @@
           "kind": "test",
           "signal": "Daemon runtime actor tests record local slot, goroutine, and leak behavior for one-PC multi-agent load.",
           "evidence_ref": "riido-daemon:internal/agentbridge/runtimeactor/actor_slot_limit_test.go"
+        },
+        {
+          "id": "single_pc_runtime_actor_2026_07_02",
+          "kind": "artifact",
+          "signal": "Local daemon evidence reran runtimeactor Slot/Goroutine/Leak focused tests for one-PC local capacity.",
+          "evidence_ref": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"
         }
       ],
       "evidence_refs": [
         {"kind": "external", "path": "riido-daemon:.github/workflows/local-qa-runner.yml"},
-        {"kind": "external", "path": "riido-daemon:internal/agentbridge/runtimeactor/actor_slot_limit_test.go"}
+        {"kind": "external", "path": "riido-daemon:internal/agentbridge/runtimeactor/actor_slot_limit_test.go"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"}
       ],
       "next_artifact": "single_pc_agent_capacity_evidence",
       "next_command": "sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./internal/agentbridge/runtimeactor -run \"Test.*Slot|Test.*Goroutine|Test.*Leak\" -count=1'"
@@ -649,11 +663,18 @@
           "kind": "test",
           "signal": "Daemon server-down evidence records reconnect backoff and verifies server recovery does not create request storms.",
           "evidence_ref": "riido-daemon:cmd/riido/daemon_control_plane_long_poll_server_test.go"
+        },
+        {
+          "id": "daemon_reconnect_retry_2026_07_02",
+          "kind": "artifact",
+          "signal": "Local daemon evidence reran transient poll, transport-error retry, permanent failure non-retry, and long-poll timeout tests as the current pre-chaos reconnect baseline.",
+          "evidence_ref": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"
         }
       ],
       "evidence_refs": [
         {"kind": "external", "path": "riido-daemon:cmd/riido/daemon_control_plane_long_poll_server_test.go"},
-        {"kind": "external", "path": "riido-daemon:docs/30-architecture/product-loop-evidence.riido.json"}
+        {"kind": "external", "path": "riido-daemon:docs/30-architecture/product-loop-evidence.riido.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/daemon-local-network-capacity-evidence-2026-07-02.json"}
       ],
       "next_artifact": "daemon_reconnect_storm_evidence",
       "next_command": "sh -lc 'test -d ../riido-daemon && cd ../riido-daemon && go test ./internal/agentbridge/controlplane/saasplane -run \"TestPlaneRetriesTransientPollTransportError|TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout\" -count=1'"
