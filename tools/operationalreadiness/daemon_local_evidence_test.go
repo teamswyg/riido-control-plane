@@ -16,6 +16,9 @@ func TestOperationalReadinessBindsDaemonLocalEvidence(t *testing.T) {
 		if !hasMeasurementEvidence(check, "daemon-local-network-capacity-evidence-2026-07-02.json") {
 			t.Fatalf("%s missing daemon local evidence measurement", id)
 		}
+		if !hasMeasurementEvidence(check, "daemon-reconnect-runtimeactor-evidence-2026-07-02.json") {
+			t.Fatalf("%s missing daemon reconnect/runtimeactor evidence measurement", id)
+		}
 	}
 }
 

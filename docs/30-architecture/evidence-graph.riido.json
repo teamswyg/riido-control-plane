@@ -8505,6 +8505,60 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "daemon_reconnect_runtimeactor_evidence_loop",
+      "observation": "Release readiness still had daemon network-disconnect, all-server-down reconnect, and one-PC runtime actor checks marked partial. Previous evidence existed, but the active daemon QA branch had moved and needed current commit-bound test evidence without editing the daemon repository while another branch was in flight.",
+      "hypothesis": "Running the existing daemon retry, long-poll, and runtimeactor tests on the current daemon QA branch and binding a redacted artifact to the three readiness checks strengthens the local pre-chaos proof while preserving partial status for live installed-daemon outage drills.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/daemon-reconnect-runtimeactor-evidence-2026-07-02.json"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/daemon_local_evidence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/daemon_reconnect_evidence_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/main.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/daemon_reconnect_evidence_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph/main.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "daemon-reconnect-runtimeactor-evidence-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "On riido-daemon branch RIID-5001-QA-runner-workflow-evidence-doc-sync at commit eb7976f, long-poll default wait, SaaS-plane transient/permanent/transport retry behavior, request timeout extension, runtime actor slot limiting, and goroutine release tests all passed. daemon_network_disconnect_waiting, single_pc_agent_limit, and all_servers_down_daemon_behavior remain partial because this was local test evidence rather than a live outage drill against an installed desktop daemon.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "notion_backfill_review_loop",
       "observation": "The backfilled v1.24 AI Agent QA Notion page now contains both older page-body guidance and newer comment/repo evidence; for example the page body still mentions pre-notarization staging desktop workarounds while later comments and readiness evidence prove a notarized CDN DMG, and a page-level server-deploy property can be misread as backend deploy truth.",
       "hypothesis": "A redacted Notion backfill review artifact can make the latest truth machine-readable without changing product code: stale body guidance, property scope, generated P0 cycle count, and visual-partial status are separated into reviewed signals and bound to operational readiness.",

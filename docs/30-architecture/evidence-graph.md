@@ -10,23 +10,23 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `85`
-- claim refs: `100`
-- change refs: `1100`
-- verifier refs: `524`
-- evidence refs: `240`
+- chains: `86`
+- claim refs: `101`
+- change refs: `1104`
+- verifier refs: `527`
+- evidence refs: `242`
 
 ## Compiled Chain Summary
 
-- complete chains: `85` / `85`
-- claim-bound chains: `85`
+- complete chains: `86` / `86`
+- claim-bound chains: `86`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `closed_loop_candidate` | `47` | `48` | `705` | `312` | `121` |
-| `operational_readiness_release_harness` | `18` | `31` | `135` | `83` | `54` |
+| `operational_readiness_release_harness` | `19` | `32` | `139` | `86` | `56` |
 | `ai_thread_history` | `8` | `8` | `110` | `55` | `11` |
 | `closed_loop_candidate_decision` | `7` | `7` | `110` | `52` | `35` |
 | `provider_acceptance_harness` | `2` | `2` | `12` | `7` | `6` |
@@ -117,6 +117,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `operational_readiness_ecs_recovery_scale_readonly_baseline_loop` | `1` | `3` | `3` | `2` | `operational_readiness_release_harness` |
 | `operational_readiness_staging_public_burst_load_loop` | `1` | `3` | `3` | `2` | `operational_readiness_release_harness` |
 | `operational_readiness_deploy_overlap_burst_loop` | `1` | `3` | `3` | `2` | `operational_readiness_release_harness` |
+| `daemon_reconnect_runtimeactor_evidence_loop` | `1` | `4` | `3` | `2` | `operational_readiness_release_harness` |
 | `notion_backfill_review_loop` | `1` | `3` | `3` | `2` | `closed_loop_candidate` |
 | `operational_readiness_staging_dmg_gatekeeper_evidence_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `operational_readiness_cw_feedback_transfer_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
