@@ -8,11 +8,6 @@ import (
 
 const stagingBurstEvidence = "docs/30-architecture/evidence/staging-public-burst-load-evidence-2026-07-02.json"
 
-type burstFinding struct {
-	ID       string `json:"id"`
-	Severity string `json:"severity"`
-}
-
 func TestOperationalReadinessBindsStagingPublicBurstEvidence(t *testing.T) {
 	check := readinessCheckByID(t, "boot_burst_capacity")
 	if check.Status != "partial" {
@@ -41,13 +36,4 @@ func TestStagingPublicBurstEvidenceKeepsColdStartPartial(t *testing.T) {
 	if !evidence.Redacted || !hasFinding(evidence.Findings, "cold_start_not_exercised", "partial") {
 		t.Fatal("staging burst evidence must remain redacted and preserve cold-start partial finding")
 	}
-}
-
-func hasFinding(findings []burstFinding, id, severity string) bool {
-	for _, finding := range findings {
-		if finding.ID == id && finding.Severity == severity {
-			return true
-		}
-	}
-	return false
 }
