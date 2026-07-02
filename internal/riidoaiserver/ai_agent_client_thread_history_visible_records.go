@@ -1,5 +1,7 @@
 package riidoaiserver
 
+import "strings"
+
 func (s *DevelopmentAIAgentClientStore) visibleTaskThreadHistoryRecordsLocked(
 	principal AuthorizationResult,
 	taskID string,
@@ -7,12 +9,13 @@ func (s *DevelopmentAIAgentClientStore) visibleTaskThreadHistoryRecordsLocked(
 	source := s.taskThreads[taskID]
 	records := make([]AIAgentTaskThreadHistoryRecord, 0, len(source))
 	var snapshots map[string]AIAgentTaskThreadAgentSnapshot
+	streamHref := aiAgentClientEventStreamHref(strings.TrimSpace(principal.WorkspaceID))
 	for i := range source {
 		s.ensureTaskThreadAgentSnapshotLocked(&source[i], source[i].StartedAt)
 		if !s.taskThreadVisibleTo(principal, source[i]) {
 			continue
 		}
-		record := s.taskThreadHistoryRecordLocked(principal, source[i])
+		record := s.taskThreadHistoryRecordLocked(source[i], streamHref)
 		records = append(records, record)
 		snapshots = appendTaskThreadHistorySnapshot(snapshots, record, source[i])
 	}

@@ -58,6 +58,7 @@ on:
       - "docs/30-architecture/evidence/control-plane-v3-history-readonly-projection-after-2026-07-03.json"
       - "docs/30-architecture/evidence/control-plane-v3-history-message-cache-before-2026-07-03.json"
       - "docs/30-architecture/evidence/control-plane-v3-history-message-cache-after-2026-07-03.json"
+      - "docs/30-architecture/evidence/control-plane-v3-history-thread-metadata-cache-after-2026-07-03.json"
       - "docs/30-architecture/control-plane-high-traffic-audit.md"
       - "docs/30-architecture/control-plane-high-traffic-audit.riido.json"
       - "docs/30-architecture/operational-readiness.md"

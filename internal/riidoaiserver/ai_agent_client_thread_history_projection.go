@@ -28,8 +28,7 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreadHistory(ctx context
 	return response, nil
 }
 
-func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(principal AuthorizationResult, thread AIAgentTaskThreadRecord) AIAgentTaskThreadHistoryRecord {
-	snapshotID := taskThreadAgentSnapshotID(thread.AgentSnapshot)
+func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(thread AIAgentTaskThreadRecord, streamHref string) AIAgentTaskThreadHistoryRecord {
 	record := AIAgentTaskThreadHistoryRecord{
 		ThreadID:        thread.ThreadID,
 		ConversationID:  taskThreadConversationID(thread),
@@ -37,7 +36,7 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(principal 
 		TaskID:          thread.TaskID,
 		AssignmentID:    thread.AssignmentID,
 		AgentID:         thread.AgentID,
-		AgentSnapshotID: snapshotID,
+		AgentSnapshotID: thread.AgentSnapshotID,
 		RunID:           thread.RunID,
 		WorkStatus:      thread.WorkStatus,
 		AssignmentState: thread.AssignmentState,
@@ -46,7 +45,7 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(principal 
 		Messages:        s.taskThreadHistoryMessagesLocked(thread),
 	}
 	if taskThreadHasActiveStream(thread) {
-		link := activeStreamLinkForThread(thread, strings.TrimSpace(principal.WorkspaceID))
+		link := activeStreamLinkForThreadHref(thread, streamHref)
 		record.ActiveStream = &link
 	}
 	return record
