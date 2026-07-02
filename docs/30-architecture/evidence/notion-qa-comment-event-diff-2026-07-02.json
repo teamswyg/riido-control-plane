@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-02T13:31:06Z",
+  "captured_at": "2026-07-02T15:48:20Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -198,6 +198,15 @@
       "status_tag": "[codex][완료][백필diff][증적강화]",
       "signal": "The latest page-level comment ties Notion QA comment drift, PR #772, and PR #773 pressure evidence together, with deploy skipped as expected for evidence-only changes.",
       "decision": "Treat this as the latest page-level Notion QA backfill checkpoint; no new backend blocker was found, and performance work should proceed from the recorded allocation candidates."
+    },
+    {
+      "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+      "discussion": "page_level_backfill_diff",
+      "observed_at": "2026-07-02T15:47:51.000Z",
+      "event_type": "performance_deploy_followup",
+      "status_tag": "[codex][완료][성능개선][staging 배포]",
+      "signal": "The latest page-level comment records PR #777, merge commit 045ddc3, staging deploy 28602038703, and before/after stream-target and SSE fanout measurements.",
+      "decision": "Treat this as the current Notion QA performance follow-up checkpoint; product P0 partials remain open while endpoint contracts stay unchanged."
     }
   ],
   "reviewed_discussions": [
@@ -342,6 +351,11 @@
       "id": "39120241-cf7f-8148-bd04-001d6cbae868",
       "target": "page_level_backfill_diff_summary",
       "status": "[codex][완료][백필diff][증적강화]"
+    },
+    {
+      "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+      "target": "page_level_backfill_diff_summary",
+      "status": "[codex][완료][성능개선][staging 배포]"
     }
   ],
   "next_actions": [
