@@ -27,6 +27,19 @@ func streamTargetFixtureStore(threadCount, lineCount int) *DevelopmentAIAgentCli
 	return store
 }
 
+func inactiveHeavyStreamTargetFixtureStore(
+	threadCount, activeCount, lineCount int,
+) *DevelopmentAIAgentClientStore {
+	store := streamTargetFixtureStore(threadCount, lineCount)
+	threads := store.taskThreads["task-load-read"]
+	for i := 0; i < len(threads)-activeCount; i++ {
+		threads[i].WorkStatus = AgentWorkStatusCompleted
+		threads[i].AssignmentState = AgentAssignmentStateCompleted
+	}
+	store.taskThreads["task-load-read"] = threads
+	return store
+}
+
 func streamTargetFixtureLines(count int) []AgentThreadProgressLine {
 	lines := make([]AgentThreadProgressLine, count)
 	for i := range lines {

@@ -673,6 +673,18 @@
           "kind": "artifact",
           "signal": "After v3 history message-id key building removed intermediate joined strings, local pressure again measured zero errors, zero goroutine deltas, and lower allocation per operation for thread_history_v3 and the v3 thread-history HTTP endpoint.",
           "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-after-2026-07-02.json"
+        },
+        {
+          "id": "local_pressure_stream_target_capacity_2026_07_02",
+          "kind": "artifact",
+          "signal": "Thread stream subscription target selection keeps the all-active fast path while reducing inactive-heavy target allocation from 2688 B/op to 96 B/op without changing endpoints or response contracts.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"
+        },
+        {
+          "id": "local_pressure_client_event_fanout_2026_07_02",
+          "kind": "artifact",
+          "signal": "Client event live fanout reuses same-principal visibility decisions and reduces subscriber fanout allocation from 1792 B/op to 1584 B/op without changing SSE endpoints or payload contracts.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-client-event-fanout-after-2026-07-02.json"
         }
       ],
       "evidence_refs": [
@@ -685,7 +697,9 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-allocation-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-allocation-candidates-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-after-2026-07-02.json"},
-        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-candidates-after-2026-07-02.json"}
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-candidates-after-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-client-event-fanout-after-2026-07-02.json"}
       ],
       "next_artifact": "capacity_result_annotation",
       "next_command": "go run ./tools/aiagentload -scenario public -base-url https://staging.ai-api.riido.io -duration 60s -concurrency 64 -evidence-out out/load.json"

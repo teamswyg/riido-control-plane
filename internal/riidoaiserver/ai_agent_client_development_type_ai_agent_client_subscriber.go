@@ -1,6 +1,7 @@
 package riidoaiserver
 
 type aiAgentClientSubscriber struct {
-	principal AuthorizationResult
-	events    chan ClientStreamEvent
+	principal     AuthorizationResult
+	visibilityKey string
+	events        chan ClientStreamEvent
 }
