@@ -5,6 +5,10 @@ import (
 )
 
 func clientVisibleTaskThreadText(message string) string {
+	message = strings.TrimSpace(message)
+	if message == "" || clientVisibleTaskThreadTextIsPlain(message) {
+		return message
+	}
 	message = stripRiidoLogBlocks(message)
 	message = clientVisibleMarkdownLocalLinkPattern.ReplaceAllString(message, "$1")
 	message = clientVisibleAngleLocalPathPattern.ReplaceAllString(message, "로컬 파일")

@@ -3,20 +3,34 @@ package riidoaiserver
 import "sort"
 
 func sortTaskThreadHistoryMessages(messages []AIAgentTaskThreadHistoryMessage) {
+	if len(messages) < 2 || taskThreadHistoryMessagesSorted(messages) {
+		return
+	}
 	sort.SliceStable(messages, func(i, j int) bool {
-		left := messages[i]
-		right := messages[j]
-		if !left.ObservedAt.Equal(right.ObservedAt) {
-			return left.ObservedAt.Before(right.ObservedAt)
-		}
-		if messageRoleRank(left.Role) != messageRoleRank(right.Role) {
-			return messageRoleRank(left.Role) < messageRoleRank(right.Role)
-		}
-		if left.Seq != right.Seq {
-			return left.Seq < right.Seq
-		}
-		return left.MessageID < right.MessageID
+		return taskThreadHistoryMessageLess(messages[i], messages[j])
 	})
+}
+
+func taskThreadHistoryMessagesSorted(messages []AIAgentTaskThreadHistoryMessage) bool {
+	for i := 1; i < len(messages); i++ {
+		if taskThreadHistoryMessageLess(messages[i], messages[i-1]) {
+			return false
+		}
+	}
+	return true
+}
+
+func taskThreadHistoryMessageLess(left, right AIAgentTaskThreadHistoryMessage) bool {
+	if !left.ObservedAt.Equal(right.ObservedAt) {
+		return left.ObservedAt.Before(right.ObservedAt)
+	}
+	if messageRoleRank(left.Role) != messageRoleRank(right.Role) {
+		return messageRoleRank(left.Role) < messageRoleRank(right.Role)
+	}
+	if left.Seq != right.Seq {
+		return left.Seq < right.Seq
+	}
+	return left.MessageID < right.MessageID
 }
 
 func messageRoleRank(role AIAgentTaskThreadMessageRole) int {
