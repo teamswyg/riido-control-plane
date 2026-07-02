@@ -1,0 +1,51 @@
+{
+  "schema_version": "riido-staging-completion-progress-followup.v1",
+  "id": "staging_completion_progress_followup_2026_07_02",
+  "captured_at": "2026-07-02T11:07:09Z",
+  "redacted": true,
+  "source": {
+    "workspace_id": "1IFsD2c8Mnk2VstqJ4iNo",
+    "task_id": "uNYpHxDOzMp3vMy_urWsu",
+    "base_url": "https://staging.ai-api.riido.io",
+    "app_url": "https://staging.app.riido.io/1IFsD2c8Mnk2VstqJ4iNo/teams/SWYG/tasks/uNYpHxDOzMp3vMy_urWsu"
+  },
+  "browser_observation": {
+    "screenshot": "docs/30-architecture/evidence/screenshots/staging-completion-progress-followup-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png",
+    "screenshot_sha256": "56df6116c7bab2e29108fc1c77be2e39d2fe4b585d9e4ea4259a366d2e52dccd",
+    "screenshot_bytes": 96452,
+    "visible_thinking_count": 0,
+    "visible_running_count": 0,
+    "visible_queued_copy_count": 0,
+    "visible_stopped_copy_count": 14,
+    "visible_completed_copy_count": 0,
+    "visible_unknown_variant_count": 0,
+    "visible_request_failed_400_count": 0
+  },
+  "api_observation": {
+    "v3": {
+      "thread_count": 40,
+      "active_stream_present": false,
+      "running_threads": 0,
+      "queued_messages": 0,
+      "progress_messages": 88,
+      "terminal_threads": 40,
+      "thread_active_streams": 0
+    },
+    "v2": {
+      "thread_count": 40,
+      "active_stream_present": false,
+      "running_threads": 0,
+      "queued_threads": 0,
+      "progress_line_count": 88
+    },
+    "subscription": {
+      "active_thread_filter_count": 0,
+      "stream_href_present": true
+    }
+  },
+  "decision": {
+    "status": "partial",
+    "summary": "A second same-task staging follow-up again shows no visible thinking/running/queued copy, no v2/v3 active stream, no running threads, and no active subscription filters. This strengthens the non-reproduction baseline but still does not close the reported completed-but-still-progressing symptom because it does not capture the reproduction moment.",
+    "next_artifact": "reproduced_completion_progress_same_conversation_network_snapshot"
+  }
+}

@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `64`
+- measurements: `65`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -63,7 +63,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `8` | `10` | `client_surface_alarm_plan_apply_evidence` |
 | `2026-07-01` | `monitoring` | `covered` | `public_qa_status_surface` | `10` | `17` | `public_qa_status_pages_live_evidence` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
-| `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `22` | `20` | `staging_client_p0_visual_screenshot_evidence` |
+| `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `23` | `22` | `staging_client_p0_visual_screenshot_evidence` |
 | `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `1` | `2` | `agent_rename_snapshot_regression_evidence` |
 | `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `3` | `4` | `daemon_network_disconnect_release_evidence` |
 | `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `2` | `4` | `capacity_result_annotation` |
