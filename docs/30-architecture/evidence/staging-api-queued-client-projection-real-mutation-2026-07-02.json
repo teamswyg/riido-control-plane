@@ -1,0 +1,64 @@
+{
+  "schema_version": "riido-staging-api-snapshot.v1",
+  "id": "staging-api-queued-client-projection-real-mutation-2026-07-02",
+  "environment": "staging",
+  "redacted": true,
+  "captured_at": "2026-07-02T05:59:00Z",
+  "deployment": {
+    "commit": "aa4a53b005c2c1f644f80ac182a4e6153b7eb4df",
+    "run": "https://github.com/teamswyg/riido-control-plane/actions/runs/28568193167"
+  },
+  "subject": {
+    "workspace": "redacted",
+    "task": "uNYpHxDOzMp3vMy_urWsu",
+    "agent": "redacted-codex-agent"
+  },
+  "checks": {
+    "v3_history_read_before": {
+      "thread_count": 38,
+      "queued_messages": 0,
+      "active_stream_present": false
+    },
+    "v2_threads_read_before": {
+      "thread_count": 38,
+      "queued_threads": 0,
+      "active_stream_present": false
+    },
+    "double_assignment_mutation": {
+      "first_http": 202,
+      "first_assignment_id": "asn-000184",
+      "first_work_status": "running",
+      "first_assignment_state": "running",
+      "first_comment_kind": "assignment_started",
+      "first_active_stream": true,
+      "second_http": 202,
+      "second_assignment_id": "asn-000184",
+      "second_work_status": "idle",
+      "second_assignment_state": "",
+      "second_comment_kind": "",
+      "second_message": "",
+      "second_result_message": null,
+      "second_active_stream": true
+    },
+    "cleanup": {
+      "stop_first_http": 202,
+      "stop_second_http": 202,
+      "final_assignment_state": "stopped",
+      "final_comment_kind": "stopped_by_user_request"
+    },
+    "v2_threads_after_cleanup": {
+      "queued_threads": 0,
+      "active_stream_present": false,
+      "test_assignment_state": "stopped"
+    },
+    "stream_subscription_after_cleanup": {
+      "active_thread_filter_count": 0
+    },
+    "sse_replay_sample": {
+      "curl_status": 28,
+      "bytes": 51323,
+      "queued_markers": 0
+    }
+  },
+  "decision": "The deployed staging API keeps durable queue behavior but hides queued client projection in v2 mutation responses, v2 thread list, stream subscription state, and SSE replay samples."
+}
