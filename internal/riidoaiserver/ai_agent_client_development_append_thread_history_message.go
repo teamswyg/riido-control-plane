@@ -44,4 +44,5 @@ func (s *DevelopmentAIAgentClientStore) appendThreadHistoryMessageLocked(threadI
 		}
 	}
 	s.taskThreadMessages[threadID] = append(source, message)
+	s.dropTaskThreadHistoryCacheLocked(threadID)
 }

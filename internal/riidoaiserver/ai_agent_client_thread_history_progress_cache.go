@@ -31,9 +31,18 @@ func (s *DevelopmentAIAgentClientStore) cachedTaskThreadProgressMessagesLocked(
 
 func (s *DevelopmentAIAgentClientStore) dropTaskThreadProgressCacheLocked(threadID string) {
 	if s.taskThreadProgressCache == nil {
+		s.dropTaskThreadHistoryCacheLocked(threadID)
 		return
 	}
 	delete(s.taskThreadProgressCache, threadID)
+	s.dropTaskThreadHistoryCacheLocked(threadID)
+}
+
+func (s *DevelopmentAIAgentClientStore) dropTaskThreadHistoryCacheLocked(threadID string) {
+	if s.taskThreadHistoryCache == nil {
+		return
+	}
+	delete(s.taskThreadHistoryCache, threadID)
 }
 
 func newTaskThreadProgressMessageCache(
