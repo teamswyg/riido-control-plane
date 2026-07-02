@@ -52,7 +52,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `notion_p0_terminal_stop_refresh` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
 | `notion_p0_author_fallback` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
 | `notion_p0_instruction_intent_dialogue` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
-| `notion_p0_gatekeeper_staging_dmg` | `partial` | `[codex][진행중]` | `staging_client_p0_visual_retest` | `staging_desktop_notarized_install_screenshot` |
+| `notion_p0_gatekeeper_staging_dmg` | `partial` | `[codex][완료][전달요청]` | `staging_client_p0_visual_retest` | `staging_desktop_notarized_install_screenshot` |
 | `notion_p0_cw_feedback_inventory` | `partial` | `[codex][진행중]` | `staging_client_p0_visual_retest` | `staging_client_p0_visual_screenshot_evidence` |
 
 ## Release Prep Checks
