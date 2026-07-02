@@ -53,6 +53,52 @@
           "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
         }
       ]
+    },
+    {
+      "observed_at": "2026-07-02T22:29:26Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "page fetch plus discussion_id targeted readback",
+      "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
+      "aggregate_get_comments_result": "network_error",
+      "decision": "The page fetch still returns the older page snapshot and aggregate get_comments can fail, but targeted inline discussion readback still exposes the latest selected P0 comments.",
+      "discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 18,
+          "latest_visible_comment_id": "39120241-cf7f-81d5-9c0f-001d26c153a0",
+          "latest_visible_comment_observed_at": "2026-07-02T10:08:16.163Z"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57",
+          "latest_visible_comment_observed_at": "2026-07-02T01:22:09.543Z"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66",
+          "latest_visible_comment_observed_at": "2026-07-02T00:42:59.595Z"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349",
+          "latest_visible_comment_observed_at": "2026-07-02T00:54:18.769Z"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8",
+          "latest_visible_comment_observed_at": "2026-07-02T10:09:14.555Z"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+          "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
+        }
+      ]
     }
   ],
   "comment_events": [
