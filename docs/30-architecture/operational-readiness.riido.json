@@ -121,6 +121,7 @@
           {"kind": "external", "path": "notion-comment:39120241-cf7f-8119-b377-001d66282634"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-81fe-8a5f-001d4070221f"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-813f-aa9b-001dbe8f3a47"},
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-8130-b9a6-001d9e29226a"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"}
@@ -558,6 +559,7 @@
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"},
         {"kind": "external", "path": "notion-comment:39120241-cf7f-81c7-9e1b-001dc54ec414"},
+        {"kind": "external", "path": "notion-comment:39120241-cf7f-8148-bd04-001d6cbae868"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-backfill-followup-review-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"},

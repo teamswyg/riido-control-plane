@@ -31,6 +31,10 @@ func TestOperationalReadinessBindsNotionQACommentEventDiff(t *testing.T) {
 	if !notionCycleHasEvidenceRef(cycle, followupComment) {
 		t.Fatalf("completion/progress cycle missing follow-up comment ref %+v", followupComment)
 	}
+	refreshComment := evidenceRef{Kind: "external", Path: "notion-comment:39120241-cf7f-8130-b9a6-001d9e29226a"}
+	if !notionCycleHasEvidenceRef(cycle, refreshComment) {
+		t.Fatalf("completion/progress cycle missing refresh comment ref %+v", refreshComment)
+	}
 	api := evidenceRef{Kind: "api_snapshot", Path: stagingCompletionProgressReadOnlyEvidence}
 	if !notionCycleHasEvidenceRef(cycle, api) {
 		t.Fatalf("completion/progress cycle missing read-only baseline %+v", api)
