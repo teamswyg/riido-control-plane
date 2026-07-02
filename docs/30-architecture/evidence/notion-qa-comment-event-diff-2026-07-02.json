@@ -9,6 +9,98 @@
     "page_url": "https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165",
     "fetch_mode": "page_body_with_selected_discussion_comments"
   },
+  "comment_events": [
+    {
+      "id": "38f20241-cf7f-807a-8b67-001d3da31af0",
+      "discussion": "queued_by_busy_agent",
+      "observed_at": "2026-06-30T07:16:31.242Z",
+      "event_type": "qa_bug_report",
+      "status_tag": "reported",
+      "signal": "QA reports that the busy-agent copy appears immediately after participant assignment while work is also progressing.",
+      "decision": "Treat as a P0 read-model/SSE/UI-state consistency issue, not a wording-only issue."
+    },
+    {
+      "id": "38f20241-cf7f-81bd-b21b-001d7a2b557f",
+      "discussion": "queued_by_busy_agent",
+      "observed_at": "2026-06-30T11:03:47.192Z",
+      "event_type": "server_fix_evidence",
+      "status_tag": "[codex][완료][전달요청]",
+      "signal": "PR #710 and staging deploy evidence say superseded queued streams are removed when a conversation has a newer running state.",
+      "decision": "Keep server evidence present, but require client visual/network proof before product readiness becomes covered."
+    },
+    {
+      "id": "38f20241-cf7f-80fb-b9f2-001d19095493",
+      "discussion": "waiting_for_user_intent",
+      "observed_at": "2026-06-30T04:50:46.822Z",
+      "event_type": "qa_bug_report",
+      "status_tag": "reported",
+      "signal": "QA clarifies that the issue is a question being rendered inside thinking/progress space, not the existence of a question itself.",
+      "decision": "Separate intent-gate behavior from progress UI state; waiting_for_user must not look like runtime progress."
+    },
+    {
+      "id": "39120241-cf7f-8170-8ea0-001daa3bd74d",
+      "discussion": "waiting_for_user_intent",
+      "observed_at": "2026-07-02T00:42:17.389Z",
+      "event_type": "server_fix_evidence",
+      "status_tag": "[codex][완료][전달요청]",
+      "signal": "The ambiguous waiting prompt copy was changed while preserving waiting_for_user / needs_input contract and no active stream.",
+      "decision": "Server contract is covered; client visual verification remains the product gate."
+    },
+    {
+      "id": "38f20241-cf7f-80ed-8da6-001df524cd88",
+      "discussion": "author_fallback",
+      "observed_at": "2026-06-30T08:54:39.811Z",
+      "event_type": "qa_bug_report",
+      "status_tag": "reported",
+      "signal": "QA confirms another user's AI-thread reply is rendered as if the current user authored it.",
+      "decision": "Track as a collaboration-trust P0 and require author identity in v3 user messages."
+    },
+    {
+      "id": "39120241-cf7f-81e9-8e8b-001dfae5d349",
+      "discussion": "author_fallback",
+      "observed_at": "2026-07-02T00:54:18.769Z",
+      "event_type": "contract_evidence",
+      "status_tag": "[codex][완료]",
+      "signal": "v3 history now preserves author_principal_id for new user messages; legacy messages may still be null.",
+      "decision": "Backend contract is covered; null-author visual fixture remains partial."
+    },
+    {
+      "id": "39120241-cf7f-8194-be57-001d386c49d8",
+      "discussion": "codex_unknown_variant",
+      "observed_at": "2026-07-02T09:16:52.723Z",
+      "event_type": "daemon_release_evidence",
+      "status_tag": "[codex][완료][P0][배포]",
+      "signal": "Daemon v0.0.58 release and CDN latest mirror verified the Codex unknown-variant fix is shipped.",
+      "decision": "Do not reopen control-plane without a post-v0.0.58 device/version/log reproduction."
+    },
+    {
+      "id": "39120241-cf7f-8094-a687-001d6aa33891",
+      "discussion": "completion_progress_after_terminal",
+      "observed_at": "2026-07-02T09:53:35.910Z",
+      "event_type": "qa_bug_report",
+      "status_tag": "reported",
+      "signal": "QA reports a completed answer can still look in progress and refresh can reveal an additional answer.",
+      "decision": "Backfill as a distinct P0 event-order/stream symptom instead of merging it into queued_by_busy_agent."
+    },
+    {
+      "id": "39120241-cf7f-81ec-99e9-001d90f2fa61",
+      "discussion": "completion_progress_after_terminal",
+      "observed_at": "2026-07-02T10:32:03.929Z",
+      "event_type": "evidence_request",
+      "status_tag": "[codex][계획중][증적요청]",
+      "signal": "The next reproduction must capture screenshot, v3 threads, v2 threads, stream subscription, and SSE payload for the same conversation.",
+      "decision": "Keep the item partial until same-conversation evidence can distinguish server projection, SSE replay, and client optimistic/cache state."
+    },
+    {
+      "id": "39120241-cf7f-8196-a65c-001d664f0e7a",
+      "discussion": "completion_progress_after_terminal",
+      "observed_at": "2026-07-02T10:46:48.928Z",
+      "event_type": "readonly_baseline",
+      "status_tag": "[codex][진행중][부분증적]",
+      "signal": "Read-only staging baseline on the reported task currently has thinking/running/queued counts at zero and no active stream.",
+      "decision": "Baseline is useful but does not close the bug because it does not capture the reproduction moment."
+    }
+  ],
   "reviewed_discussions": [
     {
       "id": "queued_by_busy_agent",
