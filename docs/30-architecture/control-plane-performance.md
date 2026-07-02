@@ -11,7 +11,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - concurrency tests: `8`
 - optimization candidates: `7`
 - architecture components: `5`
-- architecture file index entries: `30`
+- architecture file index entries: `31`
 - architecture target verifier commands: `8`
 - assertions: `15`
 - local pressure artifact: `control-plane-local-pressure`
@@ -73,6 +73,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 | `internal/riidoaiserver/store_operation_metrics_snapshot.go` | `bounded_observability_metrics` | `store_operation_metrics` | `allocation, cpu_busy, heap_memory, otel_signal` | `aws.operation, cloudwatch_emf, http.route, riido.store.operation` | `control-plane-high-traffic-audit, control-plane-performance-bench, control-plane-performance-evidence` | `1` |
 | `internal/riidoaiserver/store_poll_api.go` | `store_assignment_scheduler` | `assignment_poll_and_wait` | `allocation, goroutine_delta, latency, otel_signal, race_condition` | `aws.operation, riido.store.operation, xray_subsegment` | `control-plane-local-pressure, control-plane-pressure-closed-loop-candidates, control-plane-race` | `1` |
 | `internal/riidoaiserver/store_tool_approval.go` | `waiter_and_tool_approval_lifecycle` | `tool_approval_waiters` | `cpu_busy, goroutine_delta, latency, race_condition` | `assignment_poll_wait, cloudwatch_emf, tool_approval_wait` | `control-plane-high-traffic-audit, control-plane-local-pressure, control-plane-race` | `1` |
+| `internal/riidoaiserver/store_tool_approval_wait.go` | `waiter_and_tool_approval_lifecycle` | `tool_approval_waiters` | `cpu_busy, goroutine_delta, latency, race_condition` | `assignment_poll_wait, cloudwatch_emf, tool_approval_wait` | `control-plane-high-traffic-audit, control-plane-local-pressure, control-plane-race` | `1` |
 | `internal/riidoaiserver/store_wait_assignment_api.go` | `store_assignment_scheduler` | `assignment_poll_and_wait` | `allocation, goroutine_delta, latency, otel_signal, race_condition` | `aws.operation, riido.store.operation, xray_subsegment` | `control-plane-local-pressure, control-plane-pressure-closed-loop-candidates, control-plane-race` | `1` |
 | `internal/riidoaiserver/store_wait_assignment_pressure.go` | `store_assignment_scheduler` | `assignment_poll_and_wait` | `allocation, goroutine_delta, latency, otel_signal, race_condition` | `aws.operation, riido.store.operation, xray_subsegment` | `control-plane-local-pressure, control-plane-pressure-closed-loop-candidates, control-plane-race` | `1` |
 | `internal/riidoaiserver/store_waiter_api.go` | `waiter_and_tool_approval_lifecycle` | `` | `cpu_busy, goroutine_delta, latency, race_condition` | `assignment_poll_wait, cloudwatch_emf, tool_approval_wait` | `control-plane-high-traffic-audit, control-plane-local-pressure, control-plane-race` | `0` |

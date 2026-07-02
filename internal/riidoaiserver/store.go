@@ -104,11 +104,11 @@ func (s *Store) loop(state storeState) {
 			}
 			msg.reply <- toolApprovalDecisionResult{result: result, decision: decision, err: err}
 		case readToolApprovalCmd:
-			result, decision, mutated, err := s.handleReadToolApproval(&state, msg.agentID, msg.assignmentID, msg.approvalID)
+			result, decision, approval, mutated, err := s.handleReadToolApproval(&state, msg.agentID, msg.assignmentID, msg.approvalID)
 			if err == nil && mutated {
 				err = s.saveSnapshot(&state)
 			}
-			msg.reply <- toolApprovalDecisionResult{result: result, decision: decision, mutated: mutated, err: err}
+			msg.reply <- toolApprovalDecisionResult{approval: approval, result: result, decision: decision, mutated: mutated, err: err}
 		case listAgentCatalogCmd:
 			msg.reply <- listAgentCatalogResult{records: handleListAgentCatalog(&state)}
 		case getAgentCatalogCmd:

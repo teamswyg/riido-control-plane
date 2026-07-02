@@ -35,6 +35,7 @@ type readToolApprovalCmd struct {
 }
 
 type toolApprovalDecisionResult struct {
+	approval ToolApprovalRequest
 	result   ToolApprovalResult
 	decision *ToolApprovalDecision
 	mutated  bool
