@@ -9,7 +9,16 @@ import (
 const stagingCompletionProgressReadOnlyEvidence = "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"
 
 func TestStagingCompletionProgressReadOnlyBaselineStaysPartial(t *testing.T) {
-	body, err := os.ReadFile("../../" + stagingCompletionProgressReadOnlyEvidence)
+	evidence := loadCompletionProgressBaselineEvidence(t, stagingCompletionProgressReadOnlyEvidence)
+	if !evidence.Redacted || evidence.Decision.Status != "partial" {
+		t.Fatalf("baseline must be redacted partial evidence: redacted=%v status=%s", evidence.Redacted, evidence.Decision.Status)
+	}
+	assertNoActiveCompletionProgress(t, evidence)
+}
+
+func loadCompletionProgressBaselineEvidence(t *testing.T, path string) completionProgressBaselineEvidence {
+	t.Helper()
+	body, err := os.ReadFile("../../" + path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -17,10 +26,7 @@ func TestStagingCompletionProgressReadOnlyBaselineStaysPartial(t *testing.T) {
 	if err := json.Unmarshal(body, &evidence); err != nil {
 		t.Fatal(err)
 	}
-	if !evidence.Redacted || evidence.Decision.Status != "partial" {
-		t.Fatalf("baseline must be redacted partial evidence: redacted=%v status=%s", evidence.Redacted, evidence.Decision.Status)
-	}
-	assertNoActiveCompletionProgress(t, evidence)
+	return evidence
 }
 
 type completionProgressBaselineEvidence struct {

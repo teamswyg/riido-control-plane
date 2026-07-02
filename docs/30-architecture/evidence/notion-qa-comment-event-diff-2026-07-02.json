@@ -99,6 +99,15 @@
       "status_tag": "[codex][진행중][부분증적]",
       "signal": "Read-only staging baseline on the reported task currently has thinking/running/queued counts at zero and no active stream.",
       "decision": "Baseline is useful but does not close the bug because it does not capture the reproduction moment."
+    },
+    {
+      "id": "39120241-cf7f-8125-bd7a-001d0eff72b8",
+      "discussion": "completion_progress_after_terminal",
+      "observed_at": "2026-07-02T11:16:00Z",
+      "event_type": "readonly_followup_baseline",
+      "status_tag": "[codex][진행중][부분증적]",
+      "signal": "A second same-task staging follow-up again has thinking/running/queued counts at zero, v2/v3 active_stream false, and active_thread_filters at zero.",
+      "decision": "Follow-up baseline strengthens non-reproduction evidence but still does not close the bug without same-conversation reproduction payloads."
     }
   ],
   "reviewed_discussions": [
@@ -134,9 +143,11 @@
       "current_evidence_refs": [
         "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go",
         "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go",
-        "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"
+        "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go",
+        "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json",
+        "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json"
       ],
-      "decision": "Backfill as a distinct P0 visual/event-order cycle. Existing terminal and queued tests reduce backend risk but do not prove this user-visible symptom; next evidence must capture v3 history, v2 task threads, thread-stream-subscription, SSE events, and screenshot state for the same completed conversation. The endpoint contract approval gate discussed in the thread is a separate P-3 candidate, not this P0 fix."
+      "decision": "Backfill as a distinct P0 visual/event-order cycle. Existing terminal and queued tests plus two read-only staging baselines reduce backend risk but do not prove this user-visible symptom; next evidence must capture v3 history, v2 task threads, thread-stream-subscription, SSE events, and screenshot state for the same completed conversation at the reproduction moment. The endpoint contract approval gate discussed in the thread is a separate P-3 candidate, not this P0 fix."
     },
     {
       "id": "author_fallback",
@@ -179,6 +190,11 @@
       "id": "39120241-cf7f-81ec-99e9-001d90f2fa61",
       "target": "completion_progress_after_terminal_discussion",
       "status": "[codex][계획중][증적요청]"
+    },
+    {
+      "id": "39120241-cf7f-8125-bd7a-001d0eff72b8",
+      "target": "completion_progress_after_terminal_discussion",
+      "status": "[codex][진행중][부분증적]"
     },
     {
       "id": "39120241-cf7f-81c7-9e1b-001dc54ec414",

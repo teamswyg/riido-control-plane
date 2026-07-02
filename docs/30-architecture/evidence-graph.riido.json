@@ -8590,8 +8590,8 @@
     },
     {
       "id": "notion_backfill_review_loop",
-      "observation": "The backfilled v1.24 AI Agent QA Notion page contained older page-body guidance and newer comment/repo evidence; for example the page body mentioned pre-notarization staging desktop workarounds while later comments and readiness evidence proved a notarized CDN DMG, and a page-level server-deploy property could be misread as backend deploy truth. A follow-up read also shows the CW structured subpage remains aligned with readiness: three CW-AIA items are confirmed, while eight remain product-policy or client/design visual work. A later selected comment diff also separated already-evidenced queued/author/DMG items from a newly under-backfilled completed-but-still-progressing UI report, and a read-only staging sample of that task showed no current active stream, running thread, queued copy, or visible thinking state.",
-      "hypothesis": "Redacted Notion backfill review artifacts can make the latest truth machine-readable without changing product code: stale body guidance cleanup, property scope, generated P0 cycle count, CW subpage status, comment-event diff status, current read-only API/visual baseline, and visual-partial status are separated into reviewed signals and bound to operational readiness.",
+      "observation": "The backfilled v1.24 AI Agent QA Notion page contained older page-body guidance and newer comment/repo evidence; for example the page body mentioned pre-notarization staging desktop workarounds while later comments and readiness evidence proved a notarized CDN DMG, and a page-level server-deploy property could be misread as backend deploy truth. A follow-up read also shows the CW structured subpage remains aligned with readiness: three CW-AIA items are confirmed, while eight remain product-policy or client/design visual work. A later selected comment diff also separated already-evidenced queued/author/DMG items from a newly under-backfilled completed-but-still-progressing UI report. Read-only and follow-up staging samples of that task both showed no current active stream, running thread, queued copy, or visible thinking state, which strengthens the non-reproduction baseline but still leaves the original reported race uncaptured.",
+      "hypothesis": "Redacted Notion backfill review artifacts can make the latest truth machine-readable without changing product code: stale body guidance cleanup, property scope, generated P0 cycle count, CW subpage status, comment-event diff status, repeated read-only API/visual baselines, and visual-partial status are separated into reviewed signals and bound to operational readiness.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence"
       ],
@@ -8616,13 +8616,17 @@
         "kind": "manifest",
         "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"
       },
-      {
-        "kind": "manifest",
-        "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"
-      },
-      {
-        "kind": "test",
-        "path": "tools/operationalreadiness/notion_backfill_review_test.go"
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_backfill_review_test.go"
     },
     {
       "kind": "test",
@@ -8636,11 +8640,15 @@
         "kind": "test",
         "path": "tools/operationalreadiness/notion_qa_comment_event_diff_test.go"
       },
-      {
-        "kind": "test",
-        "path": "tools/operationalreadiness/staging_completion_progress_readonly_test.go"
-      }
-  ],
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/staging_completion_progress_readonly_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/staging_completion_progress_followup_test.go"
+        }
+      ],
       "verifiers": [
         {
           "kind": "tool",
@@ -8662,12 +8670,16 @@
         "kind": "test",
         "path": "tools/operationalreadiness/notion_qa_comment_event_diff_test.go"
       },
-      {
-        "kind": "test",
-        "path": "tools/operationalreadiness/staging_completion_progress_readonly_test.go"
-      },
-      {
-        "kind": "tool",
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/staging_completion_progress_readonly_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/staging_completion_progress_followup_test.go"
+        },
+        {
+          "kind": "tool",
         "path": "tools/evidencegraph/main.go"
         }
       ],
@@ -8692,18 +8704,23 @@
         "path": "notion-qa-comment-event-diff-2026-07-02",
         "redacted": true
       },
-      {
-        "kind": "artifact",
-        "path": "staging-completion-progress-readonly-2026-07-02",
-        "redacted": true
-      },
-      {
-        "kind": "artifact",
+        {
+          "kind": "artifact",
+          "path": "staging-completion-progress-readonly-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "staging-completion-progress-followup-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
         "path": "operational-readiness-evidence",
         "redacted": true
       }
     ],
-      "decision": "The latest Notion backfill reviews separate current truth from stale snapshots and new gaps: treat newer comments/generated readiness as current truth, keep staging_client_p0_visual_retest partial for product-policy/client-design visual evidence, remove stale page-body Gatekeeper runbook guidance, and track completed-but-still-progressing UI as its own P0 evidence request instead of merging it into the already-evidenced queued fix. The current read-only staging sample does not reproduce the completed/progress drift, but it remains partial because a reproduced same-conversation network snapshot is still required. The QA page now points testers to the signed/notarized CDN DMG, the old xattr/ad-hoc codesign commands are no longer presented as install steps, and product readiness remains partial until teammate install and visual QA screenshots close.",
+      "decision": "The latest Notion backfill reviews separate current truth from stale snapshots and new gaps: treat newer comments/generated readiness as current truth, keep staging_client_p0_visual_retest partial for product-policy/client-design visual evidence, remove stale page-body Gatekeeper runbook guidance, and track completed-but-still-progressing UI as its own P0 evidence request instead of merging it into the already-evidenced queued fix. The read-only and follow-up staging samples do not reproduce the completed/progress drift: both show zero active streams, zero running threads, zero queued messages, zero active subscription filters, and no visible thinking/running/queued copy on the sampled task. The cycle remains partial because these are non-reproduction baselines; closure still requires a same-conversation screenshot plus v3, v2, thread-stream-subscription, and SSE payload captured at the moment the reported race appears. The QA page now points testers to the signed/notarized CDN DMG, the old xattr/ad-hoc codesign commands are no longer presented as install steps, and product readiness remains partial until teammate install and visual QA screenshots close.",
       "next_loop": "closed_loop_candidate"
     },
     {
