@@ -181,6 +181,16 @@
       "reason": "Client-surface monitoring now has merged riido-infra alarm topology evidence, but remains stale partial readiness until environment-specific threshold/action plan/apply evidence exists."
     },
     {
+      "candidate_id": "operational-readiness:staging_client_p0_visual_retest",
+      "disposition": "deferred",
+      "priority": "P0",
+      "owner": "client-qa-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "staging_client_p0_visual_screenshot_evidence",
+      "review_by": "2026-07-08",
+      "reason": "Backend P0 contract fixes are unblocked, but the visual screenshot confirmation remains a client QA artifact tracked through issue 711 and must not fail server-only follow-up work."
+    },
+    {
       "candidate_id": "operational-readiness:daemon_network_disconnect_waiting",
       "disposition": "triage_required",
       "priority": "P1",
