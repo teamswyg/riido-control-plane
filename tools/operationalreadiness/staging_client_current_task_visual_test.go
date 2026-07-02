@@ -34,7 +34,12 @@ func TestStagingClientCurrentTaskVisualEvidence(t *testing.T) {
 
 func loadCurrentTaskVisualEvidence(t *testing.T) currentTaskVisualEvidence {
 	t.Helper()
-	body, err := os.ReadFile("../../" + stagingClientCurrentTaskVisualEvidence)
+	return loadVisualEvidence(t, stagingClientCurrentTaskVisualEvidence)
+}
+
+func loadVisualEvidence(t *testing.T, path string) currentTaskVisualEvidence {
+	t.Helper()
+	body, err := os.ReadFile("../../" + path)
 	if err != nil {
 		t.Fatal(err)
 	}
