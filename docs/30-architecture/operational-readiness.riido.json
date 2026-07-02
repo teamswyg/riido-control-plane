@@ -149,15 +149,17 @@
         "id": "notion_p0_cw_feedback_inventory",
         "priority": "P0",
         "status": "partial",
-        "codex_status": "[codex][진행중]",
+        "codex_status": "[codex][완료][전달요청]",
         "source": "notion:38f20241cf7f813cbe7cddf3c6fd8b65#cw-ai-agent-feedback",
-        "summary": "CW structured QA feedback is backfilled as CW-AIA-001..011 so unresolved onboarding, layout, copy, logo, and nickname visual risks cannot be hidden behind backend-only green checks.",
+        "summary": "CW structured QA feedback is backfilled as CW-AIA-001..011 and triaged: backend/control-plane/infra has no remaining blocker, CW-AIA-003/006/009 stay confirmed, CW-AIA-001/002 need product onboarding policy, and CW-AIA-004/005/007/008/010/011 remain client/design visual QA work. Product readiness stays partial until screenshot/design-decision evidence closes the open visual items.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
-        "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
+        "required_next_command": "open https://app.notion.com/p/38f20241cf7f813cbe7cddf3c6fd8b65 and attach visual screenshots or product decisions for the remaining CW-AIA items",
         "evidence_refs": [
           {"kind": "external", "path": "notion:https://app.notion.com/p/38f20241cf7f813cbe7cddf3c6fd8b65"},
-          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"}
+          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"},
+          {"kind": "external", "path": "notion-comment:38f20241-cf7f-81ed-af9f-001deb8da349"},
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-8110-ac53-001d16e97a80"}
         ]
       }
     ]
