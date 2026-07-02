@@ -14,6 +14,7 @@
     "default_token_env": "RIIDO_PRIVATE_JWT",
     "missing_token_behavior": "writes redacted decision=blocked_missing_bearer_token evidence instead of exiting without an artifact",
     "redaction_policy": "message bodies, result messages, progress line text, and bearer-token request headers are excluded from the generated JSON report",
+    "candidate_conversation_behavior": "when conversation-id is omitted, emits redacted candidate_conversations with conversation_id, sample thread/assignment/run ids, and running/queued/terminal/active-stream counts so QA can choose the right conversation for same-moment recapture",
     "capture_window": "5s default SSE window",
     "terminal_live_conflict_detection": "reports terminal_active_stream_count, terminal_filter_matched, and decision=captured_terminal_live_conflict when a completed/stopped/failed/cancelled/timeout thread has active_stream, remains in active_thread_filters, or receives a matching live SSE event"
   },

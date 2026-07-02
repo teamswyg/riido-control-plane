@@ -3,16 +3,18 @@ package main
 import "encoding/json"
 
 type report struct {
-	SchemaVersion string                `json:"schema_version"`
-	CapturedAt    string                `json:"captured_at"`
-	Redacted      bool                  `json:"redacted"`
-	Source        sourceSummary         `json:"source"`
-	Endpoints     []endpointObservation `json:"endpoints"`
-	V3            threadSummary         `json:"v3_threads"`
-	V2            threadSummary         `json:"v2_threads"`
-	Subscription  subscriptionSummary   `json:"thread_stream_subscription"`
-	SSEEvents     []sseEventSummary     `json:"sse_events"`
-	Decision      decisionSummary       `json:"decision"`
+	SchemaVersion     string                  `json:"schema_version"`
+	CapturedAt        string                  `json:"captured_at"`
+	Redacted          bool                    `json:"redacted"`
+	Source            sourceSummary           `json:"source"`
+	Endpoints         []endpointObservation   `json:"endpoints"`
+	V3                threadSummary           `json:"v3_threads"`
+	V2                threadSummary           `json:"v2_threads"`
+	Subscription      subscriptionSummary     `json:"thread_stream_subscription"`
+	SSEEvents         []sseEventSummary       `json:"sse_events"`
+	ConversationCount int                     `json:"candidate_conversation_count,omitempty"`
+	Conversations     []conversationCandidate `json:"candidate_conversations,omitempty"`
+	Decision          decisionSummary         `json:"decision"`
 }
 
 type sourceSummary struct {

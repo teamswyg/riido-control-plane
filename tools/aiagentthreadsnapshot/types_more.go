@@ -42,3 +42,15 @@ type decisionSummary struct {
 	Status string `json:"status"`
 	Reason string `json:"reason"`
 }
+
+type conversationCandidate struct {
+	ConversationID string `json:"conversation_id"`
+	ThreadCount    int    `json:"thread_count"`
+	RunningCount   int    `json:"running_count"`
+	QueuedCount    int    `json:"queued_count"`
+	TerminalCount  int    `json:"terminal_count"`
+	ActiveStreams  int    `json:"active_stream_count"`
+	ThreadID       string `json:"sample_thread_id,omitempty"`
+	AssignmentID   string `json:"sample_assignment_id,omitempty"`
+	RunID          string `json:"sample_run_id,omitempty"`
+}

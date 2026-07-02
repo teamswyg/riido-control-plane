@@ -26,6 +26,7 @@ func TestCompletionProgressCaptureToolEvidenceIsRedacted(t *testing.T) {
 			Path                          string `json:"path"`
 			TerminalLiveConflictDetection string `json:"terminal_live_conflict_detection"`
 			MissingTokenBehavior          string `json:"missing_token_behavior"`
+			CandidateConversationBehavior string `json:"candidate_conversation_behavior"`
 		} `json:"tool"`
 	}
 	if err := json.Unmarshal(body, &evidence); err != nil {
@@ -45,5 +46,8 @@ func TestCompletionProgressCaptureToolEvidenceIsRedacted(t *testing.T) {
 	}
 	if !strings.Contains(evidence.Tool.MissingTokenBehavior, "blocked_missing_bearer_token") {
 		t.Fatal("capture tool evidence must preserve missing-token blocked evidence")
+	}
+	if !strings.Contains(evidence.Tool.CandidateConversationBehavior, "candidate_conversations") {
+		t.Fatal("capture tool evidence must describe candidate conversation selection")
 	}
 }

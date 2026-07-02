@@ -36,6 +36,9 @@ func TestSnapshotRedactsTokenAndBodies(t *testing.T) {
 	if !got.Redacted || got.V3.ThreadCount != 1 || len(got.V3.HighlightedThreads) != 1 {
 		t.Fatalf("unexpected report: %+v", got)
 	}
+	if got.ConversationCount != 1 || len(got.Conversations) != 1 {
+		t.Fatalf("missing candidate conversations: %+v", got)
+	}
 }
 
 func fakeHandler(w http.ResponseWriter, r *http.Request) {

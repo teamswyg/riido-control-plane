@@ -30,6 +30,8 @@ func capture(ctx context.Context, cfg config) (report, error) {
 	rep.Endpoints = append(rep.Endpoints, v3.Observation, v2.Observation, sub.Observation)
 	rep.V3 = summarizeThreads(v3.Payload, cfg.ConversationID)
 	rep.V2 = summarizeThreads(v2.Payload, cfg.ConversationID)
+	rep.Conversations, rep.ConversationCount = candidateConversations(
+		v3.Payload, v2.Payload, 25)
 	rep.Subscription = summarizeSubscription(
 		sub.Payload, highlightedThreads(rep), cfg.ConversationID)
 	if sub.Payload.Stream.Href != "" {
