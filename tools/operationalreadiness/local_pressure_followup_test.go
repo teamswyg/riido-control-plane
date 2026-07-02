@@ -32,7 +32,12 @@ func TestLocalPressureFollowupEvidence(t *testing.T) {
 
 func loadLocalPressureFollowup(t *testing.T) pressureEvidence {
 	t.Helper()
-	body, err := os.ReadFile("../../" + localPressureFollowup)
+	return loadPressureEvidence(t, localPressureFollowup)
+}
+
+func loadPressureEvidence(t *testing.T, path string) pressureEvidence {
+	t.Helper()
+	body, err := os.ReadFile("../../" + path)
 	if err != nil {
 		t.Fatal(err)
 	}
