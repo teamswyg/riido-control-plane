@@ -12,9 +12,9 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `86`
 - claim refs: `101`
-- change refs: `1159`
-- verifier refs: `548`
-- evidence refs: `263`
+- change refs: `1162`
+- verifier refs: `549`
+- evidence refs: `264`
 
 ## Compiled Chain Summary
 
@@ -25,7 +25,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `47` | `48` | `753` | `332` | `140` |
+| `closed_loop_candidate` | `47` | `48` | `756` | `333` | `141` |
 | `operational_readiness_release_harness` | `19` | `32` | `143` | `87` | `58` |
 | `ai_thread_history` | `8` | `8` | `113` | `55` | `11` |
 | `closed_loop_candidate_decision` | `7` | `7` | `110` | `52` | `35` |
@@ -118,7 +118,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `operational_readiness_staging_public_burst_load_loop` | `1` | `5` | `3` | `3` | `operational_readiness_release_harness` |
 | `operational_readiness_deploy_overlap_burst_loop` | `1` | `3` | `3` | `2` | `operational_readiness_release_harness` |
 | `daemon_reconnect_runtimeactor_evidence_loop` | `1` | `4` | `3` | `2` | `operational_readiness_release_harness` |
-| `notion_backfill_review_loop` | `1` | `27` | `18` | `10` | `closed_loop_candidate` |
+| `notion_backfill_review_loop` | `1` | `30` | `19` | `11` | `closed_loop_candidate` |
 | `operational_readiness_staging_dmg_gatekeeper_evidence_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `operational_readiness_cw_feedback_transfer_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `container_image_contract_runtime_shape_loop` | `1` | `16` | `6` | `4` | `closed_loop_candidate` |
