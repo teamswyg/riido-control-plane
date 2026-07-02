@@ -7877,6 +7877,78 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "notion_p0_server_status_transfer_loop",
+      "observation": "After the server fixes for queued_by_busy_agent and instruction intent dialogue were merged and deployed, the executable operational readiness backfill still showed both Notion P0 cycles as [codex][진행중]. That made backend-complete work look indistinguishable from open implementation work, even though product readiness must remain partial until visual screenshot evidence exists.",
+      "hypothesis": "If operational readiness marks server-complete P0 cycles as [codex][완료][전달요청] while keeping their status partial and next artifact as staging_client_p0_visual_screenshot_evidence, agents and humans can distinguish closed backend work from the remaining client visual acceptance gate without changing endpoint contracts.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/operational-readiness.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/evidence-graph.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_server_transfer_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "queued_by_busy_agent and instruction intent dialogue are now represented as server-complete transfer requests in the Notion P0 cycle table, while the covered/partial product gate is unchanged: staging_client_p0_visual_retest remains partial and stale until screenshot evidence is attached. This keeps P0 visual bypass explicit instead of silently marking product readiness covered.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "container_image_contract_runtime_shape_loop",
       "observation": "The container image contract manifest and verifier were executable, but they were not bound into the loop registry or evidence graph, so changes under tools/containercontract could bypass target verifier routing and force agents to infer runtime image ownership from scattered files.",
       "hypothesis": "Binding the container image contract, Dockerfile, verifier helpers, module-decomposition ratchet, and integration matrix evidence into one claim lets changed-path QA route container runtime shape edits to the exact verifier commands without asking agents to read prose.",
