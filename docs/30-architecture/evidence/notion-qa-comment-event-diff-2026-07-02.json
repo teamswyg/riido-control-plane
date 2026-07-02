@@ -358,6 +358,21 @@
       "status": "[codex][완료][성능개선][staging 배포]"
     }
   ],
+  "readback_observations": [
+    {
+      "observed_at": "2026-07-02T16:59:00Z",
+      "tool": "notion.get_comments",
+      "mode": "include_all_blocks=true, include_resolved=true",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed"
+      ],
+      "decision": "Do not treat a Notion get_comments readback that stops at the 31-comment page-level discussion snapshot as proof that later QA evidence comments were not written; preserve write-confirmed IDs separately until connector readback catches up or pagination is available."
+    }
+  ],
   "next_actions": [
     {
       "owner": "control_plane",
