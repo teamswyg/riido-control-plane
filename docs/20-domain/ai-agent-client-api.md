@@ -122,7 +122,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | --- | --- |
 | `user` | User follow-up instruction inside the AI thread. Use author_principal_id for the writer when present. |
 | `progress` | Runtime progress log, ordered by seq inside assignment_id and run_id |
-| `agent` | Agent status or final result message. queued_by_busy_agent is a current status hint, not a durable agent reply; v3 suppresses it when the same conversation has newer progress, running, or result messages. |
+| `agent` | Agent status or final result message. queued_by_busy_agent is exposed through thread state fields, not v3 messages[]; the server removes queued status rows from the timeline so they are not rendered as agent replies. |
 
 ### Thread History v3 Interaction Scenarios
 
@@ -142,7 +142,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | --- | --- |
 | `conversation-card-ordering` | First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root. |
 | `message-row-ordering` | Within one thread record, render messages by observed_at, then role order user -> progress -> agent, then seq, then message_id. Use message_id as the stable row key, not body text. |
-| `queued-status-current-only` | comment_kind=queued_by_busy_agent means the assignment is currently waiting behind busy work. If the same conversation_id has an active running thread state, newer progress, or result messages, v3 history omits that stale queued status from messages[] while preserving the user's follow-up message. Running conversation state wins even when event timestamps arrive out of order. |
+| `queued-status-current-only` | comment_kind=queued_by_busy_agent means the assignment is currently waiting behind busy work, but v3 history must not expose that copy as a timeline message. Preserve work_status, assignment_state, active_stream, and the user's follow-up message; render queued UI from state fields instead of messages[]. |
 | `queued-stream-current-only` | If the same conversation_id has an active running thread, a superseded queued thread must not expose per-thread active_stream and must not win the collection active_stream. This prevents a stale queued hint from keeping the UI in a thinking/progress state while the conversation is already running. |
 | `progress-dedupe-ordering` | For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility. |
 | `late-terminal-guard` | If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running. |

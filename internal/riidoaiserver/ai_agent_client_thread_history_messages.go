@@ -34,6 +34,9 @@ func taskThreadProgressObservedAt(thread AIAgentTaskThreadRecord, line AgentThre
 }
 
 func taskThreadProjectionMessage(thread AIAgentTaskThreadRecord) (AIAgentTaskThreadHistoryMessage, bool) {
+	if thread.CommentKind == AgentTaskCommentQueuedByBusyAgent {
+		return AIAgentTaskThreadHistoryMessage{}, false
+	}
 	body := clientVisibleTaskThreadMessage(thread)
 	result := clientVisibleTaskThreadResultMessage(thread)
 	if body == "" && result == "" {

@@ -26,26 +26,26 @@ func TestAIAgentTaskThreadHistoryHidesSupersededBusyQueuedMessage(t *testing.T) 
 	}
 }
 
-func TestAIAgentTaskThreadHistoryKeepsCurrentBusyQueuedMessage(t *testing.T) {
+func TestAIAgentTaskThreadHistoryHidesCurrentBusyQueuedMessage(t *testing.T) {
 	queuedAt := time.Unix(10, 0).UTC()
 	threads := []AIAgentTaskThreadHistoryRecord{
-		historyRecordWithMessages("thread-queued", "conversation-a", []AIAgentTaskThreadHistoryMessage{
-			historyAgentMessage(AgentTaskCommentQueuedByBusyAgent, queuedAt),
-		}),
+		{
+			ThreadID:        "thread-queued",
+			ConversationID:  "conversation-a",
+			WorkStatus:      AgentWorkStatusQueued,
+			AssignmentState: AgentAssignmentStateQueued,
+			Messages: []AIAgentTaskThreadHistoryMessage{
+				historyAgentMessage(AgentTaskCommentQueuedByBusyAgent, queuedAt),
+			},
+		},
 	}
 	suppressSupersededQueuedHistoryMessages(threads)
-	if !historyHasAgentCommentKind(threads[0].Messages, AgentTaskCommentQueuedByBusyAgent) {
-		t.Fatalf("current queued message must remain visible: %+v", threads[0].Messages)
+	if historyHasAgentCommentKind(threads[0].Messages, AgentTaskCommentQueuedByBusyAgent) {
+		t.Fatalf("queued status must not render as timeline message: %+v", threads[0].Messages)
 	}
-}
-
-func historyRecordWithMessages(
-	threadID string,
-	conversationID string,
-	messages []AIAgentTaskThreadHistoryMessage,
-) AIAgentTaskThreadHistoryRecord {
-	return AIAgentTaskThreadHistoryRecord{
-		ThreadID: threadID, ConversationID: conversationID, Messages: messages,
+	if threads[0].AssignmentState != AgentAssignmentStateQueued ||
+		threads[0].WorkStatus != AgentWorkStatusQueued {
+		t.Fatalf("queued status must stay available on the thread: %+v", threads[0])
 	}
 }
 
@@ -61,13 +61,4 @@ func historyUserMessage(body string, observedAt time.Time) AIAgentTaskThreadHist
 		MessageID: "user-" + body, Role: AIAgentTaskThreadMessageRoleUser,
 		Body: body, ObservedAt: observedAt,
 	}
-}
-
-func historyHasAgentCommentKind(messages []AIAgentTaskThreadHistoryMessage, kind AgentTaskCommentKind) bool {
-	for _, message := range messages {
-		if message.Role == AIAgentTaskThreadMessageRoleAgent && message.CommentKind == kind {
-			return true
-		}
-	}
-	return false
 }
