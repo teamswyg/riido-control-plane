@@ -13,7 +13,7 @@ func TestAIAgentIntentDialogueScenarioKeepsProgressAndLimitResult(t *testing.T) 
 	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
 	root := mustAssignCopywritingTask(t, store, ctx, principal)
 	recordThreadProgress(t, store, root, "생각중…", "본문을 먼저 읽겠습니다.", "파악 완료.")
-	recordNeedsInput(t, store, root, "@민준용 님, 어떤 작업부터 진행할까요?")
+	recordNeedsInput(t, store, root, "@민준용 님, 작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요.")
 	draft, err := store.CreateAIAgentTaskThreadMessage(ctx, principal, root.TaskID, root.ThreadID, CreateAIAgentTaskThreadMessageRequest{
 		AssignmentID: "asn-copy-draft",
 		Body:         "우리 신기능 셀링 포인트 세 가지 반영해서 훅이 강한 카피라이팅 초안 3개만 짜줘.",

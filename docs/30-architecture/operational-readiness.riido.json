@@ -103,15 +103,16 @@
         "id": "notion_p0_instruction_intent_dialogue",
         "priority": "P0",
         "status": "partial",
-        "codex_status": "[codex][완료][전달요청]",
+        "codex_status": "[codex][진행중]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#instruction-intent-dialogue",
-        "summary": "Explicit command replies should execute while non-command component text asks for intent; server PR evidence exists and client QA still supplies product proof.",
+        "summary": "Explicit command replies should execute while non-command component text asks for intent; the waiting_for_user copy is being adjusted so the agent says it reviewed the task and asks for desired output/direction instead of asking what to start.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
         "required_next_command": "go test ./internal/riidoaiserver -run 'Test.*Intent.*Dialogue|Test.*NonCommand' -count=1",
         "evidence_refs": [
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go"},
-          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"}
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_assert_test.go"}
         ]
       },
       {

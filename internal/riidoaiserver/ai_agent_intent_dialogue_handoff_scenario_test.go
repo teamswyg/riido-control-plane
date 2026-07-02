@@ -11,7 +11,7 @@ func TestAIAgentIntentDialogueCanHandoffAfterProviderLimit(t *testing.T) {
 	store := NewDevelopmentAIAgentClientStore()
 	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
 	root := mustAssignCopywritingTask(t, store, ctx, principal)
-	recordNeedsInput(t, store, root, "@민준용 님, 어떤 작업부터 진행할까요?")
+	recordNeedsInput(t, store, root, "@민준용 님, 작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요.")
 	draft := mustCreateCopywritingDraft(t, store, ctx, principal, root)
 	recordAssignmentCompleted(t, store, draft, "Riido 카피라이팅 3개 대안 비교")
 	research := mustCreateResearchFollowup(t, store, ctx, principal, draft)
