@@ -47,6 +47,15 @@
       "decision": "Server contract is covered; client visual verification remains the product gate."
     },
     {
+      "id": "39120241-cf7f-816a-8c1f-001d780c7b57",
+      "discussion": "waiting_for_user_intent",
+      "observed_at": "2026-07-02T01:22:09.543Z",
+      "event_type": "provider_document_intent_evidence",
+      "status_tag": "[codex][완료][전달요청]",
+      "signal": "ProviderDocument explicit instructions now take priority over stale component detail text, so clear document commands do not fall into waiting_for_user.",
+      "decision": "Backend intent evidence is covered; keep product readiness partial until visual QA confirms the dialogue UX."
+    },
+    {
       "id": "38f20241-cf7f-80ed-8da6-001df524cd88",
       "discussion": "author_fallback",
       "observed_at": "2026-06-30T08:54:39.811Z",
@@ -72,6 +81,24 @@
       "status_tag": "[codex][완료][P0][배포]",
       "signal": "Daemon v0.0.58 release and CDN latest mirror verified the Codex unknown-variant fix is shipped.",
       "decision": "Do not reopen control-plane without a post-v0.0.58 device/version/log reproduction."
+    },
+    {
+      "id": "39120241-cf7f-81a6-b6b5-001d1b49303b",
+      "discussion": "codex_unknown_variant",
+      "observed_at": "2026-07-02T10:07:57.935Z",
+      "event_type": "desktop_provider_path_evidence",
+      "status_tag": "[codex][완료/진행중][증적추가]",
+      "signal": "The staging desktop runtime list issue was split from the unknown-variant fix and traced to GUI/Finder PATH missing provider CLIs.",
+      "decision": "Treat desktop provider PATH as a desktop release concern; keep control-plane closed unless latest daemon and desktop still reproduce the provider error."
+    },
+    {
+      "id": "39120241-cf7f-8178-93e6-001d7d46aec8",
+      "discussion": "codex_unknown_variant",
+      "observed_at": "2026-07-02T10:09:14.555Z",
+      "event_type": "daemon_release_correction",
+      "status_tag": "[codex][정정/증적정리]",
+      "signal": "The discussion corrected the status: unknown variant is fixed by daemon v0.0.58, while the staging desktop PATH fix is a separate delivery issue.",
+      "decision": "Future regressions must report latest daemon version, desktop build, device, assignment, and redacted log before reopening backend work."
     },
     {
       "id": "39120241-cf7f-8094-a687-001d6aa33891",
@@ -182,6 +209,42 @@
       "decision": "Server evidence is covered; if the UI still shows the copy, require same-action Network payloads before reopening backend."
     },
     {
+      "id": "39120241-cf7f-80fd-bc93-001d6a27203d",
+      "discussion": "queued_by_busy_agent",
+      "observed_at": "2026-07-02T09:03:04.264Z",
+      "event_type": "qa_reopen_existing_thread_assignment",
+      "status_tag": "reported_p0",
+      "signal": "QA reported that the first assignment path looked fixed, but assigning into an existing thread could still show the busy-agent copy.",
+      "decision": "Preserve this as a distinct repro shape; endpoint contracts stay unchanged and backend reopening requires same-action Network payloads."
+    },
+    {
+      "id": "39120241-cf7f-811c-acba-001d6b02996a",
+      "discussion": "queued_by_busy_agent",
+      "observed_at": "2026-07-02T09:31:01.939Z",
+      "event_type": "readonly_api_analysis",
+      "status_tag": "[codex][증적][분석][P0]",
+      "signal": "Staging v3 threads, v2 threads, and stream subscription showed zero queued markers for the reported task, so broad active_stream removal was rejected.",
+      "decision": "Do not change server projection without captured mutation/v3/v2/subscription/SSE evidence that still includes queued copy."
+    },
+    {
+      "id": "39120241-cf7f-8149-ba94-001d3c2ecfa9",
+      "discussion": "queued_by_busy_agent",
+      "observed_at": "2026-07-02T09:35:56.950Z",
+      "event_type": "server_projection_transfer",
+      "status_tag": "[codex][완료][전달요청]",
+      "signal": "The discussion links PR #749, staging deploy, and real mutation evidence where repeated assignment returns idle and empty visible queued copy.",
+      "decision": "If latest staging still shows queued copy, split client optimistic/cache state from server read-model using the requested Network captures."
+    },
+    {
+      "id": "39120241-cf7f-81e4-9f6e-001d6a501b66",
+      "discussion": "multi_assignment_projection",
+      "observed_at": "2026-07-02T00:42:59.595Z",
+      "event_type": "projection_transfer",
+      "status_tag": "[codex][완료][전달요청]",
+      "signal": "The three-agent mixed-status feedback was tied to the same assignable projection repair path as the busy-agent report.",
+      "decision": "Keep backend projection transfer evidence but require visual grouping/network captures before reopening multi-assignment server work."
+    },
+    {
       "id": "39120241-cf7f-816e-9523-001d6a184fdc",
       "discussion": "page_level_backfill_diff",
       "observed_at": "2026-07-02T11:03:42.184Z",
@@ -220,9 +283,25 @@
         "github:https://github.com/teamswyg/riido-control-plane/actions/runs/28568193167",
         "docs/30-architecture/evidence/staging-api-queued-client-projection-real-mutation-2026-07-02.json",
         "notion-comment:39120241-cf7f-81f7-b37a-001dba758d28",
+        "notion-comment:39120241-cf7f-80fd-bc93-001d6a27203d",
+        "notion-comment:39120241-cf7f-811c-acba-001d6b02996a",
+        "notion-comment:39120241-cf7f-8149-ba94-001d3c2ecfa9",
         "notion-comment:39120241-cf7f-81d5-9c0f-001d26c153a0"
       ],
       "decision": "Do not reopen backend queued projection without a fresh Network capture. Existing staging API evidence shows queued markers hidden from v2/v3/SSE; if UI still shows the copy, capture mutation, v3 threads, v2 threads, subscription, and SSE payloads for the same action."
+    },
+    {
+      "id": "waiting_for_user_intent",
+      "discussion_ref": "notion-discussion:38f20241-cf7f-80d3-a0a2-001c5921fb6e",
+      "status": "backend_contract_covered_client_visual_partial",
+      "latest_signal": "The discussion separates ambiguous/non-command waiting copy from explicit document instructions and records ProviderDocument intent evidence.",
+      "current_evidence_refs": [
+        "github:https://github.com/teamswyg/riido-control-plane/pull/737",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/740",
+        "notion-comment:39120241-cf7f-8170-8ea0-001daa3bd74d",
+        "notion-comment:39120241-cf7f-816a-8c1f-001d780c7b57"
+      ],
+      "decision": "Backend contract is covered: unclear content waits without active stream, while ProviderDocument explicit instructions execute. Product readiness remains partial until client visual QA confirms the intended dialogue."
     },
     {
       "id": "codex_unknown_variant",
@@ -231,7 +310,9 @@
       "latest_signal": "The discussion records daemon v0.0.58 plus desktop provider PATH evidence for the unknown variant issue.",
       "current_evidence_refs": [
         "github:https://github.com/teamswyg/riido-daemon/releases/tag/v0.0.58",
-        "riido-desktop:bc6b3dc"
+        "riido-desktop:bc6b3dc",
+        "notion-comment:39120241-cf7f-81a6-b6b5-001d1b49303b",
+        "notion-comment:39120241-cf7f-8178-93e6-001d7d46aec8"
       ],
       "decision": "No control-plane backend action is implied by this comment diff. Reopen only with latest daemon version, device id, assignment id, and redacted daemon log evidence."
     },
