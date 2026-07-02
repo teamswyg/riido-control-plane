@@ -24,6 +24,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 		fixtures:                seed.fixtures,
 		taskThreads:             seed.taskThreads,
 		taskThreadMessages:      seed.messages,
+		taskThreadProgressCache: map[string]taskThreadProgressMessageCache{},
 		subscribers:             map[int]aiAgentClientSubscriber{},
 		events:                  seed.events,
 		nextSubscriberID:        0,

@@ -53,9 +53,10 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(principal 
 }
 
 func (s *DevelopmentAIAgentClientStore) taskThreadHistoryMessagesLocked(thread AIAgentTaskThreadRecord) []AIAgentTaskThreadHistoryMessage {
+	progress := s.cachedTaskThreadProgressMessagesLocked(thread)
 	out := buildTaskThreadHistoryMessages(
 		s.taskThreadMessages[thread.ThreadID],
-		thread,
+		progress,
 	)
 	if message, ok := taskThreadProjectionMessage(thread); ok {
 		out = append(out, message)
