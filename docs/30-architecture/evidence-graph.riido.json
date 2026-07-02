@@ -8057,6 +8057,53 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "operational_readiness_queued_state_only_staging_evidence_loop",
+      "observation": "After PR #745 reached staging, the referenced QA task read-model returned queued_message_count=0, queued_thread_count=0, no active_stream, no active thread filters, and no queued_by_busy_agent replay events, but operational readiness still only referenced earlier v3/SSE repairs.",
+      "hypothesis": "Adding the PR, deploy run, Notion reply, and staging read-model checks to the queued_by_busy_agent P0 cycle keeps the QA handoff executable while preserving product readiness as partial until visual screenshot evidence confirms the client no longer shows stale optimistic copy.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "thread_history_v3_must_expose_stable_conversation_grouping"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_server_transfer_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_server_transfer_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/main.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/main.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The server-side queued fix is represented as a transfer-ready Notion P0 cycle with live staging counts, while the visual QA artifact remains the explicit next gate.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "container_image_contract_runtime_shape_loop",
       "observation": "The container image contract manifest and verifier were executable, but they were not bound into the loop registry or evidence graph, so changes under tools/containercontract could bypass target verifier routing and force agents to infer runtime image ownership from scattered files.",
       "hypothesis": "Binding the container image contract, Dockerfile, verifier helpers, module-decomposition ratchet, and integration matrix evidence into one claim lets changed-path QA route container runtime shape edits to the exact verifier commands without asking agents to read prose.",
