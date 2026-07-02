@@ -17,15 +17,23 @@ func TestOperationalReadinessBindsNotionQACommentEventDiff(t *testing.T) {
 		t.Fatal("missing Notion QA comment event diff evidence ref")
 	}
 	cycle := findNotionCycle(t, loadManifestForTest(t), "notion_p0_completion_progress_after_terminal")
-	if cycle.CodexStatus != "[codex][계획중][증적요청]" {
+	if cycle.CodexStatus != "[codex][진행중][부분증적]" {
 		t.Fatalf("completion/progress codex_status = %q", cycle.CodexStatus)
 	}
-	if cycle.RequiredNextArtifact != "completion_progress_same_conversation_network_snapshot" {
+	if cycle.RequiredNextArtifact != "reproduced_completion_progress_same_conversation_network_snapshot" {
 		t.Fatalf("completion/progress next artifact = %q", cycle.RequiredNextArtifact)
 	}
 	want := evidenceRef{Kind: "external", Path: "notion-comment:39120241-cf7f-81ec-99e9-001d90f2fa61"}
 	if !notionCycleHasEvidenceRef(cycle, want) {
 		t.Fatalf("completion/progress cycle missing Notion evidence ref %+v", want)
+	}
+	baselineComment := evidenceRef{Kind: "external", Path: "notion-comment:39120241-cf7f-8196-a65c-001d664f0e7a"}
+	if !notionCycleHasEvidenceRef(cycle, baselineComment) {
+		t.Fatalf("completion/progress cycle missing baseline comment ref %+v", baselineComment)
+	}
+	api := evidenceRef{Kind: "api_snapshot", Path: stagingCompletionProgressReadOnlyEvidence}
+	if !notionCycleHasEvidenceRef(cycle, api) {
+		t.Fatalf("completion/progress cycle missing read-only baseline %+v", api)
 	}
 }
 

@@ -99,15 +99,18 @@
         "id": "notion_p0_completion_progress_after_terminal",
         "priority": "P0",
         "status": "partial",
-        "codex_status": "[codex][계획중][증적요청]",
+        "codex_status": "[codex][진행중][부분증적]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#completion-progress-after-terminal",
-        "summary": "A Notion QA comment reports that an Agent answer can look completed while the UI still shows progress, and refresh can reveal an additional answer. Existing terminal and queued server tests reduce backend risk, but this symptom needs same-conversation screenshot plus v3, v2, subscription, and SSE captures before assigning root cause to server or client.",
+        "summary": "A Notion QA comment reports that an Agent answer can look completed while the UI still shows progress, and refresh can reveal an additional answer. Existing terminal and queued server tests reduce backend risk, and a read-only staging sample currently shows no active stream, running thread, queued copy, or visible thinking state. The reported race still needs a reproduced same-conversation screenshot plus v3, v2, subscription, and SSE captures before assigning root cause to server or client.",
         "backfilled_check": "staging_client_p0_visual_retest",
-        "required_next_artifact": "completion_progress_same_conversation_network_snapshot",
-        "required_next_command": "capture the same conversation's screenshot, GET /v3 task threads, GET /v2 task threads, GET thread-stream-subscription, and SSE agent_thread_progress payloads when the completed-but-progressing UI appears",
+        "required_next_artifact": "reproduced_completion_progress_same_conversation_network_snapshot",
+        "required_next_command": "when the completed-but-progressing UI appears, capture the same conversation's screenshot, GET /v3 task threads, GET /v2 task threads, GET thread-stream-subscription, and SSE agent_thread_progress payloads",
         "evidence_refs": [
           {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"},
+          {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"},
+          {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-readonly-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-81ec-99e9-001d90f2fa61"},
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-8196-a65c-001d664f0e7a"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"}
@@ -417,6 +420,12 @@
           "evidence_ref": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"
         },
         {
+          "id": "staging_completion_progress_readonly_2026_07_02",
+          "kind": "artifact",
+          "signal": "Read-only staging check on the reported QA task currently shows browser-visible thinking/running/queued counts at zero, v2/v3 active_stream false, running threads 0, queued threads/messages 0, and subscription active filters 0; this is a baseline, not a reproduced-race closure.",
+          "evidence_ref": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"
+        },
+        {
           "id": "server_contract_regression_tests",
           "kind": "test",
           "signal": "Control-plane tests cover queued status suppression, terminal active-stream closure, and user-message author preservation before client visual retest.",
@@ -525,9 +534,11 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-backfill-followup-review-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"},
+        {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-task-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-waiting-for-user-iaeSDGRQi7jl5QQ_UDNO7-2026-07-02.png"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-readonly-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
