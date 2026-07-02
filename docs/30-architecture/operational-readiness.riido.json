@@ -83,14 +83,16 @@
         "status": "partial",
         "codex_status": "[codex][완료][전달요청]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#terminal-stop-refresh",
-        "summary": "Stopped/deleted terminal work must not revive after refresh or late daemon events; server live smoke is proven and needs visual confirmation.",
+        "summary": "Stopped/deleted terminal work must not revive after refresh or late daemon events; server live mutation evidence proves v2/v3 stop truth and empty stream filters, while product readiness still needs visual confirmation.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
         "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
         "evidence_refs": [
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
-          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"}
+          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"},
+          {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-api-terminal-stop-refresh-real-mutation-2026-07-02.json"},
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-81d3-b312-001dec529267"}
         ]
       },
       {
