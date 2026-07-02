@@ -703,6 +703,12 @@
           "evidence_ref": "docs/30-architecture/evidence/control-plane-progress-message-id-stack-after-2026-07-03.json"
         },
         {
+          "id": "local_pressure_v3_history_readonly_projection_2026_07_03",
+          "kind": "artifact",
+          "signal": "After v3 thread history stopped copying v2-visible progress line slices before building messages[], local pressure measured zero errors, zero goroutine deltas, thread_history_v3 at about 11.4KB/op, and the v3 thread-history HTTP endpoint at about 39.7KB/op without changing endpoint response fields.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-readonly-projection-after-2026-07-03.json"
+        },
+        {
           "id": "local_pressure_tool_approval_signal_only_2026_07_03",
           "kind": "artifact",
           "signal": "After pending tool approval waits skip polling ticks when the approval cannot expire during the hold window, local pressure measured zero errors, zero goroutine deltas, and lower allocation/CPU per operation for tool_approval_waiters.",
@@ -734,6 +740,7 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-candidates-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-plain-text-fastpath-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-progress-message-id-stack-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-readonly-projection-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-before-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"},
