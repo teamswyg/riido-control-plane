@@ -6,6 +6,7 @@ func TestOperationalReadinessMarksServerCompleteP0AsTransferRequested(t *testing
 	m := loadManifestForTest(t)
 	want := []string{
 		"notion_p0_queued_by_busy_agent",
+		"notion_p0_terminal_stop_refresh",
 		"notion_p0_instruction_intent_dialo" + "gue",
 	}
 	for _, id := range want {
@@ -34,6 +35,22 @@ func TestOperationalReadinessBindsQueuedStateOnlyEvidence(t *testing.T) {
 	for _, ref := range want {
 		if !notionCycleHasEvidenceRef(cycle, ref) {
 			t.Fatalf("queued P0 cycle missing evidence ref %+v", ref)
+		}
+	}
+}
+
+func TestOperationalReadinessBindsTerminalStopLiveEvidence(t *testing.T) {
+	m := loadManifestForTest(t)
+	cycle := findNotionCycle(t, m, "notion_p0_terminal_stop_refresh")
+	want := []evidenceRef{
+		{Kind: "test", Path: "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
+		{Kind: "test", Path: "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
+		{Kind: "api_snapshot", Path: "docs/30-architecture/evidence/staging-api-terminal-stop-refresh-real-mutation-2026-07-02.json"},
+		{Kind: "external", Path: "notion-comment:39120241-cf7f-81d3-b312-001dec529267"},
+	}
+	for _, ref := range want {
+		if !notionCycleHasEvidenceRef(cycle, ref) {
+			t.Fatalf("terminal stop P0 cycle missing evidence ref %+v", ref)
 		}
 	}
 }

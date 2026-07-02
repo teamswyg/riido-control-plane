@@ -8176,6 +8176,69 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "operational_readiness_terminal_stop_staging_evidence_loop",
+      "observation": "Notion QA reported that stopped Agent comments could appear active again after refresh, while earlier evidence only covered repository tests and did not include a real staging stop/read-model mutation snapshot.",
+      "hypothesis": "Recording a real staging assign-stop-v2-v3-subscription sequence proves the SaaS read model treats stop as immediate terminal truth and keeps the remaining product gate focused on client visual state rather than reopening backend terminal-state logic.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "thread_history_v3_must_expose_stable_conversation_grouping"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/staging-api-terminal-stop-refresh-real-mutation-2026-07-02.json"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_server_transfer_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/main.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_server_transfer_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "staging-api-terminal-stop-refresh-real-mutation-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The staging API now has recorded live evidence that user stop closes the server truth immediately: the stop mutation returns stopped, v2 and v3 reads return only terminal state, no active stream is exposed, and the stream subscription has no active filters for the stopped assignment. The P0 remains product-partial only for client visual screenshot confirmation.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "operational_readiness_staging_dmg_gatekeeper_evidence_loop",
       "observation": "The Notion P0 gatekeeper report said the Riido Staging app could not be opened because Apple could not verify it, while the readiness manifest still marked the staging DMG work as in progress even after a CDN artifact was published.",
       "hypothesis": "A downloaded CDN DMG that passes shasum, spctl, stapler, mount checksum, app codesign, app spctl, and app stapler checks can be transferred to team QA as an install-screenshot gate instead of remaining an unresolved backend/infra packaging task.",
