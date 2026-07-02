@@ -6,6 +6,7 @@ func TestOperationalReadinessRejectsCoveredVisualWithoutScreenshot(t *testing.T)
 	m := loadManifestForTest(t)
 	check := findReadinessCheck(t, m, "staging_client_p0_visual_retest")
 	check.Status = "covered"
+	check.Measurements = filterOutMeasurementKind(check.Measurements, "screenshot")
 	check.Measurements = append(check.Measurements, measurement{
 		ID: "api_state", Kind: "artifact", Signal: "Server state is green.",
 	})
@@ -13,6 +14,16 @@ func TestOperationalReadinessRejectsCoveredVisualWithoutScreenshot(t *testing.T)
 	if err := verifyChecks("../..", m); err == nil {
 		t.Fatal("expected covered visual QA without screenshot evidence to fail")
 	}
+}
+
+func filterOutMeasurementKind(measurements []measurement, kind string) []measurement {
+	filtered := measurements[:0]
+	for _, measurement := range measurements {
+		if measurement.Kind != kind {
+			filtered = append(filtered, measurement)
+		}
+	}
+	return filtered
 }
 
 func TestOperationalReadinessAcceptsCoveredVisualWithScreenshot(t *testing.T) {

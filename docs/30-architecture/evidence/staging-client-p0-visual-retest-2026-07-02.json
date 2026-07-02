@@ -1,0 +1,77 @@
+{
+  "schema_version": "riido-staging-client-visual-snapshot.v1",
+  "id": "staging-client-p0-visual-retest-2026-07-02",
+  "environment": "staging",
+  "redacted": true,
+  "captured_at": "2026-07-02T06:52:00Z",
+  "subject": {
+    "workspace": "redacted",
+    "tasks": [
+      "uNYpHxDOzMp3vMy_urWsu",
+      "iaeSDGRQi7jl5QQ_UDNO7"
+    ]
+  },
+  "screenshots": [
+    {
+      "id": "task_uNYpHxDOzMp3vMy_urWsu_initial",
+      "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-task-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png",
+      "sha256": "904971f7bd908fc9a3b62847ad84d6a14fcfa55acc759b83dda510f075933621",
+      "bytes": 350754,
+      "visual_counts": {
+        "queued_copy": 0,
+        "thinking": 0,
+        "stopped_copy": 14,
+        "waiting_new_copy": 0,
+        "raw_unknown_author": 0,
+        "request_failed_400": 0
+      },
+      "api_summary": {
+        "v2_stream_subscription": {
+          "http": 200,
+          "active_thread_filters": 0,
+          "has_active_stream": false
+        },
+        "v3_threads": {
+          "http": 200,
+          "thread_count": 40,
+          "has_active_stream": false,
+          "queued_threads": 0,
+          "queued_messages": 0,
+          "terminal_active_streams": 0
+        }
+      }
+    },
+    {
+      "id": "waiting_for_user_iaeSDGRQi7jl5QQ_UDNO7",
+      "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-waiting-for-user-iaeSDGRQi7jl5QQ_UDNO7-2026-07-02.png",
+      "sha256": "aec9056d27f68c95abc6974361cfba96c47b56444357a39f1fe43cb63bf89782",
+      "bytes": 296196,
+      "visual_counts": {
+        "waiting_old_copy": 1,
+        "waiting_new_copy": 0,
+        "queued_copy": 0,
+        "thinking": 0,
+        "not_found": 0,
+        "stopped_copy": 0
+      },
+      "api_summary": {
+        "v2_stream_subscription": {
+          "http": 200,
+          "stream_href_present": true,
+          "active_thread_filters": 0
+        },
+        "v3_threads": {
+          "http": 200,
+          "thread_count": 1,
+          "has_active_stream": false,
+          "waiting_threads": 1,
+          "thread_active_streams": 0,
+          "message_kinds": [
+            "needs_input"
+          ]
+        }
+      }
+    }
+  ],
+  "decision": "Staging client visual retest confirms that the deployed API no longer exposes queued copy or thinking/progress UI on the sampled P0 tasks. Waiting-for-user remains a historical question card with no v3 active stream and no active v2 stream filters. This evidence does not close unrelated CW design/onboarding visual items, so the parent readiness check remains partial."
+}

@@ -392,6 +392,12 @@
           "evidence_ref": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"
         },
         {
+          "id": "staging_client_p0_visual_screenshots_2026_07_02",
+          "kind": "screenshot",
+          "signal": "Staging client screenshots bind visible P0 state to v2/v3 network snapshots: sampled task screen has queued copy 0, thinking 0, v3 queued messages 0, and terminal active streams 0; sampled waiting_for_user screen has no thinking/progress UI, v3 active stream false, and v2 active thread filters 0.",
+          "evidence_ref": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"
+        },
+        {
           "id": "cw_aia_001_existing_user_feature_entry",
           "kind": "notion",
           "signal": "CW-AIA-001 remains open: existing desktop users need a new-feature entry page or equivalent product decision before visual QA can close.",
@@ -465,6 +471,9 @@
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-task-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-waiting-for-user-iaeSDGRQi7jl5QQ_UDNO7-2026-07-02.png"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},

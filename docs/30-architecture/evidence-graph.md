@@ -10,23 +10,23 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `79`
-- claim refs: `93`
-- change refs: `1080`
-- verifier refs: `506`
-- evidence refs: `227`
+- chains: `80`
+- claim refs: `95`
+- change refs: `1085`
+- verifier refs: `509`
+- evidence refs: `230`
 
 ## Compiled Chain Summary
 
-- complete chains: `79` / `79`
-- claim-bound chains: `79`
+- complete chains: `80` / `80`
+- claim-bound chains: `80`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `closed_loop_candidate` | `46` | `47` | `702` | `309` | `119` |
-| `operational_readiness_release_harness` | `13` | `25` | `118` | `68` | `43` |
+| `operational_readiness_release_harness` | `14` | `27` | `123` | `71` | `46` |
 | `ai_thread_history` | `8` | `8` | `110` | `55` | `11` |
 | `closed_loop_candidate_decision` | `7` | `7` | `110` | `52` | `35` |
 | `provider_acceptance_harness` | `2` | `2` | `12` | `7` | `6` |
@@ -112,6 +112,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `ai_thread_history_queued_client_projection_hidden_loop` | `1` | `7` | `2` | `4` | `operational_readiness_release_harness` |
 | `operational_readiness_queued_state_only_staging_evidence_loop` | `2` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `operational_readiness_terminal_stop_staging_evidence_loop` | `2` | `5` | `4` | `2` | `operational_readiness_release_harness` |
+| `operational_readiness_client_p0_visual_screenshot_loop` | `2` | `5` | `3` | `3` | `operational_readiness_release_harness` |
 | `operational_readiness_staging_dmg_gatekeeper_evidence_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `operational_readiness_cw_feedback_transfer_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `container_image_contract_runtime_shape_loop` | `1` | `16` | `6` | `4` | `closed_loop_candidate` |
