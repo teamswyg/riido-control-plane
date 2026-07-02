@@ -4409,8 +4409,8 @@
     },
     {
       "id": "closed_loop_candidate_decision_loop",
-      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, with a source seed incorrectly treated as a stale live candidate decision, with live scheduled artifact download failing before it records that a source had no candidate artifact, or with dynamic loop-refresh ignored-command and stale-source candidates requiring manual per-id decision records.",
-      "hypothesis": "A candidate decision tool can require an explicit candidate artifact for verifier runs, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale non-seed decision records for the consumed source, allow source coverage seeds when a source currently has no open candidates, synthesize decisions from subject-kind templates for redacted machine-routable candidates including loop-refresh stale sources, fail when workflow path triggers omit linked manifests, consume a performance-specific candidate fixture in PR checks, and emit skipped live evidence for missing or empty producer artifacts.",
+      "observation": "Candidate intake can verify adoption requirements, but a candidate decision verifier can still be run without the candidate artifact, without workflow triggers that refresh when linked manifests change, without an owned decision seed for each intake source, with a source seed incorrectly treated as a stale live candidate decision, with live scheduled artifact download failing before it records that a source had no candidate artifact, or with dynamic loop-refresh ignored-command and stale-source candidates requiring manual per-id decision records. Live operational readiness can surface a stale P0 visual-retest candidate after PR checks pass, and without an explicit decision record the scheduled decision workflow fails on main even when backend/server work should continue.",
+      "hypothesis": "A candidate decision tool can require an explicit candidate artifact for verifier runs, force each redacted candidate to bind owner, priority, disposition, next loop, next artifact, require source-scoped decision seeds, reject stale non-seed decision records for the consumed source, allow source coverage seeds when a source currently has no open candidates, synthesize decisions from subject-kind templates for redacted machine-routable candidates including loop-refresh stale sources, fail when workflow path triggers omit linked manifests, consume a performance-specific candidate fixture in PR checks, and emit skipped live evidence for missing or empty producer artifacts. Binding that visual candidate to its screenshot-evidence artifact and fixture date keeps visual QA as an owned client evidence task without blocking server-only follow-up merges.",
       "claims": [
         "candidate_decisions_must_match_consumed_candidates"
       ],
@@ -4470,6 +4470,10 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/closed-loop-candidate-decision.yml"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/operational_readiness_fixture_test.go"
         }
       ],
       "verifiers": [
@@ -4500,6 +4504,10 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/closed-loop-candidate-decision.yml"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/operational_readiness_fixture_test.go"
         }
       ],
       "evidence": [
@@ -4537,9 +4545,14 @@
           "kind": "artifact",
           "path": "closed-loop-candidate-decision-performance-sample-evidence",
           "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-closed-loop-candidates",
+          "redacted": true
         }
       ],
-      "decision": "Candidate decisions are scheduled and cannot produce verifier evidence without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, skip performance-specific sample decision evidence, or leave loop-refresh ignored-command or stale-source subjects without a template decision; scheduled live decisions now publish skipped evidence when a source has no candidate artifact or no open candidates, stale source candidates route to regenerated redacted evidence, and the stale operational-readiness client-surface decision now routes to the narrower live alarm plan/apply evidence instead of the older topology artifact.",
+      "decision": "Candidate decisions are scheduled and cannot produce verifier evidence without candidate input, omit owner, priority, disposition, next loop, or next artifact, retain orphan non-seed decisions for the consumed source after the candidate artifact changes, miss an intake-source seed, drift away from linked manifest workflow triggers, skip performance-specific sample decision evidence, or leave loop-refresh ignored-command or stale-source subjects without a template decision; scheduled live decisions now publish skipped evidence when a source has no candidate artifact or no open candidates, stale source candidates route to regenerated redacted evidence, and the stale operational-readiness client-surface decision now routes to the narrower live alarm plan/apply evidence instead of the older topology artifact. Operational readiness visual retest now has a deferred P0 decision selecting staging_client_p0_visual_screenshot_evidence, and the operational readiness decision fixture runs at a date that reproduces the stale visual candidate so the main failure is covered before merge.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
