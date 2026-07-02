@@ -1,0 +1,61 @@
+{
+  "schema_version": "riido-client-surface-alarm-plan-apply-evidence.v1",
+  "id": "client_surface_alarm_preflight_development_2026_07_02",
+  "captured_at": "2026-07-02T08:16:34Z",
+  "redacted": true,
+  "source": {
+    "infra_repo": "teamswyg/riido-infra",
+    "infra_branch": "codex/client-surface-alarm-preflight",
+    "infra_commit": "5959e68",
+    "terraform_module": "terraform/riido_ai_server",
+    "terraform_workspace": "development"
+  },
+  "merged_infra_prs": [
+    {
+      "number": 113,
+      "title": "Add client surface CloudWatch alarms",
+      "state": "MERGED",
+      "merge_commit": "08077e9f216d40dfe60a54d8cde48103933a7031"
+    },
+    {
+      "number": 114,
+      "title": "Verify client surface alarm dimensions",
+      "state": "MERGED",
+      "merge_commit": "5e286e9cebf6e5efc413b8ffdf7d9fdc25201bbe"
+    },
+    {
+      "number": 115,
+      "title": "Add client surface alarm live evidence collector",
+      "state": "MERGED",
+      "merge_commit": "93751a3da224967d7ec9b1e24e5d4feccf9c8dda"
+    },
+    {
+      "number": 116,
+      "title": "Add client surface alarm preflight evidence",
+      "state": "MERGED",
+      "merge_commit": "4795065c86fafe43dff2cc49d19f066b05ecbf6a"
+    }
+  ],
+  "preflight": {
+    "schema_version": "riido-client-surface-alarm-preflight-evidence.v1",
+    "workspace": "development",
+    "status": "blocked_missing_operator_tfvars",
+    "plan_exit_code": 1,
+    "tfvars_present": false,
+    "plan_log_present": true,
+    "missing_required_input_kinds": [
+      "protected_reference",
+      "region"
+    ],
+    "raw_plan_log_included": false,
+    "tfvars_values_included": false,
+    "secrets_included": false,
+    "next_action": "provide local operator tfvars and rerun the client-surface alarm plan command",
+    "passed": true
+  },
+  "decision": {
+    "status": "partial",
+    "summary": "Client-surface alarm topology and redacted collectors are merged, but development live plan/apply evidence is intentionally not claimed because the local operator tfvars file is absent. The preflight evidence proves the block without committing raw plan logs, tfvars values, ARNs, tokens, endpoint hosts, or principal identifiers.",
+    "next_artifact": "client_surface_alarm_plan_apply_evidence"
+  }
+}
