@@ -8560,8 +8560,8 @@
     },
     {
       "id": "notion_backfill_review_loop",
-      "observation": "The backfilled v1.24 AI Agent QA Notion page now contains both older page-body guidance and newer comment/repo evidence; for example the page body still mentions pre-notarization staging desktop workarounds while later comments and readiness evidence prove a notarized CDN DMG, and a page-level server-deploy property can be misread as backend deploy truth.",
-      "hypothesis": "A redacted Notion backfill review artifact can make the latest truth machine-readable without changing product code: stale body guidance, property scope, generated P0 cycle count, and visual-partial status are separated into reviewed signals and bound to operational readiness.",
+      "observation": "The backfilled v1.24 AI Agent QA Notion page now contains both older page-body guidance and newer comment/repo evidence; for example the page body still mentions pre-notarization staging desktop workarounds while later comments and readiness evidence prove a notarized CDN DMG, and a page-level server-deploy property can be misread as backend deploy truth. A follow-up read also shows the CW structured subpage remains aligned with readiness: three CW-AIA items are confirmed, while eight remain product-policy or client/design visual work.",
+      "hypothesis": "Redacted Notion backfill review artifacts can make the latest truth machine-readable without changing product code: stale body guidance, property scope, generated P0 cycle count, CW subpage status, and visual-partial status are separated into reviewed signals and bound to operational readiness.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence"
       ],
@@ -8570,42 +8570,59 @@
           "kind": "manifest",
           "path": "docs/30-architecture/operational-readiness.riido.json"
         },
-        {
-          "kind": "manifest",
-          "path": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"
-        },
-        {
-          "kind": "test",
-          "path": "tools/operationalreadiness/notion_backfill_review_test.go"
-        }
-      ],
+    {
+      "kind": "manifest",
+      "path": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"
+    },
+    {
+      "kind": "manifest",
+      "path": "docs/30-architecture/evidence/notion-backfill-followup-review-2026-07-02.json"
+    },
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/notion_backfill_review_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/notion_backfill_followup_review_test.go"
+    }
+  ],
       "verifiers": [
         {
           "kind": "tool",
           "path": "tools/operationalreadiness/main.go"
         },
-        {
-          "kind": "test",
-          "path": "tools/operationalreadiness/notion_backfill_review_test.go"
-        },
-        {
-          "kind": "tool",
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/notion_backfill_review_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/notion_backfill_followup_review_test.go"
+    },
+    {
+      "kind": "tool",
           "path": "tools/evidencegraph/main.go"
         }
       ],
       "evidence": [
-        {
-          "kind": "artifact",
-          "path": "notion-backfill-review-2026-07-02",
-          "redacted": true
-        },
-        {
-          "kind": "artifact",
+    {
+      "kind": "artifact",
+      "path": "notion-backfill-review-2026-07-02",
+      "redacted": true
+    },
+    {
+      "kind": "artifact",
+      "path": "notion-backfill-followup-review-2026-07-02",
+      "redacted": true
+    },
+    {
+      "kind": "artifact",
           "path": "operational-readiness-evidence",
           "redacted": true
         }
       ],
-      "decision": "The latest Notion backfill review found no new backend regression; the actionable drift is knowledge hygiene: treat newer comments/generated readiness as current truth, keep staging_client_p0_visual_retest partial for visual/client/design evidence, and update or annotate stale page-body Gatekeeper guidance.",
+      "decision": "The latest Notion backfill reviews found no new backend regression; the actionable drift is knowledge hygiene and handoff clarity: treat newer comments/generated readiness as current truth, keep staging_client_p0_visual_retest partial for product-policy/client-design visual evidence, and update or annotate stale page-body Gatekeeper guidance.",
       "next_loop": "closed_loop_candidate"
     },
     {
