@@ -3124,7 +3124,7 @@
     },
     {
       "id": "ai_thread_history_conversation_grouping_loop",
-      "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card, later observed stale queued_by_busy_agent status text and active stream state appearing next to newer progress or running state in the same conversation, and staging showed a task screen keeping an optimistic running spinner even though daemon status had running_tasks=0, v2 thread-stream-subscription returned active_thread_filters=[], and v3 history contained only terminal threads. A running thread state can be known before a delayed queued status message receives a later observed_at timestamp, queued thread active_stream can otherwise keep the card looking alive, and terminal server truth must be able to clear stale client session state.",
+      "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card, later observed stale queued_by_busy_agent status text and active stream state appearing next to newer progress or running state in the same conversation, and staging showed a task screen keeping an optimistic running spinner even though daemon status had running_tasks=0, v2 thread-stream-subscription returned active_thread_filters=[], and v3 history contained only terminal threads. A reopened Notion P0 report also described a stopped agent looking active after refresh, so the server proof must include the HTTP stop path plus a late daemon progress event, not only a direct store unit test. A running thread state can be known before a delayed queued status message receives a later observed_at timestamp, queued thread active_stream can otherwise keep the card looking alive, and terminal server truth must be able to clear stale client session state.",
       "hypothesis": "Binding conversation_id, parent_thread_id, queued-status current-only filtering, queued active_stream suppression, running-over-queued active_stream priority, and terminal active_stream closure to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations, prevents stale queue hints from rendering as durable agent replies or active progress streams once progress, active running state, or result history exists, and lets refresh/refetch clear local running UI when every server-side thread is terminal.",
       "claims": [
         "thread_history_v3_must_expose_stable_conversation_grouping"
@@ -3187,6 +3187,10 @@
           "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"
         },
         {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"
+        },
+        {
           "kind": "projection",
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_active_stream.go"
         },
@@ -3229,7 +3233,7 @@
           "redacted": true
         }
       ],
-      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI.",
+      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI. The HTTP stop-refresh proof also verifies that late daemon thread-progress after stop is rejected by the durable FSM and cannot leak into v3 history.",
       "next_loop": "ai_thread_history"
     },
     {

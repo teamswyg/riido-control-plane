@@ -81,6 +81,7 @@
         "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
         "evidence_refs": [
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
           {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"}
         ]
       },
@@ -363,6 +364,7 @@
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_author_test.go"}
       ],
       "next_artifact": "staging_client_p0_visual_screenshot_evidence",
