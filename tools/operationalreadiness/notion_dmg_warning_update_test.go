@@ -17,11 +17,11 @@ func TestOperationalReadinessBindsNotionDMGWarningUpdate(t *testing.T) {
 		t.Fatal("missing Notion DMG warning update evidence ref")
 	}
 	if check.Status != "partial" {
-		t.Fatalf("visual readiness must remain partial until stale body and visual QA close: %s", check.Status)
+		t.Fatalf("visual readiness must remain partial until teammate install and visual QA close: %s", check.Status)
 	}
 }
 
-func TestNotionDMGWarningUpdateKeepsMitigationHonest(t *testing.T) {
+func TestNotionDMGWarningUpdateRecordsStaleRemoval(t *testing.T) {
 	body, err := os.ReadFile("../../" + notionDMGWarningUpdateEvidence)
 	if err != nil {
 		t.Fatal(err)
@@ -33,6 +33,8 @@ func TestNotionDMGWarningUpdateKeepsMitigationHonest(t *testing.T) {
 			TopWarningMentionsSignedNotarized bool `json:"top_warning_mentions_signed_notarized_dmg"`
 			TopWarningMentionsStaleDoNotUse   bool `json:"top_warning_mentions_stale_workaround_do_not_use_first"`
 			StaleWorkaroundStillPresent       bool `json:"stale_workaround_block_still_present"`
+			StaleWorkaroundCommandsRemoved    bool `json:"stale_workaround_commands_removed"`
+			StaleWorkaroundOnlyDoNotUse       bool `json:"stale_workaround_only_mentioned_as_do_not_use"`
 		} `json:"verified_page_state"`
 		Decision struct {
 			Status string `json:"status"`
@@ -41,14 +43,17 @@ func TestNotionDMGWarningUpdateKeepsMitigationHonest(t *testing.T) {
 	if err := json.Unmarshal(body, &evidence); err != nil {
 		t.Fatal(err)
 	}
-	if !evidence.Redacted || evidence.Decision.Status != "partial" {
+	if !evidence.Redacted || evidence.Decision.Status != "covered" {
 		t.Fatalf("unexpected evidence status: redacted=%v decision=%s", evidence.Redacted, evidence.Decision.Status)
 	}
 	state := evidence.VerifiedPageState
 	if !state.TopWarningPresent || !state.TopWarningMentionsSignedNotarized || !state.TopWarningMentionsStaleDoNotUse {
 		t.Fatalf("top warning is not strong enough: %+v", state)
 	}
-	if !state.StaleWorkaroundStillPresent {
-		t.Fatal("evidence must not claim the stale workaround block was removed")
+	if state.StaleWorkaroundStillPresent {
+		t.Fatal("evidence must not leave the stale workaround block as an active install step")
+	}
+	if !state.StaleWorkaroundCommandsRemoved || !state.StaleWorkaroundOnlyDoNotUse {
+		t.Fatalf("stale workaround command state is not closed: %+v", state)
 	}
 }

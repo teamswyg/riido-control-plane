@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-page-warning-update-evidence.v1",
   "id": "notion_dmg_stale_warning_update_2026_07_02",
-  "captured_at": "2026-07-02T08:27:47Z",
+  "captured_at": "2026-07-02T10:10:49Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -18,17 +18,25 @@
       "id": "prepend_current_dmg_warning_callout",
       "status": "applied",
       "comment_id": "39120241-cf7f-81ae-bd7a-001d50ded795"
+    },
+    {
+      "id": "replace_stale_workaround_block_retry",
+      "status": "applied",
+      "verified_at": "2026-07-02T10:10:49Z",
+      "summary": "Replaced the old xattr/ad-hoc codesign runbook in the desktop QA install callout with signed/notarized DMG instructions."
     }
   ],
   "verified_page_state": {
     "top_warning_present": true,
     "top_warning_mentions_signed_notarized_dmg": true,
     "top_warning_mentions_stale_workaround_do_not_use_first": true,
-    "stale_workaround_block_still_present": true
+    "stale_workaround_block_still_present": false,
+    "stale_workaround_commands_removed": true,
+    "stale_workaround_only_mentioned_as_do_not_use": true
   },
   "decision": {
-    "status": "partial",
-    "summary": "The QA page now shows a top warning before the stale Gatekeeper workaround, reducing accidental use of old xattr/codesign commands. The stale block itself still exists later in the page, so this is evidence of mitigation, not full cleanup.",
-    "next_artifact": "notion_parent_body_stale_workaround_removed_or_resolved"
+    "status": "covered",
+    "summary": "The QA page no longer presents the old xattr/ad-hoc codesign commands as install steps. It now points testers to the signed/notarized CDN DMG and keeps the workaround only as a do-not-use warning. Product readiness still needs teammate install screenshot evidence.",
+    "next_artifact": "staging_desktop_teammate_install_screenshot"
   }
 }

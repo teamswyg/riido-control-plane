@@ -389,7 +389,7 @@
         {
           "id": "notion_dmg_stale_warning_update_2026_07_02",
           "kind": "notion",
-          "signal": "A top-of-page QA warning now tells testers the staging DMG is signed/notarized and that xattr/codesign workaround commands are stale; the old workaround block still exists later in the page, so the readiness state remains partial.",
+          "signal": "The Notion QA page now tells testers the staging DMG is signed/notarized, removes the old xattr/ad-hoc codesign commands from the install steps, and keeps those commands only as a do-not-use warning; readiness remains partial until teammate install and visual QA evidence close.",
           "evidence_ref": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"
         },
         {
