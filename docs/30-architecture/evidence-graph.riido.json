@@ -8596,12 +8596,20 @@
       "path": "docs/30-architecture/evidence/notion-backfill-followup-review-2026-07-02.json"
     },
     {
+      "kind": "manifest",
+      "path": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"
+    },
+    {
       "kind": "test",
       "path": "tools/operationalreadiness/notion_backfill_review_test.go"
     },
     {
       "kind": "test",
       "path": "tools/operationalreadiness/notion_backfill_followup_review_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/notion_dmg_warning_update_test.go"
     }
   ],
       "verifiers": [
@@ -8616,6 +8624,10 @@
     {
       "kind": "test",
       "path": "tools/operationalreadiness/notion_backfill_followup_review_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/operationalreadiness/notion_dmg_warning_update_test.go"
     },
     {
       "kind": "tool",
@@ -8635,11 +8647,16 @@
     },
     {
       "kind": "artifact",
+      "path": "notion-dmg-stale-warning-update-2026-07-02",
+      "redacted": true
+    },
+    {
+      "kind": "artifact",
           "path": "operational-readiness-evidence",
           "redacted": true
         }
       ],
-      "decision": "The latest Notion backfill reviews found no new backend regression; the actionable drift is knowledge hygiene and handoff clarity: treat newer comments/generated readiness as current truth, keep staging_client_p0_visual_retest partial for product-policy/client-design visual evidence, and update or annotate stale page-body Gatekeeper guidance.",
+      "decision": "The latest Notion backfill reviews found no new backend regression; the actionable drift is knowledge hygiene and handoff clarity: treat newer comments/generated readiness as current truth, keep staging_client_p0_visual_retest partial for product-policy/client-design visual evidence, and annotate stale page-body Gatekeeper guidance. The QA page now has a top warning, but the old workaround block remains, so this is mitigation evidence rather than cleanup completion.",
       "next_loop": "closed_loop_candidate"
     },
     {

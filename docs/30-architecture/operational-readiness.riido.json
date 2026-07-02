@@ -387,6 +387,12 @@
           "evidence_ref": "docs/30-architecture/evidence/notion-backfill-followup-review-2026-07-02.json"
         },
         {
+          "id": "notion_dmg_stale_warning_update_2026_07_02",
+          "kind": "notion",
+          "signal": "A top-of-page QA warning now tells testers the staging DMG is signed/notarized and that xattr/codesign workaround commands are stale; the old workaround block still exists later in the page, so the readiness state remains partial.",
+          "evidence_ref": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"
+        },
+        {
           "id": "server_contract_regression_tests",
           "kind": "test",
           "signal": "Control-plane tests cover queued status suppression, terminal active-stream closure, and user-message author preservation before client visual retest.",
@@ -492,6 +498,7 @@
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-backfill-followup-review-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-task-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-waiting-for-user-iaeSDGRQi7jl5QQ_UDNO7-2026-07-02.png"},
