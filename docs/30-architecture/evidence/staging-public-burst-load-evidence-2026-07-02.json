@@ -1,0 +1,99 @@
+{
+  "schema_version": "riido-staging-public-burst-load-evidence.v1",
+  "id": "staging-public-burst-load-evidence-2026-07-02",
+  "captured_at": "2026-07-02T07:18:58Z",
+  "environment": "staging",
+  "redacted": true,
+  "workflow": {
+    "name": "ai-agent-client-testnet-load",
+    "path": ".github/workflows/ai-agent-client-testnet-load.yml",
+    "scenario": "public",
+    "duration": "120s",
+    "concurrency": 128
+  },
+  "configuration_repair": {
+    "issue": "The first manually dispatched run used the repository variable RIIDO_AI_SERVER_TESTNET_BASE_URL=http://ai-api.riido.io and therefore produced a non-staging host artifact.",
+    "rejected_run": {
+      "id": "28572295997",
+      "base_host": "ai-api.riido.io",
+      "reason": "host_mismatch"
+    },
+    "action": "Updated RIIDO_AI_SERVER_TESTNET_BASE_URL to https://staging.ai-api.riido.io and reran the same workflow inputs.",
+    "validated_health_endpoints": [
+      "https://staging.ai-api.riido.io/healthz",
+      "https://staging.ai-api.riido.io/readyz"
+    ]
+  },
+  "authoritative_run": {
+    "id": "28572477935",
+    "url": "https://github.com/teamswyg/riido-control-plane/actions/runs/28572477935",
+    "status": "success",
+    "head_sha": "015e1d5a64267b4c7fdbfbbdc74afdf8cba40280",
+    "event": "workflow_dispatch",
+    "started_at": "2026-07-02T07:16:51.073940536Z",
+    "ended_at": "2026-07-02T07:18:51.212661938Z",
+    "base_host": "staging.ai-api.riido.io",
+    "duration_ms": 120138,
+    "concurrency": 128,
+    "total_requests": 98304,
+    "success": 98304,
+    "failures": 0,
+    "requests_per_second": 818.2540887135119,
+    "success_per_second": 818.2540887135119,
+    "failure_rate_pct": 0,
+    "latency_ms": {
+      "min": 144,
+      "p50": 146,
+      "p90": 148,
+      "p95": 152,
+      "p99": 451,
+      "max": 1099
+    },
+    "endpoints": {
+      "/healthz": {
+        "total": 49155,
+        "success": 49155,
+        "failures": 0,
+        "p95_latency_ms": 152,
+        "p99_latency_ms": 479,
+        "max_latency_ms": 1098
+      },
+      "/readyz": {
+        "total": 49149,
+        "success": 49149,
+        "failures": 0,
+        "p95_latency_ms": 152,
+        "p99_latency_ms": 446,
+        "max_latency_ms": 1099
+      }
+    },
+    "load_generator_resource_delta": {
+      "heap_alloc_bytes": 4849664,
+      "total_alloc_bytes": 643715816,
+      "total_alloc_bytes_per_request": 6548.215901692708,
+      "mallocs": 5956701,
+      "frees": 5933667,
+      "goroutines": 0
+    },
+    "candidate_count": 0,
+    "expires_at": "2026-07-03T07:18:51Z"
+  },
+  "findings": [
+    {
+      "id": "staging_public_burst_success",
+      "severity": "info",
+      "signal": "Staging accepted 98,304 public health/ready requests at concurrency 128 for 120 seconds with 0 failures and p95 latency 152ms."
+    },
+    {
+      "id": "workflow_host_mismatch_repaired",
+      "severity": "info",
+      "signal": "The testnet load workflow repository variable was corrected from a non-staging HTTP host to https://staging.ai-api.riido.io before accepting the run as staging evidence."
+    },
+    {
+      "id": "cold_start_not_exercised",
+      "severity": "partial",
+      "signal": "This run measured a warm staging burst against health and readiness endpoints. It did not force an ECS task restart, server cold start, or client-visible post-deployment packet storm."
+    }
+  ],
+  "decision": "Bind this artifact as warm staging public burst evidence for boot_burst_capacity, but keep the readiness check partial until a controlled cold-start or force-new-deployment burst run records time-to-ready, accepted requests during startup, and post-event error rate."
+}

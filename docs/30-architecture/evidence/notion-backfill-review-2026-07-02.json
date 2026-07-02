@@ -1,0 +1,88 @@
+{
+  "schema_version": "riido-notion-backfill-review.v1",
+  "id": "notion_backfill_review_2026_07_02",
+  "captured_at": "2026-07-02T07:24:48Z",
+  "redacted": true,
+  "source": {
+    "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
+    "page_title": "[v1.24] AI Agent QA",
+    "page_url": "https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165",
+    "fetch_mode": "page_body_with_discussions_and_resolved_comments"
+  },
+  "repo_state": {
+    "branch": "codex/boot-burst-capacity-evidence",
+    "base_commit": "015e1d5",
+    "notion_open_loop_cycle_count": 7,
+    "notion_open_loop_p0_count": 7,
+    "current_backfilled_check": "staging_client_p0_visual_retest"
+  },
+  "reviewed_signals": [
+    {
+      "id": "notion_body_gatekeeper_text_is_stale",
+      "severity": "partial",
+      "observed_in": "notion_page_body",
+      "signal": "The body still contains older staging desktop Gatekeeper workaround language, while later comments and repo evidence record a signed/notarized CDN DMG.",
+      "latest_truth_refs": [
+        "notion-comment:39120241-cf7f-81c3-b521-001dbf8c1bba",
+        "notion-comment:39120241-cf7f-81f2-9d54-001d551d544e",
+        "cdn:https://cdn.riido.io/releases/latest/staging/Riido-Staging-arm64.dmg",
+        "spctl:dmg-accepted-source-notarized-developer-id",
+        "stapler:dmg-validate-action-worked"
+      ],
+      "decision": "Treat the later comment/evidence chain as the operational truth; the Notion body needs cleanup or an explicit stale-warning before using it as QA install guidance."
+    },
+    {
+      "id": "server_deploy_property_is_client_pr_scope",
+      "severity": "info",
+      "observed_in": "notion_page_property",
+      "signal": "The page property shows server deployment as no, but the page also references riido-client PR 3046 and later comments contain control-plane/server PR deployment evidence.",
+      "latest_truth_refs": [
+        "github:https://github.com/teamswyg/riido-control-plane/pull/737",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/740",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/743",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/749",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/752"
+      ],
+      "decision": "Do not use the Notion page-level server-deploy property as backend deployment truth; use per-comment PR/deploy evidence and generated readiness checks."
+    },
+    {
+      "id": "notion_open_loop_count_supersedes_older_comment_count",
+      "severity": "info",
+      "observed_in": "repo_generated_readiness_manifest",
+      "signal": "An older Notion backfill comment recorded six P0 cycles, while the current manifest has seven P0 cycles after Gatekeeper/CW feedback inventory was added.",
+      "latest_truth_refs": [
+        "docs/30-architecture/operational-readiness.riido.json:notion_open_loop",
+        "tools/operationalreadiness/notion_open_loop_test.go",
+        "tools/operationalreadiness/notion_cw_feedback_test.go",
+        "tools/operationalreadiness/notion_gatekeeper_test.go"
+      ],
+      "decision": "Current generated readiness evidence supersedes the older count; future comments should cite the generated cycle count instead of copying stale totals."
+    },
+    {
+      "id": "p0_backend_fix_status_remains_visual_partial",
+      "severity": "partial",
+      "observed_in": "notion_comments_and_repo_evidence",
+      "signal": "queued_by_busy_agent, terminal stop refresh, waiting_for_user, author fallback, and instruction-intent fixes all have server/API evidence, but product readiness stays partial until visual/client-side screenshots close the user-visible loop.",
+      "latest_truth_refs": [
+        "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json",
+        "docs/30-architecture/operational-readiness.riido.json:staging_client_p0_visual_retest",
+        "github:https://github.com/teamswyg/riido-control-plane/issues/711"
+      ],
+      "decision": "No new backend regression is proven by the backfill review; keep the visual/product loop partial and route remaining open items to client/design QA."
+    }
+  ],
+  "next_actions": [
+    {
+      "owner": "product_or_client_qa",
+      "action": "Update or annotate the Notion body section that still describes pre-notarization staging desktop install workarounds."
+    },
+    {
+      "owner": "client_or_design_qa",
+      "action": "Attach visual evidence for open CW-AIA client/design items before marking staging_client_p0_visual_retest covered."
+    },
+    {
+      "owner": "control_plane",
+      "action": "Keep server/API P0 fixes bound to generated readiness evidence and avoid treating page-level properties as deployment truth."
+    }
+  ]
+}

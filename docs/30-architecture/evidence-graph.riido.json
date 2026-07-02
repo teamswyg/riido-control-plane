@@ -8405,6 +8405,106 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "operational_readiness_staging_public_burst_load_loop",
+      "observation": "The boot_burst_capacity release check required a real high-concurrency packet-burst run, but the first workflow dispatch used RIIDO_AI_SERVER_TESTNET_BASE_URL=http://ai-api.riido.io and produced a non-staging host artifact. Without recording that mismatch, agents could treat the wrong host as staging evidence.",
+      "hypothesis": "Correcting the repository variable to https://staging.ai-api.riido.io, rerunning the same public 120s/concurrency-128 workflow, and binding the valid run as warm staging burst evidence makes capacity progress measurable while preserving partial status for true cold-start timing.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/staging-public-burst-load-evidence-2026-07-02.json"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/boot_burst_evidence_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/main.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/boot_burst_evidence_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph/main.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "staging-public-burst-load-evidence-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The authoritative staging run 28572477935 reached staging.ai-api.riido.io and completed 98,304 public health/ready requests over 120 seconds at concurrency 128 with 0 failures, p95 latency 152ms, p99 latency 451ms, and no closed-loop failure candidates. boot_burst_capacity remains partial because the run was a warm public burst and did not force server cold start, ECS task replacement, or measure time-to-ready during startup.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
+      "id": "notion_backfill_review_loop",
+      "observation": "The backfilled v1.24 AI Agent QA Notion page now contains both older page-body guidance and newer comment/repo evidence; for example the page body still mentions pre-notarization staging desktop workarounds while later comments and readiness evidence prove a notarized CDN DMG, and a page-level server-deploy property can be misread as backend deploy truth.",
+      "hypothesis": "A redacted Notion backfill review artifact can make the latest truth machine-readable without changing product code: stale body guidance, property scope, generated P0 cycle count, and visual-partial status are separated into reviewed signals and bound to operational readiness.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_backfill_review_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/main.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_backfill_review_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph/main.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "notion-backfill-review-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The latest Notion backfill review found no new backend regression; the actionable drift is knowledge hygiene: treat newer comments/generated readiness as current truth, keep staging_client_p0_visual_retest partial for visual/client/design evidence, and update or annotate stale page-body Gatekeeper guidance.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "operational_readiness_staging_dmg_gatekeeper_evidence_loop",
       "observation": "The Notion P0 gatekeeper report said the Riido Staging app could not be opened because Apple could not verify it, while the readiness manifest still marked the staging DMG work as in progress even after a CDN artifact was published.",
       "hypothesis": "A downloaded CDN DMG that passes shasum, spctl, stapler, mount checksum, app codesign, app spctl, and app stapler checks can be transferred to team QA as an install-screenshot gate instead of remaining an unresolved backend/infra packaging task.",
