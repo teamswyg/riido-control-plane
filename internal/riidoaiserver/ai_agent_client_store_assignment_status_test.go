@@ -15,7 +15,7 @@ func TestDevelopmentAIAgentClientStoreSuppressesDuplicateAssignmentStatusFanout(
 	if err != nil {
 		t.Fatalf("AssignAIAgentTask: %v", err)
 	}
-	baseCount := countWorkStatusChangedEventsForTask(t, store, principal, "task-dedupe")
+	baseCount := countNonQueuedWorkStatusChangedEventsForTask(t, store, principal, "task-dedupe")
 	runningEvent := TaskEvent{
 		TaskID:       "task-dedupe",
 		AssignmentID: "asn-dedupe",
@@ -28,7 +28,7 @@ func TestDevelopmentAIAgentClientStoreSuppressesDuplicateAssignmentStatusFanout(
 	if err := store.RecordAIAgentAssignmentEvent(context.Background(), assigned.AgentID, AgentEventRequest{}, runningEvent); err != nil {
 		t.Fatalf("first RecordAIAgentAssignmentEvent: %v", err)
 	}
-	afterFirstRunning := countWorkStatusChangedEventsForTask(t, store, principal, "task-dedupe")
+	afterFirstRunning := countNonQueuedWorkStatusChangedEventsForTask(t, store, principal, "task-dedupe")
 	if afterFirstRunning != baseCount+1 {
 		t.Fatalf("first running event count = %d, want %d", afterFirstRunning, baseCount+1)
 	}
@@ -37,7 +37,7 @@ func TestDevelopmentAIAgentClientStoreSuppressesDuplicateAssignmentStatusFanout(
 	if err := store.RecordAIAgentAssignmentEvent(context.Background(), assigned.AgentID, AgentEventRequest{}, runningEvent); err != nil {
 		t.Fatalf("second RecordAIAgentAssignmentEvent: %v", err)
 	}
-	afterDuplicateRunning := countWorkStatusChangedEventsForTask(t, store, principal, "task-dedupe")
+	afterDuplicateRunning := countNonQueuedWorkStatusChangedEventsForTask(t, store, principal, "task-dedupe")
 	if afterDuplicateRunning != afterFirstRunning {
 		t.Fatalf("duplicate running event count = %d, want unchanged %d", afterDuplicateRunning, afterFirstRunning)
 	}
@@ -49,7 +49,7 @@ func TestDevelopmentAIAgentClientStoreSuppressesDuplicateAssignmentStatusFanout(
 	if err := store.RecordAIAgentAssignmentEvent(context.Background(), assigned.AgentID, AgentEventRequest{}, completedEvent); err != nil {
 		t.Fatalf("completed RecordAIAgentAssignmentEvent: %v", err)
 	}
-	afterCompleted := countWorkStatusChangedEventsForTask(t, store, principal, "task-dedupe")
+	afterCompleted := countNonQueuedWorkStatusChangedEventsForTask(t, store, principal, "task-dedupe")
 	if afterCompleted != afterFirstRunning+1 {
 		t.Fatalf("completed event count = %d, want %d", afterCompleted, afterFirstRunning+1)
 	}

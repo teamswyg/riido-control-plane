@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func countWorkStatusChangedEventsForTask(t *testing.T, store *DevelopmentAIAgentClientStore, principal AuthorizationResult, taskID string) int {
+func countNonQueuedWorkStatusChangedEventsForTask(t *testing.T, store *DevelopmentAIAgentClientStore, principal AuthorizationResult, taskID string) int {
 	t.Helper()
 	events, err := store.AIAgentClientEvents(context.Background(), principal)
 	if err != nil {
@@ -17,7 +17,7 @@ func countWorkStatusChangedEventsForTask(t *testing.T, store *DevelopmentAIAgent
 			continue
 		}
 		status, ok := event.Payload.(AgentWorkStatusChangedEvent)
-		if ok && status.TaskID == taskID {
+		if ok && status.TaskID == taskID && status.CommentKind != AgentTaskCommentQueuedByBusyAgent {
 			count++
 		}
 	}
