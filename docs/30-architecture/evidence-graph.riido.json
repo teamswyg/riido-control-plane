@@ -8057,6 +8057,60 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "ai_thread_history_queued_client_projection_hidden_loop",
+      "observation": "A staging screenshot still showed the queued_by_busy_agent copy together with a thinking/progress row. Read-only inspection of the staging client showed v2 task threads treat work_status=queued and assignment_state=queued as working, map queued_by_busy_agent to visible copy, and add non-terminal mutation responses to active_thread_filters optimistically.",
+      "hypothesis": "Keeping durable queued assignments for daemon scheduling while hiding queued work_status, assignment_state, comment_kind, messages, and queued work-status SSE events from client-visible projections prevents the frontend from rendering queued as an Agent reply or thinking state without changing endpoint shape.",
+      "claims": [
+        "thread_history_v3_must_expose_stable_conversation_grouping"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_queued_client_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_list_ai_agent_task_threads.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_principal_locked.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_sse_replay_comment_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_agent_event_read_model_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_sse_replay_comment_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_agent_event_read_model_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-test-riidoaiserver",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "client-readonly-queued-working-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "queued_by_busy_agent remains durable scheduler state only. Client-facing v2 action/list/SSE projections no longer expose queued as a working thread, status copy, or replayed work-status event.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "operational_readiness_queued_state_only_staging_evidence_loop",
       "observation": "After PR #745 reached staging, the referenced QA task read-model returned queued_message_count=0, queued_thread_count=0, no active_stream, no active thread filters, and no queued_by_busy_agent replay events, but operational readiness still only referenced earlier v3/SSE repairs.",
       "hypothesis": "Adding the PR, deploy run, Notion reply, and staging read-model checks to the queued_by_busy_agent P0 cycle keeps the QA handoff executable while preserving product readiness as partial until visual screenshot evidence confirms the client no longer shows stale optimistic copy.",

@@ -248,7 +248,7 @@ func taskThreadByAssignment(t *testing.T, threads []AIAgentTaskThreadRecord, ass
 	return AIAgentTaskThreadRecord{}
 }
 
-func TestAIAgentClientThreadProjectionExposesQueueDiagnostics(t *testing.T) {
+func TestAIAgentClientThreadProjectionKeepsDurableQueueDiagnostics(t *testing.T) {
 	ctx := context.Background()
 	now := time.Date(2026, 6, 9, 5, 0, 0, 0, time.UTC)
 	store := NewDevelopmentAIAgentClientStore()
@@ -302,7 +302,15 @@ func TestAIAgentClientThreadProjectionExposesQueueDiagnostics(t *testing.T) {
 	if len(threads.Threads) != 1 {
 		t.Fatalf("threads = %+v", threads)
 	}
-	diagnostics := threads.Threads[0].QueueDiagnostics
+	if threads.Threads[0].QueueDiagnostics != nil ||
+		threads.Threads[0].AssignmentState != "" ||
+		threads.Threads[0].WorkStatus != AgentWorkStatusIdle {
+		t.Fatalf("client projection should hide queue diagnostics: %+v", threads)
+	}
+	store.mu.Lock()
+	durableThread := store.taskThreads["task-queue-diagnostics"][0]
+	store.mu.Unlock()
+	diagnostics := durableThread.QueueDiagnostics
 	if diagnostics == nil ||
 		diagnostics.Reason != "blocked_by_assignment" ||
 		diagnostics.BlockedByAssignmentID != "asn-blocker" ||

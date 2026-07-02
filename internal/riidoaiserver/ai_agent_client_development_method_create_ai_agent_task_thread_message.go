@@ -60,5 +60,5 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	s.appendThreadUserMessageLocked(response, principal, req.Body, req.SourceMessageID)
 	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID, conversationID, parentThreadID)
 	s.appendAgentTaskActionEvent(response)
-	return response, nil
+	return clientVisibleQueuedActionResponse(response), nil
 }

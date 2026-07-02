@@ -122,7 +122,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | --- | --- |
 | `user` | User follow-up instruction inside the AI thread. Use author_principal_id for the writer when present. |
 | `progress` | Runtime progress log, ordered by seq inside assignment_id and run_id |
-| `agent` | Agent status or final result message. queued_by_busy_agent is exposed through thread state fields, not v3 messages[]; the server removes queued status rows from the timeline so they are not rendered as agent replies. |
+| `agent` | Agent status or final result message. queued_by_busy_agent must not be exposed as a durable reply or live progress copy; the server removes queued status rows from v3 messages[] and hides queued status from v2 client-visible action/list/SSE projections. |
 
 ### Thread History v3 Interaction Scenarios
 
@@ -142,7 +142,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | --- | --- |
 | `conversation-card-ordering` | First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root. |
 | `message-row-ordering` | Within one thread record, render messages by observed_at, then role order user -> progress -> agent, then seq, then message_id. Use message_id as the stable row key, not body text. |
-| `queued-status-current-only` | comment_kind=queued_by_busy_agent means the assignment is currently waiting behind busy work, but v3 history must not expose that copy as a timeline message. Preserve work_status, assignment_state, active_stream, and the user's follow-up message; render queued UI from state fields instead of messages[]. |
+| `queued-status-current-only` | comment_kind=queued_by_busy_agent means the durable assignment is waiting behind busy work, but client-visible projections must not render it as an Agent reply, thinking/progress row, or working thread. Preserve the durable queue for daemon polling and scheduling, but hide queued work_status, assignment_state, comment_kind, message, and queued work-status SSE events from v2 client display projections. |
 | `queued-stream-current-only` | If the same conversation_id has an active running thread, a superseded queued thread must not expose per-thread active_stream and must not win the collection active_stream. This prevents a stale queued hint from keeping the UI in a thinking/progress state while the conversation is already running. |
 | `progress-dedupe-ordering` | For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility. |
 | `late-terminal-guard` | If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running. |

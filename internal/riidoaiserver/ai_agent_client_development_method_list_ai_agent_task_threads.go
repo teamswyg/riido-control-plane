@@ -31,5 +31,8 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Conte
 		response.ActiveStream = &link
 		break
 	}
+	for i := range response.Threads {
+		response.Threads[i] = clientVisibleQueuedTaskThread(response.Threads[i])
+	}
 	return response, nil
 }

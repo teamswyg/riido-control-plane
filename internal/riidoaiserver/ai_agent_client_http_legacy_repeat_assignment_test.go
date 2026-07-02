@@ -33,17 +33,15 @@ func TestHTTPAIAgentClientLegacyAssignmentRepeatsSameAgentAsNewThread(t *testing
 	if taskThreadHasActiveStream(firstThread) || firstThread.AssignmentState != AgentAssignmentStateStopped {
 		t.Fatalf("legacy previous thread should remain visible as stopped: %+v", firstThread)
 	}
-	if !taskThreadHasActiveStream(secondThread) {
-		t.Fatalf("legacy replacement thread should remain active or queued: %+v", secondThread)
-	}
-	switch secondThread.AssignmentState {
-	case AgentAssignmentStateQueued, AgentAssignmentStateRunning:
-	default:
-		t.Fatalf("legacy replacement state = %+v", secondThread)
+	if taskThreadHasActiveStream(secondThread) ||
+		secondThread.WorkStatus != AgentWorkStatusIdle ||
+		secondThread.AssignmentState != "" ||
+		secondThread.CommentKind != "" {
+		t.Fatalf("legacy replacement thread should hide queued projection: %+v", secondThread)
 	}
 }
 
-func TestHTTPAIAgentClientLegacyAssignmentReportsBlockedRepeatAsQueued(t *testing.T) {
+func TestHTTPAIAgentClientLegacyAssignmentHidesBlockedRepeatQueuedProjection(t *testing.T) {
 	const token = "owner-token"
 	const taskID = "task-legacy-repeat-blocked"
 	const agentID = "agent-public-openclaw"
@@ -60,9 +58,12 @@ func TestHTTPAIAgentClientLegacyAssignmentReportsBlockedRepeatAsQueued(t *testin
 	if second.AssignmentID == first.AssignmentID || second.ThreadID == first.ThreadID {
 		t.Fatalf("blocked legacy repeat collapsed: first=%+v second=%+v", first, second)
 	}
-	if second.AssignmentState != AgentAssignmentStateQueued ||
-		second.CommentKind != AgentTaskCommentQueuedByBusyAgent {
-		t.Fatalf("blocked repeat should be queued immediately: %+v", second)
+	if second.WorkStatus != AgentWorkStatusIdle ||
+		second.AssignmentState != "" ||
+		second.CommentKind != "" ||
+		second.Message != "" ||
+		second.ActiveStream == nil {
+		t.Fatalf("blocked repeat should hide queued client projection: %+v", second)
 	}
 }
 

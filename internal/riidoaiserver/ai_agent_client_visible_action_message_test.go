@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAIAgentActionResponsesUseClientVisibleMessages(t *testing.T) {
+func TestAIAgentActionResponsesHideQueuedButUseTerminalMessages(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	store := NewDevelopmentAIAgentClientStore()
@@ -27,8 +27,12 @@ func TestAIAgentActionResponsesUseClientVisibleMessages(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SubmitAIAgentTaskComment: %v", err)
 	}
-	if queued.Message != clientMessageAgentBusyQueued {
-		t.Fatalf("queued message = %q", queued.Message)
+	if queued.Message != "" ||
+		queued.ResultMessage != "" ||
+		queued.CommentKind != "" ||
+		queued.AssignmentState != "" ||
+		queued.WorkStatus != AgentWorkStatusIdle {
+		t.Fatalf("queued response should be hidden: %+v", queued)
 	}
 
 	stopped, err := store.StopAIAgentTask(ctx, principal, "task-visible", StopAIAgentTaskRequest{

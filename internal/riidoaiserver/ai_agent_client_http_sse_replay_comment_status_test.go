@@ -30,7 +30,7 @@ func TestHTTPAIAgentClientDevelopmentSSEHidesStaleQueuedStatus(t *testing.T) {
 	}
 }
 
-func TestHTTPAIAgentClientDevelopmentSSEKeepsCurrentQueuedStatus(t *testing.T) {
+func TestHTTPAIAgentClientDevelopmentSSEHidesCurrentQueuedStatus(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -54,8 +54,7 @@ func TestHTTPAIAgentClientDevelopmentSSEKeepsCurrentQueuedStatus(t *testing.T) {
 	eventsResp := httptest.NewRecorder()
 	server.ServeHTTP(eventsResp, eventsReq)
 	body := eventsResp.Body.String()
-	if !strings.Contains(body, "task-current-queued") ||
-		!strings.Contains(body, string(AgentTaskCommentQueuedByBusyAgent)) {
-		t.Fatalf("current queued status missing from replay: %q", body)
+	if strings.Contains(body, string(AgentTaskCommentQueuedByBusyAgent)) {
+		t.Fatalf("current queued status leaked into replay: %q", body)
 	}
 }

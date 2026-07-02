@@ -1,6 +1,9 @@
 package riidoaiserver
 
 func clientEventForPrincipalLocked(s *DevelopmentAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) (ClientStreamEvent, bool) {
+	if eventIsQueuedForClient(event) {
+		return ClientStreamEvent{}, false
+	}
 	if deviceEvent, ok := event.Payload.(DeviceRuntimeSnapshotEvent); ok {
 		device, ok := s.visibleDeviceRecordLocked(principal, deviceEvent.Device)
 		if !ok {
