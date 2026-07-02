@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `45`
+- measurements: `46`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -71,7 +71,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `2026-06-26` | `chaos` | `partial` | `server_crash_recovery` | `1` | `2` | `ecs_service_recovery_chaos_evidence` |
 | `2026-06-26` | `chaos` | `partial` | `scale_out_recovery` | `1` | `2` | `scale_out_timing_evidence` |
 | `2026-06-26` | `chaos` | `partial` | `all_servers_down_daemon_behavior` | `1` | `2` | `daemon_reconnect_storm_evidence` |
-| `2026-06-26` | `scenario` | `covered` | `scenario_message_policy` | `1` | `2` | `weekend_open_scenario_result` |
+| `2026-06-26` | `scenario` | `covered` | `scenario_message_policy` | `2` | `3` | `weekend_open_scenario_result` |
 | `2026-06-27` | `desktop` | `partial` | `desktop_body_only_change` | `1` | `2` | `desktop_body_only_golden_evidence` |
 
 ## Partial Evidence Queue

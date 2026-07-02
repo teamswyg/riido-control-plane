@@ -640,14 +640,21 @@
           "kind": "test",
           "signal": "Scenario tests distinguish non-command component text from explicit command replies without changing endpoint IO.",
           "evidence_ref": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"
+        },
+        {
+          "id": "provider_document_explicit_intent_guard",
+          "kind": "test",
+          "signal": "ProviderDocument HTML is preferred over stale component detail document content and drives explicit_instruction classification when it contains a concrete command.",
+          "evidence_ref": "internal/riidoaiserver/ai_agent_task_context_provider_document_intent_test.go"
         }
       ],
       "evidence_refs": [
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go"},
-        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"}
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_task_context_provider_document_intent_test.go"}
       ],
       "next_artifact": "weekend_open_scenario_result",
-      "next_command": "go test ./internal/riidoaiserver -run 'Test.*Intent.*Dialogue|Test.*NonCommand' -count=1"
+      "next_command": "go test ./internal/riidoaiserver -run 'Test.*Intent.*Dialogue|Test.*NonCommand|TestProviderDocumentDrivesExplicitIntentClassification' -count=1"
     },
     {
       "id": "desktop_body_only_change",
