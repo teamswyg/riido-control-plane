@@ -16,6 +16,12 @@ func TestCompletionProgressCycleHasExecutableCaptureTool(t *testing.T) {
 	if !strings.Contains(cycle.RequiredNextCommand, "go run ./tools/aiagentthreadsnapshot") {
 		t.Fatalf("completion progress next command is not executable capture tool: %s", cycle.RequiredNextCommand)
 	}
+	if !strings.Contains(cycle.RequiredNextCommand, "candidate_conversations") {
+		t.Fatalf("completion progress next command must expose candidate conversations: %s", cycle.RequiredNextCommand)
+	}
+	if !strings.Contains(cycle.RequiredNextCommand, "-conversation-id \"$RIIDO_CONVERSATION_ID\"") {
+		t.Fatalf("completion progress next command must include the focused recapture step: %s", cycle.RequiredNextCommand)
+	}
 	if strings.Contains(cycle.RequiredNextCommand, "<") || strings.Contains(cycle.RequiredNextCommand, "...") {
 		t.Fatalf("completion progress next command must not contain placeholders: %s", cycle.RequiredNextCommand)
 	}

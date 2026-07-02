@@ -24,7 +24,7 @@
     "GET thread-stream-subscription",
     "SSE agent_thread_progress summaries"
   ],
-  "command_template": "go run ./tools/aiagentthreadsnapshot -base-url https://staging.ai-api.riido.io -workspace-id 1IFsD2c8Mnk2VstqJ4iNo -task-id uNYpHxDOzMp3vMy_urWsu -conversation-id \"$RIIDO_CONVERSATION_ID\" -output docs/30-architecture/evidence/manual/reproduced-completion-progress-$(date -u +%Y%m%dT%H%M%SZ).json",
+  "command_template": "RIIDO_SNAPSHOT=\"docs/30-architecture/evidence/manual/reproduced-completion-progress-$(date -u +%Y%m%dT%H%M%SZ).json\"; go run ./tools/aiagentthreadsnapshot -base-url https://staging.ai-api.riido.io -workspace-id 1IFsD2c8Mnk2VstqJ4iNo -task-id uNYpHxDOzMp3vMy_urWsu -output \"$RIIDO_SNAPSHOT\"; jq '{decision,candidate_conversation_count,candidate_conversations}' \"$RIIDO_SNAPSHOT\"; if test -z \"$RIIDO_CONVERSATION_ID\"; then echo \"set RIIDO_CONVERSATION_ID from candidate_conversations and rerun this command\" >&2; exit 2; fi; go run ./tools/aiagentthreadsnapshot -base-url https://staging.ai-api.riido.io -workspace-id 1IFsD2c8Mnk2VstqJ4iNo -task-id uNYpHxDOzMp3vMy_urWsu -conversation-id \"$RIIDO_CONVERSATION_ID\" -output \"$RIIDO_SNAPSHOT\"",
   "decision": {
     "status": "partial",
     "summary": "The reproduction is not captured here. This artifact makes the next required evidence executable so a future tester can capture same-moment API and SSE summaries without placing bearer tokens or message bodies into repo evidence. The capture tool now separates ordinary historical progress from a terminal/live conflict so the reported completed-but-still-progressing race can be identified directly when it recurs."
