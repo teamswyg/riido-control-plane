@@ -1,0 +1,111 @@
+{
+  "schema_version": "riido-notion-qa-comment-event-diff.v1",
+  "id": "notion_qa_comment_event_diff_2026_07_02",
+  "captured_at": "2026-07-02T10:30:00Z",
+  "redacted": true,
+  "source": {
+    "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
+    "page_title": "[v1.24] AI Agent QA",
+    "page_url": "https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165",
+    "fetch_mode": "page_body_with_selected_discussion_comments"
+  },
+  "reviewed_discussions": [
+    {
+      "id": "queued_by_busy_agent",
+      "discussion_ref": "notion-discussion:38f20241-cf7f-803d-ad9e-001c876420b5",
+      "status": "server_evidence_present_product_visual_partial",
+      "latest_signal": "The thread contains later comments saying the first assignment path is fixed, but a same-agent existing-thread assignment can still look queued in the UI.",
+      "current_evidence_refs": [
+        "github:https://github.com/teamswyg/riido-control-plane/pull/749",
+        "github:https://github.com/teamswyg/riido-control-plane/actions/runs/28568193167",
+        "docs/30-architecture/evidence/staging-api-queued-client-projection-real-mutation-2026-07-02.json",
+        "notion-comment:39120241-cf7f-81f7-b37a-001dba758d28"
+      ],
+      "decision": "Do not reopen backend queued projection without a fresh Network capture. Existing staging API evidence shows queued markers hidden from v2/v3/SSE; if UI still shows the copy, capture mutation, v3 threads, v2 threads, subscription, and SSE payloads for the same action."
+    },
+    {
+      "id": "codex_unknown_variant",
+      "discussion_ref": "notion-discussion:39120241-cf7f-8078-b592-001c7622face",
+      "status": "daemon_evidence_present_monitor_only",
+      "latest_signal": "The discussion records daemon v0.0.58 plus desktop provider PATH evidence for the unknown variant issue.",
+      "current_evidence_refs": [
+        "github:https://github.com/teamswyg/riido-daemon/releases/tag/v0.0.58",
+        "riido-desktop:bc6b3dc"
+      ],
+      "decision": "No control-plane backend action is implied by this comment diff. Reopen only with latest daemon version, device id, assignment id, and redacted daemon log evidence."
+    },
+    {
+      "id": "completion_progress_after_terminal",
+      "discussion_ref": "notion-discussion:39120241-cf7f-801c-9365-001cb422d43e",
+      "status": "partial_unbackfilled_before_this_artifact",
+      "latest_signal": "A QA comment says a completed answer can continue to look in progress and a refresh can reveal an additional answer. Later comments propose SSE/shared-resource diagnosis and a P-3 endpoint contract-change confirmation gate.",
+      "current_evidence_refs": [
+        "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go",
+        "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go",
+        "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"
+      ],
+      "decision": "Backfill as a distinct P0 visual/event-order cycle. Existing terminal and queued tests reduce backend risk but do not prove this user-visible symptom; next evidence must capture v3 history, v2 task threads, thread-stream-subscription, SSE events, and screenshot state for the same completed conversation. The endpoint contract approval gate discussed in the thread is a separate P-3 candidate, not this P0 fix."
+    },
+    {
+      "id": "author_fallback",
+      "discussion_ref": "notion-discussion:38f20241-cf7f-8021-b116-001c09efc24c",
+      "status": "backend_contract_covered_client_visual_partial",
+      "latest_signal": "Client confirmed null author_principal_id uses the existing RIID-4508 fallback UI instead of raw unknown-author copy.",
+      "current_evidence_refs": [
+        "internal/riidoaiserver/ai_agent_client_thread_history_author_test.go",
+        "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"
+      ],
+      "decision": "Keep the backend contract closed and product readiness partial until a visual/null-author fixture or screenshot closes the client acceptance gate."
+    },
+    {
+      "id": "staging_dmg_page_body",
+      "discussion_ref": "notion-page:38e20241-cf7f-804d-bbdb-fdddb2bef165",
+      "status": "covered_by_newer_evidence",
+      "latest_signal": "The QA page body was updated so the old xattr/ad-hoc codesign workaround is no longer presented as the install path.",
+      "current_evidence_refs": [
+        "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/762"
+      ],
+      "decision": "Treat older notion-backfill-review artifacts as historical snapshots; the newer DMG warning update evidence is the current page-body truth."
+    }
+  ],
+  "diff_summary": {
+    "covered_or_transferred_items": [
+      "staging_dmg_page_body",
+      "author_fallback",
+      "codex_unknown_variant"
+    ],
+    "server_evidence_present_but_visual_partial": [
+      "queued_by_busy_agent"
+    ],
+    "new_or_under_backfilled_items": [
+      "completion_progress_after_terminal"
+    ]
+  },
+  "comments_written": [
+    {
+      "id": "39120241-cf7f-81ec-99e9-001d90f2fa61",
+      "target": "completion_progress_after_terminal_discussion",
+      "status": "[codex][계획중][증적요청]"
+    },
+    {
+      "id": "39120241-cf7f-81c7-9e1b-001dc54ec414",
+      "target": "page_level_backfill_diff_summary",
+      "status": "[codex][완료][백필diff]"
+    }
+  ],
+  "next_actions": [
+    {
+      "owner": "control_plane",
+      "action": "Register completion_progress_after_terminal as its own Notion P0 cycle so future agents do not confuse it with the already-covered queued copy fix."
+    },
+    {
+      "owner": "qa_or_frontend",
+      "action": "When completion/progress drift recurs, attach a same-conversation screenshot plus v3 threads, v2 task threads, stream subscription, and SSE event payload captures."
+    },
+    {
+      "owner": "control_plane",
+      "action": "Keep the P-3 endpoint contract confirmation gate separate from P0 visual/event-order diagnosis; do not change endpoint shape from this evidence alone."
+    }
+  ]
+}

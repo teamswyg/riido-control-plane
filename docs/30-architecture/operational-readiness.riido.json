@@ -96,6 +96,24 @@
         ]
       },
       {
+        "id": "notion_p0_completion_progress_after_terminal",
+        "priority": "P0",
+        "status": "partial",
+        "codex_status": "[codex][계획중][증적요청]",
+        "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#completion-progress-after-terminal",
+        "summary": "A Notion QA comment reports that an Agent answer can look completed while the UI still shows progress, and refresh can reveal an additional answer. Existing terminal and queued server tests reduce backend risk, but this symptom needs same-conversation screenshot plus v3, v2, subscription, and SSE captures before assigning root cause to server or client.",
+        "backfilled_check": "staging_client_p0_visual_retest",
+        "required_next_artifact": "completion_progress_same_conversation_network_snapshot",
+        "required_next_command": "capture the same conversation's screenshot, GET /v3 task threads, GET /v2 task threads, GET thread-stream-subscription, and SSE agent_thread_progress payloads when the completed-but-progressing UI appears",
+        "evidence_refs": [
+          {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"},
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-81ec-99e9-001d90f2fa61"},
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"}
+        ]
+      },
+      {
         "id": "notion_p0_author_fallback",
         "priority": "P0",
         "status": "partial",
@@ -393,6 +411,12 @@
           "evidence_ref": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"
         },
         {
+          "id": "notion_qa_comment_event_diff_2026_07_02",
+          "kind": "artifact",
+          "signal": "Latest Notion comment diff separates covered/transferred items from new gaps: queued residual UI has server evidence but still needs same-action Network capture if it recurs, author fallback and DMG cleanup are covered/visual-partial, and completed-but-still-progressing UI is now a distinct P0 evidence request rather than being merged into the queued fix.",
+          "evidence_ref": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"
+        },
+        {
           "id": "server_contract_regression_tests",
           "kind": "test",
           "signal": "Control-plane tests cover queued status suppression, terminal active-stream closure, and user-message author preservation before client visual retest.",
@@ -496,9 +520,11 @@
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"},
+        {"kind": "external", "path": "notion-comment:39120241-cf7f-81c7-9e1b-001dc54ec414"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-backfill-followup-review-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-task-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-waiting-for-user-iaeSDGRQi7jl5QQ_UDNO7-2026-07-02.png"},
