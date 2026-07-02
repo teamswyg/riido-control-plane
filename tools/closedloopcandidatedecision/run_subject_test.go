@@ -16,7 +16,7 @@ func TestCandidateDecisionRunEvidencePreservesCandidateSubject(t *testing.T) {
 	evidenceOut := t.TempDir() + "/evidence.json"
 	if err := run(options{
 		Repo:        "../..",
-		Manifest:    defaultManifest,
+		Manifest:    writeGeneratedRecordManifest(t),
 		CandidateIn: candidateIn,
 		EvidenceOut: evidenceOut,
 	}); err != nil {

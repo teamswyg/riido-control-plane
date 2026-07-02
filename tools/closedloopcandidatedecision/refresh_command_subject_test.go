@@ -15,7 +15,7 @@ func TestCandidateDecisionRefreshCommandsCarryCandidateSubject(t *testing.T) {
 	)
 	result, err := verifyCandidateDecisions(
 		root,
-		loadDecisionManifestForTest(t),
+		manifestWithGeneratedCandidateRecord(t),
 		out,
 	)
 	if err != nil {

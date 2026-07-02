@@ -3,7 +3,7 @@ package main
 import "testing"
 
 func TestCandidateDecisionEvidenceMarksRecordDecisionSource(t *testing.T) {
-	result := generatedCandidateDecisionResult(t)
+	result := generatedCandidateDecisionResult(t, manifestWithGeneratedCandidateRecord(t))
 	if len(result.DecisionArtifacts) != 1 {
 		t.Fatalf("decision artifacts = %+v", result.DecisionArtifacts)
 	}
@@ -28,14 +28,14 @@ func TestCandidateDecisionEvidenceMarksTemplateDecisionSource(t *testing.T) {
 	}
 }
 
-func generatedCandidateDecisionResult(t *testing.T) verifyResult {
+func generatedCandidateDecisionResult(t *testing.T, m manifest) verifyResult {
 	t.Helper()
 	root := repoRootForTest(t)
 	out := t.TempDir() + "/candidates.json"
 	if err := generateCandidate(t, root, out); err != nil {
 		t.Fatal(err)
 	}
-	result, err := verifyCandidateDecisions(root, loadDecisionManifestForTest(t), out)
+	result, err := verifyCandidateDecisions(root, m, out)
 	if err != nil {
 		t.Fatalf("verify candidate decision: %v", err)
 	}
