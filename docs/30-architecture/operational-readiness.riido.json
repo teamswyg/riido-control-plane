@@ -449,6 +449,12 @@
           "evidence_ref": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"
         },
         {
+          "id": "staging_client_current_task_visual_2026_07_03",
+          "kind": "screenshot",
+          "signal": "A fresh signed-in Chrome existing-tab capture of the reported staging task shows visible thinking count 0 and queued copy count 0 while preserving historical permission-request and stopped messages as thread history; this is a non-reproduction baseline, not same-moment closure.",
+          "evidence_ref": "docs/30-architecture/evidence/staging-client-current-task-visual-2026-07-03.json"
+        },
+        {
           "id": "completion_progress_same_moment_capture_tool_2026_07_02",
           "kind": "artifact",
           "signal": "The remaining completion-progress P0 now has an executable redacted capture command for the exact reproduction moment: v3 threads, v2 threads, thread-stream-subscription, and SSE event summaries are captured without serializing bearer tokens or message bodies.",
@@ -567,12 +573,14 @@
         {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"},
         {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-current-task-visual-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-task-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-waiting-for-user-iaeSDGRQi7jl5QQ_UDNO7-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-readonly-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-followup-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-live-screen-uNYpHxDOzMp3vMy_urWsu-2026-07-02T12-10Z.png"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-current-task-uNYpHxDOzMp3vMy_urWsu-2026-07-03.png"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
