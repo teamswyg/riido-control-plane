@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `52`
+- measurements: `54`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -62,12 +62,12 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `2026-06-26` | `monitoring` | `partial` | `otel_xray_client_surface` | `7` | `9` | `client_surface_alarm_plan_apply_evidence` |
 | `2026-07-01` | `monitoring` | `covered` | `public_qa_status_surface` | `10` | `17` | `public_qa_status_pages_live_evidence` |
 | `2026-06-26` | `usability` | `covered` | `real_screen_wording` | `1` | `2` | `frontend_screenshot_regression_case` |
-| `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `17` | `13` | `staging_client_p0_visual_screenshot_evidence` |
+| `2026-06-30` | `usability` | `partial` | `staging_client_p0_visual_retest` | `18` | `14` | `staging_client_p0_visual_screenshot_evidence` |
 | `2026-06-26` | `usability` | `covered` | `agent_rename_snapshot_policy` | `1` | `2` | `agent_rename_snapshot_regression_evidence` |
 | `2026-06-26` | `exception` | `partial` | `daemon_network_disconnect_waiting` | `2` | `3` | `daemon_network_disconnect_release_evidence` |
 | `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `2` | `4` | `capacity_result_annotation` |
 | `2026-06-26` | `stress` | `partial` | `single_pc_agent_limit` | `2` | `3` | `single_pc_agent_capacity_evidence` |
-| `2026-06-26` | `stress` | `partial` | `boot_burst_capacity` | `1` | `2` | `cold_start_packet_burst_evidence` |
+| `2026-06-26` | `stress` | `partial` | `boot_burst_capacity` | `2` | `3` | `cold_start_packet_burst_evidence` |
 | `2026-06-26` | `chaos` | `partial` | `server_crash_recovery` | `2` | `3` | `ecs_service_recovery_chaos_evidence` |
 | `2026-06-26` | `chaos` | `partial` | `scale_out_recovery` | `2` | `3` | `scale_out_timing_evidence` |
 | `2026-06-26` | `chaos` | `partial` | `all_servers_down_daemon_behavior` | `2` | `3` | `daemon_reconnect_storm_evidence` |

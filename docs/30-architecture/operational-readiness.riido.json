@@ -368,6 +368,12 @@
           "evidence_ref": "notion:v1.24-ai-agent-qa"
         },
         {
+          "id": "notion_backfill_review_2026_07_02",
+          "kind": "artifact",
+          "signal": "Backfilled Notion QA review separates stale page-body guidance from newer comment/repo evidence: staging DMG Gatekeeper text in the body is stale, page-level server-deploy status is client-PR scoped, and the generated readiness manifest is the current P0 cycle truth.",
+          "evidence_ref": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"
+        },
+        {
           "id": "server_contract_regression_tests",
           "kind": "test",
           "signal": "Control-plane tests cover queued status suppression, terminal active-stream closure, and user-message author preservation before client visual retest.",
@@ -471,6 +477,7 @@
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4842967480"},
         {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711#issuecomment-4843050388"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-task-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-p0-waiting-for-user-iaeSDGRQi7jl5QQ_UDNO7-2026-07-02.png"},
@@ -600,11 +607,18 @@
           "kind": "workflow",
           "signal": "Cold-start burst workflow records accepted requests, throttles, 5xx, and time-to-ready under immediate packet load.",
           "evidence_ref": ".github/workflows/ai-agent-client-testnet-load.yml"
+        },
+        {
+          "id": "staging_public_burst_2026_07_02",
+          "kind": "artifact",
+          "signal": "Staging public burst workflow ran 128 concurrent health/ready workers for 120 seconds against staging.ai-api.riido.io with 98,304 successful requests, 0 failures, and p95 latency 152ms; this is warm burst evidence, not a forced cold-start timing proof.",
+          "evidence_ref": "docs/30-architecture/evidence/staging-public-burst-load-evidence-2026-07-02.json"
         }
       ],
       "evidence_refs": [
         {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"},
-        {"kind": "tool", "path": "tools/aiagentload/run.go"}
+        {"kind": "tool", "path": "tools/aiagentload/run.go"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-public-burst-load-evidence-2026-07-02.json"}
       ],
       "next_artifact": "cold_start_packet_burst_evidence",
       "next_command": "gh workflow run ai-agent-client-testnet-load.yml -f scenario=public -f duration=120s -f concurrency=128"
