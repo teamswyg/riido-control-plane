@@ -8,7 +8,7 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - checks: `14`
-- measurements: `50`
+- measurements: `52`
 - covered: `5`
 - partial: `9`
 - evidence ttl hours: `24`
@@ -68,8 +68,8 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 | `2026-06-26` | `stress` | `covered` | `testnet_load_capacity` | `2` | `4` | `capacity_result_annotation` |
 | `2026-06-26` | `stress` | `partial` | `single_pc_agent_limit` | `2` | `3` | `single_pc_agent_capacity_evidence` |
 | `2026-06-26` | `stress` | `partial` | `boot_burst_capacity` | `1` | `2` | `cold_start_packet_burst_evidence` |
-| `2026-06-26` | `chaos` | `partial` | `server_crash_recovery` | `1` | `2` | `ecs_service_recovery_chaos_evidence` |
-| `2026-06-26` | `chaos` | `partial` | `scale_out_recovery` | `1` | `2` | `scale_out_timing_evidence` |
+| `2026-06-26` | `chaos` | `partial` | `server_crash_recovery` | `2` | `3` | `ecs_service_recovery_chaos_evidence` |
+| `2026-06-26` | `chaos` | `partial` | `scale_out_recovery` | `2` | `3` | `scale_out_timing_evidence` |
 | `2026-06-26` | `chaos` | `partial` | `all_servers_down_daemon_behavior` | `2` | `3` | `daemon_reconnect_storm_evidence` |
 | `2026-06-26` | `scenario` | `covered` | `scenario_message_policy` | `2` | `3` | `weekend_open_scenario_result` |
 | `2026-06-27` | `desktop` | `partial` | `desktop_body_only_change` | `1` | `2` | `desktop_body_only_golden_evidence` |
