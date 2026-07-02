@@ -8438,8 +8438,16 @@
           "path": "docs/30-architecture/evidence/staging-public-burst-load-evidence-2026-07-02.json"
         },
         {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/staging-public-burst-load-256-evidence-2026-07-02.json"
+        },
+        {
           "kind": "test",
           "path": "tools/operationalreadiness/boot_burst_evidence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/boot_burst_256_evidence_test.go"
         }
       ],
       "verifiers": [
@@ -8464,11 +8472,16 @@
         },
         {
           "kind": "artifact",
+          "path": "staging-public-burst-load-256-evidence-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
           "path": "operational-readiness-evidence",
           "redacted": true
         }
       ],
-      "decision": "The authoritative staging run 28572477935 reached staging.ai-api.riido.io and completed 98,304 public health/ready requests over 120 seconds at concurrency 128 with 0 failures, p95 latency 152ms, p99 latency 451ms, and no closed-loop failure candidates. boot_burst_capacity remains partial because the run was a warm public burst and did not force server cold start, ECS task replacement, or measure time-to-ready during startup.",
+      "decision": "The authoritative staging runs 28572477935 and 28576806795 reached staging.ai-api.riido.io and completed warm public bursts at concurrency 128 and 256 with 249,441 combined requests, 0 failures, p95 latency 152ms/222ms, p99 latency 451ms/591ms, and no closed-loop failure candidates. boot_burst_capacity remains partial because these runs were warm public bursts and did not force server cold start, ECS task replacement, or measure time-to-ready during startup.",
       "next_loop": "operational_readiness_release_harness"
     },
     {

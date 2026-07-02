@@ -650,6 +650,12 @@
           "evidence_ref": "docs/30-architecture/evidence/staging-public-burst-load-evidence-2026-07-02.json"
         },
         {
+          "id": "staging_public_burst_256_2026_07_02",
+          "kind": "artifact",
+          "signal": "Staging public burst workflow ran 256 concurrent health/ready workers for 120 seconds against staging.ai-api.riido.io with 151,137 successful requests, 0 failures, p95 latency 222ms, and p99 latency 591ms; this is higher-pressure warm burst evidence, not a forced cold-start timing proof.",
+          "evidence_ref": "docs/30-architecture/evidence/staging-public-burst-load-256-evidence-2026-07-02.json"
+        },
+        {
           "id": "staging_deploy_overlap_burst_2026_07_02",
           "kind": "artifact",
           "signal": "A 300s concurrency-128 public load run overlapped the testnet ECS rolling deploy build/register/deploy-wait/smoke window and returned 189,043 successful requests with 0 failures, p95 latency 211ms, and p99 latency 625ms; this proves deployment-overlap availability but still lacks per-task cold-start attribution.",
@@ -660,6 +666,7 @@
         {"kind": "workflow", "path": ".github/workflows/ai-agent-client-testnet-load.yml"},
         {"kind": "tool", "path": "tools/aiagentload/run.go"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-deploy-overlap-burst-evidence-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-public-burst-load-256-evidence-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-public-burst-load-evidence-2026-07-02.json"}
       ],
       "next_artifact": "cold_start_packet_burst_evidence",
