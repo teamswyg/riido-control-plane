@@ -57,14 +57,15 @@
         "id": "notion_p0_queued_by_busy_agent",
         "priority": "P0",
         "status": "partial",
-        "codex_status": "[codex][진행중]",
+        "codex_status": "[codex][완료][전달요청]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#queued-by-busy-agent",
-        "summary": "A reopened Notion QA comment reports queued_by_busy_agent still appearing for a workable agent; assignable-agents now reconciles stale durable assignment projections before returning selectable agent state.",
+        "summary": "queued_by_busy_agent server-side regressions are fixed in v3 history and assignable-agents projection repair; product readiness remains partial only until client visual screenshot evidence confirms the stale queue copy is gone.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
         "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
         "evidence_refs": [
           {"kind": "external", "path": "notion:https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165"},
+          {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/issues/711"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_assignable_repair_test.go"}
         ]
@@ -104,12 +105,12 @@
         "id": "notion_p0_instruction_intent_dialogue",
         "priority": "P0",
         "status": "partial",
-        "codex_status": "[codex][진행중]",
+        "codex_status": "[codex][완료][전달요청]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#instruction-intent-dialogue",
-        "summary": "Explicit command replies should execute while non-command component text asks for intent; the waiting_for_user copy is being adjusted so the agent says it reviewed the task and asks for desired output/direction instead of asking what to start.",
+        "summary": "Explicit command replies execute without intent gating, while non-command component text asks for direction with reviewed-context copy; product readiness remains partial only until client visual screenshot evidence confirms the dialogue UX.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
-        "required_next_command": "go test ./internal/riidoaiserver -run 'Test.*Intent.*Dialogue|Test.*NonCommand' -count=1",
+        "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",
         "evidence_refs": [
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_intent_dialogue_full_scenario_test.go"},
