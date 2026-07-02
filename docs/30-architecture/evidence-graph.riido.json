@@ -7688,6 +7688,82 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "notion_qa_assignable_projection_repair_loop",
+      "observation": "A reopened Notion P0 comment reported that a workable online agent still showed the queued_by_busy_agent copy after the earlier v3 queued-stream fix. Staging read-only evidence for the referenced QA task showed no current active_stream, empty v2 active_thread_filters, and idle assignable agents, which narrowed the remaining server-side risk to stale agent selection projections rather than v3 thread-history suppression.",
+      "hypothesis": "If task assignable-agents reads agent status without reconciling durable assignment projections first, a completed or failed assignment can leave the client read-model looking busy and make the selectable agent path show stale queued_by_busy_agent behavior even when the runtime is workable.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assignable_handler.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_repair_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_repair_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_repair_event_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_repair_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Task assignable-agents now reconciles workspace active-thread projections before returning selectable agent state, while the mutation endpoint shapes remain unchanged. The regression fixture proves a durable completed assignment no longer leaves assignable agents busy in the HTTP read path, and operational readiness marks the reopened Notion P0 as in-progress until staging deployment plus visual QA confirms the product symptom is gone.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "container_image_contract_runtime_shape_loop",
       "observation": "The container image contract manifest and verifier were executable, but they were not bound into the loop registry or evidence graph, so changes under tools/containercontract could bypass target verifier routing and force agents to infer runtime image ownership from scattered files.",
       "hypothesis": "Binding the container image contract, Dockerfile, verifier helpers, module-decomposition ratchet, and integration matrix evidence into one claim lets changed-path QA route container runtime shape edits to the exact verifier commands without asking agents to read prose.",
