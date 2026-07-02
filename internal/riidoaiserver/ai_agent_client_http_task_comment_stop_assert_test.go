@@ -14,8 +14,10 @@ func assertTaskCommentStopReplayEvents(t *testing.T, server http.Handler) {
 	eventsResp := httptest.NewRecorder()
 	server.ServeHTTP(eventsResp, eventsReq)
 	body := eventsResp.Body.String()
-	if !strings.Contains(body, string(AgentTaskCommentQueuedByBusyAgent)) ||
-		!strings.Contains(body, string(AgentTaskCommentStoppedByUserRequest)) {
+	if strings.Contains(body, string(AgentTaskCommentQueuedByBusyAgent)) {
+		t.Fatalf("stale queued event leaked after stop: %q", body)
+	}
+	if !strings.Contains(body, string(AgentTaskCommentStoppedByUserRequest)) {
 		t.Fatalf("events body = %q", body)
 	}
 }

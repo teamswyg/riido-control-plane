@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestHTTPAIAgentClientDevelopmentSSEReplaysTypedCommentStatus(t *testing.T) {
+func TestHTTPAIAgentClientDevelopmentSSEHidesStaleQueuedStatus(t *testing.T) {
 	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 		PrincipalID: "user-1",
 		Token:       "user-token",
@@ -24,8 +24,38 @@ func TestHTTPAIAgentClientDevelopmentSSEReplaysTypedCommentStatus(t *testing.T) 
 	if got := resp.Header().Get("Content-Type"); !strings.HasPrefix(got, "text/event-stream") {
 		t.Fatalf("Content-Type = %q", got)
 	}
-	message := resp.Body.String()
-	if !strings.Contains(message, "event: agent_work_status_changed\n") || !strings.Contains(message, string(AgentTaskCommentQueuedByBusyAgent)) {
-		t.Fatalf("sse message = %q", message)
+	body := resp.Body.String()
+	if strings.Contains(body, string(AgentTaskCommentQueuedByBusyAgent)) {
+		t.Fatalf("stale queued status leaked into replay: %q", body)
+	}
+}
+
+func TestHTTPAIAgentClientDevelopmentSSEKeepsCurrentQueuedStatus(t *testing.T) {
+	server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
+		PrincipalID: "user-1",
+		Token:       "user-token",
+		Scopes:      []string{"ai-agent:*"},
+	}})
+
+	req := httptest.NewRequest(
+		http.MethodPost,
+		"/v1/client/ai-agent/tasks/task-current-queued/comments",
+		strings.NewReader(`{"agent_id":"agent-owned-codex","body":"queued please"}`),
+	)
+	req.Header.Set("Authorization", "Bearer user-token")
+	resp := httptest.NewRecorder()
+	server.ServeHTTP(resp, req)
+	if resp.Code != http.StatusAccepted {
+		t.Fatalf("comment status=%d body=%s", resp.Code, resp.Body.String())
+	}
+
+	eventsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/events?replay=1", nil)
+	eventsReq.Header.Set("Authorization", "Bearer user-token")
+	eventsResp := httptest.NewRecorder()
+	server.ServeHTTP(eventsResp, eventsReq)
+	body := eventsResp.Body.String()
+	if !strings.Contains(body, "task-current-queued") ||
+		!strings.Contains(body, string(AgentTaskCommentQueuedByBusyAgent)) {
+		t.Fatalf("current queued status missing from replay: %q", body)
 	}
 }

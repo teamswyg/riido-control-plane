@@ -9,5 +9,5 @@ func (s *DevelopmentAIAgentClientStore) clientEventsForPrincipalLocked(principal
 		}
 		events = append(events, visible)
 	}
-	return events
+	return withoutSupersededQueuedClientEvents(s, events)
 }

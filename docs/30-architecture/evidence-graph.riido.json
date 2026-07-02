@@ -7949,6 +7949,69 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "ai_thread_history_stale_queued_replay_loop",
+      "observation": "A staging screenshot still showed the queued_by_busy_agent copy next to a newer thinking/progress block for the same agent card. The v3 history filter already suppressed stale queued messages after running/progress/result, but SSE replay and reconnect history could still resend an older agent_work_status_changed queued event that the client may render as a normal timeline message.",
+      "hypothesis": "Filtering replayable client events with the same current-only queued rule keeps true current queued work visible while preventing reconnect/refetch from reviving stale queued_by_busy_agent status after the same thread or conversation has moved to progress, running, completed, stopped, or failed.",
+      "claims": [
+        "thread_history_v3_must_expose_stable_conversation_grouping",
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_client_events_for_principal_locked.go"
+        },
+        {
+          "kind": "projection",
+          "path": "internal/riidoaiserver/ai_agent_client_event_queued_filter.go"
+        },
+        {
+          "kind": "projection",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_queued_superseded.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_sse_replay_comment_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_task_comment_stop_assert_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_participants_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_store_assignment_status_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_sse_replay_comment_status_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-test-riidoaiserver",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "queued_by_busy_agent remains a current status hint, not a durable agent reply. The server now applies that rule to replayable client events as well as v3 history: stale queued events are omitted once superseded, but a genuinely current queued assignment is still replayed.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "container_image_contract_runtime_shape_loop",
       "observation": "The container image contract manifest and verifier were executable, but they were not bound into the loop registry or evidence graph, so changes under tools/containercontract could bypass target verifier routing and force agents to infer runtime image ownership from scattered files.",
       "hypothesis": "Binding the container image contract, Dockerfile, verifier helpers, module-decomposition ratchet, and integration matrix evidence into one claim lets changed-path QA route container runtime shape edits to the exact verifier commands without asking agents to read prose.",
