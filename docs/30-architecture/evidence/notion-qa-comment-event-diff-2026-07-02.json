@@ -99,6 +99,52 @@
           "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
         }
       ]
+    },
+    {
+      "observed_at": "2026-07-02T23:14:55Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "page fetch plus selected discussion_id targeted readback",
+      "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
+      "aggregate_get_comments_result": "stale_page_level_snapshot",
+      "decision": "A 2026-07-03 KST readback still shows the older page snapshot and 31 page-level comments, while targeted inline readback for selected P0 threads still matches the latest evidence ids. No new backend/control-plane blocker was discovered from the visible Notion comments.",
+      "discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 18,
+          "latest_visible_comment_id": "39120241-cf7f-81d5-9c0f-001d26c153a0",
+          "latest_visible_comment_observed_at": "2026-07-02T10:08:16.163Z"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57",
+          "latest_visible_comment_observed_at": "2026-07-02T01:22:09.543Z"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66",
+          "latest_visible_comment_observed_at": "2026-07-02T00:42:59.595Z"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349",
+          "latest_visible_comment_observed_at": "2026-07-02T00:54:18.769Z"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8",
+          "latest_visible_comment_observed_at": "2026-07-02T10:09:14.555Z"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+          "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
+        }
+      ]
     }
   ],
   "comment_events": [
@@ -784,6 +830,42 @@
         }
       ],
       "decision": "A 2026-07-03 KST backfill still exposes the same stale page snapshot and 31 visible page-level comments, so comment-event diff evidence remains the safer source for QA event reconciliation."
+    },
+    {
+      "observed_at": "2026-07-02T23:14:55Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "include_discussions=true; include_all_blocks=true, include_resolved=true",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        }
+      ],
+      "decision": "A 2026-07-03 KST readback again exposes the same stale page snapshot and 31 visible page-level comments, while targeted inline reads still match selected P0 discussions. Keep write-confirmed comments and targeted discussion readbacks as the authoritative event boundary."
     }
   ],
   "next_actions": [
