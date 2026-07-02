@@ -74,7 +74,8 @@
           {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/actions/runs/28565727298"},
           {"kind": "external", "path": "github:https://github.com/teamswyg/riido-control-plane/actions/runs/28568193167"},
           {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-api-queued-client-projection-real-mutation-2026-07-02.json"},
-          {"kind": "external", "path": "notion-comment:39120241-cf7f-81f7-b37a-001dba758d28"}
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-81f7-b37a-001dba758d28"},
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-81d5-9c0f-001d26c153a0"}
         ]
       },
       {
@@ -114,6 +115,7 @@
           {"kind": "external", "path": "notion-comment:39120241-cf7f-81ec-99e9-001d90f2fa61"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-8196-a65c-001d664f0e7a"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-8125-bd7a-001d0eff72b8"},
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-8119-b377-001d66282634"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"}
