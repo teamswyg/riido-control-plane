@@ -39,4 +39,7 @@ func TestCompletionProgressCaptureToolEvidenceIsRedacted(t *testing.T) {
 	if !strings.Contains(evidence.Tool.TerminalLiveConflictDetection, "captured_terminal_live_conflict") {
 		t.Fatal("capture tool evidence must describe terminal/live conflict detection")
 	}
+	if !strings.Contains(evidence.Tool.TerminalLiveConflictDetection, "active_thread_filters") {
+		t.Fatal("capture tool evidence must include active subscription filter conflicts")
+	}
 }

@@ -19,6 +19,7 @@ type subscriptionSummary struct {
 	EventType                string `json:"event_type"`
 	ActiveThreadFilterCount  int    `json:"active_thread_filter_count"`
 	HighlightedFilterMatched bool   `json:"highlighted_filter_matched"`
+	TerminalFilterMatched    bool   `json:"terminal_filter_matched"`
 }
 
 type sseEventSummary struct {

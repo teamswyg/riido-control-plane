@@ -26,7 +26,8 @@ func capture(ctx context.Context, cfg config) (report, error) {
 	rep.Endpoints = append(rep.Endpoints, v3.Observation, v2.Observation, sub.Observation)
 	rep.V3 = summarizeThreads(v3.Payload, cfg.ConversationID)
 	rep.V2 = summarizeThreads(v2.Payload, cfg.ConversationID)
-	rep.Subscription = summarizeSubscription(sub.Payload, cfg.ConversationID)
+	rep.Subscription = summarizeSubscription(
+		sub.Payload, highlightedThreads(rep), cfg.ConversationID)
 	if sub.Payload.Stream.Href != "" {
 		rep.SSEEvents = captureSSE(ctx, client, token, cfg, sub.Payload.Stream.Href)
 	}
@@ -45,4 +46,9 @@ func newReport(cfg config, now string) report {
 			TokenEnv: cfg.TokenEnv,
 		},
 	}
+}
+
+func highlightedThreads(rep report) []threadSurface {
+	threads := append([]threadSurface{}, rep.V3.HighlightedThreads...)
+	return append(threads, rep.V2.HighlightedThreads...)
 }
