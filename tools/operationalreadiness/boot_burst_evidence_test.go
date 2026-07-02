@@ -16,8 +16,14 @@ func TestOperationalReadinessBindsStagingPublicBurstEvidence(t *testing.T) {
 	if !hasMeasurement(check, "staging_public_burst_2026_07_02") {
 		t.Fatal("missing staging public burst measurement")
 	}
+	if !hasMeasurement(check, "staging_public_burst_256_2026_07_02") {
+		t.Fatal("missing staging public burst 256 measurement")
+	}
 	if !hasEvidenceRef(check, stagingBurstEvidence) {
 		t.Fatal("missing staging public burst evidence ref")
+	}
+	if !hasEvidenceRef(check, stagingBurst256Evidence) {
+		t.Fatal("missing staging public burst 256 evidence ref")
 	}
 }
 
