@@ -104,7 +104,8 @@
         "internal/riidoaiserver/store_waiter_api.go",
         "internal/riidoaiserver/store_waiter_handlers.go",
         "internal/riidoaiserver/tool_approval_http.go",
-        "internal/riidoaiserver/store_tool_approval.go"
+        "internal/riidoaiserver/store_tool_approval.go",
+        "internal/riidoaiserver/store_tool_approval_wait.go"
       ],
       "pressure_dimensions": ["goroutine_delta", "race_condition", "cpu_busy", "latency"],
       "observability_signals": ["tool_approval_wait", "assignment_poll_wait", "cloudwatch_emf"],
@@ -215,7 +216,7 @@
       "id": "tool_approval_waiters",
       "category": "assignment_scheduling",
       "risk": "tool approval long-poll waiters can add timer and waiter-map pressure when provider tools request human decisions",
-      "files": ["internal/riidoaiserver/tool_approval_http.go", "internal/riidoaiserver/store_tool_approval.go"],
+      "files": ["internal/riidoaiserver/tool_approval_http.go", "internal/riidoaiserver/store_tool_approval.go", "internal/riidoaiserver/store_tool_approval_wait.go"],
       "tests": ["TestHTTPToolApprovalRoundTrip"],
       "candidate": "keep approval waits bounded and watch goroutine/timer deltas under stalled approvals"
     }

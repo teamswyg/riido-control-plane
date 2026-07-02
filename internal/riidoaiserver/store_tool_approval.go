@@ -50,58 +50,16 @@ func (s *Store) DecideToolApproval(ctx context.Context, taskID string, decision 
 	}
 }
 
-func (s *Store) WaitForToolApproval(ctx context.Context, agentID, assignmentID, approvalID string, hold, tick time.Duration) (ToolApprovalResult, *ToolApprovalDecision, error) {
-	result, decision, err := s.readToolApprovalResult(ctx, agentID, assignmentID, approvalID)
-	if err != nil || result.Status.IsTerminal() || hold <= 0 {
-		return result, decision, err
-	}
-	key := toolApprovalKey(assignmentID, approvalID)
-	signal, release, err := s.registerToolApprovalWaiter(ctx, key)
-	if err != nil {
-		return ToolApprovalResult{}, nil, err
-	}
-	defer release()
-	result, decision, err = s.readToolApprovalResult(ctx, agentID, assignmentID, approvalID)
-	if err != nil || result.Status.IsTerminal() {
-		return result, decision, err
-	}
-	if tick <= 0 || tick > hold {
-		tick = hold
-	}
-	deadline := time.NewTimer(hold)
-	defer deadline.Stop()
-	ticker := time.NewTicker(tick)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-signal:
-			result, decision, err = s.readToolApprovalResult(ctx, agentID, assignmentID, approvalID)
-			if err != nil || result.Status.IsTerminal() {
-				return result, decision, err
-			}
-		case <-ticker.C:
-			result, decision, err = s.readToolApprovalResult(ctx, agentID, assignmentID, approvalID)
-			if err != nil || result.Status.IsTerminal() {
-				return result, decision, err
-			}
-		case <-deadline.C:
-			return result, decision, nil
-		case <-ctx.Done():
-			return ToolApprovalResult{}, nil, ctx.Err()
-		}
-	}
-}
-
-func (s *Store) readToolApprovalResult(ctx context.Context, agentID, assignmentID, approvalID string) (ToolApprovalResult, *ToolApprovalDecision, error) {
+func (s *Store) readToolApprovalResult(ctx context.Context, agentID, assignmentID, approvalID string) (ToolApprovalResult, *ToolApprovalDecision, ToolApprovalRequest, error) {
 	reply := make(chan toolApprovalDecisionResult, 1)
 	if err := s.send(ctx, readToolApprovalCmd{agentID: agentID, assignmentID: assignmentID, approvalID: approvalID, reply: reply}); err != nil {
-		return ToolApprovalResult{}, nil, err
+		return ToolApprovalResult{}, nil, ToolApprovalRequest{}, err
 	}
 	select {
 	case res := <-reply:
-		return res.result, res.decision, res.err
+		return res.result, res.decision, res.approval, res.err
 	case <-ctx.Done():
-		return ToolApprovalResult{}, nil, ctx.Err()
+		return ToolApprovalResult{}, nil, ToolApprovalRequest{}, ctx.Err()
 	}
 }
 
@@ -197,14 +155,14 @@ func (s *Store) handleDecideToolApproval(state *storeState, taskID string, decis
 	return result, &decision, nil
 }
 
-func (s *Store) handleReadToolApproval(state *storeState, agentID, assignmentID, approvalID string) (ToolApprovalResult, *ToolApprovalDecision, bool, error) {
+func (s *Store) handleReadToolApproval(state *storeState, agentID, assignmentID, approvalID string) (ToolApprovalResult, *ToolApprovalDecision, ToolApprovalRequest, bool, error) {
 	key := toolApprovalKey(assignmentID, approvalID)
 	approval, ok := state.toolApprovals[key]
 	if !ok {
-		return ToolApprovalResult{}, nil, false, fmt.Errorf("tool approval %s not found", approvalID)
+		return ToolApprovalResult{}, nil, ToolApprovalRequest{}, false, fmt.Errorf("tool approval %s not found", approvalID)
 	}
 	if agentID = strings.TrimSpace(agentID); agentID != "" && approval.AgentID != agentID {
-		return ToolApprovalResult{}, nil, false, fmt.Errorf("tool approval %s belongs to agent %s", approvalID, approval.AgentID)
+		return ToolApprovalResult{}, nil, ToolApprovalRequest{}, false, fmt.Errorf("tool approval %s belongs to agent %s", approvalID, approval.AgentID)
 	}
 	decision, hasDecision := state.toolApprovalDecisions[key]
 	if approval.Status == ApprovalPending && !approval.ExpiresAt.IsZero() && !s.now().Before(approval.ExpiresAt) {
@@ -212,14 +170,14 @@ func (s *Store) handleReadToolApproval(state *storeState, agentID, assignmentID,
 		state.toolApprovals[key] = approval
 		s.signalToolApprovalWaiters(state, key)
 		result := toolApprovalResultFor(approval, nil, s.now())
-		return result, nil, true, nil
+		return result, nil, approval, true, nil
 	}
 	if hasDecision {
 		result := toolApprovalResultFor(approval, &decision, s.now())
-		return result, &decision, false, nil
+		return result, &decision, approval, false, nil
 	}
 	result := toolApprovalResultFor(approval, nil, s.now())
-	return result, nil, false, nil
+	return result, nil, approval, false, nil
 }
 
 func (s *Store) handleRegisterToolApprovalWaiter(state *storeState, key string) (chan struct{}, int64) {

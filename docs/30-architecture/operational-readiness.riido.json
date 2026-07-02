@@ -681,6 +681,12 @@
           "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-plain-text-fastpath-after-2026-07-03.json"
         },
         {
+          "id": "local_pressure_tool_approval_signal_only_2026_07_03",
+          "kind": "artifact",
+          "signal": "After pending tool approval waits skip polling ticks when the approval cannot expire during the hold window, local pressure measured zero errors, zero goroutine deltas, and lower allocation/CPU per operation for tool_approval_waiters.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-after-2026-07-03.json"
+        },
+        {
           "id": "local_pressure_stream_target_capacity_2026_07_02",
           "kind": "artifact",
           "signal": "Thread stream subscription target selection keeps the all-active fast path while reducing inactive-heavy target allocation from 2688 B/op to 96 B/op without changing endpoints or response contracts.",
@@ -705,6 +711,8 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-candidates-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-plain-text-fastpath-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-before-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-client-event-fanout-after-2026-07-02.json"}
       ],

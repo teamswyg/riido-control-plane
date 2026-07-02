@@ -1,0 +1,2853 @@
+{
+  "schema_version": "riido-control-plane-local-pressure-evidence.v1",
+  "started_at": "2026-07-02T18:52:14.023918Z",
+  "ended_at": "2026-07-02T18:52:32.962877Z",
+  "duration_ms": 18938,
+  "fixture": {
+    "threads": 24,
+    "lines_per_thread": 40
+  },
+  "runs": [
+    {
+      "scenario": "http_endpoint_threads_v3",
+      "concurrency": 1,
+      "concurrent_users": 1,
+      "operations": 17355,
+      "errors": 0,
+      "ops_per_sec": 24792.857142857145,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 34,
+        "p50": 35,
+        "p90": 42,
+        "p95": 48,
+        "p99": 151,
+        "max": 437
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 3137888,
+        "total_alloc_bytes": 842280640,
+        "total_alloc_bytes_per_op": 48532.4482857966,
+        "mallocs": 3354838,
+        "frees": 3342280,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.7339859999999999,
+        "system_cpu_seconds": 0.042683,
+        "gc_cpu_seconds": 0.092040285,
+        "scavenge_cpu_seconds": 0.000843867,
+        "active_cpu_seconds": 0.7766689999999999,
+        "available_cpu_seconds": 9.800772912,
+        "cpu_utilization_pct": 7.924568878124415,
+        "cpu_seconds_per_op": 0.000044751887064246614
+      },
+      "candidate": {
+        "id": "control-plane-pressure:http_endpoint_threads_v3",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "http_endpoint_threads_v3",
+        "risk": "v3 thread history endpoint covers auth, route metrics, reconcile, projection, and JSON response pressure",
+        "next": "track refresh pressure before changing v3 history projection internals",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "http_endpoint_threads_v3",
+      "concurrency": 8,
+      "concurrent_users": 8,
+      "operations": 16530,
+      "errors": 0,
+      "ops_per_sec": 23614.285714285717,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 48,
+        "p50": 314,
+        "p90": 467,
+        "p95": 506,
+        "p99": 557,
+        "max": 750
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 579456,
+        "total_alloc_bytes": 820332640,
+        "total_alloc_bytes_per_op": 49626.89897156685,
+        "mallocs": 3204166,
+        "frees": 3202350,
+        "goroutines": 0,
+        "user_cpu_seconds": 1.006471,
+        "system_cpu_seconds": 0.17375200000000002,
+        "gc_cpu_seconds": 0.208299273,
+        "scavenge_cpu_seconds": 0.002356114,
+        "active_cpu_seconds": 1.1802229999999998,
+        "available_cpu_seconds": 9.805075,
+        "cpu_utilization_pct": 12.036858463601755,
+        "cpu_seconds_per_op": 0.00007139885057471263
+      },
+      "candidate": {
+        "id": "control-plane-pressure:http_endpoint_threads_v3",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "http_endpoint_threads_v3",
+        "risk": "v3 thread history endpoint covers auth, route metrics, reconcile, projection, and JSON response pressure",
+        "next": "track refresh pressure before changing v3 history projection internals",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "http_endpoint_threads_v3",
+      "concurrency": 32,
+      "concurrent_users": 32,
+      "operations": 17617,
+      "errors": 0,
+      "ops_per_sec": 25167.14285714286,
+      "latency_ms": {
+        "min": 0,
+        "p50": 1,
+        "p90": 1,
+        "p95": 1,
+        "p99": 1,
+        "max": 1
+      },
+      "latency_us": {
+        "min": 46,
+        "p50": 1299,
+        "p90": 1480,
+        "p95": 1538,
+        "p99": 1603,
+        "max": 1616
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1419552,
+        "total_alloc_bytes": 881645928,
+        "total_alloc_bytes_per_op": 50045.17954248737,
+        "mallocs": 3419731,
+        "frees": 3413872,
+        "goroutines": 0,
+        "user_cpu_seconds": 1.123703,
+        "system_cpu_seconds": 0.190551,
+        "gc_cpu_seconds": 0.292166228,
+        "scavenge_cpu_seconds": 0.0033165370000000005,
+        "active_cpu_seconds": 1.3142539999999998,
+        "available_cpu_seconds": 9.819705588,
+        "cpu_utilization_pct": 13.383843214261546,
+        "cpu_seconds_per_op": 0.00007460146449452233
+      },
+      "candidate": {
+        "id": "control-plane-pressure:http_endpoint_threads_v3",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "http_endpoint_threads_v3",
+        "risk": "v3 thread history endpoint covers auth, route metrics, reconcile, projection, and JSON response pressure",
+        "next": "track refresh pressure before changing v3 history projection internals",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "http_metrics_observe",
+      "concurrency": 1,
+      "concurrent_users": 1,
+      "operations": 2661165,
+      "errors": 0,
+      "ops_per_sec": 3801664.285714286,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 7
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1516600,
+        "total_alloc_bytes": 1516600,
+        "total_alloc_bytes_per_op": 0.5699007765395983,
+        "mallocs": 36,
+        "frees": 0,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.7805489999999997,
+        "system_cpu_seconds": 0.19899199999999995,
+        "gc_cpu_seconds": 0,
+        "scavenge_cpu_seconds": 0,
+        "active_cpu_seconds": 0.9795409999999997,
+        "available_cpu_seconds": 9.800785750000001,
+        "cpu_utilization_pct": 9.994514980597343,
+        "cpu_seconds_per_op": 3.680872850800306e-7
+      },
+      "candidate": {
+        "id": "control-plane-pressure:http_metrics_observe",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "http_metrics_observe",
+        "risk": "route metrics lock/allocation pressure on endpoint hot paths",
+        "next": "watch lock cost before adding route dimensions",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "http_metrics_observe",
+      "concurrency": 8,
+      "concurrent_users": 8,
+      "operations": 1953354,
+      "errors": 0,
+      "ops_per_sec": 2790505.7142857146,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 8,
+        "p95": 15,
+        "p99": 32,
+        "max": 89
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1170456,
+        "total_alloc_bytes": 1170456,
+        "total_alloc_bytes_per_op": 0.5992032166212576,
+        "mallocs": 44,
+        "frees": 0,
+        "goroutines": 0,
+        "user_cpu_seconds": 1.55606,
+        "system_cpu_seconds": 0.907995,
+        "gc_cpu_seconds": 0,
+        "scavenge_cpu_seconds": 0,
+        "active_cpu_seconds": 2.464055,
+        "available_cpu_seconds": 9.800610176,
+        "cpu_utilization_pct": 25.141852963747553,
+        "cpu_seconds_per_op": 0.0000012614482577146795
+      },
+      "candidate": {
+        "id": "control-plane-pressure:http_metrics_observe",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "http_metrics_observe",
+        "risk": "route metrics lock/allocation pressure on endpoint hot paths",
+        "next": "watch lock cost before adding route dimensions",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "http_metrics_observe",
+      "concurrency": 32,
+      "concurrent_users": 32,
+      "operations": 1628777,
+      "errors": 0,
+      "ops_per_sec": 2326824.285714286,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 37,
+        "p95": 87,
+        "p99": 215,
+        "max": 556
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 929920,
+        "total_alloc_bytes": 929920,
+        "total_alloc_bytes_per_op": 0.570931441197905,
+        "mallocs": 104,
+        "frees": 0,
+        "goroutines": 0,
+        "user_cpu_seconds": 1.607069,
+        "system_cpu_seconds": 1.4110269999999998,
+        "gc_cpu_seconds": 0,
+        "scavenge_cpu_seconds": 0,
+        "active_cpu_seconds": 3.018096,
+        "available_cpu_seconds": 9.801374912,
+        "cpu_utilization_pct": 30.79257784849032,
+        "cpu_seconds_per_op": 0.000001852982943644219
+      },
+      "candidate": {
+        "id": "control-plane-pressure:http_metrics_observe",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "http_metrics_observe",
+        "risk": "route metrics lock/allocation pressure on endpoint hot paths",
+        "next": "watch lock cost before adding route dimensions",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "store_metrics_observe",
+      "concurrency": 1,
+      "concurrent_users": 1,
+      "operations": 3236132,
+      "errors": 0,
+      "ops_per_sec": 4623045.714285715,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 19
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1957064,
+        "total_alloc_bytes": 1957064,
+        "total_alloc_bytes_per_op": 0.6047540706003339,
+        "mallocs": 32,
+        "frees": 0,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.7709360000000007,
+        "system_cpu_seconds": 0.17295799999999995,
+        "gc_cpu_seconds": 0,
+        "scavenge_cpu_seconds": 0,
+        "active_cpu_seconds": 0.9438940000000007,
+        "available_cpu_seconds": 9.800614838,
+        "cpu_utilization_pct": 9.630967195448118,
+        "cpu_seconds_per_op": 2.9167351640786e-7
+      },
+      "candidate": {
+        "id": "control-plane-pressure:store_metrics_observe",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "store_metrics_observe",
+        "risk": "store operation metrics lock/allocation pressure on DB hot paths",
+        "next": "keep operation vocabulary bounded and compare with live EMF",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "store_metrics_observe",
+      "concurrency": 8,
+      "concurrent_users": 8,
+      "operations": 2280925,
+      "errors": 0,
+      "ops_per_sec": 3258464.285714286,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 7,
+        "p95": 14,
+        "p99": 31,
+        "max": 200
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1522840,
+        "total_alloc_bytes": 1522840,
+        "total_alloc_bytes_per_op": 0.6676414174074115,
+        "mallocs": 45,
+        "frees": 0,
+        "goroutines": 0,
+        "user_cpu_seconds": 1.7279309999999999,
+        "system_cpu_seconds": 0.9582449999999998,
+        "gc_cpu_seconds": 0,
+        "scavenge_cpu_seconds": 0,
+        "active_cpu_seconds": 2.6861759999999997,
+        "available_cpu_seconds": 9.800585662,
+        "cpu_utilization_pct": 27.40832122324242,
+        "cpu_seconds_per_op": 0.0000011776695858040048
+      },
+      "candidate": {
+        "id": "control-plane-pressure:store_metrics_observe",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "store_metrics_observe",
+        "risk": "store operation metrics lock/allocation pressure on DB hot paths",
+        "next": "keep operation vocabulary bounded and compare with live EMF",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "store_metrics_observe",
+      "concurrency": 32,
+      "concurrent_users": 32,
+      "operations": 1953053,
+      "errors": 0,
+      "ops_per_sec": 2790075.7142857146,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 1
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 23,
+        "p95": 69,
+        "p99": 215,
+        "max": 1005
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1198520,
+        "total_alloc_bytes": 1198520,
+        "total_alloc_bytes_per_op": 0.613664862141478,
+        "mallocs": 97,
+        "frees": 0,
+        "goroutines": 0,
+        "user_cpu_seconds": 1.7243089999999999,
+        "system_cpu_seconds": 1.2344179999999998,
+        "gc_cpu_seconds": 0,
+        "scavenge_cpu_seconds": 0,
+        "active_cpu_seconds": 2.9587269999999997,
+        "available_cpu_seconds": 9.801583162,
+        "cpu_utilization_pct": 30.186215339892858,
+        "cpu_seconds_per_op": 0.0000015149240701609222
+      },
+      "candidate": {
+        "id": "control-plane-pressure:store_metrics_observe",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "store_metrics_observe",
+        "risk": "store operation metrics lock/allocation pressure on DB hot paths",
+        "next": "keep operation vocabulary bounded and compare with live EMF",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "progress_ingest_fragment",
+      "concurrency": 1,
+      "concurrent_users": 1,
+      "operations": 502338,
+      "errors": 0,
+      "ops_per_sec": 717625.7142857143,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 1,
+        "p95": 1,
+        "p99": 1,
+        "max": 42
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1819616,
+        "total_alloc_bytes": 434344712,
+        "total_alloc_bytes_per_op": 864.6463377247989,
+        "mallocs": 4018737,
+        "frees": 4002954,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.7384219999999999,
+        "system_cpu_seconds": 0.06545799999999957,
+        "gc_cpu_seconds": 0.05058141999999999,
+        "scavenge_cpu_seconds": 0.00029391699999999944,
+        "active_cpu_seconds": 0.8038799999999995,
+        "available_cpu_seconds": 9.80044975,
+        "cpu_utilization_pct": 8.202480707581808,
+        "cpu_seconds_per_op": 0.000001600277104260477
+      },
+      "candidate": {
+        "id": "control-plane-pressure:progress_ingest_fragment",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "progress_ingest_fragment",
+        "risk": "fine-grained provider fragments can amplify normalize, merge, event, and fanout cost",
+        "next": "measure fragment cost before changing provider batching",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "progress_ingest_fragment",
+      "concurrency": 8,
+      "concurrent_users": 8,
+      "operations": 382321,
+      "errors": 0,
+      "ops_per_sec": 546172.8571428572,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 1,
+        "p90": 1,
+        "p95": 128,
+        "p99": 267,
+        "max": 684
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 2139376,
+        "total_alloc_bytes": 437710960,
+        "total_alloc_bytes_per_op": 1144.8781521287085,
+        "mallocs": 3124159,
+        "frees": 3109659,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.8581199999999995,
+        "system_cpu_seconds": 0.2575120000000002,
+        "gc_cpu_seconds": 0.087066113,
+        "scavenge_cpu_seconds": 0.0005578290000000001,
+        "active_cpu_seconds": 1.1156319999999997,
+        "available_cpu_seconds": 9.801022588,
+        "cpu_utilization_pct": 11.382812252324948,
+        "cpu_seconds_per_op": 0.0000029180505386834616
+      },
+      "candidate": {
+        "id": "control-plane-pressure:progress_ingest_fragment",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "progress_ingest_fragment",
+        "risk": "fine-grained provider fragments can amplify normalize, merge, event, and fanout cost",
+        "next": "measure fragment cost before changing provider batching",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "progress_ingest_fragment",
+      "concurrency": 32,
+      "concurrent_users": 32,
+      "operations": 385263,
+      "errors": 0,
+      "ops_per_sec": 550375.7142857143,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 3
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 1,
+        "p90": 1,
+        "p95": 744,
+        "p99": 981,
+        "max": 3468
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 2494880,
+        "total_alloc_bytes": 453913568,
+        "total_alloc_bytes_per_op": 1178.1914380566002,
+        "mallocs": 3156164,
+        "frees": 3140485,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.8696889999999993,
+        "system_cpu_seconds": 0.2680510000000007,
+        "gc_cpu_seconds": 0.0925280839999999,
+        "scavenge_cpu_seconds": 0.001217379000000001,
+        "active_cpu_seconds": 1.13774,
+        "available_cpu_seconds": 9.8021665,
+        "cpu_utilization_pct": 11.607025854947475,
+        "cpu_seconds_per_op": 0.000002953151483532029
+      },
+      "candidate": {
+        "id": "control-plane-pressure:progress_ingest_fragment",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "progress_ingest_fragment",
+        "risk": "fine-grained provider fragments can amplify normalize, merge, event, and fanout cost",
+        "next": "measure fragment cost before changing provider batching",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "thread_stream_subscription",
+      "concurrency": 1,
+      "concurrent_users": 1,
+      "operations": 3499512,
+      "errors": 0,
+      "ops_per_sec": 4999302.857142857,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 133
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 756136,
+        "total_alloc_bytes": 393902168,
+        "total_alloc_bytes_per_op": 112.55917053577755,
+        "mallocs": 6999054,
+        "frees": 6993435,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.8034300000000005,
+        "system_cpu_seconds": 0.2372569999999996,
+        "gc_cpu_seconds": 0.08160905899999993,
+        "scavenge_cpu_seconds": 0.0003869620000000011,
+        "active_cpu_seconds": 1.0406870000000001,
+        "available_cpu_seconds": 9.8007245,
+        "cpu_utilization_pct": 10.618470093716033,
+        "cpu_seconds_per_op": 2.9738060621023734e-7
+      },
+      "candidate": {
+        "id": "control-plane-pressure:thread_stream_subscription",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "thread_stream_subscription",
+        "risk": "SSE filter computation can copy active thread state under task fanout",
+        "next": "prefer active target projection over full thread projection",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "thread_stream_subscription",
+      "concurrency": 8,
+      "concurrent_users": 8,
+      "operations": 2179147,
+      "errors": 0,
+      "ops_per_sec": 3113067.142857143,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 5,
+        "p95": 13,
+        "p99": 37,
+        "max": 220
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1929976,
+        "total_alloc_bytes": 245235512,
+        "total_alloc_bytes_per_op": 112.5373882532936,
+        "mallocs": 4358344,
+        "frees": 4328973,
+        "goroutines": 0,
+        "user_cpu_seconds": 1.386006,
+        "system_cpu_seconds": 0.8358499999999998,
+        "gc_cpu_seconds": 0.10322397399999994,
+        "scavenge_cpu_seconds": 0.002760417999999999,
+        "active_cpu_seconds": 2.221856,
+        "available_cpu_seconds": 9.800731500000001,
+        "cpu_utilization_pct": 22.670307823451743,
+        "cpu_seconds_per_op": 0.0000010195989531683726
+      },
+      "candidate": {
+        "id": "control-plane-pressure:thread_stream_subscription",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "thread_stream_subscription",
+        "risk": "SSE filter computation can copy active thread state under task fanout",
+        "next": "prefer active target projection over full thread projection",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "thread_stream_subscription",
+      "concurrency": 32,
+      "concurrent_users": 32,
+      "operations": 1712013,
+      "errors": 0,
+      "ops_per_sec": 2445732.8571428573,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 0,
+        "p90": 36,
+        "p95": 81,
+        "p99": 211,
+        "max": 695
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 2604016,
+        "total_alloc_bytes": 192669616,
+        "total_alloc_bytes_per_op": 112.53980898509532,
+        "mallocs": 3424122,
+        "frees": 3382196,
+        "goroutines": 0,
+        "user_cpu_seconds": 1.5250190000000003,
+        "system_cpu_seconds": 1.5383019999999998,
+        "gc_cpu_seconds": 0.10679537900000002,
+        "scavenge_cpu_seconds": 0.0006761629999999987,
+        "active_cpu_seconds": 3.063321,
+        "available_cpu_seconds": 9.80154,
+        "cpu_utilization_pct": 31.25346629203166,
+        "cpu_seconds_per_op": 0.0000017893094269728094
+      },
+      "candidate": {
+        "id": "control-plane-pressure:thread_stream_subscription",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "thread_stream_subscription",
+        "risk": "SSE filter computation can copy active thread state under task fanout",
+        "next": "prefer active target projection over full thread projection",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "client_event_subscriber_fanout",
+      "concurrency": 1,
+      "concurrent_users": 1,
+      "operations": 404725,
+      "errors": 0,
+      "ops_per_sec": 578178.5714285715,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 0,
+        "p50": 1,
+        "p90": 1,
+        "p95": 1,
+        "p99": 1,
+        "max": 57
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1641520,
+        "total_alloc_bytes": 349933368,
+        "total_alloc_bytes_per_op": 864.6200951263204,
+        "mallocs": 3237833,
+        "frees": 3223561,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.7367499999999971,
+        "system_cpu_seconds": 0.056701999999999586,
+        "gc_cpu_seconds": 0.04527723700000008,
+        "scavenge_cpu_seconds": 0.0004003749999999997,
+        "active_cpu_seconds": 0.7934519999999967,
+        "available_cpu_seconds": 9.8004795,
+        "cpu_utilization_pct": 8.09605285129158,
+        "cpu_seconds_per_op": 0.000001960471925381424
+      },
+      "candidate": {
+        "id": "control-plane-pressure:client_event_subscriber_fanout",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "client_event_subscriber_fanout",
+        "risk": "workspace SSE subscribers add per-event visibility and channel-send work",
+        "next": "measure subscriber fanout before adding richer live events",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "client_event_subscriber_fanout",
+      "concurrency": 8,
+      "concurrent_users": 8,
+      "operations": 297217,
+      "errors": 0,
+      "ops_per_sec": 424595.7142857143,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 1,
+        "p50": 2,
+        "p90": 2,
+        "p95": 177,
+        "p99": 379,
+        "max": 869
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 2251552,
+        "total_alloc_bytes": 335795840,
+        "total_alloc_bytes_per_op": 1129.8002469576102,
+        "mallocs": 2425988,
+        "frees": 2410199,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.8552939999999971,
+        "system_cpu_seconds": 0.24945400000000006,
+        "gc_cpu_seconds": 0.07701394599999989,
+        "scavenge_cpu_seconds": 0.0005345739999999995,
+        "active_cpu_seconds": 1.1047479999999972,
+        "available_cpu_seconds": 9.800911162,
+        "cpu_utilization_pct": 11.271890763415096,
+        "cpu_seconds_per_op": 0.000003716974466467252
+      },
+      "candidate": {
+        "id": "control-plane-pressure:client_event_subscriber_fanout",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "client_event_subscriber_fanout",
+        "risk": "workspace SSE subscribers add per-event visibility and channel-send work",
+        "next": "measure subscriber fanout before adding richer live events",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "client_event_subscriber_fanout",
+      "concurrency": 32,
+      "concurrent_users": 32,
+      "operations": 289476,
+      "errors": 0,
+      "ops_per_sec": 413537.1428571429,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 1,
+        "max": 2
+      },
+      "latency_us": {
+        "min": 1,
+        "p50": 2,
+        "p90": 3,
+        "p95": 943,
+        "p99": 1015,
+        "max": 2784
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 2126216,
+        "total_alloc_bytes": 359746720,
+        "total_alloc_bytes_per_op": 1242.7514543520015,
+        "mallocs": 2383024,
+        "frees": 2370351,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.8659549999999996,
+        "system_cpu_seconds": 0.2644719999999996,
+        "gc_cpu_seconds": 0.08017239799999998,
+        "scavenge_cpu_seconds": 0.0009286759999999998,
+        "active_cpu_seconds": 1.1304269999999992,
+        "available_cpu_seconds": 9.802423162,
+        "cpu_utilization_pct": 11.532117939798844,
+        "cpu_seconds_per_op": 0.00000390508021390374
+      },
+      "candidate": {
+        "id": "control-plane-pressure:client_event_subscriber_fanout",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "client_event_subscriber_fanout",
+        "risk": "workspace SSE subscribers add per-event visibility and channel-send work",
+        "next": "measure subscriber fanout before adding richer live events",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "thread_history_v3",
+      "concurrency": 1,
+      "concurrent_users": 1,
+      "operations": 36987,
+      "errors": 0,
+      "ops_per_sec": 52838.571428571435,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "latency_us": {
+        "min": 16,
+        "p50": 16,
+        "p90": 19,
+        "p95": 21,
+        "p99": 38,
+        "max": 109
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1992152,
+        "total_alloc_bytes": 863319224,
+        "total_alloc_bytes_per_op": 23341.152945629547,
+        "mallocs": 3701446,
+        "frees": 3692932,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.7441539999999982,
+        "system_cpu_seconds": 0.044356000000000506,
+        "gc_cpu_seconds": 0.09144283200000003,
+        "scavenge_cpu_seconds": 0.0012984779999999987,
+        "active_cpu_seconds": 0.7885099999999987,
+        "available_cpu_seconds": 9.800673176,
+        "cpu_utilization_pct": 8.045467753489739,
+        "cpu_seconds_per_op": 0.000021318571389947786
+      },
+      "candidate": {
+        "id": "control-plane-pressure:thread_history_v3",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "thread_history_v3",
+        "risk": "v3 thread history can copy historical messages during refresh/recovery",
+        "next": "split immutable snapshots and cap per-refresh projection work",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "thread_history_v3",
+      "concurrency": 8,
+      "concurrent_users": 8,
+      "operations": 28365,
+      "errors": 0,
+      "ops_per_sec": 40521.42857142857,
+      "latency_ms": {
+        "min": 0,
+        "p50": 0,
+        "p90": 1,
+        "p95": 1,
+        "p99": 1,
+        "max": 1
+      },
+      "latency_us": {
+        "min": 20,
+        "p50": 24,
+        "p90": 1049,
+        "p95": 1060,
+        "p99": 1177,
+        "max": 1314
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 304288,
+        "total_alloc_bytes": 662257568,
+        "total_alloc_bytes_per_op": 23347.70202714613,
+        "mallocs": 2840113,
+        "frees": 2838827,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.8039369999999977,
+        "system_cpu_seconds": 0.19313799999999937,
+        "gc_cpu_seconds": 0.09675886499999997,
+        "scavenge_cpu_seconds": 0.0009621809999999995,
+        "active_cpu_seconds": 0.997074999999997,
+        "available_cpu_seconds": 9.802879926,
+        "cpu_utilization_pct": 10.171245669912505,
+        "cpu_seconds_per_op": 0.00003515159527586804
+      },
+      "candidate": {
+        "id": "control-plane-pressure:thread_history_v3",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "thread_history_v3",
+        "risk": "v3 thread history can copy historical messages during refresh/recovery",
+        "next": "split immutable snapshots and cap per-refresh projection work",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "thread_history_v3",
+      "concurrency": 32,
+      "concurrent_users": 32,
+      "operations": 28251,
+      "errors": 0,
+      "ops_per_sec": 40358.57142857143,
+      "latency_ms": {
+        "min": 0,
+        "p50": 1,
+        "p90": 1,
+        "p95": 1,
+        "p99": 1,
+        "max": 1
+      },
+      "latency_us": {
+        "min": 19,
+        "p50": 1050,
+        "p90": 1220,
+        "p95": 1300,
+        "p99": 1701,
+        "max": 1817
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1084512,
+        "total_alloc_bytes": 659910832,
+        "total_alloc_bytes_per_op": 23358.84860712895,
+        "mallocs": 2831331,
+        "frees": 2826759,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.8072680000000005,
+        "system_cpu_seconds": 0.17378900000000108,
+        "gc_cpu_seconds": 0.09103552800000014,
+        "scavenge_cpu_seconds": 0.001359181000000001,
+        "active_cpu_seconds": 0.9810570000000016,
+        "available_cpu_seconds": 9.810451588,
+        "cpu_utilization_pct": 10.00012069984644,
+        "cpu_seconds_per_op": 0.00003472645216098551
+      },
+      "candidate": {
+        "id": "control-plane-pressure:thread_history_v3",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "thread_history_v3",
+        "risk": "v3 thread history can copy historical messages during refresh/recovery",
+        "next": "split immutable snapshots and cap per-refresh projection work",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "assignment_long_poll_wait",
+      "concurrency": 1,
+      "concurrent_users": 1,
+      "operations": 312,
+      "errors": 0,
+      "ops_per_sec": 445.7142857142857,
+      "latency_ms": {
+        "min": 2,
+        "p50": 2,
+        "p90": 2,
+        "p95": 2,
+        "p99": 2,
+        "max": 2
+      },
+      "latency_us": {
+        "min": 2214,
+        "p50": 2230,
+        "p90": 2265,
+        "p95": 2265,
+        "p99": 2265,
+        "max": 2331
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 973816,
+        "total_alloc_bytes": 973816,
+        "total_alloc_bytes_per_op": 3121.2051282051284,
+        "mallocs": 11565,
+        "frees": 0,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.016726999999999492,
+        "system_cpu_seconds": 0.027740999999998905,
+        "gc_cpu_seconds": 0,
+        "scavenge_cpu_seconds": 0,
+        "active_cpu_seconds": 0.0444679999999984,
+        "available_cpu_seconds": 9.803892,
+        "cpu_utilization_pct": 0.4535749679820871,
+        "cpu_seconds_per_op": 0.0001425256410256359
+      },
+      "candidate": {
+        "id": "control-plane-pressure:assignment_long_poll_wait",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "assignment_long_poll_wait",
+        "risk": "daemon long-poll waiters can add timer/goroutine pressure while no work is available",
+        "next": "keep waiters bounded and verify actor commands stay responsive",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "assignment_long_poll_wait",
+      "concurrency": 8,
+      "concurrent_users": 8,
+      "operations": 2509,
+      "errors": 0,
+      "ops_per_sec": 3584.2857142857147,
+      "latency_ms": {
+        "min": 2,
+        "p50": 2,
+        "p90": 2,
+        "p95": 2,
+        "p99": 2,
+        "max": 2
+      },
+      "latency_us": {
+        "min": 2023,
+        "p50": 2239,
+        "p90": 2318,
+        "p95": 2410,
+        "p99": 2416,
+        "max": 2440
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1759424,
+        "total_alloc_bytes": 7348432,
+        "total_alloc_bytes_per_op": 2928.8290155440413,
+        "mallocs": 87965,
+        "frees": 67003,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.09675099999999759,
+        "system_cpu_seconds": 0.08208400000000005,
+        "gc_cpu_seconds": 0.005739879000000059,
+        "scavenge_cpu_seconds": 0.000015292000000000083,
+        "active_cpu_seconds": 0.17883499999999763,
+        "available_cpu_seconds": 9.8223615,
+        "cpu_utilization_pct": 1.8206925086192118,
+        "cpu_seconds_per_op": 0.00007127740135512062
+      },
+      "candidate": {
+        "id": "control-plane-pressure:assignment_long_poll_wait",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "assignment_long_poll_wait",
+        "risk": "daemon long-poll waiters can add timer/goroutine pressure while no work is available",
+        "next": "keep waiters bounded and verify actor commands stay responsive",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "assignment_long_poll_wait",
+      "concurrency": 32,
+      "concurrent_users": 32,
+      "operations": 10247,
+      "errors": 0,
+      "ops_per_sec": 14638.57142857143,
+      "latency_ms": {
+        "min": 2,
+        "p50": 2,
+        "p90": 2,
+        "p95": 2,
+        "p99": 2,
+        "max": 2
+      },
+      "latency_us": {
+        "min": 2011,
+        "p50": 2147,
+        "p90": 2388,
+        "p95": 2442,
+        "p99": 2512,
+        "max": 2546
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 1886816,
+        "total_alloc_bytes": 30025224,
+        "total_alloc_bytes_per_op": 2930.1477505611397,
+        "mallocs": 359215,
+        "frees": 337172,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.306203,
+        "system_cpu_seconds": 0.17099300000000106,
+        "gc_cpu_seconds": 0.02959590099999998,
+        "scavenge_cpu_seconds": 0.0005644110000000008,
+        "active_cpu_seconds": 0.47719600000000106,
+        "available_cpu_seconds": 9.825122411999999,
+        "cpu_utilization_pct": 4.8568962297830875,
+        "cpu_seconds_per_op": 0.00004656933736703436
+      },
+      "candidate": {
+        "id": "control-plane-pressure:assignment_long_poll_wait",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "assignment_long_poll_wait",
+        "risk": "daemon long-poll waiters can add timer/goroutine pressure while no work is available",
+        "next": "keep waiters bounded and verify actor commands stay responsive",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "tool_approval_waiters",
+      "concurrency": 1,
+      "concurrent_users": 1,
+      "operations": 313,
+      "errors": 0,
+      "ops_per_sec": 447.14285714285717,
+      "latency_ms": {
+        "min": 2,
+        "p50": 2,
+        "p90": 2,
+        "p95": 2,
+        "p99": 2,
+        "max": 2
+      },
+      "latency_us": {
+        "min": 2223,
+        "p50": 2232,
+        "p90": 2241,
+        "p95": 2241,
+        "p99": 2241,
+        "max": 2338
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 774864,
+        "total_alloc_bytes": 774864,
+        "total_alloc_bytes_per_op": 2475.6038338658145,
+        "mallocs": 9711,
+        "frees": 0,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.017159000000003033,
+        "system_cpu_seconds": 0.02996899999999947,
+        "gc_cpu_seconds": 0,
+        "scavenge_cpu_seconds": 0,
+        "active_cpu_seconds": 0.0471280000000025,
+        "available_cpu_seconds": 9.804321912,
+        "cpu_utilization_pct": 0.480685971176856,
+        "cpu_seconds_per_op": 0.00015056869009585463
+      },
+      "candidate": {
+        "id": "control-plane-pressure:tool_approval_waiters",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "tool_approval_waiters",
+        "risk": "tool approval waits can add timer and waiter-map pressure under stalled human decisions",
+        "next": "keep approval waits bounded and promote leak checks before expanding approval UX",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "tool_approval_waiters",
+      "concurrency": 8,
+      "concurrent_users": 8,
+      "operations": 2507,
+      "errors": 0,
+      "ops_per_sec": 3581.4285714285716,
+      "latency_ms": {
+        "min": 2,
+        "p50": 2,
+        "p90": 2,
+        "p95": 2,
+        "p99": 2,
+        "max": 2
+      },
+      "latency_us": {
+        "min": 2055,
+        "p50": 2223,
+        "p90": 2297,
+        "p95": 2308,
+        "p99": 2317,
+        "max": 2319
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 2793840,
+        "total_alloc_bytes": 5728672,
+        "total_alloc_bytes_per_op": 2285.070602313522,
+        "mallocs": 72774,
+        "frees": 37306,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.08218899999999962,
+        "system_cpu_seconds": 0.07845299999999966,
+        "gc_cpu_seconds": 0.0031986220000002064,
+        "scavenge_cpu_seconds": 0.00006208199999999803,
+        "active_cpu_seconds": 0.16064199999999929,
+        "available_cpu_seconds": 9.817621337999999,
+        "cpu_utilization_pct": 1.6362619260759201,
+        "cpu_seconds_per_op": 0.000064077383326685
+      },
+      "candidate": {
+        "id": "control-plane-pressure:tool_approval_waiters",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "tool_approval_waiters",
+        "risk": "tool approval waits can add timer and waiter-map pressure under stalled human decisions",
+        "next": "keep approval waits bounded and promote leak checks before expanding approval UX",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "tool_approval_waiters",
+      "concurrency": 32,
+      "concurrent_users": 32,
+      "operations": 10238,
+      "errors": 0,
+      "ops_per_sec": 14625.714285714286,
+      "latency_ms": {
+        "min": 2,
+        "p50": 2,
+        "p90": 2,
+        "p95": 3,
+        "p99": 5,
+        "max": 5
+      },
+      "latency_us": {
+        "min": 2015,
+        "p50": 2194,
+        "p90": 2608,
+        "p95": 3855,
+        "p99": 5166,
+        "max": 5201
+      },
+      "resource_delta": {
+        "heap_alloc_bytes": 366976,
+        "total_alloc_bytes": 23427120,
+        "total_alloc_bytes_per_op": 2288.251611642899,
+        "mallocs": 297407,
+        "frees": 293131,
+        "goroutines": 0,
+        "user_cpu_seconds": 0.27896000000000143,
+        "system_cpu_seconds": 0.18270099999999978,
+        "gc_cpu_seconds": 0.029675088999999932,
+        "scavenge_cpu_seconds": 0.00032062600000000094,
+        "active_cpu_seconds": 0.4616610000000012,
+        "available_cpu_seconds": 9.859705911999999,
+        "cpu_utilization_pct": 4.682299899413078,
+        "cpu_seconds_per_op": 0.00004509288923617906
+      },
+      "candidate": {
+        "id": "control-plane-pressure:tool_approval_waiters",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "tool_approval_waiters",
+        "risk": "tool approval waits can add timer and waiter-map pressure under stalled human decisions",
+        "next": "keep approval waits bounded and promote leak checks before expanding approval UX",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    }
+  ],
+  "capacity_estimates": [
+    {
+      "scenario": "http_endpoint_threads_v3",
+      "max_concurrent_users": 32,
+      "ops_per_sec": 25167.14285714286,
+      "p95_latency_us": 1538,
+      "alloc_bytes_per_op": 50045.17954248737,
+      "cpu_seconds_per_op": 0.00007460146449452233,
+      "goroutine_delta": 0,
+      "error_free": true
+    },
+    {
+      "scenario": "http_metrics_observe",
+      "max_concurrent_users": 32,
+      "ops_per_sec": 2326824.285714286,
+      "p95_latency_us": 87,
+      "alloc_bytes_per_op": 0.570931441197905,
+      "cpu_seconds_per_op": 0.000001852982943644219,
+      "goroutine_delta": 0,
+      "error_free": true
+    },
+    {
+      "scenario": "store_metrics_observe",
+      "max_concurrent_users": 32,
+      "ops_per_sec": 2790075.7142857146,
+      "p95_latency_us": 69,
+      "alloc_bytes_per_op": 0.613664862141478,
+      "cpu_seconds_per_op": 0.0000015149240701609222,
+      "goroutine_delta": 0,
+      "error_free": true
+    },
+    {
+      "scenario": "progress_ingest_fragment",
+      "max_concurrent_users": 32,
+      "ops_per_sec": 550375.7142857143,
+      "p95_latency_us": 744,
+      "alloc_bytes_per_op": 1178.1914380566002,
+      "cpu_seconds_per_op": 0.000002953151483532029,
+      "goroutine_delta": 0,
+      "error_free": true
+    },
+    {
+      "scenario": "thread_stream_subscription",
+      "max_concurrent_users": 32,
+      "ops_per_sec": 2445732.8571428573,
+      "p95_latency_us": 81,
+      "alloc_bytes_per_op": 112.53980898509532,
+      "cpu_seconds_per_op": 0.0000017893094269728094,
+      "goroutine_delta": 0,
+      "error_free": true
+    },
+    {
+      "scenario": "client_event_subscriber_fanout",
+      "max_concurrent_users": 32,
+      "ops_per_sec": 413537.1428571429,
+      "p95_latency_us": 943,
+      "alloc_bytes_per_op": 1242.7514543520015,
+      "cpu_seconds_per_op": 0.00000390508021390374,
+      "goroutine_delta": 0,
+      "error_free": true
+    },
+    {
+      "scenario": "thread_history_v3",
+      "max_concurrent_users": 32,
+      "ops_per_sec": 40358.57142857143,
+      "p95_latency_us": 1300,
+      "alloc_bytes_per_op": 23358.84860712895,
+      "cpu_seconds_per_op": 0.00003472645216098551,
+      "goroutine_delta": 0,
+      "error_free": true
+    },
+    {
+      "scenario": "assignment_long_poll_wait",
+      "max_concurrent_users": 32,
+      "ops_per_sec": 14638.57142857143,
+      "p95_latency_us": 2442,
+      "alloc_bytes_per_op": 2930.1477505611397,
+      "cpu_seconds_per_op": 0.00004656933736703436,
+      "goroutine_delta": 0,
+      "error_free": true
+    },
+    {
+      "scenario": "tool_approval_waiters",
+      "max_concurrent_users": 32,
+      "ops_per_sec": 14625.714285714286,
+      "p95_latency_us": 3855,
+      "alloc_bytes_per_op": 2288.251611642899,
+      "cpu_seconds_per_op": 0.00004509288923617906,
+      "goroutine_delta": 0,
+      "error_free": true
+    }
+  ],
+  "candidates": [
+    {
+      "id": "control-plane-pressure:http_endpoint_threads_v3",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "scenario": "http_endpoint_threads_v3",
+      "risk": "v3 thread history endpoint covers auth, route metrics, reconcile, projection, and JSON response pressure",
+      "next": "track refresh pressure before changing v3 history projection internals",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:http_metrics_observe",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "scenario": "http_metrics_observe",
+      "risk": "route metrics lock/allocation pressure on endpoint hot paths",
+      "next": "watch lock cost before adding route dimensions",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:store_metrics_observe",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "scenario": "store_metrics_observe",
+      "risk": "store operation metrics lock/allocation pressure on DB hot paths",
+      "next": "keep operation vocabulary bounded and compare with live EMF",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:progress_ingest_fragment",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "scenario": "progress_ingest_fragment",
+      "risk": "fine-grained provider fragments can amplify normalize, merge, event, and fanout cost",
+      "next": "measure fragment cost before changing provider batching",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:thread_stream_subscription",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "scenario": "thread_stream_subscription",
+      "risk": "SSE filter computation can copy active thread state under task fanout",
+      "next": "prefer active target projection over full thread projection",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:client_event_subscriber_fanout",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "scenario": "client_event_subscriber_fanout",
+      "risk": "workspace SSE subscribers add per-event visibility and channel-send work",
+      "next": "measure subscriber fanout before adding richer live events",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:thread_history_v3",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "scenario": "thread_history_v3",
+      "risk": "v3 thread history can copy historical messages during refresh/recovery",
+      "next": "split immutable snapshots and cap per-refresh projection work",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:assignment_long_poll_wait",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "scenario": "assignment_long_poll_wait",
+      "risk": "daemon long-poll waiters can add timer/goroutine pressure while no work is available",
+      "next": "keep waiters bounded and verify actor commands stay responsive",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "control-plane-pressure:tool_approval_waiters",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "scenario": "tool_approval_waiters",
+      "risk": "tool approval waits can add timer and waiter-map pressure under stalled human decisions",
+      "next": "keep approval waits bounded and promote leak checks before expanding approval UX",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "allocation_hotspot",
+      "scenario": "http_endpoint_threads_v3",
+      "concurrency": 32,
+      "metric": "total_alloc_bytes_per_op",
+      "value": 50045.17954248737,
+      "unit": "bytes/op",
+      "next": "track refresh pressure before changing v3 history projection internals",
+      "candidate": {
+        "id": "control-plane-pressure:http_endpoint_threads_v3",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "http_endpoint_threads_v3",
+        "risk": "v3 thread history endpoint covers auth, route metrics, reconcile, projection, and JSON response pressure",
+        "next": "track refresh pressure before changing v3 history projection internals",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "id": "latency_hotspot",
+      "scenario": "tool_approval_waiters",
+      "concurrency": 32,
+      "metric": "p95_latency_us",
+      "value": 3855,
+      "unit": "microseconds",
+      "next": "keep approval waits bounded and promote leak checks before expanding approval UX",
+      "candidate": {
+        "id": "control-plane-pressure:tool_approval_waiters",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "tool_approval_waiters",
+        "risk": "tool approval waits can add timer and waiter-map pressure under stalled human decisions",
+        "next": "keep approval waits bounded and promote leak checks before expanding approval UX",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cpu_hotspot",
+      "scenario": "tool_approval_waiters",
+      "concurrency": 1,
+      "metric": "cpu_seconds_per_op",
+      "value": 0.00015056869009585463,
+      "unit": "seconds/op",
+      "next": "keep approval waits bounded and promote leak checks before expanding approval UX",
+      "candidate": {
+        "id": "control-plane-pressure:tool_approval_waiters",
+        "harness_loop": "control_plane_performance_harness",
+        "promotion_target": "closed_loop_candidate",
+        "scenario": "tool_approval_waiters",
+        "risk": "tool approval waits can add timer and waiter-map pressure under stalled human decisions",
+        "next": "keep approval waits bounded and promote leak checks before expanding approval UX",
+        "required_next_artifacts": [
+          "claim_binding",
+          "verifier",
+          "ci_gate",
+          "redacted_evidence",
+          "decision_record",
+          "evidence_graph_edge"
+        ],
+        "adoption_plan": [
+          {
+            "artifact": "claim_binding",
+            "command": "go run ./tools/loopregistry -check-doc -github-annotations"
+          },
+          {
+            "artifact": "verifier",
+            "command": "go test ./tools/controlplanepressure ./tools/controlplaneperf ./tools/controlplaneaudit -count=1"
+          },
+          {
+            "artifact": "ci_gate",
+            "command": "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+          },
+          {
+            "artifact": "redacted_evidence",
+            "command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out out/control-plane-local-pressure.json"
+          },
+          {
+            "artifact": "decision_record",
+            "command": "go run ./tools/loopclosureaudit -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+          },
+          {
+            "artifact": "evidence_graph_edge",
+            "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+          }
+        ]
+      }
+    }
+  ]
+}
