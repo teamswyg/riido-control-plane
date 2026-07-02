@@ -31,7 +31,7 @@ permissions:
 
 concurrency:
   group: public-qa-status-pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -114,6 +114,8 @@ jobs:
           cache: false
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: 1200000
       - name: Verify live public QA status page
         run: |
           mkdir -p out
