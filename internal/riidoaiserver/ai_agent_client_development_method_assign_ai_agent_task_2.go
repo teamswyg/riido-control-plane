@@ -62,5 +62,5 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	s.agents[agent.AgentID] = agent
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.appendAgentTaskActionEvent(response)
-	return response, nil
+	return clientVisibleQueuedActionResponse(response), nil
 }

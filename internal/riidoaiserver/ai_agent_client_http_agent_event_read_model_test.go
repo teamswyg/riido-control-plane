@@ -199,9 +199,10 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		followup.RunID == assigned.RunID ||
 		followup.AssignmentID == assigned.AssignmentID ||
 		followup.AgentID != assigned.AgentID ||
-		followup.WorkStatus != AgentWorkStatusQueued ||
-		followup.AssignmentState != AgentAssignmentStateQueued ||
-		followup.CommentKind != AgentTaskCommentQueuedByBusyAgent {
+		followup.WorkStatus != AgentWorkStatusIdle ||
+		followup.AssignmentState != "" ||
+		followup.CommentKind != "" ||
+		followup.Message != "" {
 		t.Fatalf("followup response = %+v", followup)
 	}
 	followupPoll, err := assignmentStore.PollAgent(ctx, "agent-public-openclaw", PollRequest{
@@ -247,7 +248,7 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 	eventsBody := eventsResp.Body.String()
 	if !strings.Contains(eventsBody, "event: agent_thread_progress\n") ||
 		!strings.Contains(eventsBody, "event: agent_work_status_changed\n") ||
-		!strings.Contains(eventsBody, string(AgentTaskCommentQueuedByBusyAgent)) {
+		strings.Contains(eventsBody, string(AgentTaskCommentQueuedByBusyAgent)) {
 		t.Fatalf("events body = %q", eventsBody)
 	}
 }

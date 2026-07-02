@@ -59,7 +59,7 @@
         "status": "partial",
         "codex_status": "[codex][완료][전달요청]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#queued-by-busy-agent",
-        "summary": "queued_by_busy_agent server-side regressions are fixed in v3 history, SSE replay, assignable-agents projection repair, and state-only queued timeline handling; product readiness remains partial only until client visual screenshot evidence confirms the stale queue copy is gone.",
+        "summary": "queued_by_busy_agent server-side regressions are fixed in v3 history, SSE replay, assignable-agents projection repair, state-only queued timeline handling, and v2 client-visible queued projection hiding. Product readiness remains partial until client visual screenshot evidence confirms the stale queue copy and thinking row are gone together.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "staging_client_p0_visual_screenshot_evidence",
         "required_next_command": "gh issue view 711 --repo teamswyg/riido-control-plane --json url,title,state,body,comments",

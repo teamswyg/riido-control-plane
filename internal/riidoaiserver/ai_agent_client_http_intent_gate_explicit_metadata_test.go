@@ -21,10 +21,11 @@ func TestHTTPAIAgentIntentGateExecutesExplicitMetadataTitle(t *testing.T) {
 		t.Fatalf("assign status=%d body=%s", assignResp.Code, assignResp.Body.String())
 	}
 	assigned := decodeAIAgentTaskActionResponse(t, assignResp.Body.Bytes())
-	if assigned.WorkStatus != AgentWorkStatusQueued ||
-		assigned.AssignmentState != AgentAssignmentStateQueued ||
-		assigned.CommentKind != AgentTaskCommentQueuedByBusyAgent ||
-		isIntentGateAssignmentID(assigned.AssignmentID) {
+	if assigned.WorkStatus != AgentWorkStatusIdle ||
+		assigned.AssignmentState != "" ||
+		assigned.CommentKind != "" ||
+		isIntentGateAssignmentID(assigned.AssignmentID) ||
+		assigned.ActiveStream == nil {
 		t.Fatalf("explicit metadata title should create durable assignment: %+v", assigned)
 	}
 	pollStart, err := assignmentStore.PollAgent(t.Context(), assigned.AgentID, PollRequest{

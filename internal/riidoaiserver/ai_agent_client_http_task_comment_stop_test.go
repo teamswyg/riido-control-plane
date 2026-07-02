@@ -26,7 +26,10 @@ func TestHTTPAIAgentClientDevelopmentTaskCommentAndStop(t *testing.T) {
 	if err := json.Unmarshal(commentResp.Body.Bytes(), &comment); err != nil {
 		t.Fatalf("comment json: %v", err)
 	}
-	if comment.AssignmentState != AgentAssignmentStateQueued || comment.CommentKind != AgentTaskCommentQueuedByBusyAgent {
+	if comment.WorkStatus != AgentWorkStatusIdle ||
+		comment.AssignmentState != "" ||
+		comment.CommentKind != "" ||
+		comment.Message != "" {
 		t.Fatalf("comment response = %+v", comment)
 	}
 	if comment.ActiveStream == nil || comment.ActiveStream.Href != "/v1/client/ai-agent/events" {
