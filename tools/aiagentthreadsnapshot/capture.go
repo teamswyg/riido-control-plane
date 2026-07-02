@@ -9,17 +9,21 @@ import (
 const schemaVersion = "riido-ai-thread-same-moment-snapshot.v1"
 
 func capture(ctx context.Context, cfg config) (report, error) {
-	token, err := tokenFromEnv(cfg.TokenEnv)
-	if err != nil {
-		return report{}, err
+	now := time.Now().UTC().Format(time.RFC3339)
+	rep := newReport(cfg, now)
+	token := tokenFromEnv(cfg.TokenEnv)
+	if token == "" {
+		rep.Decision = decisionSummary{
+			Status: "blocked_missing_bearer_token",
+			Reason: "bearer token environment variable is empty",
+		}
+		return rep, nil
 	}
 	client := &http.Client{Timeout: cfg.SSEWindow + 10*time.Second}
-	now := time.Now().UTC().Format(time.RFC3339)
 	base := "/v2/client/workspaces/" + cfg.WorkspaceID + "/ai-agent"
 	v3Path := "/v3/client/workspaces/" + cfg.WorkspaceID + "/ai-agent/tasks/" + cfg.TaskID + "/threads"
 	v2Path := base + "/tasks/" + cfg.TaskID + "/threads"
 	subPath := base + "/tasks/" + cfg.TaskID + "/thread-stream-subscription"
-	rep := newReport(cfg, now)
 	v3 := fetchThreads(ctx, client, token, cfg.BaseURL, v3Path, "v3_threads")
 	v2 := fetchThreads(ctx, client, token, cfg.BaseURL, v2Path, "v2_threads")
 	sub := fetchSubscription(ctx, client, token, cfg.BaseURL, subPath)

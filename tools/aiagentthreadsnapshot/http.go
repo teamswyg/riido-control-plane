@@ -10,12 +10,8 @@ import (
 	"strings"
 )
 
-func tokenFromEnv(name string) (string, error) {
-	token := strings.TrimSpace(os.Getenv(name))
-	if token == "" {
-		return "", fmt.Errorf("missing bearer token in %s", name)
-	}
-	return token, nil
+func tokenFromEnv(name string) string {
+	return strings.TrimSpace(os.Getenv(name))
 }
 
 func getJSON(ctx context.Context, client *http.Client, token, rawURL string, dst any) (int, error) {
