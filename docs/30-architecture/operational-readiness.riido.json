@@ -117,6 +117,7 @@
           {"kind": "external", "path": "notion-comment:39120241-cf7f-8125-bd7a-001d0eff72b8"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-8119-b377-001d66282634"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-81fe-8a5f-001d4070221f"},
+          {"kind": "external", "path": "notion-comment:39120241-cf7f-813f-aa9b-001dbe8f3a47"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"}
