@@ -21,7 +21,7 @@ func taskThreadProjectionMessageID(thread AIAgentTaskThreadRecord) string {
 }
 
 func taskThreadProgressMessageID(threadID string, seq int) string {
-	return taskThreadHistoryHashID("msg_progress_", taskThreadProgressMessageKey(threadID, seq))
+	return taskThreadProgressMessageIDFast(threadID, seq)
 }
 
 func taskThreadHistoryHashID(prefix string, key []byte) string {

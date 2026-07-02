@@ -697,6 +697,12 @@
           "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-plain-text-fastpath-after-2026-07-03.json"
         },
         {
+          "id": "local_pressure_progress_message_id_stack_2026_07_03",
+          "kind": "artifact",
+          "signal": "After progress history message IDs switched to stack-first hash key construction, local pressure measured zero errors, zero goroutine deltas, and lower allocation per operation for thread_history_v3 and the v3 thread-history HTTP endpoint without changing response IDs.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-progress-message-id-stack-after-2026-07-03.json"
+        },
+        {
           "id": "local_pressure_tool_approval_signal_only_2026_07_03",
           "kind": "artifact",
           "signal": "After pending tool approval waits skip polling ticks when the approval cannot expire during the hold window, local pressure measured zero errors, zero goroutine deltas, and lower allocation/CPU per operation for tool_approval_waiters.",
@@ -727,6 +733,7 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-candidates-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-plain-text-fastpath-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-progress-message-id-stack-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-before-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"},
