@@ -17,7 +17,7 @@ func TestAIAgentIntentDialogueScenarioStaysInConversation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("AssignAIAgentTask: %v", err)
 	}
-	recordNeedsInput(t, store, root, "@민준용 님, 어떤 작업부터 진행할까요?")
+	recordNeedsInput(t, store, root, "@민준용 님, 작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요.")
 	followup, err := store.CreateAIAgentTaskThreadMessage(ctx, principal, root.TaskID, root.ThreadID, CreateAIAgentTaskThreadMessageRequest{
 		AssignmentID: "asn-copy-research",
 		Body:         "2번째 안이 좋은데 팩트 기반으로 작성하자. 자세한 리서치 후에 팩트인지 아닌지 보고해.",
@@ -32,7 +32,7 @@ func TestAIAgentIntentDialogueScenarioStaysInConversation(t *testing.T) {
 	}
 	assertConversationFollowup(t, history, root.ThreadID, followup.ThreadID)
 	rootThread := historyThreadByID(t, history, root.ThreadID)
-	if rootThread.WorkStatus != AgentWorkStatusWaitingForUser || !historyAgentMessageContains(rootThread, "어떤 작업부터") {
+	if rootThread.WorkStatus != AgentWorkStatusWaitingForUser || !historyAgentMessageContains(rootThread, "원하는 결과물이나 방향") {
 		t.Fatalf("root thread did not wait for user intent: %+v", rootThread)
 	}
 	followupThread := historyThreadByID(t, history, followup.ThreadID)

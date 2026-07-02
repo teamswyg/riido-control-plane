@@ -18,7 +18,7 @@ func assertMarketingPromptAsksForIntent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ComposeAIAgentAssignmentPrompt: %v", err)
 	}
-	if !strings.Contains(prompt.Prompt, "intent_class: intent_oriented") || !strings.Contains(prompt.Prompt, "어떤 작업부터 진행할까요?") {
+	if !strings.Contains(prompt.Prompt, "intent_class: intent_oriented") || !strings.Contains(prompt.Prompt, "원하는 결과물이나 방향") {
 		t.Fatalf("marketing prompt did not ask for intent:\n%s", prompt.Prompt)
 	}
 }

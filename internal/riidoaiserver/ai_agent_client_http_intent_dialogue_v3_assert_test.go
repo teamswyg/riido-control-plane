@@ -20,7 +20,7 @@ func assertHTTPRootIntentQuestion(t *testing.T, thread AIAgentTaskThreadHistoryR
 	if thread.WorkStatus != AgentWorkStatusWaitingForUser ||
 		thread.AssignmentState != AgentAssignmentStateWaiting ||
 		thread.ActiveStream != nil ||
-		!historyAgentMessageContains(thread, "어떤 작업부터") {
+		!historyAgentMessageContains(thread, "원하는 결과물이나 방향") {
 		t.Fatalf("root thread did not ask for intent: %+v", thread)
 	}
 	if historyMessagesContainProgressBody(thread.Messages, "본문을 먼저 읽겠습니다.") {

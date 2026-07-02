@@ -30,7 +30,7 @@ func TestAssignmentPromptAsksForIntentOnAmbiguousMarketingDocument(t *testing.T)
 		"- intent_class: intent_oriented",
 		"- intent_gate_required: true",
 		"- first_response_policy: ask_for_intent_before_deliverables_do_not_create_deliverables_until_user_replies",
-		"- clarification_question_example: 어떤 작업부터 진행할까요?",
+		"- clarification_question_example: 작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요.",
 		"Classify the task context as either an explicit instruction or background/intent before doing work.",
 		"ask a concise clarification question in the existing AI Agent thread before producing deliverables.",
 		"Use the user's apparent language and product tone when asking clarification questions or reporting provider limits.",

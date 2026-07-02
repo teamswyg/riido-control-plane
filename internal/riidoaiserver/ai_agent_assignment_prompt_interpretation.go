@@ -52,7 +52,7 @@ func intentGateRequiredBool(intentClass string) bool {
 
 func clarificationQuestionExample(component AIAgentTaskContextComponent) string {
 	if looksKorean(component.Title) {
-		return "어떤 작업부터 진행할까요?"
+		return "작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요."
 	}
-	return "What should I work on first?"
+	return "I reviewed the task context. Please reply with the outcome or direction you want."
 }
