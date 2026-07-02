@@ -1,0 +1,29 @@
+{
+  "schema_version": "riido-completion-progress-same-moment-capture-tool.v1",
+  "id": "completion_progress_same_moment_capture_tool_2026_07_02",
+  "captured_at": "2026-07-02T12:25:30Z",
+  "redacted": true,
+  "source": {
+    "notion_page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
+    "notion_discussion": "completion_progress_after_terminal",
+    "required_next_artifact": "reproduced_completion_progress_same_conversation_network_snapshot"
+  },
+  "tool": {
+    "path": "tools/aiagentthreadsnapshot",
+    "token_handling": "reads bearer token from an environment variable and does not serialize token values",
+    "default_token_env": "RIIDO_PRIVATE_JWT",
+    "redaction_policy": "message bodies, result messages, progress line text, and bearer-token request headers are excluded from the generated JSON report",
+    "capture_window": "5s default SSE window"
+  },
+  "captures": [
+    "GET /v3 task threads",
+    "GET /v2 task threads",
+    "GET thread-stream-subscription",
+    "SSE agent_thread_progress summaries"
+  ],
+  "command_template": "go run ./tools/aiagentthreadsnapshot -base-url https://staging.ai-api.riido.io -workspace-id 1IFsD2c8Mnk2VstqJ4iNo -task-id uNYpHxDOzMp3vMy_urWsu -conversation-id \"$RIIDO_CONVERSATION_ID\" -output docs/30-architecture/evidence/manual/reproduced-completion-progress-$(date -u +%Y%m%dT%H%M%SZ).json",
+  "decision": {
+    "status": "partial",
+    "summary": "The reproduction is not captured here. This artifact makes the next required evidence executable so a future tester can capture same-moment API and SSE summaries without placing bearer tokens or message bodies into repo evidence."
+  }
+}

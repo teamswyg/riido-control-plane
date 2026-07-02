@@ -105,11 +105,12 @@
         "summary": "A Notion QA comment reports that an Agent answer can look completed while the UI still shows progress, and refresh can reveal an additional answer. Existing terminal and queued server tests reduce backend risk, and a read-only staging sample currently shows no active stream, running thread, queued copy, or visible thinking state. The reported race still needs a reproduced same-conversation screenshot plus v3, v2, subscription, and SSE captures before assigning root cause to server or client.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "reproduced_completion_progress_same_conversation_network_snapshot",
-        "required_next_command": "when the completed-but-progressing UI appears, capture the same conversation's screenshot, GET /v3 task threads, GET /v2 task threads, GET thread-stream-subscription, and SSE agent_thread_progress payloads",
+        "required_next_command": "go run ./tools/aiagentthreadsnapshot -base-url https://staging.ai-api.riido.io -workspace-id 1IFsD2c8Mnk2VstqJ4iNo -task-id uNYpHxDOzMp3vMy_urWsu -conversation-id \"$RIIDO_CONVERSATION_ID\" -output docs/30-architecture/evidence/manual/reproduced-completion-progress-$(date -u +%Y%m%dT%H%M%SZ).json",
         "evidence_refs": [
           {"kind": "artifact", "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"},
           {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"},
           {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json"},
+          {"kind": "artifact", "path": "docs/30-architecture/evidence/completion-progress-same-moment-capture-tool-2026-07-02.json"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-readonly-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-followup-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
@@ -445,6 +446,12 @@
           "kind": "screenshot",
           "signal": "A live logged-in Chrome staging screen pass again shows visible thinking/running/queued counts at zero on the reported task. API capture was not available from the read-only browser scope, so the result is intentionally screen-only partial evidence.",
           "evidence_ref": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"
+        },
+        {
+          "id": "completion_progress_same_moment_capture_tool_2026_07_02",
+          "kind": "artifact",
+          "signal": "The remaining completion-progress P0 now has an executable redacted capture command for the exact reproduction moment: v3 threads, v2 threads, thread-stream-subscription, and SSE event summaries are captured without serializing bearer tokens or message bodies.",
+          "evidence_ref": "docs/30-architecture/evidence/completion-progress-same-moment-capture-tool-2026-07-02.json"
         },
         {
           "id": "server_contract_regression_tests",
