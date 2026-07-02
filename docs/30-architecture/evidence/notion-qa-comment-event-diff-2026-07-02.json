@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-02T12:38:58Z",
+  "captured_at": "2026-07-02T13:31:06Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -164,6 +164,15 @@
       "decision": "The tool reduces evidence loss on the next reproduction but intentionally leaves the P0 partial until it captures a real failing moment."
     },
     {
+      "id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+      "discussion": "completion_progress_after_terminal",
+      "observed_at": "2026-07-02T12:44:16.953Z",
+      "event_type": "repo_ci_merge_evidence",
+      "status_tag": "[codex][완료][백필diff][증적갱신]",
+      "signal": "PR #772 added the latest completion-progress Notion comments to repo evidence and CI, while keeping the P0 partial.",
+      "decision": "Preserve the backfill-refresh comment as executable evidence, but require an actual failing-moment snapshot before closing the P0."
+    },
+    {
       "id": "39120241-cf7f-81d5-9c0f-001d26c153a0",
       "discussion": "queued_by_busy_agent",
       "observed_at": "2026-07-02T10:08:16.163Z",
@@ -180,6 +189,15 @@
       "status_tag": "[codex][완료][백필diff][증적강화]",
       "signal": "The page-level backfill comment says concrete comment_events were added so Notion comments map to evidence and decisions rather than remaining summary-only text.",
       "decision": "Keep the diff evidence executable by requiring representative latest comment IDs in CI."
+    },
+    {
+      "id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "discussion": "page_level_backfill_diff",
+      "observed_at": "2026-07-02T13:01:35.286Z",
+      "event_type": "backfill_diff_pressure_followup",
+      "status_tag": "[codex][완료][백필diff][증적강화]",
+      "signal": "The latest page-level comment ties Notion QA comment drift, PR #772, and PR #773 pressure evidence together, with deploy skipped as expected for evidence-only changes.",
+      "decision": "Treat this as the latest page-level Notion QA backfill checkpoint; no new backend blocker was found, and performance work should proceed from the recorded allocation candidates."
     }
   ],
   "reviewed_discussions": [
@@ -314,6 +332,16 @@
       "id": "39120241-cf7f-8137-9a8b-001d7a5d1615",
       "target": "completion_progress_after_terminal_discussion",
       "status": "[codex][완료][증적도구추가][partial 유지]"
+    },
+    {
+      "id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+      "target": "completion_progress_after_terminal_discussion",
+      "status": "[codex][완료][백필diff][증적갱신]"
+    },
+    {
+      "id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "target": "page_level_backfill_diff_summary",
+      "status": "[codex][완료][백필diff][증적강화]"
     }
   ],
   "next_actions": [
