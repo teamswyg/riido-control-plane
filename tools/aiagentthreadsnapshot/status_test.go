@@ -31,3 +31,16 @@ func TestDecideKeepsHistoricalTerminalProgressBaseline(t *testing.T) {
 		t.Fatalf("historical terminal progress should stay baseline: %+v", got)
 	}
 }
+
+func TestDecideCapturesTerminalSubscriptionFilterConflict(t *testing.T) {
+	rep := report{
+		Subscription: subscriptionSummary{TerminalFilterMatched: true},
+		V3: threadSummary{HighlightedThreads: []threadSurface{{
+			ThreadID: "thread-1", AssignmentState: "completed",
+		}}},
+	}
+	got := decide(rep)
+	if got.Status != "captured_terminal_live_conflict" {
+		t.Fatalf("terminal subscription filter conflict not captured: %+v", got)
+	}
+}

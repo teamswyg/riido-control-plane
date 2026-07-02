@@ -32,6 +32,9 @@ func hasEndpointError(endpoints []endpointObservation) bool {
 }
 
 func hasTerminalLiveConflict(rep report) bool {
+	if rep.Subscription.TerminalFilterMatched {
+		return true
+	}
 	for _, thread := range append(rep.V3.HighlightedThreads, rep.V2.HighlightedThreads...) {
 		if !isTerminal(thread.AssignmentState) {
 			continue

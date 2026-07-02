@@ -14,7 +14,7 @@
     "default_token_env": "RIIDO_PRIVATE_JWT",
     "redaction_policy": "message bodies, result messages, progress line text, and bearer-token request headers are excluded from the generated JSON report",
     "capture_window": "5s default SSE window",
-    "terminal_live_conflict_detection": "reports terminal_active_stream_count and decision=captured_terminal_live_conflict when a completed/stopped/failed/cancelled/timeout thread has active_stream or a matching live SSE event"
+    "terminal_live_conflict_detection": "reports terminal_active_stream_count, terminal_filter_matched, and decision=captured_terminal_live_conflict when a completed/stopped/failed/cancelled/timeout thread has active_stream, remains in active_thread_filters, or receives a matching live SSE event"
   },
   "captures": [
     "GET /v3 task threads",
