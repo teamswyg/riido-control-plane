@@ -12,7 +12,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `71`
 - claim refs: `81`
-- change refs: `1041`
+- change refs: `1042`
 - verifier refs: `481`
 - evidence refs: `207`
 
@@ -26,7 +26,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `closed_loop_candidate` | `46` | `47` | `702` | `309` | `118` |
-| `ai_thread_history` | `8` | `8` | `109` | `55` | `11` |
+| `ai_thread_history` | `8` | `8` | `110` | `55` | `11` |
 | `closed_loop_candidate_decision` | `7` | `7` | `109` | `51` | `34` |
 | `operational_readiness_release_harness` | `5` | `13` | `81` | `44` | `25` |
 | `provider_acceptance_harness` | `2` | `2` | `12` | `7` | `6` |
@@ -68,7 +68,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `deleted_agent_thread_retention_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `thread_history_user_followup_retention_loop` | `1` | `15` | `7` | `1` | `ai_thread_history` |
 | `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
-| `ai_thread_history_conversation_grouping_loop` | `1` | `17` | `4` | `2` | `ai_thread_history` |
+| `ai_thread_history_conversation_grouping_loop` | `1` | `18` | `4` | `2` | `ai_thread_history` |
 | `ai_thread_history_run_identity_ordering_loop` | `1` | `8` | `5` | `2` | `ai_thread_history` |
 | `stop_reassign_thread_consistency_loop` | `1` | `8` | `7` | `2` | `ai_thread_history` |
 | `loop_evidence_expiry_loop` | `1` | `10` | `5` | `2` | `closed_loop_candidate` |
