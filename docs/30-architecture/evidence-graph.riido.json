@@ -2879,6 +2879,10 @@
         },
         {
           "kind": "test",
+          "path": "tools/operationalreadiness/local_pressure_followup_test.go"
+        },
+        {
+          "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_test.go"
         }
       ],
@@ -2914,9 +2918,17 @@
           "kind": "artifact",
           "path": "loop-registry-evidence",
           "redacted": true
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-local-pressure-followup-2026-07-02.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-pressure-candidates-followup-2026-07-02.json"
         }
       ],
-      "decision": "Generated endpoint smoke matrix remains excluded from harness promotion only as long as its contract/generator claim, tests, generated docs, workflow, and evidence artifact stay connected; candidate-decision review expiry changes may update shared loop-registry hash surfaces, but they do not reclassify this workflow as a failure-promoting harness unless the smoke-matrix workflow, manifest, tests, or evidence artifact change.",
+      "decision": "Generated endpoint smoke matrix remains excluded from harness promotion only as long as its contract/generator claim, tests, generated docs, workflow, and evidence artifact stay connected; candidate-decision review expiry changes may update shared loop-registry hash surfaces, but they do not reclassify this workflow as a failure-promoting harness unless the smoke-matrix workflow, manifest, tests, or evidence artifact change. Local pressure follow-up evidence may update operational-readiness artifacts and the shared loop-registry hash surface, but it changes only capacity/latency/allocation evidence and does not alter the generated endpoint smoke matrix workflow, manifest, tests, docs, or uploaded evidence artifact semantics.",
       "next_loop": "closed_loop_candidate"
     },
     {
