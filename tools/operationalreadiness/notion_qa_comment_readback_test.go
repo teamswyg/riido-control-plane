@@ -24,6 +24,9 @@ func TestNotionQACommentReadbackLimitIsRecorded(t *testing.T) {
 	if !hasReadbackMissingID(observation, "39120241-cf7f-818e-87dd-001d714d66ed") {
 		t.Fatal("missing write-confirmed public evidence comment readback gap")
 	}
+	if !hasReadbackMissingID(observation, "39120241-cf7f-81c8-bd89-001d768e3b97") {
+		t.Fatal("missing latest write-confirmed QA backfill comment readback gap")
+	}
 	if observation.Decision == "" {
 		t.Fatal("readback gap decision must be explicit")
 	}

@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-02T15:48:20Z",
+  "captured_at": "2026-07-02T19:19:46Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -270,6 +270,15 @@
       "status_tag": "[codex][완료][성능개선][staging 배포]",
       "signal": "The latest page-level comment records PR #777, merge commit 045ddc3, staging deploy 28602038703, and before/after stream-target and SSE fanout measurements.",
       "decision": "Treat this as the current Notion QA performance follow-up checkpoint; product P0 partials remain open while endpoint contracts stay unchanged."
+    },
+    {
+      "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+      "discussion": "page_level_backfill_diff",
+      "observed_at": "2026-07-02T19:19:46Z",
+      "event_type": "readback_diff_followup",
+      "status_tag": "[codex][완료][백필diff][증적강화]",
+      "signal": "A write-confirmed page-level Notion comment rechecked the QA page after PR #787 and reported that page-level comments still read back at 31 while backend/control-plane P0s have no newly discovered blocker.",
+      "decision": "Preserve the write-confirmed comment even while the Notion get_comments readback remains stale, so future agents do not treat the connector's 31-comment snapshot as the full QA truth."
     }
   ],
   "reviewed_discussions": [
@@ -437,6 +446,11 @@
       "id": "39120241-cf7f-8172-b716-001dd440d1e1",
       "target": "page_level_backfill_diff_summary",
       "status": "[codex][완료][성능개선][staging 배포]"
+    },
+    {
+      "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+      "target": "page_level_backfill_diff_summary",
+      "status": "[codex][완료][백필diff][증적강화]"
     }
   ],
   "readback_observations": [
@@ -467,6 +481,41 @@
         }
       ],
       "decision": "Do not treat a Notion get_comments readback that stops at the 31-comment page-level discussion snapshot as proof that later QA evidence comments were not written; preserve write-confirmed IDs separately until connector readback catches up or pagination is available."
+    },
+    {
+      "observed_at": "2026-07-02T19:19:46Z",
+      "tool": "notion.get_comments",
+      "mode": "include_all_blocks=true, include_resolved=true",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        }
+      ],
+      "decision": "The latest Notion page fetch still reports 17 discussions and get_comments still exposes the 31-comment page-level snapshot ending at 39120241-cf7f-8148-bd04-001d6cbae868. Keep write-confirmed later comments as first-class evidence until readback pagination or connector freshness catches up."
     }
   ],
   "next_actions": [
