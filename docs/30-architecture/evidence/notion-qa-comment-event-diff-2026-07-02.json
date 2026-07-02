@@ -370,6 +370,21 @@
         "39120241-cf7f-8172-b716-001dd440d1e1",
         "39120241-cf7f-818e-87dd-001d714d66ed"
       ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        }
+      ],
       "decision": "Do not treat a Notion get_comments readback that stops at the 31-comment page-level discussion snapshot as proof that later QA evidence comments were not written; preserve write-confirmed IDs separately until connector readback catches up or pagination is available."
     }
   ],
