@@ -9,6 +9,7 @@ func TestNotionQACommentEventsIncludeLatestBackfillDiff(t *testing.T) {
 		"39120241-cf7f-80fd-bc93-001d6a27203d": "queued_by_busy_agent",
 		"39120241-cf7f-811c-acba-001d6b02996a": "queued_by_busy_agent",
 		"39120241-cf7f-8149-ba94-001d3c2ecfa9": "queued_by_busy_agent",
+		"39220241-cf7f-81a3-a228-001dcc9f4141": "queued_by_busy_agent",
 		"39120241-cf7f-81e4-9f6e-001d6a501b66": "multi_assignment_projection",
 		"39120241-cf7f-816a-8c1f-001d780c7b57": "waiting_for_user_intent",
 		"39120241-cf7f-81a6-b6b5-001d1b49303b": "codex_unknown_variant",

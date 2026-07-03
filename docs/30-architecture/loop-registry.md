@@ -139,7 +139,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `17` | `5` | `036168073881` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `54b14a3217bb` |
 | `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `01d87e7c82bc` |
-| `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `157` | `46` | `b2a38102f9a0` |
+| `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `157` | `46` | `84bf4b16fcfe` |
 | `control_plane_meta_evidence_must_self_expire` | `control_plane_performance_harness` | `10` | `4` | `71a63b0e249d` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `17` | `9` | `988582040291` |
 | `generated_endpoint_smoke_matrix_must_remain_contract_gate` | `closed_loop_candidate` | `7` | `8` | `2e5c8d4a0031` |

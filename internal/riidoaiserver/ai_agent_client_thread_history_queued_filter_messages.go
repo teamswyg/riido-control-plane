@@ -13,15 +13,31 @@ func withoutSupersededQueuedMessages(
 	}
 	cutoff, ok := latest[conversationID]
 	hasRunning := taskThreadHistoryConversationIsRunning(conversationID, running)
-	out := messages[:0]
-	for _, message := range messages {
-		if historyMessageIsQueuedStatus(message) {
+	var out []AIAgentTaskThreadHistoryMessage
+	for i, message := range messages {
+		if historyThreadMessageShouldDropQueued(message, cutoff, ok, hasRunning) {
+			if out == nil {
+				out = make([]AIAgentTaskThreadHistoryMessage, 0, len(messages)-1)
+				out = append(out, messages[:i]...)
+			}
 			continue
 		}
-		if historyQueuedStatusIsSuperseded(message, cutoff, ok, hasRunning) {
-			continue
+		if out != nil {
+			out = append(out, message)
 		}
-		out = append(out, message)
+	}
+	if out == nil {
+		return messages
 	}
 	return out
+}
+
+func historyThreadMessageShouldDropQueued(
+	message AIAgentTaskThreadHistoryMessage,
+	cutoff time.Time,
+	hasCutoff bool,
+	hasRunning bool,
+) bool {
+	return historyMessageIsQueuedStatus(message) ||
+		historyQueuedStatusIsSuperseded(message, cutoff, hasCutoff, hasRunning)
 }
