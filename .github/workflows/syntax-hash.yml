@@ -59,6 +59,7 @@ jobs:
           go test ./tools/healthreadycmd -run TestHealthReadyCommandBehaviorGolden -count=1
           go test ./tools/runtimeboundary -run TestRuntimeBoundaryBehaviorGolden -count=1
           go test ./tools/configreference -run TestConfigReferenceBehaviorGolden -count=1
+          go test ./tools/storesaferouting -run TestStoreSafeRoutingBehaviorGolden -count=1
       - name: Verify syntax hash evidence
         run: |
           mkdir -p out
