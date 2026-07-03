@@ -1,116 +1,664 @@
 {
-  "schema_version":"riido-control-plane-module-decomposition.v1",
-  "id":"control-plane-module-decomposition",
-  "title":"Control Plane Module Decomposition",
-  "riido_task":"RIID-4712",
-  "generated_doc":"docs/30-architecture/module-decomposition.md",
-  "workflow":".github/workflows/module-decomposition.yml",
-  "evidence_artifact":"module-decomposition-evidence",
-  "module_path":"github.com/teamswyg/riido-control-plane",
-  "source_roots":["awsadapters","cmd","internal","tools"],
-  "forbidden_imports":["riido-daemon","riido_daemon","riido-infra"],
-  "file_line_budget":{"target_lines":75,"sample_limit":10,"hotspot_limit":8,"max_files_over_target":97,"max_file_lines":2481,"hotspot_limits":[
-    {"path":"internal/riidoaiserver","max_files":85,"max_lines":838,"max_total_over_target_lines":13604},
-    {"path":"tools/reactquerygen","max_files":3,"max_lines":1395,"max_total_over_target_lines":2766},
-    {"path":"cmd/riido_ai_server","max_files":3,"max_lines":791,"max_total_over_target_lines":1474},
-    {"path":"tools/containercontract","max_files":0,"max_lines":75,"max_total_over_target_lines":0},
-    {"path":"tools/generatedclienthandoff","max_files":2,"max_lines":601,"max_total_over_target_lines":578},
-    {"path":"awsadapters","max_files":1,"max_lines":84,"max_total_over_target_lines":9},
-    {"path":"internal/contractscompat","max_files":1,"max_lines":81,"max_total_over_target_lines":6},
-    {"path":"tools/operationalreadiness","max_files":1,"max_lines":77,"max_total_over_target_lines":2},
-    {"path":"tools/looprefreshdispatch","max_files":0,"max_lines":75,"max_total_over_target_lines":0}
-  ]},
-  "packages":[
-    {"path":"awsadapters","kind":"public-adapter","role":"Public facade for private infra and evidence tooling that needs selected AWS adapter behavior.","must_not_own":"new adapter behavior, duplicated DTOs, credential storage"},
-    {"path":"cmd/riido_ai_server","kind":"runtime-shell","role":"Binary entrypoint, Factor 12 env parsing, HTTP lifecycle, optional metrics and tracing startup.","must_not_own":"domain decisions, Terraform, production secret values, provider process execution"},
-    {"path":"internal/contractscompat","kind":"compatibility-test","role":"Shared contracts dependency compatibility smoke tests.","must_not_own":"domain redefinition"},
-    {"path":"internal/repoidentity","kind":"guard","role":"Repository identity guard.","must_not_own":"runtime behavior"},
-    {"path":"internal/riidoaiserver","kind":"core","role":"Domain and adapter implementation for HTTP, SSE, metrics, assignment, AI Agent client, auth, RBAC, and stdlib AWS requests.","must_not_own":"daemon runtime, live deploy evidence, cloud resource topology"},
-    {"path":"tools/agentcatalogrbac","kind":"evidence-tool","role":"Agent catalog RBAC executable knowledge gate.","must_not_own":"runtime authorization behavior"},
-    {"path":"tools/agentcatalogrbac/pathutil","kind":"adapter","role":"Path adapter for the agent catalog RBAC verifier.","must_not_own":"agent catalog RBAC policy or source checks"},
-    {"path":"tools/agentcatalogrbac/requirements","kind":"adapter","role":"Agent catalog RBAC required schema, identity, route, and task vocabulary.","must_not_own":"runtime authorization behavior or doc rendering"},
-    {"path":"tools/agentcatalogrbac/setutil","kind":"adapter","role":"Agent catalog RBAC membership and text matching adapter.","must_not_own":"agent catalog RBAC policy"},
-    {"path":"tools/agentruntimebinding","kind":"evidence-tool","role":"Agent runtime binding generated reader and verifier.","must_not_own":"runtime persistence behavior"},
-    {"path":"tools/agentruntimebinding/pathutil","kind":"adapter","role":"Path adapter for the agent runtime binding verifier.","must_not_own":"agent runtime binding rules or source checks"},
-    {"path":"tools/agentruntimebinding/requirements","kind":"adapter","role":"Agent runtime binding required identity, field, and rule vocabulary.","must_not_own":"manifest loading or doc rendering"},
-    {"path":"tools/apiclientdelivery","kind":"evidence-tool","role":"API client delivery generated reader and frontend handoff boundary verifier.","must_not_own":"riido-client application implementation or live delivery execution"},
-    {"path":"tools/aiagentclientapi","kind":"evidence-tool","role":"AI Agent client API SSOT verifier.","must_not_own":"HTTP handler implementation"},
-    {"path":"tools/aiagentrisk","kind":"evidence-tool","role":"AI Agent unresolved-risk closure evidence verifier.","must_not_own":"risk resolution without source tests"},
-    {"path":"tools/aigeneratedsmokematrix","kind":"evidence-tool","role":"Generated endpoint smoke matrix verifier.","must_not_own":"endpoint shape"},
-    {"path":"tools/aiagentload","kind":"evidence-tool","role":"Staging AI Agent client API load evidence generator with redacted report output.","must_not_own":"runtime API behavior, secret handling outside masked workflow inputs, or private infra scaling policy"},
-    {"path":"tools/aiagentthreadsnapshot","kind":"evidence-tool","role":"AI Agent thread same-moment v2/v3/subscription/SSE snapshot generator with redacted report output.","must_not_own":"runtime API behavior, message body storage, token storage, or client rendering"},
-    {"path":"tools/assignmentjournal","kind":"evidence-tool","role":"Assignment operation journal evidence verifier.","must_not_own":"assignment store execution"},
-    {"path":"tools/assignmentjournal/pathutil","kind":"adapter","role":"Path adapter for the assignment operation journal verifier.","must_not_own":"assignment journal rules or source checks"},
-    {"path":"tools/assignmentjournal/requirements","kind":"adapter","role":"Assignment operation journal required identity, port, record, replay, and version vocabulary.","must_not_own":"manifest loading or doc rendering"},
-    {"path":"tools/cloudwatchemf","kind":"evidence-tool","role":"CloudWatch EMF shape generated reader and verifier.","must_not_own":"live AWS metrics publishing or dashboard topology"},
-    {"path":"tools/cloudwatchemf/pathutil","kind":"adapter","role":"Path adapter for the CloudWatch EMF verifier.","must_not_own":"CloudWatch EMF shape rules or source checks"},
-    {"path":"tools/cloudwatchemf/requirements","kind":"adapter","role":"CloudWatch EMF required manifest path, evidence schema, and generated notice vocabulary.","must_not_own":"manifest loading, EMF shape verification, or doc rendering"},
-    {"path":"tools/configreference","kind":"evidence-tool","role":"Runtime config catalog verifier.","must_not_own":"deployment values or secrets"},
-    {"path":"tools/containercontract","kind":"evidence-tool","role":"Container image contract verifier.","must_not_own":"image publishing or ECS deployment"},
-    {"path":"tools/controlplaneaudit","kind":"evidence-tool","role":"Control-plane high-traffic source-surface audit verifier and static risk evidence generator.","must_not_own":"endpoint contract changes, runtime optimization implementation, infra scaling, or live production load execution"},
-    {"path":"tools/controlplaneperf","kind":"evidence-tool","role":"Control-plane high-traffic performance evidence verifier and hot-path candidate generator.","must_not_own":"endpoint contract changes, infra scaling, or live production load execution"},
-    {"path":"tools/controlplanepressure","kind":"evidence-tool","role":"Local open-loop control-plane pressure harness for throughput, latency, allocation, goroutine evidence, and finding-level closed-loop candidate adoption paths.","must_not_own":"endpoint contract changes, live production load execution, or infra scaling policy"},
-    {"path":"tools/contextmap","kind":"evidence-tool","role":"Context map generated reader and verifier.","must_not_own":"runtime package boundaries"},
-    {"path":"tools/syntaxhash","kind":"meta-evidence-tool","role":"Syntax hash graph generator and verifier that derives AST-normalized package hashes, repository coverage, relocation evidence, and semantic-claim graph edges after target packages are golden locked.","must_not_own":"runtime behavior, semantic hash definition, or package refactoring execution"},
-    {"path":"tools/dependencyallowlist","kind":"policy-tool","role":"Direct Go dependency allowlist verifier.","must_not_own":"transitive dependency policy outside the allowlist contract"},
-    {"path":"tools/dependencyallowlist/layers","kind":"adapter","role":"Dependency allowlist layer vocabulary adapter.","must_not_own":"dependency allowlist contract or module verification behavior"},
-    {"path":"tools/deploypolicy","kind":"policy-tool","role":"Public workflow and docs redaction plus CD ownership drift tests.","must_not_own":"live AWS deploy execution or private operator evidence"},
-    {"path":"tools/figmaprojection","kind":"evidence-tool","role":"Figma control-plane projection evidence verifier.","must_not_own":"Figma source coverage or generated-client implementation"},
-    {"path":"tools/generatedclienthandoff","kind":"generator","role":"Generated client README, history, manifest, barrels, and PR body handoff generator.","must_not_own":"riido-client application code"},
-    {"path":"tools/gocibaseline","kind":"meta-evidence-tool","role":"Go CI baseline workflow contract verifier.","must_not_own":"domain-specific test semantics or live smoke evidence"},
-    {"path":"tools/healthreadycmd","kind":"evidence-tool","role":"Health/ready and command runtime generated reader and verifier.","must_not_own":"runtime server lifecycle"},
-    {"path":"tools/harnesspromotion","kind":"meta-evidence-tool","role":"Harness failure to closed-loop candidate promotion verifier and redacted candidate generator.","must_not_own":"harness execution or runtime behavior"},
-    {"path":"tools/closedloopcandidateintake","kind":"meta-evidence-tool","role":"Closed-loop candidate intake verifier that consumes redacted candidate artifacts and checks adoption requirements.","must_not_own":"candidate implementation priority or runtime bug fixing"},
-    {"path":"tools/closedloopcandidatedecision","kind":"meta-evidence-tool","role":"Closed-loop candidate decision verifier that binds candidate artifacts to owner, priority, disposition, and next artifacts.","must_not_own":"runtime bug fixing or product priority authority"},
-    {"path":"tools/evidencegraph","kind":"meta-evidence-tool","role":"Evidence graph verifier that connects observations, hypotheses, changes, verifiers, evidence, decisions, and next loops.","must_not_own":"runtime behavior, raw evidence payloads, or human-only narrative memory"},
-    {"path":"tools/integrationmatrix","kind":"evidence-tool","role":"Public/private integration matrix verifier.","must_not_own":"private infra evidence"},
-    {"path":"tools/integrationmatrix/pathutil","kind":"adapter","role":"Path adapter for the integration matrix verifier.","must_not_own":"integration matrix policy or private infra evidence"},
-    {"path":"tools/knowledgecoverage","kind":"meta-evidence-tool","role":"Executable knowledge coverage verifier.","must_not_own":"domain-specific verification semantics"},
-    {"path":"tools/liveworkflowevidence","kind":"meta-evidence-tool","role":"Live workflow redacted summary evidence verifier.","must_not_own":"raw endpoint responses, token values, AWS topology, or deployment execution"},
-    {"path":"tools/loopclosureaudit","kind":"meta-evidence-tool","role":"Human-exit loop closure audit verifier that proves refresh dispatch, claim co-change, harness promotion, provider coverage, pre-commit gates, and evidence graph reasoning remain connected.","must_not_own":"runtime behavior, harness execution, or human-only narrative memory"},
-    {"path":"tools/loopregistry","kind":"meta-evidence-tool","role":"Loop registry, claim binding, semantic hash, and harness promotion verifier.","must_not_own":"runtime behavior or harness execution"},
-    {"path":"tools/looprefreshdispatch","kind":"meta-evidence-tool","role":"Loop refresh command artifact dispatcher and safe workflow dispatch plan verifier.","must_not_own":"loop registry selection semantics, raw shell execution, or workflow priority"},
-    {"path":"tools/migrationledger","kind":"evidence-tool","role":"Control-plane migration ledger generated reader and verifier.","must_not_own":"runtime migration behavior or private repository source contents"},
-    {"path":"tools/metricshttpadapter","kind":"evidence-tool","role":"Metrics HTTP adapter generated reader and verifier.","must_not_own":"runtime metrics implementation"},
-    {"path":"tools/metricshttpadapter/pathutil","kind":"adapter","role":"Path adapter for the metrics HTTP adapter verifier.","must_not_own":"metrics HTTP adapter rules or source checks"},
-    {"path":"tools/metricshttpadapter/requirements","kind":"adapter","role":"Metrics HTTP adapter required schema, identity, endpoint, workflow, and generated notice vocabulary.","must_not_own":"manifest loading, route exercise, or doc rendering"},
-    {"path":"tools/metricshttpadapter/runconfig","kind":"adapter","role":"Metrics HTTP adapter CLI option contract.","must_not_own":"metrics adapter execution behavior"},
-    {"path":"tools/metricshttpadapter/sourcechecks","kind":"adapter","role":"Metrics HTTP adapter source-anchor verifier.","must_not_own":"metrics endpoint semantics"},
-    {"path":"tools/metricshttpadapter/statuscheck","kind":"adapter","role":"Metrics HTTP adapter status-code contract verifier.","must_not_own":"HTTP handler behavior"},
-    {"path":"tools/moduledecomposition","kind":"meta-evidence-tool","role":"Go package surface and module boundary verifier.","must_not_own":"runtime package behavior"},
-    {"path":"tools/openquestions","kind":"evidence-tool","role":"Open question decision queue generated reader and verifier.","must_not_own":"architecture decisions without owner evidence"},
-    {"path":"tools/openquestions/pathutil","kind":"adapter","role":"Path adapter for the open questions verifier.","must_not_own":"open question policy or decision queue evidence"},
-    {"path":"tools/operationalreadiness","kind":"evidence-tool","role":"Operational readiness release loop verifier that binds launch checklist items to generated evidence and partial follow-up commands.","must_not_own":"runtime behavior, private operator evidence, or live infrastructure execution"},
-    {"path":"tools/precommitbaseline","kind":"meta-evidence-tool","role":"Pre-commit baseline and loopregistry claim-binding hook verifier.","must_not_own":"runtime behavior or domain-specific claim semantics"},
-    {"path":"tools/providerstatus","kind":"evidence-tool","role":"Provider status vocabulary verifier.","must_not_own":"provider process execution"},
-    {"path":"tools/providerstatus/pathutil","kind":"adapter","role":"Path adapter for the provider status verifier.","must_not_own":"provider status vocabulary or source checks"},
-    {"path":"tools/providerstatus/renderutil","kind":"adapter","role":"Markdown section renderer for the provider status verifier.","must_not_own":"provider status vocabulary or routing policy"},
-    {"path":"tools/providerstatus/requirements","kind":"adapter","role":"Provider status required surface and vocabulary contract.","must_not_own":"manifest loading or source verification"},
-    {"path":"tools/publicpageslive","kind":"evidence-tool","role":"Public GitHub Pages live status verifier that fetches deployed redacted QA status surfaces and writes body-free evidence.","must_not_own":"raw response storage, private endpoint discovery, AWS topology, or GitHub Pages deployment"},
-    {"path":"tools/reactquerygen","kind":"generator","role":"Deterministic OpenAPI-to-React-Query generator for AI Agent client surfaces.","must_not_own":"frontend app implementation"},
-    {"path":"tools/reviewaccountseed","kind":"evidence-tool","role":"Review account seed generated reader and redacted verifier.","must_not_own":"operator token values or live review account deployment"},
-    {"path":"tools/reviewaccountseed/httpclient","kind":"adapter","role":"Review account seed HTTP request exerciser.","must_not_own":"review account seed policy or live endpoint behavior"},
-    {"path":"tools/reviewaccountseed/pathutil","kind":"adapter","role":"Path adapter for the review account seed verifier.","must_not_own":"review account seed rules or source checks"},
-    {"path":"tools/reviewaccountseed/requirements","kind":"adapter","role":"Review account seed required manifest, evidence schema, and generated notice vocabulary.","must_not_own":"manifest loading, HTTP execution, or doc rendering"},
-    {"path":"tools/reviewaccountseed/runconfig","kind":"adapter","role":"Review account seed CLI option contract.","must_not_own":"review seed execution behavior"},
-    {"path":"tools/reviewaccountseed/seedruntime","kind":"adapter","role":"Review account seed deterministic runtime fixture provider.","must_not_own":"operator token values or live account provisioning"},
-    {"path":"tools/requestauth","kind":"evidence-tool","role":"Request authorization generated reader and verifier.","must_not_own":"external identity provider policy"},
-    {"path":"tools/repositoryreadme","kind":"meta-evidence-tool","role":"Repository README generated reader and executable entrypoint verifier.","must_not_own":"domain-specific verification semantics or private operator evidence"},
-    {"path":"tools/repositoryreadme/pathutil","kind":"adapter","role":"Path adapter for the repository README verifier.","must_not_own":"repository README policy or generated reader semantics"},
-    {"path":"tools/runtimeboundary","kind":"evidence-tool","role":"Runtime deployment boundary generated reader and public/private ownership verifier.","must_not_own":"live AWS deploy execution or private topology evidence"},
-    {"path":"tools/runtimecdownership","kind":"evidence-tool","role":"Runtime CD ownership generated reader and public redaction evidence verifier.","must_not_own":"live AWS deploy execution or private topology evidence"},
-    {"path":"tools/saascontrolplane","kind":"evidence-tool","role":"SaaS control-plane generated reader and verifier.","must_not_own":"private infra topology"},
-    {"path":"tools/saascontrolplane/pathutil","kind":"adapter","role":"Path adapter for the SaaS control-plane verifier.","must_not_own":"SaaS control-plane boundary rules or source checks"},
-    {"path":"tools/saascontrolplane/requirements","kind":"adapter","role":"SaaS control-plane required schema, identity, contract, and generated notice vocabulary.","must_not_own":"manifest loading, source verification, or doc rendering"},
-    {"path":"tools/saascontrolplane/setutil","kind":"adapter","role":"String membership set adapter for the SaaS control-plane verifier.","must_not_own":"SaaS control-plane shared contract policy"},
-    {"path":"tools/snapshotcqrsgate","kind":"evidence-tool","role":"AI Agent snapshot CQRS decision gate.","must_not_own":"store-wide CQRS migration"},
-    {"path":"tools/snapshotcqrsgate/pathutil","kind":"adapter","role":"Path adapter for the snapshot CQRS gate verifier.","must_not_own":"snapshot CQRS decision policy or measurement rules"},
-    {"path":"tools/snapshotcqrsgate/requirements","kind":"adapter","role":"Snapshot CQRS gate required identity, operation, signal, and threshold vocabulary.","must_not_own":"manifest loading or doc rendering"},
-    {"path":"tools/storesaferouting","kind":"evidence-tool","role":"Store-safe routing generated reader and verifier.","must_not_own":"provider process execution or store-channel policy decisions"},
-    {"path":"tools/storesnapshotoutbox","kind":"evidence-tool","role":"Store snapshot and file outbox generated reader and verifier.","must_not_own":"DynamoDB, EventBridge, or live deployment evidence"},
-    {"path":"tools/webfrontendapi","kind":"evidence-tool","role":"Web frontend API CORS generated reader and verifier.","must_not_own":"frontend implementation or private deployment origins"},
-    {"path":"tools/workflowevidence","kind":"meta-evidence-tool","role":"GitHub Actions evidence coverage verifier.","must_not_own":"domain-specific test semantics or private operator evidence"}
+  "schema_version": "riido-control-plane-module-decomposition.v1",
+  "id": "control-plane-module-decomposition",
+  "title": "Control Plane Module Decomposition",
+  "riido_task": "RIID-4712",
+  "generated_doc": "docs/30-architecture/module-decomposition.md",
+  "workflow": ".github/workflows/module-decomposition.yml",
+  "evidence_artifact": "module-decomposition-evidence",
+  "module_path": "github.com/teamswyg/riido-control-plane",
+  "source_roots": [
+    "awsadapters",
+    "cmd",
+    "internal",
+    "tools"
   ],
-  "rules":["Every Go package directory under the source roots must appear exactly once in this manifest.","Forbidden imports are checked from Go import declarations, not from test fixture strings.","Public behavior must remain black-box testable without AWS credentials.","Runtime artifact CD is owned by this repository, while topology and private operator evidence remain outside it.","Direct Go module dependencies remain governed by dependency_allowlist.riido.json."],
-  "loop":{"observation":"The manual module decomposition listed only a subset of the actual Go package surface.","hypothesis":"Scanning package directories against a manifest can keep surface-area documentation aligned with the codebase.","execute":"Generate this reader from the package manifest and verify package/import boundaries in CI.","evaluate":"The verifier checks package parity, duplicate ownership entries, forbidden imports, generated doc freshness, and evidence output.","retrospective":"This preserves the surface-area philosophy: many packages are fine when their observable ownership is explicit and verifiable."}
+  "forbidden_imports": [
+    "riido-daemon",
+    "riido_daemon",
+    "riido-infra"
+  ],
+  "file_line_budget": {
+    "target_lines": 75,
+    "sample_limit": 10,
+    "hotspot_limit": 8,
+    "max_files_over_target": 97,
+    "max_file_lines": 2481,
+    "hotspot_limits": [
+      {
+        "path": "internal/riidoaiserver",
+        "max_files": 85,
+        "max_lines": 838,
+        "max_total_over_target_lines": 13604
+      },
+      {
+        "path": "tools/reactquerygen",
+        "max_files": 3,
+        "max_lines": 1395,
+        "max_total_over_target_lines": 2766
+      },
+      {
+        "path": "cmd/riido_ai_server",
+        "max_files": 3,
+        "max_lines": 791,
+        "max_total_over_target_lines": 1474
+      },
+      {
+        "path": "tools/containercontract",
+        "max_files": 0,
+        "max_lines": 75,
+        "max_total_over_target_lines": 0
+      },
+      {
+        "path": "tools/generatedclienthandoff",
+        "max_files": 2,
+        "max_lines": 601,
+        "max_total_over_target_lines": 578
+      },
+      {
+        "path": "awsadapters",
+        "max_files": 1,
+        "max_lines": 84,
+        "max_total_over_target_lines": 9
+      },
+      {
+        "path": "internal/contractscompat",
+        "max_files": 1,
+        "max_lines": 81,
+        "max_total_over_target_lines": 6
+      },
+      {
+        "path": "tools/operationalreadiness",
+        "max_files": 1,
+        "max_lines": 77,
+        "max_total_over_target_lines": 2
+      },
+      {
+        "path": "tools/looprefreshdispatch",
+        "max_files": 0,
+        "max_lines": 75,
+        "max_total_over_target_lines": 0
+      }
+    ]
+  },
+  "packages": [
+    {
+      "path": "awsadapters",
+      "kind": "public-adapter",
+      "role": "Public facade for private infra and evidence tooling that needs selected AWS adapter behavior.",
+      "must_not_own": "new adapter behavior, duplicated DTOs, credential storage"
+    },
+    {
+      "path": "cmd/riido_ai_server",
+      "kind": "runtime-shell",
+      "role": "Binary entrypoint, Factor 12 env parsing, HTTP lifecycle, optional metrics and tracing startup.",
+      "must_not_own": "domain decisions, Terraform, production secret values, provider process execution"
+    },
+    {
+      "path": "internal/contractscompat",
+      "kind": "compatibility-test",
+      "role": "Shared contracts dependency compatibility smoke tests.",
+      "must_not_own": "domain redefinition"
+    },
+    {
+      "path": "internal/repoidentity",
+      "kind": "guard",
+      "role": "Repository identity guard.",
+      "must_not_own": "runtime behavior"
+    },
+    {
+      "path": "internal/riidoaiserver",
+      "kind": "core",
+      "role": "Domain and adapter implementation for HTTP, SSE, metrics, assignment, AI Agent client, auth, RBAC, and stdlib AWS requests.",
+      "must_not_own": "daemon runtime, live deploy evidence, cloud resource topology"
+    },
+    {
+      "path": "tools/agentcatalogrbac",
+      "kind": "evidence-tool",
+      "role": "Agent catalog RBAC executable knowledge gate.",
+      "must_not_own": "runtime authorization behavior"
+    },
+    {
+      "path": "tools/agentcatalogrbac/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the agent catalog RBAC verifier.",
+      "must_not_own": "agent catalog RBAC policy or source checks"
+    },
+    {
+      "path": "tools/agentcatalogrbac/requirements",
+      "kind": "adapter",
+      "role": "Agent catalog RBAC required schema, identity, route, and task vocabulary.",
+      "must_not_own": "runtime authorization behavior or doc rendering"
+    },
+    {
+      "path": "tools/agentcatalogrbac/setutil",
+      "kind": "adapter",
+      "role": "Agent catalog RBAC membership and text matching adapter.",
+      "must_not_own": "agent catalog RBAC policy"
+    },
+    {
+      "path": "tools/agentruntimebinding",
+      "kind": "evidence-tool",
+      "role": "Agent runtime binding generated reader and verifier.",
+      "must_not_own": "runtime persistence behavior"
+    },
+    {
+      "path": "tools/agentruntimebinding/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the agent runtime binding verifier.",
+      "must_not_own": "agent runtime binding rules or source checks"
+    },
+    {
+      "path": "tools/agentruntimebinding/requirements",
+      "kind": "adapter",
+      "role": "Agent runtime binding required identity, field, and rule vocabulary.",
+      "must_not_own": "manifest loading or doc rendering"
+    },
+    {
+      "path": "tools/apiclientdelivery",
+      "kind": "evidence-tool",
+      "role": "API client delivery generated reader and frontend handoff boundary verifier.",
+      "must_not_own": "riido-client application implementation or live delivery execution"
+    },
+    {
+      "path": "tools/aiagentclientapi",
+      "kind": "evidence-tool",
+      "role": "AI Agent client API SSOT verifier.",
+      "must_not_own": "HTTP handler implementation"
+    },
+    {
+      "path": "tools/aiagentrisk",
+      "kind": "evidence-tool",
+      "role": "AI Agent unresolved-risk closure evidence verifier.",
+      "must_not_own": "risk resolution without source tests"
+    },
+    {
+      "path": "tools/aigeneratedsmokematrix",
+      "kind": "evidence-tool",
+      "role": "Generated endpoint smoke matrix verifier.",
+      "must_not_own": "endpoint shape"
+    },
+    {
+      "path": "tools/aiagentload",
+      "kind": "evidence-tool",
+      "role": "Staging AI Agent client API load evidence generator with redacted report output.",
+      "must_not_own": "runtime API behavior, secret handling outside masked workflow inputs, or private infra scaling policy"
+    },
+    {
+      "path": "tools/aiagentthreadsnapshot",
+      "kind": "evidence-tool",
+      "role": "AI Agent thread same-moment v2/v3/subscription/SSE snapshot generator with redacted report output.",
+      "must_not_own": "runtime API behavior, message body storage, token storage, or client rendering"
+    },
+    {
+      "path": "tools/assignmentjournal",
+      "kind": "evidence-tool",
+      "role": "Assignment operation journal evidence verifier.",
+      "must_not_own": "assignment store execution"
+    },
+    {
+      "path": "tools/assignmentjournal/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the assignment operation journal verifier.",
+      "must_not_own": "assignment journal rules or source checks"
+    },
+    {
+      "path": "tools/assignmentjournal/requirements",
+      "kind": "adapter",
+      "role": "Assignment operation journal required identity, port, record, replay, and version vocabulary.",
+      "must_not_own": "manifest loading or doc rendering"
+    },
+    {
+      "path": "tools/cloudwatchemf",
+      "kind": "evidence-tool",
+      "role": "CloudWatch EMF shape generated reader and verifier.",
+      "must_not_own": "live AWS metrics publishing or dashboard topology"
+    },
+    {
+      "path": "tools/cloudwatchemf/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the CloudWatch EMF verifier.",
+      "must_not_own": "CloudWatch EMF shape rules or source checks"
+    },
+    {
+      "path": "tools/cloudwatchemf/requirements",
+      "kind": "adapter",
+      "role": "CloudWatch EMF required manifest path, evidence schema, and generated notice vocabulary.",
+      "must_not_own": "manifest loading, EMF shape verification, or doc rendering"
+    },
+    {
+      "path": "tools/configreference",
+      "kind": "evidence-tool",
+      "role": "Runtime config catalog verifier.",
+      "must_not_own": "deployment values or secrets"
+    },
+    {
+      "path": "tools/containercontract",
+      "kind": "evidence-tool",
+      "role": "Container image contract verifier.",
+      "must_not_own": "image publishing or ECS deployment"
+    },
+    {
+      "path": "tools/controlplaneaudit",
+      "kind": "evidence-tool",
+      "role": "Control-plane high-traffic source-surface audit verifier and static risk evidence generator.",
+      "must_not_own": "endpoint contract changes, runtime optimization implementation, infra scaling, or live production load execution"
+    },
+    {
+      "path": "tools/controlplaneperf",
+      "kind": "evidence-tool",
+      "role": "Control-plane high-traffic performance evidence verifier and hot-path candidate generator.",
+      "must_not_own": "endpoint contract changes, infra scaling, or live production load execution"
+    },
+    {
+      "path": "tools/controlplanepressure",
+      "kind": "evidence-tool",
+      "role": "Local open-loop control-plane pressure harness for throughput, latency, allocation, goroutine evidence, and finding-level closed-loop candidate adoption paths.",
+      "must_not_own": "endpoint contract changes, live production load execution, or infra scaling policy"
+    },
+    {
+      "path": "tools/contextmap",
+      "kind": "evidence-tool",
+      "role": "Context map generated reader and verifier.",
+      "must_not_own": "runtime package boundaries"
+    },
+    {
+      "path": "tools/syntaxhash",
+      "kind": "meta-evidence-tool",
+      "role": "Syntax hash graph generator and verifier that derives AST-normalized package hashes, repository coverage, relocation evidence, and semantic-claim graph edges after target packages are golden locked.",
+      "must_not_own": "runtime behavior, semantic hash definition, or package refactoring execution"
+    },
+    {
+      "path": "tools/dependencyallowlist",
+      "kind": "policy-tool",
+      "role": "Direct Go dependency allowlist verifier.",
+      "must_not_own": "transitive dependency policy outside the allowlist contract"
+    },
+    {
+      "path": "tools/dependencyallowlist/layers",
+      "kind": "adapter",
+      "role": "Dependency allowlist layer vocabulary adapter.",
+      "must_not_own": "dependency allowlist contract or module verification behavior"
+    },
+    {
+      "path": "tools/deploypolicy",
+      "kind": "policy-tool",
+      "role": "Public workflow and docs redaction plus CD ownership drift tests.",
+      "must_not_own": "live AWS deploy execution or private operator evidence"
+    },
+    {
+      "path": "tools/figmaprojection",
+      "kind": "evidence-tool",
+      "role": "Figma control-plane projection evidence verifier.",
+      "must_not_own": "Figma source coverage or generated-client implementation"
+    },
+    {
+      "path": "tools/generatedclienthandoff",
+      "kind": "generator",
+      "role": "Generated client README, history, manifest, barrels, and PR body handoff generator.",
+      "must_not_own": "riido-client application code"
+    },
+    {
+      "path": "tools/gocibaseline",
+      "kind": "meta-evidence-tool",
+      "role": "Go CI baseline workflow contract verifier.",
+      "must_not_own": "domain-specific test semantics or live smoke evidence"
+    },
+    {
+      "path": "tools/healthreadycmd",
+      "kind": "evidence-tool",
+      "role": "Health/ready and command runtime generated reader and verifier.",
+      "must_not_own": "runtime server lifecycle"
+    },
+    {
+      "path": "tools/harnesspromotion",
+      "kind": "meta-evidence-tool",
+      "role": "Harness failure to closed-loop candidate promotion verifier and redacted candidate generator.",
+      "must_not_own": "harness execution or runtime behavior"
+    },
+    {
+      "path": "tools/closedloopcandidateintake",
+      "kind": "meta-evidence-tool",
+      "role": "Closed-loop candidate intake verifier that consumes redacted candidate artifacts and checks adoption requirements.",
+      "must_not_own": "candidate implementation priority or runtime bug fixing"
+    },
+    {
+      "path": "tools/closedloopcandidatedecision",
+      "kind": "meta-evidence-tool",
+      "role": "Closed-loop candidate decision verifier that binds candidate artifacts to owner, priority, disposition, and next artifacts.",
+      "must_not_own": "runtime bug fixing or product priority authority"
+    },
+    {
+      "path": "tools/evidencegraph",
+      "kind": "meta-evidence-tool",
+      "role": "Evidence graph verifier that connects observations, hypotheses, changes, verifiers, evidence, decisions, and next loops.",
+      "must_not_own": "runtime behavior, raw evidence payloads, or human-only narrative memory"
+    },
+    {
+      "path": "tools/integrationmatrix",
+      "kind": "evidence-tool",
+      "role": "Public/private integration matrix verifier.",
+      "must_not_own": "private infra evidence"
+    },
+    {
+      "path": "tools/integrationmatrix/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the integration matrix verifier.",
+      "must_not_own": "integration matrix policy or private infra evidence"
+    },
+    {
+      "path": "tools/knowledgecoverage",
+      "kind": "meta-evidence-tool",
+      "role": "Executable knowledge coverage verifier.",
+      "must_not_own": "domain-specific verification semantics"
+    },
+    {
+      "path": "tools/liveworkflowevidence",
+      "kind": "meta-evidence-tool",
+      "role": "Live workflow redacted summary evidence verifier.",
+      "must_not_own": "raw endpoint responses, token values, AWS topology, or deployment execution"
+    },
+    {
+      "path": "tools/loopclosureaudit",
+      "kind": "meta-evidence-tool",
+      "role": "Human-exit loop closure audit verifier that proves refresh dispatch, claim co-change, harness promotion, provider coverage, pre-commit gates, and evidence graph reasoning remain connected.",
+      "must_not_own": "runtime behavior, harness execution, or human-only narrative memory"
+    },
+    {
+      "path": "tools/loopregistry",
+      "kind": "meta-evidence-tool",
+      "role": "Loop registry, claim binding, semantic hash, and harness promotion verifier.",
+      "must_not_own": "runtime behavior or harness execution"
+    },
+    {
+      "path": "tools/looprefreshdispatch",
+      "kind": "meta-evidence-tool",
+      "role": "Loop refresh command artifact dispatcher and safe workflow dispatch plan verifier.",
+      "must_not_own": "loop registry selection semantics, raw shell execution, or workflow priority"
+    },
+    {
+      "path": "tools/migrationledger",
+      "kind": "evidence-tool",
+      "role": "Control-plane migration ledger generated reader and verifier.",
+      "must_not_own": "runtime migration behavior or private repository source contents"
+    },
+    {
+      "path": "tools/metricshttpadapter",
+      "kind": "evidence-tool",
+      "role": "Metrics HTTP adapter generated reader and verifier.",
+      "must_not_own": "runtime metrics implementation"
+    },
+    {
+      "path": "tools/metricshttpadapter/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the metrics HTTP adapter verifier.",
+      "must_not_own": "metrics HTTP adapter rules or source checks"
+    },
+    {
+      "path": "tools/metricshttpadapter/requirements",
+      "kind": "adapter",
+      "role": "Metrics HTTP adapter required schema, identity, endpoint, workflow, and generated notice vocabulary.",
+      "must_not_own": "manifest loading, route exercise, or doc rendering"
+    },
+    {
+      "path": "tools/metricshttpadapter/runconfig",
+      "kind": "adapter",
+      "role": "Metrics HTTP adapter CLI option contract.",
+      "must_not_own": "metrics adapter execution behavior"
+    },
+    {
+      "path": "tools/metricshttpadapter/sourcechecks",
+      "kind": "adapter",
+      "role": "Metrics HTTP adapter source-anchor verifier.",
+      "must_not_own": "metrics endpoint semantics"
+    },
+    {
+      "path": "tools/metricshttpadapter/statuscheck",
+      "kind": "adapter",
+      "role": "Metrics HTTP adapter status-code contract verifier.",
+      "must_not_own": "HTTP handler behavior"
+    },
+    {
+      "path": "tools/moduledecomposition",
+      "kind": "meta-evidence-tool",
+      "role": "Go package surface and module boundary verifier.",
+      "must_not_own": "runtime package behavior"
+    },
+    {
+      "path": "tools/openquestions",
+      "kind": "evidence-tool",
+      "role": "Open question decision queue generated reader and verifier.",
+      "must_not_own": "architecture decisions without owner evidence"
+    },
+    {
+      "path": "tools/openquestions/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the open questions verifier.",
+      "must_not_own": "open question policy or decision queue evidence"
+    },
+    {
+      "path": "tools/operationalreadiness",
+      "kind": "evidence-tool",
+      "role": "Operational readiness release loop verifier that binds launch checklist items to generated evidence and partial follow-up commands.",
+      "must_not_own": "runtime behavior, private operator evidence, or live infrastructure execution"
+    },
+    {
+      "path": "tools/precommitbaseline",
+      "kind": "meta-evidence-tool",
+      "role": "Pre-commit baseline and loopregistry claim-binding hook verifier.",
+      "must_not_own": "runtime behavior or domain-specific claim semantics"
+    },
+    {
+      "path": "tools/providerstatus",
+      "kind": "evidence-tool",
+      "role": "Provider status vocabulary verifier.",
+      "must_not_own": "provider process execution"
+    },
+    {
+      "path": "tools/providerstatus/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the provider status verifier.",
+      "must_not_own": "provider status vocabulary or source checks"
+    },
+    {
+      "path": "tools/providerstatus/renderutil",
+      "kind": "adapter",
+      "role": "Markdown section renderer for the provider status verifier.",
+      "must_not_own": "provider status vocabulary or routing policy"
+    },
+    {
+      "path": "tools/providerstatus/requirements",
+      "kind": "adapter",
+      "role": "Provider status required surface and vocabulary contract.",
+      "must_not_own": "manifest loading or source verification"
+    },
+    {
+      "path": "tools/publicpageslive",
+      "kind": "evidence-tool",
+      "role": "Public GitHub Pages live status verifier that fetches deployed redacted QA status surfaces and writes body-free evidence.",
+      "must_not_own": "raw response storage, private endpoint discovery, AWS topology, or GitHub Pages deployment"
+    },
+    {
+      "path": "tools/reactquerygen",
+      "kind": "generator",
+      "role": "Deterministic OpenAPI-to-React-Query generator for AI Agent client surfaces.",
+      "must_not_own": "frontend app implementation"
+    },
+    {
+      "path": "tools/reviewaccountseed",
+      "kind": "evidence-tool",
+      "role": "Review account seed generated reader and redacted verifier.",
+      "must_not_own": "operator token values or live review account deployment"
+    },
+    {
+      "path": "tools/reviewaccountseed/httpclient",
+      "kind": "adapter",
+      "role": "Review account seed HTTP request exerciser.",
+      "must_not_own": "review account seed policy or live endpoint behavior"
+    },
+    {
+      "path": "tools/reviewaccountseed/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the review account seed verifier.",
+      "must_not_own": "review account seed rules or source checks"
+    },
+    {
+      "path": "tools/reviewaccountseed/requirements",
+      "kind": "adapter",
+      "role": "Review account seed required manifest, evidence schema, and generated notice vocabulary.",
+      "must_not_own": "manifest loading, HTTP execution, or doc rendering"
+    },
+    {
+      "path": "tools/reviewaccountseed/runconfig",
+      "kind": "adapter",
+      "role": "Review account seed CLI option contract.",
+      "must_not_own": "review seed execution behavior"
+    },
+    {
+      "path": "tools/reviewaccountseed/seedruntime",
+      "kind": "adapter",
+      "role": "Review account seed deterministic runtime fixture provider.",
+      "must_not_own": "operator token values or live account provisioning"
+    },
+    {
+      "path": "tools/requestauth",
+      "kind": "evidence-tool",
+      "role": "Request authorization generated reader and verifier.",
+      "must_not_own": "external identity provider policy"
+    },
+    {
+      "path": "tools/repositoryreadme",
+      "kind": "meta-evidence-tool",
+      "role": "Repository README generated reader and executable entrypoint verifier.",
+      "must_not_own": "domain-specific verification semantics or private operator evidence"
+    },
+    {
+      "path": "tools/repositoryreadme/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the repository README verifier.",
+      "must_not_own": "repository README policy or generated reader semantics"
+    },
+    {
+      "path": "tools/runtimeboundary",
+      "kind": "evidence-tool",
+      "role": "Runtime deployment boundary generated reader and public/private ownership verifier.",
+      "must_not_own": "live AWS deploy execution or private topology evidence"
+    },
+    {
+      "path": "tools/runtimecdownership",
+      "kind": "evidence-tool",
+      "role": "Runtime CD ownership generated reader and public redaction evidence verifier.",
+      "must_not_own": "live AWS deploy execution or private topology evidence"
+    },
+    {
+      "path": "tools/saascontrolplane",
+      "kind": "evidence-tool",
+      "role": "SaaS control-plane generated reader and verifier.",
+      "must_not_own": "private infra topology"
+    },
+    {
+      "path": "tools/saascontrolplane/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the SaaS control-plane verifier.",
+      "must_not_own": "SaaS control-plane boundary rules or source checks"
+    },
+    {
+      "path": "tools/saascontrolplane/requirements",
+      "kind": "adapter",
+      "role": "SaaS control-plane required schema, identity, contract, and generated notice vocabulary.",
+      "must_not_own": "manifest loading, source verification, or doc rendering"
+    },
+    {
+      "path": "tools/saascontrolplane/setutil",
+      "kind": "adapter",
+      "role": "String membership set adapter for the SaaS control-plane verifier.",
+      "must_not_own": "SaaS control-plane shared contract policy"
+    },
+    {
+      "path": "tools/snapshotcqrsgate",
+      "kind": "evidence-tool",
+      "role": "AI Agent snapshot CQRS decision gate.",
+      "must_not_own": "store-wide CQRS migration"
+    },
+    {
+      "path": "tools/snapshotcqrsgate/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the snapshot CQRS gate verifier.",
+      "must_not_own": "snapshot CQRS decision policy or measurement rules"
+    },
+    {
+      "path": "tools/snapshotcqrsgate/requirements",
+      "kind": "adapter",
+      "role": "Snapshot CQRS gate required identity, operation, signal, and threshold vocabulary.",
+      "must_not_own": "manifest loading or doc rendering"
+    },
+    {
+      "path": "tools/storesaferouting",
+      "kind": "evidence-tool",
+      "role": "Store-safe routing generated reader and verifier.",
+      "must_not_own": "provider process execution or store-channel policy decisions"
+    },
+    {
+      "path": "tools/storesnapshotoutbox",
+      "kind": "evidence-tool",
+      "role": "Store snapshot and file outbox generated reader and verifier.",
+      "must_not_own": "DynamoDB, EventBridge, or live deployment evidence"
+    },
+    {
+      "path": "tools/webfrontendapi",
+      "kind": "evidence-tool",
+      "role": "Web frontend API CORS generated reader and verifier.",
+      "must_not_own": "frontend implementation or private deployment origins"
+    },
+    {
+      "path": "tools/workflowevidence",
+      "kind": "meta-evidence-tool",
+      "role": "GitHub Actions evidence coverage verifier.",
+      "must_not_own": "domain-specific test semantics or private operator evidence"
+    },
+    {
+      "path": "tools/apiclientdelivery/doccheck",
+      "kind": "adapter",
+      "role": "Generated-doc freshness adapter for the API client delivery verifier.",
+      "must_not_own": "API client delivery policy, manifest loading, or rendering"
+    },
+    {
+      "path": "tools/apiclientdelivery/pathutil",
+      "kind": "adapter",
+      "role": "Repository path resolution adapter for the API client delivery verifier.",
+      "must_not_own": "API client delivery policy or source checks"
+    },
+    {
+      "path": "tools/apiclientdelivery/rendertext",
+      "kind": "adapter",
+      "role": "Markdown inline code-list rendering adapter for the API client delivery reader.",
+      "must_not_own": "API client delivery section ownership or manifest verification"
+    },
+    {
+      "path": "tools/apiclientdelivery/requirements",
+      "kind": "adapter",
+      "role": "API client delivery manifest path, schema, and generated notice vocabulary.",
+      "must_not_own": "manifest loading, rendering, or evidence verification"
+    },
+    {
+      "path": "tools/apiclientdelivery/runconfig",
+      "kind": "adapter",
+      "role": "CLI run option DTO for the API client delivery verifier.",
+      "must_not_own": "flag parsing, manifest semantics, or evidence output"
+    }
+  ],
+  "rules": [
+    "Every Go package directory under the source roots must appear exactly once in this manifest.",
+    "Forbidden imports are checked from Go import declarations, not from test fixture strings.",
+    "Public behavior must remain black-box testable without AWS credentials.",
+    "Runtime artifact CD is owned by this repository, while topology and private operator evidence remain outside it.",
+    "Direct Go module dependencies remain governed by dependency_allowlist.riido.json."
+  ],
+  "loop": {
+    "observation": "The manual module decomposition listed only a subset of the actual Go package surface.",
+    "hypothesis": "Scanning package directories against a manifest can keep surface-area documentation aligned with the codebase.",
+    "execute": "Generate this reader from the package manifest and verify package/import boundaries in CI.",
+    "evaluate": "The verifier checks package parity, duplicate ownership entries, forbidden imports, generated doc freshness, and evidence output.",
+    "retrospective": "This preserves the surface-area philosophy: many packages are fine when their observable ownership is explicit and verifiable."
+  }
 }

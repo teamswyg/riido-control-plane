@@ -1,21 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
 
-type options struct {
-	Repo        string
-	Manifest    string
-	EvidenceOut string
-	WriteDoc    bool
-	CheckDoc    bool
-}
+	"github.com/teamswyg/riido-control-plane/tools/apiclientdelivery/doccheck"
+	"github.com/teamswyg/riido-control-plane/tools/apiclientdelivery/pathutil"
+	"github.com/teamswyg/riido-control-plane/tools/apiclientdelivery/runconfig"
+)
 
-func run(opt options) error {
-	repoRoot, err := findRepoRoot(opt.Repo)
+func run(opt runconfig.Options) error {
+	repoRoot, err := pathutil.FindRepoRoot(opt.Repo)
 	if err != nil {
 		return err
 	}
-	m, err := loadManifest(repoPath(repoRoot, opt.Manifest))
+	m, err := loadManifest(pathutil.Resolve(repoRoot, opt.Manifest))
 	if err != nil {
 		return err
 	}
@@ -25,12 +23,12 @@ func run(opt options) error {
 	}
 	doc := renderDoc(m, result)
 	if opt.WriteDoc {
-		if err := writeText(repoPath(repoRoot, m.GeneratedDoc), doc); err != nil {
+		if err := writeText(pathutil.Resolve(repoRoot, m.GeneratedDoc), doc); err != nil {
 			return fmt.Errorf("write generated doc: %w", err)
 		}
 	}
 	if opt.CheckDoc {
-		if err := verifyDoc(repoRoot, m, doc); err != nil {
+		if err := doccheck.Verify(pathutil.Resolve(repoRoot, m.GeneratedDoc), doc); err != nil {
 			return err
 		}
 	}

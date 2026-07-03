@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/apiclientdelivery/rendertext"
 )
 
 func renderSources(b *strings.Builder, sources []sourceRef) {
@@ -37,6 +39,6 @@ func renderGenerator(b *strings.Builder, g generator) {
 	b.WriteString("## Generator Boundary\n\n")
 	fmt.Fprintf(b, "- React Query generator: `%s`\n", g.ReactQuery)
 	fmt.Fprintf(b, "- handoff generator: `%s`\n", g.Handoff)
-	fmt.Fprintf(b, "- artifacts: %s\n", codeList(g.Artifacts))
+	fmt.Fprintf(b, "- artifacts: %s\n", rendertext.CodeList(g.Artifacts))
 	fmt.Fprintf(b, "- must not own: %s\n\n", strings.Join(g.MustNotOwn, "; "))
 }

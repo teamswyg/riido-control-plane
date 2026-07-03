@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/teamswyg/riido-control-plane/tools/apiclientdelivery/pathutil"
+	"github.com/teamswyg/riido-control-plane/tools/apiclientdelivery/requirements"
 )
 
 func verifyAll(repoRoot string, m manifest) (verifyResult, error) {
@@ -29,8 +32,8 @@ func verifyAll(repoRoot string, m manifest) (verifyResult, error) {
 }
 
 func verifyShape(m manifest) error {
-	if m.SchemaVersion != manifestSchema {
-		return fmt.Errorf("schema_version must be %s", manifestSchema)
+	if m.SchemaVersion != requirements.ManifestSchema {
+		return fmt.Errorf("schema_version must be %s", requirements.ManifestSchema)
 	}
 	if m.ID == "" || m.Title == "" || m.GeneratedDoc == "" || m.Workflow == "" || m.RiskEvidence == "" {
 		return fmt.Errorf("id, title, generated_doc, workflow, and risk_evidence_manifest are required")
@@ -46,7 +49,7 @@ func verifySourceManifests(repoRoot string, sources []sourceRef) error {
 		if source.Name == "" || source.Path == "" {
 			return fmt.Errorf("source manifest name and path are required")
 		}
-		if _, err := os.Stat(repoPath(repoRoot, source.Path)); err != nil {
+		if _, err := os.Stat(pathutil.Resolve(repoRoot, source.Path)); err != nil {
 			return fmt.Errorf("missing source manifest %s: %w", source.Path, err)
 		}
 	}

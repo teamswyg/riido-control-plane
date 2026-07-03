@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/teamswyg/riido-control-plane/tools/apiclientdelivery/pathutil"
 )
 
 type riskManifest struct {
@@ -18,7 +20,7 @@ type riskEvidence struct {
 }
 
 func collectRiskEvidenceTests(repoRoot, path string, result *verifyResult) error {
-	body, err := os.ReadFile(repoPath(repoRoot, path))
+	body, err := os.ReadFile(pathutil.Resolve(repoRoot, path))
 	if err != nil {
 		return fmt.Errorf("read risk evidence manifest: %w", err)
 	}
