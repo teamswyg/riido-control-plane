@@ -10398,6 +10398,89 @@
       "next_loop": "closed_loop_candidate_decision"
     },
     {
+      "id": "pre_commit_baseline_syntax_hash_loop",
+      "observation": "The pre-commit baseline verifier owned local claim/evidence impact gates, but its Go package shape was still outside syntax-hash coverage even though it is part of the mechanism that keeps agents from skipping executable evidence.",
+      "hypothesis": "Golden-locking the pre-commit baseline evidence and generated reader before adding it to the syntax hash manifest preserves hook, workflow, TTL, and strict evidence semantics while connecting the package syntax hash to the existing pre-commit semantic claims.",
+      "claims": [
+        "pre_commit_must_run_claim_binding_impact",
+        "pre_commit_must_run_evidence_graph_impact",
+        "pre_commit_baseline_evidence_must_self_expire",
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/precommitbaseline/main_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/precommitbaseline/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/precommitbaseline"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "pre-commit-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Pre-commit baseline syntax coverage expands only after TestPreCommitBaselineBehaviorGolden fixes the current evidence and generated-reader contract with deterministic time. The syntax target increases repository tracking from 646 to 666 Go files and keeps the generated artifact constraints green without changing pre-commit hook behavior or the existing semantic hash implementation.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "api_client_delivery_syntax_hash_loop",
       "observation": "The API client delivery evidence tool was outside syntax-hash tracking even though it owns generated-client handoff evidence, risk references, and frontend boundary verification.",
       "hypothesis": "Golden-locking API client delivery evidence before splitting helper adapters and binding the resulting packages into syntax hash coverage preserves behavior while reducing root file surface and expanding the syntax-to-semantic graph.",

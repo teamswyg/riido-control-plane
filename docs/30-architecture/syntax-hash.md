@@ -24,6 +24,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `store_safe_routing_guard` | `tools/storesaferouting` | 100% | `affad8a109c9` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `public_pages_live_guard` | `tools/publicpageslive` | 100% | `c9fb97e9cd95` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `go_ci_baseline_guard` | `tools/gocibaseline` | 100% | `47cc7e2cf7ff` | `go_ci_baseline_must_preserve_broad_ci_contract` |
+| `pre_commit_baseline_guard` | `tools/precommitbaseline` | 100% | `55e387dbb587` | `pre_commit_baseline_evidence_must_self_expire` |
 | `web_frontend_api_guard` | `tools/webfrontendapi` | 100% | `23a98ee173bc` | `web_frontend_api_must_preserve_cors_contract` |
 | `ai_agent_risk_evidence_guard` | `tools/aiagentrisk` | 100% | `c4551769ea32` | `ai_agent_risk_evidence_must_preserve_boundary_manifest` |
 | `migration_ledger_guard` | `tools/migrationledger` | 100% | `c6ddc5f8b294` | `migration_ledger_must_preserve_historical_evidence` |
@@ -98,9 +99,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 ## Repository Coverage
 
 - Go files: `2718`
-- tracked files: `646`
-- untracked files: `2072`
-- coverage: `23.76%`
+- tracked files: `666`
+- untracked files: `2052`
+- coverage: `24.50%`
 
 ## Constraints
 
@@ -111,5 +112,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `646`
-- compression score: `113`
+- efficiency score: `666`
+- compression score: `118`
