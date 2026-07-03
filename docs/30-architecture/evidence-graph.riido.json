@@ -9263,10 +9263,6 @@
         },
         {
           "kind": "test",
-          "path": "tools/aiagentthreadsnapshot/subscription_test.go"
-        },
-        {
-          "kind": "test",
           "path": "tools/aiagentthreadsnapshot/token_test.go"
         },
         {
@@ -11046,6 +11042,141 @@
         }
       ],
       "decision": "Store snapshot/file outbox syntax coverage may expand only after TestRunWritesEvidence preserves the emitted evidence hash; case/source/doc helpers are consolidated to satisfy folder limits without changing durability evidence output.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_thread_snapshot_syntax_hash_loop",
+      "observation": "The AI Agent same-moment thread snapshot tool became the executable capture path for Notion P0 completion-progress races, but its package shape was not syntax-hash tracked and stale evidence references could keep pointing at removed helper files.",
+      "hypothesis": "Hash-locking the redacted capture report before consolidating same-concept helpers preserves the v3/v2/subscription/SSE snapshot contract while binding the tool to the operational-readiness semantic graph.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/candidates.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/candidates_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/capture.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/http.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/main.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/sse.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/sse_types.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/status.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/status_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/subscription.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/summary.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/token_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/types.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentthreadsnapshot/types_more.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentthreadsnapshot/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentthreadsnapshot/status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentthreadsnapshot/token_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "completion-progress-same-moment-capture-tool-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "AI Agent thread snapshot syntax coverage may expand only after TestAIAgentThreadSnapshotBehaviorGolden preserves the redacted capture report hash; same-concept config, fetch, output, and subscription test helpers are consolidated to satisfy folder/file limits without changing the captured evidence shape.",
       "next_loop": "closed_loop_candidate"
     }
   ],

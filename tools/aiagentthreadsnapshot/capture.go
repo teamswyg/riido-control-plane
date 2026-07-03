@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -57,4 +60,15 @@ func newReport(cfg config, now string) report {
 func highlightedThreads(rep report) []threadSurface {
 	threads := append([]threadSurface{}, rep.V3.HighlightedThreads...)
 	return append(threads, rep.V2.HighlightedThreads...)
+}
+
+func writeReport(path string, rep report) error {
+	body, err := json.MarshalIndent(rep, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(path, append(body, '\n'), 0o644)
 }

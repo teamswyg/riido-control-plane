@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -10,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestSnapshotRedactsTokenAndBodies(t *testing.T) {
+func TestAIAgentThreadSnapshotBehaviorGolden(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(fakeHandler))
 	defer server.Close()
 	t.Setenv("RIIDO_TEST_TOKEN", "secret-token")
@@ -39,6 +41,17 @@ func TestSnapshotRedactsTokenAndBodies(t *testing.T) {
 	if got.ConversationCount != 1 || len(got.Conversations) != 1 {
 		t.Fatalf("missing candidate conversations: %+v", got)
 	}
+	got.CapturedAt = "<captured_at>"
+	got.Source.BaseURL = "<base_url>"
+	normalized, err := json.MarshalIndent(got, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	hash := fmt.Sprintf("%x", sha256.Sum256(append(normalized, '\n')))
+	const want = "d7be2ff40dacf8d3258b2a8154d3d48e785d1fc8b3ee4142a350240c000e3fa9"
+	if hash != want {
+		t.Fatalf("golden hash = %s", hash)
+	}
 }
 
 func fakeHandler(w http.ResponseWriter, r *http.Request) {
@@ -55,12 +68,5 @@ func fakeHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 	default:
 		_, _ = w.Write([]byte(`{"threads":[{"thread_id":"t","assignment_state":"completed","lines":[{"message":"private body"}]}]}`))
-	}
-}
-
-func assertNotContains(t *testing.T, got, forbidden string) {
-	t.Helper()
-	if strings.Contains(got, forbidden) {
-		t.Fatalf("report leaked %q: %s", forbidden, got)
 	}
 }

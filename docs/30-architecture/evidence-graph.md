@@ -10,22 +10,22 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `94`
-- claim refs: `137`
-- change refs: `1375`
-- verifier refs: `625`
-- evidence refs: `303`
+- chains: `95`
+- claim refs: `138`
+- change refs: `1394`
+- verifier refs: `631`
+- evidence refs: `306`
 
 ## Compiled Chain Summary
 
-- complete chains: `94` / `94`
-- claim-bound chains: `94`
+- complete chains: `95` / `95`
+- claim-bound chains: `95`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `53` | `56` | `894` | `371` | `171` |
+| `closed_loop_candidate` | `54` | `57` | `913` | `377` | `174` |
 | `operational_readiness_release_harness` | `20` | `35` | `153` | `93` | `63` |
 | `ai_thread_history` | `8` | `8` | `114` | `55` | `12` |
 | `closed_loop_candidate_decision` | `8` | `32` | `174` | `84` | `38` |
@@ -119,7 +119,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `operational_readiness_staging_public_burst_load_loop` | `1` | `5` | `3` | `3` | `operational_readiness_release_harness` |
 | `operational_readiness_deploy_overlap_burst_loop` | `1` | `3` | `3` | `2` | `operational_readiness_release_harness` |
 | `daemon_reconnect_runtimeactor_evidence_loop` | `1` | `4` | `3` | `2` | `operational_readiness_release_harness` |
-| `notion_backfill_review_loop` | `1` | `30` | `19` | `11` | `closed_loop_candidate` |
+| `notion_backfill_review_loop` | `1` | `30` | `18` | `11` | `closed_loop_candidate` |
 | `operational_readiness_staging_dmg_gatekeeper_evidence_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `operational_readiness_cw_feedback_transfer_loop` | `1` | `2` | `3` | `2` | `operational_readiness_release_harness` |
 | `container_image_contract_runtime_shape_loop` | `1` | `16` | `6` | `4` | `closed_loop_candidate` |
@@ -132,6 +132,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `ai_agent_client_api_syntax_hash_loop` | `1` | `25` | `5` | `3` | `closed_loop_candidate` |
 | `generated_client_handoff_syntax_hash_loop` | `1` | `15` | `5` | `3` | `closed_loop_candidate` |
 | `store_snapshot_file_outbox_syntax_hash_loop` | `1` | `8` | `6` | `3` | `closed_loop_candidate` |
+| `ai_agent_thread_snapshot_syntax_hash_loop` | `1` | `19` | `7` | `3` | `closed_loop_candidate` |
 
 ## Loop
 

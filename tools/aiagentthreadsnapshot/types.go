@@ -17,6 +17,16 @@ type report struct {
 	Decision          decisionSummary         `json:"decision"`
 }
 
+type threadFetch struct {
+	Observation endpointObservation
+	Payload     threadCollection
+}
+
+type subscriptionFetch struct {
+	Observation endpointObservation
+	Payload     subscriptionPayload
+}
+
 type sourceSummary struct {
 	BaseURL        string `json:"base_url"`
 	WorkspaceID    string `json:"workspace_id"`
