@@ -9970,11 +9970,12 @@
       "id": "syntax_hash_graph_spike_loop",
       "observation": "Loop Registry semantic hashes bind code to SSOT value claims, but Go syntax pattern coverage and relocation evidence are not yet machine-routable for metaprogramming refactors.",
       "hypothesis": "A JSON-driven syntax hash graph can expand through behavior-golden packages, derive deterministic AST-normalized file and package hashes, and connect them to the existing semantic hash without changing runtime behavior.",
-      "claims": [
-        "public_aws_adapter_facade_must_preserve_contract",
-        "runtime_adapter_config_must_preserve_public_env_contract",
-        "context_map_must_guard_public_boundaries"
-      ],
+    "claims": [
+      "public_aws_adapter_facade_must_preserve_contract",
+      "runtime_adapter_config_must_preserve_public_env_contract",
+      "repo_identity_must_anchor_public_module_boundary",
+      "context_map_must_guard_public_boundaries"
+    ],
       "changes": [
         {
           "kind": "manifest",
@@ -10000,13 +10001,17 @@
           "kind": "test",
           "path": "awsadapters/golden_behavior_test.go"
         },
-        {
-          "kind": "test",
-          "path": "cmd/riido_ai_server/golden_behavior_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "tools/syntaxhash/syntaxhash_test.go"
+    {
+      "kind": "test",
+      "path": "cmd/riido_ai_server/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/repoidentity/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/syntaxhash/syntaxhash_test.go"
         }
       ],
       "verifiers": [
@@ -10018,13 +10023,17 @@
           "kind": "test",
           "path": "awsadapters/golden_behavior_test.go"
         },
-        {
-          "kind": "test",
-          "path": "cmd/riido_ai_server/golden_behavior_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "tools/syntaxhash/syntaxhash_test.go"
+    {
+      "kind": "test",
+      "path": "cmd/riido_ai_server/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/repoidentity/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/syntaxhash/syntaxhash_test.go"
         },
         {
           "kind": "tool",
@@ -10056,7 +10065,7 @@
           "redacted": true
         }
       ],
-      "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
+  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
       "next_loop": "closed_loop_candidate_decision"
     }
   ],

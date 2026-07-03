@@ -38,6 +38,13 @@
       "golden_command": "go test ./cmd/riido_ai_server -run TestRuntimeConfigBehaviorGolden -count=1",
       "semantic_claim_id": "runtime_adapter_config_must_preserve_public_env_contract",
       "mode": "golden_locked_runtime_adapter"
+    },
+    {
+      "id": "repo_identity_guard",
+      "package_path": "internal/repoidentity",
+      "golden_command": "go test ./internal/repoidentity -run TestRepoIdentityBehaviorGolden -count=1",
+      "semantic_claim_id": "repo_identity_must_anchor_public_module_boundary",
+      "mode": "golden_locked_public_identity_guard"
     }
   ],
   "constraints": {

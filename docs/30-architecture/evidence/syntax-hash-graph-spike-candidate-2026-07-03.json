@@ -30,13 +30,15 @@
           "tools/contextmap",
           "tools/syntaxhash",
           "awsadapters",
-          "cmd/riido_ai_server"
+          "cmd/riido_ai_server",
+          "internal/repoidentity"
         ],
         "golden_tests": [
           "TestContextMapBehaviorGolden",
           "TestSyntaxHashToolBehaviorGolden",
           "TestAWSAdaptersFacadeBehaviorGolden",
-          "TestRuntimeConfigBehaviorGolden"
+          "TestRuntimeConfigBehaviorGolden",
+          "TestRepoIdentityBehaviorGolden"
         ],
         "semantic_hash_policy": "reuse_existing_loopregistry_semantic_hash_without_definition_changes"
       },
@@ -65,7 +67,7 @@
         },
         {
           "artifact": "verifier",
-          "command": "go test ./tools/contextmap ./tools/syntaxhash -count=1"
+          "command": "go test ./tools/contextmap ./tools/syntaxhash ./awsadapters ./cmd/riido_ai_server ./internal/repoidentity -count=1"
         },
         {
           "artifact": "ci_gate",

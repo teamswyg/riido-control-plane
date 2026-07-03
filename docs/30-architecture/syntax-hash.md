@@ -12,13 +12,14 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `c5770c70ddc3` | `context_map_must_guard_public_boundaries` |
 | `awsadapters_facade` | `awsadapters` | 100% | `6e8fc7dd43bf` | `public_aws_adapter_facade_must_preserve_contract` |
 | `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `2ff9e131e590` | `runtime_adapter_config_must_preserve_public_env_contract` |
+| `repo_identity_guard` | `internal/repoidentity` | 100% | `2402928360f7` | `repo_identity_must_anchor_public_module_boundary` |
 
 ## Repository Coverage
 
-- Go files: `2763`
-- tracked files: `113`
-- untracked files: `2650`
-- coverage: `4.08%`
+- Go files: `2764`
+- tracked files: `116`
+- untracked files: `2648`
+- coverage: `4.19%`
 
 ## Constraints
 
@@ -29,5 +30,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `113`
+- efficiency score: `116`
 - compression score: `0`

@@ -81,6 +81,7 @@ on:
       - "tools/syntaxhash/**"
       - "awsadapters/**"
       - "cmd/riido_ai_server/**"
+      - "internal/repoidentity/**"
       - "internal/riidoaiserver/**"
       - "internal/riidoaiserver/ai_agent_assignment_prompt.go"
       - "internal/riidoaiserver/ai_agent_assignment_prompt_explicit_markers.go"
