@@ -619,6 +619,15 @@
       "decision": "Treat /devices/{device_id}/daemons as complete for backend/control-plane and use repo evidence plus live 401 route probes as the authoritative state until Notion aggregate readback catches up."
     },
     {
+      "id": "39220241-cf7f-81ec-8b5f-001dd76b3cb6",
+      "discussion": "device_daemons_plural_api",
+      "observed_at": "2026-07-03T10:03:17Z",
+      "event_type": "contracts_main_confirmation_with_stale_readback",
+      "status_tag": "[codex][완료][전달요청]",
+      "signal": "A follow-up QA transfer comment confirms that the plural daemon API is present in control-plane main, contracts main after riido-contracts PR #203, and all three live control-plane environments with unauthenticated 401 route probes.",
+      "decision": "Treat frontend generated-contract handoff as ready for the plural /daemons read model while preserving the singular /daemon compatibility route. Do not reopen from stale Notion aggregate state without a fresh failing route, authenticated payload, or contracts trace."
+    },
+    {
       "id": "39220241-cf7f-8134-bc4e-001d98e7d805",
       "discussion": "page_level_backfill_diff",
       "observed_at": "2026-07-03T05:57:22Z",
@@ -1370,7 +1379,8 @@
         "39220241-cf7f-8134-bc4e-001d98e7d805",
         "39220241-cf7f-8129-b12d-001d5b689249",
         "39220241-cf7f-81df-a487-001d7b84713a",
-        "39220241-cf7f-8171-9aea-001dcb582334"
+        "39220241-cf7f-8171-9aea-001dcb582334",
+        "39220241-cf7f-81ec-8b5f-001dd76b3cb6"
       ],
       "write_confirmed_comment_sources": [
         {
@@ -1427,9 +1437,15 @@
           "source": "manual_write_result",
           "target": "device_daemons_plural_api",
           "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-81ec-8b5f-001dd76b3cb6",
+          "source": "manual_write_result",
+          "target": "device_daemons_plural_api",
+          "comment_event_required": true
         }
       ],
-      "decision": "A current Notion page-level readback still returns the stale 31-comment aggregate after the PR #811 device-daemons handoff comment. Do not treat page-level aggregate get_comments as the current QA source; use write-confirmed comment ids, targeted discussion readbacks, and repo evidence until Notion aggregate freshness catches up."
+      "decision": "A current Notion page-level readback still returns the stale 31-comment aggregate after the PR #811 device-daemons handoff comments. Do not treat page-level aggregate get_comments as the current QA source; use write-confirmed comment ids, targeted discussion readbacks, and repo evidence until Notion aggregate freshness catches up."
     }
   ],
   "next_actions": [

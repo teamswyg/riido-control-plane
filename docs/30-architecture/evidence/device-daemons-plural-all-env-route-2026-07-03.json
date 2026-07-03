@@ -18,7 +18,8 @@
     "related_notion_comments": [
       "39220241-cf7f-81a7-b4ca-001d8d6c5d1d",
       "39220241-cf7f-811d-83da-001d06107d73",
-      "39220241-cf7f-8171-9aea-001dcb582334"
+      "39220241-cf7f-8171-9aea-001dcb582334",
+      "39220241-cf7f-81ec-8b5f-001dd76b3cb6"
     ]
   },
   "deployments": [
@@ -59,5 +60,5 @@
     "raw_response_bodies_included": false,
     "secrets_included": false
   },
-  "decision": "The plural device daemon API is deployed across staging, development, and production after PR #808. Health and readiness probes return 200, while unauthenticated v1/v2 plural route probes return 401 instead of 404, proving the route is present while preserving authorization."
+  "decision": "The plural device daemon API is deployed across staging, development, and production after PR #808. Health and readiness probes return 200, while unauthenticated v1/v2 plural route probes return 401 instead of 404, proving the route is present while preserving authorization. A 2026-07-03 follow-up Notion transfer comment also confirms contracts main contains the plural generated surface after riido-contracts PR #203."
 }

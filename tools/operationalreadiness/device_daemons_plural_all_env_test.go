@@ -16,7 +16,7 @@ func TestDeviceDaemonsPluralAllEnvEvidence(t *testing.T) {
 	if evidence.Source.NotionComment != "39220241-cf7f-8129-b12d-001d5b689249" {
 		t.Fatalf("notion comment id = %q", evidence.Source.NotionComment)
 	}
-	if !deviceDaemonsPluralHasRelatedComment(evidence, "39220241-cf7f-8171-9aea-001dcb582334") {
+	if !deviceDaemonsPluralHasRelatedComment(evidence, "39220241-cf7f-81ec-8b5f-001dd76b3cb6") {
 		t.Fatal("latest Notion reconfirmation comment is not linked")
 	}
 	if evidence.Assertions.RawResponseBodiesIncluded || evidence.Assertions.SecretsIncluded {
