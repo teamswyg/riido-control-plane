@@ -10960,6 +10960,93 @@
       ],
       "decision": "Generated client handoff syntax coverage may expand only after TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody preserves generated output hashes; same-concept files are consolidated to satisfy folder/file limits without changing generated artifacts.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "store_snapshot_file_outbox_syntax_hash_loop",
+      "observation": "The store snapshot/file outbox sidecar produced executable durability evidence, but its Go package shape was not syntax-hash tracked and its root folder exceeded the IA file limit.",
+      "hypothesis": "Hash-locking the emitted evidence before consolidating same-concept files preserves local durability behavior while binding snapshot/outbox evidence code to the existing semantic hash graph.",
+      "claims": [
+        "store_snapshot_file_outbox_must_preserve_durable_replay_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "tools/storesnapshotoutbox/cases.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/storesnapshotoutbox/main.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/storesnapshotoutbox/main_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/storesnapshotoutbox/verify.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_persistence_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "store-snapshot-file-outbox-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Store snapshot/file outbox syntax coverage may expand only after TestRunWritesEvidence preserves the emitted evidence hash; case/source/doc helpers are consolidated to satisfy folder limits without changing durability evidence output.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

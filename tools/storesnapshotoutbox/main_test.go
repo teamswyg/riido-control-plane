@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"os/exec"
@@ -23,6 +25,16 @@ func TestRunWritesEvidence(t *testing.T) {
 	}
 	if got.Status != "verified" || got.CasesVerified != 3 || got.SourceChecks == 0 {
 		t.Fatalf("unexpected evidence: %+v", got)
+	}
+	assertEvidenceHash(t, data)
+}
+
+func assertEvidenceHash(t *testing.T, data []byte) {
+	t.Helper()
+	sum := sha256.Sum256(data)
+	want := "365891901acacfeb80988d775d5c6b48bd6549d74d0be621d3b7d919b702aecc"
+	if got := hex.EncodeToString(sum[:]); got != want {
+		t.Fatalf("evidence hash = %s, want %s", got, want)
 	}
 }
 
