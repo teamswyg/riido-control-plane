@@ -10096,6 +10096,22 @@
         },
         {
           "kind": "test",
+          "path": "tools/providerstatus/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/providerstatus/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/providerstatus/requirements"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/providerstatus/renderutil"
+        },
+        {
+          "kind": "test",
           "path": "tools/syntaxhash/syntaxhash_test.go"
         }
       ],
@@ -10140,6 +10156,10 @@
       "kind": "test",
       "path": "tools/storesaferouting/main_test.go"
     },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/main_test.go"
+        },
         {
           "kind": "test",
           "path": "tools/publicpageslive/golden_behavior_test.go"

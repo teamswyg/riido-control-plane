@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/providerstatus/renderutil"
 )
 
 func renderDoc(m manifest) string {
@@ -18,7 +20,7 @@ func renderDoc(m manifest) string {
 	renderRuleSet(&b, "Store-Safe Routing", m.RoutingRules)
 	renderAuth(&b, m.Authorization)
 	renderLoop(&b, m.Loop)
-	renderSection(&b, "Non-Goals", m.NonGoals)
+	renderutil.Section(&b, "Non-Goals", m.NonGoals)
 	return b.String()
 }
 

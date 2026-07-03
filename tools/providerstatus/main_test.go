@@ -6,9 +6,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"github.com/teamswyg/riido-control-plane/tools/providerstatus/requirements"
 )
 
-func TestRunWritesEvidence(t *testing.T) {
+func TestProviderStatusBehaviorGolden(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "evidence.json")
 	if err := mainRun([]string{"-evidence-out", out}); err != nil {
 		t.Fatal(err)
@@ -21,8 +23,17 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.SchemaVersion != evidenceSchema || got.Surfaces != len(requiredSurfaces) {
+	if got.SchemaVersion != requirements.EvidenceSchema || got.ID != requirements.ExpectedID || got.Status != "verified" {
 		t.Fatalf("unexpected evidence: %+v", got)
+	}
+	if got.Surfaces != 7 || got.RoutingStatuses != 4 || got.DistributionChannels != 5 {
+		t.Fatalf("unexpected vocabulary evidence: %+v", got)
+	}
+	if got.ValidationRules != 10 || got.RoutingRules != 8 || got.AuthorizationRules != 2 {
+		t.Fatalf("unexpected rule evidence: %+v", got)
+	}
+	if got.SourceChecks != 8 || got.Loop.Observation == "" || got.Loop.Retrospective == "" {
+		t.Fatalf("unexpected source/loop evidence: %+v", got)
 	}
 }
 

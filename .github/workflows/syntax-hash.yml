@@ -61,8 +61,9 @@ jobs:
           ./tools/openquestions
           ./tools/repositoryreadme
           ./tools/dependencyallowlist
+          ./tools/providerstatus
           -run
-          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger|IntegrationMatrix|OpenQuestions|RepositoryReadme|DependencyAllowlist)BehaviorGolden'
+          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger|IntegrationMatrix|OpenQuestions|RepositoryReadme|DependencyAllowlist|ProviderStatus)BehaviorGolden'
           -count=1
       - name: Verify syntax hash evidence
         run: |

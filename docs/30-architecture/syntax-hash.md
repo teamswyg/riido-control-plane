@@ -32,13 +32,17 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `repository_readme_path_adapter` | `tools/repositoryreadme/pathutil` | 100% | `f951feeb01f3` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `dependency_allowlist_guard` | `tools/dependencyallowlist` | 100% | `d6a6b85bff90` | `context_map_must_guard_public_boundaries` |
 | `dependency_allowlist_layers_adapter` | `tools/dependencyallowlist/layers` | 100% | `b564be13c293` | `context_map_must_guard_public_boundaries` |
+| `provider_status_guard` | `tools/providerstatus` | 100% | `b3b6f919a2b7` | `store_safe_routing_must_preserve_provider_status_decisions` |
+| `provider_status_path_adapter` | `tools/providerstatus/pathutil` | 100% | `df5f9b546a12` | `store_safe_routing_must_preserve_provider_status_decisions` |
+| `provider_status_requirements_adapter` | `tools/providerstatus/requirements` | 100% | `443e40b1653a` | `store_safe_routing_must_preserve_provider_status_decisions` |
+| `provider_status_render_adapter` | `tools/providerstatus/renderutil` | 100% | `a61250f5fc34` | `store_safe_routing_must_preserve_provider_status_decisions` |
 
 ## Repository Coverage
 
-- Go files: `2768`
-- tracked files: `327`
-- untracked files: `2441`
-- coverage: `11.81%`
+- Go files: `2769`
+- tracked files: `346`
+- untracked files: `2423`
+- coverage: `12.49%`
 
 ## Constraints
 
@@ -49,5 +53,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `327`
-- compression score: `48`
+- efficiency score: `346`
+- compression score: `50`
