@@ -19,7 +19,8 @@
     {"id":"health_ready_command_guard","package_path":"tools/healthreadycmd","golden_command":"go test ./tools/healthreadycmd -run TestHealthReadyCommandBehaviorGolden -count=1","semantic_claim_id":"health_ready_command_must_preserve_public_runtime_probe","mode":"golden_locked_health_ready_command_tool"},
     {"id":"runtime_deployment_boundary_guard","package_path":"tools/runtimeboundary","golden_command":"go test ./tools/runtimeboundary -run TestRuntimeBoundaryBehaviorGolden -count=1","semantic_claim_id":"runtime_deployment_boundary_must_preserve_public_private_ownership","mode":"golden_locked_runtime_deployment_boundary_tool"},
     {"id":"config_reference_guard","package_path":"tools/configreference","golden_command":"go test ./tools/configreference -run TestConfigReferenceBehaviorGolden -count=1","semantic_claim_id":"config_reference_must_preserve_env_manifest_parity","mode":"golden_locked_config_reference_tool"},
-    {"id":"store_safe_routing_guard","package_path":"tools/storesaferouting","golden_command":"go test ./tools/storesaferouting -run TestStoreSafeRoutingBehaviorGolden -count=1","semantic_claim_id":"store_safe_routing_must_preserve_provider_status_decisions","mode":"golden_locked_store_safe_routing_tool"}
+    {"id":"store_safe_routing_guard","package_path":"tools/storesaferouting","golden_command":"go test ./tools/storesaferouting -run TestStoreSafeRoutingBehaviorGolden -count=1","semantic_claim_id":"store_safe_routing_must_preserve_provider_status_decisions","mode":"golden_locked_store_safe_routing_tool"},
+    {"id":"public_pages_live_guard","package_path":"tools/publicpageslive","golden_command":"go test ./tools/publicpageslive -run TestPublicPagesLiveBehaviorGolden -count=1","semantic_claim_id":"operational_readiness_checks_must_bind_release_items_to_evidence","mode":"golden_locked_public_pages_live_tool"}
   ],
   "constraints": {
     "max_file_lines": 75,

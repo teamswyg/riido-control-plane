@@ -52,9 +52,9 @@ jobs:
           go test ./tools/contextmap ./tools/syntaxhash ./awsadapters
           ./cmd/riido_ai_server ./internal/repoidentity ./internal/contractscompat
           ./tools/requestauth ./tools/healthreadycmd ./tools/runtimeboundary
-          ./tools/configreference ./tools/storesaferouting
+          ./tools/configreference ./tools/storesaferouting ./tools/publicpageslive
           -run
-          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting)BehaviorGolden'
+          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive)BehaviorGolden'
           -count=1
       - name: Verify syntax hash evidence
         run: |
