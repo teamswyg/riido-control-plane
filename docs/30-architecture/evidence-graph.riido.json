@@ -10551,6 +10551,149 @@
       ],
       "decision": "API client delivery syntax coverage may expand only after TestAPIClientDeliveryBehaviorGolden preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client handoff ownership bound to the SSOT.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "generated_smoke_matrix_syntax_hash_loop",
+      "observation": "The generated endpoint smoke matrix verifier was already a semantic contract gate, but its Go package shape was not tracked by syntax hash coverage, leaving adapter extraction and relocation invisible to the syntax-to-semantic graph.",
+      "hypothesis": "Golden-locking the smoke-matrix evidence before splitting helper adapters and binding the root/helper packages into syntax hash coverage preserves the generated endpoint contract while increasing tracked Go coverage.",
+      "claims": [
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/doccheck/verify.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/evidence.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/golden_results_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/io.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/main.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/main_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/openapi.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/pathutil/path.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/render.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/rendertext/render.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/requirements/constants.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/run.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/setutil/set.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/smoke.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/types.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/verify.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/verify_counts.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/verify_evidence.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/verify_matrix.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aigeneratedsmokematrix/verify_source.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/module-decomposition.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aigeneratedsmokematrix"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-generated-endpoint-smoke-matrix-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The generated endpoint smoke matrix package now has golden evidence before adapter extraction, root direct files under the folder limit, helper packages under the depth limit, and syntax hash targets connected to the existing generated endpoint smoke matrix semantic claim without changing smoke matrix output behavior.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/teamswyg/riido-control-plane/tools/aigeneratedsmokematrix/requirements"
 )
 
 func main() {
@@ -16,7 +18,7 @@ func main() {
 func mainRun(args []string) error {
 	fs := flag.NewFlagSet("aigeneratedsmokematrix", flag.ContinueOnError)
 	repo := fs.String("repo", ".", "repository root")
-	manifest := fs.String("manifest", defaultManifest, "smoke matrix manifest")
+	manifest := fs.String("manifest", requirements.DefaultManifest, "smoke matrix manifest")
 	evidenceOut := fs.String("evidence-out", "", "optional evidence JSON output path")
 	writeDoc := fs.Bool("write-doc", false, "write generated reader doc")
 	checkDoc := fs.Bool("check-doc", false, "check generated reader doc")

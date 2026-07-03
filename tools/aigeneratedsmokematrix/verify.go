@@ -1,6 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/aigeneratedsmokematrix/pathutil"
+	"github.com/teamswyg/riido-control-plane/tools/aigeneratedsmokematrix/requirements"
+)
 
 type verifyResult struct {
 	Counts operationCounts
@@ -10,11 +15,11 @@ func verifyAll(repo string, m manifest) (verifyResult, error) {
 	if err := verifyManifestShape(m); err != nil {
 		return verifyResult{}, err
 	}
-	ops, counts, err := loadOpenAPIGenerated(repoPath(repo, m.OpenAPI))
+	ops, counts, err := loadOpenAPIGenerated(pathutil.Resolve(repo, m.OpenAPI))
 	if err != nil {
 		return verifyResult{}, fmt.Errorf("load OpenAPI: %w", err)
 	}
-	matrix, err := loadSmokeMatrix(repoPath(repo, m.SmokeMatrix))
+	matrix, err := loadSmokeMatrix(pathutil.Resolve(repo, m.SmokeMatrix))
 	if err != nil {
 		return verifyResult{}, fmt.Errorf("load smoke matrix: %w", err)
 	}
@@ -31,7 +36,7 @@ func verifyAll(repo string, m manifest) (verifyResult, error) {
 }
 
 func verifyManifestShape(m manifest) error {
-	if m.SchemaVersion != manifestSchema || m.ID != expectedID {
+	if m.SchemaVersion != requirements.ManifestSchema || m.ID != requirements.ExpectedID {
 		return fmt.Errorf("manifest identity drifted")
 	}
 	if m.Title == "" || m.GeneratedDoc == "" || m.Workflow == "" || m.EvidenceArtifact == "" {

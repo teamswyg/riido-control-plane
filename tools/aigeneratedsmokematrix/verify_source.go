@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/aigeneratedsmokematrix/pathutil"
 )
 
 func verifySourceChecks(repo string, checks []sourceCheck) error {
@@ -22,7 +24,7 @@ func verifySourceCheck(repo string, check sourceCheck) error {
 	if check.Name == "" || check.File == "" || len(check.Contains) == 0 {
 		return fmt.Errorf("incomplete source check: %+v", check)
 	}
-	body, err := os.ReadFile(repoPath(repo, check.File))
+	body, err := os.ReadFile(pathutil.Resolve(repo, check.File))
 	if err != nil {
 		return fmt.Errorf("read source check %q: %w", check.Name, err)
 	}
