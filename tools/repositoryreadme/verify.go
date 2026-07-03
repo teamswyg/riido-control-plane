@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/repositoryreadme/pathutil"
 )
 
 func verifyAll(root string, m manifest, rendered string) error {
 	if err := verifyShape(m); err != nil {
 		return err
 	}
-	if _, err := os.Stat(repoPath(root, m.Workflow)); err != nil {
+	if _, err := os.Stat(pathutil.RepoPath(root, m.Workflow)); err != nil {
 		return fmt.Errorf("missing workflow %q: %w", m.Workflow, err)
 	}
 	for _, link := range m.DocLinks {
-		if _, err := os.Stat(repoPath(root, link.Path)); err != nil {
+		if _, err := os.Stat(pathutil.RepoPath(root, link.Path)); err != nil {
 			return fmt.Errorf("missing linked doc %q: %w", link.Path, err)
 		}
 	}

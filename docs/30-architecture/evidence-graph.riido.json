@@ -10080,6 +10080,14 @@
         },
         {
           "kind": "test",
+          "path": "tools/repositoryreadme/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/repositoryreadme/pathutil"
+        },
+        {
+          "kind": "test",
           "path": "tools/syntaxhash/syntaxhash_test.go"
         }
       ],
@@ -10151,6 +10159,10 @@
         {
           "kind": "test",
           "path": "tools/openquestions/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/main_test.go"
         },
         {
           "kind": "test",

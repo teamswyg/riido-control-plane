@@ -1,8 +1,10 @@
 package main
 
+import "github.com/teamswyg/riido-control-plane/tools/repositoryreadme/pathutil"
+
 func loadFragments(base string, m *manifest) error {
 	for _, fragmentPath := range m.Fragments {
-		fragment, err := loadFragment(repoPath(base, fragmentPath))
+		fragment, err := loadFragment(pathutil.RepoPath(base, fragmentPath))
 		if err != nil {
 			return err
 		}

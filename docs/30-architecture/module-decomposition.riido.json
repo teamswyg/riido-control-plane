@@ -73,6 +73,7 @@
     {"path":"tools/reviewaccountseed","kind":"evidence-tool","role":"Review account seed generated reader and redacted verifier.","must_not_own":"operator token values or live review account deployment"},
     {"path":"tools/requestauth","kind":"evidence-tool","role":"Request authorization generated reader and verifier.","must_not_own":"external identity provider policy"},
     {"path":"tools/repositoryreadme","kind":"meta-evidence-tool","role":"Repository README generated reader and executable entrypoint verifier.","must_not_own":"domain-specific verification semantics or private operator evidence"},
+    {"path":"tools/repositoryreadme/pathutil","kind":"adapter","role":"Path adapter for the repository README verifier.","must_not_own":"repository README policy or generated reader semantics"},
     {"path":"tools/runtimeboundary","kind":"evidence-tool","role":"Runtime deployment boundary generated reader and public/private ownership verifier.","must_not_own":"live AWS deploy execution or private topology evidence"},
     {"path":"tools/runtimecdownership","kind":"evidence-tool","role":"Runtime CD ownership generated reader and public redaction evidence verifier.","must_not_own":"live AWS deploy execution or private topology evidence"},
     {"path":"tools/saascontrolplane","kind":"evidence-tool","role":"SaaS control-plane generated reader and verifier.","must_not_own":"private infra topology"},

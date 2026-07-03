@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/teamswyg/riido-control-plane/tools/repositoryreadme/pathutil"
 )
 
 func runWithOptions(repoRoot, manifestPath string, writeDoc, checkDoc bool, evidenceOut string) error {
@@ -11,7 +13,7 @@ func runWithOptions(repoRoot, manifestPath string, writeDoc, checkDoc bool, evid
 	if err != nil {
 		return fmt.Errorf("resolve repo root: %w", err)
 	}
-	m, err := loadManifest(repoPath(root, manifestPath))
+	m, err := loadManifest(pathutil.RepoPath(root, manifestPath))
 	if err != nil {
 		return err
 	}
@@ -20,12 +22,12 @@ func runWithOptions(repoRoot, manifestPath string, writeDoc, checkDoc bool, evid
 		return err
 	}
 	if writeDoc {
-		if err := writeText(repoPath(root, generatedDoc), rendered); err != nil {
+		if err := writeText(pathutil.RepoPath(root, generatedDoc), rendered); err != nil {
 			return err
 		}
 	}
 	if checkDoc {
-		current, err := os.ReadFile(repoPath(root, generatedDoc))
+		current, err := os.ReadFile(pathutil.RepoPath(root, generatedDoc))
 		if err != nil {
 			return err
 		}
@@ -34,7 +36,7 @@ func runWithOptions(repoRoot, manifestPath string, writeDoc, checkDoc bool, evid
 		}
 	}
 	if evidenceOut != "" {
-		return writeJSON(repoPath(root, evidenceOut), buildEvidence(m))
+		return writeJSON(pathutil.RepoPath(root, evidenceOut), buildEvidence(m))
 	}
 	return nil
 }

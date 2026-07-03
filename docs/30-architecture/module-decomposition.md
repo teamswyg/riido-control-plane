@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `60`; runtime: `1`; internal: `3`; tools: `55`; forbidden import hits: `0`.
+Packages: `61`; runtime: `1`; internal: `3`; tools: `56`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `88`; max file lines: `838`.
 
@@ -73,7 +73,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 - `meta-evidence-tool`: `tools/syntaxhash`, `tools/gocibaseline`, `tools/harnesspromotion`, `tools/closedloopcandidateintake`, `tools/closedloopcandidatedecision`, `tools/evidencegraph`, `tools/knowledgecoverage`, `tools/liveworkflowevidence`, `tools/loopclosureaudit`, `tools/loopregistry`, `tools/looprefreshdispatch`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/repositoryreadme`, `tools/workflowevidence`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
-- `adapter`: `tools/integrationmatrix/pathutil`, `tools/openquestions/pathutil`
+- `adapter`: `tools/integrationmatrix/pathutil`, `tools/openquestions/pathutil`, `tools/repositoryreadme/pathutil`
 
 ## Boundary Rules
 
