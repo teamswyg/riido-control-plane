@@ -24,7 +24,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 
 ## Commands
 
-- lightweight benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
+- lightweight benchmark: `go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|HTTPTransactionMetricsSnapshot|StoreOperationMetricsObserve|StoreOperationMetricsSnapshot|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1`
 - benchmark history append: `go run ./tools/controlplaneperf -benchmark-in out/control-plane-performance-bench.txt -append-benchmark-history docs/30-architecture/control-plane-performance-averages.jsonl`
 - local pressure: `go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -candidate-out out/control-plane-pressure-closed-loop-candidates.json -evidence-out out/control-plane-local-pressure.json`
 - manual pressure: `go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -candidate-out out/control-plane-pressure-closed-loop-candidates-manual.json -evidence-out out/control-plane-local-pressure-manual.json`
