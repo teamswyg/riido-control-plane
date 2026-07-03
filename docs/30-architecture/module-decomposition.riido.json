@@ -155,28 +155,10 @@
       "must_not_own": "manifest loading or doc rendering"
     },
     {
-      "path": "tools/apiclientdelivery",
-      "kind": "evidence-tool",
-      "role": "API client delivery generated reader and frontend handoff boundary verifier.",
-      "must_not_own": "riido-client application implementation or live delivery execution"
-    },
-    {
       "path": "tools/aiagentclientapi",
       "kind": "evidence-tool",
       "role": "AI Agent client API SSOT verifier.",
       "must_not_own": "HTTP handler implementation"
-    },
-    {
-      "path": "tools/aiagentrisk",
-      "kind": "evidence-tool",
-      "role": "AI Agent unresolved-risk closure evidence verifier.",
-      "must_not_own": "risk resolution without source tests"
-    },
-    {
-      "path": "tools/aigeneratedsmokematrix",
-      "kind": "evidence-tool",
-      "role": "Generated endpoint smoke matrix verifier.",
-      "must_not_own": "endpoint shape"
     },
     {
       "path": "tools/aiagentload",
@@ -185,10 +167,88 @@
       "must_not_own": "runtime API behavior, secret handling outside masked workflow inputs, or private infra scaling policy"
     },
     {
+      "path": "tools/aiagentrisk",
+      "kind": "evidence-tool",
+      "role": "AI Agent unresolved-risk closure evidence verifier.",
+      "must_not_own": "risk resolution without source tests"
+    },
+    {
       "path": "tools/aiagentthreadsnapshot",
       "kind": "evidence-tool",
       "role": "AI Agent thread same-moment v2/v3/subscription/SSE snapshot generator with redacted report output.",
       "must_not_own": "runtime API behavior, message body storage, token storage, or client rendering"
+    },
+    {
+      "path": "tools/aigeneratedsmokematrix",
+      "kind": "evidence-tool",
+      "role": "Generated endpoint smoke matrix verifier.",
+      "must_not_own": "endpoint shape"
+    },
+    {
+      "path": "tools/aigeneratedsmokematrix/doccheck",
+      "kind": "adapter",
+      "role": "Generated smoke matrix generated-doc comparison adapter.",
+      "must_not_own": "generated endpoint smoke matrix contract semantics"
+    },
+    {
+      "path": "tools/aigeneratedsmokematrix/pathutil",
+      "kind": "adapter",
+      "role": "Generated smoke matrix repository path adapter.",
+      "must_not_own": "generated endpoint smoke matrix contract semantics"
+    },
+    {
+      "path": "tools/aigeneratedsmokematrix/rendertext",
+      "kind": "adapter",
+      "role": "Generated smoke matrix markdown rendering helper.",
+      "must_not_own": "generated endpoint smoke matrix contract semantics"
+    },
+    {
+      "path": "tools/aigeneratedsmokematrix/requirements",
+      "kind": "adapter",
+      "role": "Generated smoke matrix constants and identity requirements.",
+      "must_not_own": "generated endpoint smoke matrix contract semantics"
+    },
+    {
+      "path": "tools/aigeneratedsmokematrix/setutil",
+      "kind": "adapter",
+      "role": "Generated smoke matrix string set helper.",
+      "must_not_own": "generated endpoint smoke matrix contract semantics"
+    },
+    {
+      "path": "tools/apiclientdelivery",
+      "kind": "evidence-tool",
+      "role": "API client delivery generated reader and frontend handoff boundary verifier.",
+      "must_not_own": "riido-client application implementation or live delivery execution"
+    },
+    {
+      "path": "tools/apiclientdelivery/doccheck",
+      "kind": "adapter",
+      "role": "Generated-doc freshness adapter for the API client delivery verifier.",
+      "must_not_own": "API client delivery policy, manifest loading, or rendering"
+    },
+    {
+      "path": "tools/apiclientdelivery/pathutil",
+      "kind": "adapter",
+      "role": "Repository path resolution adapter for the API client delivery verifier.",
+      "must_not_own": "API client delivery policy or source checks"
+    },
+    {
+      "path": "tools/apiclientdelivery/rendertext",
+      "kind": "adapter",
+      "role": "Markdown inline code-list rendering adapter for the API client delivery reader.",
+      "must_not_own": "API client delivery section ownership or manifest verification"
+    },
+    {
+      "path": "tools/apiclientdelivery/requirements",
+      "kind": "adapter",
+      "role": "API client delivery manifest path, schema, and generated notice vocabulary.",
+      "must_not_own": "manifest loading, rendering, or evidence verification"
+    },
+    {
+      "path": "tools/apiclientdelivery/runconfig",
+      "kind": "adapter",
+      "role": "CLI run option DTO for the API client delivery verifier.",
+      "must_not_own": "flag parsing, manifest semantics, or evidence output"
     },
     {
       "path": "tools/assignmentjournal",
@@ -207,6 +267,18 @@
       "kind": "adapter",
       "role": "Assignment operation journal required identity, port, record, replay, and version vocabulary.",
       "must_not_own": "manifest loading or doc rendering"
+    },
+    {
+      "path": "tools/closedloopcandidatedecision",
+      "kind": "meta-evidence-tool",
+      "role": "Closed-loop candidate decision verifier that binds candidate artifacts to owner, priority, disposition, and next artifacts.",
+      "must_not_own": "runtime bug fixing or product priority authority"
+    },
+    {
+      "path": "tools/closedloopcandidateintake",
+      "kind": "meta-evidence-tool",
+      "role": "Closed-loop candidate intake verifier that consumes redacted candidate artifacts and checks adoption requirements.",
+      "must_not_own": "candidate implementation priority or runtime bug fixing"
     },
     {
       "path": "tools/cloudwatchemf",
@@ -239,6 +311,12 @@
       "must_not_own": "image publishing or ECS deployment"
     },
     {
+      "path": "tools/contextmap",
+      "kind": "evidence-tool",
+      "role": "Context map generated reader and verifier.",
+      "must_not_own": "runtime package boundaries"
+    },
+    {
       "path": "tools/controlplaneaudit",
       "kind": "evidence-tool",
       "role": "Control-plane high-traffic source-surface audit verifier and static risk evidence generator.",
@@ -255,18 +333,6 @@
       "kind": "evidence-tool",
       "role": "Local open-loop control-plane pressure harness for throughput, latency, allocation, goroutine evidence, and finding-level closed-loop candidate adoption paths.",
       "must_not_own": "endpoint contract changes, live production load execution, or infra scaling policy"
-    },
-    {
-      "path": "tools/contextmap",
-      "kind": "evidence-tool",
-      "role": "Context map generated reader and verifier.",
-      "must_not_own": "runtime package boundaries"
-    },
-    {
-      "path": "tools/syntaxhash",
-      "kind": "meta-evidence-tool",
-      "role": "Syntax hash graph generator and verifier that derives AST-normalized package hashes, repository coverage, relocation evidence, and semantic-claim graph edges after target packages are golden locked.",
-      "must_not_own": "runtime behavior, semantic hash definition, or package refactoring execution"
     },
     {
       "path": "tools/dependencyallowlist",
@@ -287,6 +353,12 @@
       "must_not_own": "live AWS deploy execution or private operator evidence"
     },
     {
+      "path": "tools/evidencegraph",
+      "kind": "meta-evidence-tool",
+      "role": "Evidence graph verifier that connects observations, hypotheses, changes, verifiers, evidence, decisions, and next loops.",
+      "must_not_own": "runtime behavior, raw evidence payloads, or human-only narrative memory"
+    },
+    {
       "path": "tools/figmaprojection",
       "kind": "evidence-tool",
       "role": "Figma control-plane projection evidence verifier.",
@@ -305,34 +377,16 @@
       "must_not_own": "domain-specific test semantics or live smoke evidence"
     },
     {
-      "path": "tools/healthreadycmd",
-      "kind": "evidence-tool",
-      "role": "Health/ready and command runtime generated reader and verifier.",
-      "must_not_own": "runtime server lifecycle"
-    },
-    {
       "path": "tools/harnesspromotion",
       "kind": "meta-evidence-tool",
       "role": "Harness failure to closed-loop candidate promotion verifier and redacted candidate generator.",
       "must_not_own": "harness execution or runtime behavior"
     },
     {
-      "path": "tools/closedloopcandidateintake",
-      "kind": "meta-evidence-tool",
-      "role": "Closed-loop candidate intake verifier that consumes redacted candidate artifacts and checks adoption requirements.",
-      "must_not_own": "candidate implementation priority or runtime bug fixing"
-    },
-    {
-      "path": "tools/closedloopcandidatedecision",
-      "kind": "meta-evidence-tool",
-      "role": "Closed-loop candidate decision verifier that binds candidate artifacts to owner, priority, disposition, and next artifacts.",
-      "must_not_own": "runtime bug fixing or product priority authority"
-    },
-    {
-      "path": "tools/evidencegraph",
-      "kind": "meta-evidence-tool",
-      "role": "Evidence graph verifier that connects observations, hypotheses, changes, verifiers, evidence, decisions, and next loops.",
-      "must_not_own": "runtime behavior, raw evidence payloads, or human-only narrative memory"
+      "path": "tools/healthreadycmd",
+      "kind": "evidence-tool",
+      "role": "Health/ready and command runtime generated reader and verifier.",
+      "must_not_own": "runtime server lifecycle"
     },
     {
       "path": "tools/integrationmatrix",
@@ -365,22 +419,16 @@
       "must_not_own": "runtime behavior, harness execution, or human-only narrative memory"
     },
     {
-      "path": "tools/loopregistry",
-      "kind": "meta-evidence-tool",
-      "role": "Loop registry, claim binding, semantic hash, and harness promotion verifier.",
-      "must_not_own": "runtime behavior or harness execution"
-    },
-    {
       "path": "tools/looprefreshdispatch",
       "kind": "meta-evidence-tool",
       "role": "Loop refresh command artifact dispatcher and safe workflow dispatch plan verifier.",
       "must_not_own": "loop registry selection semantics, raw shell execution, or workflow priority"
     },
     {
-      "path": "tools/migrationledger",
-      "kind": "evidence-tool",
-      "role": "Control-plane migration ledger generated reader and verifier.",
-      "must_not_own": "runtime migration behavior or private repository source contents"
+      "path": "tools/loopregistry",
+      "kind": "meta-evidence-tool",
+      "role": "Loop registry, claim binding, semantic hash, and harness promotion verifier.",
+      "must_not_own": "runtime behavior or harness execution"
     },
     {
       "path": "tools/metricshttpadapter",
@@ -417,6 +465,12 @@
       "kind": "adapter",
       "role": "Metrics HTTP adapter status-code contract verifier.",
       "must_not_own": "HTTP handler behavior"
+    },
+    {
+      "path": "tools/migrationledger",
+      "kind": "evidence-tool",
+      "role": "Control-plane migration ledger generated reader and verifier.",
+      "must_not_own": "runtime migration behavior or private repository source contents"
     },
     {
       "path": "tools/moduledecomposition",
@@ -485,6 +539,24 @@
       "must_not_own": "frontend app implementation"
     },
     {
+      "path": "tools/repositoryreadme",
+      "kind": "meta-evidence-tool",
+      "role": "Repository README generated reader and executable entrypoint verifier.",
+      "must_not_own": "domain-specific verification semantics or private operator evidence"
+    },
+    {
+      "path": "tools/repositoryreadme/pathutil",
+      "kind": "adapter",
+      "role": "Path adapter for the repository README verifier.",
+      "must_not_own": "repository README policy or generated reader semantics"
+    },
+    {
+      "path": "tools/requestauth",
+      "kind": "evidence-tool",
+      "role": "Request authorization generated reader and verifier.",
+      "must_not_own": "external identity provider policy"
+    },
+    {
       "path": "tools/reviewaccountseed",
       "kind": "evidence-tool",
       "role": "Review account seed generated reader and redacted verifier.",
@@ -519,24 +591,6 @@
       "kind": "adapter",
       "role": "Review account seed deterministic runtime fixture provider.",
       "must_not_own": "operator token values or live account provisioning"
-    },
-    {
-      "path": "tools/requestauth",
-      "kind": "evidence-tool",
-      "role": "Request authorization generated reader and verifier.",
-      "must_not_own": "external identity provider policy"
-    },
-    {
-      "path": "tools/repositoryreadme",
-      "kind": "meta-evidence-tool",
-      "role": "Repository README generated reader and executable entrypoint verifier.",
-      "must_not_own": "domain-specific verification semantics or private operator evidence"
-    },
-    {
-      "path": "tools/repositoryreadme/pathutil",
-      "kind": "adapter",
-      "role": "Path adapter for the repository README verifier.",
-      "must_not_own": "repository README policy or generated reader semantics"
     },
     {
       "path": "tools/runtimeboundary",
@@ -605,6 +659,12 @@
       "must_not_own": "DynamoDB, EventBridge, or live deployment evidence"
     },
     {
+      "path": "tools/syntaxhash",
+      "kind": "meta-evidence-tool",
+      "role": "Syntax hash graph generator and verifier that derives AST-normalized package hashes, repository coverage, relocation evidence, and semantic-claim graph edges after target packages are golden locked.",
+      "must_not_own": "runtime behavior, semantic hash definition, or package refactoring execution"
+    },
+    {
       "path": "tools/webfrontendapi",
       "kind": "evidence-tool",
       "role": "Web frontend API CORS generated reader and verifier.",
@@ -615,36 +675,6 @@
       "kind": "meta-evidence-tool",
       "role": "GitHub Actions evidence coverage verifier.",
       "must_not_own": "domain-specific test semantics or private operator evidence"
-    },
-    {
-      "path": "tools/apiclientdelivery/doccheck",
-      "kind": "adapter",
-      "role": "Generated-doc freshness adapter for the API client delivery verifier.",
-      "must_not_own": "API client delivery policy, manifest loading, or rendering"
-    },
-    {
-      "path": "tools/apiclientdelivery/pathutil",
-      "kind": "adapter",
-      "role": "Repository path resolution adapter for the API client delivery verifier.",
-      "must_not_own": "API client delivery policy or source checks"
-    },
-    {
-      "path": "tools/apiclientdelivery/rendertext",
-      "kind": "adapter",
-      "role": "Markdown inline code-list rendering adapter for the API client delivery reader.",
-      "must_not_own": "API client delivery section ownership or manifest verification"
-    },
-    {
-      "path": "tools/apiclientdelivery/requirements",
-      "kind": "adapter",
-      "role": "API client delivery manifest path, schema, and generated notice vocabulary.",
-      "must_not_own": "manifest loading, rendering, or evidence verification"
-    },
-    {
-      "path": "tools/apiclientdelivery/runconfig",
-      "kind": "adapter",
-      "role": "CLI run option DTO for the API client delivery verifier.",
-      "must_not_own": "flag parsing, manifest semantics, or evidence output"
     }
   ],
   "rules": [

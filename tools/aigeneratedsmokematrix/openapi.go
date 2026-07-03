@@ -10,6 +10,15 @@ type openAPISpec struct {
 	Paths map[string]map[string]openAPIOperation `json:"paths"`
 }
 
+func isHTTPMethod(value string) bool {
+	switch strings.ToLower(value) {
+	case "get", "post", "put", "patch", "delete", "head", "options", "trace":
+		return true
+	default:
+		return false
+	}
+}
+
 type openAPIOperation struct {
 	OperationID string            `json:"operationId"`
 	Client      openAPIClientMeta `json:"x-riido-client"`

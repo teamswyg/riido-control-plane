@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestRunWritesEvidence(t *testing.T) {
+func TestRunWritesBehaviorGoldenEvidence(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "evidence.json")
 	if err := mainRun([]string{"-repo", "../..", "-evidence-out", out}); err != nil {
 		t.Fatal(err)
@@ -22,9 +22,7 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.SchemaVersion != evidenceSchema || got.Counts.Total != 55 || !got.MatrixParity {
-		t.Fatalf("unexpected evidence: %+v", got)
-	}
+	assertGeneratedSmokeMatrixGolden(t, got)
 }
 
 func TestGoRunWiresCLIFlags(t *testing.T) {

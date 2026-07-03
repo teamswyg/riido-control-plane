@@ -74,13 +74,19 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `api_client_delivery_rendertext_adapter` | `tools/apiclientdelivery/rendertext` | 100% | `1624807301ac` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 | `api_client_delivery_requirements_adapter` | `tools/apiclientdelivery/requirements` | 100% | `d055ebae7bb8` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 | `api_client_delivery_runconfig_adapter` | `tools/apiclientdelivery/runconfig` | 100% | `10d6af178589` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
+| `generated_smoke_matrix_guard` | `tools/aigeneratedsmokematrix` | 100% | `712fbc8711c9` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
+| `generated_smoke_matrix_doccheck_adapter` | `tools/aigeneratedsmokematrix/doccheck` | 100% | `7cb72fff203b` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
+| `generated_smoke_matrix_path_adapter` | `tools/aigeneratedsmokematrix/pathutil` | 100% | `1d537370dc6a` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
+| `generated_smoke_matrix_rendertext_adapter` | `tools/aigeneratedsmokematrix/rendertext` | 100% | `5e394582857c` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
+| `generated_smoke_matrix_requirements_adapter` | `tools/aigeneratedsmokematrix/requirements` | 100% | `4dc304797eff` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
+| `generated_smoke_matrix_set_adapter` | `tools/aigeneratedsmokematrix/setutil` | 100% | `38e756f3c814` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 
 ## Repository Coverage
 
-- Go files: `2770`
-- tracked files: `510`
-- untracked files: `2260`
-- coverage: `18.41%`
+- Go files: `2771`
+- tracked files: `530`
+- untracked files: `2241`
+- coverage: `19.12%`
 
 ## Constraints
 
@@ -91,5 +97,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `510`
-- compression score: `99`
+- efficiency score: `530`
+- compression score: `103`

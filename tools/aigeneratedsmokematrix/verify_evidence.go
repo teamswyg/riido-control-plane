@@ -1,9 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/aigeneratedsmokematrix/setutil"
+)
 
 func verifyEvidenceTests(m manifest, entry smokeEntry) error {
-	allowed := stringSet(m.RequiredEvidenceTests)
+	allowed := setutil.StringSet(m.RequiredEvidenceTests)
 	for _, test := range entry.EvidenceTests {
 		if !allowed[test] {
 			return fmt.Errorf("unknown evidence test %q for %s", test, entry.GeneratedPath)

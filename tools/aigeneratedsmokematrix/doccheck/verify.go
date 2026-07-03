@@ -1,12 +1,12 @@
-package main
+package doccheck
 
 import (
 	"fmt"
 	"os"
 )
 
-func verifyDoc(repo string, m manifest, want string) error {
-	got, err := os.ReadFile(repoPath(repo, m.GeneratedDoc))
+func Verify(path, want string) error {
+	got, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("read generated doc: %w", err)
 	}
