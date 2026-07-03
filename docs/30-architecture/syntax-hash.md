@@ -36,6 +36,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `provider_status_path_adapter` | `tools/providerstatus/pathutil` | 100% | `df5f9b546a12` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_requirements_adapter` | `tools/providerstatus/requirements` | 100% | `443e40b1653a` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_render_adapter` | `tools/providerstatus/renderutil` | 100% | `a61250f5fc34` | `store_safe_routing_must_preserve_provider_status_decisions` |
+| `agent_runtime_binding_guard` | `tools/agentruntimebinding` | 100% | `983cfac244cb` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
+| `agent_runtime_binding_path_adapter` | `tools/agentruntimebinding/pathutil` | 100% | `646b40beb507` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
+| `agent_runtime_binding_requirements_adapter` | `tools/agentruntimebinding/requirements` | 100% | `c1a7283f900a` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `d49e070fc838` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `7735900c5929` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_requirements_adapter` | `tools/snapshotcqrsgate/requirements` | 100% | `2d4fd81b478e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
@@ -43,9 +46,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 ## Repository Coverage
 
 - Go files: `2769`
-- tracked files: `363`
-- untracked files: `2406`
-- coverage: `13.10%`
+- tracked files: `380`
+- untracked files: `2389`
+- coverage: `13.72%`
 
 ## Constraints
 
@@ -56,5 +59,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `363`
-- compression score: `52`
+- efficiency score: `380`
+- compression score: `60`

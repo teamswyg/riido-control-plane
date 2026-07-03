@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"os"
+
+	"github.com/teamswyg/riido-control-plane/tools/agentruntimebinding/requirements"
 )
 
 func main() {
@@ -12,7 +14,7 @@ func main() {
 func mainRun(args []string) error {
 	fs := flag.NewFlagSet("agentruntimebinding", flag.ContinueOnError)
 	repo := fs.String("repo", ".", "repository root")
-	manifest := fs.String("manifest", defaultManifest, "agent runtime binding manifest")
+	manifest := fs.String("manifest", requirements.DefaultManifest, "agent runtime binding manifest")
 	evidenceOut := fs.String("evidence-out", "", "optional evidence JSON output path")
 	writeDoc := fs.Bool("write-doc", false, "write generated reader doc")
 	checkDoc := fs.Bool("check-doc", false, "check generated reader doc")
