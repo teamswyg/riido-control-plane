@@ -9965,6 +9965,412 @@
       ],
       "decision": "The server side of the completed-but-still-progressing P0 is now narrower: completed assignments reject late daemon progress and expose no active stream/filter/replay residue across v2 and v3 HTTP surfaces. This is not product closure; operational-readiness stays partial until the next actual UI recurrence is captured with the redacted same-conversation v3/v2/subscription/SSE tool plus screenshot.",
       "next_loop": "operational_readiness_release_harness"
+    },
+    {
+      "id": "syntax_hash_graph_spike_loop",
+      "observation": "Loop Registry semantic hashes bind code to SSOT value claims, but Go syntax pattern coverage and relocation evidence are not yet machine-routable for metaprogramming refactors.",
+      "hypothesis": "A JSON-driven syntax hash graph can expand through behavior-golden packages, derive deterministic AST-normalized file and package hashes, and connect them to the existing semantic hash without changing runtime behavior.",
+    "claims": [
+      "public_aws_adapter_facade_must_preserve_contract",
+      "runtime_adapter_config_must_preserve_public_env_contract",
+      "repo_identity_must_anchor_public_module_boundary",
+      "shared_contract_compat_must_preserve_generated_contract_surface",
+      "request_authorization_must_preserve_security_boundary",
+      "health_ready_command_must_preserve_public_runtime_probe",
+      "runtime_deployment_boundary_must_preserve_public_private_ownership",
+        "config_reference_must_preserve_env_manifest_parity",
+        "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
+        "assignment_operation_journal_must_preserve_replay_and_claim_ports",
+        "cloudwatch_emf_shape_must_preserve_metric_scope_evidence",
+        "saas_control_plane_boundaries_must_remain_executable",
+        "snapshot_cqrs_gate_must_scope_store_split_decisions",
+        "store_safe_routing_must_preserve_provider_status_decisions",
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "go_ci_baseline_must_preserve_broad_ci_contract",
+        "web_frontend_api_must_preserve_cors_contract",
+        "ai_agent_risk_evidence_must_preserve_boundary_manifest",
+        "migration_ledger_must_preserve_historical_evidence",
+        "metrics_http_adapter_must_preserve_public_metrics_contract",
+        "agent_catalog_rbac_must_preserve_catalog_authorization_contract",
+        "integration_matrix_must_preserve_public_private_boundary",
+        "open_decision_questions_must_bind_owner_next_artifact_and_reader",
+        "context_map_must_guard_public_boundaries"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/syntax-hash-graph-spike-candidate-2026-07-03.json"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "awsadapters/golden_behavior_test.go"
+        },
+    {
+      "kind": "test",
+      "path": "cmd/riido_ai_server/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/repoidentity/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/contractscompat/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/requestauth/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/healthreadycmd/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/runtimeboundary/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/configreference/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/agentruntimebinding/main_test.go"
+    },
+    {
+      "kind": "tool",
+      "path": "tools/agentruntimebinding/pathutil"
+    },
+    {
+      "kind": "tool",
+      "path": "tools/agentruntimebinding/requirements"
+    },
+    {
+      "kind": "test",
+      "path": "tools/assignmentjournal/main_test.go"
+    },
+    {
+      "kind": "tool",
+      "path": "tools/assignmentjournal/pathutil"
+    },
+    {
+      "kind": "tool",
+      "path": "tools/assignmentjournal/requirements"
+    },
+    {
+      "kind": "test",
+      "path": "tools/cloudwatchemf/main_test.go"
+    },
+    {
+      "kind": "tool",
+      "path": "tools/cloudwatchemf/pathutil"
+    },
+    {
+      "kind": "tool",
+      "path": "tools/cloudwatchemf/requirements"
+    },
+    {
+      "kind": "test",
+      "path": "tools/saascontrolplane/main_test.go"
+    },
+    {
+      "kind": "tool",
+      "path": "tools/saascontrolplane/pathutil"
+    },
+    {
+      "kind": "tool",
+      "path": "tools/saascontrolplane/requirements"
+    },
+    {
+      "kind": "tool",
+      "path": "tools/saascontrolplane/setutil"
+    },
+    {
+      "kind": "test",
+      "path": "tools/storesaferouting/main_test.go"
+    },
+        {
+          "kind": "test",
+          "path": "tools/publicpageslive/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/migrationledger/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/metricshttpadapter/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/metricshttpadapter/requirements"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/metricshttpadapter/runconfig"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/metricshttpadapter/sourcechecks"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/metricshttpadapter/statuscheck"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentcatalogrbac/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/agentcatalogrbac/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/agentcatalogrbac/requirements"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/agentcatalogrbac/setutil"
+        },
+        {
+          "kind": "test",
+          "path": "tools/integrationmatrix/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/openquestions/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/openquestions/pathutil"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/repositoryreadme/pathutil"
+        },
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist/evidence_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/dependencyallowlist/layers"
+        },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/providerstatus/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/providerstatus/requirements"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/providerstatus/renderutil"
+        },
+        {
+          "kind": "test",
+          "path": "tools/snapshotcqrsgate/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/snapshotcqrsgate/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/snapshotcqrsgate/requirements"
+        },
+        {
+          "kind": "test",
+          "path": "tools/syntaxhash/syntaxhash_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/contextmap/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "awsadapters/golden_behavior_test.go"
+        },
+    {
+      "kind": "test",
+      "path": "cmd/riido_ai_server/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/repoidentity/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/contractscompat/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/requestauth/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/healthreadycmd/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/runtimeboundary/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/configreference/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/agentruntimebinding/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/assignmentjournal/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/cloudwatchemf/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/saascontrolplane/main_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/storesaferouting/main_test.go"
+    },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/publicpageslive/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/migrationledger/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentcatalogrbac/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/integrationmatrix/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/openquestions/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist/evidence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/snapshotcqrsgate/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/syntaxhash/syntaxhash_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/closedloopcandidateintake"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/closedloopcandidatedecision"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-intake-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-decision-evidence",
+          "redacted": true
+        }
+      ],
+  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/agentruntimebinding, tools/assignmentjournal, tools/cloudwatchemf, tools/saascontrolplane, tools/storesaferouting, tools/snapshotcqrsgate, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, tools/aiagentrisk, tools/migrationledger, tools/metricshttpadapter, tools/agentcatalogrbac, tools/integrationmatrix, tools/openquestions, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
+      "next_loop": "closed_loop_candidate_decision"
     }
   ],
   "loop": {

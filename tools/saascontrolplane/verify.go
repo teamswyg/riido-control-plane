@@ -2,13 +2,16 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/saascontrolplane/requirements"
+	"github.com/teamswyg/riido-control-plane/tools/saascontrolplane/setutil"
 )
 
 func verifyManifest(repo string, m manifest) error {
-	if m.SchemaVersion != manifestSchema {
+	if m.SchemaVersion != requirements.ManifestSchema {
 		return fmt.Errorf("schema_version = %q", m.SchemaVersion)
 	}
-	if m.ID != expectedID || m.Title == "" || m.GeneratedDoc == "" || m.Workflow == "" {
+	if m.ID != requirements.ExpectedID || m.Title == "" || m.GeneratedDoc == "" || m.Workflow == "" {
 		return fmt.Errorf("manifest identity is incomplete")
 	}
 	if m.EvidenceArtifact == "" || m.OwnerPackage == "" {
@@ -27,8 +30,8 @@ func verifyManifest(repo string, m manifest) error {
 }
 
 func verifySharedContracts(got []string) error {
-	set := stringSet(got)
-	for _, contract := range requiredSharedContracts {
+	set := setutil.StringSet(got)
+	for _, contract := range requirements.RequiredSharedContracts {
 		if !set[contract] {
 			return fmt.Errorf("missing shared contract %q", contract)
 		}

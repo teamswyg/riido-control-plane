@@ -25,6 +25,13 @@
       "workflow": ".github/workflows/evidence-graph.yml",
       "evidence_artifact": "evidence-graph-evidence",
       "human_doc": "docs/30-architecture/evidence-graph.md"
+    },
+    {
+      "path": "docs/30-architecture/syntax-hash.riido.json",
+      "evidence_tool": "tools/syntaxhash",
+      "workflow": ".github/workflows/syntax-hash.yml",
+      "evidence_artifact": "syntax-hash-evidence",
+      "human_doc": "docs/30-architecture/syntax-hash.md"
     }
   ],
   "source_manifests": [

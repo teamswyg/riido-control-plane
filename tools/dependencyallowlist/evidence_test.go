@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestRunWritesEvidence(t *testing.T) {
+func TestDependencyAllowlistBehaviorGolden(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "evidence.json")
 	if err := run([]string{"-contract", "../../dependency_allowlist.riido.json", "-evidence-out", path}); err != nil {
 		t.Fatalf("run: %v", err)
@@ -23,10 +23,13 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.SchemaVersion != evidenceSchemaVersion || got.Status != "verified" {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
-	if got.ID == "" || got.Loop.Observation == "" {
+	if got.ID != "control-plane-go-dependency-allowlist" || got.Service != "riido-control-plane" {
+		t.Fatalf("unexpected evidence identity: %+v", got)
+	}
+	if got.Loop.Observation == "" || got.Loop.Retrospective == "" {
 		t.Fatalf("missing loop evidence: %+v", got)
 	}
-	if got.DirectDependenciesVerified == 0 || got.AllowedDirectModules == 0 {
+	if got.DirectDependenciesVerified != 5 || got.AllowedDirectModules != 5 {
 		t.Fatalf("missing evidence counts: %+v", got)
 	}
 }

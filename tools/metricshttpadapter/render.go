@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/metricshttpadapter/requirements"
 )
 
 func renderDoc(m manifest) string {
 	var b strings.Builder
-	b.WriteString(generatedNotice + "\n\n")
+	b.WriteString(requirements.GeneratedNotice + "\n\n")
 	fmt.Fprintf(&b, "# %s\n\n", m.Title)
 	b.WriteString("This reader is generated from the metrics HTTP adapter SSOT.\n\n")
 	b.WriteString("## Endpoint\n\n")

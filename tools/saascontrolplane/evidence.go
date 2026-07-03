@@ -1,5 +1,7 @@
 package main
 
+import "github.com/teamswyg/riido-control-plane/tools/saascontrolplane/requirements"
+
 type evidence struct {
 	SchemaVersion    string       `json:"schema_version"`
 	ID               string       `json:"id"`
@@ -18,7 +20,7 @@ type evidence struct {
 
 func newEvidence(m manifest, selected *boundary) evidence {
 	out := evidence{
-		SchemaVersion:    evidenceSchema,
+		SchemaVersion:    requirements.EvidenceSchema,
 		ID:               m.ID,
 		Status:           "verified",
 		Boundaries:       len(m.Boundaries),

@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+
+	"github.com/teamswyg/riido-control-plane/tools/integrationmatrix/pathutil"
 )
 
 func verifyDoc(repoRoot string, m manifest, want string) error {
-	path := repoPath(repoRoot, m.GeneratedDoc)
+	path := pathutil.RepoPath(repoRoot, m.GeneratedDoc)
 	got, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("read generated doc: %w", err)

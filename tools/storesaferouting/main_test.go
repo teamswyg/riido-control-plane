@@ -1,12 +1,16 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
 )
+
+const storeSafeRoutingGoldenSHA256 = "ff3dfdc3057123a0a4af35cd474e883d739ca4ba01e0d46d37893aff1ea802d4"
 
 func TestRunWritesEvidence(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "evidence.json")
@@ -23,6 +27,20 @@ func TestRunWritesEvidence(t *testing.T) {
 	}
 	if got.Status != "verified" || got.CasesVerified != 8 || got.SourceChecks == 0 {
 		t.Fatalf("unexpected evidence: %+v", got)
+	}
+}
+
+func TestStoreSafeRoutingBehaviorGolden(t *testing.T) {
+	out := filepath.Join(t.TempDir(), "evidence.json")
+	if err := mainRun([]string{"-repo", "../..", "-evidence-out", out}); err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := fmt.Sprintf("%x", sha256.Sum256(body)); got != storeSafeRoutingGoldenSHA256 {
+		t.Fatalf("store safe routing golden hash = %s", got)
 	}
 }
 

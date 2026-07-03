@@ -161,6 +161,16 @@
       "reason": "Loop closure audit is an intake source even when current residual and claim coverage gaps are closed, so it keeps a seed decision for source coverage."
     },
     {
+      "candidate_id": "loop-closure-audit:syntax_hash_graph_spike",
+      "disposition": "adopted",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "syntax_hash_manifest",
+      "review_by": "2026-07-10",
+      "reason": "Syntax hash coverage must expand only through golden-locked packages before broader Go-code restructuring, while preserving existing semantic hash generation unchanged."
+    },
+    {
       "candidate_id": "loop-refresh-dispatch:source_coverage_seed",
       "disposition": "deferred",
       "priority": "P2",

@@ -1,20 +1,25 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/agentcatalogrbac/requirements"
+	"github.com/teamswyg/riido-control-plane/tools/agentcatalogrbac/setutil"
+)
 
 func verifyDomain(m manifest) error {
 	for _, value := range []string{"admin"} {
-		if !containsExact(m.Roles, value) {
+		if !setutil.ContainsExact(m.Roles, value) {
 			return fmt.Errorf("missing role %q", value)
 		}
 	}
 	for _, value := range []string{"public", "private"} {
-		if !containsExact(m.Visibilities, value) {
+		if !setutil.ContainsExact(m.Visibilities, value) {
 			return fmt.Errorf("missing visibility %q", value)
 		}
 	}
 	for _, value := range []string{"read", "update", "delete"} {
-		if !containsExact(m.Actions, value) {
+		if !setutil.ContainsExact(m.Actions, value) {
 			return fmt.Errorf("missing action %q", value)
 		}
 	}
@@ -27,8 +32,8 @@ func verifyRulesAndRoutes(m manifest) error {
 			return fmt.Errorf("missing rule %q", id)
 		}
 	}
-	for _, route := range requiredRoutes {
-		if !containsExact(m.Routes, route) {
+	for _, route := range requirements.RequiredRoutes {
+		if !setutil.ContainsExact(m.Routes, route) {
 			return fmt.Errorf("missing route %q", route)
 		}
 	}

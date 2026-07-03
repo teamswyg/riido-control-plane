@@ -6,7 +6,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Summary
 
-- decisions: `25`
+- decisions: `26`
 - command artifact: `closed-loop-candidate-decision-commands`
 
 ## Assertions
@@ -47,11 +47,11 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 ## Decision Summary
 
-- registered decisions: `25`
+- registered decisions: `26`
 - consumed decisions: `0`
-- disposition counts: `deferred=9`, `triage_required=16`
-- priority counts: `P0=1`, `P1=16`, `P2=8`
-- next artifact counts: `claim_binding=8`, `client_surface_alarm_plan_apply_evidence=1`, `cold_start_packet_burst_evidence=1`, `daemon_network_disconnect_release_evidence=1`, `daemon_reconnect_storm_evidence=1`, `decision_record=3`, `desktop_body_only_golden_evidence=1`, `ecs_service_recovery_chaos_evidence=1`, `redacted_evidence=5`, `scale_out_timing_evidence=1`, `single_pc_agent_capacity_evidence=1`, `staging_client_p0_visual_screenshot_evidence=1`
+- disposition counts: `adopted=1`, `deferred=9`, `triage_required=16`
+- priority counts: `P0=1`, `P1=17`, `P2=8`
+- next artifact counts: `claim_binding=8`, `client_surface_alarm_plan_apply_evidence=1`, `cold_start_packet_burst_evidence=1`, `daemon_network_disconnect_release_evidence=1`, `daemon_reconnect_storm_evidence=1`, `decision_record=3`, `desktop_body_only_golden_evidence=1`, `ecs_service_recovery_chaos_evidence=1`, `redacted_evidence=5`, `scale_out_timing_evidence=1`, `single_pc_agent_capacity_evidence=1`, `staging_client_p0_visual_screenshot_evidence=1`, `syntax_hash_manifest=1`
 
 ## Decisions
 
@@ -72,6 +72,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `control-plane-pressure:assignment_long_poll_wait` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `control-plane-pressure:tool_approval_waiters` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `loop-closure-audit:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
+| `loop-closure-audit:syntax_hash_graph_spike` | `adopted` | `P1` | `agent-platform-loop` | `2026-07-10` | `syntax_hash_manifest` |
 | `loop-refresh-dispatch:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
 | `operational-readiness:otel_xray_client_surface` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `client_surface_alarm_plan_apply_evidence` |
 | `operational-readiness:staging_client_p0_visual_retest` | `deferred` | `P0` | `client-qa-loop` | `2026-07-08` | `staging_client_p0_visual_screenshot_evidence` |

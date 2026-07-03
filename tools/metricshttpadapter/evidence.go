@@ -1,5 +1,7 @@
 package main
 
+import "github.com/teamswyg/riido-control-plane/tools/metricshttpadapter/requirements"
+
 type evidence struct {
 	SchemaVersion       string       `json:"schema_version"`
 	ID                  string       `json:"id"`
@@ -21,7 +23,7 @@ type evidence struct {
 
 func newEvidence(m manifest, result adapterResult) evidence {
 	return evidence{
-		SchemaVersion:       evidenceSchema,
+		SchemaVersion:       requirements.EvidenceSchema,
 		ID:                  m.ID,
 		Status:              "verified",
 		Endpoint:            m.Endpoint.Method + " " + m.Endpoint.Path,

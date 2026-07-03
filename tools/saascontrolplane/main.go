@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/teamswyg/riido-control-plane/tools/saascontrolplane/requirements"
 )
 
 func main() {
@@ -16,7 +18,7 @@ func main() {
 func mainRun(args []string) error {
 	fs := flag.NewFlagSet("saascontrolplane", flag.ContinueOnError)
 	repo := fs.String("repo", ".", "repository root")
-	manifest := fs.String("manifest", defaultManifest, "SaaS control-plane manifest")
+	manifest := fs.String("manifest", requirements.DefaultManifest, "SaaS control-plane manifest")
 	boundary := fs.String("boundary", "", "optional boundary evidence id")
 	evidenceOut := fs.String("evidence-out", "", "optional evidence JSON output path")
 	writeDoc := fs.Bool("write-doc", false, "write generated reader doc")

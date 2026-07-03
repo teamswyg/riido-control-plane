@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/openquestions/pathutil"
+)
 
 type options struct {
 	Repo        string
@@ -11,11 +15,11 @@ type options struct {
 }
 
 func run(opt options) error {
-	repoRoot, err := findRepoRoot(opt.Repo)
+	repoRoot, err := pathutil.FindRepoRoot(opt.Repo)
 	if err != nil {
 		return err
 	}
-	m, err := loadManifest(repoPath(repoRoot, opt.Manifest))
+	m, err := loadManifest(pathutil.RepoPath(repoRoot, opt.Manifest))
 	if err != nil {
 		return err
 	}
@@ -25,7 +29,7 @@ func run(opt options) error {
 	}
 	doc := renderDoc(m, result)
 	if opt.WriteDoc {
-		if err := writeText(repoPath(repoRoot, m.GeneratedDoc), doc); err != nil {
+		if err := writeText(pathutil.RepoPath(repoRoot, m.GeneratedDoc), doc); err != nil {
 			return fmt.Errorf("write generated doc: %w", err)
 		}
 	}

@@ -57,3 +57,14 @@ func writeText(path, body string) error {
 	}
 	return os.WriteFile(path, []byte(body), 0o644)
 }
+
+func writeJSON(path string, value any) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	body, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, append(body, '\n'), 0o644)
+}

@@ -6,9 +6,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"github.com/teamswyg/riido-control-plane/tools/metricshttpadapter/requirements"
 )
 
-func TestRunWritesEvidence(t *testing.T) {
+func TestMetricsHTTPAdapterBehaviorGolden(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "evidence.json")
 	if err := mainRun([]string{"-repo", "../..", "-evidence-out", out}); err != nil {
 		t.Fatal(err)
@@ -21,8 +23,23 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.Status != "verified" || got.AuthorizedStatus != 200 || got.StoreBreakdownRows == 0 {
-		t.Fatalf("unexpected evidence: %+v", got)
+	if got.SchemaVersion != requirements.EvidenceSchema || got.ID != requirements.ExpectedID || got.Status != "verified" {
+		t.Fatalf("unexpected evidence identity: %+v", got)
+	}
+	if got.Endpoint != requirements.ExpectedEndpoint || got.MetricsSchema != requirements.ExpectedMetricsSchema {
+		t.Fatalf("unexpected metrics surface: %+v", got)
+	}
+	if got.AuthorizedStatus != 200 || got.MissingScopeStatus != 403 || got.UnconfiguredStatus != 503 {
+		t.Fatalf("unexpected status evidence: %+v", got)
+	}
+	if got.JSONFieldsVerified != 12 || got.StatusCasesVerified != 3 || got.SourceChecks != 3 {
+		t.Fatalf("unexpected verifier counts: %+v", got)
+	}
+	if got.HTTPBreakdownRows != 1 || got.StoreBreakdownRows != 5 {
+		t.Fatalf("unexpected breakdown rows: %+v", got)
+	}
+	if got.EvidenceArtifact != requirements.EvidenceArtifact || got.Workflow != requirements.Workflow {
+		t.Fatalf("unexpected workflow evidence: %+v", got)
 	}
 }
 

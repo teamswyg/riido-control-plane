@@ -1081,7 +1081,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "44a027b21cf136ae8645ba1b7dff893236f6f9fb76c376d9632e511fad085e36"
+      "semantic_hash": "60f979f634e6e496d9d2382d97a777e51f7ff970137159110233e8db077d580a"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
@@ -1444,7 +1444,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c57d094fe4d49b0104a3426179436ae54875aa18095996428553ab816e0ab7e6"
+      "semantic_hash": "e07203b136d03309f38b153c840a38b4228844148f6a649b1810a91e4c62a7fa"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -1541,7 +1541,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2e5c8d4a00316f84f7a421e2780205580d53bb9a2fa8b2ffdd834a940f5e1cb2"
+      "semantic_hash": "5aecd7f233e39528533430edad6d0aff12dab6bacd04811fe10ef341a7b5a1b7"
     },
     {
       "id": "loop_closure_audit_must_prove_human_exit_requirements",
@@ -1748,7 +1748,7 @@
         "docs/30-architecture/closed-loop-candidate-decision.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e9378b91776458e13ff0c1db72e53c30dc220bb298027c97ce88bf97fee028e9"
+      "semantic_hash": "9e13085a4651426bcb720f9fd4bbdea9ae6a566f0fdc95a039754d2b19125815"
     },
     {
       "id": "closed_loop_candidates_must_carry_promotion_edge",
@@ -1815,7 +1815,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "32c50cf3f07b10fa4df0111490b7428c5bc55e38374248b5d46c6a19c0bb9a4d"
+      "semantic_hash": "c1fe7d6b18ecef490801d030a72bf98c669ff8b2f1ffff2b1ab949b346b3013c"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1875,7 +1875,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "0a2ffae957628a9e9894d1e4d14df2e61215a20c05296a9ce83bad13ea1050dc"
+      "semantic_hash": "ae18f8e47f74a907764e33b6ae7a02b8a60bcc9c4f5ecdaca6887320297add49"
     },
     {
       "id": "closed_loop_candidates_must_carry_subject",
@@ -1927,7 +1927,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "58c4ac712bc4224ad9ce263bf4aa47b9c080ddaa845638477a6cecb7ed0f058a"
+      "semantic_hash": "cf70420cfbd8179aa07498ca527826dbbd8085de133a498d38a29d91862323f1"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -2021,7 +2021,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f0934cbd32cc30895d350a338b394459a6a7bda65d56a46049c271353813655b"
+      "semantic_hash": "9cd6ba9fdb086a1ee7d3e962985aaca1efbece3a378499b66694c5186804cba0"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -2215,7 +2215,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "63fa2a43a2b43f7a1336ad6aa8c2178b4439438549877a71a8e3b5cef90825bf"
+      "semantic_hash": "27f261f4c05cb46307e8cd7c9eece0a1c829293581e26c5d62b9abe5b767d360"
     },
     {
       "id": "loop_registry_evidence_must_expose_loop_surfaces",
@@ -2251,7 +2251,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0a177ccfa9111d2fd56d6b515a34063b2971b2c2cf4aec395ed3a53e0515cc60"
+      "semantic_hash": "4b1c8c7d430029bebdf155d9fd59baa31c6187f8b1ebd02bd659a66490c450f6"
     },
     {
       "id": "loop_registry_evidence_must_expose_architecture_index",
@@ -2304,7 +2304,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "bc8029091949c2368167f8f0e73eeb33e507323c4f297421652a2241df76af4d"
+      "semantic_hash": "803bd66e0eb3f038f904f3dd2d0298a2ab5ed7920f35e5f644660b1fdb503dc3"
     },
     {
       "id": "loop_registry_impact_must_expose_target_verifier_plan",
@@ -2420,7 +2420,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8c850d7b79596c21ef32551ec919c00ddc5136bcfc6579f00f2953ef7dd44557"
+      "semantic_hash": "24fbbd9f03a82208a2f85df68ab25c6afa6fc7825394f134990420780575511a"
     },
     {
       "id": "loop_coverage_dimensions_must_use_static_registry",
@@ -2474,7 +2474,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a90bcf6b0f05dfb7b81fc3bf4496fad17b4e636758c09907bb10d18e2678014b"
+      "semantic_hash": "48782e1f43b7c2a6110766b63d47096ae92908b25391ae8a0e6b9bdf60f8545c"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -2664,7 +2664,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c5fed59761d769555856e9bb5b95cefacdeb0477c70fddd06037baee6018cb40"
+      "semantic_hash": "0c5b33327f0e645dc33cf9ee83ee8a4af89647a642a5b42714074d53432a2728"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -2708,7 +2708,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f1ebfc8795bf08088231c96b5813e85c9cda8d5f5242823eee1cd660663bce35"
+      "semantic_hash": "0d235f48cab17219f05d793650aa17fba7b49c8751ce0c16b1097cf7148dfb54"
     },
     {
       "id": "evidence_graph_impact_must_surface_as_ci_annotations",
@@ -2748,7 +2748,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "6d6b4a61e195a1e22217d9740b48af84edbb7bd7530843acf6ec7bc06fe072a6"
+      "semantic_hash": "365089a1c7c165f1620b2cd78ba61b088b6786d13bdc740aba3fc1e0fb3a455a"
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
@@ -2797,7 +2797,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "801d2532349e51e60631198ac43b80309144fa6bb9c4e5b6e98ed009ff429f54"
+      "semantic_hash": "83c622734c031f36499559dff1cb7fff95d71775f7dc2333ee1f4fc71b4cc924"
     },
     {
       "id": "claim_meaning_changes_require_reasoning_chain",
@@ -2955,7 +2955,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2aa07feacd94d5ec0727c657ac30f8a325e1bcb982ee215356fc6cc1b528b2d3"
+      "semantic_hash": "d6dc56be59f64167ea25175b2a29a47f2d041d3ad4de6ded757d8820571b5074"
     },
     {
       "id": "pre_commit_must_run_evidence_graph_impact",
@@ -2994,7 +2994,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a96f748047b2f5602029bd6da4468256f7eafbd8920886a7fade786485bbd60a"
+      "semantic_hash": "a4802b3e36ca70d9477e16aea3fef9ae52578cc07dbafd38ddd61d00eb512802"
     },
     {
       "id": "pre_commit_baseline_evidence_must_self_expire",
@@ -3080,7 +3080,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f71c67bc4c9490acc61d907fabba77d4ff62f02fc699420bcfb4cb110a83cce9"
+      "semantic_hash": "091651f5b5c312a6197b3a26a05fc5e6e9ff52d51ea10961ff9b56e6e379edcf"
     },
     {
       "id": "semantic_hash_metadata_must_not_affect_claim_meaning",
@@ -3143,7 +3143,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "a8812825a55b42cfa87551a107e1f2cf89e1700533acc0b4b46b6fde0d037556"
+      "semantic_hash": "3cbe1a615396fea3279ffd2052f1859c1f1ff7a4b5170fbcda5f9b43bc03d77e"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -3186,7 +3186,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9b8a1ce2a6b3c35e605570c98cd062feef5cba80935692a8c1f2be341f9dd803"
+      "semantic_hash": "87a857a5c7252c868622722260bde4df254984d3ebcf434793b348e102a820c5"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -3225,7 +3225,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "31fe24e85f984550b7b4bc1d925bde53da73f0e353188eec658b206dc6c66223"
+      "semantic_hash": "41b4aa593702fdd897b875f4c5d7e1006b0b58c3762ef8b5b1d5eeeff8d6ac14"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -3266,7 +3266,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1af9332f23284409479593119ea2a111916264d97ead66346790c1d17ccbe579"
+      "semantic_hash": "cb3f213771092a2cedcda46dc125b323f2c473e2deed6eebcecd6b62665cbb81"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -3316,7 +3316,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "3a8acf6a36b60226096f6650b5c79e6dc29747b3c0da8207187a6cc843f34705"
+      "semantic_hash": "7540ca2a728145811751bde0c3ae86cc044b7b0222f3bb5522dc9651ec7a94c0"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -3362,7 +3362,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5548ed7fc974fdecafb5c4f13151b035a7724a709dbe4a0b332949c359c4029a"
+      "semantic_hash": "d0c842cbf249dca5f567f4e383a055d04d792cd29fd403a5d6edd83b8199ba88"
     },
     {
       "id": "closed_loop_candidate_evidence_must_self_expire",
@@ -3404,7 +3404,7 @@
         "docs/30-architecture/closed-loop-candidate-intake.md",
         "docs/30-architecture/closed-loop-candidate-decision.md"
       ],
-      "semantic_hash": "b2ac4bd60fedee13734ef859ba3170d951a73e1ebcd0d6309c179e433fb602f9"
+      "semantic_hash": "5211d7448676b192f4d37a797d05e3d011bff145c1c061317e49f351cf21e564"
     },
     {
       "id": "closed_loop_candidate_consumers_must_reject_expired_candidates",
@@ -3449,7 +3449,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "31700b6b8d507c66bda14690ab204ad43ca8f2648aa4d081e81606a8b2503d5f"
+      "semantic_hash": "e8a2e4054b8091197b9fc18e9279ebba1c51081997272d856e2f6df5ed8453bc"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -3592,7 +3592,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "dabc951a483692272b16ac3d48a00a7a65274de31c42b1e3a7cd1d4116b5aa3f"
+      "semantic_hash": "b836bb6eb2dd5f496fd8cd6d62b27e297b8555c9d28cb156e45d5aa58e624031"
     },
     {
       "id": "loop_registry_evidence_must_expose_refresh_plans",
@@ -3694,7 +3694,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "483c4a65e4663884e9cf7719011d94db3bebcea64975f7440dd09dfe9c259ad7"
+      "semantic_hash": "96f4bf65783353afca5d4988baabd6500609ae1672e51aa6a80522884c294b79"
     },
     {
       "id": "expired_loop_refresh_commands_must_dispatch_safe_workflows",
@@ -3835,7 +3835,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "be65aac00a020cf553b1475b151f79de21bed6e552b4c1354595b472f8481f92"
+      "semantic_hash": "d94f5f6e247629dee372c2b405f4bb7bbc7284395b66ca62acd033c2ce56d07d"
     },
     {
       "id": "loop_registry_evidence_must_expose_graph_edges",
@@ -3914,7 +3914,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "35913648f9fe51e369c04f07c99a40e73ea613e0a1b4bc2853870d09d85d4065"
+      "semantic_hash": "8db6faabc1098554aac4005d667533580abc1d324fd18b6449530bd0fb7df3fc"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
@@ -3992,7 +3992,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5da74a10983c7fa020c2ced6c87c784e4e5681e4f8ecb5cc871d0cbc8e0e342d"
+      "semantic_hash": "525acd7343262f5340e1e3668674b470c11df7ae1af7525fe074c6873a66b5cf"
     },
     {
       "id": "candidate_decision_next_artifact_must_be_required",
@@ -4038,7 +4038,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ba04a631e50bbb9e7754d941257d9dedfb32610ce055f3a7192eb40b40956317"
+      "semantic_hash": "a958080cebd24eeb24eb179b028613f97e15836c6f3b2322bb0b7f1ab7f98f3a"
     },
     {
       "id": "candidate_decision_evidence_must_expose_next_command",
@@ -4113,7 +4113,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "dfa1b0388a1bfb2efcef44bba737c483ebbc259363ea178ff6bdf95d2fc90515"
+      "semantic_hash": "4c7718600aa761917bfcb781c32bf08d2151b4cec0b4a87c1754348a2c3d5a52"
     },
     {
       "id": "open_decision_questions_must_bind_owner_next_artifact_and_reader",
@@ -4147,22 +4147,22 @@
         "docs/50-roadmap/open-questions.md",
         ".github/workflows/open-questions.yml",
         "tools/openquestions/main_test.go",
+        "tools/openquestions/pathutil/path.go",
         "tools/openquestions/evidence_command.go",
         "tools/openquestions/verify_command.go",
         "tools/openquestions/verify_question.go",
         "tools/openquestions/verify_doc.go"
       ],
       "verifiers": [
-        "TestOpenQuestionsManifest",
-        "TestOpenQuestionsBindOwnerNextArtifactAndReader",
-        "TestOpenQuestionsEvidenceExposesNextCommands"
+        "TestOpenQuestionsBehaviorGolden",
+        "TestOpenQuestionsBindOwnerNextArtifactAndReader"
       ],
       "generated_docs": [
         "docs/50-roadmap/open-questions.md",
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e362d54b6f38c8ecd3f04ee9d865fec8e2e782b0abb416c07a6842cb5301e57e"
+      "semantic_hash": "9cf6a31ee8e16bfa20e98433b0ff0d22941691f2d2ed12c0307d5b724b311449"
     },
     {
       "id": "operational_readiness_checks_must_bind_release_items_to_evidence",
@@ -4318,9 +4318,21 @@
         "tools/operationalreadiness/render_partial_promotion.go",
         "tools/operationalreadiness/render_partial_promotion_test.go",
         "tools/repositoryreadme/main_test.go",
+        "tools/repositoryreadme/pathutil/path.go",
         "tools/repositoryreadme/run.go",
         "tools/repositoryreadme/verify.go",
         "tools/knowledgecoverage/main_test.go",
+        "tools/publicpageslive/collect.go",
+        "tools/publicpageslive/constants.go",
+        "tools/publicpageslive/decode.go",
+        "tools/publicpageslive/golden_behavior_test.go",
+        "tools/publicpageslive/http.go",
+        "tools/publicpageslive/main.go",
+        "tools/publicpageslive/main_test.go",
+        "tools/publicpageslive/record.go",
+        "tools/publicpageslive/redaction.go",
+        "tools/publicpageslive/types.go",
+        "tools/publicpageslive/write.go",
         "internal/riidoaiserver/assignment_api.go",
         "internal/riidoaiserver/cloudwatch_emf_envelope.go",
         "internal/riidoaiserver/cloudwatch_emf_envelope_http.go",
@@ -4363,7 +4375,8 @@
         "TestOperationalReadinessCandidateAdoptsPartialNextWorkFirst",
         "TestOperationalReadinessCandidateArtifactIsFresh",
         "TestOperationalReadinessDocRendersPartialPromotion",
-        "TestRunWritesEvidence",
+        "TestPublicPagesLiveBehaviorGolden",
+        "TestRepositoryReadmeBehaviorGolden",
         "TestTraceHTTPClientSurfaceClassifiesKnownSurfaces",
         "TestHTTPTracingRecordsClientSurface",
         "TestHTTPTransactionMetricsTrackClientSurfaceTotals",
@@ -4374,7 +4387,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "4634b03146e2ae9ed73e7bdf05c8071199c5d5177f078bd0a9084205a48c11eb"
+      "semantic_hash": "deb197f47d39b038f7cf8599d820a024eae38a4de82cf213c77959601665b03b"
     },
     {
       "id": "container_image_contract_must_bind_runtime_shape",
@@ -4422,7 +4435,7 @@
         "docs/30-architecture/module-decomposition.md",
         "docs/30-architecture/integration-matrix.md"
       ],
-      "semantic_hash": "97069e0581e798ae1402e9f0e8f9a2276c227731a6e4318e0073901032fcb795"
+      "semantic_hash": "0af0d2d53df55258d43527b3822ebd157e4da7748c8ddeee489edbe1ca59e6fc"
     },
     {
       "id": "server_route_handlers_must_stay_semantically_split",
@@ -4495,13 +4508,1297 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "9930fd57553ba7d0de110c3d91820072a0fc175fe81057562872a52c244f1839"
+      "semantic_hash": "6697fbebb5312a020a4f8ff1c070283d1db4a4cdf37c4fcfe21510c48f2363e9"
+    },
+    {
+      "id": "public_aws_adapter_facade_must_preserve_contract",
+      "statement": "The public awsadapters facade must preserve its module-consumable AWS credentials and DynamoDB stream relay DTO contract as a golden-locked public boundary over internal control-plane adapter implementations.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "files": [
+        "docs/20-domain/context-map.riido.json",
+        "docs/20-domain/saas-control-plane.riido.json",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "awsadapters/ai_agent_snapshot.go",
+        "awsadapters/assignment_store.go",
+        "awsadapters/constants.go",
+        "awsadapters/credentials.go",
+        "awsadapters/doc.go",
+        "awsadapters/eventbridge.go",
+        "awsadapters/facade_test.go",
+        "awsadapters/golden_behavior_test.go",
+        "awsadapters/outbox.go",
+        "awsadapters/store_snapshot.go",
+        "awsadapters/stream_relay.go",
+        "awsadapters/table.go"
+      ],
+      "verifiers": [
+        "TestAWSAdaptersFacadeBehaviorGolden",
+        "TestStaticCredentialsFacade",
+        "TestStreamRelayFacadeTypesCompile"
+      ],
+      "generated_docs": [
+        "docs/20-domain/context-map.md",
+        "docs/20-domain/saas-control-plane.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "2096c3fb12bddd46f0fef77e4fbf5447c36a6ff244a7bb16c89ed7e1d0526d8b"
+    },
+    {
+      "id": "runtime_adapter_config_must_preserve_public_env_contract",
+      "statement": "The riido_ai_server runtime adapter configuration must preserve its public environment-variable contract for address, shutdown timing, observability, tracing, web origins, long-poll timing, and AI Agent client development mode while syntax hash graphing expands only after the runtime config behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "files": [
+        "docs/20-domain/context-map.riido.json",
+        "docs/20-domain/saas-control-plane.riido.json",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "cmd/riido_ai_server/ai_agent_client_config.go",
+        "cmd/riido_ai_server/ai_agent_client_config_test.go",
+        "cmd/riido_ai_server/assignment_store_config.go",
+        "cmd/riido_ai_server/authorizer_config.go",
+        "cmd/riido_ai_server/authorizer_config_test.go",
+        "cmd/riido_ai_server/authorizer_external.go",
+        "cmd/riido_ai_server/authorizer_external_harness_test.go",
+        "cmd/riido_ai_server/authorizer_external_request_test.go",
+        "cmd/riido_ai_server/authorizer_fallback_assertions_test.go",
+        "cmd/riido_ai_server/authorizer_static.go",
+        "cmd/riido_ai_server/aws_credentials_config.go",
+        "cmd/riido_ai_server/aws_credentials_config_test.go",
+        "cmd/riido_ai_server/background_errors.go",
+        "cmd/riido_ai_server/config_core_test.go",
+        "cmd/riido_ai_server/dynamodb_config.go",
+        "cmd/riido_ai_server/env_bool.go",
+        "cmd/riido_ai_server/env_duration_test.go",
+        "cmd/riido_ai_server/env_names.go",
+        "cmd/riido_ai_server/env_test_helpers_test.go",
+        "cmd/riido_ai_server/env_values.go",
+        "cmd/riido_ai_server/golden_behavior_test.go",
+        "cmd/riido_ai_server/json_decode.go",
+        "cmd/riido_ai_server/main.go",
+        "cmd/riido_ai_server/metrics_publisher.go",
+        "cmd/riido_ai_server/metrics_publisher_test.go",
+        "cmd/riido_ai_server/metrics_test_writer_test.go",
+        "cmd/riido_ai_server/observability_config.go",
+        "cmd/riido_ai_server/observability_config_test.go",
+        "cmd/riido_ai_server/outbox_config.go",
+        "cmd/riido_ai_server/pprof.go",
+        "cmd/riido_ai_server/pprof_config_test.go",
+        "cmd/riido_ai_server/profile_thumbnail_config.go",
+        "cmd/riido_ai_server/profile_thumbnail_config_test.go",
+        "cmd/riido_ai_server/profile_thumbnail_env.go",
+        "cmd/riido_ai_server/review_account_assertions_test.go",
+        "cmd/riido_ai_server/review_account_config.go",
+        "cmd/riido_ai_server/review_account_config_test.go",
+        "cmd/riido_ai_server/runtime_config.go",
+        "cmd/riido_ai_server/runtime_config_env.go",
+        "cmd/riido_ai_server/runtime_config_parts.go",
+        "cmd/riido_ai_server/runtime_http.go",
+        "cmd/riido_ai_server/runtime_open.go",
+        "cmd/riido_ai_server/runtime_review.go",
+        "cmd/riido_ai_server/runtime_timing_config.go",
+        "cmd/riido_ai_server/server_lifecycle.go",
+        "cmd/riido_ai_server/server_shutdown.go",
+        "cmd/riido_ai_server/task_context_config.go",
+        "cmd/riido_ai_server/task_context_config_test.go",
+        "cmd/riido_ai_server/task_context_env.go",
+        "cmd/riido_ai_server/task_context_fixture_test.go",
+        "cmd/riido_ai_server/task_context_private.go",
+        "cmd/riido_ai_server/task_context_private_fixture_test.go",
+        "cmd/riido_ai_server/task_context_private_test.go",
+        "cmd/riido_ai_server/token_hash_test.go",
+        "cmd/riido_ai_server/tracing_attributes.go",
+        "cmd/riido_ai_server/tracing_config.go",
+        "cmd/riido_ai_server/tracing_env.go",
+        "cmd/riido_ai_server/tracing_exporter.go",
+        "cmd/riido_ai_server/tracing_open.go",
+        "cmd/riido_ai_server/tracing_recorder.go",
+        "cmd/riido_ai_server/tracing_shutdown.go",
+        "cmd/riido_ai_server/tracing_span.go",
+        "cmd/riido_ai_server/tracing_test.go",
+        "cmd/riido_ai_server/web_origin_config.go",
+        "cmd/riido_ai_server/web_origin_normalize.go"
+      ],
+      "verifiers": [
+        "TestRuntimeConfigBehaviorGolden",
+        "TestConfigFromEnvParsesAddressShutdownAndStaticAuthorizer",
+        "TestConfigFromEnvDefaultsToPublicHealthOnlyRuntime",
+        "TestConfigFromEnvParsesWebAllowedOrigins",
+        "TestConfigFromEnvParsesMetricsLogInterval",
+        "TestConfigFromEnvParsesPprofAddr",
+        "TestConfigFromEnvParsesTracing"
+      ],
+      "generated_docs": [
+        "docs/20-domain/context-map.md",
+        "docs/20-domain/saas-control-plane.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "527f7ec13cb165e690171ffa07e80436d790bb11c4b13405fbdd5a4843244e67"
+    },
+    {
+      "id": "repo_identity_must_anchor_public_module_boundary",
+      "statement": "The repoidentity guard must preserve the public repository name, Go module path, and SaaS control-plane boundary label while syntax hash graphing expands only after the identity behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "files": [
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "internal/repoidentity/repoidentity.go",
+        "internal/repoidentity/repoidentity_test.go",
+        "internal/repoidentity/golden_behavior_test.go"
+      ],
+      "verifiers": [
+        "TestRepoIdentityBehaviorGolden",
+        "TestIdentity"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "9cb21e5c410073ab613673e21d9a990af92aee7dbae289b3d8ef77545bbd57f5"
+    },
+    {
+      "id": "shared_contract_compat_must_preserve_generated_contract_surface",
+      "statement": "The internal contracts compatibility mirror must preserve assignment FSM, task FSM, approval, provider capability fingerprint, catalog default model, and localized progress-message behavior while syntax hash graphing expands only after the compatibility behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/assignment-contract.yml",
+        "docs/20-domain/saas-control-plane.riido.json",
+        "docs/20-domain/saas-control-plane.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "internal/contractscompat/assignment_test.go",
+        "internal/contractscompat/capability_test.go",
+        "internal/contractscompat/progress_message_test.go",
+        "internal/contractscompat/task_test.go",
+        "internal/contractscompat/golden_behavior_test.go"
+      ],
+      "verifiers": [
+        "TestContractsCompatBehaviorGolden",
+        "TestAssignmentFSMBaseline",
+        "TestAssignmentApprovalBaseline",
+        "TestCapabilityFingerprintBaseline",
+        "TestProgressMessageBaseline",
+        "TestTaskFSMBaseline"
+      ],
+      "generated_docs": [
+        "docs/20-domain/saas-control-plane.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "92dd92a7fbd85ba333fee777ddeb971b42831041169a19b36eb3a1039ada7f3e"
+    },
+    {
+      "id": "request_authorization_must_preserve_security_boundary",
+      "statement": "The request authorization SSOT and verifier must preserve static token, device principal, external authorizer, fallback, coalescing, CORS, token transport, runtime config, and fail-closed security semantics while syntax hash graphing expands only after the request authorization behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/external-authorizer.yml",
+        "docs/20-domain/request-authorization.riido.json",
+        "docs/20-domain/request-authorization.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/requestauth/constants.go",
+        "tools/requestauth/evidence.go",
+        "tools/requestauth/io.go",
+        "tools/requestauth/main.go",
+        "tools/requestauth/main_test.go",
+        "tools/requestauth/path.go",
+        "tools/requestauth/render.go",
+        "tools/requestauth/render_rules.go",
+        "tools/requestauth/run.go",
+        "tools/requestauth/types.go",
+        "tools/requestauth/verify.go",
+        "tools/requestauth/verify_doc.go",
+        "tools/requestauth/verify_domain.go",
+        "tools/requestauth/verify_loop.go",
+        "tools/requestauth/verify_source.go"
+      ],
+      "verifiers": [
+        "TestRequestAuthorizationBehaviorGolden",
+        "TestRunWritesEvidence",
+        "TestGoRunWiresCLIFlags",
+        "TestGeneratedDocMatchesManifest"
+      ],
+      "generated_docs": [
+        "docs/20-domain/request-authorization.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "0cf3cf284c784746b2d90b3d66bb2b83c9b7cb1bc77c3a8e8265488cc0b9ad27"
+    },
+    {
+      "id": "health_ready_command_must_preserve_public_runtime_probe",
+      "statement": "The health-ready command SSOT and verifier must preserve public /healthz and /readyz response contracts plus command runtime configuration source anchors while syntax hash graphing expands only after the health-ready behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/health-ready-cmd.yml",
+        "docs/30-architecture/health-ready-cmd.riido.json",
+        "docs/30-architecture/health-ready-cmd.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/healthreadycmd/constants.go",
+        "tools/healthreadycmd/evidence.go",
+        "tools/healthreadycmd/http.go",
+        "tools/healthreadycmd/io.go",
+        "tools/healthreadycmd/main.go",
+        "tools/healthreadycmd/main_test.go",
+        "tools/healthreadycmd/options.go",
+        "tools/healthreadycmd/path.go",
+        "tools/healthreadycmd/render.go",
+        "tools/healthreadycmd/render_more.go",
+        "tools/healthreadycmd/run.go",
+        "tools/healthreadycmd/source.go",
+        "tools/healthreadycmd/types.go",
+        "tools/healthreadycmd/verify.go",
+        "tools/healthreadycmd/verify_doc.go"
+      ],
+      "verifiers": [
+        "TestHealthReadyCommandBehaviorGolden",
+        "TestRunWritesEvidence",
+        "TestGoRunWiresCLIFlags",
+        "TestGeneratedDocMatchesManifest"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/health-ready-cmd.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "8f1d975312cceededa09de420100cadd5fb9bae73e3e2c7325a28024f7ec3fa4"
+    },
+    {
+      "id": "runtime_deployment_boundary_must_preserve_public_private_ownership",
+      "statement": "The runtime deployment boundary SSOT and verifier must preserve public/private deployment ownership, linked runtime-CD manifest shape, redaction anchors, and evidence phrase checks while syntax hash graphing expands only after the runtime boundary behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/runtime-deployment-boundary.yml",
+        "docs/30-architecture/runtime-deployment-boundary.riido.json",
+        "docs/30-architecture/runtime-deployment-boundary.md",
+        "docs/30-architecture/runtime-cd-ownership.riido.json",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/runtimeboundary/constants.go",
+        "tools/runtimeboundary/evidence.go",
+        "tools/runtimeboundary/io.go",
+        "tools/runtimeboundary/main.go",
+        "tools/runtimeboundary/main_test.go",
+        "tools/runtimeboundary/path.go",
+        "tools/runtimeboundary/render.go",
+        "tools/runtimeboundary/render_more.go",
+        "tools/runtimeboundary/run.go",
+        "tools/runtimeboundary/types.go",
+        "tools/runtimeboundary/verify.go",
+        "tools/runtimeboundary/verify_doc.go",
+        "tools/runtimeboundary/verify_more.go"
+      ],
+      "verifiers": [
+        "TestRuntimeBoundaryBehaviorGolden",
+        "TestRuntimeBoundaryManifest"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/runtime-deployment-boundary.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "f0d20752b51e0e0bac9b557c0a87b8a849c2eca36e75e85056f71cfe1c623434"
+    },
+    {
+      "id": "config_reference_must_preserve_env_manifest_parity",
+      "statement": "The config-reference SSOT and verifier must preserve parity between cmd/riido_ai_server environment reads and the public config manifest, including secret and operator-only classifications, while syntax hash graphing expands only after the config reference behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/config-reference.yml",
+        "docs/30-architecture/config-reference.riido.json",
+        "docs/30-architecture/config-reference.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/configreference/constants.go",
+        "tools/configreference/envscan.go",
+        "tools/configreference/envscan_more.go",
+        "tools/configreference/evidence.go",
+        "tools/configreference/io.go",
+        "tools/configreference/main.go",
+        "tools/configreference/main_test.go",
+        "tools/configreference/path.go",
+        "tools/configreference/render.go",
+        "tools/configreference/render_more.go",
+        "tools/configreference/run.go",
+        "tools/configreference/types.go",
+        "tools/configreference/verify.go",
+        "tools/configreference/verify_doc.go",
+        "tools/configreference/verify_more.go"
+      ],
+      "verifiers": [
+        "TestConfigReferenceBehaviorGolden",
+        "TestConfigReferenceEvidence",
+        "TestConfigReferenceGeneratedDocFresh"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/config-reference.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "3428ef0c312b443da43d37c8ef47376f6215fe17677eaaedac11415b13cb9a60"
+    },
+    {
+      "id": "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
+      "statement": "The agent runtime binding SSOT and verifier must preserve required agent, daemon, runtime, and provider binding fields; unique-agent ownership; assignment provider, daemon id, runtime id, and optional device id checks; connected workspace visibility; cross-workspace binding visibility; legacy runtime pruning; source anchors; generated reader freshness; and the focused evidence counts so agents cannot infer runtime binding behavior from prose or collapse multiple daemon/runtime identities into one unchecked surface.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/agent-runtime-binding.yml",
+        ".github/workflows/syntax-hash.yml",
+        "docs/20-domain/agent-runtime-binding.riido.json",
+        "docs/20-domain/agent-runtime-binding.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/agentruntimebinding/evidence.go",
+        "tools/agentruntimebinding/main.go",
+        "tools/agentruntimebinding/main_test.go",
+        "tools/agentruntimebinding/pathutil/path.go",
+        "tools/agentruntimebinding/requirements/constants.go",
+        "tools/agentruntimebinding/run.go",
+        "tools/agentruntimebinding/verify.go",
+        "tools/agentruntimebinding/verify_domain.go",
+        "tools/agentruntimebinding/verify_source.go"
+      ],
+      "verifiers": [
+        "TestAgentRuntimeBindingBehaviorGolden",
+        "TestGeneratedDocMatchesManifest"
+      ],
+      "generated_docs": [
+        "docs/20-domain/agent-runtime-binding.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "5ef114f4dbf380c2d884aa72ea225becd99b2b1ac0d2bfab4d60c7f80657bea5"
+    },
+    {
+      "id": "assignment_operation_journal_must_preserve_replay_and_claim_ports",
+      "statement": "The assignment operation journal SSOT and verifier must preserve required assignment operation ports, projection and active lease records, replay ordering and dedupe rules, version constants, source anchors, generated reader freshness, and focused evidence counts so agents cannot infer durable assignment replay behavior from prose or collapse claim, lease, projection, and replay semantics into unchecked code movement.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/assignment-operation-journal.yml",
+        ".github/workflows/syntax-hash.yml",
+        "docs/20-domain/assignment-operation-journal.riido.json",
+        "docs/20-domain/assignment-operation-journal.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "internal/riidoaiserver/assignment_operation_port.go",
+        "internal/riidoaiserver/assignment_operation_replay.go",
+        "internal/riidoaiserver/assignment_operation_port_test.go",
+        "internal/riidoaiserver/assignment_operation_replay_test.go",
+        "tools/assignmentjournal/evidence.go",
+        "tools/assignmentjournal/main.go",
+        "tools/assignmentjournal/main_test.go",
+        "tools/assignmentjournal/pathutil/path.go",
+        "tools/assignmentjournal/requirements/constants.go",
+        "tools/assignmentjournal/run.go",
+        "tools/assignmentjournal/verify.go",
+        "tools/assignmentjournal/verify_domain.go",
+        "tools/assignmentjournal/verify_source.go"
+      ],
+      "verifiers": [
+        "TestAssignmentJournalBehaviorGolden",
+        "TestGeneratedDocMatchesManifest",
+        "TestAssignmentOperationRecordValidation",
+        "TestAssignmentOperationReplayOrdersAndDedupesEvents"
+      ],
+      "generated_docs": [
+        "docs/20-domain/assignment-operation-journal.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "925dbefc8219163194c0c8d16b7e78d837d366631c1e0c58965828452e94d8aa"
+    },
+    {
+      "id": "cloudwatch_emf_shape_must_preserve_metric_scope_evidence",
+      "statement": "The CloudWatch EMF SSOT and verifier must preserve required EMF dimensions, JSON fields, metric scopes, metric units, source anchors, generated reader freshness, and focused evidence counts so observability agents cannot confuse rolling, cumulative, and process-lifetime metrics or infer CloudWatch shape from prose.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/cloudwatch-emf.yml",
+        ".github/workflows/syntax-hash.yml",
+        "docs/30-architecture/cloudwatch-emf.riido.json",
+        "docs/30-architecture/cloudwatch-emf.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "internal/riidoaiserver/cloudwatch_emf_envelope.go",
+        "internal/riidoaiserver/cloudwatch_emf_envelope_http.go",
+        "internal/riidoaiserver/cloudwatch_emf_metric_specs.go",
+        "internal/riidoaiserver/cloudwatch_emf_write_test.go",
+        "tools/cloudwatchemf/evidence.go",
+        "tools/cloudwatchemf/main.go",
+        "tools/cloudwatchemf/main_test.go",
+        "tools/cloudwatchemf/pathutil/path.go",
+        "tools/cloudwatchemf/requirements/constants.go",
+        "tools/cloudwatchemf/run.go",
+        "tools/cloudwatchemf/verify.go",
+        "tools/cloudwatchemf/verify_doc.go"
+      ],
+      "verifiers": [
+        "TestCloudWatchEMFBehaviorGolden",
+        "TestGeneratedDocMatchesManifest",
+        "TestWriteCloudWatchEMF",
+        "TestPublishCloudWatchEMFUsesStoreSnapshot"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/cloudwatch-emf.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "e850d41b2ac46b7a5984907f2edc858a919922166de1f1f3e50d8358b35bb619"
+    },
+    {
+      "id": "saas_control_plane_boundaries_must_remain_executable",
+      "statement": "The SaaS control-plane SSOT and verifier must preserve deployment boundary counts, focused workflow coverage, required source checks, shared contract imports, generated reader freshness, and required reader phrases so agents cannot infer live control-plane ownership, blue/green deploy behavior, or public/private contract scope from prose.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/saas-control-plane.yml",
+        ".github/workflows/syntax-hash.yml",
+        "docs/20-domain/saas-control-plane.riido.json",
+        "docs/20-domain/saas-control-plane.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/saascontrolplane/evidence.go",
+        "tools/saascontrolplane/main.go",
+        "tools/saascontrolplane/main_test.go",
+        "tools/saascontrolplane/pathutil/path.go",
+        "tools/saascontrolplane/requirements/constants.go",
+        "tools/saascontrolplane/run.go",
+        "tools/saascontrolplane/setutil/set.go",
+        "tools/saascontrolplane/verify.go",
+        "tools/saascontrolplane/verify_boundary.go",
+        "tools/saascontrolplane/verify_doc.go",
+        "tools/saascontrolplane/verify_source.go",
+        "tools/saascontrolplane/verify_workflow.go"
+      ],
+      "verifiers": [
+        "TestSaaSControlPlaneBehaviorGolden",
+        "TestBoundaryEvidence",
+        "TestUnknownBoundaryFails",
+        "TestGeneratedDocMatchesManifest"
+      ],
+      "generated_docs": [
+        "docs/20-domain/saas-control-plane.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "669707e84e6757a02da8313f4684b1050311cbddcc4cd4903ccb9c70359052ff"
+    },
+    {
+      "id": "snapshot_cqrs_gate_must_scope_store_split_decisions",
+      "statement": "The AI Agent snapshot CQRS gate SSOT and verifier must preserve the narrow snapshot-only split decision, required snapshot load/save/poll operations, measurement signals, decision thresholds, cadence rules, candidate command/query split, and forbidden public trace attributes so agents cannot promote store-wide CQRS or expose task, agent, credential, or payload document data from prose or memory.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/architecture-docs.yml",
+        ".github/workflows/syntax-hash.yml",
+        "docs/30-architecture/ai-agent-snapshot-cqrs-gate.riido.json",
+        "docs/30-architecture/ai-agent-snapshot-cqrs-gate.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/snapshotcqrsgate/evidence.go",
+        "tools/snapshotcqrsgate/main.go",
+        "tools/snapshotcqrsgate/main_test.go",
+        "tools/snapshotcqrsgate/pathutil/root.go",
+        "tools/snapshotcqrsgate/requirements/constants.go",
+        "tools/snapshotcqrsgate/verify.go",
+        "tools/snapshotcqrsgate/verify_operations.go",
+        "tools/snapshotcqrsgate/verify_rules.go"
+      ],
+      "verifiers": [
+        "TestSnapshotCQRSGateBehaviorGolden"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/ai-agent-snapshot-cqrs-gate.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "7f4d599cea1d951e2c8a2dd4462dcc13768b79fb89c0d5c086b301797bb15068"
+    },
+    {
+      "id": "store_safe_routing_must_preserve_provider_status_decisions",
+      "statement": "The store-safe routing SSOT, verifier, and evaluator must preserve provider-status allow/block/error decisions through the real EvaluateStoreSafeRouting path while syntax hash graphing expands only after the store-safe routing behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/store-safe-routing.yml",
+        "docs/20-domain/provider-status.riido.json",
+        "docs/20-domain/provider-status.md",
+        "docs/30-architecture/store-safe-routing.riido.json",
+        "docs/30-architecture/store-safe-routing.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "internal/riidoaiserver/provider_status.go",
+        "internal/riidoaiserver/store_safe_routing.go",
+        "internal/riidoaiserver/store_safe_routing_test.go",
+        "tools/storesaferouting/constants.go",
+        "tools/storesaferouting/evidence.go",
+        "tools/storesaferouting/io.go",
+        "tools/storesaferouting/main.go",
+        "tools/storesaferouting/main_test.go",
+        "tools/storesaferouting/options.go",
+        "tools/storesaferouting/path.go",
+        "tools/storesaferouting/render.go",
+        "tools/storesaferouting/routing.go",
+        "tools/storesaferouting/run.go",
+        "tools/storesaferouting/source.go",
+        "tools/storesaferouting/types.go",
+        "tools/storesaferouting/verify.go",
+        "tools/storesaferouting/verify_doc.go",
+        "tools/providerstatus/main_test.go",
+        "tools/providerstatus/pathutil/path.go",
+        "tools/providerstatus/renderutil/section.go",
+        "tools/providerstatus/requirements/requirements.go",
+        "tools/providerstatus/requirements/rules.go"
+      ],
+      "verifiers": [
+        "TestStoreSafeRoutingBehaviorGolden",
+        "TestProviderStatusBehaviorGolden",
+        "TestRunWritesEvidence",
+        "TestGoRunWiresCLIFlags",
+        "TestGeneratedDocMatchesManifest",
+        "TestStoreSafeRoutingAllowsAvailableProvider",
+        "TestStoreSafeRoutingBlocksUnavailableProviderStatuses",
+        "TestStoreSafeRoutingBlocksMissingSyncedProvider",
+        "TestStoreSafeRoutingKeepsLegacyAssignmentWhenNoStatusWasSynced",
+        "TestStoreSafeRoutingRejectsInvalidInput"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/store-safe-routing.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "b02a8b7b9da5e8eb699898766ed0f5cd4c35defbf036b1d8a08a5b9e451a4957"
+    },
+    {
+      "id": "go_ci_baseline_must_preserve_broad_ci_contract",
+      "statement": "The Go CI baseline SSOT and verifier must preserve the broad workflow contract for go.mod version selection, module download, pinned golangci-lint, full go test, and strict baseline evidence upload while syntax hash graphing expands only after the Go CI baseline behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/go-ci.yml",
+        "docs/30-architecture/go-ci-baseline.riido.json",
+        "docs/30-architecture/go-ci-baseline.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/gocibaseline/constants.go",
+        "tools/gocibaseline/evidence.go",
+        "tools/gocibaseline/golden_behavior_test.go",
+        "tools/gocibaseline/io.go",
+        "tools/gocibaseline/main.go",
+        "tools/gocibaseline/main_test.go",
+        "tools/gocibaseline/path.go",
+        "tools/gocibaseline/render.go",
+        "tools/gocibaseline/render_more.go",
+        "tools/gocibaseline/run.go",
+        "tools/gocibaseline/types.go",
+        "tools/gocibaseline/verify.go",
+        "tools/gocibaseline/verify_doc.go",
+        "tools/gocibaseline/verify_workflow.go"
+      ],
+      "verifiers": [
+        "TestGoCIBaselineBehaviorGolden",
+        "TestGoCIBaselineManifest"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/go-ci-baseline.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "cd4813946716f25137d42240bca1a03a5c4fbe79ec060119be9c08510956b7f5"
+    },
+    {
+      "id": "web_frontend_api_must_preserve_cors_contract",
+      "statement": "The web frontend API SSOT and verifier must preserve browser CORS behavior for allowed preflight, allowed actual requests, rejected origins, unsupported headers, runtime origin configuration, source anchors, generated reader freshness, and strict evidence upload while syntax hash graphing expands only after the web frontend API behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/web-frontend-api.yml",
+        "docs/30-architecture/web-frontend-api.riido.json",
+        "docs/30-architecture/web-frontend-api.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/webfrontendapi/constants.go",
+        "tools/webfrontendapi/cors.go",
+        "tools/webfrontendapi/evidence.go",
+        "tools/webfrontendapi/golden_behavior_test.go",
+        "tools/webfrontendapi/io.go",
+        "tools/webfrontendapi/main.go",
+        "tools/webfrontendapi/main_test.go",
+        "tools/webfrontendapi/options.go",
+        "tools/webfrontendapi/path.go",
+        "tools/webfrontendapi/render.go",
+        "tools/webfrontendapi/run.go",
+        "tools/webfrontendapi/source.go",
+        "tools/webfrontendapi/types.go",
+        "tools/webfrontendapi/verify.go",
+        "tools/webfrontendapi/verify_doc.go"
+      ],
+      "verifiers": [
+        "TestWebFrontendAPIBehaviorGolden",
+        "TestRunWritesEvidence",
+        "TestGoRunWiresCLIFlags",
+        "TestGeneratedDocMatchesManifest"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/web-frontend-api.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "799734454c16889b90442b36a155e27f47ff4c3d5e47372b8f26fa75c6bb6ece"
+    },
+    {
+      "id": "ai_agent_risk_evidence_must_preserve_boundary_manifest",
+      "statement": "The AI Agent risk evidence manifest and verifier must preserve verified local risk tests, external contract evidence, remaining ownership boundaries, loop metadata, architecture-doc evidence upload, and the risk handoff doc link while syntax hash graphing expands only after the AI Agent risk evidence behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/architecture-docs.yml",
+        "docs/30-architecture/ai-agent-risk-evidence.riido.json",
+        "docs/30-architecture/api-client-delivery.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/aiagentrisk/constants.go",
+        "tools/aiagentrisk/errors.go",
+        "tools/aiagentrisk/evidence.go",
+        "tools/aiagentrisk/load.go",
+        "tools/aiagentrisk/main.go",
+        "tools/aiagentrisk/main_test.go",
+        "tools/aiagentrisk/root.go",
+        "tools/aiagentrisk/source.go",
+        "tools/aiagentrisk/types.go",
+        "tools/aiagentrisk/verify.go",
+        "tools/aiagentrisk/verify_boundary.go",
+        "tools/aiagentrisk/verify_evidence.go",
+        "tools/aiagentrisk/verify_external.go",
+        "tools/aiagentrisk/verify_header.go",
+        "tools/aiagentrisk/verify_loop.go"
+      ],
+      "verifiers": [
+        "TestAIAgentRiskBehaviorGolden",
+        "TestDefaultManifestVerifies",
+        "TestRunAcceptsCheckDoc"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/api-client-delivery.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "bbde7f78086bab926222c254e89d619fbe97fb6f45cfa89eff643d3d17d85bf4"
+    },
+    {
+      "id": "migration_ledger_must_preserve_historical_evidence",
+      "statement": "The migration ledger manifest, generated reader, workflow, and verifier must preserve historical control-plane migration slices, required section coverage, validation gates, Riido references, loop metadata, and strict evidence upload while syntax hash graphing expands only after the migration ledger behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/migration-ledger.yml",
+        "docs/migration/control-plane.riido.json",
+        "docs/migration/control-plane.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/migrationledger/constants.go",
+        "tools/migrationledger/evidence.go",
+        "tools/migrationledger/io.go",
+        "tools/migrationledger/main.go",
+        "tools/migrationledger/main_test.go",
+        "tools/migrationledger/path.go",
+        "tools/migrationledger/render.go",
+        "tools/migrationledger/render_loop.go",
+        "tools/migrationledger/run.go",
+        "tools/migrationledger/section_counts.go",
+        "tools/migrationledger/types.go",
+        "tools/migrationledger/verify.go",
+        "tools/migrationledger/verify_doc.go",
+        "tools/migrationledger/verify_loop.go",
+        "tools/migrationledger/verify_sections.go"
+      ],
+      "verifiers": [
+        "TestMigrationLedgerBehaviorGolden",
+        "TestMigrationLedgerGeneratedDocFresh"
+      ],
+      "generated_docs": [
+        "docs/migration/control-plane.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "5b2ed32352d4f9e4e00f92b1ff4906a60c62621959991fdc5bf6ac7ad22190fc"
+    },
+    {
+      "id": "metrics_http_adapter_must_preserve_public_metrics_contract",
+      "statement": "The metrics HTTP adapter SSOT and verifier must preserve the GET /metrics public route, scoped authorization result, fail-closed missing-scope and store-unconfigured statuses, required metrics JSON fields, source anchors, generated reader freshness, and focused workflow evidence so agents cannot infer observability contract shape from prose or expose runtime counters without the executable adapter test.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/metrics-http-adapter.yml",
+        ".github/workflows/syntax-hash.yml",
+        "docs/30-architecture/metrics-http-adapter.riido.json",
+        "docs/30-architecture/metrics-http-adapter.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "internal/riidoaiserver/assignment_api.go",
+        "internal/riidoaiserver/assignment_metrics_test.go",
+        "internal/riidoaiserver/server_metrics_http.go",
+        "tools/metricshttpadapter/adapter.go",
+        "tools/metricshttpadapter/evidence.go",
+        "tools/metricshttpadapter/http_authorized.go",
+        "tools/metricshttpadapter/http_calls.go",
+        "tools/metricshttpadapter/http_failures.go",
+        "tools/metricshttpadapter/main.go",
+        "tools/metricshttpadapter/main_test.go",
+        "tools/metricshttpadapter/pathutil/path.go",
+        "tools/metricshttpadapter/requirements/constants.go",
+        "tools/metricshttpadapter/run.go",
+        "tools/metricshttpadapter/runconfig/options.go",
+        "tools/metricshttpadapter/sourcechecks/verify.go",
+        "tools/metricshttpadapter/statuscheck/verify.go",
+        "tools/metricshttpadapter/verify.go",
+        "tools/metricshttpadapter/verify_doc.go"
+      ],
+      "verifiers": [
+        "TestMetricsHTTPAdapterBehaviorGolden",
+        "TestGeneratedDocMatchesManifest",
+        "TestHTTPMetricsReturnsAssignmentSnapshot",
+        "TestHTTPMetricsRequiresScopedAuthorization",
+        "TestHTTPMetricsStoreNotConfiguredFailsClosed"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/metrics-http-adapter.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "7604dc017430eeb445b094e07218fdb460527bdefcf4b7317b1e47e5e91f9b5f"
+    },
+    {
+      "id": "agent_catalog_rbac_must_preserve_catalog_authorization_contract",
+      "statement": "The agent catalog RBAC SSOT and verifier must preserve role, visibility, action, route, DTO, store-port, source-anchor, generated reader, and workflow evidence for the v1 agent catalog so agents cannot infer private-agent visibility or mutation rules from prose, split helper files without a golden lock, or drift the catalog authorization contract while syntax hash coverage expands.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/agent-catalog-api-port.yml",
+        ".github/workflows/agent-catalog-http-adapter.yml",
+        ".github/workflows/agent-catalog-rbac.yml",
+        ".github/workflows/syntax-hash.yml",
+        "docs/20-domain/agent-catalog-rbac.riido.json",
+        "docs/20-domain/agent-catalog-rbac.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "internal/riidoaiserver/agent_catalog_api.go",
+        "internal/riidoaiserver/agent_catalog_api_test.go",
+        "internal/riidoaiserver/agent_catalog_port.go",
+        "internal/riidoaiserver/agent_catalog_rbac.go",
+        "internal/riidoaiserver/agent_catalog_rbac_test.go",
+        "internal/riidoaiserver/agent_catalog_store.go",
+        "internal/riidoaiserver/agent_catalog_store_test.go",
+        "internal/riidoaiserver/server_test.go",
+        "tools/agentcatalogrbac/evidence.go",
+        "tools/agentcatalogrbac/main.go",
+        "tools/agentcatalogrbac/main_test.go",
+        "tools/agentcatalogrbac/pathutil/path.go",
+        "tools/agentcatalogrbac/profile.go",
+        "tools/agentcatalogrbac/requirements/constants.go",
+        "tools/agentcatalogrbac/run.go",
+        "tools/agentcatalogrbac/setutil/contains.go",
+        "tools/agentcatalogrbac/verify.go",
+        "tools/agentcatalogrbac/verify_doc.go",
+        "tools/agentcatalogrbac/verify_domain.go",
+        "tools/agentcatalogrbac/verify_source.go"
+      ],
+      "verifiers": [
+        "TestAgentCatalogRBACBehaviorGolden",
+        "TestGeneratedDocMatchesManifest",
+        "TestAgentCatalogAPIDTOsExposeOnlyCatalogShape",
+        "TestAgentCatalogAPIResponsesIncludeSchemaAndRecords",
+        "TestAgentCatalogStoreActorSerializesCatalogCommands",
+        "TestAgentCatalogStorePortShape",
+        "TestAgentCatalogRBACAdminSeesAndMutatesPublicAndPrivateAgents",
+        "TestAgentCatalogRBACOwnerIsAdminForOwnAgents",
+        "TestAgentCatalogRBACNonAdminSeesOwnedAndOtherPublicAgents",
+        "TestAgentCatalogRBACPublicVisibilityDoesNotGrantMutation",
+        "TestStaticTokenAuthorizerReturnsAgentCatalogRoles",
+        "TestHTTPAgentCatalogRBACAdminSeesAndMutatesPrivateAgents",
+        "TestHTTPAgentCatalogRBACListShowsOwnAndOtherPublicAgents",
+        "TestHTTPAgentCatalogRBACOwnerMutatesOwnedAgents",
+        "TestHTTPAgentCatalogRBACPublicReadDoesNotGrantMutation"
+      ],
+      "generated_docs": [
+        "docs/20-domain/agent-catalog-rbac.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "c181cef38a41b9d3eaa8ae6ed48f892090a2df40c2fbd72d2b25798317591c5d"
+    },
+    {
+      "id": "integration_matrix_must_preserve_public_private_boundary",
+      "statement": "The integration matrix manifest, generated reader, workflow, verifier, and path adapter must preserve public PR-safe gates, operator/private gates, forbidden dependency wording, workflow references, command references, and strict evidence upload while syntax hash graphing expands only after the integration matrix behavior golden is locked.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern",
+        "operator_decision"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier",
+        "evidence_expired"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence",
+        "workflow-evidence"
+      ],
+      "files": [
+        ".github/workflows/integration-matrix.yml",
+        "docs/30-architecture/integration-matrix.riido.json",
+        "docs/30-architecture/integration-matrix.md",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/integrationmatrix/constants.go",
+        "tools/integrationmatrix/evidence.go",
+        "tools/integrationmatrix/io.go",
+        "tools/integrationmatrix/main.go",
+        "tools/integrationmatrix/main_test.go",
+        "tools/integrationmatrix/pathutil/path.go",
+        "tools/integrationmatrix/render.go",
+        "tools/integrationmatrix/render_loop.go",
+        "tools/integrationmatrix/render_tables.go",
+        "tools/integrationmatrix/run.go",
+        "tools/integrationmatrix/types.go",
+        "tools/integrationmatrix/verify.go",
+        "tools/integrationmatrix/verify_doc.go",
+        "tools/integrationmatrix/verify_private.go",
+        "tools/integrationmatrix/verify_public.go",
+        "tools/integrationmatrix/verify_workflow.go"
+      ],
+      "verifiers": [
+        "TestIntegrationMatrixBehaviorGolden",
+        "TestIntegrationMatrixGeneratedDocFresh"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/integration-matrix.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "391284377b32a7e9813671fb91e4eecce3fccf9a470a2b47bb456848e2356b02"
+    },
+    {
+      "id": "context_map_must_guard_public_boundaries",
+      "statement": "The context map SSOT and verifier must preserve public control-plane boundary knowledge while syntax hash graphing expands only through behavior-golden packages and reuses existing semantic hash generation unchanged.",
+      "loop": "loop_closure_audit",
+      "covers_observes": [
+        "claim_bound_surface_drift",
+        "human_exit_objective"
+      ],
+      "covers_verifies": [
+        "closure_requirement_coverage",
+        "pre_commit_claim_gate"
+      ],
+      "covers_fails_when": [
+        "claim_gate_missing",
+        "graph_chain_missing"
+      ],
+      "covers_evidence": [
+        "loop-closure-audit-evidence"
+      ],
+      "files": [
+        "docs/20-domain/context-map.riido.json",
+        "docs/20-domain/context-map.md",
+        "dependency_allowlist.riido.json",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/syntax-hash.md",
+        "tools/contextmap/golden_behavior_test.go",
+        "tools/contextmap/main.go",
+        "tools/contextmap/run.go",
+        "tools/contextmap/verify.go",
+        "tools/dependencyallowlist/evidence_test.go",
+        "tools/dependencyallowlist/layers/layers.go",
+        "tools/dependencyallowlist/main.go",
+        "tools/dependencyallowlist/verify.go",
+        "tools/syntaxhash/constraints.go",
+        "tools/syntaxhash/graph_types.go",
+        "tools/syntaxhash/io.go",
+        "tools/syntaxhash/loop_registry.go",
+        "tools/syntaxhash/main.go",
+        "tools/syntaxhash/normalize.go",
+        "tools/syntaxhash/normalize_decl.go",
+        "tools/syntaxhash/render.go",
+        "tools/syntaxhash/repository.go",
+        "tools/syntaxhash/run.go",
+        "tools/syntaxhash/scan.go",
+        "tools/syntaxhash/scan_more.go",
+        "tools/syntaxhash/syntaxhash_test.go",
+        "tools/syntaxhash/types.go",
+        "tools/syntaxhash/verify.go"
+      ],
+      "verifiers": [
+        "TestContextMapBehaviorGolden",
+        "TestDependencyAllowlistBehaviorGolden",
+        "TestSyntaxHashGraphUsesGoldenLockedContextMap",
+        "TestSyntaxHashToolBehaviorGolden",
+        "TestSyntaxHashGeneratedDocMatches"
+      ],
+      "generated_docs": [
+        "docs/20-domain/context-map.md",
+        "docs/30-architecture/syntax-hash.md",
+        "docs/30-architecture/loop-registry.md"
+      ],
+      "semantic_hash": "0b36d4b72eaa02601d059c10f8e690c00947794b2257dcb8c7f3efa1057d6eed"
     }
   ],
   "evidence_graph": [
     {
       "from": "closed_loop_candidate",
       "to": "container_image_contract_must_bind_runtime_shape",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "public_aws_adapter_facade_must_preserve_contract",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "runtime_adapter_config_must_preserve_public_env_contract",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "repo_identity_must_anchor_public_module_boundary",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "shared_contract_compat_must_preserve_generated_contract_surface",
       "relation": "enforces"
     },
     {
@@ -4867,6 +6164,96 @@
     {
       "from": "closed_loop_candidate",
       "to": "server_route_handlers_must_stay_semantically_split",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "request_authorization_must_preserve_security_boundary",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "health_ready_command_must_preserve_public_runtime_probe",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "runtime_deployment_boundary_must_preserve_public_private_ownership",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "config_reference_must_preserve_env_manifest_parity",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "assignment_operation_journal_must_preserve_replay_and_claim_ports",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "cloudwatch_emf_shape_must_preserve_metric_scope_evidence",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "saas_control_plane_boundaries_must_remain_executable",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "snapshot_cqrs_gate_must_scope_store_split_decisions",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "store_safe_routing_must_preserve_provider_status_decisions",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "go_ci_baseline_must_preserve_broad_ci_contract",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "web_frontend_api_must_preserve_cors_contract",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "ai_agent_risk_evidence_must_preserve_boundary_manifest",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "migration_ledger_must_preserve_historical_evidence",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "metrics_http_adapter_must_preserve_public_metrics_contract",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "agent_catalog_rbac_must_preserve_catalog_authorization_contract",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "integration_matrix_must_preserve_public_private_boundary",
+      "relation": "enforces"
+    },
+    {
+      "from": "loop_closure_audit",
+      "to": "context_map_must_guard_public_boundaries",
       "relation": "enforces"
     }
   ],

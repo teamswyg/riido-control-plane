@@ -5,9 +5,11 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/teamswyg/riido-control-plane/tools/assignmentjournal/requirements"
 )
 
-func TestRunWritesEvidence(t *testing.T) {
+func TestAssignmentJournalBehaviorGolden(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "evidence.json")
 	if err := mainRun([]string{"-evidence-out", out}); err != nil {
 		t.Fatal(err)
@@ -20,10 +22,10 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.SchemaVersion != evidenceSchema || got.ReplayRules != len(requiredReplayRules) {
+	if got.SchemaVersion != requirements.EvidenceSchema || got.ReplayRules != 8 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
-	if got.Ports != len(requiredPorts) || got.Records != len(requiredRecords) {
+	if got.Ports != 6 || got.Records != 4 || got.Constants != 4 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
 	if got.Loop.Observation == "" || got.Loop.Evaluate == "" {

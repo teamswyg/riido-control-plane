@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/saascontrolplane/pathutil"
+)
 
 type options struct {
 	Repo        string
@@ -12,7 +16,7 @@ type options struct {
 }
 
 func run(opt options) error {
-	m, err := loadManifest(repoPath(opt.Repo, opt.Manifest))
+	m, err := loadManifest(pathutil.RepoPath(opt.Repo, opt.Manifest))
 	if err != nil {
 		return err
 	}
@@ -28,7 +32,7 @@ func run(opt options) error {
 		return err
 	}
 	if opt.WriteDoc {
-		if err := writeText(repoPath(opt.Repo, m.GeneratedDoc), doc); err != nil {
+		if err := writeText(pathutil.RepoPath(opt.Repo, m.GeneratedDoc), doc); err != nil {
 			return fmt.Errorf("write generated doc: %w", err)
 		}
 	}

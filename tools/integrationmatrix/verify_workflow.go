@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/integrationmatrix/pathutil"
 )
 
 func verifyWorkflow(repoRoot, workflow string, pullRequestGate bool) error {
 	if workflow == "" {
 		return nil
 	}
-	path := repoPath(repoRoot, workflow)
+	path := pathutil.RepoPath(repoRoot, workflow)
 	body, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("read workflow %s: %w", workflow, err)

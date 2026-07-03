@@ -14,12 +14,9 @@ on:
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
-      - "internal/riidoaiserver/assignment_contract_gen.go"
-      - "internal/riidoaiserver/assignment_contract_test.go"
-      - "internal/riidoaiserver/assignment_api.go"
-      - "internal/riidoaiserver/assignment_api_test.go"
-      - "internal/riidoaiserver/agent_registry.go"
-      - "internal/riidoaiserver/agent_registry_test.go"
+      - "internal/riidoaiserver/assignment_*"
+      - "internal/riidoaiserver/agent_registry*"
+      - "internal/contractscompat/**"
   pull_request:
     paths:
       - ".github/workflows/assignment-contract.yml"
@@ -32,12 +29,9 @@ on:
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
-      - "internal/riidoaiserver/assignment_contract_gen.go"
-      - "internal/riidoaiserver/assignment_contract_test.go"
-      - "internal/riidoaiserver/assignment_api.go"
-      - "internal/riidoaiserver/assignment_api_test.go"
-      - "internal/riidoaiserver/agent_registry.go"
-      - "internal/riidoaiserver/agent_registry_test.go"
+      - "internal/riidoaiserver/assignment_*"
+      - "internal/riidoaiserver/agent_registry*"
+      - "internal/contractscompat/**"
 
 jobs:
   contract:
@@ -66,7 +60,9 @@ jobs:
             -check-doc \
             -evidence-out out/assignment-contract-evidence.json
       - name: Test assignment contract
-        run: go test ./internal/riidoaiserver -run 'AssignmentContract|AssignmentAPI|StaticAgentRegistry|ValidateAssignmentBinding|ValidateDaemonBinding' -count=1
+        run: |
+          go test ./internal/contractscompat -count=1
+          go test ./internal/riidoaiserver -run 'AssignmentContract|AssignmentAPI|StaticAgentRegistry|ValidateAssignmentBinding|ValidateDaemonBinding' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:
