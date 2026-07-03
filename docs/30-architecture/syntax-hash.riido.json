@@ -7,9 +7,7 @@
   "evidence_artifact": "syntax-hash-evidence",
   "evidence_tool": "tools/syntaxhash",
   "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
-  "artifact_roots": [
-    "tools/syntaxhash"
-  ],
+  "artifact_roots": ["tools/syntaxhash"],
   "targets": [
     {
       "id": "contextmap_spike",
@@ -45,6 +43,13 @@
       "golden_command": "go test ./internal/repoidentity -run TestRepoIdentityBehaviorGolden -count=1",
       "semantic_claim_id": "repo_identity_must_anchor_public_module_boundary",
       "mode": "golden_locked_public_identity_guard"
+    },
+    {
+      "id": "contracts_compat_mirror",
+      "package_path": "internal/contractscompat",
+      "golden_command": "go test ./internal/contractscompat -run TestContractsCompatBehaviorGolden -count=1",
+      "semantic_claim_id": "shared_contract_compat_must_preserve_generated_contract_surface",
+      "mode": "golden_locked_contract_compatibility_mirror"
     }
   ],
   "constraints": {

@@ -9974,6 +9974,7 @@
       "public_aws_adapter_facade_must_preserve_contract",
       "runtime_adapter_config_must_preserve_public_env_contract",
       "repo_identity_must_anchor_public_module_boundary",
+      "shared_contract_compat_must_preserve_generated_contract_surface",
       "context_map_must_guard_public_boundaries"
     ],
       "changes": [
@@ -10011,6 +10012,10 @@
     },
     {
       "kind": "test",
+      "path": "internal/contractscompat/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
       "path": "tools/syntaxhash/syntaxhash_test.go"
         }
       ],
@@ -10030,6 +10035,10 @@
     {
       "kind": "test",
       "path": "internal/repoidentity/golden_behavior_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/contractscompat/golden_behavior_test.go"
     },
     {
       "kind": "test",
@@ -10065,7 +10074,7 @@
           "redacted": true
         }
       ],
-  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
+  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
       "next_loop": "closed_loop_candidate_decision"
     }
   ],
