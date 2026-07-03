@@ -1,4 +1,4 @@
-package main
+package sourcechecks
 
 import (
 	"fmt"
@@ -6,7 +6,13 @@ import (
 	"strings"
 )
 
-func verifySourceChecks(root string, checks []sourceCheck) error {
+type Check struct {
+	Name     string
+	File     string
+	Contains []string
+}
+
+func Verify(root string, checks []Check, resolve func(string, string) string) error {
 	for _, check := range checks {
 		body, err := os.ReadFile(resolve(root, check.File))
 		if err != nil {

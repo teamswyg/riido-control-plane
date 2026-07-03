@@ -1,9 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/metricshttpadapter/pathutil"
+	"github.com/teamswyg/riido-control-plane/tools/metricshttpadapter/sourcechecks"
+	"github.com/teamswyg/riido-control-plane/tools/metricshttpadapter/statuscheck"
+)
 
 func verify(root string, m manifest, result adapterResult, checkDoc bool) error {
-	if err := verifySourceChecks(root, m.SourceChecks); err != nil {
+	if err := sourcechecks.Verify(root, sourceCheckAdapters(m.SourceChecks), pathutil.Resolve); err != nil {
 		return err
 	}
 	if err := verifyFields(m, result); err != nil {
@@ -28,4 +34,28 @@ func verifyFields(m manifest, result adapterResult) error {
 		}
 	}
 	return nil
+}
+
+func verifyStatuses(m manifest, result adapterResult) error {
+	return statuscheck.Verify(statusAdapters(m.RequiredStatuses), statuscheck.Result{
+		Authorized:   result.AuthorizedStatus,
+		MissingScope: result.MissingScopeStatus,
+		Unconfigured: result.UnconfiguredStatus,
+	})
+}
+
+func sourceCheckAdapters(items []sourceCheck) []sourcechecks.Check {
+	out := make([]sourcechecks.Check, 0, len(items))
+	for _, item := range items {
+		out = append(out, sourcechecks.Check(item))
+	}
+	return out
+}
+
+func statusAdapters(items []statusContract) []statuscheck.Required {
+	out := make([]statuscheck.Required, 0, len(items))
+	for _, item := range items {
+		out = append(out, statuscheck.Required(item))
+	}
+	return out
 }
