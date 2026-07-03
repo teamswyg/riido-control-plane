@@ -9775,6 +9775,113 @@
       ],
       "decision": "The server route surface is now represented as bounded semantic handler files and a verified static route registry instead of one monolithic server.go and hand-written mux registration; the split files are claim-bound, workflow-triggered, and covered by module-decomposition evidence so future route work cannot bypass the same verifier surface.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "completion_progress_completed_terminal_http_proof_loop",
+      "observation": "The Notion QA completion-progress P0 still needed evidence that a completed AI Agent assignment cannot be made to look active again by late daemon progress. Existing stop-terminal tests covered user stop, but completed terminal state had no HTTP-level v2/v3/subscription/SSE replay proof. Updating operational-readiness also changed loop-registry generated surfaces that are claim-bound to generated endpoint and route-handler gates.",
+      "hypothesis": "A focused HTTP regression test can prove the completed terminal path without changing endpoints: after assignment poll, running log, and assignment_completed, a late /thread-progress batch for the same assignment/thread/run must be rejected and must not leak into v2 threads, v3 history, active_thread_filters, or SSE replay. Binding that proof into operational-readiness and evidence-graph keeps generated endpoint and route-handler claims honest while leaving the product P0 partial until a same-moment browser/network reproduction is captured.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate",
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_v3_completed_refresh_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "completion-progress-completed-terminal-http-proof-2026-07-03",
+          "redacted": true
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/operational-readiness.md"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/completion_progress_terminal_http_proof_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_cycle_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_server_transfer_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_v3_completed_refresh_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/completion_progress_terminal_http_proof_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/completion-progress-completed-terminal-http-proof-2026-07-03.json"
+        },
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "module-decomposition-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The server side of the completed-but-still-progressing P0 is now narrower: completed assignments reject late daemon progress and expose no active stream/filter/replay residue across v2 and v3 HTTP surfaces. This is not product closure; operational-readiness stays partial until the next actual UI recurrence is captured with the redacted same-conversation v3/v2/subscription/SSE tool plus screenshot.",
+      "next_loop": "operational_readiness_release_harness"
     }
   ],
   "loop": {

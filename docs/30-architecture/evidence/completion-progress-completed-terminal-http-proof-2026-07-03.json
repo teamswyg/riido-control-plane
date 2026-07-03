@@ -1,0 +1,40 @@
+{
+  "schema_version": "riido-completion-progress-completed-terminal-http-proof.v1",
+  "id": "completion_progress_completed_terminal_http_proof_2026_07_03",
+  "captured_at": "2026-07-03T04:20:00Z",
+  "redacted": true,
+  "source": {
+    "notion_page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
+    "notion_discussion": "completion_progress_after_terminal",
+    "test": "internal/riidoaiserver/ai_agent_client_http_v3_completed_refresh_test.go"
+  },
+  "scenario": [
+    "POST v2 task assignment",
+    "POST daemon poll to move the durable assignment out of queued",
+    "POST running riido_log event",
+    "POST assignment_completed event",
+    "POST late /thread-progress for the same assignment/thread/run",
+    "GET v2 task threads",
+    "GET v3 task thread history",
+    "GET v2 thread-stream-subscription",
+    "GET v2 events replay"
+  ],
+  "assertions": {
+    "late_thread_progress_status": 400,
+    "v2_active_stream_after_completion": false,
+    "v3_active_stream_after_completion": false,
+    "subscription_active_thread_filters_after_completion": 0,
+    "late_progress_visible_in_v2_lines": false,
+    "late_progress_visible_in_v3_messages": false,
+    "late_progress_visible_in_sse_replay": false
+  },
+  "verification": {
+    "command": "go test ./internal/riidoaiserver -run 'TestHTTPAIAgentClientCompletedRefreshIgnoresLateProgress|TestHTTPAIAgentClientV3StopRefreshIgnoresLateProgress|TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel' -count=1",
+    "result": "pass"
+  },
+  "decision": {
+    "status": "partial",
+    "summary": "The control-plane HTTP path now has a regression proof that a completed assignment cannot be reactivated by late daemon thread-progress and cannot leak that late progress through v2 threads, v3 history, thread-stream-subscription, or SSE replay. This does not close the product P0 by itself because the original user-visible race still needs a same-moment browser screenshot plus v3/v2/subscription/SSE capture if it recurs.",
+    "next_artifact": "reproduced_completion_progress_same_conversation_network_snapshot"
+  }
+}
