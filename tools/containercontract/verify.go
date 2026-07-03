@@ -2,11 +2,16 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/containercontract/dockerfile"
 )
 
+type namedField struct{ Name, Value string }
+
 func verifyContract(contract imageContract) (checkRecord, error) {
-	parsed, err := parseDockerfile(contract.Dockerfile)
+	parsed, err := dockerfile.Parse(contract.Dockerfile)
 	if err != nil {
 		return checkRecord{}, err
 	}
@@ -28,8 +33,8 @@ func verifyContract(contract imageContract) (checkRecord, error) {
 	return newCheckRecord(contract, buildStage, finalStage, checks), nil
 }
 
-func verifyFinalStage(contract imageContract, parsed dockerfile) (*stage, int, error) {
-	finalStage := parsed.finalStage()
+func verifyFinalStage(contract imageContract, parsed dockerfile.File) (*dockerfile.Stage, int, error) {
+	finalStage := parsed.FinalStage()
 	if finalStage == nil {
 		return nil, 0, errors.New("final stage not found")
 	}
@@ -42,4 +47,13 @@ func verifyFinalStage(contract imageContract, parsed dockerfile) (*stage, int, e
 		return nil, checks, err
 	}
 	return finalStage, checks, nil
+}
+
+func requireNamedFields(prefix string, fields []namedField) error {
+	for _, field := range fields {
+		if strings.TrimSpace(field.Value) == "" {
+			return fmt.Errorf("%s%s is required", prefix, field.Name)
+		}
+	}
+	return nil
 }

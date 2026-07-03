@@ -311,6 +311,12 @@
       "must_not_own": "image publishing or ECS deployment"
     },
     {
+      "path": "tools/containercontract/dockerfile",
+      "kind": "adapter",
+      "role": "Dockerfile parser and matcher for the container image contract verifier.",
+      "must_not_own": "container image policy, evidence output, or ECS deployment"
+    },
+    {
       "path": "tools/contextmap",
       "kind": "evidence-tool",
       "role": "Context map generated reader and verifier.",

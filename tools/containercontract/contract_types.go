@@ -56,3 +56,18 @@ type requiredCopyContract struct {
 	Source      string `json:"source"`
 	Destination string `json:"destination"`
 }
+
+type taskDefinitionIR struct {
+	RuntimePlatform struct {
+		OperatingSystemFamily string `json:"operatingSystemFamily"`
+	} `json:"runtime_platform"`
+	Container struct {
+		PortMappings []struct {
+			ContainerPort int `json:"containerPort"`
+		} `json:"portMappings"`
+		Environment []struct {
+			Name  string `json:"name"`
+			Value string `json:"value"`
+		} `json:"environment"`
+	} `json:"container"`
+}

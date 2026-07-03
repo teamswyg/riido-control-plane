@@ -82,6 +82,20 @@
       "mode": "golden_locked_runtime_cd_ownership_tool"
     },
     {
+      "id": "container_image_contract_guard",
+      "package_path": "tools/containercontract",
+      "golden_command": "go test ./tools/containercontract -run TestContainerContractBehaviorGolden -count=1",
+      "semantic_claim_id": "container_image_contract_must_bind_runtime_shape",
+      "mode": "golden_locked_container_image_contract_tool"
+    },
+    {
+      "id": "container_image_contract_dockerfile_parser",
+      "package_path": "tools/containercontract/dockerfile",
+      "golden_command": "go test ./tools/containercontract -run TestContainerContractBehaviorGolden -count=1",
+      "semantic_claim_id": "container_image_contract_must_bind_runtime_shape",
+      "mode": "golden_locked_container_dockerfile_parser_adapter"
+    },
+    {
       "id": "config_reference_guard",
       "package_path": "tools/configreference",
       "golden_command": "go test ./tools/configreference -run TestConfigReferenceBehaviorGolden -count=1",

@@ -18,6 +18,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `health_ready_command_guard` | `tools/healthreadycmd` | 100% | `6e07c15bc38f` | `health_ready_command_must_preserve_public_runtime_probe` |
 | `runtime_deployment_boundary_guard` | `tools/runtimeboundary` | 100% | `f4b3dd56559f` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `runtime_cd_ownership_guard` | `tools/runtimecdownership` | 100% | `81f0d079a0ee` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
+| `container_image_contract_guard` | `tools/containercontract` | 100% | `c847c0333f73` | `container_image_contract_must_bind_runtime_shape` |
+| `container_image_contract_dockerfile_parser` | `tools/containercontract/dockerfile` | 100% | `24bf3678cc48` | `container_image_contract_must_bind_runtime_shape` |
 | `config_reference_guard` | `tools/configreference` | 100% | `f517462a6edf` | `config_reference_must_preserve_env_manifest_parity` |
 | `store_safe_routing_guard` | `tools/storesaferouting` | 100% | `affad8a109c9` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `public_pages_live_guard` | `tools/publicpageslive` | 100% | `c9fb97e9cd95` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
@@ -95,10 +97,10 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `2728`
-- tracked files: `626`
-- untracked files: `2102`
-- coverage: `22.94%`
+- Go files: `2718`
+- tracked files: `646`
+- untracked files: `2072`
+- coverage: `23.76%`
 
 ## Constraints
 
@@ -109,5 +111,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `626`
+- efficiency score: `646`
 - compression score: `113`
