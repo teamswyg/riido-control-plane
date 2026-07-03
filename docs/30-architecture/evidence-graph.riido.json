@@ -10694,6 +10694,157 @@
       ],
       "decision": "The generated endpoint smoke matrix package now has golden evidence before adapter extraction, root direct files under the folder limit, helper packages under the depth limit, and syntax hash targets connected to the existing generated endpoint smoke matrix semantic claim without changing smoke matrix output behavior.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_client_api_syntax_hash_loop",
+      "observation": "The AI Agent client API verifier owns generated client, thread history v3, SSE, and frontend handoff contract evidence, but its tool shape was not syntax-hash tracked.",
+      "hypothesis": "Golden-locking the AI Agent client API evidence before extracting helper adapters and binding root/helper packages into syntax hash coverage preserves the generated-client frontend contract while reducing root file surface.",
+      "claims": [
+        "thread_history_v3_must_expose_stable_conversation_grouping"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/doccheck/verify.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/evidence.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/io.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/main.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/main_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/openapi.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/pathutil/path.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/render.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/render_thread_history_v3.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/rendertext/render.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/requirements/constants.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/run.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/setutil/set.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/smokematrix/smoke.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/types.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/types_thread_history_v3.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/verify.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/verify_contract.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/verify_source.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/verify_thread_history_v3.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/aiagentclientapi/verify_thread_history_v3_rules.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/module-decomposition.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentclientapi"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

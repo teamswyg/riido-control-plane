@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/rendertext"
 )
 
 func renderThreadHistoryV3(b *strings.Builder, v3 threadHistoryV3) {
@@ -19,7 +21,7 @@ func renderThreadHistoryV3(b *strings.Builder, v3 threadHistoryV3) {
 	renderNamedRuleTable(b, "Thread History v3 Message Ordering", v3.OrderingRules)
 	renderNamedRuleTable(b, "Thread History v3 Mutation Rules", v3.MutationRules)
 	renderBullets(b, "Thread History v3 SSE Handling Rules", v3.SSEHandlingRules)
-	renderList(b, "Thread History v3 Terminal States", v3.TerminalStates)
+	rendertext.List(b, "Thread History v3 Terminal States", v3.TerminalStates)
 	renderBullets(b, "Thread History v3 Frontend Checklist", v3.Checklist)
 }
 
@@ -55,7 +57,7 @@ func renderShapeRules(b *strings.Builder, shapes []shapeRule) {
 	b.WriteString("\n### Thread History v3 Response Model\n")
 	for _, shape := range shapes {
 		fmt.Fprintf(b, "\n#### `%s`\n\n%s\n\n", shape.Name, shape.Purpose)
-		fmt.Fprintf(b, "- Fields: %s\n", codeList(shape.Fields))
+		fmt.Fprintf(b, "- Fields: %s\n", rendertext.CodeList(shape.Fields))
 	}
 }
 

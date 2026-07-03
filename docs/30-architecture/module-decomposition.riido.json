@@ -675,6 +675,42 @@
       "kind": "meta-evidence-tool",
       "role": "GitHub Actions evidence coverage verifier.",
       "must_not_own": "domain-specific test semantics or private operator evidence"
+    },
+    {
+      "path": "tools/aiagentclientapi/doccheck",
+      "kind": "adapter",
+      "role": "Generated document freshness adapter for the AI Agent client API verifier.",
+      "must_not_own": "AI Agent client API rendering policy or manifest loading"
+    },
+    {
+      "path": "tools/aiagentclientapi/pathutil",
+      "kind": "adapter",
+      "role": "Repository path resolution adapter for the AI Agent client API verifier.",
+      "must_not_own": "AI Agent client API contract policy"
+    },
+    {
+      "path": "tools/aiagentclientapi/rendertext",
+      "kind": "adapter",
+      "role": "Markdown list/code rendering adapter for the AI Agent client API generated reader.",
+      "must_not_own": "Thread history v3 frontend semantics"
+    },
+    {
+      "path": "tools/aiagentclientapi/requirements",
+      "kind": "adapter",
+      "role": "AI Agent client API required schema, identity, endpoint, field, and deployment vocabulary.",
+      "must_not_own": "manifest loading, source verification, or doc rendering"
+    },
+    {
+      "path": "tools/aiagentclientapi/setutil",
+      "kind": "adapter",
+      "role": "String membership set adapter for the AI Agent client API verifier.",
+      "must_not_own": "AI Agent client API semantic rules"
+    },
+    {
+      "path": "tools/aiagentclientapi/smokematrix",
+      "kind": "adapter",
+      "role": "Smoke matrix generated-path reader for the AI Agent client API verifier.",
+      "must_not_own": "OpenAPI operation counting or generated client handoff policy"
     }
   ],
   "rules": [

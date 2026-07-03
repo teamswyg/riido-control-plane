@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/rendertext"
 )
 
 func renderDoc(m manifest) string {
@@ -14,13 +16,13 @@ func renderDoc(m manifest) string {
 	b.WriteString("Canonical domain changes start in `riido-contracts`; this repo verifies the executable mirror.\n\n")
 	renderFiles(&b, m)
 	renderCounts(&b, m.OperationCounts)
-	renderList(&b, "Required Generated Paths", m.RequiredGeneratedPaths)
-	renderList(&b, "Runtime Config Keys", m.RuntimeConfigKeys)
-	renderList(&b, "Public Field And Endpoint Signals", m.PublicFields)
-	renderList(&b, "Deployment Evidence Phrases", m.DeploymentEvidence)
+	rendertext.List(&b, "Required Generated Paths", m.RequiredGeneratedPaths)
+	rendertext.List(&b, "Runtime Config Keys", m.RuntimeConfigKeys)
+	rendertext.List(&b, "Public Field And Endpoint Signals", m.PublicFields)
+	rendertext.List(&b, "Deployment Evidence Phrases", m.DeploymentEvidence)
 	renderThreadHistoryV3(&b, m.ThreadHistoryV3)
 	renderLoop(&b, m.Loop)
-	renderList(&b, "Non-Goals", m.NonGoals)
+	rendertext.List(&b, "Non-Goals", m.NonGoals)
 	return b.String()
 }
 
@@ -38,4 +40,13 @@ func renderCounts(b *strings.Builder, c operationCounts) {
 	fmt.Fprintf(b, "| v1 operations | %d |\n", c.V1)
 	fmt.Fprintf(b, "| v2 operations | %d |\n", c.V2)
 	fmt.Fprintf(b, "| smoke matrix entries | %d |\n", c.SmokeMatrix)
+}
+
+func renderLoop(b *strings.Builder, loop loop) {
+	b.WriteString("\n## Evidence Loop\n\n| Step | Statement |\n| --- | --- |\n")
+	fmt.Fprintf(b, "| Observe | %s |\n", loop.Observation)
+	fmt.Fprintf(b, "| Hypothesis | %s |\n", loop.Hypothesis)
+	fmt.Fprintf(b, "| Execute | %s |\n", loop.Execute)
+	fmt.Fprintf(b, "| Evaluate | %s |\n", loop.Evaluate)
+	fmt.Fprintf(b, "| Retrospective | %s |\n", loop.Retrospective)
 }

@@ -1,21 +1,27 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/pathutil"
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/requirements"
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/smokematrix"
+)
 
 func verifyContractMirror(root string, m manifest) error {
 	for _, path := range []string{m.DSL, m.IR, m.OpenAPI, m.SmokeMatrix, m.GeneratedCore, m.GeneratedReact} {
-		if err := verifyFile(resolve(root, path)); err != nil {
+		if err := verifyFile(pathutil.Resolve(root, path)); err != nil {
 			return err
 		}
 	}
-	ops, err := loadOpenAPIOperations(resolve(root, m.OpenAPI))
+	ops, err := loadOpenAPIOperations(pathutil.Resolve(root, m.OpenAPI))
 	if err != nil {
 		return fmt.Errorf("load openapi operations: %w", err)
 	}
 	if ops.Counts != m.OperationCounts.withoutSmoke() {
 		return fmt.Errorf("operation counts = %+v, want %+v", ops.Counts, m.OperationCounts)
 	}
-	smokePaths, smokeCount, err := loadSmokeGeneratedPaths(resolve(root, m.SmokeMatrix))
+	smokePaths, smokeCount, err := smokematrix.LoadGeneratedPaths(pathutil.Resolve(root, m.SmokeMatrix))
 	if err != nil {
 		return fmt.Errorf("load smoke matrix: %w", err)
 	}
@@ -31,7 +37,7 @@ func (c operationCounts) withoutSmoke() operationCounts {
 }
 
 func verifyRequiredPaths(m manifest, openAPI, smoke map[string]struct{}) error {
-	for _, path := range append(requiredGeneratedPaths, m.RequiredGeneratedPaths...) {
+	for _, path := range append(requirements.RequiredGeneratedPaths, m.RequiredGeneratedPaths...) {
 		if _, ok := openAPI[path]; !ok {
 			return fmt.Errorf("required generated path %q missing from openapi", path)
 		}

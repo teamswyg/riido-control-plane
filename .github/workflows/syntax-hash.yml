@@ -56,6 +56,7 @@ jobs:
           ./tools/gocibaseline
           ./tools/aigeneratedsmokematrix
           ./tools/apiclientdelivery
+          ./tools/aiagentclientapi
           ./tools/webfrontendapi
           ./tools/aiagentrisk
           ./tools/migrationledger

@@ -1,6 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/doccheck"
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/pathutil"
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/requirements"
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/setutil"
+)
 
 func verify(root string, m manifest, checkDoc bool) error {
 	if err := verifyHeader(m); err != nil {
@@ -22,19 +29,45 @@ func verify(root string, m manifest, checkDoc bool) error {
 		return err
 	}
 	if checkDoc {
-		return verifyDoc(root, m)
+		return doccheck.Verify(pathutil.Resolve(root, m.GeneratedDoc), renderDoc(m))
 	}
 	return nil
 }
 
 func verifyHeader(m manifest) error {
-	if m.SchemaVersion != manifestSchema || m.ID != expectedID || m.RiidoTask != expectedTask {
+	if m.SchemaVersion != requirements.ManifestSchema || m.ID != requirements.ExpectedID || m.RiidoTask != requirements.ExpectedTask {
 		return fmt.Errorf("unexpected manifest identity")
 	}
 	required := []string{m.Title, m.GeneratedDoc, m.Workflow, m.EvidenceArtifact}
 	for _, value := range required {
 		if value == "" {
 			return fmt.Errorf("title, generated_doc, workflow, and evidence_artifact are required")
+		}
+	}
+	return nil
+}
+
+func verifyStaticLists(m manifest) error {
+	if err := setutil.RequireStrings("runtime config", m.RuntimeConfigKeys, requirements.RequiredRuntimeConfigKeys); err != nil {
+		return err
+	}
+	if err := setutil.RequireStrings("public field", m.PublicFields, requirements.RequiredPublicFields); err != nil {
+		return err
+	}
+	return setutil.RequireStrings("deployment evidence", m.DeploymentEvidence, requirements.RequiredDeploymentEvidence)
+}
+
+func verifyLoop(loop loop) error {
+	steps := map[string]string{
+		"observation":   loop.Observation,
+		"hypothesis":    loop.Hypothesis,
+		"execute":       loop.Execute,
+		"evaluate":      loop.Evaluate,
+		"retrospective": loop.Retrospective,
+	}
+	for name, value := range steps {
+		if value == "" {
+			return fmt.Errorf("missing evidence loop step %q", name)
 		}
 	}
 	return nil
