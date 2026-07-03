@@ -19,11 +19,11 @@ func TestNotionQAInlineDiscussionReadbackIsRecorded(t *testing.T) {
 		t.Fatal("missing targeted inline discussion readback evidence")
 	}
 	latest := evidence.InlineReadbacks[len(evidence.InlineReadbacks)-1]
-	if latest.ObservedAt != "2026-07-03T01:18:26Z" {
+	if latest.ObservedAt != "2026-07-03T01:28:00Z" {
 		t.Fatalf("latest inline readback observed_at = %q", latest.ObservedAt)
 	}
 	want := map[string]string{
-		"queued_by_busy_agent":               "39220241-cf7f-8114-8920-001d7b721670",
+		"queued_by_busy_agent":               "39220241-cf7f-81a1-816d-001dc39ab368",
 		"waiting_for_user_intent":            "39120241-cf7f-816a-8c1f-001d780c7b57",
 		"multi_assignment_projection":        "39120241-cf7f-81e4-9f6e-001d6a501b66",
 		"author_fallback":                    "39120241-cf7f-81e9-8e8b-001dfae5d349",

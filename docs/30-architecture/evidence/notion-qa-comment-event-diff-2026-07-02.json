@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-03T01:18:26Z",
+  "captured_at": "2026-07-03T01:28:00Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -147,18 +147,18 @@
       ]
     },
     {
-      "observed_at": "2026-07-03T01:18:26Z",
+      "observed_at": "2026-07-03T01:28:00Z",
       "tool": "notion.fetch + notion.get_comments",
       "mode": "page fetch plus selected discussion_id targeted readback",
       "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
       "aggregate_get_comments_result": "stale_page_level_snapshot",
-      "decision": "A fresh 2026-07-03 UTC readback still shows the older page snapshot and 31 page-level comments, while targeted inline readback for queued, waiting, author, codex, completion, and multi-assignment discussions matches the latest evidence ids. The queued discussion also read back the source-slice mutation fix, staging deploy, and all-environment deploy comments. No unrelated backend/control-plane blocker was discovered from the visible Notion comments.",
+      "decision": "A fresh 2026-07-03 UTC readback still shows the older page snapshot and 31 page-level comments, while targeted inline readback for queued, waiting, author, codex, completion, and multi-assignment discussions matches the latest evidence ids. The queued discussion also read back the source-slice mutation fix, staging deploy, all-environment deploy, and PR #799 evidence-lock comments. No unrelated backend/control-plane blocker was discovered from the visible Notion comments.",
       "discussions": [
         {
           "discussion": "queued_by_busy_agent",
-          "comment_count": 21,
-          "latest_visible_comment_id": "39220241-cf7f-8114-8920-001d7b721670",
-          "latest_visible_comment_observed_at": "2026-07-03T01:10:17.582Z"
+          "comment_count": 22,
+          "latest_visible_comment_id": "39220241-cf7f-81a1-816d-001dc39ab368",
+          "latest_visible_comment_observed_at": "2026-07-03T01:27:12.892Z"
         },
         {
           "discussion": "waiting_for_user_intent",
@@ -420,6 +420,15 @@
       "decision": "Preserve the all-environment deployment as executable QA evidence while keeping product visual readiness gated on future same-action mutation/v3/v2/subscription/SSE captures."
     },
     {
+      "id": "39220241-cf7f-81a1-816d-001dc39ab368",
+      "discussion": "queued_by_busy_agent",
+      "observed_at": "2026-07-03T01:27:12.892Z",
+      "event_type": "notion_comment_event_diff_locked",
+      "status_tag": "[codex][완료][백필diff][증적고정]",
+      "signal": "The queued discussion records PR #799, merge commit b3724bc, and main workflow success for the latest Notion QA deploy-comment backfill.",
+      "decision": "Treat this as the terminal write-confirmed comment for this backfill slice; do not add another Notion comment for this evidence-only lock to avoid recursive comment drift."
+    },
+    {
       "id": "39120241-cf7f-80fd-bc93-001d6a27203d",
       "discussion": "queued_by_busy_agent",
       "observed_at": "2026-07-02T09:03:04.264Z",
@@ -673,6 +682,11 @@
       "id": "39220241-cf7f-8114-8920-001d7b721670",
       "target": "queued_by_busy_agent_discussion",
       "status": "[codex][완료][전체배포]"
+    },
+    {
+      "id": "39220241-cf7f-81a1-816d-001dc39ab368",
+      "target": "queued_by_busy_agent_discussion",
+      "status": "[codex][완료][백필diff][증적고정]"
     }
   ],
   "readback_observations": [
@@ -988,8 +1002,8 @@
       "targeted_discussions": [
         {
           "discussion": "queued_by_busy_agent",
-          "comment_count": 21,
-          "latest_visible_comment_id": "39220241-cf7f-8114-8920-001d7b721670"
+          "comment_count": 22,
+          "latest_visible_comment_id": "39220241-cf7f-81a1-816d-001dc39ab368"
         },
         {
           "discussion": "waiting_for_user_intent",
