@@ -206,6 +206,20 @@ export interface StopAIAgentDeviceDaemonReactEndpoint extends core.StopAIAgentDe
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * 계약 generated path: `aiAgent.devices.daemons.list`
+ * 검색용 generated 경로: `devices.daemons.list`
+ * 접근 예시: `riido.aiAgent.devices.daemons.list`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface ListAIAgentDeviceDaemonsReactEndpoint extends core.ListAIAgentDeviceDaemonsEndpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.ListAIAgentDeviceDaemonsPathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonListResponse>) => UseQueryResult<core.DeviceDaemonListResponse, Error>;
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * 계약 generated path: `aiAgent.events.stream`
  * 검색용 generated 경로: `events.stream`
@@ -556,6 +570,20 @@ export interface StopAIAgentDeviceDaemonV2ReactEndpoint extends core.StopAIAgent
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.devices.daemons.list`
+ * 검색용 generated 경로: `aiAgent.devices.daemons.list`
+ * 접근 예시: `riido.v2.aiAgent.devices.daemons.list`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface ListAIAgentDeviceDaemonsV2ReactEndpoint extends core.ListAIAgentDeviceDaemonsV2Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.ListAIAgentDeviceDaemonsV2PathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonListResponse>) => UseQueryResult<core.DeviceDaemonListResponse, Error>;
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.events.stream`
  * 검색용 generated 경로: `aiAgent.events.stream`
@@ -898,6 +926,20 @@ export interface RiidoAIAgentDevicesDaemonReactNamespace {
 }
 
 /**
+ * aiAgent.devices.daemons namespace입니다.
+ */
+export interface RiidoAIAgentDevicesDaemonsReactNamespace {
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+   * 계약 generated path: `aiAgent.devices.daemons.list`
+   * 검색용 generated 경로: `devices.daemons.list`
+   * 접근 예시: `riido.aiAgent.devices.daemons.list`
+   * cache tag: `aiAgent.devices.daemons`
+   */
+  readonly list: ListAIAgentDeviceDaemonsReactEndpoint;
+}
+
+/**
  * device와 runtime 상태를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentDevicesReactNamespace {
@@ -905,6 +947,10 @@ export interface RiidoAIAgentDevicesReactNamespace {
    * aiAgent.devices.daemon namespace입니다.
    */
   readonly daemon: RiidoAIAgentDevicesDaemonReactNamespace;
+  /**
+   * aiAgent.devices.daemons namespace입니다.
+   */
+  readonly daemons: RiidoAIAgentDevicesDaemonsReactNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다
    * 계약 generated path: `aiAgent.devices.runtimes`
@@ -1205,6 +1251,20 @@ export interface RiidoV2AIAgentDevicesDaemonReactNamespace {
 }
 
 /**
+ * v2.aiAgent.devices.daemons namespace입니다.
+ */
+export interface RiidoV2AIAgentDevicesDaemonsReactNamespace {
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.devices.daemons.list`
+   * 검색용 generated 경로: `aiAgent.devices.daemons.list`
+   * 접근 예시: `riido.v2.aiAgent.devices.daemons.list`
+   * cache tag: `v2.aiAgent.devices.daemons`
+   */
+  readonly list: ListAIAgentDeviceDaemonsV2ReactEndpoint;
+}
+
+/**
  * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
  */
 export interface RiidoV2AIAgentDevicesReactNamespace {
@@ -1212,6 +1272,10 @@ export interface RiidoV2AIAgentDevicesReactNamespace {
    * v2.aiAgent.devices.daemon namespace입니다.
    */
   readonly daemon: RiidoV2AIAgentDevicesDaemonReactNamespace;
+  /**
+   * v2.aiAgent.devices.daemons namespace입니다.
+   */
+  readonly daemons: RiidoV2AIAgentDevicesDaemonsReactNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.devices.runtimes`
@@ -1536,6 +1600,12 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
               useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDeviceDaemonMutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDeviceDaemonMutationVariables>(coreClient.aiAgent.devices.daemon.stop.mutation(options)),
             },
           },
+          daemons: {
+            list: {
+              ...coreClient.aiAgent.devices.daemons.list,
+              useQuery: (params: core.ListAIAgentDeviceDaemonsPathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonListResponse>) => useQuery<core.DeviceDaemonListResponse, Error>(coreClient.aiAgent.devices.daemons.list.query(params, options)),
+            },
+          },
           runtimes: {
             ...coreClient.aiAgent.devices.runtimes,
             useQuery: (options?: core.RiidoQueryOptions<core.DeviceRuntimeListResponse>) => useQuery<core.DeviceRuntimeListResponse, Error>(coreClient.aiAgent.devices.runtimes.query(options)),
@@ -1657,6 +1727,12 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
               stop: {
                 ...coreClient.v2.aiAgent.devices.daemon.stop,
                 useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDeviceDaemonV2MutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDeviceDaemonV2MutationVariables>(coreClient.v2.aiAgent.devices.daemon.stop.mutation(options)),
+              },
+            },
+            daemons: {
+              list: {
+                ...coreClient.v2.aiAgent.devices.daemons.list,
+                useQuery: (params: core.ListAIAgentDeviceDaemonsV2PathParams, options?: core.RiidoQueryOptions<core.DeviceDaemonListResponse>) => useQuery<core.DeviceDaemonListResponse, Error>(coreClient.v2.aiAgent.devices.daemons.list.query(params, options)),
               },
             },
             runtimes: {

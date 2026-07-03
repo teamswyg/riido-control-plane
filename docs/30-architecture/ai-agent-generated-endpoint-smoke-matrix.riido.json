@@ -9,7 +9,7 @@
   "openapi": "contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json",
   "smoke_matrix": "contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json",
   "smoke_schema_version": "riido-ai-agent-generated-endpoint-smoke-matrix.v1",
-  "operation_counts": {"total":55,"v1":25,"v2":30},
+  "operation_counts": {"total":57,"v1":26,"v2":31},
   "required_evidence_tests": ["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2"],
   "source_checks": [
     {"name":"matrix-parity","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI","readAIAgentGeneratedOpenAPIOperations","readAIAgentGeneratedSmokeMatrix"]},

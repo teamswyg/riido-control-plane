@@ -943,6 +943,36 @@
       }
     },
     {
+      "name": "DeviceDaemonListResponse",
+      "schema": {
+        "name": "DeviceDaemonListResponse",
+        "description": "runtime 설정 화면의 내 기기 영역에서 device_id 기준으로 접근 가능한 daemon들을 profile별로 모두 표시하기 위한 응답입니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "device_id",
+          "daemons"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "device_id",
+            "type": "string"
+          },
+          {
+            "name": "daemons",
+            "type": "array",
+            "items": {
+              "ref": "DeviceDaemonRecord"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "ControlDeviceDaemonRequest",
       "schema": {
         "name": "ControlDeviceDaemonRequest",
@@ -3029,6 +3059,41 @@
       ]
     },
     {
+      "operation_id": "listAIAgentDeviceDaemons",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemons",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemons",
+          "list"
+        ],
+        "generated_path": "aiAgent.devices.daemons.list",
+        "cache_tag": "aiAgent.devices.daemons"
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonListResponse"
+      },
+      "scenario_ids": [
+        "listAIAgentDeviceDaemons.figma-my-device-daemon-profiles"
+      ]
+    },
+    {
       "operation_id": "startAIAgentDeviceDaemon",
       "kind": "command",
       "method": "POST",
@@ -4004,6 +4069,39 @@
       "response": {
         "status": 200,
         "ref": "DeviceDaemonDetailResponse"
+      }
+    },
+    {
+      "operation_id": "listAIAgentDeviceDaemonsV2",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "devices",
+          "daemons",
+          "list"
+        ],
+        "generated_path": "v2.aiAgent.devices.daemons.list",
+        "cache_tag": "v2.aiAgent.devices.daemons"
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonListResponse"
       }
     },
     {

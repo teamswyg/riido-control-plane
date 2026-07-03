@@ -109,6 +109,14 @@
       ]
     },
     {
+      "generated_path": "aiAgent.devices.daemons.list",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemons",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
+    },
+    {
       "generated_path": "aiAgent.devices.runtimes",
       "method": "GET",
       "path": "/v1/client/ai-agent/devices",
@@ -304,6 +312,14 @@
       "generated_path": "v2.aiAgent.devices.daemon.stop",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/stop",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
+      "generated_path": "v2.aiAgent.devices.daemons.list",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons",
       "evidence_tests": [
         "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
       ]

@@ -83,8 +83,8 @@ Source manifests: `4`; owners: `3`; Figma contexts: `9`; source checks: `7`; phr
 ### runtime-settings
 
 - node ids: `162-23090`
-- generated paths: `listAIAgentDeviceRuntimes`, `getAIAgentDeviceDaemon`, `startAIAgentDeviceDaemon`, `restartAIAgentDeviceDaemon`, `stopAIAgentDeviceDaemon`
-- rule: generated pieces feed device/runtime grouping and daemon controls
+- generated paths: `listAIAgentDeviceRuntimes`, `getAIAgentDeviceDaemon`, `listAIAgentDeviceDaemons`, `startAIAgentDeviceDaemon`, `restartAIAgentDeviceDaemon`, `stopAIAgentDeviceDaemon`
+- rule: generated pieces feed device/runtime grouping and daemon controls, including profile별 daemon list rendering
 - must not own: hover popover, stop modal layout, or restart animation rendering
 
 ### agent-settings

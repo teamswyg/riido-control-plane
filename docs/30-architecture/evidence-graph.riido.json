@@ -3262,7 +3262,7 @@
     {
       "id": "ai_agent_device_daemon_list_surface_loop",
       "observation": "The existing device daemon client API exposed only the preferred daemon for a device, so clients could not render multiple profile-specific daemon instances such as staging, development, and production without inferring hidden server state.",
-      "hypothesis": "Adding a read-only plural device daemon endpoint, binding it to the route classifier, store query, HTTP test, generated endpoint smoke matrix, and loop-registry evidence surface lets the client inspect daemon instances without changing the existing preferred daemon compatibility endpoint.",
+      "hypothesis": "Adding a read-only plural device daemon endpoint and binding it through route classifier, store query, HTTP test, DSL/IR/OpenAPI, generated React Query client, generated endpoint smoke matrix, and loop-registry evidence surface lets the client inspect daemon instances without changing the existing preferred daemon compatibility endpoint.",
       "claims": [
         "generated_endpoint_smoke_matrix_must_remain_contract_gate",
         "loop_registry_evidence_must_expose_loop_surfaces",
@@ -3308,6 +3308,14 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/http_route_ai_agent_client_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/golden_results_test.go"
         },
         {
           "kind": "test",
@@ -3374,7 +3382,7 @@
           "redacted": true
         }
       ],
-      "decision": "GET /devices/{device_id}/daemon remains the single preferred daemon compatibility endpoint, while GET /devices/{device_id}/daemons is a read-only plural projection sorted newest first and filtered through the same device and daemon visibility checks; route and HTTP tests prove the new surface is explicit instead of inferred by clients. Redacted live probes now prove the plural v1/v2 routes are present and auth-protected, not 404, across staging, development, and production after deployment. The latest Notion QA comment-event diff keeps the frontend handoff comment id executable, so stale page-level Notion readback cannot reopen the server API without a fresh route or contract failure.",
+      "decision": "GET /devices/{device_id}/daemon remains the single preferred daemon compatibility endpoint, while GET /devices/{device_id}/daemons is a read-only plural projection sorted newest first and filtered through the same device and daemon visibility checks; route and HTTP tests prove the new surface is explicit instead of inferred by clients. The plural v1/v2 endpoints now appear in DSL/IR/OpenAPI as DeviceDaemonListResponse-backed query operations and generate aiAgent.devices.daemons.list / v2.aiAgent.devices.daemons.list React Query clients, so frontend handoff no longer depends on stale Notion readback or a manual URL. Redacted live probes now prove the plural v1/v2 routes are present and auth-protected, not 404, across staging, development, and production after deployment. The latest Notion QA comment-event diff keeps the frontend handoff comment id executable, so stale page-level Notion readback cannot reopen the server API without a fresh route or contract failure.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -10831,7 +10839,7 @@
           "redacted": true
         }
       ],
-      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT.",
+      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT. The device daemon plural API increases the executable contract to 57 operations and adds aiAgent.devices.daemons.list plus v2.aiAgent.devices.daemons.list to required generated paths, so the claim now covers profile별 daemon list handoff without changing v3 thread history semantics.",
       "next_loop": "closed_loop_candidate"
     },
     {

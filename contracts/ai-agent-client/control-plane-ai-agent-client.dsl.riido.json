@@ -927,6 +927,33 @@
       ]
     },
     {
+      "name": "DeviceDaemonListResponse",
+      "description": "runtime 설정 화면의 내 기기 영역에서 device_id 기준으로 접근 가능한 daemon들을 profile별로 모두 표시하기 위한 응답입니다.",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "device_id",
+        "daemons"
+      ],
+      "properties": [
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "device_id",
+          "type": "string"
+        },
+        {
+          "name": "daemons",
+          "type": "array",
+          "items": {
+            "ref": "DeviceDaemonRecord"
+          }
+        }
+      ]
+    },
+    {
       "name": "ControlDeviceDaemonRequest",
       "description": "agent 권한으로 접근 가능한 daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.",
       "type": "object",
@@ -2972,6 +2999,27 @@
       ]
     },
     {
+      "operation_id": "listAIAgentDeviceDaemons",
+      "kind": "query",
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemons",
+      "resource": "device",
+      "action": "read",
+      "client": {"module": "aiAgent", "facade_path": ["devices", "daemons", "list"], "cache_tag": "aiAgent.devices.daemons"},
+      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:read", "ai-agent:device:{device_id}:read"]},
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {"status": 200, "ref": "DeviceDaemonListResponse"},
+      "scenarios": [
+        {
+          "name": "figma my device daemon profiles",
+          "given": "the runtime settings UI needs to show multiple daemon profiles for one physical device",
+          "when": "the device owner opens the 내 기기 daemon profile list",
+          "then": "the response returns every visible daemon for that device instead of collapsing to the preferred daemon"
+        }
+      ]
+    },
+    {
       "operation_id": "startAIAgentDeviceDaemon",
       "kind": "command",
       "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 시작을 요청합니다",
@@ -4068,6 +4116,38 @@
       "response": {
         "status": 200,
         "ref": "DeviceDaemonDetailResponse"
+      }
+    },
+    {
+      "operation_id": "listAIAgentDeviceDaemonsV2",
+      "kind": "query",
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "devices",
+          "daemons",
+          "list"
+        ],
+        "cache_tag": "v2.aiAgent.devices.daemons"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonListResponse"
       }
     },
     {
