@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-02T19:19:46Z",
+  "captured_at": "2026-07-03T00:43:15Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -9,6 +9,190 @@
     "page_url": "https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165",
     "fetch_mode": "page_body_with_selected_discussion_comments"
   },
+  "inline_discussion_readbacks": [
+    {
+      "observed_at": "2026-07-02T22:21:07Z",
+      "tool": "notion.get_comments",
+      "mode": "discussion_id targeted readback",
+      "decision": "Targeted inline discussion readback exposes newer QA comments even when page-level aggregate readback is stale.",
+      "discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 18,
+          "latest_visible_comment_id": "39120241-cf7f-81d5-9c0f-001d26c153a0",
+          "latest_visible_comment_observed_at": "2026-07-02T10:08:16.163Z"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57",
+          "latest_visible_comment_observed_at": "2026-07-02T01:22:09.543Z"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66",
+          "latest_visible_comment_observed_at": "2026-07-02T00:42:59.595Z"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349",
+          "latest_visible_comment_observed_at": "2026-07-02T00:54:18.769Z"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8",
+          "latest_visible_comment_observed_at": "2026-07-02T10:09:14.555Z"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+          "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-07-02T22:29:26Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "page fetch plus discussion_id targeted readback",
+      "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
+      "aggregate_get_comments_result": "network_error",
+      "decision": "The page fetch still returns the older page snapshot and aggregate get_comments can fail, but targeted inline discussion readback still exposes the latest selected P0 comments.",
+      "discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 18,
+          "latest_visible_comment_id": "39120241-cf7f-81d5-9c0f-001d26c153a0",
+          "latest_visible_comment_observed_at": "2026-07-02T10:08:16.163Z"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57",
+          "latest_visible_comment_observed_at": "2026-07-02T01:22:09.543Z"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66",
+          "latest_visible_comment_observed_at": "2026-07-02T00:42:59.595Z"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349",
+          "latest_visible_comment_observed_at": "2026-07-02T00:54:18.769Z"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8",
+          "latest_visible_comment_observed_at": "2026-07-02T10:09:14.555Z"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+          "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-07-02T23:14:55Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "page fetch plus selected discussion_id targeted readback",
+      "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
+      "aggregate_get_comments_result": "stale_page_level_snapshot",
+      "decision": "A 2026-07-03 KST readback still shows the older page snapshot and 31 page-level comments, while targeted inline readback for selected P0 threads still matches the latest evidence ids. No new backend/control-plane blocker was discovered from the visible Notion comments.",
+      "discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 18,
+          "latest_visible_comment_id": "39120241-cf7f-81d5-9c0f-001d26c153a0",
+          "latest_visible_comment_observed_at": "2026-07-02T10:08:16.163Z"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57",
+          "latest_visible_comment_observed_at": "2026-07-02T01:22:09.543Z"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66",
+          "latest_visible_comment_observed_at": "2026-07-02T00:42:59.595Z"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349",
+          "latest_visible_comment_observed_at": "2026-07-02T00:54:18.769Z"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8",
+          "latest_visible_comment_observed_at": "2026-07-02T10:09:14.555Z"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+          "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-07-03T00:43:15Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "page fetch plus selected discussion_id targeted readback",
+      "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
+      "aggregate_get_comments_result": "stale_page_level_snapshot",
+      "decision": "A fresh 2026-07-03 UTC readback still shows the older page snapshot and 31 page-level comments, while targeted inline readback for queued, waiting, author, codex, completion, and multi-assignment discussions matches the latest evidence ids. The queued discussion also read back the new source-slice mutation fix comment. No unrelated backend/control-plane blocker was discovered from the visible Notion comments.",
+      "discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 19,
+          "latest_visible_comment_id": "39220241-cf7f-81a3-a228-001dcc9f4141",
+          "latest_visible_comment_observed_at": "2026-07-03T00:40:48Z"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57",
+          "latest_visible_comment_observed_at": "2026-07-02T01:22:09.543Z"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66",
+          "latest_visible_comment_observed_at": "2026-07-02T00:42:59.595Z"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349",
+          "latest_visible_comment_observed_at": "2026-07-02T00:54:18.769Z"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8",
+          "latest_visible_comment_observed_at": "2026-07-02T10:09:14.555Z"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+          "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
+        }
+      ]
+    }
+  ],
   "comment_events": [
     {
       "id": "38f20241-cf7f-807a-8b67-001d3da31af0",
@@ -209,6 +393,15 @@
       "decision": "Server evidence is covered; if the UI still shows the copy, require same-action Network payloads before reopening backend."
     },
     {
+      "id": "39220241-cf7f-81a3-a228-001dcc9f4141",
+      "discussion": "queued_by_busy_agent",
+      "observed_at": "2026-07-03T00:40:48Z",
+      "event_type": "read_model_cache_mutation_fix",
+      "status_tag": "[codex][완료][증적추가]",
+      "signal": "A fresh Notion QA readback led to a regression test showing v3 queued suppression could mutate the source/cached messages slice from [queued, progress] into [progress, progress].",
+      "decision": "Fix the server read-model filter to allocate only when dropping queued messages is required, preserve endpoint contracts, and keep visual/product readiness gated on same-action network payloads if the UI symptom recurs."
+    },
+    {
       "id": "39120241-cf7f-80fd-bc93-001d6a27203d",
       "discussion": "queued_by_busy_agent",
       "observed_at": "2026-07-02T09:03:04.264Z",
@@ -295,9 +488,10 @@
         "notion-comment:39120241-cf7f-80fd-bc93-001d6a27203d",
         "notion-comment:39120241-cf7f-811c-acba-001d6b02996a",
         "notion-comment:39120241-cf7f-8149-ba94-001d3c2ecfa9",
-        "notion-comment:39120241-cf7f-81d5-9c0f-001d26c153a0"
+        "notion-comment:39120241-cf7f-81d5-9c0f-001d26c153a0",
+        "notion-comment:39220241-cf7f-81a3-a228-001dcc9f4141"
       ],
-      "decision": "Do not reopen backend queued projection without a fresh Network capture. Existing staging API evidence shows queued markers hidden from v2/v3/SSE; if UI still shows the copy, capture mutation, v3 threads, v2 threads, subscription, and SSE payloads for the same action."
+      "decision": "Do not reopen backend queued projection without a fresh Network capture. Existing staging API evidence shows queued markers hidden from v2/v3/SSE, and the v3 queued suppression source-slice mutation bug now has a regression test. If UI still shows the copy, capture mutation, v3 threads, v2 threads, subscription, and SSE payloads for the same action."
     },
     {
       "id": "waiting_for_user_intent",
@@ -586,6 +780,216 @@
         }
       ],
       "decision": "A 2026-07-03 KST readback still exposes the same stale 31-comment page-level snapshot. Keep the write-confirmed later comments and the repo verifier as the evidence boundary until Notion readback pagination or freshness catches up."
+    },
+    {
+      "observed_at": "2026-07-02T21:53:12Z",
+      "tool": "notion.get_comments",
+      "mode": "include_all_blocks=true, include_resolved=true",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        }
+      ],
+      "decision": "A fresh 2026-07-03 KST readback still exposes the same 31-comment page-level snapshot ending at 39120241-cf7f-8148-bd04-001d6cbae868, so keep write-confirmed later comment IDs as authoritative QA evidence instead of treating connector readback as complete."
+    },
+    {
+      "observed_at": "2026-07-02T21:57:09Z",
+      "tool": "notion.get_comments",
+      "mode": "include_all_blocks=true, include_resolved=true",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        }
+      ],
+      "decision": "A repeated 2026-07-03 KST readback still returns the same 31 visible page-level comments and does not expose later write-confirmed QA evidence comments. Preserve the comment-event diff as the authoritative backfill boundary."
+    },
+    {
+      "observed_at": "2026-07-02T22:17:54Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "include_discussions=true; include_all_blocks=true, include_resolved=true",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        }
+      ],
+      "decision": "A 2026-07-03 KST backfill still exposes the same stale page snapshot and 31 visible page-level comments, so comment-event diff evidence remains the safer source for QA event reconciliation."
+    },
+    {
+      "observed_at": "2026-07-02T23:14:55Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "include_discussions=true; include_all_blocks=true, include_resolved=true",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        }
+      ],
+      "decision": "A 2026-07-03 KST readback again exposes the same stale page snapshot and 31 visible page-level comments, while targeted inline reads still match selected P0 discussions. Keep write-confirmed comments and targeted discussion readbacks as the authoritative event boundary."
+    },
+    {
+      "observed_at": "2026-07-03T00:23:32Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "include_discussions=true; include_all_blocks=true, include_resolved=true; selected discussion_id targeted readback",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        }
+      ],
+      "targeted_discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 19,
+          "latest_visible_comment_id": "39220241-cf7f-81a3-a228-001dcc9f4141"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66"
+        }
+      ],
+      "decision": "A fresh 2026-07-03 readback still returns the stale 31-comment page-level snapshot, but selected discussion-level reads confirm the latest P0 comment ids already recorded in repo evidence. Treat repo evidence plus targeted readbacks as the QA truth until Notion aggregate readback freshness catches up."
     }
   ],
   "next_actions": [

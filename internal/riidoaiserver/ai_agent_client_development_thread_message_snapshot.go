@@ -11,5 +11,6 @@ func (s *DevelopmentAIAgentClientStore) updateTaskThreadMessageAgentSnapshotLock
 		return
 	}
 	thread.AgentSnapshot = copyTaskThreadAgentSnapshot(response.AgentSnapshot)
+	thread.AgentSnapshotID = ""
 	s.ensureTaskThreadAgentSnapshotLocked(thread, now)
 }

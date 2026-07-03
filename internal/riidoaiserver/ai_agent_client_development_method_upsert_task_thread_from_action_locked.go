@@ -43,6 +43,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		}
 		if threads[i].AgentSnapshot == nil {
 			threads[i].AgentSnapshot = copyTaskThreadAgentSnapshot(response.AgentSnapshot)
+			threads[i].AgentSnapshotID = ""
 			s.ensureTaskThreadAgentSnapshotLocked(&threads[i], now)
 		}
 		threads[i].AssignmentState = response.AssignmentState

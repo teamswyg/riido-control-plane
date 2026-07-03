@@ -23,11 +23,12 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Conte
 		TaskID:        taskID,
 		Threads:       threads,
 	}
+	streamHref := s.eventStreamHrefLocked(principal.WorkspaceID)
 	for _, thread := range slices.Backward(threads) {
 		if !taskThreadHasActiveStream(thread) {
 			continue
 		}
-		link := activeStreamLinkForThread(thread, strings.TrimSpace(principal.WorkspaceID))
+		link := activeStreamLinkForThreadHref(thread, streamHref)
 		response.ActiveStream = &link
 		break
 	}

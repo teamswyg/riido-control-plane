@@ -28,10 +28,15 @@ func (s *DevelopmentAIAgentClientStore) deletedAgentSnapshot(agentID string, cap
 }
 
 func (s *DevelopmentAIAgentClientStore) ensureTaskThreadAgentSnapshotLocked(thread *AIAgentTaskThreadRecord, capturedAt time.Time) {
-	if thread == nil || thread.AgentSnapshot != nil {
+	if thread == nil {
 		return
 	}
-	thread.AgentSnapshot = s.snapshotForTaskThreadLocked(thread.AgentID, capturedAt)
+	if thread.AgentSnapshot == nil {
+		thread.AgentSnapshot = s.snapshotForTaskThreadLocked(thread.AgentID, capturedAt)
+	}
+	if thread.AgentSnapshotID == "" {
+		thread.AgentSnapshotID = taskThreadAgentSnapshotID(thread.AgentSnapshot)
+	}
 }
 
 func (s *DevelopmentAIAgentClientStore) snapshotAgentTaskThreadsLocked(agent AgentClientRecord, capturedAt time.Time) {
@@ -43,6 +48,8 @@ func (s *DevelopmentAIAgentClientStore) snapshotAgentTaskThreadsLocked(agent Age
 		for i := range threads {
 			if threads[i].AgentID == agent.AgentID && threads[i].AgentSnapshot == nil {
 				threads[i].AgentSnapshot = copyTaskThreadAgentSnapshot(snapshot)
+				threads[i].AgentSnapshotID = ""
+				s.ensureTaskThreadAgentSnapshotLocked(&threads[i], capturedAt)
 			}
 		}
 		s.taskThreads[taskID] = threads

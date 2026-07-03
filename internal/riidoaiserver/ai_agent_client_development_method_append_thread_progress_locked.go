@@ -31,6 +31,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 			threads[i].Message = event.Lines[len(event.Lines)-1].Message
 		}
 		threads[i].Lines = appendRetainedThreadProgressLines(threads[i].Lines, event.Lines)
+		s.dropTaskThreadProgressCacheLocked(threads[i].ThreadID)
 		s.taskThreads[event.TaskID] = threads
 		return
 	}

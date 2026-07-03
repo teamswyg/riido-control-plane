@@ -384,7 +384,7 @@
     {
       "id": "control_plane_performance_evidence_loop",
       "observation": "Control-plane high-traffic risk surfaces had isolated benchmarks, pprof configuration, live load tooling, local pressure findings, and per-run resource rows, but agents still needed a per-scenario capacity estimate to compare concurrent-user pressure without recalculating raw rows; pressure output could also promote a zero goroutine delta as if it were an actionable leak signal, heavy local stress needed to stay separate from the lightweight CI pressure command, the static audit could lose an entire endpoint, DB, SSE, scheduling, fanout, waiter, progress, lock, read-model, or goroutine-risk category while still reporting a non-empty surface list, live HTTP load evidence lacked direct throughput, failure-rate, endpoint-finding, load-generator resource rows, and opt-in pprof sample metadata, local pressure had resource deltas but no same-command CPU/heap/goroutine profile metadata path for manual hotspot inspection, the v3 thread history endpoint needed httptest pressure coverage rather than only internal projection timing, local pressure showed client event subscriber fanout as a measurable allocation/cpu hotspot before any endpoint contract change, the generated evidence artifacts did not directly expose assertion/category coverage even though the manifest verified those rules, follow-up pressure showed progress ingest repeatedly allocating around 590KB/op while appending monotonically increasing lines, benchmark profiling showed runtime progress lookups copying client-visible thread lines before internal state checks, pressure candidates still carried human TODO wording instead of executable next-step commands, assignment long-poll/tool-approval waiter risks were claimed as hot paths without direct local pressure scenarios measuring waiter timer/goroutine behavior, candidate artifacts did not carry the measured capacity/latency/allocation/cpu summary needed for the next loop to prioritize without reopening the raw pressure report, the performance manifest did not expose an architecture component map that binds code paths to heap, CPU, goroutine, race, and OTel/X-Ray/CloudWatch evidence dimensions, agents still had to infer a touched file's performance architecture context from component prose instead of a generated file index, hot-path files could be listed without component coverage or executable target commands in the file index, a follow-up agent still needed to reread generated prose to query one touched file's pressure and target-verifier scope, and exact-only architecture queries returned unmatched for central or newly split files that live beside registered performance components. benchmark evidence then showed RecordAIAgentThreadProgress at 6.7us/75KB/23 allocs before the fix and 1.4us/1.1KB/19 allocs after append-retained progress/replay buffers, with pprof shifting remaining allocation pressure to live fanout and progress text normalization. A later local pressure baseline identified v3 thread history projection as the top remaining allocation hotspot, with thread_history_v3 at about 52.7KB/op and the v3 thread-history HTTP endpoint at about 79.5KB/op before the projection slice-builder change. Later open-loop evidence found two remaining API-neutral hot paths: inactive-heavy thread stream target construction still allocated like all threads had active streams, and client event fanout repeated the same visibility decision for subscribers that shared the same principal/workspace/role key. The latest tool approval pressure slice showed pending approval waiters still burning ticker reads when the approval could not expire during the hold window.",
-      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, explicit local pressure scenario names, manual high-concurrency pressure evidence commands, optional local CPU/heap/goroutine profile metadata with 0600 profile files, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, live aiagentload throughput/capacity/resource findings, opt-in pprof sample metadata without profile bodies, required high-traffic category coverage, architecture component coverage, generated file architecture index rows, file-to-hot-path routing rows, executable per-file target verifier commands, file-level architecture query JSON with exact and directory-fallback routing plus component role summaries, heap/cpu/goroutine/race/OTel dimension coverage, assertion/category coverage fields in the evidence artifact, allocation-aware progress merge/filter surfaces, runtime progress raw lookup surfaces, line-retention regression tests, bounded assignment/tool-approval waiter pressure scenarios, finding-level closed-loop adoption plans whose commands are directly executable, and candidate measurement summaries that carry max concurrent users, ops/sec, p95 latency, alloc/op, cpu/op, goroutine delta, and error-free status, then publish candidate evidence for architect review. A retained append helper for append-only progress and replay tails can reduce hot-path heap pressure without changing endpoint payloads, SSE semantics, or replay limits. A pre-sized v3 history message builder can append stored messages, progress lines, and projection results into one response slice, reducing refresh allocation pressure while preserving v3 response shape and message ordering. Counting active stream targets only when the first thread proves the list is not all-active can remove inactive-heavy allocation without changing subscription response shape, and a per-fanout visibility cache keyed by principal/workspace/roles can reduce repeated SSE subscriber work while still delegating authorization to the same subscriber visibility function. Plain progress text can bypass regex-heavy local-path, approval, and provider-limit rewrites only after marker checks prove the message has no sensitive or localized rewrite surface. Tool approval waits can skip polling ticks when a pending approval cannot expire before the hold deadline, preserving signal/deadline behavior while reducing idle CPU and allocation pressure.",
+      "hypothesis": "A control-plane performance sidecar can verify hot-path files, benchmark/test functions, local open-loop pressure evidence, explicit local pressure scenario names, manual high-concurrency pressure evidence commands, optional local CPU/heap/goroutine profile metadata with 0600 profile files, per-scenario capacity estimates, measured alloc/latency/cpu/subscriber findings, positive-only goroutine leak findings, pprof loopback command, redacted aiagentload command, live aiagentload throughput/capacity/resource findings, opt-in pprof sample metadata without profile bodies, required high-traffic category coverage, architecture component coverage, generated file architecture index rows, file-to-hot-path routing rows, executable per-file target verifier commands, file-level architecture query JSON with exact and directory-fallback routing plus component role summaries, heap/cpu/goroutine/race/OTel dimension coverage, assertion/category coverage fields in the evidence artifact, allocation-aware progress merge/filter surfaces, runtime progress raw lookup surfaces, line-retention regression tests, bounded assignment/tool-approval waiter pressure scenarios, finding-level closed-loop adoption plans whose commands are directly executable, and candidate measurement summaries that carry max concurrent users, ops/sec, p95 latency, alloc/op, cpu/op, goroutine delta, and error-free status, then publish candidate evidence for architect review. A retained append helper for append-only progress and replay tails can reduce hot-path heap pressure without changing endpoint payloads, SSE semantics, or replay limits. A pre-sized v3 history message builder can append stored messages, progress lines, and projection results into one response slice, reducing refresh allocation pressure while preserving v3 response shape and message ordering. Counting active stream targets only when the first thread proves the list is not all-active can remove inactive-heavy allocation without changing subscription response shape, and a per-fanout visibility cache keyed by principal/workspace/roles can reduce repeated SSE subscriber work while still delegating authorization to the same subscriber visibility function. Plain progress text can bypass regex-heavy local-path, approval, and provider-limit rewrites only after marker checks prove the message has no sensitive or localized rewrite surface. Tool approval waits can skip polling ticks when a pending approval cannot expire before the hold deadline, preserving signal/deadline behavior while reducing idle CPU and allocation pressure. V3 progress history message IDs can keep the same legacy SHA-256 key semantics while building the progress key on the stack first, reducing refresh allocation without changing message_id values or endpoint response shape. V3 thread history read projection can skip the v2-visible progress line copy and build history records directly, reducing refresh allocation while preserving response fields, message ordering, visibility, and snapshot semantics. V3 thread history can cache progress-to-history message conversion inside the store, invalidate it on runtime progress updates, and reuse the converted progress rows across refreshes without changing message_id values or endpoint payload shape. V3 thread history can also cache complete progress/projection message timelines for threads without stored user replies, invalidating on progress or user-message writes and preserving queued-status suppression semantics. V3 thread history can cache internal agent snapshot IDs on thread records and reuse a per-request active stream href, preserving the public agent_snapshot_id and active_stream fields while reducing per-refresh metadata work.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
@@ -796,6 +796,66 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/module-decomposition.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_visible_records.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/local_pressure_v3_history_readonly_projection_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-readonly-projection-after-2026-07-03.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_message_cache.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_filter_messages.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_fast_path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/local_pressure_v3_history_message_cache_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-message-cache-before-2026-07-03.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-message-cache-after-2026-07-03.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_active_stream_link_for_thread.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_visible_records.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_task_thread_agent_snapshot_store.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_snapshot_id_cache_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/local_pressure_v3_history_thread_metadata_cache_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-thread-metadata-cache-after-2026-07-03.json"
         }
       ],
       "verifiers": [
@@ -938,6 +998,10 @@
         {
           "kind": "test",
           "path": "tools/operationalreadiness/tool_approval_waiter_signal_only_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/local_pressure_v3_history_readonly_projection_test.go"
         }
       ],
       "evidence": [
@@ -1028,9 +1092,29 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/control-plane-performance-averages.jsonl"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-readonly-projection-after-2026-07-03.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-progress-message-cache-after-2026-07-03.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-message-cache-before-2026-07-03.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-message-cache-after-2026-07-03.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/control-plane-v3-history-thread-metadata-cache-after-2026-07-03.json"
         }
       ],
-      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, optional local CPU/heap/goroutine profile metadata with 0600 profile files, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, assignment long-poll waiter pressure, tool-approval waiter pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, required high-traffic category coverage, architecture component coverage, generated file architecture index coverage, exact and directory-fallback architecture query routing, heap/cpu/goroutine/race/OTel signal coverage, and assertion coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories, missing assertions, missing architecture components, missing file architecture index rows, missing pressure dimensions, missing local profile command, or missing local pressure scenarios fail before merge. Live progress fanout also precomputes the client-visible progress payload once per event before subscriber visibility checks, progress line ingestion avoids copying the whole existing line slice or allocating a seen-seq map for strictly increasing line batches, runtime progress lookup avoids client-visible thread copies on internal hot paths, runtime thread lines are retained before snapshot persistence, pressure operations can now clean up scenario-owned resources, pressure candidate adoption plans now expose executable go run/go test commands for each required next artifact, and candidate artifacts now carry measured capacity/latency/allocation/cpu summaries for the next loop, preserving v2/v3 contracts while reducing repeated progress allocation work and keeping next-loop handoff machine-runnable. Runtime progress ingest now retains bounded append-only progress lines and client replay events in place; benchmark history records the reduction from roughly 6.7us/75KB/23 allocs to roughly 1.4us/1.1KB/19 allocs, while pprof identifies live fanout and progress normalization as the next safe candidate rather than expanding this slice. V3 thread history projection now builds stored, progress, and projection messages through one pre-sized response slice; follow-up local pressure evidence shows thread_history_v3 allocation falling below the prior baseline by more than 10% and the HTTP v3 thread-history endpoint by more than 5%, with zero errors and zero goroutine delta. V3 history message IDs keep the same SHA-256 legacy keys, verified by a sidecar test, while avoiding intermediate joined strings; follow-up pressure shows thread_history_v3 allocation falling further from about 44.5KB/op to about 40.0KB/op and the HTTP v3 thread-history endpoint from about 71.0KB/op to about 66.7KB/op with zero errors and zero goroutine delta. Thread stream subscription targets now pre-size for inactive-heavy task histories only when needed, reducing the inactive-heavy benchmark from 2688 B/op to 96 B/op while preserving all-active allocation behavior and the v2 subscription contract. Client SSE event fanout now caches visibility decisions per subscriber visibility key inside one fanout pass, reducing local fanout evidence from roughly 1792 alloc/op to roughly 1584 alloc/op and CPU/op by about 29%, with no endpoint, payload, or authorization contract change. V3 history plain-text fast paths now avoid regex-heavy rewrite and unnecessary queued suppression scans for the common no-queued progress case; local pressure shows thread_history_v3 allocation falling from about 40.0KB/op to about 23.4KB/op and CPU/op from about 66us to about 36us, while the HTTP v3 thread-history endpoint falls from about 66.7KB/op to about 49.9KB/op with zero errors and zero goroutine delta. Tool approval waiters now use signal-only waits when pending approvals cannot expire inside the hold window; local pressure shows tool_approval_waiters allocation falling from about 2288 B/op to about 2083 B/op and CPU/op from about 45us to about 27us with zero errors and zero goroutine delta.",
+      "decision": "Performance work now starts as an open-loop evidence harness: local benchmarks, lightweight CI pressure, separate manual 128-concurrency pressure, CPU/resource deltas, optional local CPU/heap/goroutine profile metadata with 0600 profile files, capacity estimates, subscriber fanout pressure, v3 thread history endpoint pressure, assignment long-poll waiter pressure, tool-approval waiter pressure, measured positive findings, pprof/load commands, opt-in pprof sample metadata, live HTTP throughput/failure/resource findings, required high-traffic category coverage, architecture component coverage, generated file architecture index coverage, exact and directory-fallback architecture query routing, heap/cpu/goroutine/race/OTel signal coverage, and assertion coverage identify hot paths, while zero-valued goroutine deltas stay as capacity evidence instead of becoming closed-loop candidates and missing audit categories, missing assertions, missing architecture components, missing file architecture index rows, missing pressure dimensions, missing local profile command, or missing local pressure scenarios fail before merge. Live progress fanout also precomputes the client-visible progress payload once per event before subscriber visibility checks, progress line ingestion avoids copying the whole existing line slice or allocating a seen-seq map for strictly increasing line batches, runtime progress lookup avoids client-visible thread copies on internal hot paths, runtime thread lines are retained before snapshot persistence, pressure operations can now clean up scenario-owned resources, pressure candidate adoption plans now expose executable go run/go test commands for each required next artifact, and candidate artifacts now carry measured capacity/latency/allocation/cpu summaries for the next loop, preserving v2/v3 contracts while reducing repeated progress allocation work and keeping next-loop handoff machine-runnable. Runtime progress ingest now retains bounded append-only progress lines and client replay events in place; benchmark history records the reduction from roughly 6.7us/75KB/23 allocs to roughly 1.4us/1.1KB/19 allocs, while pprof identifies live fanout and progress normalization as the next safe candidate rather than expanding this slice. V3 thread history projection now builds stored, progress, and projection messages through one pre-sized response slice; follow-up local pressure evidence shows thread_history_v3 allocation falling below the prior baseline by more than 10% and the HTTP v3 thread-history endpoint by more than 5%, with zero errors and zero goroutine delta. V3 history message IDs keep the same SHA-256 legacy keys, verified by a sidecar test, while avoiding intermediate joined strings; follow-up pressure shows thread_history_v3 allocation falling further from about 44.5KB/op to about 40.0KB/op and the HTTP v3 thread-history endpoint from about 71.0KB/op to about 66.7KB/op with zero errors and zero goroutine delta. Thread stream subscription targets now pre-size for inactive-heavy task histories only when needed, reducing the inactive-heavy benchmark from 2688 B/op to 96 B/op while preserving all-active allocation behavior and the v2 subscription contract. Client SSE event fanout now caches visibility decisions per subscriber visibility key inside one fanout pass, reducing local fanout evidence from roughly 1792 alloc/op to roughly 1584 alloc/op and CPU/op by about 29%, with no endpoint, payload, or authorization contract change. V3 history plain-text fast paths now avoid regex-heavy rewrite and unnecessary queued suppression scans for the common no-queued progress case; local pressure shows thread_history_v3 allocation falling from about 40.0KB/op to about 23.4KB/op and CPU/op from about 66us to about 36us, while the HTTP v3 thread-history endpoint falls from about 66.7KB/op to about 49.9KB/op with zero errors and zero goroutine delta. Tool approval waiters now use signal-only waits when pending approvals cannot expire inside the hold window; local pressure shows tool_approval_waiters allocation falling from about 2288 B/op to about 2083 B/op and CPU/op from about 45us to about 27us with zero errors and zero goroutine delta. V3 progress message IDs now use a stack-first legacy key builder that preserves every message_id value; local pressure shows thread_history_v3 allocation falling further to about 18.9KB/op and the HTTP v3 thread-history endpoint to about 45.3KB/op with zero errors and zero goroutine delta. V3 thread history now reads history records directly instead of first materializing v2-visible thread records; local pressure shows thread_history_v3 allocation falling from about 18.9KB/op to about 11.4KB/op and the HTTP v3 thread-history endpoint from about 45.3KB/op to about 39.7KB/op, with zero errors and zero goroutine delta. V3 thread history now caches progress-to-history message conversion and invalidates the cache on runtime progress updates; local pressure shows thread_history_v3 allocation falling from about 11.4KB/op to about 10.2KB/op and p95 latency from about 15us to about 5us, while the full HTTP endpoint remains dominated by JSON/response overhead and stays a separate candidate. Same-fixture pressure now shows complete progress/projection history message caching reducing thread_history_v3 allocation from about 16.3KB/op to about 1.4KB/op and CPU/op from about 19.5us to about 3.7us; the HTTP endpoint drops from about 70.5KB/op to about 47.5KB/op, with JSON/response buffering still the next separate candidate. Caching internal agent snapshot IDs and reusing the per-request stream href reduces thread_history_v3 further to about 0.94KB/op and the HTTP endpoint to about 46.4KB/op while keeping every public field and endpoint unchanged.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -7432,20 +7516,20 @@
           "kind": "test",
           "path": "tools/operationalreadiness/infra_alarm_test.go"
         },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/infra_alarm_command_test.go"
-    },
-    {
-      "kind": "manifest",
-      "path": "docs/30-architecture/evidence/client-surface-alarm-preflight-development-2026-07-02.json"
-    },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/client_surface_alarm_preflight_evidence_test.go"
-    },
-    {
-      "kind": "test",
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/infra_alarm_command_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/client-surface-alarm-preflight-development-2026-07-02.json"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/client_surface_alarm_preflight_evidence_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/operationalreadiness/evidence_time_test.go"
         },
         {
@@ -7478,16 +7562,16 @@
           "kind": "test",
           "path": "tools/operationalreadiness/infra_alarm_test.go"
         },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/infra_alarm_command_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/client_surface_alarm_preflight_evidence_test.go"
-    },
-    {
-      "kind": "test",
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/infra_alarm_command_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/client_surface_alarm_preflight_evidence_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/operationalreadiness/evidence_time_test.go"
         },
         {
@@ -7537,17 +7621,17 @@
           "kind": "manifest",
           "path": "docs/30-architecture/operational-readiness.riido.json"
         },
-    {
-      "kind": "generated_doc",
-      "path": "docs/30-architecture/operational-readiness.md"
-    },
-    {
-      "kind": "artifact",
-      "path": "client-surface-alarm-preflight-development-2026-07-02",
-      "redacted": true
-    }
-  ],
-  "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal and rejects partial checks whose measurements are only manual notes, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, daemon-owned go test next commands must enter ../riido-daemon before running so external evidence refs cannot be misexecuted from the control-plane repo, partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context, and the client-surface monitoring partial now cites merged riido-infra alarm topology, dimension regression guard, redacted live CloudWatch alarm evidence collector, and redacted preflight evidence collector while still requiring environment-specific threshold/action plan/apply evidence before claiming live alarm coverage. Local operator dry-run showed the old adoption command was not executable because required Terraform variables are intentionally private and live client-surface alarms were absent, so the next command now derives workspace/service from Terraform, records missing tfvars or required Terraform inputs as redacted preflight evidence instead of storing raw plan logs or tfvars values, captures detailed-exitcode plan evidence when private inputs exist, and then runs the redacted CloudWatch alarm evidence collector. A fresh development preflight now records `blocked_missing_operator_tfvars` with missing protected reference and region input kinds, keeps raw plan logs/tfvars/secrets out of the artifact, and intentionally leaves otel_xray_client_surface partial until operator tfvars allow live plan/apply evidence.",
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/operational-readiness.md"
+        },
+        {
+          "kind": "artifact",
+          "path": "client-surface-alarm-preflight-development-2026-07-02",
+          "redacted": true
+        }
+      ],
+      "decision": "Operational readiness is represented as a closed loop that accepts partial evidence only when a next executable artifact and placeholder-free command are declared, requires each readiness check to name at least one measurement signal and rejects partial checks whose measurements are only manual notes, exposes stale partial age, measurement-kind distribution, and generated/expires freshness windows in JSON evidence, verifies those freshness windows against the Loop Registry expiry and artifact surface, closes the agent rename usability item as historical thread snapshot preservation, and emits low-cardinality client-surface HTTP counters for CloudWatch alerts; OTel/X-Ray spans include the matching server-side client surface for daemon, browser client, Electron desktop, desktop-candidate, component, and healthcheck traffic analysis. Daemon resilience next commands use concrete test names instead of broad patterns that can pass with no tests run, daemon-owned go test next commands must enter ../riido-daemon before running so external evidence refs cannot be misexecuted from the control-plane repo, partial next commands reject placeholder tokens so candidate adoption can execute without asking a human to fill in missing context, and the client-surface monitoring partial now cites merged riido-infra alarm topology, dimension regression guard, redacted live CloudWatch alarm evidence collector, and redacted preflight evidence collector while still requiring environment-specific threshold/action plan/apply evidence before claiming live alarm coverage. Local operator dry-run showed the old adoption command was not executable because required Terraform variables are intentionally private and live client-surface alarms were absent, so the next command now derives workspace/service from Terraform, records missing tfvars or required Terraform inputs as redacted preflight evidence instead of storing raw plan logs or tfvars values, captures detailed-exitcode plan evidence when private inputs exist, and then runs the redacted CloudWatch alarm evidence collector. A fresh development preflight now records `blocked_missing_operator_tfvars` with missing protected reference and region input kinds, keeps raw plan logs/tfvars/secrets out of the artifact, and intentionally leaves otel_xray_client_surface partial until operator tfvars allow live plan/apply evidence.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
@@ -8780,22 +8864,22 @@
           "kind": "manifest",
           "path": "docs/30-architecture/operational-readiness.riido.json"
         },
-    {
-      "kind": "manifest",
-      "path": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"
-    },
-    {
-      "kind": "manifest",
-      "path": "docs/30-architecture/evidence/notion-backfill-followup-review-2026-07-02.json"
-    },
-      {
-        "kind": "manifest",
-        "path": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"
-      },
-      {
-        "kind": "manifest",
-        "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"
-      },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/notion-backfill-review-2026-07-02.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/notion-backfill-followup-review-2026-07-02.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/notion-dmg-stale-warning-update-2026-07-02.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/notion-qa-comment-event-diff-2026-07-02.json"
+        },
         {
           "kind": "manifest",
           "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"
@@ -8847,26 +8931,26 @@
         {
           "kind": "test",
           "path": "tools/operationalreadiness/notion_backfill_review_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/notion_backfill_followup_review_test.go"
-    },
-      {
-        "kind": "test",
-        "path": "tools/operationalreadiness/notion_dmg_warning_update_test.go"
-      },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/notion_qa_comment_event_diff_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/notion_qa_latest_comment_events_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/staging_completion_progress_readonly_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_backfill_followup_review_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_dmg_warning_update_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_qa_comment_event_diff_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_qa_latest_comment_events_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/staging_completion_progress_readonly_test.go"
         },
         {
           "kind": "test",
@@ -8902,29 +8986,29 @@
           "kind": "tool",
           "path": "tools/operationalreadiness/main.go"
         },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/notion_backfill_review_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/notion_backfill_followup_review_test.go"
-    },
-      {
-        "kind": "test",
-        "path": "tools/operationalreadiness/notion_dmg_warning_update_test.go"
-      },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/notion_qa_comment_event_diff_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/notion_qa_latest_comment_events_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/operationalreadiness/staging_completion_progress_readonly_test.go"
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_backfill_review_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_backfill_followup_review_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_dmg_warning_update_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_qa_comment_event_diff_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/notion_qa_latest_comment_events_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/staging_completion_progress_readonly_test.go"
         },
         {
           "kind": "test",
@@ -8972,30 +9056,30 @@
         },
         {
           "kind": "tool",
-        "path": "tools/evidencegraph/main.go"
+          "path": "tools/evidencegraph/main.go"
         }
       ],
       "evidence": [
-    {
-      "kind": "artifact",
-      "path": "notion-backfill-review-2026-07-02",
-      "redacted": true
-    },
-    {
-      "kind": "artifact",
-      "path": "notion-backfill-followup-review-2026-07-02",
-      "redacted": true
-    },
-      {
-        "kind": "artifact",
-        "path": "notion-dmg-stale-warning-update-2026-07-02",
-        "redacted": true
-      },
-      {
-        "kind": "artifact",
-        "path": "notion-qa-comment-event-diff-2026-07-02",
-        "redacted": true
-      },
+        {
+          "kind": "artifact",
+          "path": "notion-backfill-review-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "notion-backfill-followup-review-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "notion-dmg-stale-warning-update-2026-07-02",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "notion-qa-comment-event-diff-2026-07-02",
+          "redacted": true
+        },
         {
           "kind": "artifact",
           "path": "staging-completion-progress-readonly-2026-07-02",
@@ -9028,10 +9112,10 @@
         },
         {
           "kind": "artifact",
-        "path": "operational-readiness-evidence",
-        "redacted": true
-      }
-    ],
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        }
+      ],
       "decision": "The latest Notion backfill reviews separate current truth from stale snapshots and new gaps: treat newer comments/generated readiness as current truth, keep staging_client_p0_visual_retest partial for product-policy/client-design visual evidence, remove stale page-body Gatekeeper runbook guidance, and track completed-but-still-progressing UI as its own P0 evidence request instead of merging it into the already-evidenced queued fix. The read-only, follow-up, and live Chrome product-screen checks do not reproduce the completed/progress drift: they show zero active streams where API snapshots exist, zero running threads, zero queued messages, zero active subscription filters, and no visible thinking/running/queued copy on the sampled task. The newest logged-in Chrome pass also shows no visible active progress or queued copy, but it is screen-only because API capture was unavailable in the browser scope. A subsequent signed-in existing-tab capture on 2026-07-03 repeats that non-reproduction shape, and a later follow-up capture repeats it again: visible thinking count 0 and queued copy count 0 on the sampled task, while historical permission-request-like and stopped messages remain visible as thread history. The cycle remains partial because these are non-reproduction baselines; closure still requires a same-conversation screenshot plus v3, v2, thread-stream-subscription, and SSE payload captured at the moment the reported race appears. The required next artifact is now executable: tools/aiagentthreadsnapshot first captures redacted candidate_conversations when RIIDO_CONVERSATION_ID is unknown, then requires the tester to set RIIDO_CONVERSATION_ID for the focused same-conversation recapture; it captures redacted v3, v2, subscription, and SSE summaries from a bearer-token env var without serializing message bodies or tokens, treats terminal threads that remain in active_thread_filters as captured_terminal_live_conflict, and writes redacted blocked_missing_bearer_token evidence when the token env var is absent, so reproduction attempts do not disappear as local setup failures or as missing conversation-id setup. The comment-event diff now preserves the newest concrete Notion comment IDs for queued live-mutation evidence, completion-progress repo/CI merge evidence, page-level backfill strengthening, live product-screen recheck, the PR #768 merge-completion comment that proves the live recheck reached repo CI, the PR #772 completion-progress backfill-refresh comment, and the page-level PR #772/#773 backfill/performance-pressure checkpoint; a verifier fails if those events disappear, while the screen-only verifiers fail if a screenshot hash drifts, if active queued/thinking copy reappears in a baseline artifact, or if the evidence pretends API data was captured. The PR #772 follow-up stays attached to notion_p0_completion_progress_after_terminal, the PR #772/#773 page-level follow-up stays attached to staging_client_p0_visual_retest, no new backend blocker was found, and performance work should continue from the recorded allocation candidates. The QA page now points testers to the signed/notarized CDN DMG, the old xattr/ad-hoc codesign commands are no longer presented as install steps, and product readiness remains partial until teammate install and visual QA screenshots close.",
       "next_loop": "closed_loop_candidate"
     },

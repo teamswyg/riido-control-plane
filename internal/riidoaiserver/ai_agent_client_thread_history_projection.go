@@ -16,30 +16,19 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreadHistory(ctx context
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	threads := s.visibleTaskThreadsLocked(principal, taskID)
+	threads, snapshots := s.visibleTaskThreadHistoryRecordsLocked(principal, taskID)
 	response := AIAgentTaskThreadHistoryCollectionResponse{
 		SchemaVersion:  SchemaVersion,
 		TaskID:         taskID,
-		Threads:        make([]AIAgentTaskThreadHistoryRecord, 0, len(threads)),
-		AgentSnapshots: map[string]AIAgentTaskThreadAgentSnapshot{},
-	}
-	for _, thread := range threads {
-		record := s.taskThreadHistoryRecordLocked(principal, thread)
-		response.Threads = append(response.Threads, record)
-		if record.AgentSnapshotID != "" && thread.AgentSnapshot != nil {
-			response.AgentSnapshots[record.AgentSnapshotID] = *copyTaskThreadAgentSnapshot(thread.AgentSnapshot)
-		}
+		Threads:        threads,
+		AgentSnapshots: snapshots,
 	}
 	suppressSupersededQueuedHistoryMessages(response.Threads)
 	response.ActiveStream = taskThreadHistoryActiveStream(response.Threads)
-	if len(response.AgentSnapshots) == 0 {
-		response.AgentSnapshots = nil
-	}
 	return response, nil
 }
 
-func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(principal AuthorizationResult, thread AIAgentTaskThreadRecord) AIAgentTaskThreadHistoryRecord {
-	snapshotID := taskThreadAgentSnapshotID(thread.AgentSnapshot)
+func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(thread AIAgentTaskThreadRecord, streamHref string) AIAgentTaskThreadHistoryRecord {
 	record := AIAgentTaskThreadHistoryRecord{
 		ThreadID:        thread.ThreadID,
 		ConversationID:  taskThreadConversationID(thread),
@@ -47,7 +36,7 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(principal 
 		TaskID:          thread.TaskID,
 		AssignmentID:    thread.AssignmentID,
 		AgentID:         thread.AgentID,
-		AgentSnapshotID: snapshotID,
+		AgentSnapshotID: thread.AgentSnapshotID,
 		RunID:           thread.RunID,
 		WorkStatus:      thread.WorkStatus,
 		AssignmentState: thread.AssignmentState,
@@ -56,16 +45,21 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(principal 
 		Messages:        s.taskThreadHistoryMessagesLocked(thread),
 	}
 	if taskThreadHasActiveStream(thread) {
-		link := activeStreamLinkForThread(thread, strings.TrimSpace(principal.WorkspaceID))
+		link := activeStreamLinkForThreadHref(thread, streamHref)
 		record.ActiveStream = &link
 	}
 	return record
 }
 
 func (s *DevelopmentAIAgentClientStore) taskThreadHistoryMessagesLocked(thread AIAgentTaskThreadRecord) []AIAgentTaskThreadHistoryMessage {
+	stored := s.taskThreadMessages[thread.ThreadID]
+	if len(stored) == 0 {
+		return s.cachedTaskThreadHistoryMessagesLocked(thread)
+	}
+	progress := s.cachedTaskThreadProgressMessagesLocked(thread)
 	out := buildTaskThreadHistoryMessages(
-		s.taskThreadMessages[thread.ThreadID],
-		thread,
+		stored,
+		progress,
 	)
 	if message, ok := taskThreadProjectionMessage(thread); ok {
 		out = append(out, message)

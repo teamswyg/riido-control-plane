@@ -697,6 +697,54 @@
           "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-plain-text-fastpath-after-2026-07-03.json"
         },
         {
+          "id": "local_pressure_progress_message_id_stack_2026_07_03",
+          "kind": "artifact",
+          "signal": "After progress history message IDs switched to stack-first hash key construction, local pressure measured zero errors, zero goroutine deltas, and lower allocation per operation for thread_history_v3 and the v3 thread-history HTTP endpoint without changing response IDs.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-progress-message-id-stack-after-2026-07-03.json"
+        },
+        {
+          "id": "local_pressure_v3_history_readonly_projection_2026_07_03",
+          "kind": "artifact",
+          "signal": "After v3 thread history stopped copying v2-visible progress line slices before building messages[], local pressure measured zero errors, zero goroutine deltas, thread_history_v3 at about 11.4KB/op, and the v3 thread-history HTTP endpoint at about 39.7KB/op without changing endpoint response fields.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-readonly-projection-after-2026-07-03.json"
+        },
+        {
+          "id": "local_pressure_v3_history_progress_message_cache_2026_07_03",
+          "kind": "artifact",
+          "signal": "After v3 thread history cached progress-to-history message conversion between refreshes, local pressure measured zero errors, zero goroutine deltas, and lower allocation/latency for thread_history_v3 without changing endpoint response fields; the full HTTP endpoint remains a JSON/response pressure candidate.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-progress-message-cache-after-2026-07-03.json"
+        },
+        {
+          "id": "local_pressure_v3_history_message_cache_2026_07_03",
+          "kind": "artifact",
+          "signal": "After v3 thread history cached complete progress/projection message timelines for threads without stored user replies, same-fixture local pressure reduced thread_history_v3 allocation from about 16.3KB/op to about 1.4KB/op and the v3 HTTP endpoint from about 70.5KB/op to about 47.5KB/op with zero errors and zero goroutine delta.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-message-cache-after-2026-07-03.json"
+        },
+        {
+          "id": "local_pressure_v3_history_thread_metadata_cache_2026_07_03",
+          "kind": "artifact",
+          "signal": "After v3 thread history cached internal agent snapshot IDs and reused the per-request stream href, same-fixture local pressure reduced thread_history_v3 allocation from about 1.4KB/op to about 0.94KB/op and the v3 HTTP endpoint from about 47.5KB/op to about 46.4KB/op with zero errors and zero goroutine delta.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-thread-metadata-cache-after-2026-07-03.json"
+        },
+        {
+          "id": "local_pressure_small_progress_filter_2026_07_03",
+          "kind": "artifact",
+          "signal": "After small progress-fragment filtering avoided map allocation on tiny non-strict batches, local pressure reduced progress_ingest_fragment allocation from about 1.5KB/op to about 0.87KB/op with zero errors and zero goroutine delta.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-small-progress-filter-after-2026-07-03.json"
+        },
+        {
+          "id": "local_pressure_agent_snapshot_pointer_map_2026_07_03",
+          "kind": "artifact",
+          "signal": "After v3 thread history agent snapshots switched from map value copies to pointer values, local pressure reduced thread_history_v3 allocation from about 0.95KB/op to about 0.75KB/op and kept the v3 HTTP endpoint error-free with zero goroutine delta.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-agent-snapshot-pointer-map-after-2026-07-03.json"
+        },
+        {
+          "id": "local_pressure_event_stream_href_cache_2026_07_03",
+          "kind": "artifact",
+          "signal": "After AI agent client event-stream hrefs were cached per workspace inside the store lock, local pressure reduced thread_stream_subscription allocation from about 113 B/op to about 49 B/op and thread_history_v3 allocation from about 753 B/op to about 689 B/op with zero errors and zero goroutine delta.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-event-stream-href-cache-after-2026-07-03.json"
+        },
+        {
           "id": "local_pressure_tool_approval_signal_only_2026_07_03",
           "kind": "artifact",
           "signal": "After pending tool approval waits skip polling ticks when the approval cannot expire during the hold window, local pressure measured zero errors, zero goroutine deltas, and lower allocation/CPU per operation for tool_approval_waiters.",
@@ -727,6 +775,15 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-candidates-after-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-plain-text-fastpath-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-progress-message-id-stack-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-readonly-projection-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-progress-message-cache-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-cache-before-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-message-cache-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-thread-metadata-cache-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-small-progress-filter-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-agent-snapshot-pointer-map-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-event-stream-href-cache-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-before-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"},

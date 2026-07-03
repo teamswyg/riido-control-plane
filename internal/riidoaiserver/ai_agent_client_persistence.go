@@ -710,6 +710,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
 	s.taskThreadMessages = taskThreadMessages
+	s.taskThreadProgressCache = map[string]taskThreadProgressMessageCache{}
 	s.events = events
 	if preserveSubscribers {
 		s.subscribers = subscribers

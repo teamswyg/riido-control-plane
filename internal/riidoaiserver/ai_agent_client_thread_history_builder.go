@@ -2,15 +2,15 @@ package riidoaiserver
 
 func buildTaskThreadHistoryMessages(
 	stored []AIAgentTaskThreadHistoryMessage,
-	thread AIAgentTaskThreadRecord,
+	progress []AIAgentTaskThreadHistoryMessage,
 ) []AIAgentTaskThreadHistoryMessage {
-	size := len(stored) + len(thread.Lines) + 1
+	size := len(stored) + len(progress) + 1
 	if size == 1 {
 		size = 0
 	}
 	out := make([]AIAgentTaskThreadHistoryMessage, 0, size)
 	out = appendVisibleStoredTaskThreadHistoryMessages(out, stored)
-	return appendTaskThreadProgressMessages(out, thread)
+	return append(out, progress...)
 }
 
 func appendVisibleStoredTaskThreadHistoryMessages(

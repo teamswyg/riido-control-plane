@@ -472,6 +472,7 @@ type AIAgentTaskThreadRecord struct {
 	AssignmentID       string                               `json:"assignment_id,omitempty"`
 	AgentID            string                               `json:"agent_id"`
 	AgentSnapshot      *AIAgentTaskThreadAgentSnapshot      `json:"agent_snapshot,omitempty"`
+	AgentSnapshotID    string                               `json:"-"`
 	RunID              string                               `json:"run_id"`
 	SourceCommentID    string                               `json:"source_comment_id,omitempty"`
 	SourceMessageID    string                               `json:"source_message_id,omitempty"`
