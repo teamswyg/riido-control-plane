@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/saascontrolplane/pathutil"
 )
 
 func verifySourceCheck(repo, boundaryID string, check sourceCheck) error {
 	if check.Name == "" || check.File == "" || len(check.Contains) == 0 {
 		return fmt.Errorf("boundary %q has incomplete source check: %+v", boundaryID, check)
 	}
-	body, err := os.ReadFile(repoPath(repo, check.File))
+	body, err := os.ReadFile(pathutil.RepoPath(repo, check.File))
 	if err != nil {
 		return fmt.Errorf("read source check %q/%q: %w", boundaryID, check.Name, err)
 	}
@@ -27,7 +29,7 @@ func verifyRequiredPhrases(repo, generatedDoc, generatedText string, phrases []p
 	for _, phrase := range phrases {
 		text := generatedText
 		if phrase.File != generatedDoc {
-			body, err := os.ReadFile(repoPath(repo, phrase.File))
+			body, err := os.ReadFile(pathutil.RepoPath(repo, phrase.File))
 			if err != nil {
 				return fmt.Errorf("read required phrase file %q: %w", phrase.File, err)
 			}

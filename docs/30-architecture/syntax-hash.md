@@ -45,16 +45,20 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `cloudwatch_emf_guard` | `tools/cloudwatchemf` | 100% | `ea2afe093731` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
 | `cloudwatch_emf_path_adapter` | `tools/cloudwatchemf/pathutil` | 100% | `4b5efac43574` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
 | `cloudwatch_emf_requirements_adapter` | `tools/cloudwatchemf/requirements` | 100% | `d055ebae7bb8` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
+| `saas_control_plane_guard` | `tools/saascontrolplane` | 100% | `d2d6aa9ba863` | `saas_control_plane_boundaries_must_remain_executable` |
+| `saas_control_plane_path_adapter` | `tools/saascontrolplane/pathutil` | 100% | `f951feeb01f3` | `saas_control_plane_boundaries_must_remain_executable` |
+| `saas_control_plane_requirements_adapter` | `tools/saascontrolplane/requirements` | 100% | `073e15ea29e9` | `saas_control_plane_boundaries_must_remain_executable` |
+| `saas_control_plane_set_adapter` | `tools/saascontrolplane/setutil` | 100% | `38e756f3c814` | `saas_control_plane_boundaries_must_remain_executable` |
 | `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `d49e070fc838` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `7735900c5929` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_requirements_adapter` | `tools/snapshotcqrsgate/requirements` | 100% | `2d4fd81b478e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 
 ## Repository Coverage
 
-- Go files: `2769`
-- tracked files: `414`
-- untracked files: `2355`
-- coverage: `14.95%`
+- Go files: `2770`
+- tracked files: `432`
+- untracked files: `2338`
+- coverage: `15.59%`
 
 ## Constraints
 
@@ -65,5 +69,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `414`
-- compression score: `76`
+- efficiency score: `432`
+- compression score: `78`

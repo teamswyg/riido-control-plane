@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/saascontrolplane/requirements"
 )
 
 func renderDoc(m manifest) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "# %s\n\n%s\n\n", m.Title, generatedNotice)
+	fmt.Fprintf(&b, "# %s\n\n%s\n\n", m.Title, requirements.GeneratedNotice)
 	fmt.Fprintf(&b, "> Riido tasks: `%s`\n\n", strings.Join(m.RiidoTasks, "`, `"))
 	fmt.Fprintf(&b, "Executable SSOT: [`saas-control-plane.riido.json`](saas-control-plane.riido.json).\n\n")
 	b.WriteString("This reader is generated from the coverage-hub manifest. ")

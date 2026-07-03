@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/saascontrolplane/pathutil"
+	"github.com/teamswyg/riido-control-plane/tools/saascontrolplane/setutil"
 )
 
 const domainDocPath = "docs/20-domain/saas-control-plane.md"
@@ -13,7 +16,7 @@ func verifyFocusedWorkflows(repo string, workflows []string) error {
 		return fmt.Errorf("focused workflow coverage is underspecified: %d", len(workflows))
 	}
 	for _, workflow := range workflows {
-		body, err := os.ReadFile(repoPath(repo, workflow))
+		body, err := os.ReadFile(pathutil.RepoPath(repo, workflow))
 		if err != nil {
 			return fmt.Errorf("read focused workflow %q: %w", workflow, err)
 		}
@@ -32,7 +35,7 @@ func verifyBoundaryWorkflow(repo string, m manifest, item boundary) error {
 	if item.Workflow == "" {
 		return fmt.Errorf("boundary %q missing workflow", item.ID)
 	}
-	if !stringSet(m.FocusedWorkflows)[item.Workflow] {
+	if !setutil.StringSet(m.FocusedWorkflows)[item.Workflow] {
 		return fmt.Errorf("boundary %q uses unregistered workflow %q", item.ID, item.Workflow)
 	}
 	if item.EvidenceArtifact != "" {
@@ -42,7 +45,7 @@ func verifyBoundaryWorkflow(repo string, m manifest, item boundary) error {
 }
 
 func verifyBoundaryArtifact(repo string, item boundary) error {
-	body, err := os.ReadFile(repoPath(repo, item.Workflow))
+	body, err := os.ReadFile(pathutil.RepoPath(repo, item.Workflow))
 	if err != nil {
 		return fmt.Errorf("read boundary workflow %q: %w", item.Workflow, err)
 	}

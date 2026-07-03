@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/teamswyg/riido-control-plane/tools/saascontrolplane/pathutil"
 )
 
 func verifyDoc(repo string, m manifest, want string) error {
-	got, err := os.ReadFile(repoPath(repo, m.GeneratedDoc))
+	got, err := os.ReadFile(pathutil.RepoPath(repo, m.GeneratedDoc))
 	if err != nil {
 		return fmt.Errorf("read generated doc: %w", err)
 	}
