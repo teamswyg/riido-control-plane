@@ -40,6 +40,9 @@ func (s *Store) WaitForAssignment(ctx context.Context, agentID string, req PollR
 		return resp, err
 	}
 	waited = true
+	if s.operationStore == nil {
+		return s.waitForAssignmentSignalOnly(ctx, agentID, req, signal, hold)
+	}
 	return s.waitForAssignmentSignal(ctx, agentID, req, signal, hold, tick)
 }
 
