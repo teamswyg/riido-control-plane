@@ -1,0 +1,52 @@
+{
+  "schema_version": "riido-live-route-evidence.v1",
+  "id": "device-daemons-plural-all-env-route-2026-07-03",
+  "captured_at": "2026-07-03T05:39:24Z",
+  "redacted": true,
+  "subject": {
+    "feature": "ai-agent-device-daemons-plural-api",
+    "endpoints": [
+      "GET /v1/client/ai-agent/devices/{device_id}/daemons",
+      "GET /v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons"
+    ],
+    "compatibility_endpoint": "GET /devices/{device_id}/daemon remains preferred single-daemon detail"
+  },
+  "source": {
+    "commit": "1f56e712d880ac9d95cea119b4b5516a3bb6438a",
+    "notion_page": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
+    "notion_comment": "39220241-cf7f-81a7-b4ca-001d8d6c5d1d"
+  },
+  "deployments": [
+    {
+      "environment": "staging",
+      "base_url": "https://staging.ai-api.riido.io",
+      "deployment_run": "already_live_before_this_capture",
+      "v1_status": 401,
+      "v2_status": 401,
+      "decision": "route exists and is protected by client authorization"
+    },
+    {
+      "environment": "development",
+      "base_url": "https://development.ai-api.riido.io",
+      "deployment_run": "https://github.com/teamswyg/riido-control-plane/actions/runs/28640542631",
+      "v1_status": 401,
+      "v2_status": 401,
+      "decision": "route exists and is protected by client authorization"
+    },
+    {
+      "environment": "production",
+      "base_url": "https://prod.ai-api.riido.io",
+      "deployment_run": "https://github.com/teamswyg/riido-control-plane/actions/runs/28640723634",
+      "v1_status": 401,
+      "v2_status": 401,
+      "decision": "route exists and is protected by client authorization"
+    }
+  ],
+  "assertions": {
+    "not_404": true,
+    "unauthenticated_probe_only": true,
+    "raw_response_bodies_included": false,
+    "secrets_included": false
+  },
+  "decision": "The plural device daemon API is deployed across staging, development, and production. Unauthenticated probes return 401 instead of 404, proving the route is present while preserving authorization."
+}

@@ -508,6 +508,15 @@
       "status_tag": "[codex][완료][서버API][증적추가]",
       "signal": "A page-level QA transfer comment records that GET /v1/client/ai-agent/devices/{device_id}/daemons and GET /v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons were added, merged through contracts/control-plane, deployed to staging, and route-protected with 401 rather than missing with 404.",
       "decision": "Treat the plural daemon API as backend/contract complete while preserving GET /devices/{device_id}/daemon as the single preferred compatibility endpoint. Do not infer missing work from stale Notion page-level get_comments readback alone."
+    },
+    {
+      "id": "39220241-cf7f-81a7-b4ca-001d8d6c5d1d",
+      "discussion": "device_daemons_plural_api",
+      "observed_at": "2026-07-03T05:39:24Z",
+      "event_type": "all_environment_deploy_confirmation",
+      "status_tag": "[codex][완료][전달요청]",
+      "signal": "A follow-up QA transfer comment records that the plural daemon API was present on staging and then deployed to development and production, with unauthenticated v1/v2 probes returning 401 instead of 404 in all three environments.",
+      "decision": "Treat staging, development, and production as route-present for the plural daemon API. Future agents should use the all-env route evidence artifact and live probes instead of the stale Notion page property when deciding frontend handoff readiness."
     }
   ],
   "reviewed_discussions": [
