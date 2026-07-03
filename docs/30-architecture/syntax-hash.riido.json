@@ -21,7 +21,8 @@
     {"id":"config_reference_guard","package_path":"tools/configreference","golden_command":"go test ./tools/configreference -run TestConfigReferenceBehaviorGolden -count=1","semantic_claim_id":"config_reference_must_preserve_env_manifest_parity","mode":"golden_locked_config_reference_tool"},
     {"id":"store_safe_routing_guard","package_path":"tools/storesaferouting","golden_command":"go test ./tools/storesaferouting -run TestStoreSafeRoutingBehaviorGolden -count=1","semantic_claim_id":"store_safe_routing_must_preserve_provider_status_decisions","mode":"golden_locked_store_safe_routing_tool"},
     {"id":"public_pages_live_guard","package_path":"tools/publicpageslive","golden_command":"go test ./tools/publicpageslive -run TestPublicPagesLiveBehaviorGolden -count=1","semantic_claim_id":"operational_readiness_checks_must_bind_release_items_to_evidence","mode":"golden_locked_public_pages_live_tool"},
-    {"id":"go_ci_baseline_guard","package_path":"tools/gocibaseline","golden_command":"go test ./tools/gocibaseline -run TestGoCIBaselineBehaviorGolden -count=1","semantic_claim_id":"go_ci_baseline_must_preserve_broad_ci_contract","mode":"golden_locked_go_ci_baseline_tool"}
+    {"id":"go_ci_baseline_guard","package_path":"tools/gocibaseline","golden_command":"go test ./tools/gocibaseline -run TestGoCIBaselineBehaviorGolden -count=1","semantic_claim_id":"go_ci_baseline_must_preserve_broad_ci_contract","mode":"golden_locked_go_ci_baseline_tool"},
+    {"id":"web_frontend_api_guard","package_path":"tools/webfrontendapi","golden_command":"go test ./tools/webfrontendapi -run TestWebFrontendAPIBehaviorGolden -count=1","semantic_claim_id":"web_frontend_api_must_preserve_cors_contract","mode":"golden_locked_web_frontend_api_tool"}
   ],
   "constraints": {
     "max_file_lines": 75,

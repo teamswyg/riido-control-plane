@@ -9982,6 +9982,7 @@
         "store_safe_routing_must_preserve_provider_status_decisions",
         "operational_readiness_checks_must_bind_release_items_to_evidence",
         "go_ci_baseline_must_preserve_broad_ci_contract",
+        "web_frontend_api_must_preserve_cors_contract",
         "context_map_must_guard_public_boundaries"
       ],
       "changes": [
@@ -10051,6 +10052,10 @@
         },
         {
           "kind": "test",
+          "path": "tools/webfrontendapi/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/syntaxhash/syntaxhash_test.go"
         }
       ],
@@ -10105,6 +10110,10 @@
         },
         {
           "kind": "test",
+          "path": "tools/webfrontendapi/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/syntaxhash/syntaxhash_test.go"
         },
         {
@@ -10137,7 +10146,7 @@
           "redacted": true
         }
       ],
-  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/storesaferouting, tools/publicpageslive, tools/gocibaseline, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
+  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/storesaferouting, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
       "next_loop": "closed_loop_candidate_decision"
     }
   ],

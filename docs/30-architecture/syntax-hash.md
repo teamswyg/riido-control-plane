@@ -21,13 +21,14 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `store_safe_routing_guard` | `tools/storesaferouting` | 100% | `affad8a109c9` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `public_pages_live_guard` | `tools/publicpageslive` | 100% | `c9fb97e9cd95` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `go_ci_baseline_guard` | `tools/gocibaseline` | 100% | `47cc7e2cf7ff` | `go_ci_baseline_must_preserve_broad_ci_contract` |
+| `web_frontend_api_guard` | `tools/webfrontendapi` | 100% | `23a98ee173bc` | `web_frontend_api_must_preserve_cors_contract` |
 
 ## Repository Coverage
 
-- Go files: `2767`
-- tracked files: `218`
-- untracked files: `2549`
-- coverage: `7.87%`
+- Go files: `2768`
+- tracked files: `233`
+- untracked files: `2535`
+- coverage: `8.41%`
 
 ## Constraints
 
@@ -38,5 +39,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `218`
-- compression score: `21`
+- efficiency score: `233`
+- compression score: `30`
