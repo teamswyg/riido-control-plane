@@ -102,7 +102,7 @@
         "status": "partial",
         "codex_status": "[codex][진행중][부분증적]",
         "source": "notion:38e20241cf7f804dbbdbfdddb2bef165#completion-progress-after-terminal",
-        "summary": "A Notion QA comment reports that an Agent answer can look completed while the UI still shows progress, and refresh can reveal an additional answer. Existing terminal and queued server tests reduce backend risk, and a read-only staging sample currently shows no active stream, running thread, queued copy, or visible thinking state. The reported race still needs a reproduced same-conversation screenshot plus v3, v2, subscription, and SSE captures before assigning root cause to server or client.",
+        "summary": "A Notion QA comment reports that an Agent answer can look completed while the UI still shows progress, and refresh can reveal an additional answer. Existing terminal and queued server tests reduce backend risk; the completed-terminal HTTP proof now shows late daemon progress after completion is rejected and cannot leak through v2, v3, subscription, or SSE replay. The reported user-visible race still needs a reproduced same-conversation screenshot plus v3, v2, subscription, and SSE captures before assigning root cause to server or client.",
         "backfilled_check": "staging_client_p0_visual_retest",
         "required_next_artifact": "reproduced_completion_progress_same_conversation_network_snapshot",
         "required_next_command": "RIIDO_SNAPSHOT=\"docs/30-architecture/evidence/manual/reproduced-completion-progress-$(date -u +%Y%m%dT%H%M%SZ).json\"; go run ./tools/aiagentthreadsnapshot -base-url https://staging.ai-api.riido.io -workspace-id 1IFsD2c8Mnk2VstqJ4iNo -task-id uNYpHxDOzMp3vMy_urWsu -output \"$RIIDO_SNAPSHOT\"; jq '{decision,candidate_conversation_count,candidate_conversations}' \"$RIIDO_SNAPSHOT\"; if test -z \"$RIIDO_CONVERSATION_ID\"; then echo \"set RIIDO_CONVERSATION_ID from candidate_conversations and rerun this command\" >&2; exit 2; fi; go run ./tools/aiagentthreadsnapshot -base-url https://staging.ai-api.riido.io -workspace-id 1IFsD2c8Mnk2VstqJ4iNo -task-id uNYpHxDOzMp3vMy_urWsu -conversation-id \"$RIIDO_CONVERSATION_ID\" -output \"$RIIDO_SNAPSHOT\"",
@@ -112,6 +112,7 @@
           {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/completion-progress-same-moment-capture-tool-2026-07-02.json"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"},
+          {"kind": "artifact", "path": "docs/30-architecture/evidence/completion-progress-completed-terminal-http-proof-2026-07-03.json"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-readonly-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-followup-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png"},
           {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-completion-progress-live-screen-uNYpHxDOzMp3vMy_urWsu-2026-07-02T12-10Z.png"},
@@ -122,6 +123,7 @@
           {"kind": "external", "path": "notion-comment:39120241-cf7f-81fe-8a5f-001d4070221f"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-813f-aa9b-001dbe8f3a47"},
           {"kind": "external", "path": "notion-comment:39120241-cf7f-8130-b9a6-001d9e29226a"},
+          {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_completed_refresh_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
           {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"}
@@ -449,6 +451,12 @@
           "evidence_ref": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"
         },
         {
+          "id": "completion_progress_completed_terminal_http_proof_2026_07_03",
+          "kind": "test",
+          "signal": "HTTP regression proof shows completed assignments reject late daemon thread-progress and keep v2 threads, v3 history, active_thread_filters, and SSE replay free of the late progress.",
+          "evidence_ref": "docs/30-architecture/evidence/completion-progress-completed-terminal-http-proof-2026-07-03.json"
+        },
+        {
           "id": "staging_client_current_task_visual_2026_07_03",
           "kind": "screenshot",
           "signal": "A fresh signed-in Chrome existing-tab capture of the reported staging task shows visible thinking count 0 and queued copy count 0 while preserving historical permission-request and stopped messages as thread history; this is a non-reproduction baseline, not same-moment closure.",
@@ -579,6 +587,7 @@
         {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-readonly-2026-07-02.json"},
         {"kind": "api_snapshot", "path": "docs/30-architecture/evidence/staging-completion-progress-followup-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-completion-progress-live-screen-2026-07-02.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/completion-progress-completed-terminal-http-proof-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-current-task-visual-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-current-task-visual-followup-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/staging-client-p0-visual-retest-2026-07-02.json"},
@@ -590,6 +599,7 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-current-task-uNYpHxDOzMp3vMy_urWsu-2026-07-03.png"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/screenshots/staging-client-current-task-uNYpHxDOzMp3vMy_urWsu-2026-07-03-followup.png"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_completed_refresh_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_http_v3_stop_refresh_test.go"},
         {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_author_test.go"}
