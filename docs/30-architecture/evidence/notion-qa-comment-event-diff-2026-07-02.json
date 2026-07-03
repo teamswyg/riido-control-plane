@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-03T06:15:44Z",
+  "captured_at": "2026-07-03T08:13:54Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -1344,6 +1344,76 @@
         }
       ],
       "decision": "The latest post-deploy transfer comment is write-confirmed but not visible through page-level aggregate get_comments, which still returns the stale 31-comment snapshot. Preserve the write-confirmed comment id, PR #808 merge, deploy runs, and live probes as authoritative evidence."
+    },
+    {
+      "observed_at": "2026-07-03T08:13:54Z",
+      "tool": "notion.get_comments",
+      "mode": "page-level discussion readback after PR #811 device daemon handoff comment",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97",
+        "39220241-cf7f-81ad-84b5-001df57331e5",
+        "39220241-cf7f-8191-a0b4-001d15db7b78",
+        "39220241-cf7f-8134-bc4e-001d98e7d805",
+        "39220241-cf7f-8129-b12d-001d5b689249",
+        "39220241-cf7f-81df-a487-001d7b84713a"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-81ad-84b5-001df57331e5",
+          "source": "manual_write_result",
+          "target": "device_daemons_plural_api",
+          "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-8191-a0b4-001d15db7b78",
+          "source": "manual_write_result",
+          "target": "device_daemons_plural_api",
+          "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-8134-bc4e-001d98e7d805",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-8129-b12d-001d5b689249",
+          "source": "manual_write_result",
+          "target": "device_daemons_plural_api",
+          "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-81df-a487-001d7b84713a",
+          "source": "manual_write_result",
+          "target": "device_daemons_plural_api",
+          "comment_event_required": true
+        }
+      ],
+      "decision": "A current Notion page-level readback still returns the stale 31-comment aggregate after the PR #811 device-daemons handoff comment. Do not treat page-level aggregate get_comments as the current QA source; use write-confirmed comment ids, targeted discussion readbacks, and repo evidence until Notion aggregate freshness catches up."
     }
   ],
   "next_actions": [
