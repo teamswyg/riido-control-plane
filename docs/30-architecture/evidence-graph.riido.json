@@ -9965,6 +9965,99 @@
       ],
       "decision": "The server side of the completed-but-still-progressing P0 is now narrower: completed assignments reject late daemon progress and expose no active stream/filter/replay residue across v2 and v3 HTTP surfaces. This is not product closure; operational-readiness stays partial until the next actual UI recurrence is captured with the redacted same-conversation v3/v2/subscription/SSE tool plus screenshot.",
       "next_loop": "operational_readiness_release_harness"
+    },
+    {
+      "id": "syntax_hash_graph_spike_loop",
+      "observation": "Loop Registry semantic hashes bind code to SSOT value claims, but Go syntax pattern coverage and relocation evidence are not yet machine-routable for metaprogramming refactors.",
+      "hypothesis": "A JSON-driven syntax hash graph can expand through behavior-golden packages, derive deterministic AST-normalized file and package hashes, and connect them to the existing semantic hash without changing runtime behavior.",
+      "claims": [
+        "public_aws_adapter_facade_must_preserve_contract",
+        "runtime_adapter_config_must_preserve_public_env_contract",
+        "context_map_must_guard_public_boundaries"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/syntax-hash-graph-spike-candidate-2026-07-03.json"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "awsadapters/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/syntaxhash/syntaxhash_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/contextmap/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "awsadapters/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/syntaxhash/syntaxhash_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/closedloopcandidateintake"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/closedloopcandidatedecision"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-intake-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-decision-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
+      "next_loop": "closed_loop_candidate_decision"
     }
   ],
   "loop": {

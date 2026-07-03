@@ -1,0 +1,99 @@
+{
+  "schema_version": "riido-control-plane-closed-loop-candidates.v1",
+  "id": "loop-closure-audit",
+  "status": "verified",
+  "source_workflow": ".github/workflows/loop-closure-audit.yml",
+  "live_status": "measured",
+  "source_generated_at": "2026-07-03T09:08:00Z",
+  "source_expires_at": "2026-07-10T09:08:00Z",
+  "candidate_count": 1,
+  "candidates": [
+    {
+      "id": "loop-closure-audit:syntax_hash_graph_spike",
+      "source_ref": {
+        "harness_loop": "loop_closure_audit",
+        "source_workflow": ".github/workflows/loop-closure-audit.yml",
+        "summary_artifact": "loop-closure-audit-evidence",
+        "candidate_artifact": "loop-closure-audit-closed-loop-candidates",
+        "live_status": "measured",
+        "source_generated_at": "2026-07-03T09:08:00Z",
+        "source_expires_at": "2026-07-10T09:08:00Z",
+        "run": {
+          "id": "local-syntax-hash-spike-2026-07-03",
+          "event": "manual_spike"
+        }
+      },
+      "subject": {
+        "kind": "syntax_hash_graph_gap",
+        "next_artifact": "syntax_hash_manifest",
+        "target_packages": [
+          "tools/contextmap",
+          "tools/syntaxhash",
+          "awsadapters",
+          "cmd/riido_ai_server"
+        ],
+        "golden_tests": [
+          "TestContextMapBehaviorGolden",
+          "TestSyntaxHashToolBehaviorGolden",
+          "TestAWSAdaptersFacadeBehaviorGolden",
+          "TestRuntimeConfigBehaviorGolden"
+        ],
+        "semantic_hash_policy": "reuse_existing_loopregistry_semantic_hash_without_definition_changes"
+      },
+      "harness_loop": "loop_closure_audit",
+      "promotion_target": "closed_loop_candidate",
+      "promotion_edge": {
+        "from": "loop_closure_audit",
+        "to": "closed_loop_candidate",
+        "relation": "promotes_failure_to"
+      },
+      "observation": "Loop Registry semantic hashes bind code to SSOT value claims, but untracked Go syntax shape changes still lack a deterministic syntax hash graph and relocation evidence surface.",
+      "hypothesis": "A JSON-driven syntax hash graph can lock each target package with a behavior golden, then connect normalized AST hashes to the existing semantic hash without changing runtime behavior.",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge",
+        "syntax_hash_manifest"
+      ],
+      "adoption_plan": [
+        {
+          "artifact": "claim_binding",
+          "command": "go run ./tools/loopregistry -write-hashes -write-doc"
+        },
+        {
+          "artifact": "verifier",
+          "command": "go test ./tools/contextmap ./tools/syntaxhash -count=1"
+        },
+        {
+          "artifact": "ci_gate",
+          "command": "go run ./tools/syntaxhash -check-doc -evidence-out out/syntax-hash-evidence.json"
+        },
+        {
+          "artifact": "redacted_evidence",
+          "command": "go run ./tools/syntaxhash -evidence-out out/syntax-hash-evidence.json"
+        },
+        {
+          "artifact": "decision_record",
+          "command": "go run ./tools/closedloopcandidatedecision -candidate-in docs/30-architecture/evidence/syntax-hash-graph-spike-candidate-2026-07-03.json -evidence-out out/closed-loop-candidate-decision-evidence.json"
+        },
+        {
+          "artifact": "evidence_graph_edge",
+          "command": "go run ./tools/evidencegraph -check-doc -evidence-out out/evidence-graph-evidence.json"
+        },
+        {
+          "artifact": "syntax_hash_manifest",
+          "command": "go run ./tools/syntaxhash -write-doc -evidence-out out/syntax-hash-evidence.json"
+        }
+      ]
+    }
+  ],
+  "redaction": {
+    "summary_only": true,
+    "no_raw_secrets": true,
+    "no_raw_endpoints": true,
+    "no_raw_aws_resource_ids": true
+  }
+}

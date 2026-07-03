@@ -1,0 +1,62 @@
+{
+  "schema_version": "riido-control-plane-syntax-hash.v1",
+  "id": "control-plane-syntax-hash",
+  "title": "Control Plane Syntax Hash Graph",
+  "generated_doc": "docs/30-architecture/syntax-hash.md",
+  "workflow": ".github/workflows/syntax-hash.yml",
+  "evidence_artifact": "syntax-hash-evidence",
+  "evidence_tool": "tools/syntaxhash",
+  "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+  "artifact_roots": [
+    "tools/syntaxhash"
+  ],
+  "targets": [
+    {
+      "id": "contextmap_spike",
+      "package_path": "tools/contextmap",
+      "golden_command": "go test ./tools/contextmap -run TestContextMapBehaviorGolden -count=1",
+      "semantic_claim_id": "context_map_must_guard_public_boundaries",
+      "mode": "single_package_spike"
+    },
+    {
+      "id": "syntaxhash_tool_self",
+      "package_path": "tools/syntaxhash",
+      "golden_command": "go test ./tools/syntaxhash -run TestSyntaxHashToolBehaviorGolden -count=1",
+      "semantic_claim_id": "context_map_must_guard_public_boundaries",
+      "mode": "golden_locked_metaprogramming_tool"
+    },
+    {
+      "id": "awsadapters_facade",
+      "package_path": "awsadapters",
+      "golden_command": "go test ./awsadapters -run TestAWSAdaptersFacadeBehaviorGolden -count=1",
+      "semantic_claim_id": "public_aws_adapter_facade_must_preserve_contract",
+      "mode": "golden_locked_public_facade"
+    },
+    {
+      "id": "runtime_adapter_config",
+      "package_path": "cmd/riido_ai_server",
+      "golden_command": "go test ./cmd/riido_ai_server -run TestRuntimeConfigBehaviorGolden -count=1",
+      "semantic_claim_id": "runtime_adapter_config_must_preserve_public_env_contract",
+      "mode": "golden_locked_runtime_adapter"
+    }
+  ],
+  "constraints": {
+    "max_file_lines": 75,
+    "max_files_per_folder": 15,
+    "max_directory_depth": 8,
+    "min_coverage_percent": 100,
+    "min_repository_coverage_basis_points": 1,
+    "untracked_sample_limit": 20
+  },
+  "scoring": {
+    "efficiency_weight": 1,
+    "compression_weight": 1
+  },
+  "loop": {
+    "observation": "Go code can be semantically claim-bound while its reusable syntax patterns remain untracked, making metaprogramming refactors hard to prove without reading every file.",
+    "hypothesis": "A deterministic AST-normalized syntax hash graph can connect code pattern hashes to existing semantic claim hashes after a behavior golden test locks the package contract.",
+    "execute": "Start with golden-locked Go packages, derive syntax hashes from normalized AST declarations, connect package hashes to the existing Loop Registry semantic hash, and emit relocation, repository-coverage, and physical-constraint evidence.",
+    "evaluate": "The verifier fails on missing golden target coverage, syntax hash collisions, coverage below the manifest floor, stale generated docs, missing semantic claim hashes, or generated artifact files breaching line/folder/depth limits.",
+    "retrospective": "This keeps functionality unchanged while preparing a staged syntax/semantic graph surface that can later feed Bazel-style targeted CI without replacing the existing semantic hash implementation."
+  }
+}

@@ -1,0 +1,66 @@
+name: Syntax Hash
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "53 20 * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/syntax-hash.yml"
+      - "docs/30-architecture/syntax-hash.md"
+      - "docs/30-architecture/syntax-hash.riido.json"
+      - "docs/30-architecture/evidence/syntax-hash-graph-spike-candidate-2026-07-03.json"
+      - "docs/30-architecture/loop-registry.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "tools/syntaxhash/**"
+      - "tools/contextmap/**"
+      - "awsadapters/**"
+      - "cmd/riido_ai_server/**"
+      - "go.mod"
+      - "go.sum"
+  pull_request:
+    paths:
+      - ".github/workflows/syntax-hash.yml"
+      - "docs/30-architecture/syntax-hash.md"
+      - "docs/30-architecture/syntax-hash.riido.json"
+      - "docs/30-architecture/evidence/syntax-hash-graph-spike-candidate-2026-07-03.json"
+      - "docs/30-architecture/loop-registry.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "tools/syntaxhash/**"
+      - "tools/contextmap/**"
+      - "awsadapters/**"
+      - "cmd/riido_ai_server/**"
+      - "go.mod"
+      - "go.sum"
+
+jobs:
+  syntax-hash:
+    runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: syntax_hash_graph_spike_loop
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Run golden locks before syntax hash
+        run: |
+          go test ./tools/contextmap -run TestContextMapBehaviorGolden -count=1
+          go test ./tools/syntaxhash -run TestSyntaxHashToolBehaviorGolden -count=1
+          go test ./awsadapters -run TestAWSAdaptersFacadeBehaviorGolden -count=1
+          go test ./cmd/riido_ai_server -run TestRuntimeConfigBehaviorGolden -count=1
+      - name: Verify syntax hash evidence
+        run: |
+          mkdir -p out
+          go test ./tools/syntaxhash -count=1
+          go run ./tools/syntaxhash \
+            -check-doc \
+            -evidence-out out/syntax-hash-evidence.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: syntax-hash-evidence
+          path: out/syntax-hash-evidence.json
+          if-no-files-found: error

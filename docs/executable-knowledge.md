@@ -8,17 +8,17 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 | Class | Count |
 | --- | ---: |
-| Generated reader docs | 41 |
-| Generated reader docs with tool | 41 |
-| Generated reader docs with CI evidence | 41 |
-| Generated reader docs with declared workflow evidence | 41 |
-| Generated reader docs with manifest evidence_tool | 11 |
-| Generated reader docs with uploaded evidence artifact | 41 |
+| Generated reader docs | 42 |
+| Generated reader docs with tool | 42 |
+| Generated reader docs with CI evidence | 42 |
+| Generated reader docs with declared workflow evidence | 42 |
+| Generated reader docs with manifest evidence_tool | 12 |
+| Generated reader docs with uploaded evidence artifact | 42 |
 | Direct SSOT docs | 0 |
 | Direct SSOT docs with evidence loop | 0 |
 | Direct SSOT docs with CI evidence | 0 |
-| Standalone executable manifests | 2 |
-| Standalone executable manifests with strict CI evidence | 2 |
+| Standalone executable manifests | 3 |
+| Standalone executable manifests with strict CI evidence | 3 |
 | Source SSOT manifests | 2 |
 | Source SSOT manifests with executable loop | 2 |
 | Source SSOT manifests with strict CI evidence | 2 |
@@ -28,16 +28,16 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Imported manifests with projection evidence | 1 |
 | Owned manifests | 9 |
 | Owned manifests with owner evidence | 9 |
-| Executable manifest inventory | 57 |
-| Tracked executable manifests | 57 |
+| Executable manifest inventory | 58 |
+| Tracked executable manifests | 58 |
 | Registered manual docs | 0 |
-| Scanned docs | 41 |
+| Scanned docs | 42 |
 
 ## Manifest Inventory
 
 | Group | Count | Sample paths |
 | --- | ---: | --- |
-| `docs` | 49 | `docs/20-domain/agent-catalog-rbac.riido.json`<br>`docs/20-domain/agent-runtime-binding.riido.json`<br>`docs/20-domain/ai-agent-client-api.riido.json` |
+| `docs` | 50 | `docs/20-domain/agent-catalog-rbac.riido.json`<br>`docs/20-domain/agent-runtime-binding.riido.json`<br>`docs/20-domain/ai-agent-client-api.riido.json` |
 | `contracts` | 4 | `contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json`<br>`contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json`<br>`contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json` |
 | `.` | 2 | `README.riido.json`<br>`dependency_allowlist.riido.json` |
 | `internal` | 1 | `internal/riidoaiserver/review_account_seed.riido.json` |
@@ -45,8 +45,8 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 ## Manifest Loop Inventory
 
-- Complete manifest loops: `57`
-- Direct manifest loops: `45`
+- Complete manifest loops: `58`
+- Direct manifest loops: `46`
 - Delegated manifest loops: `12`
 - Missing manifest loops: `0`
 - Missing loop budget: `0`
