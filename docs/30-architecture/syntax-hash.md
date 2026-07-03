@@ -30,13 +30,15 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `open_questions_path_adapter` | `tools/openquestions/pathutil` | 100% | `97b020b4ebfc` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `repository_readme_guard` | `tools/repositoryreadme` | 100% | `fe1a8fb72b35` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `repository_readme_path_adapter` | `tools/repositoryreadme/pathutil` | 100% | `f951feeb01f3` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
+| `dependency_allowlist_guard` | `tools/dependencyallowlist` | 100% | `d6a6b85bff90` | `context_map_must_guard_public_boundaries` |
+| `dependency_allowlist_layers_adapter` | `tools/dependencyallowlist/layers` | 100% | `b564be13c293` | `context_map_must_guard_public_boundaries` |
 
 ## Repository Coverage
 
 - Go files: `2768`
-- tracked files: `311`
-- untracked files: `2457`
-- coverage: `11.23%`
+- tracked files: `327`
+- untracked files: `2441`
+- coverage: `11.81%`
 
 ## Constraints
 
@@ -47,5 +49,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `311`
+- efficiency score: `327`
 - compression score: `48`

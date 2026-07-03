@@ -44,6 +44,7 @@
     {"path":"tools/contextmap","kind":"evidence-tool","role":"Context map generated reader and verifier.","must_not_own":"runtime package boundaries"},
     {"path":"tools/syntaxhash","kind":"meta-evidence-tool","role":"Syntax hash graph generator and verifier that derives AST-normalized package hashes, repository coverage, relocation evidence, and semantic-claim graph edges after target packages are golden locked.","must_not_own":"runtime behavior, semantic hash definition, or package refactoring execution"},
     {"path":"tools/dependencyallowlist","kind":"policy-tool","role":"Direct Go dependency allowlist verifier.","must_not_own":"transitive dependency policy outside the allowlist contract"},
+    {"path":"tools/dependencyallowlist/layers","kind":"adapter","role":"Dependency allowlist layer vocabulary adapter.","must_not_own":"dependency allowlist contract or module verification behavior"},
     {"path":"tools/deploypolicy","kind":"policy-tool","role":"Public workflow and docs redaction plus CD ownership drift tests.","must_not_own":"live AWS deploy execution or private operator evidence"},
     {"path":"tools/figmaprojection","kind":"evidence-tool","role":"Figma control-plane projection evidence verifier.","must_not_own":"Figma source coverage or generated-client implementation"},
     {"path":"tools/generatedclienthandoff","kind":"generator","role":"Generated client README, history, manifest, barrels, and PR body handoff generator.","must_not_own":"riido-client application code"},

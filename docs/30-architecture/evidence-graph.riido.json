@@ -10088,6 +10088,14 @@
         },
         {
           "kind": "test",
+          "path": "tools/dependencyallowlist/evidence_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/dependencyallowlist/layers"
+        },
+        {
+          "kind": "test",
           "path": "tools/syntaxhash/syntaxhash_test.go"
         }
       ],
@@ -10163,6 +10171,10 @@
         {
           "kind": "test",
           "path": "tools/repositoryreadme/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist/evidence_test.go"
         },
         {
           "kind": "test",

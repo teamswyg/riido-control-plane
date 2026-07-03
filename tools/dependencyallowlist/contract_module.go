@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/dependencyallowlist/layers"
 )
 
 func verifyAllowedModule(i int, module allowedModule, seen map[string]struct{}) error {
@@ -12,8 +14,8 @@ func verifyAllowedModule(i int, module allowedModule, seen map[string]struct{}) 
 	if strings.TrimSpace(module.Layer) == "" || strings.TrimSpace(module.Owner) == "" || strings.TrimSpace(module.Reason) == "" {
 		return fmt.Errorf("allowed_direct_modules[%d] must include layer, owner, and reason", i)
 	}
-	if _, ok := allowedLayers[module.Layer]; !ok {
-		return fmt.Errorf("allowed_direct_modules[%d].layer %q is not in vocabulary: %s", i, module.Layer, formatAllowedLayers())
+	if !layers.IsAllowed(module.Layer) {
+		return fmt.Errorf("allowed_direct_modules[%d].layer %q is not in vocabulary: %s", i, module.Layer, layers.FormatAllowed())
 	}
 	if !module.Approved {
 		return fmt.Errorf("allowed_direct_modules[%d].approved must be true for %q", i, module.Path)
