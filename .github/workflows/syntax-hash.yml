@@ -58,6 +58,7 @@ jobs:
           ./tools/apiclientdelivery
           ./tools/aiagentclientapi
           ./tools/generatedclienthandoff
+          ./tools/storesnapshotoutbox
           ./tools/webfrontendapi
           ./tools/aiagentrisk
           ./tools/migrationledger

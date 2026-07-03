@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func verify(root string, m manifest, results []caseEvidence, checkDoc bool) error {
 	if err := verifySourceChecks(root, m.SourceChecks); err != nil {
@@ -11,6 +14,17 @@ func verify(root string, m manifest, results []caseEvidence, checkDoc bool) erro
 	}
 	if checkDoc {
 		return verifyDoc(root, m)
+	}
+	return nil
+}
+
+func verifyDoc(root string, m manifest) error {
+	current, err := os.ReadFile(resolve(root, m.GeneratedDoc))
+	if err != nil {
+		return fmt.Errorf("read generated doc: %w", err)
+	}
+	if string(current) != renderDoc(m) {
+		return fmt.Errorf("%s is stale; run go run ./tools/storesnapshotoutbox -write-doc", m.GeneratedDoc)
 	}
 	return nil
 }

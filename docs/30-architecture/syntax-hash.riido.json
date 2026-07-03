@@ -564,6 +564,13 @@
       "golden_command": "go test ./tools/generatedclienthandoff -run TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody -count=1",
       "semantic_claim_id": "api_client_delivery_must_preserve_generated_handoff_boundary",
       "mode": "golden_locked_generated_client_handoff_tool"
+    },
+    {
+      "id": "store_snapshot_file_outbox_guard",
+      "package_path": "tools/storesnapshotoutbox",
+      "golden_command": "go test ./tools/storesnapshotoutbox -run TestRunWritesEvidence -count=1",
+      "semantic_claim_id": "store_snapshot_file_outbox_must_preserve_durable_replay_evidence",
+      "mode": "golden_locked_store_snapshot_file_outbox_tool"
     }
   ],
   "constraints": {
