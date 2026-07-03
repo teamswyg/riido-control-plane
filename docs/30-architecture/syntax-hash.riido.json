@@ -435,42 +435,42 @@
       "id": "api_client_delivery_guard",
       "package_path": "tools/apiclientdelivery",
       "golden_command": "go test ./tools/apiclientdelivery -run TestAPIClientDeliveryBehaviorGolden -count=1",
-      "semantic_claim_id": "api_client_delivery_must_preserve_generated_handoff_boundary",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
       "mode": "golden_locked_api_client_delivery_tool"
     },
     {
       "id": "api_client_delivery_doccheck_adapter",
       "package_path": "tools/apiclientdelivery/doccheck",
       "golden_command": "go test ./tools/apiclientdelivery -run TestAPIClientDeliveryBehaviorGolden -count=1",
-      "semantic_claim_id": "api_client_delivery_must_preserve_generated_handoff_boundary",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
       "mode": "golden_locked_api_client_delivery_adapter"
     },
     {
       "id": "api_client_delivery_path_adapter",
       "package_path": "tools/apiclientdelivery/pathutil",
       "golden_command": "go test ./tools/apiclientdelivery -run TestAPIClientDeliveryBehaviorGolden -count=1",
-      "semantic_claim_id": "api_client_delivery_must_preserve_generated_handoff_boundary",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
       "mode": "golden_locked_api_client_delivery_adapter"
     },
     {
       "id": "api_client_delivery_rendertext_adapter",
       "package_path": "tools/apiclientdelivery/rendertext",
       "golden_command": "go test ./tools/apiclientdelivery -run TestAPIClientDeliveryBehaviorGolden -count=1",
-      "semantic_claim_id": "api_client_delivery_must_preserve_generated_handoff_boundary",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
       "mode": "golden_locked_api_client_delivery_adapter"
     },
     {
       "id": "api_client_delivery_requirements_adapter",
       "package_path": "tools/apiclientdelivery/requirements",
       "golden_command": "go test ./tools/apiclientdelivery -run TestAPIClientDeliveryBehaviorGolden -count=1",
-      "semantic_claim_id": "api_client_delivery_must_preserve_generated_handoff_boundary",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
       "mode": "golden_locked_api_client_delivery_adapter"
     },
     {
       "id": "api_client_delivery_runconfig_adapter",
       "package_path": "tools/apiclientdelivery/runconfig",
       "golden_command": "go test ./tools/apiclientdelivery -run TestAPIClientDeliveryBehaviorGolden -count=1",
-      "semantic_claim_id": "api_client_delivery_must_preserve_generated_handoff_boundary",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
       "mode": "golden_locked_api_client_delivery_adapter"
     },
     {
@@ -508,6 +508,55 @@
       "package_path": "tools/aigeneratedsmokematrix/setutil",
       "semantic_claim_id": "generated_endpoint_smoke_matrix_must_remain_contract_gate",
       "mode": "golden_locked_generated_smoke_matrix_adapter"
+    },
+    {
+      "id": "ai_agent_client_api_guard",
+      "package_path": "tools/aiagentclientapi",
+      "golden_command": "go test ./tools/aiagentclientapi -run TestRunWritesEvidence -count=1",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
+      "mode": "golden_locked_ai_agent_client_api_tool"
+    },
+    {
+      "id": "ai_agent_client_api_doccheck_adapter",
+      "package_path": "tools/aiagentclientapi/doccheck",
+      "golden_command": "go test ./tools/aiagentclientapi -run TestRunWritesEvidence -count=1",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
+      "mode": "golden_locked_ai_agent_client_api_adapter"
+    },
+    {
+      "id": "ai_agent_client_api_path_adapter",
+      "package_path": "tools/aiagentclientapi/pathutil",
+      "golden_command": "go test ./tools/aiagentclientapi -run TestRunWritesEvidence -count=1",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
+      "mode": "golden_locked_ai_agent_client_api_adapter"
+    },
+    {
+      "id": "ai_agent_client_api_rendertext_adapter",
+      "package_path": "tools/aiagentclientapi/rendertext",
+      "golden_command": "go test ./tools/aiagentclientapi -run TestRunWritesEvidence -count=1",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
+      "mode": "golden_locked_ai_agent_client_api_adapter"
+    },
+    {
+      "id": "ai_agent_client_api_requirements_adapter",
+      "package_path": "tools/aiagentclientapi/requirements",
+      "golden_command": "go test ./tools/aiagentclientapi -run TestRunWritesEvidence -count=1",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
+      "mode": "golden_locked_ai_agent_client_api_adapter"
+    },
+    {
+      "id": "ai_agent_client_api_set_adapter",
+      "package_path": "tools/aiagentclientapi/setutil",
+      "golden_command": "go test ./tools/aiagentclientapi -run TestRunWritesEvidence -count=1",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
+      "mode": "golden_locked_ai_agent_client_api_adapter"
+    },
+    {
+      "id": "ai_agent_client_api_smoke_matrix_adapter",
+      "package_path": "tools/aiagentclientapi/smokematrix",
+      "golden_command": "go test ./tools/aiagentclientapi -run TestRunWritesEvidence -count=1",
+      "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
+      "mode": "golden_locked_ai_agent_client_api_adapter"
     }
   ],
   "constraints": {

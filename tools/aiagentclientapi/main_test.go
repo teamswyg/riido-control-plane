@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/requirements"
 )
 
 func TestRunWritesEvidence(t *testing.T) {
@@ -21,8 +23,26 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.SchemaVersion != evidenceSchema || got.OperationCounts.Total != 55 || got.ThreadHistoryV3Rules == 0 {
-		t.Fatalf("unexpected evidence: %+v", got)
+	assertAIClientAPIGolden(t, got)
+}
+
+func assertAIClientAPIGolden(t *testing.T, got evidence) {
+	t.Helper()
+	if got.SchemaVersion != requirements.EvidenceSchema || got.ID != requirements.ExpectedID ||
+		got.Status != "verified" || !got.SmokeMatrixParity || !got.GeneratedPathCovered {
+		t.Fatalf("unexpected evidence identity/status: %+v", got)
+	}
+	if got.OperationCounts.Total != 55 || got.OperationCounts.V1 != 25 ||
+		got.OperationCounts.V2 != 30 || got.OperationCounts.SmokeMatrix != 55 {
+		t.Fatalf("operation counts drifted: %+v", got.OperationCounts)
+	}
+	if got.RequiredPaths != 10 || got.RuntimeConfigs != 1 || got.PublicFields != 12 ||
+		got.DeploymentEvidence != 2 || got.ThreadHistoryV3Rules != 70 || got.SourceChecks != 27 {
+		t.Fatalf("evidence counters drifted: %+v", got)
+	}
+	if got.Loop.Observation == "" || got.Loop.Hypothesis == "" || got.Loop.Execute == "" || got.Loop.Evaluate == "" ||
+		got.Loop.Retrospective == "" {
+		t.Fatalf("loop evidence must stay populated: %+v", got.Loop)
 	}
 }
 

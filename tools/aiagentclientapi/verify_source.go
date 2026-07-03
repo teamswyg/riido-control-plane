@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/pathutil"
 )
 
 func verifySources(root string, checks []sourceCheck) error {
@@ -11,7 +13,7 @@ func verifySources(root string, checks []sourceCheck) error {
 		return fmt.Errorf("source checks are required")
 	}
 	for _, check := range checks {
-		body, err := os.ReadFile(resolve(root, check.File))
+		body, err := os.ReadFile(pathutil.Resolve(root, check.File))
 		if err != nil {
 			return fmt.Errorf("read source check %q: %w", check.Name, err)
 		}

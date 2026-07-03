@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/setutil"
+)
 
 func verifyThreadHistoryV3(v3 threadHistoryV3) error {
 	if v3.ReadEndpoint.Path != "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads" {
@@ -43,10 +47,10 @@ func verifyThreadHistoryV3(v3 threadHistoryV3) error {
 	if err := requireNamedRules("thread history v3 interaction scenario", v3.InteractionScenarios, scenarios); err != nil {
 		return err
 	}
-	if err := requireStrings("thread history v3 terminal state", v3.TerminalStates, []string{"completed", "failed", "stopped", "cancelled", "timeout"}); err != nil {
+	if err := setutil.RequireStrings("thread history v3 terminal state", v3.TerminalStates, []string{"completed", "failed", "stopped", "cancelled", "timeout"}); err != nil {
 		return err
 	}
-	return requireStrings("thread history v3 checklist", v3.Checklist, []string{"v3-read-model", "conversation-id-card-key", "v2-mutations", "v2-sse", "queued-status-current-only", "queued-stream-current-only", "terminal-late-event-guard", "terminal-active-stream-closure"})
+	return setutil.RequireStrings("thread history v3 checklist", v3.Checklist, []string{"v3-read-model", "conversation-id-card-key", "v2-mutations", "v2-sse", "queued-status-current-only", "queued-stream-current-only", "terminal-late-event-guard", "terminal-active-stream-closure"})
 }
 
 func requireIdentity(rules []identityRule, name string) error {
