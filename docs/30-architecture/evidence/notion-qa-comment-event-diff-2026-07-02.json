@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-03T05:57:22Z",
+  "captured_at": "2026-07-03T06:15:44Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -572,6 +572,15 @@
       "status_tag": "[codex][완료][증적고정]",
       "signal": "A final QA transfer comment records PR #806 merge and confirms the plural daemon API evidence is now pinned in repo tests rather than only in a Notion page-level comment.",
       "decision": "Treat the plural daemon API work as closed for backend/control-plane. Do not reopen from stale Notion aggregate readback; require a fresh endpoint trace or contract failure."
+    },
+    {
+      "id": "39220241-cf7f-811d-83da-001d06107d73",
+      "discussion": "device_daemons_plural_api",
+      "observed_at": "2026-07-03T06:15:44Z",
+      "event_type": "readback_reconfirmation",
+      "status_tag": "[codex][완료][전달요청]",
+      "signal": "A follow-up QA transfer comment reconfirms that the plural daemon API is already implemented, tested, and live across staging/development/production, while desktop work remains out of scope.",
+      "decision": "Keep the frontend handoff state as complete for the server API: use the plural /daemons endpoints for UI grouping, keep the singular /daemon endpoint for preferred-daemon compatibility, and do not reopen unless a fresh authenticated contract or route trace fails."
     },
     {
       "id": "39220241-cf7f-8134-bc4e-001d98e7d805",
