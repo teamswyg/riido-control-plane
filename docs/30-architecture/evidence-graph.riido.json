@@ -11305,6 +11305,77 @@
       ],
       "decision": "Figma projection syntax coverage may expand only after TestFigmaProjectionBehaviorGolden preserves the projection evidence and generated reader hashes; same-concept doc, IO, root, render, type, and run helpers are consolidated to satisfy folder/file limits without changing generated-client projection behavior.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "runtime_cd_ownership_syntax_hash_loop",
+      "observation": "The runtime CD ownership SSOT was executable, but its verifier package was outside syntax hash tracking and had more files than the target folder budget, forcing agents to infer deployment-ownership semantics from an untracked tool surface.",
+      "hypothesis": "Golden-locking runtime CD ownership evidence before consolidating same-concept helpers lets syntax hash coverage expand without changing public/private deployment ownership behavior.",
+      "claims": [
+        "runtime_deployment_boundary_must_preserve_public_private_ownership"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/runtime-cd-ownership.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/runtime-cd-ownership.md"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/runtimecdownership"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "runtime-cd-ownership-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Runtime CD ownership syntax coverage may expand only after TestRuntimeCDOwnershipBehaviorGolden preserves the generated evidence and reader hashes; helper consolidation is limited to same-concept files and keeps runtime deployment ownership behavior unchanged.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

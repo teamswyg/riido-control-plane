@@ -45,3 +45,21 @@ func verifyIdentity(m manifest) error {
 	}
 	return nil
 }
+
+func verifyDoc(root, expected string) error {
+	actual, err := readText(repoPath(root, generatedDoc))
+	if err != nil {
+		return err
+	}
+	if actual != expected {
+		return fmt.Errorf("%s is stale; run go run ./tools/runtimecdownership -write-doc", generatedDoc)
+	}
+	return nil
+}
+
+func verifyLoop(loop evidenceLoop) (int, error) {
+	if !nonEmpty(loop.Observation, loop.Hypothesis, loop.Execute, loop.Evaluate, loop.Retrospective) {
+		return 0, fmt.Errorf("loop evidence must include observe, hypothesis, execute, evaluate, retrospective")
+	}
+	return 5, nil
+}
