@@ -20,6 +20,8 @@ func (s Server) handleAIAgentClientDeviceRoutes(w http.ResponseWriter, r *http.R
 		writeMethodNotAllowed(w)
 	case suffix == "daemon" && r.Method == http.MethodGet:
 		s.handleAIAgentClientDeviceDaemon(w, r, deviceID)
+	case suffix == "daemons" && r.Method == http.MethodGet:
+		s.handleAIAgentClientDeviceDaemons(w, r, deviceID)
 	case strings.HasPrefix(suffix, "daemon/") && r.Method == http.MethodPost:
 		s.handleAIAgentClientDeviceDaemonControl(w, r, deviceID, strings.TrimPrefix(suffix, "daemon/"))
 	default:

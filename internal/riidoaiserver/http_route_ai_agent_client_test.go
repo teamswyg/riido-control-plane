@@ -10,6 +10,7 @@ func TestTraceHTTPRouteClassifiesV2AIAgentClientRoutes(t *testing.T) {
 		"/v2/client/workspaces/ws-sensitive/ai-agent/bootstrap":                                      "/v2/client/workspaces/{workspace_id}/ai-agent/bootstrap",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/devices":                                        "/v2/client/workspaces/{workspace_id}/ai-agent/devices",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/devices/dev-sensitive/daemon":                   "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon",
+		"/v2/client/workspaces/ws-sensitive/ai-agent/devices/dev-sensitive/daemons":                  "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/profile-thumbnails/uploads":                     "/v2/client/workspaces/{workspace_id}/ai-agent/profile-thumbnails/uploads",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/tasks/task-sensitive/assignable-agents":         "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignable-agents",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/tasks/task-sensitive/agent-assignments":         "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments",
