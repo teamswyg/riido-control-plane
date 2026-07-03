@@ -9455,36 +9455,20 @@
           "path": "docs/30-architecture/integration-matrix.riido.json"
         },
         {
-          "kind": "tool",
-          "path": "tools/containercontract/validate.go"
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
         },
         {
           "kind": "tool",
-          "path": "tools/containercontract/validate_required_fields.go"
+          "path": "tools/containercontract"
         },
         {
           "kind": "tool",
-          "path": "tools/containercontract/validate_final.go"
+          "path": "tools/containercontract/dockerfile"
         },
         {
-          "kind": "tool",
-          "path": "tools/containercontract/verify.go"
-        },
-        {
-          "kind": "tool",
-          "path": "tools/containercontract/verify_build_stage.go"
-        },
-        {
-          "kind": "tool",
-          "path": "tools/containercontract/verify_build_commands.go"
-        },
-        {
-          "kind": "tool",
-          "path": "tools/containercontract/verify_more.go"
-        },
-        {
-          "kind": "tool",
-          "path": "tools/containercontract/task_ir_verify.go"
+          "kind": "test",
+          "path": "tools/containercontract/golden_test.go"
         },
         {
           "kind": "test",
@@ -9496,6 +9480,10 @@
         }
       ],
       "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/containercontract/golden_test.go"
+        },
         {
           "kind": "test",
           "path": "tools/containercontract/run_test.go"

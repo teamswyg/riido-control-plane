@@ -1,4 +1,4 @@
-package main
+package dockerfile
 
 import "strings"
 
@@ -42,9 +42,9 @@ func parseFrom(rest string) (string, string) {
 	return base, ""
 }
 
-func parseCopy(rest string) copyInstruction {
+func parseCopy(rest string) CopyInstruction {
 	parts := strings.Fields(rest)
-	var out copyInstruction
+	var out CopyInstruction
 	var positional []string
 	for _, part := range parts {
 		if after, ok := strings.CutPrefix(part, "--from="); ok {
