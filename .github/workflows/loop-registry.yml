@@ -106,6 +106,7 @@ on:
       - "tools/webfrontendapi/**"
       - "tools/aiagentrisk/**"
       - "tools/migrationledger/**"
+      - "tools/integrationmatrix/**"
       - "tools/runtimeboundary/**"
       - "tools/requestauth/**"
       - "tools/storesaferouting/**"

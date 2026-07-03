@@ -57,8 +57,9 @@ jobs:
           ./tools/webfrontendapi
           ./tools/aiagentrisk
           ./tools/migrationledger
+          ./tools/integrationmatrix
           -run
-          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger)BehaviorGolden'
+          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger|IntegrationMatrix)BehaviorGolden'
           -count=1
       - name: Verify syntax hash evidence
         run: |

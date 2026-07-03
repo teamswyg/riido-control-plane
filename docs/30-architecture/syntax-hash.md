@@ -24,13 +24,15 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `web_frontend_api_guard` | `tools/webfrontendapi` | 100% | `23a98ee173bc` | `web_frontend_api_must_preserve_cors_contract` |
 | `ai_agent_risk_evidence_guard` | `tools/aiagentrisk` | 100% | `c4551769ea32` | `ai_agent_risk_evidence_must_preserve_boundary_manifest` |
 | `migration_ledger_guard` | `tools/migrationledger` | 100% | `c6ddc5f8b294` | `migration_ledger_must_preserve_historical_evidence` |
+| `integration_matrix_guard` | `tools/integrationmatrix` | 100% | `5a392122b635` | `integration_matrix_must_preserve_public_private_boundary` |
+| `integration_matrix_path_adapter` | `tools/integrationmatrix/pathutil` | 100% | `97b020b4ebfc` | `integration_matrix_must_preserve_public_private_boundary` |
 
 ## Repository Coverage
 
 - Go files: `2768`
-- tracked files: `263`
-- untracked files: `2505`
-- coverage: `9.50%`
+- tracked files: `279`
+- untracked files: `2489`
+- coverage: `10.07%`
 
 ## Constraints
 
@@ -41,5 +43,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `263`
-- compression score: `36`
+- efficiency score: `279`
+- compression score: `41`

@@ -9985,6 +9985,7 @@
         "web_frontend_api_must_preserve_cors_contract",
         "ai_agent_risk_evidence_must_preserve_boundary_manifest",
         "migration_ledger_must_preserve_historical_evidence",
+        "integration_matrix_must_preserve_public_private_boundary",
         "context_map_must_guard_public_boundaries"
       ],
       "changes": [
@@ -10066,6 +10067,10 @@
         },
         {
           "kind": "test",
+          "path": "tools/integrationmatrix/main_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/syntaxhash/syntaxhash_test.go"
         }
       ],
@@ -10132,6 +10137,10 @@
         },
         {
           "kind": "test",
+          "path": "tools/integrationmatrix/main_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/syntaxhash/syntaxhash_test.go"
         },
         {
@@ -10164,7 +10173,7 @@
           "redacted": true
         }
       ],
-  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/storesaferouting, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, tools/aiagentrisk, tools/migrationledger, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
+  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/storesaferouting, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, tools/aiagentrisk, tools/migrationledger, tools/integrationmatrix, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
       "next_loop": "closed_loop_candidate_decision"
     }
   ],

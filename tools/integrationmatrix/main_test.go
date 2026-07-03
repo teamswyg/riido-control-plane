@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestIntegrationMatrixEvidence(t *testing.T) {
+func TestIntegrationMatrixBehaviorGolden(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "evidence.json")
 	if err := mainRun([]string{"-repo", "../..", "-evidence-out", out}); err != nil {
 		t.Fatalf("mainRun: %v", err)
@@ -20,8 +20,17 @@ func TestIntegrationMatrixEvidence(t *testing.T) {
 	if err := json.Unmarshal(body, &got); err != nil {
 		t.Fatalf("decode evidence: %v", err)
 	}
-	if got.Status != "verified" || got.PublicGates < 10 || got.PullRequestGates == 0 {
+	if got.SchemaVersion != evidenceSchema || got.ID != "control-plane-integration-matrix" || got.Status != "verified" {
 		t.Fatalf("unexpected evidence: %+v", got)
+	}
+	if got.PublicGates != 15 || got.PullRequestGates != 12 || got.OperatorGates != 3 || got.PrivateGates != 7 {
+		t.Fatalf("unexpected gate counts: %+v", got)
+	}
+	if got.WorkflowRefs != 15 || got.CommandRefs != 14 {
+		t.Fatalf("unexpected ref counts: %+v", got)
+	}
+	if got.Workflow != ".github/workflows/integration-matrix.yml" || got.GeneratedDoc != "docs/30-architecture/integration-matrix.md" {
+		t.Fatalf("unexpected output refs: %+v", got)
 	}
 }
 
