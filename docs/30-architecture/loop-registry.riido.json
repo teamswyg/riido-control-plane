@@ -862,7 +862,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "04affa8ae37c1574e9f4dac914f86514ff754e78b9a87bc4900bfc724c4af6a5"
+      "semantic_hash": "8ff817380783b6031918dd442c95ad6e95fbe509bb681b539f4b188f4bfe9366"
     },
     {
       "id": "thread_history_v3_must_preserve_run_identity_and_message_order",
@@ -1394,7 +1394,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "b5249370f87b61e4fe26d1665d7c2a0475293f3dee01570b2c9450173a327bff"
+      "semantic_hash": "b2a38102f9a0592f8ba77147819b861a5acbe70d97f81ebca271c06caecae7bd"
     },
     {
       "id": "control_plane_meta_evidence_must_self_expire",
@@ -4374,7 +4374,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a76b48e8a77669fb72b784f6b9cfb5697610c174a6d60af00b44f8c6d07c8f8a"
+      "semantic_hash": "7846211aa67baf3d1a424d9b6d881630d66f53f365d58c2bc384ce6e786da0cf"
     },
     {
       "id": "container_image_contract_must_bind_runtime_shape",

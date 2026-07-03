@@ -739,6 +739,12 @@
           "evidence_ref": "docs/30-architecture/evidence/control-plane-agent-snapshot-pointer-map-after-2026-07-03.json"
         },
         {
+          "id": "local_pressure_event_stream_href_cache_2026_07_03",
+          "kind": "artifact",
+          "signal": "After AI agent client event-stream hrefs were cached per workspace inside the store lock, local pressure reduced thread_stream_subscription allocation from about 113 B/op to about 49 B/op and thread_history_v3 allocation from about 753 B/op to about 689 B/op with zero errors and zero goroutine delta.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-event-stream-href-cache-after-2026-07-03.json"
+        },
+        {
           "id": "local_pressure_tool_approval_signal_only_2026_07_03",
           "kind": "artifact",
           "signal": "After pending tool approval waits skip polling ticks when the approval cannot expire during the hold window, local pressure measured zero errors, zero goroutine deltas, and lower allocation/CPU per operation for tool_approval_waiters.",
@@ -777,6 +783,7 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-thread-metadata-cache-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-small-progress-filter-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-agent-snapshot-pointer-map-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-event-stream-href-cache-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-before-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-stream-target-capacity-after-2026-07-02.json"},

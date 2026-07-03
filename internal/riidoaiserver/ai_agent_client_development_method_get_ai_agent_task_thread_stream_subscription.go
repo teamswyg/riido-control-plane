@@ -22,7 +22,7 @@ func (s *DevelopmentAIAgentClientStore) GetAIAgentTaskThreadStreamSubscription(c
 		TaskID:        taskID,
 		Stream: AIAgentTaskEventStreamLink{
 			Rel:       "agent_thread_progress_stream",
-			Href:      aiAgentClientEventStreamHref(strings.TrimSpace(principal.WorkspaceID)),
+			Href:      s.eventStreamHrefLocked(principal.WorkspaceID),
 			EventType: AgentClientEventThreadProgress,
 		},
 		ActiveThreadFilters: filters,
