@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/snapshotcqrsgate/requirements"
+)
 
 func verifyOperations(m manifest) (int, error) {
 	seen := map[string]bool{}
@@ -12,7 +16,7 @@ func verifyOperations(m manifest) (int, error) {
 			seen[op] = true
 		}
 	}
-	for _, op := range requiredOperations {
+	for _, op := range requirements.Operations {
 		if !seen[op] {
 			return 0, fmt.Errorf("missing operation evidence %q", op)
 		}
@@ -21,7 +25,7 @@ func verifyOperations(m manifest) (int, error) {
 }
 
 func verifySignals(m manifest) (int, error) {
-	for _, signal := range requiredSignals {
+	for _, signal := range requirements.Signals {
 		if !containsText(m.MeasurementSignals, signal) {
 			return 0, fmt.Errorf("missing measurement signal %q", signal)
 		}

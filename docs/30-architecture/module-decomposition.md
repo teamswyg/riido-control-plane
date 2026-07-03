@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `65`; runtime: `1`; internal: `3`; tools: `60`; forbidden import hits: `0`.
+Packages: `67`; runtime: `1`; internal: `3`; tools: `62`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `88`; max file lines: `838`.
 
@@ -72,7 +72,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 - `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/aiagentclientapi`, `tools/aiagentrisk`, `tools/aigeneratedsmokematrix`, `tools/aiagentload`, `tools/aiagentthreadsnapshot`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/controlplanepressure`, `tools/contextmap`, `tools/figmaprojection`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/metricshttpadapter`, `tools/openquestions`, `tools/operationalreadiness`, `tools/providerstatus`, `tools/publicpageslive`, `tools/reviewaccountseed`, `tools/requestauth`, `tools/runtimeboundary`, `tools/runtimecdownership`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
 - `meta-evidence-tool`: `tools/syntaxhash`, `tools/gocibaseline`, `tools/harnesspromotion`, `tools/closedloopcandidateintake`, `tools/closedloopcandidatedecision`, `tools/evidencegraph`, `tools/knowledgecoverage`, `tools/liveworkflowevidence`, `tools/loopclosureaudit`, `tools/loopregistry`, `tools/looprefreshdispatch`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/repositoryreadme`, `tools/workflowevidence`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
-- `adapter`: `tools/dependencyallowlist/layers`, `tools/integrationmatrix/pathutil`, `tools/openquestions/pathutil`, `tools/providerstatus/pathutil`, `tools/providerstatus/renderutil`, `tools/providerstatus/requirements`, `tools/repositoryreadme/pathutil`
+- `adapter`: `tools/dependencyallowlist/layers`, `tools/integrationmatrix/pathutil`, `tools/openquestions/pathutil`, `tools/providerstatus/pathutil`, `tools/providerstatus/renderutil`, `tools/providerstatus/requirements`, `tools/repositoryreadme/pathutil`, `tools/snapshotcqrsgate/pathutil`, `tools/snapshotcqrsgate/requirements`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
 
 ## Boundary Rules

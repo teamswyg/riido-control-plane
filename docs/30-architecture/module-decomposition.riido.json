@@ -82,6 +82,8 @@
     {"path":"tools/runtimecdownership","kind":"evidence-tool","role":"Runtime CD ownership generated reader and public redaction evidence verifier.","must_not_own":"live AWS deploy execution or private topology evidence"},
     {"path":"tools/saascontrolplane","kind":"evidence-tool","role":"SaaS control-plane generated reader and verifier.","must_not_own":"private infra topology"},
     {"path":"tools/snapshotcqrsgate","kind":"evidence-tool","role":"AI Agent snapshot CQRS decision gate.","must_not_own":"store-wide CQRS migration"},
+    {"path":"tools/snapshotcqrsgate/pathutil","kind":"adapter","role":"Path adapter for the snapshot CQRS gate verifier.","must_not_own":"snapshot CQRS decision policy or measurement rules"},
+    {"path":"tools/snapshotcqrsgate/requirements","kind":"adapter","role":"Snapshot CQRS gate required identity, operation, signal, and threshold vocabulary.","must_not_own":"manifest loading or doc rendering"},
     {"path":"tools/storesaferouting","kind":"evidence-tool","role":"Store-safe routing generated reader and verifier.","must_not_own":"provider process execution or store-channel policy decisions"},
     {"path":"tools/storesnapshotoutbox","kind":"evidence-tool","role":"Store snapshot and file outbox generated reader and verifier.","must_not_own":"DynamoDB, EventBridge, or live deployment evidence"},
     {"path":"tools/webfrontendapi","kind":"evidence-tool","role":"Web frontend API CORS generated reader and verifier.","must_not_own":"frontend implementation or private deployment origins"},

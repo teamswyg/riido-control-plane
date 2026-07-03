@@ -36,13 +36,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `provider_status_path_adapter` | `tools/providerstatus/pathutil` | 100% | `df5f9b546a12` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_requirements_adapter` | `tools/providerstatus/requirements` | 100% | `443e40b1653a` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_render_adapter` | `tools/providerstatus/renderutil` | 100% | `a61250f5fc34` | `store_safe_routing_must_preserve_provider_status_decisions` |
+| `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `d49e070fc838` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
+| `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `7735900c5929` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
+| `snapshot_cqrs_gate_requirements_adapter` | `tools/snapshotcqrsgate/requirements` | 100% | `2d4fd81b478e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 
 ## Repository Coverage
 
 - Go files: `2769`
-- tracked files: `346`
-- untracked files: `2423`
-- coverage: `12.49%`
+- tracked files: `363`
+- untracked files: `2406`
+- coverage: `13.10%`
 
 ## Constraints
 
@@ -53,5 +56,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `346`
-- compression score: `50`
+- efficiency score: `363`
+- compression score: `52`

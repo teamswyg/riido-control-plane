@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/snapshotcqrsgate/requirements"
+)
 
 type result struct {
 	Operations          int
@@ -39,13 +43,13 @@ func verify(repoRoot string, m manifest, checkDoc bool) (result, error) {
 }
 
 func verifyHeader(m manifest) error {
-	if m.SchemaVersion != manifestSchema || m.ID != requiredID || m.RiidoTask != requiredTask {
+	if m.SchemaVersion != requirements.ManifestSchema || m.ID != requirements.RequiredID || m.RiidoTask != requirements.RequiredTask {
 		return fmt.Errorf("unexpected manifest identity")
 	}
-	if m.HumanDoc != requiredHumanDoc {
+	if m.HumanDoc != requirements.RequiredHumanDoc {
 		return fmt.Errorf("unexpected human_doc %q", m.HumanDoc)
 	}
-	if m.GeneratedDoc != requiredHumanDoc || m.Workflow != workflow || m.EvidenceArtifact != evidenceArtifact {
+	if m.GeneratedDoc != requirements.RequiredHumanDoc || m.Workflow != requirements.Workflow || m.EvidenceArtifact != requirements.EvidenceArtifact {
 		return fmt.Errorf("unexpected snapshot CQRS reader evidence binding")
 	}
 	if m.Decision.Scope != "ai_agent_client_snapshot_only" || m.Decision.StoreWideCQRS {

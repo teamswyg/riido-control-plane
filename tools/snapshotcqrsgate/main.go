@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/teamswyg/riido-control-plane/tools/snapshotcqrsgate/pathutil"
+	"github.com/teamswyg/riido-control-plane/tools/snapshotcqrsgate/requirements"
 )
 
 func main() {
@@ -17,7 +20,7 @@ func main() {
 func run(args []string) error {
 	fs := flag.NewFlagSet("snapshotcqrsgate", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	manifestPath := fs.String("manifest", defaultManifest, "snapshot CQRS gate manifest")
+	manifestPath := fs.String("manifest", requirements.DefaultManifest, "snapshot CQRS gate manifest")
 	repo := fs.String("repo", ".", "repository root")
 	writeDoc := fs.Bool("write-doc", false, "write the paired reader doc")
 	checkDoc := fs.Bool("check-doc", false, "verify the paired reader doc")
@@ -25,7 +28,7 @@ func run(args []string) error {
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	repoRoot, err := findRepoRoot(*repo)
+	repoRoot, err := pathutil.FindRepoRoot(*repo)
 	if err != nil {
 		return err
 	}

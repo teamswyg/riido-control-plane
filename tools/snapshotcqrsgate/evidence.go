@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/teamswyg/riido-control-plane/tools/snapshotcqrsgate/requirements"
 )
 
 type evidence struct {
@@ -19,7 +21,7 @@ type evidence struct {
 }
 
 func newEvidence(m manifest, r result) evidence {
-	return evidence{evidenceSchema, m.ID, "verified", r.Operations, r.Signals, r.DecisionRules, r.ForbiddenAttributes, m.Loop}
+	return evidence{requirements.EvidenceSchema, m.ID, "verified", r.Operations, r.Signals, r.DecisionRules, r.ForbiddenAttributes, m.Loop}
 }
 
 func writeEvidence(path string, value evidence) error {

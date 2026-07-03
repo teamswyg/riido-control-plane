@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/snapshotcqrsgate/requirements"
+)
 
 func verifyDecisionRules(m manifest) error {
 	if len(m.DecisionRules) < 2 {
@@ -8,7 +12,7 @@ func verifyDecisionRules(m manifest) error {
 	}
 	actions := map[string]bool{}
 	for _, rule := range m.DecisionRules {
-		if rule.ThresholdDropPercent != minDecisionThreshold || rule.When == "" {
+		if rule.ThresholdDropPercent != requirements.MinDecisionThreshold || rule.When == "" {
 			return fmt.Errorf("invalid decision rule %+v", rule)
 		}
 		actions[rule.Action] = true
