@@ -6,9 +6,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"github.com/teamswyg/riido-control-plane/tools/cloudwatchemf/requirements"
 )
 
-func TestRunWritesEvidence(t *testing.T) {
+func TestCloudWatchEMFBehaviorGolden(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "evidence.json")
 	if err := mainRun([]string{"-repo", "../..", "-evidence-out", out}); err != nil {
 		t.Fatal(err)
@@ -21,7 +23,16 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.Status != "verified" || got.MetricUnitsVerified == 0 || got.ScopesVerified == 0 || got.HTTPBreakdownRows != 1 {
+	if got.SchemaVersion != requirements.EvidenceSchema || got.ID != "control-plane-cloudwatch-emf" || got.Status != "verified" {
+		t.Fatalf("unexpected evidence identity: %+v", got)
+	}
+	if got.DimensionsVerified != 1 || got.JSONFieldsVerified != 11 || got.ScopesVerified != 5 {
+		t.Fatalf("unexpected required shape counts: %+v", got)
+	}
+	if got.MetricUnitsVerified != 11 || got.MetricSpecsTotal != 62 {
+		t.Fatalf("unexpected metric counts: %+v", got)
+	}
+	if got.HTTPBreakdownRows != 1 || got.StoreBreakdownRows != 1 || got.SourceChecks != 6 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
 }

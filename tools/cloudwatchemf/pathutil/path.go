@@ -1,17 +1,17 @@
-package main
+package pathutil
 
 import (
 	"os"
 	"path/filepath"
 )
 
-func findRepoRoot(start string) (string, error) {
+func FindRepoRoot(start string) (string, error) {
 	root, err := filepath.Abs(start)
 	if err != nil {
 		return "", err
 	}
 	for {
-		if _, err := os.Stat(filepath.Join(root, "go.mod")); err == nil {
+		if exists(filepath.Join(root, "go.mod")) {
 			return root, nil
 		}
 		next := filepath.Dir(root)
@@ -22,9 +22,14 @@ func findRepoRoot(start string) (string, error) {
 	}
 }
 
-func resolve(root, path string) string {
+func Resolve(root, path string) string {
 	if filepath.IsAbs(path) {
 		return path
 	}
 	return filepath.Join(root, filepath.FromSlash(path))
+}
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }

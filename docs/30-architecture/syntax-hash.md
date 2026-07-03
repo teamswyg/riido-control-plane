@@ -42,6 +42,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `assignment_journal_guard` | `tools/assignmentjournal` | 100% | `f61e624b229a` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
 | `assignment_journal_path_adapter` | `tools/assignmentjournal/pathutil` | 100% | `646b40beb507` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
 | `assignment_journal_requirements_adapter` | `tools/assignmentjournal/requirements` | 100% | `88a7bd0c31c4` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
+| `cloudwatch_emf_guard` | `tools/cloudwatchemf` | 100% | `ea2afe093731` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
+| `cloudwatch_emf_path_adapter` | `tools/cloudwatchemf/pathutil` | 100% | `4b5efac43574` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
+| `cloudwatch_emf_requirements_adapter` | `tools/cloudwatchemf/requirements` | 100% | `d055ebae7bb8` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
 | `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `d49e070fc838` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `7735900c5929` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_requirements_adapter` | `tools/snapshotcqrsgate/requirements` | 100% | `2d4fd81b478e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
@@ -49,9 +52,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 ## Repository Coverage
 
 - Go files: `2769`
-- tracked files: `397`
-- untracked files: `2372`
-- coverage: `14.33%`
+- tracked files: `414`
+- untracked files: `2355`
+- coverage: `14.95%`
 
 ## Constraints
 
@@ -62,5 +65,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `397`
-- compression score: `72`
+- efficiency score: `414`
+- compression score: `76`

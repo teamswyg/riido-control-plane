@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/cloudwatchemf/pathutil"
 )
 
 func verifySourceChecks(root string, checks []sourceCheck) error {
 	for _, check := range checks {
-		body, err := os.ReadFile(resolve(root, check.File))
+		body, err := os.ReadFile(pathutil.Resolve(root, check.File))
 		if err != nil {
 			return fmt.Errorf("read source check %s: %w", check.Name, err)
 		}
