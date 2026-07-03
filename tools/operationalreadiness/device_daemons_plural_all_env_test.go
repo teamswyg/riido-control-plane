@@ -13,7 +13,7 @@ func TestDeviceDaemonsPluralAllEnvEvidence(t *testing.T) {
 	if !evidence.Redacted {
 		t.Fatal("plural daemon route evidence must be redacted")
 	}
-	if evidence.Source.NotionComment != "39220241-cf7f-81a7-b4ca-001d8d6c5d1d" {
+	if evidence.Source.NotionComment != "39220241-cf7f-8129-b12d-001d5b689249" {
 		t.Fatalf("notion comment id = %q", evidence.Source.NotionComment)
 	}
 	if evidence.Assertions.RawResponseBodiesIncluded || evidence.Assertions.SecretsIncluded {
@@ -23,9 +23,9 @@ func TestDeviceDaemonsPluralAllEnvEvidence(t *testing.T) {
 		t.Fatal("route evidence must prove unauthenticated 401 route existence")
 	}
 	want := map[string]string{
-		"staging":     "already_live_before_this_capture",
-		"development": "https://github.com/teamswyg/riido-control-plane/actions/runs/28640542631",
-		"production":  "https://github.com/teamswyg/riido-control-plane/actions/runs/28640723634",
+		"staging":     "https://github.com/teamswyg/riido-control-plane/actions/runs/28643283686",
+		"development": "https://github.com/teamswyg/riido-control-plane/actions/runs/28643517509",
+		"production":  "https://github.com/teamswyg/riido-control-plane/actions/runs/28643749629",
 	}
 	if len(evidence.Deployments) != len(want) {
 		t.Fatalf("deployment count = %d", len(evidence.Deployments))
@@ -35,7 +35,11 @@ func TestDeviceDaemonsPluralAllEnvEvidence(t *testing.T) {
 		if !ok {
 			t.Fatalf("unexpected environment %q", deployment.Environment)
 		}
-		if deployment.DeploymentRun != run || deployment.V1Status != 401 || deployment.V2Status != 401 {
+		if deployment.DeploymentRun != run ||
+			deployment.HealthzStatus != 200 ||
+			deployment.ReadyzStatus != 200 ||
+			deployment.V1Status != 401 ||
+			deployment.V2Status != 401 {
 			t.Fatalf("bad deployment evidence: %+v", deployment)
 		}
 	}
@@ -52,23 +56,4 @@ func loadDeviceDaemonsPluralEvidence(t *testing.T) deviceDaemonsPluralEvidence {
 		t.Fatal(err)
 	}
 	return evidence
-}
-
-type deviceDaemonsPluralEvidence struct {
-	Redacted bool `json:"redacted"`
-	Source   struct {
-		NotionComment string `json:"notion_comment"`
-	} `json:"source"`
-	Deployments []struct {
-		Environment   string `json:"environment"`
-		DeploymentRun string `json:"deployment_run"`
-		V1Status      int    `json:"v1_status"`
-		V2Status      int    `json:"v2_status"`
-	} `json:"deployments"`
-	Assertions struct {
-		Not404                    bool `json:"not_404"`
-		UnauthenticatedProbeOnly  bool `json:"unauthenticated_probe_only"`
-		RawResponseBodiesIncluded bool `json:"raw_response_bodies_included"`
-		SecretsIncluded           bool `json:"secrets_included"`
-	} `json:"assertions"`
 }
