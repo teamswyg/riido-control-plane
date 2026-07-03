@@ -1,8 +1,8 @@
-package main
+package setutil
 
 import "strings"
 
-func containsExact(values []string, want string) bool {
+func ContainsExact(values []string, want string) bool {
 	for _, value := range values {
 		if value == want {
 			return true
@@ -11,6 +11,6 @@ func containsExact(values []string, want string) bool {
 	return false
 }
 
-func containsText(value, want string) bool {
+func ContainsText(value, want string) bool {
 	return strings.Contains(value, want)
 }

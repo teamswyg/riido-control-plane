@@ -9991,6 +9991,7 @@
         "ai_agent_risk_evidence_must_preserve_boundary_manifest",
         "migration_ledger_must_preserve_historical_evidence",
         "metrics_http_adapter_must_preserve_public_metrics_contract",
+        "agent_catalog_rbac_must_preserve_catalog_authorization_contract",
         "integration_matrix_must_preserve_public_private_boundary",
         "open_decision_questions_must_bind_owner_next_artifact_and_reader",
         "context_map_must_guard_public_boundaries"
@@ -10150,6 +10151,22 @@
         },
         {
           "kind": "test",
+          "path": "tools/agentcatalogrbac/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/agentcatalogrbac/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/agentcatalogrbac/requirements"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/agentcatalogrbac/setutil"
+        },
+        {
+          "kind": "test",
           "path": "tools/integrationmatrix/main_test.go"
         },
         {
@@ -10296,6 +10313,10 @@
         },
         {
           "kind": "test",
+          "path": "tools/agentcatalogrbac/main_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/integrationmatrix/main_test.go"
         },
         {
@@ -10348,7 +10369,7 @@
           "redacted": true
         }
       ],
-  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/agentruntimebinding, tools/assignmentjournal, tools/cloudwatchemf, tools/saascontrolplane, tools/storesaferouting, tools/snapshotcqrsgate, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, tools/aiagentrisk, tools/migrationledger, tools/metricshttpadapter, tools/integrationmatrix, tools/openquestions, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
+  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/agentruntimebinding, tools/assignmentjournal, tools/cloudwatchemf, tools/saascontrolplane, tools/storesaferouting, tools/snapshotcqrsgate, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, tools/aiagentrisk, tools/migrationledger, tools/metricshttpadapter, tools/agentcatalogrbac, tools/integrationmatrix, tools/openquestions, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
       "next_loop": "closed_loop_candidate_decision"
     }
   ],

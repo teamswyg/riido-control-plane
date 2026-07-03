@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/teamswyg/riido-control-plane/tools/agentcatalogrbac/pathutil"
+	"github.com/teamswyg/riido-control-plane/tools/agentcatalogrbac/setutil"
 )
 
 func evidenceProfileFor(m manifest, id string) (profile, error) {
@@ -30,16 +33,16 @@ func verifyProfile(root string, p profile) error {
 	if p.ID == "" || p.Workflow == "" || p.EvidenceArtifact == "" || p.Focus == "" || len(p.TestPatterns) == 0 {
 		return fmt.Errorf("invalid evidence profile %+v", p)
 	}
-	body, err := os.ReadFile(resolve(root, p.Workflow))
+	body, err := os.ReadFile(pathutil.Resolve(root, p.Workflow))
 	if err != nil {
 		return fmt.Errorf("read evidence profile workflow %s: %w", p.ID, err)
 	}
 	text := string(body)
-	if !containsText(text, p.EvidenceArtifact) {
+	if !setutil.ContainsText(text, p.EvidenceArtifact) {
 		return fmt.Errorf("profile %s workflow missing artifact %s", p.ID, p.EvidenceArtifact)
 	}
 	for _, pattern := range p.TestPatterns {
-		if !containsText(text, pattern) {
+		if !setutil.ContainsText(text, pattern) {
 			return fmt.Errorf("profile %s workflow missing test pattern %s", p.ID, pattern)
 		}
 	}

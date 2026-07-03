@@ -32,6 +32,10 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `metrics_http_adapter_runconfig_adapter` | `tools/metricshttpadapter/runconfig` | 100% | `10d6af178589` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_sourcechecks_adapter` | `tools/metricshttpadapter/sourcechecks` | 100% | `b9ce9030a750` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_statuscheck_adapter` | `tools/metricshttpadapter/statuscheck` | 100% | `f9994330013b` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
+| `agent_catalog_rbac_guard` | `tools/agentcatalogrbac` | 100% | `8d91ea54c7cf` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
+| `agent_catalog_rbac_path_adapter` | `tools/agentcatalogrbac/pathutil` | 100% | `646b40beb507` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
+| `agent_catalog_rbac_requirements_adapter` | `tools/agentcatalogrbac/requirements` | 100% | `073e15ea29e9` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
+| `agent_catalog_rbac_set_adapter` | `tools/agentcatalogrbac/setutil` | 100% | `db587838fc32` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `open_questions_guard` | `tools/openquestions` | 100% | `d4061a32be2a` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `open_questions_path_adapter` | `tools/openquestions/pathutil` | 100% | `97b020b4ebfc` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `repository_readme_guard` | `tools/repositoryreadme` | 100% | `fe1a8fb72b35` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
@@ -62,9 +66,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 ## Repository Coverage
 
 - Go files: `2770`
-- tracked files: `452`
-- untracked files: `2318`
-- coverage: `16.31%`
+- tracked files: `470`
+- untracked files: `2300`
+- coverage: `16.96%`
 
 ## Constraints
 
@@ -75,5 +79,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `452`
-- compression score: `81`
+- efficiency score: `470`
+- compression score: `88`

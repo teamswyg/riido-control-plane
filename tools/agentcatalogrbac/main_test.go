@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/teamswyg/riido-control-plane/tools/agentcatalogrbac/requirements"
 )
 
 func TestAgentCatalogRBACBehaviorGolden(t *testing.T) {
@@ -20,7 +22,7 @@ func TestAgentCatalogRBACBehaviorGolden(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.SchemaVersion != evidenceSchema || got.ID != expectedID || got.Status != "verified" {
+	if got.SchemaVersion != requirements.EvidenceSchema || got.ID != requirements.ExpectedID || got.Status != "verified" {
 		t.Fatalf("unexpected evidence identity: %+v", got)
 	}
 	if got.ProfileID != "rbac" || got.Workflow != ".github/workflows/agent-catalog-rbac.yml" {
@@ -29,7 +31,7 @@ func TestAgentCatalogRBACBehaviorGolden(t *testing.T) {
 	if got.EvidenceArtifact != "agent-catalog-rbac-evidence" || got.Focus == "" {
 		t.Fatalf("unexpected evidence artifact: %+v", got)
 	}
-	if got.Rules != 5 || got.Scopes != 8 || got.Routes != len(requiredRoutes) {
+	if got.Rules != 5 || got.Scopes != 8 || got.Routes != len(requirements.RequiredRoutes) {
 		t.Fatalf("unexpected RBAC counts: %+v", got)
 	}
 	if got.RequestDTOs != 2 || got.ResponseDTOs != 2 || got.StoreMethods != 4 || got.SourceChecks != 7 {

@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/agentcatalogrbac/requirements"
+)
 
 func verify(root string, m manifest, checkDoc bool) error {
 	if err := verifyHeader(m); err != nil {
@@ -27,7 +31,7 @@ func verify(root string, m manifest, checkDoc bool) error {
 }
 
 func verifyHeader(m manifest) error {
-	if m.SchemaVersion != manifestSchema || m.ID != expectedID || m.RiidoTask != expectedTask {
+	if m.SchemaVersion != requirements.ManifestSchema || m.ID != requirements.ExpectedID || m.RiidoTask != requirements.ExpectedTask {
 		return fmt.Errorf("unexpected manifest identity")
 	}
 	for _, value := range []string{m.Title, m.GeneratedDoc, m.Workflow, m.EvidenceArtifact, m.OwnerPackage} {
