@@ -529,6 +529,15 @@
       "decision": "Treat this as the latest page-level Notion QA backfill checkpoint; no new backend blocker was found, and performance work should proceed from the recorded allocation candidates."
     },
     {
+      "id": "39220241-cf7f-813e-b786-001d81884879",
+      "discussion": "page_level_backfill_diff",
+      "observed_at": "2026-07-03T07:34:26Z",
+      "event_type": "backfill_diff_active_stream_candidate_rejected",
+      "status_tag": "[codex][완료][백필검토]",
+      "signal": "A fresh Notion QA backfill rechecked page-level comments and repo inline-discussion evidence, then rejected broad server-side active_stream hiding because riidoaiserver tests showed it would break normal follow-up execution visibility.",
+      "decision": "Keep backend/control-plane changes closed unless the latest staging UI repro includes same-action mutation, v3/v2 thread, subscription, and SSE payloads. queued copy/status suppression remains server-owned; active_stream is also used for valid execution subscriptions."
+    },
+    {
       "id": "39120241-cf7f-8172-b716-001dd440d1e1",
       "discussion": "page_level_backfill_diff",
       "observed_at": "2026-07-02T15:47:51.000Z",
