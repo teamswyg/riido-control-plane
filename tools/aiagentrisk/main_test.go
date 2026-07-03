@@ -19,7 +19,7 @@ func TestRunAcceptsCheckDoc(t *testing.T) {
 	}
 }
 
-func TestRunWritesEvidence(t *testing.T) {
+func TestAIAgentRiskBehaviorGolden(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "risk-evidence.json")
 	if err := run([]string{"-evidence-out", path}); err != nil {
 		t.Fatalf("run: %v", err)
@@ -35,10 +35,19 @@ func TestRunWritesEvidence(t *testing.T) {
 	if got.SchemaVersion != evidenceSchemaVersion || got.Status != "verified" {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
+	if got.ID != "control-plane-ai-agent-risk-evidence" {
+		t.Fatalf("unexpected evidence id: %s", got.ID)
+	}
+	if got.LocalEvidence != 12 || got.ExternalEvidence != 2 || got.RemainingBoundary != 2 {
+		t.Fatalf("unexpected evidence counts: %+v", got)
+	}
 	if got.LocalEvidence == 0 || got.ExternalEvidence == 0 || got.RemainingBoundary == 0 {
 		t.Fatalf("missing evidence counts: %+v", got)
 	}
 	if got.Loop.Observation == "" || got.Loop.Retrospective == "" {
 		t.Fatalf("missing loop evidence: %+v", got.Loop)
+	}
+	if got.Loop.Observation != "Unresolved AI Agent risks were spread across review notes, tests, and cross-repository boundaries, making closure evidence easy to overstate." {
+		t.Fatalf("unexpected loop observation: %s", got.Loop.Observation)
 	}
 }
