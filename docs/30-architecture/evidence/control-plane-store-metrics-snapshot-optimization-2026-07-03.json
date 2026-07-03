@@ -1,0 +1,38 @@
+{
+  "schema_version": "riido-control-plane-performance-optimization-evidence.v1",
+  "captured_at": "2026-07-03T02:05:00Z",
+  "redacted": true,
+  "change": {
+    "id": "store_operation_metrics_snapshot_direct_aggregate",
+    "file": "internal/riidoaiserver/store_operation_metrics_snapshot.go",
+    "contract_impact": "none",
+    "summary": "Aggregate store operation metric buckets directly while holding the metrics lock, then sort the bounded response outside the lock. This removes an intermediate bucket/map copy from /metrics store snapshot generation."
+  },
+  "before": {
+    "command": "go test ./internal/riidoaiserver -run '^$' -bench 'BenchmarkStoreOperationMetricsSnapshot|BenchmarkStoreOperationMetricsObserve' -benchmem -count=5",
+    "median_ns_per_op": 1383,
+    "bytes_per_op": 3672,
+    "allocs_per_op": 11
+  },
+  "after": {
+    "command": "go test ./internal/riidoaiserver -run '^$' -bench 'BenchmarkStoreOperationMetricsSnapshot|BenchmarkStoreOperationMetricsObserve' -benchmem -count=5",
+    "median_ns_per_op": 821.2,
+    "bytes_per_op": 520,
+    "allocs_per_op": 4
+  },
+  "improvement": {
+    "median_latency_reduction_percent": 40.6,
+    "bytes_per_op_reduction_percent": 85.8,
+    "allocs_per_op_reduction_percent": 63.6
+  },
+  "verification": {
+    "tests": [
+      "go test ./internal/riidoaiserver -run 'TestStoreOperationMetrics|TestHTTP.*Metrics|TestMetrics' -count=1",
+      "go test -race ./internal/riidoaiserver -run 'TestStoreOperationMetrics|TestHTTP.*Metrics|TestMetrics' -count=1",
+      "go test ./internal/riidoaiserver -run '^$' -bench 'BenchmarkStoreOperationMetricsSnapshot|BenchmarkStoreOperationMetricsObserve' -benchmem -count=5",
+      "go test ./tools/controlplaneperf ./tools/controlplanepressure ./tools/controlplaneaudit -count=1",
+      "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+    ],
+    "benchmark_history": "docs/30-architecture/control-plane-performance-averages.jsonl"
+  }
+}
