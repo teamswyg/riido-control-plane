@@ -571,6 +571,13 @@
       "golden_command": "go test ./tools/storesnapshotoutbox -run TestRunWritesEvidence -count=1",
       "semantic_claim_id": "store_snapshot_file_outbox_must_preserve_durable_replay_evidence",
       "mode": "golden_locked_store_snapshot_file_outbox_tool"
+    },
+    {
+      "id": "ai_agent_thread_snapshot_guard",
+      "package_path": "tools/aiagentthreadsnapshot",
+      "golden_command": "go test ./tools/aiagentthreadsnapshot -run TestAIAgentThreadSnapshotBehaviorGolden -count=1",
+      "semantic_claim_id": "operational_readiness_checks_must_bind_release_items_to_evidence",
+      "mode": "golden_locked_ai_agent_thread_snapshot_tool"
     }
   ],
   "constraints": {

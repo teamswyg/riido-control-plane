@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestCandidateConversationsRanksActiveThreads(t *testing.T) {
 	threads := threadCollection{Threads: []threadRecord{
@@ -35,5 +38,12 @@ func TestCandidateConversationsFallsBackToV2AndThreadID(t *testing.T) {
 	}
 	if candidate.AssignmentID != "asn-1" || candidate.RunID != "run-1" {
 		t.Fatalf("missing sample IDs: %+v", candidate)
+	}
+}
+
+func assertNotContains(t *testing.T, got, forbidden string) {
+	t.Helper()
+	if strings.Contains(got, forbidden) {
+		t.Fatalf("report leaked %q: %s", forbidden, got)
 	}
 }
