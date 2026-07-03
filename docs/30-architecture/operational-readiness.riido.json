@@ -683,6 +683,18 @@
           "evidence_ref": "tools/controlplanepressure/main.go"
         },
         {
+          "id": "local_pressure_http_metrics_snapshot_2026_07_03",
+          "kind": "artifact",
+          "signal": "HTTP transaction metrics snapshot aggregation now avoids an intermediate bucket/map copy, reducing /metrics snapshot median latency by 23.3%, allocation by 32.5%, and allocation count by 31.8% without changing the metrics response contract.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-http-metrics-snapshot-optimization-2026-07-03.json"
+        },
+        {
+          "id": "local_pressure_store_metrics_snapshot_2026_07_03",
+          "kind": "artifact",
+          "signal": "Store operation metrics snapshot aggregation now avoids an intermediate bucket/map copy, reducing /metrics store snapshot median latency by 40.6%, allocation by 85.8%, and allocation count by 63.6% without changing the metrics response contract.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-store-metrics-snapshot-optimization-2026-07-03.json"
+        },
+        {
           "id": "local_pressure_followup_2026_07_02",
           "kind": "artifact",
           "signal": "Follow-up local pressure run measured 27 scenario/concurrency rows with zero errors and zero goroutine deltas; allocation pressure remains concentrated in v3 thread history projection paths.",
@@ -784,6 +796,8 @@
         {"kind": "workflow", "path": ".github/workflows/control-plane-performance.yml"},
         {"kind": "tool", "path": "tools/aiagentload/main.go"},
         {"kind": "tool", "path": "tools/controlplanepressure/main.go"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-http-metrics-snapshot-optimization-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-store-metrics-snapshot-optimization-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-local-pressure-followup-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-pressure-candidates-followup-2026-07-02.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-allocation-after-2026-07-02.json"},
