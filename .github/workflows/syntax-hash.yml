@@ -58,8 +58,9 @@ jobs:
           ./tools/aiagentrisk
           ./tools/migrationledger
           ./tools/integrationmatrix
+          ./tools/openquestions
           -run
-          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger|IntegrationMatrix)BehaviorGolden'
+          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger|IntegrationMatrix|OpenQuestions)BehaviorGolden'
           -count=1
       - name: Verify syntax hash evidence
         run: |

@@ -64,6 +64,7 @@
     {"path":"tools/metricshttpadapter","kind":"evidence-tool","role":"Metrics HTTP adapter generated reader and verifier.","must_not_own":"runtime metrics implementation"},
     {"path":"tools/moduledecomposition","kind":"meta-evidence-tool","role":"Go package surface and module boundary verifier.","must_not_own":"runtime package behavior"},
     {"path":"tools/openquestions","kind":"evidence-tool","role":"Open question decision queue generated reader and verifier.","must_not_own":"architecture decisions without owner evidence"},
+    {"path":"tools/openquestions/pathutil","kind":"adapter","role":"Path adapter for the open questions verifier.","must_not_own":"open question policy or decision queue evidence"},
     {"path":"tools/operationalreadiness","kind":"evidence-tool","role":"Operational readiness release loop verifier that binds launch checklist items to generated evidence and partial follow-up commands.","must_not_own":"runtime behavior, private operator evidence, or live infrastructure execution"},
     {"path":"tools/precommitbaseline","kind":"meta-evidence-tool","role":"Pre-commit baseline and loopregistry claim-binding hook verifier.","must_not_own":"runtime behavior or domain-specific claim semantics"},
     {"path":"tools/providerstatus","kind":"evidence-tool","role":"Provider status vocabulary verifier.","must_not_own":"provider process execution"},

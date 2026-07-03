@@ -1,4 +1,4 @@
-package main
+package pathutil
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func findRepoRoot(start string) (string, error) {
+func FindRepoRoot(start string) (string, error) {
 	root, err := filepath.Abs(start)
 	if err != nil {
 		return "", err
@@ -23,7 +23,7 @@ func findRepoRoot(start string) (string, error) {
 	}
 }
 
-func repoPath(repoRoot, slashPath string) string {
+func RepoPath(repoRoot, slashPath string) string {
 	if filepath.IsAbs(slashPath) {
 		return slashPath
 	}
