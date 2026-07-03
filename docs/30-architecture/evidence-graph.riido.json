@@ -3668,15 +3668,15 @@
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"
         },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_client_thread_history_benchmark_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_client_thread_history_fast_path_test.go"
-    }
-  ],
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_benchmark_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_fast_path_test.go"
+        }
+      ],
       "verifiers": [
         {
           "kind": "tool",
@@ -3701,18 +3701,18 @@
           "path": "ai-agent-client-api-evidence",
           "redacted": true
         },
-    {
-      "kind": "artifact",
-      "path": "loop-registry-evidence",
-      "redacted": true
-    },
-    {
-      "kind": "artifact",
-      "path": "control-plane-v3-history-queued-suppression-fastpath-2026-07-03",
-      "redacted": true
-    }
-  ],
-  "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI. The HTTP stop-refresh proof also verifies that late daemon thread-progress after stop is rejected by the durable FSM and cannot leak into v3 history. The queued suppression performance fast path preserves this decision by returning early only for histories that contain no queued state and, when queued state exists, removing queued timeline messages directly instead of constructing obsolete cutoff maps.",
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "control-plane-v3-history-queued-suppression-fastpath-2026-07-03",
+          "redacted": true
+        }
+      ],
+      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI. The HTTP stop-refresh proof also verifies that late daemon thread-progress after stop is rejected by the durable FSM and cannot leak into v3 history. The queued suppression performance fast path preserves this decision by returning early only for histories that contain no queued state and, when queued state exists, removing queued timeline messages directly instead of constructing obsolete cutoff maps.",
       "next_loop": "ai_thread_history"
     },
     {
@@ -9970,14 +9970,14 @@
       "id": "syntax_hash_graph_spike_loop",
       "observation": "Loop Registry semantic hashes bind code to SSOT value claims, but Go syntax pattern coverage and relocation evidence are not yet machine-routable for metaprogramming refactors.",
       "hypothesis": "A JSON-driven syntax hash graph can expand through behavior-golden packages, derive deterministic AST-normalized file and package hashes, and connect them to the existing semantic hash without changing runtime behavior.",
-    "claims": [
-      "public_aws_adapter_facade_must_preserve_contract",
-      "runtime_adapter_config_must_preserve_public_env_contract",
-      "repo_identity_must_anchor_public_module_boundary",
-      "shared_contract_compat_must_preserve_generated_contract_surface",
-      "request_authorization_must_preserve_security_boundary",
-      "health_ready_command_must_preserve_public_runtime_probe",
-      "runtime_deployment_boundary_must_preserve_public_private_ownership",
+      "claims": [
+        "public_aws_adapter_facade_must_preserve_contract",
+        "runtime_adapter_config_must_preserve_public_env_contract",
+        "repo_identity_must_anchor_public_module_boundary",
+        "shared_contract_compat_must_preserve_generated_contract_surface",
+        "request_authorization_must_preserve_security_boundary",
+        "health_ready_command_must_preserve_public_runtime_probe",
+        "runtime_deployment_boundary_must_preserve_public_private_ownership",
         "config_reference_must_preserve_env_manifest_parity",
         "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
         "assignment_operation_journal_must_preserve_replay_and_claim_ports",
@@ -10022,90 +10022,90 @@
           "kind": "test",
           "path": "awsadapters/golden_behavior_test.go"
         },
-    {
-      "kind": "test",
-      "path": "cmd/riido_ai_server/golden_behavior_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/repoidentity/golden_behavior_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/contractscompat/golden_behavior_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/requestauth/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/healthreadycmd/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/runtimeboundary/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/configreference/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/agentruntimebinding/main_test.go"
-    },
-    {
-      "kind": "tool",
-      "path": "tools/agentruntimebinding/pathutil"
-    },
-    {
-      "kind": "tool",
-      "path": "tools/agentruntimebinding/requirements"
-    },
-    {
-      "kind": "test",
-      "path": "tools/assignmentjournal/main_test.go"
-    },
-    {
-      "kind": "tool",
-      "path": "tools/assignmentjournal/pathutil"
-    },
-    {
-      "kind": "tool",
-      "path": "tools/assignmentjournal/requirements"
-    },
-    {
-      "kind": "test",
-      "path": "tools/cloudwatchemf/main_test.go"
-    },
-    {
-      "kind": "tool",
-      "path": "tools/cloudwatchemf/pathutil"
-    },
-    {
-      "kind": "tool",
-      "path": "tools/cloudwatchemf/requirements"
-    },
-    {
-      "kind": "test",
-      "path": "tools/saascontrolplane/main_test.go"
-    },
-    {
-      "kind": "tool",
-      "path": "tools/saascontrolplane/pathutil"
-    },
-    {
-      "kind": "tool",
-      "path": "tools/saascontrolplane/requirements"
-    },
-    {
-      "kind": "tool",
-      "path": "tools/saascontrolplane/setutil"
-    },
-    {
-      "kind": "test",
-      "path": "tools/storesaferouting/main_test.go"
-    },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/repoidentity/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/contractscompat/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/configreference/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/agentruntimebinding/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/agentruntimebinding/requirements"
+        },
+        {
+          "kind": "test",
+          "path": "tools/assignmentjournal/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/assignmentjournal/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/assignmentjournal/requirements"
+        },
+        {
+          "kind": "test",
+          "path": "tools/cloudwatchemf/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/cloudwatchemf/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/cloudwatchemf/requirements"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/saascontrolplane/pathutil"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/saascontrolplane/requirements"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/saascontrolplane/setutil"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesaferouting/main_test.go"
+        },
         {
           "kind": "test",
           "path": "tools/publicpageslive/golden_behavior_test.go"
@@ -10264,54 +10264,54 @@
           "kind": "test",
           "path": "awsadapters/golden_behavior_test.go"
         },
-    {
-      "kind": "test",
-      "path": "cmd/riido_ai_server/golden_behavior_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/repoidentity/golden_behavior_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/contractscompat/golden_behavior_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/requestauth/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/healthreadycmd/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/runtimeboundary/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/configreference/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/agentruntimebinding/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/assignmentjournal/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/cloudwatchemf/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/saascontrolplane/main_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/storesaferouting/main_test.go"
-    },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/repoidentity/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/contractscompat/golden_behavior_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/configreference/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/assignmentjournal/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/cloudwatchemf/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesaferouting/main_test.go"
+        },
         {
           "kind": "test",
           "path": "tools/providerstatus/main_test.go"
@@ -10402,8 +10402,155 @@
           "redacted": true
         }
       ],
-  "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/agentruntimebinding, tools/assignmentjournal, tools/cloudwatchemf, tools/saascontrolplane, tools/storesaferouting, tools/snapshotcqrsgate, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, tools/aiagentrisk, tools/migrationledger, tools/metricshttpadapter, tools/agentcatalogrbac, tools/reviewaccountseed, tools/integrationmatrix, tools/openquestions, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
+      "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/agentruntimebinding, tools/assignmentjournal, tools/cloudwatchemf, tools/saascontrolplane, tools/storesaferouting, tools/snapshotcqrsgate, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, tools/aiagentrisk, tools/migrationledger, tools/metricshttpadapter, tools/agentcatalogrbac, tools/reviewaccountseed, tools/integrationmatrix, tools/openquestions, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints.",
       "next_loop": "closed_loop_candidate_decision"
+    },
+    {
+      "id": "api_client_delivery_syntax_hash_loop",
+      "observation": "The API client delivery evidence tool was outside syntax-hash tracking even though it owns generated-client handoff evidence, risk references, and frontend boundary verification.",
+      "hypothesis": "Golden-locking API client delivery evidence before splitting helper adapters and binding the resulting packages into syntax hash coverage preserves behavior while reducing root file surface and expanding the syntax-to-semantic graph.",
+      "claims": [
+        "api_client_delivery_must_preserve_generated_handoff_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/doccheck/verify.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/evidence.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/golden_results_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/io.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/main.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/main_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/pathutil/path.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/render.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/render_more.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/render_sections.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/rendertext/list.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/requirements/constants.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/risk.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/run.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/runconfig/options.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/types.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/types_more.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/verify.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/verify_more.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/apiclientdelivery/verify_source.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/module-decomposition.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "API client delivery syntax coverage may expand only after TestAPIClientDeliveryBehaviorGolden preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client handoff ownership bound to the SSOT.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

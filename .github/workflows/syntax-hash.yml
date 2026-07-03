@@ -54,6 +54,7 @@ jobs:
           ./tools/requestauth ./tools/healthreadycmd ./tools/runtimeboundary
           ./tools/configreference ./tools/storesaferouting ./tools/publicpageslive
           ./tools/gocibaseline
+          ./tools/apiclientdelivery
           ./tools/webfrontendapi
           ./tools/aiagentrisk
           ./tools/migrationledger
@@ -71,7 +72,7 @@ jobs:
           ./tools/saascontrolplane
           ./tools/snapshotcqrsgate
           -run
-          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|ReviewAccountSeed|IntegrationMatrix|OpenQuestions|RepositoryReadme|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate)BehaviorGolden'
+          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|APIClientDelivery|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|ReviewAccountSeed|IntegrationMatrix|OpenQuestions|RepositoryReadme|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate)BehaviorGolden'
           -count=1
       - name: Verify syntax hash evidence
         run: |

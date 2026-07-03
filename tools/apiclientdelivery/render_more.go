@@ -3,14 +3,16 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/apiclientdelivery/rendertext"
 )
 
 func renderFigma(b *strings.Builder, contexts []figmaContext) {
 	b.WriteString("## Figma Consumption Contexts\n\n")
 	for _, ctx := range contexts {
 		fmt.Fprintf(b, "### %s\n\n", ctx.ID)
-		fmt.Fprintf(b, "- node ids: %s\n", codeList(ctx.NodeIDs))
-		fmt.Fprintf(b, "- generated paths: %s\n", emptyAwareCodeList(ctx.GeneratedPaths))
+		fmt.Fprintf(b, "- node ids: %s\n", rendertext.CodeList(ctx.NodeIDs))
+		fmt.Fprintf(b, "- generated paths: %s\n", rendertext.EmptyAwareCodeList(ctx.GeneratedPaths))
 		fmt.Fprintf(b, "- rule: %s\n", ctx.Rule)
 		fmt.Fprintf(b, "- must not own: %s\n\n", ctx.MustNotOwn)
 	}

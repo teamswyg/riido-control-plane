@@ -68,13 +68,19 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `d49e070fc838` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `7735900c5929` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_requirements_adapter` | `tools/snapshotcqrsgate/requirements` | 100% | `2d4fd81b478e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
+| `api_client_delivery_guard` | `tools/apiclientdelivery` | 100% | `662e297a7df9` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
+| `api_client_delivery_doccheck_adapter` | `tools/apiclientdelivery/doccheck` | 100% | `7cb72fff203b` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
+| `api_client_delivery_path_adapter` | `tools/apiclientdelivery/pathutil` | 100% | `df5f9b546a12` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
+| `api_client_delivery_rendertext_adapter` | `tools/apiclientdelivery/rendertext` | 100% | `1624807301ac` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
+| `api_client_delivery_requirements_adapter` | `tools/apiclientdelivery/requirements` | 100% | `d055ebae7bb8` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
+| `api_client_delivery_runconfig_adapter` | `tools/apiclientdelivery/runconfig` | 100% | `10d6af178589` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 
 ## Repository Coverage
 
-- Go files: `2769`
-- tracked files: `490`
-- untracked files: `2279`
-- coverage: `17.69%`
+- Go files: `2770`
+- tracked files: `510`
+- untracked files: `2260`
+- coverage: `18.41%`
 
 ## Constraints
 
@@ -85,5 +91,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `490`
-- compression score: `94`
+- efficiency score: `510`
+- compression score: `99`

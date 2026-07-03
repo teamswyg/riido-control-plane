@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/apiclientdelivery/pathutil"
 )
 
 func verifySourceChecks(repoRoot string, checks []sourceCheck, result *verifyResult) error {
@@ -16,7 +18,7 @@ func verifySourceChecks(repoRoot string, checks []sourceCheck, result *verifyRes
 }
 
 func verifySourceCheck(repoRoot string, check sourceCheck, result *verifyResult) error {
-	body, err := os.ReadFile(repoPath(repoRoot, check.File))
+	body, err := os.ReadFile(pathutil.Resolve(repoRoot, check.File))
 	if err != nil {
 		return fmt.Errorf("%s source %s: %w", check.Name, check.File, err)
 	}
