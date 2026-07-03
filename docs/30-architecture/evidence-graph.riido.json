@@ -10508,6 +10508,10 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/syntax-hash.yml"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/evidence-graph.yml"
         }
       ],
       "verifiers": [
@@ -10844,6 +10848,117 @@
         }
       ],
       "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "generated_client_handoff_syntax_hash_loop",
+      "observation": "The generated client handoff generator was part of the public API delivery loop, but its Go package shape was not syntax-hash tracked and its root folder had too many direct files for the IA limit.",
+      "hypothesis": "Hash-locking the generated handoff outputs before consolidating same-concept files preserves generated client delivery behavior while reducing root file surface and adding syntax-to-semantic graph coverage.",
+      "claims": [
+        "api_client_delivery_must_preserve_generated_handoff_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/api_history.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/change_summary.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/config.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/generated_files_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/lifecycle.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/main.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/openapi.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/operation_diff.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/pr_body.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/previous.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/previous_manifest_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/run.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/generated_files_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/previous_manifest_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "api-client-delivery-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Generated client handoff syntax coverage may expand only after TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody preserves generated output hashes; same-concept files are consolidated to satisfy folder/file limits without changing generated artifacts.",
       "next_loop": "closed_loop_candidate"
     }
   ],

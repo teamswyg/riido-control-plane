@@ -10,22 +10,22 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `92`
-- claim refs: `135`
-- change refs: `1351`
-- verifier refs: `614`
-- evidence refs: `297`
+- chains: `93`
+- claim refs: `136`
+- change refs: `1367`
+- verifier refs: `619`
+- evidence refs: `300`
 
 ## Compiled Chain Summary
 
-- complete chains: `92` / `92`
-- claim-bound chains: `92`
+- complete chains: `93` / `93`
+- claim-bound chains: `93`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `51` | `54` | `870` | `360` | `165` |
+| `closed_loop_candidate` | `52` | `55` | `886` | `365` | `168` |
 | `operational_readiness_release_harness` | `20` | `35` | `153` | `93` | `63` |
 | `ai_thread_history` | `8` | `8` | `114` | `55` | `12` |
 | `closed_loop_candidate_decision` | `8` | `32` | `174` | `84` | `38` |
@@ -127,9 +127,10 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `server_route_handler_decomposition_loop` | `2` | `38` | `5` | `3` | `closed_loop_candidate` |
 | `completion_progress_completed_terminal_http_proof_loop` | `3` | `10` | `6` | `5` | `operational_readiness_release_harness` |
 | `syntax_hash_graph_spike_loop` | `25` | `64` | `32` | `3` | `closed_loop_candidate_decision` |
-| `api_client_delivery_syntax_hash_loop` | `1` | `24` | `5` | `3` | `closed_loop_candidate` |
+| `api_client_delivery_syntax_hash_loop` | `1` | `25` | `5` | `3` | `closed_loop_candidate` |
 | `generated_smoke_matrix_syntax_hash_loop` | `1` | `23` | `5` | `3` | `closed_loop_candidate` |
 | `ai_agent_client_api_syntax_hash_loop` | `1` | `25` | `5` | `3` | `closed_loop_candidate` |
+| `generated_client_handoff_syntax_hash_loop` | `1` | `15` | `5` | `3` | `closed_loop_candidate` |
 
 ## Loop
 

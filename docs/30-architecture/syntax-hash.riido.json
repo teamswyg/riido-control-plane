@@ -557,6 +557,13 @@
       "golden_command": "go test ./tools/aiagentclientapi -run TestRunWritesEvidence -count=1",
       "semantic_claim_id": "thread_history_v3_must_expose_stable_conversation_grouping",
       "mode": "golden_locked_ai_agent_client_api_adapter"
+    },
+    {
+      "id": "generated_client_handoff_guard",
+      "package_path": "tools/generatedclienthandoff",
+      "golden_command": "go test ./tools/generatedclienthandoff -run TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody -count=1",
+      "semantic_claim_id": "api_client_delivery_must_preserve_generated_handoff_boundary",
+      "mode": "golden_locked_generated_client_handoff_tool"
     }
   ],
   "constraints": {

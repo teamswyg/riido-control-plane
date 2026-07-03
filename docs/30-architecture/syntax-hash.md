@@ -87,13 +87,14 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_client_api_requirements_adapter` | `tools/aiagentclientapi/requirements` | 100% | `88a7bd0c31c4` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_set_adapter` | `tools/aiagentclientapi/setutil` | 100% | `5a83883645b8` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_smoke_matrix_adapter` | `tools/aiagentclientapi/smokematrix` | 100% | `efe242a36e5e` | `thread_history_v3_must_expose_stable_conversation_grouping` |
+| `generated_client_handoff_guard` | `tools/generatedclienthandoff` | 100% | `842f212537e9` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 
 ## Repository Coverage
 
-- Go files: `2770`
-- tracked files: `551`
-- untracked files: `2219`
-- coverage: `19.89%`
+- Go files: `2757`
+- tracked files: `566`
+- untracked files: `2191`
+- coverage: `20.52%`
 
 ## Constraints
 
@@ -104,5 +105,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `551`
+- efficiency score: `566`
 - compression score: `108`

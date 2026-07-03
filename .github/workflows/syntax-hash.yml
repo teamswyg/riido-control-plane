@@ -57,6 +57,7 @@ jobs:
           ./tools/aigeneratedsmokematrix
           ./tools/apiclientdelivery
           ./tools/aiagentclientapi
+          ./tools/generatedclienthandoff
           ./tools/webfrontendapi
           ./tools/aiagentrisk
           ./tools/migrationledger
@@ -74,7 +75,7 @@ jobs:
           ./tools/saascontrolplane
           ./tools/snapshotcqrsgate
           -run
-          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|RunWrites|APIClientDelivery|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|ReviewAccountSeed|IntegrationMatrix|OpenQuestions|RepositoryReadme|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate)BehaviorGolden'
+          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|RunWrites|APIClientDelivery|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|ReviewAccountSeed|IntegrationMatrix|OpenQuestions|RepositoryReadme|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate)BehaviorGolden|GeneratedClientHandoff'
           -count=1
       - name: Verify syntax hash evidence
         run: |

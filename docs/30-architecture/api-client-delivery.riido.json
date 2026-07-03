@@ -41,7 +41,7 @@
     {"name":"react-query-generator-drift","file":"tools/reactquerygen/drift_test.go","contains":["TestGenerateReactQueryClientDoesNotDrift","generateReact"]},
     {"name":"react-query-generator-model-catalog","file":"tools/reactquerygen/runtime_model_catalog_test.go","contains":["TestAPIClientDeliveryUsesResolvedRuntimeModelCatalogWording","runtimeModelCatalogRequiredPhrases"]},
     {"name":"generated-client-handoff-files","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","assertGeneratedClientHandoffFiles"]},
-    {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/branch_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
+    {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
     {"name":"public-surface-scan","file":"docs/30-architecture/runtime-cd-ownership.riido.json","contains":["docs/30-architecture/api-client-delivery.md","public_surface_scan_contract"]},
     {"name":"risk-evidence","file":"docs/30-architecture/ai-agent-risk-evidence.riido.json","contains":["docs/30-architecture/api-client-delivery.md","active-stream-handoff"]}
   ],
