@@ -57,6 +57,7 @@ jobs:
           go test ./internal/contractscompat -run TestContractsCompatBehaviorGolden -count=1
           go test ./tools/requestauth -run TestRequestAuthorizationBehaviorGolden -count=1
           go test ./tools/healthreadycmd -run TestHealthReadyCommandBehaviorGolden -count=1
+          go test ./tools/runtimeboundary -run TestRuntimeBoundaryBehaviorGolden -count=1
       - name: Verify syntax hash evidence
         run: |
           mkdir -p out

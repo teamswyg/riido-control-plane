@@ -16,7 +16,8 @@
     {"id":"repo_identity_guard","package_path":"internal/repoidentity","golden_command":"go test ./internal/repoidentity -run TestRepoIdentityBehaviorGolden -count=1","semantic_claim_id":"repo_identity_must_anchor_public_module_boundary","mode":"golden_locked_public_identity_guard"},
     {"id":"contracts_compat_mirror","package_path":"internal/contractscompat","golden_command":"go test ./internal/contractscompat -run TestContractsCompatBehaviorGolden -count=1","semantic_claim_id":"shared_contract_compat_must_preserve_generated_contract_surface","mode":"golden_locked_contract_compatibility_mirror"},
     {"id":"request_authorization_guard","package_path":"tools/requestauth","golden_command":"go test ./tools/requestauth -run TestRequestAuthorizationBehaviorGolden -count=1","semantic_claim_id":"request_authorization_must_preserve_security_boundary","mode":"golden_locked_request_authorization_tool"},
-    {"id":"health_ready_command_guard","package_path":"tools/healthreadycmd","golden_command":"go test ./tools/healthreadycmd -run TestHealthReadyCommandBehaviorGolden -count=1","semantic_claim_id":"health_ready_command_must_preserve_public_runtime_probe","mode":"golden_locked_health_ready_command_tool"}
+    {"id":"health_ready_command_guard","package_path":"tools/healthreadycmd","golden_command":"go test ./tools/healthreadycmd -run TestHealthReadyCommandBehaviorGolden -count=1","semantic_claim_id":"health_ready_command_must_preserve_public_runtime_probe","mode":"golden_locked_health_ready_command_tool"},
+    {"id":"runtime_deployment_boundary_guard","package_path":"tools/runtimeboundary","golden_command":"go test ./tools/runtimeboundary -run TestRuntimeBoundaryBehaviorGolden -count=1","semantic_claim_id":"runtime_deployment_boundary_must_preserve_public_private_ownership","mode":"golden_locked_runtime_deployment_boundary_tool"}
   ],
   "constraints": {
     "max_file_lines": 75,
