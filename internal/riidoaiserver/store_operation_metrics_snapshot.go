@@ -18,13 +18,15 @@ func (m *StoreOperationMetrics) ApplyToMetricsSnapshot(snapshot MetricsSnapshot)
 }
 
 func (m *StoreOperationMetrics) snapshot() (int64, int64, storeOperationLatencyMetrics, []StoreOperationMetric) {
-	buckets := m.snapshotBuckets(time.Now())
 	callsTotal := int64(0)
 	errorsTotal := int64(0)
 	latency := storeOperationLatencyMetrics{}
 	latencyLastObservedAt := time.Time{}
 	byOperation := map[string]storeOperationMetricState{}
-	for _, bucket := range buckets {
+
+	m.mu.Lock()
+	m.pruneLocked(time.Now())
+	for _, bucket := range m.buckets {
 		callsTotal += bucket.callsTotal
 		errorsTotal += bucket.errorsTotal
 		latency.samplesTotal += bucket.latency.samplesTotal
@@ -36,8 +38,10 @@ func (m *StoreOperationMetrics) snapshot() (int64, int64, storeOperationLatencyM
 			latencyLastObservedAt = bucket.lastObservedAt
 			latency.lastMilliseconds = bucket.latency.lastMilliseconds
 		}
-		mergeStoreOperationMetrics(byOperation, bucket)
+		mergeStoreOperationMetrics(byOperation, *bucket)
 	}
+	m.mu.Unlock()
+
 	operations := make([]StoreOperationMetric, 0, len(byOperation))
 	for _, state := range byOperation {
 		operations = append(operations, state.metric)
