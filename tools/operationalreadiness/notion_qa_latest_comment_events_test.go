@@ -29,6 +29,7 @@ func TestNotionQACommentEventsIncludeLatestBackfillDiff(t *testing.T) {
 		"39120241-cf7f-8172-b716-001dd440d1e1": "page_level_backfill_diff",
 		"39120241-cf7f-81c8-bd89-001d768e3b97": "page_level_backfill_diff",
 		"39220241-cf7f-81ad-84b5-001df57331e5": "device_daemons_plural_api",
+		"39220241-cf7f-81a7-b4ca-001d8d6c5d1d": "device_daemons_plural_api",
 	}
 	for id, discussion := range want {
 		if !hasCommentEventID(evidence.CommentEvents, id, discussion) {

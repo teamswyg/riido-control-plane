@@ -3268,6 +3268,10 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/device-daemons-plural-all-env-route-2026-07-03.json"
         }
       ],
       "verifiers": [
@@ -3278,6 +3282,10 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/http_route_ai_agent_client_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/device_daemons_plural_all_env_test.go"
         },
         {
           "kind": "tool",
@@ -3298,9 +3306,14 @@
           "kind": "artifact",
           "path": "evidence-graph-evidence",
           "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "device-daemons-plural-all-env-route-2026-07-03",
+          "redacted": true
         }
       ],
-      "decision": "GET /devices/{device_id}/daemon remains the single preferred daemon compatibility endpoint, while GET /devices/{device_id}/daemons is a read-only plural projection sorted newest first and filtered through the same device and daemon visibility checks; route and HTTP tests prove the new surface is explicit instead of inferred by clients.",
+      "decision": "GET /devices/{device_id}/daemon remains the single preferred daemon compatibility endpoint, while GET /devices/{device_id}/daemons is a read-only plural projection sorted newest first and filtered through the same device and daemon visibility checks; route and HTTP tests prove the new surface is explicit instead of inferred by clients. Redacted live probes now prove the plural v1/v2 routes are present and auth-protected, not 404, across staging, development, and production after deployment.",
       "next_loop": "closed_loop_candidate"
     },
     {
