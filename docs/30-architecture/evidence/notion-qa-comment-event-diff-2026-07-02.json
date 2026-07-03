@@ -601,6 +601,15 @@
       "decision": "Treat the plural daemon API as deployed and handed off across all three control-plane environments after the latest main merge. Desktop work remains explicitly out of scope."
     },
     {
+      "id": "39220241-cf7f-81df-a487-001d7b84713a",
+      "discussion": "device_daemons_plural_api",
+      "observed_at": "2026-07-03T07:46:12Z",
+      "event_type": "latest_reconfirmation",
+      "status_tag": "[codex][완료][전달요청]",
+      "signal": "A fresh QA transfer comment reconfirms that singular /daemon remains the preferred compatibility endpoint while plural v1/v2 /daemons endpoints are present in control-plane code, contracts DSL/IR/OpenAPI, generated contract UI, and all three live environments with unauthenticated 401 route probes.",
+      "decision": "Keep the server API work closed and ask frontend to use the plural /daemons endpoint for multi-profile daemon UI. Do not reopen from stale Notion page-level aggregate readback without a fresh failing route, authenticated payload, or contract trace."
+    },
+    {
       "id": "39220241-cf7f-8134-bc4e-001d98e7d805",
       "discussion": "page_level_backfill_diff",
       "observed_at": "2026-07-03T05:57:22Z",
