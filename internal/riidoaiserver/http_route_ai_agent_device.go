@@ -4,6 +4,9 @@ func aiAgentClientDeviceHTTPRoute(base string, segments []string) string {
 	if len(segments) == 1 {
 		return base + "/devices"
 	}
+	if len(segments) == 3 && segments[2] == "daemons" {
+		return base + "/devices/{device_id}/daemons"
+	}
 	if len(segments) < 3 || segments[2] != "daemon" {
 		return ""
 	}

@@ -3216,6 +3216,94 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "ai_agent_device_daemon_list_surface_loop",
+      "observation": "The existing device daemon client API exposed only the preferred daemon for a device, so clients could not render multiple profile-specific daemon instances such as staging, development, and production without inferring hidden server state.",
+      "hypothesis": "Adding a read-only plural device daemon endpoint, binding it to the route classifier, store query, HTTP test, generated endpoint smoke matrix, and loop-registry evidence surface lets the client inspect daemon instances without changing the existing preferred daemon compatibility endpoint.",
+      "claims": [
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate",
+        "loop_registry_evidence_must_expose_loop_surfaces",
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_list_ai_agent_device_daemons.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_type_ai_agent_client_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_device_daemon_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_device_daemons_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_device_daemons_response.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_device_daemons.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_daemon_identity_list.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/http_route_ai_agent_device.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_daemons_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_route_ai_agent_client_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_daemons_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_route_ai_agent_client_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "GET /devices/{device_id}/daemon remains the single preferred daemon compatibility endpoint, while GET /devices/{device_id}/daemons is a read-only plural projection sorted newest first and filtered through the same device and daemon visibility checks; route and HTTP tests prove the new surface is explicit instead of inferred by clients.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "deleted_agent_thread_retention_loop",
       "observation": "Deleting an AI Agent can accidentally remove or hide historical task thread replies if the read model depends on the live agent row.",
       "hypothesis": "Capturing an agent snapshot on the thread and falling back to that snapshot for deleted agents keeps prior replies, results, and progress visible.",

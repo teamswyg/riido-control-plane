@@ -10,22 +10,22 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `86`
-- claim refs: `101`
-- change refs: `1186`
-- verifier refs: `552`
-- evidence refs: `271`
+- chains: `87`
+- claim refs: `104`
+- change refs: `1197`
+- verifier refs: `556`
+- evidence refs: `273`
 
 ## Compiled Chain Summary
 
-- complete chains: `86` / `86`
-- claim-bound chains: `86`
+- complete chains: `87` / `87`
+- claim-bound chains: `87`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `47` | `48` | `780` | `336` | `148` |
+| `closed_loop_candidate` | `48` | `51` | `791` | `340` | `150` |
 | `operational_readiness_release_harness` | `19` | `32` | `143` | `87` | `58` |
 | `ai_thread_history` | `8` | `8` | `113` | `55` | `11` |
 | `closed_loop_candidate_decision` | `7` | `7` | `110` | `52` | `35` |
@@ -65,6 +65,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `evidence_graph_annotation_loop` | `1` | `13` | `4` | `2` | `closed_loop_candidate` |
 | `harness_workflow_coverage_loop` | `1` | `10` | `5` | `2` | `closed_loop_candidate` |
 | `generated_endpoint_smoke_matrix_exclusion_loop` | `1` | `12` | `6` | `4` | `closed_loop_candidate` |
+| `ai_agent_device_daemon_list_surface_loop` | `3` | `11` | `4` | `2` | `closed_loop_candidate` |
 | `deleted_agent_thread_retention_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `thread_history_user_followup_retention_loop` | `1` | `15` | `7` | `1` | `ai_thread_history` |
 | `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
