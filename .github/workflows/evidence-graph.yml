@@ -87,6 +87,7 @@ on:
       - "tools/aiagentthreadsnapshot/**"
       - "tools/aigeneratedsmokematrix/**"
       - "tools/containercontract/**"
+      - "tools/configreference/**"
       - "tools/evidencegraph/**"
       - "tools/runtimeboundary/**"
       - "tools/harnesspromotion/**"
