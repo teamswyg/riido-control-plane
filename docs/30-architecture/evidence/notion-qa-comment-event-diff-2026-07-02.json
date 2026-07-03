@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-03T01:28:00Z",
+  "captured_at": "2026-07-03T04:00:19Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -499,6 +499,15 @@
       "status_tag": "[codex][완료][백필diff][증적강화]",
       "signal": "A write-confirmed page-level Notion comment rechecked the QA page after PR #787 and reported that page-level comments still read back at 31 while backend/control-plane P0s have no newly discovered blocker.",
       "decision": "Preserve the write-confirmed comment even while the Notion get_comments readback remains stale, so future agents do not treat the connector's 31-comment snapshot as the full QA truth."
+    },
+    {
+      "id": "39220241-cf7f-81ad-84b5-001df57331e5",
+      "discussion": "device_daemons_plural_api",
+      "observed_at": "2026-07-03T03:37:00Z",
+      "event_type": "server_api_transfer",
+      "status_tag": "[codex][완료][서버API][증적추가]",
+      "signal": "A page-level QA transfer comment records that GET /v1/client/ai-agent/devices/{device_id}/daemons and GET /v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons were added, merged through contracts/control-plane, deployed to staging, and route-protected with 401 rather than missing with 404.",
+      "decision": "Treat the plural daemon API as backend/contract complete while preserving GET /devices/{device_id}/daemon as the single preferred compatibility endpoint. Do not infer missing work from stale Notion page-level get_comments readback alone."
     }
   ],
   "reviewed_discussions": [
@@ -1032,6 +1041,48 @@
         }
       ],
       "decision": "A fresh 2026-07-03 readback still returns the stale 31-comment page-level snapshot, but selected discussion-level reads confirm the latest P0 comment ids already recorded in repo evidence. Treat repo evidence plus targeted readbacks as the QA truth until Notion aggregate readback freshness catches up."
+    },
+    {
+      "observed_at": "2026-07-03T04:00:19Z",
+      "tool": "notion.get_comments",
+      "mode": "page-level discussion readback after device_daemons_plural_api write-confirmed comment",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97",
+        "39220241-cf7f-81ad-84b5-001df57331e5"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-81ad-84b5-001df57331e5",
+          "source": "manual_write_result",
+          "target": "device_daemons_plural_api",
+          "comment_event_required": true
+        }
+      ],
+      "decision": "A post-write readback still exposes the same stale 31-comment page-level snapshot and does not show the newly written device_daemons_plural_api transfer comment. Preserve the write-confirmed comment id and backend/contract deploy evidence as the authoritative QA event until Notion aggregate readback catches up."
     }
   ],
   "next_actions": [
