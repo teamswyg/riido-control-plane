@@ -8,7 +8,8 @@ type deviceDaemonsPluralEvidence struct {
 }
 
 type deviceDaemonsPluralSource struct {
-	NotionComment string `json:"notion_comment"`
+	NotionComment         string   `json:"notion_comment"`
+	RelatedNotionComments []string `json:"related_notion_comments"`
 }
 
 type deviceDaemonsPluralDeployment struct {

@@ -767,6 +767,12 @@
           "evidence_ref": "docs/30-architecture/evidence/control-plane-event-stream-href-cache-after-2026-07-03.json"
         },
         {
+          "id": "local_pressure_v3_history_queued_suppression_fastpath_2026_07_03",
+          "kind": "artifact",
+          "signal": "After queued-status v3 suppression stopped constructing obsolete cutoff maps, the queued+running conversation projection benchmark reduced median latency by 53.1%, allocation by 20.3%, and allocation count by 17.5% without changing endpoint fields or durable queue semantics.",
+          "evidence_ref": "docs/30-architecture/evidence/control-plane-v3-history-queued-suppression-fastpath-2026-07-03.json"
+        },
+        {
           "id": "local_pressure_tool_approval_signal_only_2026_07_03",
           "kind": "artifact",
           "signal": "After pending tool approval waits skip polling ticks when the approval cannot expire during the hold window, local pressure measured zero errors, zero goroutine deltas, and lower allocation/CPU per operation for tool_approval_waiters.",
@@ -814,6 +820,7 @@
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-small-progress-filter-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-agent-snapshot-pointer-map-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-event-stream-href-cache-after-2026-07-03.json"},
+        {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-v3-history-queued-suppression-fastpath-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-before-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-tool-approval-waiter-signal-only-after-2026-07-03.json"},
         {"kind": "artifact", "path": "docs/30-architecture/evidence/control-plane-assignment-wait-signal-only-before-2026-07-03.json"},
