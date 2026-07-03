@@ -12,7 +12,7 @@ func TestNotionQACommentReadbackLimitIsRecorded(t *testing.T) {
 		t.Fatal("missing Notion comment readback observations")
 	}
 	observation := evidence.ReadbackObservations[len(evidence.ReadbackObservations)-1]
-	if observation.ObservedAt != "2026-07-03T06:59:04Z" {
+	if observation.ObservedAt != "2026-07-03T08:13:54Z" {
 		t.Fatalf("latest readback observation = %q", observation.ObservedAt)
 	}
 	if observation.VisiblePageLevelCommentCount != 31 {
@@ -29,6 +29,7 @@ func TestNotionQACommentReadbackLimitIsRecorded(t *testing.T) {
 		"39220241-cf7f-8191-a0b4-001d15db7b78",
 		"39220241-cf7f-8134-bc4e-001d98e7d805",
 		"39220241-cf7f-8129-b12d-001d5b689249",
+		"39220241-cf7f-81df-a487-001d7b84713a",
 	} {
 		if !hasReadbackMissingID(observation, id) {
 			t.Fatalf("missing write-confirmed comment readback gap id=%s", id)
