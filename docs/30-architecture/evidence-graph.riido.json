@@ -11178,6 +11178,133 @@
       ],
       "decision": "AI Agent thread snapshot syntax coverage may expand only after TestAIAgentThreadSnapshotBehaviorGolden preserves the redacted capture report hash; same-concept config, fetch, output, and subscription test helpers are consolidated to satisfy folder/file limits without changing the captured evidence shape.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "figma_projection_syntax_hash_loop",
+      "observation": "The Figma generated-client projection tool was already part of API client delivery evidence, but its Go package shape was not syntax-hash tracked and its root folder exceeded the IA file limit.",
+      "hypothesis": "Hash-locking the projection evidence JSON and generated reader before consolidating same-concept helpers preserves generated-client projection behavior while binding the tool to the API client delivery semantic graph.",
+      "claims": [
+        "api_client_delivery_must_preserve_generated_handoff_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/constants.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/io.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/render.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/render_annotations.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/render_boundaries.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/render_entries.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/render_limitations.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/root.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/run.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/types.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/types_entries.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/types_source.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/types_source_more.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/figmaprojection/verify.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/figmaprojection/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "api-client-delivery-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Figma projection syntax coverage may expand only after TestFigmaProjectionBehaviorGolden preserves the projection evidence and generated reader hashes; same-concept doc, IO, root, render, type, and run helpers are consolidated to satisfy folder/file limits without changing generated-client projection behavior.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

@@ -74,6 +74,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `api_client_delivery_rendertext_adapter` | `tools/apiclientdelivery/rendertext` | 100% | `1624807301ac` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `api_client_delivery_requirements_adapter` | `tools/apiclientdelivery/requirements` | 100% | `d055ebae7bb8` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `api_client_delivery_runconfig_adapter` | `tools/apiclientdelivery/runconfig` | 100% | `10d6af178589` | `thread_history_v3_must_expose_stable_conversation_grouping` |
+| `figma_projection_guard` | `tools/figmaprojection` | 100% | `92f07f1df288` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 | `generated_smoke_matrix_guard` | `tools/aigeneratedsmokematrix` | 100% | `712fbc8711c9` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_doccheck_adapter` | `tools/aigeneratedsmokematrix/doccheck` | 100% | `7cb72fff203b` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_path_adapter` | `tools/aigeneratedsmokematrix/pathutil` | 100% | `1d537370dc6a` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
@@ -93,10 +94,10 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `2749`
-- tracked files: `596`
-- untracked files: `2153`
-- coverage: `21.68%`
+- Go files: `2737`
+- tracked files: `611`
+- untracked files: `2126`
+- coverage: `22.32%`
 
 ## Constraints
 
@@ -107,5 +108,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `596`
+- efficiency score: `611`
 - compression score: `112`
