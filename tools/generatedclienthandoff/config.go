@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -46,4 +47,11 @@ func sourceFiles(cfg config) map[string]string {
 		"core":    cfg.Core,
 		"react":   cfg.React,
 	}
+}
+
+func validateTargetBranch(branch string) error {
+	if strings.Contains(branch, "react-query-") && !strings.HasPrefix(branch, "RIID-") {
+		return fmt.Errorf("target branch %q must be a Riido work branchName, not a generated branch", branch)
+	}
+	return nil
 }

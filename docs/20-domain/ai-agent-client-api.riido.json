@@ -175,7 +175,7 @@
     {"name":"react-query-generator-metadata","file":"tools/reactquerygen/client_metadata_projection_test.go","contains":["TestAIAgentClientMetadataFlowsThroughContractProjections","assertRequiredClientMetadataFields"]},
     {"name":"react-query-generator-required-fields","file":"tools/reactquerygen/client_metadata_required_test.go","contains":["assignAIAgentTask","invalidates"]},
     {"name":"generated-client-handoff-files","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","assertGeneratedClientHandoffFiles"]},
-    {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/branch_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
+    {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
     {"name":"black-box-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2","TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI"]},
     {"name":"thread-history-v3-api","file":"internal/riidoaiserver/ai_agent_client_thread_history_api.go","contains":["ConversationID","ParentThreadID","AgentSnapshotID","AuthorPrincipalID","Messages","AgentSnapshots"]},
     {"name":"thread-history-v3-projection","file":"internal/riidoaiserver/ai_agent_client_thread_history_projection.go","contains":["taskThreadConversationID","taskThreadParentThreadID","taskThreadHistoryMessagesLocked","AgentSnapshots"]},
