@@ -19,14 +19,16 @@ func (m *HTTPTransactionMetrics) ApplyToMetricsSnapshot(snapshot MetricsSnapshot
 }
 
 func (m *HTTPTransactionMetrics) snapshot() (int64, map[int]int64, map[string]int64, httpTransactionLatencyMetrics, []HTTPTransactionMetric) {
-	buckets := m.snapshotBuckets(time.Now())
 	requestsTotal := int64(0)
 	responsesByStatus := map[int]int64{}
 	clientSurfaces := map[string]int64{}
 	latency := httpTransactionLatencyMetrics{}
 	latencyLastObservedAt := time.Time{}
 	byKey := map[httpTransactionKey]httpTransactionMetricState{}
-	for _, bucket := range buckets {
+
+	m.mu.Lock()
+	m.pruneLocked(time.Now())
+	for _, bucket := range m.buckets {
 		requestsTotal += bucket.requestsTotal
 		for statusCode, total := range bucket.responsesByStatus {
 			responsesByStatus[statusCode] += total
@@ -42,6 +44,8 @@ func (m *HTTPTransactionMetrics) snapshot() (int64, map[int]int64, map[string]in
 		}
 		mergeHTTPTransactionBucketState(byKey, bucket.byKey)
 	}
+	m.mu.Unlock()
+
 	transactions := make([]HTTPTransactionMetric, 0, len(byKey))
 	for _, state := range byKey {
 		clientSurfaces[state.metric.ClientSurface] += state.metric.RequestsTotal
