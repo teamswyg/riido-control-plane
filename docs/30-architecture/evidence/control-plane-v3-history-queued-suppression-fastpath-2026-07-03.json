@@ -1,0 +1,37 @@
+{
+  "schema_version": "riido-control-plane-performance-evidence.v1",
+  "id": "control-plane-v3-history-queued-suppression-fastpath-2026-07-03",
+  "captured_at": "2026-07-03T08:48:00Z",
+  "redacted": true,
+  "source": {
+    "command": "go test ./internal/riidoaiserver -run '^$' -bench 'BenchmarkAIAgentTaskThreadHistoryProjection/queued_and_running_conversation' -benchmem -count=5",
+    "benchmark": "BenchmarkAIAgentTaskThreadHistoryProjection/queued_and_running_conversation",
+    "contract": "queued_by_busy_agent remains hidden from v3 messages[] while durable queued thread state remains available"
+  },
+  "change": {
+    "summary": "Queued-status v3 suppression now removes queued timeline messages directly instead of constructing historical cutoff maps from an older supersession model.",
+    "endpoint_contract_changed": false,
+    "durable_queue_changed": false,
+    "client_visible_rule": "queued_by_busy_agent must not render as an agent reply/progress row"
+  },
+  "before": {
+    "median_ns_per_op": 22212,
+    "bytes_per_op": 12776,
+    "allocs_per_op": 40
+  },
+  "after": {
+    "median_ns_per_op": 10422,
+    "bytes_per_op": 10188,
+    "allocs_per_op": 33
+  },
+  "decision": {
+    "status": "accepted",
+    "latency_reduction_percent": 53.08,
+    "bytes_per_op_reduction_percent": 20.26,
+    "allocs_per_op_reduction_percent": 17.5,
+    "notes": [
+      "The endpoint-level pressure path is dominated by HTTP/JSON/auth wrapper cost, so this evidence intentionally claims only the queued+running v3 projection fast path.",
+      "Targeted queued, terminal, and stop regression tests passed after the change."
+    ]
+  }
+}

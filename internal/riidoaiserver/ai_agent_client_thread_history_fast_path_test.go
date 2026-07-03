@@ -27,7 +27,7 @@ func TestWithoutSupersededQueuedMessagesKeepsNonQueuedSlice(t *testing.T) {
 		MessageID: "progress-1",
 		Role:      AIAgentTaskThreadMessageRoleProgress,
 	}}
-	got := withoutSupersededQueuedMessages("conversation-1", messages, nil, nil)
+	got := withoutSupersededQueuedMessages(messages)
 	if len(got) != 1 || &got[0] != &messages[0] {
 		t.Fatalf("non-queued messages should remain unchanged: %+v", got)
 	}
@@ -42,7 +42,7 @@ func TestWithoutSupersededQueuedMessagesDoesNotMutateSource(t *testing.T) {
 		MessageID: "progress-1", Role: AIAgentTaskThreadMessageRoleProgress,
 	}
 	messages := []AIAgentTaskThreadHistoryMessage{queued, progress}
-	got := withoutSupersededQueuedMessages("conversation-1", messages, nil, nil)
+	got := withoutSupersededQueuedMessages(messages)
 	if len(got) != 1 || got[0].MessageID != progress.MessageID {
 		t.Fatalf("filtered messages = %+v, want only progress", got)
 	}

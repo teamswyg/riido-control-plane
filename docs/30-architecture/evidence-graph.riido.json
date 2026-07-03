@@ -3668,11 +3668,15 @@
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go"
         },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/ai_agent_client_thread_history_benchmark_test.go"
-        }
-      ],
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_client_thread_history_benchmark_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_client_thread_history_fast_path_test.go"
+    }
+  ],
       "verifiers": [
         {
           "kind": "tool",
@@ -3697,13 +3701,18 @@
           "path": "ai-agent-client-api-evidence",
           "redacted": true
         },
-        {
-          "kind": "artifact",
-          "path": "loop-registry-evidence",
-          "redacted": true
-        }
-      ],
-      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI. The HTTP stop-refresh proof also verifies that late daemon thread-progress after stop is rejected by the durable FSM and cannot leak into v3 history. The performance fast path preserves this decision by returning early only for histories that contain no queued state to suppress.",
+    {
+      "kind": "artifact",
+      "path": "loop-registry-evidence",
+      "redacted": true
+    },
+    {
+      "kind": "artifact",
+      "path": "control-plane-v3-history-queued-suppression-fastpath-2026-07-03",
+      "redacted": true
+    }
+  ],
+  "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI. The HTTP stop-refresh proof also verifies that late daemon thread-progress after stop is rejected by the durable FSM and cannot leak into v3 history. The queued suppression performance fast path preserves this decision by returning early only for histories that contain no queued state and, when queued state exists, removing queued timeline messages directly instead of constructing obsolete cutoff maps.",
       "next_loop": "ai_thread_history"
     },
     {

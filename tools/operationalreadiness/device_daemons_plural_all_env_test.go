@@ -16,6 +16,9 @@ func TestDeviceDaemonsPluralAllEnvEvidence(t *testing.T) {
 	if evidence.Source.NotionComment != "39220241-cf7f-8129-b12d-001d5b689249" {
 		t.Fatalf("notion comment id = %q", evidence.Source.NotionComment)
 	}
+	if !deviceDaemonsPluralHasRelatedComment(evidence, "39220241-cf7f-8171-9aea-001dcb582334") {
+		t.Fatal("latest Notion reconfirmation comment is not linked")
+	}
 	if evidence.Assertions.RawResponseBodiesIncluded || evidence.Assertions.SecretsIncluded {
 		t.Fatal("route evidence must not include raw bodies or secrets")
 	}
@@ -43,6 +46,15 @@ func TestDeviceDaemonsPluralAllEnvEvidence(t *testing.T) {
 			t.Fatalf("bad deployment evidence: %+v", deployment)
 		}
 	}
+}
+
+func deviceDaemonsPluralHasRelatedComment(evidence deviceDaemonsPluralEvidence, id string) bool {
+	for _, related := range evidence.Source.RelatedNotionComments {
+		if related == id {
+			return true
+		}
+	}
+	return false
 }
 
 func loadDeviceDaemonsPluralEvidence(t *testing.T) deviceDaemonsPluralEvidence {
