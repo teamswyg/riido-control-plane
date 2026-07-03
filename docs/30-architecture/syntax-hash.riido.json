@@ -9,48 +9,13 @@
   "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
   "artifact_roots": ["tools/syntaxhash"],
   "targets": [
-    {
-      "id": "contextmap_spike",
-      "package_path": "tools/contextmap",
-      "golden_command": "go test ./tools/contextmap -run TestContextMapBehaviorGolden -count=1",
-      "semantic_claim_id": "context_map_must_guard_public_boundaries",
-      "mode": "single_package_spike"
-    },
-    {
-      "id": "syntaxhash_tool_self",
-      "package_path": "tools/syntaxhash",
-      "golden_command": "go test ./tools/syntaxhash -run TestSyntaxHashToolBehaviorGolden -count=1",
-      "semantic_claim_id": "context_map_must_guard_public_boundaries",
-      "mode": "golden_locked_metaprogramming_tool"
-    },
-    {
-      "id": "awsadapters_facade",
-      "package_path": "awsadapters",
-      "golden_command": "go test ./awsadapters -run TestAWSAdaptersFacadeBehaviorGolden -count=1",
-      "semantic_claim_id": "public_aws_adapter_facade_must_preserve_contract",
-      "mode": "golden_locked_public_facade"
-    },
-    {
-      "id": "runtime_adapter_config",
-      "package_path": "cmd/riido_ai_server",
-      "golden_command": "go test ./cmd/riido_ai_server -run TestRuntimeConfigBehaviorGolden -count=1",
-      "semantic_claim_id": "runtime_adapter_config_must_preserve_public_env_contract",
-      "mode": "golden_locked_runtime_adapter"
-    },
-    {
-      "id": "repo_identity_guard",
-      "package_path": "internal/repoidentity",
-      "golden_command": "go test ./internal/repoidentity -run TestRepoIdentityBehaviorGolden -count=1",
-      "semantic_claim_id": "repo_identity_must_anchor_public_module_boundary",
-      "mode": "golden_locked_public_identity_guard"
-    },
-    {
-      "id": "contracts_compat_mirror",
-      "package_path": "internal/contractscompat",
-      "golden_command": "go test ./internal/contractscompat -run TestContractsCompatBehaviorGolden -count=1",
-      "semantic_claim_id": "shared_contract_compat_must_preserve_generated_contract_surface",
-      "mode": "golden_locked_contract_compatibility_mirror"
-    }
+    {"id":"contextmap_spike","package_path":"tools/contextmap","golden_command":"go test ./tools/contextmap -run TestContextMapBehaviorGolden -count=1","semantic_claim_id":"context_map_must_guard_public_boundaries","mode":"single_package_spike"},
+    {"id":"syntaxhash_tool_self","package_path":"tools/syntaxhash","golden_command":"go test ./tools/syntaxhash -run TestSyntaxHashToolBehaviorGolden -count=1","semantic_claim_id":"context_map_must_guard_public_boundaries","mode":"golden_locked_metaprogramming_tool"},
+    {"id":"awsadapters_facade","package_path":"awsadapters","golden_command":"go test ./awsadapters -run TestAWSAdaptersFacadeBehaviorGolden -count=1","semantic_claim_id":"public_aws_adapter_facade_must_preserve_contract","mode":"golden_locked_public_facade"},
+    {"id":"runtime_adapter_config","package_path":"cmd/riido_ai_server","golden_command":"go test ./cmd/riido_ai_server -run TestRuntimeConfigBehaviorGolden -count=1","semantic_claim_id":"runtime_adapter_config_must_preserve_public_env_contract","mode":"golden_locked_runtime_adapter"},
+    {"id":"repo_identity_guard","package_path":"internal/repoidentity","golden_command":"go test ./internal/repoidentity -run TestRepoIdentityBehaviorGolden -count=1","semantic_claim_id":"repo_identity_must_anchor_public_module_boundary","mode":"golden_locked_public_identity_guard"},
+    {"id":"contracts_compat_mirror","package_path":"internal/contractscompat","golden_command":"go test ./internal/contractscompat -run TestContractsCompatBehaviorGolden -count=1","semantic_claim_id":"shared_contract_compat_must_preserve_generated_contract_surface","mode":"golden_locked_contract_compatibility_mirror"},
+    {"id":"request_authorization_guard","package_path":"tools/requestauth","golden_command":"go test ./tools/requestauth -run TestRequestAuthorizationBehaviorGolden -count=1","semantic_claim_id":"request_authorization_must_preserve_security_boundary","mode":"golden_locked_request_authorization_tool"}
   ],
   "constraints": {
     "max_file_lines": 75,

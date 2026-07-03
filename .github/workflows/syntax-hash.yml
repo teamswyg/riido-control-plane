@@ -15,6 +15,7 @@ on:
       - "docs/30-architecture/loop-registry.riido.json"
       - "tools/syntaxhash/**"
       - "tools/contextmap/**"
+      - "tools/requestauth/**"
       - "awsadapters/**"
       - "cmd/riido_ai_server/**"
       - "internal/repoidentity/**"
@@ -31,6 +32,7 @@ on:
       - "docs/30-architecture/loop-registry.riido.json"
       - "tools/syntaxhash/**"
       - "tools/contextmap/**"
+      - "tools/requestauth/**"
       - "awsadapters/**"
       - "cmd/riido_ai_server/**"
       - "internal/repoidentity/**"
@@ -57,6 +59,7 @@ jobs:
           go test ./cmd/riido_ai_server -run TestRuntimeConfigBehaviorGolden -count=1
           go test ./internal/repoidentity -run TestRepoIdentityBehaviorGolden -count=1
           go test ./internal/contractscompat -run TestContractsCompatBehaviorGolden -count=1
+          go test ./tools/requestauth -run TestRequestAuthorizationBehaviorGolden -count=1
       - name: Verify syntax hash evidence
         run: |
           mkdir -p out
