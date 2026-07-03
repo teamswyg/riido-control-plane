@@ -56,8 +56,9 @@ jobs:
           ./tools/gocibaseline
           ./tools/webfrontendapi
           ./tools/aiagentrisk
+          ./tools/migrationledger
           -run
-          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk)BehaviorGolden'
+          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger)BehaviorGolden'
           -count=1
       - name: Verify syntax hash evidence
         run: |
