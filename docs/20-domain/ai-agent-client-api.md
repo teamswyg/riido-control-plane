@@ -23,14 +23,14 @@ Canonical domain changes start in `riido-contracts`; this repo verifies the exec
 
 | Class | Count |
 | --- | ---: |
-| OpenAPI operations | 55 |
-| v1 operations | 25 |
-| v2 operations | 30 |
-| smoke matrix entries | 55 |
+| OpenAPI operations | 57 |
+| v1 operations | 26 |
+| v2 operations | 31 |
+| smoke matrix entries | 57 |
 
 ## Required Generated Paths
 
-- `aiAgent.bootstrap`, `aiAgent.profileThumbnails.uploads.create`, `aiAgent.tasks.assign`, `aiAgent.tasks.threadMessages.create`, `v2.aiAgent.bootstrap`, `v2.aiAgent.agents.create`, `v2.aiAgent.profileThumbnails.uploads.create`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.agentAssignments.create`, `v2.aiAgent.tasks.threadStreamSubscription`
+- `aiAgent.bootstrap`, `aiAgent.profileThumbnails.uploads.create`, `aiAgent.devices.daemons.list`, `aiAgent.tasks.assign`, `aiAgent.tasks.threadMessages.create`, `v2.aiAgent.bootstrap`, `v2.aiAgent.agents.create`, `v2.aiAgent.devices.daemons.list`, `v2.aiAgent.profileThumbnails.uploads.create`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.agentAssignments.create`, `v2.aiAgent.tasks.threadStreamSubscription`
 
 ## Runtime Config Keys
 

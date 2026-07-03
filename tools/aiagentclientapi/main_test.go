@@ -32,11 +32,11 @@ func assertAIClientAPIGolden(t *testing.T, got evidence) {
 		got.Status != "verified" || !got.SmokeMatrixParity || !got.GeneratedPathCovered {
 		t.Fatalf("unexpected evidence identity/status: %+v", got)
 	}
-	if got.OperationCounts.Total != 55 || got.OperationCounts.V1 != 25 ||
-		got.OperationCounts.V2 != 30 || got.OperationCounts.SmokeMatrix != 55 {
+	if got.OperationCounts.Total != 57 || got.OperationCounts.V1 != 26 ||
+		got.OperationCounts.V2 != 31 || got.OperationCounts.SmokeMatrix != 57 {
 		t.Fatalf("operation counts drifted: %+v", got.OperationCounts)
 	}
-	if got.RequiredPaths != 10 || got.RuntimeConfigs != 1 || got.PublicFields != 12 ||
+	if got.RequiredPaths != 12 || got.RuntimeConfigs != 1 || got.PublicFields != 12 ||
 		got.DeploymentEvidence != 2 || got.ThreadHistoryV3Rules != 70 || got.SourceChecks != 27 {
 		t.Fatalf("evidence counters drifted: %+v", got)
 	}

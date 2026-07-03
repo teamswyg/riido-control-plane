@@ -604,6 +604,15 @@ export interface DeviceDaemonDetailResponse {
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준으로 접근 가능한 daemon들을 profile별로 모두 표시하기 위한 응답입니다.
+ */
+export interface DeviceDaemonListResponse {
+  daemons: DeviceDaemonRecord[];
+  device_id: string;
+  schema_version: string;
+}
+
+/**
  * runtime 설정 화면에서 agent 권한으로 접근 가능한 daemon 상세 표시와 제어 버튼 상태를 구성하는 read model입니다.
  */
 export interface DeviceDaemonRecord {
@@ -1445,6 +1454,52 @@ export function stopAIAgentDeviceDaemonMutationOptions(config: RiidoClientConfig
     ...options,
     mutationKey: stopAIAgentDeviceDaemonMutationKey(),
     mutationFn: (variables: StopAIAgentDeviceDaemonMutationVariables) => stopAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentDeviceDaemonsPathParams {
+  device_id: string;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ */
+export async function listAIAgentDeviceDaemons(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonListResponse> {
+  const path = `/v1/client/ai-agent/devices/${params.device_id}/daemons`;
+  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * cache tag: `aiAgent.devices.daemons`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentDeviceDaemonsQueryKeyRoot(): readonly unknown[] {
+  return ["aiAgent.devices.daemons"] as const;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentDeviceDaemonsQueryKey(params: ListAIAgentDeviceDaemonsPathParams): readonly unknown[] {
+  return [...listAIAgentDeviceDaemonsQueryKeyRoot(), params] as const;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentDeviceDaemonsQueryOptions(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsPathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentDeviceDaemonsQueryKey(params),
+    queryFn: () => listAIAgentDeviceDaemons(config, params, { signal }),
   };
 }
 
@@ -2565,6 +2620,53 @@ export function stopAIAgentDeviceDaemonV2MutationOptions(config: RiidoClientConf
     ...options,
     mutationKey: stopAIAgentDeviceDaemonV2MutationKey(),
     mutationFn: (variables: StopAIAgentDeviceDaemonV2MutationVariables) => stopAIAgentDeviceDaemonV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentDeviceDaemonsV2PathParams {
+  workspace_id: string;
+  device_id: string;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ */
+export async function listAIAgentDeviceDaemonsV2(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonListResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemons`;
+  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.devices.daemons`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentDeviceDaemonsV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.devices.daemons"] as const;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentDeviceDaemonsV2QueryKey(params: ListAIAgentDeviceDaemonsV2PathParams): readonly unknown[] {
+  return [...listAIAgentDeviceDaemonsV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentDeviceDaemonsV2QueryOptions(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentDeviceDaemonsV2QueryKey(params),
+    queryFn: () => listAIAgentDeviceDaemonsV2(config, params, { signal }),
   };
 }
 
@@ -3925,6 +4027,48 @@ export interface StopAIAgentDeviceDaemonEndpoint {
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * 계약 generated path: `aiAgent.devices.daemons.list`
+ * 검색용 generated 경로: `devices.daemons.list`
+ * 접근 예시: `riido.aiAgent.devices.daemons.list`
+ * cache tag: `aiAgent.devices.daemons`
+ */
+export interface ListAIAgentDeviceDaemonsEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoRequestOptions) => Promise<DeviceDaemonListResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentDeviceDaemonsPathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => ReturnType<typeof listAIAgentDeviceDaemonsQueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => ReturnType<typeof listAIAgentDeviceDaemonsQueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsPathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => Promise<void>;
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * 계약 generated path: `aiAgent.events.stream`
  * 검색용 generated 경로: `events.stream`
@@ -5027,6 +5171,48 @@ export interface StopAIAgentDeviceDaemonV2Endpoint {
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.devices.daemons.list`
+ * 검색용 generated 경로: `aiAgent.devices.daemons.list`
+ * 접근 예시: `riido.v2.aiAgent.devices.daemons.list`
+ * cache tag: `v2.aiAgent.devices.daemons`
+ */
+export interface ListAIAgentDeviceDaemonsV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoRequestOptions) => Promise<DeviceDaemonListResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentDeviceDaemonsV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => ReturnType<typeof listAIAgentDeviceDaemonsV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => ReturnType<typeof listAIAgentDeviceDaemonsV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => Promise<void>;
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.events.stream`
  * 검색용 generated 경로: `aiAgent.events.stream`
@@ -5875,6 +6061,20 @@ export interface RiidoAIAgentDevicesDaemonNamespace {
 }
 
 /**
+ * aiAgent.devices.daemons namespace입니다.
+ */
+export interface RiidoAIAgentDevicesDaemonsNamespace {
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+   * 계약 generated path: `aiAgent.devices.daemons.list`
+   * 검색용 generated 경로: `devices.daemons.list`
+   * 접근 예시: `riido.aiAgent.devices.daemons.list`
+   * cache tag: `aiAgent.devices.daemons`
+   */
+  readonly list: ListAIAgentDeviceDaemonsEndpoint;
+}
+
+/**
  * device와 runtime 상태를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentDevicesNamespace {
@@ -5882,6 +6082,10 @@ export interface RiidoAIAgentDevicesNamespace {
    * aiAgent.devices.daemon namespace입니다.
    */
   readonly daemon: RiidoAIAgentDevicesDaemonNamespace;
+  /**
+   * aiAgent.devices.daemons namespace입니다.
+   */
+  readonly daemons: RiidoAIAgentDevicesDaemonsNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다
    * 계약 generated path: `aiAgent.devices.runtimes`
@@ -6182,6 +6386,20 @@ export interface RiidoV2AIAgentDevicesDaemonNamespace {
 }
 
 /**
+ * v2.aiAgent.devices.daemons namespace입니다.
+ */
+export interface RiidoV2AIAgentDevicesDaemonsNamespace {
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.devices.daemons.list`
+   * 검색용 generated 경로: `aiAgent.devices.daemons.list`
+   * 접근 예시: `riido.v2.aiAgent.devices.daemons.list`
+   * cache tag: `v2.aiAgent.devices.daemons`
+   */
+  readonly list: ListAIAgentDeviceDaemonsV2Endpoint;
+}
+
+/**
  * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
  */
 export interface RiidoV2AIAgentDevicesNamespace {
@@ -6189,6 +6407,10 @@ export interface RiidoV2AIAgentDevicesNamespace {
    * v2.aiAgent.devices.daemon namespace입니다.
    */
   readonly daemon: RiidoV2AIAgentDevicesDaemonNamespace;
+  /**
+   * v2.aiAgent.devices.daemons namespace입니다.
+   */
+  readonly daemons: RiidoV2AIAgentDevicesDaemonsNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.devices.runtimes`
@@ -6602,6 +6824,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             },
           },
         },
+        daemons: {
+          list: {
+            request: (params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoRequestOptions) => listAIAgentDeviceDaemons(config, params, options),
+            queryKeyRoot: listAIAgentDeviceDaemonsQueryKeyRoot,
+            queryKey: listAIAgentDeviceDaemonsQueryKey,
+            query: (params: ListAIAgentDeviceDaemonsPathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) => listAIAgentDeviceDaemonsQueryOptions(config, params, options),
+            queryOptions: (params: ListAIAgentDeviceDaemonsPathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) => listAIAgentDeviceDaemonsQueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsPathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceDaemonsQueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceDaemonsQueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => queryClient.prefetchQuery(listAIAgentDeviceDaemonsQueryOptions(config, params, options)),
+          },
+        },
         runtimes: {
           request: (options?: RiidoRequestOptions) => listAIAgentDeviceRuntimes(config, options),
           queryKeyRoot: listAIAgentDeviceRuntimesQueryKeyRoot,
@@ -6898,6 +7132,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 aiAgentDevicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
                 all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDeviceDaemonV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() })]),
               },
+            },
+          },
+          daemons: {
+            list: {
+              request: (params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoRequestOptions) => listAIAgentDeviceDaemonsV2(config, params, options),
+              queryKeyRoot: listAIAgentDeviceDaemonsV2QueryKeyRoot,
+              queryKey: listAIAgentDeviceDaemonsV2QueryKey,
+              query: (params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) => listAIAgentDeviceDaemonsV2QueryOptions(config, params, options),
+              queryOptions: (params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) => listAIAgentDeviceDaemonsV2QueryOptions(config, params, options),
+              invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsV2PathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceDaemonsV2QueryKey(params) }),
+              invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceDaemonsV2QueryKeyRoot() }),
+              prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => queryClient.prefetchQuery(listAIAgentDeviceDaemonsV2QueryOptions(config, params, options)),
             },
           },
           runtimes: {
