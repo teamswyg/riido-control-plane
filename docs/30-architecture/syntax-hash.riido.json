@@ -474,6 +474,13 @@
       "mode": "golden_locked_api_client_delivery_adapter"
     },
     {
+      "id": "figma_projection_guard",
+      "package_path": "tools/figmaprojection",
+      "golden_command": "go test ./tools/figmaprojection -run TestFigmaProjectionBehaviorGolden -count=1",
+      "semantic_claim_id": "api_client_delivery_must_preserve_generated_handoff_boundary",
+      "mode": "golden_locked_figma_projection_tool"
+    },
+    {
       "id": "generated_smoke_matrix_guard",
       "package_path": "tools/aigeneratedsmokematrix",
       "semantic_claim_id": "generated_endpoint_smoke_matrix_must_remain_contract_gate",
