@@ -1,6 +1,6 @@
-package main
+package runconfig
 
-type options struct {
+type Options struct {
 	Repo        string
 	Manifest    string
 	EvidenceOut string

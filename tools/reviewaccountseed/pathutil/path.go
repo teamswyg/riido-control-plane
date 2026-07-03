@@ -1,11 +1,11 @@
-package main
+package pathutil
 
 import (
 	"os"
 	"path/filepath"
 )
 
-func findRepoRoot(start string) (string, error) {
+func FindRepoRoot(start string) (string, error) {
 	root, err := filepath.Abs(start)
 	if err != nil {
 		return "", err
@@ -22,7 +22,7 @@ func findRepoRoot(start string) (string, error) {
 	}
 }
 
-func resolve(root, path string) string {
+func Resolve(root, path string) string {
 	if filepath.IsAbs(path) {
 		return path
 	}

@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/teamswyg/riido-control-plane/tools/reviewaccountseed/requirements"
 )
 
 func renderDoc(m manifest) string {
 	var b strings.Builder
-	b.WriteString(generatedNotice + "\n\n")
+	b.WriteString(requirements.GeneratedNotice + "\n\n")
 	fmt.Fprintf(&b, "# %s\n\n", m.Title)
 	b.WriteString("This reader is generated from the review account seed evidence sidecar.\n\n")
 	b.WriteString("## Runtime Contract\n\n")

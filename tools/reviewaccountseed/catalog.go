@@ -5,10 +5,11 @@ import (
 	"sort"
 
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
+	"github.com/teamswyg/riido-control-plane/tools/reviewaccountseed/seedruntime"
 )
 
 func verifyCatalogCase(tc caseSpec) (caseEvidence, error) {
-	provisioning, err := reviewProvisioning()
+	provisioning, err := seedruntime.ReviewProvisioning()
 	if err != nil {
 		return caseEvidence{}, err
 	}
@@ -21,7 +22,7 @@ func verifyCatalogCase(tc caseSpec) (caseEvidence, error) {
 		Name: tc.Name, Kind: tc.Kind,
 		VisibleAgents: ids, Admin: provisioning.Principal.HasRole(riidoaiserver.AgentCatalogRoleAdmin),
 	}
-	if !sameStrings(ids, tc.WantVisibleAgents) || result.Admin != tc.WantAdmin {
+	if !seedruntime.SameStrings(ids, tc.WantVisibleAgents) || result.Admin != tc.WantAdmin {
 		return result, fmt.Errorf("%s result=%+v", tc.Name, result)
 	}
 	return result, nil
