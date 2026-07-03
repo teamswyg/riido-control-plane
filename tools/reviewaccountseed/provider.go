@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/teamswyg/riido-contracts/hostintegration"
+	"github.com/teamswyg/riido-control-plane/tools/reviewaccountseed/seedruntime"
 )
 
 func verifyProviderStatusCase(tc caseSpec) (caseEvidence, error) {
-	provisioning, err := reviewProvisioning()
+	provisioning, err := seedruntime.ReviewProvisioning()
 	if err != nil {
 		return caseEvidence{}, err
 	}

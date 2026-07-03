@@ -36,6 +36,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `agent_catalog_rbac_path_adapter` | `tools/agentcatalogrbac/pathutil` | 100% | `646b40beb507` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_requirements_adapter` | `tools/agentcatalogrbac/requirements` | 100% | `073e15ea29e9` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_set_adapter` | `tools/agentcatalogrbac/setutil` | 100% | `db587838fc32` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
+| `review_account_seed_guard` | `tools/reviewaccountseed` | 100% | `33eb51abab21` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_http_adapter` | `tools/reviewaccountseed/httpclient` | 100% | `9bb97bf0c430` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_path_adapter` | `tools/reviewaccountseed/pathutil` | 100% | `a9f7e3bd12d6` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_requirements_adapter` | `tools/reviewaccountseed/requirements` | 100% | `d055ebae7bb8` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_runconfig_adapter` | `tools/reviewaccountseed/runconfig` | 100% | `10d6af178589` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_runtime_adapter` | `tools/reviewaccountseed/seedruntime` | 100% | `f760dc94ef5e` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `open_questions_guard` | `tools/openquestions` | 100% | `d4061a32be2a` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `open_questions_path_adapter` | `tools/openquestions/pathutil` | 100% | `97b020b4ebfc` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `repository_readme_guard` | `tools/repositoryreadme` | 100% | `fe1a8fb72b35` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
@@ -65,10 +71,10 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `2770`
-- tracked files: `470`
-- untracked files: `2300`
-- coverage: `16.96%`
+- Go files: `2769`
+- tracked files: `490`
+- untracked files: `2279`
+- coverage: `17.69%`
 
 ## Constraints
 
@@ -79,5 +85,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `470`
-- compression score: `88`
+- efficiency score: `490`
+- compression score: `94`

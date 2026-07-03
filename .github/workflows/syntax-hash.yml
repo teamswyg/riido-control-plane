@@ -59,6 +59,7 @@ jobs:
           ./tools/migrationledger
           ./tools/metricshttpadapter
           ./tools/agentcatalogrbac
+          ./tools/reviewaccountseed
           ./tools/integrationmatrix
           ./tools/openquestions
           ./tools/repositoryreadme
@@ -70,7 +71,7 @@ jobs:
           ./tools/saascontrolplane
           ./tools/snapshotcqrsgate
           -run
-          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|IntegrationMatrix|OpenQuestions|RepositoryReadme|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate)BehaviorGolden'
+          'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|ReviewAccountSeed|IntegrationMatrix|OpenQuestions|RepositoryReadme|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate)BehaviorGolden'
           -count=1
       - name: Verify syntax hash evidence
         run: |

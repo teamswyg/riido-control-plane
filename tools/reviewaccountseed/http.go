@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
+	"github.com/teamswyg/riido-control-plane/tools/reviewaccountseed/httpclient"
+	"github.com/teamswyg/riido-control-plane/tools/reviewaccountseed/seedruntime"
 )
 
 func verifyHTTPCase(tc caseSpec) (caseEvidence, error) {
@@ -13,15 +15,15 @@ func verifyHTTPCase(tc caseSpec) (caseEvidence, error) {
 	if err != nil {
 		return caseEvidence{}, err
 	}
-	catalogStatus, err := getCatalogStatus(handler)
+	catalogStatus, err := httpclient.GetCatalogStatus(handler)
 	if err != nil {
 		return caseEvidence{}, err
 	}
-	providerStatus, err := getProviderStatus(handler)
+	providerStatus, err := httpclient.GetProviderStatus(handler)
 	if err != nil {
 		return caseEvidence{}, err
 	}
-	pollStatus := postPollStatus(handler)
+	pollStatus := httpclient.PostPollStatus(handler)
 	result := caseEvidence{
 		Name: tc.Name, Kind: tc.Kind,
 		CatalogStatus: catalogStatus, ProviderStatus: providerStatus, PollStatus: pollStatus,
@@ -33,7 +35,7 @@ func verifyHTTPCase(tc caseSpec) (caseEvidence, error) {
 }
 
 func reviewHTTPHandler() (http.Handler, error) {
-	provisioning, err := reviewProvisioning()
+	provisioning, err := seedruntime.ReviewProvisioning()
 	if err != nil {
 		return nil, err
 	}

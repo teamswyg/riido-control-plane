@@ -1,5 +1,7 @@
 package main
 
+import "github.com/teamswyg/riido-control-plane/tools/reviewaccountseed/requirements"
+
 type evidence struct {
 	SchemaVersion    string         `json:"schema_version"`
 	ID               string         `json:"id"`
@@ -30,7 +32,7 @@ type caseEvidence struct {
 
 func newEvidence(m manifest, results []caseEvidence) evidence {
 	return evidence{
-		SchemaVersion:    evidenceSchema,
+		SchemaVersion:    requirements.EvidenceSchema,
 		ID:               m.ID,
 		Status:           "verified",
 		CasesVerified:    len(results),

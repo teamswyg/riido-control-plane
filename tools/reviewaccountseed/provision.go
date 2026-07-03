@@ -1,9 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/reviewaccountseed/seedruntime"
+)
 
 func verifyProvisionCase(tc caseSpec) (caseEvidence, error) {
-	provisioning, err := reviewProvisioning()
+	provisioning, err := seedruntime.ReviewProvisioning()
 	if err != nil {
 		return caseEvidence{}, err
 	}

@@ -1,4 +1,4 @@
-package main
+package seedruntime
 
 import (
 	"crypto/sha256"
@@ -8,7 +8,7 @@ import (
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
-func reviewProvisioning() (riidoaiserver.ReviewAccountProvisioning, error) {
+func ReviewProvisioning() (riidoaiserver.ReviewAccountProvisioning, error) {
 	seed, err := riidoaiserver.LoadReviewAccountSeed()
 	if err != nil {
 		return riidoaiserver.ReviewAccountProvisioning{}, err
@@ -18,16 +18,11 @@ func reviewProvisioning() (riidoaiserver.ReviewAccountProvisioning, error) {
 	})
 }
 
-func reviewToken() string {
-	return strings.Join([]string{"review", "token"}, "-")
+func ReviewToken() string {
+	return reviewToken()
 }
 
-func tokenHash(value string) string {
-	sum := sha256.Sum256([]byte(value))
-	return hex.EncodeToString(sum[:])
-}
-
-func sameStrings(a, b []string) bool {
+func SameStrings(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -37,4 +32,13 @@ func sameStrings(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+func reviewToken() string {
+	return strings.Join([]string{"review", "token"}, "-")
+}
+
+func tokenHash(value string) string {
+	sum := sha256.Sum256([]byte(value))
+	return hex.EncodeToString(sum[:])
 }
