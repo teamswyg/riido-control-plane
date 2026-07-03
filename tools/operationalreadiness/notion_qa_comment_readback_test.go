@@ -12,7 +12,7 @@ func TestNotionQACommentReadbackLimitIsRecorded(t *testing.T) {
 		t.Fatal("missing Notion comment readback observations")
 	}
 	observation := evidence.ReadbackObservations[len(evidence.ReadbackObservations)-1]
-	if observation.ObservedAt != "2026-07-03T04:00:19Z" {
+	if observation.ObservedAt != "2026-07-03T05:57:22Z" {
 		t.Fatalf("latest readback observation = %q", observation.ObservedAt)
 	}
 	if observation.VisiblePageLevelCommentCount != 31 {
@@ -21,17 +21,17 @@ func TestNotionQACommentReadbackLimitIsRecorded(t *testing.T) {
 	if observation.LatestVisibleCommentID == "" {
 		t.Fatal("latest visible comment id must be recorded")
 	}
-	if !hasReadbackMissingID(observation, "39120241-cf7f-8172-b716-001dd440d1e1") {
-		t.Fatal("missing write-confirmed performance comment readback gap")
-	}
-	if !hasReadbackMissingID(observation, "39120241-cf7f-818e-87dd-001d714d66ed") {
-		t.Fatal("missing write-confirmed public evidence comment readback gap")
-	}
-	if !hasReadbackMissingID(observation, "39120241-cf7f-81c8-bd89-001d768e3b97") {
-		t.Fatal("missing latest write-confirmed QA backfill comment readback gap")
-	}
-	if !hasReadbackMissingID(observation, "39220241-cf7f-81ad-84b5-001df57331e5") {
-		t.Fatal("missing write-confirmed device daemons API comment readback gap")
+	for _, id := range []string{
+		"39120241-cf7f-8172-b716-001dd440d1e1",
+		"39120241-cf7f-818e-87dd-001d714d66ed",
+		"39120241-cf7f-81c8-bd89-001d768e3b97",
+		"39220241-cf7f-81ad-84b5-001df57331e5",
+		"39220241-cf7f-8191-a0b4-001d15db7b78",
+		"39220241-cf7f-8134-bc4e-001d98e7d805",
+	} {
+		if !hasReadbackMissingID(observation, id) {
+			t.Fatalf("missing write-confirmed comment readback gap id=%s", id)
+		}
 	}
 	if observation.Decision == "" {
 		t.Fatal("readback gap decision must be explicit")

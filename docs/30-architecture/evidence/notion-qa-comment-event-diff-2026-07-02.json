@@ -1,7 +1,7 @@
 {
   "schema_version": "riido-notion-qa-comment-event-diff.v1",
   "id": "notion_qa_comment_event_diff_2026_07_02",
-  "captured_at": "2026-07-03T04:00:19Z",
+  "captured_at": "2026-07-03T05:57:22Z",
   "redacted": true,
   "source": {
     "page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
@@ -153,6 +153,52 @@
       "page_fetch_snapshot_observed_at": "2026-07-02T10:10:49.236Z",
       "aggregate_get_comments_result": "stale_page_level_snapshot",
       "decision": "A fresh 2026-07-03 UTC readback still shows the older page snapshot and 31 page-level comments, while targeted inline readback for queued, waiting, author, codex, completion, and multi-assignment discussions matches the latest evidence ids. The queued discussion also read back the source-slice mutation fix, staging deploy, all-environment deploy, and PR #799 evidence-lock comments. No unrelated backend/control-plane blocker was discovered from the visible Notion comments.",
+      "discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 22,
+          "latest_visible_comment_id": "39220241-cf7f-81a1-816d-001dc39ab368",
+          "latest_visible_comment_observed_at": "2026-07-03T01:27:12.892Z"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57",
+          "latest_visible_comment_observed_at": "2026-07-02T01:22:09.543Z"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66",
+          "latest_visible_comment_observed_at": "2026-07-02T00:42:59.595Z"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349",
+          "latest_visible_comment_observed_at": "2026-07-02T00:54:18.769Z"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8",
+          "latest_visible_comment_observed_at": "2026-07-02T10:09:14.555Z"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a",
+          "latest_visible_comment_observed_at": "2026-07-02T12:44:16.953Z"
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-07-03T05:57:22Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "page fetch plus selected discussion_id targeted readback",
+      "page_fetch_snapshot_observed_at": "2026-07-03T01:37:55.127Z",
+      "aggregate_get_comments_result": "stale_page_level_snapshot",
+      "decision": "A fresh backfill read confirms that page-level get_comments still exposes the older 31-comment aggregate, while targeted inline readback for queued, waiting, completion-progress, and multi-assignment discussions exposes the latest server-side QA decisions. No new backend/control-plane P0 blocker was found; completion_progress_after_terminal remains partial until a same-moment live snapshot is captured with a bearer token during reproduction.",
       "discussions": [
         {
           "discussion": "queued_by_busy_agent",
@@ -517,6 +563,24 @@
       "status_tag": "[codex][완료][전달요청]",
       "signal": "A follow-up QA transfer comment records that the plural daemon API was present on staging and then deployed to development and production, with unauthenticated v1/v2 probes returning 401 instead of 404 in all three environments.",
       "decision": "Treat staging, development, and production as route-present for the plural daemon API. Future agents should use the all-env route evidence artifact and live probes instead of the stale Notion page property when deciding frontend handoff readiness."
+    },
+    {
+      "id": "39220241-cf7f-8191-a0b4-001d15db7b78",
+      "discussion": "device_daemons_plural_api",
+      "observed_at": "2026-07-03T05:53:00Z",
+      "event_type": "evidence_merge_confirmation",
+      "status_tag": "[codex][완료][증적고정]",
+      "signal": "A final QA transfer comment records PR #806 merge and confirms the plural daemon API evidence is now pinned in repo tests rather than only in a Notion page-level comment.",
+      "decision": "Treat the plural daemon API work as closed for backend/control-plane. Do not reopen from stale Notion aggregate readback; require a fresh endpoint trace or contract failure."
+    },
+    {
+      "id": "39220241-cf7f-8134-bc4e-001d98e7d805",
+      "discussion": "page_level_backfill_diff",
+      "observed_at": "2026-07-03T05:57:22Z",
+      "event_type": "targeted_readback_refresh",
+      "status_tag": "[codex][완료][백필diff][부분증적]",
+      "signal": "A write-confirmed page-level comment records that Notion aggregate readback still looks stale, targeted discussion readbacks expose the latest selected QA decisions, and no new backend/control-plane P0 blocker was found.",
+      "decision": "Keep completion_progress_after_terminal partial until a same-moment screenshot, v3/v2/subscription/SSE snapshot is captured with a bearer token during reproduction. Avoid desktop/client work from this backfill alone."
     }
   ],
   "reviewed_discussions": [
@@ -1092,6 +1156,95 @@
         }
       ],
       "decision": "A post-write readback still exposes the same stale 31-comment page-level snapshot and does not show the newly written device_daemons_plural_api transfer comment. Preserve the write-confirmed comment id and backend/contract deploy evidence as the authoritative QA event until Notion aggregate readback catches up."
+    },
+    {
+      "observed_at": "2026-07-03T05:57:22Z",
+      "tool": "notion.fetch + notion.get_comments",
+      "mode": "page-level aggregate plus selected discussion_id targeted readback after QA backfill comment",
+      "visible_page_level_comment_count": 31,
+      "latest_visible_comment_id": "39120241-cf7f-8148-bd04-001d6cbae868",
+      "latest_visible_comment_observed_at": "2026-07-02T13:01:35.286Z",
+      "page_fetch_snapshot_observed_at": "2026-07-03T01:37:55.127Z",
+      "write_confirmed_comment_ids_not_visible": [
+        "39120241-cf7f-8172-b716-001dd440d1e1",
+        "39120241-cf7f-818e-87dd-001d714d66ed",
+        "39120241-cf7f-81c8-bd89-001d768e3b97",
+        "39220241-cf7f-81ad-84b5-001df57331e5",
+        "39220241-cf7f-8191-a0b4-001d15db7b78",
+        "39220241-cf7f-8134-bc4e-001d98e7d805"
+      ],
+      "write_confirmed_comment_sources": [
+        {
+          "id": "39120241-cf7f-8172-b716-001dd440d1e1",
+          "source": "comments_written",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39120241-cf7f-818e-87dd-001d714d66ed",
+          "source": "manual_write_result",
+          "target": "public_qa_pages_status_followup",
+          "comment_event_required": false,
+          "reason": "Preserves the Notion connector readback gap for a write-confirmed follow-up that is outside the selected QA comment-event diff set."
+        },
+        {
+          "id": "39120241-cf7f-81c8-bd89-001d768e3b97",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-81ad-84b5-001df57331e5",
+          "source": "manual_write_result",
+          "target": "device_daemons_plural_api",
+          "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-8191-a0b4-001d15db7b78",
+          "source": "manual_write_result",
+          "target": "device_daemons_plural_api",
+          "comment_event_required": true
+        },
+        {
+          "id": "39220241-cf7f-8134-bc4e-001d98e7d805",
+          "source": "manual_write_result",
+          "target": "page_level_backfill_diff_summary",
+          "comment_event_required": true
+        }
+      ],
+      "targeted_discussions": [
+        {
+          "discussion": "queued_by_busy_agent",
+          "comment_count": 22,
+          "latest_visible_comment_id": "39220241-cf7f-81a1-816d-001dc39ab368"
+        },
+        {
+          "discussion": "waiting_for_user_intent",
+          "comment_count": 15,
+          "latest_visible_comment_id": "39120241-cf7f-816a-8c1f-001d780c7b57"
+        },
+        {
+          "discussion": "author_fallback",
+          "comment_count": 9,
+          "latest_visible_comment_id": "39120241-cf7f-81e9-8e8b-001dfae5d349"
+        },
+        {
+          "discussion": "codex_unknown_variant",
+          "comment_count": 7,
+          "latest_visible_comment_id": "39120241-cf7f-8178-93e6-001d7d46aec8"
+        },
+        {
+          "discussion": "completion_progress_after_terminal",
+          "comment_count": 13,
+          "latest_visible_comment_id": "39120241-cf7f-8130-b9a6-001d9e29226a"
+        },
+        {
+          "discussion": "multi_assignment_projection",
+          "comment_count": 6,
+          "latest_visible_comment_id": "39120241-cf7f-81e4-9f6e-001d6a501b66"
+        }
+      ],
+      "decision": "The latest backfill confirms no new backend/control-plane blocker beyond already tracked partials. The completion/progress P0 still needs a live reproduction snapshot with token-backed API evidence; this session had no RIIDO_PRIVATE_JWT, so repo evidence must record the blocker instead of fabricating a smoke result."
     }
   ],
   "next_actions": [
