@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/teamswyg/riido-control-plane/tools/assignmentjournal/pathutil"
 )
 
 func verifySources(root string, m manifest) error {
@@ -21,7 +23,7 @@ func verifySource(root string, check sourceCheck) error {
 	if check.Name == "" || check.File == "" || len(check.Contains) == 0 {
 		return fmt.Errorf("invalid source check %+v", check)
 	}
-	data, err := os.ReadFile(resolve(root, check.File))
+	data, err := os.ReadFile(pathutil.Resolve(root, check.File))
 	if err != nil {
 		return fmt.Errorf("read source check %s: %w", check.Name, err)
 	}

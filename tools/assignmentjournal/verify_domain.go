@@ -1,24 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/teamswyg/riido-control-plane/tools/assignmentjournal/requirements"
+)
 
 func verifyDomain(m manifest) error {
-	for _, name := range requiredPorts {
+	for _, name := range requirements.RequiredPorts {
 		if !hasSurface(m.Ports, name) {
 			return fmt.Errorf("missing port %q", name)
 		}
 	}
-	for _, name := range requiredRecords {
+	for _, name := range requirements.RequiredRecords {
 		if !hasSurface(m.Records, name) {
 			return fmt.Errorf("missing record %q", name)
 		}
 	}
-	for _, id := range requiredReplayRules {
+	for _, id := range requirements.RequiredReplayRules {
 		if !hasRule(m.ReplayRules, id) {
 			return fmt.Errorf("missing replay rule %q", id)
 		}
 	}
-	for _, name := range requiredConstants {
+	for _, name := range requirements.RequiredConstants {
 		if !hasConstant(m.VersionConstants, name) {
 			return fmt.Errorf("missing version constant %q", name)
 		}

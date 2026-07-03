@@ -39,6 +39,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `agent_runtime_binding_guard` | `tools/agentruntimebinding` | 100% | `983cfac244cb` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `agent_runtime_binding_path_adapter` | `tools/agentruntimebinding/pathutil` | 100% | `646b40beb507` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `agent_runtime_binding_requirements_adapter` | `tools/agentruntimebinding/requirements` | 100% | `c1a7283f900a` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
+| `assignment_journal_guard` | `tools/assignmentjournal` | 100% | `f61e624b229a` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
+| `assignment_journal_path_adapter` | `tools/assignmentjournal/pathutil` | 100% | `646b40beb507` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
+| `assignment_journal_requirements_adapter` | `tools/assignmentjournal/requirements` | 100% | `88a7bd0c31c4` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
 | `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `d49e070fc838` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `7735900c5929` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_requirements_adapter` | `tools/snapshotcqrsgate/requirements` | 100% | `2d4fd81b478e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
@@ -46,9 +49,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 ## Repository Coverage
 
 - Go files: `2769`
-- tracked files: `380`
-- untracked files: `2389`
-- coverage: `13.72%`
+- tracked files: `397`
+- untracked files: `2372`
+- coverage: `14.33%`
 
 ## Constraints
 
@@ -59,5 +62,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `380`
-- compression score: `60`
+- efficiency score: `397`
+- compression score: `72`

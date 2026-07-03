@@ -37,6 +37,8 @@
     {"path":"tools/aiagentload","kind":"evidence-tool","role":"Staging AI Agent client API load evidence generator with redacted report output.","must_not_own":"runtime API behavior, secret handling outside masked workflow inputs, or private infra scaling policy"},
     {"path":"tools/aiagentthreadsnapshot","kind":"evidence-tool","role":"AI Agent thread same-moment v2/v3/subscription/SSE snapshot generator with redacted report output.","must_not_own":"runtime API behavior, message body storage, token storage, or client rendering"},
     {"path":"tools/assignmentjournal","kind":"evidence-tool","role":"Assignment operation journal evidence verifier.","must_not_own":"assignment store execution"},
+    {"path":"tools/assignmentjournal/pathutil","kind":"adapter","role":"Path adapter for the assignment operation journal verifier.","must_not_own":"assignment journal rules or source checks"},
+    {"path":"tools/assignmentjournal/requirements","kind":"adapter","role":"Assignment operation journal required identity, port, record, replay, and version vocabulary.","must_not_own":"manifest loading or doc rendering"},
     {"path":"tools/cloudwatchemf","kind":"evidence-tool","role":"CloudWatch EMF shape generated reader and verifier.","must_not_own":"live AWS metrics publishing or dashboard topology"},
     {"path":"tools/configreference","kind":"evidence-tool","role":"Runtime config catalog verifier.","must_not_own":"deployment values or secrets"},
     {"path":"tools/containercontract","kind":"evidence-tool","role":"Container image contract verifier.","must_not_own":"image publishing or ECS deployment"},

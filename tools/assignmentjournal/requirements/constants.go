@@ -1,14 +1,14 @@
-package main
+package requirements
 
 const (
-	defaultManifest = "docs/20-domain/assignment-operation-journal.riido.json"
-	manifestSchema  = "riido-assignment-operation-journal.v1"
-	evidenceSchema  = "riido-assignment-operation-journal-evidence.v1"
-	expectedID      = "assignment-operation-journal"
-	expectedTask    = "RIID-4669"
+	DefaultManifest = "docs/20-domain/assignment-operation-journal.riido.json"
+	ManifestSchema  = "riido-assignment-operation-journal.v1"
+	EvidenceSchema  = "riido-assignment-operation-journal-evidence.v1"
+	ExpectedID      = "assignment-operation-journal"
+	ExpectedTask    = "RIID-4669"
 )
 
-var requiredPorts = []string{
+var RequiredPorts = []string{
 	"AssignmentOperationStore",
 	"AssignmentOperationLoader",
 	"AssignmentQueueReader",
@@ -17,14 +17,14 @@ var requiredPorts = []string{
 	"AssignmentProjectionReader",
 }
 
-var requiredRecords = []string{
+var RequiredRecords = []string{
 	"AssignmentOperationRecord",
 	"AssignmentProjection",
 	"AssignmentActiveLease",
 	"AssignmentClaimResult",
 }
 
-var requiredReplayRules = []string{
+var RequiredReplayRules = []string{
 	"validate-before-apply",
 	"stable-replay-order",
 	"dedupe-task-events",
@@ -35,7 +35,7 @@ var requiredReplayRules = []string{
 	"rebuild-agent-index",
 }
 
-var requiredConstants = []string{
+var RequiredConstants = []string{
 	"AssignmentOperationSchemaVersion",
 	"AssignmentProjectionSchemaVersion",
 	"AssignmentAgentActiveSchemaVersion",
