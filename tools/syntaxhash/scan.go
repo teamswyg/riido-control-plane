@@ -27,7 +27,7 @@ func buildGraph(root string, m manifest) (syntaxGraph, error) {
 		return graph, err
 	}
 	graph.Constraints = constraints
-	graph.Score = scoreGraph(graph)
+	graph.Score = scoreGraph(graph, m.Scoring)
 	return graph, nil
 }
 

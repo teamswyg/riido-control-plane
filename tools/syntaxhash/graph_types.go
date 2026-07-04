@@ -54,17 +54,14 @@ type constraintRun struct {
 }
 
 type scoreRun struct {
-	EfficiencyScore  int `json:"efficiency_score"`
-	CompressionScore int `json:"compression_score"`
-}
-
-func scoreGraph(graph syntaxGraph) scoreRun {
-	files, hashes := 0, map[string]bool{}
-	for _, target := range graph.Targets {
-		files += target.TrackedFiles
-		for _, file := range target.FileHashes {
-			hashes[file.Hash] = true
-		}
-	}
-	return scoreRun{EfficiencyScore: files, CompressionScore: files - len(hashes)}
+	TrackedFiles       int    `json:"tracked_files"`
+	UniqueSyntaxHashes int    `json:"unique_syntax_hashes"`
+	CompressionGain    int    `json:"compression_gain"`
+	EfficiencyWeight   int    `json:"efficiency_weight"`
+	CompressionWeight  int    `json:"compression_weight"`
+	EfficiencyScore    int    `json:"efficiency_score"`
+	CompressionScore   int    `json:"compression_score"`
+	WeightedScore      int    `json:"weighted_score"`
+	ConstraintGate     string `json:"constraint_gate"`
+	Formula            string `json:"formula"`
 }
