@@ -253,6 +253,70 @@
       "next_loop": "provider_acceptance_harness"
     },
     {
+      "id": "device_daemon_plural_endpoint_live_smoke_loop",
+      "observation": "Runtime settings now need a device-scoped daemon list because the singular device daemon endpoint intentionally returns only the preferred daemon. Without a live smoke check, the plural contract can be merged while staging remains on a build that only proves the singular endpoint.",
+      "hypothesis": "Checking `/devices/{device_id}/daemons` in both scheduled testnet smoke and deploy smoke proves the generated plural client contract is present in the live API and returns at least one daemon for the selected device without changing existing singular endpoint behavior.",
+      "claims": [
+        "provider_acceptance_summary_must_cover_declared_observations",
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate"
+      ],
+      "changes": [
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/ai-agent-client-testnet-smoke.yml"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/deploy-ai-agent-testnet.yml"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_daemons_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_daemons_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_test.go"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/ai-agent-client-testnet-smoke.yml"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/deploy-ai-agent-testnet.yml"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-test-riidoaiserver",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-testnet-smoke-redacted-summary",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "deploy-ai-agent-testnet-redacted-summary",
+          "redacted": true
+        }
+      ],
+      "decision": "The plural daemon endpoint is a live product contract for runtime settings, not a replacement for the preferred singular daemon endpoint. Scheduled and deploy smoke now call the plural endpoint after the singular endpoint and assert a `DeviceDaemonListResponse` scoped to the same device id, so staging deployment cannot be considered green while only the singular daemon route is verified.",
+      "next_loop": "provider_acceptance_harness"
+    },
+    {
       "id": "semantic_hash_metadata_normalization_loop",
       "observation": "Claim semantic hashes can become self-referential if semantic_hash metadata values inside bound generated files are treated as semantic input.",
       "hypothesis": "Normalizing semantic_hash metadata values before hashing preserves real statement, policy, verifier, and bound-file meaning changes while preventing evidence refresh metadata from becoming its own meaning change.",

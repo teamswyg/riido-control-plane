@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `98`
-- claim refs: `144`
-- change refs: `1423`
-- verifier refs: `646`
-- evidence refs: `316`
+- chains: `99`
+- claim refs: `146`
+- change refs: `1427`
+- verifier refs: `650`
+- evidence refs: `319`
 
 ## Compiled Chain Summary
 
-- complete chains: `98` / `98`
-- claim-bound chains: `98`
+- complete chains: `99` / `99`
+- claim-bound chains: `99`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
@@ -29,7 +29,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `operational_readiness_release_harness` | `20` | `35` | `153` | `93` | `63` |
 | `ai_thread_history` | `8` | `8` | `114` | `55` | `12` |
 | `closed_loop_candidate_decision` | `8` | `32` | `174` | `84` | `38` |
-| `provider_acceptance_harness` | `2` | `2` | `12` | `7` | `6` |
+| `provider_acceptance_harness` | `3` | `4` | `16` | `11` | `9` |
 | `closed_loop_candidate_intake` | `1` | `1` | `11` | `4` | `7` |
 | `loop_closure_audit` | `1` | `2` | `10` | `7` | `4` |
 | `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
@@ -41,6 +41,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `harness_failure_promotion_loop` | `1` | `11` | `5` | `3` | `closed_loop_candidate` |
 | `harness_evidence_expiry_gate_loop` | `1` | `6` | `3` | `3` | `provider_acceptance_harness` |
 | `provider_acceptance_observation_coverage_loop` | `1` | `6` | `4` | `3` | `provider_acceptance_harness` |
+| `device_daemon_plural_endpoint_live_smoke_loop` | `2` | `4` | `4` | `3` | `provider_acceptance_harness` |
 | `semantic_hash_metadata_normalization_loop` | `1` | `6` | `3` | `1` | `closed_loop_candidate` |
 | `load_harness_closed_loop_promotion_loop` | `1` | `5` | `4` | `4` | `closed_loop_candidate` |
 | `control_plane_performance_evidence_loop` | `1` | `128` | `40` | `29` | `closed_loop_candidate` |
