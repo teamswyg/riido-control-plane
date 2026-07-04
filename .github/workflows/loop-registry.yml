@@ -126,6 +126,7 @@ on:
       - "tools/contextmap/**"
       - "tools/configreference/**"
       - "tools/gocibaseline/**"
+      - "tools/moduledecomposition/**"
       - "tools/healthreadycmd/**"
       - "tools/dependencyallowlist/**"
       - "tools/apiclientdelivery/**"

@@ -124,6 +124,13 @@
       "mode": "golden_locked_go_ci_baseline_tool"
     },
     {
+      "id": "module_decomposition_guard",
+      "package_path": "tools/moduledecomposition",
+      "golden_command": "go test ./tools/moduledecomposition -run TestModuleDecompositionBehaviorGolden -count=1",
+      "semantic_claim_id": "module_decomposition_must_preserve_surface_area_ratchet",
+      "mode": "golden_locked_module_decomposition_tool"
+    },
+    {
       "id": "pre_commit_baseline_guard",
       "package_path": "tools/precommitbaseline",
       "golden_command": "go test ./tools/precommitbaseline -run TestPreCommitBaselineBehaviorGolden -count=1",
