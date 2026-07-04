@@ -9992,6 +9992,83 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "harness_promotion_syntax_hash_loop",
+      "observation": "The harness promotion sidecar already verifies promotion wiring and turns redacted harness failures into closed-loop candidate artifacts, but its Go package shape remained outside syntax-hash coverage.",
+      "hypothesis": "After harness promotion evidence and candidate artifact output are golden-locked with deterministic evidence clocks and sanitized candidate paths, adding tools/harnesspromotion as a syntax hash target can connect promotion sidecar AST-shape changes to harness_promotion_must_run_after_failure without changing candidate artifact contracts.",
+      "claims": [
+        "harness_promotion_must_run_after_failure"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/harnesspromotion/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/harnesspromotion/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/harnesspromotion"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "harness-promotion-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-testnet-smoke-closed-loop-candidates",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Harness promotion syntax coverage may expand only after TestHarnessPromotionBehaviorGolden preserves the deterministic promotion evidence and candidate artifact hash; the syntax target binds promotion sidecar shape to harness_promotion_must_run_after_failure while preserving candidate artifact and evidence contracts.",
+      "next_loop": "closed_loop_candidate_intake"
+    },
+    {
       "id": "closed_loop_candidate_intake_syntax_hash_loop",
       "observation": "The closed-loop candidate intake verifier already consumes candidate artifacts, checks adoption requirements, preserves candidate subjects, and publishes intake evidence, but its Go package shape remained outside syntax-hash coverage.",
       "hypothesis": "After candidate intake evidence is golden-locked with deterministic freshness and sanitized fixture paths, adding tools/closedloopcandidateintake as a syntax hash target can connect candidate intake AST-shape changes to candidate_intake_must_consume_candidate_artifact without changing candidate artifact contracts.",

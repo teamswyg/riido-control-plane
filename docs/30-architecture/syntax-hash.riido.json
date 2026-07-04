@@ -159,6 +159,13 @@
       "mode": "golden_locked_load_evidence_tool"
     },
     {
+      "id": "harness_promotion_guard",
+      "package_path": "tools/harnesspromotion",
+      "golden_command": "go test ./tools/harnesspromotion -run TestHarnessPromotionBehaviorGolden -count=1",
+      "semantic_claim_id": "harness_promotion_must_run_after_failure",
+      "mode": "golden_locked_harness_promotion_tool"
+    },
+    {
       "id": "closed_loop_candidate_intake_guard",
       "package_path": "tools/closedloopcandidateintake",
       "golden_command": "go test ./tools/closedloopcandidateintake -run TestClosedLoopCandidateIntakeBehaviorGolden -count=1",
