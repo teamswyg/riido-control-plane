@@ -152,6 +152,13 @@
       "mode": "golden_locked_pressure_candidate_tool"
     },
     {
+      "id": "ai_agent_load_guard",
+      "package_path": "tools/aiagentload",
+      "golden_command": "go test ./tools/aiagentload -run TestAIAgentLoadBehaviorGolden -count=1",
+      "semantic_claim_id": "control_plane_performance_hot_paths_must_emit_evidence",
+      "mode": "golden_locked_load_evidence_tool"
+    },
+    {
       "id": "pre_commit_baseline_guard",
       "package_path": "tools/precommitbaseline",
       "golden_command": "go test ./tools/precommitbaseline -run TestPreCommitBaselineBehaviorGolden -count=1",
