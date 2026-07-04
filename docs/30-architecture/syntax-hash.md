@@ -29,6 +29,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `control_plane_performance_guard` | `tools/controlplaneperf` | 100% | `a7a0b212b849` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `control_plane_pressure_guard` | `tools/controlplanepressure` | 100% | `cc950ae361a6` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `ai_agent_load_guard` | `tools/aiagentload` | 100% | `90f7c74d7074` | `control_plane_performance_hot_paths_must_emit_evidence` |
+| `harness_promotion_guard` | `tools/harnesspromotion` | 100% | `95c7fdfe7029` | `harness_promotion_must_run_after_failure` |
 | `closed_loop_candidate_intake_guard` | `tools/closedloopcandidateintake` | 100% | `de3efe4d5931` | `candidate_intake_must_consume_candidate_artifact` |
 | `closed_loop_candidate_decision_guard` | `tools/closedloopcandidatedecision` | 100% | `b1e7c8537d69` | `candidate_decisions_must_match_consumed_candidates` |
 | `pre_commit_baseline_guard` | `tools/precommitbaseline` | 100% | `55e387dbb587` | `pre_commit_baseline_evidence_must_self_expire` |
@@ -107,10 +108,10 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `2728`
-- tracked files: `1060`
-- untracked files: `1668`
-- coverage: `38.85%`
+- Go files: `2729`
+- tracked files: `1106`
+- untracked files: `1623`
+- coverage: `40.52%`
 
 ## Constraints
 
@@ -121,5 +122,5 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Score
 
-- efficiency score: `1060`
-- compression score: `156`
+- efficiency score: `1106`
+- compression score: `162`
