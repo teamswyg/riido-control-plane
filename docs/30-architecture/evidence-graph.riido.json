@@ -11539,6 +11539,78 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "workflow_evidence_syntax_hash_loop",
+      "observation": "The workflow evidence verifier already owned scheduled evidence coverage and expiry semantics, but its Go package shape remained outside syntax-hash coverage, so agents could change the verifier structure without syntax-to-semantic routing.",
+      "hypothesis": "After the workflow evidence output is golden-locked with deterministic time, adding the package as a syntax hash target can connect all workflow evidence AST-shape changes to the existing self-expiring workflow evidence semantic claim without changing runtime behavior.",
+      "claims": [
+        "workflow_evidence_must_self_expire"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/workflowevidence/main_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/workflowevidence/main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/workflowevidence"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "workflow-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Workflow evidence syntax coverage may expand only after TestWorkflowEvidenceBehaviorGolden preserves the full emitted evidence hash; the syntax target binds the package to workflow_evidence_must_self_expire while preserving the existing semantic hash implementation and workflow evidence behavior.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "runtime_cd_ownership_syntax_hash_loop",
       "observation": "The runtime CD ownership SSOT was executable, but its verifier package was outside syntax hash tracking and had more files than the target folder budget, forcing agents to infer deployment-ownership semantics from an untracked tool surface.",
       "hypothesis": "Golden-locking runtime CD ownership evidence before consolidating same-concept helpers lets syntax hash coverage expand without changing public/private deployment ownership behavior.",

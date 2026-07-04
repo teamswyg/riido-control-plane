@@ -131,6 +131,13 @@
       "mode": "golden_locked_pre_commit_baseline_tool"
     },
     {
+      "id": "workflow_evidence_guard",
+      "package_path": "tools/workflowevidence",
+      "golden_command": "go test ./tools/workflowevidence -run TestWorkflowEvidenceBehaviorGolden -count=1",
+      "semantic_claim_id": "workflow_evidence_must_self_expire",
+      "mode": "golden_locked_workflow_evidence_tool"
+    },
+    {
       "id": "live_workflow_evidence_guard",
       "package_path": "tools/liveworkflowevidence",
       "golden_command": "go test ./tools/liveworkflowevidence -run TestLiveWorkflowEvidenceBehaviorGolden -count=1",
