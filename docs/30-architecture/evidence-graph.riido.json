@@ -9992,6 +9992,78 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "closed_loop_candidate_intake_syntax_hash_loop",
+      "observation": "The closed-loop candidate intake verifier already consumes candidate artifacts, checks adoption requirements, preserves candidate subjects, and publishes intake evidence, but its Go package shape remained outside syntax-hash coverage.",
+      "hypothesis": "After candidate intake evidence is golden-locked with deterministic freshness and sanitized fixture paths, adding tools/closedloopcandidateintake as a syntax hash target can connect candidate intake AST-shape changes to candidate_intake_must_consume_candidate_artifact without changing candidate artifact contracts.",
+      "claims": [
+        "candidate_intake_must_consume_candidate_artifact"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidateintake/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidateintake/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/closedloopcandidateintake"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-intake-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Closed-loop candidate intake syntax coverage may expand only after TestClosedLoopCandidateIntakeBehaviorGolden preserves the deterministic candidate intake evidence hash; the syntax target binds intake verifier shape to candidate_intake_must_consume_candidate_artifact while preserving candidate artifact and evidence contracts.",
+      "next_loop": "closed_loop_candidate_decision"
+    },
+    {
       "id": "control_plane_meta_evidence_expiry_loop",
       "observation": "Control-plane performance, high-traffic audit, and loop-closure audit evidence were machine-readable but lacked generated_at/expires_at windows, so refresh automation could not distinguish fresh open-loop measurements from stale proof artifacts.",
       "hypothesis": "Giving these meta-evidence sidecars the same 24h evidence window as core loop evidence lets refresh dispatch and downstream agents reject stale performance, audit, and closure evidence without embedding dynamic timestamps in generated prose.",
