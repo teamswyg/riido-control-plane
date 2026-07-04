@@ -48,6 +48,8 @@ func renderDoc(m manifest, graph syntaxGraph) string {
 	fmt.Fprintf(&b, "- missing relocation mappings: `%d`\n", graph.Score.MissingRelocations)
 	fmt.Fprintf(&b, "- relocation coverage: `%d.%02d%%`\n",
 		graph.Score.RelocationCoverage/100, graph.Score.RelocationCoverage%100)
+	fmt.Fprintf(&b, "- golden commands: `%d`\n", graph.Score.GoldenCommands)
+	fmt.Fprintf(&b, "- missing golden commands: `%d`\n", graph.Score.MissingGoldens)
 	fmt.Fprintf(&b, "- efficiency score: `%d`\n", graph.Score.EfficiencyScore)
 	fmt.Fprintf(&b, "- compression score: `%d`\n", graph.Score.CompressionScore)
 	fmt.Fprintf(&b, "- weighted score: `%d`\n", graph.Score.WeightedScore)
