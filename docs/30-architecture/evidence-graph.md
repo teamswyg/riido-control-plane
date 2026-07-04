@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `120`
-- claim refs: `169`
-- change refs: `1524`
-- verifier refs: `748`
-- evidence refs: `395`
+- chains: `121`
+- claim refs: `171`
+- change refs: `1538`
+- verifier refs: `753`
+- evidence refs: `399`
 
 ## Compiled Chain Summary
 
-- complete chains: `120` / `120`
-- claim-bound chains: `120`
+- complete chains: `121` / `121`
+- claim-bound chains: `121`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
@@ -31,7 +31,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `ai_thread_history` | `8` | `8` | `114` | `55` | `12` |
 | `provider_acceptance_harness` | `5` | `7` | `21` | `15` | `13` |
 | `closed_loop_candidate_intake` | `3` | `3` | `19` | `14` | `17` |
-| `loop_closure_audit` | `1` | `2` | `10` | `7` | `4` |
+| `loop_closure_audit` | `2` | `4` | `24` | `12` | `8` |
 | `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
 
 ## Evidence Chains
@@ -155,6 +155,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `deploy_policy_syntax_hash_loop` | `1` | `4` | `4` | `3` | `closed_loop_candidate` |
 | `knowledge_coverage_syntax_hash_loop` | `1` | `4` | `5` | `3` | `closed_loop_candidate` |
 | `loop_registry_syntax_hash_loop` | `1` | `4` | `4` | `3` | `closed_loop_candidate` |
+| `loop_registry_loop_completion_score_loop` | `2` | `14` | `5` | `4` | `loop_closure_audit` |
 | `react_query_generated_client_syntax_hash_loop` | `1` | `8` | `5` | `3` | `closed_loop_candidate` |
 | `operational_readiness_syntax_hash_loop` | `1` | `4` | `5` | `3` | `closed_loop_candidate` |
 | `riido_ai_server_syntax_hash_loop` | `1` | `5` | `5` | `3` | `closed_loop_candidate` |

@@ -24,6 +24,9 @@ func verifyAll(root string, m manifest, hashes map[string]string) (verifyResult,
 	if err := verifyLoopCoverageDimensions(m); err != nil {
 		return verifyResult{}, err
 	}
+	if err := verifyLoopCompletions(m); err != nil {
+		return verifyResult{}, err
+	}
 	if err := verifyClaimEvidenceChains(m.Claims, chains); err != nil {
 		return verifyResult{}, err
 	}

@@ -12796,6 +12796,118 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "loop_registry_loop_completion_score_loop",
+      "observation": "The Loop Registry already rejected missing claim coverage for observation, verification, failure, and evidence tokens, but agents still had to infer per-loop completeness from scattered fields and could not see whether every loop met the requested 90% completion threshold.",
+      "hypothesis": "Deriving loop_completion_summary and loop_completions from the existing Loop Registry SSOT can expose per-loop completion basis points, verified loop counts, missing checks, and a 9000-basis-point gate without creating a second source of truth.",
+      "claims": [
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract",
+        "loop_registry_evidence_must_expose_loop_surfaces"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/loop_completion.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/loop_completion_claim.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/loop_completion_summary.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/loop_completion_types.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/render_loop_completion.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/verify_loop_completion.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/evidence_build.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/evidence.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/render.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry/verify.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/loop_completion_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/behavior_golden_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/loop_completion_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopclosureaudit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-closure-audit-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Loop Registry evidence now exposes a loop_completion_summary plus per-loop loop_completions derived from the same observes/verifies/fails_when/evidence, claim binding, graph edge, refresh workflow, expiry, and harness promotion surfaces that the registry already verifies. The verifier fails when any loop drops below 9000 basis points, while missing-but-above-threshold checks remain visible as missing_checks in the evidence instead of becoming hidden prose.",
+      "next_loop": "loop_closure_audit"
+    },
+    {
       "id": "react_query_generated_client_syntax_hash_loop",
       "observation": "The React Query generated client generator owns the OpenAPI-to-TypeScript core client and hook wrapper, but its Go package shape was not syntax-hash tracked even though generated client delivery and Figma handoff evidence depend on it.",
       "hypothesis": "Hash-locking the generated TypeScript output before adding syntax coverage preserves public generated client behavior while connecting generator syntax patterns to the generated-client semantic claim.",
