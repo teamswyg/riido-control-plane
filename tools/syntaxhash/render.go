@@ -38,8 +38,14 @@ func renderDoc(m manifest, graph syntaxGraph) string {
 	fmt.Fprintln(&b)
 	fmt.Fprintln(&b, "## Score")
 	fmt.Fprintln(&b)
+	fmt.Fprintf(&b, "- formula: `%s`\n", graph.Score.Formula)
+	fmt.Fprintf(&b, "- constraint gate: `%s`\n", graph.Score.ConstraintGate)
+	fmt.Fprintf(&b, "- tracked files: `%d`\n", graph.Score.TrackedFiles)
+	fmt.Fprintf(&b, "- unique syntax hashes: `%d`\n", graph.Score.UniqueSyntaxHashes)
+	fmt.Fprintf(&b, "- compression gain: `%d`\n", graph.Score.CompressionGain)
 	fmt.Fprintf(&b, "- efficiency score: `%d`\n", graph.Score.EfficiencyScore)
 	fmt.Fprintf(&b, "- compression score: `%d`\n", graph.Score.CompressionScore)
+	fmt.Fprintf(&b, "- weighted score: `%d`\n", graph.Score.WeightedScore)
 	return b.String()
 }
 

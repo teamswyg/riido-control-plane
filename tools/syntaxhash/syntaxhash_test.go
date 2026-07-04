@@ -1,31 +1,19 @@
 package main
 
 import (
-	"encoding/json"
-	"os"
 	"path/filepath"
 	"testing"
 )
-
-func readGraph(t *testing.T, path string) syntaxGraph {
-	t.Helper()
-	body, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var graph syntaxGraph
-	if err := json.Unmarshal(body, &graph); err != nil {
-		t.Fatal(err)
-	}
-	return graph
-}
 
 func TestSyntaxHashGraphUsesGoldenLockedContextMap(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "syntax-hash.json")
 	if err := mainRun([]string{"-evidence-out", out}); err != nil {
 		t.Fatal(err)
 	}
-	graph := readGraph(t, out)
+	var graph syntaxGraph
+	if err := readJSON(out, &graph); err != nil {
+		t.Fatal(err)
+	}
 	if graph.Status != "verified" || len(graph.Targets) < 2 {
 		t.Fatalf("unexpected graph: %+v", graph)
 	}
@@ -39,6 +27,10 @@ func TestSyntaxHashGraphUsesGoldenLockedContextMap(t *testing.T) {
 	}
 	if graph.Constraints.MinRepositoryCoverageBasisPoint != 10000 {
 		t.Fatalf("repository coverage floor = %+v", graph.Constraints)
+	}
+	if graph.Score.WeightedScore != graph.Score.EfficiencyScore+graph.Score.CompressionScore ||
+		graph.Score.ConstraintGate == "" || graph.Score.Formula == "" {
+		t.Fatalf("incomplete score evidence: %+v", graph.Score)
 	}
 	if len(target.Relocations) != target.TrackedFiles {
 		t.Fatalf("missing relocation evidence: %+v", target.Relocations)
@@ -61,7 +53,10 @@ func TestSyntaxHashToolBehaviorGolden(t *testing.T) {
 	if err := run(options{Repo: "../..", Manifest: manifestPath, EvidenceOut: out}); err != nil {
 		t.Fatal(err)
 	}
-	graph := readGraph(t, out)
+	var graph syntaxGraph
+	if err := readJSON(out, &graph); err != nil {
+		t.Fatal(err)
+	}
 	if got := graph.Targets[0].PackageHash; got != "a11308340a6110b8f76064273920d7d2d4fb057cb654e525997679659fd1f622" {
 		t.Fatalf("contextmap syntax package hash drifted: %s", got)
 	}
