@@ -12833,6 +12833,77 @@
       ],
       "decision": "Operational readiness syntax coverage may expand only after TestOperationalReadinessBehaviorGolden preserves deterministic evidence, candidate, and public-status hashes plus readiness counts; this target binds the readiness generator shape to the existing operational-readiness semantic claim without changing product runtime behavior.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_ai_server_syntax_hash_loop",
+      "observation": "The remaining untracked Go scope is internal/riidoaiserver, which owns the public HTTP route registry, AI Agent client endpoints, daemon handoff, and live control-plane surfaces. Without a package-level syntax target, route-surface refactors can change high-value server shape without appearing in syntax-hash coverage.",
+      "hypothesis": "After a behavior golden locks the static route registry and representative HTTP status matrix, adding internal/riidoaiserver as a syntax hash target can bind the server package AST shape to server_route_handlers_must_stay_semantically_split without changing endpoint behavior.",
+      "claims": [
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/behavior_golden_status_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/behavior_golden_status_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Riido AI server syntax coverage may expand only after TestRiidoAIServerBehaviorGolden preserves the 24-route registry hash and representative authenticated/unauthenticated HTTP status matrix; this target tracks public server AST shape without changing runtime endpoint behavior.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

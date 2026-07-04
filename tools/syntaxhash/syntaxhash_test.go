@@ -33,9 +33,9 @@ func TestSyntaxHashGraphUsesGoldenLockedContextMap(t *testing.T) {
 	if target.Coverage != 100 || target.PackageHash == "" || target.SemanticHash == "" {
 		t.Fatalf("incomplete target graph: %+v", target)
 	}
-	if graph.Repository.GoFiles <= target.GoFiles || graph.Repository.TrackedFiles < target.TrackedFiles ||
-		graph.Repository.UntrackedFiles == 0 || len(graph.Repository.UntrackedSample) == 0 {
-		t.Fatalf("expected single-package spike to expose untracked files: %+v", graph.Repository)
+	if graph.Repository.GoFiles != graph.Repository.TrackedFiles ||
+		graph.Repository.UntrackedFiles != 0 || len(graph.Repository.UntrackedSample) != 0 {
+		t.Fatalf("expected repository syntax coverage to be complete: %+v", graph.Repository)
 	}
 	if len(target.Relocations) != target.TrackedFiles {
 		t.Fatalf("missing relocation evidence: %+v", target.Relocations)
