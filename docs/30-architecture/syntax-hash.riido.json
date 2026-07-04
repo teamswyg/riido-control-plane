@@ -26,6 +26,13 @@
       "mode": "golden_locked_metaprogramming_tool"
     },
     {
+      "id": "loop_registry_tool_guard",
+      "package_path": "tools/loopregistry",
+      "golden_command": "go test ./tools/loopregistry -run TestLoopRegistryBehaviorGolden -count=1",
+      "semantic_claim_id": "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract",
+      "mode": "golden_locked_loop_registry_metaprogramming_tool"
+    },
+    {
       "id": "awsadapters_facade",
       "package_path": "awsadapters",
       "golden_command": "go test ./awsadapters -run TestAWSAdaptersFacadeBehaviorGolden -count=1",

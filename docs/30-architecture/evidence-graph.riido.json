@@ -12620,6 +12620,69 @@
       ],
       "decision": "Executable knowledge coverage syntax coverage may expand only after TestKnowledgeCoverageBehaviorGolden preserves the generated reader and evidence JSON hashes; the target is a meta-evidence verifier and does not alter runtime endpoint behavior.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "loop_registry_syntax_hash_loop",
+      "observation": "The loopregistry tool is the repository's semantic claim and target-verifier router, but its own Go package shape remained outside syntax-hash coverage even though its generated reader and evidence JSON define how agents discover executable knowledge.",
+      "hypothesis": "After TestLoopRegistryBehaviorGolden locks the generated doc and evidence JSON output, adding tools/loopregistry as a syntax-hash target can route loopregistry AST-shape changes to loop_registry_tool_must_preserve_generated_doc_and_evidence_contract without changing runtime behavior.",
+      "claims": [
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Loop registry syntax coverage may expand only after TestLoopRegistryBehaviorGolden preserves the generated reader and evidence JSON hashes; the target is a metaprogramming evidence router and does not alter runtime endpoint behavior.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
