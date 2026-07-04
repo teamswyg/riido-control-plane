@@ -10,23 +10,23 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `119`
-- claim refs: `167`
-- change refs: `1512`
-- verifier refs: `741`
-- evidence refs: `391`
+- chains: `120`
+- claim refs: `169`
+- change refs: `1524`
+- verifier refs: `748`
+- evidence refs: `395`
 
 ## Compiled Chain Summary
 
-- complete chains: `119` / `119`
-- claim-bound chains: `119`
+- complete chains: `120` / `120`
+- claim-bound chains: `120`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `closed_loop_candidate` | `72` | `78` | `1010` | `464` | `238` |
-| `operational_readiness_release_harness` | `20` | `35` | `153` | `93` | `63` |
+| `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
 | `closed_loop_candidate_decision` | `9` | `33` | `178` | `89` | `42` |
 | `ai_thread_history` | `8` | `8` | `114` | `55` | `12` |
 | `provider_acceptance_harness` | `5` | `7` | `21` | `15` | `13` |
@@ -107,6 +107,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `evidence_graph_workflow_trigger_coverage_loop` | `1` | `6` | `6` | `2` | `closed_loop_candidate` |
 | `operational_readiness_stale_partial_promotion_loop` | `1` | `18` | `9` | `2` | `closed_loop_candidate` |
 | `operational_readiness_release_loop` | `1` | `30` | `15` | `4` | `operational_readiness_release_harness` |
+| `operational_readiness_internal_completion_gate_loop` | `2` | `12` | `7` | `4` | `operational_readiness_release_harness` |
 | `public_qa_status_operational_surface_loop` | `7` | `29` | `18` | `13` | `operational_readiness_release_harness` |
 | `notion_qa_operational_evidence_backfill_loop` | `1` | `11` | `5` | `3` | `operational_readiness_release_harness` |
 | `notion_qa_assignable_projection_repair_loop` | `2` | `7` | `4` | `3` | `operational_readiness_release_harness` |

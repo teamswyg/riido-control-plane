@@ -47,6 +47,7 @@ func newEvidenceAt(m manifest, now time.Time) evidence {
 		MissingCategories:  missingCategories(m.RequiredCategories, categoryCounts),
 		CategoryCounts:     categoryCounts, MeasurementKinds: measurementKinds,
 		StatusCounts:     statusCounts,
+		Completion:       newCompletionEvidence(m.Checks),
 		NotionOpenLoop:   newNotionEvidence(m.NotionOpenLoop),
 		PublicStatus:     newPublicStatus(m, partials, stalePartials, generated, expires),
 		PartialPromotion: partialPromotionFor(partials),

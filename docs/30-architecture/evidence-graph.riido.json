@@ -8074,6 +8074,117 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "operational_readiness_internal_completion_gate_loop",
+      "observation": "Release readiness partials mixed repository-owned control-plane evidence with external desktop, daemon, infra, and teammate visual checks, so agents could either overclaim readiness by counting external partials as internal failures or hide real internal gaps behind external blockers.",
+      "hypothesis": "Adding completion_scope and scope_reason to every readiness check, then computing an internal-only completion gate in the operational-readiness evidence artifact, can prove repository-owned readiness reaches the 90% target while keeping external partials visible and excluded from the internal denominator.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/operational-readiness.md"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/completion.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/verify_scope.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/render_completion.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/evidence.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/types.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/types_evidence.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness/verify_checks.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/completion_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/behavior_golden_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/completion_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/controlplaneperf"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "control-plane-performance-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/operational-readiness.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/operational-readiness.md"
+        }
+      ],
+      "decision": "The release-readiness generator now fails any check without an explicit internal/external completion scope and scope reason, computes internal completeness only from repository-owned checks, requires at least 9000 basis points for internal completion, and emits the excluded external partial list so daemon, desktop, infra, and visual QA gaps stay visible without blocking the control-plane internal denominator. The same gate binds control-plane performance capacity evidence by keeping the testnet_load_capacity check internal and covered while classifying live infra, desktop, and daemon stress/chaos items as external evidence owners.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "public_qa_status_operational_surface_loop",
       "observation": "Operational QA evidence existed as redacted workflow artifacts and generated docs, but operators still had to inspect the readiness detail to know whether P0 QA, stale partials, and closed-loop candidates made the release status degraded.",
       "hypothesis": "Emitting a public aggregate QA status from operational readiness evidence into generated docs, workflow artifacts, GitHub Actions summaries, and a static HTML status page, then binding it to redaction tests and Loop Registry claims, gives GitHub-Status-like visibility without publishing raw logs, endpoint details, AWS identifiers, device credentials, or JWT fragments.",
