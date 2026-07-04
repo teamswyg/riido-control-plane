@@ -9,7 +9,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | Target | Package | Coverage | Syntax Hash | Semantic Claim |
 | --- | --- | ---: | --- | --- |
 | `contextmap_spike` | `tools/contextmap` | 100% | `a11308340a61` | `context_map_must_guard_public_boundaries` |
-| `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `58f33c11d935` | `context_map_must_guard_public_boundaries` |
+| `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `7439b94afdf0` | `context_map_must_guard_public_boundaries` |
 | `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `863870c7d3fa` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
 | `awsadapters_facade` | `awsadapters` | 100% | `6e8fc7dd43bf` | `public_aws_adapter_facade_must_preserve_contract` |
 | `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `2ff9e131e590` | `runtime_adapter_config_must_preserve_public_env_contract` |
@@ -132,10 +132,14 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 ## Score
 
 - formula: `tracked_files*efficiency_weight + compression_gain*compression_weight`
-- constraint gate: `coverage>=floor && collisions==0 && physical_violations==0`
+- constraint gate: `coverage>=floor && collisions==0 && relocations==tracked && physical_violations==0`
 - tracked files: `2739`
 - unique syntax hashes: `2551`
 - compression gain: `188`
+- collision count: `0`
+- relocation mappings: `2739`
+- missing relocation mappings: `0`
+- relocation coverage: `100.00%`
 - efficiency score: `2739`
 - compression score: `188`
 - weighted score: `2927`

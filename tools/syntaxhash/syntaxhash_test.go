@@ -32,6 +32,10 @@ func TestSyntaxHashGraphUsesGoldenLockedContextMap(t *testing.T) {
 		graph.Score.ConstraintGate == "" || graph.Score.Formula == "" {
 		t.Fatalf("incomplete score evidence: %+v", graph.Score)
 	}
+	if graph.Score.CollisionCount != 0 || graph.Score.MissingRelocations != 0 ||
+		graph.Score.RelocationMappings != graph.Score.TrackedFiles {
+		t.Fatalf("incomplete safety evidence: %+v", graph.Score)
+	}
 	if len(target.Relocations) != target.TrackedFiles {
 		t.Fatalf("missing relocation evidence: %+v", target.Relocations)
 	}

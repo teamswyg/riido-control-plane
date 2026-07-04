@@ -62,6 +62,10 @@ type scoreRun struct {
 	EfficiencyScore    int    `json:"efficiency_score"`
 	CompressionScore   int    `json:"compression_score"`
 	WeightedScore      int    `json:"weighted_score"`
+	CollisionCount     int    `json:"collision_count"`
+	RelocationMappings int    `json:"relocation_mappings"`
+	MissingRelocations int    `json:"missing_relocation_mappings"`
+	RelocationCoverage int    `json:"relocation_coverage_basis_points"`
 	ConstraintGate     string `json:"constraint_gate"`
 	Formula            string `json:"formula"`
 }
