@@ -12766,6 +12766,73 @@
       ],
       "decision": "React Query generator syntax coverage may expand only after TestReactQueryGenBehaviorGolden preserves the current core and react generated output hashes, operation count, schema count, and output byte sizes; this slice adds graph coverage without changing the generated client output contract.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "operational_readiness_syntax_hash_loop",
+      "observation": "The operational readiness evidence generator owns P0, partial, public QA status, Notion, and stale-candidate evidence, but its package shape remained outside syntax-hash coverage even though many readiness semantic claims already bind to it.",
+      "hypothesis": "After the readiness generator output is golden-locked across evidence, candidate, and public-status JSON, adding tools/operationalreadiness as a syntax hash target can connect its AST shape to operational_readiness_checks_must_bind_release_items_to_evidence without changing readiness behavior.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/operationalreadiness/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Operational readiness syntax coverage may expand only after TestOperationalReadinessBehaviorGolden preserves deterministic evidence, candidate, and public-status hashes plus readiness counts; this target binds the readiness generator shape to the existing operational-readiness semantic claim without changing product runtime behavior.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
