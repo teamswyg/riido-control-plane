@@ -12553,6 +12553,73 @@
       ],
       "decision": "Deploy policy syntax coverage may expand only after TestDeployPolicyBehaviorGolden preserves the runtime CD ownership manifest, expected deploy/smoke key sets, phrase rules, workflow scope, and public redaction contract hash; the target is test-only and does not alter runtime endpoint behavior.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "knowledge_coverage_syntax_hash_loop",
+      "observation": "The executable knowledge coverage verifier keeps generated documentation, manifest inventory, and strict evidence ownership from becoming prose-only, but its Go package shape remained outside syntax-hash coverage.",
+      "hypothesis": "After knowledge coverage output is golden-locked across generated reader and evidence JSON, adding tools/knowledgecoverage as a syntax hash target can route executable-knowledge verifier AST-shape changes to operational_readiness_checks_must_bind_release_items_to_evidence without changing coverage behavior.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/knowledgecoverage/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/knowledgecoverage/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/knowledgecoverage"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Executable knowledge coverage syntax coverage may expand only after TestKnowledgeCoverageBehaviorGolden preserves the generated reader and evidence JSON hashes; the target is a meta-evidence verifier and does not alter runtime endpoint behavior.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
