@@ -27,6 +27,7 @@ func buildGraph(root string, m manifest) (syntaxGraph, error) {
 		return graph, err
 	}
 	graph.Constraints = constraints
+	graph.Duplicates = duplicateShapeEvidence(graph, m.DuplicateShapes)
 	graph.Score = scoreGraph(graph, m)
 	return graph, nil
 }

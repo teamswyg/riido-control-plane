@@ -29,6 +29,8 @@ func renderDoc(m manifest, graph syntaxGraph) string {
 	fmt.Fprintf(&b, "- coverage: `%d.%02d%%`\n",
 		graph.Repository.CoverageBasisPoints/100, graph.Repository.CoverageBasisPoints%100)
 	fmt.Fprintln(&b)
+	renderDuplicateShapes(&b, graph)
+	fmt.Fprintln(&b)
 	fmt.Fprintln(&b, "## Constraints")
 	fmt.Fprintln(&b)
 	fmt.Fprintf(&b, "- max file lines: `%d`\n", graph.Constraints.MaxFileLines)

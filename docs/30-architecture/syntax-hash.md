@@ -9,7 +9,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | Target | Package | Coverage | Syntax Hash | Semantic Claim |
 | --- | --- | ---: | --- | --- |
 | `contextmap_spike` | `tools/contextmap` | 100% | `a11308340a61` | `context_map_must_guard_public_boundaries` |
-| `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `1cd3b0ca8aba` | `context_map_must_guard_public_boundaries` |
+| `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `0828144b09ce` | `context_map_must_guard_public_boundaries` |
+| `syntaxhash_duplicate_shapes_policy` | `tools/syntaxhash/duplicates` | 100% | `f506f1540fac` | `context_map_must_guard_public_boundaries` |
 | `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `62066456283d` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
 | `awsadapters_facade` | `awsadapters` | 100% | `6e8fc7dd43bf` | `public_aws_adapter_facade_must_preserve_contract` |
 | `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `2ff9e131e590` | `runtime_adapter_config_must_preserve_public_env_contract` |
@@ -117,10 +118,41 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `2752`
-- tracked files: `2752`
+- Go files: `2757`
+- tracked files: `2757`
 - untracked files: `0`
 - coverage: `100.00%`
+
+## Duplicate AST Shapes
+
+- status: `evidence_only`
+- group by: `ast_shape_hash`
+- duplicate groups: `83`
+- duplicate files: `289`
+- internal groups: `5`
+
+| Shape Hash | Files | Packages |
+| --- | ---: | --- |
+| `93f04d45bb45` | 17 | `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/aigeneratedsmokematrix`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/configreference`, `tools/contextmap`, `tools/integrationmatrix`, `tools/knowledgecoverage`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/openquestions`, `tools/providerstatus`, `tools/requestauth`, `tools/runtimeboundary`, `tools/saascontrolplane` |
+| `fbaa48914cf4` | 12 | `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/harnesspromotion`, `tools/healthreadycmd`, `tools/liveworkflowevidence`, `tools/loopclosureaudit`, `tools/operationalreadiness`, `tools/storesaferouting`, `tools/webfrontendapi`, `tools/workflowevidence` |
+| `c23af611509c` | 10 | `internal/repoidentity`, `tools/apiclientdelivery/requirements`, `tools/cloudwatchemf/requirements`, `tools/healthreadycmd`, `tools/openquestions`, `tools/reviewaccountseed/requirements`, `tools/runtimeboundary`, `tools/storesaferouting`, `tools/webfrontendapi`, `tools/workflowevidence` |
+| `66f86bb91c48` | 9 | `tools/configreference`, `tools/gocibaseline`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/openquestions`, `tools/precommitbaseline`, `tools/runtimeboundary`, `tools/workflowevidence` |
+| `e5921d9933d8` | 8 | `tools/configreference`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/evidencegraph`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/operationalreadiness`, `tools/runtimeboundary` |
+| `4d8c04ac8351` | 7 | `internal/riidoaiserver`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/evidencegraph`, `tools/gocibaseline`, `tools/loopclosureaudit`, `tools/precommitbaseline` |
+| `57e35ce78429` | 7 | `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/evidencegraph`, `tools/harnesspromotion`, `tools/loopclosureaudit` |
+| `7bfab29d8431` | 7 | `tools/cloudwatchemf`, `tools/healthreadycmd`, `tools/metricshttpadapter`, `tools/reviewaccountseed`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
+| `99ad4aab6a2c` | 7 | `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/metricshttpadapter`, `tools/providerstatus`, `tools/reviewaccountseed` |
+| `cf0fe1b458fe` | 6 | `tools/configreference`, `tools/gocibaseline`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/runtimeboundary` |
+| `ef2c7580672d` | 6 | `tools/configreference`, `tools/gocibaseline`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/runtimecdownership` |
+| `faa58e8068ec` | 6 | `internal/riidoaiserver`, `tools/loopclosureaudit`, `tools/reactquerygen` |
+| `09a26b1d4d7d` | 5 | `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/evidencegraph`, `tools/harnesspromotion`, `tools/loopregistry` |
+| `952ec131238e` | 5 | `tools/agentruntimebinding`, `tools/assignmentjournal`, `tools/contextmap`, `tools/providerstatus`, `tools/requestauth` |
+| `252cbee00213` | 4 | `tools/healthreadycmd`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
+| `385106af75c3` | 4 | `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/loopclosureaudit`, `tools/operationalreadiness` |
+| `4e09e2f36217` | 4 | `tools/healthreadycmd`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
+| `50f0035ed7f7` | 4 | `internal/riidoaiserver`, `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/harnesspromotion` |
+| `769fb85b546a` | 4 | `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/assignmentjournal`, `tools/providerstatus` |
+| `7b24b06eb753` | 4 | `tools/agentcatalogrbac`, `tools/aiagentrisk`, `tools/migrationledger`, `tools/snapshotcqrsgate` |
 
 ## Constraints
 
@@ -133,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `2752`
-- unique syntax hashes: `2564`
+- tracked files: `2757`
+- unique syntax hashes: `2569`
 - compression gain: `188`
-- analysis reduction: `6.83%`
+- analysis reduction: `6.81%`
 - collision count: `0`
-- relocation mappings: `2752`
+- relocation mappings: `2757`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
-- golden commands: `106`
+- golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `683`
+- efficiency score: `681`
 - compression score: `188`
-- weighted score: `871`
+- weighted score: `869`
