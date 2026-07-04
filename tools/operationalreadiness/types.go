@@ -17,15 +17,17 @@ type manifest struct {
 }
 
 type readinessCheck struct {
-	ID           string        `json:"id"`
-	Date         string        `json:"date"`
-	Category     string        `json:"category"`
-	Status       string        `json:"status"`
-	Title        string        `json:"title"`
-	Measurements []measurement `json:"measurements"`
-	EvidenceRefs []evidenceRef `json:"evidence_refs"`
-	NextArtifact string        `json:"next_artifact"`
-	NextCommand  string        `json:"next_command"`
+	ID              string        `json:"id"`
+	Date            string        `json:"date"`
+	Category        string        `json:"category"`
+	Status          string        `json:"status"`
+	Title           string        `json:"title"`
+	CompletionScope string        `json:"completion_scope"`
+	ScopeReason     string        `json:"scope_reason"`
+	Measurements    []measurement `json:"measurements"`
+	EvidenceRefs    []evidenceRef `json:"evidence_refs"`
+	NextArtifact    string        `json:"next_artifact"`
+	NextCommand     string        `json:"next_command"`
 }
 
 type measurement struct {

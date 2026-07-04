@@ -25,6 +25,9 @@ func TestOperationalReadinessVerifies(t *testing.T) {
 	if got.MeasurementCount < got.CheckCount {
 		t.Fatalf("measurement count should cover checks: %+v", got)
 	}
+	if got.Completion.Status != "verified" || got.Completion.InternalCompletenessBasisPoints < 9000 {
+		t.Fatalf("internal completion gate missing: %+v", got.Completion)
+	}
 	if len(got.MissingCategories) != 0 {
 		t.Fatalf("missing categories: %+v", got.MissingCategories)
 	}

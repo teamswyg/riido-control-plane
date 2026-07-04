@@ -10,6 +10,7 @@ func renderDoc(m manifest, e evidence) string {
 	fmt.Fprintf(&b, "# %s\n\n%s\n\n", m.Title, generatedNotice)
 	b.WriteString("Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riido.json).\n\n")
 	renderSummary(&b, m, e)
+	renderCompletion(&b, e.Completion)
 	renderPublicStatusGeneratedDoc(&b, e.PublicStatus)
 	renderNotionOpenLoop(&b, e.NotionOpenLoop)
 	renderChecks(&b, m.Checks)

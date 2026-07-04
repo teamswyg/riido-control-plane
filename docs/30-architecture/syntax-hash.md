@@ -112,13 +112,13 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `store_snapshot_file_outbox_guard` | `tools/storesnapshotoutbox` | 100% | `0318670e4d66` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `7aadb0213e97` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `7ee1bbf6a41c` | `react_query_generator_must_preserve_generated_client_surface` |
-| `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `5152ede403fe` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
+| `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `e9c0ec1de5cc` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `90db5f416444` | `server_route_handlers_must_stay_semantically_split` |
 
 ## Repository Coverage
 
-- Go files: `2739`
-- tracked files: `2739`
+- Go files: `2743`
+- tracked files: `2743`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -133,16 +133,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `2739`
-- unique syntax hashes: `2551`
+- tracked files: `2743`
+- unique syntax hashes: `2555`
 - compression gain: `188`
-- analysis reduction: `6.86%`
+- analysis reduction: `6.85%`
 - collision count: `0`
-- relocation mappings: `2739`
+- relocation mappings: `2743`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `106`
 - missing golden commands: `0`
-- efficiency score: `686`
+- efficiency score: `685`
 - compression score: `188`
-- weighted score: `874`
+- weighted score: `873`

@@ -15,6 +15,28 @@ Executable SSOT: [`operational-readiness.riido.json`](operational-readiness.riid
 - required categories: `7`
 - missing categories: `0`
 
+## Internal Completion Gate
+
+- status: `verified`
+- threshold basis points: `9000`
+- internal completeness basis points: `10000`
+- internal checks: `5`
+- internal covered: `5`
+- internal partial: `0`
+- external excluded: `9`
+- external partial: `9`
+
+External excluded checks:
+- `otel_xray_client_surface`
+- `staging_client_p0_visual_retest`
+- `daemon_network_disconnect_waiting`
+- `single_pc_agent_limit`
+- `boot_burst_capacity`
+- `server_crash_recovery`
+- `scale_out_recovery`
+- `all_servers_down_daemon_behavior`
+- `desktop_body_only_change`
+
 ## Public QA Status
 
 - overall: `degraded`
