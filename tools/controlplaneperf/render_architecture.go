@@ -36,3 +36,20 @@ func renderArchitectureFileIndex(b *strings.Builder, rows []architectureFileEvid
 	}
 	b.WriteString("\n")
 }
+
+func renderPressureDimensions(b *strings.Builder, rows []pressureDimensionEvidence) {
+	b.WriteString("## Pressure Dimension Summary\n\n")
+	b.WriteString("| Dimension | Components | Files | Hot Paths | Signals | Evidence | Target Commands |\n")
+	b.WriteString("| --- | --- | ---: | --- | --- | --- | ---: |\n")
+	for _, row := range rows {
+		fmt.Fprintf(b, "| `%s` | `%s` | `%d` | `%s` | `%s` | `%s` | `%d` |\n",
+			row.Dimension,
+			strings.Join(row.ComponentIDs, ", "),
+			len(row.Files),
+			strings.Join(row.HotPathIDs, ", "),
+			strings.Join(row.ObservabilitySignals, ", "),
+			strings.Join(row.EvidenceRefs, ", "),
+			len(row.TargetVerifierCommands))
+	}
+	b.WriteString("\n")
+}

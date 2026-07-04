@@ -31,6 +31,7 @@ type evidence struct {
 	Assertions                     []string                        `json:"assertions"`
 	ArchitectureComponents         []architectureComponentEvidence `json:"architecture_components"`
 	FileArchitectureIndex          []architectureFileEvidence      `json:"file_architecture_index"`
+	PressureDimensionSummary       []pressureDimensionEvidence     `json:"pressure_dimension_summary"`
 	HotPaths                       []hotPathEvidence               `json:"hot_paths"`
 	Candidates                     []candidateEvidence             `json:"candidates"`
 	Loop                           loopSpec                        `json:"loop"`
