@@ -1,66 +1,73 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
+const (
+	liveManifestEvidenceSHA256 = "a4ccf7c90c5e98aea521369c276fb5776364fb164edd01214a0cf1bd04b2d9df"
+	liveDeploySummarySHA256    = "4816fc4fec1c718a5d6bf8a4b0b3fcc1e49f184fb040ea7f040a611b61d3d84e"
+)
+
+func TestLiveWorkflowEvidenceBehaviorGolden(t *testing.T) {
+	t.Run("manifest", TestManifestEvidence)
+	t.Run("summary", TestLiveSummaryRedactsRuntimeValues)
+}
+
 func TestManifestEvidence(t *testing.T) {
-	out := filepath.Join(t.TempDir(), "evidence.json")
-	if err := mainRun([]string{"-repo", "../..", "-check-doc", "-evidence-out", out}); err != nil {
+	setStableLiveEvidenceEnv(t)
+	manifestOut := filepath.Join(t.TempDir(), "manifest.json")
+	if err := mainRun([]string{"-repo", "../..", "-check-doc", "-evidence-out", manifestOut}); err != nil {
 		t.Fatal(err)
 	}
-	data, err := os.ReadFile(out)
-	if err != nil {
-		t.Fatal(err)
-	}
-	text := string(data)
-	for _, phrase := range []string{
-		"\"status\": \"verified\"",
-		"\"workflow_count\": 4",
-		"\"id\": \"control-plane-performance\"",
-	} {
-		if !strings.Contains(text, phrase) {
-			t.Fatalf("evidence missing %s: %s", phrase, text)
-		}
-	}
+	assertSHA256File(t, manifestOut, liveManifestEvidenceSHA256)
 }
 
 func TestLiveSummaryRedactsRuntimeValues(t *testing.T) {
+	setStableLiveEvidenceEnv(t)
 	t.Setenv("TESTNET_TOKEN", "super-secret-token")
 	t.Setenv("TESTNET_BASE_URL", "https://private.example.test")
-	t.Setenv("RIIDO_LIVE_WORKFLOW_EVIDENCE_NOW", "2026-06-24T00:00:00Z")
-	out := filepath.Join(t.TempDir(), "summary.json")
+	summaryOut := filepath.Join(t.TempDir(), "summary.json")
 	err := mainRun([]string{
 		"-repo", "../..",
 		"-workflow", "deploy-ai-agent-testnet",
 		"-deployment-mode", "ecs-rolling",
 		"-build-cache-mode", "buildkit-gha",
-		"-evidence-out", out,
+		"-evidence-out", summaryOut,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := os.ReadFile(out)
+	data := assertSHA256File(t, summaryOut, liveDeploySummarySHA256)
+	for _, forbidden := range []string{"super-secret-token", "private.example.test"} {
+		if strings.Contains(string(data), forbidden) {
+			t.Fatalf("summary leaked %s: %s", forbidden, data)
+		}
+	}
+}
+
+func setStableLiveEvidenceEnv(t *testing.T) {
+	t.Helper()
+	t.Setenv("RIIDO_LIVE_WORKFLOW_EVIDENCE_NOW", "2026-06-24T00:00:00Z")
+	for _, key := range []string{"GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "GITHUB_SHA", "GITHUB_REF_NAME", "GITHUB_EVENT_NAME"} {
+		t.Setenv(key, "")
+	}
+}
+
+func assertSHA256File(t *testing.T, path, want string) []byte {
+	t.Helper()
+	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	text := string(data)
-	for _, forbidden := range []string{"super-secret-token", "private.example.test"} {
-		if strings.Contains(text, forbidden) {
-			t.Fatalf("summary leaked %s: %s", forbidden, text)
-		}
+	sum := sha256.Sum256(data)
+	if got := hex.EncodeToString(sum[:]); got != want {
+		t.Fatalf("%s sha256 = %s, want %s\n%s", path, got, want, data)
 	}
-	for _, required := range []string{
-		"\"generated_at\": \"2026-06-24T00:00:00Z\"",
-		"\"expires_at\": \"2026-06-25T00:00:00Z\"",
-		"\"deployment_mode\": \"ecs-rolling\"",
-		"\"build_cache_mode\": \"buildkit-gha\"",
-	} {
-		if !strings.Contains(text, required) {
-			t.Fatalf("summary missing %s: %s", required, text)
-		}
-	}
+	return data
 }
