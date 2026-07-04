@@ -131,6 +131,13 @@
       "mode": "golden_locked_module_decomposition_tool"
     },
     {
+      "id": "control_plane_audit_guard",
+      "package_path": "tools/controlplaneaudit",
+      "golden_command": "go test ./tools/controlplaneaudit -run TestControlPlaneAuditBehaviorGolden -count=1",
+      "semantic_claim_id": "control_plane_performance_hot_paths_must_emit_evidence",
+      "mode": "golden_locked_control_plane_audit_tool"
+    },
+    {
       "id": "pre_commit_baseline_guard",
       "package_path": "tools/precommitbaseline",
       "golden_command": "go test ./tools/precommitbaseline -run TestPreCommitBaselineBehaviorGolden -count=1",
