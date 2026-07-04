@@ -12350,6 +12350,69 @@
       ],
       "decision": "Runtime CD ownership syntax coverage may expand only after TestRuntimeCDOwnershipBehaviorGolden preserves the generated evidence and reader hashes; helper consolidation is limited to same-concept files and keeps runtime deployment ownership behavior unchanged.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "deploy_policy_syntax_hash_loop",
+      "observation": "The deploy policy verifier already guarded public/private runtime CD ownership, redaction, key-name minimization, generated-client delivery, and public surface scan rules, but the test-only deploypolicy package remained outside syntax-hash coverage.",
+      "hypothesis": "After the deploy policy manifest, expected keys, phrase checks, workflow scope, and public redaction contract are golden-locked as one deterministic behavior summary, adding tools/deploypolicy as a syntax hash target can route policy verifier AST-shape changes to runtime_deployment_boundary_must_preserve_public_private_ownership without changing runtime behavior.",
+      "claims": [
+        "runtime_deployment_boundary_must_preserve_public_private_ownership"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/deploypolicy/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/deploypolicy/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Deploy policy syntax coverage may expand only after TestDeployPolicyBehaviorGolden preserves the runtime CD ownership manifest, expected deploy/smoke key sets, phrase rules, workflow scope, and public redaction contract hash; the target is test-only and does not alter runtime endpoint behavior.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
