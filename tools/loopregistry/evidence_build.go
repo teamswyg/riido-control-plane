@@ -8,6 +8,7 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 	index := architectureIndexFor(m.Claims, result.ClaimSurfaces)
 	attachTargetVerifierPlan(impact, index, result.ClaimSurfaces)
 	refreshPlans := evidenceRefreshPlans(m, result, now)
+	completions := loopCompletions(m)
 	return evidence{
 		SchemaVersion:             evidenceSchema,
 		ID:                        m.ID,
@@ -23,6 +24,8 @@ func newEvidence(m manifest, result verifyResult, impact *impactEvidence) eviden
 		SemanticHashes:            result.Hashes,
 		EvidenceKinds:             m.EvidenceKinds,
 		LoopSurfaces:              loopSurfaces(m.Loops),
+		LoopCompletionSummary:     summarizeLoopCompletions(completions),
+		LoopCompletions:           completions,
 		CoverageDimensions:        loopCoverageDimensionSurfaces(),
 		ArchitectureIndex:         index,
 		EvidenceGraph:             m.EvidenceGraph,

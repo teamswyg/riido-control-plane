@@ -15,6 +15,8 @@ type evidence struct {
 	SemanticHashes            map[string]string              `json:"semantic_hashes"`
 	EvidenceKinds             []evidenceKind                 `json:"evidence_kinds"`
 	LoopSurfaces              []loopSurface                  `json:"loop_surfaces"`
+	LoopCompletionSummary     loopCompletionSummary          `json:"loop_completion_summary"`
+	LoopCompletions           []loopCompletion               `json:"loop_completions"`
 	CoverageDimensions        []loopCoverageDimensionSurface `json:"coverage_dimensions"`
 	ArchitectureIndex         architectureIndex              `json:"architecture_index"`
 	EvidenceGraph             []graphEdge                    `json:"evidence_graph"`

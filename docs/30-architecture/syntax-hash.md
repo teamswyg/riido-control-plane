@@ -10,7 +10,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | --- | --- | ---: | --- | --- |
 | `contextmap_spike` | `tools/contextmap` | 100% | `a11308340a61` | `context_map_must_guard_public_boundaries` |
 | `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `1cd3b0ca8aba` | `context_map_must_guard_public_boundaries` |
-| `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `863870c7d3fa` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
+| `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `62066456283d` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
 | `awsadapters_facade` | `awsadapters` | 100% | `6e8fc7dd43bf` | `public_aws_adapter_facade_must_preserve_contract` |
 | `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `2ff9e131e590` | `runtime_adapter_config_must_preserve_public_env_contract` |
 | `repo_identity_guard` | `internal/repoidentity` | 100% | `2402928360f7` | `repo_identity_must_anchor_public_module_boundary` |
@@ -117,8 +117,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `2743`
-- tracked files: `2743`
+- Go files: `2750`
+- tracked files: `2750`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -133,16 +133,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `2743`
-- unique syntax hashes: `2555`
+- tracked files: `2750`
+- unique syntax hashes: `2562`
 - compression gain: `188`
-- analysis reduction: `6.85%`
+- analysis reduction: `6.83%`
 - collision count: `0`
-- relocation mappings: `2743`
+- relocation mappings: `2750`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `106`
 - missing golden commands: `0`
-- efficiency score: `685`
+- efficiency score: `683`
 - compression score: `188`
-- weighted score: `873`
+- weighted score: `871`
