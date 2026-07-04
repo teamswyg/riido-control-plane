@@ -43,6 +43,11 @@ func renderDoc(m manifest, graph syntaxGraph) string {
 	fmt.Fprintf(&b, "- tracked files: `%d`\n", graph.Score.TrackedFiles)
 	fmt.Fprintf(&b, "- unique syntax hashes: `%d`\n", graph.Score.UniqueSyntaxHashes)
 	fmt.Fprintf(&b, "- compression gain: `%d`\n", graph.Score.CompressionGain)
+	fmt.Fprintf(&b, "- collision count: `%d`\n", graph.Score.CollisionCount)
+	fmt.Fprintf(&b, "- relocation mappings: `%d`\n", graph.Score.RelocationMappings)
+	fmt.Fprintf(&b, "- missing relocation mappings: `%d`\n", graph.Score.MissingRelocations)
+	fmt.Fprintf(&b, "- relocation coverage: `%d.%02d%%`\n",
+		graph.Score.RelocationCoverage/100, graph.Score.RelocationCoverage%100)
 	fmt.Fprintf(&b, "- efficiency score: `%d`\n", graph.Score.EfficiencyScore)
 	fmt.Fprintf(&b, "- compression score: `%d`\n", graph.Score.CompressionScore)
 	fmt.Fprintf(&b, "- weighted score: `%d`\n", graph.Score.WeightedScore)

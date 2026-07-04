@@ -46,9 +46,11 @@ type evidenceLoop struct {
 }
 
 func scoreGraph(graph syntaxGraph, cfg scoring) scoreRun {
-	files, hashes := 0, map[string]struct{}{}
+	files, moves, collisions, hashes := 0, 0, 0, map[string]struct{}{}
 	for _, target := range graph.Targets {
 		files += target.TrackedFiles
+		moves += len(target.Relocations)
+		collisions += target.CollisionCount
 		for _, file := range target.FileHashes {
 			hashes[file.Hash] = struct{}{}
 		}
@@ -60,7 +62,9 @@ func scoreGraph(graph syntaxGraph, cfg scoring) scoreRun {
 		TrackedFiles: files, UniqueSyntaxHashes: len(hashes), CompressionGain: compression,
 		EfficiencyWeight: cfg.EfficiencyWeight, CompressionWeight: cfg.CompressionWeight,
 		EfficiencyScore: efficiency, CompressionScore: compressed, WeightedScore: efficiency + compressed,
-		ConstraintGate: "coverage>=floor && collisions==0 && physical_violations==0",
-		Formula:        "tracked_files*efficiency_weight + compression_gain*compression_weight",
+		CollisionCount: collisions, RelocationMappings: moves, MissingRelocations: files - moves,
+		RelocationCoverage: basisPoints(moves, files),
+		ConstraintGate:     "coverage>=floor && collisions==0 && relocations==tracked && physical_violations==0",
+		Formula:            "tracked_files*efficiency_weight + compression_gain*compression_weight",
 	}
 }
