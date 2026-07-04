@@ -194,6 +194,13 @@
       "mode": "golden_locked_candidate_decision_tool"
     },
     {
+      "id": "loop_refresh_dispatch_guard",
+      "package_path": "tools/looprefreshdispatch",
+      "golden_command": "go test ./tools/looprefreshdispatch -run TestLoopRefreshDispatchBehaviorGolden -count=1",
+      "semantic_claim_id": "expired_loop_refresh_commands_must_dispatch_safe_workflows",
+      "mode": "golden_locked_loop_refresh_dispatch_tool"
+    },
+    {
       "id": "pre_commit_baseline_guard",
       "package_path": "tools/precommitbaseline",
       "golden_command": "go test ./tools/precommitbaseline -run TestPreCommitBaselineBehaviorGolden -count=1",
