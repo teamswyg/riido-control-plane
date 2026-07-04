@@ -725,6 +725,13 @@
       "golden_command": "go test ./tools/aiagentthreadsnapshot -run TestAIAgentThreadSnapshotBehaviorGolden -count=1",
       "semantic_claim_id": "operational_readiness_checks_must_bind_release_items_to_evidence",
       "mode": "golden_locked_ai_agent_thread_snapshot_tool"
+    },
+    {
+      "id": "react_query_generated_client_guard",
+      "package_path": "tools/reactquerygen",
+      "golden_command": "go test ./tools/reactquerygen -run TestReactQueryGenBehaviorGolden -count=1",
+      "semantic_claim_id": "react_query_generator_must_preserve_generated_client_surface",
+      "mode": "golden_locked_react_query_client_generator"
     }
   ],
   "constraints": {
