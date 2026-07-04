@@ -3590,7 +3590,7 @@
     {
       "id": "thread_history_user_followup_retention_loop",
       "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status, can lose the actual reply author when another workspace member writes inside the thread, and conversational execution-approval replies such as go command requests can accidentally create new work when there is no pending tool approval to decide.",
-      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent \ud2f0\ud0a4\ud0c0\uce74 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer.",
+      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent 티키타카 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer.",
       "claims": [
         "thread_history_must_keep_user_followups"
       ],
@@ -8518,7 +8518,7 @@
     },
     {
       "id": "notion_qa_intent_waiting_copy_loop",
-      "observation": "Notion QA feedback said the waiting_for_user copy '\uc5b4\ub5a4 \uc791\uc5c5\ubd80\ud130 \uc9c4\ud589\ud560\uae4c\uc694?' felt like the agent was simply asking the user what to do instead of showing that it had inspected the task context.",
+      "observation": "Notion QA feedback said the waiting_for_user copy '어떤 작업부터 진행할까요?' felt like the agent was simply asking the user what to do instead of showing that it had inspected the task context.",
       "hypothesis": "Keeping the same waiting_for_user state contract while changing the server-visible needs_input copy and prompt clarification example can preserve the intent gate but make the AI thread feel like it reviewed the task and is asking for desired output or direction.",
       "claims": [
         "ambiguous_task_context_must_ask_before_work",
@@ -8593,13 +8593,13 @@
           "redacted": true
         }
       ],
-      "decision": "The server now returns '\uc791\uc5c5 \ub0b4\uc6a9\uc744 \ud655\uc778\ud588\uc5b4\uc694. \uc6d0\ud558\ub294 \uacb0\uacfc\ubb3c\uc774\ub098 \ubc29\ud5a5\uc744 \ub313\uae00\ub85c \uc54c\ub824\uc8fc\uc138\uc694.' for needs_input/waiting_for_user while preserving the v2/v3 status fields, comment_kind, and daemon gating behavior. Regression tests assert the new copy in prompt interpretation and v3 thread history so the product tone does not drift back to the old ambiguous question.",
+      "decision": "The server now returns '작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요.' for needs_input/waiting_for_user while preserving the v2/v3 status fields, comment_kind, and daemon gating behavior. Regression tests assert the new copy in prompt interpretation and v3 thread history so the product tone does not drift back to the old ambiguous question.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
       "id": "notion_p0_server_status_transfer_loop",
-      "observation": "After the server fixes for queued_by_busy_agent and instruction intent dialogue were merged and deployed, the executable operational readiness backfill still showed both Notion P0 cycles as [codex][\uc9c4\ud589\uc911]. That made backend-complete work look indistinguishable from open implementation work, even though product readiness must remain partial until visual screenshot evidence exists.",
-      "hypothesis": "If operational readiness marks server-complete P0 cycles as [codex][\uc644\ub8cc][\uc804\ub2ec\uc694\uccad] while keeping their status partial and next artifact as staging_client_p0_visual_screenshot_evidence, agents and humans can distinguish closed backend work from the remaining client visual acceptance gate without changing endpoint contracts.",
+      "observation": "After the server fixes for queued_by_busy_agent and instruction intent dialogue were merged and deployed, the executable operational readiness backfill still showed both Notion P0 cycles as [codex][진행중]. That made backend-complete work look indistinguishable from open implementation work, even though product readiness must remain partial until visual screenshot evidence exists.",
+      "hypothesis": "If operational readiness marks server-complete P0 cycles as [codex][완료][전달요청] while keeping their status partial and next artifact as staging_client_p0_visual_screenshot_evidence, agents and humans can distinguish closed backend work from the remaining client visual acceptance gate without changing endpoint contracts.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence",
         "generated_endpoint_smoke_matrix_must_remain_contract_gate"
@@ -11809,7 +11809,7 @@
           "redacted": true
         }
       ],
-      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT. The device daemon plural API increases the executable contract to 57 operations and adds aiAgent.devices.daemons.list plus v2.aiAgent.devices.daemons.list to required generated paths, so the claim now covers profile\ubcc4 daemon list handoff without changing v3 thread history semantics.",
+      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT. The device daemon plural API increases the executable contract to 57 operations and adds aiAgent.devices.daemons.list plus v2.aiAgent.devices.daemons.list to required generated paths, so the claim now covers profile별 daemon list handoff without changing v3 thread history semantics.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -12682,6 +12682,89 @@
         }
       ],
       "decision": "Loop registry syntax coverage may expand only after TestLoopRegistryBehaviorGolden preserves the generated reader and evidence JSON hashes; the target is a metaprogramming evidence router and does not alter runtime endpoint behavior.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "react_query_generated_client_syntax_hash_loop",
+      "observation": "The React Query generated client generator owns the OpenAPI-to-TypeScript core client and hook wrapper, but its Go package shape was not syntax-hash tracked even though generated client delivery and Figma handoff evidence depend on it.",
+      "hypothesis": "Hash-locking the generated TypeScript output before adding syntax coverage preserves public generated client behavior while connecting generator syntax patterns to the generated-client semantic claim.",
+      "claims": [
+        "react_query_generator_must_preserve_generated_client_surface"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/behavior_golden_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/reactquerygen/generate.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/reactquerygen/run.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/drift_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/drift_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "React Query generator syntax coverage may expand only after TestReactQueryGenBehaviorGolden preserves the current core and react generated output hashes, operation count, schema count, and output byte sizes; this slice adds graph coverage without changing the generated client output contract.",
       "next_loop": "closed_loop_candidate"
     }
   ],
