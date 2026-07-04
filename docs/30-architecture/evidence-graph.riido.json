@@ -10069,6 +10069,83 @@
       "next_loop": "closed_loop_candidate_intake"
     },
     {
+      "id": "loop_closure_audit_syntax_hash_loop",
+      "observation": "The loop closure audit verifier already compiles the human-exit objective into executable proof surfaces, candidate summaries, residual-gap exports, and claim coverage checks, but its Go package shape remained outside syntax-hash coverage.",
+      "hypothesis": "After loop closure audit evidence and candidate export output are golden-locked with deterministic evidence clocks and sanitized candidate paths, adding tools/loopclosureaudit as a syntax hash target can connect loop audit AST-shape changes to loop_closure_audit_must_prove_human_exit_requirements without changing audit evidence or candidate contracts.",
+      "claims": [
+        "loop_closure_audit_must_prove_human_exit_requirements"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/loopclosureaudit/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/loopclosureaudit/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopclosureaudit"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-closure-audit-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-closure-audit-closed-loop-candidates",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Loop closure audit syntax coverage may expand only after TestLoopClosureAuditBehaviorGolden preserves the deterministic audit evidence and candidate artifact hash; the syntax target binds audit verifier shape to loop_closure_audit_must_prove_human_exit_requirements while preserving evidence and closed-loop candidate contracts.",
+      "next_loop": "closed_loop_candidate_intake"
+    },
+    {
       "id": "closed_loop_candidate_intake_syntax_hash_loop",
       "observation": "The closed-loop candidate intake verifier already consumes candidate artifacts, checks adoption requirements, preserves candidate subjects, and publishes intake evidence, but its Go package shape remained outside syntax-hash coverage.",
       "hypothesis": "After candidate intake evidence is golden-locked with deterministic freshness and sanitized fixture paths, adding tools/closedloopcandidateintake as a syntax hash target can connect candidate intake AST-shape changes to candidate_intake_must_consume_candidate_artifact without changing candidate artifact contracts.",

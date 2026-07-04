@@ -166,6 +166,13 @@
       "mode": "golden_locked_harness_promotion_tool"
     },
     {
+      "id": "loop_closure_audit_guard",
+      "package_path": "tools/loopclosureaudit",
+      "golden_command": "go test ./tools/loopclosureaudit -run TestLoopClosureAuditBehaviorGolden -count=1",
+      "semantic_claim_id": "loop_closure_audit_must_prove_human_exit_requirements",
+      "mode": "golden_locked_loop_closure_audit_tool"
+    },
+    {
       "id": "closed_loop_candidate_intake_guard",
       "package_path": "tools/closedloopcandidateintake",
       "golden_command": "go test ./tools/closedloopcandidateintake -run TestClosedLoopCandidateIntakeBehaviorGolden -count=1",
