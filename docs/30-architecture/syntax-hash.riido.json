@@ -131,6 +131,13 @@
       "mode": "golden_locked_pre_commit_baseline_tool"
     },
     {
+      "id": "live_workflow_evidence_guard",
+      "package_path": "tools/liveworkflowevidence",
+      "golden_command": "go test ./tools/liveworkflowevidence -run TestLiveWorkflowEvidenceBehaviorGolden -count=1",
+      "semantic_claim_id": "provider_acceptance_summary_must_cover_declared_observations",
+      "mode": "golden_locked_live_workflow_evidence_tool"
+    },
+    {
       "id": "web_frontend_api_guard",
       "package_path": "tools/webfrontendapi",
       "golden_command": "go test ./tools/webfrontendapi -run TestWebFrontendAPIBehaviorGolden -count=1",

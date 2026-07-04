@@ -225,6 +225,52 @@
       "next_loop": "provider_acceptance_harness"
     },
     {
+      "id": "live_workflow_evidence_syntax_hash_loop",
+      "observation": "tools/liveworkflowevidence owned provider-acceptance redaction and live workflow evidence but remained outside the syntax hash graph, so agents could not route AST-shape changes in that package to the provider acceptance semantic claim.",
+      "hypothesis": "After the live workflow evidence behavior is golden-locked, adding the package as a syntax hash target can connect all package files, relocation hashes, and physical constraints to the existing provider acceptance semantic hash without changing runtime behavior.",
+      "claims": [
+        "provider_acceptance_summary_must_cover_declared_observations"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        },
+        {
+          "kind": "test",
+          "path": "tools/liveworkflowevidence/main_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "test",
+          "path": "tools/liveworkflowevidence/main_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "live-workflow-redaction-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The live workflow evidence package is now syntax-hash tracked only after its behavior golden passed; repository syntax coverage rises while the target reports 100% package coverage, zero collisions, relocation mappings for every file hash, and zero physical-constraint violations.",
+      "next_loop": "provider_acceptance_harness"
+    },
+    {
       "id": "provider_acceptance_observation_coverage_loop",
       "observation": "The provider acceptance harness declared codex_provider_qa, openclaw_provider_qa, and daemon_runtime_snapshot observations, but the redacted smoke summary or loop manifest could omit structured provider coverage while still reporting generic contract coverage.",
       "hypothesis": "Binding those observations to workflow source phrases, summary claims, machine-readable provider coverage, and the ai_thread_history loop identity lets agents see which provider/runtime paths and live v3 thread-history API surfaces were verified without reading raw live output or exporting secrets.",

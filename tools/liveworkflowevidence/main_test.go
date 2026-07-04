@@ -20,7 +20,7 @@ func TestLiveWorkflowEvidenceBehaviorGolden(t *testing.T) {
 }
 
 func TestManifestEvidence(t *testing.T) {
-	t.Setenv("RIIDO_LIVE_WORKFLOW_EVIDENCE_NOW", "2026-06-24T00:00:00Z")
+	setStableLiveEvidenceEnv(t)
 	manifestOut := filepath.Join(t.TempDir(), "manifest.json")
 	if err := mainRun([]string{"-repo", "../..", "-check-doc", "-evidence-out", manifestOut}); err != nil {
 		t.Fatal(err)
@@ -29,7 +29,7 @@ func TestManifestEvidence(t *testing.T) {
 }
 
 func TestLiveSummaryRedactsRuntimeValues(t *testing.T) {
-	t.Setenv("RIIDO_LIVE_WORKFLOW_EVIDENCE_NOW", "2026-06-24T00:00:00Z")
+	setStableLiveEvidenceEnv(t)
 	t.Setenv("TESTNET_TOKEN", "super-secret-token")
 	t.Setenv("TESTNET_BASE_URL", "https://private.example.test")
 	summaryOut := filepath.Join(t.TempDir(), "summary.json")
@@ -48,6 +48,14 @@ func TestLiveSummaryRedactsRuntimeValues(t *testing.T) {
 		if strings.Contains(string(data), forbidden) {
 			t.Fatalf("summary leaked %s: %s", forbidden, data)
 		}
+	}
+}
+
+func setStableLiveEvidenceEnv(t *testing.T) {
+	t.Helper()
+	t.Setenv("RIIDO_LIVE_WORKFLOW_EVIDENCE_NOW", "2026-06-24T00:00:00Z")
+	for _, key := range []string{"GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "GITHUB_SHA", "GITHUB_REF_NAME", "GITHUB_EVENT_NAME"} {
+		t.Setenv(key, "")
 	}
 }
 

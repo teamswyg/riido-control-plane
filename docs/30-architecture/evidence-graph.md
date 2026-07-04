@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `100`
-- claim refs: `148`
-- change refs: `1429`
-- verifier refs: `652`
-- evidence refs: `321`
+- chains: `101`
+- claim refs: `149`
+- change refs: `1432`
+- verifier refs: `654`
+- evidence refs: `323`
 
 ## Compiled Chain Summary
 
-- complete chains: `100` / `100`
-- claim-bound chains: `100`
+- complete chains: `101` / `101`
+- claim-bound chains: `101`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
@@ -29,7 +29,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `operational_readiness_release_harness` | `20` | `35` | `153` | `93` | `63` |
 | `ai_thread_history` | `8` | `8` | `114` | `55` | `12` |
 | `closed_loop_candidate_decision` | `8` | `32` | `174` | `84` | `38` |
-| `provider_acceptance_harness` | `4` | `6` | `18` | `13` | `11` |
+| `provider_acceptance_harness` | `5` | `7` | `21` | `15` | `13` |
 | `closed_loop_candidate_intake` | `1` | `1` | `11` | `4` | `7` |
 | `loop_closure_audit` | `1` | `2` | `10` | `7` | `4` |
 | `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
@@ -41,6 +41,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `harness_failure_promotion_loop` | `1` | `11` | `5` | `3` | `closed_loop_candidate` |
 | `harness_evidence_expiry_gate_loop` | `1` | `6` | `3` | `3` | `provider_acceptance_harness` |
 | `live_workflow_evidence_golden_lock_loop` | `2` | `2` | `2` | `2` | `provider_acceptance_harness` |
+| `live_workflow_evidence_syntax_hash_loop` | `1` | `3` | `2` | `2` | `provider_acceptance_harness` |
 | `provider_acceptance_observation_coverage_loop` | `1` | `6` | `4` | `3` | `provider_acceptance_harness` |
 | `device_daemon_plural_endpoint_live_smoke_loop` | `2` | `4` | `4` | `3` | `provider_acceptance_harness` |
 | `semantic_hash_metadata_normalization_loop` | `1` | `6` | `3` | `1` | `closed_loop_candidate` |
