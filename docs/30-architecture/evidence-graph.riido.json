@@ -10290,6 +10290,83 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "loop_refresh_dispatch_syntax_hash_loop",
+      "observation": "The loop refresh dispatcher already converts fresh loop command evidence into safe workflow dispatch plans and redacted closed-loop candidate artifacts, but its Go package shape remained outside syntax-hash coverage.",
+      "hypothesis": "After dispatch plan and candidate output are golden-locked with deterministic evidence time and GitHub run metadata, adding tools/looprefreshdispatch as a syntax hash target can connect dispatcher AST-shape changes to expired_loop_refresh_commands_must_dispatch_safe_workflows without changing dispatch or candidate artifact contracts.",
+      "claims": [
+        "expired_loop_refresh_commands_must_dispatch_safe_workflows"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/looprefreshdispatch/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/looprefreshdispatch/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/looprefreshdispatch"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-refresh-dispatch-plan",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-refresh-dispatch-closed-loop-candidates",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Loop refresh dispatch syntax coverage may expand only after TestLoopRefreshDispatchBehaviorGolden preserves the deterministic dispatch plan and closed-loop candidate output hash; the syntax target binds dispatcher verifier shape to expired_loop_refresh_commands_must_dispatch_safe_workflows while preserving dispatch, stale-source, and closed-loop candidate artifact contracts.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "control_plane_meta_evidence_expiry_loop",
       "observation": "Control-plane performance, high-traffic audit, and loop-closure audit evidence were machine-readable but lacked generated_at/expires_at windows, so refresh automation could not distinguish fresh open-loop measurements from stale proof artifacts.",
       "hypothesis": "Giving these meta-evidence sidecars the same 24h evidence window as core loop evidence lets refresh dispatch and downstream agents reject stale performance, audit, and closure evidence without embedding dynamic timestamps in generated prose.",
