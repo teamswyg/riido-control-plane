@@ -11611,6 +11611,82 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "module_decomposition_syntax_hash_loop",
+      "observation": "The module decomposition verifier owned the repository surface-area and line-budget ratchet evidence, but its Go package shape remained outside syntax-hash coverage, so agents could change the verifier structure without syntax-to-semantic routing.",
+      "hypothesis": "After a fixture-backed evidence golden locks module decomposition behavior, adding the package as a syntax hash target can connect package ownership, line-budget, and generated-doc verifier shape changes to the module decomposition semantic claim without changing runtime behavior.",
+      "claims": [
+        "module_decomposition_must_preserve_surface_area_ratchet"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/behavior_fixture_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "module-decomposition-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Module decomposition syntax coverage may expand only after TestModuleDecompositionBehaviorGolden preserves the fixture evidence hash; the syntax target binds the verifier package to module_decomposition_must_preserve_surface_area_ratchet while preserving existing module decomposition runtime behavior.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "runtime_cd_ownership_syntax_hash_loop",
       "observation": "The runtime CD ownership SSOT was executable, but its verifier package was outside syntax hash tracking and had more files than the target folder budget, forcing agents to infer deployment-ownership semantics from an untracked tool surface.",
       "hypothesis": "Golden-locking runtime CD ownership evidence before consolidating same-concept helpers lets syntax hash coverage expand without changing public/private deployment ownership behavior.",
