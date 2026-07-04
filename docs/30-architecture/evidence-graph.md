@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `107`
-- claim refs: `155`
-- change refs: `1459`
-- verifier refs: `684`
-- evidence refs: `347`
+- chains: `108`
+- claim refs: `156`
+- change refs: `1463`
+- verifier refs: `689`
+- evidence refs: `351`
 
 ## Compiled Chain Summary
 
-- complete chains: `107` / `107`
-- claim-bound chains: `107`
+- complete chains: `108` / `108`
+- claim-bound chains: `108`
 - unclaimed chains: `0`
 - next-loop targets: `8`
 
@@ -27,8 +27,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `closed_loop_candidate` | `63` | `69` | `969` | `422` | `208` |
 | `operational_readiness_release_harness` | `20` | `35` | `153` | `93` | `63` |
+| `closed_loop_candidate_decision` | `9` | `33` | `178` | `89` | `42` |
 | `ai_thread_history` | `8` | `8` | `114` | `55` | `12` |
-| `closed_loop_candidate_decision` | `8` | `32` | `174` | `84` | `38` |
 | `provider_acceptance_harness` | `5` | `7` | `21` | `15` | `13` |
 | `closed_loop_candidate_intake` | `1` | `1` | `11` | `4` | `7` |
 | `loop_closure_audit` | `1` | `2` | `10` | `7` | `4` |
@@ -130,6 +130,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `control_plane_performance_syntax_hash_loop` | `1` | `4` | `5` | `4` | `closed_loop_candidate` |
 | `control_plane_pressure_syntax_hash_loop` | `1` | `4` | `5` | `4` | `closed_loop_candidate` |
 | `ai_agent_load_syntax_hash_loop` | `1` | `4` | `5` | `4` | `closed_loop_candidate` |
+| `closed_loop_candidate_intake_syntax_hash_loop` | `1` | `4` | `5` | `4` | `closed_loop_candidate_decision` |
 | `control_plane_meta_evidence_expiry_loop` | `2` | `10` | `7` | `4` | `loop_closure_audit` |
 | `server_route_handler_decomposition_loop` | `2` | `38` | `5` | `3` | `closed_loop_candidate` |
 | `completion_progress_completed_terminal_http_proof_loop` | `3` | `10` | `6` | `5` | `operational_readiness_release_harness` |

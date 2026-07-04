@@ -159,6 +159,13 @@
       "mode": "golden_locked_load_evidence_tool"
     },
     {
+      "id": "closed_loop_candidate_intake_guard",
+      "package_path": "tools/closedloopcandidateintake",
+      "golden_command": "go test ./tools/closedloopcandidateintake -run TestClosedLoopCandidateIntakeBehaviorGolden -count=1",
+      "semantic_claim_id": "candidate_intake_must_consume_candidate_artifact",
+      "mode": "golden_locked_candidate_intake_tool"
+    },
+    {
       "id": "pre_commit_baseline_guard",
       "package_path": "tools/precommitbaseline",
       "golden_command": "go test ./tools/precommitbaseline -run TestPreCommitBaselineBehaviorGolden -count=1",
