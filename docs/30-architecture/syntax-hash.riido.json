@@ -753,7 +753,7 @@
     "max_files_per_folder": 15,
     "max_directory_depth": 8,
     "min_coverage_percent": 100,
-    "min_repository_coverage_basis_points": 1,
+    "min_repository_coverage_basis_points": 10000,
     "untracked_sample_limit": 20
   },
   "scoring": {
