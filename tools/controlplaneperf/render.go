@@ -12,6 +12,7 @@ func renderDoc(m manifest, e evidence) string {
 	renderSummary(&b, m, e)
 	renderCommands(&b, m)
 	renderArchitecture(&b, m.ArchitectureComponents)
+	renderPressureDimensions(&b, e.PressureDimensionSummary)
 	renderArchitectureFileIndex(&b, e.FileArchitectureIndex)
 	renderHotPaths(&b, m.HotPaths)
 	renderLoop(&b, m.Loop)

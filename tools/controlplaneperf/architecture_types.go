@@ -31,3 +31,13 @@ type architectureFileEvidence struct {
 	OptimizationCandidates []string `json:"optimization_candidates,omitempty"`
 	TargetVerifierCommands []string `json:"target_verifier_commands,omitempty"`
 }
+
+type pressureDimensionEvidence struct {
+	Dimension              string   `json:"dimension"`
+	ComponentIDs           []string `json:"component_ids"`
+	Files                  []string `json:"files"`
+	HotPathIDs             []string `json:"hot_path_ids"`
+	ObservabilitySignals   []string `json:"observability_signals"`
+	EvidenceRefs           []string `json:"evidence_refs"`
+	TargetVerifierCommands []string `json:"target_verifier_commands"`
+}

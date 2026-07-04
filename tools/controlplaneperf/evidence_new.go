@@ -3,6 +3,7 @@ package main
 func newEvidence(m manifest) evidence {
 	generatedAt, expiresAt := evidenceWindow(controlPlanePerformanceEvidenceTTLHours)
 	fileIndex := architectureFileIndex(m.ArchitectureComponents, m.HotPaths)
+	dimensions := pressureDimensionSummary(fileIndex)
 	return evidence{
 		SchemaVersion:                  evidenceSchema,
 		Status:                         "verified",
@@ -34,6 +35,7 @@ func newEvidence(m manifest) evidence {
 		Assertions:                     append([]string(nil), m.Assertions...),
 		ArchitectureComponents:         architectureEvidenceRows(m.ArchitectureComponents),
 		FileArchitectureIndex:          fileIndex,
+		PressureDimensionSummary:       dimensions,
 		HotPaths:                       hotPathEvidenceRows(m.HotPaths),
 		Candidates:                     candidateEvidenceRows(m.HotPaths),
 		Loop:                           m.Loop,

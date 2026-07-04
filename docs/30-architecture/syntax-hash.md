@@ -28,7 +28,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `go_ci_baseline_guard` | `tools/gocibaseline` | 100% | `47cc7e2cf7ff` | `go_ci_baseline_must_preserve_broad_ci_contract` |
 | `module_decomposition_guard` | `tools/moduledecomposition` | 100% | `f82a03c89ad7` | `module_decomposition_must_preserve_surface_area_ratchet` |
 | `control_plane_audit_guard` | `tools/controlplaneaudit` | 100% | `b6962d896e85` | `control_plane_performance_hot_paths_must_emit_evidence` |
-| `control_plane_performance_guard` | `tools/controlplaneperf` | 100% | `a7a0b212b849` | `control_plane_performance_hot_paths_must_emit_evidence` |
+| `control_plane_performance_guard` | `tools/controlplaneperf` | 100% | `66d182bc1546` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `control_plane_pressure_guard` | `tools/controlplanepressure` | 100% | `cc950ae361a6` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `ai_agent_load_guard` | `tools/aiagentload` | 100% | `90f7c74d7074` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `harness_promotion_guard` | `tools/harnesspromotion` | 100% | `95c7fdfe7029` | `harness_promotion_must_run_after_failure` |
@@ -117,8 +117,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `2750`
-- tracked files: `2750`
+- Go files: `2752`
+- tracked files: `2752`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -133,12 +133,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `2750`
-- unique syntax hashes: `2562`
+- tracked files: `2752`
+- unique syntax hashes: `2564`
 - compression gain: `188`
 - analysis reduction: `6.83%`
 - collision count: `0`
-- relocation mappings: `2750`
+- relocation mappings: `2752`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `106`
