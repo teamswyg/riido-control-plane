@@ -9,7 +9,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | Target | Package | Coverage | Syntax Hash | Semantic Claim |
 | --- | --- | ---: | --- | --- |
 | `contextmap_spike` | `tools/contextmap` | 100% | `a11308340a61` | `context_map_must_guard_public_boundaries` |
-| `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `c5770c70ddc3` | `context_map_must_guard_public_boundaries` |
+| `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `c03414e31116` | `context_map_must_guard_public_boundaries` |
 | `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `863870c7d3fa` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
 | `awsadapters_facade` | `awsadapters` | 100% | `6e8fc7dd43bf` | `public_aws_adapter_facade_must_preserve_contract` |
 | `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `2ff9e131e590` | `runtime_adapter_config_must_preserve_public_env_contract` |

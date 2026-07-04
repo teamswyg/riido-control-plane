@@ -37,32 +37,33 @@ func TestSyntaxHashGraphUsesGoldenLockedContextMap(t *testing.T) {
 		graph.Repository.UntrackedFiles != 0 || len(graph.Repository.UntrackedSample) != 0 {
 		t.Fatalf("expected repository syntax coverage to be complete: %+v", graph.Repository)
 	}
+	if graph.Constraints.MinRepositoryCoverageBasisPoint != 10000 {
+		t.Fatalf("repository coverage floor = %+v", graph.Constraints)
+	}
 	if len(target.Relocations) != target.TrackedFiles {
 		t.Fatalf("missing relocation evidence: %+v", target.Relocations)
 	}
 }
 
 func TestSyntaxHashToolBehaviorGolden(t *testing.T) {
-	root := filepath.Join("..", "..")
 	var m manifest
-	if err := readJSON(repoPath(root, defaultManifest), &m); err != nil {
+	if err := readJSON(repoPath("../..", defaultManifest), &m); err != nil {
 		t.Fatal(err)
 	}
-	m.ID = "syntaxhash-tool-golden"
 	m.GeneratedDoc = filepath.Join(t.TempDir(), "syntax-hash.md")
 	m.Targets = m.Targets[:1]
+	m.Constraints.MinRepositoryCoverageBasisPoint = 1
 	manifestPath := filepath.Join(t.TempDir(), "manifest.json")
 	if err := writeJSON(manifestPath, m); err != nil {
 		t.Fatal(err)
 	}
 	out := filepath.Join(t.TempDir(), "syntax-hash.json")
-	if err := run(options{Repo: root, Manifest: manifestPath, EvidenceOut: out}); err != nil {
+	if err := run(options{Repo: "../..", Manifest: manifestPath, EvidenceOut: out}); err != nil {
 		t.Fatal(err)
 	}
 	graph := readGraph(t, out)
-	target := graph.Targets[0]
-	if target.PackageHash != "a11308340a6110b8f76064273920d7d2d4fb057cb654e525997679659fd1f622" {
-		t.Fatalf("contextmap syntax package hash drifted: %s", target.PackageHash)
+	if got := graph.Targets[0].PackageHash; got != "a11308340a6110b8f76064273920d7d2d4fb057cb654e525997679659fd1f622" {
+		t.Fatalf("contextmap syntax package hash drifted: %s", got)
 	}
 }
 
