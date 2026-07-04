@@ -66,6 +66,8 @@ type scoreRun struct {
 	RelocationMappings int    `json:"relocation_mappings"`
 	MissingRelocations int    `json:"missing_relocation_mappings"`
 	RelocationCoverage int    `json:"relocation_coverage_basis_points"`
+	GoldenCommands     int    `json:"golden_commands"`
+	MissingGoldens     int    `json:"missing_golden_commands"`
 	ConstraintGate     string `json:"constraint_gate"`
 	Formula            string `json:"formula"`
 }

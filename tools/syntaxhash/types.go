@@ -11,8 +11,11 @@ type manifest struct {
 	ArtifactRoots    []string       `json:"artifact_roots"`
 	Targets          []targetConfig `json:"targets"`
 	Constraints      constraints    `json:"constraints"`
-	Scoring          scoring        `json:"scoring"`
-	Loop             evidenceLoop   `json:"loop"`
+	Scoring          struct {
+		EfficiencyWeight  int `json:"efficiency_weight"`
+		CompressionWeight int `json:"compression_weight"`
+	} `json:"scoring"`
+	Loop evidenceLoop `json:"loop"`
 }
 
 type targetConfig struct {
@@ -32,11 +35,6 @@ type constraints struct {
 	UntrackedSampleLimit            int `json:"untracked_sample_limit"`
 }
 
-type scoring struct {
-	EfficiencyWeight  int `json:"efficiency_weight"`
-	CompressionWeight int `json:"compression_weight"`
-}
-
 type evidenceLoop struct {
 	Observation   string `json:"observation"`
 	Hypothesis    string `json:"hypothesis"`
@@ -45,8 +43,8 @@ type evidenceLoop struct {
 	Retrospective string `json:"retrospective"`
 }
 
-func scoreGraph(graph syntaxGraph, cfg scoring) scoreRun {
-	files, moves, collisions, hashes := 0, 0, 0, map[string]struct{}{}
+func scoreGraph(graph syntaxGraph, m manifest) scoreRun {
+	files, moves, collisions, goldens, hashes := 0, 0, 0, 0, map[string]struct{}{}
 	for _, target := range graph.Targets {
 		files += target.TrackedFiles
 		moves += len(target.Relocations)
@@ -55,16 +53,22 @@ func scoreGraph(graph syntaxGraph, cfg scoring) scoreRun {
 			hashes[file.Hash] = struct{}{}
 		}
 	}
+	for _, target := range m.Targets {
+		if target.GoldenCommand != "" {
+			goldens++
+		}
+	}
 	compression := files - len(hashes)
-	efficiency := files * cfg.EfficiencyWeight
-	compressed := compression * cfg.CompressionWeight
 	return scoreRun{
 		TrackedFiles: files, UniqueSyntaxHashes: len(hashes), CompressionGain: compression,
-		EfficiencyWeight: cfg.EfficiencyWeight, CompressionWeight: cfg.CompressionWeight,
-		EfficiencyScore: efficiency, CompressionScore: compressed, WeightedScore: efficiency + compressed,
-		CollisionCount: collisions, RelocationMappings: moves, MissingRelocations: files - moves,
+		EfficiencyWeight: m.Scoring.EfficiencyWeight, CompressionWeight: m.Scoring.CompressionWeight,
+		EfficiencyScore:  files * m.Scoring.EfficiencyWeight,
+		CompressionScore: compression * m.Scoring.CompressionWeight,
+		WeightedScore:    files*m.Scoring.EfficiencyWeight + compression*m.Scoring.CompressionWeight,
+		CollisionCount:   collisions, RelocationMappings: moves, MissingRelocations: files - moves,
 		RelocationCoverage: basisPoints(moves, files),
-		ConstraintGate:     "coverage>=floor && collisions==0 && relocations==tracked && physical_violations==0",
-		Formula:            "tracked_files*efficiency_weight + compression_gain*compression_weight",
+		GoldenCommands:     goldens, MissingGoldens: len(m.Targets) - goldens,
+		ConstraintGate: "coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0",
+		Formula:        "tracked_files*efficiency_weight + compression_gain*compression_weight",
 	}
 }

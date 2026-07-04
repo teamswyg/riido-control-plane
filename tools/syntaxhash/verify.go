@@ -7,7 +7,10 @@ func verifyGraph(m manifest, graph syntaxGraph) error {
 		return fmt.Errorf("repository coverage %d bp below %d bp",
 			graph.Repository.CoverageBasisPoints, m.Constraints.MinRepositoryCoverageBasisPoint)
 	}
-	for _, target := range graph.Targets {
+	for i, target := range graph.Targets {
+		if m.Targets[i].GoldenCommand == "" {
+			return fmt.Errorf("target %s missing golden command", target.ID)
+		}
 		if target.Coverage < m.Constraints.MinCoveragePercent {
 			return fmt.Errorf("target %s coverage %d below %d",
 				target.ID, target.Coverage, m.Constraints.MinCoveragePercent)

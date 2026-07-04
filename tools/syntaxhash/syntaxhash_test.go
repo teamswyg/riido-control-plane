@@ -1,12 +1,9 @@
 package main
 
-import (
-	"path/filepath"
-	"testing"
-)
+import "testing"
 
 func TestSyntaxHashGraphUsesGoldenLockedContextMap(t *testing.T) {
-	out := filepath.Join(t.TempDir(), "syntax-hash.json")
+	out := t.TempDir() + "/syntax-hash.json"
 	if err := mainRun([]string{"-evidence-out", out}); err != nil {
 		t.Fatal(err)
 	}
@@ -36,6 +33,9 @@ func TestSyntaxHashGraphUsesGoldenLockedContextMap(t *testing.T) {
 		graph.Score.RelocationMappings != graph.Score.TrackedFiles {
 		t.Fatalf("incomplete safety evidence: %+v", graph.Score)
 	}
+	if graph.Score.MissingGoldens != 0 || graph.Score.GoldenCommands != len(graph.Targets) {
+		t.Fatalf("incomplete golden evidence: %+v", graph.Score)
+	}
 	if len(target.Relocations) != target.TrackedFiles {
 		t.Fatalf("missing relocation evidence: %+v", target.Relocations)
 	}
@@ -46,14 +46,14 @@ func TestSyntaxHashToolBehaviorGolden(t *testing.T) {
 	if err := readJSON(repoPath("../..", defaultManifest), &m); err != nil {
 		t.Fatal(err)
 	}
-	m.GeneratedDoc = filepath.Join(t.TempDir(), "syntax-hash.md")
+	m.GeneratedDoc = t.TempDir() + "/syntax-hash.md"
 	m.Targets = m.Targets[:1]
 	m.Constraints.MinRepositoryCoverageBasisPoint = 1
-	manifestPath := filepath.Join(t.TempDir(), "manifest.json")
+	manifestPath := t.TempDir() + "/manifest.json"
 	if err := writeJSON(manifestPath, m); err != nil {
 		t.Fatal(err)
 	}
-	out := filepath.Join(t.TempDir(), "syntax-hash.json")
+	out := t.TempDir() + "/syntax-hash.json"
 	if err := run(options{Repo: "../..", Manifest: manifestPath, EvidenceOut: out}); err != nil {
 		t.Fatal(err)
 	}

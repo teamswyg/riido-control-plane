@@ -623,36 +623,42 @@
     {
       "id": "generated_smoke_matrix_guard",
       "package_path": "tools/aigeneratedsmokematrix",
+      "golden_command": "go test ./tools/aigeneratedsmokematrix -run TestRunWritesBehaviorGoldenEvidence -count=1",
       "semantic_claim_id": "generated_endpoint_smoke_matrix_must_remain_contract_gate",
       "mode": "golden_locked_generated_smoke_matrix_tool"
     },
     {
       "id": "generated_smoke_matrix_doccheck_adapter",
       "package_path": "tools/aigeneratedsmokematrix/doccheck",
+      "golden_command": "go test ./tools/aigeneratedsmokematrix -run TestRunWritesBehaviorGoldenEvidence -count=1",
       "semantic_claim_id": "generated_endpoint_smoke_matrix_must_remain_contract_gate",
       "mode": "golden_locked_generated_smoke_matrix_adapter"
     },
     {
       "id": "generated_smoke_matrix_path_adapter",
       "package_path": "tools/aigeneratedsmokematrix/pathutil",
+      "golden_command": "go test ./tools/aigeneratedsmokematrix -run TestRunWritesBehaviorGoldenEvidence -count=1",
       "semantic_claim_id": "generated_endpoint_smoke_matrix_must_remain_contract_gate",
       "mode": "golden_locked_generated_smoke_matrix_adapter"
     },
     {
       "id": "generated_smoke_matrix_rendertext_adapter",
       "package_path": "tools/aigeneratedsmokematrix/rendertext",
+      "golden_command": "go test ./tools/aigeneratedsmokematrix -run TestRunWritesBehaviorGoldenEvidence -count=1",
       "semantic_claim_id": "generated_endpoint_smoke_matrix_must_remain_contract_gate",
       "mode": "golden_locked_generated_smoke_matrix_adapter"
     },
     {
       "id": "generated_smoke_matrix_requirements_adapter",
       "package_path": "tools/aigeneratedsmokematrix/requirements",
+      "golden_command": "go test ./tools/aigeneratedsmokematrix -run TestRunWritesBehaviorGoldenEvidence -count=1",
       "semantic_claim_id": "generated_endpoint_smoke_matrix_must_remain_contract_gate",
       "mode": "golden_locked_generated_smoke_matrix_adapter"
     },
     {
       "id": "generated_smoke_matrix_set_adapter",
       "package_path": "tools/aigeneratedsmokematrix/setutil",
+      "golden_command": "go test ./tools/aigeneratedsmokematrix -run TestRunWritesBehaviorGoldenEvidence -count=1",
       "semantic_claim_id": "generated_endpoint_smoke_matrix_must_remain_contract_gate",
       "mode": "golden_locked_generated_smoke_matrix_adapter"
     },
