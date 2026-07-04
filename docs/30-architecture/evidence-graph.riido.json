@@ -9920,6 +9920,78 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "ai_agent_load_syntax_hash_loop",
+      "observation": "The AI Agent load harness already turns live endpoint traffic, status counts, request rates, latency, load-generator resources, capacity estimates, findings, and optional pprof metadata into redacted evidence, but its Go package shape remained outside syntax-hash coverage.",
+      "hypothesis": "After the redacted load report projection is golden-locked with deterministic timestamps, resource deltas, status rows, and pprof metadata, adding tools/aiagentload as a syntax hash target can connect live-load evidence AST-shape changes to the existing control-plane performance semantic claim without changing endpoint contracts or live load behavior.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentload/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentload/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentload"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-load-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "AI Agent load syntax coverage may expand only after TestAIAgentLoadBehaviorGolden preserves the deterministic redacted load report hash; the syntax target binds live-load verifier shape to control_plane_performance_hot_paths_must_emit_evidence while preserving API contracts and live load evidence semantics.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "control_plane_meta_evidence_expiry_loop",
       "observation": "Control-plane performance, high-traffic audit, and loop-closure audit evidence were machine-readable but lacked generated_at/expires_at windows, so refresh automation could not distinguish fresh open-loop measurements from stale proof artifacts.",
       "hypothesis": "Giving these meta-evidence sidecars the same 24h evidence window as core loop evidence lets refresh dispatch and downstream agents reject stale performance, audit, and closure evidence without embedding dynamic timestamps in generated prose.",
