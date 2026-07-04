@@ -11,7 +11,7 @@ import (
 
 const workflowEvidenceGoldenSHA256 = "2c5b6192fc4fe586f064a6a5c8284d5a68d2bf2f6df306cdb58e403481e108b2"
 
-func TestWorkflowEvidence(t *testing.T) {
+func TestWorkflowEvidenceBehaviorGolden(t *testing.T) {
 	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-24T00:00:00Z")
 	out := filepath.Join(t.TempDir(), "evidence.json")
 	if err := mainRun([]string{"-repo", "../..", "-evidence-out", out}); err != nil {
