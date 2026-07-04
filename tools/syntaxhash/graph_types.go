@@ -57,6 +57,7 @@ type scoreRun struct {
 	TrackedFiles       int    `json:"tracked_files"`
 	UniqueSyntaxHashes int    `json:"unique_syntax_hashes"`
 	CompressionGain    int    `json:"compression_gain"`
+	AnalysisReduction  int    `json:"analysis_reduction_basis_points"`
 	EfficiencyWeight   int    `json:"efficiency_weight"`
 	CompressionWeight  int    `json:"compression_weight"`
 	EfficiencyScore    int    `json:"efficiency_score"`

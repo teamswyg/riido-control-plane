@@ -26,7 +26,8 @@ func TestSyntaxHashGraphUsesGoldenLockedContextMap(t *testing.T) {
 		t.Fatalf("repository coverage floor = %+v", graph.Constraints)
 	}
 	if graph.Score.WeightedScore != graph.Score.EfficiencyScore+graph.Score.CompressionScore ||
-		graph.Score.ConstraintGate == "" || graph.Score.Formula == "" {
+		graph.Score.AnalysisReduction == 0 || graph.Score.ConstraintGate == "" ||
+		graph.Score.Formula == "" {
 		t.Fatalf("incomplete score evidence: %+v", graph.Score)
 	}
 	if graph.Score.CollisionCount != 0 || graph.Score.MissingRelocations != 0 ||
