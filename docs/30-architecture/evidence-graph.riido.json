@@ -6995,6 +6995,69 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "evidence_graph_syntax_hash_loop",
+      "observation": "The evidence graph tool owns generated reasoning docs, evidence artifacts, impact checks, workflow trigger verification, and compiled chain summaries, but its Go package shape remained outside syntax-hash coverage.",
+      "hypothesis": "After generated reasoning doc and evidence JSON output are golden-locked with deterministic evidence time, adding tools/evidencegraph as a syntax hash target can connect evidence-graph AST-shape changes to evidence_graph_evidence_must_expose_full_chain without changing reasoning graph runtime behavior.",
+      "claims": [
+        "evidence_graph_evidence_must_expose_full_chain"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Evidence graph syntax coverage may expand only after TestEvidenceGraphBehaviorGolden preserves the deterministic generated doc and evidence JSON hash; the syntax target binds reasoning graph tool shape to evidence_graph_evidence_must_expose_full_chain while preserving graph verification behavior.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "loop_registry_loop_surface_evidence_loop",
       "observation": "Loop Registry manifest records already define observes, verifies, evidence, refresh workflow, expiry, fails_when, promotions, and providers, but the evidence artifact exposed claim surfaces and refresh plans without a direct loop surface for agents that skip the manifest.",
       "hypothesis": "Publishing loop_surfaces in loop-registry evidence lets agents derive QA scope directly from evidence JSON, including newly added verify tokens such as stale partial candidate subject checks, while claim binding and generated-doc checks still prevent drift from the executable manifest.",
