@@ -10064,6 +10064,78 @@
       "next_loop": "closed_loop_candidate_decision"
     },
     {
+      "id": "closed_loop_candidate_decision_syntax_hash_loop",
+      "observation": "The closed-loop candidate decision verifier already consumes intake candidate artifacts, selects decision records or subject-kind templates, exposes selected next commands, and publishes decision evidence, but its Go package shape remained outside syntax-hash coverage.",
+      "hypothesis": "After candidate decision evidence is golden-locked with deterministic freshness and sanitized fixture paths, adding tools/closedloopcandidatedecision as a syntax hash target can connect decision verifier AST-shape changes to candidate_decisions_must_match_consumed_candidates without changing candidate or decision evidence contracts.",
+      "claims": [
+        "candidate_decisions_must_match_consumed_candidates"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/syntax-hash.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/closedloopcandidatedecision"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-decision-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Closed-loop candidate decision syntax coverage may expand only after TestClosedLoopCandidateDecisionBehaviorGolden preserves the deterministic decision evidence hash; the syntax target binds decision verifier shape to candidate_decisions_must_match_consumed_candidates while preserving candidate artifact, decision evidence, and command evidence contracts.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "control_plane_meta_evidence_expiry_loop",
       "observation": "Control-plane performance, high-traffic audit, and loop-closure audit evidence were machine-readable but lacked generated_at/expires_at windows, so refresh automation could not distinguish fresh open-loop measurements from stale proof artifacts.",
       "hypothesis": "Giving these meta-evidence sidecars the same 24h evidence window as core loop evidence lets refresh dispatch and downstream agents reject stale performance, audit, and closure evidence without embedding dynamic timestamps in generated prose.",
