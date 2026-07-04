@@ -671,6 +671,12 @@
       "must_not_own": "runtime behavior, semantic hash definition, or package refactoring execution"
     },
     {
+      "path": "tools/syntaxhash/duplicates",
+      "kind": "meta-evidence-adapter",
+      "role": "AST duplicate-shape evidence adapter for syntax-hash graph runs.",
+      "must_not_own": "syntax hash normalization, semantic hash definition, or refactoring execution"
+    },
+    {
       "path": "tools/webfrontendapi",
       "kind": "evidence-tool",
       "role": "Web frontend API CORS generated reader and verifier.",

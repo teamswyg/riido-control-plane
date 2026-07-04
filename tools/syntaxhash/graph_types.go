@@ -6,6 +6,7 @@ type syntaxGraph struct {
 	Status        string        `json:"status"`
 	Repository    repoCoverage  `json:"repository_coverage"`
 	Targets       []targetGraph `json:"targets"`
+	Duplicates    duplicateRun  `json:"duplicate_shapes"`
 	Constraints   constraintRun `json:"constraints"`
 	Score         scoreRun      `json:"score"`
 }
@@ -36,6 +37,7 @@ type targetGraph struct {
 type fileHash struct {
 	Path       string `json:"path"`
 	Hash       string `json:"syntax_hash"`
+	ShapeHash  string `json:"shape_hash"`
 	Shape      string `json:"shape"`
 	Normalized string `json:"normalized"`
 }
@@ -51,24 +53,4 @@ type constraintRun struct {
 	MaxDepth                        int `json:"max_directory_depth"`
 	MinRepositoryCoverageBasisPoint int `json:"min_repository_coverage_basis_points"`
 	Violations                      int `json:"violations"`
-}
-
-type scoreRun struct {
-	TrackedFiles       int    `json:"tracked_files"`
-	UniqueSyntaxHashes int    `json:"unique_syntax_hashes"`
-	CompressionGain    int    `json:"compression_gain"`
-	AnalysisReduction  int    `json:"analysis_reduction_basis_points"`
-	EfficiencyWeight   int    `json:"efficiency_weight"`
-	CompressionWeight  int    `json:"compression_weight"`
-	EfficiencyScore    int    `json:"efficiency_score"`
-	CompressionScore   int    `json:"compression_score"`
-	WeightedScore      int    `json:"weighted_score"`
-	CollisionCount     int    `json:"collision_count"`
-	RelocationMappings int    `json:"relocation_mappings"`
-	MissingRelocations int    `json:"missing_relocation_mappings"`
-	RelocationCoverage int    `json:"relocation_coverage_basis_points"`
-	GoldenCommands     int    `json:"golden_commands"`
-	MissingGoldens     int    `json:"missing_golden_commands"`
-	ConstraintGate     string `json:"constraint_gate"`
-	Formula            string `json:"formula"`
 }

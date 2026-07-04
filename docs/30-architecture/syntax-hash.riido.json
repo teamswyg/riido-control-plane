@@ -10,6 +10,16 @@
   "artifact_roots": [
     "tools/syntaxhash"
   ],
+  "duplicate_shape_policy": {
+    "enabled": true,
+    "group_by": "ast_shape_hash",
+    "package_prefixes": [
+      "tools/",
+      "internal/"
+    ],
+    "max_groups": 20,
+    "status": "evidence_only"
+  },
   "targets": [
     {
       "id": "contextmap_spike",
@@ -24,6 +34,13 @@
       "golden_command": "go test ./tools/syntaxhash -run TestSyntaxHashToolBehaviorGolden -count=1",
       "semantic_claim_id": "context_map_must_guard_public_boundaries",
       "mode": "golden_locked_metaprogramming_tool"
+    },
+    {
+      "id": "syntaxhash_duplicate_shapes_policy",
+      "package_path": "tools/syntaxhash/duplicates",
+      "golden_command": "go test ./tools/syntaxhash/duplicates -run TestBuildGroupsSharedShapes -count=1",
+      "semantic_claim_id": "context_map_must_guard_public_boundaries",
+      "mode": "golden_locked_ast_duplicate_shape_policy"
     },
     {
       "id": "loop_registry_tool_guard",

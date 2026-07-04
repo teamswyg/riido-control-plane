@@ -9970,6 +9970,10 @@
           "path": "docs/30-architecture/loop-registry.riido.json"
         },
         {
+          "kind": "test",
+          "path": "tools/syntaxhash/duplicates/build_test.go"
+        },
+        {
           "kind": "workflow",
           "path": ".github/workflows/syntax-hash.yml"
         }
@@ -9986,6 +9990,10 @@
         {
           "kind": "tool",
           "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "test",
+          "path": "tools/syntaxhash/duplicates/build_test.go"
         },
         {
           "kind": "tool",
@@ -10018,7 +10026,7 @@
           "redacted": true
         }
       ],
-      "decision": "Control-plane performance syntax coverage may expand only after TestControlPlanePerformanceBehaviorGolden preserves the deterministic performance evidence hash; the syntax target binds performance verifier shape to control_plane_performance_hot_paths_must_emit_evidence while preserving API contracts and evidence output semantics.",
+      "decision": "Control-plane performance syntax coverage may expand only after TestControlPlanePerformanceBehaviorGolden preserves the deterministic performance evidence hash; the syntax target binds performance verifier shape to control_plane_performance_hot_paths_must_emit_evidence while preserving API contracts and evidence output semantics. Shared syntax-hash duplicate-shape evidence remains evidence_only: it can reveal hot-path AST shape overlap for future architecture routing without claiming a runtime performance optimization or changing endpoint behavior.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -11005,6 +11013,10 @@
           "path": "tools/syntaxhash"
         },
         {
+          "kind": "tool",
+          "path": "tools/syntaxhash/duplicates"
+        },
+        {
           "kind": "test",
           "path": "tools/contextmap/golden_behavior_test.go"
         },
@@ -11367,6 +11379,10 @@
           "path": "tools/syntaxhash"
         },
         {
+          "kind": "test",
+          "path": "tools/syntaxhash/duplicates/build_test.go"
+        },
+        {
           "kind": "tool",
           "path": "tools/closedloopcandidateintake"
         },
@@ -11392,7 +11408,7 @@
           "redacted": true
         }
       ],
-      "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/agentruntimebinding, tools/assignmentjournal, tools/cloudwatchemf, tools/saascontrolplane, tools/storesaferouting, tools/snapshotcqrsgate, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, tools/aiagentrisk, tools/migrationledger, tools/metricshttpadapter, tools/agentcatalogrbac, tools/reviewaccountseed, tools/integrationmatrix, tools/openquestions, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocation mappings, score, and generated artifact physical constraints. Repository-wide Go syntax coverage is now a hard 10000-basis-point constraint so the generated evidence cannot bless partial repository tracking after the graph reaches 2739/2739 tracked Go files. Score evidence now exposes tracked file count, unique syntax hash count, compression gain, analysis reduction basis points, manifest weights, weighted score, formula, and the constraint gate that must pass before optimization scoring is meaningful; the efficiency score uses analysis-reduction basis points instead of rewarding uncompressed file count. Relocation and collision safety are now graph-level score evidence too: collision count, relocation mappings, missing relocation mappings, and relocation coverage are visible beside the weighted score, and the constraint gate requires relocations to match tracked files before scoring is meaningful. Golden command coverage is now graph-level score evidence as well: every syntax target must declare the behavior golden command that protects it, generated smoke matrix helper targets inherit the root smoke-matrix golden, and missing golden commands fail before scoring is meaningful.",
+      "decision": "Adopt the syntax hash graph as a staged golden-first spike: contextmap, awsadapters, cmd/riido_ai_server runtime config, internal/repoidentity, internal/contractscompat, tools/requestauth, tools/healthreadycmd, tools/runtimeboundary, tools/configreference, tools/agentruntimebinding, tools/assignmentjournal, tools/cloudwatchemf, tools/saascontrolplane, tools/storesaferouting, tools/snapshotcqrsgate, tools/publicpageslive, tools/gocibaseline, tools/webfrontendapi, tools/aiagentrisk, tools/migrationledger, tools/metricshttpadapter, tools/agentcatalogrbac, tools/reviewaccountseed, tools/integrationmatrix, tools/openquestions, and the syntaxhash tool are golden-locked before analysis, semantic hash generation remains the existing Loop Registry implementation, and syntax hash evidence records target coverage, repository coverage, collision-free hashes, relocations, score, generated artifact physical constraints, and evidence-only AST duplicate-shape groups. Repository-wide Go syntax coverage is now a hard 10000-basis-point constraint so the generated evidence cannot bless partial repository tracking after the graph reaches 2739/2739 tracked Go files. Score evidence now exposes tracked file count, unique syntax hash count, compression gain, analysis reduction basis points, manifest weights, weighted score, formula, and the constraint gate that must pass before optimization scoring is meaningful; the efficiency score uses analysis-reduction basis points instead of rewarding uncompressed file count. Relocation and collision safety are now graph-level score evidence too: collision count, relocation mappings, missing relocation mappings, and relocation coverage are visible beside the weighted score, and the constraint gate requires relocations to match tracked files before scoring is meaningful. Golden command coverage is now graph-level score evidence as well: every syntax target must declare the behavior golden command that protects it, generated smoke matrix helper targets inherit the root smoke-matrix golden, and missing golden commands fail before scoring is meaningful. Duplicate-shape evidence keeps filename-sensitive syntax_hash unchanged while adding shape_hash grouping across tools/ and internal/, so future parallel refactors can see repeated AST forms before moving code or creating merge-conflict-heavy abstractions.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

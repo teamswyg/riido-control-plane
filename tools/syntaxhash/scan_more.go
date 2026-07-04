@@ -20,6 +20,7 @@ func scanFile(root, path string) (fileHash, error) {
 	return fileHash{
 		Path:       filepath.ToSlash(rel),
 		Hash:       hashString(normalized),
+		ShapeHash:  hashString(shape),
 		Shape:      shape,
 		Normalized: normalized,
 	}, nil
