@@ -124,6 +124,13 @@
       "mode": "golden_locked_go_ci_baseline_tool"
     },
     {
+      "id": "pre_commit_baseline_guard",
+      "package_path": "tools/precommitbaseline",
+      "golden_command": "go test ./tools/precommitbaseline -run TestPreCommitBaselineBehaviorGolden -count=1",
+      "semantic_claim_id": "pre_commit_baseline_evidence_must_self_expire",
+      "mode": "golden_locked_pre_commit_baseline_tool"
+    },
+    {
       "id": "web_frontend_api_guard",
       "package_path": "tools/webfrontendapi",
       "golden_command": "go test ./tools/webfrontendapi -run TestWebFrontendAPIBehaviorGolden -count=1",
