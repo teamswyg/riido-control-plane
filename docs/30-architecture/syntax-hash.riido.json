@@ -739,6 +739,13 @@
       "golden_command": "go test ./tools/operationalreadiness -run TestOperationalReadinessBehaviorGolden -count=1",
       "semantic_claim_id": "operational_readiness_checks_must_bind_release_items_to_evidence",
       "mode": "golden_locked_operational_readiness_tool"
+    },
+    {
+      "id": "riido_ai_server_guard",
+      "package_path": "internal/riidoaiserver",
+      "golden_command": "go test ./internal/riidoaiserver -run TestRiidoAIServerBehaviorGolden -count=1",
+      "semantic_claim_id": "server_route_handlers_must_stay_semantically_split",
+      "mode": "golden_locked_ai_server_route_surface"
     }
   ],
   "constraints": {
