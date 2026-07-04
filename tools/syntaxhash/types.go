@@ -44,31 +44,5 @@ type evidenceLoop struct {
 }
 
 func scoreGraph(graph syntaxGraph, m manifest) scoreRun {
-	files, moves, collisions, goldens, hashes := 0, 0, 0, 0, map[string]struct{}{}
-	for _, target := range graph.Targets {
-		files += target.TrackedFiles
-		moves += len(target.Relocations)
-		collisions += target.CollisionCount
-		for _, file := range target.FileHashes {
-			hashes[file.Hash] = struct{}{}
-		}
-	}
-	for _, target := range m.Targets {
-		if target.GoldenCommand != "" {
-			goldens++
-		}
-	}
-	compression := files - len(hashes)
-	return scoreRun{
-		TrackedFiles: files, UniqueSyntaxHashes: len(hashes), CompressionGain: compression,
-		EfficiencyWeight: m.Scoring.EfficiencyWeight, CompressionWeight: m.Scoring.CompressionWeight,
-		EfficiencyScore:  files * m.Scoring.EfficiencyWeight,
-		CompressionScore: compression * m.Scoring.CompressionWeight,
-		WeightedScore:    files*m.Scoring.EfficiencyWeight + compression*m.Scoring.CompressionWeight,
-		CollisionCount:   collisions, RelocationMappings: moves, MissingRelocations: files - moves,
-		RelocationCoverage: basisPoints(moves, files),
-		GoldenCommands:     goldens, MissingGoldens: len(m.Targets) - goldens,
-		ConstraintGate: "coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0",
-		Formula:        "tracked_files*efficiency_weight + compression_gain*compression_weight",
-	}
+	return scoreGraphRun(graph, m)
 }
