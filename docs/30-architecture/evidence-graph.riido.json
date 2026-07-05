@@ -10031,8 +10031,8 @@
     },
     {
       "id": "control_plane_pressure_syntax_hash_loop",
-      "observation": "The local control-plane pressure harness already measures endpoint, fanout, assignment waiter, tool approval waiter, progress ingest, allocation, CPU, goroutine, profile, capacity, and candidate-adoption surfaces, but its Go package shape remained outside syntax-hash coverage.",
-      "hypothesis": "After the pressure closed-loop candidate projection is golden-locked with deterministic source time and GitHub run metadata, adding tools/controlplanepressure as a syntax hash target can connect pressure-harness AST-shape changes to the existing control-plane performance semantic claim without changing endpoint contracts or live pressure measurements.",
+      "observation": "The local control-plane pressure harness already measures endpoint, fanout, assignment waiter, tool approval waiter, progress ingest, allocation, CPU, goroutine, profile, capacity, and candidate-adoption surfaces, but its Go package shape remained outside syntax-hash coverage and manual pprof runs had to execute every pressure scenario even when a single hot path was under investigation.",
+      "hypothesis": "After the pressure closed-loop candidate projection is golden-locked with deterministic source time and GitHub run metadata, adding tools/controlplanepressure as a syntax hash target plus a verified scenario filter can connect pressure-harness AST-shape changes to the existing control-plane performance semantic claim while reducing manual pprof cost without changing endpoint contracts or live pressure measurements.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
@@ -10040,6 +10040,18 @@
         {
           "kind": "test",
           "path": "tools/controlplanepressure/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/controlplanepressure/scenario_filter.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplanepressure/scenario_filter_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplanepressure/scenario_filter_evidence_test.go"
         },
         {
           "kind": "manifest",
@@ -10058,6 +10070,14 @@
         {
           "kind": "test",
           "path": "tools/controlplanepressure/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplanepressure/scenario_filter_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplanepressure/scenario_filter_evidence_test.go"
         },
         {
           "kind": "tool",
@@ -10098,7 +10118,7 @@
           "redacted": true
         }
       ],
-      "decision": "Control-plane pressure syntax coverage may expand only after TestControlPlanePressureBehaviorGolden preserves the deterministic closed-loop candidate projection hash; the syntax target binds pressure verifier shape to control_plane_performance_hot_paths_must_emit_evidence while preserving API contracts and live pressure evidence semantics.",
+      "decision": "Control-plane pressure syntax coverage may expand only after TestControlPlanePressureBehaviorGolden preserves the deterministic closed-loop candidate projection hash; the pressure harness now verifies a scenario filter so manual pprof can target one measured hot path such as http_endpoint_threads_v3, while the syntax target binds pressure verifier shape to control_plane_performance_hot_paths_must_emit_evidence and preserves API contracts and live pressure evidence semantics.",
       "next_loop": "closed_loop_candidate"
     },
     {

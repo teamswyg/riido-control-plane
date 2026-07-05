@@ -13,7 +13,11 @@ type sample struct {
 func run(cfg config) (pressureReport, error) {
 	started := time.Now().UTC()
 	report := pressureReport{SchemaVersion: evidenceSchema, StartedAt: started, Fixture: fixtureSummary{Threads: cfg.Threads, Lines: cfg.Lines}}
-	for _, sc := range scenarios() {
+	selected, err := selectedScenarios(cfg)
+	if err != nil {
+		return pressureReport{}, err
+	}
+	for _, sc := range selected {
 		for _, concurrency := range cfg.Concurrencies {
 			row, err := runOne(cfg, sc, concurrency)
 			if err != nil {
