@@ -3296,8 +3296,8 @@
     },
     {
       "id": "generated_endpoint_smoke_matrix_exclusion_loop",
-      "observation": "The generated endpoint smoke matrix workflow looked harness-like by filename, but it is intended to be a contract and generator gate; without a replacement claim/evidence binding, agents had to trust prose to know why it was excluded from harness failure promotion.",
-      "hypothesis": "Binding the workflow to a dedicated contract-gate claim, smoke matrix manifest, generated doc, OpenAPI parity tests, generated endpoint smoke tests, and uploaded evidence artifact makes the exclusion executable and keeps future workflow changes from silently becoming unpromoted QA harnesses.",
+      "observation": "The generated endpoint smoke matrix workflow looked harness-like by filename, but it is intended to be a contract and generator gate; without a replacement claim/evidence binding, agents had to trust prose to know why it was excluded from harness failure promotion. Main push also proved that evidence-graph path triggers must stay valid YAML, because a malformed workflow file prevents every downstream graph annotation from starting.",
+      "hypothesis": "Binding the workflow to a dedicated contract-gate claim, smoke matrix manifest, generated doc, OpenAPI parity tests, generated endpoint smoke tests, evidence-graph workflow trigger syntax, and uploaded evidence artifact makes the exclusion executable and keeps future workflow changes from silently becoming unpromoted QA harnesses or un-runnable CI graph checks.",
       "claims": [
         "generated_endpoint_smoke_matrix_must_remain_contract_gate"
       ],
@@ -3305,6 +3305,10 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/ai-agent-generated-endpoint-smoke-matrix.yml"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/evidence-graph.yml"
         },
         {
           "kind": "manifest",
@@ -3379,6 +3383,10 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/ai-agent-generated-endpoint-smoke-matrix.yml"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/evidence-graph.yml"
         }
       ],
       "evidence": [
@@ -3409,7 +3417,7 @@
           "path": "docs/30-architecture/evidence/control-plane-store-metrics-snapshot-optimization-2026-07-03.json"
         }
       ],
-      "decision": "Generated endpoint smoke matrix remains excluded from harness promotion only as long as its contract/generator claim, tests, generated docs, workflow, and evidence artifact stay connected; candidate-decision review expiry or dynamic harness-failure template changes may update shared loop-registry and candidate-decision surfaces, but they do not reclassify this workflow as a failure-promoting harness unless the smoke-matrix workflow, manifest, tests, or evidence artifact change. Live testnet smoke failures now route redacted dynamic claim ids through the harness_failure decision template while keeping a smoke source_coverage_seed, which restores main decision verification without changing generated endpoint smoke matrix workflow, manifest, tests, docs, or uploaded evidence artifact semantics. Local pressure follow-up and metrics snapshot evidence may update operational-readiness artifacts and the shared loop-registry hash surface, but they change only capacity/latency/allocation evidence and do not alter the generated endpoint smoke matrix workflow, manifest, tests, docs, or uploaded evidence artifact semantics.",
+      "decision": "Generated endpoint smoke matrix remains excluded from harness promotion only as long as its contract/generator claim, tests, generated docs, workflow, and evidence artifact stay connected; candidate-decision review expiry or dynamic harness-failure template changes may update shared loop-registry and candidate-decision surfaces, but they do not reclassify this workflow as a failure-promoting harness unless the smoke-matrix workflow, manifest, tests, or evidence artifact change. Live testnet smoke failures now route redacted dynamic claim ids through the harness_failure decision template while keeping a smoke source_coverage_seed, which restores main decision verification without changing generated endpoint smoke matrix workflow, manifest, tests, docs, or uploaded evidence artifact semantics. Local pressure follow-up and metrics snapshot evidence may update operational-readiness artifacts and the shared loop-registry hash surface, but they change only capacity/latency/allocation evidence and do not alter the generated endpoint smoke matrix workflow, manifest, tests, docs, or uploaded evidence artifact semantics. Evidence-graph workflow path-trigger syntax is part of the same executable contract: malformed indentation is fixed as a CI graph availability repair, not as an endpoint contract change.",
       "next_loop": "closed_loop_candidate"
     },
     {
