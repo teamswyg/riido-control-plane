@@ -11,6 +11,7 @@ import (
 type config struct {
 	Duration      time.Duration
 	Concurrencies []int
+	ScenarioNames []string
 	Threads       int
 	Lines         int
 	EvidenceOut   string
@@ -22,8 +23,10 @@ func parseConfig(args []string) (config, error) {
 	fs := flag.NewFlagSet("controlplanepressure", flag.ContinueOnError)
 	cfg := config{}
 	var concurrencyCSV string
+	var scenarioCSV string
 	fs.DurationVar(&cfg.Duration, "duration", 500*time.Millisecond, "duration per scenario/concurrency")
 	fs.StringVar(&concurrencyCSV, "concurrency", "1,8,32", "comma-separated worker counts")
+	fs.StringVar(&scenarioCSV, "scenario", "", "optional comma-separated scenario names")
 	fs.IntVar(&cfg.Threads, "threads", 24, "fixture thread count")
 	fs.IntVar(&cfg.Lines, "lines", 40, "fixture progress lines per thread")
 	fs.StringVar(&cfg.EvidenceOut, "evidence-out", "", "optional evidence JSON path")
@@ -37,10 +40,23 @@ func parseConfig(args []string) (config, error) {
 		return config{}, err
 	}
 	cfg.Concurrencies = concurrencies
+	cfg.ScenarioNames = parseScenarioNames(scenarioCSV)
 	if cfg.Duration <= 0 || cfg.Threads <= 0 || cfg.Lines <= 0 {
 		return config{}, fmt.Errorf("duration, threads, and lines must be positive")
 	}
 	return cfg, nil
+}
+
+func parseScenarioNames(csv string) []string {
+	parts := strings.Split(csv, ",")
+	values := make([]string, 0, len(parts))
+	for _, part := range parts {
+		name := strings.TrimSpace(part)
+		if name != "" {
+			values = append(values, name)
+		}
+	}
+	return values
 }
 
 func parseConcurrencies(csv string) ([]int, error) {

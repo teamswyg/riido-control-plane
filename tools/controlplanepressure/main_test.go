@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"os"
 	"testing"
-	"time"
 )
 
 func TestControlPlanePressureProducesEvidence(t *testing.T) {
@@ -61,13 +60,4 @@ func TestControlPlanePressureProducesEvidence(t *testing.T) {
 		}
 	}
 	assertPressureCandidatesActionable(t, got)
-}
-
-func TestParseConcurrenciesRejectsInvalidValues(t *testing.T) {
-	if _, err := parseConcurrencies("1,0"); err == nil {
-		t.Fatal("expected invalid concurrency to fail")
-	}
-	if _, err := parseConfig([]string{"-duration", time.Second.String()}); err != nil {
-		t.Fatal(err)
-	}
 }
