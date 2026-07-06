@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/evidence-graph.yml"
+      - ".github/workflows/go-ci.yml"
       - ".github/workflows/harness-promotion.yml"
       - ".github/workflows/closed-loop-candidate-intake.yml"
       - ".github/workflows/closed-loop-candidate-decision.yml"
@@ -70,6 +71,8 @@ on:
       - "docs/30-architecture/loop-refresh-dispatch.riido.json"
       - "docs/30-architecture/loop-registry.md"
       - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/go-ci-baseline.md"
+      - "docs/30-architecture/go-ci-baseline.riido.json"
       - "docs/30-architecture/syntax-hash.md"
       - "docs/30-architecture/syntax-hash.riido.json"
       - "docs/30-architecture/ai-agent-snapshot-cqrs-gate.md"
@@ -165,6 +168,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/evidence-graph.yml"
+      - ".github/workflows/go-ci.yml"
       - ".github/workflows/harness-promotion.yml"
       - ".github/workflows/closed-loop-candidate-intake.yml"
       - ".github/workflows/closed-loop-candidate-decision.yml"
@@ -226,6 +230,8 @@ on:
       - "docs/30-architecture/loop-refresh-dispatch.riido.json"
       - "docs/30-architecture/loop-registry.md"
       - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/go-ci-baseline.md"
+      - "docs/30-architecture/go-ci-baseline.riido.json"
       - "docs/30-architecture/syntax-hash.md"
       - "docs/30-architecture/syntax-hash.riido.json"
       - "docs/30-architecture/ai-agent-snapshot-cqrs-gate.md"

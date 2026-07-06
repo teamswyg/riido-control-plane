@@ -8,8 +8,8 @@ Executable SSOT: [`go-ci-baseline.riido.json`](go-ci-baseline.riido.json).
 
 - workflow: `.github/workflows/go-ci.yml`
 - evidence artifact: `go-ci-baseline-evidence`
-- gates: `5`
-- phrase checks: `8`
+- gates: `6`
+- phrase checks: `11`
 
 ## Gates
 
@@ -19,17 +19,18 @@ Executable SSOT: [`go-ci-baseline.riido.json`](go-ci-baseline.riido.json).
 | `module-download` | module graph resolves before lint/test | `1` |
 | `golangci-lint` | golangci-lint version and repo-wide lint are pinned | `2` |
 | `full-go-test` | all Go packages run in the baseline gate | `1` |
+| `coverage-evidence` | baseline CI publishes Go coverage profile and function summary | `3` |
 | `baseline-evidence` | baseline CI publishes this executable evidence | `3` |
 
 ## Evidence Loop
 
 | Step | Evidence |
 | --- | --- |
-| Observe | The broad Go CI workflow was the final non-live workflow that executed important checks without durable JSON evidence. |
-| Hypothesis | A compact baseline manifest can make lint, full-test, tool-version, and evidence publication expectations explicit without duplicating domain-specific gates. |
-| Execute | Verify go-ci.yml against this manifest, generate the reader, and publish go-ci-baseline-evidence from the workflow. |
-| Evaluate | The verifier fails when go-ci drops the Go version pin, module download, lint command, full test, or evidence artifact upload. |
-| Retrospective | This keeps broad CI as a safety net while making its observable contract machine-checkable. |
+| Observe | The broad Go CI workflow was the final non-live workflow that executed important checks without durable JSON evidence, and full-test green did not expose statement coverage. |
+| Hypothesis | A compact baseline manifest can make lint, full-test, coverage-profile, tool-version, and evidence publication expectations explicit without duplicating domain-specific gates. |
+| Execute | Verify go-ci.yml against this manifest, generate the reader, publish go-ci-baseline-evidence, and retain Go coverage profile plus function summary from the workflow. |
+| Evaluate | The verifier fails when go-ci drops the Go version pin, module download, lint command, full test, coverage profile, coverage summary, or evidence artifact upload. |
+| Retrospective | This keeps broad CI as a safety net while making its observable contract and coverage evidence machine-checkable. |
 
 ## Non-Goals
 

@@ -34,12 +34,18 @@ jobs:
       - name: Lint
         run: golangci-lint run ./... --timeout=5m
 
-      - name: Test
-        run: go test ./...
+      - name: Test with coverage
+        run: |
+          mkdir -p out
+          go test ./... -coverprofile=out/go-test-cover.out -covermode=count
+          go tool cover -func=out/go-test-cover.out | tee out/go-test-coverage-summary.txt
 
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: go-ci-baseline-evidence
-          path: out/go-ci-baseline-evidence.json
+          path: |
+            out/go-ci-baseline-evidence.json
+            out/go-test-cover.out
+            out/go-test-coverage-summary.txt
           if-no-files-found: error
