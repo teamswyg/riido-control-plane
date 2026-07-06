@@ -39,7 +39,7 @@ func TestVisibleRuntimeAcceptanceUsesAssignableAgentPhrases(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(data)
-	for _, required := range []string{"\"visible_runtime_acceptance\"", "select_daemon_bound_agent", "visible_v2_agent", "$visible_v2_agent/daemon"} {
+	for _, required := range []string{"\"visible_runtime_acceptance\"", "select_daemon_bound_agent", "create_smoke_agent_from_runtime", "no visible or creatable daemon-bound v2 agent"} {
 		if !strings.Contains(text, required) {
 			t.Fatalf("manifest missing %s: %s", required, text)
 		}
