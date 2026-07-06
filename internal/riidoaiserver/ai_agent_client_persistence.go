@@ -89,9 +89,10 @@ func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAg
 		if err := base.restoreSnapshot(snapshot); err != nil {
 			return nil, err
 		}
+		profilePruned := base.pruneUnexpectedDaemonProfiles("snapshot_restore")
 		repaired := base.repairStaleActiveTaskThreads(store.snapshotNow().UTC())
 		store.markSnapshotObserved(snapshot.SavedAt)
-		if repaired {
+		if repaired || profilePruned {
 			return store, store.saveSnapshot(ctx)
 		}
 		return store, nil
@@ -215,6 +216,11 @@ func (s *PersistentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx cont
 	}
 	response, changed, err := s.syncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
 	if err != nil {
+		if changed {
+			if saveErr := s.saveSnapshot(ctx); saveErr != nil {
+				return response, saveErr
+			}
+		}
 		return response, err
 	}
 	if !changed && !s.shouldSaveHeartbeatSnapshot() {

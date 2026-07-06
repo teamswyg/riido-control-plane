@@ -45,6 +45,7 @@ jobs:
       - name: Generate redacted public QA status site
         env:
           GH_TOKEN: ${{ github.token }}
+          RIIDO_OPERATIONAL_READINESS_NOW: 2026-07-05T00:00:00Z
         run: |
           mkdir -p out site
           go test ./tools/operationalreadiness -count=1

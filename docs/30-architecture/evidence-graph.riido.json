@@ -13171,6 +13171,77 @@
       ],
       "decision": "Riido AI server syntax coverage may expand only after TestRiidoAIServerBehaviorGolden preserves the 24-route registry hash and representative authenticated/unauthenticated HTTP status matrix; this target tracks public server AST shape without changing runtime endpoint behavior.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "daemon_profile_environment_guard_loop",
+      "observation": "Control-plane environments could accept daemon runtime snapshots from a different daemon profile, letting development, staging, and production daemon/runtime rows overwrite or pollute the same read model after desktop or daemon restarts.",
+      "hypothesis": "Binding each control-plane task definition to an expected daemon profile, rejecting mismatched snapshots, pruning stale profile rows on mismatch and snapshot restore, and logging the prune counts prevents cross-environment runtime state from being treated as live evidence.",
+      "claims": [
+        "runtime_adapter_config_must_preserve_public_env_contract",
+        "config_reference_must_preserve_env_manifest_parity",
+        "store_snapshot_file_outbox_must_preserve_durable_replay_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "tool",
+          "path": "cmd/riido_ai_server/daemon_profile_config.go"
+        },
+        {
+          "kind": "tool",
+          "path": "cmd/riido_ai_server/runtime_open.go"
+        },
+        {
+          "kind": "tool",
+          "path": "internal/riidoaiserver/daemon_profile_policy.go"
+        },
+        {
+          "kind": "tool",
+          "path": "internal/riidoaiserver/daemon_profile_snapshot.go"
+        },
+        {
+          "kind": "tool",
+          "path": "internal/riidoaiserver/daemon_profile_prune.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/daemon_profile_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_profile_policy_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_daemon_profile_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/configreference"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/daemon_profile_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_profile_policy_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_daemon_profile_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "daemon_profile_mismatch_log",
+          "redacted": true
+        }
+      ],
+      "decision": "Control-plane now treats RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE as the environment authority: mismatched daemon snapshots fail closed, stale profile rows are pruned and logged, and persistence restore saves the cleaned snapshot so future runtime binding reads cannot resurrect foreign-profile daemon state.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

@@ -97,6 +97,10 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 	if req.DaemonID == "" {
 		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("daemon_id is required")
 	}
+	expectedProfile, changed, err := s.rejectUnexpectedDaemonProfileSnapshot(req)
+	if err != nil {
+		return DeviceRuntimeSnapshotSyncResponse{}, changed, err
+	}
 	runtimes, err := normalizeRuntimeSnapshotRecords(req.DeviceID, principal.PrincipalID, req.DaemonID, req.Profile, req.Runtimes)
 	if err != nil {
 		return DeviceRuntimeSnapshotSyncResponse{}, false, err
@@ -116,6 +120,7 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	profilePruned := s.pruneExpectedDaemonProfilesForSnapshotLocked(req.DeviceID, expectedProfile)
 	if credential, ok := s.deviceCredentials[req.DeviceID]; ok {
 		if credential.ownerPrincipalID != principal.PrincipalID {
 			return DeviceRuntimeSnapshotSyncResponse{}, false, ErrAuthorizationForbidden
@@ -209,7 +214,7 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 		SchemaVersion: SchemaVersion,
 		Device:        copyDevice(device),
 		Daemon:        copyDeviceDaemon(daemon),
-	}, deviceChanged || daemonChanged, nil
+	}, deviceChanged || daemonChanged || profilePruned.changed(), nil
 }
 
 func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx context.Context, principal AuthorizationResult, deviceID string) (AgentRuntimeBindingListResponse, error) {

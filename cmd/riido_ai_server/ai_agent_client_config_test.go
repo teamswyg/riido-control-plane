@@ -17,6 +17,7 @@ func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	t.Setenv(envAssignmentActiveLease, "300")
 	t.Setenv(envAIAgentClientSnapshotReload, "17")
 	t.Setenv(envAIAgentClientHeartbeatSave, "19")
+	t.Setenv(envAIAgentDaemonProfile, "testnet")
 
 	config, err := configFromEnv()
 	if err != nil {
@@ -28,6 +29,9 @@ func TestConfigFromEnvParsesAIAgentClientDevelopmentStore(t *testing.T) {
 	}
 	if config.AIAgentSnapshotReload != 17*time.Second || config.AIAgentHeartbeatSave != 19*time.Second {
 		t.Fatalf("AI Agent snapshot cadence = reload:%s heartbeat:%s", config.AIAgentSnapshotReload, config.AIAgentHeartbeatSave)
+	}
+	if config.AIAgentDaemonProfile != "staging" {
+		t.Fatalf("daemon profile = %q, want staging", config.AIAgentDaemonProfile)
 	}
 	if config.AIAgentClientStore == nil || config.AIAgentClientMetrics == nil || config.AssignmentOperationStore == nil {
 		t.Fatalf("AI Agent persistence config missing: %+v", config)

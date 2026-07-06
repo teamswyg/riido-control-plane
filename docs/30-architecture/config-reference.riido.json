@@ -26,6 +26,7 @@
     {"name":"RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS","default":"store default 20","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"Optional active assignment lease duration."},
     {"name":"RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT","default":"false","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"Enables development AI Agent client persistence."},
     {"name":"RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE","default":"empty","owner":"cmd/riido_ai_server","sensitivity":"operator","meaning":"DynamoDB table for development snapshot and assignment operation state."},
+    {"name":"RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE","default":"empty","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"Expected daemon profile accepted by this control-plane environment; mismatches are rejected and stale profile rows are pruned."},
     {"name":"RIIDO_AI_SERVER_AI_AGENT_CLIENT_SNAPSHOT_RELOAD_SECONDS","default":"store default 15","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"AI Agent client snapshot cache reload cadence."},
     {"name":"RIIDO_AI_SERVER_AI_AGENT_CLIENT_HEARTBEAT_SNAPSHOT_SAVE_SECONDS","default":"store default 15","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"No-change daemon heartbeat snapshot save cadence."},
     {"name":"RIIDO_AI_SERVER_DYNAMODB_OUTBOX_TABLE","default":"empty","owner":"cmd/riido_ai_server","sensitivity":"operator","meaning":"Optional DynamoDB outbox table for event delivery."},
