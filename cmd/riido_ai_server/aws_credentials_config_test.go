@@ -19,3 +19,11 @@ func TestConfigFromEnvRejectsRemotePlainHTTPCredentialsEndpoint(t *testing.T) {
 		t.Fatalf("expected remote plain HTTP credentials endpoint rejection, got %v", err)
 	}
 }
+
+func TestAWSContainerCredentialsProviderFromEnvReportsAIAgentFeature(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	_, err := awsContainerCredentialsProviderFromEnv()
+	if err == nil || !strings.Contains(err.Error(), envAIAgentClientDev) {
+		t.Fatalf("expected AI agent feature credential error, got %v", err)
+	}
+}
