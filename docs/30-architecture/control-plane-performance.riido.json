@@ -217,7 +217,14 @@
       "category": "assignment_scheduling",
       "risk": "tool approval long-poll waiters can add timer and waiter-map pressure when provider tools request human decisions",
       "files": ["internal/riidoaiserver/tool_approval_http.go", "internal/riidoaiserver/store_tool_approval.go", "internal/riidoaiserver/store_tool_approval_wait.go"],
-      "tests": ["TestHTTPToolApprovalRoundTrip"],
+      "tests": [
+        "TestCompareToolApprovalsOrdersByRequestTimeAssignmentThenApproval",
+        "TestHTTPToolApprovalRoundTrip",
+        "TestWaitForToolApprovalWithTickReturnsApprovedSignal",
+        "TestWaitForToolApprovalWithTickReturnsContextCancellation",
+        "TestWaitForToolApprovalWithTickReturnsPendingAtHoldDeadline",
+        "TestWaitForToolApprovalWithTickReturnsTimedOutApproval"
+      ],
       "candidate": "keep approval waits bounded and watch goroutine/timer deltas under stalled approvals"
     }
   ],
