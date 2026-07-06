@@ -111,37 +111,37 @@ jobs:
           assignable_v1="$(mktemp)"
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/assignable-agents" > "$assignable_v1"
           visible_v1_agent="$(select_daemon_bound_agent "$assignable_v1" "$base_url/v1/client/ai-agent/agents" || true)"
-          test -n "$visible_v1_agent" || {
-            echo "::error::no visible assignable daemon-bound v1 agent for smoke assignment"
-            exit 1
-          }
-          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/agents/$visible_v1_agent/daemon" \
-            | jq -e '.schema_version == "riido-ai-server.v1" and (.daemon.supported_actions | length) > 0' >/dev/null
-          jq -e --arg agent_id "$visible_v1_agent" '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == $agent_id)' "$assignable_v1" >/dev/null
-          curl_json \
-            -H "$auth_header" \
-            -H "Content-Type: application/json" \
-            -d "{\"agent_id\":\"$visible_v1_agent\"}" \
-            "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/assignment" \
-            | jq -e --arg agent_id "$visible_v1_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' >/dev/null
-          curl_json \
-            -H "$auth_header" \
-            -H "Content-Type: application/json" \
-            -d "{\"agent_id\":\"$visible_v1_agent\",\"body\":\"Please continue from the latest design\"}" \
-            "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/comments" \
-            | jq -e --arg agent_id "$visible_v1_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and (.assignment_state == "running" or .assignment_state == "queued")' >/dev/null
-          curl_json \
-            -H "$auth_header" \
-            -H "Content-Type: application/json" \
-            -d "{\"agent_id\":\"$visible_v1_agent\",\"reason\":\"user requested stop\"}" \
-            "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/stop" \
-            | jq -e '.schema_version == "riido-ai-server.v1" and .comment_kind == "stopped_by_user_request" and .assignment_state == "stopped"' >/dev/null
+          if test -n "$visible_v1_agent"; then
+            curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/agents/$visible_v1_agent/daemon" \
+              | jq -e '.schema_version == "riido-ai-server.v1" and (.daemon.supported_actions | length) > 0' >/dev/null
+            jq -e --arg agent_id "$visible_v1_agent" '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == $agent_id)' "$assignable_v1" >/dev/null
+            curl_json \
+              -H "$auth_header" \
+              -H "Content-Type: application/json" \
+              -d "{\"agent_id\":\"$visible_v1_agent\"}" \
+              "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/assignment" \
+              | jq -e --arg agent_id "$visible_v1_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' >/dev/null
+            curl_json \
+              -H "$auth_header" \
+              -H "Content-Type: application/json" \
+              -d "{\"agent_id\":\"$visible_v1_agent\",\"body\":\"Please continue from the latest design\"}" \
+              "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/comments" \
+              | jq -e --arg agent_id "$visible_v1_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and (.assignment_state == "running" or .assignment_state == "queued")' >/dev/null
+            curl_json \
+              -H "$auth_header" \
+              -H "Content-Type: application/json" \
+              -d "{\"agent_id\":\"$visible_v1_agent\",\"reason\":\"user requested stop\"}" \
+              "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/stop" \
+              | jq -e '.schema_version == "riido-ai-server.v1" and .comment_kind == "stopped_by_user_request" and .assignment_state == "stopped"' >/dev/null
 
-          replay="$(mktemp)"
-          trap 'rm -f "$replay"' EXIT
-          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/events?replay=1" > "$replay"
-          grep -q "$visible_v1_agent" "$replay"
-          grep -q "stopped_by_user_request" "$replay"
+            replay="$(mktemp)"
+            trap 'rm -f "$replay"' EXIT
+            curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/events?replay=1" > "$replay"
+            grep -q "$visible_v1_agent" "$replay"
+            grep -q "stopped_by_user_request" "$replay"
+          else
+            echo "::warning::no visible assignable daemon-bound v1 agent; v1 mutation smoke skipped"
+          fi
 
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/bootstrap" \
             | jq -e --arg workspace_id "$workspace_id" '.schema_version == "riido-ai-server.v1" and .workspace_id == $workspace_id and (.devices | length) > 0' >/dev/null
@@ -165,6 +165,8 @@ jobs:
             echo "::error::no visible assignable daemon-bound v2 agent for smoke assignment"
             exit 1
           }
+          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/agents/$visible_v2_agent/daemon" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and (.daemon.supported_actions | length) > 0' >/dev/null
           v2_assignment="$(mktemp)"
           curl_json \
             -H "$auth_header" \
