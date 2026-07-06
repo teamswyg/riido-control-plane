@@ -69,7 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RIIDO_LOOP_IDS: operational_readiness_release_harness
-      RIIDO_OPERATIONAL_READINESS_NOW: 2026-07-05T00:00:00Z
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
@@ -84,8 +83,9 @@ jobs:
         if: always()
         run: |
           mkdir -p out
+          RIIDO_OPERATIONAL_READINESS_NOW=2026-07-05T00:00:00Z \
+            go run ./tools/operationalreadiness -check-doc
           go run ./tools/operationalreadiness \
-            -check-doc \
             -evidence-out out/operational-readiness-evidence.json \
             -candidate-out out/operational-readiness-closed-loop-candidates.json \
             -public-status-out out/operational-readiness-public-status.md \

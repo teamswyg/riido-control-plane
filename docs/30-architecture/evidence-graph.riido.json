@@ -13597,6 +13597,74 @@
       ],
       "decision": "Control-plane now treats RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE as the environment authority: mismatched daemon snapshots fail closed, stale profile rows are pruned and logged, and persistence restore saves the cleaned snapshot so future runtime binding reads cannot resurrect foreign-profile daemon state.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "operational_readiness_live_clock_evidence_loop",
+      "observation": "The live operational-readiness workflow exported a job-wide fixed historical RIIDO_OPERATIONAL_READINESS_NOW value, so a fresh manual run produced operational-readiness-closed-loop-candidates that were already expired and blocked closed-loop-candidate-intake and closed-loop-candidate-decision after the main merge.",
+      "hypothesis": "Scoping the fixed clock only to the deterministic -check-doc command lets tools/operationalreadiness use the current UTC runtime clock for GitHub Actions evidence artifacts while preserving generated-doc drift checks; the generated candidate artifacts should then remain fresh for the loop registry's 24 hour expiry window without changing any public endpoint or runtime behavior.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate"
+      ],
+      "changes": [
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/operational-readiness.yml"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/evidence-graph.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/operationalreadiness"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/closedloopcandidateintake"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/closedloopcandidatedecision"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "operational-readiness-closed-loop-candidates",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-intake-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-decision-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Operational-readiness live artifacts now use the workflow runtime clock instead of a stale job-wide fixed date, while the generated-doc check keeps a scoped deterministic clock. Tests may still inject RIIDO_OPERATIONAL_READINESS_NOW, but uploaded artifacts must be generated fresh enough for closed-loop candidate intake and decision gates to consume them after deployment merges.",
+      "next_loop": "closed_loop_candidate_intake"
     }
   ],
   "loop": {
