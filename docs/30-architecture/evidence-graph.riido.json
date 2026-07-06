@@ -4040,12 +4040,20 @@
     },
     {
       "id": "stop_reassign_thread_consistency_loop",
-      "observation": "On staging, stopping an AI Agent task and immediately assigning again could make the just-stopped agent appear to keep working, and a stop call without an active assignment could create a synthetic stopped thread with no assignment_id.",
-      "hypothesis": "Separating stop target selection from unassign target selection keeps user stop strongly scoped to active assignment threads, while preserving participant-removal history semantics for unassign.",
+      "observation": "On staging, stopping an AI Agent task and immediately assigning again could make the just-stopped agent appear to keep working, a stop call without an active assignment could create a synthetic stopped thread with no assignment_id, and deleting an agent while it had an active durable assignment could leave the daemon without a cancellable poll target because the agent registry entry disappeared first.",
+      "hypothesis": "Separating stop target selection from unassign target selection keeps user stop strongly scoped to active assignment threads, while preserving participant-removal history semantics for unassign; deleting an agent must cancel active durable assignments before removing the visible agent and must let only the original daemon-shaped poll recover PollCancel from the historical thread snapshot instead of reviving the deleted agent catalog entry.",
       "claims": [
         "stop_reassign_must_not_revive_or_mutate_inactive_threads"
       ],
       "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_agent_config_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_agent_from_thread.go"
+        },
         {
           "kind": "code",
           "path": "internal/riidoaiserver/ai_agent_client_development_method_stop_ai_agent_task.go"
@@ -4057,6 +4065,26 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/ai_agent_client_development_method_unassign_ai_agent_task.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_ai_agent_client_delete_cancel.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_deleted_agent_poll_cancel.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_deleted_agent_assignment_action_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_delete_cancels_durable_test.go"
         },
         {
           "kind": "test",
@@ -4080,6 +4108,14 @@
         }
       ],
       "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_deleted_agent_assignment_action_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_delete_cancels_durable_test.go"
+        },
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_stop_requires_active_test.go"
@@ -4121,7 +4157,7 @@
           "redacted": true
         }
       ],
-      "decision": "Stop/reassign consistency is now a closed-loop invariant: stop cannot invent synthetic thread history or rewrite completed history when no active assignment exists, and unassign keeps the separate participant-removal behavior.",
+      "decision": "Stop/reassign consistency is now a closed-loop invariant: stop cannot invent synthetic thread history or rewrite completed history when no active assignment exists, unassign keeps the separate participant-removal behavior, and agent deletion first cancels durable active assignments while historical thread snapshots keep stop/delete assignment actions possible without resurrecting deleted agents.",
       "next_loop": "ai_thread_history"
     },
     {

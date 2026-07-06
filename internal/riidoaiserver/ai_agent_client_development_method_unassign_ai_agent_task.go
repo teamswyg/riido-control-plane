@@ -23,7 +23,12 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	defer s.mu.Unlock()
 	agent, ok := s.visibleAgent(principal, req.AgentID)
 	if !ok {
-		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
+		if thread, found := s.taskThreadForUnassignTargetLocked(taskID, req.AgentID, req.AssignmentID); found {
+			agent, ok = s.agentFromTaskThreadLocked(principal, thread)
+		}
+		if !ok {
+			return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
+		}
 	}
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
@@ -50,8 +55,10 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
 	}
 	s.upsertTaskThreadFromActionLocked(response, "")
-	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
-	s.agents[agent.AgentID] = agent
+	if _, ok := s.agents[agent.AgentID]; ok {
+		agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
+		s.agents[agent.AgentID] = agent
+	}
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
 }

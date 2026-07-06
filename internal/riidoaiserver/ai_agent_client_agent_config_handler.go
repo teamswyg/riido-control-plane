@@ -58,6 +58,10 @@ func (s Server) handleAIAgentClientDelete(w http.ResponseWriter, r *http.Request
 	if !ok {
 		return
 	}
+	if err := s.cancelAIAgentAssignmentsForDelete(r.Context(), principal, agentID); err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
 	response, err := s.aiAgent.DeleteAIAgent(r.Context(), principal, agentID)
 	if err != nil {
 		writeAIAgentClientError(w, err)
