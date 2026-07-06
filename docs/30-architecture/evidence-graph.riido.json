@@ -1541,6 +1541,85 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_persistence_action_coverage_loop",
+      "observation": "Persistent AI Agent client action wrappers were low-coverage around assignment stop, task stop, user follow-up comment, unassign, and delete paths even though these wrappers are the control-plane boundary that reloads snapshots before mutation and saves terminal/read-model state after mutation.",
+      "hypothesis": "Function-level persistence tests can prove assignment actions survive process-local snapshot reopen and terminal actions do not restore active streams, without changing endpoint payloads, daemon contracts, or read-model shape.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_assignment_actions_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_comment_actions_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_stop_task_actions_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_unassign_actions_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_assignment_actions_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_comment_actions_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_stop_task_actions_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_unassign_actions_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "local-go1.26.2-target-race",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "local-go1.26.2-target-coverage",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "local-go1.26.2-full-tests",
+          "redacted": true
+        }
+      ],
+      "decision": "Persistent AI Agent client action coverage now proves create-assignment, stop-assignment, stop-by-assignment, task comment, unassign, and delete-assignment paths reload, mutate, save, and reopen correctly under Go 1.26.2. The slice raises the tested persistence action wrappers from 0% gaps to covered reload/save paths while preserving every endpoint and response contract.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "harness_failure_always_promotion_loop",
       "observation": "A harness workflow can run harnesspromotion in the happy path but skip promotion or candidate artifact upload after the smoke/load step fails, and a newly registered harness loop can be omitted from the harness-promotion source manifest entirely.",
       "hypothesis": "Verifying that both the harnesspromotion step and closed-loop candidate artifact upload step run under if: always(), and that every registered harness loop has exactly one promotion source with the same refresh workflow, keeps failed harness runs from becoming silent artifacts.",
