@@ -49,8 +49,10 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	}
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.upsertTaskThreadFromActionLocked(response, "")
-	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
-	s.agents[agent.AgentID] = agent
+	if _, ok := s.agents[agent.AgentID]; ok {
+		agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
+		s.agents[agent.AgentID] = agent
+	}
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
 }

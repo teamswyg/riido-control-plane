@@ -360,6 +360,9 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 		return PollResponse{}, false, nil, "", errors.New("agent_id is required")
 	}
 	if err := validateDaemonBinding(s.agentRegistry, agentID, req); err != nil {
+		if response, ok := deletedAgentPollCancelResponse(state, agentID, req, count); ok {
+			return response, false, nil, "", nil
+		}
 		return PollResponse{}, false, nil, "", err
 	}
 	if count {
