@@ -61,6 +61,31 @@ jobs:
               }
           }
 
+          select_daemon_bound_agent() {
+            local assignable_file="$1"
+            local agent_base_url="$2"
+            local candidate daemon_file http_code
+            while IFS= read -r candidate; do
+              test -n "$candidate" || continue
+              daemon_file="$(mktemp)"
+              echo "smoke optional request: ${agent_base_url#"$base_url"}/$candidate/daemon" >&2
+              http_code="$(
+                curl --silent --show-error \
+                  --connect-timeout 5 \
+                  --max-time 15 \
+                  --output "$daemon_file" \
+                  --write-out "%{http_code}" \
+                  -H "$auth_header" \
+                  "$agent_base_url/$candidate/daemon" || true
+              )"
+              if test "$http_code" = "200" && jq -e '.schema_version == "riido-ai-server.v1" and (.daemon.supported_actions | length) > 0' "$daemon_file" >/dev/null; then
+                printf '%s\n' "$candidate"
+                return 0
+              fi
+            done < <(jq -r '.agents[]? | .agent_id // empty' "$assignable_file")
+            return 1
+          }
+
           curl_json "$base_url/healthz" \
             | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ok"' >/dev/null
           curl_json "$base_url/readyz" \
@@ -85,9 +110,9 @@ jobs:
             | jq -e --arg device_id "$device_id" '.schema_version == "riido-ai-server.v1" and .device_id == $device_id and any(.daemons[]; .device_id == $device_id)' >/dev/null
           assignable_v1="$(mktemp)"
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/assignable-agents" > "$assignable_v1"
-          visible_v1_agent="$(jq -r 'first(.agents[]? | select((.agent_id // "") != "") | .agent_id) // ""' "$assignable_v1")"
+          visible_v1_agent="$(select_daemon_bound_agent "$assignable_v1" "$base_url/v1/client/ai-agent/agents" || true)"
           test -n "$visible_v1_agent" || {
-            echo "::error::no visible assignable v1 agent for smoke assignment"
+            echo "::error::no visible assignable daemon-bound v1 agent for smoke assignment"
             exit 1
           }
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/agents/$visible_v1_agent/daemon" \
@@ -135,9 +160,9 @@ jobs:
             | jq -e --arg device_id "$device_id_v2" '.schema_version == "riido-ai-server.v1" and .device_id == $device_id and any(.daemons[]; .device_id == $device_id)' >/dev/null
           assignable_v2="$(mktemp)"
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/assignable-agents" > "$assignable_v2"
-          visible_v2_agent="$(jq -r 'first(.agents[]? | select((.agent_id // "") != "") | .agent_id) // ""' "$assignable_v2")"
+          visible_v2_agent="$(select_daemon_bound_agent "$assignable_v2" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/agents" || true)"
           test -n "$visible_v2_agent" || {
-            echo "::error::no visible assignable v2 agent for smoke assignment"
+            echo "::error::no visible assignable daemon-bound v2 agent for smoke assignment"
             exit 1
           }
           v2_assignment="$(mktemp)"
