@@ -39,6 +39,15 @@ func TestTaskThreadHistoryMessageIDsMatchLegacyKeys(t *testing.T) {
 	)
 }
 
+func TestTaskThreadProgressMessageIDFallsBackForLongThreadID(t *testing.T) {
+	threadID := strings.Repeat("thread-", 120)
+	assertHistoryID(t,
+		taskThreadProgressMessageID(threadID, -7),
+		"msg_progress_",
+		strings.Join([]string{threadID, "progress", strconv.Itoa(-7)}, "\x00"),
+	)
+}
+
 func assertHistoryID(t *testing.T, got, prefix, key string) {
 	t.Helper()
 	sum := sha256.Sum256([]byte(key))
