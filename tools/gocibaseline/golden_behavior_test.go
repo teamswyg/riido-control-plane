@@ -20,9 +20,9 @@ func TestGoCIBaselineBehaviorGolden(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertFileSHA256(t, out, "b8c46b600f5557dd5feb57c47c4419bcfcd5e586fabb1d49203c3b909adfe535")
+	assertFileSHA256(t, out, "26fec9efc9d34f78e6cdd8d32c3c4c75c57aed75884899cbbc184dbc3512235b")
 	doc := filepath.Join(repo, "docs/30-architecture/go-ci-baseline.md")
-	assertFileSHA256(t, doc, "890a178a80a1a2b1508220b325af4ccb9db47f3efcb6e2cabba66163e2484df7")
+	assertFileSHA256(t, doc, "3067d72c4d2a04801711a939c9049e576eae5c350c8ee564b4b712eec1463bb8")
 }
 
 func assertFileSHA256(t *testing.T, path, want string) {

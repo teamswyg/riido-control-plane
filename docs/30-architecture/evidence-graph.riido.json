@@ -10993,6 +10993,83 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "go_ci_coverage_evidence_loop",
+      "observation": "Repo-wide Go CI previously proved pass/fail but did not publish the coverage profile or function summary needed to track the gap between current 78 percent statement coverage and the desired 100 percent target.",
+      "hypothesis": "Adding coverage profile generation to the existing Go CI baseline keeps endpoint and runtime contracts unchanged while making coverage drift observable as a CI artifact.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract"
+      ],
+      "changes": [
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/go-ci.yml"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/go-ci-baseline.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/go-ci-baseline.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline/golden_behavior_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "tool",
+          "path": "tools/gocibaseline"
+        },
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline/golden_behavior_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-test-cover.out",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-test-coverage-summary.txt",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Adopt coverage artifact publication as baseline evidence rather than a runtime behavior change: CI still runs the same package set, but now uploads the raw coverage profile and function summary so future coverage ratchets can be based on durable evidence.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "syntax_hash_graph_spike_loop",
       "observation": "Loop Registry semantic hashes bind code to SSOT value claims, but Go syntax pattern coverage and relocation evidence are not yet machine-routable for metaprogramming refactors.",
       "hypothesis": "A JSON-driven syntax hash graph can expand through behavior-golden packages, derive deterministic AST-normalized file and package hashes, and connect them to the existing semantic hash without changing runtime behavior.",
