@@ -21,8 +21,9 @@ func TestLoopClosureAuditEvidenceExposesLoopProofSurface(t *testing.T) {
 	m, deps := loadForTest(t)
 	got := newEvidence(m, deps)
 	proof := findProof(t, got, "loop:provider_acceptance_harness")
-	if proof.Surface == nil || len(proof.Surface.Providers) == 0 ||
-		len(proof.Surface.PromotesTo) == 0 {
+	if proof.Surface == nil || len(proof.Surface.Observes) == 0 ||
+		len(proof.Surface.PromotesTo) == 0 ||
+		!contains(proof.Surface.Observes, "visible_runtime_acceptance") {
 		t.Fatalf("incomplete loop proof surface: %+v", proof.Surface)
 	}
 }

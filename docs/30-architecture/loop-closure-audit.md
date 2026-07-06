@@ -54,7 +54,7 @@ No claim coverage token gaps detected.
 ## Loop
 
 - Observe: Riido has loop registry, evidence graph, harness promotion, and pre-commit gates, but the high-level human-exit objective is still distributed across many artifacts.
-- Hypothesis: A loop closure audit can compile the human-exit objective into machine-checkable requirements that point at existing loops, claims, workflows, hooks, providers, and graph edges.
-- Execute: Verify the required loops, claim bindings, pre-commit hook, scheduled refresh dispatcher, provider harness coverage, harness promotion edges, and evidence graph chains; generate this reader and publish audit evidence in CI.
-- Evaluate: The verifier fails when any human-exit requirement loses its executable proof surface, including missing claims, missing provider coverage, missing scheduled dispatch, missing pre-commit hook, missing graph chains, or stale generated docs.
+- Hypothesis: A loop closure audit can compile the human-exit objective into machine-checkable requirements that point at existing loops, claims, workflows, hooks, runtime acceptance, and graph edges.
+- Execute: Verify the required loops, claim bindings, pre-commit hook, scheduled refresh dispatcher, visible-runtime acceptance harness, harness promotion edges, and evidence graph chains; generate this reader and publish audit evidence in CI.
+- Evaluate: The verifier fails when any human-exit requirement loses its executable proof surface, including missing claims, missing runtime-acceptance promotion, missing scheduled dispatch, missing pre-commit hook, missing graph chains, or stale generated docs.
 - Retrospective: This keeps the objective executable: agents can ignore the prose, but the audit still proves whether the loop system lets humans leave the inner loop.

@@ -123,6 +123,10 @@
       ],
       "changes": [
         {
+          "kind": "workflow",
+          "path": ".github/workflows/ai-agent-client-testnet-smoke.yml"
+        },
+        {
           "kind": "manifest",
           "path": "docs/30-architecture/live-workflow-redaction.riido.json"
         },
@@ -178,7 +182,7 @@
           "redacted": true
         }
       ],
-      "decision": "Harness promotion now treats evidence freshness as a strict merge gate: malformed windows, zero-length windows, expired summaries, and exact-expiry summaries cannot produce closed-loop candidate evidence.",
+      "decision": "Harness promotion now treats evidence freshness as a strict merge gate: malformed windows, zero-length windows, expired summaries, and exact-expiry summaries cannot produce closed-loop candidate evidence. The same gate applies after the testnet smoke switched from fixed provider fixtures to visible_runtime_acceptance summaries, so dynamic live-principal runtime evidence cannot be promoted after expiry.",
       "next_loop": "provider_acceptance_harness"
     },
     {
