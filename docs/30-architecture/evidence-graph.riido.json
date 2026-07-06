@@ -1483,6 +1483,102 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_observability_utility_coverage_loop",
+      "observation": "The latest riidoaiserver coverage slice found low-level v3 progress message ID fallback, progress-history cache matching, HTTP status recorder flush/unwrap, 5xx tracing errors, observed metrics contributors, and no-op/finish tracing helpers under-covered even though those utility paths support thread-history refresh performance, SSE/HTTP observability, OTel/X-Ray status attributes, and metrics snapshot evidence.",
+      "hypothesis": "Focused sidecar tests can pin those utility contracts without changing endpoints, response payloads, runtime behavior, or deployment configuration, raising internal/riidoaiserver coverage while keeping the control-plane performance claim bound to executable evidence.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_message_id_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_progress_cache_match_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_status_tracing_edge_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/observed_metrics_reader_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/tracing_noop_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_message_id_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_progress_cache_match_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_status_tracing_edge_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/observed_metrics_reader_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/tracing_noop_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-test-riidoaiserver",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-coverage-79-9",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "This slice adds only tests and generated evidence updates: progress message IDs preserve legacy hashes even on the heap fallback path, progress cache matching invalidates on line identity changes, HTTP tracing records 5xx status errors, status recorder flush/unwrap behavior remains explicit, observed metrics contributors preserve nil/error semantics, and no-op/finish tracing paths stay safe. Go 1.26.2 package coverage for internal/riidoaiserver rises to 79.9% while endpoint contracts and runtime behavior remain unchanged.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "control_plane_registry_progress_coverage_loop",
       "observation": "Composite agent runtime binding lookup and fallback thread-progress response were still low-coverage control-plane paths even though they influence daemon/runtime routing and progress fanout behavior under degraded or legacy inputs.",
       "hypothesis": "Function-level tests for composite registry fallthrough, first-match precedence, nil filtering, lookup miss, explicit progress thread IDs, and derived progress thread IDs can raise coverage without changing endpoint payloads, daemon contracts, or runtime behavior.",

@@ -10,18 +10,18 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `126`
-- claim refs: `179`
-- change refs: `1596`
-- verifier refs: `808`
-- evidence refs: `421`
+- chains: `127`
+- claim refs: `180`
+- change refs: `1603`
+- verifier refs: `816`
+- evidence refs: `425`
 
 ## Compiled Chain Summary
 
-- complete chains: `126` / `126`
-- claim-bound chains: `126`
+- complete chains: `127` / `127`
+- claim-bound chains: `127`
 - unclaimed chains: `0`
-- next-loop targets: `8`
+- next-loop targets: `9`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -32,6 +32,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
 | `loop_closure_audit` | `2` | `4` | `24` | `12` | `8` |
+| `control_plane_performance_harness` | `1` | `1` | `7` | `8` | `4` |
 | `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
 
 ## Evidence Chains
@@ -47,6 +48,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `semantic_hash_metadata_normalization_loop` | `1` | `6` | `3` | `1` | `closed_loop_candidate` |
 | `load_harness_closed_loop_promotion_loop` | `1` | `5` | `4` | `4` | `closed_loop_candidate` |
 | `control_plane_performance_evidence_loop` | `1` | `140` | `59` | `29` | `closed_loop_candidate` |
+| `control_plane_observability_utility_coverage_loop` | `1` | `7` | `8` | `4` | `control_plane_performance_harness` |
 | `control_plane_registry_progress_coverage_loop` | `1` | `4` | `4` | `2` | `closed_loop_candidate` |
 | `control_plane_persistence_action_coverage_loop` | `1` | `6` | `6` | `3` | `closed_loop_candidate` |
 | `harness_failure_always_promotion_loop` | `1` | `8` | `6` | `3` | `closed_loop_candidate` |
