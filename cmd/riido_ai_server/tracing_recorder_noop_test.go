@@ -25,6 +25,16 @@ func TestOtelTraceRecorderNilTracerReturnsNoopSpan(t *testing.T) {
 	}
 }
 
+func TestOtelTraceNoopSpanMethodsAreSafe(t *testing.T) {
+	span := noopOtelTraceSpan{}
+	span.SetAttributes(riidoaiserver.StringTraceAttribute("ignored", "value"))
+	span.RecordError(errors.New("ignored"))
+	span.End()
+
+	otelTraceSpan{}.SetAttributes(riidoaiserver.StringTraceAttribute("ignored", "value"))
+	otelTraceSpan{}.SetAttributes()
+}
+
 func TestOtelTraceSpanIgnoresCanceledError(t *testing.T) {
 	exporter := tracetest.NewInMemoryExporter()
 	provider := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
@@ -41,5 +51,24 @@ func TestOtelTraceSpanIgnoresCanceledError(t *testing.T) {
 	}
 	if spans[0].Status().Code != codes.Unset {
 		t.Fatalf("canceled status = %v, want unset", spans[0].Status().Code)
+	}
+}
+
+func TestOtelTraceSpanIgnoresNilError(t *testing.T) {
+	exporter := tracetest.NewInMemoryExporter()
+	provider := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
+	defer func() { _ = provider.Shutdown(context.Background()) }()
+
+	_, span := (otelTraceRecorder{tracer: provider.Tracer("riido-test")}).
+		StartTraceSpan(context.Background(), riidoaiserver.TraceSpanStart{Name: "nil-error"})
+	span.RecordError(nil)
+	span.End()
+
+	spans := exporter.GetSpans().Snapshots()
+	if len(spans) != 1 {
+		t.Fatalf("recorded spans = %d, want 1", len(spans))
+	}
+	if spans[0].Status().Code != codes.Unset {
+		t.Fatalf("nil error status = %v, want unset", spans[0].Status().Code)
 	}
 }
