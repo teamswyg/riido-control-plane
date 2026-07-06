@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `123`
 - claim refs: `175`
-- change refs: `1571`
-- verifier refs: `776`
+- change refs: `1573`
+- verifier refs: `778`
 - evidence refs: `408`
 
 ## Compiled Chain Summary
@@ -25,11 +25,11 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `74` | `82` | `1035` | `484` | `247` |
+| `closed_loop_candidate` | `74` | `82` | `1036` | `485` | `247` |
 | `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
 | `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
 | `ai_thread_history` | `8` | `8` | `121` | `57` | `12` |
-| `provider_acceptance_harness` | `5` | `7` | `21` | `15` | `13` |
+| `provider_acceptance_harness` | `5` | `7` | `22` | `16` | `13` |
 | `closed_loop_candidate_intake` | `3` | `3` | `19` | `14` | `17` |
 | `loop_closure_audit` | `2` | `4` | `24` | `12` | `8` |
 | `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
@@ -43,7 +43,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `live_workflow_evidence_golden_lock_loop` | `2` | `2` | `2` | `2` | `provider_acceptance_harness` |
 | `live_workflow_evidence_syntax_hash_loop` | `1` | `3` | `2` | `2` | `provider_acceptance_harness` |
 | `provider_acceptance_observation_coverage_loop` | `1` | `6` | `4` | `3` | `provider_acceptance_harness` |
-| `device_daemon_plural_endpoint_live_smoke_loop` | `2` | `4` | `4` | `3` | `provider_acceptance_harness` |
+| `device_daemon_plural_endpoint_live_smoke_loop` | `2` | `5` | `5` | `3` | `provider_acceptance_harness` |
 | `semantic_hash_metadata_normalization_loop` | `1` | `6` | `3` | `1` | `closed_loop_candidate` |
 | `load_harness_closed_loop_promotion_loop` | `1` | `5` | `4` | `4` | `closed_loop_candidate` |
 | `control_plane_performance_evidence_loop` | `1` | `137` | `49` | `29` | `closed_loop_candidate` |
@@ -68,7 +68,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `evidence_graph_annotation_loop` | `1` | `13` | `4` | `2` | `closed_loop_candidate` |
 | `harness_workflow_coverage_loop` | `1` | `10` | `5` | `2` | `closed_loop_candidate` |
 | `generated_endpoint_smoke_matrix_exclusion_loop` | `1` | `14` | `7` | `6` | `closed_loop_candidate` |
-| `ai_agent_device_daemon_list_surface_loop` | `3` | `16` | `6` | `4` | `closed_loop_candidate` |
+| `ai_agent_device_daemon_list_surface_loop` | `3` | `17` | `7` | `4` | `closed_loop_candidate` |
 | `deleted_agent_thread_retention_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `thread_history_user_followup_retention_loop` | `1` | `15` | `7` | `1` | `ai_thread_history` |
 | `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
