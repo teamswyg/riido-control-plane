@@ -3510,8 +3510,8 @@
     },
     {
       "id": "ai_agent_device_daemon_list_surface_loop",
-      "observation": "The existing device daemon client API exposed only the preferred daemon for a device, so clients could not render multiple profile-specific daemon instances such as staging, development, and production without inferring hidden server state. Development deploy smoke later exposed that the plural endpoint can be route-present and still unusable for runtime settings if the singular compatibility endpoint synthesizes a device read-model daemon while the plural list returns an empty array.",
-      "hypothesis": "Adding a read-only plural device daemon endpoint and binding it through route classifier, store query, HTTP test, DSL/IR/OpenAPI, generated React Query client, generated endpoint smoke matrix, and loop-registry evidence surface lets the client inspect daemon instances without changing the existing preferred daemon compatibility endpoint. The plural list should include a read-model fallback daemon only when no visible daemon rows exist, preserving multi-profile rows when present while keeping empty-list semantics out of the device-owned compatibility case.",
+      "observation": "The existing device daemon client API exposed only the preferred daemon for a device, so clients could not render multiple profile-specific daemon instances such as staging, development, and production without inferring hidden server state. Development deploy smoke later exposed that the plural endpoint can be route-present and still unusable for runtime settings if the singular compatibility endpoint synthesizes a device read-model daemon while the plural list returns an empty array. Follow-up coverage showed daemon identity comparison, freshest-daemon preference, runtime-to-device lookup, and owner fallback/denial branches were under-tested even though those branches decide whether profile-specific daemon rows collapse, disappear, or leak across owners.",
+      "hypothesis": "Adding a read-only plural device daemon endpoint and binding it through route classifier, store query, HTTP test, DSL/IR/OpenAPI, generated React Query client, generated endpoint smoke matrix, and loop-registry evidence surface lets the client inspect daemon instances without changing the existing preferred daemon compatibility endpoint. The plural list should include a read-model fallback daemon only when no visible daemon rows exist, preserving multi-profile rows when present while keeping empty-list semantics out of the device-owned compatibility case. Focused daemon identity and owner-boundary tests can prove profile-vs-daemon-id identity, freshest daemon selection, runtime-owned daemon fallback, projection-lag fallback, and wrong-device denial without changing endpoint payloads.",
       "claims": [
         "generated_endpoint_smoke_matrix_must_remain_contract_gate",
         "loop_registry_evidence_must_expose_loop_surfaces",
@@ -3560,6 +3560,26 @@
         },
         {
           "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_identity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_preference_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_fallback_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_projection_test.go"
+        },
+        {
+          "kind": "test",
           "path": "internal/riidoaiserver/http_route_ai_agent_client_test.go"
         },
         {
@@ -3595,6 +3615,26 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_http_device_daemons_fallback_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_identity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_preference_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_fallback_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_projection_test.go"
         },
         {
           "kind": "test",
@@ -3637,9 +3677,29 @@
           "kind": "artifact",
           "path": "notion_qa_comment_event_diff_2026_07_02",
           "redacted": true
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_identity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_preference_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_fallback_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_projection_test.go"
         }
       ],
-      "decision": "GET /devices/{device_id}/daemon remains the single preferred daemon compatibility endpoint, while GET /devices/{device_id}/daemons is a read-only plural projection sorted newest first and filtered through the same device and daemon visibility checks; route and HTTP tests prove the new surface is explicit instead of inferred by clients. When no visible daemon rows exist for a visible device, plural list now includes the same device read-model fallback daemon used by the singular compatibility endpoint, so live deploy smoke and runtime settings do not see `daemon` as present but `daemons` as empty. The plural v1/v2 endpoints appear in DSL/IR/OpenAPI as DeviceDaemonListResponse-backed query operations and generate aiAgent.devices.daemons.list / v2.aiAgent.devices.daemons.list React Query clients, so frontend handoff no longer depends on stale Notion readback or a manual URL. Redacted live probes prove the plural v1/v2 routes are present and auth-protected, not 404, across staging, development, and production after deployment, and fallback regression evidence now proves the list remains useful when only the device read model is available.",
+      "decision": "GET /devices/{device_id}/daemon remains the single preferred daemon compatibility endpoint, while GET /devices/{device_id}/daemons is a read-only plural projection sorted newest first and filtered through the same device and daemon visibility checks; route and HTTP tests prove the new surface is explicit instead of inferred by clients. When no visible daemon rows exist for a visible device, plural list now includes the same device read-model fallback daemon used by the singular compatibility endpoint, so live deploy smoke and runtime settings do not see `daemon` as present but `daemons` as empty. The plural v1/v2 endpoints appear in DSL/IR/OpenAPI as DeviceDaemonListResponse-backed query operations and generate aiAgent.devices.daemons.list / v2.aiAgent.devices.daemons.list React Query clients, so frontend handoff no longer depends on stale Notion readback or a manual URL. Redacted live probes prove the plural v1/v2 routes are present and auth-protected, not 404, across staging, development, and production after deployment, and fallback regression evidence now proves the list remains useful when only the device read model is available. Focused daemon identity and owner-boundary tests now keep same-profile identity, same-daemon-id legacy identity, freshest daemon preference, runtime-owned daemon fallback, projection-lag fallback, and wrong-device denial executable instead of relying on operator memory.",
       "next_loop": "closed_loop_candidate"
     },
     {
