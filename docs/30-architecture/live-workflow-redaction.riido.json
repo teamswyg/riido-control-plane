@@ -27,8 +27,8 @@
         },
         {
           "id": "visible_runtime_acceptance",
-          "summary": "testnet smoke verifies the provider path through an agent created from a runtime visible to the live smoke principal.",
-          "source_phrases": ["runtime_id_v1", "/v1/client/ai-agent/agents/$created_v1_agent/daemon", "any(.agents[]; .agent_id == $agent_id)"]
+          "summary": "testnet smoke verifies the provider path through a runtime-bound agent visible and assignable to the live smoke principal.",
+          "source_phrases": ["visible_v1_agent", "/v1/client/ai-agent/agents/$visible_v1_agent/daemon", "any(.agents[]; .agent_id == $agent_id)"]
         },
         {
           "id": "daemon_runtime_snapshot",

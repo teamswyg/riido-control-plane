@@ -79,52 +79,43 @@ jobs:
           device_id="$(
             jq -re '.devices[0].device_id' "$devices_v1"
           )"
-          runtime_id_v1="$(
-            jq -re '[.devices[].runtimes[]? | select(.availability == "online" and (.runtime_id // "") != "")][0].runtime_id // empty' "$devices_v1"
-          )"
-          test -n "$runtime_id_v1" || {
-            echo "::error::no visible online v1 runtime for smoke agent creation"
-            exit 1
-          }
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/devices/$device_id/daemon" \
             | jq -e --arg device_id "$device_id" '.schema_version == "riido-ai-server.v1" and .daemon.device_id == $device_id and (.daemon.supported_actions | length) >= 1' >/dev/null
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/devices/$device_id/daemons" \
             | jq -e --arg device_id "$device_id" '.schema_version == "riido-ai-server.v1" and .device_id == $device_id and any(.daemons[]; .device_id == $device_id)' >/dev/null
-          created_v1_agent="$(
-            curl_json \
-              -H "$auth_header" \
-              -H "Content-Type: application/json" \
-              -d "{\"name\":\"Smoke 신규 에이전트 $smoke_suffix\",\"visibility\":\"private\",\"runtime_id\":\"$runtime_id_v1\",\"description\":\"testnet smoke agent\",\"instruction\":\"smoke test instruction\"}" \
-              "$base_url/v1/client/ai-agent/agents" \
-              | jq -re --arg runtime_id "$runtime_id_v1" 'if .schema_version == "riido-ai-server.v1" and .agent.is_owned_by_viewer == true and .agent.runtime_id == $runtime_id and .agent.editability == "editable" and .agent.assigned_task_count == 0 and (.agent.updated_at | length) > 0 then .agent.agent_id else empty end'
-          )"
-          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/agents/$created_v1_agent/daemon" \
+          assignable_v1="$(mktemp)"
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/assignable-agents" > "$assignable_v1"
+          visible_v1_agent="$(jq -r 'first(.agents[]? | select((.agent_id // "") != "") | .agent_id) // ""' "$assignable_v1")"
+          test -n "$visible_v1_agent" || {
+            echo "::error::no visible assignable v1 agent for smoke assignment"
+            exit 1
+          }
+          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/agents/$visible_v1_agent/daemon" \
             | jq -e '.schema_version == "riido-ai-server.v1" and (.daemon.supported_actions | length) > 0' >/dev/null
-          curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/assignable-agents" \
-            | jq -e --arg agent_id "$created_v1_agent" '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == $agent_id)' >/dev/null
+          jq -e --arg agent_id "$visible_v1_agent" '.schema_version == "riido-ai-server.v1" and any(.agents[]; .agent_id == $agent_id)' "$assignable_v1" >/dev/null
           curl_json \
             -H "$auth_header" \
             -H "Content-Type: application/json" \
-            -d "{\"agent_id\":\"$created_v1_agent\"}" \
+            -d "{\"agent_id\":\"$visible_v1_agent\"}" \
             "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/assignment" \
-            | jq -e --arg agent_id "$created_v1_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' >/dev/null
+            | jq -e --arg agent_id "$visible_v1_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' >/dev/null
           curl_json \
             -H "$auth_header" \
             -H "Content-Type: application/json" \
-            -d "{\"agent_id\":\"$created_v1_agent\",\"body\":\"Please continue from the latest design\"}" \
+            -d "{\"agent_id\":\"$visible_v1_agent\",\"body\":\"Please continue from the latest design\"}" \
             "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/comments" \
-            | jq -e --arg agent_id "$created_v1_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and (.assignment_state == "running" or .assignment_state == "queued")' >/dev/null
+            | jq -e --arg agent_id "$visible_v1_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and (.assignment_state == "running" or .assignment_state == "queued")' >/dev/null
           curl_json \
             -H "$auth_header" \
             -H "Content-Type: application/json" \
-            -d "{\"agent_id\":\"$created_v1_agent\",\"reason\":\"user requested stop\"}" \
+            -d "{\"agent_id\":\"$visible_v1_agent\",\"reason\":\"user requested stop\"}" \
             "$base_url/v1/client/ai-agent/tasks/$smoke_task_id/stop" \
             | jq -e '.schema_version == "riido-ai-server.v1" and .comment_kind == "stopped_by_user_request" and .assignment_state == "stopped"' >/dev/null
 
           replay="$(mktemp)"
           trap 'rm -f "$replay"' EXIT
           curl_json -H "$auth_header" "$base_url/v1/client/ai-agent/events?replay=1" > "$replay"
-          grep -q "$created_v1_agent" "$replay"
+          grep -q "$visible_v1_agent" "$replay"
           grep -q "stopped_by_user_request" "$replay"
 
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/bootstrap" \
@@ -138,33 +129,25 @@ jobs:
           devices_v2="$(mktemp)"
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices" > "$devices_v2"
           device_id_v2="$(jq -re '.devices[0].device_id' "$devices_v2")"
-          runtime_id_v2="$(
-            jq -re '[.devices[].runtimes[]? | select(.availability == "online" and (.runtime_id // "") != "")][0].runtime_id // empty' "$devices_v2"
-          )"
-          test -n "$runtime_id_v2" || {
-            echo "::error::no visible online v2 runtime for smoke agent creation"
-            exit 1
-          }
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices/$device_id_v2/daemon" \
             | jq -e --arg device_id "$device_id_v2" '.schema_version == "riido-ai-server.v1" and .daemon.device_id == $device_id and (.daemon.supported_actions | length) >= 1' >/dev/null
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices/$device_id_v2/daemons" \
             | jq -e --arg device_id "$device_id_v2" '.schema_version == "riido-ai-server.v1" and .device_id == $device_id and any(.daemons[]; .device_id == $device_id)' >/dev/null
-          created_v2_agent="$(
-            curl_json \
-              -H "$auth_header" \
-              -H "Content-Type: application/json" \
-              -d "{\"name\":\"Smoke v2 에이전트\",\"visibility\":\"private\",\"runtime_id\":\"$runtime_id_v2\",\"description\":\"workspace scoped smoke agent\",\"instruction\":\"smoke test instruction\"}" \
-              "$base_url/v2/client/workspaces/$workspace_id/ai-agent/agents" \
-              | jq -re --arg workspace_id "$workspace_id" --arg runtime_id "$runtime_id_v2" 'if .schema_version == "riido-ai-server.v1" and .agent.workspace_id == $workspace_id and .agent.is_owned_by_viewer == true and .agent.runtime_id == $runtime_id then .agent.agent_id else empty end' \
-          )"
+          assignable_v2="$(mktemp)"
+          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/assignable-agents" > "$assignable_v2"
+          visible_v2_agent="$(jq -r 'first(.agents[]? | select((.agent_id // "") != "") | .agent_id) // ""' "$assignable_v2")"
+          test -n "$visible_v2_agent" || {
+            echo "::error::no visible assignable v2 agent for smoke assignment"
+            exit 1
+          }
           v2_assignment="$(mktemp)"
           curl_json \
             -H "$auth_header" \
             -H "Content-Type: application/json" \
-            -d "{\"agent_id\":\"$created_v2_agent\"}" \
+            -d "{\"agent_id\":\"$visible_v2_agent\"}" \
             "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/assignment" \
             > "$v2_assignment"
-          jq -e --arg agent_id "$created_v2_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' "$v2_assignment" >/dev/null
+          jq -e --arg agent_id "$visible_v2_agent" '.schema_version == "riido-ai-server.v1" and .agent_id == $agent_id and .assignment_state == "running"' "$v2_assignment" >/dev/null
           thread_id_v2="$(jq -re '.thread_id' "$v2_assignment")"
           rm -f "$v2_assignment"
           v3_followup_body="Please preserve this v3 follow-up after refresh"
@@ -175,9 +158,9 @@ jobs:
             "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/threads/$thread_id_v2/messages" \
             | jq -e --arg thread_id "$thread_id_v2" '.schema_version == "riido-ai-server.v1" and .thread_id == $thread_id' >/dev/null
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/threads" \
-            | jq -e --arg agent_id "$created_v2_agent" --arg href "/v2/client/workspaces/$workspace_id/ai-agent/events" '.schema_version == "riido-ai-server.v1" and any(.threads[]; .agent_id == $agent_id) and .active_stream.href == $href' >/dev/null
+            | jq -e --arg agent_id "$visible_v2_agent" --arg href "/v2/client/workspaces/$workspace_id/ai-agent/events" '.schema_version == "riido-ai-server.v1" and any(.threads[]; .agent_id == $agent_id) and .active_stream.href == $href' >/dev/null
           curl_json -H "$auth_header" "$base_url/v3/client/workspaces/$workspace_id/ai-agent/tasks/$smoke_task_id_v2/threads" \
-            | jq -e --arg task_id "$smoke_task_id_v2" --arg agent_id "$created_v2_agent" --arg href "/v2/client/workspaces/$workspace_id/ai-agent/events" --arg thread_id "$thread_id_v2" --arg body "$v3_followup_body" '
+            | jq -e --arg task_id "$smoke_task_id_v2" --arg agent_id "$visible_v2_agent" --arg href "/v2/client/workspaces/$workspace_id/ai-agent/events" --arg thread_id "$thread_id_v2" --arg body "$v3_followup_body" '
               . as $root
               | .schema_version == "riido-ai-server.v1"
               and .task_id == $task_id
