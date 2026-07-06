@@ -1463,6 +1463,64 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_registry_progress_coverage_loop",
+      "observation": "Composite agent runtime binding lookup and fallback thread-progress response were still low-coverage control-plane paths even though they influence daemon/runtime routing and progress fanout behavior under degraded or legacy inputs.",
+      "hypothesis": "Function-level tests for composite registry fallthrough, first-match precedence, nil filtering, lookup miss, explicit progress thread IDs, and derived progress thread IDs can raise coverage without changing endpoint payloads, daemon contracts, or runtime behavior.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_registry_composite_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_thread_progress_response_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_registry_composite_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_thread_progress_response_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "local-go1.26.2-target-coverage",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "local-go1.26.2-full-coverage",
+          "redacted": true
+        }
+      ],
+      "decision": "The registry/progress fallback coverage slice pins routing and progress fallback semantics at function level: NewCompositeAgentRegistry, composite LookupAgent, and fallbackAgentThreadProgressResponse are 100% covered under Go 1.26.2 while the repository-wide contract remains unchanged.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "harness_failure_always_promotion_loop",
       "observation": "A harness workflow can run harnesspromotion in the happy path but skip promotion or candidate artifact upload after the smoke/load step fails, and a newly registered harness loop can be omitted from the harness-promotion source manifest entirely.",
       "hypothesis": "Verifying that both the harnesspromotion step and closed-loop candidate artifact upload step run under if: always(), and that every registered harness loop has exactly one promotion source with the same refresh workflow, keeps failed harness runs from becoming silent artifacts.",
