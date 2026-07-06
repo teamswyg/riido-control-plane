@@ -18,6 +18,9 @@ func (s *DevelopmentAIAgentClientStore) visibleDaemonsForDeviceLocked(principal 
 		}
 		out = append(out, projectDeviceDaemonLiveness(daemon, now))
 	}
+	if len(out) == 0 {
+		out = append(out, projectDeviceDaemonLiveness(deviceDaemonFromDeviceReadModel(device), now))
+	}
 	sort.SliceStable(out, func(i, j int) bool {
 		if !out[i].LastSeenAt.Equal(out[j].LastSeenAt) {
 			return out[i].LastSeenAt.After(out[j].LastSeenAt)
