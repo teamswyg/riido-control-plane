@@ -33,6 +33,24 @@ func TestSmokeLiveSummaryCarriesSafeClaims(t *testing.T) {
 	}
 }
 
+func TestVisibleRuntimeAcceptanceUsesAssignableAgentPhrases(t *testing.T) {
+	data, err := os.ReadFile("../../docs/30-architecture/live-workflow-redaction.riido.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+	for _, required := range []string{"\"visible_runtime_acceptance\"", "visible_v1_agent", "$visible_v1_agent/daemon"} {
+		if !strings.Contains(text, required) {
+			t.Fatalf("manifest missing %s: %s", required, text)
+		}
+	}
+	for _, forbidden := range []string{"runtime_id_v1", "$created_v1_agent/daemon"} {
+		if strings.Contains(text, forbidden) {
+			t.Fatalf("manifest kept stale source phrase %s: %s", forbidden, text)
+		}
+	}
+}
+
 func assertSummaryOmitsSecrets(t *testing.T, text string) {
 	t.Helper()
 	for _, forbidden := range []string{"super-secret-token", "private.example.test"} {

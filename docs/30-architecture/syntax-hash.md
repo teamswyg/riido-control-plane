@@ -40,7 +40,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `evidence_graph_guard` | `tools/evidencegraph` | 100% | `0472868ec089` | `evidence_graph_evidence_must_expose_full_chain` |
 | `pre_commit_baseline_guard` | `tools/precommitbaseline` | 100% | `55e387dbb587` | `pre_commit_baseline_evidence_must_self_expire` |
 | `workflow_evidence_guard` | `tools/workflowevidence` | 100% | `69fa8f48bd97` | `workflow_evidence_must_self_expire` |
-| `live_workflow_evidence_guard` | `tools/liveworkflowevidence` | 100% | `4c80bb1bb60c` | `provider_acceptance_summary_must_cover_declared_observations` |
+| `live_workflow_evidence_guard` | `tools/liveworkflowevidence` | 100% | `e57f6f160801` | `provider_acceptance_summary_must_cover_declared_observations` |
 | `web_frontend_api_guard` | `tools/webfrontendapi` | 100% | `23a98ee173bc` | `web_frontend_api_must_preserve_cors_contract` |
 | `ai_agent_risk_evidence_guard` | `tools/aiagentrisk` | 100% | `c4551769ea32` | `ai_agent_risk_evidence_must_preserve_boundary_manifest` |
 | `migration_ledger_guard` | `tools/migrationledger` | 100% | `c6ddc5f8b294` | `migration_ledger_must_preserve_historical_evidence` |
