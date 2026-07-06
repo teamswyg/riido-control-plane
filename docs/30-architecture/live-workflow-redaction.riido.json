@@ -26,14 +26,9 @@
           "source_phrases": ["/v1/client/ai-agent/tasks/$smoke_task_id/stop", ".comment_kind == \"stopped_by_user_request\" and .assignment_state == \"stopped\""]
         },
         {
-          "id": "codex_provider_qa",
-          "summary": "testnet smoke verifies the Codex provider path through agent daemon lookup and assignable-agent visibility.",
-          "source_phrases": ["/v1/client/ai-agent/agents/agent-owned-codex/daemon", "any(.agents[]; .agent_id == \"agent-owned-codex\")"]
-        },
-        {
-          "id": "openclaw_provider_qa",
-          "summary": "testnet smoke verifies the OpenClaw provider path through agent daemon lookup and assignable-agent visibility.",
-          "source_phrases": ["/v1/client/ai-agent/agents/agent-public-openclaw/daemon", "any(.agents[]; .agent_id == \"agent-public-openclaw\")"]
+          "id": "visible_runtime_acceptance",
+          "summary": "testnet smoke verifies the provider path through an agent created from a runtime visible to the live smoke principal.",
+          "source_phrases": ["runtime_id_v1", "/v1/client/ai-agent/agents/$created_v1_agent/daemon", "any(.agents[]; .agent_id == $agent_id)"]
         },
         {
           "id": "daemon_runtime_snapshot",

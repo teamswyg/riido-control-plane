@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	liveManifestEvidenceSHA256 = "a4ccf7c90c5e98aea521369c276fb5776364fb164edd01214a0cf1bd04b2d9df"
+	liveManifestEvidenceSHA256 = "b50d23efb9ff959a97eb17c7ad64ae9dab6b466d77bc0192bb847bb5ed381538"
 	liveDeploySummarySHA256    = "4816fc4fec1c718a5d6bf8a4b0b3fcc1e49f184fb040ea7f040a611b61d3d84e"
 )
 

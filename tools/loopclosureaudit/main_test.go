@@ -26,15 +26,15 @@ func TestLoopClosureAuditRejectsMissingClaim(t *testing.T) {
 	}
 }
 
-func TestLoopClosureAuditRejectsMissingProviderCoverage(t *testing.T) {
+func TestLoopClosureAuditRejectsMissingHarnessPromotionTarget(t *testing.T) {
 	m, deps := loadForTest(t)
 	for i := range deps.registry.Loops {
 		if deps.registry.Loops[i].ID == "provider_acceptance_harness" {
-			deps.registry.Loops[i].Providers = []string{"codex"}
+			deps.registry.Loops[i].PromotesTo = nil
 		}
 	}
 	if err := verifyAll("../..", m, deps); err == nil {
-		t.Fatal("expected missing provider coverage to fail")
+		t.Fatal("expected missing harness promotion target to fail")
 	}
 }
 
