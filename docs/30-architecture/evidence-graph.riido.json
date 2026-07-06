@@ -276,8 +276,8 @@
     },
     {
       "id": "provider_acceptance_observation_coverage_loop",
-      "observation": "The provider acceptance harness now declares visible_runtime_acceptance and daemon_runtime_snapshot observations, but the redacted smoke summary or loop manifest could omit structured assignable runtime-bound agent coverage while still reporting generic contract coverage.",
-      "hypothesis": "Binding those observations to workflow source phrases, summary claims, machine-readable visible runtime acceptance, and the ai_thread_history loop identity lets agents see which provider/runtime paths and live v3 thread-history API surfaces were verified without reading raw live output or exporting secrets.",
+      "observation": "The provider acceptance harness now declares visible_runtime_acceptance and daemon_runtime_snapshot observations, but the redacted smoke summary or loop manifest could omit structured daemon-bound assignable runtime agent coverage while still reporting generic contract coverage.",
+      "hypothesis": "Binding those observations to workflow source phrases, summary claims, machine-readable visible daemon-bound runtime acceptance, and the ai_thread_history loop identity lets agents see which provider/runtime paths and live v3 thread-history API surfaces were verified without reading raw live output or exporting secrets.",
       "claims": [
         "provider_acceptance_summary_must_cover_declared_observations"
       ],
@@ -342,7 +342,7 @@
           "redacted": true
         }
       ],
-      "decision": "Provider acceptance evidence now exposes visible runtime acceptance through a dynamically selected assignable agent, daemon runtime snapshot, and live v3 thread-history smoke coverage in the safe redacted summary path, while loop-registry evidence rejects observation/summary drift before merge; the same scheduled smoke artifact is also owned by ai_thread_history so product thread regressions are visible as loop evidence instead of only provider QA evidence.",
+      "decision": "Provider acceptance evidence now exposes visible runtime acceptance through a dynamically selected daemon-bound assignable agent, daemon runtime snapshot, and live v3 thread-history smoke coverage in the safe redacted summary path, while loop-registry evidence rejects observation/summary drift before merge; the same scheduled smoke artifact is also owned by ai_thread_history so product thread regressions are visible as loop evidence instead of only provider QA evidence.",
       "next_loop": "provider_acceptance_harness"
     },
     {
