@@ -6,6 +6,7 @@ import (
 	"github.com/teamswyg/riido-contracts/metadatakeys"
 	riidoaiserver "github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func TestOtelAttributesPreserveTypedValues(t *testing.T) {
@@ -28,5 +29,25 @@ func TestOtelAttributesPreserveTypedValues(t *testing.T) {
 	}
 	if got["riido.test.sampled"].Type() != attribute.BOOL || !got["riido.test.sampled"].AsBool() {
 		t.Fatalf("bool value = %s/%v", got["riido.test.sampled"].Type(), got["riido.test.sampled"].AsBool())
+	}
+}
+
+func TestOtelSpanKindMapsServerClientAndDefault(t *testing.T) {
+	tests := []struct {
+		name string
+		kind riidoaiserver.TraceSpanKind
+		want trace.SpanKind
+	}{
+		{name: "server", kind: riidoaiserver.TraceSpanKindServer, want: trace.SpanKindServer},
+		{name: "client", kind: riidoaiserver.TraceSpanKindClient, want: trace.SpanKindClient},
+		{name: "internal", kind: riidoaiserver.TraceSpanKindInternal, want: trace.SpanKindInternal},
+		{name: "unknown", kind: riidoaiserver.TraceSpanKind(99), want: trace.SpanKindInternal},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := otelSpanKind(tt.kind); got != tt.want {
+				t.Fatalf("otelSpanKind(%v) = %v, want %v", tt.kind, got, tt.want)
+			}
+		})
 	}
 }
