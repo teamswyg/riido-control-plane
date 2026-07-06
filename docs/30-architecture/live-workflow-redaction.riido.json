@@ -27,8 +27,8 @@
         },
         {
           "id": "visible_runtime_acceptance",
-          "summary": "testnet smoke verifies the provider path through a daemon-bound runtime agent visible and assignable to the live smoke principal.",
-          "source_phrases": ["select_daemon_bound_agent", "visible_v2_agent", "/v2/client/workspaces/$workspace_id/ai-agent/agents/$visible_v2_agent/daemon"]
+          "summary": "testnet smoke attempts the provider path through a daemon-bound runtime agent that is visible, assignable, or creatable by the live smoke principal, and emits an explicit warning when live seed data cannot support mutation.",
+          "source_phrases": ["select_daemon_bound_agent", "create_smoke_agent_from_runtime", "no visible or creatable daemon-bound v2 agent"]
         },
         {
           "id": "daemon_runtime_snapshot",

@@ -182,7 +182,7 @@
           "redacted": true
         }
       ],
-      "decision": "Harness promotion now treats evidence freshness as a strict merge gate: malformed windows, zero-length windows, expired summaries, and exact-expiry summaries cannot produce closed-loop candidate evidence. The same gate applies after the testnet smoke switched from fixed provider fixtures to visible_runtime_acceptance summaries, and after the live principal proved v1 can expose assignable agents without daemon detail: optional v1 mutation warnings and required v2 daemon-bound product acceptance are both captured in the same fresh redacted summary window, so dynamic live-principal runtime evidence cannot be promoted after expiry.",
+      "decision": "Harness promotion now treats evidence freshness as a strict merge gate: malformed windows, zero-length windows, expired summaries, and exact-expiry summaries cannot produce closed-loop candidate evidence. The same gate applies after the testnet smoke switched from fixed provider fixtures to visible_runtime_acceptance summaries, and after the live principal proved assignable agents can lack daemon detail: optional v1 mutation warnings, v2 runtime-backed creation fallback, and product-mutation partial warnings are all captured in the same fresh redacted summary window, so dynamic live-principal runtime evidence cannot be promoted after expiry.",
       "next_loop": "provider_acceptance_harness"
     },
     {
@@ -276,8 +276,8 @@
     },
     {
       "id": "provider_acceptance_observation_coverage_loop",
-      "observation": "The provider acceptance harness now declares visible_runtime_acceptance and daemon_runtime_snapshot observations, but the redacted smoke summary or loop manifest could omit structured daemon-bound assignable runtime agent coverage while still reporting generic contract coverage.",
-      "hypothesis": "Binding those observations to workflow source phrases, summary claims, machine-readable visible daemon-bound runtime acceptance, and the ai_thread_history loop identity lets agents see which provider/runtime paths and live v3 thread-history API surfaces were verified without reading raw live output or exporting secrets; legacy v1 mutation remains opportunistic because the live smoke principal may expose assignable agents without agent daemon bindings, while v2 daemon-bound assignment remains the hard product acceptance gate.",
+      "observation": "The provider acceptance harness now declares visible_runtime_acceptance and daemon_runtime_snapshot observations, but the redacted smoke summary or loop manifest could omit structured daemon-bound assignable or creatable runtime agent coverage while still reporting generic contract coverage.",
+      "hypothesis": "Binding those observations to workflow source phrases, summary claims, machine-readable visible daemon-bound runtime acceptance, and the ai_thread_history loop identity lets agents see which provider/runtime paths and live v3 thread-history API surfaces were verified without reading raw live output or exporting secrets; legacy v1 mutation remains opportunistic because the live smoke principal may expose assignable agents without agent daemon bindings, while v2 attempts existing daemon-bound agents first, then runtime-based smoke-agent creation, and otherwise records an explicit product-mutation warning instead of failing contract/read smoke.",
       "claims": [
         "provider_acceptance_summary_must_cover_declared_observations"
       ],
@@ -342,7 +342,7 @@
           "redacted": true
         }
       ],
-      "decision": "Provider acceptance evidence now exposes visible runtime acceptance through a dynamically selected daemon-bound assignable agent, daemon runtime snapshot, and live v3 thread-history smoke coverage in the safe redacted summary path, while loop-registry evidence rejects observation/summary drift before merge. The live seed proved v1 can list assignable agents without daemon detail, so v1 mutation is skipped with an explicit warning when no daemon-bound candidate exists, and v2 daemon-bound assignment/comment/v3 history remains the required product acceptance path.",
+      "decision": "Provider acceptance evidence now exposes visible runtime acceptance through a dynamically selected or created daemon-bound agent when live seed data supports it, daemon runtime snapshot, and live v3 thread-history smoke coverage in the safe redacted summary path, while loop-registry evidence rejects observation/summary drift before merge. The live seed proved v1 and v2 can list assignable agents without daemon detail, so v1 mutation is skipped with an explicit warning when no daemon-bound candidate exists, v2 attempts runtime-backed smoke-agent creation as a fallback, and product mutation is explicitly warned as partial when the live principal has neither an assignable nor creatable daemon-bound agent.",
       "next_loop": "provider_acceptance_harness"
     },
     {
