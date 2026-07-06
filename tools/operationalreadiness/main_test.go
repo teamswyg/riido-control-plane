@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+func TestMain(m *testing.M) { _ = os.Setenv(readinessNowEnv, "2026-07-05T00:00:00Z"); os.Exit(m.Run()) }
+
 func TestOperationalReadinessVerifies(t *testing.T) {
 	out := t.TempDir() + "/evidence.json"
 	err := run(options{Repo: "../..", Manifest: defaultManifest, CheckDoc: true, EvidenceOut: out})

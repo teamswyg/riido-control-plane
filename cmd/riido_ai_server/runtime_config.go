@@ -21,6 +21,7 @@ type runtimeConfig struct {
 	AIAgentClientDev         bool
 	AIAgentClientStore       riidoaiserver.AIAgentClientSnapshotStore
 	AIAgentClientMetrics     *riidoaiserver.AIAgentClientPersistenceMetrics
+	AIAgentDaemonProfile     string
 	AIAgentSnapshotReload    time.Duration
 	AIAgentHeartbeatSave     time.Duration
 	AIAgentProfileThumbnails riidoaiserver.AIAgentProfileThumbnailUploadService

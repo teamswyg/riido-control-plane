@@ -19,6 +19,7 @@ const (
 	envAssignmentActiveLease              = "RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS"
 	envAIAgentClientDev                   = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
 	envAIAgentClientTable                 = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE"
+	envAIAgentDaemonProfile               = "RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE"
 	envAIAgentClientSnapshotReload        = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_SNAPSHOT_RELOAD_SECONDS"
 	envAIAgentClientHeartbeatSave         = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_HEARTBEAT_SNAPSHOT_SAVE_SECONDS"
 	envDynamoDBOutboxTable                = "RIIDO_AI_SERVER_DYNAMODB_OUTBOX_TABLE"

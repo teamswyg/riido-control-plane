@@ -9,6 +9,10 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	daemonProfile, err := daemonProfileFromEnv()
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	assignmentOperationStore, err := assignmentOperationStoreFromEnv(parts.aiAgentClientDev, timing.AssignmentActiveLease)
 	if err != nil {
 		return runtimeConfig{}, err
@@ -40,6 +44,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 		AIAgentClientDev:         parts.aiAgentClientDev,
 		AIAgentClientStore:       parts.aiAgentClientStore,
 		AIAgentClientMetrics:     parts.aiAgentClientMetrics,
+		AIAgentDaemonProfile:     daemonProfile,
 		AIAgentSnapshotReload:    cadence.Reload,
 		AIAgentHeartbeatSave:     cadence.HeartbeatSave,
 		AIAgentProfileThumbnails: profileThumbnails,

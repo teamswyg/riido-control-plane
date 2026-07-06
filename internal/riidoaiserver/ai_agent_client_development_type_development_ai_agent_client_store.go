@@ -7,6 +7,7 @@ import (
 type DevelopmentAIAgentClientStore struct {
 	mu                      sync.Mutex
 	workspaceID             string
+	expectedDaemonProfile   string
 	devices                 []DeviceRecord
 	deviceCredentials       map[string]deviceCredentialRecord
 	nextDeviceCredentialSeq int
