@@ -14,6 +14,9 @@ func TestStartTraceSpanWithoutRecorderReturnsNoopSpan(t *testing.T) {
 	span.SetAttributes(StringTraceAttribute("key", "value"))
 	span.RecordError(errors.New("ignored"))
 	span.End()
+	noopTraceSpan{}.SetAttributes(StringTraceAttribute("direct", "yes"))
+	noopTraceSpan{}.RecordError(errors.New("direct ignored"))
+	noopTraceSpan{}.End()
 	FinishTraceSpan(nil, errors.New("ignored"))
 }
 
