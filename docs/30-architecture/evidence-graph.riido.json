@@ -15202,6 +15202,55 @@
       ],
       "decision": "Approval reply matching and assignment event input fallback now have direct function-level evidence: pending same-assignment approvals match only before expiry and only for the same agent, terminal/expired/foreign approvals are rejected, event payload values take precedence over request fallbacks, missing agent/task/assignment identity fails closed, and default daemon event state remains running. Go 1.26.2 coverage raises toolApprovalMatchesThread, newAssignmentEventInput, and firstNonEmpty to 100.0%, and internal/riidoaiserver package coverage rises to 84.5% without API or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "assignment_action_target_resolution_coverage_loop",
+      "observation": "Stop/delete/reassign strong consistency depends on resolving the exact assignment action target, but the top-level resolver branches for assignment-scoped, agent-scoped, active-scoped, foreign-assignment, missing-assignment, and terminal-only inputs still had partial function coverage.",
+      "hypothesis": "Focused pure-function tests can prove assignment_id scope wins over agent scope, agent scope cancels active assignments before historical ones, omitted identifiers target only the latest active assignment, foreign or missing assignment_id fails closed, unknown agents produce no target, and terminal-only history is not revived.",
+      "claims": [
+        "stop_reassign_must_not_revive_or_mutate_inactive_threads"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_assignment_action_resolve_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_assignment_action_resolve_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_assignment_action_resolve_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice42-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Assignment action target resolution now has direct function-level evidence for assignment-scoped, agent-scoped, active-scoped, foreign-assignment, missing-assignment, unknown-agent, and terminal-only histories. Go 1.26.2 coverage raises assignmentActionTargetsFromThreads, assignmentActionTargetsByAssignmentID, assignmentActionTargetsByAgentID, assignmentActionTargetByAssignmentID, and preferredActiveAssignmentActionTarget to 100.0%, and internal/riidoaiserver package coverage rises to 84.6% without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
