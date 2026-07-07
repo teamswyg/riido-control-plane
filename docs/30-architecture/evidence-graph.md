@@ -11,10 +11,10 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `127`
-- claim refs: `180`
-- change refs: `1675`
-- verifier refs: `881`
-- evidence refs: `466`
+- claim refs: `181`
+- change refs: `1679`
+- verifier refs: `883`
+- evidence refs: `468`
 
 ## Compiled Chain Summary
 
@@ -25,7 +25,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `76` | `84` | `1060` | `514` | `257` |
+| `closed_loop_candidate` | `76` | `85` | `1064` | `516` | `259` |
 | `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
 | `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
 | `ai_thread_history` | `8` | `8` | `121` | `57` | `12` |
@@ -164,7 +164,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `react_query_generated_client_syntax_hash_loop` | `1` | `8` | `5` | `3` | `closed_loop_candidate` |
 | `operational_readiness_syntax_hash_loop` | `1` | `4` | `5` | `3` | `closed_loop_candidate` |
 | `riido_ai_server_syntax_hash_loop` | `1` | `5` | `5` | `3` | `closed_loop_candidate` |
-| `daemon_profile_environment_guard_loop` | `3` | `5` | `4` | `4` | `closed_loop_candidate` |
+| `daemon_profile_environment_guard_loop` | `4` | `9` | `6` | `6` | `closed_loop_candidate` |
 | `operational_readiness_live_clock_evidence_loop` | `2` | `4` | `5` | `3` | `closed_loop_candidate_intake` |
 
 ## Loop

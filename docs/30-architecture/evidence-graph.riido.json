@@ -14482,7 +14482,8 @@
       "claims": [
         "runtime_adapter_config_must_preserve_public_env_contract",
         "config_reference_must_preserve_env_manifest_parity",
-        "store_snapshot_file_outbox_must_preserve_durable_replay_evidence"
+        "store_snapshot_file_outbox_must_preserve_durable_replay_evidence",
+        "server_route_handlers_must_stay_semantically_split"
       ],
       "changes": [
         {
@@ -14504,6 +14505,22 @@
         {
           "kind": "tool",
           "path": "internal/riidoaiserver/daemon_profile_prune.go"
+        },
+        {
+          "kind": "tool",
+          "path": "internal/riidoaiserver/server_daemon_http.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/daemon_runtime_snapshot_http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/daemon_runtime_snapshot_http_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/daemon_runtime_snapshot_http_test.go"
         }
       ],
       "verifiers": [
@@ -14518,6 +14535,14 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_persistence_daemon_profile_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/daemon_runtime_snapshot_http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/daemon_runtime_snapshot_http_test.go"
         },
         {
           "kind": "tool",
@@ -14538,12 +14563,20 @@
           "path": "internal/riidoaiserver/ai_agent_client_persistence_daemon_profile_test.go"
         },
         {
+          "kind": "test",
+          "path": "internal/riidoaiserver/daemon_runtime_snapshot_http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/daemon_runtime_snapshot_http_test.go"
+        },
+        {
           "kind": "artifact",
           "path": "daemon_profile_mismatch_log",
           "redacted": true
         }
       ],
-      "decision": "Control-plane now treats RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE as the environment authority: mismatched daemon snapshots fail closed, stale profile rows are pruned and logged, and persistence restore saves the cleaned snapshot so future runtime binding reads cannot resurrect foreign-profile daemon state.",
+      "decision": "Control-plane now treats RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE as the environment authority: mismatched daemon snapshots fail closed, stale profile rows are pruned and logged, and persistence restore saves the cleaned snapshot so future runtime binding reads cannot resurrect foreign-profile daemon state. The daemon runtime snapshot HTTP boundary now also has direct evidence for 405 method rejection, 503 missing runtime store, 401 missing or bad device credential, 403 header/body device mismatch, 400 malformed JSON, and 202 device-credential snapshot sync preserving daemon app_version, raising handleDaemonRuntimeSnapshot coverage to 83.9% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
     },
     {
