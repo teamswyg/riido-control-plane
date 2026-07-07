@@ -14928,6 +14928,55 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "ai_agent_client_workspace_stop_http_boundary_coverage_loop",
+      "observation": "The workspace-level AI Agent stop route is the client-facing strong-consistency stop path for all active threads of one agent, but its HTTP wrapper remained at 55.6% function coverage and lacked direct evidence for method rejection, malformed suffix rejection, missing auth, bad JSON, and no-active-thread errors.",
+      "hypothesis": "Focused HTTP boundary tests can raise the workspace stop route and stop handler to full function coverage without changing the v2/v1 stop endpoint contract, while proving invalid requests fail before mutating thread or assignment state.",
+      "claims": [
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_workspace_agent_stop_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_workspace_agent_stop_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_workspace_agent_stop_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice38-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Workspace-level AI Agent stop keeps the existing v2/v1 endpoint contract while HTTP boundary tests now prove non-POST and malformed suffix return 404, missing auth returns 401, bad JSON returns 400, and no active thread returns 404, raising handleAIAgentClientAgentAssignments and handleAIAgentClientStopWorkspaceAgentAssignment to 100.0% under Go 1.26.2.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "operational_readiness_live_clock_evidence_loop",
       "observation": "The live operational-readiness workflow exported a job-wide fixed historical RIIDO_OPERATIONAL_READINESS_NOW value, so a fresh manual run produced operational-readiness-closed-loop-candidates that were already expired and blocked closed-loop-candidate-intake and closed-loop-candidate-decision after the main merge.",
       "hypothesis": "Scoping the fixed clock only to the deterministic -check-doc command lets tools/operationalreadiness use the current UTC runtime clock for GitHub Actions evidence artifacts while preserving generated-doc drift checks; the generated candidate artifacts should then remain fresh for the loop registry's 24 hour expiry window without changing any public endpoint or runtime behavior.",
