@@ -14810,6 +14810,71 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "ai_agent_client_events_http_boundary_coverage_loop",
+      "observation": "The AI Agent client events endpoint drives live thread replay/SSE state, but its HTTP wrapper remained at 57.9% function coverage and lacked direct evidence for missing store, method rejection, missing auth, forbidden stream scope, subscriber failure, and reader-only fallback failure.",
+      "hypothesis": "Focused replay-mode HTTP boundary tests can raise the events handler to full function coverage without changing the SSE endpoint contract, while proving both subscriber and reader-only store failure paths return deterministic client errors instead of hanging live streams.",
+      "claims": [
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_events_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_events_error_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_events_reader_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_events_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_events_reader_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_events_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_events_reader_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice36-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "AI Agent client events keeps the existing SSE endpoint contract while HTTP boundary tests now prove missing store returns 503, non-GET returns 405, missing auth returns 401, insufficient stream scope returns 403, subscriber failure returns 400, and reader-only fallback failure returns 400, raising handleAIAgentClientEvents from 57.9% to 100.0% under Go 1.26.2.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "operational_readiness_live_clock_evidence_loop",
       "observation": "The live operational-readiness workflow exported a job-wide fixed historical RIIDO_OPERATIONAL_READINESS_NOW value, so a fresh manual run produced operational-readiness-closed-loop-candidates that were already expired and blocked closed-loop-candidate-intake and closed-loop-candidate-decision after the main merge.",
       "hypothesis": "Scoping the fixed clock only to the deterministic -check-doc command lets tools/operationalreadiness use the current UTC runtime clock for GitHub Actions evidence artifacts while preserving generated-doc drift checks; the generated candidate artifacts should then remain fresh for the loop registry's 24 hour expiry window without changing any public endpoint or runtime behavior.",
