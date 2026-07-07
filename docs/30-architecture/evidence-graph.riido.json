@@ -15469,6 +15469,59 @@
       ],
       "decision": "Daemon handler branch tests now cover long-poll hold capping, poll store fail-close, assignment-event read-model fanout, heartbeat event-store and fallback paths, thread-progress event journaling, fallback response shape, recorder not-found mapping, and empty-line validation. Go 1.26.2 coverage raises handleAgentPoll to 81.8%, handleAgentEvent to 68.8%, handleAgentHeartbeat to 68.2%, handleAgentThreadProgress to 78.3%, and internal/riidoaiserver package coverage to 85.1% without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "claimed_assignment_projection_fail_close_loop",
+      "observation": "applyClaimedAssignment returned an error when a durable claim operation list omitted the primary claim operation, but applyClaimedAssignmentOperations applied non-primary operations to in-memory state before detecting that missing-primary error.",
+      "hypothesis": "Validating all claimed operations and primary-operation presence before mutating storeState can make invalid durable claim replay fail closed while preserving valid poll-start claim behavior.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_assignment_projection_apply.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_assignment_projection_handlers_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_assignment_projection_handlers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_operation_runtime_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_assignment_projection_handlers_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice49-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Invalid durable claim results now fail before mutating storeState when assignment id, operation id, operation type, assignment identity, assignment payload, or primary operation presence is wrong. Go 1.26.2 targeted tests keep valid AssignmentClaimer poll-start behavior green, raise applyClaimedAssignment to 93.3% and applyClaimedAssignmentOperations to 93.8%, and lift internal/riidoaiserver package coverage to 85.2% without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
