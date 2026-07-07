@@ -114,7 +114,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `7aadb0213e97` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `7ee1bbf6a41c` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `022072756d6d` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `344659d0d018` | `server_route_handlers_must_stay_semantically_split` |
 
 ## Repository Coverage
 

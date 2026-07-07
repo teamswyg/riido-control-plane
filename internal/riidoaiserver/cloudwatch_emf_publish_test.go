@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"bytes"
 	"context"
+	"errors"
 	"testing"
 	"time"
 )
@@ -31,5 +32,30 @@ func TestPublishCloudWatchEMFUsesStoreSnapshot(t *testing.T) {
 	}
 	if envelope.AssignmentsTotal != 1 || envelope.TaskEventsTotal != 1 {
 		t.Fatalf("store counters = %+v", envelope)
+	}
+}
+
+func TestRunCloudWatchEMFPublisherRejectsNonPositiveInterval(t *testing.T) {
+	err := RunCloudWatchEMFPublisher(context.Background(), nil, 0, CloudWatchEMFConfig{})
+	if err == nil || err.Error() != "riidoaiserver: metrics interval must be positive" {
+		t.Fatalf("RunCloudWatchEMFPublisher() error = %v", err)
+	}
+}
+
+func TestRunCloudWatchEMFPublisherStopsWhenContextCanceled(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	calls := 0
+	metrics := metricsReaderFunc(func(context.Context) (MetricsSnapshot, error) {
+		calls++
+		return MetricsSnapshot{}, nil
+	})
+	var buf bytes.Buffer
+	err := RunCloudWatchEMFPublisher(ctx, metrics, time.Hour, CloudWatchEMFConfig{Writer: &buf})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("RunCloudWatchEMFPublisher() error = %v, want context.Canceled", err)
+	}
+	if calls != 1 || buf.Len() == 0 {
+		t.Fatalf("publisher calls=%d output=%q", calls, buf.String())
 	}
 }
