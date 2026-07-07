@@ -15092,6 +15092,55 @@
       ],
       "decision": "Operational-readiness live artifacts now use the workflow runtime clock instead of a stale job-wide fixed date, while the generated-doc check keeps a scoped deterministic clock. Tests may still inject RIIDO_OPERATIONAL_READINESS_NOW, but uploaded artifacts must be generated fresh enough for closed-loop candidate intake and decision gates to consume them after deployment merges.",
       "next_loop": "closed_loop_candidate_intake"
+    },
+    {
+      "id": "legacy_ai_agent_client_route_vocabulary_coverage_loop",
+      "observation": "The v1 AI Agent client route classifier shares the same route vocabulary as newer workspace-scoped routes, but its legacy prefix, top-level, onboarding, thumbnail, task, thread, agent, and rejection branches still had partial coverage.",
+      "hypothesis": "A focused v1 route vocabulary test can prove legacy client paths normalize sensitive ids, reject base-like and over-deep paths, and keep the shared route helpers fully covered without changing endpoint behavior.",
+      "claims": [
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_route_ai_agent_v1_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_route_ai_agent_v1_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_route_ai_agent_v1_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice40-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Legacy v1 AI Agent client route vocabulary keeps existing endpoint patterns while tests now prove v1 client paths normalize device, task, thread, and agent identifiers, reject ambiguous base-like prefixes and malformed depths, and raise the shared AI Agent client route helpers and v1 route wrapper to 100.0% under Go 1.26.2.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
