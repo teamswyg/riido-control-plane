@@ -14602,11 +14602,64 @@
           "redacted": true
         }
       ],
-      "decision": "Control-plane now treats RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE as the environment authority: mismatched daemon snapshots fail closed, stale profile rows are pruned and logged, and persistence restore saves the cleaned snapshot so future runtime binding reads cannot resurrect foreign-profile daemon state. The daemon runtime snapshot HTTP boundary now also has direct evidence for 405 method rejection, 503 missing runtime store, 401 missing or bad device credential, 403 header/body device mismatch, 400 malformed JSON, and 202 device-credential snapshot sync preserving daemon app_version, raising handleDaemonRuntimeSnapshot coverage to 83.9% under Go 1.26.2 without endpoint or payload changes.",
-      "next_loop": "closed_loop_candidate"
-    },
-    {
-      "id": "operational_readiness_live_clock_evidence_loop",
+    "decision": "Control-plane now treats RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE as the environment authority: mismatched daemon snapshots fail closed, stale profile rows are pruned and logged, and persistence restore saves the cleaned snapshot so future runtime binding reads cannot resurrect foreign-profile daemon state. The daemon runtime snapshot HTTP boundary now also has direct evidence for 405 method rejection, 503 missing runtime store, 401 missing or bad device credential, 403 header/body device mismatch, 400 malformed JSON, and 202 device-credential snapshot sync preserving daemon app_version, raising handleDaemonRuntimeSnapshot coverage to 83.9% under Go 1.26.2 without endpoint or payload changes.",
+    "next_loop": "closed_loop_candidate"
+  },
+  {
+    "id": "profile_thumbnail_upload_http_boundary_coverage_loop",
+    "observation": "The AI Agent profile thumbnail upload handler had success-path S3 POST policy evidence, but its HTTP boundary remained at 50.0% function coverage and lacked direct evidence for method rejection, missing upload service, missing client authorization, malformed JSON, and service validation failure across the v1 and v2 routes.",
+    "hypothesis": "Adding focused handler-level HTTP error tests can raise the endpoint boundary to full function coverage without changing the public upload intent request, response, or S3 form upload contract.",
+    "claims": [
+      "server_route_handlers_must_stay_semantically_split"
+    ],
+    "changes": [
+      {
+        "kind": "test",
+        "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_test.go"
+      },
+      {
+        "kind": "test",
+        "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_helpers_test.go"
+      },
+      {
+        "kind": "manifest",
+        "path": "docs/30-architecture/loop-registry.riido.json"
+      },
+      {
+        "kind": "manifest",
+        "path": "docs/30-architecture/evidence-graph.riido.json"
+      }
+    ],
+    "verifiers": [
+      {
+        "kind": "test",
+        "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_test.go"
+      },
+      {
+        "kind": "tool",
+        "path": "tools/loopregistry"
+      },
+      {
+        "kind": "tool",
+        "path": "tools/evidencegraph"
+      }
+    ],
+    "evidence": [
+      {
+        "kind": "test",
+        "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_test.go"
+      },
+      {
+        "kind": "artifact",
+        "path": "riidoaiserver-slice32-after.cover",
+        "redacted": true
+      }
+    ],
+    "decision": "Profile thumbnail upload keeps the existing v1/v2 upload-intent contract while the HTTP boundary now proves 405 method rejection, 503 missing upload service, 401 unauthenticated client, 400 malformed JSON, and 400 upload-service validation failure, raising handleAIAgentClientProfileThumbnailUpload from 50.0% to 100.0% under Go 1.26.2.",
+    "next_loop": "closed_loop_candidate"
+  },
+  {
+    "id": "operational_readiness_live_clock_evidence_loop",
       "observation": "The live operational-readiness workflow exported a job-wide fixed historical RIIDO_OPERATIONAL_READINESS_NOW value, so a fresh manual run produced operational-readiness-closed-loop-candidates that were already expired and blocked closed-loop-candidate-intake and closed-loop-candidate-decision after the main merge.",
       "hypothesis": "Scoping the fixed clock only to the deterministic -check-doc command lets tools/operationalreadiness use the current UTC runtime clock for GitHub Actions evidence artifacts while preserving generated-doc drift checks; the generated candidate artifacts should then remain fresh for the loop registry's 24 hour expiry window without changing any public endpoint or runtime behavior.",
       "claims": [
