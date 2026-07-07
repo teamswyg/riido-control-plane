@@ -1484,7 +1484,7 @@
     },
     {
       "id": "control_plane_observability_utility_coverage_loop",
-      "observation": "The latest riidoaiserver coverage slice found low-level v3 progress message ID fallback, progress-history cache matching, HTTP status recorder flush/unwrap, 5xx tracing errors, observed metrics contributors, no-op/finish tracing helpers, large-batch progress dedupe, progress argument and metadata conversion, daemon profile normalization, active-thread work-status projection, coalesced authorization clone/cancel branches, HTTP transaction metric ordering, daemon profile pruning, DynamoDB snapshot reply waiting, and AWS JSON operation/error formatting under-covered even though those utility paths support thread-history refresh performance, SSE/HTTP observability, OTel/X-Ray status attributes, metrics snapshot evidence, runtime profile isolation, queued/running UI state interpretation, authorization isolation, metrics determinism, persistence shutdown semantics, and AWS trace naming.",
+      "observation": "The latest riidoaiserver coverage slice found low-level v3 progress message ID fallback, progress-history cache matching, HTTP status recorder flush/unwrap, 5xx tracing errors, observed metrics contributors, no-op/finish tracing helpers, large-batch progress dedupe, progress argument and metadata conversion, daemon profile normalization, active-thread work-status projection, coalesced authorization clone/cancel branches, HTTP transaction metric ordering, daemon profile pruning, DynamoDB snapshot reply waiting, AWS JSON operation/error formatting, operation-store-backed assignment long-poll waiting, assignment action target selection, and global reconcile gate reserve/forget pruning under-covered even though those utility paths support thread-history refresh performance, SSE/HTTP observability, OTel/X-Ray status attributes, metrics snapshot evidence, runtime profile isolation, queued/running UI state interpretation, authorization isolation, metrics determinism, persistence shutdown semantics, AWS trace naming, daemon poll durability, strong stop/delete targeting, and reconcile throttling.",
       "hypothesis": "Focused sidecar tests can pin those utility contracts without changing endpoints, response payloads, runtime behavior, daemon profile semantics, or deployment configuration, raising internal/riidoaiserver coverage while keeping the control-plane performance claim bound to executable evidence.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence"
@@ -1549,6 +1549,22 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/http_transaction_metrics_sort_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_longpoll_operation_store_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_longpoll_operation_store_signal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_ai_agent_reconcile_gate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_assignment_action_target_branch_test.go"
         },
         {
           "kind": "manifest",
@@ -1621,6 +1637,22 @@
           "path": "internal/riidoaiserver/http_transaction_metrics_sort_test.go"
         },
         {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_longpoll_operation_store_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_longpoll_operation_store_signal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_ai_agent_reconcile_gate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_assignment_action_target_branch_test.go"
+        },
+        {
           "kind": "tool",
           "path": "tools/syntaxhash"
         },
@@ -1656,6 +1688,11 @@
         },
         {
           "kind": "artifact",
+          "path": "riidoaiserver-coverage-80-7",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
           "path": "loop-registry-evidence",
           "redacted": true
         },
@@ -1665,7 +1702,7 @@
           "redacted": true
         }
       ],
-      "decision": "This slice adds only tests and generated evidence updates: progress message IDs preserve legacy hashes even on the heap fallback path, progress cache matching invalidates on line identity changes, HTTP tracing records 5xx status errors, status recorder flush/unwrap behavior remains explicit, observed metrics contributors preserve nil/error semantics, no-op/finish tracing paths stay safe, large progress batches dedupe with replacement lines intact, progress args and metadata trim/drop blank fields deterministically, daemon profile aliases and mismatches stay explicit, active-thread projections prefer waiting/queued/running states predictably, authorization result cloning no longer aliases role slices, coalesced waits honor context cancellation, HTTP transaction metrics sort deterministically, daemon profile pruning removes stale records only for the expected profile, DynamoDB snapshot wait replies handle result/cancel/closed paths, and AWS JSON helpers preserve trace operation names and redacted error formatting. Go 1.26.2 package coverage for internal/riidoaiserver rises from 79.9% to 80.5% while endpoint contracts and runtime behavior remain unchanged.",
+      "decision": "This slice adds only tests and generated evidence updates: progress message IDs preserve legacy hashes even on the heap fallback path, progress cache matching invalidates on line identity changes, HTTP tracing records 5xx status errors, status recorder flush/unwrap behavior remains explicit, observed metrics contributors preserve nil/error semantics, no-op/finish tracing paths stay safe, large progress batches dedupe with replacement lines intact, progress args and metadata trim/drop blank fields deterministically, daemon profile aliases and mismatches stay explicit, active-thread projections prefer waiting/queued/running states predictably, authorization result cloning no longer aliases role slices, coalesced waits honor context cancellation, HTTP transaction metrics sort deterministically, daemon profile pruning removes stale records only for the expected profile, DynamoDB snapshot wait replies handle result/cancel/closed paths, AWS JSON helpers preserve trace operation names and redacted error formatting, operation-store-backed long-polls timeout, wake on assignment signal, and return context cancellation deterministically, assignment action targets prefer the current active assignment while rejecting agent mismatches, and reconcile gates trim identity keys, block within interval, forget explicit reservations, and prune old reservations. Go 1.26.2 package coverage for internal/riidoaiserver rises from 79.9% to 80.7% while endpoint contracts and runtime behavior remain unchanged.",
       "next_loop": "control_plane_performance_harness"
     },
     {
