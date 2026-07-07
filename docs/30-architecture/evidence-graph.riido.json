@@ -15380,6 +15380,95 @@
       ],
       "decision": "Client stream visibility and fanout helper coverage now proves eventAgentID and clientEventForSubscriberLocked at 100.0%, raises clientEventVisibleToLocked to 93.3%, preserves deleted-agent thread visibility through snapshots, and keeps unknown agent events without thread references visible only to admins. Go 1.26.2 package coverage for internal/riidoaiserver rises to 84.7% without endpoint, SSE event type, or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "daemon_handler_branch_coverage_loop",
+      "observation": "Daemon-facing poll, heartbeat, event, and thread-progress HTTP handlers are hot-path control-plane boundaries, but branch coverage was still partial for long-poll selection, read-model recorder fanout, fallback progress responses, recorder errors, and request validation.",
+      "hypothesis": "Small handler-level tests can prove these branches without changing endpoint paths, request bodies, response payloads, daemon contracts, or production handler code.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_handler_test_support_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_handler_recorder_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_poll_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_event_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_heartbeat_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_thread_progress_handler_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_poll_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_event_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_heartbeat_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_thread_progress_handler_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_poll_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_event_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_heartbeat_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_thread_progress_handler_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice48-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Daemon handler branch tests now cover long-poll hold capping, poll store fail-close, assignment-event read-model fanout, heartbeat event-store and fallback paths, thread-progress event journaling, fallback response shape, recorder not-found mapping, and empty-line validation. Go 1.26.2 coverage raises handleAgentPoll to 81.8%, handleAgentEvent to 68.8%, handleAgentHeartbeat to 68.2%, handleAgentThreadProgress to 78.3%, and internal/riidoaiserver package coverage to 85.1% without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
