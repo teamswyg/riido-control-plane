@@ -53,7 +53,7 @@ func aiAgentClientTaskLeafRoute(taskBase string, segments []string) string {
 }
 
 func aiAgentClientTaskThreadsRoute(taskBase string, segments []string) string {
-	if len(segments) == 2 {
+	if len(segments) == 2 && segments[1] == "threads" {
 		return taskBase + "/threads"
 	}
 	if len(segments) == 4 && segments[1] == "threads" && segments[3] == "messages" {
