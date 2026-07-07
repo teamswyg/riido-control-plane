@@ -1484,7 +1484,7 @@
     },
     {
       "id": "control_plane_observability_utility_coverage_loop",
-      "observation": "The latest riidoaiserver coverage slice found low-level v3 progress message ID fallback, progress-history cache matching, HTTP status recorder flush/unwrap, 5xx tracing errors, observed metrics contributors, no-op/finish tracing helpers, large-batch progress dedupe, progress argument and metadata conversion, daemon profile normalization, active-thread work-status projection, coalesced authorization clone/cancel branches, HTTP transaction metric ordering, daemon profile pruning, DynamoDB snapshot reply waiting, AWS JSON operation/error formatting, operation-store-backed assignment long-poll waiting, assignment action target selection, global reconcile gate reserve/forget pruning, explicit client stop target selection, assignment blocker clearing, agent runtime fact resolution, task-thread snapshot/workspace helper branches, and persistent AI Agent client delegate wrapper branches under-covered even though those utility paths support thread-history refresh performance, SSE/HTTP observability, OTel/X-Ray status attributes, metrics snapshot evidence, runtime profile isolation, queued/running UI state interpretation, authorization isolation, metrics determinism, persistence shutdown semantics, AWS trace naming, daemon poll durability, strong stop/delete targeting, reconcile throttling, runtime routing, deleted-agent thread history preservation, and snapshot reload/save boundaries.",
+      "observation": "The latest riidoaiserver coverage slice found low-level v3 progress message ID fallback, progress-history cache matching, HTTP status recorder flush/unwrap, 5xx tracing errors, observed metrics contributors, no-op/finish tracing helpers, large-batch progress dedupe, progress argument and metadata conversion, daemon profile normalization, active-thread work-status projection, coalesced authorization clone/cancel branches, HTTP transaction metric ordering, daemon profile pruning, DynamoDB snapshot reply waiting, AWS JSON operation/error formatting, operation-store-backed assignment long-poll waiting, assignment action target selection, global reconcile gate reserve/forget pruning, explicit client stop target selection, assignment blocker clearing, agent runtime fact resolution, task-thread snapshot/workspace helper branches, and persistent AI Agent client delegate wrapper branches under-covered even though those utility paths support thread-history refresh performance, SSE/HTTP observability, OTel/X-Ray status attributes, metrics snapshot evidence, runtime profile isolation, queued/running UI state interpretation, authorization isolation, metrics determinism, persistence shutdown semantics, AWS trace naming, daemon poll durability, strong stop/delete targeting, reconcile throttling, runtime routing, deleted-agent thread history preservation, snapshot reload/save boundaries, daemon control visibility, binding handoff, and assignment event persistence.",
       "hypothesis": "Focused sidecar tests can pin those utility contracts without changing endpoints, response payloads, runtime behavior, daemon profile semantics, or deployment configuration, raising internal/riidoaiserver coverage while keeping the control-plane performance claim bound to executable evidence.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence"
@@ -1589,6 +1589,14 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_persistence_delegate_helper_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_daemon_delegate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_event_delegate_test.go"
         },
         {
           "kind": "manifest",
@@ -1701,6 +1709,14 @@
           "path": "internal/riidoaiserver/ai_agent_client_persistence_delegate_helper_test.go"
         },
         {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_daemon_delegate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_event_delegate_test.go"
+        },
+        {
           "kind": "tool",
           "path": "tools/syntaxhash"
         },
@@ -1751,6 +1767,11 @@
         },
         {
           "kind": "artifact",
+          "path": "riidoaiserver-coverage-81-4",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
           "path": "loop-registry-evidence",
           "redacted": true
         },
@@ -1760,7 +1781,7 @@
           "redacted": true
         }
       ],
-      "decision": "This slice adds only tests and generated evidence updates: progress message IDs preserve legacy hashes even on the heap fallback path, progress cache matching invalidates on line identity changes, HTTP tracing records 5xx status errors, status recorder flush/unwrap behavior remains explicit, observed metrics contributors preserve nil/error semantics, no-op/finish tracing paths stay safe, large progress batches dedupe with replacement lines intact, progress args and metadata trim/drop blank fields deterministically, daemon profile aliases and mismatches stay explicit, active-thread projections prefer waiting/queued/running states predictably, authorization result cloning no longer aliases role slices, coalesced waits honor context cancellation, HTTP transaction metrics sort deterministically, daemon profile pruning removes stale records only for the expected profile, DynamoDB snapshot wait replies handle result/cancel/closed paths, AWS JSON helpers preserve trace operation names and redacted error formatting, operation-store-backed long-polls timeout, wake on assignment signal, and return context cancellation deterministically, assignment action targets prefer the current active assignment while rejecting agent mismatches, reconcile gates trim identity keys, block within interval, forget explicit reservations, and prune old reservations, client stop target selection prefers explicit assignments and otherwise skips terminal/foreign task records, assignment blockers clear only after terminal blocker state, runtime fact resolution prefers fact registries and fails closed on missing bindings or registries, task thread helpers preserve existing snapshots while materializing copied response snapshots, and persistent AI Agent client wrapper delegates now prove read/stream calls do not create extra snapshot saves while successful create/update/delete/device/fixture mutations do save. Go 1.26.2 package coverage for internal/riidoaiserver rises from 79.9% to 81.2% while endpoint contracts and runtime behavior remain unchanged.",
+      "decision": "This slice adds only tests and generated evidence updates: progress message IDs preserve legacy hashes even on the heap fallback path, progress cache matching invalidates on line identity changes, HTTP tracing records 5xx status errors, status recorder flush/unwrap behavior remains explicit, observed metrics contributors preserve nil/error semantics, no-op/finish tracing paths stay safe, large progress batches dedupe with replacement lines intact, progress args and metadata trim/drop blank fields deterministically, daemon profile aliases and mismatches stay explicit, active-thread projections prefer waiting/queued/running states predictably, authorization result cloning no longer aliases role slices, coalesced waits honor context cancellation, HTTP transaction metrics sort deterministically, daemon profile pruning removes stale records only for the expected profile, DynamoDB snapshot wait replies handle result/cancel/closed paths, AWS JSON helpers preserve trace operation names and redacted error formatting, operation-store-backed long-polls timeout, wake on assignment signal, and return context cancellation deterministically, assignment action targets prefer the current active assignment while rejecting agent mismatches, reconcile gates trim identity keys, block within interval, forget explicit reservations, and prune old reservations, client stop target selection prefers explicit assignments and otherwise skips terminal/foreign task records, assignment blockers clear only after terminal blocker state, runtime fact resolution prefers fact registries and fails closed on missing bindings or registries, task thread helpers preserve existing snapshots while materializing copied response snapshots, persistent AI Agent client wrapper delegates now prove read/stream calls do not create extra snapshot saves while successful create/update/delete/device/fixture mutations do save, and daemon/detail/binding/reconcile/thread lookup/event delegates preserve reload/save boundaries around daemon control and assignment event handoff. Go 1.26.2 package coverage for internal/riidoaiserver rises from 79.9% to 81.4% while endpoint contracts and runtime behavior remain unchanged.",
       "next_loop": "control_plane_performance_harness"
     },
     {
