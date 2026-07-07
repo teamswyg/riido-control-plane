@@ -14977,6 +14977,55 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "core_http_route_vocabulary_coverage_loop",
+      "observation": "The core HTTP route classifier protects metrics and tracing from raw agent, daemon, and component identifiers, but its core agent, daemon, component, and trace wrapper branches still had partial function coverage.",
+      "hypothesis": "A focused route vocabulary test can raise the core route classifier branches to full coverage while proving sensitive ids are normalized to route patterns and unknown or wrong-method requests stay unmatched.",
+      "claims": [
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_route_core_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_route_core_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_route_core_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice39-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Core HTTP route vocabulary keeps the existing route patterns while tests now prove agent ids and component ids are normalized, daemon routes are matched only on their intended method, and wrong-method or unknown-action requests remain unmatched, raising traceHTTPRoute, agentHTTPRoute, daemonHTTPRoute, and componentTaskHTTPRoute to 100.0% under Go 1.26.2.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "operational_readiness_live_clock_evidence_loop",
       "observation": "The live operational-readiness workflow exported a job-wide fixed historical RIIDO_OPERATIONAL_READINESS_NOW value, so a fresh manual run produced operational-readiness-closed-loop-candidates that were already expired and blocked closed-loop-candidate-intake and closed-loop-candidate-decision after the main merge.",
       "hypothesis": "Scoping the fixed clock only to the deterministic -check-doc command lets tools/operationalreadiness use the current UTC runtime clock for GitHub Actions evidence artifacts while preserving generated-doc drift checks; the generated candidate artifacts should then remain fresh for the loop registry's 24 hour expiry window without changing any public endpoint or runtime behavior.",
