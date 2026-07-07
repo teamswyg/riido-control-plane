@@ -92,7 +92,16 @@
       "id": "tool_approval_waiters",
       "category": "busy_worker_polling",
       "risk": "Headless tool approval waits use the same timer/ticker/waiter pattern and can accumulate under stalled provider approvals.",
-      "files": ["internal/riidoaiserver/tool_approval_http.go", "internal/riidoaiserver/store_tool_approval.go", "internal/riidoaiserver/store_tool_approval_wait.go", "internal/riidoaiserver/store_tool_approval_types.go"],
+      "files": [
+        "internal/riidoaiserver/tool_approval_http.go",
+        "internal/riidoaiserver/tool_approval_agent_http.go",
+        "internal/riidoaiserver/tool_approval_client_http.go",
+        "internal/riidoaiserver/store_tool_approval_api.go",
+        "internal/riidoaiserver/store_tool_approval_waiter_api.go",
+        "internal/riidoaiserver/store_tool_approval_waiter_handlers.go",
+        "internal/riidoaiserver/store_tool_approval_wait.go",
+        "internal/riidoaiserver/store_tool_approval_types.go"
+      ],
       "patterns": ["WaitForToolApproval", "registerToolApprovalWaiter", "time.NewTicker"],
       "candidate": "Measure approval waiter timeout pressure and keep web approval waits bounded by long-poll limits."
     },
