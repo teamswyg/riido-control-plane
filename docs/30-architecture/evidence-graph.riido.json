@@ -15522,6 +15522,63 @@
       ],
       "decision": "Invalid durable claim results now fail before mutating storeState when assignment id, operation id, operation type, assignment identity, assignment payload, or primary operation presence is wrong. Go 1.26.2 targeted tests keep valid AssignmentClaimer poll-start behavior green, raise applyClaimedAssignment to 93.3% and applyClaimedAssignmentOperations to 93.8%, and lift internal/riidoaiserver package coverage to 85.2% without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_snapshot_event_payload_replay_loop",
+      "observation": "AIAgent client snapshot replay stores client stream events as JSON envelopes, but the restore path had weak direct evidence that known event types recover their concrete payload types and that corrupt replay payloads fail with event-type context.",
+      "hypothesis": "Targeted replay tests can make snapshot event persistence safer by proving known event payload type restoration, unknown event map fallback, malformed JSON rejection, and event-type-preserving error messages without changing endpoint contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_event_payload_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_snapshot_events_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_event_payload_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_snapshot_events_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_event_payload_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_snapshot_events_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice50-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Snapshot event replay now has explicit Go 1.26.2 evidence that device runtime, daemon status, editability, work status, and thread progress events restore to concrete payload types; unknown event types stay recoverable as map payloads; malformed JSON fails; and snapshot/restore envelope errors include the event type. snapshotEvents, restoreSnapshotEvents, and restoreSnapshotEventPayload now report 100.0% coverage without endpoint or payload shape changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
