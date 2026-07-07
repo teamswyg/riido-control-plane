@@ -15251,6 +15251,67 @@
       ],
       "decision": "Assignment action target resolution now has direct function-level evidence for assignment-scoped, agent-scoped, active-scoped, foreign-assignment, missing-assignment, unknown-agent, and terminal-only histories. Go 1.26.2 coverage raises assignmentActionTargetsFromThreads, assignmentActionTargetsByAssignmentID, assignmentActionTargetsByAgentID, assignmentActionTargetByAssignmentID, and preferredActiveAssignmentActionTarget to 100.0%, and internal/riidoaiserver package coverage rises to 84.6% without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "client_event_visibility_fanout_coverage_loop",
+      "observation": "Client SSE fanout and replay filtering depends on extracting agent identity from heterogeneous client events and hiding unknown-agent fanout from non-admin subscribers, but these pure helper branches still had partial function coverage.",
+      "hypothesis": "Focused pure-function tests can prove agent id extraction for editability, work-status, and progress events, deleted-agent thread visibility through retained snapshots, admin-only fallback for unknown agent events without thread refs, and fanout event selection without changing SSE payload contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_event_agent_id_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_event_visibility_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_event_agent_id_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_event_visibility_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_event_agent_id_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_event_visibility_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice43-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Client stream visibility and fanout helper coverage now proves eventAgentID and clientEventForSubscriberLocked at 100.0%, raises clientEventVisibleToLocked to 93.3%, preserves deleted-agent thread visibility through snapshots, and keeps unknown agent events without thread references visible only to admins. Go 1.26.2 package coverage for internal/riidoaiserver rises to 84.7% without endpoint, SSE event type, or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
