@@ -4570,7 +4570,23 @@
         },
         {
           "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_control_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_routes_error_test.go"
+        },
+        {
+          "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_daemon_identity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_control_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_routes_error_test.go"
         },
         {
           "kind": "test",
@@ -4625,6 +4641,14 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_http_device_daemons_fallback_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_control_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_routes_error_test.go"
         },
         {
           "kind": "test",
@@ -4709,7 +4733,7 @@
           "path": "internal/riidoaiserver/ai_agent_client_development_daemon_owner_projection_test.go"
         }
       ],
-      "decision": "GET /devices/{device_id}/daemon remains the single preferred daemon compatibility endpoint, while GET /devices/{device_id}/daemons is a read-only plural projection sorted newest first and filtered through the same device and daemon visibility checks; route and HTTP tests prove the new surface is explicit instead of inferred by clients. When no visible daemon rows exist for a visible device, plural list now includes the same device read-model fallback daemon used by the singular compatibility endpoint, so live deploy smoke and runtime settings do not see `daemon` as present but `daemons` as empty. The plural v1/v2 endpoints appear in DSL/IR/OpenAPI as DeviceDaemonListResponse-backed query operations and generate aiAgent.devices.daemons.list / v2.aiAgent.devices.daemons.list React Query clients, so frontend handoff no longer depends on stale Notion readback or a manual URL. Redacted live probes prove the plural v1/v2 routes are present and auth-protected, not 404, across staging, development, and production after deployment, and fallback regression evidence now proves the list remains useful when only the device read model is available. Focused daemon identity and owner-boundary tests now keep same-profile identity, same-daemon-id legacy identity, freshest daemon preference, runtime-owned daemon fallback, projection-lag fallback, and wrong-device denial executable instead of relying on operator memory.",
+      "decision": "GET /devices/{device_id}/daemon remains the single preferred daemon compatibility endpoint, while GET /devices/{device_id}/daemons is a read-only plural projection sorted newest first and filtered through the same device and daemon visibility checks; route and HTTP tests prove the new surface is explicit instead of inferred by clients. Device daemon route and control error tests now pin store-unconfigured, malformed body, invalid suffix, wrong method, and backend failure statuses so runtime settings can distinguish missing routes from unsupported actions without changing endpoint payloads. When no visible daemon rows exist for a visible device, plural list now includes the same device read-model fallback daemon used by the singular compatibility endpoint, so live deploy smoke and runtime settings do not see `daemon` as present but `daemons` as empty. The plural v1/v2 endpoints appear in DSL/IR/OpenAPI as DeviceDaemonListResponse-backed query operations and generate aiAgent.devices.daemons.list / v2.aiAgent.devices.daemons.list React Query clients, so frontend handoff no longer depends on stale Notion readback or a manual URL. Redacted live probes prove the plural v1/v2 routes are present and auth-protected, not 404, across staging, development, and production after deployment, and fallback regression evidence now proves the list remains useful when only the device read model is available. Focused daemon identity and owner-boundary tests now keep same-profile identity, same-daemon-id legacy identity, freshest daemon preference, runtime-owned daemon fallback, projection-lag fallback, and wrong-device denial executable instead of relying on operator memory.",
       "next_loop": "closed_loop_candidate"
     },
     {
