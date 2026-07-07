@@ -15141,6 +15141,67 @@
       ],
       "decision": "Legacy v1 AI Agent client route vocabulary keeps existing endpoint patterns while tests now prove v1 client paths normalize device, task, thread, and agent identifiers, reject ambiguous base-like prefixes and malformed depths, and raise the shared AI Agent client route helpers and v1 route wrapper to 100.0% under Go 1.26.2.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "tool_approval_assignment_event_input_coverage_loop",
+      "observation": "Same-assignment tool approval replies and daemon assignment event ingestion guard user-visible approval loops, but the isolated approval-thread matcher and assignment event input fallback/error branches still had partial function coverage.",
+      "hypothesis": "Focused pure-function tests can prove pending approvals match only fresh same-assignment same-agent threads, terminal or expired approvals do not match, daemon event fields take precedence over request fallbacks, missing identities fail closed, and default assignment state remains running without changing endpoint payloads.",
+      "claims": [
+        "ambiguous_task_context_must_ask_before_work"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/tool_approval_thread_match_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_event_input_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/tool_approval_thread_match_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_event_input_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/tool_approval_thread_match_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_event_input_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice41-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Approval reply matching and assignment event input fallback now have direct function-level evidence: pending same-assignment approvals match only before expiry and only for the same agent, terminal/expired/foreign approvals are rejected, event payload values take precedence over request fallbacks, missing agent/task/assignment identity fails closed, and default daemon event state remains running. Go 1.26.2 coverage raises toolApprovalMatchesThread, newAssignmentEventInput, and firstNonEmpty to 100.0%, and internal/riidoaiserver package coverage rises to 84.5% without API or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
