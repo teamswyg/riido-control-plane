@@ -12,9 +12,9 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `127`
 - claim refs: `180`
-- change refs: `1653`
-- verifier refs: `861`
-- evidence refs: `456`
+- change refs: `1657`
+- verifier refs: `865`
+- evidence refs: `457`
 
 ## Compiled Chain Summary
 
@@ -25,14 +25,14 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `76` | `84` | `1054` | `510` | `257` |
+| `closed_loop_candidate` | `76` | `84` | `1056` | `512` | `257` |
 | `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
 | `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
 | `ai_thread_history` | `8` | `8` | `121` | `57` | `12` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
 | `loop_closure_audit` | `2` | `4` | `24` | `12` | `8` |
-| `control_plane_performance_harness` | `1` | `1` | `57` | `53` | `35` |
+| `control_plane_performance_harness` | `1` | `1` | `59` | `55` | `36` |
 | `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
 
 ## Evidence Chains
@@ -47,8 +47,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `device_daemon_plural_endpoint_live_smoke_loop` | `2` | `5` | `5` | `3` | `provider_acceptance_harness` |
 | `semantic_hash_metadata_normalization_loop` | `1` | `6` | `3` | `1` | `closed_loop_candidate` |
 | `load_harness_closed_loop_promotion_loop` | `1` | `5` | `4` | `4` | `closed_loop_candidate` |
-| `control_plane_performance_evidence_loop` | `1` | `140` | `59` | `29` | `closed_loop_candidate` |
-| `control_plane_observability_utility_coverage_loop` | `1` | `57` | `53` | `35` | `control_plane_performance_harness` |
+| `control_plane_performance_evidence_loop` | `1` | `142` | `61` | `29` | `closed_loop_candidate` |
+| `control_plane_observability_utility_coverage_loop` | `1` | `59` | `55` | `36` | `control_plane_performance_harness` |
 | `control_plane_registry_progress_coverage_loop` | `1` | `4` | `4` | `2` | `closed_loop_candidate` |
 | `control_plane_persistence_action_coverage_loop` | `1` | `6` | `6` | `3` | `closed_loop_candidate` |
 | `harness_failure_always_promotion_loop` | `1` | `8` | `6` | `3` | `closed_loop_candidate` |
