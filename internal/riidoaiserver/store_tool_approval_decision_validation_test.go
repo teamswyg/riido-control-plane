@@ -22,9 +22,24 @@ func TestNormalizeAndValidateStoredToolApprovalDecision(t *testing.T) {
 		t.Fatalf("valid decision rejected: %v", err)
 	}
 
-	decision.Decision = "maybe"
-	if err := validateStoredToolApprovalDecision(decision); err == nil ||
-		!strings.Contains(err.Error(), "decision must be approve or deny") {
-		t.Fatalf("invalid decision error = %v", err)
+	cases := []struct {
+		name   string
+		mutate func(*ToolApprovalDecision)
+		want   string
+	}{
+		{"approval", func(d *ToolApprovalDecision) { d.ApprovalID = " " }, "approval_id is required"},
+		{"assignment", func(d *ToolApprovalDecision) { d.AssignmentID = "" }, "assignment_id is required"},
+		{"decision", func(d *ToolApprovalDecision) { d.Decision = "maybe" }, "decision must be approve or deny"},
+		{"decided", func(d *ToolApprovalDecision) { d.DecidedAt = time.Time{} }, "decided_at is required"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			candidate := decision
+			tc.mutate(&candidate)
+			if err := validateStoredToolApprovalDecision(candidate); err == nil ||
+				!strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("validateStoredToolApprovalDecision error = %v, want %q", err, tc.want)
+			}
+		})
 	}
 }
