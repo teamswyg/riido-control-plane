@@ -14602,162 +14602,215 @@
           "redacted": true
         }
       ],
-    "decision": "Control-plane now treats RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE as the environment authority: mismatched daemon snapshots fail closed, stale profile rows are pruned and logged, and persistence restore saves the cleaned snapshot so future runtime binding reads cannot resurrect foreign-profile daemon state. The daemon runtime snapshot HTTP boundary now also has direct evidence for 405 method rejection, 503 missing runtime store, 401 missing or bad device credential, 403 header/body device mismatch, 400 malformed JSON, and 202 device-credential snapshot sync preserving daemon app_version, raising handleDaemonRuntimeSnapshot coverage to 83.9% under Go 1.26.2 without endpoint or payload changes.",
-    "next_loop": "closed_loop_candidate"
-  },
-  {
-    "id": "profile_thumbnail_upload_http_boundary_coverage_loop",
-    "observation": "The AI Agent profile thumbnail upload handler had success-path S3 POST policy evidence, but its HTTP boundary remained at 50.0% function coverage and lacked direct evidence for method rejection, missing upload service, missing client authorization, malformed JSON, and service validation failure across the v1 and v2 routes.",
-    "hypothesis": "Adding focused handler-level HTTP error tests can raise the endpoint boundary to full function coverage without changing the public upload intent request, response, or S3 form upload contract.",
-    "claims": [
-      "server_route_handlers_must_stay_semantically_split"
-    ],
-    "changes": [
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_test.go"
-      },
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_helpers_test.go"
-      },
-      {
-        "kind": "manifest",
-        "path": "docs/30-architecture/loop-registry.riido.json"
-      },
-      {
-        "kind": "manifest",
-        "path": "docs/30-architecture/evidence-graph.riido.json"
-      }
-    ],
-    "verifiers": [
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_test.go"
-      },
-      {
-        "kind": "tool",
-        "path": "tools/loopregistry"
-      },
-      {
-        "kind": "tool",
-        "path": "tools/evidencegraph"
-      }
-    ],
-    "evidence": [
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_test.go"
-      },
-      {
-        "kind": "artifact",
-        "path": "riidoaiserver-slice32-after.cover",
-        "redacted": true
-      }
-    ],
-    "decision": "Profile thumbnail upload keeps the existing v1/v2 upload-intent contract while the HTTP boundary now proves 405 method rejection, 503 missing upload service, 401 unauthenticated client, 400 malformed JSON, and 400 upload-service validation failure, raising handleAIAgentClientProfileThumbnailUpload from 50.0% to 100.0% under Go 1.26.2.",
-    "next_loop": "closed_loop_candidate"
-  },
-  {
-    "id": "delete_task_agent_assignment_http_boundary_coverage_loop",
-    "observation": "The task-scoped AI Agent assignment delete handler guarded user-visible participant removal and deleted-agent cancellation paths, but its HTTP boundary remained at 52.4% function coverage and lacked direct evidence for unscoped v1 route rejection, malformed v2 delete JSON, and durable-cancel failure preserving the running thread read model.",
-    "hypothesis": "Adding focused HTTP regression tests can raise the delete-assignment handler boundary coverage without changing the v2 request or response contract, while proving a failed durable cancel cannot pre-stop the UI projection.",
-    "claims": [
-      "server_route_handlers_must_stay_semantically_split"
-    ],
-    "changes": [
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_client_task_assignment_delete_http_error_test.go"
-      },
-      {
-        "kind": "manifest",
-        "path": "docs/30-architecture/loop-registry.riido.json"
-      },
-      {
-        "kind": "manifest",
-        "path": "docs/30-architecture/evidence-graph.riido.json"
-      }
-    ],
-    "verifiers": [
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_client_task_assignment_delete_http_error_test.go"
-      },
-      {
-        "kind": "tool",
-        "path": "tools/loopregistry"
-      },
-      {
-        "kind": "tool",
-        "path": "tools/evidencegraph"
-      }
-    ],
-    "evidence": [
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_client_task_assignment_delete_http_error_test.go"
-      },
-      {
-        "kind": "artifact",
-        "path": "riidoaiserver-slice33-after.cover",
-        "redacted": true
-      }
-    ],
-    "decision": "Task-scoped assignment delete keeps the existing v2 endpoint contract while HTTP boundary tests now prove direct v1 unscoped route rejection, malformed v2 delete-body rejection, and durable cancel failure preserving a running active-stream thread, raising handleAIAgentClientDeleteTaskAgentAssignment from 52.4% to 85.7% under Go 1.26.2.",
-    "next_loop": "closed_loop_candidate"
-  },
-  {
-    "id": "stop_task_agent_assignment_http_boundary_coverage_loop",
-    "observation": "The task-scoped AI Agent assignment stop handler carried strong-consistency and durable-cancel tests, but its thin HTTP wrapper remained at 57.1% function coverage and lacked direct evidence that unscoped v1 assignment-stop routes stay unavailable while malformed v2 stop bodies are rejected before mutation.",
-    "hypothesis": "A focused HTTP boundary test can raise stop-assignment handler coverage without changing the v2 endpoint contract, while proving legacy unscoped routes cannot accidentally become a second stop surface.",
-    "claims": [
-      "server_route_handlers_must_stay_semantically_split"
-    ],
-    "changes": [
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_client_task_assignment_stop_http_error_test.go"
-      },
-      {
-        "kind": "manifest",
-        "path": "docs/30-architecture/loop-registry.riido.json"
-      },
-      {
-        "kind": "manifest",
-        "path": "docs/30-architecture/evidence-graph.riido.json"
-      }
-    ],
-    "verifiers": [
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_client_task_assignment_stop_http_error_test.go"
-      },
-      {
-        "kind": "tool",
-        "path": "tools/loopregistry"
-      },
-      {
-        "kind": "tool",
-        "path": "tools/evidencegraph"
-      }
-    ],
-    "evidence": [
-      {
-        "kind": "test",
-        "path": "internal/riidoaiserver/ai_agent_client_task_assignment_stop_http_error_test.go"
-      },
-      {
-        "kind": "artifact",
-        "path": "riidoaiserver-slice34-after.cover",
-        "redacted": true
-      }
-    ],
-    "decision": "Task-scoped assignment stop keeps the existing v2 endpoint contract while HTTP boundary tests now prove direct v1 unscoped assignment-stop rejection and malformed v2 stop-body rejection, raising handleAIAgentClientStopTaskAgentAssignment from 57.1% to 78.6% under Go 1.26.2.",
-    "next_loop": "closed_loop_candidate"
-  },
-  {
-    "id": "operational_readiness_live_clock_evidence_loop",
+      "decision": "Control-plane now treats RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE as the environment authority: mismatched daemon snapshots fail closed, stale profile rows are pruned and logged, and persistence restore saves the cleaned snapshot so future runtime binding reads cannot resurrect foreign-profile daemon state. The daemon runtime snapshot HTTP boundary now also has direct evidence for 405 method rejection, 503 missing runtime store, 401 missing or bad device credential, 403 header/body device mismatch, 400 malformed JSON, and 202 device-credential snapshot sync preserving daemon app_version, raising handleDaemonRuntimeSnapshot coverage to 83.9% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "profile_thumbnail_upload_http_boundary_coverage_loop",
+      "observation": "The AI Agent profile thumbnail upload handler had success-path S3 POST policy evidence, but its HTTP boundary remained at 50.0% function coverage and lacked direct evidence for method rejection, missing upload service, missing client authorization, malformed JSON, and service validation failure across the v1 and v2 routes.",
+      "hypothesis": "Adding focused handler-level HTTP error tests can raise the endpoint boundary to full function coverage without changing the public upload intent request, response, or S3 form upload contract.",
+      "claims": [
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_helpers_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_profile_thumbnail_upload_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice32-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Profile thumbnail upload keeps the existing v1/v2 upload-intent contract while the HTTP boundary now proves 405 method rejection, 503 missing upload service, 401 unauthenticated client, 400 malformed JSON, and 400 upload-service validation failure, raising handleAIAgentClientProfileThumbnailUpload from 50.0% to 100.0% under Go 1.26.2.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "delete_task_agent_assignment_http_boundary_coverage_loop",
+      "observation": "The task-scoped AI Agent assignment delete handler guarded user-visible participant removal and deleted-agent cancellation paths, but its HTTP boundary remained at 52.4% function coverage and lacked direct evidence for unscoped v1 route rejection, malformed v2 delete JSON, and durable-cancel failure preserving the running thread read model.",
+      "hypothesis": "Adding focused HTTP regression tests can raise the delete-assignment handler boundary coverage without changing the v2 request or response contract, while proving a failed durable cancel cannot pre-stop the UI projection.",
+      "claims": [
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assignment_delete_http_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assignment_delete_http_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assignment_delete_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice33-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Task-scoped assignment delete keeps the existing v2 endpoint contract while HTTP boundary tests now prove direct v1 unscoped route rejection, malformed v2 delete-body rejection, and durable cancel failure preserving a running active-stream thread, raising handleAIAgentClientDeleteTaskAgentAssignment from 52.4% to 85.7% under Go 1.26.2.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "stop_task_agent_assignment_http_boundary_coverage_loop",
+      "observation": "The task-scoped AI Agent assignment stop handler carried strong-consistency and durable-cancel tests, but its thin HTTP wrapper remained at 57.1% function coverage and lacked direct evidence that unscoped v1 assignment-stop routes stay unavailable while malformed v2 stop bodies are rejected before mutation.",
+      "hypothesis": "A focused HTTP boundary test can raise stop-assignment handler coverage without changing the v2 endpoint contract, while proving legacy unscoped routes cannot accidentally become a second stop surface.",
+      "claims": [
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assignment_stop_http_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assignment_stop_http_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assignment_stop_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice34-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Task-scoped assignment stop keeps the existing v2 endpoint contract while HTTP boundary tests now prove direct v1 unscoped assignment-stop rejection and malformed v2 stop-body rejection, raising handleAIAgentClientStopTaskAgentAssignment from 57.1% to 78.6% under Go 1.26.2.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "assignable_agents_http_boundary_coverage_loop",
+      "observation": "The task assignable-agents endpoint is the frontend participant-selection source, but its thin HTTP wrapper remained at 54.5% function coverage and lacked direct evidence for unauthenticated requests, forbidden scopes, assignable-store failures, and projection reconcile failures.",
+      "hypothesis": "Focused HTTP boundary tests can raise assignable-agents handler coverage to full function coverage without changing the v2 endpoint contract, while preserving the projection repair step that keeps agent availability honest.",
+      "claims": [
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_agents_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_agents_error_helpers_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_agents_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_agents_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice35-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Task assignable-agents keeps the existing v2 endpoint contract while HTTP boundary tests now prove missing auth returns 401, insufficient scope returns 403, store read failure returns 400, and projection reconcile failure returns 502, raising handleAIAgentClientTaskAssignableAgents from 54.5% to 100.0% under Go 1.26.2.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "operational_readiness_live_clock_evidence_loop",
       "observation": "The live operational-readiness workflow exported a job-wide fixed historical RIIDO_OPERATIONAL_READINESS_NOW value, so a fresh manual run produced operational-readiness-closed-loop-candidates that were already expired and blocked closed-loop-candidate-intake and closed-loop-candidate-decision after the main merge.",
       "hypothesis": "Scoping the fixed clock only to the deterministic -check-doc command lets tools/operationalreadiness use the current UTC runtime clock for GitHub Actions evidence artifacts while preserving generated-doc drift checks; the generated candidate artifacts should then remain fresh for the loop registry's 24 hour expiry window without changing any public endpoint or runtime behavior.",
       "claims": [
