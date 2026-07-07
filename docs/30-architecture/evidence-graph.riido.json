@@ -1484,8 +1484,8 @@
     },
     {
       "id": "control_plane_observability_utility_coverage_loop",
-      "observation": "The latest riidoaiserver coverage slice found low-level v3 progress message ID fallback, progress-history cache matching, HTTP status recorder flush/unwrap, 5xx tracing errors, observed metrics contributors, and no-op/finish tracing helpers under-covered even though those utility paths support thread-history refresh performance, SSE/HTTP observability, OTel/X-Ray status attributes, and metrics snapshot evidence.",
-      "hypothesis": "Focused sidecar tests can pin those utility contracts without changing endpoints, response payloads, runtime behavior, or deployment configuration, raising internal/riidoaiserver coverage while keeping the control-plane performance claim bound to executable evidence.",
+      "observation": "The latest riidoaiserver coverage slice found low-level v3 progress message ID fallback, progress-history cache matching, HTTP status recorder flush/unwrap, 5xx tracing errors, observed metrics contributors, no-op/finish tracing helpers, large-batch progress dedupe, progress argument and metadata conversion, daemon profile normalization, and active-thread work-status projection under-covered even though those utility paths support thread-history refresh performance, SSE/HTTP observability, OTel/X-Ray status attributes, metrics snapshot evidence, runtime profile isolation, and queued/running UI state interpretation.",
+      "hypothesis": "Focused sidecar tests can pin those utility contracts without changing endpoints, response payloads, runtime behavior, daemon profile semantics, or deployment configuration, raising internal/riidoaiserver coverage while keeping the control-plane performance claim bound to executable evidence.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
@@ -1509,6 +1509,26 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/tracing_noop_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_work_status_projection_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/daemon_profile_policy_unit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/progress_messages_args_unit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/progress_messages_metadata_unit_test.go"
         },
         {
           "kind": "manifest",
@@ -1541,6 +1561,26 @@
           "path": "internal/riidoaiserver/tracing_noop_test.go"
         },
         {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_work_status_projection_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/daemon_profile_policy_unit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/progress_messages_args_unit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/progress_messages_metadata_unit_test.go"
+        },
+        {
           "kind": "tool",
           "path": "tools/syntaxhash"
         },
@@ -1566,6 +1606,11 @@
         },
         {
           "kind": "artifact",
+          "path": "riidoaiserver-coverage-80-3",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
           "path": "loop-registry-evidence",
           "redacted": true
         },
@@ -1575,7 +1620,7 @@
           "redacted": true
         }
       ],
-      "decision": "This slice adds only tests and generated evidence updates: progress message IDs preserve legacy hashes even on the heap fallback path, progress cache matching invalidates on line identity changes, HTTP tracing records 5xx status errors, status recorder flush/unwrap behavior remains explicit, observed metrics contributors preserve nil/error semantics, and no-op/finish tracing paths stay safe. Go 1.26.2 package coverage for internal/riidoaiserver rises to 79.9% while endpoint contracts and runtime behavior remain unchanged.",
+      "decision": "This slice adds only tests and generated evidence updates: progress message IDs preserve legacy hashes even on the heap fallback path, progress cache matching invalidates on line identity changes, HTTP tracing records 5xx status errors, status recorder flush/unwrap behavior remains explicit, observed metrics contributors preserve nil/error semantics, no-op/finish tracing paths stay safe, large progress batches dedupe with replacement lines intact, progress args and metadata trim/drop blank fields deterministically, daemon profile aliases and mismatches stay explicit, and active-thread projections prefer waiting/queued/running states predictably. Go 1.26.2 package coverage for internal/riidoaiserver rises from 79.9% to 80.3% while endpoint contracts and runtime behavior remain unchanged.",
       "next_loop": "control_plane_performance_harness"
     },
     {
