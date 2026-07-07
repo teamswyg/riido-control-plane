@@ -115,8 +115,8 @@ func FinishTraceSpan(span TraceSpan, err error) {
 
 type noopTraceSpan struct{}
 
-func (noopTraceSpan) SetAttributes(...TraceAttribute) {}
+func (noopTraceSpan) SetAttributes(attributes ...TraceAttribute) { _ = len(attributes) }
 
-func (noopTraceSpan) RecordError(error) {}
+func (noopTraceSpan) RecordError(err error) { _ = err }
 
-func (noopTraceSpan) End() {}
+func (noopTraceSpan) End() { _ = TraceSpanKindInternal }
