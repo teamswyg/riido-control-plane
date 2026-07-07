@@ -15,13 +15,15 @@ func (s *Store) applyClaimedAssignmentOperations(state *storeState, claim Assign
 		if operation.OperationID == claim.Operation.OperationID {
 			sawPrimary = true
 		}
+	}
+	if !sawPrimary {
+		return errors.New("claimed assignment operations missing primary claim operation")
+	}
+	for _, operation := range operations {
 		applyAssignmentToState(state, operation.Assignment)
 		for _, event := range operation.Events {
 			s.appendRecordedEvent(state, event)
 		}
-	}
-	if !sawPrimary {
-		return errors.New("claimed assignment operations missing primary claim operation")
 	}
 	return nil
 }
