@@ -16141,6 +16141,47 @@
       ],
       "decision": "Late tool approval decision tests now prove expired pending approvals return timed_out, do not persist a late approve decision, resolve at ExpiresAt, and raise handleDecideToolApproval coverage from 58.1% to 71.0% under Go 1.26.2 while internal/riidoaiserver remains 86.3% and endpoint contracts remain unchanged.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "desktop_device_enroll_http_error_coverage_loop",
+      "observation": "Desktop device enrollment HTTP handling had happy-path coverage but still lacked direct proof for unconfigured credential storage, malformed JSON, and enrollment-store failure branches even though this boundary issues daemon credentials for desktop startup and profile QA.",
+      "hypothesis": "Focused HTTP tests can prove desktop enrollment fails closed before issuing credentials when the store is unavailable, the request body is malformed, or the enrollment store rejects the request without changing endpoint paths or payload contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/desktop_device_enroll_http_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/desktop_device_enroll_http_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/desktop_device_enroll_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice61-after-desktop-enroll.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Desktop enrollment HTTP error tests now prove missing device credential storage returns 503, malformed JSON returns 400 before credential issuance, backend enrollment errors return 400, handleDesktopDeviceEnroll rises from 56.2% to 93.8%, and internal/riidoaiserver package coverage rises to 86.4% under Go 1.26.2 without endpoint or response-shape changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
