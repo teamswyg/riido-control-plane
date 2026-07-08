@@ -5959,6 +5959,63 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_snapshot_cqrs_gate_coverage_loop_15",
+      "observation": "After the assignment journal slice, the snapshot CQRS gate verifier remained low covered; its happy path proved the generated gate evidence but malformed manifests, scoped-decision drift, operation/signal loss, cadence and split drift, forbidden trace attribute loss, generated-doc freshness, repo-root discovery, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove snapshot CQRS gate failures are deterministic and fail closed without changing snapshot runtime behavior, endpoint payloads, daemon contracts, or infrastructure contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/snapshotcqrsgate/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/snapshotcqrsgate/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/snapshotcqrsgate/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/snapshotcqrsgate/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/snapshotcqrsgate/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/snapshotcqrsgate/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/snapshotcqrsgate/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-snapshotcqrsgate-slice15-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The fifteenth coverage slice raises the snapshot CQRS gate verifier from 73.6% to 94.9% through deterministic tests for manifest identity drift, reader evidence binding drift, store-wide CQRS scope drift, incomplete loop metadata, missing operation evidence, missing measurement signals, invalid decision rules, invalid cadence windows, missing command/query split candidates, missing forbidden trace attributes, malformed JSON, generated doc freshness, missing repo roots, and evidence/doc write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",

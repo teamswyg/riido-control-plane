@@ -86,7 +86,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `saas_control_plane_path_adapter` | `tools/saascontrolplane/pathutil` | 100% | `eb8457dd7977` | `saas_control_plane_boundaries_must_remain_executable` |
 | `saas_control_plane_requirements_adapter` | `tools/saascontrolplane/requirements` | 100% | `073e15ea29e9` | `saas_control_plane_boundaries_must_remain_executable` |
 | `saas_control_plane_set_adapter` | `tools/saascontrolplane/setutil` | 100% | `0e5e59b84c34` | `saas_control_plane_boundaries_must_remain_executable` |
-| `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `d49e070fc838` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
+| `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `548ea02d3f21` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `68cdb71f934e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_requirements_adapter` | `tools/snapshotcqrsgate/requirements` | 100% | `2d4fd81b478e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `api_client_delivery_guard` | `tools/apiclientdelivery` | 100% | `662e297a7df9` | `thread_history_v3_must_expose_stable_conversation_grouping` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3059`
-- tracked files: `3059`
+- Go files: `3063`
+- tracked files: `3063`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3059`
-- unique syntax hashes: `2863`
+- tracked files: `3063`
+- unique syntax hashes: `2867`
 - compression gain: `196`
-- analysis reduction: `6.40%`
+- analysis reduction: `6.39%`
 - collision count: `0`
-- relocation mappings: `3059`
+- relocation mappings: `3063`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `640`
+- efficiency score: `639`
 - compression score: `196`
-- weighted score: `836`
+- weighted score: `835`
