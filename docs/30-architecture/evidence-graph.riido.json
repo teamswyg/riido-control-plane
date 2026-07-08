@@ -18932,6 +18932,55 @@
       ],
       "decision": "DynamoDB stream relay endpoint tests now prove default endpoint synthesis, safe custom endpoint host capture, and fail-fast rejection for invalid URL shapes. normalizeDynamoDBStreamEndpoint rises from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "control_plane_integration_matrix_coverage_loop_28",
+      "observation": "The integration matrix verifier protects public PR-safe gates and private/operator evidence boundaries, but baseline coverage left manifest decode, stale doc, forbidden dependency, workflow, and write failure paths under-tested.",
+      "hypothesis": "Focused failure-path tests can prove integration matrix evidence fails closed when executable knowledge is malformed, stale, or impossible to write, without changing generated contracts or runtime behavior.",
+      "claims": [
+        "integration_matrix_must_preserve_public_private_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/integrationmatrix/io_run_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/integrationmatrix/verify_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/integrationmatrix/doc_private_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/integrationmatrix/test_helpers_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/integrationmatrix"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-integrationmatrix-slice28-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Integration matrix failure-path tests now cover missing/invalid/trailing manifests, stale generated docs, forbidden PR dependencies, missing pull_request triggers, duplicate gates, write failures, and unmarshalable evidence values. tools/integrationmatrix rises from 75.0% to 91.4% under Go 1.26.2 with no endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
