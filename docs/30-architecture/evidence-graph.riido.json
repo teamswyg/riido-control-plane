@@ -15579,6 +15579,51 @@
       ],
       "decision": "Snapshot event replay now has explicit Go 1.26.2 evidence that device runtime, daemon status, editability, work status, and thread progress events restore to concrete payload types; unknown event types stay recoverable as map payloads; malformed JSON fails; and snapshot/restore envelope errors include the event type. snapshotEvents, restoreSnapshotEvents, and restoreSnapshotEventPayload now report 100.0% coverage without endpoint or payload shape changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "assignment_operation_store_channel_boundary_loop",
+      "observation": "DynamoDB assignment operation store APIs depend on channel send/receive helpers to fail closed when the worker is closed or request contexts are canceled, but those channel-boundary branches still had partial function coverage.",
+      "hypothesis": "Small in-package tests can prove nil-context normalization, successful command send, closed-store rejection, canceled-context rejection, reply error propagation, and receive-side closed/canceled behavior without touching DynamoDB, endpoint contracts, or runtime payloads.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_send_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_send_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_send_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice51-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Assignment operation store channel boundaries now have direct Go 1.26.2 evidence that active sends deliver commands, closed stores reject before blocking, canceled contexts return context.Canceled, reply errors propagate, and receive-side closed/canceled paths fail closed. Function coverage for dynamoDBAssignmentOperationContext, send, and receiveError is 100%, and internal/riidoaiserver package coverage rises to 85.3% without API or runtime contract changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
