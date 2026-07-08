@@ -62,7 +62,7 @@ func TestSyntaxHashToolBehaviorGolden(t *testing.T) {
 	if err := readJSON(out, &graph); err != nil {
 		t.Fatal(err)
 	}
-	if got := graph.Targets[0].PackageHash; got != "a11308340a6110b8f76064273920d7d2d4fb057cb654e525997679659fd1f622" {
+	if got := graph.Targets[0].PackageHash; got != "73463c272c08cba7122a27303553601bd631a0898498faf18635db52e7d9c358" {
 		t.Fatalf("contextmap syntax package hash drifted: %s", got)
 	}
 }
