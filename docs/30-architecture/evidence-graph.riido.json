@@ -18981,6 +18981,51 @@
       ],
       "decision": "Integration matrix failure-path tests now cover missing/invalid/trailing manifests, stale generated docs, forbidden PR dependencies, missing pull_request triggers, duplicate gates, write failures, and unmarshalable evidence values. tools/integrationmatrix rises from 75.0% to 91.4% under Go 1.26.2 with no endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "control_plane_go_ci_baseline_coverage_loop_29",
+      "observation": "The Go CI baseline verifier keeps public CI executable, but baseline coverage left malformed manifest, stale doc, workflow phrase, repo-root, and write failure paths under-tested.",
+      "hypothesis": "Focused failure-path tests can prove the Go CI baseline fails closed when its executable manifest, workflow, generated reader, or evidence output is missing or stale, without changing CI behavior.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline/verify_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline/run_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-gocibaseline-slice29-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Go CI baseline failure-path tests now cover missing/invalid manifests, malformed required fields, missing or stale generated docs, missing workflow phrases, missing repo roots, write failures, and unmarshalable evidence values. tools/gocibaseline rises from 75.4% to 91.3% under Go 1.26.2 with no endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
