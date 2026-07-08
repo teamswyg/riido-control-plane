@@ -6326,6 +6326,71 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_repository_readme_coverage_loop_21",
+      "observation": "After the health/ready command slice, the repository README generator remained low covered; its happy path proved README evidence but malformed manifest and fragment input, fragment merge failure, shape validation, linked-doc drift, generated README freshness, CLI flag errors, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove repository README SSOT failures are deterministic and fail closed without changing runtime code, endpoint contracts, daemon contracts, or frontend source.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/fragment_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/fragment_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/repositoryreadme/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-repositoryreadme-slice21-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The twenty-first coverage slice raises the repository README generator from 74.3% to 93.9% through deterministic tests for malformed and unknown-field manifests, trailing JSON, invalid fragments, missing fragment files, fragment merge behavior, shape validation failures, workflow/doc-link drift, required/forbidden README marker drift, stale generated README checks, CLI flag errors, generated README writes, and JSON/text/evidence write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
