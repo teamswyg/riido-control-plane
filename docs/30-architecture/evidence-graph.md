@@ -10,23 +10,23 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `197`
-- claim refs: `254`
-- change refs: `1970`
-- verifier refs: `1174`
-- evidence refs: `599`
+- chains: `198`
+- claim refs: `255`
+- change refs: `1976`
+- verifier refs: `1180`
+- evidence refs: `600`
 
 ## Compiled Chain Summary
 
-- complete chains: `197` / `197`
-- claim-bound chains: `197`
+- complete chains: `198` / `198`
+- claim-bound chains: `198`
 - unclaimed chains: `0`
 - next-loop targets: `9`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `closed_loop_candidate` | `121` | `131` | `1219` | `652` | `361` |
-| `control_plane_performance_harness` | `25` | `26` | `203` | `220` | `71` |
+| `control_plane_performance_harness` | `26` | `27` | `209` | `226` | `72` |
 | `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
 | `ai_thread_history` | `9` | `10` | `127` | `61` | `15` |
 | `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
@@ -99,6 +99,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `control_plane_review_account_seed_coverage_loop_22` | `1` | `6` | `6` | `1` | `control_plane_performance_harness` |
 | `control_plane_provider_status_coverage_loop_23` | `1` | `5` | `6` | `1` | `control_plane_performance_harness` |
 | `control_plane_context_map_coverage_loop_24` | `1` | `7` | `7` | `1` | `control_plane_performance_harness` |
+| `control_plane_saas_control_plane_coverage_loop_25` | `1` | `6` | `6` | `1` | `control_plane_performance_harness` |
 | `provider_auth_failure_visible_message_loop` | `2` | `6` | `4` | `3` | `ai_thread_history` |
 | `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `ai_thread_history_conversation_grouping_loop` | `1` | `21` | `4` | `3` | `ai_thread_history` |

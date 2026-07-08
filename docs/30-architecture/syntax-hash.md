@@ -82,7 +82,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `cloudwatch_emf_guard` | `tools/cloudwatchemf` | 100% | `ea2afe093731` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
 | `cloudwatch_emf_path_adapter` | `tools/cloudwatchemf/pathutil` | 100% | `484876fcac64` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
 | `cloudwatch_emf_requirements_adapter` | `tools/cloudwatchemf/requirements` | 100% | `d055ebae7bb8` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
-| `saas_control_plane_guard` | `tools/saascontrolplane` | 100% | `d2d6aa9ba863` | `saas_control_plane_boundaries_must_remain_executable` |
+| `saas_control_plane_guard` | `tools/saascontrolplane` | 100% | `ba03c83d8f79` | `saas_control_plane_boundaries_must_remain_executable` |
 | `saas_control_plane_path_adapter` | `tools/saascontrolplane/pathutil` | 100% | `eb8457dd7977` | `saas_control_plane_boundaries_must_remain_executable` |
 | `saas_control_plane_requirements_adapter` | `tools/saascontrolplane/requirements` | 100% | `073e15ea29e9` | `saas_control_plane_boundaries_must_remain_executable` |
 | `saas_control_plane_set_adapter` | `tools/saascontrolplane/setutil` | 100% | `0e5e59b84c34` | `saas_control_plane_boundaries_must_remain_executable` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3110`
-- tracked files: `3110`
+- Go files: `3116`
+- tracked files: `3116`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -127,8 +127,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - status: `evidence_only`
 - group by: `ast_shape_hash`
-- duplicate groups: `88`
-- duplicate files: `305`
+- duplicate groups: `89`
+- duplicate files: `307`
 - internal groups: `5`
 
 | Shape Hash | Files | Packages |
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3110`
-- unique syntax hashes: `2911`
-- compression gain: `199`
-- analysis reduction: `6.39%`
+- tracked files: `3116`
+- unique syntax hashes: `2916`
+- compression gain: `200`
+- analysis reduction: `6.41%`
 - collision count: `0`
-- relocation mappings: `3110`
+- relocation mappings: `3116`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `639`
-- compression score: `199`
-- weighted score: `838`
+- efficiency score: `641`
+- compression score: `200`
+- weighted score: `841`
