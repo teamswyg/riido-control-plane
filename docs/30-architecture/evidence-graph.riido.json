@@ -6257,6 +6257,75 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_health_ready_command_coverage_loop_20",
+      "observation": "After the web frontend API slice, the health/ready command verifier remained low covered; its happy path proved liveness/readiness evidence but IO failures, malformed manifest input, source-check drift, generated-doc freshness, endpoint drift, repo-root discovery, CLI flag errors, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove health/ready command SSOT failures are deterministic and fail closed without changing control-plane endpoints, health/ready payloads, daemon contracts, or frontend source.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/healthreadycmd/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-healthreadycmd-slice20-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The twentieth coverage slice raises the health/ready command verifier from 74.2% to 94.4% through deterministic tests for unmatched-route decode failures, wrong-method endpoint evidence, malformed JSON, source-check file/token drift, generated doc freshness, endpoint drift, missing repo roots, CLI flag errors, and JSON/text/evidence/doc write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
