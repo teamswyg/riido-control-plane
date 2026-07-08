@@ -16886,6 +16886,48 @@
       ],
       "decision": "Device/progress helper tests now prove zero timestamps are not stale, threshold timestamps remain fresh, older snapshots become stale, device snapshot events are extracted while unrelated payloads are ignored, and the defensive drop-all progress retention branch no longer panics when incoming lines exceed the existing slice capacity. deviceRuntimeSnapshotStale, eventDeviceRecord, and appendRetainedProgressLinesInPlace each rise from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "task_context_composition_intent_gate_coverage_loop",
+      "observation": "AI assignment composition must preserve task-context intent gating and component identity; weak branch coverage here could let non-command documents lose their ask-before-work contract or route assignments to the wrong component without endpoint changes.",
+      "hypothesis": "Focused composition tests can prove intent-gate propagation, context component-id precedence, route component-id fallback, and empty-context fail-close behavior while preserving existing assignment APIs and payloads.",
+      "claims": [
+        "ambiguous_task_context_must_ask_before_work",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_task_context_compose_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_task_context_compose_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_task_context_compose_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice78-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Task-context composition tests now prove non-command documents keep IntentGateRequired=true through assignment request composition, blank request component IDs prefer the immutable context component ID, missing context IDs fall back to the route component ID, and empty task context fails closed. composeAssignRequestWithTaskContextResult rises from 63.6% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
