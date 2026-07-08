@@ -109,7 +109,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_client_api_requirements_adapter` | `tools/aiagentclientapi/requirements` | 100% | `88a7bd0c31c4` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_set_adapter` | `tools/aiagentclientapi/setutil` | 100% | `65b5a74c4aeb` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_smoke_matrix_adapter` | `tools/aiagentclientapi/smokematrix` | 100% | `c327f8391bfe` | `thread_history_v3_must_expose_stable_conversation_grouping` |
-| `generated_client_handoff_guard` | `tools/generatedclienthandoff` | 100% | `842f212537e9` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
+| `generated_client_handoff_guard` | `tools/generatedclienthandoff` | 100% | `4af6fc6f5e9f` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 | `store_snapshot_file_outbox_guard` | `tools/storesnapshotoutbox` | 100% | `069f1635d5a6` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `7ee1bbf6a41c` | `react_query_generator_must_preserve_generated_client_surface` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3205`
-- tracked files: `3205`
+- Go files: `3211`
+- tracked files: `3211`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3205`
-- unique syntax hashes: `3003`
+- tracked files: `3211`
+- unique syntax hashes: `3009`
 - compression gain: `202`
-- analysis reduction: `6.30%`
+- analysis reduction: `6.29%`
 - collision count: `0`
-- relocation mappings: `3205`
+- relocation mappings: `3211`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `630`
+- efficiency score: `629`
 - compression score: `202`
-- weighted score: `832`
+- weighted score: `831`

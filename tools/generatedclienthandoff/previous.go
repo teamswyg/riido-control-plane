@@ -20,11 +20,10 @@ func readPreviousManifest(path string) (previousManifest, error) {
 		}
 		return previousManifest{}, fmt.Errorf("read previous manifest: %w", err)
 	}
-	body := string(data)
-	if strings.TrimSpace(body) == "" {
+	if strings.TrimSpace(string(data)) == "" {
 		return previousManifest{}, nil
 	}
-	return parsePreviousManifest(body), nil
+	return parsePreviousManifest(string(data)), nil
 }
 
 func parsePreviousManifest(body string) previousManifest {
@@ -42,13 +41,16 @@ func parsePreviousManifest(body string) previousManifest {
 }
 
 var (
-	previousCommitPattern    = regexp.MustCompile(`sourceCommit:\s*'([^']*)'`)
+	tsQuoted                 = `((?:\\'|[^'])*)`
+	previousCommitPattern    = regexp.MustCompile(`sourceCommit:\s*'` + tsQuoted + `'`)
 	previousOperationPattern = regexp.MustCompile(
-		`(?s)\{\s*generatedPath:\s*'([^']*)',\s*operationId:\s*'([^']*)',\s*method:\s*'([^']*)',\s*path:\s*'([^']*)',\s*deprecated:\s*(true|false)([^}]*)\}`,
+		`(?s)\{\s*generatedPath:\s*'` + tsQuoted + `',\s*operationId:\s*'` +
+			tsQuoted + `',\s*method:\s*'` + tsQuoted + `',\s*path:\s*'` +
+			tsQuoted + `',\s*deprecated:\s*(true|false)([^}]*)\}`,
 	)
-	previousLifecyclePattern      = regexp.MustCompile(`lifecycle:\s*'([^']*)'`)
-	previousReplacementPattern    = regexp.MustCompile(`replacement:\s*'([^']*)'`)
-	previousRemovalHorizonPattern = regexp.MustCompile(`removalHorizon:\s*'([^']*)'`)
+	previousLifecyclePattern      = regexp.MustCompile(`lifecycle:\s*'` + tsQuoted + `'`)
+	previousReplacementPattern    = regexp.MustCompile(`replacement:\s*'` + tsQuoted + `'`)
+	previousRemovalHorizonPattern = regexp.MustCompile(`removalHorizon:\s*'` + tsQuoted + `'`)
 )
 
 func parsePreviousOperation(match []string) operationRow {

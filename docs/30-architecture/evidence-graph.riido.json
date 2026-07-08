@@ -15858,6 +15858,96 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "generated_client_handoff_coverage_loop_44",
+      "observation": "Generated client handoff package coverage was 80.2%, and the previous generated manifest parser had no direct evidence for escaped TypeScript string fields even though generated contract manifests escape quotes with the same ts helper used by handoff outputs.",
+      "hypothesis": "Focused tests for config defaults, CLI flag parsing, lifecycle rendering, changed-operation summaries, OpenAPI/read failures, write failures, and escaped previous-manifest parsing can raise generated handoff coverage and close a real diff-parser bug without changing generated client delivery behavior or riido-client ownership.",
+      "claims": [
+        "api_client_delivery_must_preserve_generated_handoff_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "tools/generatedclienthandoff/previous.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/change_summary_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/config_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/io_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/lifecycle_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/main_flags_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/previous_more_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/change_summary_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/config_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/io_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/lifecycle_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/main_flags_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/previous_more_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "generated-client-handoff-coverage-slice44",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "control-plane-coverage-slice44-after",
+          "redacted": true
+        }
+      ],
+      "decision": "Generated client handoff coverage rises from 80.2% to 93.9%, and escaped quote fields in previous generated manifests now round-trip through tsUnescape before operation diffing; generated output hashes and endpoint payload contracts remain unchanged.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "store_snapshot_file_outbox_syntax_hash_loop",
       "observation": "The store snapshot/file outbox sidecar produced executable durability evidence, but its Go package shape was not syntax-hash tracked and its root folder exceeded the IA file limit.",
       "hypothesis": "Hash-locking the emitted evidence before consolidating same-concept files preserves local durability behavior while binding snapshot/outbox evidence code to the existing semantic hash graph.",
