@@ -28,7 +28,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `public_pages_live_guard` | `tools/publicpageslive` | 100% | `baa223c86295` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `go_ci_baseline_guard` | `tools/gocibaseline` | 100% | `1fa05fb324ac` | `go_ci_baseline_must_preserve_broad_ci_contract` |
 | `module_decomposition_guard` | `tools/moduledecomposition` | 100% | `d1d944d891d3` | `module_decomposition_must_preserve_surface_area_ratchet` |
-| `control_plane_audit_guard` | `tools/controlplaneaudit` | 100% | `b6962d896e85` | `control_plane_performance_hot_paths_must_emit_evidence` |
+| `control_plane_audit_guard` | `tools/controlplaneaudit` | 100% | `96780df17279` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `control_plane_performance_guard` | `tools/controlplaneperf` | 100% | `66d182bc1546` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `control_plane_pressure_guard` | `tools/controlplanepressure` | 100% | `f8217dd3024e` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `ai_agent_load_guard` | `tools/aiagentload` | 100% | `6ed7f175242f` | `control_plane_performance_hot_paths_must_emit_evidence` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3211`
-- tracked files: `3211`
+- Go files: `3215`
+- tracked files: `3215`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3211`
-- unique syntax hashes: `3009`
+- tracked files: `3215`
+- unique syntax hashes: `3013`
 - compression gain: `202`
-- analysis reduction: `6.29%`
+- analysis reduction: `6.28%`
 - collision count: `0`
-- relocation mappings: `3211`
+- relocation mappings: `3215`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `629`
+- efficiency score: `628`
 - compression score: `202`
-- weighted score: `831`
+- weighted score: `830`

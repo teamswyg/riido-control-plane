@@ -13660,6 +13660,76 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_audit_coverage_loop_45",
+      "observation": "The control-plane high-traffic audit verifier package coverage was 81.0%, and fail-closed paths for generated doc drift, JSON IO, repo root lookup, manifest shape, workflow shape, pprof command shape, surface file binding, run evidence output, and surface scan failures were weakly evidenced.",
+      "hypothesis": "Focused tests around the audit harness failure boundaries can raise package coverage while proving high-traffic audit evidence fails closed without changing any API endpoint, runtime behavior, or evidence schema.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/controlplaneaudit/io_doc_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplaneaudit/run_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplaneaudit/verify_failure_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplaneaudit/verify_identity_more_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/controlplaneaudit/io_doc_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplaneaudit/run_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplaneaudit/verify_failure_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/controlplaneaudit/verify_identity_more_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/controlplaneaudit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "control-plane-audit-coverage-slice45",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "control-plane-coverage-slice45-after",
+          "redacted": true
+        }
+      ],
+      "decision": "Control-plane audit package coverage rises from 81.0% to 91.1%; the new evidence proves generated doc drift, malformed JSON, missing repo roots, invalid manifest identity, incomplete workflow/loop/pprof config, invalid surface bindings, evidence write failures, and scan failures are rejected before stale high-traffic audit evidence can be reused.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "control_plane_performance_syntax_hash_loop",
       "observation": "The control-plane performance verifier already binds hot paths, architecture file indexes, pressure dimensions, OTel/X-Ray/CloudWatch signals, benchmark history, and pressure candidates to executable evidence, but its Go package shape remained outside syntax-hash coverage.",
       "hypothesis": "After deterministic performance evidence is golden-locked with fixed evidence time, adding tools/controlplaneperf as a syntax hash target can connect performance-evidence AST-shape changes to the existing control-plane performance semantic claim without changing API contracts or evidence semantics.",
