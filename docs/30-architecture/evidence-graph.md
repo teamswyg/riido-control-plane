@@ -10,22 +10,22 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `207`
-- claim refs: `267`
-- change refs: `2027`
-- verifier refs: `1211`
-- evidence refs: `609`
+- chains: `208`
+- claim refs: `268`
+- change refs: `2034`
+- verifier refs: `1213`
+- evidence refs: `610`
 
 ## Compiled Chain Summary
 
-- complete chains: `207` / `207`
-- claim-bound chains: `207`
+- complete chains: `208` / `208`
+- claim-bound chains: `208`
 - unclaimed chains: `0`
 - next-loop targets: `9`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `128` | `141` | `1255` | `666` | `368` |
+| `closed_loop_candidate` | `129` | `142` | `1262` | `668` | `369` |
 | `control_plane_performance_harness` | `28` | `29` | `224` | `243` | `74` |
 | `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
 | `ai_thread_history` | `9` | `10` | `127` | `61` | `15` |
@@ -143,6 +143,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `public_qa_status_operational_surface_loop` | `7` | `29` | `18` | `13` | `operational_readiness_release_harness` |
 | `control_plane_public_pages_live_coverage_loop_33` | `1` | `4` | `2` | `1` | `closed_loop_candidate` |
 | `control_plane_request_authorization_coverage_loop_34` | `1` | `6` | `2` | `1` | `closed_loop_candidate` |
+| `control_plane_metrics_http_adapter_coverage_loop_35` | `1` | `7` | `2` | `1` | `closed_loop_candidate` |
 | `notion_qa_operational_evidence_backfill_loop` | `1` | `11` | `5` | `3` | `operational_readiness_release_harness` |
 | `notion_qa_assignable_projection_repair_loop` | `2` | `7` | `4` | `3` | `operational_readiness_release_harness` |
 | `notion_qa_intent_waiting_copy_loop` | `2` | `7` | `5` | `3` | `operational_readiness_release_harness` |
