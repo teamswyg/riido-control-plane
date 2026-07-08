@@ -11708,6 +11708,51 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "control_plane_public_pages_live_coverage_loop_33",
+      "observation": "The public pages live verifier protects redacted QA status publication, but baseline coverage left parse, fetch, decode, validation, and write failure paths under-tested.",
+      "hypothesis": "Focused failure-path tests can prove public QA live evidence fails closed when redacted status pages are unreachable, malformed, invalid, or unwritable without changing the public status payload contract.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/publicpageslive/error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/publicpageslive/live_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/publicpageslive/live_server_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/publicpageslive"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-publicpageslive-slice33-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Public pages live failure-path tests now cover missing flags, bad flags, output write failures, HTTP status failures, malformed status/pages/badge JSON, and invalid visibility validation. tools/publicpageslive rises from 76.2% to 90.0% under Go 1.26.2 with no endpoint, payload, or publication contract changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "notion_qa_operational_evidence_backfill_loop",
       "observation": "Notion QA comments contained P0 operating evidence for waiting_for_user, queued_by_busy_agent, terminal stop refresh, author fallback, instruction intent, and staging DMG install issues, but a comment-only record can be missed by agents, cannot expire, and cannot produce closed-loop candidates.",
       "hypothesis": "Backfilling Notion QA comments into the operational readiness SSOT as P0 cycles, then emitting cycle counts, partial status, codex status tags, next artifacts, and 24h cadence evidence lets daily readiness runs keep product QA partials visible without editing client or endpoint contracts.",

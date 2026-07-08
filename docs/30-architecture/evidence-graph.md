@@ -10,22 +10,22 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `205`
-- claim refs: `265`
-- change refs: `2017`
-- verifier refs: `1207`
-- evidence refs: `607`
+- chains: `206`
+- claim refs: `266`
+- change refs: `2021`
+- verifier refs: `1209`
+- evidence refs: `608`
 
 ## Compiled Chain Summary
 
-- complete chains: `205` / `205`
-- claim-bound chains: `205`
+- complete chains: `206` / `206`
+- claim-bound chains: `206`
 - unclaimed chains: `0`
 - next-loop targets: `9`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `126` | `139` | `1245` | `662` | `366` |
+| `closed_loop_candidate` | `127` | `140` | `1249` | `664` | `367` |
 | `control_plane_performance_harness` | `28` | `29` | `224` | `243` | `74` |
 | `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
 | `ai_thread_history` | `9` | `10` | `127` | `61` | `15` |
@@ -141,6 +141,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `operational_readiness_release_loop` | `1` | `30` | `15` | `4` | `operational_readiness_release_harness` |
 | `operational_readiness_internal_completion_gate_loop` | `2` | `12` | `7` | `4` | `operational_readiness_release_harness` |
 | `public_qa_status_operational_surface_loop` | `7` | `29` | `18` | `13` | `operational_readiness_release_harness` |
+| `control_plane_public_pages_live_coverage_loop_33` | `1` | `4` | `2` | `1` | `closed_loop_candidate` |
 | `notion_qa_operational_evidence_backfill_loop` | `1` | `11` | `5` | `3` | `operational_readiness_release_harness` |
 | `notion_qa_assignable_projection_repair_loop` | `2` | `7` | `4` | `3` | `operational_readiness_release_harness` |
 | `notion_qa_intent_waiting_copy_loop` | `2` | `7` | `5` | `3` | `operational_readiness_release_harness` |
