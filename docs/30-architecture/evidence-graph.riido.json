@@ -5650,6 +5650,71 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_runtime_boundary_coverage_loop_10",
+      "observation": "After the review account seed runtime helper slice, the runtime deployment boundary verifier remained the lowest covered package; its happy-path golden covered the generated artifact but left malformed manifest, stale doc, linked runtime-CD, repository path, and write failure paths weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove runtime boundary failures are deterministic and fail closed without changing any deployment workflow, endpoint payload, or runtime contract.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/linked_manifest_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/path_io_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/test_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/linked_manifest_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/path_io_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimeboundary/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-runtimeboundary-slice10-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The tenth coverage slice raises the runtime deployment boundary verifier from 71.9% to 85.6% through deterministic tests for linked runtime-CD decode/schema/id/workflow failures, missing/stale generated docs, malformed multi-object manifests, missing phrases, missing go.mod roots, absolute path handling, write-doc generation, and JSON/text write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
