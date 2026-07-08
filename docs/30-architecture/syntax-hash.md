@@ -25,7 +25,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `container_image_contract_dockerfile_parser` | `tools/containercontract/dockerfile` | 100% | `7e3496402754` | `container_image_contract_must_bind_runtime_shape` |
 | `config_reference_guard` | `tools/configreference` | 100% | `f517462a6edf` | `config_reference_must_preserve_env_manifest_parity` |
 | `store_safe_routing_guard` | `tools/storesaferouting` | 100% | `9898791be6fe` | `store_safe_routing_must_preserve_provider_status_decisions` |
-| `public_pages_live_guard` | `tools/publicpageslive` | 100% | `c9fb97e9cd95` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
+| `public_pages_live_guard` | `tools/publicpageslive` | 100% | `baa223c86295` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `go_ci_baseline_guard` | `tools/gocibaseline` | 100% | `1fa05fb324ac` | `go_ci_baseline_must_preserve_broad_ci_contract` |
 | `module_decomposition_guard` | `tools/moduledecomposition` | 100% | `f82a03c89ad7` | `module_decomposition_must_preserve_surface_area_ratchet` |
 | `control_plane_audit_guard` | `tools/controlplaneaudit` | 100% | `b6962d896e85` | `control_plane_performance_hot_paths_must_emit_evidence` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3152`
-- tracked files: `3152`
+- Go files: `3155`
+- tracked files: `3155`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,12 +165,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3152`
-- unique syntax hashes: `2951`
+- tracked files: `3155`
+- unique syntax hashes: `2954`
 - compression gain: `201`
 - analysis reduction: `6.37%`
 - collision count: `0`
-- relocation mappings: `3152`
+- relocation mappings: `3155`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
