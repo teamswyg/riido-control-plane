@@ -16969,6 +16969,47 @@
       ],
       "decision": "Provider status clone tests now prove nil and empty provider slices normalize to nil and cloned non-empty provider status records are isolated from caller mutation. cloneProviderStatusRecords rises from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "dynamodb_stream_endpoint_boundary_coverage_loop",
+      "observation": "DynamoDB stream relay depends on a normalized endpoint and host for signed requests; weak endpoint boundary coverage could allow malformed local or production endpoints to fail later during stream polling.",
+      "hypothesis": "Focused endpoint tests can prove the relay uses the AWS streams default, preserves safe custom HTTP endpoints, and rejects invalid URLs, unsupported schemes, missing hosts, queries, and fragments before runtime polling starts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_endpoint_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_endpoint_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_endpoint_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice80-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "DynamoDB stream relay endpoint tests now prove default endpoint synthesis, safe custom endpoint host capture, and fail-fast rejection for invalid URL shapes. normalizeDynamoDBStreamEndpoint rises from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
