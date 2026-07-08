@@ -16595,6 +16595,47 @@
       ],
       "decision": "Agent editability HTTP tests now prove missing auth returns 401, forbidden scopes return 403, backend editability reader failures surface as 400, and handleAIAgentClientEditability rises from 62.5% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "component_task_http_error_coverage_loop",
+      "observation": "The component task integration route is the legacy assignment entrypoint, but malformed route, unsupported suffix, missing auth, and assignment store failure branches had partial handler coverage.",
+      "hypothesis": "Focused HTTP tests can prove component task routes fail closed for malformed or unsupported paths, reject unauthenticated assignment requests, surface assignment store failures, and keep the existing endpoint and payload contract unchanged.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/component_task_handler_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/component_task_handler_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/component_task_handler_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice71-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Component task HTTP tests now prove malformed routes and unsupported suffixes return 404, missing assignment auth returns 401, assignment store failures surface as 400, handleComponentTasks rises from 62.5% to 100.0%, and handleComponentTaskAssign rises from 85.0% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
