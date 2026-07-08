@@ -15770,6 +15770,75 @@
       ],
       "decision": "Store snapshot and outbox boundary tests now prove nil receivers remain no-ops, closed workers reject commands, invalid snapshot responses do not restore state, invalid outbox events are rejected before DynamoDB writes, and upstream PutItem failures propagate with diagnostic context. Function coverage for NewDynamoDBStoreSnapshot and NewDynamoDBOutbox is 100%, putTaskEvent rises to 88.9%, and internal/riidoaiserver package coverage rises to 85.7% without API or runtime contract changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "local_file_durability_boundary_coverage_loop",
+      "observation": "File-backed outbox and snapshot persistence still had partial boundary coverage around nil receivers, closed outboxes, canceled append/save contexts, nil internal outbox commands, and local filesystem write failures.",
+      "hypothesis": "Focused in-package tests can prove local durability boundaries fail closed and preserve diagnostic errors without changing endpoint contracts, runtime payloads, or file formats.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/file_outbox_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/file_outbox_context_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/file_store_snapshot_boundary_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/file_outbox_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/file_outbox_context_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/file_store_snapshot_boundary_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/file_outbox_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/file_store_snapshot_boundary_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice54-after-local-durability.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Local durability boundary tests now prove nil file outboxes and snapshot stores remain no-ops, closed outboxes reject appends, canceled contexts fail before or after append command send, nil internal outbox commands are rejected, and snapshot filesystem failures propagate. Function coverage for FileOutbox AppendTaskEvent rises to 92.3%, NewFileOutbox rises to 90.9%, FileStoreSnapshot LoadStoreSnapshot rises to 81.2%, SaveStoreSnapshot rises to 71.4%, and internal/riidoaiserver package coverage rises to 85.9% without API or runtime contract changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
