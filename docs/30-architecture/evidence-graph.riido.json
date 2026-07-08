@@ -16182,6 +16182,47 @@
       ],
       "decision": "Desktop enrollment HTTP error tests now prove missing device credential storage returns 503, malformed JSON returns 400 before credential issuance, backend enrollment errors return 400, handleDesktopDeviceEnroll rises from 56.2% to 93.8%, and internal/riidoaiserver package coverage rises to 86.4% under Go 1.26.2 without endpoint or response-shape changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_onboarding_http_error_coverage_loop",
+      "observation": "AI Agent onboarding fixture HTTP handling had success-path coverage but still lacked direct proof for unconfigured store, wrong method, fixture-list backend failure, malformed fixture-create JSON, fixture-create backend failure, and unknown nested suffix branches even though this path starts the user's first agent creation flow.",
+      "hypothesis": "Focused HTTP tests can prove onboarding fixture list and fixture-based agent creation fail closed on malformed or unavailable inputs without changing onboarding endpoint paths, methods, or response payload contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_onboarding_http_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_onboarding_http_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_onboarding_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice62-after-onboarding.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Onboarding fixture HTTP error tests now prove missing AI Agent store returns 503, wrong list method returns 405, fixture-list backend errors return 400, malformed fixture-create JSON returns 400, fixture-create backend errors return 400, unknown nested suffixes return 404, handleAIAgentClientOnboardingFixtures rises from 56.5% to 87.0%, handleAIAgentClientCreateFromOnboardingFixture rises from 75.0% to 91.7%, and internal/riidoaiserver package coverage rises to 86.5% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
