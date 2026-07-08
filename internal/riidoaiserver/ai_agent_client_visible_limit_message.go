@@ -9,6 +9,9 @@ import (
 const providerLimitFailureCategory = "provider_limit"
 
 func clientVisibleFailureMessage(metadata map[string]string, message string) string {
+	if clientVisibleProviderAuthCategory(metadata) {
+		return clientMessageProviderAuthFailed
+	}
 	if clientVisibleProviderLimitCategory(metadata) {
 		return clientMessageCloudCreditInsufficient
 	}

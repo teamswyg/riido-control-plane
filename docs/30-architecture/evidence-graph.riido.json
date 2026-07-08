@@ -4989,6 +4989,76 @@
       "next_loop": "ai_thread_history"
     },
     {
+      "id": "provider_auth_failure_visible_message_loop",
+      "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
+      "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_visible_provider_auth_message.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_visible_limit_message.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_client_visible_task_thread_text.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_failure_diagnostics_from_assignment_event.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_visible_provider_auth_message_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_provider_auth_message_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_visible_provider_auth_message_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_provider_auth_message_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_visible_provider_auth_message_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_provider_auth_message_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "production-provider-auth-failure-asn-000023-000024-2026-07-08",
+          "redacted": true
+        }
+      ],
+      "decision": "Provider authentication failures are now a client-visible projection concern, not raw provider text. Existing stored 401 messages and future provider_authentication metadata render as a Korean reconnect instruction, and failure_diagnostics reports provider_authentication so UI and operations can route the issue without changing v2/v3 endpoints or daemon event payloads.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "same_provider_multi_assignment_loop",
       "observation": "Two different AI Agents can use the same provider runtime, so provider-based dedupe can collapse independent task assignments and threads.",
       "hypothesis": "Assignment and thread identity must stay agent/assignment scoped even when provider/runtime_kind is identical.",

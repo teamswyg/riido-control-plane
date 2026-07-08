@@ -22,6 +22,9 @@ func clientVisibleTaskThreadText(message string) string {
 	if limitMessage, ok := clientVisibleProviderLimitMessage(message); ok {
 		message = limitMessage
 	}
+	if authMessage, ok := clientVisibleProviderAuthMessage(message); ok {
+		message = authMessage
+	}
 	return strings.TrimSpace(message)
 }
 

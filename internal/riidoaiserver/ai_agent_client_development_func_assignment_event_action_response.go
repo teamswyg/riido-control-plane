@@ -20,7 +20,7 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 		response.ResultMessage = response.Message
 	}
 	if response.AssignmentState == AgentAssignmentStateFailed {
-		response.FailureDiagnostics = failureDiagnosticsFromAssignmentEvent(metadata, response.Message)
+		response.FailureDiagnostics = failureDiagnosticsFromAssignmentEvent(metadata, message)
 	}
 	return response
 }
