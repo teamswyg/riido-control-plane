@@ -6191,6 +6191,72 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_web_frontend_api_coverage_loop_19",
+      "observation": "After the agent catalog RBAC slice, the web frontend API verifier remained low covered; its happy path proved the browser CORS contract but CORS drift, malformed manifest input, source-check drift, generated-doc freshness, repo-root discovery, CLI flag errors, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove web frontend API SSOT failures are deterministic and fail closed without changing control-plane endpoints, browser CORS behavior, daemon contracts, or frontend source.",
+      "claims": [
+        "web_frontend_api_must_preserve_cors_contract",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/cors_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/cors_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/webfrontendapi/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-webfrontendapi-slice19-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The nineteenth coverage slice raises the web frontend API verifier from 74.1% to 94.6% through deterministic tests for CORS status/header/credential drift, runtime CORS handler mismatch, malformed JSON, missing repo roots, CLI flag errors, source-check file/token drift, generated doc freshness, evidence/doc write failures, and stale generated reader output. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
