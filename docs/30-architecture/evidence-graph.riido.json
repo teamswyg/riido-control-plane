@@ -16718,6 +16718,47 @@
       ],
       "decision": "Thread progress cache invalidation tests now prove dropping progress cache also drops the same thread's history cache, preserves unrelated thread caches, covers the nil-progress-cache path, and raises dropTaskThreadProgressCacheLocked from 60.0% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "thread_history_identity_retention_coverage_loop",
+      "observation": "AI thread history v3 relies on stable conversation grouping, assignment-scoped message run ids, and bounded message retention; weak branch coverage here could let refresh/reply timelines drift without visible API contract changes.",
+      "hypothesis": "Focused pure-function tests can prove conversation id fallback, message run id fallback, retention trimming, and copy isolation without changing thread endpoints or payloads.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_identity_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_identity_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_identity_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice74-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Thread history identity tests now prove explicit conversation ids are preserved, blank conversation ids fall back to trimmed thread ids, assignment-scoped message run ids prefer assignment_id, sequence fallback remains deterministic, retention keeps the latest 100 messages, and retained messages do not alias source storage. defaultTaskThreadConversationID, taskThreadMessageRunID, and retainLatestThreadHistoryMessages each rise from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
