@@ -5062,6 +5062,119 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_helper_package_coverage_loop_2",
+      "observation": "After the first helper coverage slice, the full Go coverage baseline still reported 28 zero-coverage tool/helper packages, including AI Agent generated-client doc checks, smoke matrix helpers, generated-smoke-matrix helpers, and API client delivery helpers.",
+      "hypothesis": "Focused tests around generated-doc verification, markdown render helpers, smoke matrix JSON loading, path resolution, and set utilities can remove another batch of zero-coverage helper packages while preserving API endpoints, generated contracts, and runtime behavior.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/doccheck/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/rendertext/render_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/smokematrix/smoke_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/doccheck/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/rendertext/render_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/setutil/set_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/doccheck/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/pathutil/test_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/rendertext/list_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/doccheck/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/rendertext/render_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/smokematrix/smoke_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/doccheck/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/rendertext/render_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/setutil/set_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/doccheck/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/rendertext/list_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-helper-packages-slice2-2026-07-08",
+          "redacted": true
+        }
+      ],
+      "decision": "Coverage remains an incremental executable-evidence loop, not a broad completion claim. This second helper slice adds direct tests for ten additional previously 0.0% tool/helper packages, preserving external contracts while keeping the remaining zero-coverage package count visible for the next slice.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
