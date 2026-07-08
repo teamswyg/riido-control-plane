@@ -17222,6 +17222,96 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "riido_ai_server_runtime_config_coverage_loop_46",
+      "observation": "The riido_ai_server entrypoint package remained the lowest statement-coverage package at 76.2%, with runtime env parsing, ECS credential endpoint selection, DynamoDB outbox wiring, profile-thumbnail upload configuration, static authorizer parsing, tracing sample boundaries, and daemon profile normalization under-tested even though these paths guard deploy-time configuration and observability behavior.",
+      "hypothesis": "Focused config-boundary tests can raise cmd/riido_ai_server coverage while preserving every endpoint, environment variable name, runtime contract, and deployment behavior.",
+      "claims": [
+        "runtime_adapter_config_must_preserve_public_env_contract"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_static_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/aws_outbox_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/daemon_profile_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/env_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/profile_thumbnail_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/tracing_more_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_static_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/aws_outbox_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/daemon_profile_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/env_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/profile_thumbnail_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/tracing_more_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "riido-ai-server-cmd-coverage-slice46",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "control-plane-coverage-slice46-after",
+          "redacted": true
+        }
+      ],
+      "decision": "The forty-sixth coverage slice raises cmd/riido_ai_server coverage from 76.2% to 80.3% by proving accepted and rejected env boolean/int/float values, ECS relative credential URI handling, DynamoDB outbox no-op/missing-region/success wiring, static authorizer blank/valid/review-token parsing, daemon profile default/testnet/production normalization, profile-thumbnail partial-config fail-closed behavior, and tracing sample boundaries. Repository-wide coverage remains below 100%, so this is incremental evidence toward the active full-coverage goal rather than completion.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "daemon_profile_environment_guard_loop",
       "observation": "Control-plane environments could accept daemon runtime snapshots from a different daemon profile, letting development, staging, and production daemon/runtime rows overwrite or pollute the same read model after desktop or daemon restarts.",
       "hypothesis": "Binding each control-plane task definition to an expected daemon profile, rejecting mismatched snapshots, pruning stale profile rows on mismatch and snapshot restore, and logging the prune counts prevents cross-environment runtime state from being treated as live evidence.",
