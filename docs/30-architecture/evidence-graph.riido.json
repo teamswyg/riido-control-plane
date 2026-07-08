@@ -15969,6 +15969,47 @@
       ],
       "decision": "EventBridge stream relay boundary tests now prove invalid stream relay and outbox schema inputs are rejected before any EventBridge HTTP request, nil publishers remain no-ops, closed publishers reject publishes, malformed PutEvents responses fail decode, FailedEntryCount and entry ErrorCode failures surface diagnostic errors, failureSummary reaches 100%, normalizeEventBridgeEndpoint rises to 91.7%, putEvent rises to 88.0%, and internal/riidoaiserver package coverage rises to 86.1% without API or runtime contract changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "device_enrollment_normalization_coverage_loop",
+      "observation": "Desktop device enrollment normalization still had partial coverage around trimmed identities, workspace fallback, default display names, and missing principal/workspace rejection.",
+      "hypothesis": "Focused pure-function tests can prove enrollment normalization keeps daemon credential identity deterministic without changing desktop enrollment endpoints or response contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_credential_enroll_normalize_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_credential_enroll_normalize_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_credential_enroll_normalize_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice57-after-device-enroll.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Device enrollment normalization tests now prove principal/workspace/display/machine/device values are trimmed, request workspace overrides principal workspace, blank display names default to Riido Desktop, missing principal is rejected, missing workspace is rejected, normalizeDeviceEnrollment reaches 100%, completeDeviceEnrollment reaches 100%, and internal/riidoaiserver package coverage rises to 86.2% without API or runtime contract changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
