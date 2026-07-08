@@ -114,12 +114,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `7aadb0213e97` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `7ee1bbf6a41c` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `6776a7dfa411` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `9097c8d53f17` | `server_route_handlers_must_stay_semantically_split` |
 
 ## Repository Coverage
 
-- Go files: `2976`
-- tracked files: `2976`
+- Go files: `2977`
+- tracked files: `2977`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,12 +165,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `2976`
-- unique syntax hashes: `2788`
+- tracked files: `2977`
+- unique syntax hashes: `2789`
 - compression gain: `188`
 - analysis reduction: `6.31%`
 - collision count: `0`
-- relocation mappings: `2976`
+- relocation mappings: `2977`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
