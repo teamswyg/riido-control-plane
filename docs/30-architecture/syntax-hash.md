@@ -62,7 +62,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `review_account_seed_requirements_adapter` | `tools/reviewaccountseed/requirements` | 100% | `d055ebae7bb8` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_runconfig_adapter` | `tools/reviewaccountseed/runconfig` | 100% | `10d6af178589` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_runtime_adapter` | `tools/reviewaccountseed/seedruntime` | 100% | `7ebc1adcab18` | `review_account_seed_must_preserve_redacted_seed_evidence` |
-| `open_questions_guard` | `tools/openquestions` | 100% | `d4061a32be2a` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
+| `open_questions_guard` | `tools/openquestions` | 100% | `4b7eb285e965` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `open_questions_path_adapter` | `tools/openquestions/pathutil` | 100% | `ed456b033798` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `repository_readme_guard` | `tools/repositoryreadme` | 100% | `fe1a8fb72b35` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `repository_readme_path_adapter` | `tools/repositoryreadme/pathutil` | 100% | `eb8457dd7977` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3025`
-- tracked files: `3025`
+- Go files: `3030`
+- tracked files: `3030`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3025`
-- unique syntax hashes: `2830`
+- tracked files: `3030`
+- unique syntax hashes: `2835`
 - compression gain: `195`
-- analysis reduction: `6.44%`
+- analysis reduction: `6.43%`
 - collision count: `0`
-- relocation mappings: `3025`
+- relocation mappings: `3030`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `644`
+- efficiency score: `643`
 - compression score: `195`
-- weighted score: `839`
+- weighted score: `838`
