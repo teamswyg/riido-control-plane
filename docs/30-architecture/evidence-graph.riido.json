@@ -346,6 +346,69 @@
       "next_loop": "provider_acceptance_harness"
     },
     {
+      "id": "control_plane_live_workflow_evidence_coverage_loop_38",
+      "observation": "The live workflow evidence verifier protects redacted deployment/load summaries and workflow evidence freshness, but baseline coverage left manifest IO errors, stale-doc detection, path resolution, workflow phrase failures, raw shell output rejection, and claim-spec validation weakly asserted.",
+      "hypothesis": "Focused failure-path tests can prove the live workflow evidence sidecar fails closed when redacted summary wiring, workflow source phrases, or stale generated docs drift, without exposing secrets or changing runtime/API behavior.",
+      "claims": [
+        "expired_harness_evidence_must_not_promote_candidates",
+        "provider_acceptance_summary_must_cover_declared_observations",
+        "load_harness_failures_must_promote_candidates"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/liveworkflowevidence/io_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/liveworkflowevidence/test_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/liveworkflowevidence/verify_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/liveworkflowevidence/verify_more_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/liveworkflowevidence/workflow_error_paths_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/liveworkflowevidence"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-liveworkflowevidence-slice38-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Live workflow evidence failure-path tests now cover invalid/missing manifests, JSON/write/read failures, repo path errors, stale generated docs, workflow source phrase gaps, raw shell-output rejection, missing workflow ids, identity/no-workflow manifest failures, and claim-spec validation. tools/liveworkflowevidence rises from 77.8% to 91.2% under Go 1.26.2 with no endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "device_daemon_plural_endpoint_live_smoke_loop",
       "observation": "Runtime settings now need a device-scoped daemon list because the singular device daemon endpoint intentionally returns only the preferred daemon. Without a live smoke check, the plural contract can be merged while staging remains on a build that only proves the singular endpoint. A development deploy smoke later proved a sharper mismatch: the singular `/devices/{device_id}/daemon` compatibility endpoint returned 200, while plural `/devices/{device_id}/daemons` returned 200 with no matching daemon row, so deploy smoke failed before profile thumbnail upload.",
       "hypothesis": "Checking `/devices/{device_id}/daemons` in both scheduled testnet smoke and deploy smoke proves the generated plural client contract is present in the live API and returns at least one daemon for the selected device without changing existing singular endpoint behavior. If no profile-specific daemon rows are visible, the plural read model should include the same device read-model fallback used by the singular compatibility endpoint so clients and smoke do not disagree about whether the device has a daemon representation.",
