@@ -6602,6 +6602,75 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_saas_control_plane_coverage_loop_25",
+      "observation": "After the context map slice, the SaaS control-plane verifier remained one of the lowest-covered executable knowledge tools; its happy path proved the reader and boundary evidence, but manifest input failures, domain identity drift, workflow/boundary/source/doc phrase drift, CLI flag errors, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove SaaS control-plane SSOT failures are deterministic and fail closed without changing endpoint payloads, daemon contracts, runtime behavior, or frontend source.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/domain_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/integrity_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/load_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/test_manifest_parts_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/domain_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/integrity_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/load_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/saascontrolplane/run_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-saascontrolplane-slice25-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The twenty-fifth coverage slice raises the SaaS control-plane verifier from 74.8% to 91.3% through deterministic tests for malformed, unknown-field, trailing-object, and missing manifests; manifest identity and required contract drift; underspecified workflows and boundaries; boundary identity, duplicate, workflow, artifact, and source-check drift; generated doc and required phrase drift; CLI flag errors; write-doc/evidence paths; and JSON/text write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
