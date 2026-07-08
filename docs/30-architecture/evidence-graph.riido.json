@@ -16636,6 +16636,47 @@
       ],
       "decision": "Component task HTTP tests now prove malformed routes and unsupported suffixes return 404, missing assignment auth returns 401, assignment store failures surface as 400, handleComponentTasks rises from 62.5% to 100.0%, and handleComponentTaskAssign rises from 85.0% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "onboarding_fixture_color_repair_coverage_loop",
+      "observation": "Development onboarding fixture color repair preserves existing colors, fills known blank fixture colors, and leaves unknown fixtures untouched, but those semantic branches had partial coverage.",
+      "hypothesis": "A focused store-level test can prove the repair semantics without changing onboarding endpoints, fixture payload shape, or seeded fixture data.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_onboarding_fixture_colors_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_onboarding_fixture_colors_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_onboarding_fixture_colors_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice72-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Onboarding fixture color repair tests now prove blank known fixture colors are restored, unknown fixture colors stay empty, existing nonblank colors are preserved, ensureOnboardingFixtureColorsLocked rises from 60.0% to 100.0%, and internal/riidoaiserver rises from 87.1% to 87.2% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

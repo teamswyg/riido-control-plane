@@ -10,22 +10,22 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `163`
-- claim refs: `217`
-- change refs: `1817`
-- verifier refs: `1003`
-- evidence refs: `554`
+- chains: `164`
+- claim refs: `218`
+- change refs: `1819`
+- verifier refs: `1005`
+- evidence refs: `556`
 
 ## Compiled Chain Summary
 
-- complete chains: `163` / `163`
-- claim-bound chains: `163`
+- complete chains: `164` / `164`
+- claim-bound chains: `164`
 - unclaimed chains: `0`
 - next-loop targets: `9`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `112` | `121` | `1200` | `634` | `343` |
+| `closed_loop_candidate` | `113` | `122` | `1202` | `636` | `345` |
 | `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
 | `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
 | `ai_thread_history` | `8` | `8` | `121` | `57` | `12` |
@@ -202,6 +202,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `ai_agent_device_daemon_http_error_coverage_loop` | `1` | `3` | `2` | `2` | `closed_loop_candidate` |
 | `ai_agent_editability_http_error_coverage_loop` | `1` | `3` | `2` | `2` | `closed_loop_candidate` |
 | `component_task_http_error_coverage_loop` | `1` | `2` | `2` | `2` | `closed_loop_candidate` |
+| `onboarding_fixture_color_repair_coverage_loop` | `1` | `2` | `2` | `2` | `closed_loop_candidate` |
 
 ## Loop
 
