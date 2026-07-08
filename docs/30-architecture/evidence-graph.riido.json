@@ -16350,6 +16350,51 @@
       ],
       "decision": "Task comment HTTP error tests now prove missing auth returns 401, malformed JSON returns 400 without mutating task threads, backend comment persistence errors return 400, missing agents map to 404, handleAIAgentClientSubmitTaskComment rises from 58.3% to 100.0%, and internal/riidoaiserver package coverage remains 86.7% rounded under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_legacy_assign_http_error_coverage_loop",
+      "observation": "The legacy task assignment endpoint remains a compatibility path for AI Agent task execution, but its HTTP boundary had partial coverage for intent-gated tasks, assignment queue failures, and action projection failures.",
+      "hypothesis": "Focused HTTP tests can prove legacy assignment waits for user input before durable daemon work, surfaces queue and projection failures, and keeps endpoint and payload contracts unchanged.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_legacy_assign_http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_legacy_assign_http_error_helpers_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_legacy_assign_http_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_legacy_assign_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice66-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Legacy assignment HTTP tests now prove intent-gated tasks return waiting_for_user without daemon-visible durable work, assignment queue failures surface as 400, action projection failures surface as 400, handleAIAgentClientAssignTask rises from 60.0% to 85.0%, and internal/riidoaiserver package coverage rises to 86.8% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
