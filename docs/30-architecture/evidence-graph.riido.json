@@ -16800,6 +16800,47 @@
       ],
       "decision": "Diagnostics and fanout tests now prove nil diagnostics compare equal only with nil, matching diagnostics compare equal, changed queue/failure diagnostics differ, new threads fan out, unchanged threads do not fan out, and comment-kind or failure-diagnostic changes fan out. failureDiagnosticsEqual, queueDiagnosticsEqual, and shouldFanoutAgentTaskActionEvent each rise from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "runtime_model_defaults_coverage_loop",
+      "observation": "Runtime model records drive provider/model display and default selection; weak branch coverage here could hide duplicate model comparisons or incorrect fallback labels without endpoint changes.",
+      "hypothesis": "Focused pure-function tests can prove ordered runtime model equality and every default runtime model fallback while preserving existing runtime APIs and payloads.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_runtime_models_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_runtime_models_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_daemon_runtime_models_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice76-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Runtime model tests now prove matching ordered model records compare equal, length/value differences compare unequal, and codex, claude, cursor, openclaw, and unknown runtimes all resolve their expected default model ids, labels, and default flags. equalRuntimeModelRecords and defaultRuntimeModel each rise from 66.7% to 100.0%, and internal/riidoaiserver package coverage rises from 87.2% to 87.3% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
