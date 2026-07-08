@@ -56,7 +56,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `agent_catalog_rbac_path_adapter` | `tools/agentcatalogrbac/pathutil` | 100% | `cb000cdafef0` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_requirements_adapter` | `tools/agentcatalogrbac/requirements` | 100% | `073e15ea29e9` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_set_adapter` | `tools/agentcatalogrbac/setutil` | 100% | `0ae7738dd1f6` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
-| `review_account_seed_guard` | `tools/reviewaccountseed` | 100% | `33eb51abab21` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_guard` | `tools/reviewaccountseed` | 100% | `7ca705a1c5cf` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_http_adapter` | `tools/reviewaccountseed/httpclient` | 100% | `423857993551` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_path_adapter` | `tools/reviewaccountseed/pathutil` | 100% | `7ddab02879c4` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_requirements_adapter` | `tools/reviewaccountseed/requirements` | 100% | `d055ebae7bb8` | `review_account_seed_must_preserve_redacted_seed_evidence` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3092`
-- tracked files: `3092`
+- Go files: `3098`
+- tracked files: `3098`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3092`
-- unique syntax hashes: `2893`
+- tracked files: `3098`
+- unique syntax hashes: `2899`
 - compression gain: `199`
-- analysis reduction: `6.43%`
+- analysis reduction: `6.42%`
 - collision count: `0`
-- relocation mappings: `3092`
+- relocation mappings: `3098`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `643`
+- efficiency score: `642`
 - compression score: `199`
-- weighted score: `842`
+- weighted score: `841`

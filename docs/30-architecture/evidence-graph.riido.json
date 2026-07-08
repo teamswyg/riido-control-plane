@@ -6391,6 +6391,75 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_review_account_seed_coverage_loop_22",
+      "observation": "After the repository README slice, the review account seed verifier remained low covered; its happy path proved review account evidence but case mismatch handling, manifest input failures, source-check drift, seed redaction failures, generated-doc freshness, CLI flag errors, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove review account seed SSOT failures are deterministic and fail closed without changing review seed runtime behavior, endpoint contracts, daemon contracts, or frontend source.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/case_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/case_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-reviewaccountseed-slice22-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The twenty-second coverage slice raises the review account seed verifier from 74.4% to 90.5% through deterministic tests for unknown case kinds, case result count/name drift, provision/catalog/provider/http expectation mismatch, malformed and missing manifests, source-check file/token drift, forbidden seed terms, unknown forbidden term sets, missing seed SSOT, generated doc freshness, CLI flag errors, generated doc writes, and JSON/text/evidence write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
