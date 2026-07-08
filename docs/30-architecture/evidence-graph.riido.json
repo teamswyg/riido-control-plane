@@ -6460,6 +6460,71 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_provider_status_coverage_loop_23",
+      "observation": "After the review account seed slice, the provider status verifier remained low covered; its happy path proved the provider status SSOT but manifest input failures, vocabulary drift, source-check drift, generated-doc freshness, CLI flag errors, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove provider status SSOT failures are deterministic and fail closed without changing provider status contracts, endpoint payloads, daemon contracts, or frontend source.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/domain_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/domain_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/providerstatus/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-providerstatus-slice23-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The twenty-third coverage slice raises the provider status verifier from 74.5% to 93.0% through deterministic tests for malformed, missing, and trailing-object manifests, required field failures, missing vocabulary, empty semantic fields, validation/routing rule drift, source-check file/token drift, generated doc freshness, CLI flag errors, generated doc writes, and JSON/text/evidence write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
