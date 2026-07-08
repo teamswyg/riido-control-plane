@@ -5300,6 +5300,99 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_helper_package_coverage_loop_4",
+      "observation": "After helper coverage slice 3, the full coverage profile still reported six zero-coverage helper packages in Dockerfile parsing, dependency-layer normalization, metrics HTTP adapter source/status checks, and review-account seed HTTP/runtime helpers.",
+      "hypothesis": "Focused unit tests for parser behavior, source/status verification, deterministic seed helpers, and in-memory HTTP client requests can clear the remaining zero-coverage helper packages without changing runtime paths, endpoints, or external contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/containercontract/dockerfile/instruction_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/dockerfile/match_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/dockerfile/parse_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist/layers/layers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/sourcechecks/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/statuscheck/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/httpclient/requests_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/seedruntime/shared_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/containercontract/dockerfile/instruction_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/dockerfile/match_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/dockerfile/parse_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist/layers/layers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/sourcechecks/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/statuscheck/verify_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/httpclient/requests_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/seedruntime/shared_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-helper-packages-slice4-2026-07-08",
+          "redacted": true
+        }
+      ],
+      "decision": "The fourth helper coverage slice closes the remaining zero-coverage helper packages visible after slice 3 while preserving endpoint behavior and runtime contracts. This is still incremental coverage evidence, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
