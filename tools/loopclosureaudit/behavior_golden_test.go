@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const loopClosureAuditGoldenSHA256 = "a3a74a519df37d9958951c58131889634c6d5af2b460e5dbc2e711446669e4db"
+const loopClosureAuditGoldenSHA256 = "5c77b0bb93d30a7b00a117c607cc55d0d5879f4a4eac66e45c8c881cb773e8cc"
 
 func TestLoopClosureAuditBehaviorGolden(t *testing.T) {
 	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-24T12:00:00Z")

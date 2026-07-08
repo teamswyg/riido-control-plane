@@ -16841,6 +16841,51 @@
       ],
       "decision": "Runtime model tests now prove matching ordered model records compare equal, length/value differences compare unequal, and codex, claude, cursor, openclaw, and unknown runtimes all resolve their expected default model ids, labels, and default flags. equalRuntimeModelRecords and defaultRuntimeModel each rise from 66.7% to 100.0%, and internal/riidoaiserver package coverage rises from 87.2% to 87.3% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "device_progress_helper_coverage_loop",
+      "observation": "Device runtime liveness and retained progress lines shape user-visible runtime availability and streamed thread logs; weak helper coverage hid an in-place retention panic when the defensive drop-all branch received more lines than the existing slice capacity.",
+      "hypothesis": "Focused helper tests can prove stale-threshold behavior, device snapshot event extraction, and defensive progress retention while hardening the panic path without changing endpoints or payloads.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_append_retained_thread_progress_lines.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_device_progress_helpers_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_device_progress_helpers_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_device_progress_helpers_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice77-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Device/progress helper tests now prove zero timestamps are not stale, threshold timestamps remain fresh, older snapshots become stale, device snapshot events are extracted while unrelated payloads are ignored, and the defensive drop-all progress retention branch no longer panics when incoming lines exceed the existing slice capacity. deviceRuntimeSnapshotStale, eventDeviceRecord, and appendRetainedProgressLinesInPlace each rise from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
