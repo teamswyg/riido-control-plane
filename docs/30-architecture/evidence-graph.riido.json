@@ -409,6 +409,67 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_config_reference_coverage_loop_39",
+      "observation": "The config-reference verifier protects cmd/riido_ai_server runtime environment parity, but baseline coverage left manifest decoding, stale generated docs, blocked writes, invalid source parsing, and secret/public classification failures weakly asserted.",
+      "hypothesis": "Focused failure-path tests can prove the config-reference sidecar fails closed when manifest, source scan, doc freshness, or sensitivity rules drift, without changing runtime/API behavior.",
+      "claims": [
+        "config_reference_must_preserve_env_manifest_parity"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/configreference/io_path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/configreference/more_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/configreference/run_doc_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/configreference/test_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/configreference/verify_error_paths_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/configreference"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-configreference-slice39-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Config-reference failure-path tests now cover write parent failures, trailing and malformed JSON manifests, missing manifests, stale generated docs, invalid Go source parsing, duplicate/missing runtime env parity, missing required manifest fields, missing loop phases, and secret-like public names. tools/configreference rises from 78.3% to 92.4% under Go 1.26.2 with no endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "device_daemon_plural_endpoint_live_smoke_loop",
       "observation": "Runtime settings now need a device-scoped daemon list because the singular device daemon endpoint intentionally returns only the preferred daemon. Without a live smoke check, the plural contract can be merged while staging remains on a build that only proves the singular endpoint. A development deploy smoke later proved a sharper mismatch: the singular `/devices/{device_id}/daemon` compatibility endpoint returned 200, while plural `/devices/{device_id}/daemons` returned 200 with no matching daemon row, so deploy smoke failed before profile thumbnail upload.",
       "hypothesis": "Checking `/devices/{device_id}/daemons` in both scheduled testnet smoke and deploy smoke proves the generated plural client contract is present in the live API and returns at least one daemon for the selected device without changing existing singular endpoint behavior. If no profile-specific daemon rows are visible, the plural read model should include the same device read-model fallback used by the singular compatibility endpoint so clients and smoke do not disagree about whether the device has a daemon representation.",
