@@ -16059,6 +16059,47 @@
       ],
       "decision": "Assignment active lease tests now prove non-active assignments and recently updated active assignments skip durable lease reads, missing/mismatched/expired durable leases are treated as expired, fresh durable heartbeat timestamps refresh in-memory assignment UpdatedAt, lease store errors are surfaced, assignmentActiveLeaseExpired reaches 100%, failStaleAssignment remains 100%, failStaleAssignmentWithMessage remains 100%, and no API or runtime contract changes are introduced.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "assignment_progress_line_structured_metadata_coverage_loop",
+      "observation": "Assignment progress line construction still had partial coverage around structured progress metadata rendering and provider-omitted observed_at timestamps, even though this path controls user-visible runtime progress text and timeline ordering.",
+      "hypothesis": "A focused function-level test can prove structured progress metadata renders through the contracts catalog, fills the progress key, and assigns a server observed_at timestamp when providers omit one without changing SSE, v2, or v3 response shapes.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_store_structured_progress_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_store_structured_progress_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_store_structured_progress_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice59-after-progress-line.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Structured progress-line tests now prove assignmentProgressLineLocked renders metadata code 1101 through the contracts progress-message catalog, fills the message key when providers omit it, assigns ObservedAt when providers omit timestamps, and reaches 100% coverage while internal/riidoaiserver package coverage rises to 86.3% without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
