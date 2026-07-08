@@ -19396,6 +19396,71 @@
       ],
       "decision": "AI Agent client API failure-path tests now cover missing/invalid/trailing manifests, write failures, OpenAPI parse and method filtering, required generated-path gaps, source anchor failures, static list drift, loop-step failures, and v3 thread-history rule gaps. tools/aiagentclientapi rises from 75.8% to 90.0% under Go 1.26.2 with no endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "control_plane_module_decomposition_coverage_loop_37",
+      "observation": "The module decomposition verifier guards package ownership, generated reader freshness, forbidden imports, and line-budget ratchets, but baseline coverage left manifest IO errors, stale-doc detection, path resolution, line-budget sorting, and verifier failure paths weakly asserted.",
+      "hypothesis": "Focused error-path tests can make the module decomposition sidecar fail closed when its SSOT, generated doc, or source-boundary checks drift, without changing endpoint behavior or generated runtime artifacts.",
+      "claims": [
+        "module_decomposition_must_preserve_surface_area_ratchet"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/io_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/line_budget_sort_render_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/path_doc_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/render_more_edges_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/verify_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/verify_more_errors_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-moduledecomposition-slice37-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Module decomposition failure-path tests now cover invalid/trailing manifests, write failures, stale generated docs, missing repo roots, line counting, line-budget deterministic ordering, empty render branches, manifest shape errors, package parity errors, and forbidden import rejection. tools/moduledecomposition rises from 76.2% to 90.3% under Go 1.26.2 with no endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
