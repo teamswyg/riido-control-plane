@@ -46,7 +46,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `migration_ledger_guard` | `tools/migrationledger` | 100% | `835457caad5c` | `migration_ledger_must_preserve_historical_evidence` |
 | `integration_matrix_guard` | `tools/integrationmatrix` | 100% | `5052bfd34673` | `integration_matrix_must_preserve_public_private_boundary` |
 | `integration_matrix_path_adapter` | `tools/integrationmatrix/pathutil` | 100% | `ed456b033798` | `integration_matrix_must_preserve_public_private_boundary` |
-| `metrics_http_adapter_guard` | `tools/metricshttpadapter` | 100% | `610d5168aa7c` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
+| `metrics_http_adapter_guard` | `tools/metricshttpadapter` | 100% | `a391b3e94bd4` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_path_adapter` | `tools/metricshttpadapter/pathutil` | 100% | `7ddab02879c4` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_requirements_adapter` | `tools/metricshttpadapter/requirements` | 100% | `71e11b08e8f0` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_runconfig_adapter` | `tools/metricshttpadapter/runconfig` | 100% | `10d6af178589` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3160`
-- tracked files: `3160`
+- Go files: `3166`
+- tracked files: `3166`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3160`
-- unique syntax hashes: `2959`
+- tracked files: `3166`
+- unique syntax hashes: `2965`
 - compression gain: `201`
-- analysis reduction: `6.36%`
+- analysis reduction: `6.34%`
 - collision count: `0`
-- relocation mappings: `3160`
+- relocation mappings: `3166`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `636`
+- efficiency score: `634`
 - compression score: `201`
-- weighted score: `837`
+- weighted score: `835`

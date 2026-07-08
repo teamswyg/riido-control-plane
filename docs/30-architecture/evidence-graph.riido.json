@@ -11806,6 +11806,63 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_metrics_http_adapter_coverage_loop_35",
+      "observation": "The metrics HTTP adapter SSOT protects the GET /metrics route, scoped authorization, required JSON fields, status contracts, source anchors, generated docs, and redacted workflow evidence, but baseline coverage left manifest IO, write failures, stale docs, adapter decode failures, wrapper failures, and source-check failures under-tested.",
+      "hypothesis": "Focused failure-path tests can prove the metrics HTTP adapter sidecar fails closed when its executable metrics contract or evidence publication path drifts, without changing the /metrics endpoint, payload shape, or runtime authorization behavior.",
+      "claims": [
+        "metrics_http_adapter_must_preserve_public_metrics_contract"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/io_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/run_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/run_more_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/test_manifest_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/verify_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter/verify_source_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/metricshttpadapter"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-metricshttpadapter-slice35-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Metrics HTTP adapter failure-path tests now cover missing/invalid manifests, JSON marshal and mkdir write failures, generated doc writes, stale and unreadable generated docs, missing repo roots, bad CLI flags, adapter decode failures, status drift, missing metrics JSON fields, missing breakdown rows, source-check failures, and evidence write failures. tools/metricshttpadapter rises from 77.3% to 90.1% under Go 1.26.2 with no endpoint, payload, or authorization runtime behavior changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "notion_qa_operational_evidence_backfill_loop",
       "observation": "Notion QA comments contained P0 operating evidence for waiting_for_user, queued_by_busy_agent, terminal stop refresh, author fallback, instruction intent, and staging DMG install issues, but a comment-only record can be missed by agents, cannot expire, and cannot produce closed-loop candidates.",
       "hypothesis": "Backfilling Notion QA comments into the operational readiness SSOT as P0 cycles, then emitting cycle counts, partial status, codex status tags, next artifacts, and 24h cadence evidence lets daily readiness runs keep product QA partials visible without editing client or endpoint contracts.",
