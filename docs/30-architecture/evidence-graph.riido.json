@@ -11093,6 +11093,63 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "dependency_allowlist_coverage_loop_43",
+      "observation": "Dependency allowlist behavior was guarded by a golden evidence test, but contract required-field errors, JSON loading failures, go list failures, and run/write failure paths were weakly evidenced while the package sat below 80% coverage.",
+      "hypothesis": "Focused failure-path tests can raise dependency allowlist coverage above 90% without changing module policy, endpoint contracts, runtime behavior, or generated client surfaces.",
+      "claims": [
+        "context_map_must_guard_public_boundaries"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist/contract_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist/io_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist/list_modules_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist/run_more_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/dependencyallowlist"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-dependencyallowlist-slice43-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Dependency allowlist tests now cover contract metadata and module-shape rejection, decode/trailing JSON errors, go list failure reporting, evidence write success/failure, and run parse/load/listing failures. tools/dependencyallowlist rises from 79.6% to 93.4% under Go 1.26.2 with no endpoint, payload, dependency policy, or runtime behavior changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "evidence_graph_workflow_trigger_coverage_loop",
       "observation": "Evidence graph chains can reference code, workflows, tools, or manifests that do not trigger the evidence-graph workflow when they change, and the loop-registry claim did not expose machine-readable observe/verify/fail coverage for that trigger gate.",
       "hypothesis": "The evidence graph verifier can read its own workflow path filters and fail when any non-artifact chain reference is outside those filters, while claim coverage tokens keep that trigger requirement routable without asking agents to remember trigger maintenance.",
