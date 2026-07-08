@@ -19026,6 +19026,57 @@
       ],
       "decision": "Go CI baseline failure-path tests now cover missing/invalid manifests, malformed required fields, missing or stale generated docs, missing workflow phrases, missing repo roots, write failures, and unmarshalable evidence values. tools/gocibaseline rises from 75.4% to 91.3% under Go 1.26.2 with no endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "control_plane_pre_commit_baseline_coverage_loop_30",
+      "observation": "The pre-commit baseline proves claim-binding and evidence-graph hooks run locally, but baseline coverage left malformed manifest, stale doc, source-read, workflow, repo-root, and write failure paths under-tested.",
+      "hypothesis": "Focused failure-path tests can prove the pre-commit baseline fails closed when hooks, scripts, generated readers, workflow evidence, or output paths are missing or stale, without changing hook behavior.",
+      "claims": [
+        "pre_commit_must_run_claim_binding_impact",
+        "pre_commit_must_run_evidence_graph_impact",
+        "pre_commit_baseline_evidence_must_self_expire"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/precommitbaseline/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/precommitbaseline/verify_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/precommitbaseline/verify_all_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/precommitbaseline/run_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/precommitbaseline"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-precommitbaseline-slice30-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Pre-commit baseline failure-path tests now cover missing/invalid manifests, required field and TTL failures, hook/script source failures, workflow schedule and upload failures, missing or stale generated docs, missing repo roots, write failures, and unmarshalable evidence values. tools/precommitbaseline rises from 75.6% to 90.9% under Go 1.26.2 with no endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
