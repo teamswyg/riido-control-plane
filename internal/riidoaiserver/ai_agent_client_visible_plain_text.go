@@ -6,6 +6,7 @@ var clientVisibleRewriteLowerMarkers = []string{
 	"/users", "/private/var", "/var/folders", "/tmp/",
 	"approval", "permission", "allow /", "bash)", "write)",
 	"token", "quota", "credit", "cloud ai", "context ",
+	"authenticate", "authentication", "credentials", "api error: 401",
 	"권한", "승인", "터미널에서 직접", "go 명령", "토큰", "크레딧",
 }
 
