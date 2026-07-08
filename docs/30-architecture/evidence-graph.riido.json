@@ -16223,6 +16223,51 @@
       ],
       "decision": "Onboarding fixture HTTP error tests now prove missing AI Agent store returns 503, wrong list method returns 405, fixture-list backend errors return 400, malformed fixture-create JSON returns 400, fixture-create backend errors return 400, unknown nested suffixes return 404, handleAIAgentClientOnboardingFixtures rises from 56.5% to 87.0%, handleAIAgentClientCreateFromOnboardingFixture rises from 75.0% to 91.7%, and internal/riidoaiserver package coverage rises to 86.5% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_bootstrap_devices_http_error_coverage_loop",
+      "observation": "AI Agent bootstrap and device list HTTP handling had broad success-path coverage but still lacked direct proof for unconfigured store, wrong method, backend failure, and bootstrap projection reconcile failure branches even though these endpoints feed the first client screen and runtime availability list.",
+      "hypothesis": "Focused HTTP tests can prove bootstrap and device list requests fail closed on malformed route usage, unavailable stores, backend errors, and reconcile failures without changing endpoint paths, methods, or response payload contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_bootstrap_devices_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_bootstrap_devices_error_helpers_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_bootstrap_devices_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_bootstrap_devices_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice63-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Bootstrap and device-list HTTP error tests now prove missing AI Agent store returns 503, wrong methods return 405, bootstrap backend errors return 400, device-list backend errors return 400, projection reconcile failures return 502, handleAIAgentClientBootstrap rises from 64.7% to 100.0%, handleAIAgentClientDevices rises from 57.1% to 100.0%, and internal/riidoaiserver package coverage rises to 86.6% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
