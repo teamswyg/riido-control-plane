@@ -5715,6 +5715,75 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_ai_generated_smoke_matrix_coverage_loop_11",
+      "observation": "After the runtime boundary slice, the AI generated smoke matrix verifier remained low covered; its happy path proved generated endpoint parity but malformed OpenAPI, smoke matrix, source-check, evidence-test, doc freshness, and IO failure paths were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove generated endpoint smoke matrix failures are deterministic and fail closed without changing generated endpoints, endpoint payloads, or runtime behavior.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/matrix_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/source_io_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/test_write_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/matrix_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/source_io_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aigeneratedsmokematrix/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-aigeneratedsmokematrix-slice11-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The eleventh coverage slice raises the AI generated smoke matrix verifier from 72.3% to 95.5% through deterministic tests for manifest identity drift, OpenAPI load/decode failures, smoke matrix schema/order/parity drift, evidence-test coverage drift, source-check failures, generated doc freshness, and JSON/text write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
