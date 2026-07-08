@@ -21,7 +21,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `runtime_deployment_boundary_guard` | `tools/runtimeboundary` | 100% | `d0e61dbc8b0c` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `runtime_cd_ownership_guard` | `tools/runtimecdownership` | 100% | `81f0d079a0ee` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `deploy_policy_guard` | `tools/deploypolicy` | 100% | `6cdfe42c5d6d` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
-| `container_image_contract_guard` | `tools/containercontract` | 100% | `c847c0333f73` | `container_image_contract_must_bind_runtime_shape` |
+| `container_image_contract_guard` | `tools/containercontract` | 100% | `4cd9478e628e` | `container_image_contract_must_bind_runtime_shape` |
 | `container_image_contract_dockerfile_parser` | `tools/containercontract/dockerfile` | 100% | `7e3496402754` | `container_image_contract_must_bind_runtime_shape` |
 | `config_reference_guard` | `tools/configreference` | 100% | `f517462a6edf` | `config_reference_must_preserve_env_manifest_parity` |
 | `store_safe_routing_guard` | `tools/storesaferouting` | 100% | `affad8a109c9` | `store_safe_routing_must_preserve_provider_status_decisions` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3047`
-- tracked files: `3047`
+- Go files: `3051`
+- tracked files: `3051`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,12 +165,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3047`
-- unique syntax hashes: `2852`
+- tracked files: `3051`
+- unique syntax hashes: `2856`
 - compression gain: `195`
 - analysis reduction: `6.39%`
 - collision count: `0`
-- relocation mappings: `3047`
+- relocation mappings: `3051`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`

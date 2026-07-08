@@ -5784,6 +5784,67 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_container_contract_coverage_loop_12",
+      "observation": "After the generated smoke matrix slice, the container contract verifier remained low covered; its happy path proved the production Dockerfile contract but malformed metadata, task IR, Dockerfile stage drift, and CLI/write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove container contract failures are deterministic and fail closed without changing Dockerfile semantics, ECS task definitions, endpoint payloads, or runtime behavior.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/containercontract/main_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/stage_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/task_ir_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/validate_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/containercontract/main_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/stage_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/task_ir_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/containercontract/validate_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-containercontract-slice12-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The twelfth coverage slice raises the container contract verifier from 72.6% to 92.9% through deterministic tests for contract identity and loop metadata drift, missing final-stage requirements, malformed Fargate task IR, task port/env drift, Dockerfile build/final stage drift, malformed contract JSON, missing CLI inputs, and output write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
