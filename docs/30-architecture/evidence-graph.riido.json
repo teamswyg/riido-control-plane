@@ -5393,6 +5393,51 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_low_tool_coverage_loop_5",
+      "observation": "After zero-coverage helper packages were cleared, the lowest covered tool packages included Go CI baseline and pre-commit baseline verifier CLIs, with uncovered paths concentrated in CLI flag parsing, write-doc, and evidence output behavior.",
+      "hypothesis": "Mini-repository CLI tests can exercise write-doc and evidence-output paths for these verifier tools without changing verifier semantics, workflow contracts, or runtime endpoints.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline/cli_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/precommitbaseline/cli_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/gocibaseline/cli_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/precommitbaseline/cli_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-low-tool-packages-slice5-2026-07-08",
+          "redacted": true
+        }
+      ],
+      "decision": "The fifth coverage slice raises the lowest baseline verifier packages through contract-neutral CLI tests. This improves coverage evidence after zero-coverage packages were cleared, while still not claiming total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
