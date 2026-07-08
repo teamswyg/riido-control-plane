@@ -19,7 +19,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `request_authorization_guard` | `tools/requestauth` | 100% | `53e07c989285` | `request_authorization_must_preserve_security_boundary` |
 | `health_ready_command_guard` | `tools/healthreadycmd` | 100% | `aab4f106f850` | `health_ready_command_must_preserve_public_runtime_probe` |
 | `runtime_deployment_boundary_guard` | `tools/runtimeboundary` | 100% | `d0e61dbc8b0c` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
-| `runtime_cd_ownership_guard` | `tools/runtimecdownership` | 100% | `81f0d079a0ee` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
+| `runtime_cd_ownership_guard` | `tools/runtimecdownership` | 100% | `dbf313d91637` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `deploy_policy_guard` | `tools/deploypolicy` | 100% | `6cdfe42c5d6d` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `container_image_contract_guard` | `tools/containercontract` | 100% | `4cd9478e628e` | `container_image_contract_must_bind_runtime_shape` |
 | `container_image_contract_dockerfile_parser` | `tools/containercontract/dockerfile` | 100% | `7e3496402754` | `container_image_contract_must_bind_runtime_shape` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3116`
-- tracked files: `3116`
+- Go files: `3124`
+- tracked files: `3124`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -128,7 +128,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 - status: `evidence_only`
 - group by: `ast_shape_hash`
 - duplicate groups: `89`
-- duplicate files: `307`
+- duplicate files: `308`
 - internal groups: `5`
 
 | Shape Hash | Files | Packages |
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3116`
-- unique syntax hashes: `2916`
-- compression gain: `200`
-- analysis reduction: `6.41%`
+- tracked files: `3124`
+- unique syntax hashes: `2923`
+- compression gain: `201`
+- analysis reduction: `6.43%`
 - collision count: `0`
-- relocation mappings: `3116`
+- relocation mappings: `3124`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `641`
-- compression score: `200`
-- weighted score: `841`
+- efficiency score: `643`
+- compression score: `201`
+- weighted score: `844`

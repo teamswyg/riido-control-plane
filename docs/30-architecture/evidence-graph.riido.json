@@ -6671,6 +6671,95 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_runtime_cd_ownership_coverage_loop_26",
+      "observation": "After the SaaS control-plane slice, the runtime CD ownership verifier remained one of the lowest-covered executable knowledge tools; its happy path proved the generated runtime ownership reader, but manifest input failures, identity drift, public/infra/strategy policy drift, CodeDeploy activation drift, doc freshness drift, CLI flag errors, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove runtime CD ownership SSOT failures are deterministic and fail closed without changing endpoint payloads, daemon contracts, runtime behavior, infrastructure, or frontend source.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/codedeploy_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/identity_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/infra_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/load_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/public_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/strategy_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/test_manifest_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/codedeploy_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/identity_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/infra_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/load_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/public_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/runtimecdownership/strategy_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-runtimecdownership-slice26-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The twenty-sixth coverage slice raises the runtime CD ownership verifier from 74.9% to 91.1% through deterministic tests for malformed, unknown-field, trailing-object, and missing manifests; identity, target, reader-binding, and lineage drift; infra ownership, topology, visibility, and dependency-direction drift; public export, scan, config, and sensitive-surface guard drift; current strategy, immutable image digest, profile-thumbnail smoke, CodeDeploy mode, and activation-gate drift; generated doc and loop failures; CLI flag errors; and JSON/text write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
