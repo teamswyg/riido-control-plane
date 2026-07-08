@@ -6525,6 +6525,83 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_context_map_coverage_loop_24",
+      "observation": "After the provider status slice, the context map verifier remained one of the lowest-covered executable knowledge tools; its happy path proved the generated context map, but manifest input failures, required context drift, SSOT/source/doc freshness drift, forbidden import drift, CLI flag errors, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove context-map SSOT failures are deterministic and fail closed without changing context-map contracts, endpoint payloads, daemon contracts, or frontend source.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/contextmap/domain_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/integrity_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/load_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/test_manifest_parts_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/contextmap/domain_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/integrity_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/load_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/contextmap/run_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-contextmap-slice24-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The twenty-fourth coverage slice raises the context map verifier from 74.8% to 91.1% through deterministic tests for malformed, unknown-field, trailing-object, and missing manifests; required domain context drift; missing owner paths; SSOT link drift; source-check drift; generated doc missing/stale failures; forbidden Go imports; CLI flag errors; write-doc/evidence paths; and JSON/text write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",

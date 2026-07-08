@@ -8,7 +8,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 | Target | Package | Coverage | Syntax Hash | Semantic Claim |
 | --- | --- | ---: | --- | --- |
-| `contextmap_spike` | `tools/contextmap` | 100% | `a11308340a61` | `context_map_must_guard_public_boundaries` |
+| `contextmap_spike` | `tools/contextmap` | 100% | `73463c272c08` | `context_map_must_guard_public_boundaries` |
 | `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `0828144b09ce` | `context_map_must_guard_public_boundaries` |
 | `syntaxhash_duplicate_shapes_policy` | `tools/syntaxhash/duplicates` | 100% | `f506f1540fac` | `context_map_must_guard_public_boundaries` |
 | `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `62066456283d` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3103`
-- tracked files: `3103`
+- Go files: `3110`
+- tracked files: `3110`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3103`
-- unique syntax hashes: `2904`
+- tracked files: `3110`
+- unique syntax hashes: `2911`
 - compression gain: `199`
-- analysis reduction: `6.41%`
+- analysis reduction: `6.39%`
 - collision count: `0`
-- relocation mappings: `3103`
+- relocation mappings: `3110`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `641`
+- efficiency score: `639`
 - compression score: `199`
-- weighted score: `840`
+- weighted score: `838`
