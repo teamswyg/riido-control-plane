@@ -45,9 +45,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_risk_evidence_guard` | `tools/aiagentrisk` | 100% | `c4551769ea32` | `ai_agent_risk_evidence_must_preserve_boundary_manifest` |
 | `migration_ledger_guard` | `tools/migrationledger` | 100% | `c6ddc5f8b294` | `migration_ledger_must_preserve_historical_evidence` |
 | `integration_matrix_guard` | `tools/integrationmatrix` | 100% | `5a392122b635` | `integration_matrix_must_preserve_public_private_boundary` |
-| `integration_matrix_path_adapter` | `tools/integrationmatrix/pathutil` | 100% | `97b020b4ebfc` | `integration_matrix_must_preserve_public_private_boundary` |
+| `integration_matrix_path_adapter` | `tools/integrationmatrix/pathutil` | 100% | `ed456b033798` | `integration_matrix_must_preserve_public_private_boundary` |
 | `metrics_http_adapter_guard` | `tools/metricshttpadapter` | 100% | `610d5168aa7c` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
-| `metrics_http_adapter_path_adapter` | `tools/metricshttpadapter/pathutil` | 100% | `a9f7e3bd12d6` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
+| `metrics_http_adapter_path_adapter` | `tools/metricshttpadapter/pathutil` | 100% | `7ddab02879c4` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_requirements_adapter` | `tools/metricshttpadapter/requirements` | 100% | `71e11b08e8f0` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_runconfig_adapter` | `tools/metricshttpadapter/runconfig` | 100% | `10d6af178589` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_sourcechecks_adapter` | `tools/metricshttpadapter/sourcechecks` | 100% | `b9ce9030a750` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
@@ -58,36 +58,36 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `agent_catalog_rbac_set_adapter` | `tools/agentcatalogrbac/setutil` | 100% | `0ae7738dd1f6` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `review_account_seed_guard` | `tools/reviewaccountseed` | 100% | `33eb51abab21` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_http_adapter` | `tools/reviewaccountseed/httpclient` | 100% | `9bb97bf0c430` | `review_account_seed_must_preserve_redacted_seed_evidence` |
-| `review_account_seed_path_adapter` | `tools/reviewaccountseed/pathutil` | 100% | `a9f7e3bd12d6` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_path_adapter` | `tools/reviewaccountseed/pathutil` | 100% | `7ddab02879c4` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_requirements_adapter` | `tools/reviewaccountseed/requirements` | 100% | `d055ebae7bb8` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_runconfig_adapter` | `tools/reviewaccountseed/runconfig` | 100% | `10d6af178589` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_runtime_adapter` | `tools/reviewaccountseed/seedruntime` | 100% | `f760dc94ef5e` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `open_questions_guard` | `tools/openquestions` | 100% | `d4061a32be2a` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
-| `open_questions_path_adapter` | `tools/openquestions/pathutil` | 100% | `97b020b4ebfc` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
+| `open_questions_path_adapter` | `tools/openquestions/pathutil` | 100% | `ed456b033798` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `repository_readme_guard` | `tools/repositoryreadme` | 100% | `fe1a8fb72b35` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `repository_readme_path_adapter` | `tools/repositoryreadme/pathutil` | 100% | `f951feeb01f3` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
+| `repository_readme_path_adapter` | `tools/repositoryreadme/pathutil` | 100% | `eb8457dd7977` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `knowledge_coverage_guard` | `tools/knowledgecoverage` | 100% | `349115bf46ef` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `dependency_allowlist_guard` | `tools/dependencyallowlist` | 100% | `d6a6b85bff90` | `context_map_must_guard_public_boundaries` |
 | `dependency_allowlist_layers_adapter` | `tools/dependencyallowlist/layers` | 100% | `b564be13c293` | `context_map_must_guard_public_boundaries` |
 | `provider_status_guard` | `tools/providerstatus` | 100% | `b3b6f919a2b7` | `store_safe_routing_must_preserve_provider_status_decisions` |
-| `provider_status_path_adapter` | `tools/providerstatus/pathutil` | 100% | `df5f9b546a12` | `store_safe_routing_must_preserve_provider_status_decisions` |
+| `provider_status_path_adapter` | `tools/providerstatus/pathutil` | 100% | `429078cba0e3` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_requirements_adapter` | `tools/providerstatus/requirements` | 100% | `443e40b1653a` | `store_safe_routing_must_preserve_provider_status_decisions` |
-| `provider_status_render_adapter` | `tools/providerstatus/renderutil` | 100% | `a61250f5fc34` | `store_safe_routing_must_preserve_provider_status_decisions` |
+| `provider_status_render_adapter` | `tools/providerstatus/renderutil` | 100% | `70f6dd7739b3` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `agent_runtime_binding_guard` | `tools/agentruntimebinding` | 100% | `983cfac244cb` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `agent_runtime_binding_path_adapter` | `tools/agentruntimebinding/pathutil` | 100% | `cd78e0896ad2` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `agent_runtime_binding_requirements_adapter` | `tools/agentruntimebinding/requirements` | 100% | `c1a7283f900a` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `assignment_journal_guard` | `tools/assignmentjournal` | 100% | `f61e624b229a` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
-| `assignment_journal_path_adapter` | `tools/assignmentjournal/pathutil` | 100% | `646b40beb507` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
+| `assignment_journal_path_adapter` | `tools/assignmentjournal/pathutil` | 100% | `9ec9644915bf` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
 | `assignment_journal_requirements_adapter` | `tools/assignmentjournal/requirements` | 100% | `88a7bd0c31c4` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
 | `cloudwatch_emf_guard` | `tools/cloudwatchemf` | 100% | `ea2afe093731` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
-| `cloudwatch_emf_path_adapter` | `tools/cloudwatchemf/pathutil` | 100% | `4b5efac43574` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
+| `cloudwatch_emf_path_adapter` | `tools/cloudwatchemf/pathutil` | 100% | `484876fcac64` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
 | `cloudwatch_emf_requirements_adapter` | `tools/cloudwatchemf/requirements` | 100% | `d055ebae7bb8` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
 | `saas_control_plane_guard` | `tools/saascontrolplane` | 100% | `d2d6aa9ba863` | `saas_control_plane_boundaries_must_remain_executable` |
-| `saas_control_plane_path_adapter` | `tools/saascontrolplane/pathutil` | 100% | `f951feeb01f3` | `saas_control_plane_boundaries_must_remain_executable` |
+| `saas_control_plane_path_adapter` | `tools/saascontrolplane/pathutil` | 100% | `eb8457dd7977` | `saas_control_plane_boundaries_must_remain_executable` |
 | `saas_control_plane_requirements_adapter` | `tools/saascontrolplane/requirements` | 100% | `073e15ea29e9` | `saas_control_plane_boundaries_must_remain_executable` |
-| `saas_control_plane_set_adapter` | `tools/saascontrolplane/setutil` | 100% | `38e756f3c814` | `saas_control_plane_boundaries_must_remain_executable` |
+| `saas_control_plane_set_adapter` | `tools/saascontrolplane/setutil` | 100% | `0e5e59b84c34` | `saas_control_plane_boundaries_must_remain_executable` |
 | `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `d49e070fc838` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
-| `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `7735900c5929` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
+| `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `68cdb71f934e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_requirements_adapter` | `tools/snapshotcqrsgate/requirements` | 100% | `2d4fd81b478e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `api_client_delivery_guard` | `tools/apiclientdelivery` | 100% | `662e297a7df9` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `api_client_delivery_doccheck_adapter` | `tools/apiclientdelivery/doccheck` | 100% | `c75585b69063` | `thread_history_v3_must_expose_stable_conversation_grouping` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3000`
-- tracked files: `3000`
+- Go files: `3012`
+- tracked files: `3012`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -127,8 +127,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - status: `evidence_only`
 - group by: `ast_shape_hash`
-- duplicate groups: `84`
-- duplicate files: `292`
+- duplicate groups: `87`
+- duplicate files: `300`
 - internal groups: `5`
 
 | Shape Hash | Files | Packages |
@@ -148,11 +148,11 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `09a26b1d4d7d` | 5 | `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/evidencegraph`, `tools/harnesspromotion`, `tools/loopregistry` |
 | `952ec131238e` | 5 | `tools/agentruntimebinding`, `tools/assignmentjournal`, `tools/contextmap`, `tools/providerstatus`, `tools/requestauth` |
 | `252cbee00213` | 4 | `tools/healthreadycmd`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
+| `2e152374c529` | 4 | `tools/cloudwatchemf/pathutil`, `tools/metricshttpadapter/pathutil`, `tools/providerstatus/pathutil`, `tools/reviewaccountseed/pathutil` |
 | `385106af75c3` | 4 | `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/loopclosureaudit`, `tools/operationalreadiness` |
 | `4e09e2f36217` | 4 | `tools/healthreadycmd`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
 | `50f0035ed7f7` | 4 | `internal/riidoaiserver`, `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/harnesspromotion` |
 | `769fb85b546a` | 4 | `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/assignmentjournal`, `tools/providerstatus` |
-| `7b24b06eb753` | 4 | `tools/agentcatalogrbac`, `tools/aiagentrisk`, `tools/migrationledger`, `tools/snapshotcqrsgate` |
 
 ## Constraints
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3000`
-- unique syntax hashes: `2810`
-- compression gain: `190`
-- analysis reduction: `6.33%`
+- tracked files: `3012`
+- unique syntax hashes: `2817`
+- compression gain: `195`
+- analysis reduction: `6.47%`
 - collision count: `0`
-- relocation mappings: `3000`
+- relocation mappings: `3012`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `633`
-- compression score: `190`
-- weighted score: `823`
+- efficiency score: `647`
+- compression score: `195`
+- weighted score: `842`
