@@ -15900,6 +15900,75 @@
       ],
       "decision": "Stream relay checkpoint boundary tests now prove invalid checkpoint saves reject before issuing DynamoDB requests, nil stores remain no-ops, closed stores reject load/save commands, malformed DynamoDB responses fail decode, unsupported checkpoint schema and missing sequence data are rejected, invalid timestamps fail, and loaded stream/shard mismatches do not restore corrupt state. Function coverage for checkpoint load rises to 85.7%, save rises to 90.0%, decodeDynamoDBStreamRelayCheckpoint reaches 100%, validateStreamRelayCheckpointKey reaches 100%, and internal/riidoaiserver package coverage rises to 86.0% without API or runtime contract changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "eventbridge_stream_relay_boundary_coverage_loop",
+      "observation": "EventBridge stream relay publishing still had partial boundary coverage around invalid event schema rejection, closed publishers, malformed PutEvents responses, entry-level failures, failure summary formatting, and endpoint normalization.",
+      "hypothesis": "Focused in-package tests can prove EventBridge publishing rejects invalid inputs before HTTP calls and surfaces AWS failure responses without changing stream relay APIs, EventBridge payload shape, or endpoint contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_endpoint_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_event_mutators_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_failure_summary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_publisher_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_publisher_response_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_publisher_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_publisher_response_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_endpoint_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_publisher_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/eventbridge_stream_relay_failure_summary_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice56-after-eventbridge.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "EventBridge stream relay boundary tests now prove invalid stream relay and outbox schema inputs are rejected before any EventBridge HTTP request, nil publishers remain no-ops, closed publishers reject publishes, malformed PutEvents responses fail decode, FailedEntryCount and entry ErrorCode failures surface diagnostic errors, failureSummary reaches 100%, normalizeEventBridgeEndpoint rises to 91.7%, putEvent rises to 88.0%, and internal/riidoaiserver package coverage rises to 86.1% without API or runtime contract changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
