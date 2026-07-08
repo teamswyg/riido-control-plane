@@ -29,8 +29,7 @@ func appendRetainedProgressLinesInPlace(existing, incoming []AgentThreadProgress
 	drop := len(existing) + len(incoming) - aiAgentClientThreadProgressLineLimit
 	if drop >= len(existing) {
 		start := drop - len(existing)
-		copy(existing[:0], incoming[start:])
-		return existing[:len(incoming)-start]
+		return copyProgressLines(incoming[start:])
 	}
 	kept := len(existing) - drop
 	copy(existing, existing[drop:])
