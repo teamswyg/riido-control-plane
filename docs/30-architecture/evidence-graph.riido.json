@@ -16448,6 +16448,63 @@
       ],
       "decision": "Legacy unassign HTTP tests now prove missing auth returns 401, malformed JSON and missing agent ids return 400 without mutating task threads, unassign projection failures surface as 400, durable cancel failures leave active read-model threads running, handleAIAgentClientUnassignTask rises from 61.1% to 100.0%, and internal/riidoaiserver package coverage rises to 86.9% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_task_thread_message_http_error_coverage_loop",
+      "observation": "Task-scoped AI Agent thread replies are the follow-up comment boundary for user-agent interaction, but auth rejection, malformed payloads, missing body, durable queue failure, and read-model projection failure paths had partial handler coverage.",
+      "hypothesis": "Focused HTTP tests can prove rejected follow-up replies do not mutate thread history, backend queue failures surface as 400, projection failures surface as 400, and endpoint payload contracts remain unchanged.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_assert_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_http_error_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_store_failure_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_store_failure_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice68-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Task thread message HTTP tests now prove missing auth returns 401, malformed JSON and missing body return 400 without mutating task thread history, assignment queue failures surface as 400, projection failures surface as 400, handleAIAgentClientCreateTaskThreadMessage rises from 66.7% to 93.9%, and internal/riidoaiserver package coverage rises to 87.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
