@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -10,7 +11,19 @@ import (
 func gitOutput(root string, args ...string) ([]byte, error) {
 	cmd := exec.Command("git", args...)
 	cmd.Dir = root
+	cmd.Env = gitEnvWithoutOuterRepo(os.Environ())
 	return cmd.Output()
+}
+
+func gitEnvWithoutOuterRepo(env []string) []string {
+	filtered := make([]string, 0, len(env))
+	for _, entry := range env {
+		if strings.HasPrefix(entry, "GIT_") {
+			continue
+		}
+		filtered = append(filtered, entry)
+	}
+	return filtered
 }
 
 func gitChangedFiles(root, baseRef string) (map[string]bool, error) {

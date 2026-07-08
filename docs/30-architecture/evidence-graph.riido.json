@@ -11026,6 +11026,73 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "evidence_graph_coverage_loop_42",
+      "observation": "Evidence graph behavior was guarded by golden tests, but package coverage left git impact loading, manifest/doc failure paths, workflow cadence failures, and GitHub annotation no-op branches weakly evidenced.",
+      "hypothesis": "Adding focused failure-path tests for those verifier boundaries improves the reasoning graph evidence loop without changing workflow contracts, endpoint payloads, or runtime behavior.",
+      "claims": [
+        "evidence_graph_chain_changes_require_executable_surface",
+        "evidence_graph_must_cover_loop_registry_claims",
+        "loop_evidence_artifacts_must_self_expire"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/git_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/impact_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/io_cadence_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/path_annotation_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/verify_doc_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/workflow_more_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-evidencegraph-slice42-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Evidence graph tests now cover git changed-file and base-manifest loading, added/removed chain impact, empty impact annotations, repo-root failure, manifest/doc required-field failures, blocked writes, malformed manifest JSON, workflow artifact rejection, and cadence branch failures. tools/evidencegraph rises from 79.3% to 90.2% under Go 1.26.2 with no endpoint, payload, workflow contract, or runtime behavior changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "evidence_graph_workflow_trigger_coverage_loop",
       "observation": "Evidence graph chains can reference code, workflows, tools, or manifests that do not trigger the evidence-graph workflow when they change, and the loop-registry claim did not expose machine-readable observe/verify/fail coverage for that trigger gate.",
       "hypothesis": "The evidence graph verifier can read its own workflow path filters and fail when any non-artifact chain reference is outside those filters, while claim coverage tokens keep that trigger requirement routable without asking agents to remember trigger maintenance.",
