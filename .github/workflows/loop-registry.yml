@@ -130,6 +130,7 @@ on:
       - "tools/healthreadycmd/**"
       - "tools/dependencyallowlist/**"
       - "tools/apiclientdelivery/**"
+      - "tools/generatedclienthandoff/**"
       - "tools/webfrontendapi/**"
       - "tools/aiagentrisk/**"
       - "tools/migrationledger/**"
