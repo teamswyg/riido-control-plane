@@ -16136,6 +16136,63 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "figma_projection_coverage_loop_41",
+      "observation": "Figma generated-client projection behavior was hash-locked, but package coverage left IO, root gate, and verifier drift failures weakly evidenced.",
+      "hypothesis": "Adding failure-path tests around manifest verification, JSON/text IO, generated-doc staleness, and projection gate failure improves generated-client handoff evidence without changing endpoint or payload behavior.",
+      "claims": [
+        "api_client_delivery_must_preserve_generated_handoff_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/figmaprojection/counts_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/figmaprojection/io_root_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/figmaprojection/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/figmaprojection/verify_more_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/figmaprojection"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-figmaprojection-slice41-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Figma projection tests now cover projection/source identity drift, incomplete evidence loops, count drift, malformed or multi-document JSON, blocked writes, generated-doc staleness, and projection gate failure. tools/figmaprojection rises from 78.3% to 91.0% under Go 1.26.2 with no endpoint, payload, generated-client, or riido-client changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "workflow_evidence_syntax_hash_loop",
       "observation": "The workflow evidence verifier already owned scheduled evidence coverage and expiry semantics, but its Go package shape remained outside syntax-hash coverage, so agents could change the verifier structure without syntax-to-semantic routing.",
       "hypothesis": "After the workflow evidence output is golden-locked with deterministic time, adding the package as a syntax hash target can connect all workflow evidence AST-shape changes to the existing self-expiring workflow evidence semantic claim without changing runtime behavior.",
