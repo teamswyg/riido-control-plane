@@ -11,6 +11,14 @@ type failingDeviceDaemonsStore struct {
 	err error
 }
 
+func (s *failingDeviceDaemonsStore) GetAIAgentDeviceDaemon(
+	context.Context,
+	AuthorizationResult,
+	string,
+) (DeviceDaemonDetailResponse, error) {
+	return DeviceDaemonDetailResponse{}, s.err
+}
+
 func (s *failingDeviceDaemonsStore) ListAIAgentDeviceDaemons(
 	context.Context,
 	AuthorizationResult,
