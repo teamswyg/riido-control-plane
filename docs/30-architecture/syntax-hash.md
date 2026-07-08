@@ -61,7 +61,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `review_account_seed_path_adapter` | `tools/reviewaccountseed/pathutil` | 100% | `7ddab02879c4` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_requirements_adapter` | `tools/reviewaccountseed/requirements` | 100% | `d055ebae7bb8` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_runconfig_adapter` | `tools/reviewaccountseed/runconfig` | 100% | `10d6af178589` | `review_account_seed_must_preserve_redacted_seed_evidence` |
-| `review_account_seed_runtime_adapter` | `tools/reviewaccountseed/seedruntime` | 100% | `7ebc1adcab18` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_runtime_adapter` | `tools/reviewaccountseed/seedruntime` | 100% | `12418d650e38` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `open_questions_guard` | `tools/openquestions` | 100% | `4b7eb285e965` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `open_questions_path_adapter` | `tools/openquestions/pathutil` | 100% | `ed456b033798` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `repository_readme_guard` | `tools/repositoryreadme` | 100% | `fe1a8fb72b35` | `operational_readiness_checks_must_bind_release_items_to_evidence` |

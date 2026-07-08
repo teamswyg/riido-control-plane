@@ -5613,6 +5613,43 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_review_seed_runtime_coverage_loop_9",
+      "observation": "After the AI Agent risk verifier slice, the lowest covered package was the review account seed runtime helper, where the public ReviewProvisioning constructor was not directly covered even though it bridges the embedded review seed and hashed review token.",
+      "hypothesis": "A focused constructor test can prove the review provisioning helper emits only hashed token credentials, preserves principal/catalog identity, and includes synthetic provider status without changing seed data, runtime endpoints, or external contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/seedruntime/shared_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/reviewaccountseed/seedruntime/shared_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-review-seed-runtime-slice9-2026-07-08",
+          "redacted": true
+        }
+      ],
+      "decision": "The ninth coverage slice raises the review account seed runtime helper through a deterministic constructor test that proves raw review tokens are not exposed, the expected token hash is used, and seeded principal/catalog/synthetic provider status data remains present. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",

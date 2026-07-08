@@ -8,6 +8,28 @@ func TestReviewToken(t *testing.T) {
 	}
 }
 
+func TestReviewProvisioningUsesHashedReviewToken(t *testing.T) {
+	got, err := ReviewProvisioning()
+	if err != nil {
+		t.Fatalf("ReviewProvisioning: %v", err)
+	}
+	if got.Credential.Token != "" {
+		t.Fatal("review provisioning must not expose raw token")
+	}
+	if got.Credential.TokenSHA256 != tokenHash(ReviewToken()) {
+		t.Fatalf("token hash = %q", got.Credential.TokenSHA256)
+	}
+	if got.Credential.PrincipalID == "" || got.Principal.PrincipalID == "" {
+		t.Fatalf("missing principal identity: %+v", got)
+	}
+	if len(got.AgentCatalogRecords) == 0 {
+		t.Fatal("review provisioning should include catalog records")
+	}
+	if got.SyntheticProviderStatusAgentID == "" {
+		t.Fatal("review provisioning should include synthetic provider status agent")
+	}
+}
+
 func TestSameStrings(t *testing.T) {
 	if !SameStrings([]string{"a", "b"}, []string{"a", "b"}) {
 		t.Fatal("matching slices should compare equal")
