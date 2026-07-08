@@ -44,7 +44,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `web_frontend_api_guard` | `tools/webfrontendapi` | 100% | `414582586924` | `web_frontend_api_must_preserve_cors_contract` |
 | `ai_agent_risk_evidence_guard` | `tools/aiagentrisk` | 100% | `8f30deb8ca7e` | `ai_agent_risk_evidence_must_preserve_boundary_manifest` |
 | `migration_ledger_guard` | `tools/migrationledger` | 100% | `835457caad5c` | `migration_ledger_must_preserve_historical_evidence` |
-| `integration_matrix_guard` | `tools/integrationmatrix` | 100% | `5a392122b635` | `integration_matrix_must_preserve_public_private_boundary` |
+| `integration_matrix_guard` | `tools/integrationmatrix` | 100% | `5052bfd34673` | `integration_matrix_must_preserve_public_private_boundary` |
 | `integration_matrix_path_adapter` | `tools/integrationmatrix/pathutil` | 100% | `ed456b033798` | `integration_matrix_must_preserve_public_private_boundary` |
 | `metrics_http_adapter_guard` | `tools/metricshttpadapter` | 100% | `610d5168aa7c` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_path_adapter` | `tools/metricshttpadapter/pathutil` | 100% | `7ddab02879c4` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3131`
-- tracked files: `3131`
+- Go files: `3135`
+- tracked files: `3135`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,12 +165,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3131`
-- unique syntax hashes: `2930`
+- tracked files: `3135`
+- unique syntax hashes: `2934`
 - compression gain: `201`
 - analysis reduction: `6.41%`
 - collision count: `0`
-- relocation mappings: `3131`
+- relocation mappings: `3135`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
