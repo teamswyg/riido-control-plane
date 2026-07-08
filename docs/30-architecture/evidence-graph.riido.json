@@ -16268,6 +16268,47 @@
       ],
       "decision": "Bootstrap and device-list HTTP error tests now prove missing AI Agent store returns 503, wrong methods return 405, bootstrap backend errors return 400, device-list backend errors return 400, projection reconcile failures return 502, handleAIAgentClientBootstrap rises from 64.7% to 100.0%, handleAIAgentClientDevices rises from 57.1% to 100.0%, and internal/riidoaiserver package coverage rises to 86.6% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_task_agent_assignment_http_error_coverage_loop",
+      "observation": "The additive task agent assignment endpoint had multi-assignment success coverage but still lacked direct proof for unscoped workspace routing, missing auth, malformed JSON, missing agent id, missing durable assignment store, and post-durable read-model failures even though this endpoint is the frontend entry point for assigning multiple agents to a task.",
+      "hypothesis": "Focused HTTP boundary tests can prove task-scoped agent assignment fails closed before daemon work is queued when request scope, auth, JSON, agent identity, durable assignment storage, or action read-model persistence is unavailable, without changing endpoint paths or payload contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_agent_assignment_http_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_agent_assignment_http_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_agent_assignment_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice64-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Task agent assignment HTTP error tests now prove unscoped v1 routing returns 404, missing auth returns 401, malformed JSON and missing agent ids return 400, a missing assignment store returns 503, action read-model persistence errors are surfaced, handleAIAgentClientCreateTaskAgentAssignment rises from 57.5% to 85.0%, and internal/riidoaiserver package coverage rises to 86.7% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
