@@ -52,7 +52,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `metrics_http_adapter_runconfig_adapter` | `tools/metricshttpadapter/runconfig` | 100% | `10d6af178589` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_sourcechecks_adapter` | `tools/metricshttpadapter/sourcechecks` | 100% | `67dc67ee1393` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_statuscheck_adapter` | `tools/metricshttpadapter/statuscheck` | 100% | `302a56e02498` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
-| `agent_catalog_rbac_guard` | `tools/agentcatalogrbac` | 100% | `8d91ea54c7cf` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
+| `agent_catalog_rbac_guard` | `tools/agentcatalogrbac` | 100% | `6110946389cf` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_path_adapter` | `tools/agentcatalogrbac/pathutil` | 100% | `cb000cdafef0` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_requirements_adapter` | `tools/agentcatalogrbac/requirements` | 100% | `073e15ea29e9` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_set_adapter` | `tools/agentcatalogrbac/setutil` | 100% | `0ae7738dd1f6` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3071`
-- tracked files: `3071`
+- Go files: `3076`
+- tracked files: `3076`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -128,7 +128,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 - status: `evidence_only`
 - group by: `ast_shape_hash`
 - duplicate groups: `88`
-- duplicate files: `304`
+- duplicate files: `305`
 - internal groups: `5`
 
 | Shape Hash | Files | Packages |
@@ -146,13 +146,13 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ef2c7580672d` | 6 | `tools/configreference`, `tools/gocibaseline`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/runtimecdownership` |
 | `faa58e8068ec` | 6 | `internal/riidoaiserver`, `tools/loopclosureaudit`, `tools/reactquerygen` |
 | `09a26b1d4d7d` | 5 | `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/evidencegraph`, `tools/harnesspromotion`, `tools/loopregistry` |
+| `7361781d8898` | 5 | `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/migrationledger` |
 | `952ec131238e` | 5 | `tools/agentruntimebinding`, `tools/assignmentjournal`, `tools/contextmap`, `tools/providerstatus`, `tools/requestauth` |
 | `252cbee00213` | 4 | `tools/healthreadycmd`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
 | `2e152374c529` | 4 | `tools/cloudwatchemf/pathutil`, `tools/metricshttpadapter/pathutil`, `tools/providerstatus/pathutil`, `tools/reviewaccountseed/pathutil` |
 | `385106af75c3` | 4 | `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/loopclosureaudit`, `tools/operationalreadiness` |
 | `4e09e2f36217` | 4 | `tools/healthreadycmd`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
 | `50f0035ed7f7` | 4 | `internal/riidoaiserver`, `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/harnesspromotion` |
-| `7361781d8898` | 4 | `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/migrationledger` |
 
 ## Constraints
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3071`
-- unique syntax hashes: `2873`
-- compression gain: `198`
-- analysis reduction: `6.44%`
+- tracked files: `3076`
+- unique syntax hashes: `2877`
+- compression gain: `199`
+- analysis reduction: `6.46%`
 - collision count: `0`
-- relocation mappings: `3071`
+- relocation mappings: `3076`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `644`
-- compression score: `198`
-- weighted score: `842`
+- efficiency score: `646`
+- compression score: `199`
+- weighted score: `845`
