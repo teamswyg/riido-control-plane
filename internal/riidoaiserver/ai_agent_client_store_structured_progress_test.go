@@ -50,3 +50,26 @@ func TestDevelopmentAIAgentClientStoreRendersStructuredProgressCode(t *testing.T
 	}
 	t.Fatalf("threads = %+v", threads)
 }
+
+func TestAssignmentProgressLineRendersMetadataAndFillsObservedAt(t *testing.T) {
+	store := NewDevelopmentAIAgentClientStore()
+	thread := AIAgentTaskThreadRecord{TaskID: "task-1", ThreadID: "thread-1"}
+	input := assignmentEventInput{
+		Message: "raw fallback",
+		Metadata: map[string]string{
+			progressMessageMetadataCode:                      "1101",
+			progressMessageMetadataArgPrefix + "label":       "팀 프로젝트",
+			progressMessageMetadataArgPrefix + "description": "요약 준비",
+		},
+	}
+	line := store.assignmentProgressLineLocked(input, thread)
+	if line.Message != "팀 프로젝트 수집 중 - 요약 준비" {
+		t.Fatalf("message = %q", line.Message)
+	}
+	if line.MessageKey != "tool.collecting" || line.MessageCode != 1101 {
+		t.Fatalf("structured metadata = %+v", line)
+	}
+	if line.ObservedAt.IsZero() {
+		t.Fatal("ObservedAt should be filled when provider omitted it")
+	}
+}
