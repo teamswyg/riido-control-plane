@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `173`
-- claim refs: `229`
-- change refs: `1842`
-- verifier refs: `1025`
-- evidence refs: `575`
+- chains: `174`
+- claim refs: `230`
+- change refs: `1850`
+- verifier refs: `1030`
+- evidence refs: `576`
 
 ## Compiled Chain Summary
 
-- complete chains: `173` / `173`
-- claim-bound chains: `173`
+- complete chains: `174` / `174`
+- claim-bound chains: `174`
 - unclaimed chains: `0`
 - next-loop targets: `9`
 
@@ -31,8 +31,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
+| `control_plane_performance_harness` | `2` | `2` | `83` | `76` | `48` |
 | `loop_closure_audit` | `2` | `4` | `24` | `12` | `8` |
-| `control_plane_performance_harness` | `1` | `1` | `75` | `71` | `47` |
 | `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
 
 ## Evidence Chains
@@ -75,6 +75,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `ai_agent_device_daemon_list_surface_loop` | `3` | `26` | `14` | `9` | `closed_loop_candidate` |
 | `deleted_agent_thread_retention_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `thread_history_user_followup_retention_loop` | `1` | `15` | `7` | `1` | `ai_thread_history` |
+| `control_plane_helper_package_coverage_loop` | `1` | `8` | `5` | `1` | `control_plane_performance_harness` |
 | `provider_auth_failure_visible_message_loop` | `2` | `6` | `4` | `3` | `ai_thread_history` |
 | `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `ai_thread_history_conversation_grouping_loop` | `1` | `21` | `4` | `3` | `ai_thread_history` |

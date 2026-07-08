@@ -4989,6 +4989,79 @@
       "next_loop": "ai_thread_history"
     },
     {
+      "id": "control_plane_helper_package_coverage_loop",
+      "observation": "The full Go coverage profile still exposed zero-coverage helper packages used by control-plane verification tools, making the 100% coverage goal harder to reason about and letting shared path/set helpers drift without direct tests.",
+      "hypothesis": "Adding focused package-level tests for duplicated path and set helpers can reduce zero-coverage package count without changing runtime endpoints or generated client contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/agentcatalogrbac/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentcatalogrbac/pathutil/test_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentcatalogrbac/setutil/contains_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/pathutil/test_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/pathutil/test_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/setutil/set_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/agentcatalogrbac/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentcatalogrbac/setutil/contains_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/pathutil/path_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/setutil/set_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-2026-07-08",
+          "redacted": true
+        }
+      ],
+      "decision": "Coverage progress is tracked as executable helper-package tests rather than a broad claim of completion. This slice moves five previously untested helper packages above zero coverage and keeps remaining zero-coverage packages visible in the next coverage baseline.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
