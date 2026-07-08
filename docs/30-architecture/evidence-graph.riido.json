@@ -5491,6 +5491,67 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_open_questions_coverage_loop_7",
+      "observation": "After the load-harness slice, the lowest covered package was the open-questions verifier, with weak coverage in mini-repository run paths, generated-doc checks, malformed manifests, verifier failures, and CLI flag parsing.",
+      "hypothesis": "Temp-repository tests for run, mainRun, stale generated docs, malformed manifest input, and invalid question records can raise open-question verifier evidence without changing its manifest schema, generated reader, workflows, runtime endpoints, or external contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/openquestions/mainrun_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/openquestions/run_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/openquestions/test_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/openquestions/test_manifest_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/openquestions/verify_errors_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/openquestions/mainrun_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/openquestions/run_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/openquestions/verify_errors_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-openquestions-slice7-2026-07-08",
+          "redacted": true
+        }
+      ],
+      "decision": "The seventh coverage slice raises the open-questions verifier through deterministic temp-repository tests, improving executable-knowledge evidence for roadmap question tracking without changing generated reader semantics, endpoint behavior, or runtime contracts. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
