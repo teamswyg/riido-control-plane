@@ -1083,7 +1083,7 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "fc34ce83d7b9ff372ccc770210464254a9a893ffbeb0a766ac4c5f830bae2fbf"
+      "semantic_hash": "e06e8769a59b1a6d4ef93723bcb5edf5b0a6d0bcaf4782d65190ac6c622fb520"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
@@ -1447,7 +1447,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "37c8d5109ad8611cb01da332b287e4b2a648d38c0a0db7fdbe3c605090f37ce9"
+      "semantic_hash": "fe54350b6c2bd438ecd17652ee56cdda42d93f6eacdb769be4b350b8034f2200"
     },
     {
       "id": "control_plane_meta_evidence_must_self_expire",
@@ -1497,7 +1497,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "daa639748fe3425ea129720ac1424485f7192f7f800a4034bbd0f128e5375748"
+      "semantic_hash": "d3097b39ed4dc33230edf3e580802ffc7e193af30281d70443b8276f078fceac"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -1748,7 +1748,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f86838c3ba47190244aa652245f68b40679d05fc93e4bb3e2738ffb2aecf3381"
+      "semantic_hash": "5f4db6e28d0a0290ef8ae78090033ac4dddbd40b4cb4fbd707c09c399401573b"
     },
     {
       "id": "closed_loop_candidates_must_carry_adoption_plan",
@@ -1872,7 +1872,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "92e1dfbe96997f2f6f185accabf02784f916ebbbc2ab0f017c17923016a9f589"
+      "semantic_hash": "34718780717764e06b46df69dab76752c330ce23c9a1c8e7163bc94acaae10df"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -1932,7 +1932,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "77d9b521e849ec011797b74320a1b5dc6bc70e7085d5731819ad8289889ad773"
+      "semantic_hash": "843dc107808ad696450cd75dc72b5dc7472caed3801c2be9badf9832ec2058eb"
     },
     {
       "id": "closed_loop_candidates_must_carry_subject",
@@ -1984,7 +1984,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e4dca6151e23fb4658179742d4b471c3d400a095560d58f140da103df20df615"
+      "semantic_hash": "1f8b640c113b168173aea54fd53c7cf04d46552bc4d93a86e5b5f81d9035bad5"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -2086,7 +2086,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "3fd30f0c58b198d5915911470f7f7b51e864a2fdc43efc65ab5f5d6601e90751"
+      "semantic_hash": "ae8a183e89a3812251bc1c33e1eb973f68a2f1889ba2d44b4b1dcfd60fd9f32f"
     },
     {
       "id": "loop_evidence_artifacts_must_have_refresh_owners",
@@ -2130,7 +2130,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8bd6d576de81cd5e93dd6c41fdfd1f0be0e2748220cb058262dd7a0f9d3c5fc5"
+      "semantic_hash": "8718f32ee18da35f2a9ab37ad25c1411e65c6a9257adc5de4646feab6ae2cc14"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
@@ -2330,7 +2330,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e11ee49d16b5d9ede2627066c6acc6c58429fdc6055ca51fee0203c61cf9c58b"
+      "semantic_hash": "069b3d57f5d8cb2758c755de04f35ab272ade1cf59d5c3e3045291e64182b592"
     },
     {
       "id": "loop_registry_evidence_must_expose_loop_surfaces",
@@ -2419,7 +2419,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "962ba60bbf46abccb2dd11a98881ea48eb9da1e4617252af9837d0ea14960072"
+      "semantic_hash": "bae6bf9f7d1133d3686e0b98684f7ef35e38c2aaf28fc97b6af0ae648346e939"
     },
     {
       "id": "loop_registry_impact_must_expose_target_verifier_plan",
@@ -2535,7 +2535,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5f8b235a5a7efffb6571d402652061ec7bb024ea3f48870519e5b687e89ade0d"
+      "semantic_hash": "d7a51fe9beda8d05f85e45c42bbb714a38e02b398ed83b93691d997375298c3f"
     },
     {
       "id": "loop_coverage_dimensions_must_use_static_registry",
@@ -2589,7 +2589,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d7a8b9674653b27ce0d12b732a26ea1e865b7c5234b4a807f9f48d5daed07b8f"
+      "semantic_hash": "68c561562019fac136ca99d2735d7c7dc65f134da54f6af64979cc7d61ef2735"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -3302,7 +3302,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "25e14b777325e5258184a602d67f5296aa661f6a5908d368e97e2cfc51c6c860"
+      "semantic_hash": "ae23eae454bf9636e25fe3924a76c163311098fbe9e13e97c4dc3f84a842d2d0"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -3341,7 +3341,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f2dacd6834ad365f067578e28b6d10573bcd7490194fa25e9e9dca198701a6ec"
+      "semantic_hash": "a9c02b43b232829f29ffb7074250a350d81751a4641b7c18a4825a3f5b8f415c"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -3384,7 +3384,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "87af55acc8e3a1b159eb51be89bd345cc02accbfa5075fa53f875b384acfabba"
+      "semantic_hash": "4395673124bdd4b52b651062cb8d970ac739c95836ffd34b8482ace06f478c9c"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -3567,7 +3567,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "df49de88b0196293a2cf98bb596bec8b7d97f4609bc7f9edad6944ff721cedfe"
+      "semantic_hash": "abcc33c4757fc6f9f66b521144eee2659058d235b175ea4098a1be4926f774eb"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -4589,7 +4589,7 @@
         "docs/30-architecture/module-decomposition.md",
         "docs/30-architecture/integration-matrix.md"
       ],
-      "semantic_hash": "796bd01b02a48c6357ab03cc7e78053a4a1fd403042e67abd6f2251681325e45"
+      "semantic_hash": "9966514b62ff967ec803bef933d52a941b085e638b60dcb2a222e2d203f1de0c"
     },
     {
       "id": "store_snapshot_file_outbox_must_preserve_durable_replay_evidence",
@@ -4657,7 +4657,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ef3a824112c64e8ec6b821a969e693b372692eb68f3b9d6665cbfce013e3b45b"
+      "semantic_hash": "9d879f178c36c0aa29ad11928d5b97df8c618860b6b40278372011e0610fd5bc"
     },
     {
       "id": "server_route_handlers_must_stay_semantically_split",
@@ -4819,7 +4819,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "4d526d066a027e065dd338696b51e8e9e97438847369d2622dfb7e11bb2d81af"
+      "semantic_hash": "0e64fdc2c6571c3eddffb2b82810bfc6d853f60f75bcc5e639224de33ddc7a16"
     },
     {
       "id": "review_account_seed_must_preserve_redacted_seed_evidence",
@@ -4893,7 +4893,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e5deefd4ff7880e534a53943543b1d73df05f7acff1e7f4cebe3ade4841bfaae"
+      "semantic_hash": "5a6f363e54d5bcf4d43e74ee639c1daff974186908f2e599c465aea781c5bd89"
     },
     {
       "id": "runtime_adapter_config_must_preserve_public_env_contract",
@@ -4998,7 +4998,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b4d98c98bdba42ceb37119b1836bc3621ae4a25138ad53ac5af1180d4d790e70"
+      "semantic_hash": "340cf228a6aa477c0aff98e42905ca22a57e9967cb15703f82be0af462ef1f9a"
     },
     {
       "id": "repo_identity_must_anchor_public_module_boundary",
@@ -5032,7 +5032,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "930bd2b4bd595faa33794a99271925ae639ccbe41544651c5bb2c4bd673df981"
+      "semantic_hash": "3ebd121f94cf523474bf7f144709835e5171509ebb14ca729b83ad24fc36ed24"
     },
     {
       "id": "shared_contract_compat_must_preserve_generated_contract_surface",
@@ -5080,7 +5080,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "00b12b7d028a606484a0a5f0ed623ec1c15189d65c1cdf18e4d2fe13b499e750"
+      "semantic_hash": "c5687021588b4b75f031c4222f0e26ce5d0275f0c2e63e9c88cfbc087f0e205a"
     },
     {
       "id": "request_authorization_must_preserve_security_boundary",
@@ -5136,7 +5136,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "aaeaffe1cccb08c5e246585128c583a183f783fe6dd89abeaee2b46ebb4a00f1"
+      "semantic_hash": "e4b0026683870a280c1b77367de766fc1c87e03a525c9425c04f9fe612f4c3fd"
     },
     {
       "id": "health_ready_command_must_preserve_public_runtime_probe",
@@ -5192,7 +5192,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "a80e1c1f6c323cb150f581dfdd4447924e94a3baa672ed2ddc11f4c6bafd351f"
+      "semantic_hash": "ad354e3b028a193db9622f06b8d8abd0d88dbcef4c2c2f1b018b21c03b98db81"
     },
     {
       "id": "runtime_deployment_boundary_must_preserve_public_private_ownership",
@@ -5265,7 +5265,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "0e4a7b00922db8a0a3f0a1ca74e2da2ddc3f6b269f9fbbb2332211a826b064dc"
+      "semantic_hash": "48a3859569488f5164673f2db8ebcc286194f8b37784d9eab36ccc38652568c8"
     },
     {
       "id": "config_reference_must_preserve_env_manifest_parity",
@@ -5320,7 +5320,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "d72cc4aa241d2ae08305d78a461a44638ce0939dac72c20b105d0f2f584cdbe8"
+      "semantic_hash": "174eefd3862e9567902ff59f28d34e9f15c1c6433a4e66a868ad3627bf7db138"
     },
     {
       "id": "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
@@ -5370,7 +5370,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "69cd1c3791a95492eefd605f45570353ca5c7906d15ae8f0afcb22306482277e"
+      "semantic_hash": "aabfa00b354cf18fcc7c14595e7f7c2b6824dd8036fde7d658089edcd14d4c6e"
     },
     {
       "id": "assignment_operation_journal_must_preserve_replay_and_claim_ports",
@@ -5426,7 +5426,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "cd1f8ac741b06b03452db8399710830bbf0cec151ddfb6334c71281f98a596c0"
+      "semantic_hash": "69edc8c947d509cdd2ab33815ebd17eb17dd28594642864087abcb30695ccb5f"
     },
     {
       "id": "cloudwatch_emf_shape_must_preserve_metric_scope_evidence",
@@ -5481,7 +5481,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "30fcf368c6453e2713c1c7dd6c960868ff8b9801d8000f2c248b729b9f4ff0f5"
+      "semantic_hash": "7b6f661e461939df699d2c602ea29dfc77c9968709934b478a40a2843713f99e"
     },
     {
       "id": "saas_control_plane_boundaries_must_remain_executable",
@@ -5536,7 +5536,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9d68135cc3509ec9a6c7456e9b14c5c24fc42bae9cde5ba533b7c2ee8438c937"
+      "semantic_hash": "e974c9a220273176ff9cfe9895b37d5f4c482356056d5a2c86d9bed18de30d7f"
     },
     {
       "id": "snapshot_cqrs_gate_must_scope_store_split_decisions",
@@ -5584,7 +5584,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0430f63501564a65c5e905b63bb556c36ff267b24e708cc9843f805e4f1dc7ba"
+      "semantic_hash": "c9d7a91abc61f1cb09245cf779e0b2d678dee20911936a244b3033427b7a2074"
     },
     {
       "id": "store_safe_routing_must_preserve_provider_status_decisions",
@@ -5655,7 +5655,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c2b719799d9ec2fa3247ed50e4e4e0b88de17cfe7f1d8c1575f868efe2d3f3a4"
+      "semantic_hash": "efd7f7318ee50f10786ce1553af90a7b82e79b3412199853771078063627111f"
     },
     {
       "id": "go_ci_baseline_must_preserve_broad_ci_contract",
@@ -5708,7 +5708,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "7ae31228cd27a6f3ee144a98f513438528d01c8ec6c22da4f6cb8ece00b34258"
+      "semantic_hash": "090eba880a4e1491f437ec80093427505224188a3741b951f5f22954d1ca7bfb"
     },
     {
       "id": "module_decomposition_must_preserve_surface_area_ratchet",
@@ -5786,7 +5786,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ce07617b1b650b4570ec3efd05a65098e344f1cae9fe81183b6b4a275fd851cb"
+      "semantic_hash": "8be6f9924f4dd8d17311c720039e2bc4f60e3daecd24d0ecf43a3c5b93636998"
     },
     {
       "id": "web_frontend_api_must_preserve_cors_contract",
@@ -5842,7 +5842,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3756b83c18ea998f764701a3c1f8cea854739190fcb6df2cfe4ada06650b0aba"
+      "semantic_hash": "2cb33f083f5c4311fd1b0accb68c6f5c504920bfcede2d4b98429d2563c94168"
     },
     {
       "id": "ai_agent_risk_evidence_must_preserve_boundary_manifest",
@@ -5897,7 +5897,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "935b5a2eb52f82944a41666f446a0a3f6021c0fbe9df859371f265b4dc1e991a"
+      "semantic_hash": "08fa71e51c1ba5750955b985d1e8046401023b91cb9cb66fc94c4eb39c3dbe44"
     },
     {
       "id": "migration_ledger_must_preserve_historical_evidence",
@@ -5951,7 +5951,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ea0e154e6e30502a974e9323f873e8673868d3b1bbb5661e8b8e1a8943a05154"
+      "semantic_hash": "2cecfb34d0bf9528f235d1b3a1801e72853dfcc3a00777a25b1c6b899b61ac3f"
     },
     {
       "id": "metrics_http_adapter_must_preserve_public_metrics_contract",
@@ -6013,7 +6013,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5e69af2007b84bf2d5de13c05e22f5c7c9bfe6a804df9641b122eb99116de517"
+      "semantic_hash": "a275a875ae3c438220c4b6b89de9346cb07fbaa1513dc58679bab6e0db6c19f6"
     },
     {
       "id": "agent_catalog_rbac_must_preserve_catalog_authorization_contract",
@@ -6101,7 +6101,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "b01057d58ad97bc20358d8e5f64df00676dfbd3ceaa08119f5ec4e7d9b7749bb"
+      "semantic_hash": "0cb27a17e7af4793d25e2478c6156b66218e7723fe58d02ffe2ac9b320bd4609"
     },
     {
       "id": "integration_matrix_must_preserve_public_private_boundary",
@@ -6156,7 +6156,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b25aea8c94b027b2869514aff027caf684878611e5e1bb61d71d48c0a500e6d9"
+      "semantic_hash": "c15a49c06fc542661c2213e12f12995cdd2ded03eea04ae7e150cd25037e72e2"
     },
     {
       "id": "context_map_must_guard_public_boundaries",
@@ -6224,7 +6224,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b6ec309789c623005e0dda4cde7d880ccb98a4e08fdf4b7a30fc084068ef4434"
+      "semantic_hash": "7430865644b7cfd186a622f4e028d5269e6d527f3b30790a1fb4c16f0b9f36c1"
     },
     {
       "id": "api_client_delivery_must_preserve_generated_handoff_boundary",
@@ -6304,7 +6304,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "331211f9f0bee6043263b9cd2b6a611b5ec12e1950e5a59d94004ede847c1ed7"
+      "semantic_hash": "4492e4338e3118d6802edfa76be5a0039863dbc3765702684027cc9eb55e3b3c"
     },
     {
       "id": "react_query_generator_must_preserve_generated_client_surface",
@@ -6442,7 +6442,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "dd0b81ae1c0df9117a0770fe4bc3af9fb24a6e60c0355f529b64d0e1bd623388"
+      "semantic_hash": "93fdb500b5f58a96c37a302d2647e5bff7552aaf4903200e377f55bcb5133c01"
     }
   ],
   "evidence_graph": [

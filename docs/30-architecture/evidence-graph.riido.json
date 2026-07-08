@@ -6760,6 +6760,87 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_store_snapshot_outbox_coverage_loop_27",
+      "observation": "After the runtime CD ownership slice, the store snapshot/file outbox verifier remained one of the lowest-covered executable knowledge tools; its happy path proved file-backed durability evidence, but manifest parsing failures, outbox record corruption, source-check drift, case-name drift, generated-doc drift, expectation mismatch paths, and CLI/write branches were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove store snapshot/file outbox evidence failures are deterministic and fail closed without changing endpoint payloads, daemon contracts, runtime behavior, infrastructure, or frontend source.",
+      "claims": [
+        "store_snapshot_file_outbox_must_preserve_durable_replay_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/case_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/entrypoint_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/outbox_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/test_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/case_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/entrypoint_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/outbox_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/storesnapshotoutbox/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-storesnapshotoutbox-slice27-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The twenty-seventh coverage slice raises the store snapshot/file outbox verifier from 74.9% to 90.5% through deterministic tests for malformed, trailing-object, and missing manifests; JSON/text write failures and success paths; missing repository roots; unknown case kinds; event count/order drift; source-check read and needle drift; case evidence count, empty-name, and missing-case drift; snapshot expectation drift; generated-doc missing and stale drift; malformed/missing outbox records; outbox record-count drift; outbox failure metric drift; generated-doc write mode; and CLI entrypoint success wiring. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
