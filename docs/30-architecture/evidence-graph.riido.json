@@ -11863,6 +11863,63 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_cloudwatch_emf_coverage_loop_36",
+      "observation": "The CloudWatch EMF SSOT protects metric dimensions, JSON fields, metric scopes, units, source anchors, generated docs, and redacted workflow evidence, but baseline coverage left manifest IO, write failures, stale docs, source-check failures, and metric-shape drift under-tested.",
+      "hypothesis": "Focused failure-path tests can prove the CloudWatch EMF sidecar fails closed when observability metric evidence drifts or cannot be generated, without changing CloudWatch payload shape, metrics publication, or runtime endpoint behavior.",
+      "claims": [
+        "cloudwatch_emf_shape_must_preserve_metric_scope_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/cloudwatchemf/io_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/cloudwatchemf/run_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/cloudwatchemf/run_more_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/cloudwatchemf/test_manifest_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/cloudwatchemf/verify_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/cloudwatchemf/verify_source_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/cloudwatchemf"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-cloudwatchemf-slice36-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "CloudWatch EMF failure-path tests now cover missing/invalid manifests, JSON marshal and mkdir write failures, generated doc writes, stale and unreadable generated docs, missing repo roots, bad CLI flags, missing EMF dimensions, missing JSON fields, scope drift, metric unit drift, source-check failures, and evidence write failures. tools/cloudwatchemf rises from 77.4% to 91.7% under Go 1.26.2 with no endpoint, payload, metrics publication, or runtime behavior changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "notion_qa_operational_evidence_backfill_loop",
       "observation": "Notion QA comments contained P0 operating evidence for waiting_for_user, queued_by_busy_agent, terminal stop refresh, author fallback, instruction intent, and staging DMG install issues, but a comment-only record can be missed by agents, cannot expire, and cannot produce closed-loop candidates.",
       "hypothesis": "Backfilling Notion QA comments into the operational readiness SSOT as P0 cycles, then emitting cycle counts, partial status, codex status tags, next artifacts, and 24h cadence evidence lets daily readiness runs keep product QA partials visible without editing client or endpoint contracts.",
