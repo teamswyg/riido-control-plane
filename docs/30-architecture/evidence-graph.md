@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `180`
-- claim refs: `236`
-- change refs: `1891`
-- verifier refs: `1080`
-- evidence refs: `582`
+- chains: `181`
+- claim refs: `237`
+- change refs: `1895`
+- verifier refs: `1086`
+- evidence refs: `583`
 
 ## Compiled Chain Summary
 
-- complete chains: `180` / `180`
-- claim-bound chains: `180`
+- complete chains: `181` / `181`
+- claim-bound chains: `181`
 - unclaimed chains: `0`
 - next-loop targets: `9`
 
@@ -29,7 +29,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
 | `ai_thread_history` | `9` | `10` | `127` | `61` | `15` |
 | `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
-| `control_plane_performance_harness` | `8` | `8` | `124` | `126` | `54` |
+| `control_plane_performance_harness` | `9` | `9` | `128` | `132` | `55` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
 | `loop_closure_audit` | `2` | `4` | `24` | `12` | `8` |
@@ -82,6 +82,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `control_plane_low_tool_coverage_loop_5` | `1` | `2` | `4` | `1` | `control_plane_performance_harness` |
 | `control_plane_load_harness_coverage_loop_6` | `1` | `3` | `5` | `1` | `control_plane_performance_harness` |
 | `control_plane_open_questions_coverage_loop_7` | `1` | `5` | `5` | `1` | `control_plane_performance_harness` |
+| `control_plane_ai_agent_risk_coverage_loop_8` | `1` | `4` | `6` | `1` | `control_plane_performance_harness` |
 | `provider_auth_failure_visible_message_loop` | `2` | `6` | `4` | `3` | `ai_thread_history` |
 | `same_provider_multi_assignment_loop` | `1` | `4` | `3` | `1` | `ai_thread_history` |
 | `ai_thread_history_conversation_grouping_loop` | `1` | `21` | `4` | `3` | `ai_thread_history` |

@@ -42,7 +42,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `workflow_evidence_guard` | `tools/workflowevidence` | 100% | `69fa8f48bd97` | `workflow_evidence_must_self_expire` |
 | `live_workflow_evidence_guard` | `tools/liveworkflowevidence` | 100% | `e57f6f160801` | `provider_acceptance_summary_must_cover_declared_observations` |
 | `web_frontend_api_guard` | `tools/webfrontendapi` | 100% | `23a98ee173bc` | `web_frontend_api_must_preserve_cors_contract` |
-| `ai_agent_risk_evidence_guard` | `tools/aiagentrisk` | 100% | `c4551769ea32` | `ai_agent_risk_evidence_must_preserve_boundary_manifest` |
+| `ai_agent_risk_evidence_guard` | `tools/aiagentrisk` | 100% | `8f30deb8ca7e` | `ai_agent_risk_evidence_must_preserve_boundary_manifest` |
 | `migration_ledger_guard` | `tools/migrationledger` | 100% | `c6ddc5f8b294` | `migration_ledger_must_preserve_historical_evidence` |
 | `integration_matrix_guard` | `tools/integrationmatrix` | 100% | `5a392122b635` | `integration_matrix_must_preserve_public_private_boundary` |
 | `integration_matrix_path_adapter` | `tools/integrationmatrix/pathutil` | 100% | `ed456b033798` | `integration_matrix_must_preserve_public_private_boundary` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3030`
-- tracked files: `3030`
+- Go files: `3034`
+- tracked files: `3034`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3030`
-- unique syntax hashes: `2835`
+- tracked files: `3034`
+- unique syntax hashes: `2839`
 - compression gain: `195`
-- analysis reduction: `6.43%`
+- analysis reduction: `6.42%`
 - collision count: `0`
-- relocation mappings: `3030`
+- relocation mappings: `3034`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `643`
+- efficiency score: `642`
 - compression score: `195`
-- weighted score: `838`
+- weighted score: `837`

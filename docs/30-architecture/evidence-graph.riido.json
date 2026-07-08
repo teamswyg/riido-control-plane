@@ -5552,6 +5552,67 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_ai_agent_risk_coverage_loop_8",
+      "observation": "After the open-questions slice, the lowest covered package was the AI Agent risk evidence verifier, with weak coverage in header identity checks, external repo-boundary evidence, unsafe package-path rejection, malformed manifest input, local evidence failures, and remaining-boundary errors.",
+      "hypothesis": "Focused pure verifier tests can prove risk evidence boundary failures, including private package-path rejection for external evidence, without changing the executable risk manifest, generated docs, runtime endpoints, or product behavior.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/source_load_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/verify_external_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/verify_header_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/verify_local_boundary_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/source_load_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/verify_external_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/verify_header_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentrisk/verify_local_boundary_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-aiagentrisk-slice8-2026-07-08",
+          "redacted": true
+        }
+      ],
+      "decision": "The eighth coverage slice raises the AI Agent risk evidence verifier through deterministic pure tests, proving header identity drift, unsafe local package paths, external repo-boundary drift, private package-path leakage, malformed manifest input, and remaining-boundary failures without changing runtime contracts or endpoint behavior. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
