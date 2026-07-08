@@ -22,7 +22,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `runtime_cd_ownership_guard` | `tools/runtimecdownership` | 100% | `81f0d079a0ee` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `deploy_policy_guard` | `tools/deploypolicy` | 100% | `6cdfe42c5d6d` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `container_image_contract_guard` | `tools/containercontract` | 100% | `c847c0333f73` | `container_image_contract_must_bind_runtime_shape` |
-| `container_image_contract_dockerfile_parser` | `tools/containercontract/dockerfile` | 100% | `24bf3678cc48` | `container_image_contract_must_bind_runtime_shape` |
+| `container_image_contract_dockerfile_parser` | `tools/containercontract/dockerfile` | 100% | `7e3496402754` | `container_image_contract_must_bind_runtime_shape` |
 | `config_reference_guard` | `tools/configreference` | 100% | `f517462a6edf` | `config_reference_must_preserve_env_manifest_parity` |
 | `store_safe_routing_guard` | `tools/storesaferouting` | 100% | `affad8a109c9` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `public_pages_live_guard` | `tools/publicpageslive` | 100% | `c9fb97e9cd95` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
@@ -50,25 +50,25 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `metrics_http_adapter_path_adapter` | `tools/metricshttpadapter/pathutil` | 100% | `7ddab02879c4` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_requirements_adapter` | `tools/metricshttpadapter/requirements` | 100% | `71e11b08e8f0` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `metrics_http_adapter_runconfig_adapter` | `tools/metricshttpadapter/runconfig` | 100% | `10d6af178589` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
-| `metrics_http_adapter_sourcechecks_adapter` | `tools/metricshttpadapter/sourcechecks` | 100% | `b9ce9030a750` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
-| `metrics_http_adapter_statuscheck_adapter` | `tools/metricshttpadapter/statuscheck` | 100% | `f9994330013b` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
+| `metrics_http_adapter_sourcechecks_adapter` | `tools/metricshttpadapter/sourcechecks` | 100% | `67dc67ee1393` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
+| `metrics_http_adapter_statuscheck_adapter` | `tools/metricshttpadapter/statuscheck` | 100% | `302a56e02498` | `metrics_http_adapter_must_preserve_public_metrics_contract` |
 | `agent_catalog_rbac_guard` | `tools/agentcatalogrbac` | 100% | `8d91ea54c7cf` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_path_adapter` | `tools/agentcatalogrbac/pathutil` | 100% | `cb000cdafef0` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_requirements_adapter` | `tools/agentcatalogrbac/requirements` | 100% | `073e15ea29e9` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `agent_catalog_rbac_set_adapter` | `tools/agentcatalogrbac/setutil` | 100% | `0ae7738dd1f6` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` |
 | `review_account_seed_guard` | `tools/reviewaccountseed` | 100% | `33eb51abab21` | `review_account_seed_must_preserve_redacted_seed_evidence` |
-| `review_account_seed_http_adapter` | `tools/reviewaccountseed/httpclient` | 100% | `9bb97bf0c430` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_http_adapter` | `tools/reviewaccountseed/httpclient` | 100% | `423857993551` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_path_adapter` | `tools/reviewaccountseed/pathutil` | 100% | `7ddab02879c4` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_requirements_adapter` | `tools/reviewaccountseed/requirements` | 100% | `d055ebae7bb8` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `review_account_seed_runconfig_adapter` | `tools/reviewaccountseed/runconfig` | 100% | `10d6af178589` | `review_account_seed_must_preserve_redacted_seed_evidence` |
-| `review_account_seed_runtime_adapter` | `tools/reviewaccountseed/seedruntime` | 100% | `f760dc94ef5e` | `review_account_seed_must_preserve_redacted_seed_evidence` |
+| `review_account_seed_runtime_adapter` | `tools/reviewaccountseed/seedruntime` | 100% | `7ebc1adcab18` | `review_account_seed_must_preserve_redacted_seed_evidence` |
 | `open_questions_guard` | `tools/openquestions` | 100% | `d4061a32be2a` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `open_questions_path_adapter` | `tools/openquestions/pathutil` | 100% | `ed456b033798` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` |
 | `repository_readme_guard` | `tools/repositoryreadme` | 100% | `fe1a8fb72b35` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `repository_readme_path_adapter` | `tools/repositoryreadme/pathutil` | 100% | `eb8457dd7977` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `knowledge_coverage_guard` | `tools/knowledgecoverage` | 100% | `349115bf46ef` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `dependency_allowlist_guard` | `tools/dependencyallowlist` | 100% | `d6a6b85bff90` | `context_map_must_guard_public_boundaries` |
-| `dependency_allowlist_layers_adapter` | `tools/dependencyallowlist/layers` | 100% | `b564be13c293` | `context_map_must_guard_public_boundaries` |
+| `dependency_allowlist_layers_adapter` | `tools/dependencyallowlist/layers` | 100% | `9acb9c8eebf2` | `context_map_must_guard_public_boundaries` |
 | `provider_status_guard` | `tools/providerstatus` | 100% | `b3b6f919a2b7` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_path_adapter` | `tools/providerstatus/pathutil` | 100% | `429078cba0e3` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_requirements_adapter` | `tools/providerstatus/requirements` | 100% | `443e40b1653a` | `store_safe_routing_must_preserve_provider_status_decisions` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3012`
-- tracked files: `3012`
+- Go files: `3020`
+- tracked files: `3020`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3012`
-- unique syntax hashes: `2817`
+- tracked files: `3020`
+- unique syntax hashes: `2825`
 - compression gain: `195`
-- analysis reduction: `6.47%`
+- analysis reduction: `6.45%`
 - collision count: `0`
-- relocation mappings: `3012`
+- relocation mappings: `3020`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `647`
+- efficiency score: `645`
 - compression score: `195`
-- weighted score: `842`
+- weighted score: `840`
