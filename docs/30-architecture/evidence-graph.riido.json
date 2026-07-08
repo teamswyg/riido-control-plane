@@ -16395,6 +16395,59 @@
       ],
       "decision": "Legacy assignment HTTP tests now prove intent-gated tasks return waiting_for_user without daemon-visible durable work, assignment queue failures surface as 400, action projection failures surface as 400, handleAIAgentClientAssignTask rises from 60.0% to 85.0%, and internal/riidoaiserver package coverage rises to 86.8% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_legacy_unassign_http_error_coverage_loop",
+      "observation": "The legacy task unassignment endpoint is the compatibility path for removing an AI Agent from a task, but its HTTP boundary had partial coverage for auth rejection, malformed payloads, projection failures, and durable cancel failures.",
+      "hypothesis": "Focused HTTP tests can prove rejected legacy unassign requests do not mutate thread projections, backend projection failures are surfaced, durable cancel failures do not pre-stop active read-model threads, and endpoint payload contracts remain unchanged.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_unassign_http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_unassign_http_error_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_unassign_cancel_failure_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_unassign_http_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_unassign_cancel_failure_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_unassign_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice67-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Legacy unassign HTTP tests now prove missing auth returns 401, malformed JSON and missing agent ids return 400 without mutating task threads, unassign projection failures surface as 400, durable cancel failures leave active read-model threads running, handleAIAgentClientUnassignTask rises from 61.1% to 100.0%, and internal/riidoaiserver package coverage rises to 86.9% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
