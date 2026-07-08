@@ -15839,6 +15839,67 @@
       ],
       "decision": "Local durability boundary tests now prove nil file outboxes and snapshot stores remain no-ops, closed outboxes reject appends, canceled contexts fail before or after append command send, nil internal outbox commands are rejected, and snapshot filesystem failures propagate. Function coverage for FileOutbox AppendTaskEvent rises to 92.3%, NewFileOutbox rises to 90.9%, FileStoreSnapshot LoadStoreSnapshot rises to 81.2%, SaveStoreSnapshot rises to 71.4%, and internal/riidoaiserver package coverage rises to 85.9% without API or runtime contract changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "stream_relay_checkpoint_boundary_coverage_loop",
+      "observation": "DynamoDB stream relay checkpoint persistence still had partial boundary coverage around invalid checkpoint writes, closed worker commands, malformed DynamoDB load responses, decoded checkpoint mismatches, and sequence/update validation.",
+      "hypothesis": "Focused in-package tests can prove checkpoint persistence fails closed before unsafe DynamoDB writes and rejects corrupt loaded state without changing stream relay APIs, endpoint behavior, or runtime payloads.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_checkpoint_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_checkpoint_closed_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_checkpoint_load_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_checkpoint_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_checkpoint_closed_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_checkpoint_load_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_checkpoint_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_stream_relay_checkpoint_load_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice55-after-stream-relay-checkpoint.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Stream relay checkpoint boundary tests now prove invalid checkpoint saves reject before issuing DynamoDB requests, nil stores remain no-ops, closed stores reject load/save commands, malformed DynamoDB responses fail decode, unsupported checkpoint schema and missing sequence data are rejected, invalid timestamps fail, and loaded stream/shard mismatches do not restore corrupt state. Function coverage for checkpoint load rises to 85.7%, save rises to 90.0%, decodeDynamoDBStreamRelayCheckpoint reaches 100%, validateStreamRelayCheckpointKey reaches 100%, and internal/riidoaiserver package coverage rises to 86.0% without API or runtime contract changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
