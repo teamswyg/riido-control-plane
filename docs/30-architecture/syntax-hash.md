@@ -89,7 +89,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `snapshot_cqrs_gate_guard` | `tools/snapshotcqrsgate` | 100% | `548ea02d3f21` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_path_adapter` | `tools/snapshotcqrsgate/pathutil` | 100% | `68cdb71f934e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
 | `snapshot_cqrs_gate_requirements_adapter` | `tools/snapshotcqrsgate/requirements` | 100% | `2d4fd81b478e` | `snapshot_cqrs_gate_must_scope_store_split_decisions` |
-| `api_client_delivery_guard` | `tools/apiclientdelivery` | 100% | `662e297a7df9` | `thread_history_v3_must_expose_stable_conversation_grouping` |
+| `api_client_delivery_guard` | `tools/apiclientdelivery` | 100% | `368eed8eaa54` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `api_client_delivery_doccheck_adapter` | `tools/apiclientdelivery/doccheck` | 100% | `c75585b69063` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `api_client_delivery_path_adapter` | `tools/apiclientdelivery/pathutil` | 100% | `2729d2e1f46a` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `api_client_delivery_rendertext_adapter` | `tools/apiclientdelivery/rendertext` | 100% | `31491dbc76da` | `thread_history_v3_must_expose_stable_conversation_grouping` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3063`
-- tracked files: `3063`
+- Go files: `3067`
+- tracked files: `3067`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -128,7 +128,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 - status: `evidence_only`
 - group by: `ast_shape_hash`
 - duplicate groups: `88`
-- duplicate files: `302`
+- duplicate files: `303`
 - internal groups: `5`
 
 | Shape Hash | Files | Packages |
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3063`
-- unique syntax hashes: `2867`
-- compression gain: `196`
-- analysis reduction: `6.39%`
+- tracked files: `3067`
+- unique syntax hashes: `2870`
+- compression gain: `197`
+- analysis reduction: `6.42%`
 - collision count: `0`
-- relocation mappings: `3063`
+- relocation mappings: `3067`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `639`
-- compression score: `196`
-- weighted score: `835`
+- efficiency score: `642`
+- compression score: `197`
+- weighted score: `839`

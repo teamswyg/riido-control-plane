@@ -6016,6 +6016,63 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_api_client_delivery_coverage_loop_16",
+      "observation": "After the snapshot CQRS gate slice, the API client delivery verifier remained low covered; its happy path proved generated delivery evidence but malformed manifests, source and risk evidence drift, generated-doc freshness, repo-root discovery, rendered phrase drift, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove API client delivery failures are deterministic and fail closed without changing generated client contracts, endpoint payloads, daemon contracts, or frontend source.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/apiclientdelivery/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-apiclientdelivery-slice16-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The sixteenth coverage slice raises the API client delivery verifier from 73.7% to 94.1% through deterministic tests for manifest shape drift, incomplete loop metadata, missing source manifests, missing source-check files/tokens, missing or malformed risk evidence, required/forbidden rendered phrase drift, malformed JSON, generated doc freshness, missing repo roots, CLI flag errors, and JSON/text write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
