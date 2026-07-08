@@ -15685,6 +15685,91 @@
       ],
       "decision": "Snapshot store boundary tests now prove nil receivers are no-ops, closed stores reject load/save commands without blocking, canceled contexts fail before command send, and sequential part writes propagate DynamoDB PutItem failures. Function coverage for putSnapshotPartItemsSequentially is 100%, LoadAIAgentClientSnapshot rises to 88.9%, SaveAIAgentClientSnapshot rises to 90.0%, and internal/riidoaiserver package coverage rises to 85.4% without API or runtime contract changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "store_snapshot_outbox_boundary_coverage_loop",
+      "observation": "DynamoDB store snapshot and outbox persistence still had partial boundary coverage around nil receivers, closed workers, malformed snapshot payloads, invalid outbox events, and upstream DynamoDB write failures.",
+      "hypothesis": "Small in-package tests can prove those persistence boundaries fail closed and propagate storage errors without changing endpoint contracts, runtime payloads, or DynamoDB item shape.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_store_snapshot_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_store_snapshot_config_loop_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_store_snapshot_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_outbox_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_outbox_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_outbox_event_validation_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_store_snapshot_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_store_snapshot_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_outbox_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_outbox_event_validation_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_store_snapshot_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_outbox_event_validation_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice53-after-outbox2.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Store snapshot and outbox boundary tests now prove nil receivers remain no-ops, closed workers reject commands, invalid snapshot responses do not restore state, invalid outbox events are rejected before DynamoDB writes, and upstream PutItem failures propagate with diagnostic context. Function coverage for NewDynamoDBStoreSnapshot and NewDynamoDBOutbox is 100%, putTaskEvent rises to 88.9%, and internal/riidoaiserver package coverage rises to 85.7% without API or runtime contract changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
