@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `212`
-- claim refs: `274`
-- change refs: `2063`
-- verifier refs: `1224`
-- evidence refs: `614`
+- chains: `213`
+- claim refs: `275`
+- change refs: `2068`
+- verifier refs: `1227`
+- evidence refs: `615`
 
 ## Compiled Chain Summary
 
-- complete chains: `212` / `212`
-- claim-bound chains: `212`
+- complete chains: `213` / `213`
+- claim-bound chains: `213`
 - unclaimed chains: `0`
 - next-loop targets: `9`
 
@@ -27,7 +27,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `closed_loop_candidate` | `133` | `148` | `1291` | `679` | `373` |
 | `control_plane_performance_harness` | `28` | `29` | `224` | `243` | `74` |
-| `operational_readiness_release_harness` | `21` | `37` | `165` | `100` | `67` |
+| `operational_readiness_release_harness` | `22` | `38` | `170` | `103` | `68` |
 | `ai_thread_history` | `9` | `10` | `127` | `61` | `15` |
 | `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
@@ -187,6 +187,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `generated_client_handoff_syntax_hash_loop` | `1` | `15` | `5` | `3` | `closed_loop_candidate` |
 | `store_snapshot_file_outbox_syntax_hash_loop` | `1` | `8` | `6` | `3` | `closed_loop_candidate` |
 | `ai_agent_thread_snapshot_syntax_hash_loop` | `1` | `19` | `7` | `3` | `closed_loop_candidate` |
+| `control_plane_ai_agent_thread_snapshot_coverage_loop_40` | `1` | `5` | `3` | `1` | `operational_readiness_release_harness` |
 | `figma_projection_syntax_hash_loop` | `1` | `19` | `5` | `3` | `closed_loop_candidate` |
 | `workflow_evidence_syntax_hash_loop` | `1` | `4` | `5` | `4` | `closed_loop_candidate` |
 | `module_decomposition_syntax_hash_loop` | `1` | `5` | `5` | `4` | `closed_loop_candidate` |

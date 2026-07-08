@@ -111,15 +111,15 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_client_api_smoke_matrix_adapter` | `tools/aiagentclientapi/smokematrix` | 100% | `c327f8391bfe` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `generated_client_handoff_guard` | `tools/generatedclienthandoff` | 100% | `842f212537e9` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 | `store_snapshot_file_outbox_guard` | `tools/storesnapshotoutbox` | 100% | `069f1635d5a6` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
-| `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `7aadb0213e97` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
+| `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `7ee1bbf6a41c` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `bb2b7b4d3d47` | `server_route_handlers_must_stay_semantically_split` |
 
 ## Repository Coverage
 
-- Go files: `3188`
-- tracked files: `3188`
+- Go files: `3191`
+- tracked files: `3191`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,12 +165,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3188`
-- unique syntax hashes: `2986`
+- tracked files: `3191`
+- unique syntax hashes: `2989`
 - compression gain: `202`
 - analysis reduction: `6.33%`
 - collision count: `0`
-- relocation mappings: `3188`
+- relocation mappings: `3191`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`

@@ -15956,6 +15956,59 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_ai_agent_thread_snapshot_coverage_loop_40",
+      "observation": "The AI Agent same-moment thread snapshot tool captures v3, v2, subscription, and SSE evidence for P0 UI races, but baseline coverage left SSE parsing, malformed event redaction, endpoint errors, write failures, and terminal/live decision edges weakly asserted.",
+      "hypothesis": "Focused tests can prove the snapshot sidecar preserves terminal/live conflict detection and redacted partial evidence behavior without changing endpoint contracts or live capture payloads.",
+      "claims": [
+        "operational_readiness_checks_must_bind_release_items_to_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentthreadsnapshot/http_write_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentthreadsnapshot/sse_more_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentthreadsnapshot/summary_decision_more_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentthreadsnapshot"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-aiagentthreadsnapshot-slice40-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "AI Agent thread snapshot tests now cover SSE progress parsing, malformed event redaction, empty payload suppression, cancellation, endpoint non-2xx/decode failures, endpoint error text capture, blocked report writes, required flag errors, queued/terminal active-stream summary counts, and non-empty live event matching. tools/aiagentthreadsnapshot rises from 78.6% to 91.6% under Go 1.26.2 with no endpoint or payload changes.",
+      "next_loop": "operational_readiness_release_harness"
+    },
+    {
       "id": "figma_projection_syntax_hash_loop",
       "observation": "The Figma generated-client projection tool was already part of API client delivery evidence, but its Go package shape was not syntax-hash tracked and its root folder exceeded the IA file limit.",
       "hypothesis": "Hash-locking the projection evidence JSON and generated reader before consolidating same-concept helpers preserves generated-client projection behavior while binding the tool to the API client delivery semantic graph.",
