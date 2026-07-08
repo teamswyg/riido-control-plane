@@ -16928,6 +16928,47 @@
       ],
       "decision": "Task-context composition tests now prove non-command documents keep IntentGateRequired=true through assignment request composition, blank request component IDs prefer the immutable context component ID, missing context IDs fall back to the route component ID, and empty task context fails closed. composeAssignRequestWithTaskContextResult rises from 63.6% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "provider_status_clone_isolation_coverage_loop",
+      "observation": "Provider status records feed runtime visibility and safe routing; weak clone coverage could let callers mutate shared provider slices and create stale or inconsistent runtime status without endpoint changes.",
+      "hypothesis": "Focused clone tests can prove nil/empty provider status snapshots remain nil and non-empty snapshots are slice-copied so caller mutations cannot leak back into stored read-model state.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_clone_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_clone_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_clone_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice79-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Provider status clone tests now prove nil and empty provider slices normalize to nil and cloned non-empty provider status records are isolated from caller mutation. cloneProviderStatusRecords rises from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
