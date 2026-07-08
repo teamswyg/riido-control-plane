@@ -24,7 +24,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `container_image_contract_guard` | `tools/containercontract` | 100% | `4cd9478e628e` | `container_image_contract_must_bind_runtime_shape` |
 | `container_image_contract_dockerfile_parser` | `tools/containercontract/dockerfile` | 100% | `7e3496402754` | `container_image_contract_must_bind_runtime_shape` |
 | `config_reference_guard` | `tools/configreference` | 100% | `f517462a6edf` | `config_reference_must_preserve_env_manifest_parity` |
-| `store_safe_routing_guard` | `tools/storesaferouting` | 100% | `affad8a109c9` | `store_safe_routing_must_preserve_provider_status_decisions` |
+| `store_safe_routing_guard` | `tools/storesaferouting` | 100% | `9898791be6fe` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `public_pages_live_guard` | `tools/publicpageslive` | 100% | `c9fb97e9cd95` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `go_ci_baseline_guard` | `tools/gocibaseline` | 100% | `1fa05fb324ac` | `go_ci_baseline_must_preserve_broad_ci_contract` |
 | `module_decomposition_guard` | `tools/moduledecomposition` | 100% | `f82a03c89ad7` | `module_decomposition_must_preserve_surface_area_ratchet` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3142`
-- tracked files: `3142`
+- Go files: `3146`
+- tracked files: `3146`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3142`
-- unique syntax hashes: `2941`
+- tracked files: `3146`
+- unique syntax hashes: `2945`
 - compression gain: `201`
-- analysis reduction: `6.39%`
+- analysis reduction: `6.38%`
 - collision count: `0`
-- relocation mappings: `3142`
+- relocation mappings: `3146`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `639`
+- efficiency score: `638`
 - compression score: `201`
-- weighted score: `840`
+- weighted score: `839`
