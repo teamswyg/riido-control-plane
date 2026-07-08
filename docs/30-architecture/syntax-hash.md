@@ -31,7 +31,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `control_plane_audit_guard` | `tools/controlplaneaudit` | 100% | `b6962d896e85` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `control_plane_performance_guard` | `tools/controlplaneperf` | 100% | `66d182bc1546` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `control_plane_pressure_guard` | `tools/controlplanepressure` | 100% | `f8217dd3024e` | `control_plane_performance_hot_paths_must_emit_evidence` |
-| `ai_agent_load_guard` | `tools/aiagentload` | 100% | `90f7c74d7074` | `control_plane_performance_hot_paths_must_emit_evidence` |
+| `ai_agent_load_guard` | `tools/aiagentload` | 100% | `6ed7f175242f` | `control_plane_performance_hot_paths_must_emit_evidence` |
 | `harness_promotion_guard` | `tools/harnesspromotion` | 100% | `95c7fdfe7029` | `harness_promotion_must_run_after_failure` |
 | `loop_closure_audit_guard` | `tools/loopclosureaudit` | 100% | `a434a8bda384` | `loop_closure_audit_must_prove_human_exit_requirements` |
 | `closed_loop_candidate_intake_guard` | `tools/closedloopcandidateintake` | 100% | `de3efe4d5931` | `candidate_intake_must_consume_candidate_artifact` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3022`
-- tracked files: `3022`
+- Go files: `3025`
+- tracked files: `3025`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3022`
-- unique syntax hashes: `2827`
+- tracked files: `3025`
+- unique syntax hashes: `2830`
 - compression gain: `195`
-- analysis reduction: `6.45%`
+- analysis reduction: `6.44%`
 - collision count: `0`
-- relocation mappings: `3022`
+- relocation mappings: `3025`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `645`
+- efficiency score: `644`
 - compression score: `195`
-- weighted score: `840`
+- weighted score: `839`

@@ -5438,6 +5438,59 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_load_harness_coverage_loop_6",
+      "observation": "The lowest remaining coverage package was the AI Agent load harness, with untested paths in CLI config parsing, client-read endpoint selection, error categorization, and report output.",
+      "hypothesis": "Pure config/endpoint/error tests plus an in-memory public-scenario httptest run can raise load-harness evidence quality without touching SaaS endpoints, runtime code, or external contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentload/config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentload/endpoints_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentload/output_main_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentload/config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentload/endpoints_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentload/output_main_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-aiagentload-slice6-2026-07-08",
+          "redacted": true
+        }
+      ],
+      "decision": "The sixth coverage slice raises the AI Agent load harness through deterministic local tests, improving the trustworthiness of later performance evidence without producing live traffic or changing product behavior.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
