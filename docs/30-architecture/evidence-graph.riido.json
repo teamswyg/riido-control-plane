@@ -16677,6 +16677,47 @@
       ],
       "decision": "Onboarding fixture color repair tests now prove blank known fixture colors are restored, unknown fixture colors stay empty, existing nonblank colors are preserved, ensureOnboardingFixtureColorsLocked rises from 60.0% to 100.0%, and internal/riidoaiserver rises from 87.1% to 87.2% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "thread_progress_cache_invalidation_coverage_loop",
+      "observation": "AI thread history rendering depends on progress and history cache invalidation; stale cache entries could make refreshed v3 timelines show outdated progress unless both caches are dropped together.",
+      "hypothesis": "Focused store-level tests can prove progress cache invalidation also clears history cache, including the nil-progress-cache path, without changing thread endpoints or message payloads.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_progress_cache_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_progress_cache_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_progress_cache_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice73-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Thread progress cache invalidation tests now prove dropping progress cache also drops the same thread's history cache, preserves unrelated thread caches, covers the nil-progress-cache path, and raises dropTaskThreadProgressCacheLocked from 60.0% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
