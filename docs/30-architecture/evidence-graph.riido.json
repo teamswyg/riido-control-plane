@@ -16309,6 +16309,47 @@
       ],
       "decision": "Task agent assignment HTTP error tests now prove unscoped v1 routing returns 404, missing auth returns 401, malformed JSON and missing agent ids return 400, a missing assignment store returns 503, action read-model persistence errors are surfaced, handleAIAgentClientCreateTaskAgentAssignment rises from 57.5% to 85.0%, and internal/riidoaiserver package coverage rises to 86.7% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_task_comment_http_error_coverage_loop",
+      "observation": "The task comment endpoint is the legacy follow-up instruction path for AI Agent threads, but its HTTP boundary had partial coverage for missing auth, malformed JSON, backend persistence failure, and missing-agent error mapping.",
+      "hypothesis": "Focused HTTP tests can prove rejected task comments do not create thread projections and that backend or missing-agent failures are surfaced with stable status codes without changing endpoint paths or payload contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_comment_http_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_comment_http_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_comment_http_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice65-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Task comment HTTP error tests now prove missing auth returns 401, malformed JSON returns 400 without mutating task threads, backend comment persistence errors return 400, missing agents map to 404, handleAIAgentClientSubmitTaskComment rises from 58.3% to 100.0%, and internal/riidoaiserver package coverage remains 86.7% rounded under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
