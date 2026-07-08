@@ -6073,6 +6073,63 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_agent_runtime_binding_coverage_loop_17",
+      "observation": "After the API client delivery slice, the agent runtime binding verifier remained low covered; its happy path proved binding evidence but malformed manifests, binding field/rule drift, device visibility rule drift, source-check failures, generated-doc freshness, repo-root discovery, CLI flag errors, and write failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove agent/runtime binding SSOT failures are deterministic and fail closed without changing control-plane endpoints, daemon polling contracts, or runtime binding behavior.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-agentruntimebinding-slice17-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The seventeenth coverage slice raises the agent runtime binding verifier from 73.8% to 96.0% through deterministic tests for manifest identity drift, missing required metadata, required binding field drift, forbidden required device_id, missing binding/device rules, incomplete loop metadata, missing source checks, invalid source-check shape, missing source files/tokens, generated doc freshness, malformed JSON, missing repo roots, CLI flag errors, and JSON/text write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",

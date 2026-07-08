@@ -73,7 +73,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `provider_status_path_adapter` | `tools/providerstatus/pathutil` | 100% | `429078cba0e3` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_requirements_adapter` | `tools/providerstatus/requirements` | 100% | `443e40b1653a` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_render_adapter` | `tools/providerstatus/renderutil` | 100% | `70f6dd7739b3` | `store_safe_routing_must_preserve_provider_status_decisions` |
-| `agent_runtime_binding_guard` | `tools/agentruntimebinding` | 100% | `983cfac244cb` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
+| `agent_runtime_binding_guard` | `tools/agentruntimebinding` | 100% | `63d15339ee1c` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `agent_runtime_binding_path_adapter` | `tools/agentruntimebinding/pathutil` | 100% | `cd78e0896ad2` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `agent_runtime_binding_requirements_adapter` | `tools/agentruntimebinding/requirements` | 100% | `c1a7283f900a` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `assignment_journal_guard` | `tools/assignmentjournal` | 100% | `570dbd8d52bb` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3067`
-- tracked files: `3067`
+- Go files: `3071`
+- tracked files: `3071`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -128,7 +128,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 - status: `evidence_only`
 - group by: `ast_shape_hash`
 - duplicate groups: `88`
-- duplicate files: `303`
+- duplicate files: `304`
 - internal groups: `5`
 
 | Shape Hash | Files | Packages |
@@ -152,7 +152,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `385106af75c3` | 4 | `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/loopclosureaudit`, `tools/operationalreadiness` |
 | `4e09e2f36217` | 4 | `tools/healthreadycmd`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
 | `50f0035ed7f7` | 4 | `internal/riidoaiserver`, `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/harnesspromotion` |
-| `769fb85b546a` | 4 | `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/assignmentjournal`, `tools/providerstatus` |
+| `7361781d8898` | 4 | `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/migrationledger` |
 
 ## Constraints
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3067`
-- unique syntax hashes: `2870`
-- compression gain: `197`
-- analysis reduction: `6.42%`
+- tracked files: `3071`
+- unique syntax hashes: `2873`
+- compression gain: `198`
+- analysis reduction: `6.44%`
 - collision count: `0`
-- relocation mappings: `3067`
+- relocation mappings: `3071`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `642`
-- compression score: `197`
-- weighted score: `839`
+- efficiency score: `644`
+- compression score: `198`
+- weighted score: `842`
