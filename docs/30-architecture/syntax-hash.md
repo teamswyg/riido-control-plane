@@ -76,7 +76,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `agent_runtime_binding_guard` | `tools/agentruntimebinding` | 100% | `983cfac244cb` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `agent_runtime_binding_path_adapter` | `tools/agentruntimebinding/pathutil` | 100% | `cd78e0896ad2` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
 | `agent_runtime_binding_requirements_adapter` | `tools/agentruntimebinding/requirements` | 100% | `c1a7283f900a` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` |
-| `assignment_journal_guard` | `tools/assignmentjournal` | 100% | `f61e624b229a` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
+| `assignment_journal_guard` | `tools/assignmentjournal` | 100% | `570dbd8d52bb` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
 | `assignment_journal_path_adapter` | `tools/assignmentjournal/pathutil` | 100% | `9ec9644915bf` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
 | `assignment_journal_requirements_adapter` | `tools/assignmentjournal/requirements` | 100% | `88a7bd0c31c4` | `assignment_operation_journal_must_preserve_replay_and_claim_ports` |
 | `cloudwatch_emf_guard` | `tools/cloudwatchemf` | 100% | `ea2afe093731` | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3055`
-- tracked files: `3055`
+- Go files: `3059`
+- tracked files: `3059`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -127,8 +127,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - status: `evidence_only`
 - group by: `ast_shape_hash`
-- duplicate groups: `87`
-- duplicate files: `300`
+- duplicate groups: `88`
+- duplicate files: `302`
 - internal groups: `5`
 
 | Shape Hash | Files | Packages |
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3055`
-- unique syntax hashes: `2860`
-- compression gain: `195`
-- analysis reduction: `6.38%`
+- tracked files: `3059`
+- unique syntax hashes: `2863`
+- compression gain: `196`
+- analysis reduction: `6.40%`
 - collision count: `0`
-- relocation mappings: `3055`
+- relocation mappings: `3059`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `638`
-- compression score: `195`
-- weighted score: `833`
+- efficiency score: `640`
+- compression score: `196`
+- weighted score: `836`
