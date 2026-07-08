@@ -16550,6 +16550,51 @@
       ],
       "decision": "Device daemon detail HTTP tests now prove missing auth returns 401, forbidden scopes return 403, backend detail reader failures surface as 400, handleAIAgentClientDeviceDaemon rises from 62.5% to 100.0%, and internal/riidoaiserver package coverage rises to 87.1% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_editability_http_error_coverage_loop",
+      "observation": "The agent editability endpoint feeds configuration screens, but missing auth, forbidden scope, and backend read failure branches had partial handler coverage.",
+      "hypothesis": "Focused HTTP tests can prove editability rejects unauthenticated and unauthorized requests, surfaces backend reader failures, and keeps the existing endpoint and payload contract unchanged.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_editability_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_editability_error_helpers_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_editability_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_editability_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice70-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Agent editability HTTP tests now prove missing auth returns 401, forbidden scopes return 403, backend editability reader failures surface as 400, and handleAIAgentClientEditability rises from 62.5% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
