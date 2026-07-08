@@ -5845,6 +5845,63 @@
       "next_loop": "control_plane_performance_harness"
     },
     {
+      "id": "control_plane_migration_ledger_coverage_loop_13",
+      "observation": "After the container contract slice, the migration ledger verifier remained low covered; its happy path proved generated evidence but malformed manifests, missing sections, coverage thresholds, generated-doc freshness, repo-root discovery, and IO failures were weakly evidenced.",
+      "hypothesis": "Focused verifier tests can prove migration ledger failures are deterministic and fail closed without changing migration content, runtime behavior, endpoint payloads, or infrastructure contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/migrationledger/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/migrationledger/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/migrationledger/test_fixtures_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/migrationledger/verify_error_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/migrationledger/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/migrationledger/run_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/migrationledger/verify_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-migrationledger-slice13-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "The thirteenth coverage slice raises the migration ledger verifier from 73.4% to 94.2% through deterministic tests for manifest identity drift, missing intro/assertions, incomplete loop metadata, required section loss, invalid section shape, migration slice/gate/reference threshold drift, malformed JSON, generated doc freshness, missing repo roots, and JSON/text write failures. This remains incremental coverage progress, not a claim that total repository coverage has reached 100%.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "provider_auth_failure_visible_message_loop",
       "observation": "Production AI Agent thread history showed a Claude provider 401 string, `Failed to authenticate. API Error: 401 Invalid authentication credentials`, as the agent reply for a workspace member instead of a user-actionable reconnect message.",
       "hypothesis": "Read-time client-visible projection can classify provider authentication failures from either future `provider_authentication` metadata or existing raw 401 messages, preserving endpoint payload shape while preventing stored provider errors from leaking into v2/v3 thread UI.",
