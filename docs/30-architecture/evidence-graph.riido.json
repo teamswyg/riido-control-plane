@@ -16759,6 +16759,47 @@
       ],
       "decision": "Thread history identity tests now prove explicit conversation ids are preserved, blank conversation ids fall back to trimmed thread ids, assignment-scoped message run ids prefer assignment_id, sequence fallback remains deterministic, retention keeps the latest 100 messages, and retained messages do not alias source storage. defaultTaskThreadConversationID, taskThreadMessageRunID, and retainLatestThreadHistoryMessages each rise from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "diagnostics_fanout_coverage_loop",
+      "observation": "AI task action events should fan out only when visible thread state or failure diagnostics change; weak branch coverage could hide duplicate SSE fanout or missed diagnostic updates.",
+      "hypothesis": "Focused helper tests can prove nil/equal/different diagnostics handling and fanout decisions for new, unchanged, comment-kind-changed, and failure-diagnostic-changed thread states without changing event payloads.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_action_fanout_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_action_fanout_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_task_action_fanout_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice75-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Diagnostics and fanout tests now prove nil diagnostics compare equal only with nil, matching diagnostics compare equal, changed queue/failure diagnostics differ, new threads fan out, unchanged threads do not fan out, and comment-kind or failure-diagnostic changes fan out. failureDiagnosticsEqual, queueDiagnosticsEqual, and shouldFanoutAgentTaskActionEvent each rise from 66.7% to 100.0% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
