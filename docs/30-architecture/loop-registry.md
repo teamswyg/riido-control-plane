@@ -119,7 +119,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `cmd/riido_ai_server` | `71` | `closed_loop_candidate` | `review_account_seed_must_preserve_redacted_seed_evidence`<br>`runtime_adapter_config_must_preserve_public_env_contract` | `go test ./cmd/riido_ai_server -run '^(TestAWSCredentialsEndpointUsesRelativeURI\|TestAssignmentOu...`<br>`go test ./cmd/riido_ai_server -run '^(TestAuthorizerFromEnvIncludesReviewAccountCredential\|TestC...`<br>+2 | `daemon_profile_environment_guard_loop`<br>`riido_ai_server_runtime_config_coverage_loop_46`<br>+1 |
 | `contracts` | `2` | `closed_loop_candidate` | `generated_endpoint_smoke_matrix_must_remain_contract_gate`<br>`react_query_generator_must_preserve_generated_client_surface` | `go test ./internal/riidoaiserver -run '^(TestAIAgentGeneratedEndpointSmokeMatrixEntriesStaySorte...`<br>`go test ./tools/aiagentclientapi -run '^(TestGeneratedDocMatchesManifest\|TestGoRunWiresCLIFlags\|...`<br>+2 | `ai_agent_device_daemon_list_surface_loop`<br>`ai_thread_history_stale_queued_replay_loop`<br>+11 |
 | `dependency_allowlist.riido.json` | `1` | `loop_closure_audit` | `context_map_must_guard_public_boundaries` | `go test ./tools/contextmap -run '^(TestContextMapBehaviorGolden)$' -count=1`<br>`go test ./tools/dependencyallowlist -run '^(TestDecodeModulesRejectsBadJSON\|TestDependencyAllowl...`<br>+1 | `dependency_allowlist_coverage_loop_43`<br>`syntax_hash_graph_spike_loop` |
-| `docs/20-domain` | `16` | `ai_thread_history`<br>`closed_loop_candidate`<br>+1 | `agent_catalog_rbac_must_preserve_catalog_authorization_contract`<br>`agent_runtime_binding_must_preserve_identity_and_visibility_contract`<br>+11 | `go test ./awsadapters -run '^(TestAWSAdaptersFacadeBehaviorGolden\|TestStaticCredentialsFacade\|Te...`<br>`go test ./cmd/riido_ai_server -run '^(TestAWSCredentialsEndpointUsesRelativeURI\|TestAssignmentOu...`<br>+21 | `ai_agent_client_api_syntax_hash_loop`<br>`ai_agent_client_delete_http_boundary_coverage_loop`<br>+30 |
+| `docs/20-domain` | `16` | `ai_thread_history`<br>`closed_loop_candidate`<br>+1 | `agent_catalog_rbac_must_preserve_catalog_authorization_contract`<br>`agent_runtime_binding_must_preserve_identity_and_visibility_contract`<br>+11 | `go test ./awsadapters -run '^(TestAWSAdaptersFacadeBehaviorGolden\|TestStaticCredentialsFacade\|Te...`<br>`go test ./cmd/riido_ai_server -run '^(TestAWSCredentialsEndpointUsesRelativeURI\|TestAssignmentOu...`<br>+21 | `ai_agent_client_api_syntax_hash_loop`<br>`ai_agent_client_delete_http_boundary_coverage_loop`<br>+31 |
 | `docs/30-architecture` | `69` | `ai_agent_load_harness`<br>`ai_thread_history`<br>+8 | `agent_catalog_rbac_must_preserve_catalog_authorization_contract`<br>`agent_runtime_binding_must_preserve_identity_and_visibility_contract`<br>+91 | `go test ./awsadapters -run '^(TestAWSAdaptersFacadeBehaviorGolden\|TestStaticCredentialsFacade\|Te...`<br>`go test ./cmd/riido_ai_server -run '^(TestAWSCredentialsEndpointUsesRelativeURI\|TestAssignmentOu...`<br>+149 | `ai_agent_bootstrap_devices_http_error_coverage_loop`<br>`ai_agent_client_api_syntax_hash_loop`<br>+217 |
 | `docs/50-roadmap` | `2` | `open_decision_queue` | `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `go test ./tools/openquestions -run '^(TestOpenQuestionsBehaviorGolden\|TestOpenQuestionsBindOwner...` | `desktop_daemon_lifecycle_decision_queue_loop`<br>`syntax_hash_graph_spike_loop` |
 | `docs/executable-knowledge.md` | `1` | `operational_readiness_release_harness` | `operational_readiness_checks_must_bind_release_items_to_evidence` | `go test ./internal/riidoaiserver -run '^(TestHTTPTracingRecordsClientSurface\|TestHTTPTransaction...`<br>`go test ./tools/aiagentthreadsnapshot -run '^(TestAppendSSEIgnoresEmptyPayload\|TestDecideSeparat...`<br>+4 | `ai_agent_thread_snapshot_syntax_hash_loop`<br>`completion_progress_completed_terminal_http_proof_loop`<br>+25 |
@@ -132,7 +132,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `packaging` | `2` | `closed_loop_candidate` | `container_image_contract_must_bind_runtime_shape` | `go test ./tools/containercontract -run '^(TestContainerContractBehaviorGolden\|TestRunWritesCheck...` | `container_image_contract_runtime_shape_loop` |
 | `tools/agentcatalogrbac` | `12` | `closed_loop_candidate` | `agent_catalog_rbac_must_preserve_catalog_authorization_contract` | `go test ./internal/riidoaiserver -run '^(TestAgentCatalogAPIDTOsExposeOnlyCatalogShape\|TestAgent...`<br>`go test ./tools/agentcatalogrbac -run '^(TestAgentCatalogRBACBehaviorGolden\|TestGeneratedDocMatc...` | `syntax_hash_graph_spike_loop` |
 | `tools/agentruntimebinding` | `9` | `closed_loop_candidate` | `agent_runtime_binding_must_preserve_identity_and_visibility_contract` | `go test ./tools/agentruntimebinding -run '^(TestAgentRuntimeBindingBehaviorGolden\|TestGeneratedD...` | `syntax_hash_graph_spike_loop` |
-| `tools/aiagentclientapi` | `12` | `ai_thread_history`<br>`closed_loop_candidate` | `ambiguous_task_context_must_ask_before_work`<br>`generated_endpoint_smoke_matrix_must_remain_contract_gate`<br>+1 | `go test ./internal/riidoaiserver -run '^(TestAIAgentGeneratedEndpointSmokeMatrixEntriesStaySorte...`<br>`go test ./internal/riidoaiserver -run '^(TestAIAgentIntentDialogueCanHandoffAfterProviderLimit\|T...`<br>+5 | `ai_agent_client_api_syntax_hash_loop`<br>`ai_agent_device_daemon_list_surface_loop`<br>+21 |
+| `tools/aiagentclientapi` | `12` | `ai_thread_history`<br>`closed_loop_candidate` | `ambiguous_task_context_must_ask_before_work`<br>`generated_endpoint_smoke_matrix_must_remain_contract_gate`<br>+1 | `go test ./internal/riidoaiserver -run '^(TestAIAgentGeneratedEndpointSmokeMatrixEntriesStaySorte...`<br>`go test ./internal/riidoaiserver -run '^(TestAIAgentIntentDialogueCanHandoffAfterProviderLimit\|T...`<br>+5 | `ai_agent_client_api_syntax_hash_loop`<br>`ai_agent_device_daemon_list_surface_loop`<br>+22 |
 | `tools/aiagentload` | `16` | `control_plane_performance_harness` | `control_plane_performance_hot_paths_must_emit_evidence` | `go test ./internal/riidoaiserver -run '^(TestClientEventForSubscriberLockedSelectsFanoutEvent\|Te...`<br>`go test ./tools/aiagentload -run '^(TestAIAgentLoadBehaviorGolden\|TestAggregatorReportIncludesCa...`<br>+4 | `ai_agent_bootstrap_devices_http_error_coverage_loop`<br>`ai_agent_client_snapshot_store_boundary_loop`<br>+69 |
 | `tools/aiagentrisk` | `15` | `closed_loop_candidate` | `ai_agent_risk_evidence_must_preserve_boundary_manifest` | `go test ./tools/aiagentrisk -run '^(TestAIAgentRiskBehaviorGolden\|TestDefaultManifestVerifies\|Te...` | `syntax_hash_graph_spike_loop` |
 | `tools/aiagentthreadsnapshot` | `18` | `operational_readiness_release_harness` | `operational_readiness_checks_must_bind_release_items_to_evidence` | `go test ./internal/riidoaiserver -run '^(TestHTTPTracingRecordsClientSurface\|TestHTTPTransaction...`<br>`go test ./tools/aiagentthreadsnapshot -run '^(TestAppendSSEIgnoresEmptyPayload\|TestDecideSeparat...`<br>+4 | `ai_agent_thread_snapshot_syntax_hash_loop`<br>`completion_progress_completed_terminal_http_proof_loop`<br>+25 |
@@ -192,30 +192,30 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `deleted_agent_threads_must_remain_visible` | `ai_thread_history` | `4` | `3` | `0c833a8f52bd` |
 | `thread_history_must_keep_user_followups` | `ai_thread_history` | `11` | `7` | `88b3b4d451a0` |
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `26df19415a80` |
-| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `29` | `13` | `b982505d8f5f` |
+| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `29` | `13` | `5e2adcfa665f` |
 | `thread_history_v3_must_preserve_run_identity_and_message_order` | `ai_thread_history` | `7` | `2` | `b8759591ddda` |
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `ai_thread_history` | `11` | `7` | `2cb29997cf9b` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `22` | `10` | `fe2fb8dc64e3` |
 | `provider_acceptance_summary_must_cover_declared_observations` | `provider_acceptance_harness` | `5` | `6` | `27bc587a30eb` |
-| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `9a66cd09c0e1` |
-| `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `194` | `64` | `05d10fd7de9b` |
-| `control_plane_meta_evidence_must_self_expire` | `control_plane_performance_harness` | `10` | `4` | `d3129d18bf25` |
+| `load_harness_failures_must_promote_candidates` | `ai_agent_load_harness` | `8` | `3` | `deade5848077` |
+| `control_plane_performance_hot_paths_must_emit_evidence` | `control_plane_performance_harness` | `194` | `64` | `9c9593a30536` |
+| `control_plane_meta_evidence_must_self_expire` | `control_plane_performance_harness` | `10` | `4` | `20eeb6fcb19c` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `18` | `10` | `3765802738d2` |
 | `generated_endpoint_smoke_matrix_must_remain_contract_gate` | `closed_loop_candidate` | `11` | `18` | `f62e2c6008dc` |
 | `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `68` | `34` | `36a01a543e19` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `24` | `6` | `9e13085a4651` |
-| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `28` | `9` | `40ac69786b22` |
-| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `e7bb7178fd3d` |
-| `closed_loop_candidates_must_carry_subject` | `closed_loop_candidate` | `18` | `4` | `72a519e1304d` |
+| `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `28` | `9` | `fc73eb60cf13` |
+| `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `b1fe5372f5be` |
+| `closed_loop_candidates_must_carry_subject` | `closed_loop_candidate` | `18` | `4` | `ea123607fd89` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `16` | `10` | `61ce25286b04` |
-| `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` | `closed_loop_candidate` | `16` | `5` | `4a2990ad9f3c` |
-| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `79b559e6301a` |
+| `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` | `closed_loop_candidate` | `16` | `5` | `84f9598376e7` |
+| `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `0920d7f2b2e5` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `89` | `34` | `cf4bf84de1d6` |
-| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `feb469517875` |
+| `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `f58b5b7bddfe` |
 | `loop_registry_evidence_must_expose_loop_surfaces` | `closed_loop_candidate` | `5` | `1` | `56b212bf774d` |
-| `loop_registry_evidence_must_expose_architecture_index` | `closed_loop_candidate` | `16` | `7` | `d08d413a35f0` |
-| `loop_registry_impact_must_expose_target_verifier_plan` | `closed_loop_candidate` | `56` | `29` | `fca940e162b3` |
-| `loop_coverage_dimensions_must_use_static_registry` | `closed_loop_candidate` | `20` | `7` | `1bd1d4b33399` |
+| `loop_registry_evidence_must_expose_architecture_index` | `closed_loop_candidate` | `16` | `7` | `4fc78868eb2e` |
+| `loop_registry_impact_must_expose_target_verifier_plan` | `closed_loop_candidate` | `56` | `29` | `74b3c2b27de3` |
+| `loop_coverage_dimensions_must_use_static_registry` | `closed_loop_candidate` | `20` | `7` | `00a205564a42` |
 | `loop_verify_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `6dc092d991c8` |
 | `loop_observation_tokens_must_be_claim_covered` | `closed_loop_candidate` | `7` | `3` | `fb0c3c1df280` |
 | `loop_failure_conditions_must_be_claim_covered` | `closed_loop_candidate` | `8` | `4` | `284d97a278bd` |
@@ -233,13 +233,13 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `workflow_evidence_must_self_expire` | `closed_loop_candidate` | `10` | `4` | `81cf1f515a07` |
 | `semantic_hash_metadata_must_not_affect_claim_meaning` | `closed_loop_candidate` | `5` | `2` | `344c5eb1a791` |
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `201c4bfe3b69` |
-| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `11` | `6` | `80734618c1e8` |
-| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `b614131ec141` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `10` | `4` | `53b4f42896cd` |
+| `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `11` | `6` | `ddd3276b4c6f` |
+| `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `d74fdce2e449` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `10` | `4` | `de31b0ccac85` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `20` | `12` | `a5bd351bf4a2` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `15` | `10` | `fa9b3eb5e6e3` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `5211d7448676` |
-| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `4` | `612e47f8cc1c` |
+| `closed_loop_candidate_consumers_must_reject_expired_candidates` | `closed_loop_candidate` | `13` | `4` | `db852b7a7d4f` |
 | `candidate_intake_must_consume_candidate_artifact` | `closed_loop_candidate_intake` | `23` | `10` | `a2ec84ea2305` |
 | `expiring_loops_must_schedule_refresh` | `closed_loop_candidate` | `5` | `3` | `34af7b442aa7` |
 | `refresh_workflows_must_declare_loop_identity` | `closed_loop_candidate` | `9` | `3` | `0763cf9fc239` |
@@ -253,35 +253,35 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `26` | `13` | `4c7718600aa7` |
 | `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `open_decision_queue` | `9` | `2` | `9cf6a31ee8e1` |
 | `operational_readiness_checks_must_bind_release_items_to_evidence` | `operational_readiness_release_harness` | `114` | `46` | `5cc6068c312f` |
-| `container_image_contract_must_bind_runtime_shape` | `closed_loop_candidate` | `26` | `6` | `83f36771dc5b` |
-| `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` | `closed_loop_candidate` | `26` | `9` | `cd877e1b5336` |
+| `container_image_contract_must_bind_runtime_shape` | `closed_loop_candidate` | `26` | `6` | `aac7737b2926` |
+| `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` | `closed_loop_candidate` | `26` | `9` | `9aca0f13bf13` |
 | `server_route_handlers_must_stay_semantically_split` | `closed_loop_candidate` | `59` | `27` | `6d079289f487` |
-| `public_aws_adapter_facade_must_preserve_contract` | `closed_loop_candidate` | `16` | `3` | `f73002c6bd95` |
-| `review_account_seed_must_preserve_redacted_seed_evidence` | `closed_loop_candidate` | `31` | `10` | `029ef84cebd0` |
-| `runtime_adapter_config_must_preserve_public_env_contract` | `closed_loop_candidate` | `75` | `14` | `e28de8cd820d` |
-| `repo_identity_must_anchor_public_module_boundary` | `closed_loop_candidate` | `5` | `2` | `f9f758393b36` |
-| `shared_contract_compat_must_preserve_generated_contract_surface` | `closed_loop_candidate` | `10` | `6` | `d616f7473a34` |
-| `request_authorization_must_preserve_security_boundary` | `closed_loop_candidate` | `20` | `4` | `1bf90f74c5c2` |
-| `health_ready_command_must_preserve_public_runtime_probe` | `closed_loop_candidate` | `20` | `4` | `a40588a40e3d` |
-| `runtime_deployment_boundary_must_preserve_public_private_ownership` | `closed_loop_candidate` | `36` | `4` | `a848d5c27a12` |
-| `config_reference_must_preserve_env_manifest_parity` | `closed_loop_candidate` | `25` | `14` | `3b663851f0dd` |
-| `agent_runtime_binding_must_preserve_identity_and_visibility_contract` | `closed_loop_candidate` | `15` | `2` | `d53d14f42a60` |
-| `assignment_operation_journal_must_preserve_replay_and_claim_ports` | `closed_loop_candidate` | `19` | `4` | `c83a8f2437dc` |
-| `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` | `closed_loop_candidate` | `24` | `9` | `2a832ad72ad2` |
-| `saas_control_plane_boundaries_must_remain_executable` | `closed_loop_candidate` | `18` | `4` | `01c1f5af542c` |
-| `snapshot_cqrs_gate_must_scope_store_split_decisions` | `closed_loop_candidate` | `14` | `1` | `5aa4e48b4935` |
-| `store_safe_routing_must_preserve_provider_status_decisions` | `closed_loop_candidate` | `33` | `21` | `ad0b2dc2a935` |
-| `go_ci_baseline_must_preserve_broad_ci_contract` | `closed_loop_candidate` | `19` | `2` | `095d2e71e6b2` |
-| `module_decomposition_must_preserve_surface_area_ratchet` | `closed_loop_candidate` | `47` | `11` | `7ad1d2bb9c1e` |
-| `web_frontend_api_must_preserve_cors_contract` | `closed_loop_candidate` | `20` | `4` | `fc012619192a` |
-| `ai_agent_risk_evidence_must_preserve_boundary_manifest` | `closed_loop_candidate` | `20` | `3` | `5d21d6d1199f` |
-| `migration_ledger_must_preserve_historical_evidence` | `closed_loop_candidate` | `20` | `2` | `c86b9df86893` |
-| `metrics_http_adapter_must_preserve_public_metrics_contract` | `closed_loop_candidate` | `24` | `5` | `6acda2d59f64` |
-| `agent_catalog_rbac_must_preserve_catalog_authorization_contract` | `closed_loop_candidate` | `34` | `21` | `9b07bd659d8a` |
-| `integration_matrix_must_preserve_public_private_boundary` | `closed_loop_candidate` | `21` | `2` | `ec1baf91c207` |
-| `context_map_must_guard_public_boundaries` | `loop_closure_audit` | `37` | `15` | `d4021aca20ee` |
-| `api_client_delivery_must_preserve_generated_handoff_boundary` | `closed_loop_candidate` | `56` | `10` | `55587ba8239b` |
-| `react_query_generator_must_preserve_generated_client_surface` | `closed_loop_candidate` | `104` | `3` | `6e358e169d6c` |
+| `public_aws_adapter_facade_must_preserve_contract` | `closed_loop_candidate` | `16` | `3` | `957ffe773e4b` |
+| `review_account_seed_must_preserve_redacted_seed_evidence` | `closed_loop_candidate` | `31` | `10` | `72a93cf4a3b6` |
+| `runtime_adapter_config_must_preserve_public_env_contract` | `closed_loop_candidate` | `75` | `14` | `4c41fc4065f6` |
+| `repo_identity_must_anchor_public_module_boundary` | `closed_loop_candidate` | `5` | `2` | `d448a6ea3e17` |
+| `shared_contract_compat_must_preserve_generated_contract_surface` | `closed_loop_candidate` | `10` | `6` | `7a00ac77ca5a` |
+| `request_authorization_must_preserve_security_boundary` | `closed_loop_candidate` | `20` | `4` | `3c7843f4758f` |
+| `health_ready_command_must_preserve_public_runtime_probe` | `closed_loop_candidate` | `20` | `4` | `cfce710ce909` |
+| `runtime_deployment_boundary_must_preserve_public_private_ownership` | `closed_loop_candidate` | `36` | `4` | `13273341ae7e` |
+| `config_reference_must_preserve_env_manifest_parity` | `closed_loop_candidate` | `25` | `14` | `c2daf54f2ea6` |
+| `agent_runtime_binding_must_preserve_identity_and_visibility_contract` | `closed_loop_candidate` | `15` | `2` | `bd70458a47ff` |
+| `assignment_operation_journal_must_preserve_replay_and_claim_ports` | `closed_loop_candidate` | `19` | `4` | `85899b611cef` |
+| `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` | `closed_loop_candidate` | `24` | `9` | `1e39c87a21a1` |
+| `saas_control_plane_boundaries_must_remain_executable` | `closed_loop_candidate` | `18` | `4` | `0afaaf6fabbf` |
+| `snapshot_cqrs_gate_must_scope_store_split_decisions` | `closed_loop_candidate` | `14` | `1` | `7b347666cddd` |
+| `store_safe_routing_must_preserve_provider_status_decisions` | `closed_loop_candidate` | `33` | `21` | `802192cfc6bd` |
+| `go_ci_baseline_must_preserve_broad_ci_contract` | `closed_loop_candidate` | `19` | `2` | `d027a8a17c58` |
+| `module_decomposition_must_preserve_surface_area_ratchet` | `closed_loop_candidate` | `47` | `11` | `50a2430aeaee` |
+| `web_frontend_api_must_preserve_cors_contract` | `closed_loop_candidate` | `20` | `4` | `b80300ed8423` |
+| `ai_agent_risk_evidence_must_preserve_boundary_manifest` | `closed_loop_candidate` | `20` | `3` | `5b07479d7823` |
+| `migration_ledger_must_preserve_historical_evidence` | `closed_loop_candidate` | `20` | `2` | `d224e0f4a736` |
+| `metrics_http_adapter_must_preserve_public_metrics_contract` | `closed_loop_candidate` | `24` | `5` | `a13cb9a9274c` |
+| `agent_catalog_rbac_must_preserve_catalog_authorization_contract` | `closed_loop_candidate` | `34` | `21` | `caefb278a91d` |
+| `integration_matrix_must_preserve_public_private_boundary` | `closed_loop_candidate` | `21` | `2` | `81a7988a9c38` |
+| `context_map_must_guard_public_boundaries` | `loop_closure_audit` | `37` | `15` | `17d026fec7b2` |
+| `api_client_delivery_must_preserve_generated_handoff_boundary` | `closed_loop_candidate` | `56` | `10` | `791c8ad4a608` |
+| `react_query_generator_must_preserve_generated_client_surface` | `closed_loop_candidate` | `104` | `3` | `f08c4d3ced56` |
 
 ## Claim Surface Evidence
 
@@ -290,7 +290,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `deleted_agent_threads_must_remain_visible` | `3` | `1` | `0` | `1` | `1` | `1` | `1` | `0` | `3` | `1` | `1` |
 | `thread_history_must_keep_user_followups` | `5` | `6` | `0` | `1` | `1` | `1` | `2` | `0` | `7` | `1` | `2` |
 | `same_provider_agents_must_keep_distinct_threads` | `2` | `2` | `0` | `1` | `3` | `1` | `1` | `0` | `2` | `1` | `1` |
-| `thread_history_v3_must_expose_stable_conversation_grouping` | `17` | `11` | `1` | `2` | `4` | `5` | `1` | `3` | `13` | `2` | `8` |
+| `thread_history_v3_must_expose_stable_conversation_grouping` | `17` | `11` | `1` | `2` | `4` | `5` | `1` | `3` | `13` | `2` | `9` |
 | `thread_history_v3_must_preserve_run_identity_and_message_order` | `5` | `2` | `0` | `1` | `3` | `2` | `2` | `0` | `2` | `1` | `1` |
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `6` | `5` | `0` | `1` | `4` | `3` | `2` | `0` | `7` | `1` | `2` |
 | `expired_harness_evidence_must_not_promote_candidates` | `12` | `8` | `2` | `3` | `2` | `3` | `1` | `1` | `10` | `2` | `3` |
