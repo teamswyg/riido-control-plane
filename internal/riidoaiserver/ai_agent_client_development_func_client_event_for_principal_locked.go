@@ -17,6 +17,9 @@ func clientEventForPrincipalLocked(s *DevelopmentAIAgentClientStore, principal A
 		progressEvent.Lines = copyClientVisibleProgressLines(progressEvent.Lines)
 		event.Payload = progressEvent
 	}
+	if statusEvent, ok := event.Payload.(AgentWorkStatusChangedEvent); ok {
+		event.Payload = clientVisibleWorkStatusChangedEvent(statusEvent)
+	}
 	if !clientEventVisibleToLocked(s, principal, event) {
 		return ClientStreamEvent{}, false
 	}
