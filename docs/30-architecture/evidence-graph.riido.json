@@ -16010,6 +16010,55 @@
       ],
       "decision": "Device enrollment normalization tests now prove principal/workspace/display/machine/device values are trimmed, request workspace overrides principal workspace, blank display names default to Riido Desktop, missing principal is rejected, missing workspace is rejected, normalizeDeviceEnrollment reaches 100%, completeDeviceEnrollment reaches 100%, and internal/riidoaiserver package coverage rises to 86.2% without API or runtime contract changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "assignment_active_lease_expiry_coverage_loop",
+      "observation": "Assignment active lease expiry still had partial coverage around recent in-memory updates, missing durable leases, mismatched active assignment rows, expired durable leases, heartbeat repair, and lease-store errors.",
+      "hypothesis": "Focused store tests can prove stale active assignment leases fail closed and fresh durable heartbeats refresh in-memory state without changing daemon polling or assignment APIs.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_assignment_lease_expiry_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_assignment_lease_refresh_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_assignment_lease_expiry_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_assignment_lease_refresh_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_assignment_lease_expiry_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice58-after-active-lease.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Assignment active lease tests now prove non-active assignments and recently updated active assignments skip durable lease reads, missing/mismatched/expired durable leases are treated as expired, fresh durable heartbeat timestamps refresh in-memory assignment UpdatedAt, lease store errors are surfaced, assignmentActiveLeaseExpired reaches 100%, failStaleAssignment remains 100%, failStaleAssignmentWithMessage remains 100%, and no API or runtime contract changes are introduced.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
