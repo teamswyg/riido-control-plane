@@ -16100,6 +16100,47 @@
       ],
       "decision": "Structured progress-line tests now prove assignmentProgressLineLocked renders metadata code 1101 through the contracts progress-message catalog, fills the message key when providers omit it, assigns ObservedAt when providers omit timestamps, and reaches 100% coverage while internal/riidoaiserver package coverage rises to 86.3% without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "tool_approval_late_decision_timeout_coverage_loop",
+      "observation": "Tool approval decision handling still had partial coverage around the path where a user approval arrives after the provider approval request has expired, even though this branch decides whether stale approval chat can resurrect timed-out provider work.",
+      "hypothesis": "A focused store-level test can prove a late approve attempt returns the existing timed_out result, records no decision, and resolves at the approval expiry timestamp without changing tool approval endpoints or response contracts.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_tool_approval_decide_timeout_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_tool_approval_decide_timeout_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_tool_approval_decide_timeout_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice60-after-tool-approval.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Late tool approval decision tests now prove expired pending approvals return timed_out, do not persist a late approve decision, resolve at ExpiresAt, and raise handleDecideToolApproval coverage from 58.1% to 71.0% under Go 1.26.2 while internal/riidoaiserver remains 86.3% and endpoint contracts remain unchanged.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
