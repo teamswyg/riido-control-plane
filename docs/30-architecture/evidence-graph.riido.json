@@ -11753,6 +11753,59 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_request_authorization_coverage_loop_34",
+      "observation": "The request authorization SSOT protects token transports, source anchors, generated docs, loop evidence, and fail-closed authorization semantics, but baseline coverage left manifest IO, generated doc writes, stale docs, source-anchor failures, semantic rule omissions, and CLI flag failures under-tested.",
+      "hypothesis": "Focused failure-path tests can prove the request authorization sidecar fails closed when executable authorization knowledge drifts or cannot be written, without changing request authorization runtime contracts or endpoint behavior.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/requestauth/io_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/run_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/source_error_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/test_manifest_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/verify_error_paths_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/requestauth"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-requestauth-slice34-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "Request authorization failure-path tests now cover unknown and trailing manifest JSON, JSON marshal and mkdir write failures, generated doc writes, stale generated docs, missing repo roots, bad CLI flags, missing source checks, source-anchor failures, missing semantic anchors, missing rule groups, and missing loop steps. tools/requestauth rises from 76.8% to 91.2% under Go 1.26.2 with no endpoint, payload, or authorization runtime behavior changes.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "notion_qa_operational_evidence_backfill_loop",
       "observation": "Notion QA comments contained P0 operating evidence for waiting_for_user, queued_by_busy_agent, terminal stop refresh, author fallback, instruction intent, and staging DMG install issues, but a comment-only record can be missed by agents, cannot expire, and cannot produce closed-loop candidates.",
       "hypothesis": "Backfilling Notion QA comments into the operational readiness SSOT as P0 cycles, then emitting cycle counts, partial status, codex status tags, next artifacts, and 24h cadence evidence lets daily readiness runs keep product QA partials visible without editing client or endpoint contracts.",
