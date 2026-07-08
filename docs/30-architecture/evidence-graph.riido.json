@@ -16505,6 +16505,51 @@
       ],
       "decision": "Task thread message HTTP tests now prove missing auth returns 401, malformed JSON and missing body return 400 without mutating task thread history, assignment queue failures surface as 400, projection failures surface as 400, handleAIAgentClientCreateTaskThreadMessage rises from 66.7% to 93.9%, and internal/riidoaiserver package coverage rises to 87.0% under Go 1.26.2 without endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "ai_agent_device_daemon_http_error_coverage_loop",
+      "observation": "The singular device daemon detail endpoint is used by desktop/runtime settings surfaces, but missing auth, forbidden scope, and backend read failure paths had partial handler coverage compared with the plural daemon list endpoint.",
+      "hypothesis": "Focused HTTP tests can prove device daemon detail rejects unauthenticated and unauthorized requests, surfaces backend reader failures, and keeps the existing endpoint and payload contract unchanged.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_daemon_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_daemons_error_helpers_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_daemon_error_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_daemon_error_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "riidoaiserver-slice69-after.cover",
+          "redacted": true
+        }
+      ],
+      "decision": "Device daemon detail HTTP tests now prove missing auth returns 401, forbidden scopes return 403, backend detail reader failures surface as 400, handleAIAgentClientDeviceDaemon rises from 62.5% to 100.0%, and internal/riidoaiserver package coverage rises to 87.1% under Go 1.26.2 without endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
