@@ -102,7 +102,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `generated_smoke_matrix_rendertext_adapter` | `tools/aigeneratedsmokematrix/rendertext` | 100% | `9d974e7f5f4f` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_requirements_adapter` | `tools/aigeneratedsmokematrix/requirements` | 100% | `4dc304797eff` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_set_adapter` | `tools/aigeneratedsmokematrix/setutil` | 100% | `ffff57261b77` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
-| `ai_agent_client_api_guard` | `tools/aiagentclientapi` | 100% | `251e537b948a` | `thread_history_v3_must_expose_stable_conversation_grouping` |
+| `ai_agent_client_api_guard` | `tools/aiagentclientapi` | 100% | `0c90c6be497e` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_doccheck_adapter` | `tools/aiagentclientapi/doccheck` | 100% | `d95d063df137` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_path_adapter` | `tools/aiagentclientapi/pathutil` | 100% | `79181c0fee9f` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_rendertext_adapter` | `tools/aiagentclientapi/rendertext` | 100% | `b8172e7cea5e` | `thread_history_v3_must_expose_stable_conversation_grouping` |
@@ -118,8 +118,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3146`
-- tracked files: `3146`
+- Go files: `3152`
+- tracked files: `3152`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3146`
-- unique syntax hashes: `2945`
+- tracked files: `3152`
+- unique syntax hashes: `2951`
 - compression gain: `201`
-- analysis reduction: `6.38%`
+- analysis reduction: `6.37%`
 - collision count: `0`
-- relocation mappings: `3146`
+- relocation mappings: `3152`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `638`
+- efficiency score: `637`
 - compression score: `201`
-- weighted score: `839`
+- weighted score: `838`
