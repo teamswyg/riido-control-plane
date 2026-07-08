@@ -19126,6 +19126,64 @@
       ],
       "decision": "Store-safe routing failure-path tests now cover missing/invalid manifests, write failures, stale generated docs, missing source anchors, missing repo roots, routing result drift, missing expected errors, and flag parsing failures. tools/storesaferouting rises from 75.8% to 92.2% under Go 1.26.2 with no endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "control_plane_ai_agent_client_api_coverage_loop_32",
+      "observation": "The AI Agent client API verifier protects generated client, OpenAPI, smoke-matrix, and v3 thread history handoff rules, but baseline coverage left manifest IO, output writes, OpenAPI parsing, source anchors, static lists, and v3 rule failure paths under-tested.",
+      "hypothesis": "Focused failure-path tests can prove the AI Agent client API sidecar fails closed when its executable contract mirror or v3 handoff rules drift, without changing generated client output or endpoint payloads.",
+      "claims": [
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate",
+        "thread_history_v3_must_expose_stable_conversation_grouping"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/io_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/openapi_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/source_contract_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/thread_history_v3_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/thread_history_v3_helper_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/verify_error_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-coverage-profile-aiagentclientapi-slice32-2026-07-09",
+          "redacted": true
+        }
+      ],
+      "decision": "AI Agent client API failure-path tests now cover missing/invalid/trailing manifests, write failures, OpenAPI parse and method filtering, required generated-path gaps, source anchor failures, static list drift, loop-step failures, and v3 thread-history rule gaps. tools/aiagentclientapi rises from 75.8% to 90.0% under Go 1.26.2 with no endpoint or payload changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
