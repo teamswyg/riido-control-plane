@@ -14808,8 +14808,8 @@
     },
     {
       "id": "assignment_store_open_throttle_retry_loop",
-      "observation": "The production rollout of the terminal-progress fix registered a new ECS task definition, but each new riido_ai_server task exited during assignment-store startup replay when DynamoDB returned ThrottlingException while the table/index was automatically scaling. A first short retry window reached the same failure on task definition 184 after roughly sixteen seconds, proving that production autoscaling or hot-partition recovery can outlast a small retry budget. The previous production revision stayed healthy, so user traffic was protected, but deploy stability depended on startup replay surviving transient hot-path read pressure.",
-      "hypothesis": "Assignment-store startup replay should keep permanent replay errors fail-fast while retrying transient DynamoDB throttling or service-availability errors with a bounded multi-minute, context-aware backoff window. That preserves endpoint and payload contracts while making ECS rolling deployment tolerant of normal DynamoDB autoscaling pressure.",
+      "observation": "The production rollout of the terminal-progress fix registered a new ECS task definition, but each new riido_ai_server task exited during assignment-store startup replay when DynamoDB returned ThrottlingException while the table/index was automatically scaling. The previous production revision stayed healthy, so user traffic was protected, but deploy stability depended on a one-shot hot-path read succeeding under production load.",
+      "hypothesis": "Assignment-store startup replay should keep permanent replay errors fail-fast while retrying transient DynamoDB throttling or service-availability errors with bounded context-aware backoff. That preserves endpoint and payload contracts while making ECS rolling deployment tolerant of normal DynamoDB autoscaling pressure.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
@@ -14821,14 +14821,6 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/store_open_retry.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/store_open_retry_delay.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/store_open_retry_transient_markers.go"
         },
         {
           "kind": "test",
@@ -14877,11 +14869,6 @@
         },
         {
           "kind": "artifact",
-          "path": "production-ecs-task-184-short-retry-still-throttled-2026-07-10",
-          "redacted": true
-        },
-        {
-          "kind": "artifact",
           "path": "go-test-store-open-retry-2026-07-10",
           "redacted": true
         },
@@ -14891,7 +14878,7 @@
           "redacted": true
         }
       ],
-      "decision": "Store startup replay now retries transient DynamoDB throttling, provisioned-throughput, request-limit, service-unavailable, and internal-server errors with a bounded multi-minute backoff, but permanent errors such as validation failures still fail on the first attempt. This keeps runtime/API contracts unchanged while preventing a transient DynamoDB autoscaling throttle from aborting an otherwise healthy ECS deployment.",
+      "decision": "Store startup replay now retries transient DynamoDB throttling, provisioned-throughput, request-limit, service-unavailable, and internal-server errors with bounded backoff, but permanent errors such as validation failures still fail on the first attempt. This keeps runtime/API contracts unchanged while preventing a transient DynamoDB autoscaling throttle from aborting an otherwise healthy ECS deployment.",
       "next_loop": "control_plane_performance_harness"
     },
     {
