@@ -6,7 +6,14 @@ import (
 	"time"
 )
 
-const storeOpenRetryMaxRetries = 30
+var storeOpenRetryDelays = []time.Duration{
+	200 * time.Millisecond,
+	400 * time.Millisecond,
+	800 * time.Millisecond,
+	1600 * time.Millisecond,
+	3200 * time.Millisecond,
+	5 * time.Second,
+}
 
 func loadAssignmentOperationsWithOpenRetry(
 	ctx context.Context,
@@ -38,10 +45,10 @@ func loadReplayAssignmentProjectionsWithOpenRetry(
 func retryStoreOpenTransient(ctx context.Context, op func() error) error {
 	for attempt := 0; ; attempt++ {
 		err := op()
-		if err == nil || !isTransientStoreOpenError(err) || attempt >= storeOpenRetryMaxRetries {
+		if err == nil || !isTransientStoreOpenError(err) || attempt >= len(storeOpenRetryDelays) {
 			return err
 		}
-		if waitErr := sleepStoreOpenRetry(ctx, storeOpenRetryDelay(attempt)); waitErr != nil {
+		if waitErr := sleepStoreOpenRetry(ctx, storeOpenRetryDelays[attempt]); waitErr != nil {
 			return waitErr
 		}
 	}
@@ -69,4 +76,13 @@ func isTransientStoreOpenError(err error) bool {
 		}
 	}
 	return false
+}
+
+var transientStoreOpenErrorMarkers = []string{
+	"ThrottlingException",
+	"ProvisionedThroughputExceededException",
+	"RequestLimitExceeded",
+	"TooManyRequestsException",
+	"InternalServerError",
+	"ServiceUnavailable",
 }
