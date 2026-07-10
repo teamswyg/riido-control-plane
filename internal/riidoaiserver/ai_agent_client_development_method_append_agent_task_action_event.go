@@ -15,4 +15,7 @@ func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAg
 		ResultMessage:      response.ResultMessage,
 		FailureDiagnostics: copyFailureDiagnostics(response.FailureDiagnostics),
 	})
+	if event, ok := terminalAgentTaskProgressEvent(response); ok {
+		s.appendClientEventLocked(event.EventType, event)
+	}
 }

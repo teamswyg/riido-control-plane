@@ -14684,14 +14684,27 @@
     },
     {
       "id": "completion_progress_completed_terminal_http_proof_loop",
-      "observation": "The Notion QA completion-progress P0 still needed evidence that a completed AI Agent assignment cannot be made to look active again by late daemon progress. Existing stop-terminal tests covered user stop, but completed terminal state had no HTTP-level v2/v3/subscription/SSE replay proof. Updating operational-readiness also changed loop-registry generated surfaces that are claim-bound to generated endpoint and route-handler gates.",
-      "hypothesis": "A focused HTTP regression test can prove the completed terminal path without changing endpoints: after assignment poll, running log, and assignment_completed, a late /thread-progress batch for the same assignment/thread/run must be rejected and must not leak into v2 threads, v3 history, active_thread_filters, or SSE replay. Binding that proof into operational-readiness and evidence-graph keeps generated endpoint and route-handler claims honest while leaving the product P0 partial until a same-moment browser/network reproduction is captured.",
+      "observation": "The Notion QA completion-progress P0 still needed evidence that a completed AI Agent assignment cannot be made to look active again by late daemon progress. Existing stop-terminal tests covered user stop, but completed terminal state had no HTTP-level v2/v3/subscription/SSE replay proof. A live frontend report later showed the inverse edge: v3 history had the final answer after refresh, but the pre-refresh UI stayed running because clients subscribed to agent_thread_progress can miss terminal agent_work_status_changed events. Updating operational-readiness also changed loop-registry generated surfaces that are claim-bound to generated endpoint, route-handler, and SSE hot-path gates.",
+      "hypothesis": "Focused regression tests can prove the completed terminal path without changing endpoints: after assignment poll, running log, and assignment_completed, a late /thread-progress batch for the same assignment/thread/run must be rejected and must not leak into v2 threads, v3 history, active_thread_filters, or SSE replay; terminal task action responses must also fan out a progress-compatible terminal event with the same assignment_id/thread_id/run_id and no progress lines so progress-only clients close the spinner before refresh. Binding that proof into operational-readiness and evidence-graph keeps generated endpoint, route-handler, and SSE fanout claims honest while leaving the product P0 partial until a same-moment browser/network reproduction is captured.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence",
         "generated_endpoint_smoke_matrix_must_remain_contract_gate",
-        "server_route_handlers_must_stay_semantically_split"
+        "server_route_handlers_must_stay_semantically_split",
+        "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_append_agent_task_action_event.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_terminal_progress_event.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_terminal_progress_event_test.go"
+        },
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_http_v3_completed_refresh_test.go"
@@ -14735,6 +14748,10 @@
         }
       ],
       "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_terminal_progress_event_test.go"
+        },
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_http_v3_completed_refresh_test.go"
@@ -14786,7 +14803,7 @@
           "redacted": true
         }
       ],
-      "decision": "The server side of the completed-but-still-progressing P0 is now narrower: completed assignments reject late daemon progress and expose no active stream/filter/replay residue across v2 and v3 HTTP surfaces. This is not product closure; operational-readiness stays partial until the next actual UI recurrence is captured with the redacted same-conversation v3/v2/subscription/SSE tool plus screenshot.",
+      "decision": "The server side of the completed-but-still-progressing P0 is now narrower: completed assignments reject late daemon progress, expose no active stream/filter/replay residue across v2 and v3 HTTP surfaces, and emit a progress-compatible terminal SSE event for clients that follow the task stream subscription contract. This is not product closure; operational-readiness stays partial until the next actual UI recurrence is captured with the redacted same-conversation v3/v2/subscription/SSE tool plus screenshot.",
       "next_loop": "operational_readiness_release_harness"
     },
     {

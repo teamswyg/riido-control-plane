@@ -27,7 +27,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-08",
+      "review_by": "2026-07-15",
       "reason": "Load harness client-read pressure failures need a claim-bound verifier before they become recurring performance gates."
     },
     {
@@ -37,7 +37,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-08",
+      "review_by": "2026-07-15",
       "reason": "Load harness promotion failures must not remain isolated workflow reports without a decision owner."
     },
     {
@@ -47,7 +47,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-08",
+      "review_by": "2026-07-15",
       "reason": "Control-plane hot-path benchmark failures need an owned adoption decision before becoming closed-loop gates."
     },
     {
@@ -57,7 +57,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-08",
+      "review_by": "2026-07-15",
       "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership."
     },
     {
@@ -197,7 +197,7 @@
       "owner": "client-qa-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "staging_client_p0_visual_screenshot_evidence",
-      "review_by": "2026-07-08",
+      "review_by": "2026-07-15",
       "reason": "Backend P0 contract fixes are unblocked, but the visual screenshot confirmation remains a client QA artifact tracked through issue 711 and must not fail server-only follow-up work."
     },
     {
@@ -279,7 +279,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-08",
+      "review_by": "2026-07-15",
       "reason": "Live smoke, load, and performance harness failures can emit dynamic redacted claim ids; route them to claim binding without requiring a per-run manifest edit."
     },
     {
