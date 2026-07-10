@@ -35,7 +35,7 @@ func OpenStoreWithConfig(ctx context.Context, config StoreConfig) (*Store, error
 	}
 	if !loadedSnapshot {
 		if loader, ok := config.OperationStore.(AssignmentOperationLoader); ok {
-			operations, err := loader.LoadAssignmentOperations(ctx)
+			operations, err := loadAssignmentOperationsWithOpenRetry(ctx, loader)
 			if err != nil {
 				return nil, err
 			}
@@ -49,7 +49,7 @@ func OpenStoreWithConfig(ctx context.Context, config StoreConfig) (*Store, error
 		}
 	}
 	if reader, ok := config.OperationStore.(AssignmentProjectionReader); ok {
-		projections, err := loadReplayAssignmentProjections(ctx, &state, reader)
+		projections, err := loadReplayAssignmentProjectionsWithOpenRetry(ctx, &state, reader)
 		if err != nil {
 			return nil, err
 		}
