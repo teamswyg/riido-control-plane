@@ -127,8 +127,8 @@ func TestAIAgentClientProjectionReconcileTaskScopeSkipsUnrelatedActiveThreads(t 
 	if currentThreads.ActiveStream == nil {
 		t.Fatalf("current task should keep active stream for queued thread: %+v", currentThreads)
 	}
-	if currentThreads.Threads[0].AssignmentState != "" || currentThreads.Threads[0].WorkStatus != AgentWorkStatusIdle {
-		t.Fatalf("client projection should hide queued state: %+v", currentThreads)
+	if currentThreads.Threads[0].AssignmentState != AgentAssignmentStateQueued || currentThreads.Threads[0].WorkStatus != AgentWorkStatusIdle {
+		t.Fatalf("client projection should preserve queued lifecycle without working copy: %+v", currentThreads)
 	}
 	store.mu.Lock()
 	durableCurrent := store.taskThreads[current.TaskID][0]

@@ -33,11 +33,11 @@ func TestHTTPAIAgentClientLegacyAssignmentRepeatsSameAgentAsNewThread(t *testing
 	if taskThreadHasActiveStream(firstThread) || firstThread.AssignmentState != AgentAssignmentStateStopped {
 		t.Fatalf("legacy previous thread should remain visible as stopped: %+v", firstThread)
 	}
-	if taskThreadHasActiveStream(secondThread) ||
+	if !taskThreadHasActiveStream(secondThread) ||
 		secondThread.WorkStatus != AgentWorkStatusIdle ||
-		secondThread.AssignmentState != "" ||
+		secondThread.AssignmentState != AgentAssignmentStateQueued ||
 		secondThread.CommentKind != "" {
-		t.Fatalf("legacy replacement thread should hide queued projection: %+v", secondThread)
+		t.Fatalf("legacy replacement thread should preserve queued lifecycle: %+v", secondThread)
 	}
 }
 
@@ -59,7 +59,7 @@ func TestHTTPAIAgentClientLegacyAssignmentHidesBlockedRepeatQueuedProjection(t *
 		t.Fatalf("blocked legacy repeat collapsed: first=%+v second=%+v", first, second)
 	}
 	if second.WorkStatus != AgentWorkStatusIdle ||
-		second.AssignmentState != "" ||
+		second.AssignmentState != AgentAssignmentStateQueued ||
 		second.CommentKind != "" ||
 		second.Message != "" ||
 		second.ActiveStream == nil {

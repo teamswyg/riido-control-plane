@@ -22,7 +22,7 @@ func TestHTTPAIAgentIntentGateExecutesExplicitMetadataTitle(t *testing.T) {
 	}
 	assigned := decodeAIAgentTaskActionResponse(t, assignResp.Body.Bytes())
 	if assigned.WorkStatus != AgentWorkStatusIdle ||
-		assigned.AssignmentState != "" ||
+		assigned.AssignmentState != AgentAssignmentStateQueued ||
 		assigned.CommentKind != "" ||
 		isIntentGateAssignmentID(assigned.AssignmentID) ||
 		assigned.ActiveStream == nil {
