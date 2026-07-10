@@ -59,7 +59,7 @@
       "category": "sse_event_streaming",
       "risk": "Workspace SSE can accumulate subscribers and copy active thread filters while many clients watch the same task.",
       "files": ["internal/riidoaiserver/server_client_sse.go", "internal/riidoaiserver/ai_agent_client_development_type_ai_agent_client_subscriber.go", "internal/riidoaiserver/ai_agent_client_development_method_get_ai_agent_task_thread_stream_subscription.go"],
-      "patterns": ["fmt.Fprintf", "events        chan ClientStreamEvent", "GetAIAgentTaskThreadStreamSubscription"],
+      "patterns": ["fmt.Fprintf", "events                chan ClientStreamEvent", "GetAIAgentTaskThreadStreamSubscription"],
       "candidate": "Prefer active stream target projection and add leak checks before increasing SSE fanout."
     },
     {
@@ -70,6 +70,7 @@
         "internal/riidoaiserver/ai_agent_client_development_type_development_ai_agent_client_store.go",
         "internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go",
         "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go",
+        "internal/riidoaiserver/ai_agent_client_sse_delivery.go",
         "internal/riidoaiserver/ai_agent_client_development_thread_progress_lookup.go",
         "internal/riidoaiserver/ai_agent_client_development_method_append_thread_progress_locked.go",
         "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
@@ -77,8 +78,8 @@
         "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
         "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go"
       ],
-      "patterns": ["subscribers             map[int]aiAgentClientSubscriber", "visibilityKey", "make(chan ClientStreamEvent, 32)", "subscriber.events <- visible"],
-      "candidate": "Measure subscriber fanout pressure before adding richer realtime event types or per-message metadata."
+      "patterns": ["subscribers             map[int]aiAgentClientSubscriber", "visibilityKey", "make(chan ClientStreamEvent, 32)", "deliverAIAgentClientEvent"],
+      "candidate": "Measure subscriber fanout pressure and terminal compensation counts before changing buffer size or adding richer realtime event types."
     },
     {
       "id": "store_waiter_lifecycle",

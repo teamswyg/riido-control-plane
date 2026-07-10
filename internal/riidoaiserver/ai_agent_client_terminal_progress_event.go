@@ -20,13 +20,5 @@ func terminalAgentTaskProgressEvent(response AIAgentTaskActionResponse) (AgentTh
 }
 
 func agentTaskActionIsTerminal(response AIAgentTaskActionResponse) bool {
-	switch response.AssignmentState {
-	case AgentAssignmentStateCompleted,
-		AgentAssignmentStateFailed,
-		AgentAssignmentStateStopped,
-		AgentAssignmentStateUnassigned:
-		return true
-	default:
-		return false
-	}
+	return agentAssignmentStateIsTerminal(response.AssignmentState)
 }

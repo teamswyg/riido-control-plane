@@ -13,6 +13,7 @@ func (s *DevelopmentAIAgentClientStore) SubscribeAIAgentClientEvents(
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.compensateRecentTerminalProgressLocked()
 	history := s.clientEventsForPrincipalLocked(principal)
 	s.nextSubscriberID++
 	id := s.nextSubscriberID
@@ -24,10 +25,14 @@ func (s *DevelopmentAIAgentClientStore) SubscribeAIAgentClientEvents(
 	}
 	cancel := func() {
 		s.mu.Lock()
-		defer s.mu.Unlock()
-		if subscriber, ok := s.subscribers[id]; ok {
+		subscriber, ok := s.subscribers[id]
+		if ok {
 			delete(s.subscribers, id)
 			close(subscriber.events)
+		}
+		s.mu.Unlock()
+		if ok {
+			logAIAgentClientSubscriberDeliverySummary(subscriber)
 		}
 	}
 	return history, events, cancel, nil

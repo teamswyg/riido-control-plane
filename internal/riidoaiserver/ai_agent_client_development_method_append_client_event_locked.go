@@ -9,15 +9,13 @@ func (s *DevelopmentAIAgentClientStore) appendClientEventLocked(eventType string
 	s.events = appendRetainedClientReplayEvent(s.events, event)
 	fanoutEvent, progressFanout := clientEventForLiveFanout(event)
 	cache := subscriberEventCache{}
-	for _, subscriber := range s.subscribers {
+	for id, subscriber := range s.subscribers {
 		visible, ok := cache.eventFor(s, subscriber, event, fanoutEvent, progressFanout)
 		if !ok {
 			continue
 		}
-		select {
-		case subscriber.events <- visible:
-		default:
-		}
+		subscriber = deliverAIAgentClientEvent(subscriber, visible)
+		s.subscribers[id] = subscriber
 	}
 	return event
 }
