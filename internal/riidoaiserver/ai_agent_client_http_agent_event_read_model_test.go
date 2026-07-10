@@ -200,7 +200,7 @@ func TestHTTPAgentEventsUpdateAIAgentTaskThreadReadModel(t *testing.T) {
 		followup.AssignmentID == assigned.AssignmentID ||
 		followup.AgentID != assigned.AgentID ||
 		followup.WorkStatus != AgentWorkStatusIdle ||
-		followup.AssignmentState != "" ||
+		followup.AssignmentState != AgentAssignmentStateQueued ||
 		followup.CommentKind != "" ||
 		followup.Message != "" {
 		t.Fatalf("followup response = %+v", followup)

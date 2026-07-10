@@ -84,7 +84,7 @@ func TestHTTPBootstrapRepairsQueuedProjectionFromEagerRunningReadModel(t *testin
 		len(threads.Threads) != 1 ||
 		threads.Threads[0].ThreadID != assigned.ThreadID ||
 		threads.Threads[0].AssignmentID != assigned.AssignmentID ||
-		threads.Threads[0].AssignmentState != "" ||
+		threads.Threads[0].AssignmentState != AgentAssignmentStateQueued ||
 		threads.Threads[0].WorkStatus != AgentWorkStatusIdle ||
 		threads.Threads[0].CommentKind != "" ||
 		threads.Threads[0].Message != "" ||

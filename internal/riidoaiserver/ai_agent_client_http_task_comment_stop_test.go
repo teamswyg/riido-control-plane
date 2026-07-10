@@ -27,7 +27,7 @@ func TestHTTPAIAgentClientDevelopmentTaskCommentAndStop(t *testing.T) {
 		t.Fatalf("comment json: %v", err)
 	}
 	if comment.WorkStatus != AgentWorkStatusIdle ||
-		comment.AssignmentState != "" ||
+		comment.AssignmentState != AgentAssignmentStateQueued ||
 		comment.CommentKind != "" ||
 		comment.Message != "" {
 		t.Fatalf("comment response = %+v", comment)

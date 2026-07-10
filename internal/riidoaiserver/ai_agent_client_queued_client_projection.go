@@ -5,7 +5,6 @@ func clientVisibleQueuedActionResponse(response AIAgentTaskActionResponse) AIAge
 		return response
 	}
 	response.WorkStatus = AgentWorkStatusIdle
-	response.AssignmentState = ""
 	response.CommentKind = ""
 	response.Message = ""
 	response.ResultMessage = ""
@@ -17,7 +16,6 @@ func clientVisibleQueuedTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskTh
 		return thread
 	}
 	thread.WorkStatus = AgentWorkStatusIdle
-	thread.AssignmentState = ""
 	thread.CommentKind = ""
 	thread.Message = ""
 	thread.ResultMessage = ""
