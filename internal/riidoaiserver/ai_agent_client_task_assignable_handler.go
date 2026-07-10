@@ -18,5 +18,6 @@ func (s Server) handleAIAgentClientTaskAssignableAgents(w http.ResponseWriter, r
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	response.Agents = s.runtimeBoundAssignableAgents(response.Agents)
 	writeJSON(w, http.StatusOK, response)
 }

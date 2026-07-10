@@ -36,7 +36,8 @@
       {"name":"initial-load-v3","detail":"When the task screen opens or refreshes, call GET /v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads and use it as the canonical read model."},
       {"name":"group-by-conversation-id","detail":"Render one Agent comment card per conversation_id. thread_id is the concrete run/thread record inside that card, not the card grouping key."},
       {"name":"optimistic-v2-mutation","detail":"For assign, message, stop, and delete, use the existing v2 mutation endpoint and apply an optimistic UI update immediately from the mutation response."},
-      {"name":"refetch-v3-after-mutation","detail":"After each v2 mutation settles, refetch v3 thread history to recover persisted user messages, agent replies, progress rows, and historical snapshots."}
+      {"name":"refetch-v3-after-mutation","detail":"After each v2 mutation settles, refetch v3 thread history to recover persisted user messages, agent replies, progress rows, and historical snapshots."},
+      {"name":"select-runtime-bound-agent","detail":"Populate the participant picker from task-scoped assignable-agents. Bootstrap remains the management catalog, while assignable-agents includes only visible agents whose runtime and daemon are currently online and resolvable by the assignment POST path."}
     ],
     "response_shapes": [
       {
@@ -172,7 +173,8 @@
       "queued-stream-current-only",
       "terminal-late-event-guard",
       "terminal-active-stream-closure",
-      "deleted-agent-history-retention"
+      "deleted-agent-history-retention",
+      "runtime-bound-assignable-agents"
     ]
   },
   "source_checks": [
@@ -191,6 +193,8 @@
     {"name":"thread-history-v3-queued-status-state-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_state_test.go","contains":["TestAIAgentTaskThreadHistoryHidesQueuedMessageWhenConversationIsRunning"]},
     {"name":"thread-history-v3-queued-stream-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go","contains":["TestAIAgentTaskThreadHistoryClearsQueuedStreamWhenConversationRuns","TestAIAgentTaskThreadHistoryActiveStreamPrefersRunning"]},
     {"name":"assignment-participant-stability-test","file":"internal/riidoaiserver/ai_agent_client_http_assignment_participant_stability_test.go","contains":["TestHTTPAssignmentKeepsParticipantWhileDurablyQueued","AssignmentStateQueued","ActiveStream"]},
+    {"name":"assignable-runtime-binding-filter","file":"internal/riidoaiserver/ai_agent_client_assignable_runtime_filter.go","contains":["runtimeBoundAssignableAgents","resolveAgentRuntimeFact"]},
+    {"name":"assignable-runtime-binding-test","file":"internal/riidoaiserver/ai_agent_client_http_assignable_runtime_binding_test.go","contains":["TestHTTPAIAgentClientAssignableAgentsMatchAssignmentRuntimeValidation","agent-owned-claude","agent-owned-codex"]},
     {"name":"thread-history-v3-conversation-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go","contains":["assertConversationFollowup","ConversationID","ParentThreadID","assertConversationReassignment"]},
     {"name":"thread-history-v3-intent-chain-test","file":"internal/riidoaiserver/ai_agent_intent_dialogue_full_chain_assert_test.go","contains":["assertNestedConversationFollowup","assertDraftCopywritingComplete"]},
     {"name":"thread-history-v3-intent-handoff-test","file":"internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go","contains":["TestAIAgentIntentDialogueCanHandoffAfterProviderLimit","assertConversationReassignment","assertFollowupResearchLimit"]},

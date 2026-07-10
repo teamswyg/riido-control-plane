@@ -39,7 +39,7 @@ func TestHTTPAIAgentClientDevelopmentAssignableAgentsUseStableIDTieBreak(t *test
 	if err := json.Unmarshal(resp.Body.Bytes(), &out); err != nil {
 		t.Fatalf("assignable json: %v", err)
 	}
-	if got, want := aiAgentIDsWithName(out.Agents, "중복 이름"), []string{"agent-owned-claude", "agent-owned-codex"}; !sameStrings(got, want) {
+	if got, want := aiAgentIDsWithName(out.Agents, "중복 이름"), []string{"agent-owned-codex"}; !sameStrings(got, want) {
 		t.Fatalf("owned duplicate-name order = %v, want %v; all agents=%+v", got, want, out.Agents)
 	}
 	if got, want := aiAgentIDsWithName(out.Agents, "공개 중복"), []string{"agent-public-alpha", "agent-public-zeta"}; !sameStrings(got, want) {

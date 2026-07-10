@@ -87,14 +87,11 @@ func TestHTTPAIAgentClientDevelopmentBootstrapAndAssignableAgents(t *testing.T) 
 	if err := json.Unmarshal(assignableResp.Body.Bytes(), &assignable); err != nil {
 		t.Fatalf("assignable json: %v", err)
 	}
-	if len(assignable.Agents) != 3 {
-		t.Fatalf("assignable agents = %+v", assignable.Agents)
+	if got, want := aiAgentIDs(assignable.Agents), []string{"agent-owned-codex", "agent-public-openclaw"}; !sameStrings(got, want) {
+		t.Fatalf("assignable agents = %v, want %v", got, want)
 	}
-	if !assignable.Agents[0].IsOwnedByViewer || !assignable.Agents[1].IsOwnedByViewer || assignable.Agents[2].IsOwnedByViewer {
+	if !assignable.Agents[0].IsOwnedByViewer || assignable.Agents[1].IsOwnedByViewer {
 		t.Fatalf("assignable owned-first flags = %+v", assignable.Agents)
-	}
-	if assignable.Agents[0].Name > assignable.Agents[1].Name {
-		t.Fatalf("owned agents should be ordered by name: %+v", assignable.Agents[:2])
 	}
 
 	threadsReq := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/tasks/task-1/threads", nil)
