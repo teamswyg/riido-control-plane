@@ -20177,6 +20177,68 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "assignable_agents_runtime_binding_consistency_loop",
+      "observation": "Staging returned 400 ai agent runtime binding is not configured immediately after the participant picker offered an agent. DynamoDB runtime snapshots showed that the workspace catalog retained agents whose runtime or daemon was missing/offline, while assignment POST correctly rejected those stale bindings.",
+      "hypothesis": "Filtering only the task-scoped assignable-agents HTTP response through the same runtime-fact resolver used by assignment POST will prevent impossible selections without hiding offline profiles from bootstrap management views or changing the stale cached POST error contract.",
+      "claims": [
+        "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
+        "server_route_handlers_must_stay_semantically_split"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_assignable_runtime_filter.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assignable_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_runtime_fact_locked.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_runtime_binding_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_runtime_binding_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentclientapi"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assignable_runtime_binding_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "staging-runtime-binding-mismatch-2026-07-10",
+          "redacted": true
+        }
+      ],
+      "decision": "Task-scoped assignable-agents now returns only visible agents whose exact runtime and owning daemon project online through the assignment runtime-fact resolver. Bootstrap still exposes offline profiles for management, duplicate agents sharing one live runtime remain valid, and a stale cached direct POST still fails closed with the existing 400 runtime-binding error.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "control_plane_module_decomposition_coverage_loop_37",
       "observation": "The module decomposition verifier guards package ownership, generated reader freshness, forbidden imports, and line-budget ratchets, but baseline coverage left manifest IO errors, stale-doc detection, path resolution, line-budget sorting, and verifier failure paths weakly asserted.",
       "hypothesis": "Focused error-path tests can make the module decomposition sidecar fail closed when its SSOT, generated doc, or source-boundary checks drift, without changing endpoint behavior or generated runtime artifacts.",

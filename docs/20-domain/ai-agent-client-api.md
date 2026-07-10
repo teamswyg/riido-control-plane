@@ -67,6 +67,7 @@ Use v3 for initial/read refresh, v2 for mutations, and v2 SSE for live progress.
 | `group-by-conversation-id` | Render one Agent comment card per conversation_id. thread_id is the concrete run/thread record inside that card, not the card grouping key. |
 | `optimistic-v2-mutation` | For assign, message, stop, and delete, use the existing v2 mutation endpoint and apply an optimistic UI update immediately from the mutation response. |
 | `refetch-v3-after-mutation` | After each v2 mutation settles, refetch v3 thread history to recover persisted user messages, agent replies, progress rows, and historical snapshots. |
+| `select-runtime-bound-agent` | Populate the participant picker from task-scoped assignable-agents. Bootstrap remains the management catalog, while assignable-agents includes only visible agents whose runtime and daemon are currently online and resolvable by the assignment POST path. |
 
 ### Thread History v3 Response Model
 
@@ -191,6 +192,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 - terminal-late-event-guard
 - terminal-active-stream-closure
 - deleted-agent-history-retention
+- runtime-bound-assignable-agents
 
 ## Evidence Loop
 
