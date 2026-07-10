@@ -13,4 +13,5 @@ func retainLatestClientReplayEvents(events []ClientStreamEvent) []ClientStreamEv
 // thread. Lines accumulate per run and are serialized into the single AI Agent
 // client snapshot DynamoDB item (400 KB hard limit); left uncapped they
 // eventually make every client-projection write fail. Only the latest lines are
-// kept for replay — live SSE subscribers still receive every line in real time.
+// kept for replay. Live progress is best-effort under backpressure, while terminal
+// progress is prioritized and repaired from the durable thread projection.

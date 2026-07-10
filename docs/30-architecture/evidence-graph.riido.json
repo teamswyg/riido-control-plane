@@ -14684,13 +14684,14 @@
     },
     {
       "id": "completion_progress_completed_terminal_http_proof_loop",
-      "observation": "The Notion QA completion-progress P0 still needed evidence that a completed AI Agent assignment cannot be made to look active again by late daemon progress. Existing stop-terminal tests covered user stop, but completed terminal state had no HTTP-level v2/v3/subscription/SSE replay proof. A live frontend report later showed the inverse edge: v3 history had the final answer after refresh, but the pre-refresh UI stayed running because clients subscribed to agent_thread_progress can miss terminal agent_work_status_changed events. Updating operational-readiness also changed loop-registry generated surfaces that are claim-bound to generated endpoint, route-handler, and SSE hot-path gates.",
-      "hypothesis": "Focused regression tests can prove the completed terminal path without changing endpoints: after assignment poll, running log, and assignment_completed, a late /thread-progress batch for the same assignment/thread/run must be rejected and must not leak into v2 threads, v3 history, active_thread_filters, or SSE replay; terminal task action responses must also fan out a progress-compatible terminal event with the same assignment_id/thread_id/run_id and no progress lines so progress-only clients close the spinner before refresh. Binding that proof into operational-readiness and evidence-graph keeps generated endpoint, route-handler, and SSE fanout claims honest while leaving the product P0 partial until a same-moment browser/network reproduction is captured.",
+      "observation": "The Notion QA completion-progress P0 still needed evidence that a completed AI Agent assignment cannot be made to look active again by late daemon progress. Existing stop-terminal tests covered user stop, but completed terminal state had no HTTP-level v2/v3/subscription/SSE replay proof. A live frontend report later showed the inverse edge: v3 history had the final answer after refresh, but the pre-refresh UI stayed running because clients subscribed to agent_thread_progress can miss terminal agent_work_status_changed events. A later Claude Code recurrence exposed the remaining delivery gap after terminal-progress fanout was added: the control-plane subscriber channel buffered 32 events and silently dropped every event on overflow, including terminal progress, so Claude's bursty progress could leave durable v3 state completed while the still-open client stream never received completion. Daemon executable knowledge already retains terminal reports until accepted and assigns SSE fanout ownership to control-plane, so the contradiction was inside control-plane delivery and its old claim that every live line reaches subscribers.",
+      "hypothesis": "Focused regression tests can prove the completed terminal path without changing endpoints: after assignment poll, running log, and assignment_completed, a late /thread-progress batch for the same assignment/thread/run must be rejected and must not leak into v2 threads, v3 history, active_thread_filters, or SSE replay. Terminal task action responses must fan out a progress-compatible terminal event; when a subscriber buffer is full that terminal event must displace buffered non-terminal progress, and a reconnect must synthesize one idempotent terminal replay event from a recent durable terminal thread if the event is absent. Structured stream lifecycle, overflow summary, priority-delivery, and replay-compensation logs can then distinguish provider completion, control-plane fanout pressure, and connection loss without recording credentials or message bodies.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence",
         "generated_endpoint_smoke_matrix_must_remain_contract_gate",
         "server_route_handlers_must_stay_semantically_split",
-        "control_plane_performance_hot_paths_must_emit_evidence"
+        "control_plane_performance_hot_paths_must_emit_evidence",
+        "thread_history_v3_must_expose_stable_conversation_grouping"
       ],
       "changes": [
         {
@@ -14708,6 +14709,30 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_client_http_v3_completed_refresh_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_terminal_progress_compensation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_logging.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_terminal_sse_priority_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_terminal_sse_replay_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
         },
         {
           "kind": "artifact",
@@ -14758,6 +14783,18 @@
         },
         {
           "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_terminal_sse_priority_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_terminal_sse_replay_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_logging_test.go"
+        },
+        {
+          "kind": "test",
           "path": "tools/operationalreadiness/completion_progress_terminal_http_proof_test.go"
         },
         {
@@ -14801,9 +14838,14 @@
           "kind": "artifact",
           "path": "evidence-graph-evidence",
           "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
         }
       ],
-      "decision": "The server side of the completed-but-still-progressing P0 is now narrower: completed assignments reject late daemon progress, expose no active stream/filter/replay residue across v2 and v3 HTTP surfaces, and emit a progress-compatible terminal SSE event for clients that follow the task stream subscription contract. This is not product closure; operational-readiness stays partial until the next actual UI recurrence is captured with the redacted same-conversation v3/v2/subscription/SSE tool plus screenshot.",
+      "decision": "The server side of the completed-but-still-progressing P0 now covers both terminal creation and terminal delivery: completed assignments reject late daemon progress, expose no active stream/filter residue, emit a progress-compatible terminal SSE event, prioritize that event over buffered progress when the 32-event subscriber channel is full, and reconstruct one recent missing terminal replay event from durable v3 thread state on subscription. Connection close reasons, fanout overflow summaries, terminal priority delivery, and replay compensation are logged without query credentials or message bodies. Claude Code remains responsible for reporting terminal outcome until accepted; control-plane is responsible for client SSE delivery and compensation. Product closure still requires a live post-deploy Claude recurrence showing the pre-refresh UI closes without manual reload.",
       "next_loop": "operational_readiness_release_harness"
     },
     {

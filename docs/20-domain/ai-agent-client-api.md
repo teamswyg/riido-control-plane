@@ -163,6 +163,8 @@ One stable timeline row inside a thread history record. message_id is the React 
 - Filter payloads by task_id, agent_id, thread_id, and run_id.
 - Use assignment_id + run_id + seq as the progress dedupe key when assignment_id is present.
 - SSE is a live update input; v3 thread history remains the refresh recovery truth.
+- Live progress may be dropped under subscriber backpressure, but a terminal agent_thread_progress event must be prioritized over buffered progress and replay-compensated from a recent durable terminal thread when absent.
+- SSE open, close reason, fan-out overflow, and terminal replay compensation must be emitted as structured control-plane logs without credentials or message bodies.
 - Do not revive a terminal assignment when a late runtime progress event arrives.
 - If v3 thread history has no active_stream, the client must not keep a local running spinner for that task.
 
@@ -181,6 +183,9 @@ One stable timeline row inside a thread history record. message_id is the React 
 - v2-sse
 - optimistic-then-v3-refetch
 - progress-dedupe
+- terminal-sse-priority-delivery
+- terminal-sse-replay-compensation
+- sse-lifecycle-observability
 - queued-status-current-only
 - queued-stream-current-only
 - terminal-late-event-guard

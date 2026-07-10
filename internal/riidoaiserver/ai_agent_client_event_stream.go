@@ -8,13 +8,16 @@ import (
 
 func serveAIAgentClientEventStream(w http.ResponseWriter, r *http.Request, events []ClientStreamEvent, live <-chan ClientStreamEvent) {
 	writeAIAgentClientStreamHeaders(w)
+	logAIAgentClientStreamOpen(r, len(events))
 	for _, event := range events {
 		if err := writeAIAgentClientSSE(w, event); err != nil {
+			logAIAgentClientStreamClose(r, "replay_write_error", err)
 			return
 		}
 	}
 	flushAIAgentClientStream(w)
 	if r.URL.Query().Get("replay") == "1" {
+		logAIAgentClientStreamClose(r, "replay_complete", nil)
 		return
 	}
 	streamLiveAIAgentClientEvents(w, r, live)
@@ -33,18 +36,22 @@ func streamLiveAIAgentClientEvents(w http.ResponseWriter, r *http.Request, live 
 		select {
 		case event, ok := <-live:
 			if !ok {
+				logAIAgentClientStreamClose(r, "subscriber_closed", nil)
 				return
 			}
 			if err := writeAIAgentClientSSE(w, event); err != nil {
+				logAIAgentClientStreamClose(r, "event_write_error", err)
 				return
 			}
 			flushAIAgentClientStream(w)
 		case <-keepalive.C:
 			if _, err := io.WriteString(w, ": keepalive\n\n"); err != nil {
+				logAIAgentClientStreamClose(r, "keepalive_write_error", err)
 				return
 			}
 			flushAIAgentClientStream(w)
 		case <-r.Context().Done():
+			logAIAgentClientStreamClose(r, "request_context_done", r.Context().Err())
 			return
 		}
 	}
