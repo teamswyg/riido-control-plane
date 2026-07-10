@@ -58,10 +58,10 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | Candidate | Disposition | Priority | Owner | Review By | Next Artifact |
 | --- | --- | --- | --- | --- | --- |
 | `ai-agent-client-testnet-smoke:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
-| `ai-agent-client-testnet-load:load_harness_client_read_pressure` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
-| `ai-agent-client-testnet-load:load_harness_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
-| `control-plane-performance:control_plane_performance_hot_path_benchmarks` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
-| `control-plane-performance:control_plane_performance_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `ai-agent-client-testnet-load:load_harness_client_read_pressure` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `ai-agent-client-testnet-load:load_harness_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `control-plane-performance:control_plane_performance_hot_path_benchmarks` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
+| `control-plane-performance:control_plane_performance_closed_loop_promotion` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
 | `control-plane-pressure:http_endpoint_threads_v3` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
 | `control-plane-pressure:http_metrics_observe` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 | `control-plane-pressure:store_metrics_observe` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
@@ -75,7 +75,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 | `loop-closure-audit:syntax_hash_graph_spike` | `adopted` | `P1` | `agent-platform-loop` | `2026-07-10` | `syntax_hash_manifest` |
 | `loop-refresh-dispatch:source_coverage_seed` | `deferred` | `P2` | `agent-platform-loop` | `2026-07-15` | `decision_record` |
 | `operational-readiness:otel_xray_client_surface` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `client_surface_alarm_plan_apply_evidence` |
-| `operational-readiness:staging_client_p0_visual_retest` | `deferred` | `P0` | `client-qa-loop` | `2026-07-08` | `staging_client_p0_visual_screenshot_evidence` |
+| `operational-readiness:staging_client_p0_visual_retest` | `deferred` | `P0` | `client-qa-loop` | `2026-07-15` | `staging_client_p0_visual_screenshot_evidence` |
 | `operational-readiness:daemon_network_disconnect_waiting` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `daemon_network_disconnect_release_evidence` |
 | `operational-readiness:single_pc_agent_limit` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `single_pc_agent_capacity_evidence` |
 | `operational-readiness:boot_burst_capacity` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `cold_start_packet_burst_evidence` |
@@ -88,7 +88,7 @@ Executable SSOT: [`closed-loop-candidate-decision.riido.json`](closed-loop-candi
 
 | Subject Kind | Disposition | Priority | Owner | Review By | Next Artifact |
 | --- | --- | --- | --- | --- | --- |
-| `harness_failure` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-08` | `claim_binding` |
+| `harness_failure` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `claim_binding` |
 | `loop_refresh_ignored_command` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `verifier` |
 | `loop_refresh_stale_source` | `triage_required` | `P1` | `agent-platform-loop` | `2026-07-15` | `redacted_evidence` |
 
