@@ -14807,6 +14807,81 @@
       "next_loop": "operational_readiness_release_harness"
     },
     {
+      "id": "assignment_store_open_throttle_retry_loop",
+      "observation": "The production rollout of the terminal-progress fix registered a new ECS task definition, but each new riido_ai_server task exited during assignment-store startup replay when DynamoDB returned ThrottlingException while the table/index was automatically scaling. The previous production revision stayed healthy, so user traffic was protected, but deploy stability depended on a one-shot hot-path read succeeding under production load.",
+      "hypothesis": "Assignment-store startup replay should keep permanent replay errors fail-fast while retrying transient DynamoDB throttling or service-availability errors with bounded context-aware backoff. That preserves endpoint and payload contracts while making ECS rolling deployment tolerant of normal DynamoDB autoscaling pressure.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_open.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_open_retry.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_open_retry_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_open_retry_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "production-ecs-task-183-dynamodb-throttling-exit-2026-07-10",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-test-store-open-retry-2026-07-10",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "pre-commit-store-open-retry-2026-07-10",
+          "redacted": true
+        }
+      ],
+      "decision": "Store startup replay now retries transient DynamoDB throttling, provisioned-throughput, request-limit, service-unavailable, and internal-server errors with bounded backoff, but permanent errors such as validation failures still fail on the first attempt. This keeps runtime/API contracts unchanged while preventing a transient DynamoDB autoscaling throttle from aborting an otherwise healthy ECS deployment.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "go_ci_coverage_evidence_loop",
       "observation": "Repo-wide Go CI previously proved pass/fail but did not publish the coverage profile or function summary needed to track the gap between current 78 percent statement coverage and the desired 100 percent target.",
       "hypothesis": "Adding coverage profile generation to the existing Go CI baseline keeps endpoint and runtime contracts unchanged while making coverage drift observable as a CI artifact.",
