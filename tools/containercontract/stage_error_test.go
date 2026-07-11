@@ -7,7 +7,7 @@ import (
 
 func TestVerifyContractRejectsBuildStageDrift(t *testing.T) {
 	for name, mutate := range map[string]func(string) string{
-		"arg":      func(s string) string { return strings.Replace(s, "golang:1.26", "golang:1.25", 1) },
+		"arg":      func(s string) string { return strings.Replace(s, "golang:1.26.5", "golang:1.25", 1) },
 		"alias":    func(s string) string { return strings.Replace(s, " AS build", " AS builder", 1) },
 		"workdir":  func(s string) string { return strings.Replace(s, "WORKDIR /src", "WORKDIR /app", 1) },
 		"env":      func(s string) string { return strings.Replace(s, "CGO_ENABLED=0", "CGO_ENABLED=1", 1) },

@@ -2,7 +2,7 @@ package main
 
 func fixtureBuildContract() buildContract {
 	return buildContract{
-		BuildArg:   buildArgContract{Name: "GO_IMAGE", Default: "golang:1.26"},
+		BuildArg:   buildArgContract{Name: "GO_IMAGE", Default: "golang:1.26.5"},
 		StageName:  "build",
 		Workdir:    "/src",
 		CGOEnabled: "0",

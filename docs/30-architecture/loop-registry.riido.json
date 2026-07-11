@@ -4664,7 +4664,7 @@
         "docs/30-architecture/module-decomposition.md",
         "docs/30-architecture/integration-matrix.md"
       ],
-      "semantic_hash": "2a48bb1fe34e0c2db80a14a7e78046256e99ec489d47de5ad5f0d3181cee7d8e"
+      "semantic_hash": "0caddfe0b530fa5ebd74ab5da77d1f72202c678a5485a17d784609d419933a22"
     },
     {
       "id": "store_snapshot_file_outbox_must_preserve_durable_replay_evidence",
