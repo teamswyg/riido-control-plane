@@ -19,7 +19,7 @@
   "build": {
     "build_arg": {
       "name": "GO_IMAGE",
-      "default": "golang:1.26"
+      "default": "golang:1.26.5"
     },
     "stage_name": "build",
     "workdir": "/src",

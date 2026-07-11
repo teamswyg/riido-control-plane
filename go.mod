@@ -1,8 +1,6 @@
 module github.com/teamswyg/riido-control-plane
 
-go 1.26
-
-toolchain go1.26.2
+go 1.26.5
 
 require (
 	github.com/teamswyg/riido-contracts v0.3.7-0.20260617151744-7102162a2578

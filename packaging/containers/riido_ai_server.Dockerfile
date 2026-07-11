@@ -1,4 +1,4 @@
-ARG GO_IMAGE=golang:1.26
+ARG GO_IMAGE=golang:1.26.5
 FROM ${GO_IMAGE} AS build
 
 WORKDIR /src
