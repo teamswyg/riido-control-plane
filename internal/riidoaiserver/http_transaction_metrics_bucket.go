@@ -12,6 +12,7 @@ func (m *HTTPTransactionMetrics) bucketLocked(start time.Time) *httpTransactionB
 		start:             start,
 		byKey:             map[httpTransactionKey]httpTransactionMetricState{},
 		responsesByStatus: map[int]int64{},
+		sseByKey:          map[sseStreamKey]sseStreamMetricState{},
 	}
 	m.buckets[key] = bucket
 	return bucket

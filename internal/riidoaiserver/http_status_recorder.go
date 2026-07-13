@@ -6,6 +6,7 @@ type httpStatusRecorder struct {
 	http.ResponseWriter
 	statusCode int
 	wrote      bool
+	onCommit   func(int)
 }
 
 func (r *httpStatusRecorder) WriteHeader(statusCode int) {
@@ -15,6 +16,9 @@ func (r *httpStatusRecorder) WriteHeader(statusCode int) {
 	r.wrote = true
 	r.statusCode = statusCode
 	r.ResponseWriter.WriteHeader(statusCode)
+	if r.onCommit != nil {
+		r.onCommit(statusCode)
+	}
 }
 
 func (r *httpStatusRecorder) Write(p []byte) (int, error) {
@@ -25,6 +29,9 @@ func (r *httpStatusRecorder) Write(p []byte) (int, error) {
 }
 
 func (r *httpStatusRecorder) Flush() {
+	if !r.wrote {
+		r.WriteHeader(http.StatusOK)
+	}
 	if flusher, ok := r.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
 	}

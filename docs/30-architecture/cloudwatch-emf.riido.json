@@ -8,8 +8,8 @@
   "owner_package": "internal/riidoaiserver",
   "source_checks": [
     {"name": "writer", "file": "internal/riidoaiserver/cloudwatch_emf_write.go", "contains": ["WriteCloudWatchEMF"]},
-    {"name": "envelope", "file": "internal/riidoaiserver/cloudwatch_emf_envelope.go", "contains": ["metric_scope_schema_version", "ai_agent_client_snapshot_load_calls_total"]},
-    {"name": "metric_specs", "file": "internal/riidoaiserver/cloudwatch_emf_metric_specs.go", "contains": ["cloudWatchMetricSpecs", "ai_agent_client_snapshot_load_calls_total"]},
+    {"name": "envelope", "file": "internal/riidoaiserver/cloudwatch_emf_envelope.go", "contains": ["metric_scope_schema_version", "sse_stream_duration_max_ms", "ai_agent_client_snapshot_load_calls_total"]},
+    {"name": "metric_specs", "file": "internal/riidoaiserver/cloudwatch_emf_metric_specs.go", "contains": ["cloudWatchMetricSpecs", "sse_stream_ttfb_max_ms", "ai_agent_client_snapshot_load_calls_total"]},
     {"name": "write_test", "file": "internal/riidoaiserver/cloudwatch_emf_write_test.go", "contains": ["TestWriteCloudWatchEMF"]},
     {"name": "publish_test", "file": "internal/riidoaiserver/cloudwatch_emf_publish_test.go", "contains": ["TestPublishCloudWatchEMFUsesStoreSnapshot"]},
     {"name": "store_assertions", "file": "internal/riidoaiserver/cloudwatch_emf_assert_store_test.go", "contains": ["StoreOperationCallsTotal"]}
@@ -24,6 +24,11 @@
     "store_operation_metric_scope",
     "snapshot_persistence_metric_scope",
     "http_transactions",
+    "sse_stream_activity_metric_scope",
+    "sse_stream_active_metric_scope",
+    "sse_streams",
+    "sse_stream_ttfb_max_ms",
+    "sse_stream_duration_max_ms",
     "store_operations",
     "ai_agent_client_snapshot_load_bytes_last",
     "ai_agent_client_snapshot_save_latency_max_ms"
@@ -32,6 +37,8 @@
     {"field": "metric_scope_schema_version", "value": "riido-metric-scope.v1"},
     {"field": "store_state_metric_scope", "value": "store_state_cumulative"},
     {"field": "http_metric_scope", "value": "rolling_5m"},
+    {"field": "sse_stream_activity_metric_scope", "value": "rolling_5m"},
+    {"field": "sse_stream_active_metric_scope", "value": "process_current"},
     {"field": "store_operation_metric_scope", "value": "rolling_5m"},
     {"field": "snapshot_persistence_metric_scope", "value": "process_lifetime"}
   ],
@@ -41,6 +48,9 @@
     {"name": "event_append_latency_max_ms", "unit": "Milliseconds"},
     {"name": "http_requests_total", "unit": "Count"},
     {"name": "http_request_latency_max_ms", "unit": "Milliseconds"},
+    {"name": "sse_streams_active", "unit": "Count"},
+    {"name": "sse_stream_ttfb_max_ms", "unit": "Milliseconds"},
+    {"name": "sse_stream_duration_max_ms", "unit": "Milliseconds"},
     {"name": "store_operation_calls_total", "unit": "Count"},
     {"name": "store_operation_latency_max_ms", "unit": "Milliseconds"},
     {"name": "ai_agent_client_snapshot_load_bytes_last", "unit": "Bytes"},

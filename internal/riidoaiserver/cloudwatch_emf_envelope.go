@@ -7,6 +7,8 @@ type cloudWatchEMFEnvelope struct {
 	MetricScopeSchemaVersion                          string                  `json:"metric_scope_schema_version"`
 	StoreStateMetricScope                             string                  `json:"store_state_metric_scope"`
 	HTTPMetricScope                                   string                  `json:"http_metric_scope"`
+	SSEStreamActivityMetricScope                      string                  `json:"sse_stream_activity_metric_scope"`
+	SSEStreamActiveMetricScope                        string                  `json:"sse_stream_active_metric_scope"`
 	StoreOperationMetricScope                         string                  `json:"store_operation_metric_scope"`
 	SnapshotPersistenceMetricScope                    string                  `json:"snapshot_persistence_metric_scope"`
 	TasksTotal                                        int                     `json:"tasks_total"`
@@ -27,6 +29,18 @@ type cloudWatchEMFEnvelope struct {
 	AgentEventsTotal                                  int64                   `json:"agent_events_total"`
 	TaskEventsTotal                                   int64                   `json:"task_events_total"`
 	SSESubscribers                                    int                     `json:"sse_subscribers"`
+	SSEStreamsActive                                  int64                   `json:"sse_streams_active"`
+	SSEStreamsOpenedTotal                             int64                   `json:"sse_streams_opened_total"`
+	SSEStreamsClosedTotal                             int64                   `json:"sse_streams_closed_total"`
+	SSEStreamTTFBSamplesTotal                         int64                   `json:"sse_stream_ttfb_samples_total"`
+	SSEStreamTTFBTotalMilliseconds                    int64                   `json:"sse_stream_ttfb_total_ms"`
+	SSEStreamTTFBMaxMilliseconds                      int64                   `json:"sse_stream_ttfb_max_ms"`
+	SSEStreamTTFBLastMilliseconds                     int64                   `json:"sse_stream_ttfb_last_ms"`
+	SSEStreamDurationSamplesTotal                     int64                   `json:"sse_stream_duration_samples_total"`
+	SSEStreamDurationTotalMilliseconds                int64                   `json:"sse_stream_duration_total_ms"`
+	SSEStreamDurationMaxMilliseconds                  int64                   `json:"sse_stream_duration_max_ms"`
+	SSEStreamDurationLastMilliseconds                 int64                   `json:"sse_stream_duration_last_ms"`
+	SSEStreams                                        []SSEStreamMetric       `json:"sse_streams,omitempty"`
 	OutboxErrorsTotal                                 int64                   `json:"outbox_errors_total"`
 	EventAppendLatencySamplesTotal                    int64                   `json:"event_append_latency_samples_total"`
 	EventAppendLatencyTotalMilliseconds               int64                   `json:"event_append_latency_total_ms"`

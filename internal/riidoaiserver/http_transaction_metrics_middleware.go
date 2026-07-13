@@ -17,7 +17,41 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 		}
 		startedAt := time.Now()
 		recorder := &httpStatusRecorder{ResponseWriter: w, statusCode: http.StatusOK}
+		streamOpenedAt := time.Time{}
+		streamRoute := ""
+		streamClientSurface := ""
+		recorder.onCommit = func(statusCode int) {
+			if !isSSEResponse(recorder.Header()) {
+				return
+			}
+			streamOpenedAt = time.Now()
+			streamRoute = httpMetricRoute(r.Method, r.URL.Path, r.Pattern, statusCode)
+			streamClientSurface = traceHTTPClientSurface(streamRoute, r.URL.Path, r.UserAgent())
+			ttfb := streamOpenedAt.Sub(startedAt)
+			metrics.ObserveHTTPTransaction(HTTPTransactionObservation{
+				Method:        r.Method,
+				Route:         streamRoute,
+				ClientSurface: streamClientSurface,
+				StatusCode:    statusCode,
+				Duration:      ttfb,
+				ObservedAt:    streamOpenedAt,
+			})
+			metrics.ObserveSSEStreamOpen(SSEStreamOpenObservation{
+				Route:           streamRoute,
+				ClientSurface:   streamClientSurface,
+				TimeToFirstByte: ttfb,
+				ObservedAt:      streamOpenedAt,
+			})
+		}
 		next.ServeHTTP(recorder, r)
+		if !streamOpenedAt.IsZero() {
+			metrics.ObserveSSEStreamClose(SSEStreamCloseObservation{
+				Route:         streamRoute,
+				ClientSurface: streamClientSurface,
+				Duration:      time.Since(streamOpenedAt),
+			})
+			return
+		}
 		route := httpMetricRoute(r.Method, r.URL.Path, r.Pattern, recorder.statusCode)
 		metrics.ObserveHTTPTransaction(HTTPTransactionObservation{
 			Method:        r.Method,
@@ -27,6 +61,11 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 			Duration:      time.Since(startedAt),
 		})
 	})
+}
+
+func isSSEResponse(header http.Header) bool {
+	contentType := strings.ToLower(strings.TrimSpace(header.Get("Content-Type")))
+	return contentType == "text/event-stream" || strings.HasPrefix(contentType, "text/event-stream;")
 }
 
 func httpMetricRoute(method, path, pattern string, statusCode int) string {

@@ -21,6 +21,8 @@ func assertCloudWatchEMFScopes(t *testing.T, envelope cloudWatchEMFEnvelope) {
 	if envelope.MetricScopeSchemaVersion != cloudWatchEMFMetricScopeSchemaVersion ||
 		envelope.StoreStateMetricScope != cloudWatchEMFStoreStateScope ||
 		envelope.HTTPMetricScope != cloudWatchEMFRollingWindowScope ||
+		envelope.SSEStreamActivityMetricScope != cloudWatchEMFRollingWindowScope ||
+		envelope.SSEStreamActiveMetricScope != cloudWatchEMFProcessCurrentScope ||
 		envelope.StoreOperationMetricScope != cloudWatchEMFRollingWindowScope ||
 		envelope.SnapshotPersistenceMetricScope != cloudWatchEMFProcessLifetimeScope {
 		t.Fatalf("emf metric scopes = %+v", envelope)

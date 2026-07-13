@@ -32,8 +32,9 @@ type HTTPTransactionObservation struct {
 }
 
 type HTTPTransactionMetrics struct {
-	mu      sync.Mutex
-	buckets map[int64]*httpTransactionBucket
+	mu               sync.Mutex
+	buckets          map[int64]*httpTransactionBucket
+	activeSSEStreams map[sseStreamKey]int64
 }
 
 type httpTransactionKey struct {
@@ -49,6 +50,7 @@ type httpTransactionBucket struct {
 	responsesByStatus map[int]int64
 	requestsTotal     int64
 	latency           httpTransactionLatencyMetrics
+	sseByKey          map[sseStreamKey]sseStreamMetricState
 	lastObservedAt    time.Time
 }
 

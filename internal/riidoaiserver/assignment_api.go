@@ -37,6 +37,18 @@ type MetricsSnapshot struct {
 	AgentEventsTotal                                  int64                   `json:"agent_events_total"`
 	TaskEventsTotal                                   int64                   `json:"task_events_total"`
 	SSESubscribers                                    int                     `json:"sse_subscribers"`
+	SSEStreamsActive                                  int64                   `json:"sse_streams_active,omitempty"`
+	SSEStreamsOpenedTotal                             int64                   `json:"sse_streams_opened_total,omitempty"`
+	SSEStreamsClosedTotal                             int64                   `json:"sse_streams_closed_total,omitempty"`
+	SSEStreamTTFBSamplesTotal                         int64                   `json:"sse_stream_ttfb_samples_total,omitempty"`
+	SSEStreamTTFBTotalMilliseconds                    int64                   `json:"sse_stream_ttfb_total_ms,omitempty"`
+	SSEStreamTTFBMaxMilliseconds                      int64                   `json:"sse_stream_ttfb_max_ms,omitempty"`
+	SSEStreamTTFBLastMilliseconds                     int64                   `json:"sse_stream_ttfb_last_ms,omitempty"`
+	SSEStreamDurationSamplesTotal                     int64                   `json:"sse_stream_duration_samples_total,omitempty"`
+	SSEStreamDurationTotalMilliseconds                int64                   `json:"sse_stream_duration_total_ms,omitempty"`
+	SSEStreamDurationMaxMilliseconds                  int64                   `json:"sse_stream_duration_max_ms,omitempty"`
+	SSEStreamDurationLastMilliseconds                 int64                   `json:"sse_stream_duration_last_ms,omitempty"`
+	SSEStreams                                        []SSEStreamMetric       `json:"sse_streams,omitempty"`
 	OutboxErrorsTotal                                 int64                   `json:"outbox_errors_total"`
 	EventAppendLatencySamplesTotal                    int64                   `json:"event_append_latency_samples_total"`
 	EventAppendLatencyTotalMilliseconds               int64                   `json:"event_append_latency_total_ms"`

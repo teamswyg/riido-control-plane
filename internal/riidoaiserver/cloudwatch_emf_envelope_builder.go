@@ -15,6 +15,8 @@ func buildCloudWatchEMFEnvelope(config CloudWatchEMFConfig, snapshot MetricsSnap
 		MetricScopeSchemaVersion:       cloudWatchEMFMetricScopeSchemaVersion,
 		StoreStateMetricScope:          cloudWatchEMFStoreStateScope,
 		HTTPMetricScope:                cloudWatchEMFRollingWindowScope,
+		SSEStreamActivityMetricScope:   cloudWatchEMFRollingWindowScope,
+		SSEStreamActiveMetricScope:     cloudWatchEMFProcessCurrentScope,
 		StoreOperationMetricScope:      cloudWatchEMFRollingWindowScope,
 		SnapshotPersistenceMetricScope: cloudWatchEMFProcessLifetimeScope,
 	}

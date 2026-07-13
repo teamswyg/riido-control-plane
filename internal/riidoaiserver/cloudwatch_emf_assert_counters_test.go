@@ -23,6 +23,11 @@ func assertCloudWatchEMFEventCounters(t *testing.T, envelope cloudWatchEMFEnvelo
 	if envelope.PollStartTotal != 2 || envelope.SSESubscribers != 13 || envelope.OutboxErrorsTotal != 17 {
 		t.Fatalf("emf event counters = %+v", envelope)
 	}
+	if envelope.SSEStreamsActive != 2 || envelope.SSEStreamsOpenedTotal != 5 ||
+		envelope.SSEStreamsClosedTotal != 3 || envelope.SSEStreamTTFBMaxMilliseconds != 17 ||
+		envelope.SSEStreamDurationMaxMilliseconds != 60000 || len(envelope.SSEStreams) != 1 {
+		t.Fatalf("emf SSE stream counters = %+v", envelope)
+	}
 	if envelope.EventAppendLatencySamplesTotal != 19 || envelope.EventAppendLatencyMaxMilliseconds != 89 {
 		t.Fatalf("emf event latency counters = %+v", envelope)
 	}

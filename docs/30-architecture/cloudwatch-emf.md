@@ -21,6 +21,8 @@ This reader is generated from the CloudWatch EMF shape SSOT.
 | `metric_scope_schema_version` | `riido-metric-scope.v1` |
 | `store_state_metric_scope` | `store_state_cumulative` |
 | `http_metric_scope` | `rolling_5m` |
+| `sse_stream_activity_metric_scope` | `rolling_5m` |
+| `sse_stream_active_metric_scope` | `process_current` |
 | `store_operation_metric_scope` | `rolling_5m` |
 | `snapshot_persistence_metric_scope` | `process_lifetime` |
 
@@ -33,6 +35,9 @@ This reader is generated from the CloudWatch EMF shape SSOT.
 | `event_append_latency_max_ms` | `Milliseconds` |
 | `http_requests_total` | `Count` |
 | `http_request_latency_max_ms` | `Milliseconds` |
+| `sse_streams_active` | `Count` |
+| `sse_stream_ttfb_max_ms` | `Milliseconds` |
+| `sse_stream_duration_max_ms` | `Milliseconds` |
 | `store_operation_calls_total` | `Count` |
 | `store_operation_latency_max_ms` | `Milliseconds` |
 | `ai_agent_client_snapshot_load_bytes_last` | `Bytes` |

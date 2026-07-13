@@ -20306,6 +20306,68 @@
       ],
       "decision": "Module decomposition failure-path tests now cover invalid/trailing manifests, write failures, stale generated docs, missing repo roots, line counting, line-budget deterministic ordering, empty render branches, manifest shape errors, package parity errors, and forbidden import rejection. tools/moduledecomposition rises from 76.2% to 90.3% under Go 1.26.2 with no endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "sse_stream_lifetime_observability_loop",
+      "observation": "Production HTTP telemetry recorded successful SSE connections that remained open for up to about 62 hours as equally long request latency and trace spans, obscuring short request latency maxima even though the stream itself remained healthy.",
+      "hypothesis": "Ending the HTTP latency sample and server trace when an SSE response first commits, while retaining active-stream and close-duration metrics, will preserve setup responsiveness and connection-health evidence without treating connection lifetime as request latency.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence",
+        "cloudwatch_emf_shape_must_preserve_metric_scope_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/http_transaction_metrics_middleware.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/http_tracing.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/sse_stream_metrics.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/sse_observability_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/cloudwatch-emf.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/sse_observability_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/cloudwatchemf"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/sse_observability_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "production-sse-lifetime-observability-2026-07-13",
+          "redacted": true
+        }
+      ],
+      "decision": "SSE setup now contributes TTFB to regular HTTP latency and ends the server trace at response commit. Active streams remain visible beyond the five-minute activity window, stream lifetime is recorded only when the connection closes, and failed pre-stream authorization responses remain regular HTTP observations. A deterministic 62-hour test guards the separation without imposing a connection lifetime limit.",
+      "next_loop": "control_plane_performance_harness"
     }
   ],
   "loop": {

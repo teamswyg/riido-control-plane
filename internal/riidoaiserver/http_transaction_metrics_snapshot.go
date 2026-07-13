@@ -15,6 +15,19 @@ func (m *HTTPTransactionMetrics) ApplyToMetricsSnapshot(snapshot MetricsSnapshot
 	snapshot.HTTPRequestLatencyMaxMilliseconds = latency.maxMilliseconds
 	snapshot.HTTPRequestLatencyLastMilliseconds = latency.lastMilliseconds
 	snapshot.HTTPTransactions = transactions
+	sse := m.sseSnapshot()
+	snapshot.SSEStreamsActive = sse.activeStreams
+	snapshot.SSEStreamsOpenedTotal = sse.streamsOpenedTotal
+	snapshot.SSEStreamsClosedTotal = sse.streamsClosedTotal
+	snapshot.SSEStreamTTFBSamplesTotal = sse.ttfb.samplesTotal
+	snapshot.SSEStreamTTFBTotalMilliseconds = sse.ttfb.totalMilliseconds
+	snapshot.SSEStreamTTFBMaxMilliseconds = sse.ttfb.maxMilliseconds
+	snapshot.SSEStreamTTFBLastMilliseconds = sse.ttfb.lastMilliseconds
+	snapshot.SSEStreamDurationSamplesTotal = sse.streamDuration.samplesTotal
+	snapshot.SSEStreamDurationTotalMilliseconds = sse.streamDuration.totalMilliseconds
+	snapshot.SSEStreamDurationMaxMilliseconds = sse.streamDuration.maxMilliseconds
+	snapshot.SSEStreamDurationLastMilliseconds = sse.streamDuration.lastMilliseconds
+	snapshot.SSEStreams = sse.streams
 	return snapshot
 }
 

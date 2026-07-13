@@ -54,7 +54,7 @@ Executable SSOT: [`control-plane-high-traffic-audit.riido.json`](control-plane-h
 | `thread_history_v3_projection` | `read_model_projection` | `3` | `Lock()=1, append(=1` | Measure per-thread message copy cost, keep agent snapshots by id, and cap projection work before adding richer timelines. |
 | `progress_ingest` | `runtime_progress_ingest` | `9` | `Lock()=1, map[=6, append(=7` | Batch tiny provider fragments into line or frame sized updates while preserving v2/v3 response shapes. |
 | `dynamodb_snapshot_and_journal` | `db_query_transaction` | `3` | `make(chan=1, chan =1, select {=1, map[=6, Query=1` | Attribute costs by operation vocabulary and keep snapshot read models split from write-command models. |
-| `metrics_aggregation` | `lock_contention` | `3` | `Lock()=2, map[=1` | Keep lock scope copy-only, preserve top-N output, and watch allocation per operation in benchmarks. |
+| `metrics_aggregation` | `lock_contention` | `3` | `Lock()=2, map[=2` | Keep lock scope copy-only, preserve top-N output, and watch allocation per operation in benchmarks. |
 | `actor_shutdown_paths` | `zombie_goroutine_risk` | `3` | `make(chan=9, chan =16, select {=8, map[=12, append(=1, GetItem=1, PutItem=1` | Keep actor close paths covered by race tests before adding more background workers or buffered queues. |
 
 ## Loop

@@ -4,7 +4,8 @@ import "net/http"
 
 func NewHTTPTransactionMetrics() *HTTPTransactionMetrics {
 	return &HTTPTransactionMetrics{
-		buckets: map[int64]*httpTransactionBucket{},
+		buckets:          map[int64]*httpTransactionBucket{},
+		activeSSEStreams: map[sseStreamKey]int64{},
 	}
 }
 

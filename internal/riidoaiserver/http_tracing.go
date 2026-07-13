@@ -3,8 +3,14 @@ package riidoaiserver
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/teamswyg/riido-contracts/metadatakeys"
+)
+
+const (
+	riidoHTTPStreamTraceKey          = "riido.http.stream"
+	riidoHTTPTimeToFirstByteTraceKey = "riido.http.time_to_first_byte_ms"
 )
 
 func withHTTPTracing(next http.Handler, recorder TraceRecorder) http.Handler {
@@ -27,16 +33,37 @@ func withHTTPTracing(next http.Handler, recorder TraceRecorder) http.Handler {
 				StringTraceAttribute(riidoClientSurfaceTraceKey, traceHTTPClientSurface(route, r.URL.Path, r.UserAgent())),
 			},
 		})
-		recorderResponse := &httpStatusRecorder{ResponseWriter: w, statusCode: http.StatusOK}
-		next.ServeHTTP(recorderResponse, r.WithContext(WithTraceRecorder(ctx, recorder)))
-		span.SetAttributes(
-			Int64TraceAttribute(metadatakeys.HTTPResponseStatusCode.String(), int64(recorderResponse.statusCode)),
-			Int64TraceAttribute(metadatakeys.HTTPStatusCode.String(), int64(recorderResponse.statusCode)),
-		)
-		if recorderResponse.statusCode >= 500 {
-			span.RecordError(httpStatusTraceError(recorderResponse.statusCode))
+		startedAt := time.Now()
+		spanEnded := false
+		finishSpan := func(statusCode int, stream bool) {
+			if spanEnded {
+				return
+			}
+			attributes := []TraceAttribute{
+				Int64TraceAttribute(metadatakeys.HTTPResponseStatusCode.String(), int64(statusCode)),
+				Int64TraceAttribute(metadatakeys.HTTPStatusCode.String(), int64(statusCode)),
+			}
+			if stream {
+				attributes = append(attributes,
+					StringTraceAttribute(riidoHTTPStreamTraceKey, "sse"),
+					Int64TraceAttribute(riidoHTTPTimeToFirstByteTraceKey, durationMilliseconds(time.Since(startedAt))),
+				)
+			}
+			span.SetAttributes(attributes...)
+			if statusCode >= 500 {
+				span.RecordError(httpStatusTraceError(statusCode))
+			}
+			span.End()
+			spanEnded = true
 		}
-		span.End()
+		recorderResponse := &httpStatusRecorder{ResponseWriter: w, statusCode: http.StatusOK}
+		recorderResponse.onCommit = func(statusCode int) {
+			if isSSEResponse(recorderResponse.Header()) {
+				finishSpan(statusCode, true)
+			}
+		}
+		next.ServeHTTP(recorderResponse, r.WithContext(WithTraceRecorder(ctx, recorder)))
+		finishSpan(recorderResponse.statusCode, false)
 	})
 }
 

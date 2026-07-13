@@ -26,10 +26,10 @@ func TestCloudWatchEMFBehaviorGolden(t *testing.T) {
 	if got.SchemaVersion != requirements.EvidenceSchema || got.ID != "control-plane-cloudwatch-emf" || got.Status != "verified" {
 		t.Fatalf("unexpected evidence identity: %+v", got)
 	}
-	if got.DimensionsVerified != 1 || got.JSONFieldsVerified != 11 || got.ScopesVerified != 5 {
+	if got.DimensionsVerified != 1 || got.JSONFieldsVerified != 16 || got.ScopesVerified != 7 {
 		t.Fatalf("unexpected required shape counts: %+v", got)
 	}
-	if got.MetricUnitsVerified != 11 || got.MetricSpecsTotal != 62 {
+	if got.MetricUnitsVerified != 14 || got.MetricSpecsTotal != 73 {
 		t.Fatalf("unexpected metric counts: %+v", got)
 	}
 	if got.HTTPBreakdownRows != 1 || got.StoreBreakdownRows != 1 || got.SourceChecks != 6 {

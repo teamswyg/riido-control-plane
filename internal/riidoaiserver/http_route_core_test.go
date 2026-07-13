@@ -55,6 +55,11 @@ func TestTraceHTTPRouteClassifiesCoreAgentDaemonAndComponentRoutes(t *testing.T)
 		},
 		{
 			method: http.MethodGet,
+			path:   "/v1/component-tasks/task-sensitive/events",
+			want:   "/v1/component-tasks/{task_id}/events",
+		},
+		{
+			method: http.MethodGet,
 			path:   "/v1/component-tasks/task-sensitive",
 		},
 	} {

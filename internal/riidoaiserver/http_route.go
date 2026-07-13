@@ -48,7 +48,14 @@ func daemonHTTPRoute(method, path string) string {
 }
 
 func componentTaskHTTPRoute(method, path string) string {
-	if method == http.MethodPost && strings.HasPrefix(path, "/v1/component-tasks/") {
+	if !strings.HasPrefix(path, "/v1/component-tasks/") {
+		return ""
+	}
+	_, suffix, ok := splitResourcePath(path, "/v1/component-tasks/")
+	if method == http.MethodGet && ok && suffix == "events" {
+		return "/v1/component-tasks/{task_id}/events"
+	}
+	if method == http.MethodPost {
 		return "/v1/component-tasks/{task_id}"
 	}
 	return ""
