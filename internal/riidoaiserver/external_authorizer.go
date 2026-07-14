@@ -18,7 +18,7 @@ const (
 	ExternalAuthorizerRequestSchemaVersion  = "riido-external-authorizer-request.v1"
 	ExternalAuthorizerResponseSchemaVersion = "riido-external-authorizer-response.v1"
 	ExternalAuthorizerAPIKeyHeader          = "X-Riido-Control-Plane-Authorizer-Key"
-	DefaultExternalHTTPAuthorizerTimeout    = 2 * time.Second
+	DefaultExternalHTTPAuthorizerTimeout    = 5 * time.Second
 )
 
 type ExternalHTTPAuthorizerConfig struct {
@@ -30,11 +30,12 @@ type ExternalHTTPAuthorizerConfig struct {
 }
 
 type ExternalHTTPAuthorizer struct {
-	endpoint   string
-	audience   string
-	apiKey     string
-	timeout    time.Duration
-	httpClient *http.Client
+	endpoint    string
+	audience    string
+	apiKey      string
+	timeout     time.Duration
+	httpClient  *http.Client
+	observation externalAuthorizerObservation
 }
 
 type externalAuthorizerRequest struct {
@@ -80,11 +81,11 @@ func NewExternalHTTPAuthorizer(config ExternalHTTPAuthorizerConfig) (*ExternalHT
 		audience:   strings.TrimSpace(config.Audience),
 		apiKey:     apiKey,
 		timeout:    timeout,
-		httpClient: externalAuthorizerHTTPClient(config.HTTPClient),
+		httpClient: externalAuthorizerHTTPClient(config.HTTPClient, timeout),
 	}, nil
 }
 
-func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken string, req AuthorizationRequest) (AuthorizationResult, error) {
+func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken string, req AuthorizationRequest) (result AuthorizationResult, err error) {
 	if err := ctx.Err(); err != nil {
 		return AuthorizationResult{}, err
 	}
@@ -98,6 +99,8 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	if externalAuthorizerRequiresWorkspace(req) && strings.TrimSpace(req.WorkspaceID) == "" {
 		return AuthorizationResult{}, ErrAuthorizationForbidden
 	}
+	ctx, finishObservation := a.observation.start(ctx, req, a.timeout)
+	defer func() { finishObservation(err) }()
 	payload, err := json.Marshal(externalAuthorizerRequest{
 		SchemaVersion: ExternalAuthorizerRequestSchemaVersion,
 		BearerToken:   bearerToken,
@@ -206,11 +209,4 @@ func externalAuthorizerEndpointHostIsLoopback(host string) bool {
 	}
 	ip := net.ParseIP(strings.Trim(host, "[]"))
 	return ip != nil && ip.IsLoopback()
-}
-
-func externalAuthorizerHTTPClient(client *http.Client) *http.Client {
-	if client != nil {
-		return client
-	}
-	return &http.Client{Timeout: DefaultExternalHTTPAuthorizerTimeout}
 }

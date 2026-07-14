@@ -19,8 +19,7 @@ on:
       - "internal/riidoaiserver/authorization_coalescing*.go"
       - "internal/riidoaiserver/authorization_test.go"
       - "internal/riidoaiserver/agent_catalog_rbac.go"
-      - "internal/riidoaiserver/external_authorizer.go"
-      - "internal/riidoaiserver/external_authorizer_test.go"
+      - "internal/riidoaiserver/external_authorizer*.go"
   pull_request:
     paths:
       - ".github/workflows/external-authorizer.yml"
@@ -38,8 +37,7 @@ on:
       - "internal/riidoaiserver/authorization_coalescing*.go"
       - "internal/riidoaiserver/authorization_test.go"
       - "internal/riidoaiserver/agent_catalog_rbac.go"
-      - "internal/riidoaiserver/external_authorizer.go"
-      - "internal/riidoaiserver/external_authorizer_test.go"
+      - "internal/riidoaiserver/external_authorizer*.go"
 
 jobs:
   adapter:
