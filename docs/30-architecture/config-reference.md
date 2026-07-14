@@ -10,7 +10,7 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `42`; manifest entries: `42`; secret/credential entries: `6`; operator-only entries: `11`.
+Runtime env reads: `45`; manifest entries: `45`; secret/credential entries: `6`; operator-only entries: `11`.
 
 ## Runtime Env
 
@@ -35,6 +35,9 @@ Runtime env reads: `42`; manifest entries: `42`; secret/credential entries: `6`;
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` | `false` | `public` | Enables development AI Agent client persistence. |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE` | `empty` | `operator` | DynamoDB table for development snapshot and assignment operation state. |
 | `RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE` | `empty` | `public` | Expected daemon profile accepted by this control-plane environment; mismatches are rejected and stale profile rows are pruned. |
+| `RIIDO_AI_SERVER_MINIMUM_DAEMON_VERSION` | `v0.0.68` | `public` | Minimum daemon release that supports the current AI Agent client capability. |
+| `RIIDO_AI_SERVER_LATEST_DAEMON_VERSION` | `v0.0.68` | `public` | Latest recommended daemon release displayed as update guidance. |
+| `RIIDO_AI_SERVER_DAEMON_DOWNLOAD_URL` | `https://cdn.riido.io/releases/latest/Riido-arm64.dmg` | `public` | Server-owned Desktop update URL returned with device compatibility status. |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_SNAPSHOT_RELOAD_SECONDS` | `store default 15` | `public` | AI Agent client snapshot cache reload cadence. |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_HEARTBEAT_SNAPSHOT_SAVE_SECONDS` | `store default 15` | `public` | No-change daemon heartbeat snapshot save cadence. |
 | `RIIDO_AI_SERVER_DYNAMODB_OUTBOX_TABLE` | `empty` | `operator` | Optional DynamoDB outbox table for event delivery. |

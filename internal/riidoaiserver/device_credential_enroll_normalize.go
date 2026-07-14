@@ -11,6 +11,7 @@ type normalizedDeviceEnrollment struct {
 	displayName string
 	machineID   string
 	deviceID    string
+	appVersion  string
 }
 
 func normalizeDeviceEnrollment(principal AuthorizationResult, workspaceID string, req EnrollDeviceRequest) (normalizedDeviceEnrollment, error) {
@@ -20,6 +21,7 @@ func normalizeDeviceEnrollment(principal AuthorizationResult, workspaceID string
 		displayName: strings.TrimSpace(req.DisplayName),
 		machineID:   strings.TrimSpace(req.MachineID),
 		deviceID:    strings.TrimSpace(req.DeviceID),
+		appVersion:  strings.TrimSpace(req.AppVersion),
 	}
 	return completeDeviceEnrollment(out, principal)
 }

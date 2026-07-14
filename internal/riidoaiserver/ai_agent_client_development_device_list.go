@@ -18,6 +18,7 @@ func (s *DevelopmentAIAgentClientStore) visibleDevicesLocked(principal Authoriza
 		}
 		device = projectDeviceRuntimeLiveness(device, now)
 		device.Runtimes = dedupeRuntimesByKindForDisplay(device.Runtimes)
+		device = s.projectDeviceClientStatusLocked(principal, device, now)
 		if device.OwnerPrincipalID == principal.PrincipalID {
 			out = append(out, copyDevice(device))
 			continue

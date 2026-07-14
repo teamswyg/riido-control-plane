@@ -13,7 +13,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `syntaxhash_duplicate_shapes_policy` | `tools/syntaxhash/duplicates` | 100% | `f506f1540fac` | `context_map_must_guard_public_boundaries` |
 | `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `62066456283d` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
 | `awsadapters_facade` | `awsadapters` | 100% | `6e8fc7dd43bf` | `public_aws_adapter_facade_must_preserve_contract` |
-| `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `8bdfb617bccc` | `runtime_adapter_config_must_preserve_public_env_contract` |
+| `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `6cdd84b4bb8f` | `runtime_adapter_config_must_preserve_public_env_contract` |
 | `repo_identity_guard` | `internal/repoidentity` | 100% | `2402928360f7` | `repo_identity_must_anchor_public_module_boundary` |
 | `contracts_compat_mirror` | `internal/contractscompat` | 100% | `664fe505058d` | `shared_contract_compat_must_preserve_generated_contract_surface` |
 | `request_authorization_guard` | `tools/requestauth` | 100% | `dcac86a2ff18` | `request_authorization_must_preserve_security_boundary` |
@@ -102,7 +102,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `generated_smoke_matrix_rendertext_adapter` | `tools/aigeneratedsmokematrix/rendertext` | 100% | `9d974e7f5f4f` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_requirements_adapter` | `tools/aigeneratedsmokematrix/requirements` | 100% | `4dc304797eff` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_set_adapter` | `tools/aigeneratedsmokematrix/setutil` | 100% | `ffff57261b77` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
-| `ai_agent_client_api_guard` | `tools/aiagentclientapi` | 100% | `0c90c6be497e` | `thread_history_v3_must_expose_stable_conversation_grouping` |
+| `ai_agent_client_api_guard` | `tools/aiagentclientapi` | 100% | `8a221d14f5ab` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_doccheck_adapter` | `tools/aiagentclientapi/doccheck` | 100% | `d95d063df137` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_path_adapter` | `tools/aiagentclientapi/pathutil` | 100% | `79181c0fee9f` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `ai_agent_client_api_rendertext_adapter` | `tools/aiagentclientapi/rendertext` | 100% | `b8172e7cea5e` | `thread_history_v3_must_expose_stable_conversation_grouping` |
@@ -114,12 +114,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `7ee1bbf6a41c` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `d3066812568c` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `9a106449916b` | `server_route_handlers_must_stay_semantically_split` |
 
 ## Repository Coverage
 
-- Go files: `3243`
-- tracked files: `3243`
+- Go files: `3258`
+- tracked files: `3258`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -128,7 +128,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 - status: `evidence_only`
 - group by: `ast_shape_hash`
 - duplicate groups: `90`
-- duplicate files: `310`
+- duplicate files: `311`
 - internal groups: `5`
 
 | Shape Hash | Files | Packages |
@@ -142,12 +142,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `57e35ce78429` | 7 | `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/evidencegraph`, `tools/harnesspromotion`, `tools/loopclosureaudit` |
 | `7bfab29d8431` | 7 | `tools/cloudwatchemf`, `tools/healthreadycmd`, `tools/metricshttpadapter`, `tools/reviewaccountseed`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
 | `99ad4aab6a2c` | 7 | `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/metricshttpadapter`, `tools/providerstatus`, `tools/reviewaccountseed` |
+| `952ec131238e` | 6 | `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/assignmentjournal`, `tools/contextmap`, `tools/providerstatus`, `tools/requestauth` |
 | `cf0fe1b458fe` | 6 | `tools/configreference`, `tools/gocibaseline`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/runtimeboundary` |
 | `ef2c7580672d` | 6 | `tools/configreference`, `tools/gocibaseline`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/runtimecdownership` |
 | `faa58e8068ec` | 6 | `internal/riidoaiserver`, `tools/loopclosureaudit`, `tools/reactquerygen` |
 | `09a26b1d4d7d` | 5 | `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/evidencegraph`, `tools/harnesspromotion`, `tools/loopregistry` |
 | `7361781d8898` | 5 | `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/migrationledger` |
-| `952ec131238e` | 5 | `tools/agentruntimebinding`, `tools/assignmentjournal`, `tools/contextmap`, `tools/providerstatus`, `tools/requestauth` |
 | `252cbee00213` | 4 | `tools/healthreadycmd`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
 | `2e152374c529` | 4 | `tools/cloudwatchemf/pathutil`, `tools/metricshttpadapter/pathutil`, `tools/providerstatus/pathutil`, `tools/reviewaccountseed/pathutil` |
 | `385106af75c3` | 4 | `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/loopclosureaudit`, `tools/operationalreadiness` |
@@ -165,16 +165,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3243`
-- unique syntax hashes: `3041`
-- compression gain: `202`
-- analysis reduction: `6.22%`
+- tracked files: `3258`
+- unique syntax hashes: `3055`
+- compression gain: `203`
+- analysis reduction: `6.23%`
 - collision count: `0`
-- relocation mappings: `3243`
+- relocation mappings: `3258`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `107`
 - missing golden commands: `0`
-- efficiency score: `622`
-- compression score: `202`
-- weighted score: `824`
+- efficiency score: `623`
+- compression score: `203`
+- weighted score: `826`

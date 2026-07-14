@@ -36,8 +36,8 @@ func assertAIClientAPIGolden(t *testing.T, got evidence) {
 		got.OperationCounts.V2 != 31 || got.OperationCounts.SmokeMatrix != 57 {
 		t.Fatalf("operation counts drifted: %+v", got.OperationCounts)
 	}
-	if got.RequiredPaths != 12 || got.RuntimeConfigs != 1 || got.PublicFields != 12 ||
-		got.DeploymentEvidence != 2 || got.ThreadHistoryV3Rules != 77 || got.SourceChecks != 34 {
+	if got.RequiredPaths != 12 || got.RuntimeConfigs != 1 || got.PublicFields != 21 ||
+		got.DeploymentEvidence != 2 || got.ThreadHistoryV3Rules != 77 || got.SourceChecks != 36 {
 		t.Fatalf("evidence counters drifted: %+v", got)
 	}
 	if got.Loop.Observation == "" || got.Loop.Hypothesis == "" || got.Loop.Execute == "" || got.Loop.Evaluate == "" ||

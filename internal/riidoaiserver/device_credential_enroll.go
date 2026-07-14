@@ -43,6 +43,7 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 		DeviceID:              deviceID,
 		OwnerPrincipalID:      enrollment.principalID,
 		DisplayName:           enrollment.displayName,
+		DesktopAppVersion:     enrollment.appVersion,
 		DaemonLastSeenAt:      now,
 		ConnectedWorkspaceIDs: []string{enrollment.workspaceID},
 	})

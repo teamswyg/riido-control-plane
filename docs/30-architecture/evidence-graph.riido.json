@@ -20359,6 +20359,32 @@
       ],
       "decision": "Module decomposition failure-path tests now cover invalid/trailing manifests, write failures, stale generated docs, missing repo roots, line counting, line-budget deterministic ordering, empty render branches, manifest shape errors, package parity errors, and forbidden import rejection. tools/moduledecomposition rises from 76.2% to 90.3% under Go 1.26.2 with no endpoint or payload changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "device_client_version_guidance_loop",
+      "observation": "A workspace device can have online runtimes while the client still shows a generic Desktop download prompt because the device list omits Desktop and daemon versions and does not distinguish viewer ownership from workspace visibility.",
+      "hypothesis": "An additive server-owned compatibility projection can distinguish registered, offline, version-unknown, update-required, and ready states without changing device ownership or requiring clients to compare identifiers from different auth systems.",
+      "claims": [
+        "device_client_status_must_distinguish_install_update_and_ready"
+      ],
+      "changes": [
+        {"kind":"code","path":"internal/riidoaiserver/device_client_status_projection.go"},
+        {"kind":"code","path":"internal/riidoaiserver/daemon_version_compare.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_client_status_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_http_device_client_status_test.go"},
+        {"kind":"manifest","path":"docs/20-domain/ai-agent-client-api.riido.json"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"test","path":"internal/riidoaiserver"},
+        {"kind":"test","path":"tools/aiagentclientapi"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"ai-agent-client-api-evidence","redacted":true}
+      ],
+      "decision": "The v2 device list keeps all existing fields and adds explicit viewer ownership, enrolled Desktop version, reported daemon version, configured minimum/latest versions, update requirement, Agent support, and server-owned download guidance. Workspace-visible devices remain attributed to their real owner.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

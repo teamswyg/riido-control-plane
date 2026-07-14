@@ -28,6 +28,9 @@ var RequiredPublicFields = []string{
 	"assigned-agent-profiles", "agent-assignments", "thread-stream-subscription",
 	"conversation_id", "parent_thread_id", "agent_snapshot_id", "agent_snapshots",
 	"messages", "author_principal_id",
+	"is_owned_by_viewer", "desktop_app_version", "client_status",
+	"minimum_daemon_version", "latest_daemon_version", "agent_capability",
+	"agent_supported", "update_required", "download_url",
 }
 
 var RequiredDeploymentEvidence = []string{

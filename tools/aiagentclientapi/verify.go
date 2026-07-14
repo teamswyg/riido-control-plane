@@ -22,6 +22,9 @@ func verify(root string, m manifest, checkDoc bool) error {
 	if err := verifyThreadHistoryV3(m.ThreadHistoryV3); err != nil {
 		return err
 	}
+	if err := verifyDeviceClientGuidance(m.DeviceClientGuidance); err != nil {
+		return err
+	}
 	if err := verifySources(root, m.SourceChecks); err != nil {
 		return err
 	}
@@ -55,20 +58,4 @@ func verifyStaticLists(m manifest) error {
 		return err
 	}
 	return setutil.RequireStrings("deployment evidence", m.DeploymentEvidence, requirements.RequiredDeploymentEvidence)
-}
-
-func verifyLoop(loop loop) error {
-	steps := map[string]string{
-		"observation":   loop.Observation,
-		"hypothesis":    loop.Hypothesis,
-		"execute":       loop.Execute,
-		"evaluate":      loop.Evaluate,
-		"retrospective": loop.Retrospective,
-	}
-	for name, value := range steps {
-		if value == "" {
-			return fmt.Errorf("missing evidence loop step %q", name)
-		}
-	}
-	return nil
 }
