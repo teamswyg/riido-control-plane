@@ -10,7 +10,7 @@ This reader is generated from the control-plane decision queue manifest.
 
 ## Coverage
 
-Questions: `8`; open: `7`; resolved: `1`.
+Questions: `8`; open: `6`; resolved: `2`.
 
 ## Decision Queue
 
@@ -36,13 +36,13 @@ Questions: `8`; open: `7`; resolved: `1`.
 
 ### Q-CP-003
 
-- status: `open`
+- status: `resolved`
 - area: Production identity
 - owner: `control-plane-auth`
 - question: Which IdP/JWKS claim mapping becomes the production authorizer contract?
-- stance: External authorizer port is stable; tenant claim mapping remains outside public defaults.
-- next artifact: identity claim mapping contract
-- next command: `gh issue create --repo teamswyg/riido-control-plane --title "Q-CP-003 identity claim mapping contract" --body "Produce identity claim mapping contract for production authorizer integration."`
+- stance: Use Riido Auth exact issuer, resource audience, authorization_profile and finite scopes; require local ES256/JWKS verification, Auth introspection and the consumer domain PDP.
+- next artifact: docs/20-domain/request-authorization.riido.json and internal/authpep/authorization_jwt.go
+- resolution: The accepted mapping is iss=https://auth.riido.io, aud=https://ai-api.riido.io, authorization_profile=riido-control-plane.production.v1, typ=at+jwt, alg=ES256, canonical non-wildcard scopes and exact introspection claim equivalence. Token validation never supplies tenant authorization; the existing external domain authorizer must return the same subject and requested workspace. Production activation remains a separate infra evidence gate.
 
 ### Q-CP-004
 

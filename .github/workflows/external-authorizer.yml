@@ -13,6 +13,8 @@ on:
       - "go.mod"
       - "go.sum"
       - "cmd/riido_ai_server/env_names.go"
+      - "cmd/riido_ai_server/authorizer_auth.go"
+      - "cmd/riido_ai_server/authorizer_config.go"
       - "cmd/riido_ai_server/web_origin_config.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/authorization.go"
@@ -20,6 +22,12 @@ on:
       - "internal/riidoaiserver/authorization_test.go"
       - "internal/riidoaiserver/agent_catalog_rbac.go"
       - "internal/riidoaiserver/external_authorizer*.go"
+      - "internal/authpep/**"
+      - "internal/authpep/authorization_jwt.go"
+      - "internal/authpep/authorization_jwt_test.go"
+      - "internal/authpep/authorization_jwks_http.go"
+      - "internal/authpep/authorization_jwks_http_test.go"
+      - "internal/authpep/domain_aliases.go"
   pull_request:
     paths:
       - ".github/workflows/external-authorizer.yml"
@@ -31,6 +39,8 @@ on:
       - "go.mod"
       - "go.sum"
       - "cmd/riido_ai_server/env_names.go"
+      - "cmd/riido_ai_server/authorizer_auth.go"
+      - "cmd/riido_ai_server/authorizer_config.go"
       - "cmd/riido_ai_server/web_origin_config.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/authorization.go"
@@ -38,6 +48,12 @@ on:
       - "internal/riidoaiserver/authorization_test.go"
       - "internal/riidoaiserver/agent_catalog_rbac.go"
       - "internal/riidoaiserver/external_authorizer*.go"
+      - "internal/authpep/**"
+      - "internal/authpep/authorization_jwt.go"
+      - "internal/authpep/authorization_jwt_test.go"
+      - "internal/authpep/authorization_jwks_http.go"
+      - "internal/authpep/authorization_jwks_http_test.go"
+      - "internal/authpep/domain_aliases.go"
 
 jobs:
   adapter:
@@ -64,8 +80,8 @@ jobs:
           go run ./tools/requestauth \
             -check-doc \
             -evidence-out out/request-authorization-evidence.json
-      - name: Test external authorizer
-        run: go test ./internal/riidoaiserver -run 'ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer' -count=1
+      - name: Test request authorization adapters
+        run: go test ./internal/riidoaiserver ./internal/authpep -run 'ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:

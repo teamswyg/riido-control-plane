@@ -30,6 +30,8 @@ func (s Server) authorizeDeviceCredential(w http.ResponseWriter, r *http.Request
 			writeError(w, http.StatusForbidden, "forbidden")
 		case errors.Is(err, ErrAuthorizationUnauthenticated):
 			writeUnauthorized(w)
+		case errors.Is(err, ErrAuthorizationInvalidCredential):
+			writeUnauthorized(w)
 		default:
 			writeError(w, http.StatusServiceUnavailable, err.Error())
 		}

@@ -10,7 +10,7 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `45`; manifest entries: `45`; secret/credential entries: `6`; operator-only entries: `11`.
+Runtime env reads: `51`; manifest entries: `51`; secret/credential entries: `7`; operator-only entries: `11`.
 
 ## Runtime Env
 
@@ -23,6 +23,12 @@ Runtime env reads: `45`; manifest entries: `45`; secret/credential entries: `6`;
 | `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_AUDIENCE` | `empty` | `public` | Optional audience forwarded to the external authorizer. |
 | `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY` | `empty` | `secret` | Server-to-server key sent to the external authorizer. |
 | `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS` | `authorizer default` | `public` | Positive timeout override for external authorizer requests. |
+| `RIIDO_AI_SERVER_AUTH_ISSUER` | `disabled` | `public` | Exact Riido Auth HTTPS issuer; setting any Auth PEP field requires the full profile and external domain PDP. |
+| `RIIDO_AI_SERVER_AUTH_RESOURCE` | `disabled` | `public` | Exact HTTPS resource audience accepted by this control-plane deployment. |
+| `RIIDO_AI_SERVER_AUTH_AUTHORIZATION_PROFILE` | `disabled` | `public` | Exact server-owned Auth authorization_profile accepted by this control-plane deployment. |
+| `RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_ID` | `disabled` | `public` | Canonical control-plane confidential client identity used only for Auth introspection. |
+| `RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_SECRET` | `disabled` | `secret` | Service-owned Auth introspection secret injected from deployment secret custody; never shared with Interaction or stored in source/evidence. |
+| `RIIDO_AI_SERVER_AUTH_HTTP_TIMEOUT_SECONDS` | `5` | `public` | Bounded 1-10 second timeout for Auth JWKS and introspection requests. |
 | `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` | `empty` | `sensitive-hash` | Review/demo seed token hash; raw token values are never documented. |
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | `disabled` | `public` | Positive stdout CloudWatch EMF publish interval. |
 | `RIIDO_AI_SERVER_PPROF_ADDR` | `disabled` | `operator` | Optional loopback-only pprof listener address. |

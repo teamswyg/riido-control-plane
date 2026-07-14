@@ -14,6 +14,11 @@ var requiredSurfaces = []string{
 	"AuthorizationResult",
 	"StaticTokenAuthorizer",
 	"FallbackAuthorizer",
+	"JWTAccessTokenAuthorizer",
+	"JWTVerificationKeyProvider",
+	"AccessTokenStatusResolver",
+	"HTTPIntrospectionStatusResolver",
+	"HTTPJWKSProvider",
 	"ExternalHTTPAuthorizer",
 	"ExternalHTTPAuthorizerConfig",
 	"CoalescingAuthorizer",
@@ -41,9 +46,7 @@ var requiredContractVersions = []string{
 	"riido-external-authorizer-response.v1",
 }
 
-var requiredRuntimeConfigKeys = []string{"RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS"}
-
-var requiredRuleGroups = map[string][]string{
+var requiredRuleGroups = mergeRequiredRuleGroups(map[string][]string{
 	"static-token": {
 		"principal-required", "exactly-one-token-material", "sha256-hash-supported",
 		"duplicate-token-rejected", "scopes-required", "constant-time-compare", "scoped-deny-forbidden",
@@ -68,4 +71,4 @@ var requiredRuleGroups = map[string][]string{
 		"device-headers-server-only", "both-device-fields-required",
 		"device-auth-before-token-auth", "browser-jwt-not-daemon-auth",
 	},
-}
+}, jwtRequiredRuleGroups)
