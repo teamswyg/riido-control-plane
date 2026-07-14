@@ -35,7 +35,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 
 ## Runtime Config Keys
 
-- `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`
+- `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`, `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
 
 ## External Contract Versions
 
@@ -46,7 +46,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | Group | Verified Rules |
 | --- | --- |
 | `static-token` | `principal-required`, `exactly-one-token-material`, `sha256-hash-supported`, `duplicate-token-rejected`, `scopes-required`, `constant-time-compare`, `scoped-deny-forbidden` |
-| `external-authorizer` | `request-schema-v1`, `response-schema-v1`, `opaque-bearer-token`, `ai-agent-client-workspace-required`, `api-key-header-server-only`, `response-disallow-unknown-fields`, `response-size-limit`, `allowed-principal-required`, `admin-role-only` |
+| `external-authorizer` | `request-schema-v1`, `response-schema-v1`, `opaque-bearer-token`, `ai-agent-client-workspace-required`, `api-key-header-server-only`, `response-disallow-unknown-fields`, `response-size-limit`, `allowed-principal-required`, `admin-role-only`, `configured-timeout-budget`, `slow-or-failed-authorization-observed`, `trace-span-without-token-or-workspace` |
 | `fail-closed` | `http-401-unauthenticated`, `http-403-forbidden`, `allowed-false-forbidden`, `non-2xx-service-error`, `malformed-json-service-error`, `unsupported-schema-service-error`, `invalid-role-service-error`, `network-error-service-error` |
 | `fallback` | `next-only-unauthenticated`, `forbidden-stops-chain`, `empty-chain-unauthenticated` |
 | `coalescing` | `in-flight-only`, `no-ttl-auth-cache`, `bearer-token-hashed-in-key`, `request-scope-separated`, `concurrent-identical-requests-share-one-hop` |
