@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"strings"
 	"testing"
 
@@ -82,6 +83,27 @@ func TestAuthorizerFromEnvComposesAuthPEPWithoutChangingStaticTokenBehavior(t *t
 	}
 	result, err := authorizer.Authorize(context.Background(), "static-token", metricsReadRequest())
 	if err != nil || result.PrincipalID != "static-user" || harness.Calls() != 0 {
+		t.Fatalf("result=%+v err=%v external_calls=%d", result, err, harness.Calls())
+	}
+}
+
+func TestAuthorizerFromEnvKeepsForeignIssuerJWTOnLegacyAuthorizer(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	header := base64.RawURLEncoding.EncodeToString([]byte(`{"alg":"legacy"}`))
+	payload := base64.RawURLEncoding.EncodeToString([]byte(`{"iss":"https://legacy-idp.example","sub":"legacy-user"}`))
+	legacyJWT := header + "." + payload + ".legacy-signature"
+	harness := newExternalAuthorizerHarnessForToken(t, legacyJWT)
+	defer harness.Close()
+	setAuthProfileEnv(t)
+	t.Setenv(envExternalAuthzURL, harness.URL)
+	t.Setenv(envExternalAuthzAPIKey, "internal-key")
+	t.Setenv(envExternalAuthzTimeout, "1")
+	authorizer, err := authorizerFromEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := authorizer.Authorize(context.Background(), legacyJWT, metricsReadRequest())
+	if err != nil || result.PrincipalID != "external-user" || harness.Calls() != 1 {
 		t.Fatalf("result=%+v err=%v external_calls=%d", result, err, harness.Calls())
 	}
 }

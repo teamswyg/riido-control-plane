@@ -91,16 +91,24 @@ func TestJWTAccessTokenAuthorizerRejectsSubstitutionAndStopsFallback(t *testing.
 	}
 }
 
-func TestJWTAccessTokenAuthorizerUsesFallbackOnlyForNonJWTToken(t *testing.T) {
+func TestJWTAccessTokenAuthorizerKeepsLegacyOpaqueAndForeignIssuerJWTPaths(t *testing.T) {
 	now := time.Date(2026, 7, 14, 12, 0, 0, 0, time.UTC)
 	key, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	claims := validJWTClaims(now)
-	jwt := newJWTAuthorizerForTest(t, now, &key.PublicKey, fixedAccessTokenStatusResolver{status: statusFromJWTClaims(claims)}, &countingAuthorizer{})
-	fallback := &countingAuthorizer{result: AuthorizationResult{PrincipalID: "legacy"}}
-	chain, _ := NewFallbackAuthorizer(jwt, fallback)
-	result, err := chain.Authorize(context.Background(), "legacy-static-token", AuthorizationRequest{Resource: AuthorizationResourceMetrics, Action: AuthorizationActionRead})
-	if err != nil || result.PrincipalID != "legacy" || fallback.calls != 1 {
-		t.Fatalf("result=%+v err=%v fallback_calls=%d", result, err, fallback.calls)
+	for name, token := range map[string]string{
+		"opaque":         "legacy-static-token",
+		"foreign issuer": jwtShapedTokenForTest(t, `{"iss":"https://legacy-idp.example"}`),
+		"missing issuer": jwtShapedTokenForTest(t, `{"sub":"legacy-user"}`),
+	} {
+		t.Run(name, func(t *testing.T) {
+			jwt := newJWTAuthorizerForTest(t, now, &key.PublicKey, fixedAccessTokenStatusResolver{status: statusFromJWTClaims(claims)}, &countingAuthorizer{})
+			fallback := &countingAuthorizer{result: AuthorizationResult{PrincipalID: "legacy"}}
+			chain, _ := NewFallbackAuthorizer(jwt, fallback)
+			result, err := chain.Authorize(context.Background(), token, AuthorizationRequest{Resource: AuthorizationResourceMetrics, Action: AuthorizationActionRead})
+			if err != nil || result.PrincipalID != "legacy" || fallback.calls != 1 {
+				t.Fatalf("result=%+v err=%v fallback_calls=%d", result, err, fallback.calls)
+			}
+		})
 	}
 }
 
@@ -167,4 +175,11 @@ func signJWTForTest(t *testing.T, key *ecdsa.PrivateKey, claims jwtAccessClaims)
 	r.FillBytes(signature[:32])
 	s.FillBytes(signature[32:])
 	return signingInput + "." + base64.RawURLEncoding.EncodeToString(signature)
+}
+
+func jwtShapedTokenForTest(t *testing.T, payload string) string {
+	t.Helper()
+	header := base64.RawURLEncoding.EncodeToString([]byte(`{"alg":"ES256","kid":"auth-key-202607","typ":"at+jwt"}`))
+	claims := base64.RawURLEncoding.EncodeToString([]byte(payload))
+	return header + "." + claims + ".invalid-signature"
 }

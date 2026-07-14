@@ -40,9 +40,9 @@ Questions: `8`; open: `6`; resolved: `2`.
 - area: Production identity
 - owner: `control-plane-auth`
 - question: Which IdP/JWKS claim mapping becomes the production authorizer contract?
-- stance: Use Riido Auth exact issuer, resource audience, authorization_profile and finite scopes; require local ES256/JWKS verification, Auth introspection and the consumer domain PDP.
+- stance: Use issuer-routed dual authentication: Riido Auth exact issuer/resource/profile tokens require local ES256/JWKS verification, introspection and the consumer domain PDP, while foreign issuers continue through the existing legacy authorizer.
 - next artifact: docs/20-domain/request-authorization.riido.json and internal/authpep/authorization_jwt.go
-- resolution: The accepted mapping is iss=https://auth.riido.io, aud=https://ai-api.riido.io, authorization_profile=riido-control-plane.production.v1, typ=at+jwt, alg=ES256, canonical non-wildcard scopes and exact introspection claim equivalence. Token validation never supplies tenant authorization; the existing external domain authorizer must return the same subject and requested workspace. Production activation remains a separate infra evidence gate.
+- resolution: The accepted mapping is iss=https://auth.riido.io, aud=https://ai-api.riido.io, authorization_profile=riido-control-plane.production.v1, typ=at+jwt, alg=ES256, canonical non-wildcard scopes and exact introspection claim equivalence. A token claiming the Riido Auth issuer cannot fall back after any failure; a foreign or missing issuer may be evaluated only by the independently authenticating legacy authorizer. Token validation never supplies tenant authorization, and the domain authorizer must return the same subject and requested workspace. Production activation remains a separate infra evidence gate.
 
 ### Q-CP-004
 

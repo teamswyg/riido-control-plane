@@ -17,7 +17,8 @@ var jwtRequiredRuleGroups = map[string][]string{
 		"exact-authorization-profile", "canonical-non-wildcard-scopes", "auth-introspection-required",
 		"consumer-owned-http-spi", "private-module-independent", "confidential-client-body-binding",
 		"introspection-redirect-refused",
-		"claim-equivalence-required", "jwt-shaped-invalid-stops-fallback", "consumer-domain-pdp-required",
+		"claim-equivalence-required", "issuer-routed-dual-authentication", "auth-issuer-invalid-stops-fallback",
+		"foreign-issuer-legacy-fallback", "duplicate-jwt-claim-rejected", "consumer-domain-pdp-required",
 		"domain-subject-and-workspace-equivalence",
 	},
 }

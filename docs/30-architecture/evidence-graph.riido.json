@@ -20388,8 +20388,8 @@
     },
     {
       "id": "control_plane_auth_resource_jwt_pep_loop",
-      "observation": "Control-plane production requests could be authenticated only by static, device, or external-authorizer credentials, so a Riido Auth access token had no local resource/profile-bound verification path and a malformed JWT-like credential could fall through to a weaker authorizer.",
-      "hypothesis": "A dedicated identity adapter can verify the exact Riido Auth issuer, ES256 algorithm, P-256 key, kid, audience, authorization profile, bounded token lifetime, canonical scopes, JWKS freshness, and introspection parity before delegating workspace and action policy to the existing consumer-owned domain PDP; invalid JWT-like credentials must terminate the chain instead of falling back.",
+      "observation": "Control-plane needs Riido Auth and the existing legacy authentication to coexist, but treating every JWT-shaped credential as Riido Auth would block the legacy issuer while unconditional fallback could downgrade a damaged Riido Auth token.",
+      "hypothesis": "An issuer-routed discriminator can send foreign issuers to the independently authenticating legacy authorizer while keeping every token claiming https://auth.riido.io inside exact ES256, JWKS, resource/profile, introspection and domain-PDP verification with no fallback after failure.",
       "claims": [
         "request_authorization_must_preserve_security_boundary",
         "config_reference_must_preserve_env_manifest_parity",
@@ -20400,6 +20400,30 @@
         {
           "kind": "code",
           "path": "internal/authpep"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/authorization_jwt.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/authorization_jwt_routing.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/authorization_jwt_json.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/authorization_jwt_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/authorization_jwt_routing_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_config_test.go"
         },
         {
           "kind": "code",
@@ -20466,7 +20490,7 @@
           "path": "cmd/riido_ai_server/authorizer_config_test.go"
         }
       ],
-      "decision": "The control-plane now has a disabled-by-default Riido Auth JWT PEP foundation. Authentication proof is owned by the auth adapter, authorization remains owned by the consumer domain PDP, exact introspection equivalence is required for the security-critical claims, and invalid JWT-like credentials cannot downgrade into static or external authorization. Production activation remains a separate loop until the Auth resource profile, confidential introspection client secret, and deployment wiring are provisioned; no production identity behavior is implied by this foundation change.",
+      "decision": "The control-plane now supports issuer-routed dual authentication: foreign or missing issuers may continue to the existing legacy authorizer, while every token claiming the Riido Auth issuer is owned by the new PEP and cannot downgrade after malformed JSON, duplicate claims, signature, JWKS, claim, introspection or domain-policy failure. Production activation remains a separate loop until the Auth resource profile, confidential introspection client secret, token-acquisition path and deployment wiring are proven.",
       "next_loop": "closed_loop_candidate"
     }
   ],

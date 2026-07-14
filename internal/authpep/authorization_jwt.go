@@ -1,16 +1,13 @@
 package authpep
 
 import (
-	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"math/big"
 	"net/url"
 	"sort"
@@ -118,7 +115,7 @@ func (a *JWTAccessTokenAuthorizer) Authorize(ctx context.Context, bearerToken st
 	if a == nil {
 		return AuthorizationResult{}, ErrAuthorizationUnauthenticated
 	}
-	if strings.Count(bearerToken, ".") != 2 {
+	if !a.claimsConfiguredIssuer(bearerToken) {
 		return AuthorizationResult{}, ErrAuthorizationUnauthenticated
 	}
 	claims, err := a.verify(ctx, bearerToken)
@@ -284,18 +281,6 @@ func canonicalJWTIdentifier(value string, maximum int) bool {
 		return false
 	}
 	return true
-}
-
-func decodeExactJWTJSON(data []byte, target any) error {
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(target); err != nil {
-		return err
-	}
-	if err := decoder.Decode(&struct{}{}); err != io.EOF {
-		return errors.New("JWT JSON contains trailing data")
-	}
-	return nil
 }
 
 func exactHTTPSOrigin(value string) bool {
