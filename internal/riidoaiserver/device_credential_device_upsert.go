@@ -8,6 +8,9 @@ func (s *DevelopmentAIAgentClientStore) upsertEnrolledDeviceLocked(device Device
 			if device.DisplayName != "" {
 				merged.DisplayName = device.DisplayName
 			}
+			if device.DesktopAppVersion != "" {
+				merged.DesktopAppVersion = device.DesktopAppVersion
+			}
 			if !device.DaemonLastSeenAt.IsZero() {
 				merged.DaemonLastSeenAt = device.DaemonLastSeenAt
 			}

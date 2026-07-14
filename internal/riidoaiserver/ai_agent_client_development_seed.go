@@ -16,6 +16,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 	seed := newDevelopmentAIAgentClientSeed()
 	return &DevelopmentAIAgentClientStore{
 		workspaceID:             defaultAIAgentClientWorkspaceID,
+		daemonClientPolicy:      DefaultDaemonClientCompatibilityPolicy(),
 		devices:                 seed.devices,
 		deviceCredentials:       map[string]deviceCredentialRecord{},
 		daemons:                 seed.daemons,

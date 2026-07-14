@@ -163,10 +163,13 @@ type RuntimeSnapshotRecord struct {
 }
 
 type DeviceRecord struct {
-	DeviceID         string    `json:"device_id"`
-	OwnerPrincipalID string    `json:"owner_principal_id"`
-	DisplayName      string    `json:"display_name,omitempty"`
-	DaemonLastSeenAt time.Time `json:"daemon_last_seen_at,omitempty"`
+	DeviceID          string              `json:"device_id"`
+	OwnerPrincipalID  string              `json:"owner_principal_id"`
+	IsOwnedByViewer   bool                `json:"is_owned_by_viewer"`
+	DisplayName       string              `json:"display_name,omitempty"`
+	DesktopAppVersion string              `json:"desktop_app_version,omitempty"`
+	DaemonLastSeenAt  time.Time           `json:"daemon_last_seen_at,omitempty"`
+	ClientStatus      *DeviceClientStatus `json:"client_status,omitempty"`
 	// ConnectedWorkspaceIDs is the set of workspaces this (machine) device is
 	// connected to. The device is visible to every member of any workspace it is
 	// connected to — visibility is workspace-connection scoped, not owner scoped.

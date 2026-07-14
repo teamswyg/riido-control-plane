@@ -15,8 +15,22 @@
   "operation_counts": {"total":57,"v1":26,"v2":31,"smoke_matrix":57},
   "required_generated_paths": ["aiAgent.bootstrap","aiAgent.profileThumbnails.uploads.create","aiAgent.devices.daemons.list","aiAgent.tasks.assign","aiAgent.tasks.threadMessages.create","v2.aiAgent.bootstrap","v2.aiAgent.agents.create","v2.aiAgent.devices.daemons.list","v2.aiAgent.profileThumbnails.uploads.create","v2.aiAgent.tasks.assignedAgentProfiles","v2.aiAgent.tasks.agentAssignments.create","v2.aiAgent.tasks.threadStreamSubscription"],
   "runtime_config_keys": ["RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"],
-  "public_fields": ["workspace_id","profile_thumbnail_url","provider_version","assigned-agent-profiles","agent-assignments","thread-stream-subscription","conversation_id","parent_thread_id","agent_snapshot_id","agent_snapshots","messages","author_principal_id"],
+  "public_fields": ["workspace_id","profile_thumbnail_url","provider_version","assigned-agent-profiles","agent-assignments","thread-stream-subscription","conversation_id","parent_thread_id","agent_snapshot_id","agent_snapshots","messages","author_principal_id","is_owned_by_viewer","desktop_app_version","client_status","minimum_daemon_version","latest_daemon_version","agent_capability","agent_supported","update_required","download_url"],
   "deployment_evidence": ["not from a manual","The workflow masks both values"],
+  "device_client_guidance": {
+    "read_endpoint": "GET /v2/client/workspaces/{workspace_id}/ai-agent/devices",
+    "purpose": "Distinguish a registered Desktop device, an offline daemon, an unsupported daemon version, and an Agent-ready daemon without guessing from an empty runtime list.",
+    "rules": [
+      "Use is_owned_by_viewer instead of comparing owner_principal_id with an identifier from another auth system.",
+      "desktop_app_version is the version reported during Desktop device enrollment.",
+      "client_status.daemon_version is the daemon build version reported by runtime snapshots.",
+      "agent_capability=update_required means the Desktop is registered and the daemon is online, but daemon_version is below minimum_daemon_version.",
+      "agent_capability=offline means the device remains registered but the daemon heartbeat is stale or absent; do not describe this as not installed.",
+      "agent_capability=version_unknown means an online daemon did not report a parseable release version; show diagnostics or update guidance rather than an installation claim.",
+      "agent_capability=ready and agent_supported=true mean the daemon meets the configured minimum version.",
+      "download_url is server-owned update guidance; clients must not hard-code a different release URL."
+    ]
+  },
   "thread_history_v3_frontend": {
     "read_endpoint": {
       "name": "thread-history-v3",
@@ -211,6 +225,8 @@
     {"name":"thread-history-v3-handoff-verifier-rules","file":"tools/aiagentclientapi/verify_thread_history_v3_rules.go","contains":["requireNamedRules","requireShape","hasString"]},
     {"name":"thread-history-v2-actions","file":"internal/riidoaiserver/ai_agent_client_task_router_handler.go","contains":["agent-assignments","thread-stream-subscription","threads/","/messages"]},
     {"name":"runtime-env","file":"cmd/riido_ai_server/env_names.go","contains":["envAIAgentClientDev","RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"]},
+    {"name":"device-client-status-projection","file":"internal/riidoaiserver/device_client_status_projection.go","contains":["projectDeviceClientStatusLocked","classifyDeviceAgentCapability","DeviceAgentCapabilityUpdateRequired"]},
+    {"name":"device-client-status-http-test","file":"internal/riidoaiserver/ai_agent_client_http_device_client_status_test.go","contains":["TestHTTPAIAgentClientDevicesIncludesVersionGuidance","MinimumDaemonVersion","DownloadURL"]},
     {"name":"workflow","file":".github/workflows/ai-agent-client-api.yml","contains":["Verify React Query generation drift","Verify generated client handoff","Verify React Query generator command"]}
   ],
   "loop": {

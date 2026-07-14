@@ -38,11 +38,20 @@ Canonical domain changes start in `riido-contracts`; this repo verifies the exec
 
 ## Public Field And Endpoint Signals
 
-- `workspace_id`, `profile_thumbnail_url`, `provider_version`, `assigned-agent-profiles`, `agent-assignments`, `thread-stream-subscription`, `conversation_id`, `parent_thread_id`, `agent_snapshot_id`, `agent_snapshots`, `messages`, `author_principal_id`
+- `workspace_id`, `profile_thumbnail_url`, `provider_version`, `assigned-agent-profiles`, `agent-assignments`, `thread-stream-subscription`, `conversation_id`, `parent_thread_id`, `agent_snapshot_id`, `agent_snapshots`, `messages`, `author_principal_id`, `is_owned_by_viewer`, `desktop_app_version`, `client_status`, `minimum_daemon_version`, `latest_daemon_version`, `agent_capability`, `agent_supported`, `update_required`, `download_url`
 
 ## Deployment Evidence Phrases
 
 - `not from a manual`, `The workflow masks both values`
+
+## Device Client Guidance
+
+- read endpoint: `GET /v2/client/workspaces/{workspace_id}/ai-agent/devices`
+- purpose: Distinguish a registered Desktop device, an offline daemon, an unsupported daemon version, and an Agent-ready daemon without guessing from an empty runtime list.
+
+## Device Guidance Rules
+
+- `Use is_owned_by_viewer instead of comparing owner_principal_id with an identifier from another auth system.`, `desktop_app_version is the version reported during Desktop device enrollment.`, `client_status.daemon_version is the daemon build version reported by runtime snapshots.`, `agent_capability=update_required means the Desktop is registered and the daemon is online, but daemon_version is below minimum_daemon_version.`, `agent_capability=offline means the device remains registered but the daemon heartbeat is stale or absent; do not describe this as not installed.`, `agent_capability=version_unknown means an online daemon did not report a parseable release version; show diagnostics or update guidance rather than an installation claim.`, `agent_capability=ready and agent_supported=true mean the daemon meets the configured minimum version.`, `download_url is server-owned update guidance; clients must not hard-code a different release URL.`
 
 ## Frontend Thread History v3 Handoff
 

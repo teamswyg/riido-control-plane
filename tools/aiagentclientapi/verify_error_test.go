@@ -3,6 +3,8 @@ package main
 import (
 	"strings"
 	"testing"
+
+	"github.com/teamswyg/riido-control-plane/tools/aiagentclientapi/requirements"
 )
 
 func TestVerifyHeaderRejectsIdentityAndRequiredFields(t *testing.T) {
@@ -17,9 +19,9 @@ func TestVerifyStaticListsRejectMissingRequirements(t *testing.T) {
 	t.Parallel()
 	m := validHeaderManifest()
 	assertAIClientAPIError(t, verifyStaticLists(m), "runtime config")
-	m.RuntimeConfigKeys = []string{"RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"}
+	m.RuntimeConfigKeys = append([]string(nil), requirements.RequiredRuntimeConfigKeys...)
 	assertAIClientAPIError(t, verifyStaticLists(m), "public field")
-	m.PublicFields = []string{"workspace_id", "profile_thumbnail_url", "provider_version", "assigned-agent-profiles", "agent-assignments", "thread-stream-subscription", "conversation_id", "parent_thread_id", "agent_snapshot_id", "agent_snapshots", "messages", "author_principal_id"}
+	m.PublicFields = append([]string(nil), requirements.RequiredPublicFields...)
 	assertAIClientAPIError(t, verifyStaticLists(m), "deployment evidence")
 }
 

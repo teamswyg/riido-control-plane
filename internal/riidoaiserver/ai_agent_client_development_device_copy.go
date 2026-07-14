@@ -20,6 +20,10 @@ func copyDevice(device DeviceRecord) DeviceRecord {
 	}
 	device.Runtimes = runtimes
 	device.ConnectedWorkspaceIDs = append([]string(nil), device.ConnectedWorkspaceIDs...)
+	if device.ClientStatus != nil {
+		status := *device.ClientStatus
+		device.ClientStatus = &status
+	}
 	return device
 }
 

@@ -8,6 +8,7 @@ type DevelopmentAIAgentClientStore struct {
 	mu                      sync.Mutex
 	workspaceID             string
 	expectedDaemonProfile   string
+	daemonClientPolicy      DaemonClientCompatibilityPolicy
 	devices                 []DeviceRecord
 	deviceCredentials       map[string]deviceCredentialRecord
 	nextDeviceCredentialSeq int

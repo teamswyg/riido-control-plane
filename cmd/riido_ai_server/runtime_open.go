@@ -15,6 +15,9 @@ func openAIAgentClient(ctx context.Context, config runtimeConfig) (riidoaiserver
 	if err := base.ConfigureDaemonProfile(config.AIAgentDaemonProfile); err != nil {
 		return nil, fmt.Errorf("configure AI Agent daemon profile: %w", err)
 	}
+	if err := base.ConfigureDaemonClientCompatibility(config.DaemonClientPolicy); err != nil {
+		return nil, fmt.Errorf("configure daemon client compatibility: %w", err)
+	}
 	persistentClient, err := riidoaiserver.OpenPersistentAIAgentClientStore(ctx, base, config.AIAgentClientStore)
 	if err != nil {
 		return nil, fmt.Errorf("open AI Agent development store: %w", err)

@@ -45,6 +45,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 		AIAgentClientStore:       parts.aiAgentClientStore,
 		AIAgentClientMetrics:     parts.aiAgentClientMetrics,
 		AIAgentDaemonProfile:     daemonProfile,
+		DaemonClientPolicy:       daemonClientCompatibilityPolicyFromEnv(),
 		AIAgentSnapshotReload:    cadence.Reload,
 		AIAgentHeartbeatSave:     cadence.HeartbeatSave,
 		AIAgentProfileThumbnails: profileThumbnails,
