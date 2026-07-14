@@ -8,7 +8,7 @@ import (
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
-func assertExternalAuthorizerRequest(t *testing.T, r *http.Request) {
+func assertExternalAuthorizerRequest(t *testing.T, r *http.Request, expectedToken string) {
 	t.Helper()
 	var req struct {
 		SchemaVersion string `json:"schema_version"`
@@ -24,7 +24,7 @@ func assertExternalAuthorizerRequest(t *testing.T, r *http.Request) {
 		t.Fatalf("decode request: %v", err)
 	}
 	if req.SchemaVersion != riidoaiserver.ExternalAuthorizerRequestSchemaVersion ||
-		req.BearerToken != "external-token" ||
+		req.BearerToken != expectedToken ||
 		req.Request.Resource != "metrics" ||
 		req.Request.Action != "read" {
 		t.Fatalf("external request = %+v", req)

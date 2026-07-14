@@ -28,9 +28,9 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `internal/riidoaiserver` | 84 | 85 | 838 | 838 | 13133 | 13604 |
-| `internal/authpep` | 6 | 6 | 306 | 306 | 687 | 687 |
+| `internal/authpep` | 6 | 6 | 291 | 306 | 687 | 687 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
-| `cmd/riido_ai_server` | 1 | 3 | 119 | 791 | 44 | 1474 |
+| `cmd/riido_ai_server` | 1 | 3 | 141 | 791 | 66 | 1474 |
 | `tools/containercontract` | 0 | 0 | 0 | 75 | 0 | 0 |
 | `tools/generatedclienthandoff` | 0 | 2 | 0 | 601 | 0 | 578 |
 | `awsadapters` | 0 | 1 | 0 | 84 | 0 | 9 |
@@ -62,8 +62,8 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
 | `internal/riidoaiserver` | 84 | 838 | 13133 |
-| `internal/authpep` | 6 | 306 | 687 |
-| `cmd/riido_ai_server` | 1 | 119 | 44 |
+| `internal/authpep` | 6 | 291 | 687 |
+| `cmd/riido_ai_server` | 1 | 141 | 66 |
 
 ## Packages
 
