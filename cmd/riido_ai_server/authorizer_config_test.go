@@ -51,6 +51,62 @@ func TestAuthorizerFromEnvRejectsRemotePlainHTTPExternalAuthorizer(t *testing.T)
 	}
 }
 
+func TestAuthorizerFromEnvRejectsPartialAuthProfile(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	t.Setenv(envAuthIssuer, "https://auth.riido.io")
+	if _, err := authorizerFromEnv(); err == nil || !strings.Contains(err.Error(), envAuthIssuer) {
+		t.Fatalf("partial Auth profile err=%v", err)
+	}
+}
+
+func TestAuthorizerFromEnvRequiresConsumerDomainPDPForAuthProfile(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	setAuthProfileEnv(t)
+	if _, err := authorizerFromEnv(); err == nil || !strings.Contains(err.Error(), envExternalAuthzURL) {
+		t.Fatalf("missing domain PDP err=%v", err)
+	}
+}
+
+func TestAuthorizerFromEnvComposesAuthPEPWithoutChangingStaticTokenBehavior(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	harness := newExternalAuthorizerHarness(t)
+	defer harness.Close()
+	setAuthProfileEnv(t)
+	t.Setenv(envExternalAuthzURL, harness.URL)
+	t.Setenv(envExternalAuthzAPIKey, "internal-key")
+	t.Setenv(envExternalAuthzTimeout, "1")
+	t.Setenv(envAuthzTokensJSON, `[{"principal_id":"static-user","token":"static-token","scopes":["metrics:read"]}]`)
+	authorizer, err := authorizerFromEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := authorizer.Authorize(context.Background(), "static-token", metricsReadRequest())
+	if err != nil || result.PrincipalID != "static-user" || harness.Calls() != 0 {
+		t.Fatalf("result=%+v err=%v external_calls=%d", result, err, harness.Calls())
+	}
+}
+
+func TestAuthorizerFromEnvRejectsUnboundedAuthHTTPTimeout(t *testing.T) {
+	clearRiidoAIServerEnv(t)
+	harness := newExternalAuthorizerHarness(t)
+	defer harness.Close()
+	setAuthProfileEnv(t)
+	t.Setenv(envExternalAuthzURL, harness.URL)
+	t.Setenv(envAuthHTTPTimeout, "11")
+	if _, err := authorizerFromEnv(); err == nil || !strings.Contains(err.Error(), envAuthHTTPTimeout) {
+		t.Fatalf("unbounded Auth timeout err=%v", err)
+	}
+}
+
+func setAuthProfileEnv(t *testing.T) {
+	t.Helper()
+	t.Setenv(envAuthIssuer, "https://auth.riido.io")
+	t.Setenv(envAuthResource, "https://ai-api.riido.io")
+	t.Setenv(envAuthAuthorizationProfile, "riido-control-plane.production.v1")
+	t.Setenv(envAuthIntrospectionClientID, "riido-control-plane")
+	t.Setenv(envAuthIntrospectionClientSecret, "control-plane-introspection-secret-material")
+}
+
 func assertStaticTokenDoesNotCallExternal(t *testing.T, authorizer riidoaiserver.RequestAuthorizer, harness *externalAuthorizerHarness) {
 	t.Helper()
 	_, err := authorizer.Authorize(context.Background(), "static-token", metricsReadRequest())

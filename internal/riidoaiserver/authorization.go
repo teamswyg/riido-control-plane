@@ -43,7 +43,11 @@ const (
 
 var (
 	ErrAuthorizationUnauthenticated = errors.New("riidoaiserver: unauthenticated")
-	ErrAuthorizationForbidden       = errors.New("riidoaiserver: forbidden")
+	// ErrAuthorizationInvalidCredential is distinct from unauthenticated so a
+	// JWT-shaped but invalid credential can never fall through to another
+	// authorizer that interprets the same bytes under a weaker contract.
+	ErrAuthorizationInvalidCredential = errors.New("riidoaiserver: invalid credential")
+	ErrAuthorizationForbidden         = errors.New("riidoaiserver: forbidden")
 )
 
 type AuthorizationRequest struct {

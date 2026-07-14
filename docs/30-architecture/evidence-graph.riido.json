@@ -20385,6 +20385,89 @@
       ],
       "decision": "The v2 device list keeps all existing fields and adds explicit viewer ownership, enrolled Desktop version, reported daemon version, configured minimum/latest versions, update requirement, Agent support, and server-owned download guidance. Workspace-visible devices remain attributed to their real owner.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "control_plane_auth_resource_jwt_pep_loop",
+      "observation": "Control-plane production requests could be authenticated only by static, device, or external-authorizer credentials, so a Riido Auth access token had no local resource/profile-bound verification path and a malformed JWT-like credential could fall through to a weaker authorizer.",
+      "hypothesis": "A dedicated identity adapter can verify the exact Riido Auth issuer, ES256 algorithm, P-256 key, kid, audience, authorization profile, bounded token lifetime, canonical scopes, JWKS freshness, and introspection parity before delegating workspace and action policy to the existing consumer-owned domain PDP; invalid JWT-like credentials must terminate the chain instead of falling back.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary",
+        "config_reference_must_preserve_env_manifest_parity",
+        "module_decomposition_must_preserve_surface_area_ratchet",
+        "open_decision_questions_must_bind_owner_next_artifact_and_reader"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/authpep"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/authorizer_auth.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/request-authorization.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/config-reference.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/module-decomposition.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/50-roadmap/open-questions.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/authpep"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/requestauth"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/configreference"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/authpep/authorization_jwt_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/authorization_jwks_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_config_test.go"
+        }
+      ],
+      "decision": "The control-plane now has a disabled-by-default Riido Auth JWT PEP foundation. Authentication proof is owned by the auth adapter, authorization remains owned by the consumer domain PDP, exact introspection equivalence is required for the security-critical claims, and invalid JWT-like credentials cannot downgrade into static or external authorization. Production activation remains a separate loop until the Auth resource profile, confidential introspection client secret, and deployment wiring are provisioned; no production identity behavior is implied by this foundation change.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

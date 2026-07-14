@@ -17,17 +17,24 @@ func authorizerFromEnv() (riidoaiserver.RequestAuthorizer, error) {
 }
 
 func authorizerFromEnvWithReview(reviewProvision *riidoaiserver.ReviewAccountProvisioning) (riidoaiserver.RequestAuthorizer, error) {
-	var authorizers []riidoaiserver.RequestAuthorizer
 	static, err := staticAuthorizerFromEnv(reviewProvision)
 	if err != nil {
 		return nil, err
 	}
-	if static != nil {
-		authorizers = append(authorizers, static)
-	}
 	external, err := externalAuthorizerFromEnv()
 	if err != nil {
 		return nil, err
+	}
+	jwt, err := jwtAuthorizerFromEnv(external)
+	if err != nil {
+		return nil, err
+	}
+	var authorizers []riidoaiserver.RequestAuthorizer
+	if jwt != nil {
+		authorizers = append(authorizers, jwt)
+	}
+	if static != nil {
+		authorizers = append(authorizers, static)
 	}
 	if external != nil {
 		authorizers = append(authorizers, external)

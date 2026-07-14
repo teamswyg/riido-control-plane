@@ -13,6 +13,8 @@ func riidoAIServerEnvKeys() []string {
 	return []string{
 		envAddr, envShutdownTimeoutSeconds, envAuthzTokensJSON,
 		envExternalAuthzURL, envExternalAuthzAudience, envExternalAuthzTimeout,
+		envAuthIssuer, envAuthResource, envAuthAuthorizationProfile,
+		envAuthIntrospectionClientID, envAuthIntrospectionClientSecret, envAuthHTTPTimeout,
 		envReviewAccountTokenHash, envMetricsLogInterval, envPprofAddr,
 		envTracingEnabled, envTracingSampleRatio, envTracingOTLPEndpoint,
 		envTracingServiceName, envWebAllowedOrigins, envAssignmentActiveLease,

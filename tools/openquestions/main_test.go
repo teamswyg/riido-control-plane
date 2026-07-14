@@ -44,10 +44,10 @@ func assertOpenQuestionsEvidence(t *testing.T, got evidence) {
 		got.Workflow != ".github/workflows/open-questions.yml" {
 		t.Fatalf("doc/workflow = %s/%s", got.GeneratedDoc, got.Workflow)
 	}
-	if got.Result.QuestionCount != 8 || got.Result.OpenCount != 7 || got.Result.ResolvedCount != 1 || len(got.OpenCommands) != 7 {
+	if got.Result.QuestionCount != 8 || got.Result.OpenCount != 6 || got.Result.ResolvedCount != 2 || len(got.OpenCommands) != 6 {
 		t.Fatalf("counts = %+v commands=%d", got.Result, len(got.OpenCommands))
 	}
-	if got.Result.StatusCounts["open"] != 7 ||
+	if got.Result.StatusCounts["open"] != 6 || got.Result.StatusCounts["resolved"] != 1 ||
 		got.Result.StatusCounts["resolved-no-diff"] != 1 {
 		t.Fatalf("status counts = %+v", got.Result.StatusCounts)
 	}

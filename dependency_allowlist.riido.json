@@ -24,6 +24,13 @@
       "reason": "Shared generated assignment/runtime vocabulary contract."
     },
     {
+      "path": "github.com/teamswyg/riido-auth-service",
+      "layer": "contract",
+      "owner": "control-plane-auth",
+      "approved": true,
+      "reason": "Pinned v0.8.0 confidential-client introspection adapter; server/runtime packages are not imported and consumer domain authorization remains local."
+    },
+    {
       "path": "go.opentelemetry.io/otel",
       "layer": "observability",
       "owner": "platform",

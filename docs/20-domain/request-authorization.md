@@ -17,7 +17,11 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | `AuthorizationResult` | server-owned principal projection |
 | `StaticTokenAuthorizer` | static request-token evaluator |
 | `FallbackAuthorizer` | unauthenticated-only chain |
-| `ExternalHTTPAuthorizer` | external HTTP adapter |
+| `JWTAccessTokenAuthorizer` | resource/profile-bound Auth token PEP |
+| `JWTVerificationKeyProvider` | public verification key port |
+| `AccessTokenStatusResolver` | Auth introspection status port |
+| `HTTPJWKSProvider` | exact issuer JWKS cache adapter |
+| `ExternalHTTPAuthorizer` | consumer-owned tenant and domain PDP adapter |
 | `ExternalHTTPAuthorizerConfig` | external adapter runtime config |
 | `CoalescingAuthorizer` | in-flight duplicate authorization collapse without TTL caching |
 
@@ -35,7 +39,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 
 ## Runtime Config Keys
 
-- `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`, `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`
+- `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS`, `RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS`, `RIIDO_AI_SERVER_AUTH_ISSUER`, `RIIDO_AI_SERVER_AUTH_RESOURCE`, `RIIDO_AI_SERVER_AUTH_AUTHORIZATION_PROFILE`, `RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_ID`, `RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_SECRET`, `RIIDO_AI_SERVER_AUTH_HTTP_TIMEOUT_SECONDS`
 
 ## External Contract Versions
 
@@ -49,6 +53,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | `external-authorizer` | `request-schema-v1`, `response-schema-v1`, `opaque-bearer-token`, `ai-agent-client-workspace-required`, `api-key-header-server-only`, `response-disallow-unknown-fields`, `response-size-limit`, `allowed-principal-required`, `admin-role-only`, `configured-timeout-budget`, `slow-or-failed-authorization-observed`, `trace-span-without-token-or-workspace` |
 | `fail-closed` | `http-401-unauthenticated`, `http-403-forbidden`, `allowed-false-forbidden`, `non-2xx-service-error`, `malformed-json-service-error`, `unsupported-schema-service-error`, `invalid-role-service-error`, `network-error-service-error` |
 | `fallback` | `next-only-unauthenticated`, `forbidden-stops-chain`, `empty-chain-unauthenticated` |
+| `auth-jwt-pep` | `exact-https-issuer-and-resource`, `typ-at-jwt-only`, `es256-p256-only`, `known-kid-only`, `jwks-etag-max-age-60`, `expired-jwks-fails-closed`, `unknown-kid-one-refresh`, `exact-authorization-profile`, `canonical-non-wildcard-scopes`, `auth-introspection-required`, `claim-equivalence-required`, `jwt-shaped-invalid-stops-fallback`, `consumer-domain-pdp-required`, `domain-subject-and-workspace-equivalence` |
 | `coalescing` | `in-flight-only`, `no-ttl-auth-cache`, `bearer-token-hashed-in-key`, `request-scope-separated`, `concurrent-identical-requests-share-one-hop` |
 | `cors` | `exact-origin-allowlist`, `method-allowlist`, `header-allowlist`, `no-browser-credentials`, `unsupported-header-rejected` |
 | `device-principal` | `device-headers-server-only`, `both-device-fields-required`, `device-auth-before-token-auth`, `browser-jwt-not-daemon-auth` |
@@ -57,12 +62,12 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 
 | Step | Statement |
 | --- | --- |
-| Observe | Request authorization rules protect request tokens, device credentials, external authorizer fail-closed behavior, and browser transport, but the doc was prose-only. |
-| Hypothesis | A request-authorization SSOT gate can catch drift in token transport, static scopes, external authorizer failure mapping, fallback chaining, and CORS policy before security semantics regress. |
-| Execute | Generate this reader doc from the manifest and run the requestauth verifier in CI. |
-| Evaluate | The verifier checks required surfaces, resources, token transports, contract versions, rule groups, source anchors, generated doc freshness, and CLI evidence output. |
-| Retrospective | This slice proves public control-plane request authorization semantics and in-flight duplicate external authorization collapse; production IdP, JWKS/OIDC, secret rotation, Terraform, and live deployment evidence remain out of scope. |
+| Observe | Request authorization already protected static, device and external authorizer paths, but a JWT-shaped credential could not prove exact Auth issuer/resource/profile or current revocation status. |
+| Hypothesis | Local exact JWKS verification plus Auth introspection and the existing consumer domain PDP can add production-shaped authentication without turning token possession into tenant authorization. |
+| Execute | Add the resource-bound JWT PEP, bounded ETag JWKS adapter, introspection client composition and invalid-JWT no-fallback sentinel, then generate this reader doc. |
+| Evaluate | The verifier and counterexamples cover algorithm/kid/audience/profile/scope substitution, stale or malformed JWKS, introspection mismatch, principal/workspace substitution, partial config and domain PDP absence. |
+| Retrospective | The production contract is exact, but runtime activation remains off until Auth and infra register the resource profile, introspection credential custody and consumer PDP deployment together. |
 
 ## Non-Goals
 
-- `production IdP rollout`, `tenant claim mapping`, `JWKS/OIDC validation`, `Terraform`, `SSM secret rotation`, `production token values`, `generated frontend implementation`
+- `automatic production activation`, `centralizing tenant/resource policy in Auth`, `Terraform state`, `secret values`, `production token values`, `generated frontend implementation`

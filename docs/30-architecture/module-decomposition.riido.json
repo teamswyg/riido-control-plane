@@ -32,6 +32,12 @@
         "max_total_over_target_lines": 13604
       },
       {
+        "path": "internal/authpep",
+        "max_files": 4,
+        "max_lines": 306,
+        "max_total_over_target_lines": 528
+      },
+      {
         "path": "tools/reactquerygen",
         "max_files": 3,
         "max_lines": 1395,
@@ -93,6 +99,12 @@
       "kind": "runtime-shell",
       "role": "Binary entrypoint, Factor 12 env parsing, HTTP lifecycle, optional metrics and tracing startup.",
       "must_not_own": "domain decisions, Terraform, production secret values, provider process execution"
+    },
+    {
+      "path": "internal/authpep",
+      "kind": "identity-adapter",
+      "role": "Riido Auth resource-bound JWT, exact JWKS cache, introspection and no-fallback PEP adapter.",
+      "must_not_own": "control-plane tenant/resource policy, Auth signing keys, confidential secret values, HTTP route behavior"
     },
     {
       "path": "internal/contractscompat",

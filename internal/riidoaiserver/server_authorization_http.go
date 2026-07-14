@@ -60,6 +60,8 @@ func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req Aut
 			writeError(w, http.StatusForbidden, "forbidden")
 		case errors.Is(err, ErrAuthorizationUnauthenticated):
 			writeUnauthorized(w)
+		case errors.Is(err, ErrAuthorizationInvalidCredential):
+			writeUnauthorized(w)
 		default:
 			writeError(w, http.StatusServiceUnavailable, err.Error())
 		}

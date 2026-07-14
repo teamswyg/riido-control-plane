@@ -10,15 +10,15 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `107`; runtime: `1`; internal: `3`; tools: `102`; forbidden import hits: `0`.
+Packages: `108`; runtime: `1`; internal: `4`; tools: `102`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `84`; max file lines: `838`.
+File line budget target: `75`; files over target: `90`; max file lines: `838`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 84 | 97 | 13 |
+| Files over target | 90 | 97 | 7 |
 | Max file lines | 838 | 2481 | 1643 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
@@ -27,9 +27,10 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 84 | 85 | 838 | 838 | 13129 | 13604 |
+| `internal/riidoaiserver` | 84 | 85 | 838 | 838 | 13133 | 13604 |
+| `internal/authpep` | 4 | 4 | 306 | 306 | 528 | 528 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
-| `cmd/riido_ai_server` | 0 | 3 | 0 | 791 | 0 | 1474 |
+| `cmd/riido_ai_server` | 2 | 3 | 119 | 791 | 46 | 1474 |
 | `tools/containercontract` | 0 | 0 | 0 | 75 | 0 | 0 |
 | `tools/generatedclienthandoff` | 0 | 2 | 0 | 601 | 0 | 578 |
 | `awsadapters` | 0 | 1 | 0 | 84 | 0 | 9 |
@@ -60,12 +61,15 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 84 | 838 | 13129 |
+| `internal/riidoaiserver` | 84 | 838 | 13133 |
+| `internal/authpep` | 4 | 306 | 528 |
+| `cmd/riido_ai_server` | 2 | 119 | 46 |
 
 ## Packages
 
 - `public-adapter`: `awsadapters`
 - `runtime-shell`: `cmd/riido_ai_server`
+- `identity-adapter`: `internal/authpep`
 - `compatibility-test`: `internal/contractscompat`
 - `guard`: `internal/repoidentity`
 - `core`: `internal/riidoaiserver`
