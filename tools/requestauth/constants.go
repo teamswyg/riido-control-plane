@@ -8,7 +8,7 @@ const (
 	expectedTask    = "RIID-4664"
 )
 
-var requiredSurfaces = []string{
+var requiredSurfaces = append([]string{
 	"RequestAuthorizer",
 	"AuthorizationRequest",
 	"AuthorizationResult",
@@ -22,7 +22,7 @@ var requiredSurfaces = []string{
 	"ExternalHTTPAuthorizer",
 	"ExternalHTTPAuthorizerConfig",
 	"CoalescingAuthorizer",
-}
+}, authorizationSchemeRequiredSurfaces...)
 
 var requiredResources = []string{
 	"agent",
@@ -71,4 +71,4 @@ var requiredRuleGroups = mergeRequiredRuleGroups(map[string][]string{
 		"device-headers-server-only", "both-device-fields-required",
 		"device-auth-before-token-auth", "browser-jwt-not-daemon-auth",
 	},
-}, jwtRequiredRuleGroups)
+}, authorizationSchemeRequiredRuleGroups, jwtRequiredRuleGroups)

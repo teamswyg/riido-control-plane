@@ -31,7 +31,7 @@
     {
       "id": "auth_jwt_pep_guard",
       "package_path": "internal/authpep",
-      "golden_command": "go test ./internal/authpep -run 'TestJWTAccessTokenAuthorizer|TestHTTPJWKSProvider|TestHTTPIntrospectionStatusResolver' -count=1",
+      "golden_command": "go test ./internal/authpep -run 'TestJWTAccessTokenAuthorizer|TestIssuerAuthorizationSchemeSelector|TestHTTPJWKSProvider|TestHTTPIntrospectionStatusResolver' -count=1",
       "semantic_claim_id": "request_authorization_must_preserve_security_boundary",
       "mode": "golden_locked_auth_jwt_pep_adapter"
     },

@@ -16,8 +16,12 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | `AuthorizationRequest` | resource/action request model |
 | `AuthorizationResult` | server-owned principal projection |
 | `StaticTokenAuthorizer` | static request-token evaluator |
-| `FallbackAuthorizer` | unauthenticated-only chain |
+| `FallbackAuthorizer` | unauthenticated-only chain inside one scheme |
+| `AuthorizationScheme` | explicit legacy_v1 and auth_service_v2 ownership coordinate |
+| `AuthorizationSchemeSelector` | credential classification port without authentication authority |
+| `AuthorizationSchemeRouter` | fail-closed provider boundary router |
 | `JWTAccessTokenAuthorizer` | resource/profile-bound Auth token PEP |
+| `IssuerAuthorizationSchemeSelector` | Auth issuer ownership classifier |
 | `JWTVerificationKeyProvider` | public verification key port |
 | `AccessTokenStatusResolver` | Auth introspection status port |
 | `HTTPIntrospectionStatusResolver` | consumer-owned Auth HTTP introspection anti-corruption adapter |
@@ -54,6 +58,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | `external-authorizer` | `request-schema-v1`, `response-schema-v1`, `opaque-bearer-token`, `ai-agent-client-workspace-required`, `api-key-header-server-only`, `response-disallow-unknown-fields`, `response-size-limit`, `allowed-principal-required`, `admin-role-only`, `configured-timeout-budget`, `slow-or-failed-authorization-observed`, `trace-span-without-token-or-workspace` |
 | `fail-closed` | `http-401-unauthenticated`, `http-403-forbidden`, `allowed-false-forbidden`, `non-2xx-service-error`, `malformed-json-service-error`, `unsupported-schema-service-error`, `invalid-role-service-error`, `network-error-service-error` |
 | `fallback` | `next-only-unauthenticated`, `forbidden-stops-chain`, `empty-chain-unauthenticated` |
+| `authorization-scheme-routing` | `explicit-legacy-v1-and-auth-service-v2`, `selector-classifies-but-does-not-authenticate`, `legacy-v1-behavior-preserved`, `v2-failure-never-downgrades`, `v2-unavailable-fails-closed`, `unknown-scheme-fails-closed` |
 | `auth-jwt-pep` | `exact-https-issuer-and-resource`, `typ-at-jwt-only`, `es256-p256-only`, `known-kid-only`, `jwks-etag-max-age-60`, `expired-jwks-fails-closed`, `unknown-kid-one-refresh`, `exact-authorization-profile`, `canonical-non-wildcard-scopes`, `auth-introspection-required`, `consumer-owned-http-spi`, `private-module-independent`, `confidential-client-body-binding`, `introspection-redirect-refused`, `claim-equivalence-required`, `issuer-routed-dual-authentication`, `auth-issuer-invalid-stops-fallback`, `foreign-issuer-legacy-fallback`, `duplicate-jwt-claim-rejected`, `consumer-domain-pdp-required`, `domain-subject-and-workspace-equivalence` |
 | `coalescing` | `in-flight-only`, `no-ttl-auth-cache`, `bearer-token-hashed-in-key`, `request-scope-separated`, `concurrent-identical-requests-share-one-hop` |
 | `cors` | `exact-origin-allowlist`, `method-allowlist`, `header-allowlist`, `no-browser-credentials`, `unsupported-header-rejected` |
@@ -63,11 +68,11 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 
 | Step | Statement |
 | --- | --- |
-| Observe | Request authorization already protected static, device and external authorizer paths, but a JWT-shaped credential could not prove exact Auth issuer/resource/profile or current revocation status. |
-| Hypothesis | Local exact JWKS verification plus Auth introspection and the existing consumer domain PDP can add production-shaped authentication without turning token possession into tenant authorization. |
-| Execute | Add the resource-bound JWT PEP, bounded ETag JWKS adapter, consumer-owned HTTP introspection anti-corruption adapter and issuer-routed dual-authentication discriminator, then generate this reader doc. |
-| Evaluate | The verifier and counterexamples cover algorithm/kid/audience/profile/scope substitution, stale or malformed JWKS, introspection mismatch, client/path/body binding, redirect refusal, secret-safe errors, duplicate claims, Auth-issuer downgrade, foreign-issuer legacy fallback, principal/workspace substitution, partial config and domain PDP absence. |
-| Retrospective | The production contract keeps existing legacy authentication active for foreign issuers while every token claiming the Riido Auth issuer remains fail closed. Runtime activation still waits for Auth resource profile, introspection credential custody, token acquisition and consumer PDP deployment evidence. |
+| Observe | Production JWT verification existed, but provider ownership was implicit across the JWT authorizer and a shared fallback chain, making the legacy_v1 versus auth_service_v2 assembly boundary harder for agents and operators to discover. |
+| Hypothesis | An explicit scheme selector port and router can preserve legacy behavior while making Auth issuer ownership and no-downgrade semantics independently testable without granting trust to unverified claims. |
+| Execute | Add the legacy_v1/auth_service_v2 scheme coordinate, issuer classifier adapter and fail-closed router; compose legacy fallback only inside legacy_v1 and keep the existing JWT/JWKS/introspection/domain PEP inside auth_service_v2. |
+| Evaluate | Counterexamples prove legacy requests are unchanged, configured Auth issuer and duplicate-issuer tokens select v2, foreign or opaque credentials select v1, v2 denial never invokes v1, and missing or unknown v2 providers fail closed. Existing algorithm, kid, claim, JWKS, introspection and domain-substitution tests remain in the same evidence chain. |
+| Retrospective | Control-plane now expresses provider ownership at the composition root while retaining Riido 1.0 authentication. Production gate activation remains a separate live valid-token and revoked-replay evidence decision. |
 
 ## Non-Goals
 

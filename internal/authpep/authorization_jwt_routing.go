@@ -13,7 +13,14 @@ import (
 // a signature, claim, introspection, or domain-policy failure. Foreign or
 // missing issuers remain available to the existing legacy authorizer.
 func (a *JWTAccessTokenAuthorizer) claimsConfiguredIssuer(raw string) bool {
-	if a == nil || raw == "" || len(raw) > maxJWTAccessTokenBytes || strings.TrimSpace(raw) != raw || strings.ContainsAny(raw, "\r\n\x00") {
+	if a == nil {
+		return false
+	}
+	return claimsConfiguredIssuer(raw, a.issuer)
+}
+
+func claimsConfiguredIssuer(raw, issuer string) bool {
+	if raw == "" || len(raw) > maxJWTAccessTokenBytes || strings.TrimSpace(raw) != raw || strings.ContainsAny(raw, "\r\n\x00") {
 		return false
 	}
 	segments := strings.Split(raw, ".")
@@ -24,8 +31,8 @@ func (a *JWTAccessTokenAuthorizer) claimsConfiguredIssuer(raw string) bool {
 	if err != nil || len(payload) > 8<<10 {
 		return false
 	}
-	issuer, found, containsConfiguredIssuer := topLevelJWTIssuer(payload, a.issuer)
-	return containsConfiguredIssuer || (found && issuer == a.issuer)
+	claimedIssuer, found, containsConfiguredIssuer := topLevelJWTIssuer(payload, issuer)
+	return containsConfiguredIssuer || (found && claimedIssuer == issuer)
 }
 
 func topLevelJWTIssuer(data []byte, configuredIssuer string) (issuer string, found, containsConfiguredIssuer bool) {

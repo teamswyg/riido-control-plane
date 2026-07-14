@@ -29,17 +29,18 @@ func authorizerFromEnvWithReview(reviewProvision *riidoaiserver.ReviewAccountPro
 	if err != nil {
 		return nil, err
 	}
-	var authorizers []riidoaiserver.RequestAuthorizer
-	if jwt != nil {
-		authorizers = append(authorizers, jwt)
-	}
+	var legacy []riidoaiserver.RequestAuthorizer
 	if static != nil {
-		authorizers = append(authorizers, static)
+		legacy = append(legacy, static)
 	}
 	if external != nil {
-		authorizers = append(authorizers, external)
+		legacy = append(legacy, external)
 	}
-	return composeAuthorizers(authorizers)
+	legacyAuthorizer, err := composeAuthorizers(legacy)
+	if err != nil {
+		return nil, err
+	}
+	return composeAuthorizationSchemes(strings.TrimSpace(os.Getenv(envAuthIssuer)), legacyAuthorizer, jwt)
 }
 
 func composeAuthorizers(authorizers []riidoaiserver.RequestAuthorizer) (riidoaiserver.RequestAuthorizer, error) {
