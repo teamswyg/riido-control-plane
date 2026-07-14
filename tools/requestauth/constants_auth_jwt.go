@@ -15,6 +15,8 @@ var jwtRequiredRuleGroups = map[string][]string{
 		"exact-https-issuer-and-resource", "typ-at-jwt-only", "es256-p256-only", "known-kid-only",
 		"jwks-etag-max-age-60", "expired-jwks-fails-closed", "unknown-kid-one-refresh",
 		"exact-authorization-profile", "canonical-non-wildcard-scopes", "auth-introspection-required",
+		"consumer-owned-http-spi", "private-module-independent", "confidential-client-body-binding",
+		"introspection-redirect-refused",
 		"claim-equivalence-required", "jwt-shaped-invalid-stops-fallback", "consumer-domain-pdp-required",
 		"domain-subject-and-workspace-equivalence",
 	},

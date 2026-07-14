@@ -81,7 +81,7 @@ jobs:
             -check-doc \
             -evidence-out out/request-authorization-evidence.json
       - name: Test request authorization adapters
-        run: go test ./internal/riidoaiserver ./internal/authpep -run 'ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider' -count=1
+        run: go test ./internal/riidoaiserver ./internal/authpep -run 'ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:

@@ -17,6 +17,7 @@ var requiredSurfaces = []string{
 	"JWTAccessTokenAuthorizer",
 	"JWTVerificationKeyProvider",
 	"AccessTokenStatusResolver",
+	"HTTPIntrospectionStatusResolver",
 	"HTTPJWKSProvider",
 	"ExternalHTTPAuthorizer",
 	"ExternalHTTPAuthorizerConfig",

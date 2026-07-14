@@ -37,20 +37,20 @@ type JWTVerificationKeyProvider interface {
 }
 
 type AccessTokenStatus struct {
-	Active               bool
-	Scope                string
-	ClientID             string
-	Subject              string
-	TokenType            string
-	ExpiresAt            int64
-	IssuedAt             int64
-	NotBefore            int64
-	Audience             string
-	Issuer               string
-	JWTID                string
-	Email                string
-	EmailVerified        bool
-	AuthorizationProfile string
+	Active               bool   `json:"active"`
+	Scope                string `json:"scope,omitempty"`
+	ClientID             string `json:"client_id,omitempty"`
+	Subject              string `json:"sub,omitempty"`
+	TokenType            string `json:"token_type,omitempty"`
+	ExpiresAt            int64  `json:"exp,omitempty"`
+	IssuedAt             int64  `json:"iat,omitempty"`
+	NotBefore            int64  `json:"nbf,omitempty"`
+	Audience             string `json:"aud,omitempty"`
+	Issuer               string `json:"iss,omitempty"`
+	JWTID                string `json:"jti,omitempty"`
+	Email                string `json:"email,omitempty"`
+	EmailVerified        bool   `json:"email_verified,omitempty"`
+	AuthorizationProfile string `json:"authorization_profile,omitempty"`
 }
 
 type AccessTokenStatusResolver interface {

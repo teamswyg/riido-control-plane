@@ -22,7 +22,7 @@
     "target_lines": 75,
     "sample_limit": 10,
     "hotspot_limit": 8,
-    "max_files_over_target": 97,
+    "max_files_over_target": 99,
     "max_file_lines": 2481,
     "hotspot_limits": [
       {
@@ -33,9 +33,9 @@
       },
       {
         "path": "internal/authpep",
-        "max_files": 4,
+        "max_files": 6,
         "max_lines": 306,
-        "max_total_over_target_lines": 528
+        "max_total_over_target_lines": 687
       },
       {
         "path": "tools/reactquerygen",
@@ -103,8 +103,8 @@
     {
       "path": "internal/authpep",
       "kind": "identity-adapter",
-      "role": "Riido Auth resource-bound JWT, exact JWKS cache, introspection and no-fallback PEP adapter.",
-      "must_not_own": "control-plane tenant/resource policy, Auth signing keys, confidential secret values, HTTP route behavior"
+      "role": "Riido Auth resource-bound JWT, exact JWKS cache, consumer-owned HTTP introspection SPI and no-fallback PEP adapter.",
+      "must_not_own": "control-plane tenant/resource policy, Auth implementation packages, Auth signing keys, confidential secret values, HTTP route behavior"
     },
     {
       "path": "internal/contractscompat",
