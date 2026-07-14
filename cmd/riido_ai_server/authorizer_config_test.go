@@ -81,6 +81,9 @@ func TestAuthorizerFromEnvComposesAuthPEPWithoutChangingStaticTokenBehavior(t *t
 	if err != nil {
 		t.Fatal(err)
 	}
+	if _, ok := authorizer.(*riidoaiserver.AuthorizationSchemeRouter); !ok {
+		t.Fatalf("authorizer type = %T, want explicit scheme router", authorizer)
+	}
 	result, err := authorizer.Authorize(context.Background(), "static-token", metricsReadRequest())
 	if err != nil || result.PrincipalID != "static-user" || harness.Calls() != 0 {
 		t.Fatalf("result=%+v err=%v external_calls=%d", result, err, harness.Calls())

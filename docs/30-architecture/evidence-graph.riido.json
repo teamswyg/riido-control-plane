@@ -20388,8 +20388,8 @@
     },
     {
       "id": "control_plane_auth_resource_jwt_pep_loop",
-      "observation": "Control-plane needs Riido Auth and the existing legacy authentication to coexist, but treating every JWT-shaped credential as Riido Auth would block the legacy issuer while unconditional fallback could downgrade a damaged Riido Auth token.",
-      "hypothesis": "An issuer-routed discriminator can send foreign issuers to the independently authenticating legacy authorizer while keeping every token claiming https://auth.riido.io inside exact ES256, JWKS, resource/profile, introspection and domain-PDP verification with no fallback after failure.",
+      "observation": "Control-plane already enforces Riido Auth issuer no-downgrade, but legacy_v1 and auth_service_v2 provider ownership was implicit across the JWT authorizer and a shared fallback chain, making the assembly boundary harder for agents and operators to discover.",
+      "hypothesis": "An explicit classification port and scheme router can preserve legacy_v1 unchanged while keeping every token claiming https://auth.riido.io inside auth_service_v2 verification, without treating unverified claims as authentication evidence.",
       "claims": [
         "request_authorization_must_preserve_security_boundary",
         "config_reference_must_preserve_env_manifest_parity",
@@ -20411,6 +20411,10 @@
         },
         {
           "kind": "code",
+          "path": "internal/authpep/authorization_scheme_selector.go"
+        },
+        {
+          "kind": "code",
           "path": "internal/authpep/authorization_jwt_json.go"
         },
         {
@@ -20423,6 +20427,10 @@
         },
         {
           "kind": "test",
+          "path": "internal/authpep/authorization_scheme_selector_test.go"
+        },
+        {
+          "kind": "test",
           "path": "cmd/riido_ai_server/authorizer_config_test.go"
         },
         {
@@ -20431,7 +20439,19 @@
         },
         {
           "kind": "code",
+          "path": "cmd/riido_ai_server/authorizer_scheme.go"
+        },
+        {
+          "kind": "code",
           "path": "internal/riidoaiserver/authorization.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_scheme.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_scheme_test.go"
         },
         {
           "kind": "manifest",
@@ -20454,6 +20474,10 @@
         {
           "kind": "test",
           "path": "internal/authpep"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver"
         },
         {
           "kind": "test",
@@ -20488,9 +20512,17 @@
         {
           "kind": "test",
           "path": "cmd/riido_ai_server/authorizer_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/authorization_scheme_selector_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_scheme_test.go"
         }
       ],
-      "decision": "The control-plane now supports issuer-routed dual authentication: foreign or missing issuers may continue to the existing legacy authorizer, while every token claiming the Riido Auth issuer is owned by the new PEP and cannot downgrade after malformed JSON, duplicate claims, signature, JWKS, claim, introspection or domain-policy failure. Production activation remains a separate loop until the Auth resource profile, confidential introspection client secret, token-acquisition path and deployment wiring are proven.",
+      "decision": "The control-plane composition root now selects an explicit legacy_v1 or auth_service_v2 provider before verification. Opaque, missing-issuer and foreign-issuer credentials retain the legacy static/external chain; every token claiming the Riido Auth issuer is owned by v2 and cannot downgrade after selector, provider availability, malformed JSON, duplicate claims, signature, JWKS, claim, introspection or domain-policy failure. Classification grants no trust. Production activation remains a separate live valid-token and revoked-replay evidence gate.",
       "next_loop": "closed_loop_candidate"
     }
   ],
