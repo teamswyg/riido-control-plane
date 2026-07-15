@@ -11,6 +11,8 @@ func unmarshalDynamoDBAIAgentClientSnapshotPart(name string, raw []byte, snapsho
 		return json.Unmarshal(raw, &snapshot.Devices)
 	case dynamoDBAIAgentClientSnapshotPartDeviceCredentials:
 		return json.Unmarshal(raw, &snapshot.DeviceCredentials)
+	case dynamoDBAIAgentClientSnapshotPartDeviceConnections:
+		return json.Unmarshal(raw, &snapshot.DeviceConnectionGrants)
 	case dynamoDBAIAgentClientSnapshotPartDaemons:
 		return json.Unmarshal(raw, &snapshot.Daemons)
 	case dynamoDBAIAgentClientSnapshotPartAgents:

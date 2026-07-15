@@ -25,6 +25,9 @@
   "device_rules": [
     {"id": "machine-device-id", "rule": "machine_id derives a stable physical-machine DeviceID"},
     {"id": "connected-workspaces", "rule": "workspace connections are unioned across enroll/snapshot/connect paths"},
+    {"id": "account-connection-grants", "rule": "each authenticated account and workspace connection is preserved as a device grant without replacing device ownership or credentials"},
+    {"id": "cross-account-binding-routing", "rule": "an agent created by a connected account routes through the existing physical daemon by stable device and runtime ids"},
+    {"id": "legacy-grant-backfill", "rule": "snapshot restore backfills the original credential owner connection when older snapshots have no explicit grants"},
     {"id": "cross-workspace-bindings", "rule": "daemon agent-bindings include every agent whose verified runtime binding targets the device, even when the agent workspace is not in connected_workspace_ids"},
     {"id": "legacy-runtime-prune", "rule": "agentd-local runtimes are pruned from restored snapshots"}
   ],
@@ -33,17 +36,23 @@
     {"name": "registry-tests", "file": "internal/riidoaiserver/agent_registry_test.go", "contains": ["TestStaticAgentRegistryRejectsInvalidBindings", "TestValidateAssignmentBinding", "TestValidateDaemonBinding"]},
     {"name": "device-identity", "file": "internal/riidoaiserver/device_credential_identity.go", "contains": ["deviceIDForMachine"]},
     {"name": "connected-workspaces", "file": "internal/riidoaiserver/device_credential_device_upsert.go", "contains": ["ConnectedWorkspaceIDs", "addConnectedWorkspace"]},
+    {"name": "account-connection-grants", "file": "internal/riidoaiserver/device_connection_grant.go", "contains": ["DeviceConnectionGrant", "deviceConnectionSummaryLocked", "deviceConnectionGrantKey"]},
+    {"name": "cross-account-routing-test", "file": "internal/riidoaiserver/device_cross_account_binding_test.go", "contains": ["TestConnectedAccountAgentRoutesThroughExistingDaemonWithoutReplacingDevice", "bindingListContainsAgent"]},
+    {"name": "connection-grant-persistence-test", "file": "internal/riidoaiserver/device_connection_grant_persistence_test.go", "contains": ["TestDeviceConnectionGrantsSurviveSnapshotAndKeepOriginalCredential"]},
+    {"name": "connection-grant-migration-test", "file": "internal/riidoaiserver/device_connection_grant_migration_test.go", "contains": ["TestLegacySnapshotBackfillsOwnerConnectionGrant"]},
+    {"name": "connection-grant-device-index-benchmark", "file": "internal/riidoaiserver/device_connection_grant_benchmark_test.go", "contains": ["BenchmarkDeviceConnectionSummaryIsDeviceScoped", "10_000"]},
+    {"name": "grant-snapshot-part", "file": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split.go", "contains": ["DEVICE_CONNECTION_GRANTS"]},
     {"name": "legacy-runtime-prune", "file": "internal/riidoaiserver/device_runtime_legacy.go", "contains": ["pruneLegacyRuntimeRecords"]},
     {"name": "cross-workspace-bindings", "file": "internal/riidoaiserver/device_daemon_binding_test.go", "contains": ["TestDaemonAgentBindingsIncludeAgentsFromOtherConnectedWorkspaces", "TestDaemonAgentBindingsIncludeOwnerRuntimeAgentWithoutWorkspaceConnection", "stuck \"queued\" forever"]},
     {"name": "daemon-bindings", "file": "internal/riidoaiserver/ai_agent_daemon_runtime.go", "contains": ["ListAIAgentDaemonAgentBindings", "runtime binding is authoritative", "binding.DeviceID"]},
     {"name": "focused-ci", "file": ".github/workflows/agent-runtime-binding.yml", "contains": ["ValidateAssignmentBinding|ValidateDaemonBinding", "Verify binding import boundary"]}
   ],
   "loop": {
-    "observation": "Agent/runtime binding rules were readable prose with focused tests, but the doc itself did not emit evidence.",
-    "hypothesis": "A focused binding SSOT can make runtime identity drift detectable before daemon polling or assignment claims regress.",
-    "execute": "Generate the reader doc from this manifest and run the agentruntimebinding verifier in CI.",
-    "evaluate": "The verifier checks required fields, binding rules, source anchors, generated doc freshness, and focused runtime binding tests.",
-    "retrospective": "This slice proves document executability; live trace correlation remains a separate observability slice."
+    "observation": "A second account could connect to an existing physical daemon, but account-level recovery facts were collapsed into workspace ids and were not durable evidence.",
+    "hypothesis": "Stable physical device identity plus persisted account grants can route cross-account agents without owner replacement, secret rotation, or runtime-id migration.",
+    "execute": "Persist connection grants, expose a semantic revision to the daemon binding response, backfill legacy snapshots, and verify cross-account routing and recovery.",
+    "evaluate": "The verifier and focused tests prove stable device/runtime ids, two-account binding routing, original credential survival, legacy backfill, and DynamoDB split-part persistence.",
+    "retrospective": "Account switching is modeled as an additive connection and binding refresh; machine_id alone never authorizes cross-principal secret issuance."
   },
   "non_goals": ["assignment queue state", "active lease refresh", "provider status persistence", "HTTP routing ownership", "AWS/DynamoDB/EventBridge/Terraform wiring"]
 }
