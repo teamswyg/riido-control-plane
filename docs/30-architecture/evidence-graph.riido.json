@@ -20719,6 +20719,33 @@
       ],
       "decision": "Model account switching as an additive connection grant while keeping the physical device id, owner, credential, runtime ids, and historical bindings stable. Store grants by device so the five-second daemon binding poll summarizes only that device's connected accounts. Return only connected_principal_count and a timestamp-independent semantic revision to the daemon; principal ids and device credentials stay inside the control-plane snapshot. Legacy snapshots backfill the original owner grant and DynamoDB split snapshots preserve new grants without a storage-version break.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "runtime_liveness_heartbeat_jitter_loop",
+      "observation": "Staging emitted binding_agent_not_registered at roughly 21-second intervals for an agent whose daemon and runtime snapshots stayed online. Each rejection occurred immediately before the next supported legacy daemon heartbeat because the previous 20-second stale threshold was shorter than the observed heartbeat cadence.",
+      "hypothesis": "Keeping two observed legacy heartbeat windows before declaring a runtime stale will remove false binding rejection and repeated poll work without changing endpoint payloads, credentials, runtime identity, or the daemon heartbeat contract.",
+      "claims": [
+        "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_api.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_runtime_liveness_binding_test.go"},
+        {"kind":"manifest","path":"docs/20-domain/agent-runtime-binding.riido.json"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"test","path":"internal/riidoaiserver"},
+        {"kind":"test","path":"tools/agentruntimebinding"},
+        {"kind":"tool","path":"tools/evidencegraph"},
+        {"kind":"tool","path":"tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind":"test","path":"internal/riidoaiserver/device_runtime_liveness_binding_test.go"},
+        {"kind":"artifact","path":"staging-runtime-liveness-heartbeat-jitter-2026-07-15","redacted":true}
+      ],
+      "decision": "Set runtime and daemon snapshot staleness to 45 seconds, covering two roughly 21-second legacy heartbeat windows plus jitter. Preserve the existing greater-than stale comparison and all public contracts. Re-run staging after deployment and require the periodic binding rejection to disappear while heartbeat and binding polls remain healthy.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
