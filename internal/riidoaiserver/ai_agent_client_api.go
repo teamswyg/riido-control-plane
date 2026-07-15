@@ -11,9 +11,12 @@ const (
 )
 
 const (
-	AgentInstructionMaxCharacters          = 1000
-	AgentDescriptionMaxCharacters          = 160
-	AIAgentDeviceRuntimeSnapshotStaleAfter = 20 * time.Second
+	AgentInstructionMaxCharacters = 1000
+	AgentDescriptionMaxCharacters = 160
+	// Legacy daemons can report on a roughly 21-second cadence. Keep two
+	// heartbeat windows so poll requests do not cross the stale boundary just
+	// before the next snapshot arrives.
+	AIAgentDeviceRuntimeSnapshotStaleAfter = 45 * time.Second
 )
 
 const (

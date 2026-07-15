@@ -14,11 +14,11 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 
 | Step | Statement |
 | --- | --- |
-| Observe | A second account could connect to an existing physical daemon, but account-level recovery facts were collapsed into workspace ids and were not durable evidence. |
-| Hypothesis | Stable physical device identity plus persisted account grants can route cross-account agents without owner replacement, secret rotation, or runtime-id migration. |
-| Execute | Persist connection grants, expose a semantic revision to the daemon binding response, backfill legacy snapshots, and verify cross-account routing and recovery. |
-| Evaluate | The verifier and focused tests prove stable device/runtime ids, two-account binding routing, original credential survival, legacy backfill, and DynamoDB split-part persistence. |
-| Retrospective | Account switching is modeled as an additive connection and binding refresh; machine_id alone never authorizes cross-principal secret issuance. |
+| Observe | A second account could connect to an existing physical daemon, but account-level recovery facts were collapsed into workspace ids and a legacy daemon's roughly 21-second heartbeat crossed the 20-second stale boundary immediately before refresh. |
+| Hypothesis | Stable physical device identity plus persisted account grants and a two-heartbeat liveness tolerance can route cross-account agents without owner replacement, secret rotation, runtime-id migration, or false binding rejection. |
+| Execute | Persist connection grants, expose a semantic revision to the daemon binding response, backfill legacy snapshots, tolerate two legacy heartbeat windows, and verify cross-account routing and recovery. |
+| Evaluate | The verifier and focused tests prove stable device/runtime ids, two-account binding routing, original credential survival, legacy backfill, DynamoDB split-part persistence, and binding continuity across a delayed legacy heartbeat. |
+| Retrospective | Account switching is modeled as an additive connection and binding refresh; machine_id alone never authorizes cross-principal secret issuance, and liveness expiry must not be shorter than an actively supported daemon heartbeat cadence. |
 
 ## Binding Fields
 
@@ -52,6 +52,7 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 | `legacy-grant-backfill` | - | snapshot restore backfills the original credential owner connection when older snapshots have no explicit grants |
 | `cross-workspace-bindings` | - | daemon agent-bindings include every agent whose verified runtime binding targets the device, even when the agent workspace is not in connected_workspace_ids |
 | `legacy-runtime-prune` | - | agentd-local runtimes are pruned from restored snapshots |
+| `runtime-liveness-heartbeat-tolerance` | - | runtime and daemon bindings remain live across two legacy heartbeat windows and become stale only after 45 seconds without a snapshot |
 
 ## Non-Goals
 
