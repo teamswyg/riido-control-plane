@@ -12,14 +12,14 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `108`; runtime: `1`; internal: `4`; tools: `102`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `92`; max file lines: `838`.
+File line budget target: `75`; files over target: `92`; max file lines: `792`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
 | Files over target | 92 | 99 | 7 |
-| Max file lines | 838 | 2481 | 1643 |
+| Max file lines | 792 | 2481 | 1689 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
 
@@ -27,7 +27,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 85 | 85 | 838 | 838 | 13149 | 13604 |
+| `internal/riidoaiserver` | 85 | 85 | 792 | 838 | 13103 | 13604 |
 | `internal/authpep` | 6 | 6 | 291 | 306 | 687 | 687 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 1 | 3 | 144 | 791 | 69 | 1474 |
@@ -46,7 +46,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | File | Lines |
 | --- | ---: |
-| `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 838 |
+| `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 792 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 784 |
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
@@ -61,7 +61,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 85 | 838 | 13149 |
+| `internal/riidoaiserver` | 85 | 792 | 13103 |
 | `internal/authpep` | 6 | 291 | 687 |
 | `cmd/riido_ai_server` | 1 | 144 | 69 |
 
