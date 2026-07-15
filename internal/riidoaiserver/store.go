@@ -474,6 +474,7 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 	agentID = strings.TrimSpace(agentID)
 	req.AssignmentID = strings.TrimSpace(req.AssignmentID)
 	req.TaskID = strings.TrimSpace(req.TaskID)
+	req = normalizeNeedsInputAssignmentEvent(req)
 	if agentID == "" {
 		return AgentEventResponse{}, errors.New("agent_id is required")
 	}

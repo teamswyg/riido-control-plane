@@ -7241,8 +7241,8 @@
     },
     {
       "id": "ai_thread_history_conversation_grouping_loop",
-      "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card, later observed stale queued_by_busy_agent status text and active stream state appearing next to newer progress or running state in the same conversation, and staging showed a task screen keeping an optimistic running spinner even though daemon status had running_tasks=0, v2 thread-stream-subscription returned active_thread_filters=[], and v3 history contained only terminal threads. A reopened Notion P0 report also described a stopped agent looking active after refresh, so the server proof must include the HTTP stop path plus a late daemon progress event, not only a direct store unit test. A running thread state can be known before a delayed queued status message receives a later observed_at timestamp, queued thread active_stream can otherwise keep the card looking alive, and terminal server truth must be able to clear stale client session state. Staging overlap QA on 2026-07-15 further proved that hiding queued status events and thread state was insufficient because the same localized busy copy remained in v2 progress lines next to newer running progress.",
-      "hypothesis": "Binding conversation_id, parent_thread_id, queued-status current-only filtering, queued active_stream suppression, running-over-queued active_stream priority, terminal active_stream closure, and queued-copy suppression in client-visible progress projection to the v3 thread history contract, generated frontend handoff, runtime projection tests, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations, prevents stale queue hints from rendering as durable agent replies or active progress streams once progress, active running state, or result history exists, and lets refresh/refetch clear local running UI when every server-side thread is terminal. Durable progress lines remain unchanged while v2 thread reads and SSE fanout share the filtered copy. A queued-suppression fast path is safe only when it first proves that no thread or message carries queued state, so the same current-only queued rule still runs for every conversation where it can affect UI semantics.",
+      "observation": "Frontend implementation needed a stable key to distinguish same-agent reassignment from follow-up replies inside an existing AI Agent comment card, later observed stale queued_by_busy_agent status text and active stream state appearing next to newer progress or running state in the same conversation, and staging showed a task screen keeping an optimistic running spinner even though daemon status had running_tasks=0, v2 thread-stream-subscription returned active_thread_filters=[], and v3 history contained only terminal threads. A reopened Notion P0 report also described a stopped agent looking active after refresh, so the server proof must include the HTTP stop path plus a late daemon progress event, not only a direct store unit test. A running thread state can be known before a delayed queued status message receives a later observed_at timestamp, queued thread active_stream can otherwise keep the card looking alive, and terminal server truth must be able to clear stale client session state. Staging overlap QA on 2026-07-15 further proved that hiding queued status events and thread state was insufficient because the same localized busy copy remained in v2 progress lines next to newer running progress. Post-deploy overlap then showed the first Claude assignment returning assignment_result_status=needs_input while its durable assignment stayed running until the five-minute lease expiry, leaving the next same-agent assignment queued even though the client conversation should only be waiting for user input.",
+      "hypothesis": "Binding conversation_id, parent_thread_id, queued-status current-only filtering, queued active_stream suppression, running-over-queued active_stream priority, terminal active_stream closure, queued-copy suppression in client-visible progress projection, and needs_input durable lease release to the v3 thread history contract, generated frontend handoff, runtime projection tests, scheduler test, and loop-registry claim prevents provider or agent based dedupe from collapsing distinct conversations, prevents stale queue hints from rendering as durable agent replies or active progress streams once progress, active running state, or result history exists, lets refresh/refetch clear local running UI when every server-side thread is terminal, and lets the daemon claim the next assignment immediately after a provider asks the user a question. Durable progress lines remain unchanged while v2 thread reads and SSE fanout share the filtered copy, and the client projection remains waiting_for_user even though the execution lease is complete. A queued-suppression fast path is safe only when it first proves that no thread or message carries queued state, so the same current-only queued rule still runs for every conversation where it can affect UI semantics.",
       "claims": [
         "thread_history_v3_must_expose_stable_conversation_grouping"
       ],
@@ -7340,8 +7340,20 @@
           "path": "internal/riidoaiserver/ai_agent_client_queued_progress_projection_test.go"
         },
         {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_needs_input_event.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_needs_input_event_test.go"
+        },
+        {
           "kind": "manifest",
           "path": "docs/30-architecture/evidence/staging-queued-running-client-projection-ui-2026-07-15.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/staging-needs-input-durable-lease-queue-blocker-2026-07-15.json"
         }
       ],
       "verifiers": [
@@ -7382,9 +7394,14 @@
           "kind": "artifact",
           "path": "staging-queued-running-client-projection-ui-2026-07-15",
           "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "staging-needs-input-durable-lease-queue-blocker-2026-07-15",
+          "redacted": true
         }
       ],
-      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI. V2 thread reads and live SSE additionally remove queued status copy from client-visible progress lines while retaining the durable raw lines, so a running card cannot show both busy copy and runtime progress. The HTTP stop-refresh proof also verifies that late daemon thread-progress after stop is rejected by the durable FSM and cannot leak into v3 history. The queued suppression performance fast path preserves this decision by returning early only for histories that contain no queued state and, when queued state exists, removing queued timeline messages directly instead of constructing obsolete cutoff maps.",
+      "decision": "AI Thread History v3 comment card grouping is a closed-loop claim: conversation_id groups the card, parent_thread_id links follow-up runs, same-agent reassignment receives a distinct conversation, queued_by_busy_agent is only a current status hint that v3 suppresses once the same conversation has active running state, newer progress, or result history regardless of delayed queued-message timestamps, superseded queued threads do not expose active_stream and cannot win over running threads as the collection active_stream, and terminal-only v3 history omits active_stream so a client refetch can clear stale optimistic running UI. V2 thread reads and live SSE additionally remove queued status copy from client-visible progress lines while retaining the durable raw lines, so a running card cannot show both busy copy and runtime progress. A provider needs_input result completes the durable execution lease but remains waiting_for_user in the client projection, preventing a finished clarification turn from blocking the next same-agent assignment until lease expiry. The HTTP stop-refresh proof also verifies that late daemon thread-progress after stop is rejected by the durable FSM and cannot leak into v3 history. The queued suppression performance fast path preserves this decision by returning early only for histories that contain no queued state and, when queued state exists, removing queued timeline messages directly instead of constructing obsolete cutoff maps.",
       "next_loop": "ai_thread_history"
     },
     {

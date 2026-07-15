@@ -1,0 +1,43 @@
+{
+  "schema_version": "riido-staging-assignment-observation.v1",
+  "id": "staging-needs-input-durable-lease-queue-blocker-2026-07-15",
+  "environment": "staging",
+  "redacted": true,
+  "captured_at": "2026-07-15T10:38:12Z",
+  "deployment": {
+    "commit": "fd70735114cddcc5503bb660c523af17b87205f7",
+    "ecs_task_definition": "riido-ai-server-testnet:272",
+    "image_digest": "sha256:4b4d52f8cd58b03679d02efdd4e855d538a5150c344778db6d85f5e1a49a434c"
+  },
+  "assignments": {
+    "first": {
+      "assignment_id": "asn-000244",
+      "started_at": "2026-07-15T10:32:48.477204259Z",
+      "needs_input_at": "2026-07-15T10:33:13.609344112Z",
+      "needs_input_metadata": true,
+      "durable_state_after_needs_input": "running",
+      "lease_expired_at": "2026-07-15T10:38:11.648048686Z",
+      "terminal_state": "failed"
+    },
+    "overlap": {
+      "assignment_id": "asn-000245",
+      "queued_at": "2026-07-15T10:32:59.098492839Z",
+      "durable_state_after_first_needs_input": "queued",
+      "subsequent_events": 0
+    }
+  },
+  "root_cause": "The client read model translated assignment_result_status=needs_input to waiting_for_user, but the durable scheduler retained the provider-supplied running state. The active lease therefore blocked the next same-agent assignment until stale lease expiry.",
+  "fix_contract": {
+    "durable_state_for_running_needs_input": "completed",
+    "client_projection": "waiting_for_user",
+    "next_same_agent_poll": "start_queued_assignment"
+  },
+  "local_verification": {
+    "test": "TestNeedsInputCompletesLeaseAndUnblocksNextAssignment",
+    "race": "passed",
+    "full_go_test": "passed"
+  },
+  "staging_after_fix": {
+    "status": "pending_deploy_and_live_overlap_qa"
+  }
+}
