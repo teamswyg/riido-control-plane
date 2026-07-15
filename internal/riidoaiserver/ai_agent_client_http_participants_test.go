@@ -16,7 +16,7 @@ func TestHTTPAIAgentClientDevelopmentTaskAssignmentAndParticipantRemoval(t *test
 	message := participantPostFollowup(t, server, token, assigned.ThreadID)
 	if message.ThreadID != assigned.ThreadID ||
 		message.WorkStatus != AgentWorkStatusIdle ||
-		message.AssignmentState != AgentAssignmentStateQueued ||
+		message.AssignmentState != "" ||
 		message.CommentKind != "" ||
 		message.Message != "" ||
 		message.ActiveStream == nil {

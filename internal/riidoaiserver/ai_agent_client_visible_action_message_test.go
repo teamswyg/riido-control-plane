@@ -30,9 +30,12 @@ func TestAIAgentActionResponsesHideQueuedButUseTerminalMessages(t *testing.T) {
 	if queued.Message != "" ||
 		queued.ResultMessage != "" ||
 		queued.CommentKind != "" ||
-		queued.AssignmentState != AgentAssignmentStateQueued ||
+		queued.AssignmentState != "" ||
 		queued.WorkStatus != AgentWorkStatusIdle {
-		t.Fatalf("queued response should hide copy but preserve lifecycle: %+v", queued)
+		t.Fatalf("queued response should hide client working state: %+v", queued)
+	}
+	if queued.AgentID == "" || queued.ThreadID == "" || queued.RunID == "" || queued.ActiveStream == nil {
+		t.Fatalf("queued response should preserve participant identity: %+v", queued)
 	}
 
 	stopped, err := store.StopAIAgentTask(ctx, principal, "task-visible", StopAIAgentTaskRequest{

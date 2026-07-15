@@ -12,9 +12,9 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `227`
 - claim refs: `300`
-- change refs: `2184`
+- change refs: `2185`
 - verifier refs: `1294`
-- evidence refs: `647`
+- evidence refs: `648`
 
 ## Compiled Chain Summary
 
@@ -28,7 +28,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `closed_loop_candidate` | `145` | `168` | `1382` | `732` | `398` |
 | `control_plane_performance_harness` | `30` | `31` | `234` | `251` | `79` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
-| `ai_thread_history` | `9` | `11` | `133` | `63` | `16` |
+| `ai_thread_history` | `9` | `11` | `134` | `63` | `17` |
 | `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
@@ -107,7 +107,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `control_plane_runtime_cd_ownership_coverage_loop_26` | `1` | `8` | `9` | `1` | `control_plane_performance_harness` |
 | `control_plane_store_snapshot_outbox_coverage_loop_27` | `1` | `7` | `8` | `1` | `control_plane_performance_harness` |
 | `provider_auth_failure_visible_message_loop` | `3` | `10` | `5` | `4` | `ai_thread_history` |
-| `same_provider_multi_assignment_loop` | `1` | `6` | `4` | `1` | `ai_thread_history` |
+| `same_provider_multi_assignment_loop` | `1` | `7` | `4` | `2` | `ai_thread_history` |
 | `ai_thread_history_conversation_grouping_loop` | `1` | `21` | `4` | `3` | `ai_thread_history` |
 | `ai_thread_history_run_identity_ordering_loop` | `1` | `9` | `5` | `2` | `ai_thread_history` |
 | `stop_reassign_thread_consistency_loop` | `1` | `15` | `9` | `2` | `ai_thread_history` |

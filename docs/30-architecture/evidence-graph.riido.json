@@ -7171,8 +7171,8 @@
     },
     {
       "id": "same_provider_multi_assignment_loop",
-      "observation": "Two different AI Agents can use the same provider runtime, so provider-based dedupe can collapse independent task assignments and threads. Production assignment asn-000033 also moved queued to leased to running to completed without stop/delete, while the queued client projection erased assignment_state; a client refetch could therefore lose the participant identity before the daemon claimed otherwise healthy work.",
-      "hypothesis": "Assignment and thread identity must stay agent/assignment scoped even when provider/runtime_kind is identical, and a non-terminal queued projection must preserve assignment_state=queued plus its active stream while suppressing only queued display copy.",
+      "observation": "Two different AI Agents can use the same provider runtime, so provider-based dedupe can collapse independent task assignments and threads. Production assignment asn-000033 also moved queued to leased to running to completed without stop/delete. A later Beta QA run proved that exposing assignment_state=queued to retain participant identity caused the client to render a false busy-agent notice even though production metrics reported zero durable queued assignments in the observation window.",
+      "hypothesis": "Assignment and thread identity must stay agent/assignment scoped even when provider/runtime_kind is identical. A non-terminal queued v2 display projection can retain participant identity through its stable identity fields and active stream while hiding assignment_state=queued, which prevents false working UI without changing the durable scheduler or v3 history.",
       "claims": [
         "same_provider_agents_must_keep_distinct_threads"
       ],
@@ -7200,6 +7200,10 @@
         {
           "kind": "projection",
           "path": "internal/riidoaiserver/ai_agent_client_queued_client_projection.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/production-false-queued-client-projection-2026-07-15.json"
         }
       ],
       "verifiers": [
@@ -7225,9 +7229,14 @@
           "kind": "artifact",
           "path": "loop-registry-evidence",
           "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "production-false-queued-client-projection-2026-07-15",
+          "redacted": true
         }
       ],
-      "decision": "Same-provider multi-assignment is an assignment/thread identity claim: provider/runtime labels are display metadata, not dedupe keys, and queued display suppression must never erase the non-terminal assignment_state or active participant stream.",
+      "decision": "Same-provider multi-assignment is an assignment/thread identity claim: provider/runtime labels are display metadata, not dedupe keys. The durable scheduler and v3 history preserve queued state, while v2 display projections preserve existing identity fields and the active participant stream but hide queued assignment_state and copy so the client cannot mistake scheduling state for visible work.",
       "next_loop": "ai_thread_history"
     },
     {

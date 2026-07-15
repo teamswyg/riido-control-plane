@@ -303,7 +303,7 @@ func TestAIAgentClientThreadProjectionKeepsDurableQueueDiagnostics(t *testing.T)
 		t.Fatalf("threads = %+v", threads)
 	}
 	if threads.Threads[0].QueueDiagnostics != nil ||
-		threads.Threads[0].AssignmentState != AgentAssignmentStateQueued ||
+		threads.Threads[0].AssignmentState != "" ||
 		threads.Threads[0].WorkStatus != AgentWorkStatusIdle {
 		t.Fatalf("client projection should hide queue diagnostics: %+v", threads)
 	}
