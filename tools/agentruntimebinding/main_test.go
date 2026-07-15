@@ -25,7 +25,7 @@ func TestAgentRuntimeBindingBehaviorGolden(t *testing.T) {
 	if got.SchemaVersion != requirements.EvidenceSchema || got.ID != requirements.ExpectedID || got.Status != "verified" {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
-	if got.Fields != 5 || got.BindingRules != 6 || got.DeviceRules != 8 || got.SourceChecks != 15 {
+	if got.Fields != 5 || got.BindingRules != 7 || got.DeviceRules != 8 || got.SourceChecks != 18 {
 		t.Fatalf("unexpected evidence counts: %+v", got)
 	}
 	if got.Loop.Observation == "" || got.Loop.Evaluate == "" {

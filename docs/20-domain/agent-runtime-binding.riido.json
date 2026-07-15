@@ -20,6 +20,7 @@
     {"id": "daemon-id-match", "kind": "daemon", "rule": "poll daemon_id must match the registered binding"},
     {"id": "runtime-id-match", "kind": "daemon", "rule": "poll runtime_id must match the registered binding"},
     {"id": "device-id-if-bound", "kind": "daemon", "rule": "poll device_id must match only when the binding has a non-empty device_id"},
+    {"id": "daemon-poll-durable-identity", "kind": "daemon", "rule": "a daemon poll validates the current durable agent/runtime/device/daemon identity without applying time-based liveness projection; deleted, rebound, explicitly unavailable, or mismatched bindings remain rejected"},
     {"id": "nil-registry-no-gate", "kind": "fallback", "rule": "nil registry imposes no binding gate"}
   ],
   "device_rules": [
@@ -46,15 +47,18 @@
     {"name": "legacy-runtime-prune", "file": "internal/riidoaiserver/device_runtime_legacy.go", "contains": ["pruneLegacyRuntimeRecords"]},
     {"name": "cross-workspace-bindings", "file": "internal/riidoaiserver/device_daemon_binding_test.go", "contains": ["TestDaemonAgentBindingsIncludeAgentsFromOtherConnectedWorkspaces", "TestDaemonAgentBindingsIncludeOwnerRuntimeAgentWithoutWorkspaceConnection", "stuck \"queued\" forever"]},
     {"name": "daemon-bindings", "file": "internal/riidoaiserver/ai_agent_daemon_runtime.go", "contains": ["ListAIAgentDaemonAgentBindings", "runtime binding is authoritative", "binding.DeviceID"]},
-    {"name": "runtime-liveness-heartbeat-tolerance", "file": "internal/riidoaiserver/device_runtime_liveness_binding_test.go", "contains": ["TestAgentBindingRemainsAvailableAcrossLegacyHeartbeatJitter", "21 * time.Second", "binding lost across legacy heartbeat jitter"]},
-    {"name": "focused-ci", "file": ".github/workflows/agent-runtime-binding.yml", "contains": ["ValidateAssignmentBinding|ValidateDaemonBinding", "Verify binding import boundary"]}
+    {"name": "daemon-poll-durable-binding", "file": "internal/riidoaiserver/ai_agent_daemon_binding_lookup.go", "contains": ["LookupDaemonBinding", "authenticated poll is fresh liveness evidence", "runtimeAvailableForBinding"]},
+    {"name": "runtime-liveness-heartbeat-tolerance", "file": "internal/riidoaiserver/device_runtime_liveness_binding_test.go", "contains": ["TestAgentBindingRemainsAvailableAcrossLegacyHeartbeatJitter", "21 * time.Second"]},
+    {"name": "daemon-poll-stale-binding-test", "file": "internal/riidoaiserver/device_daemon_poll_stale_binding_test.go", "contains": ["TestDaemonPollUsesDurableBindingAcrossStaleSnapshot", "stale snapshot must remain unavailable", "wrong daemon poll"]},
+    {"name": "daemon-poll-unavailable-binding-test", "file": "internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go", "contains": ["TestDaemonPollRejectsExplicitlyUnavailableRuntime", "RuntimeAvailabilityOffline", "RuntimeDetectionStateMissing"]},
+    {"name": "focused-ci", "file": ".github/workflows/agent-runtime-binding.yml", "contains": ["ValidateAssignmentBinding|ValidateDaemonBinding|DaemonPoll", "Verify binding import boundary"]}
   ],
   "loop": {
-    "observation": "A second account could connect to an existing physical daemon, but account-level recovery facts were collapsed into workspace ids and a legacy daemon's roughly 21-second heartbeat crossed the 20-second stale boundary immediately before refresh.",
-    "hypothesis": "Stable physical device identity plus persisted account grants and a two-heartbeat liveness tolerance can route cross-account agents without owner replacement, secret rotation, runtime-id migration, or false binding rejection.",
-    "execute": "Persist connection grants, expose a semantic revision to the daemon binding response, backfill legacy snapshots, tolerate two legacy heartbeat windows, and verify cross-account routing and recovery.",
-    "evaluate": "The verifier and focused tests prove stable device/runtime ids, two-account binding routing, original credential survival, legacy backfill, DynamoDB split-part persistence, and binding continuity across a delayed legacy heartbeat.",
-    "retrospective": "Account switching is modeled as an additive connection and binding refresh; machine_id alone never authorizes cross-principal secret issuance, and liveness expiry must not be shorter than an actively supported daemon heartbeat cadence."
+    "observation": "A second account could connect to an existing physical daemon, while long-window testnet evidence still showed sporadic binding_agent_not_registered poll rejections whenever an otherwise valid daemon snapshot aged past the read-model liveness threshold.",
+    "hypothesis": "Stable physical identity, persisted account grants, and a daemon-poll-specific durable identity lookup can preserve security boundaries without treating an authenticated matching poll as an unregistered agent merely because its preceding snapshot is stale.",
+    "execute": "Persist connection grants, expose a semantic revision, backfill legacy snapshots, retain read-model liveness projection, and validate daemon polls against the current durable binding while rejecting explicit unavailability and identity mismatch.",
+    "evaluate": "The verifier and focused tests prove stable device/runtime ids, cross-account routing, credential survival, legacy backfill, stale read-model exclusion, successful matching polls across stale snapshots, and fail-closed mismatched or explicitly unavailable polls.",
+    "retrospective": "Registration identity and availability projection are different facts: UI and binding discovery remain time-sensitive, while a matching authenticated poll is itself liveness evidence and must be checked against durable identity rather than a stale projection."
   },
   "non_goals": ["assignment queue state", "active lease refresh", "provider status persistence", "HTTP routing ownership", "AWS/DynamoDB/EventBridge/Terraform wiring"]
 }
