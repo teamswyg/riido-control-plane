@@ -20,6 +20,59 @@
   ],
   "chains": [
     {
+      "id": "production_agent_event_rejection_observability_loop",
+      "observation": "The production store-operation alarm observed five POST /v1/agents/{agent_id}/events 400 responses in a window with 126 successful event appends, zero HTTP 5xx, zero queued assignments, and zero outbox errors. The durable journal proved asn-000064 reached completed in the same window, but the HTTP boundary did not log a rejection category, so a late-event transition race remained an unconfirmed inference rather than evidence.",
+      "hypothesis": "A bounded structured diagnostic at the existing agent-event 400 boundary can classify assignment absence, identity mismatch, invalid state transition, binding validation, and store failure without changing endpoint behavior or logging daemon IDs, runtime IDs, provider output, metadata, or tokens.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_event_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_agent_event_diagnostics.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_agent_event_diagnostics_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/production-agent-event-rejection-observation-2026-07-15.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_agent_event_diagnostics_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "production-store-operation-alarm",
+          "redacted": true
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/production-agent-event-rejection-observation-2026-07-15.json"
+        }
+      ],
+      "decision": "Keep the current 400 contract and terminal-state guard unchanged. Promote the production observation from an aggregate alarm to a diagnosable signal first; only a future categorized recurrence may justify daemon retry ordering or control-plane transition changes.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "harness_failure_promotion_loop",
       "observation": "Provider, smoke, load, performance, and release-readiness harness failures or stale partials could previously end as isolated artifacts.",
       "hypothesis": "Redacted harness summaries or loop-owned stale-partial evidence can be transformed into closed-loop candidate records.",
