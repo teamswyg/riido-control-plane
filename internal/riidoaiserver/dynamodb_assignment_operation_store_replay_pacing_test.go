@@ -64,3 +64,11 @@ func TestDynamoDBAssignmentOperationReplayKeepsBoundedStrongReadPages(t *testing
 		t.Fatalf("replay page delay = %s, want 100ms", dynamoDBAssignmentOperationReplayPageDelay)
 	}
 }
+
+func TestPaceDynamoDBAssignmentOperationReplayHonorsDeadline(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond)
+	defer cancel()
+	if err := paceDynamoDBAssignmentOperationReplay(ctx); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("paceDynamoDBAssignmentOperationReplay error = %v, want deadline exceeded", err)
+	}
+}

@@ -20583,7 +20583,7 @@
         {"kind":"artifact","path":"production-deploy-run-29388058904","redacted":true},
         {"kind":"artifact","path":"production-deploy-run-29388798091","redacted":true}
       ],
-      "decision": "Keep strongly consistent replay and all API/runtime contracts unchanged. Pace each successful 50-item journal page by 100 milliseconds and retry a throttled page in place. Preserve the page size and pacing interval as an executable boundary test. Move replay loading out of the oversized DynamoDB store source so the module decomposition ratchet improves while the behavior remains unchanged.",
+      "decision": "Keep strongly consistent replay and all API/runtime contracts unchanged. Pace each successful 50-item journal page by 100 milliseconds and retry a throttled page in place. Preserve the page size, pacing interval, cancellation, and deadline behavior as executable boundary tests. Move replay loading out of the oversized DynamoDB store source so the module decomposition ratchet improves while the behavior remains unchanged.",
       "next_loop": "closed_loop_candidate"
     }
   ],
