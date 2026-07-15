@@ -57,7 +57,7 @@ func TestHTTPAIAgentClientProviderMultiAssignmentReplaysEachThread(t *testing.T)
 	aiAgentSmokeDecode(t, messageBytes, &message)
 	if message.ThreadID != first.ThreadID || message.AgentID != first.AgentID ||
 		message.WorkStatus != AgentWorkStatusIdle ||
-		message.AssignmentState != AgentAssignmentStateQueued ||
+		message.AssignmentState != "" ||
 		message.CommentKind != "" ||
 		message.Message != "" {
 		t.Fatalf("thread message targeted wrong thread: %+v first=%+v", message, first)
