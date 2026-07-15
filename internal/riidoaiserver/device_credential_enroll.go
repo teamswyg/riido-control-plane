@@ -39,6 +39,10 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 		displayName:      enrollment.displayName,
 		issuedAt:         now,
 	}
+	s.upsertDeviceConnectionGrantLocked(deviceID, AuthorizationResult{
+		PrincipalID: enrollment.principalID,
+		WorkspaceID: enrollment.workspaceID,
+	}, now)
 	s.upsertEnrolledDeviceLocked(DeviceRecord{
 		DeviceID:              deviceID,
 		OwnerPrincipalID:      enrollment.principalID,

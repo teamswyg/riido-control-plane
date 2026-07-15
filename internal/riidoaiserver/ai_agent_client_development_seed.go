@@ -19,6 +19,7 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 		daemonClientPolicy:      DefaultDaemonClientCompatibilityPolicy(),
 		devices:                 seed.devices,
 		deviceCredentials:       map[string]deviceCredentialRecord{},
+		deviceConnectionGrants:  map[string]map[string]DeviceConnectionGrant{},
 		daemons:                 seed.daemons,
 		nextDaemonCommand:       1,
 		agents:                  seed.agents,

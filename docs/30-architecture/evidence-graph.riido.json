@@ -20681,6 +20681,44 @@
       ],
       "decision": "Keep strongly consistent replay and all API/runtime contracts unchanged. Pace each successful 50-item journal page by 100 milliseconds and retry a throttled page in place. Preserve the page size, pacing interval, cancellation, and deadline behavior as executable boundary tests. Move replay loading out of the oversized DynamoDB store source so the module decomposition ratchet improves while the behavior remains unchanged.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "cross_account_device_connection_grant_loop",
+      "observation": "A second authenticated account could reuse an existing physical daemon through its connected workspace, but the account-level connection was collapsed into workspace ids, was absent from durable recovery evidence, and gave the daemon no semantic signal that its binding set had changed.",
+      "hypothesis": "Persisting account/workspace grants under a stable physical device id and exposing only a redacted semantic revision can refresh cross-account bindings without rotating the original device secret, replacing ownership, changing runtime ids, leaking principal ids to the daemon, or adding a global grant scan to the binding poll hot path.",
+      "claims": [
+        "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {"kind":"code","path":"internal/riidoaiserver/device_connection_grant.go"},
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_persistence.go"},
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_daemon_runtime.go"},
+        {"kind":"code","path":"internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_cross_account_binding_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_persistence_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_migration_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_device_connections_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_benchmark_test.go"},
+        {"kind":"manifest","path":"docs/20-domain/agent-runtime-binding.riido.json"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"test","path":"internal/riidoaiserver"},
+        {"kind":"test","path":"tools/agentruntimebinding"},
+        {"kind":"tool","path":"tools/evidencegraph"},
+        {"kind":"tool","path":"tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind":"test","path":"internal/riidoaiserver/device_cross_account_binding_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_persistence_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_migration_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_device_connections_test.go"},
+        {"kind":"artifact","path":"cross-account-runtime-binding-evidence","redacted":true},
+        {"kind":"artifact","path":"cross-account-device-grant-benchmark","redacted":true}
+      ],
+      "decision": "Model account switching as an additive connection grant while keeping the physical device id, owner, credential, runtime ids, and historical bindings stable. Store grants by device so the five-second daemon binding poll summarizes only that device's connected accounts. Return only connected_principal_count and a timestamp-independent semantic revision to the daemon; principal ids and device credentials stay inside the control-plane snapshot. Legacy snapshots backfill the original owner grant and DynamoDB split snapshots preserve new grants without a storage-version break.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

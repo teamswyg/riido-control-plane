@@ -5,6 +5,7 @@ const dynamoDBAIAgentClientSnapshotSplitStorageVersion = "riido-ai-agent-client-
 const (
 	dynamoDBAIAgentClientSnapshotPartDevices            = "DEVICES"
 	dynamoDBAIAgentClientSnapshotPartDeviceCredentials  = "DEVICE_CREDENTIALS"
+	dynamoDBAIAgentClientSnapshotPartDeviceConnections  = "DEVICE_CONNECTION_GRANTS"
 	dynamoDBAIAgentClientSnapshotPartDaemons            = "DAEMONS"
 	dynamoDBAIAgentClientSnapshotPartAgents             = "AGENTS"
 	dynamoDBAIAgentClientSnapshotPartFixtures           = "FIXTURES"
@@ -24,6 +25,7 @@ var dynamoDBAIAgentClientSnapshotRequiredPartNames = []string{
 }
 
 var dynamoDBAIAgentClientSnapshotOptionalPartNames = []string{
+	dynamoDBAIAgentClientSnapshotPartDeviceConnections,
 	dynamoDBAIAgentClientSnapshotPartTaskThreadMessages,
 }
 

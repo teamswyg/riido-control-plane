@@ -29,6 +29,7 @@ type AIAgentClientSnapshot struct {
 	WorkspaceID             string                                       `json:"workspace_id"`
 	Devices                 []DeviceRecord                               `json:"devices"`
 	DeviceCredentials       []AIAgentClientDeviceCredentialSnapshot      `json:"device_credentials"`
+	DeviceConnectionGrants  []DeviceConnectionGrant                      `json:"device_connection_grants,omitempty"`
 	Daemons                 []DeviceDaemonRecord                         `json:"daemons"`
 	Agents                  []AgentClientRecord                          `json:"agents"`
 	Fixtures                []AgentOnboardingFixture                     `json:"fixtures"`
@@ -614,6 +615,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		WorkspaceID:             s.workspaceID,
 		Devices:                 copyDevices(s.devices),
 		DeviceCredentials:       credentials,
+		DeviceConnectionGrants:  copyDeviceConnectionGrants(s.deviceConnectionGrants),
 		Daemons:                 daemons,
 		Agents:                  agents,
 		Fixtures:                copyAgentOnboardingFixtures(s.fixtures),
@@ -657,6 +659,51 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 			workspaceID:      strings.TrimSpace(record.WorkspaceID),
 			displayName:      strings.TrimSpace(record.DisplayName),
 			issuedAt:         record.IssuedAt,
+		}
+	}
+	deviceConnectionGrants := make(map[string]map[string]DeviceConnectionGrant)
+	for _, grant := range snapshot.DeviceConnectionGrants {
+		grant.DeviceID = strings.TrimSpace(grant.DeviceID)
+		grant.PrincipalID = strings.TrimSpace(grant.PrincipalID)
+		grant.WorkspaceID = strings.TrimSpace(grant.WorkspaceID)
+		if grant.DeviceID == "" || grant.PrincipalID == "" || grant.WorkspaceID == "" {
+			return errors.New("ai agent client snapshot device connection grant identity is required")
+		}
+		if grant.ConnectedAt.IsZero() {
+			grant.ConnectedAt = grant.LastSeenAt
+		}
+		if grant.LastSeenAt.IsZero() {
+			grant.LastSeenAt = grant.ConnectedAt
+		}
+		deviceGrants := deviceConnectionGrants[grant.DeviceID]
+		if deviceGrants == nil {
+			deviceGrants = map[string]DeviceConnectionGrant{}
+			deviceConnectionGrants[grant.DeviceID] = deviceGrants
+		}
+		deviceGrants[deviceConnectionGrantKey(grant.DeviceID, grant.PrincipalID, grant.WorkspaceID)] = grant
+	}
+	// Older v2 snapshots predate explicit account connection grants. The
+	// credential row proves the original account/workspace connection, so seed
+	// that fact without changing the device owner or rotating its secret.
+	for _, credential := range deviceCredentials {
+		if credential.ownerPrincipalID == "" || credential.workspaceID == "" {
+			continue
+		}
+		key := deviceConnectionGrantKey(credential.deviceID, credential.ownerPrincipalID, credential.workspaceID)
+		deviceGrants := deviceConnectionGrants[credential.deviceID]
+		if deviceGrants == nil {
+			deviceGrants = map[string]DeviceConnectionGrant{}
+			deviceConnectionGrants[credential.deviceID] = deviceGrants
+		}
+		if _, ok := deviceGrants[key]; ok {
+			continue
+		}
+		deviceGrants[key] = DeviceConnectionGrant{
+			DeviceID:    credential.deviceID,
+			PrincipalID: credential.ownerPrincipalID,
+			WorkspaceID: credential.workspaceID,
+			ConnectedAt: credential.issuedAt,
+			LastSeenAt:  credential.issuedAt,
 		}
 	}
 	daemons := make(map[string]DeviceDaemonRecord, len(snapshot.Daemons))
@@ -708,6 +755,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.workspaceID = strings.TrimSpace(snapshot.WorkspaceID)
 	s.devices = devices
 	s.deviceCredentials = deviceCredentials
+	s.deviceConnectionGrants = deviceConnectionGrants
 	s.nextDeviceCredentialSeq = snapshot.NextDeviceCredentialSeq
 	s.daemons = daemons
 	s.nextDaemonCommand = snapshot.NextDaemonCommand

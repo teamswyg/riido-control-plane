@@ -14,11 +14,11 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 
 | Step | Statement |
 | --- | --- |
-| Observe | Agent/runtime binding rules were readable prose with focused tests, but the doc itself did not emit evidence. |
-| Hypothesis | A focused binding SSOT can make runtime identity drift detectable before daemon polling or assignment claims regress. |
-| Execute | Generate the reader doc from this manifest and run the agentruntimebinding verifier in CI. |
-| Evaluate | The verifier checks required fields, binding rules, source anchors, generated doc freshness, and focused runtime binding tests. |
-| Retrospective | This slice proves document executability; live trace correlation remains a separate observability slice. |
+| Observe | A second account could connect to an existing physical daemon, but account-level recovery facts were collapsed into workspace ids and were not durable evidence. |
+| Hypothesis | Stable physical device identity plus persisted account grants can route cross-account agents without owner replacement, secret rotation, or runtime-id migration. |
+| Execute | Persist connection grants, expose a semantic revision to the daemon binding response, backfill legacy snapshots, and verify cross-account routing and recovery. |
+| Evaluate | The verifier and focused tests prove stable device/runtime ids, two-account binding routing, original credential survival, legacy backfill, and DynamoDB split-part persistence. |
+| Retrospective | Account switching is modeled as an additive connection and binding refresh; machine_id alone never authorizes cross-principal secret issuance. |
 
 ## Binding Fields
 
@@ -47,6 +47,9 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 | --- | --- | --- |
 | `machine-device-id` | - | machine_id derives a stable physical-machine DeviceID |
 | `connected-workspaces` | - | workspace connections are unioned across enroll/snapshot/connect paths |
+| `account-connection-grants` | - | each authenticated account and workspace connection is preserved as a device grant without replacing device ownership or credentials |
+| `cross-account-binding-routing` | - | an agent created by a connected account routes through the existing physical daemon by stable device and runtime ids |
+| `legacy-grant-backfill` | - | snapshot restore backfills the original credential owner connection when older snapshots have no explicit grants |
 | `cross-workspace-bindings` | - | daemon agent-bindings include every agent whose verified runtime binding targets the device, even when the agent workspace is not in connected_workspace_ids |
 | `legacy-runtime-prune` | - | agentd-local runtimes are pruned from restored snapshots |
 

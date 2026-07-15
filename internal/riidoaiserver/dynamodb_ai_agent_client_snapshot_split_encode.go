@@ -32,6 +32,7 @@ func encodeDynamoDBAIAgentClientSnapshotParts(snapshot AIAgentClientSnapshot) ([
 	}{
 		{name: dynamoDBAIAgentClientSnapshotPartDevices, value: snapshot.Devices},
 		{name: dynamoDBAIAgentClientSnapshotPartDeviceCredentials, value: snapshot.DeviceCredentials},
+		{name: dynamoDBAIAgentClientSnapshotPartDeviceConnections, value: snapshot.DeviceConnectionGrants},
 		{name: dynamoDBAIAgentClientSnapshotPartDaemons, value: snapshot.Daemons},
 		{name: dynamoDBAIAgentClientSnapshotPartAgents, value: snapshot.Agents},
 		{name: dynamoDBAIAgentClientSnapshotPartFixtures, value: snapshot.Fixtures},

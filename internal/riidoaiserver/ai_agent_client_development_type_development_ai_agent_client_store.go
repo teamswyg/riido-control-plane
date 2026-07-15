@@ -11,6 +11,7 @@ type DevelopmentAIAgentClientStore struct {
 	daemonClientPolicy      DaemonClientCompatibilityPolicy
 	devices                 []DeviceRecord
 	deviceCredentials       map[string]deviceCredentialRecord
+	deviceConnectionGrants  map[string]map[string]DeviceConnectionGrant
 	nextDeviceCredentialSeq int
 	daemons                 map[string]DeviceDaemonRecord
 	nextDaemonCommand       int

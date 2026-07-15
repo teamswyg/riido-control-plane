@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 	"time"
@@ -49,6 +50,9 @@ func (s *DevelopmentAIAgentClientStore) ConnectAIAgentDevice(ctx context.Context
 	for i := range s.devices {
 		if s.devices[i].DeviceID == deviceID {
 			s.devices[i].ConnectedWorkspaceIDs = addConnectedWorkspace(s.devices[i].ConnectedWorkspaceIDs, principal.WorkspaceID)
+			s.upsertDeviceConnectionGrantLocked(deviceID, principal, time.Now().UTC())
+			revision, principalCount := s.deviceConnectionSummaryLocked(deviceID)
+			log.Printf("riido_ai_agent_device event=account_connected device_id=%q workspace_id=%q connected_principal_count=%d connection_revision=%q", deviceID, principal.WorkspaceID, principalCount, revision)
 			return copyDevice(s.devices[i]), nil
 		}
 	}
@@ -60,6 +64,7 @@ func (s *DevelopmentAIAgentClientStore) ConnectAIAgentDevice(ctx context.Context
 		DaemonLastSeenAt:      time.Now().UTC(),
 		ConnectedWorkspaceIDs: []string{principal.WorkspaceID},
 	}
+	s.upsertDeviceConnectionGrantLocked(deviceID, principal, time.Now().UTC())
 	s.devices = append(s.devices, device)
 	return copyDevice(device), nil
 }
@@ -269,7 +274,13 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx conte
 		}
 		return bindings[i].AgentID < bindings[j].AgentID
 	})
-	return AgentRuntimeBindingListResponse{SchemaVersion: SchemaVersion, Bindings: bindings}, nil
+	revision, principalCount := s.deviceConnectionSummaryLocked(deviceID)
+	return AgentRuntimeBindingListResponse{
+		SchemaVersion:           SchemaVersion,
+		Bindings:                bindings,
+		ConnectionRevision:      revision,
+		ConnectedPrincipalCount: principalCount,
+	}, nil
 }
 
 func (s *DevelopmentAIAgentClientStore) LookupAgent(agentID string) (AgentRuntimeBinding, bool) {
