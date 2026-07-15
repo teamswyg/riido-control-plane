@@ -249,18 +249,12 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx conte
 	}
 	s.repairStaleActiveTaskThreadsLocked(time.Now().UTC())
 	bindings := []AgentRuntimeBinding{}
-	scope := s.workspaceScope(principal)
 	for _, agent := range s.agents {
-		// A physical machine connects to many workspaces under one device
-		// credential, so surface bindings for agents in ANY workspace this device
-		// is connected to — not just the credential's enroll workspace. Otherwise
-		// an agent assigned from another connected workspace is never polled and
-		// its assignment stays queued forever. The binding.DeviceID guard below
-		// still restricts the result to agents bound to THIS device's runtimes.
-		agentWS := s.agentWorkspaceID(agent)
-		if agentWS != scope && !deviceConnectedToWorkspace(device, agentWS) {
-			continue
-		}
+		// The runtime binding is authoritative for daemon execution. Agent creation
+		// already verifies that the caller can select the runtime, including an
+		// owner using the same physical runtime from another workspace. Requiring
+		// ConnectedWorkspaceIDs again here creates a split contract: creation
+		// succeeds, but the daemon never sees the binding and work stays queued.
 		binding, ok := s.agentRuntimeBindingLocked(agent)
 		if !ok || binding.DeviceID != deviceID {
 			continue

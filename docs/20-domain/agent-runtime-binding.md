@@ -47,7 +47,7 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 | --- | --- | --- |
 | `machine-device-id` | - | machine_id derives a stable physical-machine DeviceID |
 | `connected-workspaces` | - | workspace connections are unioned across enroll/snapshot/connect paths |
-| `cross-workspace-bindings` | - | daemon agent-bindings include agents from every workspace connected to the device |
+| `cross-workspace-bindings` | - | daemon agent-bindings include every agent whose verified runtime binding targets the device, even when the agent workspace is not in connected_workspace_ids |
 | `legacy-runtime-prune` | - | agentd-local runtimes are pruned from restored snapshots |
 
 ## Non-Goals

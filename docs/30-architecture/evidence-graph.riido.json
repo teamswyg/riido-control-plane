@@ -20524,6 +20524,37 @@
       ],
       "decision": "The control-plane composition root now selects an explicit legacy_v1 or auth_service_v2 provider before verification. Opaque, missing-issuer and foreign-issuer credentials retain the legacy static/external chain; every token claiming the Riido Auth issuer is owned by v2 and cannot downgrade after selector, provider availability, malformed JSON, duplicate claims, signature, JWKS, claim, introspection or domain-policy failure. Classification grants no trust. Production activation remains a separate live valid-token and revoked-replay evidence gate.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "cross_workspace_runtime_binding_and_terminal_sse_evidence_loop",
+      "observation": "Production evidence for one task separated two failures: a Codex assignment remained queued without any lease even though its runtime and daemon were online, while a Claude assignment reached durable completed state after an upstream rate-limit warning but the live UI did not immediately reflect the terminal transition. The Codex agent used its owner's runtime from a workspace absent from the device connected_workspace_ids, and existing SSE logs could prove only stream open and close, not assignment-level terminal enqueue and write.",
+      "hypothesis": "Daemon polling must trust the already-authorized agent runtime binding rather than repeating a connected-workspace gate, and terminal SSE must emit redacted assignment/thread/run delivery phases so future incidents can distinguish projection completion, fanout pressure, HTTP write, and client handling without changing API payloads.",
+      "claims": [
+        "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_daemon_runtime.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_daemon_binding_test.go"},
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_sse_delivery.go"},
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_event_stream.go"},
+        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_sse_logging_test.go"},
+        {"kind":"manifest","path":"docs/20-domain/agent-runtime-binding.riido.json"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"test","path":"internal/riidoaiserver"},
+        {"kind":"test","path":"tools/agentruntimebinding"},
+        {"kind":"tool","path":"tools/evidencegraph"},
+        {"kind":"tool","path":"tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind":"test","path":"internal/riidoaiserver/device_daemon_binding_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_sse_logging_test.go"},
+        {"kind":"artifact","path":"production-task-runtime-binding-terminal-sse-triage-2026-07-15","redacted":true}
+      ],
+      "decision": "The daemon binding response now includes every agent whose validated runtime binding targets the authenticated device, including an owner-created agent in an unconnected workspace, while device credential ownership and binding.DeviceID checks remain unchanged. Terminal SSE payloads are unchanged; structured logs now record fanout enqueue, overflow compensation, replay write, and live write with workspace and execution identifiers but without credentials or message bodies. Claude's observed delay remains attributed to an upstream rate-limit retry and is not misclassified as daemon scheduling.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
