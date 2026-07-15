@@ -38,6 +38,40 @@
     "full_go_test": "passed"
   },
   "staging_after_fix": {
-    "status": "pending_deploy_and_live_overlap_qa"
+    "status": "passed_live_overlap_qa",
+    "verified_at": "2026-07-15T11:17:51.232Z",
+    "deployment": {
+      "commit": "21f808df4fdc0aa9c26355b14611e38568ca0cca",
+      "ecs_task_definition": "riido-ai-server-testnet:273",
+      "image_digest": "sha256:d01a99bf9e05b0da460de7ae99edceea076afec0c2bb7e16b0cc0d38f5e30b19"
+    },
+    "needs_input_assignment": {
+      "assignment_id": "asn-000248",
+      "queued_at": "2026-07-15T11:15:54.287558295Z",
+      "leased_at": "2026-07-15T11:15:54.527672224Z",
+      "needs_input_at": "2026-07-15T11:16:14.443405239Z",
+      "provider_reported_state": "running",
+      "durable_state_after_needs_input": "completed",
+      "client_projection": "waiting_for_user",
+      "lease_expiry_wait_seconds": 0
+    },
+    "same_agent_followup_assignment": {
+      "assignment_id": "asn-000249",
+      "queued_at": "2026-07-15T11:17:16.312510620Z",
+      "leased_at": "2026-07-15T11:17:18.736038618Z",
+      "running_at": "2026-07-15T11:17:19.220247866Z",
+      "completed_at": "2026-07-15T11:17:41.009926981Z",
+      "queue_to_lease_seconds": 2.423527998,
+      "terminal_state": "completed"
+    },
+    "client_observation": {
+      "busy_copy_occurrences_while_running": 0,
+      "busy_copy_occurrences_after_terminal": 0,
+      "thinking_occurrences_after_terminal": 0,
+      "stop_controls_after_terminal": 0,
+      "terminal_visible_without_refresh": true,
+      "result_excerpt": "Hello, World!"
+    },
+    "evaluation": "The provider needs-input event closed the durable lease immediately. A new same-agent assignment was leased on the next daemon poll without waiting for stale lease expiry, no busy copy was visible, and terminal UI state arrived without refresh."
   }
 }
