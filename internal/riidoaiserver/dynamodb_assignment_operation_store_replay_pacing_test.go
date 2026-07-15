@@ -55,3 +55,12 @@ func TestPaceDynamoDBAssignmentOperationReplayHonorsCancellation(t *testing.T) {
 		t.Fatalf("paceDynamoDBAssignmentOperationReplay error = %v, want context canceled", err)
 	}
 }
+
+func TestDynamoDBAssignmentOperationReplayKeepsBoundedStrongReadPages(t *testing.T) {
+	if dynamoDBAssignmentQueryLimit != 50 {
+		t.Fatalf("dynamoDBAssignmentQueryLimit = %d, want 50", dynamoDBAssignmentQueryLimit)
+	}
+	if dynamoDBAssignmentOperationReplayPageDelay != 100*time.Millisecond {
+		t.Fatalf("replay page delay = %s, want 100ms", dynamoDBAssignmentOperationReplayPageDelay)
+	}
+}

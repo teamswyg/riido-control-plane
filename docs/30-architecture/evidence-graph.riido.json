@@ -20558,7 +20558,7 @@
     },
     {
       "id": "assignment_journal_startup_pressure_evidence_loop",
-      "observation": "Production ECS task definition 195 failed twice during startup while the existing task remained healthy. CloudWatch recorded DynamoDB ThrottlingException from assignment journal replay, and DynamoDB metrics recorded 51,374 consumed read capacity units with seven read throttle events in one minute. The journal is read with strong consistency from one partition key, and a late-page throttle caused the existing store-open retry to restart replay from the first page.",
+      "observation": "Production ECS task definition 195 failed twice during startup while the existing task remained healthy. CloudWatch recorded DynamoDB ThrottlingException from assignment journal replay, and DynamoDB metrics recorded 51,374 consumed read capacity units with seven read throttle events in one minute. The journal is read with strong consistency from one partition key, and a late-page throttle caused the existing store-open retry to restart replay from the first page. After the fix, task definition 196 reached steady state on its first task with 8,996 consumed read capacity units in the startup minute, zero new throttle events, and successful external health and readiness probes.",
       "hypothesis": "Strongly consistent journal replay can preserve semantics and avoid the hot-partition burst by pacing successful pages below the per-partition read ceiling and retrying only the current throttled page instead of amplifying reads through a full replay restart.",
       "claims": [
         "assignment_operation_journal_must_preserve_replay_and_claim_ports",
@@ -20580,9 +20580,10 @@
       "evidence": [
         {"kind":"test","path":"internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing_test.go"},
         {"kind":"artifact","path":"production-assignment-journal-startup-pressure-2026-07-15","redacted":true},
-        {"kind":"artifact","path":"production-deploy-run-29388058904","redacted":true}
+        {"kind":"artifact","path":"production-deploy-run-29388058904","redacted":true},
+        {"kind":"artifact","path":"production-deploy-run-29388798091","redacted":true}
       ],
-      "decision": "Keep strongly consistent replay and all API/runtime contracts unchanged. Pace each successful 50-item journal page by 100 milliseconds and retry a throttled page in place. Move replay loading out of the oversized DynamoDB store source so the module decomposition ratchet improves while the behavior remains unchanged.",
+      "decision": "Keep strongly consistent replay and all API/runtime contracts unchanged. Pace each successful 50-item journal page by 100 milliseconds and retry a throttled page in place. Preserve the page size and pacing interval as an executable boundary test. Move replay loading out of the oversized DynamoDB store source so the module decomposition ratchet improves while the behavior remains unchanged.",
       "next_loop": "closed_loop_candidate"
     }
   ],
