@@ -25,8 +25,12 @@ func TestAIAgentClientSSELifecycleLogsReasonWithoutQuery(t *testing.T) {
 	logAIAgentClientStreamOpen(request, 7)
 	logAIAgentClientStreamClose(request, "event_write_error", errors.New("broken pipe"))
 	logAIAgentClientSubscriberDeliverySummary(aiAgentClientSubscriber{droppedEvents: 3, terminalCompensations: 1})
+	logAIAgentClientTerminalDelivery("live_written", ClientStreamEvent{Payload: AgentThreadProgressEvent{
+		AssignmentID: "asn-terminal", ThreadID: "thread-terminal", RunID: "run-terminal",
+		AssignmentState: AgentAssignmentStateCompleted,
+	}}, "ws")
 	got := output.String()
-	for _, want := range []string{"event=stream_open", "event=stream_closed", "event=fanout_overflow_summary", "terminal_compensations=1", "broken pipe"} {
+	for _, want := range []string{"event=stream_open", "event=stream_closed", "event=fanout_overflow_summary", "event=terminal_delivery", "assignment_id=\"asn-terminal\"", "terminal_compensations=1", "broken pipe"} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("SSE lifecycle log missing %q: %s", want, got)
 		}

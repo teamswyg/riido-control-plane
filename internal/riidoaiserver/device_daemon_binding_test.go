@@ -55,3 +55,43 @@ func TestDaemonAgentBindingsIncludeAgentsFromOtherConnectedWorkspaces(t *testing
 		t.Fatalf("binding has wrong runtime/device: %+v", *found)
 	}
 }
+
+func TestDaemonAgentBindingsIncludeOwnerRuntimeAgentWithoutWorkspaceConnection(t *testing.T) {
+	ctx := context.Background()
+	store := NewDevelopmentAIAgentClientStore()
+	const machine = "machine-binding-owner-cross-workspace"
+	const enrolledWorkspace = "workspace-enrolled"
+	const agentWorkspace = "workspace-agent"
+	const owner = "owner-user"
+	runtimeID := machine + ":codex"
+
+	enrollPrincipal := AuthorizationResult{PrincipalID: owner, WorkspaceID: enrolledWorkspace}
+	enroll := enrollTestDevice(t, ctx, store, enrollPrincipal, enrolledWorkspace, machine, "Owner Mac")
+	syncTestRuntime(t, ctx, store, enrollPrincipal, machine, enroll.DeviceID, runtimeID)
+
+	created, err := store.createAIAgent(ctx,
+		AuthorizationResult{PrincipalID: owner, WorkspaceID: agentWorkspace},
+		CreateAgentConfigurationRequest{
+			Name:       "Cross Workspace Agent",
+			RuntimeID:  runtimeID,
+			Visibility: AgentVisibilityPrivate,
+		}, "")
+	if err != nil {
+		t.Fatalf("create agent in unconnected workspace: %v", err)
+	}
+
+	bindings, err := store.ListAIAgentDaemonAgentBindings(ctx,
+		AuthorizationResult{PrincipalID: owner}, enroll.DeviceID)
+	if err != nil {
+		t.Fatalf("list bindings: %v", err)
+	}
+	for _, binding := range bindings.Bindings {
+		if binding.AgentID == created.Agent.AgentID {
+			if binding.RuntimeID != runtimeID || binding.DeviceID != enroll.DeviceID {
+				t.Fatalf("binding has wrong runtime/device: %+v", binding)
+			}
+			return
+		}
+	}
+	t.Fatalf("owner runtime agent missing from bindings: %+v", bindings.Bindings)
+}
