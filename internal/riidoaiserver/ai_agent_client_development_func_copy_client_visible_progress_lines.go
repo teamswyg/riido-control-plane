@@ -4,7 +4,7 @@ func copyClientVisibleProgressLines(lines []AgentThreadProgressLine) []AgentThre
 	out := make([]AgentThreadProgressLine, 0, len(lines))
 	for _, line := range copyProgressLines(lines) {
 		line.Message = clientVisibleTaskThreadText(line.Message)
-		if line.Message == "" {
+		if line.Message == "" || line.Message == clientMessageAgentBusyQueued {
 			continue
 		}
 		out = append(out, line)
