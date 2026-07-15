@@ -13,6 +13,14 @@ type AgentRegistry interface {
 	LookupAgent(agentID string) (AgentRuntimeBinding, bool)
 }
 
+// DaemonBindingRegistry resolves the durable identity used to authenticate a
+// daemon poll. A matching poll is itself liveness evidence, so implementations
+// may ignore time-based read-model staleness while preserving explicit
+// unavailable state and the current agent/runtime/device/daemon relationship.
+type DaemonBindingRegistry interface {
+	LookupDaemonBinding(agentID string) (AgentRuntimeBinding, bool)
+}
+
 type AgentRuntimeFactRegistry interface {
 	LookupAgentRuntimeFact(agentID string) (AgentRuntimeBinding, RuntimeRecord, bool)
 }
@@ -40,6 +48,16 @@ func NewCompositeAgentRegistry(registries ...AgentRegistry) AgentRegistry {
 func (r compositeAgentRegistry) LookupAgent(agentID string) (AgentRuntimeBinding, bool) {
 	for _, registry := range r.registries {
 		binding, ok := registry.LookupAgent(agentID)
+		if ok {
+			return binding, true
+		}
+	}
+	return AgentRuntimeBinding{}, false
+}
+
+func (r compositeAgentRegistry) LookupDaemonBinding(agentID string) (AgentRuntimeBinding, bool) {
+	for _, registry := range r.registries {
+		binding, ok := lookupDaemonBinding(registry, agentID)
 		if ok {
 			return binding, true
 		}
@@ -110,7 +128,7 @@ func validateDaemonBinding(registry AgentRegistry, agentID string, req PollReque
 	if registry == nil {
 		return nil
 	}
-	binding, ok := registry.LookupAgent(agentID)
+	binding, ok := lookupDaemonBinding(registry, agentID)
 	if !ok {
 		return newAgentBindingValidationErrorf("agent %s is not registered", agentID)
 	}
@@ -133,4 +151,11 @@ func validateDaemonBinding(registry AgentRegistry, agentID string, req PollReque
 		return newAgentBindingValidationErrorf("agent %s is bound to runtime_id %s", agentID, binding.RuntimeID)
 	}
 	return nil
+}
+
+func lookupDaemonBinding(registry AgentRegistry, agentID string) (AgentRuntimeBinding, bool) {
+	if daemonRegistry, ok := registry.(DaemonBindingRegistry); ok {
+		return daemonRegistry.LookupDaemonBinding(agentID)
+	}
+	return registry.LookupAgent(agentID)
 }

@@ -20746,6 +20746,38 @@
       ],
       "decision": "Set runtime and daemon snapshot staleness to 45 seconds, covering two roughly 21-second legacy heartbeat windows plus jitter. Preserve the existing greater-than stale comparison and all public contracts. Re-run staging after deployment and require the periodic binding rejection to disappear while heartbeat and binding polls remain healthy.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "daemon_poll_durable_binding_liveness_loop",
+      "observation": "The 45-second liveness threshold removed staging's periodic 21-second false rejections, but long-window post-deploy evidence still recorded six sporadic binding_agent_not_registered poll failures for one valid cross-account agent. The stored agent, runtime, device, daemon, and connection grant remained present and matched; only the preceding runtime snapshot had aged beyond the read-model liveness threshold.",
+      "hypothesis": "An authenticated poll carrying the current daemon, device, runtime, and agent identity is itself liveness evidence. Poll authentication should therefore validate durable current identity without applying time-based read-model staleness, while deletion, rebinding, explicit runtime unavailability, and identity mismatch must remain fail-closed.",
+      "claims": [
+        "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {"kind":"code","path":"internal/riidoaiserver/agent_registry.go"},
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_daemon_binding_lookup.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_daemon_poll_stale_binding_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go"},
+        {"kind":"workflow","path":".github/workflows/agent-runtime-binding.yml"},
+        {"kind":"manifest","path":"docs/20-domain/agent-runtime-binding.riido.json"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"test","path":"internal/riidoaiserver"},
+        {"kind":"test","path":"tools/agentruntimebinding"},
+        {"kind":"tool","path":"tools/evidencegraph"},
+        {"kind":"tool","path":"tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind":"test","path":"internal/riidoaiserver/device_daemon_poll_stale_binding_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go"},
+        {"kind":"artifact","path":"staging-daemon-poll-durable-binding-long-window-2026-07-16","redacted":true}
+      ],
+      "decision": "Keep client-visible runtime liveness and daemon agent-binding discovery time-sensitive, but authenticate poll, heartbeat, provider-status, and agent-event calls through a separate durable binding lookup. The lookup ignores only elapsed heartbeat age and still requires the current stored agent/runtime/device/daemon relationship plus explicit online/detected state. No endpoint, payload, credential, assignment, or SSE contract changes.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

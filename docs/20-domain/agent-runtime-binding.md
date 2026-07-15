@@ -14,11 +14,11 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 
 | Step | Statement |
 | --- | --- |
-| Observe | A second account could connect to an existing physical daemon, but account-level recovery facts were collapsed into workspace ids and a legacy daemon's roughly 21-second heartbeat crossed the 20-second stale boundary immediately before refresh. |
-| Hypothesis | Stable physical device identity plus persisted account grants and a two-heartbeat liveness tolerance can route cross-account agents without owner replacement, secret rotation, runtime-id migration, or false binding rejection. |
-| Execute | Persist connection grants, expose a semantic revision to the daemon binding response, backfill legacy snapshots, tolerate two legacy heartbeat windows, and verify cross-account routing and recovery. |
-| Evaluate | The verifier and focused tests prove stable device/runtime ids, two-account binding routing, original credential survival, legacy backfill, DynamoDB split-part persistence, and binding continuity across a delayed legacy heartbeat. |
-| Retrospective | Account switching is modeled as an additive connection and binding refresh; machine_id alone never authorizes cross-principal secret issuance, and liveness expiry must not be shorter than an actively supported daemon heartbeat cadence. |
+| Observe | A second account could connect to an existing physical daemon, while long-window testnet evidence still showed sporadic binding_agent_not_registered poll rejections whenever an otherwise valid daemon snapshot aged past the read-model liveness threshold. |
+| Hypothesis | Stable physical identity, persisted account grants, and a daemon-poll-specific durable identity lookup can preserve security boundaries without treating an authenticated matching poll as an unregistered agent merely because its preceding snapshot is stale. |
+| Execute | Persist connection grants, expose a semantic revision, backfill legacy snapshots, retain read-model liveness projection, and validate daemon polls against the current durable binding while rejecting explicit unavailability and identity mismatch. |
+| Evaluate | The verifier and focused tests prove stable device/runtime ids, cross-account routing, credential survival, legacy backfill, stale read-model exclusion, successful matching polls across stale snapshots, and fail-closed mismatched or explicitly unavailable polls. |
+| Retrospective | Registration identity and availability projection are different facts: UI and binding discovery remain time-sensitive, while a matching authenticated poll is itself liveness evidence and must be checked against durable identity rather than a stale projection. |
 
 ## Binding Fields
 
@@ -39,6 +39,7 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 | `daemon-id-match` | daemon | poll daemon_id must match the registered binding |
 | `runtime-id-match` | daemon | poll runtime_id must match the registered binding |
 | `device-id-if-bound` | daemon | poll device_id must match only when the binding has a non-empty device_id |
+| `daemon-poll-durable-identity` | daemon | a daemon poll validates the current durable agent/runtime/device/daemon identity without applying time-based liveness projection; deleted, rebound, explicitly unavailable, or mismatched bindings remain rejected |
 | `nil-registry-no-gate` | fallback | nil registry imposes no binding gate |
 
 ## Device And Visibility Rules

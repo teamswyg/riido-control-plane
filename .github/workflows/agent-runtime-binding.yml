@@ -15,6 +15,10 @@ on:
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/agent_registry.go"
       - "internal/riidoaiserver/agent_registry_test.go"
+      - "internal/riidoaiserver/ai_agent_daemon_binding_lookup.go"
+      - "internal/riidoaiserver/device_runtime_liveness_binding_test.go"
+      - "internal/riidoaiserver/device_daemon_poll_stale_binding_test.go"
+      - "internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go"
   pull_request:
     paths:
       - ".github/workflows/agent-runtime-binding.yml"
@@ -28,6 +32,10 @@ on:
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/agent_registry.go"
       - "internal/riidoaiserver/agent_registry_test.go"
+      - "internal/riidoaiserver/ai_agent_daemon_binding_lookup.go"
+      - "internal/riidoaiserver/device_runtime_liveness_binding_test.go"
+      - "internal/riidoaiserver/device_daemon_poll_stale_binding_test.go"
+      - "internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go"
 
 jobs:
   guard:
@@ -55,7 +63,7 @@ jobs:
             -check-doc \
             -evidence-out out/agent-runtime-binding-evidence.json
       - name: Test agent runtime binding
-        run: go test ./internal/riidoaiserver -run 'StaticAgentRegistry|ValidateAssignmentBinding|ValidateDaemonBinding' -count=1
+        run: go test ./internal/riidoaiserver -run 'StaticAgentRegistry|ValidateAssignmentBinding|ValidateDaemonBinding|DaemonPoll' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:
