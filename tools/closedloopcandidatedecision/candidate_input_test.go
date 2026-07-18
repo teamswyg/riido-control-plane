@@ -6,6 +6,7 @@ import (
 )
 
 func TestCandidateDecisionVerifyRequiresCandidateInput(t *testing.T) {
+	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-07-15T00:00:00Z")
 	err := run(options{
 		Repo:        "../..",
 		Manifest:    defaultManifest,

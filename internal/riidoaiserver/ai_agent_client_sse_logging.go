@@ -3,10 +3,14 @@ package riidoaiserver
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 func logAIAgentClientStreamOpen(r *http.Request, replayEvents int) {
-	log.Printf("riido_ai_agent_sse event=stream_open path=%q replay_events=%d", r.URL.Path, replayEvents)
+	log.Printf(
+		"riido_ai_agent_sse event=stream_open path=%q replay_cursor_present=%t replay_events=%d",
+		r.URL.Path, strings.TrimSpace(r.Header.Get("Last-Event-ID")) != "", replayEvents,
+	)
 }
 
 func logAIAgentClientStreamClose(r *http.Request, reason string, err error) {
