@@ -20778,6 +20778,38 @@
       ],
       "decision": "Keep client-visible runtime liveness and daemon agent-binding discovery time-sensitive, but authenticate poll, heartbeat, provider-status, and agent-event calls through a separate durable binding lookup. The lookup ignores only elapsed heartbeat age and still requires the current stored agent/runtime/device/daemon relationship plus explicit online/detected state. No endpoint, payload, credential, assignment, or SSE contract changes.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "sse_last_event_id_reconnect_loop",
+      "observation": "Production opened 513 AI Agent SSE streams over seven days and replayed 51,422 retained events, averaging 100.2378 events per open with p95 and max both at 175. Terminal lifecycle evidence recorded 1,956 replay deliveries against 69 live terminal deliveries. The server emitted numeric SSE ids and allowed Last-Event-ID through CORS, but did not apply that cursor before replay.",
+      "hypothesis": "Filtering the bounded replay tail to events whose sequence is greater than a valid Last-Event-ID will prevent reconnects from repeatedly delivering already observed progress and terminal state while preserving initial replay, invalid-cursor compatibility, live fanout, v3 refresh truth, and every public endpoint and payload.",
+      "claims": [
+        "sse_reconnect_must_resume_after_last_event_id"
+      ],
+      "changes": [
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_event_replay_cursor.go"},
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_events_handler.go"},
+        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_sse_logging.go"},
+        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_sse_logging_test.go"},
+        {"kind":"manifest","path":"docs/20-domain/ai-agent-client-api.riido.json"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence/production-sse-replay-cursor-2026-07-18.json"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"test","path":"internal/riidoaiserver"},
+        {"kind":"test","path":"tools/aiagentclientapi"},
+        {"kind":"tool","path":"tools/evidencegraph"},
+        {"kind":"tool","path":"tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"},
+        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_sse_logging_test.go"},
+        {"kind":"artifact","path":"production-sse-replay-cursor-2026-07-18","redacted":true}
+      ],
+      "decision": "Honor valid numeric Last-Event-ID values at the control-plane replay boundary and retain the existing bounded full replay for missing, malformed, or negative cursors. Log only cursor presence and the filtered replay count so production can prove reduction without recording cursor values, credentials, or message bodies. Keep endpoint paths, SSE event ids, payloads, terminal priority delivery, and v3 refresh behavior unchanged.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

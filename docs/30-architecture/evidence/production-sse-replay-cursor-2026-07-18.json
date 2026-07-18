@@ -1,0 +1,33 @@
+{
+  "schema_version": "riido-production-sse-replay-cursor-evidence.v1",
+  "id": "production_sse_replay_cursor_2026_07_18",
+  "captured_at": "2026-07-18T04:45:19Z",
+  "redacted": true,
+  "source": {
+    "environment": "production",
+    "cloudwatch_log_group": "/ecs/riido-ai-server-production",
+    "window_hours": 168,
+    "query_scope": "riido_ai_agent_sse stream_open and terminal_delivery lifecycle logs"
+  },
+  "observation": {
+    "stream_opens": 513,
+    "replayed_events": 51422,
+    "average_replayed_events_per_open": 100.2378,
+    "p95_replayed_events_per_open": 175,
+    "max_replayed_events_per_open": 175,
+    "terminal_replay_deliveries": 1956,
+    "terminal_live_deliveries": 69,
+    "last_event_id_allowed_by_cors": true,
+    "last_event_id_applied_before_change": false
+  },
+  "hypothesis": "Applying the SSE Last-Event-ID cursor before bounded replay will prevent reconnects from resending already observed progress and terminal events without changing endpoint paths, payloads, event ids, live delivery, or v3 refresh truth.",
+  "verification": {
+    "command": "go test ./internal/riidoaiserver -run 'TestAIAgentClientReplayEvents|TestHTTPAIAgentClientEventsHonorsLastEventID|TestAIAgentClientSSELifecycle' -count=1",
+    "expected_post_deploy_signal": "stream_open records with replay_cursor_present=true have replay_events lower than the retained replay tail, normally zero when no event was missed"
+  },
+  "decision": {
+    "status": "partial",
+    "summary": "Add an API-compatible reconnect cursor filter and cursor-presence logging. Close this evidence only after production deployment and a reconnect log proves the retained tail is no longer replayed in full.",
+    "next_artifact": "production_sse_replay_cursor_post_deploy_2026_07_18"
+  }
+}
