@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `231`
-- claim refs: `307`
-- change refs: `2226`
-- verifier refs: `1310`
-- evidence refs: `665`
+- chains: `232`
+- claim refs: `309`
+- change refs: `2233`
+- verifier refs: `1315`
+- evidence refs: `669`
 
 ## Compiled Chain Summary
 
-- complete chains: `231` / `231`
-- claim-bound chains: `231`
+- complete chains: `232` / `232`
+- claim-bound chains: `232`
 - unclaimed chains: `0`
 - next-loop targets: `9`
 
@@ -28,8 +28,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `closed_loop_candidate` | `149` | `175` | `1417` | `748` | `413` |
 | `control_plane_performance_harness` | `30` | `31` | `234` | `251` | `79` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
+| `closed_loop_candidate_decision` | `10` | `35` | `186` | `95` | `46` |
 | `ai_thread_history` | `9` | `11` | `140` | `63` | `19` |
-| `closed_loop_candidate_decision` | `9` | `33` | `179` | `90` | `42` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
 | `loop_closure_audit` | `2` | `4` | `24` | `12` | `8` |
@@ -270,6 +270,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `runtime_liveness_heartbeat_jitter_loop` | `2` | `4` | `4` | `2` | `closed_loop_candidate` |
 | `daemon_poll_durable_binding_liveness_loop` | `2` | `8` | `4` | `3` | `closed_loop_candidate` |
 | `sse_last_event_id_reconnect_loop` | `1` | `9` | `4` | `3` | `closed_loop_candidate` |
+| `closed_loop_candidate_review_expiry_recovery_loop` | `2` | `7` | `5` | `4` | `closed_loop_candidate_decision` |
 
 ## Loop
 
