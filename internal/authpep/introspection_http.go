@@ -110,8 +110,8 @@ func (r *HTTPIntrospectionStatusResolver) ResolveAccessToken(ctx context.Context
 	if response.StatusCode != http.StatusOK {
 		return AccessTokenStatus{}, fmt.Errorf("auth introspection returned status %d", response.StatusCode)
 	}
-	if media := strings.TrimSpace(strings.Split(response.Header.Get("Content-Type"), ";")[0]); media != "application/json" {
-		return AccessTokenStatus{}, errors.New("auth introspection returned an invalid content type")
+	if media := strings.TrimSpace(strings.Split(response.Header.Get("Content-Type"), ";")[0]); media != "application/json" || !cacheControlHasNoStore(response.Header.Values("Cache-Control")) {
+		return AccessTokenStatus{}, errors.New("auth introspection returned an invalid content type or cache policy")
 	}
 	var status AccessTokenStatus
 	decoder := json.NewDecoder(bytes.NewReader(limited))
