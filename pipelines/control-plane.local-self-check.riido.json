@@ -33,6 +33,7 @@
       "tools/contextmap",
       "tools/gocibaseline",
       "tools/moduledecomposition",
+      "tools/precommitbaseline",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -110,6 +111,13 @@
         "want_paths": ["out/executable-knowledge-coverage.json"],
         "want_sha256_present": true,
         "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "pre-commit-baseline-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/pre-commit-baseline-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-pre-commit-baseline-evidence.v1"
       }
     ],
     "source_checks": [
@@ -123,10 +131,12 @@
           "3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392",
           "82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4",
           "16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480",
+          "338db1065406d91b511c7fd8838f7b18964aabadbea8e2b4039cc9aa8e89c104",
           "https://github.com/teamswyg/riido-control-plane/issues/1039",
           "https://github.com/teamswyg/riido-control-plane/issues/1041",
           "https://github.com/teamswyg/riido-control-plane/issues/1043",
           "https://github.com/teamswyg/riido-control-plane/issues/1045",
+          "https://github.com/teamswyg/riido-control-plane/issues/1047",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -233,6 +243,29 @@
           "umask 077",
           "ModuleDecompositionCommandExact",
           "out/module-decomposition-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "pre-commit-baseline-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_precommit_cases.go",
+        "contains": [
+          "pre_commit_baseline_workflow_digest_is_exact",
+          "pre_commit_baseline_four_source_behaviors_are_native",
+          "pre_commit_baseline_pipeline_preserves_order",
+          "pre_commit_baseline_authority_remains_zero",
+          "pre_commit_baseline_classification_is_bounded",
+          "pre_commit_baseline_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "pre-commit-baseline-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_precommit_child.go",
+        "contains": [
+          "338db1065406d91b511c7fd8838f7b18964aabadbea8e2b4039cc9aa8e89c104",
+          "umask 077",
+          "PreCommitBaselineCommandExact",
+          "out/pre-commit-baseline-evidence.json",
           "actions/upload-artifact@v7"
         ]
       },
@@ -401,6 +434,20 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "verify-pre-commit-baseline",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/precommitbaseline -count=1 && go run ./tools/precommitbaseline -check-doc -evidence-out out/pre-commit-baseline-evidence.json"
+    },
+    {
+      "id": "collect-pre-commit-baseline-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/pre-commit-baseline-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -423,6 +470,10 @@
     "module-decomposition workflow digest remains exact and unedited",
     "dependency, module-decomposition and executable-knowledge behavior maps with zero adapters",
     "module and executable-knowledge evidence is redacted, content-addressed and mode 0600",
-    "module-decomposition workflow retirement and runtime authority remain zero"
+    "module-decomposition workflow retirement and runtime authority remain zero",
+    "pre-commit-baseline workflow digest remains exact and unedited",
+    "all four pre-commit-baseline source behaviors map with zero adapters",
+    "pre-commit baseline evidence is redacted, content-addressed and mode 0600",
+    "pre-commit-baseline workflow retirement and runtime authority remain zero"
   ]
 }
