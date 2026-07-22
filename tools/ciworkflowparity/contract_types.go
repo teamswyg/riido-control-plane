@@ -21,17 +21,17 @@ type manifest struct {
 }
 
 type boundedChild struct {
-	ID             string              `json:"id"`
-	Issue          string              `json:"issue"`
-	ParentIssue    string              `json:"parent_issue"`
-	Baseline       baseline            `json:"baseline"`
-	NativeMapping  readmeNativeMapping `json:"native_mapping"`
-	ParityClaim    readmeParityClaim   `json:"parity_claim"`
-	Authority      authority           `json:"authority"`
-	Rollback       rollback            `json:"rollback"`
-	Classification classification      `json:"classification"`
-	Assertions     []string            `json:"assertions"`
-	Loop           evidenceLoop        `json:"loop"`
+	ID             string             `json:"id"`
+	Issue          string             `json:"issue"`
+	ParentIssue    string             `json:"parent_issue"`
+	Baseline       baseline           `json:"baseline"`
+	NativeMapping  childNativeMapping `json:"native_mapping"`
+	ParityClaim    childParityClaim   `json:"parity_claim"`
+	Authority      authority          `json:"authority"`
+	Rollback       rollback           `json:"rollback"`
+	Classification classification     `json:"classification"`
+	Assertions     []string           `json:"assertions"`
+	Loop           evidenceLoop       `json:"loop"`
 }
 
 type baseline struct {

@@ -28,6 +28,7 @@ func verify(repoRoot, contractPath string) (evidence, error) {
 	record("repository_readme_pipeline_preserves_order", verifyReadmePipeline(repoRoot, document, child))
 	record("repository_readme_authority_remains_zero", verifyAuthorityForChild(child))
 	record("repository_readme_classification_is_bounded", verifyReadmeClassification(child))
+	recordContextMapCases(repoRoot, document, record)
 	result := newEvidence(document, cases)
 	if result.Decision != "passed" {
 		return result, errors.New("control plane baseline CI parity evidence failed closed")
@@ -36,7 +37,6 @@ func verify(repoRoot, contractPath string) (evidence, error) {
 }
 
 func newEvidence(document manifest, cases map[string]string) evidence {
-	child := document.BoundedChildren[0]
 	result := evidence{
 		SchemaVersion: evidenceSchema, Decision: "passed", Cases: cases,
 		BaselineWorkflowSHA256: document.Baseline.WorkflowSHA256,
@@ -45,13 +45,16 @@ func newEvidence(document manifest, cases map[string]string) evidence {
 		LegacyWorkflowPreserved: document.Rollback.BaselineWorkflowPreserved && !document.ParityClaim.SourceWorkflowEdited,
 		RetirementAuthorized:    document.Authority.WorkflowRetirementAuthorized,
 		RuntimeEffect:           document.Authority.RuntimeEffect,
-		BoundedChildren: []childEvidence{{
+		BoundedChildren:         []childEvidence{},
+	}
+	for _, child := range document.BoundedChildren {
+		result.BoundedChildren = append(result.BoundedChildren, childEvidence{
 			ID: child.ID, Issue: child.Issue, WorkflowSHA256: child.Baseline.WorkflowSHA256,
 			RequiredAdapterCount:    child.ParityClaim.RequiredAdapterCount,
 			LegacyWorkflowPreserved: child.Rollback.BaselineWorkflowPreserved && !child.ParityClaim.SourceWorkflowEdited,
 			RetirementAuthorized:    child.Authority.WorkflowRetirementAuthorized,
 			RuntimeEffect:           child.Authority.RuntimeEffect,
-		}},
+		})
 	}
 	for _, value := range cases {
 		if value != "passed" {

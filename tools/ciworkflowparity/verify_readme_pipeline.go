@@ -12,7 +12,7 @@ func verifyReadmeArtifact(child boundedChild) bool {
 
 func verifyReadmePipeline(repoRoot string, document manifest, child boundedChild) bool {
 	var value pipeline
-	if err := readJSON(repoRoot, document.Runner.Pipeline, &value); err != nil || len(value.Steps) != 8 {
+	if err := readJSON(repoRoot, document.Runner.Pipeline, &value); err != nil || len(value.Steps) != 10 {
 		return false
 	}
 	steps := value.Steps

@@ -31,19 +31,23 @@ type commandMapping struct {
 	AdapterRequired bool   `json:"adapter_required"`
 }
 
-type readmeNativeMapping struct {
+type childNativeMapping struct {
 	Checkout            checkoutMapping `json:"checkout"`
 	GoToolchain         goMapping       `json:"go_toolchain"`
-	RepositoryReadme    commandMapping  `json:"repository_readme"`
-	ExecutableKnowledge commandMapping  `json:"executable_knowledge"`
+	RepositoryReadme    commandMapping  `json:"repository_readme,omitempty"`
+	ExecutableKnowledge commandMapping  `json:"executable_knowledge,omitempty"`
+	DependencyAllowlist commandMapping  `json:"dependency_allowlist,omitempty"`
+	ContextMap          commandMapping  `json:"context_map,omitempty"`
 	EvidenceArtifact    artifactMapping `json:"evidence_artifact"`
 }
 
-type readmeParityClaim struct {
+type childParityClaim struct {
 	AllSourceStepsMapped              bool `json:"all_source_steps_mapped"`
 	RequiredAdapterCount              int  `json:"required_adapter_count"`
-	RepositoryReadmeCommandExact      bool `json:"repository_readme_command_exact"`
-	ExecutableKnowledgeCommandExact   bool `json:"executable_knowledge_command_exact"`
+	RepositoryReadmeCommandExact      bool `json:"repository_readme_command_exact,omitempty"`
+	ExecutableKnowledgeCommandExact   bool `json:"executable_knowledge_command_exact,omitempty"`
+	DependencyAllowlistBehaviorExact  bool `json:"dependency_allowlist_behavior_exact,omitempty"`
+	ContextMapCommandExact            bool `json:"context_map_command_exact,omitempty"`
 	SecureEvidencePermissions         bool `json:"secure_evidence_permissions"`
 	SourceWorkflowEdited              bool `json:"source_workflow_edited"`
 	SourceWorkflowExecutedByThisSlice bool `json:"source_workflow_executed_by_this_slice"`
