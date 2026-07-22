@@ -32,7 +32,7 @@ func validPipelineIdentity(value pipeline, document manifest) bool {
 		value.Status == "active" && value.Repo == "riido-control-plane" && value.Visibility == "private" &&
 		value.Execution.DefaultEngine == "wasm" && value.Execution.NativePolicy == "explicit" &&
 		value.Execution.Attestation == "required" && value.Evidence.Artifact != "" &&
-		len(value.Steps) == 10 && len(value.Evidence.Cases) == 6 &&
-		len(value.Evidence.SourceChecks) == 10 && len(value.SuccessGate) == 12 &&
+		len(value.Steps) == 16 && len(value.Evidence.Cases) == 9 &&
+		len(value.Evidence.SourceChecks) == 12 && len(value.SuccessGate) == 16 &&
 		completeLoop(value.Evidence.Loop)
 }

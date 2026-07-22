@@ -56,7 +56,7 @@ func verifyContextMapArtifact(child boundedChild) bool {
 
 func verifyContextMapPipeline(repoRoot string, document manifest, child boundedChild) bool {
 	var value pipeline
-	if err := readJSON(repoRoot, document.Runner.Pipeline, &value); err != nil || len(value.Steps) != 10 {
+	if err := readJSON(repoRoot, document.Runner.Pipeline, &value); err != nil || len(value.Steps) != 16 {
 		return false
 	}
 	steps := value.Steps

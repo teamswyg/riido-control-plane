@@ -17,7 +17,7 @@ func loadManifest(repoRoot, path string) (manifest, error) {
 		document.CheckedOn != "2026-07-22" || len(document.Assertions) < 5 ||
 		!completeLoop(document.Loop) ||
 		len(document.Pipelines) != 1 || document.Pipelines[0] != document.Runner.Pipeline ||
-		len(document.BoundedChildren) != 2 {
+		len(document.BoundedChildren) != 3 {
 		return manifest{}, errors.New("baseline CI parity contract identity drifted")
 	}
 	child := document.BoundedChildren[0]
@@ -30,6 +30,12 @@ func loadManifest(repoRoot, path string) (manifest, error) {
 		contextChild.ParentIssue != parentIssueURL || len(contextChild.Assertions) < 5 ||
 		!completeLoop(contextChild.Loop) {
 		return manifest{}, errors.New("context map parity child identity drifted")
+	}
+	goCIChild := document.BoundedChildren[2]
+	if goCIChild.ID != "control-plane-go-ci-quality-parity" || goCIChild.Issue != goCIIssueURL ||
+		goCIChild.ParentIssue != parentIssueURL || len(goCIChild.Assertions) < 5 ||
+		!completeLoop(goCIChild.Loop) {
+		return manifest{}, errors.New("go CI quality parity child identity drifted")
 	}
 	return document, nil
 }

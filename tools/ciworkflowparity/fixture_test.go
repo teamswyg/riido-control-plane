@@ -35,7 +35,7 @@ func copyFixtureRepo(t *testing.T) string {
 	repo := t.TempDir()
 	paths := []string{
 		repositoryContract, ".github/workflows/ci.yml", ".github/workflows/repository-readme.yml",
-		".github/workflows/context-map.yml",
+		".github/workflows/context-map.yml", ".github/workflows/go-ci.yml",
 		"pipelines/control-plane.local-self-check.riido.json", "tools/riido-ci-local", "go.mod",
 	}
 	for _, path := range paths {

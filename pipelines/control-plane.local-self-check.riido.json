@@ -31,6 +31,7 @@
       "tools/repositoryreadme",
       "tools/knowledgecoverage",
       "tools/contextmap",
+      "tools/gocibaseline",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -75,6 +76,25 @@
         "want_paths": ["out/control-plane-context-map-evidence.json"],
         "want_sha256_present": true,
         "want_json_schema_version": "riido-control-plane-context-map-evidence.v1"
+      },
+      {
+        "name": "go-ci-baseline-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/go-ci-baseline-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-go-ci-baseline-evidence.v1"
+      },
+      {
+        "name": "go-ci-coverage-profile",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/go-test-cover.out"],
+        "want_sha256_present": true
+      },
+      {
+        "name": "go-ci-coverage-summary",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/go-test-coverage-summary.txt"],
+        "want_sha256_present": true
       }
     ],
     "source_checks": [
@@ -86,8 +106,10 @@
           "74430b5f9001bdd6d384c4bae985d7914f825f998b47ffe22826f480e4789f1c",
           "ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c",
           "3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392",
+          "82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4",
           "https://github.com/teamswyg/riido-control-plane/issues/1039",
           "https://github.com/teamswyg/riido-control-plane/issues/1041",
+          "https://github.com/teamswyg/riido-control-plane/issues/1043",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -150,6 +172,28 @@
           "3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392",
           "umask 077",
           "ContextMapCommandExact",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "go-ci-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_go_ci_cases.go",
+        "contains": [
+          "go_ci_workflow_digest_is_exact",
+          "go_ci_eight_source_behaviors_are_native",
+          "go_ci_pipeline_preserves_order",
+          "go_ci_coverage_outputs_are_exact",
+          "go_ci_quality_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "go-ci-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_go_ci_child.go",
+        "contains": [
+          "82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4",
+          "golangci-lint@v2.12.2",
+          "go-test-coverage-summary.txt",
+          "CoverageSummaryBehaviorExact",
           "actions/upload-artifact@v7"
         ]
       },
@@ -262,6 +306,42 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "download-go-ci-modules",
+      "kind": "shell",
+      "command": "go mod download"
+    },
+    {
+      "id": "verify-go-ci-baseline",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/gocibaseline -count=1 && go run ./tools/gocibaseline -check-doc -evidence-out out/go-ci-baseline-evidence.json"
+    },
+    {
+      "id": "install-go-ci-lint",
+      "kind": "shell",
+      "command": "mkdir -p bin && GOBIN=\"$PWD/bin\" go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2"
+    },
+    {
+      "id": "lint-go-ci",
+      "kind": "shell",
+      "command": "bin/golangci-lint run ./... --timeout=5m"
+    },
+    {
+      "id": "test-go-ci-with-coverage",
+      "kind": "shell",
+      "command": "mkdir -p out && go test ./... -coverprofile=out/go-test-cover.out -covermode=count && go tool cover -func=out/go-test-cover.out | tee out/go-test-coverage-summary.txt && chmod 0600 out/go-test-cover.out out/go-test-coverage-summary.txt"
+    },
+    {
+      "id": "collect-go-ci-quality-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/go-ci-baseline-evidence.json",
+        "out/go-test-cover.out",
+        "out/go-test-coverage-summary.txt"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -276,6 +356,10 @@
     "repository evidence is redacted, content-addressed and mode 0600",
     "context-map workflow digest remains exact and unedited",
     "dependency policy and the Context Map command map with zero adapters",
-    "Context Map evidence is redacted, content-addressed and mode 0600"
+    "Context Map evidence is redacted, content-addressed and mode 0600",
+    "Go CI workflow digest remains exact and unedited",
+    "all eight Go CI source behaviors map with zero adapters",
+    "exact lint and coverage-summary behavior passes",
+    "Go CI baseline and coverage evidence is redacted, content-addressed and mode 0600"
   ]
 }
