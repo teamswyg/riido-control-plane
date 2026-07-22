@@ -9,9 +9,11 @@ func verifyRunner(repoRoot string, document manifest) bool {
 		return false
 	}
 	raw, err := readRootFile(repoRoot, "tools/riido-ci-local")
-	want := []string{runner.Revision, "riido-ci checkout must be clean", "-u AWS_ACCESS_KEY_ID",
+	want := []string{
+		runner.Revision, "riido-ci checkout must be clean", "-u AWS_ACCESS_KEY_ID",
 		"-u AWS_SECRET_ACCESS_KEY", "-u GITHUB_TOKEN", "-u GH_TOKEN",
-		"riido-ci evidence must be mode 0600"}
+		"riido-ci evidence must be mode 0600",
+	}
 	return err == nil && containsAll(string(raw), want)
 }
 

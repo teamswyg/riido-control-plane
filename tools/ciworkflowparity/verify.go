@@ -30,7 +30,7 @@ func verify(repoRoot, contractPath string) (evidence, error) {
 	record("repository_readme_classification_is_bounded", verifyReadmeClassification(child))
 	result := newEvidence(document, cases)
 	if result.Decision != "passed" {
-		return result, errors.New("Control Plane baseline CI parity evidence failed closed")
+		return result, errors.New("control plane baseline CI parity evidence failed closed")
 	}
 	return result, nil
 }
