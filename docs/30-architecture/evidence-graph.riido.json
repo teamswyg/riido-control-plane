@@ -20915,6 +20915,35 @@
       ],
       "decision": "Admit context-map as the third of 56 source workflows with all five source steps mapped natively, zero required adapters, exact source SHA-256 3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392, redacted content-addressed evidence, and a mode-0600 Context Map receipt. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 53 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "go_ci_quality_native_ci_parity_loop",
+      "observation": "Control Plane issue #1034 had three native riido-ci parity slices, but 53 of 56 GitHub Actions workflows remained unmapped. The Go CI quality workflow was idle and credential-free, yet its exact source digest, module download, Go CI baseline SSOT, pinned lint, coverage summary, three strict artifact paths, and zero-authority migration boundary were not represented in the native parity receipt.",
+      "hypothesis": "Extending the pinned local parity contract with one bounded Go CI quality child can prove all eight source behaviors and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding retirement, runtime, credential, scheduling, deployment, and fixed-cost authority.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract"
+      ],
+      "changes": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"tool","path":"tools/syntaxhash"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
+        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
+        {"kind":"artifact","path":"go-ci-baseline-evidence","redacted":true},
+        {"kind":"artifact","path":"go-test-cover.out","redacted":true},
+        {"kind":"artifact","path":"go-test-coverage-summary.txt","redacted":true}
+      ],
+      "decision": "Admit Go CI quality as the fourth of 56 source workflows with all eight source behaviors mapped natively, zero required adapters, exact source SHA-256 82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4, exact golangci-lint v2.12.2 and coverage-summary behavior, redacted content-addressed evidence, and mode-0600 baseline and coverage receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 52 workflows remain for separate bounded review.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

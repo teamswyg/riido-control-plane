@@ -221,6 +221,132 @@
         "evaluate": "Require zero adapters, exact Context Map behavior, mode-0600 output, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
         "retrospective": "Keep the source workflow byte-exact and count this as one bounded parity child only; retirement still requires a separate owner-reviewed blocked-to-passed policy pair."
       }
+    },
+    {
+      "id": "control-plane-go-ci-quality-parity",
+      "issue": "https://github.com/teamswyg/riido-control-plane/issues/1043",
+      "parent_issue": "https://github.com/teamswyg/riido-control-plane/issues/1034",
+      "baseline": {
+        "source_revision": "cc55c5326490b3d2dfbc19da1cfeb019e0c9b3d2",
+        "workflow": ".github/workflows/go-ci.yml",
+        "workflow_sha256": "82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4",
+        "workflow_name": "Go CI",
+        "job": "lint-test",
+        "tracked_workflow_count": 56
+      },
+      "native_mapping": {
+        "checkout": {
+          "source": "actions/checkout@v7",
+          "native_kind": "checkout",
+          "adapter_required": false
+        },
+        "go_toolchain": {
+          "source": "actions/setup-go@v6",
+          "native_kind": "worker_toolchain",
+          "version_source": "go.mod",
+          "version": "1.26.5",
+          "cache": true,
+          "adapter_required": false
+        },
+        "module_download": {
+          "source_command": "go mod download",
+          "native_command": "go mod download",
+          "native_kind": "shell",
+          "adapter_required": false
+        },
+        "go_ci_baseline": {
+          "source_command": "mkdir -p out && go test ./tools/gocibaseline -count=1 && go run ./tools/gocibaseline -check-doc -evidence-out out/go-ci-baseline-evidence.json",
+          "native_command": "umask 077 && mkdir -p out && go test ./tools/gocibaseline -count=1 && go run ./tools/gocibaseline -check-doc -evidence-out out/go-ci-baseline-evidence.json",
+          "native_kind": "shell",
+          "evidence_path": "out/go-ci-baseline-evidence.json",
+          "adapter_required": false
+        },
+        "lint_install": {
+          "source_command": "go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2",
+          "native_command": "mkdir -p bin && GOBIN=\"$PWD/bin\" go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2",
+          "native_kind": "shell",
+          "adapter_required": false
+        },
+        "lint": {
+          "source_command": "golangci-lint run ./... --timeout=5m",
+          "native_command": "bin/golangci-lint run ./... --timeout=5m",
+          "native_kind": "shell",
+          "adapter_required": false
+        },
+        "coverage": {
+          "source_command": "mkdir -p out && go test ./... -coverprofile=out/go-test-cover.out -covermode=count && go tool cover -func=out/go-test-cover.out | tee out/go-test-coverage-summary.txt",
+          "native_command": "mkdir -p out && go test ./... -coverprofile=out/go-test-cover.out -covermode=count && go tool cover -func=out/go-test-cover.out | tee out/go-test-coverage-summary.txt && chmod 0600 out/go-test-cover.out out/go-test-coverage-summary.txt",
+          "native_kind": "shell",
+          "evidence_path": "out/go-test-cover.out",
+          "adapter_required": false
+        },
+        "evidence_artifact": {
+          "source": "actions/upload-artifact@v7",
+          "native_kind": "artifact",
+          "paths": [
+            "out/go-ci-baseline-evidence.json",
+            "out/go-test-cover.out",
+            "out/go-test-coverage-summary.txt"
+          ],
+          "redaction": "required",
+          "run_when": "always",
+          "if_no_files_found": "error",
+          "content_addressed": true,
+          "adapter_required": false
+        }
+      },
+      "parity_claim": {
+        "all_source_steps_mapped": true,
+        "required_adapter_count": 0,
+        "module_download_command_exact": true,
+        "go_ci_baseline_command_exact": true,
+        "lint_install_command_exact": true,
+        "lint_command_exact": true,
+        "coverage_command_exact": true,
+        "coverage_summary_behavior_exact": true,
+        "secure_evidence_permissions": true,
+        "source_workflow_edited": false,
+        "source_workflow_executed_by_this_slice": false
+      },
+      "authority": {
+        "workflow_retirement_authorized": false,
+        "workflow_file_effect": "none",
+        "auth_jwt_pep_effect": "none",
+        "aws_terraform_deployment_effect": "none",
+        "runtime_effect": "none",
+        "fixed_cost_resource_effect": "none",
+        "requires_separate_owner_reviewed_retirement": true
+      },
+      "rollback": {
+        "baseline_workflow_preserved": true,
+        "method": "retain_exact_baseline_until_separate_retirement_parity_review",
+        "blocked_to_passed_private_policy_pair_required": true
+      },
+      "classification": {
+        "code": "go_ci_quality_native_parity_source_complete",
+        "meaning": "The Control Plane Go CI quality checks can run through pinned riido-ci with native redacted artifact evidence while the legacy workflow and runtime authority remain unchanged.",
+        "does_not_claim": [
+          "all fifty-six workflows are migrated",
+          "the private repository CI policy currently passes",
+          "the Go CI workflow is retired",
+          "controller scheduling is admitted",
+          "deployment or runtime semantics changed"
+        ]
+      },
+      "assertions": [
+        "the Go CI GitHub Actions workflow digest remains exact",
+        "all eight Go CI source behaviors map to native riido-ci behavior with zero adapters",
+        "the exact golangci-lint version, lint command and coverage summary behavior remain exact",
+        "baseline and coverage evidence is redacted, content-addressed and mode 0600",
+        "workflow retirement and runtime authority remain zero"
+      ],
+      "loop": {
+        "observation": "Three of fifty-six workflows had native parity, but the credential-free Go CI quality workflow still depended on GitHub Actions for baseline, lint and coverage evidence.",
+        "hypothesis": "The pinned credential-free runner can preserve module download, baseline SSOT, exact lint and coverage-summary behavior plus always-collected evidence without editing or retiring the source workflow.",
+        "execute": "Pin the Go CI workflow digest, verify all eight source behaviors, run the exact quality commands under a restrictive evidence umask and collect the three source artifacts as one redacted boundary.",
+        "evaluate": "Require zero adapters, exact baseline/lint/coverage behavior, mode-0600 outputs, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
+        "retrospective": "Keep the source workflow byte-exact and count this as the fourth bounded parity mapping only; fifty-two workflows and any retirement remain separately owner-reviewed."
+      }
     }
   ],
   "runner": {

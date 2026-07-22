@@ -8,4 +8,5 @@ const (
 	parentIssueURL  = "https://github.com/teamswyg/riido-control-plane/issues/1034"
 	readmeIssueURL  = "https://github.com/teamswyg/riido-control-plane/issues/1039"
 	contextIssueURL = "https://github.com/teamswyg/riido-control-plane/issues/1041"
+	goCIIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1043"
 )
