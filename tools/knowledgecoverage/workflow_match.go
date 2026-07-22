@@ -25,6 +25,14 @@ func workflowHasEvidenceTool(workflows []workflowDoc, tool string) bool {
 }
 
 func workflowRunsEvidenceTool(root, workflowPath, tool string) bool {
+	if pipeline, ok := readRiidoPipeline(root, workflowPath); ok {
+		for _, command := range riidoPipelineCommands(pipeline) {
+			if workflowCommandRunsEvidenceTool(command, tool) {
+				return true
+			}
+		}
+		return false
+	}
 	data, err := readWorkflow(root, workflowPath)
 	if err != nil {
 		return false

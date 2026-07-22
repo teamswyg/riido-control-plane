@@ -1,0 +1,172 @@
+{
+  "schema_version": "riido-ci-pipeline.v1",
+  "id": "control-plane-local-self-check",
+  "status": "active",
+  "repo": "riido-control-plane",
+  "visibility": "private",
+  "execution": {
+    "default_engine": "wasm",
+    "native_policy": "explicit",
+    "attestation": "required"
+  },
+  "worker": {
+    "labels": ["local", "go", "riido-ci"],
+    "timeout_minutes": 10
+  },
+  "env": {
+    "RIIDO_CI_MODE": "local",
+    "RIIDO_EVIDENCE_REDACTION": "required",
+    "GOPRIVATE": "github.com/teamswyg/*",
+    "GONOSUMDB": "github.com/teamswyg/*"
+  },
+  "evidence_contract": {
+    "artifact": "control-plane-local-self-check-evidence",
+    "source_check_boundary": "local_repo",
+    "owner_packages": [
+      "dependency_allowlist.riido.json",
+      "go.mod",
+      "go.sum",
+      "tools/dependencyallowlist",
+      "tools/ciworkflowparity",
+      "tools/riido-ci-local",
+      "config/ci",
+      "pipelines"
+    ],
+    "cases": [
+      {
+        "name": "local-run-envelope",
+        "kind": "result-evidence-envelope",
+        "want_schema_version": "riido-ci-local-run-evidence.v1",
+        "want_decision": "passed",
+        "want_artifact_sha256_present": true
+      },
+      {
+        "name": "baseline-ci-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/baseline-ci-parity-evidence.json"],
+        "want_sha256_present": true
+      },
+      {
+        "name": "dependency-allowlist-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/dependency-allowlist-evidence.json"],
+        "want_sha256_present": true
+      }
+    ],
+    "source_checks": [
+      {
+        "name": "baseline-go-ci-parity-contract",
+        "file": "config/ci/baseline-go-workflow-parity.riido.json",
+        "contains": [
+          "riido-control-plane-baseline-ci-parity.v1",
+          "74430b5f9001bdd6d384c4bae985d7914f825f998b47ffe22826f480e4789f1c",
+          "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
+          "required_adapter_count",
+          "workflow_retirement_authorized",
+          "source_workflow_edited"
+        ]
+      },
+      {
+        "name": "baseline-go-ci-parity-verifier-identity",
+        "file": "tools/ciworkflowparity/constants.go",
+        "contains": [
+          "riido-control-plane-baseline-ci-parity-evidence.v1",
+          "riido-control-plane-baseline-ci-parity.v1"
+        ]
+      },
+      {
+        "name": "baseline-go-ci-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify.go",
+        "contains": [
+          "legacy_workflow_digest_is_exact",
+          "native_pipeline_preserves_step_order",
+          "runner_is_pinned_and_credential_free",
+          "retirement_and_runtime_authority_remain_zero"
+        ]
+      },
+      {
+        "name": "baseline-go-ci-parity-secure-evidence",
+        "file": "tools/ciworkflowparity/write_evidence.go",
+        "contains": [
+          "0o600"
+        ]
+      },
+      {
+        "name": "dependency-allowlist-contract",
+        "file": "dependency_allowlist.riido.json",
+        "contains": [
+          "riido-go-dependency-allowlist.v2",
+          "control-plane-go-dependency-allowlist",
+          "approved direct Go module dependencies",
+          "machine-verifiable"
+        ]
+      },
+      {
+        "name": "exact-central-runner",
+        "file": "tools/riido-ci-local",
+        "contains": [
+          "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
+          "riido-ci checkout must be clean",
+          "riido-ci evidence must be mode 0600",
+          "-u AWS_ACCESS_KEY_ID",
+          "-u GH_TOKEN"
+        ]
+      }
+    ],
+    "forbidden_terms": [
+      "BEGIN PRIVATE KEY",
+      "gho_",
+      "AKIA"
+    ],
+    "forbidden_term_files": [
+      "config/ci/baseline-go-workflow-parity.riido.json"
+    ],
+    "loop": {
+      "observation": "The baseline Go workflow is fully native in the current migration draft, but no exact local parity receipt is owned by Control Plane.",
+      "hypothesis": "A pinned credential-free local pipeline can preserve dependency policy, failure artifact semantics and the exact full-test command before any owner-reviewed workflow retirement.",
+      "execute": "Verify the unchanged legacy workflow digest and exact mapping, run dependency allowlist evidence, preserve it through the native always artifact step, then run the full Go test suite.",
+      "evaluate": "Require exact source and runner pins, zero adapters, mode-0600 parity and local-run evidence, content-addressed artifacts and no workflow or runtime authority.",
+      "retrospective": "Keep the legacy workflow and blocked private-policy evidence until a separate owner-reviewed retirement change proves the replacement and rollback."
+    }
+  },
+  "steps": [
+    {
+      "id": "checkout",
+      "kind": "checkout",
+      "fetch_depth": 0
+    },
+    {
+      "id": "verify-baseline-ci-parity",
+      "kind": "shell",
+      "command": "go run ./tools/ciworkflowparity -repo-root . -contract config/ci/baseline-go-workflow-parity.riido.json -evidence-out out/baseline-ci-parity-evidence.json"
+    },
+    {
+      "id": "verify-go-dependency-allowlist",
+      "kind": "shell",
+      "command": "mkdir -p out && go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json -evidence-out out/dependency-allowlist-evidence.json"
+    },
+    {
+      "id": "collect-baseline-policy-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/baseline-ci-parity-evidence.json",
+        "out/dependency-allowlist-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "test-control-plane",
+      "kind": "shell",
+      "command": "go test ./..."
+    }
+  ],
+  "success_gate": [
+    "legacy baseline workflow digest remains exact and unedited",
+    "all five baseline job steps map to native riido-ci behavior with zero adapters",
+    "dependency allowlist evidence is redacted and content-addressed",
+    "full Go tests pass",
+    "legacy workflow retirement and runtime authority remain zero",
+    "riido-ci emits a passed mode-0600 local-run evidence envelope"
+  ]
+}

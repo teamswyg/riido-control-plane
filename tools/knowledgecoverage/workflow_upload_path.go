@@ -22,6 +22,14 @@ func workflowUploadsEvidenceOutStrict(root, workflowPath, tool, artifact string)
 	if len(paths) == 0 {
 		return false
 	}
+	if pipeline, ok := readRiidoPipeline(root, workflowPath); ok {
+		for _, path := range paths {
+			if riidoPipelineUploadsStrict(pipeline, artifact, path) {
+				return true
+			}
+		}
+		return false
+	}
 	data, err := readWorkflow(root, workflowPath)
 	if err != nil {
 		return false

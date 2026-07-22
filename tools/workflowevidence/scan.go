@@ -24,6 +24,10 @@ func auditWorkflows(root string, m manifest) (auditResult, error) {
 		result.Records = append(result.Records, record)
 		addRecord(&result, record)
 	}
+	sources, err = appendRiidoPipelineSources(root, sources, m.PipelineFiles)
+	if err != nil {
+		return auditResult{}, err
+	}
 	result.EvidenceTools, result.EvidenceToolCovered, result.EvidenceToolBound,
 		result.MissingEvidenceTools, result.MissingEvidenceToolBindings = auditEvidenceTools(root, sources)
 	for path := range accepted {
@@ -61,12 +65,4 @@ func scanWorkflow(root, path string, accepted map[string]acceptedGap, used map[s
 		DeprecatedActionCount: len(deprecatedActions),
 	}
 	return classify(record, accepted, used), text, nil
-}
-
-func acceptedByPath(gaps []acceptedGap) map[string]acceptedGap {
-	out := make(map[string]acceptedGap, len(gaps))
-	for _, gap := range gaps {
-		out[slashPath(gap.Path)] = gap
-	}
-	return out
 }

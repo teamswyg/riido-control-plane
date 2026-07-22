@@ -11,5 +11,8 @@ func manifestLoopSources(m manifest) map[string]string {
 	for _, imported := range m.ImportedManifests {
 		sources[imported.Path] = imported.OwnerManifest
 	}
+	for _, pipeline := range m.RiidoPipelines {
+		sources[pipeline.Path] = pipeline.OwnerManifest
+	}
 	return sources
 }

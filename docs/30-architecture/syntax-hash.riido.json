@@ -442,6 +442,13 @@
       "mode": "golden_locked_executable_knowledge_coverage_tool"
     },
     {
+      "id": "baseline_ci_parity_guard",
+      "package_path": "tools/ciworkflowparity",
+      "golden_command": "go test ./tools/ciworkflowparity -run TestVerifyProvesNativeBaselineParityWithoutRetirement -count=1",
+      "semantic_claim_id": "operational_readiness_checks_must_bind_release_items_to_evidence",
+      "mode": "golden_locked_native_ci_parity_policy_tool"
+    },
+    {
       "id": "dependency_allowlist_guard",
       "package_path": "tools/dependencyallowlist",
       "golden_command": "go test ./tools/dependencyallowlist -run TestDependencyAllowlistBehaviorGolden -count=1",
