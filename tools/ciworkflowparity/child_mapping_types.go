@@ -7,6 +7,7 @@ type childNativeMapping struct {
 	ExecutableKnowledge commandMapping  `json:"executable_knowledge,omitempty"`
 	DependencyAllowlist commandMapping  `json:"dependency_allowlist,omitempty"`
 	ContextMap          commandMapping  `json:"context_map,omitempty"`
+	ModuleDecomposition commandMapping  `json:"module_decomposition,omitempty"`
 	ModuleDownload      commandMapping  `json:"module_download,omitempty"`
 	GoCIBaseline        commandMapping  `json:"go_ci_baseline,omitempty"`
 	LintInstall         commandMapping  `json:"lint_install,omitempty"`
@@ -22,6 +23,7 @@ type childParityClaim struct {
 	ExecutableKnowledgeCommandExact   bool `json:"executable_knowledge_command_exact,omitempty"`
 	DependencyAllowlistBehaviorExact  bool `json:"dependency_allowlist_behavior_exact,omitempty"`
 	ContextMapCommandExact            bool `json:"context_map_command_exact,omitempty"`
+	ModuleDecompositionCommandExact   bool `json:"module_decomposition_command_exact,omitempty"`
 	ModuleDownloadCommandExact        bool `json:"module_download_command_exact,omitempty"`
 	GoCIBaselineCommandExact          bool `json:"go_ci_baseline_command_exact,omitempty"`
 	LintInstallCommandExact           bool `json:"lint_install_command_exact,omitempty"`

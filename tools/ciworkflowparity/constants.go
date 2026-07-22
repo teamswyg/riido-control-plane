@@ -9,4 +9,9 @@ const (
 	readmeIssueURL  = "https://github.com/teamswyg/riido-control-plane/issues/1039"
 	contextIssueURL = "https://github.com/teamswyg/riido-control-plane/issues/1041"
 	goCIIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1043"
+	moduleIssueURL  = "https://github.com/teamswyg/riido-control-plane/issues/1045"
+	pipelineSteps   = 19
+	pipelineCases   = 11
+	pipelineChecks  = 14
+	pipelineGates   = 20
 )

@@ -32,6 +32,7 @@
       "tools/knowledgecoverage",
       "tools/contextmap",
       "tools/gocibaseline",
+      "tools/moduledecomposition",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -95,6 +96,20 @@
         "kind": "artifact-integrity",
         "want_paths": ["out/go-test-coverage-summary.txt"],
         "want_sha256_present": true
+      },
+      {
+        "name": "module-decomposition-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/module-decomposition-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-module-decomposition-evidence.v1"
+      },
+      {
+        "name": "module-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
       }
     ],
     "source_checks": [
@@ -107,9 +122,11 @@
           "ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c",
           "3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392",
           "82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4",
+          "16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480",
           "https://github.com/teamswyg/riido-control-plane/issues/1039",
           "https://github.com/teamswyg/riido-control-plane/issues/1041",
           "https://github.com/teamswyg/riido-control-plane/issues/1043",
+          "https://github.com/teamswyg/riido-control-plane/issues/1045",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -194,6 +211,28 @@
           "golangci-lint@v2.12.2",
           "go-test-coverage-summary.txt",
           "CoverageSummaryBehaviorExact",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "module-decomposition-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_module_decomposition_cases.go",
+        "contains": [
+          "module_decomposition_workflow_digest_is_exact",
+          "module_decomposition_six_source_behaviors_are_native",
+          "module_decomposition_pipeline_preserves_order",
+          "module_decomposition_authority_remains_zero",
+          "module_decomposition_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "module-decomposition-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_module_decomposition_child.go",
+        "contains": [
+          "16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480",
+          "umask 077",
+          "ModuleDecompositionCommandExact",
+          "out/module-decomposition-evidence.json",
           "actions/upload-artifact@v7"
         ]
       },
@@ -342,6 +381,26 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "verify-module-decomposition",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/moduledecomposition -count=1 && go run ./tools/moduledecomposition -check-doc -evidence-out out/module-decomposition-evidence.json"
+    },
+    {
+      "id": "verify-module-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-module-decomposition-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/module-decomposition-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -360,6 +419,10 @@
     "Go CI workflow digest remains exact and unedited",
     "all eight Go CI source behaviors map with zero adapters",
     "exact lint and coverage-summary behavior passes",
-    "Go CI baseline and coverage evidence is redacted, content-addressed and mode 0600"
+    "Go CI baseline and coverage evidence is redacted, content-addressed and mode 0600",
+    "module-decomposition workflow digest remains exact and unedited",
+    "dependency, module-decomposition and executable-knowledge behavior maps with zero adapters",
+    "module and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "module-decomposition workflow retirement and runtime authority remain zero"
   ]
 }

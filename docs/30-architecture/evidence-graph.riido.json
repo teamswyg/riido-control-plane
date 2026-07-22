@@ -20944,6 +20944,35 @@
       ],
       "decision": "Admit Go CI quality as the fourth of 56 source workflows with all eight source behaviors mapped natively, zero required adapters, exact source SHA-256 82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4, exact golangci-lint v2.12.2 and coverage-summary behavior, redacted content-addressed evidence, and mode-0600 baseline and coverage receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 52 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "module_decomposition_native_ci_parity_loop",
+      "observation": "Control Plane issue #1034 had four native riido-ci parity slices, but 52 of 56 GitHub Actions workflows remained unmapped. The module-decomposition workflow was idle and credential-free, yet its exact source digest, dependency policy, module-decomposition verification, executable-knowledge verification, strict artifact behavior, and zero-authority migration boundary were not represented in the native parity receipt.",
+      "hypothesis": "Extending the pinned local parity contract with one bounded module-decomposition child can prove all six source behaviors and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding retirement, runtime, credential, scheduling, deployment, and fixed-cost authority.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract"
+      ],
+      "changes": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"tool","path":"tools/syntaxhash"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
+        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
+        {"kind":"artifact","path":"dependency-allowlist-evidence","redacted":true},
+        {"kind":"artifact","path":"module-decomposition-evidence","redacted":true},
+        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+      ],
+      "decision": "Admit module-decomposition as the fifth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact source SHA-256 16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480, redacted content-addressed evidence, and mode-0600 module-decomposition and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 51 workflows remain for separate bounded review.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
