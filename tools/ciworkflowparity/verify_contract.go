@@ -17,7 +17,7 @@ func loadManifest(repoRoot, path string) (manifest, error) {
 		document.CheckedOn != "2026-07-22" || len(document.Assertions) < 5 ||
 		!completeLoop(document.Loop) ||
 		len(document.Pipelines) != 1 || document.Pipelines[0] != document.Runner.Pipeline ||
-		len(document.BoundedChildren) != 5 {
+		len(document.BoundedChildren) != 6 {
 		return manifest{}, errors.New("baseline CI parity contract identity drifted")
 	}
 	child := document.BoundedChildren[0]
@@ -48,6 +48,12 @@ func loadManifest(repoRoot, path string) (manifest, error) {
 		preCommitChild.Issue != preCommitIssueURL || preCommitChild.ParentIssue != parentIssueURL ||
 		len(preCommitChild.Assertions) < 5 || !completeLoop(preCommitChild.Loop) {
 		return manifest{}, errors.New("pre-commit baseline parity child identity drifted")
+	}
+	migrationChild := document.BoundedChildren[5]
+	if migrationChild.ID != "control-plane-migration-ledger-ci-parity" ||
+		migrationChild.Issue != migrationIssueURL || migrationChild.ParentIssue != parentIssueURL ||
+		len(migrationChild.Assertions) < 5 || !completeLoop(migrationChild.Loop) {
+		return manifest{}, errors.New("migration ledger parity child identity drifted")
 	}
 	return document, nil
 }

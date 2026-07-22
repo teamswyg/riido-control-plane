@@ -32,6 +32,7 @@ func verify(repoRoot, contractPath string) (evidence, error) {
 	recordGoCICases(repoRoot, document, record)
 	recordModuleDecompositionCases(repoRoot, document, record)
 	recordPreCommitCases(repoRoot, document, record)
+	recordMigrationLedgerCases(repoRoot, document, record)
 	result := newEvidence(document, cases)
 	if result.Decision != "passed" {
 		return result, errors.New("control plane baseline CI parity evidence failed closed")

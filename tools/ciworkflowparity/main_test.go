@@ -15,7 +15,7 @@ func TestVerifyProvesNativeBaselineParityWithoutRetirement(t *testing.T) {
 		result.RetirementAuthorized || result.RuntimeEffect != "none" {
 		t.Fatalf("unexpected parity evidence: %+v", result)
 	}
-	if len(result.Cases) != 40 || len(result.BoundedChildren) != 5 ||
+	if len(result.Cases) != 46 || len(result.BoundedChildren) != 6 ||
 		result.BoundedChildren[0].ID != "control-plane-repository-readme-ci-parity" ||
 		result.BoundedChildren[0].RequiredAdapterCount != 0 ||
 		!result.BoundedChildren[0].LegacyWorkflowPreserved ||
@@ -40,7 +40,12 @@ func TestVerifyProvesNativeBaselineParityWithoutRetirement(t *testing.T) {
 		result.BoundedChildren[4].RequiredAdapterCount != 0 ||
 		!result.BoundedChildren[4].LegacyWorkflowPreserved ||
 		result.BoundedChildren[4].RetirementAuthorized ||
-		result.BoundedChildren[4].RuntimeEffect != "none" {
+		result.BoundedChildren[4].RuntimeEffect != "none" ||
+		result.BoundedChildren[5].ID != "control-plane-migration-ledger-ci-parity" ||
+		result.BoundedChildren[5].RequiredAdapterCount != 0 ||
+		!result.BoundedChildren[5].LegacyWorkflowPreserved ||
+		result.BoundedChildren[5].RetirementAuthorized ||
+		result.BoundedChildren[5].RuntimeEffect != "none" {
 		t.Fatalf("unexpected cases: %+v", result.Cases)
 	}
 }

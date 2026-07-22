@@ -11,8 +11,9 @@ const (
 	goCIIssueURL      = "https://github.com/teamswyg/riido-control-plane/issues/1043"
 	moduleIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1045"
 	preCommitIssueURL = "https://github.com/teamswyg/riido-control-plane/issues/1047"
-	pipelineSteps     = 21
-	pipelineCases     = 12
-	pipelineChecks    = 16
-	pipelineGates     = 24
+	migrationIssueURL = "https://github.com/teamswyg/riido-control-plane/issues/1049"
+	pipelineSteps     = 24
+	pipelineCases     = 14
+	pipelineChecks    = 18
+	pipelineGates     = 28
 )
