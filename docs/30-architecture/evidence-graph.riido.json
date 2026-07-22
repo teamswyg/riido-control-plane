@@ -20859,6 +20859,34 @@
       ],
       "decision": "Keep all current dispositions, priorities, owners, next artifacts, and executable next commands unchanged. Advance deferred and triage-required review dates to 2026-07-29 after verifying all 19 open live candidates against the refreshed manifest. Preserve the adopted syntax-hash decision date, retain the visual item under client-qa-loop without design work, and make no runtime, AWS, credential, or protected-repository mutation.",
       "next_loop": "closed_loop_candidate_decision"
+    },
+    {
+      "id": "repository_readme_native_ci_parity_loop",
+      "observation": "Control Plane issue #1034 had one native riido-ci baseline slice, but 55 of 56 GitHub Actions workflows remained unmapped. The repository-readme workflow was idle, credential-free, and self-contained, yet its exact source digest, README and executable-knowledge commands, strict artifact behavior, and zero-authority migration boundary were not represented in the native parity receipt.",
+      "hypothesis": "Extending the pinned local parity contract with one bounded repository-readme child can prove native command and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding retirement, runtime, credential, scheduling, deployment, and fixed-cost authority.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract"
+      ],
+      "changes": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"tool","path":"tools/syntaxhash"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
+        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
+        {"kind":"artifact","path":"repository-readme-evidence","redacted":true},
+        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+      ],
+      "decision": "Admit repository-readme as the second of 56 source workflows with all source steps mapped natively, zero required adapters, exact source SHA-256 ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c, redacted content-addressed evidence, and mode-0600 README and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 54 workflows remain for separate bounded review.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

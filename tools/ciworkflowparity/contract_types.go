@@ -1,22 +1,37 @@
 package main
 
 type manifest struct {
-	SchemaVersion  string         `json:"schema_version"`
-	ID             string         `json:"id"`
-	Status         string         `json:"status"`
-	Issue          string         `json:"issue"`
-	ParentIssue    string         `json:"parent_issue"`
-	CheckedOn      string         `json:"checked_on"`
-	Pipelines      []string       `json:"pipelines"`
-	Baseline       baseline       `json:"baseline"`
-	Runner         runner         `json:"runner"`
-	NativeMapping  nativeMapping  `json:"native_mapping"`
-	ParityClaim    parityClaim    `json:"parity_claim"`
-	Authority      authority      `json:"authority"`
-	Rollback       rollback       `json:"rollback"`
-	Classification classification `json:"classification"`
-	Assertions     []string       `json:"assertions"`
-	Loop           evidenceLoop   `json:"loop"`
+	SchemaVersion   string         `json:"schema_version"`
+	ID              string         `json:"id"`
+	Status          string         `json:"status"`
+	Issue           string         `json:"issue"`
+	ParentIssue     string         `json:"parent_issue"`
+	CheckedOn       string         `json:"checked_on"`
+	Pipelines       []string       `json:"pipelines"`
+	Baseline        baseline       `json:"baseline"`
+	BoundedChildren []boundedChild `json:"bounded_children"`
+	Runner          runner         `json:"runner"`
+	NativeMapping   nativeMapping  `json:"native_mapping"`
+	ParityClaim     parityClaim    `json:"parity_claim"`
+	Authority       authority      `json:"authority"`
+	Rollback        rollback       `json:"rollback"`
+	Classification  classification `json:"classification"`
+	Assertions      []string       `json:"assertions"`
+	Loop            evidenceLoop   `json:"loop"`
+}
+
+type boundedChild struct {
+	ID             string              `json:"id"`
+	Issue          string              `json:"issue"`
+	ParentIssue    string              `json:"parent_issue"`
+	Baseline       baseline            `json:"baseline"`
+	NativeMapping  readmeNativeMapping `json:"native_mapping"`
+	ParityClaim    readmeParityClaim   `json:"parity_claim"`
+	Authority      authority           `json:"authority"`
+	Rollback       rollback            `json:"rollback"`
+	Classification classification      `json:"classification"`
+	Assertions     []string            `json:"assertions"`
+	Loop           evidenceLoop        `json:"loop"`
 }
 
 type baseline struct {

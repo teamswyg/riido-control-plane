@@ -28,6 +28,8 @@
       "go.sum",
       "tools/dependencyallowlist",
       "tools/ciworkflowparity",
+      "tools/repositoryreadme",
+      "tools/knowledgecoverage",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -51,6 +53,20 @@
         "kind": "artifact-integrity",
         "want_paths": ["out/dependency-allowlist-evidence.json"],
         "want_sha256_present": true
+      },
+      {
+        "name": "repository-readme-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/repository-readme-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-repository-readme-evidence.v1"
+      },
+      {
+        "name": "executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
       }
     ],
     "source_checks": [
@@ -60,6 +76,8 @@
         "contains": [
           "riido-control-plane-baseline-ci-parity.v1",
           "74430b5f9001bdd6d384c4bae985d7914f825f998b47ffe22826f480e4789f1c",
+          "ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c",
+          "https://github.com/teamswyg/riido-control-plane/issues/1039",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -82,6 +100,26 @@
           "native_pipeline_preserves_step_order",
           "runner_is_pinned_and_credential_free",
           "retirement_and_runtime_authority_remain_zero"
+        ]
+      },
+      {
+        "name": "repository-readme-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify.go",
+        "contains": [
+          "repository_readme_workflow_digest_is_exact",
+          "repository_readme_steps_are_native",
+          "repository_readme_pipeline_preserves_order",
+          "repository_readme_authority_remains_zero"
+        ]
+      },
+      {
+        "name": "repository-readme-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_readme_child.go",
+        "contains": [
+          "ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c",
+          "umask 077",
+          "repository_readme_native_parity_source_complete",
+          "retain_exact_baseline_until_separate_retirement_parity_review"
         ]
       },
       {
@@ -159,6 +197,26 @@
       "id": "test-control-plane",
       "kind": "shell",
       "command": "go test ./..."
+    },
+    {
+      "id": "verify-repository-readme",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/repositoryreadme -count=1 && go run ./tools/repositoryreadme -check-doc -evidence-out out/repository-readme-evidence.json"
+    },
+    {
+      "id": "verify-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-repository-readme-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/repository-readme-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -167,6 +225,9 @@
     "dependency allowlist evidence is redacted and content-addressed",
     "full Go tests pass",
     "legacy workflow retirement and runtime authority remain zero",
-    "riido-ci emits a passed mode-0600 local-run evidence envelope"
+    "riido-ci emits a passed mode-0600 local-run evidence envelope",
+    "repository-readme workflow digest remains exact and unedited",
+    "README and executable-knowledge commands map with zero adapters",
+    "repository evidence is redacted, content-addressed and mode 0600"
   ]
 }

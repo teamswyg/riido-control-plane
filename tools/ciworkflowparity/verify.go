@@ -21,14 +21,22 @@ func verify(repoRoot, contractPath string) (evidence, error) {
 	record("retirement_and_runtime_authority_remain_zero", verifyAuthority(document))
 	record("rollback_preserves_exact_baseline", verifyRollback(document))
 	record("classification_is_source_complete_not_retired", verifyClassification(document))
+	child := document.BoundedChildren[0]
+	record("repository_readme_workflow_digest_is_exact", verifyReadmeWorkflow(repoRoot, child))
+	record("repository_readme_steps_are_native", verifyReadmeMapping(child))
+	record("repository_readme_artifact_is_redacted", verifyReadmeArtifact(child))
+	record("repository_readme_pipeline_preserves_order", verifyReadmePipeline(repoRoot, document, child))
+	record("repository_readme_authority_remains_zero", verifyAuthorityForChild(child))
+	record("repository_readme_classification_is_bounded", verifyReadmeClassification(child))
 	result := newEvidence(document, cases)
 	if result.Decision != "passed" {
-		return result, errors.New("Control Plane baseline CI parity evidence failed closed")
+		return result, errors.New("control plane baseline CI parity evidence failed closed")
 	}
 	return result, nil
 }
 
 func newEvidence(document manifest, cases map[string]string) evidence {
+	child := document.BoundedChildren[0]
 	result := evidence{
 		SchemaVersion: evidenceSchema, Decision: "passed", Cases: cases,
 		BaselineWorkflowSHA256: document.Baseline.WorkflowSHA256,
@@ -37,6 +45,13 @@ func newEvidence(document manifest, cases map[string]string) evidence {
 		LegacyWorkflowPreserved: document.Rollback.BaselineWorkflowPreserved && !document.ParityClaim.SourceWorkflowEdited,
 		RetirementAuthorized:    document.Authority.WorkflowRetirementAuthorized,
 		RuntimeEffect:           document.Authority.RuntimeEffect,
+		BoundedChildren: []childEvidence{{
+			ID: child.ID, Issue: child.Issue, WorkflowSHA256: child.Baseline.WorkflowSHA256,
+			RequiredAdapterCount:    child.ParityClaim.RequiredAdapterCount,
+			LegacyWorkflowPreserved: child.Rollback.BaselineWorkflowPreserved && !child.ParityClaim.SourceWorkflowEdited,
+			RetirementAuthorized:    child.Authority.WorkflowRetirementAuthorized,
+			RuntimeEffect:           child.Authority.RuntimeEffect,
+		}},
 	}
 	for _, value := range cases {
 		if value != "passed" {
