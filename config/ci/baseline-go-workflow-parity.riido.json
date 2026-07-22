@@ -16,6 +16,111 @@
     "job": "go",
     "tracked_workflow_count": 56
   },
+  "bounded_children": [
+    {
+      "id": "control-plane-repository-readme-ci-parity",
+      "issue": "https://github.com/teamswyg/riido-control-plane/issues/1039",
+      "parent_issue": "https://github.com/teamswyg/riido-control-plane/issues/1034",
+      "baseline": {
+        "source_revision": "646abfb4707d2addc47d37fd8a384e343c64a28c",
+        "workflow": ".github/workflows/repository-readme.yml",
+        "workflow_sha256": "ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c",
+        "workflow_name": "repository-readme",
+        "job": "repository-readme",
+        "tracked_workflow_count": 56
+      },
+      "native_mapping": {
+        "checkout": {
+          "source": "actions/checkout@v7",
+          "native_kind": "checkout",
+          "adapter_required": false
+        },
+        "go_toolchain": {
+          "source": "actions/setup-go@v6",
+          "native_kind": "worker_toolchain",
+          "version_source": "go.mod",
+          "version": "1.26.5",
+          "cache": false,
+          "adapter_required": false
+        },
+        "repository_readme": {
+          "source_command": "mkdir -p out && go test ./tools/repositoryreadme -count=1 && go run ./tools/repositoryreadme -check-doc -evidence-out out/repository-readme-evidence.json",
+          "native_command": "umask 077 && mkdir -p out && go test ./tools/repositoryreadme -count=1 && go run ./tools/repositoryreadme -check-doc -evidence-out out/repository-readme-evidence.json",
+          "native_kind": "shell",
+          "evidence_path": "out/repository-readme-evidence.json",
+          "adapter_required": false
+        },
+        "executable_knowledge": {
+          "source_command": "go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json",
+          "native_command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json",
+          "native_kind": "shell",
+          "evidence_path": "out/executable-knowledge-coverage.json",
+          "adapter_required": false
+        },
+        "evidence_artifact": {
+          "source": "actions/upload-artifact@v7",
+          "native_kind": "artifact",
+          "paths": [
+            "out/repository-readme-evidence.json",
+            "out/executable-knowledge-coverage.json"
+          ],
+          "redaction": "required",
+          "run_when": "always",
+          "if_no_files_found": "error",
+          "content_addressed": true,
+          "adapter_required": false
+        }
+      },
+      "parity_claim": {
+        "all_source_steps_mapped": true,
+        "required_adapter_count": 0,
+        "repository_readme_command_exact": true,
+        "executable_knowledge_command_exact": true,
+        "secure_evidence_permissions": true,
+        "source_workflow_edited": false,
+        "source_workflow_executed_by_this_slice": false
+      },
+      "authority": {
+        "workflow_retirement_authorized": false,
+        "workflow_file_effect": "none",
+        "auth_jwt_pep_effect": "none",
+        "aws_terraform_deployment_effect": "none",
+        "runtime_effect": "none",
+        "fixed_cost_resource_effect": "none",
+        "requires_separate_owner_reviewed_retirement": true
+      },
+      "rollback": {
+        "baseline_workflow_preserved": true,
+        "method": "retain_exact_baseline_until_separate_retirement_parity_review",
+        "blocked_to_passed_private_policy_pair_required": true
+      },
+      "classification": {
+        "code": "repository_readme_native_parity_source_complete",
+        "meaning": "The repository README and executable-knowledge checks can run through pinned riido-ci with native redacted artifact evidence while the legacy workflow and runtime authority remain unchanged.",
+        "does_not_claim": [
+          "all fifty-six workflows are migrated",
+          "the private repository CI policy currently passes",
+          "the repository-readme workflow is retired",
+          "controller scheduling is admitted",
+          "deployment or runtime semantics changed"
+        ]
+      },
+      "assertions": [
+        "the repository-readme GitHub Actions workflow digest remains exact",
+        "all repository-readme job steps map to native riido-ci behavior with zero adapters",
+        "README and executable-knowledge evidence is redacted and mode 0600",
+        "the existing pinned central runner remains credential free",
+        "workflow retirement and runtime authority remain zero"
+      ],
+      "loop": {
+        "observation": "The baseline Go workflow had native parity, but the repository entrypoint and executable-knowledge workflow remained one of fifty-five unmapped workflows.",
+        "hypothesis": "The existing credential-free runner can preserve the exact README and knowledge-coverage commands plus always-collected evidence without editing or retiring the legacy workflow.",
+        "execute": "Pin the repository-readme workflow digest, verify every native mapping, run both source checks under a restrictive umask and collect both evidence files as one redacted artifact boundary.",
+        "evaluate": "Require zero adapters, exact commands, mode-0600 outputs, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
+        "retrospective": "Keep the source workflow byte-exact and count this as one bounded parity child only; retirement still requires a separate owner-reviewed blocked-to-passed policy pair."
+      }
+    }
+  ],
   "runner": {
     "provider": "riido-ci",
     "revision": "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
