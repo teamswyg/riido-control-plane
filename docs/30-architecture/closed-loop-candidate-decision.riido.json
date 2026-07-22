@@ -17,7 +17,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Testnet smoke is an intake source even when live claim failures are dynamic, so it keeps a seed decision while harness_failure subjects route through a decision template."
     },
     {
@@ -27,7 +27,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Load harness client-read pressure failures need a claim-bound verifier before they become recurring performance gates."
     },
     {
@@ -37,7 +37,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Load harness promotion failures must not remain isolated workflow reports without a decision owner."
     },
     {
@@ -47,7 +47,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Control-plane hot-path benchmark failures need an owned adoption decision before becoming closed-loop gates."
     },
     {
@@ -57,7 +57,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership."
     },
     {
@@ -67,7 +67,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "The v3 thread history endpoint is a measured local pressure hotspot and needs a claim-bound optimization decision before it becomes a recurring gate."
     },
     {
@@ -77,7 +77,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "HTTP metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately."
     },
     {
@@ -87,7 +87,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Store metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately."
     },
     {
@@ -97,7 +97,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Fine-grained provider progress remains a measured allocation hotspot and needs a claim-bound batching or retention verifier decision."
     },
     {
@@ -107,7 +107,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Thread stream subscription targets are measured but currently low allocation, so keep trend evidence before adding a new gate."
     },
     {
@@ -117,7 +117,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Client event subscriber fanout is a measured allocation and CPU hotspot and needs an owned claim-bound optimization decision."
     },
     {
@@ -127,7 +127,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Thread history v3 projection is a measured refresh pressure surface and needs a claim-bound projection/copy-cost decision."
     },
     {
@@ -137,7 +137,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Assignment long-poll waiters are now directly measured with bounded goroutine delta, so keep trend evidence before adopting a new optimization gate."
     },
     {
@@ -147,7 +147,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Tool approval waiters are now directly measured with bounded goroutine delta, so keep redacted pressure evidence before expanding approval UX gates."
     },
     {
@@ -157,7 +157,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Loop closure audit is an intake source even when current residual and claim coverage gaps are closed, so it keeps a seed decision for source coverage."
     },
     {
@@ -177,7 +177,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Loop refresh dispatch is an intake source for ignored command candidates; source coverage stays seeded while dynamic ignored-command subjects are handled by decision templates."
     },
     {
@@ -187,7 +187,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "client_surface_alarm_plan_apply_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Client-surface monitoring now has merged riido-infra alarm topology evidence, but remains stale partial readiness until environment-specific threshold/action plan/apply evidence exists."
     },
     {
@@ -197,7 +197,7 @@
       "owner": "client-qa-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "staging_client_p0_visual_screenshot_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Backend P0 contract fixes are unblocked, but the visual screenshot confirmation remains a client QA artifact tracked through issue 711 and must not fail server-only follow-up work."
     },
     {
@@ -207,7 +207,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "daemon_network_disconnect_release_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Daemon network-disconnect waiting is stale partial readiness evidence and needs a release-grade reconnect verifier decision."
     },
     {
@@ -217,7 +217,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "single_pc_agent_capacity_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "One-PC agent capacity is stale partial readiness evidence and needs product acceptance ownership before beta capacity claims."
     },
     {
@@ -227,7 +227,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "cold_start_packet_burst_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Boot burst capacity is stale partial readiness evidence and needs a cold-start storm verifier before launch readiness."
     },
     {
@@ -237,7 +237,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "ecs_service_recovery_chaos_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Server crash recovery is stale partial readiness evidence and needs measured recovery timing before launch readiness."
     },
     {
@@ -247,7 +247,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "scale_out_timing_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Scale-out recovery is stale partial readiness evidence and needs autoscaling timing evidence before capacity claims."
     },
     {
@@ -257,7 +257,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "daemon_reconnect_storm_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "All-server-down daemon behavior is stale partial readiness evidence and needs reconnect storm evidence before launch readiness."
     },
     {
@@ -267,7 +267,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "desktop_body_only_golden_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Desktop body-only change acceptance is stale partial readiness evidence and needs local product acceptance evidence before beta signoff."
     }
   ],
@@ -279,7 +279,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Live smoke, load, and performance harness failures can emit dynamic redacted claim ids; route them to claim binding without requiring a per-run manifest edit."
     },
     {
@@ -289,7 +289,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "verifier",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Loop refresh dispatch can discover target_verifier commands that workflow dispatch cannot run; ignored-command subjects are already redacted and machine-routable, so decision can select the verifier command without a per-candidate manifest edit."
     },
     {
@@ -299,7 +299,7 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-07-15",
+      "review_by": "2026-07-29",
       "reason": "Loop refresh dispatch can discover stale command evidence on scheduled runs; stale-source subjects should route to regenerated redacted refresh evidence without requiring a per-run decision record."
     }
   ],

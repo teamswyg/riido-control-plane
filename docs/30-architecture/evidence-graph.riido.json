@@ -20826,6 +20826,39 @@
       ],
       "decision": "Honor valid numeric Last-Event-ID values at the control-plane replay boundary and retain the existing bounded full replay for missing, malformed, or negative cursors. Log only cursor presence and the filtered replay count so production can prove reduction without recording cursor values, credentials, or message bodies. Keep endpoint paths, SSE event ids, payloads, terminal priority delivery, and v3 refresh behavior unchanged.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "closed_loop_candidate_review_expiry_recovery_loop",
+      "observation": "The closed-loop candidate decision schedule failed on seven consecutive days from 2026-07-16 through 2026-07-22 because every deferred or triage-required decision still carried the 2026-07-15 review deadline. The latest redacted artifacts contained nine pressure candidates, nine operational-readiness candidates, and one stale refresh-source candidate; smoke, load, performance, and loop-closure artifacts had no open candidates.",
+      "hypothesis": "Re-reviewing the current redacted queue and advancing only its owner-bound review deadline will restore fail-closed decision verification without hiding candidates, weakening expiry enforcement, changing dispositions, or claiming runtime readiness.",
+      "claims": [
+        "candidate_decisions_must_match_consumed_candidates",
+        "candidate_decision_evidence_must_expose_next_command"
+      ],
+      "changes": [
+        {"kind":"manifest","path":"docs/30-architecture/closed-loop-candidate-decision.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/closed-loop-candidate-decision.md"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"test","path":"tools/closedloopcandidatedecision/behavior_golden_test.go"},
+        {"kind":"test","path":"tools/loopclosureaudit/behavior_golden_test.go"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"test","path":"tools/closedloopcandidatedecision"},
+        {"kind":"tool","path":"tools/closedloopcandidatedecision"},
+        {"kind":"test","path":"tools/loopclosureaudit"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"test","path":"tools/closedloopcandidatedecision/behavior_golden_test.go"},
+        {"kind":"test","path":"tools/loopclosureaudit/behavior_golden_test.go"},
+        {"kind":"artifact","path":"closed-loop-candidate-review-audit-2026-07-22","redacted":true},
+        {"kind":"artifact","path":"github-actions-run-29882928818","redacted":true}
+      ],
+      "decision": "Keep all current dispositions, priorities, owners, next artifacts, and executable next commands unchanged. Advance deferred and triage-required review dates to 2026-07-29 after verifying all 19 open live candidates against the refreshed manifest. Preserve the adopted syntax-hash decision date, retain the visual item under client-qa-loop without design work, and make no runtime, AWS, credential, or protected-repository mutation.",
+      "next_loop": "closed_loop_candidate_decision"
     }
   ],
   "loop": {
