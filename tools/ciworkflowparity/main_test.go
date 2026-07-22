@@ -15,12 +15,17 @@ func TestVerifyProvesNativeBaselineParityWithoutRetirement(t *testing.T) {
 		result.RetirementAuthorized || result.RuntimeEffect != "none" {
 		t.Fatalf("unexpected parity evidence: %+v", result)
 	}
-	if len(result.Cases) != 15 || len(result.BoundedChildren) != 1 ||
+	if len(result.Cases) != 21 || len(result.BoundedChildren) != 2 ||
 		result.BoundedChildren[0].ID != "control-plane-repository-readme-ci-parity" ||
 		result.BoundedChildren[0].RequiredAdapterCount != 0 ||
 		!result.BoundedChildren[0].LegacyWorkflowPreserved ||
 		result.BoundedChildren[0].RetirementAuthorized ||
-		result.BoundedChildren[0].RuntimeEffect != "none" {
+		result.BoundedChildren[0].RuntimeEffect != "none" ||
+		result.BoundedChildren[1].ID != "control-plane-context-map-ci-parity" ||
+		result.BoundedChildren[1].RequiredAdapterCount != 0 ||
+		!result.BoundedChildren[1].LegacyWorkflowPreserved ||
+		result.BoundedChildren[1].RetirementAuthorized ||
+		result.BoundedChildren[1].RuntimeEffect != "none" {
 		t.Fatalf("unexpected cases: %+v", result.Cases)
 	}
 }

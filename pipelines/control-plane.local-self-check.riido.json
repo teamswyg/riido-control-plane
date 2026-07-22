@@ -30,6 +30,7 @@
       "tools/ciworkflowparity",
       "tools/repositoryreadme",
       "tools/knowledgecoverage",
+      "tools/contextmap",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -67,6 +68,13 @@
         "want_paths": ["out/executable-knowledge-coverage.json"],
         "want_sha256_present": true,
         "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "context-map-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/control-plane-context-map-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-context-map-evidence.v1"
       }
     ],
     "source_checks": [
@@ -77,7 +85,9 @@
           "riido-control-plane-baseline-ci-parity.v1",
           "74430b5f9001bdd6d384c4bae985d7914f825f998b47ffe22826f480e4789f1c",
           "ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c",
+          "3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392",
           "https://github.com/teamswyg/riido-control-plane/issues/1039",
+          "https://github.com/teamswyg/riido-control-plane/issues/1041",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -120,6 +130,27 @@
           "umask 077",
           "repository_readme_native_parity_source_complete",
           "retain_exact_baseline_until_separate_retirement_parity_review"
+        ]
+      },
+      {
+        "name": "context-map-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_context_map_cases.go",
+        "contains": [
+          "context_map_workflow_digest_is_exact",
+          "context_map_steps_are_native",
+          "context_map_pipeline_preserves_order",
+          "context_map_authority_remains_zero",
+          "context_map_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "context-map-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_context_map_child.go",
+        "contains": [
+          "3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392",
+          "umask 077",
+          "ContextMapCommandExact",
+          "actions/upload-artifact@v7"
         ]
       },
       {
@@ -217,6 +248,20 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "verify-context-map",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/contextmap -count=1 && go run ./tools/contextmap -check-doc -evidence-out out/control-plane-context-map-evidence.json"
+    },
+    {
+      "id": "collect-context-map-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/control-plane-context-map-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -228,6 +273,9 @@
     "riido-ci emits a passed mode-0600 local-run evidence envelope",
     "repository-readme workflow digest remains exact and unedited",
     "README and executable-knowledge commands map with zero adapters",
-    "repository evidence is redacted, content-addressed and mode 0600"
+    "repository evidence is redacted, content-addressed and mode 0600",
+    "context-map workflow digest remains exact and unedited",
+    "dependency policy and the Context Map command map with zero adapters",
+    "Context Map evidence is redacted, content-addressed and mode 0600"
   ]
 }

@@ -20887,6 +20887,34 @@
       ],
       "decision": "Admit repository-readme as the second of 56 source workflows with all source steps mapped natively, zero required adapters, exact source SHA-256 ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c, redacted content-addressed evidence, and mode-0600 README and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 54 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "context_map_native_ci_parity_loop",
+      "observation": "Control Plane issue #1034 had two native riido-ci parity slices, but 54 of 56 GitHub Actions workflows remained unmapped. The context-map workflow was idle, credential-free, and self-contained, yet its exact source digest, dependency policy, Context Map command, strict artifact behavior, and zero-authority migration boundary were not represented in the native parity receipt.",
+      "hypothesis": "Extending the pinned local parity contract with one bounded context-map child can prove native dependency policy, Context Map command, and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding retirement, runtime, credential, scheduling, deployment, and fixed-cost authority.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract"
+      ],
+      "changes": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"tool","path":"tools/syntaxhash"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
+        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
+        {"kind":"artifact","path":"dependency-allowlist-evidence","redacted":true},
+        {"kind":"artifact","path":"control-plane-context-map-evidence","redacted":true}
+      ],
+      "decision": "Admit context-map as the third of 56 source workflows with all five source steps mapped natively, zero required adapters, exact source SHA-256 3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392, redacted content-addressed evidence, and a mode-0600 Context Map receipt. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 53 workflows remain for separate bounded review.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
