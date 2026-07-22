@@ -10,22 +10,22 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `236`
-- claim refs: `313`
-- change refs: `2253`
-- verifier refs: `1327`
-- evidence refs: `687`
+- chains: `237`
+- claim refs: `314`
+- change refs: `2258`
+- verifier refs: `1330`
+- evidence refs: `690`
 
 ## Compiled Chain Summary
 
-- complete chains: `236` / `236`
-- claim-bound chains: `236`
+- complete chains: `237` / `237`
+- claim-bound chains: `237`
 - unclaimed chains: `0`
 - next-loop targets: `9`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `153` | `179` | `1437` | `760` | `431` |
+| `closed_loop_candidate` | `154` | `180` | `1442` | `763` | `434` |
 | `control_plane_performance_harness` | `30` | `31` | `234` | `251` | `79` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
 | `closed_loop_candidate_decision` | `10` | `35` | `186` | `95` | `46` |
@@ -275,6 +275,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `context_map_native_ci_parity_loop` | `1` | `5` | `3` | `4` | `closed_loop_candidate` |
 | `go_ci_quality_native_ci_parity_loop` | `1` | `5` | `3` | `5` | `closed_loop_candidate` |
 | `module_decomposition_native_ci_parity_loop` | `1` | `5` | `3` | `5` | `closed_loop_candidate` |
+| `pre_commit_baseline_native_ci_parity_loop` | `1` | `5` | `3` | `3` | `closed_loop_candidate` |
 
 ## Loop
 
