@@ -663,6 +663,108 @@
         "evaluate": "Require zero adapters, exact dependency/migration/knowledge behavior, mode-0600 outputs, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
         "retrospective": "Keep the source workflow byte-exact and count this as the seventh bounded parity mapping only; forty-nine workflows and any retirement remain separately owner-reviewed."
       }
+    },
+    {
+      "id": "control-plane-syntax-hash-ci-parity",
+      "issue": "https://github.com/teamswyg/riido-control-plane/issues/1051",
+      "parent_issue": "https://github.com/teamswyg/riido-control-plane/issues/1034",
+      "baseline": {
+        "source_revision": "45f08aa2f91bb4ae0b6e4d7d75a841833dac0435",
+        "workflow": ".github/workflows/syntax-hash.yml",
+        "workflow_sha256": "470d347daa1b35680fb4c899ec234e3ead152356c8f38ab07d521fbcdf194ec7",
+        "workflow_name": "Syntax Hash",
+        "job": "syntax-hash",
+        "tracked_workflow_count": 56
+      },
+      "native_mapping": {
+        "checkout": {
+          "source": "actions/checkout@v7",
+          "native_kind": "checkout",
+          "adapter_required": false
+        },
+        "go_toolchain": {
+          "source": "actions/setup-go@v6",
+          "native_kind": "worker_toolchain",
+          "version_source": "go.mod",
+          "version": "1.26.5",
+          "cache": false,
+          "adapter_required": false
+        },
+        "syntax_hash_golden": {
+          "source_command": "go test ./tools/contextmap ./tools/syntaxhash ./awsadapters ./cmd/riido_ai_server ./internal/riidoaiserver ./internal/repoidentity ./internal/contractscompat ./tools/requestauth ./tools/healthreadycmd ./tools/runtimeboundary ./tools/runtimecdownership ./tools/deploypolicy ./tools/containercontract ./tools/containercontract/dockerfile ./tools/configreference ./tools/storesaferouting ./tools/publicpageslive ./tools/gocibaseline ./tools/moduledecomposition ./tools/controlplaneaudit ./tools/controlplaneperf ./tools/controlplanepressure ./tools/aiagentload ./tools/harnesspromotion ./tools/loopclosureaudit ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision ./tools/looprefreshdispatch ./tools/evidencegraph ./tools/loopregistry ./tools/operationalreadiness ./tools/precommitbaseline ./tools/workflowevidence ./tools/liveworkflowevidence ./tools/aigeneratedsmokematrix ./tools/apiclientdelivery ./tools/figmaprojection ./tools/aiagentclientapi ./tools/generatedclienthandoff ./tools/reactquerygen ./tools/storesnapshotoutbox ./tools/aiagentthreadsnapshot ./tools/webfrontendapi ./tools/aiagentrisk ./tools/migrationledger ./tools/metricshttpadapter ./tools/agentcatalogrbac ./tools/reviewaccountseed ./tools/integrationmatrix ./tools/openquestions ./tools/repositoryreadme ./tools/knowledgecoverage ./tools/dependencyallowlist ./tools/providerstatus ./tools/agentruntimebinding ./tools/assignmentjournal ./tools/cloudwatchemf ./tools/saascontrolplane ./tools/snapshotcqrsgate -run 'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RiidoAIServer|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|RuntimeCDOwnership|DeployPolicy|ContainerContract|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|ModuleDecomposition|ControlPlaneAudit|ControlPlanePerformance|ControlPlanePressure|AIAgentLoad|HarnessPromotion|LoopClosureAudit|ClosedLoopCandidateIntake|ClosedLoopCandidateDecision|LoopRefreshDispatch|EvidenceGraph|LoopRegistry|OperationalReadiness|PreCommitBaseline|WorkflowEvidence|LiveWorkflowEvidence|RunWrites|APIClientDelivery|FigmaProjection|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|ReviewAccountSeed|IntegrationMatrix|OpenQuestions|RepositoryReadme|KnowledgeCoverage|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate|AIAgentThreadSnapshot|ReactQueryGen)BehaviorGolden|GeneratedClientHandoff' -count=1",
+          "native_command": "export RIIDO_LOOP_IDS=syntax_hash_graph_spike_loop && go test ./tools/contextmap ./tools/syntaxhash ./awsadapters ./cmd/riido_ai_server ./internal/riidoaiserver ./internal/repoidentity ./internal/contractscompat ./tools/requestauth ./tools/healthreadycmd ./tools/runtimeboundary ./tools/runtimecdownership ./tools/deploypolicy ./tools/containercontract ./tools/containercontract/dockerfile ./tools/configreference ./tools/storesaferouting ./tools/publicpageslive ./tools/gocibaseline ./tools/moduledecomposition ./tools/controlplaneaudit ./tools/controlplaneperf ./tools/controlplanepressure ./tools/aiagentload ./tools/harnesspromotion ./tools/loopclosureaudit ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision ./tools/looprefreshdispatch ./tools/evidencegraph ./tools/loopregistry ./tools/operationalreadiness ./tools/precommitbaseline ./tools/workflowevidence ./tools/liveworkflowevidence ./tools/aigeneratedsmokematrix ./tools/apiclientdelivery ./tools/figmaprojection ./tools/aiagentclientapi ./tools/generatedclienthandoff ./tools/reactquerygen ./tools/storesnapshotoutbox ./tools/aiagentthreadsnapshot ./tools/webfrontendapi ./tools/aiagentrisk ./tools/migrationledger ./tools/metricshttpadapter ./tools/agentcatalogrbac ./tools/reviewaccountseed ./tools/integrationmatrix ./tools/openquestions ./tools/repositoryreadme ./tools/knowledgecoverage ./tools/dependencyallowlist ./tools/providerstatus ./tools/agentruntimebinding ./tools/assignmentjournal ./tools/cloudwatchemf ./tools/saascontrolplane ./tools/snapshotcqrsgate -run 'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RiidoAIServer|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|RuntimeCDOwnership|DeployPolicy|ContainerContract|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|ModuleDecomposition|ControlPlaneAudit|ControlPlanePerformance|ControlPlanePressure|AIAgentLoad|HarnessPromotion|LoopClosureAudit|ClosedLoopCandidateIntake|ClosedLoopCandidateDecision|LoopRefreshDispatch|EvidenceGraph|LoopRegistry|OperationalReadiness|PreCommitBaseline|WorkflowEvidence|LiveWorkflowEvidence|RunWrites|APIClientDelivery|FigmaProjection|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|ReviewAccountSeed|IntegrationMatrix|OpenQuestions|RepositoryReadme|KnowledgeCoverage|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate|AIAgentThreadSnapshot|ReactQueryGen)BehaviorGolden|GeneratedClientHandoff' -count=1",
+          "native_kind": "shell",
+          "adapter_required": false
+        },
+        "syntax_hash": {
+          "source_command": "mkdir -p out && go test ./tools/syntaxhash -count=1 && go run ./tools/syntaxhash -check-doc -evidence-out out/syntax-hash-evidence.json",
+          "native_command": "umask 077 && export RIIDO_LOOP_IDS=syntax_hash_graph_spike_loop && mkdir -p out && go test ./tools/syntaxhash -count=1 && go run ./tools/syntaxhash -check-doc -evidence-out out/syntax-hash-evidence.json",
+          "native_kind": "shell",
+          "evidence_path": "out/syntax-hash-evidence.json",
+          "adapter_required": false
+        },
+        "evidence_artifact": {
+          "source": "actions/upload-artifact@v7",
+          "native_kind": "artifact",
+          "paths": [
+            "out/syntax-hash-evidence.json"
+          ],
+          "redaction": "required",
+          "run_when": "always",
+          "if_no_files_found": "error",
+          "content_addressed": true,
+          "adapter_required": false
+        }
+      },
+      "parity_claim": {
+        "all_source_steps_mapped": true,
+        "required_adapter_count": 0,
+        "syntax_hash_loop_environment_exact": true,
+        "syntax_hash_golden_command_exact": true,
+        "syntax_hash_command_exact": true,
+        "secure_evidence_permissions": true,
+        "source_workflow_edited": false,
+        "source_workflow_executed_by_this_slice": false
+      },
+      "authority": {
+        "workflow_retirement_authorized": false,
+        "workflow_file_effect": "none",
+        "auth_jwt_pep_effect": "none",
+        "aws_terraform_deployment_effect": "none",
+        "runtime_effect": "none",
+        "fixed_cost_resource_effect": "none",
+        "requires_separate_owner_reviewed_retirement": true
+      },
+      "rollback": {
+        "baseline_workflow_preserved": true,
+        "method": "retain_exact_baseline_until_separate_retirement_parity_review",
+        "blocked_to_passed_private_policy_pair_required": true
+      },
+      "classification": {
+        "code": "syntax_hash_native_parity_source_complete",
+        "meaning": "The Control Plane syntax-hash golden locks and evidence checks can run through pinned riido-ci with native redacted artifact evidence while the legacy workflow and runtime authority remain unchanged.",
+        "does_not_claim": [
+          "all fifty-six workflows are migrated",
+          "the private repository CI policy currently passes",
+          "the syntax-hash workflow is retired",
+          "controller scheduling is admitted",
+          "deployment or runtime semantics changed"
+        ]
+      },
+      "assertions": [
+        "the syntax-hash GitHub Actions workflow digest remains exact",
+        "all five syntax-hash source behaviors map to native riido-ci behavior with zero adapters",
+        "the syntax-hash loop environment, golden locks and evidence command remain exact",
+        "syntax-hash evidence is redacted, content-addressed and mode 0600",
+        "workflow retirement and runtime authority remain zero"
+      ],
+      "loop": {
+        "observation": "Seven of fifty-six workflows had native parity, but the credential-free syntax-hash workflow still depended on GitHub Actions for golden locks and graph evidence.",
+        "hypothesis": "The pinned credential-free runner can preserve the exact loop environment, golden test selection, syntax-hash command and always-collected evidence without editing or retiring the source workflow.",
+        "execute": "Pin the syntax-hash workflow digest, verify all five source behaviors, execute the exact golden selection and emit syntax-hash evidence with restrictive output permissions.",
+        "evaluate": "Require zero adapters, exact loop and command behavior, mode-0600 output, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
+        "retrospective": "Keep the source workflow byte-exact and count this as the eighth bounded parity mapping only; forty-eight workflows and any retirement remain separately owner-reviewed."
+      }
     }
   ],
   "runner": {
