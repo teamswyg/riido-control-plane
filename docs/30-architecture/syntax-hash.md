@@ -9,7 +9,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | Target | Package | Coverage | Syntax Hash | Semantic Claim |
 | --- | --- | ---: | --- | --- |
 | `contextmap_spike` | `tools/contextmap` | 100% | `73463c272c08` | `context_map_must_guard_public_boundaries` |
-| `auth_jwt_pep_guard` | `internal/authpep` | 100% | `87d2e32dfbe2` | `request_authorization_must_preserve_security_boundary` |
+| `auth_jwt_pep_guard` | `internal/authpep` | 100% | `89f8908cf84d` | `request_authorization_must_preserve_security_boundary` |
 | `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `0828144b09ce` | `context_map_must_guard_public_boundaries` |
 | `syntaxhash_duplicate_shapes_policy` | `tools/syntaxhash/duplicates` | 100% | `f506f1540fac` | `context_map_must_guard_public_boundaries` |
 | `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `62066456283d` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
@@ -119,8 +119,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3298`
-- tracked files: `3298`
+- Go files: `3300`
+- tracked files: `3300`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -166,12 +166,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3298`
-- unique syntax hashes: `3095`
+- tracked files: `3300`
+- unique syntax hashes: `3097`
 - compression gain: `203`
 - analysis reduction: `6.15%`
 - collision count: `0`
-- relocation mappings: `3298`
+- relocation mappings: `3300`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `108`

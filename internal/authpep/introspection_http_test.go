@@ -126,7 +126,7 @@ func validAuthClientAssertion(secret []byte, clientID string, now time.Time, req
 }
 
 func authIntrospectionResponse(status int, body string) *http.Response {
-	header := make(http.Header)
+	header := http.Header{"Cache-Control": {"no-store"}}
 	header.Set("Content-Type", "application/json")
 	return &http.Response{StatusCode: status, Header: header, Body: io.NopCloser(strings.NewReader(body))}
 }
