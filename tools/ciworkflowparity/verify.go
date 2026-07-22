@@ -30,6 +30,7 @@ func verify(repoRoot, contractPath string) (evidence, error) {
 	record("repository_readme_classification_is_bounded", verifyReadmeClassification(child))
 	recordContextMapCases(repoRoot, document, record)
 	recordGoCICases(repoRoot, document, record)
+	recordModuleDecompositionCases(repoRoot, document, record)
 	result := newEvidence(document, cases)
 	if result.Decision != "passed" {
 		return result, errors.New("control plane baseline CI parity evidence failed closed")

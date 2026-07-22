@@ -347,6 +347,117 @@
         "evaluate": "Require zero adapters, exact baseline/lint/coverage behavior, mode-0600 outputs, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
         "retrospective": "Keep the source workflow byte-exact and count this as the fourth bounded parity mapping only; fifty-two workflows and any retirement remain separately owner-reviewed."
       }
+    },
+    {
+      "id": "control-plane-module-decomposition-ci-parity",
+      "issue": "https://github.com/teamswyg/riido-control-plane/issues/1045",
+      "parent_issue": "https://github.com/teamswyg/riido-control-plane/issues/1034",
+      "baseline": {
+        "source_revision": "4f4f142f639eeb6162049bf7bb7b6266a184c137",
+        "workflow": ".github/workflows/module-decomposition.yml",
+        "workflow_sha256": "16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480",
+        "workflow_name": "module-decomposition",
+        "job": "module-decomposition",
+        "tracked_workflow_count": 56
+      },
+      "native_mapping": {
+        "checkout": {
+          "source": "actions/checkout@v7",
+          "native_kind": "checkout",
+          "adapter_required": false
+        },
+        "go_toolchain": {
+          "source": "actions/setup-go@v6",
+          "native_kind": "worker_toolchain",
+          "version_source": "go.mod",
+          "version": "1.26.5",
+          "cache": false,
+          "adapter_required": false
+        },
+        "dependency_allowlist": {
+          "source_command": "go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json",
+          "native_command": "mkdir -p out && go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json -evidence-out out/dependency-allowlist-evidence.json",
+          "native_kind": "shell",
+          "evidence_path": "out/dependency-allowlist-evidence.json",
+          "adapter_required": false
+        },
+        "module_decomposition": {
+          "source_command": "mkdir -p out && go test ./tools/moduledecomposition -count=1 && go run ./tools/moduledecomposition -check-doc -evidence-out out/module-decomposition-evidence.json",
+          "native_command": "umask 077 && mkdir -p out && go test ./tools/moduledecomposition -count=1 && go run ./tools/moduledecomposition -check-doc -evidence-out out/module-decomposition-evidence.json",
+          "native_kind": "shell",
+          "evidence_path": "out/module-decomposition-evidence.json",
+          "adapter_required": false
+        },
+        "executable_knowledge": {
+          "source_command": "go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json",
+          "native_command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json",
+          "native_kind": "shell",
+          "evidence_path": "out/executable-knowledge-coverage.json",
+          "adapter_required": false
+        },
+        "evidence_artifact": {
+          "source": "actions/upload-artifact@v7",
+          "native_kind": "artifact",
+          "paths": [
+            "out/module-decomposition-evidence.json",
+            "out/executable-knowledge-coverage.json"
+          ],
+          "redaction": "required",
+          "run_when": "always",
+          "if_no_files_found": "error",
+          "content_addressed": true,
+          "adapter_required": false
+        }
+      },
+      "parity_claim": {
+        "all_source_steps_mapped": true,
+        "required_adapter_count": 0,
+        "dependency_allowlist_behavior_exact": true,
+        "module_decomposition_command_exact": true,
+        "executable_knowledge_command_exact": true,
+        "secure_evidence_permissions": true,
+        "source_workflow_edited": false,
+        "source_workflow_executed_by_this_slice": false
+      },
+      "authority": {
+        "workflow_retirement_authorized": false,
+        "workflow_file_effect": "none",
+        "auth_jwt_pep_effect": "none",
+        "aws_terraform_deployment_effect": "none",
+        "runtime_effect": "none",
+        "fixed_cost_resource_effect": "none",
+        "requires_separate_owner_reviewed_retirement": true
+      },
+      "rollback": {
+        "baseline_workflow_preserved": true,
+        "method": "retain_exact_baseline_until_separate_retirement_parity_review",
+        "blocked_to_passed_private_policy_pair_required": true
+      },
+      "classification": {
+        "code": "module_decomposition_native_parity_source_complete",
+        "meaning": "The Control Plane module-decomposition and executable-knowledge checks can run through pinned riido-ci with native redacted artifact evidence while the legacy workflow and runtime authority remain unchanged.",
+        "does_not_claim": [
+          "all fifty-six workflows are migrated",
+          "the private repository CI policy currently passes",
+          "the module-decomposition workflow is retired",
+          "controller scheduling is admitted",
+          "deployment or runtime semantics changed"
+        ]
+      },
+      "assertions": [
+        "the module-decomposition GitHub Actions workflow digest remains exact",
+        "all six module-decomposition source behaviors map to native riido-ci behavior with zero adapters",
+        "dependency policy, module decomposition and executable-knowledge behavior remain exact",
+        "module and knowledge evidence is redacted, content-addressed and mode 0600",
+        "workflow retirement and runtime authority remain zero"
+      ],
+      "loop": {
+        "observation": "Four of fifty-six workflows had native parity, but the credential-free module-decomposition workflow still depended on GitHub Actions for architecture and executable-knowledge evidence.",
+        "hypothesis": "The pinned credential-free runner can preserve dependency policy, exact module-decomposition and executable-knowledge behavior plus always-collected evidence without editing or retiring the source workflow.",
+        "execute": "Pin the module-decomposition workflow digest, verify all six source behaviors, run both evidence commands with restrictive output permissions and collect the two artifacts as one redacted boundary.",
+        "evaluate": "Require zero adapters, exact dependency/module/knowledge behavior, mode-0600 outputs, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
+        "retrospective": "Keep the source workflow byte-exact and count this as the fifth bounded parity mapping only; fifty-one workflows and any retirement remain separately owner-reviewed."
+      }
     }
   ],
   "runner": {

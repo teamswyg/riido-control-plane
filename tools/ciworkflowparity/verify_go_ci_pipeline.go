@@ -19,7 +19,7 @@ func verifyGoCICoverageOutputs(child boundedChild) bool {
 
 func verifyGoCIPipeline(repoRoot string, document manifest, child boundedChild) bool {
 	var value pipeline
-	if err := readJSON(repoRoot, document.Runner.Pipeline, &value); err != nil || len(value.Steps) != 16 {
+	if err := readJSON(repoRoot, document.Runner.Pipeline, &value); err != nil || len(value.Steps) != pipelineSteps {
 		return false
 	}
 	steps := value.Steps
