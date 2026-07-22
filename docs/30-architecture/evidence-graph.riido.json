@@ -20484,8 +20484,8 @@
     },
     {
       "id": "control_plane_auth_resource_jwt_pep_loop",
-      "observation": "Control-plane already enforces Riido Auth issuer no-downgrade, but legacy_v1 and auth_service_v2 provider ownership was implicit across the JWT authorizer and a shared fallback chain, making the assembly boundary harder for agents and operators to discover.",
-      "hypothesis": "An explicit classification port and scheme router can preserve legacy_v1 unchanged while keeping every token claiming https://auth.riido.io inside auth_service_v2 verification, without treating unverified claims as authentication evidence.",
+      "observation": "Control-plane already enforces the auth.riido.io issuer no-downgrade boundary, but legacy_v1 and the SWYG Auth-owned v2 provider were implicit across the JWT authorizer and a shared fallback chain. The introspection adapter also accepted a response without the owner contract's no-store cache directive, allowing cacheable token status to cross the anti-corruption boundary.",
+      "hypothesis": "An explicit classification port and scheme router can preserve legacy_v1 unchanged while keeping every token claiming https://auth.riido.io inside v2 verification, and an exact no-store directive check can reject cacheable introspection before claims are decoded, without treating unverified claims as authentication evidence.",
       "claims": [
         "request_authorization_must_preserve_security_boundary",
         "config_reference_must_preserve_env_manifest_parity",
@@ -20496,6 +20496,14 @@
         {
           "kind": "code",
           "path": "internal/authpep"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/cache_control.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/introspection_http.go"
         },
         {
           "kind": "code",
@@ -20524,6 +20532,10 @@
         {
           "kind": "test",
           "path": "internal/authpep/authorization_scheme_selector_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/introspection_cache_control_test.go"
         },
         {
           "kind": "test",
@@ -20607,6 +20619,10 @@
         },
         {
           "kind": "test",
+          "path": "internal/authpep/introspection_cache_control_test.go"
+        },
+        {
+          "kind": "test",
           "path": "cmd/riido_ai_server/authorizer_config_test.go"
         },
         {
@@ -20618,7 +20634,7 @@
           "path": "internal/riidoaiserver/authorization_scheme_test.go"
         }
       ],
-      "decision": "The control-plane composition root now selects an explicit legacy_v1 or auth_service_v2 provider before verification. Opaque, missing-issuer and foreign-issuer credentials retain the legacy static/external chain; every token claiming the Riido Auth issuer is owned by v2 and cannot downgrade after selector, provider availability, malformed JSON, duplicate claims, signature, JWKS, claim, introspection or domain-policy failure. Classification grants no trust. Production activation remains a separate live valid-token and revoked-replay evidence gate.",
+      "decision": "The control-plane composition root selects an explicit legacy_v1 or SWYG Auth-owned v2 provider before verification. Opaque, missing-issuer and foreign-issuer credentials retain the legacy static/external chain; every token claiming the auth.riido.io issuer is owned by v2 and cannot downgrade after selector, provider availability, malformed JSON, duplicate claims, signature, JWKS, claim, cache-policy, introspection or domain-policy failure. Introspection responses must contain an exact no-store directive before token status is decoded. Classification grants no trust. Production activation remains a separate live valid-token, revoked-token, key-overlap and rollback evidence gate.",
       "next_loop": "closed_loop_candidate"
     },
     {
