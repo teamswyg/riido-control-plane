@@ -34,6 +34,7 @@
       "tools/gocibaseline",
       "tools/moduledecomposition",
       "tools/precommitbaseline",
+      "tools/migrationledger",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -118,6 +119,20 @@
         "want_paths": ["out/pre-commit-baseline-evidence.json"],
         "want_sha256_present": true,
         "want_json_schema_version": "riido-control-plane-pre-commit-baseline-evidence.v1"
+      },
+      {
+        "name": "migration-ledger-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/migration-ledger-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-migration-ledger-evidence.v1"
+      },
+      {
+        "name": "migration-ledger-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
       }
     ],
     "source_checks": [
@@ -132,11 +147,13 @@
           "82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4",
           "16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480",
           "338db1065406d91b511c7fd8838f7b18964aabadbea8e2b4039cc9aa8e89c104",
+          "636e8b00f5ed7df631dc5a17d1560b281b0ab6c99be255afb9dafcec971254b1",
           "https://github.com/teamswyg/riido-control-plane/issues/1039",
           "https://github.com/teamswyg/riido-control-plane/issues/1041",
           "https://github.com/teamswyg/riido-control-plane/issues/1043",
           "https://github.com/teamswyg/riido-control-plane/issues/1045",
           "https://github.com/teamswyg/riido-control-plane/issues/1047",
+          "https://github.com/teamswyg/riido-control-plane/issues/1049",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -266,6 +283,29 @@
           "umask 077",
           "PreCommitBaselineCommandExact",
           "out/pre-commit-baseline-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "migration-ledger-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_migration_ledger_cases.go",
+        "contains": [
+          "migration_ledger_workflow_digest_is_exact",
+          "migration_ledger_six_source_behaviors_are_native",
+          "migration_ledger_pipeline_preserves_order",
+          "migration_ledger_authority_remains_zero",
+          "migration_ledger_classification_is_bounded",
+          "migration_ledger_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "migration-ledger-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_migration_ledger_child.go",
+        "contains": [
+          "636e8b00f5ed7df631dc5a17d1560b281b0ab6c99be255afb9dafcec971254b1",
+          "umask 077",
+          "MigrationLedgerCommandExact",
+          "out/migration-ledger-evidence.json",
           "actions/upload-artifact@v7"
         ]
       },
@@ -448,6 +488,26 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "verify-migration-ledger",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/migrationledger -count=1 && go run ./tools/migrationledger -check-doc -evidence-out out/migration-ledger-evidence.json"
+    },
+    {
+      "id": "verify-migration-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-migration-ledger-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/migration-ledger-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -474,6 +534,10 @@
     "pre-commit-baseline workflow digest remains exact and unedited",
     "all four pre-commit-baseline source behaviors map with zero adapters",
     "pre-commit baseline evidence is redacted, content-addressed and mode 0600",
-    "pre-commit-baseline workflow retirement and runtime authority remain zero"
+    "pre-commit-baseline workflow retirement and runtime authority remain zero",
+    "migration-ledger workflow digest remains exact and unedited",
+    "dependency, migration-ledger and executable-knowledge behavior maps with zero adapters",
+    "migration-ledger and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "migration-ledger workflow retirement and runtime authority remain zero"
   ]
 }
