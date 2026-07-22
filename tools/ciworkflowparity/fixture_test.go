@@ -39,6 +39,7 @@ func copyFixtureRepo(t *testing.T) string {
 		".github/workflows/module-decomposition.yml",
 		".github/workflows/pre-commit-baseline.yml",
 		".github/workflows/migration-ledger.yml",
+		".github/workflows/syntax-hash.yml",
 		"pipelines/control-plane.local-self-check.riido.json", "tools/riido-ci-local", "go.mod",
 	}
 	for _, path := range paths {

@@ -21029,6 +21029,34 @@
       ],
       "decision": "Admit migration-ledger as the seventh of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact source SHA-256 636e8b00f5ed7df631dc5a17d1560b281b0ab6c99be255afb9dafcec971254b1, redacted content-addressed evidence, and mode-0600 migration-ledger and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 49 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "syntax_hash_native_ci_parity_loop",
+      "observation": "Control Plane issue #1034 had seven native riido-ci parity slices, but 49 of 56 GitHub Actions workflows remained unmapped. The syntax-hash workflow was idle and credential-free, yet its exact source digest, loop environment, golden test selection, graph evidence command, strict artifact behavior, and zero-authority migration boundary were not represented in the native parity receipt.",
+      "hypothesis": "Extending the pinned local parity contract with one bounded syntax-hash child can prove all five source behaviors and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding retirement, runtime, credential, scheduling, deployment, and fixed-cost authority.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"tool","path":"tools/syntaxhash"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
+        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
+        {"kind":"artifact","path":"syntax-hash-evidence","redacted":true}
+      ],
+      "decision": "Admit syntax-hash as the eighth of 56 source workflows with all five source behaviors mapped natively, zero required adapters, exact loop environment and source SHA-256 470d347daa1b35680fb4c899ec234e3ead152356c8f38ab07d521fbcdf194ec7, redacted content-addressed evidence, and a mode-0600 syntax-hash receipt. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 48 workflows remain for separate bounded review.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

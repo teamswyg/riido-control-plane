@@ -1,9 +1,6 @@
 package main
 
-import (
-	"errors"
-	"strings"
-)
+import "errors"
 
 func verify(repoRoot, contractPath string) (evidence, error) {
 	document, err := loadManifest(repoRoot, contractPath)
@@ -33,6 +30,7 @@ func verify(repoRoot, contractPath string) (evidence, error) {
 	recordModuleDecompositionCases(repoRoot, document, record)
 	recordPreCommitCases(repoRoot, document, record)
 	recordMigrationLedgerCases(repoRoot, document, record)
+	recordSyntaxHashCases(repoRoot, document, record)
 	result := newEvidence(document, cases)
 	if result.Decision != "passed" {
 		return result, errors.New("control plane baseline CI parity evidence failed closed")
@@ -66,10 +64,4 @@ func newEvidence(document manifest, cases map[string]string) evidence {
 		}
 	}
 	return result
-}
-
-func verifyClassification(document manifest) bool {
-	return document.Classification.Code == "baseline_go_ci_native_parity_source_complete" &&
-		strings.Contains(document.Classification.Meaning, "legacy workflow") &&
-		len(document.Classification.DoesNotClaim) == 5
 }

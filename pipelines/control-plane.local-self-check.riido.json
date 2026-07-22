@@ -35,6 +35,7 @@
       "tools/moduledecomposition",
       "tools/precommitbaseline",
       "tools/migrationledger",
+      "tools/syntaxhash",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -133,6 +134,13 @@
         "want_paths": ["out/executable-knowledge-coverage.json"],
         "want_sha256_present": true,
         "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "syntax-hash-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/syntax-hash-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-syntax-hash.v1"
       }
     ],
     "source_checks": [
@@ -148,12 +156,14 @@
           "16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480",
           "338db1065406d91b511c7fd8838f7b18964aabadbea8e2b4039cc9aa8e89c104",
           "636e8b00f5ed7df631dc5a17d1560b281b0ab6c99be255afb9dafcec971254b1",
+          "470d347daa1b35680fb4c899ec234e3ead152356c8f38ab07d521fbcdf194ec7",
           "https://github.com/teamswyg/riido-control-plane/issues/1039",
           "https://github.com/teamswyg/riido-control-plane/issues/1041",
           "https://github.com/teamswyg/riido-control-plane/issues/1043",
           "https://github.com/teamswyg/riido-control-plane/issues/1045",
           "https://github.com/teamswyg/riido-control-plane/issues/1047",
           "https://github.com/teamswyg/riido-control-plane/issues/1049",
+          "https://github.com/teamswyg/riido-control-plane/issues/1051",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -306,6 +316,30 @@
           "umask 077",
           "MigrationLedgerCommandExact",
           "out/migration-ledger-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "syntax-hash-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_syntax_hash_cases.go",
+        "contains": [
+          "syntax_hash_workflow_digest_is_exact",
+          "syntax_hash_five_source_behaviors_are_native",
+          "syntax_hash_pipeline_preserves_order",
+          "syntax_hash_authority_remains_zero",
+          "syntax_hash_classification_is_bounded",
+          "syntax_hash_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "syntax-hash-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_syntax_hash_child.go",
+        "contains": [
+          "470d347daa1b35680fb4c899ec234e3ead152356c8f38ab07d521fbcdf194ec7",
+          "syntax_hash_graph_spike_loop",
+          "umask 077",
+          "SyntaxHashGoldenCommandExact",
+          "out/syntax-hash-evidence.json",
           "actions/upload-artifact@v7"
         ]
       },
@@ -508,6 +542,25 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "verify-syntax-hash-golden-locks",
+      "kind": "shell",
+      "command": "export RIIDO_LOOP_IDS=syntax_hash_graph_spike_loop && go test ./tools/contextmap ./tools/syntaxhash ./awsadapters ./cmd/riido_ai_server ./internal/riidoaiserver ./internal/repoidentity ./internal/contractscompat ./tools/requestauth ./tools/healthreadycmd ./tools/runtimeboundary ./tools/runtimecdownership ./tools/deploypolicy ./tools/containercontract ./tools/containercontract/dockerfile ./tools/configreference ./tools/storesaferouting ./tools/publicpageslive ./tools/gocibaseline ./tools/moduledecomposition ./tools/controlplaneaudit ./tools/controlplaneperf ./tools/controlplanepressure ./tools/aiagentload ./tools/harnesspromotion ./tools/loopclosureaudit ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision ./tools/looprefreshdispatch ./tools/evidencegraph ./tools/loopregistry ./tools/operationalreadiness ./tools/precommitbaseline ./tools/workflowevidence ./tools/liveworkflowevidence ./tools/aigeneratedsmokematrix ./tools/apiclientdelivery ./tools/figmaprojection ./tools/aiagentclientapi ./tools/generatedclienthandoff ./tools/reactquerygen ./tools/storesnapshotoutbox ./tools/aiagentthreadsnapshot ./tools/webfrontendapi ./tools/aiagentrisk ./tools/migrationledger ./tools/metricshttpadapter ./tools/agentcatalogrbac ./tools/reviewaccountseed ./tools/integrationmatrix ./tools/openquestions ./tools/repositoryreadme ./tools/knowledgecoverage ./tools/dependencyallowlist ./tools/providerstatus ./tools/agentruntimebinding ./tools/assignmentjournal ./tools/cloudwatchemf ./tools/saascontrolplane ./tools/snapshotcqrsgate -run 'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RiidoAIServer|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|RuntimeCDOwnership|DeployPolicy|ContainerContract|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|ModuleDecomposition|ControlPlaneAudit|ControlPlanePerformance|ControlPlanePressure|AIAgentLoad|HarnessPromotion|LoopClosureAudit|ClosedLoopCandidateIntake|ClosedLoopCandidateDecision|LoopRefreshDispatch|EvidenceGraph|LoopRegistry|OperationalReadiness|PreCommitBaseline|WorkflowEvidence|LiveWorkflowEvidence|RunWrites|APIClientDelivery|FigmaProjection|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|ReviewAccountSeed|IntegrationMatrix|OpenQuestions|RepositoryReadme|KnowledgeCoverage|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate|AIAgentThreadSnapshot|ReactQueryGen)BehaviorGolden|GeneratedClientHandoff' -count=1"
+    },
+    {
+      "id": "verify-syntax-hash",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=syntax_hash_graph_spike_loop && mkdir -p out && go test ./tools/syntaxhash -count=1 && go run ./tools/syntaxhash -check-doc -evidence-out out/syntax-hash-evidence.json"
+    },
+    {
+      "id": "collect-syntax-hash-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/syntax-hash-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -538,6 +591,10 @@
     "migration-ledger workflow digest remains exact and unedited",
     "dependency, migration-ledger and executable-knowledge behavior maps with zero adapters",
     "migration-ledger and executable-knowledge evidence is redacted, content-addressed and mode 0600",
-    "migration-ledger workflow retirement and runtime authority remain zero"
+    "migration-ledger workflow retirement and runtime authority remain zero",
+    "syntax-hash workflow digest remains exact and unedited",
+    "all five syntax-hash source behaviors map with zero adapters",
+    "syntax-hash evidence is redacted, content-addressed and mode 0600",
+    "syntax-hash workflow retirement and runtime authority remain zero"
   ]
 }
