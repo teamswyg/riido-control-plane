@@ -19,17 +19,17 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Direct SSOT docs with CI evidence | 0 |
 | Standalone executable manifests | 3 |
 | Standalone executable manifests with strict CI evidence | 3 |
-| Source SSOT manifests | 2 |
-| Source SSOT manifests with executable loop | 2 |
-| Source SSOT manifests with strict CI evidence | 2 |
+| Source SSOT manifests | 3 |
+| Source SSOT manifests with executable loop | 3 |
+| Source SSOT manifests with strict CI evidence | 3 |
 | Contract artifacts | 4 |
 | Contract artifacts with owner evidence | 4 |
 | Imported manifests | 1 |
 | Imported manifests with projection evidence | 1 |
 | Owned manifests | 9 |
 | Owned manifests with owner evidence | 9 |
-| Executable manifest inventory | 58 |
-| Tracked executable manifests | 58 |
+| Executable manifest inventory | 60 |
+| Tracked executable manifests | 60 |
 | Registered manual docs | 0 |
 | Scanned docs | 42 |
 
@@ -40,14 +40,16 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | `docs` | 50 | `docs/20-domain/agent-catalog-rbac.riido.json`<br>`docs/20-domain/agent-runtime-binding.riido.json`<br>`docs/20-domain/ai-agent-client-api.riido.json` |
 | `contracts` | 4 | `contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json`<br>`contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json`<br>`contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json` |
 | `.` | 2 | `README.riido.json`<br>`dependency_allowlist.riido.json` |
+| `config` | 1 | `config/ci/baseline-go-workflow-parity.riido.json` |
 | `internal` | 1 | `internal/riidoaiserver/review_account_seed.riido.json` |
 | `packaging` | 1 | `packaging/containers/riido_ai_server_container.riido.json` |
+| `pipelines` | 1 | `pipelines/control-plane.local-self-check.riido.json` |
 
 ## Manifest Loop Inventory
 
-- Complete manifest loops: `58`
-- Direct manifest loops: `46`
-- Delegated manifest loops: `12`
+- Complete manifest loops: `60`
+- Direct manifest loops: `47`
+- Delegated manifest loops: `13`
 - Missing manifest loops: `0`
 - Missing loop budget: `0`
 
@@ -61,7 +63,7 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | --- | --- |
 | Observe | Executable documentation coverage can look healthy while direct SSOT readers, standalone executable manifests, non-doc source SSOT manifests, imported manifest mirrors, owned manifests, imported contract artifacts, or newly added *.riido.json files omit the observe/hypothesis/execute/evaluate/retrospective chain, CI evidence, declared workflow ownership, uploaded artifact binding, strict missing-file behavior, or migration history remains manual prose. |
 | Hypothesis | A meta-coverage manifest can make manual debt, generated migration readers, direct-SSOT loop coverage, direct-SSOT CI evidence, standalone executable manifests, source SSOT manifests, imported manifest mirrors, owned manifests, imported contract artifacts, repository-wide manifest inventory with bounded samples, declared workflow evidence ownership, generated artifact collection, and strict artifact upload failure modes visible before review relies on memory. |
-| Execute | Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifest evidence_tool to match the generated marker tool, require generated reader manifests to bind workflow run steps to generator check-doc/evidence-out execution, require standalone manifests to bind evidence_tool execution to a strict uploaded evidence-out artifact, require source SSOT manifests to define id/assertions/loop and be consumed by their evidence tool with evidence-out, require contract artifacts to be declared by a strict-evidence owner manifest, require imported manifest mirrors to match their owner pointer and strict projection evidence, require owned manifests to be declared by strict-evidence owner manifests, require every *.riido.json file to appear in the tracked manifest inventory with bounded group samples, require one evidence_artifact upload step to own the evidence-out path and if-no-files-found:error, and publish coverage evidence in CI. |
+| Execute | Scan markdown under configured roots and explicit files, classify generated/direct/manual surfaces, verify direct SSOT evidence loops, require direct SSOT evidence tools, require generated reader manifest evidence_tool to match the generated marker tool, require generated reader manifests to bind workflow run steps to generator check-doc/evidence-out execution, require standalone manifests to bind evidence_tool execution to a strict uploaded evidence-out artifact, require source SSOT manifests to define id/assertions/loop and be consumed by their evidence tool with evidence-out, admit only active private riido-ci pipelines with required attestation and redacted always-collected artifacts as alternate evidence routes, require contract artifacts to be declared by a strict-evidence owner manifest, require imported manifest mirrors to match their owner pointer and strict projection evidence, require owned manifests to be declared by strict-evidence owner manifests, require every *.riido.json file to appear in the tracked manifest inventory with bounded group samples, require one evidence_artifact upload step to own the evidence-out path and strict missing-file behavior, and publish coverage evidence in CI. |
 | Evaluate | The verifier fails on unregistered manual docs, missing manual debt paths, stale generated coverage, direct SSOT manifests without a complete loop, direct SSOT manifests without CI evidence, standalone manifests without loop-backed strict CI evidence, source SSOT manifests without id/assertions/loop metadata, source SSOT manifests without strict CI evidence, imported manifest mirrors without owner-projection evidence, owned manifests without owner evidence, contract artifacts without owner-manifest evidence, untracked executable manifests, missing manifest inventory samples, generated manifests whose evidence_tool contradicts the generated marker, generated manifests whose declared workflow run steps do not run the generator, generated manifests whose upload-artifact step does not jointly own the generator evidence-out path and strict missing-file behavior, or generated evidence uploads that warn on missing files. |
 | Retrospective | This keeps the repository evidence-driven: migration history is generated from a ledger, standalone manifests carry their own loop and strict evidence artifact chain, source SSOT manifests carry their own executable loop and show which verifier consumes them, imported manifest mirrors show which projection proves them, owned manifests show which generated owner proves them, imported contract artifacts show which owner manifest proves them, repository-wide manifest inventory plus bounded samples prevents new executable knowledge from going dark, direct SSOT readers carry loops and evidence tools, generated readers bind generator execution, evidence-out path, and upload step ownership to strict durable artifacts, and future manual debt must be registered explicitly. |
 
@@ -93,7 +95,7 @@ None.
 - a generated reader doc manifest evidence_artifact must upload the generator evidence-out path and if-no-files-found:error from the same upload-artifact step
 - a standalone executable manifest must define an evidence loop and upload its evidence_tool evidence-out path with if-no-files-found:error
 - a source SSOT manifest must define id, assertions, and a complete evidence loop
-- a source SSOT manifest must be consumed by its evidence_tool and uploaded as strict CI evidence
+- a source SSOT manifest must be consumed by its evidence_tool and uploaded as strict CI evidence through GitHub Actions or an attested private riido-ci pipeline
 - a contract artifact must be declared by an owner manifest whose generated reader has strict CI evidence
 - an imported manifest mirror must match its owner pointer and have strict projection evidence
 - an owned manifest must be declared by its owner manifest and have strict owner evidence

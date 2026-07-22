@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const knowledgeCoverageBehaviorGoldenSHA256 = "ba97a789f926e4b64fbaf9a9ad685a48534da83697a9ba20f26d7fcb2fd2fd60"
+const knowledgeCoverageBehaviorGoldenSHA256 = "dd48e8846b1140991839d295cc01cae469ad40c47a0e71c373a57ba5ab1d9184"
 
 func TestKnowledgeCoverageBehaviorGolden(t *testing.T) {
 	root, err := filepath.Abs("../..")

@@ -22,6 +22,9 @@ func trackedManifestSet(root string, m manifest, docs []docClass) map[string]boo
 	for _, owned := range m.OwnedManifests {
 		addTrackedManifest(root, tracked, owned.Path)
 	}
+	for _, pipeline := range m.RiidoPipelines {
+		addTrackedManifest(root, tracked, pipeline.Path)
+	}
 	return tracked
 }
 

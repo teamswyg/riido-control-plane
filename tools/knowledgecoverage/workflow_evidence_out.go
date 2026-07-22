@@ -3,6 +3,15 @@ package main
 import "strings"
 
 func workflowEvidenceOutPaths(root, workflowPath, tool string) []string {
+	if pipeline, ok := readRiidoPipeline(root, workflowPath); ok {
+		var paths []string
+		for _, command := range riidoPipelineCommands(pipeline) {
+			if workflowCommandRunsEvidenceTool(command, tool) {
+				paths = append(paths, workflowCommandEvidenceOutPaths(command)...)
+			}
+		}
+		return emptyIfNil(paths)
+	}
 	data, err := readWorkflow(root, workflowPath)
 	if err != nil {
 		return nil

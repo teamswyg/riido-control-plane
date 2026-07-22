@@ -14,6 +14,7 @@ type manifest struct {
 	ContractArtifacts  []contractArtifact `json:"contract_artifacts"`
 	ImportedManifests  []importedManifest `json:"imported_manifests"`
 	OwnedManifests     []ownedManifest    `json:"owned_manifests"`
+	RiidoPipelines     []riidoPipelineRef `json:"riido_ci_pipelines"`
 	ManualGroups       []manualGroup      `json:"manual_groups"`
 	ManifestLoopBudget manifestLoopBudget `json:"manifest_loop_budget"`
 	Assertions         []string           `json:"assertions"`

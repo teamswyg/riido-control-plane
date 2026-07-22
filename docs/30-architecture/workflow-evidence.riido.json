@@ -6,12 +6,16 @@
   "workflow": ".github/workflows/workflow-evidence.yml",
   "evidence_artifact": "workflow-evidence",
   "workflow_root": ".github/workflows",
+  "pipeline_files": [
+    "pipelines/control-plane.local-self-check.riido.json"
+  ],
   "accepted_gaps": [],
   "assertions": [
     "workflows with executable checks must either publish evidence artifacts or be registered as accepted gaps",
     "artifact uploads must fail closed with if-no-files-found:error",
     "each evidence-out path must be uploaded by a strict artifact step",
-    "every evidence-out capable tool must be invoked by at least one workflow",
+    "every evidence-out capable tool must be invoked by at least one GitHub Actions workflow or declared riido-ci pipeline",
+    "declared riido-ci evidence routes must be active, private, attested, redacted, and always collected",
     "every evidence-out capable tool must have an evidence-out invocation bound to an uploaded artifact",
     "workflow inventory must include both .yml and .yaml GitHub Actions files",
     "accepted gaps are debt, not completion",
@@ -22,8 +26,8 @@
   ],
   "loop": {
     "observation": "Several workflows execute tests or live checks while durable JSON evidence can be missing, non-strict, disconnected from the uploaded artifact path, produced by tools that no workflow invokes, produced by tools that are invoked only without evidence-out, hidden behind an unscanned workflow file extension, noisy with GitHub Actions Node runtime deprecation annotations, or reused after its own coverage evidence has gone stale.",
-    "hypothesis": "A workflow evidence manifest can make CI observability debt explicit, prove that each evidence-out file is bound to a fail-closed artifact upload, ensure evidence-capable tools are exercised by public CI in evidence-producing mode, cover every GitHub Actions workflow extension, reject action versions known to emit runtime deprecation annotations, and carry a self-expiring freshness window refreshed by a scheduled workflow.",
-    "execute": "Scan .yml and .yaml GitHub Actions workflows, classify evidence coverage, require any executable workflow gap to be registered, require artifact upload steps to fail closed, require every evidence-out path to be uploaded, compare evidence-out capable tools with workflow invocations, require tool-level evidence-out bindings, publish generated_at/expires_at/evidence_ttl_hours/workflow_scheduled/strict_artifact_upload, require the workflow evidence workflow to run on a schedule with strict artifact upload, and fail on deprecated action references.",
+    "hypothesis": "A workflow evidence manifest can make CI observability debt explicit, prove that each evidence-out file is bound to a fail-closed artifact upload, ensure evidence-capable tools are exercised by a declared execution route in evidence-producing mode, cover every GitHub Actions workflow extension, admit only attested private riido-ci routes with redacted always-collected artifacts, reject action versions known to emit runtime deprecation annotations, and carry a self-expiring freshness window refreshed by a scheduled workflow.",
+    "execute": "Scan .yml and .yaml GitHub Actions workflows, classify evidence coverage, require any executable workflow gap to be registered, require artifact upload steps to fail closed, load explicitly declared riido-ci pipeline files and fail closed unless they are active, private, attested, redacted and always collected, require every evidence-out path to be uploaded, compare evidence-out capable tools with declared execution-route invocations, require tool-level evidence-out bindings, publish generated_at/expires_at/evidence_ttl_hours/workflow_scheduled/strict_artifact_upload, require the workflow evidence workflow to run on a schedule with strict artifact upload, and fail on deprecated action references.",
     "evaluate": "The verifier fails on unregistered executable workflows, non-strict artifact uploads, missing evidence-out upload bindings, evidence-capable tools with no workflow coverage, evidence-capable tools without an uploaded evidence-out invocation, deprecated action references, stale generated docs, unused accepted-gap entries, workflow extension drift, missing freshness metadata, missing scheduled refresh, or missing strict artifact upload.",
     "retrospective": "The repository can now distinguish evidence-covered workflows from accepted debt, keep artifact evidence fail-closed, prove evidence-out files reach durable artifacts, require evidence tools to be exercised in CI, require each evidence tool to produce uploaded evidence, scan both workflow extensions, keep CI annotation debt out, publish a 24h freshness window with scheduled and strict-upload proof, and reduce the gap slice by slice."
   }

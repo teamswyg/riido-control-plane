@@ -353,6 +353,12 @@
       "must_not_own": "endpoint contract changes, live production load execution, or infra scaling policy"
     },
     {
+      "path": "tools/ciworkflowparity",
+      "kind": "policy-evidence-tool",
+      "role": "Exact baseline GitHub Actions to native riido-ci parity verifier with credential-free runner pin and zero retirement authority.",
+      "must_not_own": "legacy workflow retirement, controller scheduling, deployment, runtime behavior, authentication, or fixed-cost resources"
+    },
+    {
       "path": "tools/dependencyallowlist",
       "kind": "policy-tool",
       "role": "Direct Go dependency allowlist verifier.",
@@ -697,7 +703,7 @@
     {
       "path": "tools/workflowevidence",
       "kind": "meta-evidence-tool",
-      "role": "GitHub Actions evidence coverage verifier.",
+      "role": "GitHub Actions and declared attested private riido-ci evidence-route coverage verifier.",
       "must_not_own": "domain-specific test semantics or private operator evidence"
     },
     {
