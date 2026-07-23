@@ -10,6 +10,7 @@ type childNativeMapping struct {
 	ModuleDecomposition commandMapping  `json:"module_decomposition,omitempty"`
 	PreCommitBaseline   commandMapping  `json:"pre_commit_baseline,omitempty"`
 	MigrationLedger     commandMapping  `json:"migration_ledger,omitempty"`
+	ConfigReference     commandMapping  `json:"config_reference,omitempty"`
 	SyntaxHashGolden    commandMapping  `json:"syntax_hash_golden,omitempty"`
 	SyntaxHash          commandMapping  `json:"syntax_hash,omitempty"`
 	ModuleDownload      commandMapping  `json:"module_download,omitempty"`
@@ -30,6 +31,7 @@ type childParityClaim struct {
 	ModuleDecompositionCommandExact   bool `json:"module_decomposition_command_exact,omitempty"`
 	PreCommitBaselineCommandExact     bool `json:"pre_commit_baseline_command_exact,omitempty"`
 	MigrationLedgerCommandExact       bool `json:"migration_ledger_command_exact,omitempty"`
+	ConfigReferenceCommandExact       bool `json:"config_reference_command_exact,omitempty"`
 	SyntaxHashLoopEnvironmentExact    bool `json:"syntax_hash_loop_environment_exact,omitempty"`
 	SyntaxHashGoldenCommandExact      bool `json:"syntax_hash_golden_command_exact,omitempty"`
 	SyntaxHashCommandExact            bool `json:"syntax_hash_command_exact,omitempty"`

@@ -17,7 +17,7 @@ func loadManifest(repoRoot, path string) (manifest, error) {
 		document.CheckedOn != "2026-07-22" || len(document.Assertions) < 5 ||
 		!completeLoop(document.Loop) ||
 		len(document.Pipelines) != 1 || document.Pipelines[0] != document.Runner.Pipeline ||
-		len(document.BoundedChildren) != 7 {
+		len(document.BoundedChildren) != 8 {
 		return manifest{}, errors.New("baseline CI parity contract identity drifted")
 	}
 	child := document.BoundedChildren[0]
@@ -60,6 +60,11 @@ func loadManifest(repoRoot, path string) (manifest, error) {
 		syntaxHashChild.Issue != syntaxHashIssueURL || syntaxHashChild.ParentIssue != parentIssueURL ||
 		len(syntaxHashChild.Assertions) < 5 || !completeLoop(syntaxHashChild.Loop) {
 		return manifest{}, errors.New("syntax hash parity child identity drifted")
+	}
+	configReferenceChild := document.BoundedChildren[7]
+	if configReferenceChild.ID != "control-plane-config-reference-ci-parity" ||
+		configReferenceChild.Issue != configReferenceIssueURL || configReferenceChild.ParentIssue != parentIssueURL || len(configReferenceChild.Assertions) < 5 || !completeLoop(configReferenceChild.Loop) {
+		return manifest{}, errors.New("config reference parity child identity drifted")
 	}
 	return document, nil
 }
