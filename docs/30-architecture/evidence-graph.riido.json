@@ -21117,6 +21117,37 @@
       ],
       "decision": "Admit open-questions as the twelfth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact open-decision loop environment and source SHA-256 a73744d4a386246d66f1c599953b8411a4740ca3616957857ed415ef6500c937, redacted content-addressed evidence, and mode-0600 open-questions and executable-knowledge receipts. Preserve the source workflow unchanged and keep scheduling, retirement, runtime, credential, deployment, and fixed-cost authority false; 44 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "integration_matrix_native_ci_parity_loop",
+      "observation": "Control Plane issue #1034 had thirteen native riido-ci parity slices, but 43 of 56 GitHub Actions workflows remained unmapped. The integration-matrix workflow was idle and credential-free, yet its exact source digest, dependency policy, integration-matrix verification, executable-knowledge verification, strict artifact behavior, and zero-authority migration boundary were not represented in the native parity receipt.",
+      "hypothesis": "Extending the pinned local parity contract with one bounded integration-matrix child can prove all six source behaviors and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding scheduling, retirement, runtime, credential, deployment, and fixed-cost authority.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+      ],
+      "verifiers": [
+        {"kind":"tool","path":"tools/syntaxhash"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
+        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
+        {"kind":"artifact","path":"dependency-allowlist-evidence","redacted":true},
+        {"kind":"artifact","path":"integration-matrix-evidence","redacted":true},
+        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+      ],
+      "decision": "Admit integration-matrix as the fourteenth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact source SHA-256 0d2df869bc0836ba70ac9d109d14c03ef9b927ac960d85a699190fc5d6ed9f61, redacted content-addressed evidence, and mode-0600 integration-matrix and executable-knowledge receipts. Preserve the source workflow unchanged and keep scheduling, retirement, runtime, credential, deployment, and fixed-cost authority false; 42 workflows remain for separate bounded review.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
