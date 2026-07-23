@@ -37,6 +37,7 @@ func verify(repoRoot, contractPath string) (evidence, error) {
 	recordOpenQuestionsCases(repoRoot, document, record)
 	recordHarnessPromotionCases(repoRoot, document, record)
 	recordIntegrationMatrixCases(repoRoot, document, record)
+	recordLoopClosureAuditCases(repoRoot, document, record)
 	result := newEvidence(document, cases)
 	if result.Decision != "passed" {
 		return result, errors.New("control plane baseline CI parity evidence failed closed")
