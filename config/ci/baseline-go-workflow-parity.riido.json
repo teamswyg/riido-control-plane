@@ -1065,6 +1065,118 @@
         "evaluate": "Require zero adapters, exact loop and workflow-evidence behavior, mode-0600 output, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
         "retrospective": "Keep the source workflow byte-exact and count this as the eleventh bounded parity mapping only; forty-five workflows and any retirement remain separately owner-reviewed."
       }
+    },
+    {
+      "id": "control-plane-open-questions-ci-parity",
+      "issue": "https://github.com/teamswyg/riido-control-plane/issues/1059",
+      "parent_issue": "https://github.com/teamswyg/riido-control-plane/issues/1034",
+      "baseline": {
+        "source_revision": "61753756e48290103ab7a20b876fafa747cd000f",
+        "workflow": ".github/workflows/open-questions.yml",
+        "workflow_sha256": "a73744d4a386246d66f1c599953b8411a4740ca3616957857ed415ef6500c937",
+        "workflow_name": "open-questions",
+        "job": "open-questions",
+        "tracked_workflow_count": 56
+      },
+      "native_mapping": {
+        "checkout": {
+          "source": "actions/checkout@v7",
+          "native_kind": "checkout",
+          "adapter_required": false
+        },
+        "go_toolchain": {
+          "source": "actions/setup-go@v6",
+          "native_kind": "worker_toolchain",
+          "version_source": "go.mod",
+          "version": "1.26.5",
+          "cache": false,
+          "adapter_required": false
+        },
+        "dependency_allowlist": {
+          "source_command": "go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json",
+          "native_command": "mkdir -p out && go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json -evidence-out out/dependency-allowlist-evidence.json",
+          "native_kind": "shell",
+          "evidence_path": "out/dependency-allowlist-evidence.json",
+          "adapter_required": false
+        },
+        "open_questions": {
+          "source_command": "mkdir -p out && go test ./tools/openquestions -count=1 && go run ./tools/openquestions -check-doc -evidence-out out/open-questions-evidence.json",
+          "native_command": "umask 077 && export RIIDO_LOOP_IDS=open_decision_queue && mkdir -p out && go test ./tools/openquestions -count=1 && go run ./tools/openquestions -check-doc -evidence-out out/open-questions-evidence.json",
+          "native_kind": "shell",
+          "evidence_path": "out/open-questions-evidence.json",
+          "adapter_required": false
+        },
+        "executable_knowledge": {
+          "source_command": "go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json",
+          "native_command": "umask 077 && export RIIDO_LOOP_IDS=open_decision_queue && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json",
+          "native_kind": "shell",
+          "evidence_path": "out/executable-knowledge-coverage.json",
+          "adapter_required": false
+        },
+        "evidence_artifact": {
+          "source": "actions/upload-artifact@v7",
+          "native_kind": "artifact",
+          "paths": [
+            "out/open-questions-evidence.json",
+            "out/executable-knowledge-coverage.json"
+          ],
+          "redaction": "required",
+          "run_when": "always",
+          "if_no_files_found": "error",
+          "content_addressed": true,
+          "adapter_required": false
+        }
+      },
+      "parity_claim": {
+        "all_source_steps_mapped": true,
+        "required_adapter_count": 0,
+        "dependency_allowlist_behavior_exact": true,
+        "open_questions_command_exact": true,
+        "open_questions_loop_environment_exact": true,
+        "executable_knowledge_command_exact": true,
+        "secure_evidence_permissions": true,
+        "source_workflow_edited": false,
+        "source_workflow_executed_by_this_slice": false
+      },
+      "authority": {
+        "workflow_retirement_authorized": false,
+        "workflow_file_effect": "none",
+        "auth_jwt_pep_effect": "none",
+        "aws_terraform_deployment_effect": "none",
+        "runtime_effect": "none",
+        "fixed_cost_resource_effect": "none",
+        "requires_separate_owner_reviewed_retirement": true
+      },
+      "rollback": {
+        "baseline_workflow_preserved": true,
+        "method": "retain_exact_baseline_until_separate_retirement_parity_review",
+        "blocked_to_passed_private_policy_pair_required": true
+      },
+      "classification": {
+        "code": "open_questions_native_parity_source_complete",
+        "meaning": "The Control Plane open-questions and executable-knowledge checks can run through pinned riido-ci with the exact loop environment and native redacted artifact evidence while the legacy workflow and runtime authority remain unchanged.",
+        "does_not_claim": [
+          "all fifty-six workflows are migrated",
+          "the private repository CI policy currently passes",
+          "the open-questions workflow is retired",
+          "controller scheduling is admitted",
+          "deployment or runtime semantics changed"
+        ]
+      },
+      "assertions": [
+        "the open-questions GitHub Actions workflow digest remains exact",
+        "all six open-questions source behaviors map to native riido-ci behavior with zero adapters",
+        "dependency policy, loop environment, open-questions and executable-knowledge behavior remain exact",
+        "open-questions and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+        "workflow retirement, scheduling and runtime authority remain zero"
+      ],
+      "loop": {
+        "observation": "Eleven of fifty-six workflows had native parity, but the credential-free open-questions workflow remained outside the source-owned parity ledger.",
+        "hypothesis": "The pinned credential-free runner can preserve dependency policy, the exact open-decision loop environment, open-questions and executable-knowledge behavior plus always-collected evidence without editing or retiring the source workflow.",
+        "execute": "Pin the open-questions workflow digest, verify all six source behaviors, run both evidence commands with restrictive output permissions and collect the two artifacts as one redacted boundary.",
+        "evaluate": "Require zero adapters, exact dependency, loop, open-questions and knowledge behavior, mode-0600 outputs, passed central evidence and no workflow, scheduling, Auth, AWS, runtime or fixed-cost authority.",
+        "retrospective": "Keep the source workflow byte-exact and count this as the twelfth bounded parity mapping only; forty-four workflows and any scheduling or retirement remain separately owner-reviewed."
+      }
     }
   ],
   "runner": {

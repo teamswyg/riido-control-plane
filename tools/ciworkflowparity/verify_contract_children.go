@@ -18,6 +18,7 @@ func verifyBoundedChildIdentities(document manifest) error {
 		{"control-plane-config-reference-ci-parity", configReferenceIssueURL, "config reference parity child identity drifted"},
 		{"control-plane-executable-knowledge-ci-parity", executableKnowledgeIssueURL, "executable knowledge parity child identity drifted"},
 		{"control-plane-workflow-evidence-ci-parity", workflowEvidenceIssueURL, "workflow evidence parity child identity drifted"},
+		{"control-plane-open-questions-ci-parity", openQuestionsIssueURL, "open questions parity child identity drifted"},
 	}
 	for index, want := range expected {
 		child := document.BoundedChildren[index]

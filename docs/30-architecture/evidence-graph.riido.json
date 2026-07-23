@@ -21086,6 +21086,37 @@
       ],
       "decision": "Admit config-reference as the ninth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact source SHA-256 5cbf30d7a80482fc5f29daface720c3418d31448aaac7d18a2b57c3744683d89, redacted content-addressed evidence, and mode-0600 config-reference and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 47 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "open_questions_native_ci_parity_loop",
+      "observation": "Control Plane issue #1034 had eleven native riido-ci parity slices, but 45 of 56 GitHub Actions workflows remained unmapped. The open-questions workflow was idle and credential-free, yet its exact source digest, dependency policy, open-decision loop environment, open-questions verification, executable-knowledge verification, strict artifact behavior, and zero-authority migration boundary were not represented in the native parity receipt.",
+      "hypothesis": "Extending the pinned local parity contract with one bounded open-questions child can prove all six source behaviors and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding scheduling, retirement, runtime, credential, deployment, and fixed-cost authority.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+      ],
+      "verifiers": [
+        {"kind":"tool","path":"tools/syntaxhash"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
+        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
+        {"kind":"artifact","path":"dependency-allowlist-evidence","redacted":true},
+        {"kind":"artifact","path":"open-questions-evidence","redacted":true},
+        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+      ],
+      "decision": "Admit open-questions as the twelfth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact open-decision loop environment and source SHA-256 a73744d4a386246d66f1c599953b8411a4740ca3616957857ed415ef6500c937, redacted content-addressed evidence, and mode-0600 open-questions and executable-knowledge receipts. Preserve the source workflow unchanged and keep scheduling, retirement, runtime, credential, deployment, and fixed-cost authority false; 44 workflows remain for separate bounded review.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

@@ -15,57 +15,22 @@ func TestVerifyProvesNativeBaselineParityWithoutRetirement(t *testing.T) {
 		result.RetirementAuthorized || result.RuntimeEffect != "none" {
 		t.Fatalf("unexpected parity evidence: %+v", result)
 	}
-	if len(result.Cases) != 70 || len(result.BoundedChildren) != 10 ||
-		result.BoundedChildren[0].ID != "control-plane-repository-readme-ci-parity" ||
-		result.BoundedChildren[0].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[0].LegacyWorkflowPreserved ||
-		result.BoundedChildren[0].RetirementAuthorized ||
-		result.BoundedChildren[0].RuntimeEffect != "none" ||
-		result.BoundedChildren[1].ID != "control-plane-context-map-ci-parity" ||
-		result.BoundedChildren[1].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[1].LegacyWorkflowPreserved ||
-		result.BoundedChildren[1].RetirementAuthorized ||
-		result.BoundedChildren[1].RuntimeEffect != "none" ||
-		result.BoundedChildren[2].ID != "control-plane-go-ci-quality-parity" ||
-		result.BoundedChildren[2].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[2].LegacyWorkflowPreserved ||
-		result.BoundedChildren[2].RetirementAuthorized ||
-		result.BoundedChildren[2].RuntimeEffect != "none" ||
-		result.BoundedChildren[3].ID != "control-plane-module-decomposition-ci-parity" ||
-		result.BoundedChildren[3].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[3].LegacyWorkflowPreserved ||
-		result.BoundedChildren[3].RetirementAuthorized ||
-		result.BoundedChildren[3].RuntimeEffect != "none" ||
-		result.BoundedChildren[4].ID != "control-plane-pre-commit-baseline-ci-parity" ||
-		result.BoundedChildren[4].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[4].LegacyWorkflowPreserved ||
-		result.BoundedChildren[4].RetirementAuthorized ||
-		result.BoundedChildren[4].RuntimeEffect != "none" ||
-		result.BoundedChildren[5].ID != "control-plane-migration-ledger-ci-parity" ||
-		result.BoundedChildren[5].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[5].LegacyWorkflowPreserved ||
-		result.BoundedChildren[5].RetirementAuthorized ||
-		result.BoundedChildren[5].RuntimeEffect != "none" ||
-		result.BoundedChildren[6].ID != "control-plane-syntax-hash-ci-parity" ||
-		result.BoundedChildren[6].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[6].LegacyWorkflowPreserved ||
-		result.BoundedChildren[6].RetirementAuthorized ||
-		result.BoundedChildren[6].RuntimeEffect != "none" ||
-		result.BoundedChildren[7].ID != "control-plane-config-reference-ci-parity" ||
-		result.BoundedChildren[7].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[7].LegacyWorkflowPreserved ||
-		result.BoundedChildren[7].RetirementAuthorized ||
-		result.BoundedChildren[7].RuntimeEffect != "none" ||
-		result.BoundedChildren[8].ID != "control-plane-executable-knowledge-ci-parity" ||
-		result.BoundedChildren[8].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[8].LegacyWorkflowPreserved ||
-		result.BoundedChildren[8].RetirementAuthorized ||
-		result.BoundedChildren[8].RuntimeEffect != "none" ||
-		result.BoundedChildren[9].ID != "control-plane-workflow-evidence-ci-parity" ||
-		result.BoundedChildren[9].RequiredAdapterCount != 0 ||
-		!result.BoundedChildren[9].LegacyWorkflowPreserved ||
-		result.BoundedChildren[9].RetirementAuthorized ||
-		result.BoundedChildren[9].RuntimeEffect != "none" {
+	expected := []string{
+		"control-plane-repository-readme-ci-parity", "control-plane-context-map-ci-parity",
+		"control-plane-go-ci-quality-parity", "control-plane-module-decomposition-ci-parity",
+		"control-plane-pre-commit-baseline-ci-parity", "control-plane-migration-ledger-ci-parity",
+		"control-plane-syntax-hash-ci-parity", "control-plane-config-reference-ci-parity",
+		"control-plane-executable-knowledge-ci-parity", "control-plane-workflow-evidence-ci-parity",
+		"control-plane-open-questions-ci-parity",
+	}
+	if len(result.Cases) != 76 || len(result.BoundedChildren) != len(expected) {
 		t.Fatalf("unexpected cases: %+v", result.Cases)
+	}
+	for index, child := range result.BoundedChildren {
+		if child.ID != expected[index] || child.RequiredAdapterCount != 0 ||
+			!child.LegacyWorkflowPreserved || child.RetirementAuthorized ||
+			child.RuntimeEffect != "none" {
+			t.Fatalf("unexpected bounded child: %+v", child)
+		}
 	}
 }
