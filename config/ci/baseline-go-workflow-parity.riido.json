@@ -876,6 +876,100 @@
         "evaluate": "Require zero adapters, exact dependency/config-reference/knowledge behavior, mode-0600 outputs, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
         "retrospective": "Keep the source workflow byte-exact and count this as the ninth bounded parity mapping only; forty-seven workflows and any retirement remain separately owner-reviewed."
       }
+    },
+    {
+      "id": "control-plane-executable-knowledge-ci-parity",
+      "issue": "https://github.com/teamswyg/riido-control-plane/issues/1055",
+      "parent_issue": "https://github.com/teamswyg/riido-control-plane/issues/1034",
+      "baseline": {
+        "source_revision": "5c1251925749faf51c95a1f567a2f41d866ee31d",
+        "workflow": ".github/workflows/executable-knowledge-coverage.yml",
+        "workflow_sha256": "722c8b947b5738d827a4196cbc1716a804a19740277d2ced1fda1dd97497fd04",
+        "workflow_name": "executable-knowledge-coverage",
+        "job": "executable-knowledge-coverage",
+        "tracked_workflow_count": 56
+      },
+      "native_mapping": {
+        "checkout": {
+          "source": "actions/checkout@v7",
+          "native_kind": "checkout",
+          "adapter_required": false
+        },
+        "go_toolchain": {
+          "source": "actions/setup-go@v6",
+          "native_kind": "worker_toolchain",
+          "version_source": "go.mod",
+          "version": "1.26.5",
+          "cache": false,
+          "adapter_required": false
+        },
+        "executable_knowledge": {
+          "source_command": "mkdir -p out && go test ./tools/knowledgecoverage -count=1 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json",
+          "native_command": "umask 077 && mkdir -p out && go test ./tools/knowledgecoverage -count=1 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json",
+          "native_kind": "shell",
+          "evidence_path": "out/executable-knowledge-coverage.json",
+          "adapter_required": false
+        },
+        "evidence_artifact": {
+          "source": "actions/upload-artifact@v7",
+          "native_kind": "artifact",
+          "paths": [
+            "out/executable-knowledge-coverage.json"
+          ],
+          "redaction": "required",
+          "run_when": "always",
+          "if_no_files_found": "error",
+          "content_addressed": true,
+          "adapter_required": false
+        }
+      },
+      "parity_claim": {
+        "all_source_steps_mapped": true,
+        "required_adapter_count": 0,
+        "executable_knowledge_command_exact": true,
+        "secure_evidence_permissions": true,
+        "source_workflow_edited": false,
+        "source_workflow_executed_by_this_slice": false
+      },
+      "authority": {
+        "workflow_retirement_authorized": false,
+        "workflow_file_effect": "none",
+        "auth_jwt_pep_effect": "none",
+        "aws_terraform_deployment_effect": "none",
+        "runtime_effect": "none",
+        "fixed_cost_resource_effect": "none",
+        "requires_separate_owner_reviewed_retirement": true
+      },
+      "rollback": {
+        "baseline_workflow_preserved": true,
+        "method": "retain_exact_baseline_until_separate_retirement_parity_review",
+        "blocked_to_passed_private_policy_pair_required": true
+      },
+      "classification": {
+        "code": "executable_knowledge_native_parity_source_complete",
+        "meaning": "The dedicated Control Plane executable-knowledge check can run through pinned riido-ci with native redacted artifact evidence while the legacy workflow and runtime authority remain unchanged.",
+        "does_not_claim": [
+          "all fifty-six workflows are migrated",
+          "the private repository CI policy currently passes",
+          "the executable-knowledge workflow is retired",
+          "controller scheduling is admitted",
+          "deployment or runtime semantics changed"
+        ]
+      },
+      "assertions": [
+        "the executable-knowledge GitHub Actions workflow digest remains exact",
+        "all four executable-knowledge source behaviors map to native riido-ci behavior with zero adapters",
+        "the dedicated test and executable-knowledge commands remain exact",
+        "executable-knowledge evidence is redacted, content-addressed and mode 0600",
+        "workflow retirement and runtime authority remain zero"
+      ],
+      "loop": {
+        "observation": "Nine of fifty-six workflows had native parity, but the credential-free dedicated executable-knowledge workflow remained outside the source-owned parity ledger.",
+        "hypothesis": "The pinned credential-free runner can preserve the exact dedicated knowledge test and evidence command plus always-collected artifact behavior without editing or retiring the source workflow.",
+        "execute": "Pin the executable-knowledge workflow digest, verify all four source behaviors, execute its test and evidence command under restrictive permissions and collect the result as one redacted artifact.",
+        "evaluate": "Require zero adapters, exact dedicated knowledge behavior, mode-0600 output, passed central evidence and no workflow, Auth, AWS, runtime or fixed-cost authority.",
+        "retrospective": "Keep the source workflow byte-exact and count this as the tenth bounded parity mapping only; forty-six workflows and any retirement remain separately owner-reviewed."
+      }
     }
   ],
   "runner": {

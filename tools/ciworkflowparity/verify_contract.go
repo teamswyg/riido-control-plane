@@ -17,54 +17,11 @@ func loadManifest(repoRoot, path string) (manifest, error) {
 		document.CheckedOn != "2026-07-22" || len(document.Assertions) < 5 ||
 		!completeLoop(document.Loop) ||
 		len(document.Pipelines) != 1 || document.Pipelines[0] != document.Runner.Pipeline ||
-		len(document.BoundedChildren) != 8 {
+		len(document.BoundedChildren) != 9 {
 		return manifest{}, errors.New("baseline CI parity contract identity drifted")
 	}
-	child := document.BoundedChildren[0]
-	if child.ID != "control-plane-repository-readme-ci-parity" || child.Issue != readmeIssueURL ||
-		child.ParentIssue != parentIssueURL || len(child.Assertions) < 5 || !completeLoop(child.Loop) {
-		return manifest{}, errors.New("repository README parity child identity drifted")
-	}
-	contextChild := document.BoundedChildren[1]
-	if contextChild.ID != "control-plane-context-map-ci-parity" || contextChild.Issue != contextIssueURL ||
-		contextChild.ParentIssue != parentIssueURL || len(contextChild.Assertions) < 5 ||
-		!completeLoop(contextChild.Loop) {
-		return manifest{}, errors.New("context map parity child identity drifted")
-	}
-	goCIChild := document.BoundedChildren[2]
-	if goCIChild.ID != "control-plane-go-ci-quality-parity" || goCIChild.Issue != goCIIssueURL ||
-		goCIChild.ParentIssue != parentIssueURL || len(goCIChild.Assertions) < 5 ||
-		!completeLoop(goCIChild.Loop) {
-		return manifest{}, errors.New("go CI quality parity child identity drifted")
-	}
-	moduleChild := document.BoundedChildren[3]
-	if moduleChild.ID != "control-plane-module-decomposition-ci-parity" || moduleChild.Issue != moduleIssueURL ||
-		moduleChild.ParentIssue != parentIssueURL || len(moduleChild.Assertions) < 5 ||
-		!completeLoop(moduleChild.Loop) {
-		return manifest{}, errors.New("module decomposition parity child identity drifted")
-	}
-	preCommitChild := document.BoundedChildren[4]
-	if preCommitChild.ID != "control-plane-pre-commit-baseline-ci-parity" ||
-		preCommitChild.Issue != preCommitIssueURL || preCommitChild.ParentIssue != parentIssueURL ||
-		len(preCommitChild.Assertions) < 5 || !completeLoop(preCommitChild.Loop) {
-		return manifest{}, errors.New("pre-commit baseline parity child identity drifted")
-	}
-	migrationChild := document.BoundedChildren[5]
-	if migrationChild.ID != "control-plane-migration-ledger-ci-parity" ||
-		migrationChild.Issue != migrationIssueURL || migrationChild.ParentIssue != parentIssueURL ||
-		len(migrationChild.Assertions) < 5 || !completeLoop(migrationChild.Loop) {
-		return manifest{}, errors.New("migration ledger parity child identity drifted")
-	}
-	syntaxHashChild := document.BoundedChildren[6]
-	if syntaxHashChild.ID != "control-plane-syntax-hash-ci-parity" ||
-		syntaxHashChild.Issue != syntaxHashIssueURL || syntaxHashChild.ParentIssue != parentIssueURL ||
-		len(syntaxHashChild.Assertions) < 5 || !completeLoop(syntaxHashChild.Loop) {
-		return manifest{}, errors.New("syntax hash parity child identity drifted")
-	}
-	configReferenceChild := document.BoundedChildren[7]
-	if configReferenceChild.ID != "control-plane-config-reference-ci-parity" ||
-		configReferenceChild.Issue != configReferenceIssueURL || configReferenceChild.ParentIssue != parentIssueURL || len(configReferenceChild.Assertions) < 5 || !completeLoop(configReferenceChild.Loop) {
-		return manifest{}, errors.New("config reference parity child identity drifted")
+	if err := verifyBoundedChildIdentities(document); err != nil {
+		return manifest{}, err
 	}
 	return document, nil
 }
