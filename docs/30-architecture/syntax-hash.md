@@ -68,7 +68,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `repository_readme_guard` | `tools/repositoryreadme` | 100% | `787a92426714` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `repository_readme_path_adapter` | `tools/repositoryreadme/pathutil` | 100% | `eb8457dd7977` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `knowledge_coverage_guard` | `tools/knowledgecoverage` | 100% | `1df4ce6f3352` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `baseline_ci_parity_guard` | `tools/ciworkflowparity` | 100% | `cbc1e4af4dbd` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
+| `baseline_ci_parity_guard` | `tools/ciworkflowparity` | 100% | `b95e2146b675` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `dependency_allowlist_guard` | `tools/dependencyallowlist` | 100% | `5a72db5d07b4` | `context_map_must_guard_public_boundaries` |
 | `dependency_allowlist_layers_adapter` | `tools/dependencyallowlist/layers` | 100% | `9acb9c8eebf2` | `context_map_must_guard_public_boundaries` |
 | `provider_status_guard` | `tools/providerstatus` | 100% | `f1f9b73bec0a` | `store_safe_routing_must_preserve_provider_status_decisions` |
@@ -120,8 +120,8 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 ## Repository Coverage
 
-- Go files: `3373`
-- tracked files: `3373`
+- Go files: `3378`
+- tracked files: `3378`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -167,16 +167,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3373`
-- unique syntax hashes: `3170`
+- tracked files: `3378`
+- unique syntax hashes: `3175`
 - compression gain: `203`
-- analysis reduction: `6.01%`
+- analysis reduction: `6.00%`
 - collision count: `0`
-- relocation mappings: `3373`
+- relocation mappings: `3378`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `109`
 - missing golden commands: `0`
-- efficiency score: `601`
+- efficiency score: `600`
 - compression score: `203`
-- weighted score: `804`
+- weighted score: `803`
