@@ -40,6 +40,7 @@
       "tools/workflowevidence",
       "tools/openquestions",
       "tools/harnesspromotion",
+      "tools/integrationmatrix",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -194,6 +195,20 @@
         "want_paths": ["out/harness-promotion-evidence.json"],
         "want_sha256_present": true,
         "want_json_schema_version": "riido-control-plane-harness-promotion-evidence.v1"
+      },
+      {
+        "name": "integration-matrix-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/integration-matrix-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-integration-matrix-evidence.v1"
+      },
+      {
+        "name": "integration-matrix-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
       }
     ],
     "source_checks": [
@@ -227,6 +242,8 @@
           "https://github.com/teamswyg/riido-control-plane/issues/1059",
           "ae94e1d9332d84e5d1f71ee0b7daa22e110d4a32342d8e7b3e874f3c36b0f762",
           "https://github.com/teamswyg/riido-control-plane/issues/1061",
+          "0d2df869bc0836ba70ac9d109d14c03ef9b927ac960d85a699190fc5d6ed9f61",
+          "https://github.com/teamswyg/riido-control-plane/issues/1063",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -521,6 +538,30 @@
           "umask 077",
           "HarnessPromotionLoopEnvironmentExact",
           "out/harness-promotion-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "integration-matrix-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_integration_matrix_cases.go",
+        "contains": [
+          "integration_matrix_workflow_digest_is_exact",
+          "integration_matrix_six_source_behaviors_are_native",
+          "integration_matrix_pipeline_preserves_order",
+          "integration_matrix_authority_remains_zero",
+          "integration_matrix_classification_is_bounded",
+          "integration_matrix_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "integration-matrix-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_integration_matrix_child.go",
+        "contains": [
+          "0d2df869bc0836ba70ac9d109d14c03ef9b927ac960d85a699190fc5d6ed9f61",
+          "umask 077",
+          "IntegrationMatrixCommandExact",
+          "out/integration-matrix-evidence.json",
+          "out/executable-knowledge-coverage.json",
           "actions/upload-artifact@v7"
         ]
       },
@@ -824,6 +865,26 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "verify-integration-matrix",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/integrationmatrix -count=1 && go run ./tools/integrationmatrix -check-doc -evidence-out out/integration-matrix-evidence.json"
+    },
+    {
+      "id": "verify-integration-matrix-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-integration-matrix-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/integration-matrix-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -878,6 +939,10 @@
     "harness-promotion workflow digest remains exact and unedited",
     "loop and harness-promotion behavior maps with zero adapters",
     "harness-promotion evidence is redacted, content-addressed and mode 0600",
-    "harness-promotion workflow scheduling, retirement and runtime authority remain zero"
+    "harness-promotion workflow scheduling, retirement and runtime authority remain zero",
+    "integration-matrix workflow digest remains exact and unedited",
+    "dependency, integration-matrix and executable-knowledge behavior maps with zero adapters",
+    "integration-matrix and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "integration-matrix workflow retirement and runtime authority remain zero"
   ]
 }

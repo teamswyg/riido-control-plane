@@ -18,8 +18,9 @@ const (
 	workflowEvidenceIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1057"
 	openQuestionsIssueURL       = "https://github.com/teamswyg/riido-control-plane/issues/1059"
 	harnessPromotionIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1061"
-	pipelineSteps               = 39
-	pipelineCases               = 22
-	pipelineChecks              = 30
-	pipelineGates               = 52
+	integrationMatrixIssueURL   = "https://github.com/teamswyg/riido-control-plane/issues/1063"
+	pipelineSteps               = 42
+	pipelineCases               = 24
+	pipelineChecks              = 32
+	pipelineGates               = 56
 )
