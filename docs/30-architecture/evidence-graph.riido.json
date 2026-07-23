@@ -21178,6 +21178,35 @@
       ],
       "decision": "Admit loop-closure-audit as the fifteenth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact loop environment and source SHA-256 a26fbcca723421a900bdddd2cba8da71079d1110c77acd561fe2e626ae601781, redacted content-addressed evidence, and two mode-0600 receipts. Preserve the source workflow unchanged and keep scheduling, dispatch, retirement, runtime, credential, deployment, and fixed-cost authority false; 41 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "evidence_graph_native_ci_parity_loop",
+      "observation": "Control Plane issue #1034 had fifteen native riido-ci parity slices, but 41 of 56 GitHub Actions workflows remained unmapped. The credential-free evidence-graph workflow was idle, yet its exact source digest, full-history checkout, cached Go setup, test, optional pull-request impact base, annotations, strict success-only artifact behavior, and zero-authority migration boundary were not represented in the native parity receipt.",
+      "hypothesis": "Extending the pinned local parity contract with one bounded evidence-graph child can prove all six source behaviors and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding scheduling, dispatch, pull-request admission, retirement, runtime, credential, deployment, and fixed-cost authority.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract",
+        "evidence_graph_evidence_must_expose_full_chain"
+      ],
+      "changes": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+      ],
+      "verifiers": [
+        {"kind":"tool","path":"tools/syntaxhash"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
+        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
+        {"kind":"artifact","path":"evidence-graph-evidence","redacted":true}
+      ],
+      "decision": "Admit evidence-graph as the sixteenth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact full-history, cached Go, impact-base and annotation behavior, exact source SHA-256 518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710, redacted content-addressed evidence, and a success-only mode-0600 receipt. Preserve the source workflow unchanged and keep scheduling, dispatch, pull-request admission, retirement, runtime, credential, deployment, and fixed-cost authority false; 40 workflows remain for separate bounded review.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
