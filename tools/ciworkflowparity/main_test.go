@@ -22,8 +22,9 @@ func TestVerifyProvesNativeBaselineParityWithoutRetirement(t *testing.T) {
 		"control-plane-syntax-hash-ci-parity", "control-plane-config-reference-ci-parity",
 		"control-plane-executable-knowledge-ci-parity", "control-plane-workflow-evidence-ci-parity",
 		"control-plane-open-questions-ci-parity",
+		"control-plane-harness-promotion-ci-parity",
 	}
-	if len(result.Cases) != 76 || len(result.BoundedChildren) != len(expected) {
+	if len(result.Cases) != 82 || len(result.BoundedChildren) != len(expected) {
 		t.Fatalf("unexpected cases: %+v", result.Cases)
 	}
 	for index, child := range result.BoundedChildren {
