@@ -20,8 +20,9 @@ const (
 	harnessPromotionIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1061"
 	integrationMatrixIssueURL   = "https://github.com/teamswyg/riido-control-plane/issues/1063"
 	loopClosureAuditIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1065"
-	pipelineSteps               = 44
-	pipelineCases               = 26
-	pipelineChecks              = 34
-	pipelineGates               = 60
+	evidenceGraphIssueURL       = "https://github.com/teamswyg/riido-control-plane/issues/1067"
+	pipelineSteps               = 46
+	pipelineCases               = 27
+	pipelineChecks              = 36
+	pipelineGates               = 64
 )

@@ -22,6 +22,7 @@ func verifyBoundedChildIdentities(document manifest) error {
 		{"control-plane-harness-promotion-ci-parity", harnessPromotionIssueURL, "harness promotion parity child identity drifted"},
 		{"control-plane-integration-matrix-ci-parity", integrationMatrixIssueURL, "integration matrix parity child identity drifted"},
 		{"control-plane-loop-closure-audit-ci-parity", loopClosureAuditIssueURL, "loop closure audit parity child identity drifted"},
+		{"control-plane-evidence-graph-ci-parity", evidenceGraphIssueURL, "evidence graph parity child identity drifted"},
 	}
 	for index, want := range expected {
 		child := document.BoundedChildren[index]

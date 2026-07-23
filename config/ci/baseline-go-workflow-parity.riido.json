@@ -1479,6 +1479,109 @@
         "evaluate": "Require zero adapters, exact loop and audit behavior, two mode-0600 outputs, passed central evidence and no workflow, scheduling, dispatch, Auth, AWS, runtime or fixed-cost authority.",
         "retrospective": "Keep the source workflow byte-exact and count this as the fifteenth bounded parity mapping only; forty-one workflows and any scheduling, dispatch or retirement remain separately owner-reviewed."
       }
+    },
+    {
+      "id": "control-plane-evidence-graph-ci-parity",
+      "issue": "https://github.com/teamswyg/riido-control-plane/issues/1067",
+      "parent_issue": "https://github.com/teamswyg/riido-control-plane/issues/1034",
+      "baseline": {
+        "source_revision": "cbcbbe9e9e612011836c622c300a3b6cafa0f638",
+        "workflow": ".github/workflows/evidence-graph.yml",
+        "workflow_sha256": "518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710",
+        "workflow_name": "Evidence Graph",
+        "job": "evidence-graph",
+        "tracked_workflow_count": 56
+      },
+      "native_mapping": {
+        "checkout": {
+          "source": "actions/checkout@v7",
+          "native_kind": "checkout",
+          "full_history": true,
+          "adapter_required": false
+        },
+        "go_toolchain": {
+          "source": "actions/setup-go@v6",
+          "native_kind": "worker_toolchain",
+          "version_source": "go.mod",
+          "version": "1.26.5",
+          "cache": true,
+          "adapter_required": false
+        },
+        "evidence_graph_test": {
+          "source_command": "go test ./tools/evidencegraph -count=1",
+          "native_command": "go test ./tools/evidencegraph -count=1",
+          "native_kind": "shell",
+          "adapter_required": false
+        },
+        "evidence_graph": {
+          "source_command": "impact_args=(); if [ -n \"$RIIDO_EVIDENCE_GRAPH_IMPACT_BASE\" ]; then impact_args=(-impact-base \"$RIIDO_EVIDENCE_GRAPH_IMPACT_BASE\"); fi; go run ./tools/evidencegraph -check-doc -github-annotations \"${impact_args[@]}\" -evidence-out out/evidence-graph-evidence.json",
+          "native_command": "umask 077 && go test ./tools/evidencegraph -count=1 && mkdir -p out && if [ -n \"${RIIDO_EVIDENCE_GRAPH_IMPACT_BASE:-}\" ]; then go run ./tools/evidencegraph -check-doc -github-annotations -impact-base \"$RIIDO_EVIDENCE_GRAPH_IMPACT_BASE\" -evidence-out out/evidence-graph-evidence.json; else go run ./tools/evidencegraph -check-doc -github-annotations -evidence-out out/evidence-graph-evidence.json; fi",
+          "native_kind": "shell",
+          "evidence_path": "out/evidence-graph-evidence.json",
+          "adapter_required": false
+        },
+        "evidence_artifact": {
+          "source": "actions/upload-artifact@v7",
+          "native_kind": "artifact",
+          "paths": [
+            "out/evidence-graph-evidence.json"
+          ],
+          "redaction": "required",
+          "run_when": "on_success",
+          "if_no_files_found": "error",
+          "content_addressed": true,
+          "adapter_required": false
+        }
+      },
+      "parity_claim": {
+        "all_source_steps_mapped": true,
+        "required_adapter_count": 0,
+        "evidence_graph_test_command_exact": true,
+        "evidence_graph_impact_base_exact": true,
+        "evidence_graph_annotations_exact": true,
+        "secure_evidence_permissions": true,
+        "source_workflow_edited": false,
+        "source_workflow_executed_by_this_slice": false
+      },
+      "authority": {
+        "workflow_retirement_authorized": false,
+        "workflow_file_effect": "none",
+        "auth_jwt_pep_effect": "none",
+        "aws_terraform_deployment_effect": "none",
+        "runtime_effect": "none",
+        "fixed_cost_resource_effect": "none",
+        "requires_separate_owner_reviewed_retirement": true
+      },
+      "rollback": {
+        "baseline_workflow_preserved": true,
+        "method": "retain_exact_baseline_until_separate_retirement_parity_review",
+        "blocked_to_passed_private_policy_pair_required": true
+      },
+      "classification": {
+        "code": "evidence_graph_native_parity_source_complete",
+        "meaning": "The Control Plane evidence-graph check can run through pinned riido-ci with full history, cached Go setup, exact impact-aware annotations and native redacted evidence while the legacy workflow, triggers and runtime authority remain unchanged.",
+        "does_not_claim": [
+          "all fifty-six workflows are migrated",
+          "the private repository CI policy currently passes",
+          "the evidence-graph workflow is retired",
+          "controller scheduling, dispatch or pull-request admission is admitted",
+          "deployment or runtime semantics changed"
+        ]
+      },
+      "assertions": [
+        "the evidence-graph GitHub Actions workflow digest remains exact",
+        "all six evidence-graph source behaviors map to native riido-ci behavior with zero adapters",
+        "full-history checkout, cached Go setup, impact-base and annotation behavior remain exact",
+        "evidence graph output is success-only, redacted, content-addressed and mode 0600",
+        "workflow triggers, retirement and runtime authority remain zero"
+      ],
+      "loop": {
+        "observation": "Fifteen of fifty-six workflows had native parity, but the credential-free evidence-graph workflow and its full-history, impact-aware evidence behavior remained outside the source-owned parity ledger.",
+        "hypothesis": "The pinned credential-free runner can preserve full-history checkout, cached Go setup, the exact evidence-graph test, optional pull-request impact base, annotations and strict success-only artifact behavior without editing, triggering or retiring the source workflow.",
+        "execute": "Pin the evidence-graph workflow digest, verify all six source behaviors, execute its test and impact-aware evidence command under restrictive permissions and collect the result only after success.",
+        "evaluate": "Require zero adapters, exact history, cache, impact and annotation behavior, a mode-0600 output, passed central evidence and no workflow, trigger, Auth, AWS, runtime or fixed-cost authority.",
+        "retrospective": "Keep the source workflow byte-exact and count this as the sixteenth bounded parity mapping only; forty workflows and any scheduling, dispatch, pull-request admission or retirement remain separately owner-reviewed."
+      }
     }
   ],
   "runner": {

@@ -11,6 +11,7 @@ type nativeMapping struct {
 type checkoutMapping struct {
 	Source          string `json:"source"`
 	NativeKind      string `json:"native_kind"`
+	FullHistory     bool   `json:"full_history,omitempty"`
 	AdapterRequired bool   `json:"adapter_required"`
 }
 

@@ -16,6 +16,8 @@ type childNativeMapping struct {
 	HarnessPromotion    commandMapping  `json:"harness_promotion,omitempty"`
 	IntegrationMatrix   commandMapping  `json:"integration_matrix,omitempty"`
 	LoopClosureAudit    commandMapping  `json:"loop_closure_audit,omitempty"`
+	EvidenceGraphTest   commandMapping  `json:"evidence_graph_test,omitempty"`
+	EvidenceGraph       commandMapping  `json:"evidence_graph,omitempty"`
 	SyntaxHashGolden    commandMapping  `json:"syntax_hash_golden,omitempty"`
 	SyntaxHash          commandMapping  `json:"syntax_hash,omitempty"`
 	ModuleDownload      commandMapping  `json:"module_download,omitempty"`
@@ -46,6 +48,9 @@ type childParityClaim struct {
 	IntegrationMatrixCommandExact        bool `json:"integration_matrix_command_exact,omitempty"`
 	LoopClosureAuditCommandExact         bool `json:"loop_closure_audit_command_exact,omitempty"`
 	LoopClosureAuditLoopEnvironmentExact bool `json:"loop_closure_audit_loop_environment_exact,omitempty"`
+	EvidenceGraphTestCommandExact        bool `json:"evidence_graph_test_command_exact,omitempty"`
+	EvidenceGraphImpactBaseExact         bool `json:"evidence_graph_impact_base_exact,omitempty"`
+	EvidenceGraphAnnotationsExact        bool `json:"evidence_graph_annotations_exact,omitempty"`
 	SyntaxHashLoopEnvironmentExact       bool `json:"syntax_hash_loop_environment_exact,omitempty"`
 	SyntaxHashGoldenCommandExact         bool `json:"syntax_hash_golden_command_exact,omitempty"`
 	SyntaxHashCommandExact               bool `json:"syntax_hash_command_exact,omitempty"`
