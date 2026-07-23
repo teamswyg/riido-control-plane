@@ -21057,6 +21057,35 @@
       ],
       "decision": "Admit syntax-hash as the eighth of 56 source workflows with all five source behaviors mapped natively, zero required adapters, exact loop environment and source SHA-256 470d347daa1b35680fb4c899ec234e3ead152356c8f38ab07d521fbcdf194ec7, redacted content-addressed evidence, and a mode-0600 syntax-hash receipt. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 48 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "config_reference_native_ci_parity_loop",
+      "observation": "Control Plane issue #1034 had eight native riido-ci parity slices, but 48 of 56 GitHub Actions workflows remained unmapped. The config-reference workflow was idle and credential-free, yet its exact source digest, dependency policy, environment manifest verification, executable-knowledge verification, strict artifact behavior, and zero-authority migration boundary were not represented in the native parity receipt.",
+      "hypothesis": "Extending the pinned local parity contract with one bounded config-reference child can prove all six source behaviors and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding retirement, runtime, credential, scheduling, deployment, and fixed-cost authority.",
+      "claims": [
+        "go_ci_baseline_must_preserve_broad_ci_contract",
+        "config_reference_must_preserve_env_manifest_parity"
+      ],
+      "changes": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+      ],
+      "verifiers": [
+        {"kind":"tool","path":"tools/configreference"},
+        {"kind":"tool","path":"tools/loopregistry"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
+        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
+        {"kind":"artifact","path":"config-reference-evidence","redacted":true},
+        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+      ],
+      "decision": "Admit config-reference as the ninth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact source SHA-256 5cbf30d7a80482fc5f29daface720c3418d31448aaac7d18a2b57c3744683d89, redacted content-addressed evidence, and mode-0600 config-reference and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 47 workflows remain for separate bounded review.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
