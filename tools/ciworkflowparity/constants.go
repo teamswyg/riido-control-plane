@@ -16,8 +16,9 @@ const (
 	configReferenceIssueURL     = "https://github.com/teamswyg/riido-control-plane/issues/1053"
 	executableKnowledgeIssueURL = "https://github.com/teamswyg/riido-control-plane/issues/1055"
 	workflowEvidenceIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1057"
-	pipelineSteps               = 34
-	pipelineCases               = 19
-	pipelineChecks              = 26
-	pipelineGates               = 44
+	openQuestionsIssueURL       = "https://github.com/teamswyg/riido-control-plane/issues/1059"
+	pipelineSteps               = 37
+	pipelineCases               = 21
+	pipelineChecks              = 28
+	pipelineGates               = 48
 )

@@ -38,6 +38,7 @@
       "tools/syntaxhash",
       "tools/configreference",
       "tools/workflowevidence",
+      "tools/openquestions",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -171,6 +172,20 @@
         "want_paths": ["out/workflow-evidence.json"],
         "want_sha256_present": true,
         "want_json_schema_version": "riido-control-plane-workflow-evidence.v1"
+      },
+      {
+        "name": "open-questions-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/open-questions-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-open-questions-evidence.v1"
+      },
+      {
+        "name": "open-questions-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
       }
     ],
     "source_checks": [
@@ -200,6 +215,8 @@
           "https://github.com/teamswyg/riido-control-plane/issues/1055",
           "daf9a9462e10401ae538e151f0d54daec59438cffc0ff2fce935e3834c28028b",
           "https://github.com/teamswyg/riido-control-plane/issues/1057",
+          "a73744d4a386246d66f1c599953b8411a4740ca3616957857ed415ef6500c937",
+          "https://github.com/teamswyg/riido-control-plane/issues/1059",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -446,6 +463,30 @@
           "umask 077",
           "WorkflowEvidenceLoopEnvironmentExact",
           "out/workflow-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "open-questions-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_open_questions_cases.go",
+        "contains": [
+          "open_questions_workflow_digest_is_exact",
+          "open_questions_six_source_behaviors_are_native",
+          "open_questions_pipeline_preserves_order",
+          "open_questions_authority_remains_zero",
+          "open_questions_classification_is_bounded",
+          "open_questions_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "open-questions-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_open_questions_child.go",
+        "contains": [
+          "a73744d4a386246d66f1c599953b8411a4740ca3616957857ed415ef6500c937",
+          "open_decision_queue",
+          "umask 077",
+          "OpenQuestionsLoopEnvironmentExact",
+          "out/open-questions-evidence.json",
           "actions/upload-artifact@v7"
         ]
       },
@@ -715,6 +756,26 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "verify-open-questions",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=open_decision_queue && mkdir -p out && go test ./tools/openquestions -count=1 && go run ./tools/openquestions -check-doc -evidence-out out/open-questions-evidence.json"
+    },
+    {
+      "id": "verify-open-questions-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=open_decision_queue && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-open-questions-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/open-questions-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -761,6 +822,10 @@
     "workflow-evidence workflow digest remains exact and unedited",
     "all five workflow-evidence source behaviors map with zero adapters",
     "workflow evidence is redacted, content-addressed and mode 0600",
-    "workflow-evidence workflow retirement and runtime authority remain zero"
+    "workflow-evidence workflow retirement and runtime authority remain zero",
+    "open-questions workflow digest remains exact and unedited",
+    "dependency, loop, open-questions and executable-knowledge behavior maps with zero adapters",
+    "open-questions and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "open-questions workflow scheduling, retirement and runtime authority remain zero"
   ]
 }
