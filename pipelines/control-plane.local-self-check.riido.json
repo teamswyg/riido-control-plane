@@ -39,6 +39,7 @@
       "tools/configreference",
       "tools/workflowevidence",
       "tools/openquestions",
+      "tools/harnesspromotion",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -186,6 +187,13 @@
         "want_paths": ["out/executable-knowledge-coverage.json"],
         "want_sha256_present": true,
         "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "harness-promotion-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/harness-promotion-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-harness-promotion-evidence.v1"
       }
     ],
     "source_checks": [
@@ -217,6 +225,8 @@
           "https://github.com/teamswyg/riido-control-plane/issues/1057",
           "a73744d4a386246d66f1c599953b8411a4740ca3616957857ed415ef6500c937",
           "https://github.com/teamswyg/riido-control-plane/issues/1059",
+          "ae94e1d9332d84e5d1f71ee0b7daa22e110d4a32342d8e7b3e874f3c36b0f762",
+          "https://github.com/teamswyg/riido-control-plane/issues/1061",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -487,6 +497,30 @@
           "umask 077",
           "OpenQuestionsLoopEnvironmentExact",
           "out/open-questions-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "harness-promotion-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_harness_promotion_cases.go",
+        "contains": [
+          "harness_promotion_workflow_digest_is_exact",
+          "harness_promotion_five_source_behaviors_are_native",
+          "harness_promotion_pipeline_preserves_order",
+          "harness_promotion_authority_remains_zero",
+          "harness_promotion_classification_is_bounded",
+          "harness_promotion_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "harness-promotion-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_harness_promotion_child.go",
+        "contains": [
+          "ae94e1d9332d84e5d1f71ee0b7daa22e110d4a32342d8e7b3e874f3c36b0f762",
+          "closed_loop_candidate",
+          "umask 077",
+          "HarnessPromotionLoopEnvironmentExact",
+          "out/harness-promotion-evidence.json",
           "actions/upload-artifact@v7"
         ]
       },
@@ -776,6 +810,20 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "verify-harness-promotion",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=closed_loop_candidate && mkdir -p out && go test ./tools/harnesspromotion -count=1 && go run ./tools/harnesspromotion -check-doc -evidence-out out/harness-promotion-evidence.json"
+    },
+    {
+      "id": "collect-harness-promotion-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/harness-promotion-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -826,6 +874,10 @@
     "open-questions workflow digest remains exact and unedited",
     "dependency, loop, open-questions and executable-knowledge behavior maps with zero adapters",
     "open-questions and executable-knowledge evidence is redacted, content-addressed and mode 0600",
-    "open-questions workflow scheduling, retirement and runtime authority remain zero"
+    "open-questions workflow scheduling, retirement and runtime authority remain zero",
+    "harness-promotion workflow digest remains exact and unedited",
+    "loop and harness-promotion behavior maps with zero adapters",
+    "harness-promotion evidence is redacted, content-addressed and mode 0600",
+    "harness-promotion workflow scheduling, retirement and runtime authority remain zero"
   ]
 }

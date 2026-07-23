@@ -17,8 +17,9 @@ const (
 	executableKnowledgeIssueURL = "https://github.com/teamswyg/riido-control-plane/issues/1055"
 	workflowEvidenceIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1057"
 	openQuestionsIssueURL       = "https://github.com/teamswyg/riido-control-plane/issues/1059"
-	pipelineSteps               = 37
-	pipelineCases               = 21
-	pipelineChecks              = 28
-	pipelineGates               = 48
+	harnessPromotionIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1061"
+	pipelineSteps               = 39
+	pipelineCases               = 22
+	pipelineChecks              = 30
+	pipelineGates               = 52
 )

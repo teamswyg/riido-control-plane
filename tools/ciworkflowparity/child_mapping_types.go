@@ -13,6 +13,7 @@ type childNativeMapping struct {
 	ConfigReference     commandMapping  `json:"config_reference,omitempty"`
 	WorkflowEvidence    commandMapping  `json:"workflow_evidence,omitempty"`
 	OpenQuestions       commandMapping  `json:"open_questions,omitempty"`
+	HarnessPromotion    commandMapping  `json:"harness_promotion,omitempty"`
 	SyntaxHashGolden    commandMapping  `json:"syntax_hash_golden,omitempty"`
 	SyntaxHash          commandMapping  `json:"syntax_hash,omitempty"`
 	ModuleDownload      commandMapping  `json:"module_download,omitempty"`
@@ -38,6 +39,8 @@ type childParityClaim struct {
 	WorkflowEvidenceLoopEnvironmentExact bool `json:"workflow_evidence_loop_environment_exact,omitempty"`
 	OpenQuestionsCommandExact            bool `json:"open_questions_command_exact,omitempty"`
 	OpenQuestionsLoopEnvironmentExact    bool `json:"open_questions_loop_environment_exact,omitempty"`
+	HarnessPromotionCommandExact         bool `json:"harness_promotion_command_exact,omitempty"`
+	HarnessPromotionLoopEnvironmentExact bool `json:"harness_promotion_loop_environment_exact,omitempty"`
 	SyntaxHashLoopEnvironmentExact       bool `json:"syntax_hash_loop_environment_exact,omitempty"`
 	SyntaxHashGoldenCommandExact         bool `json:"syntax_hash_golden_command_exact,omitempty"`
 	SyntaxHashCommandExact               bool `json:"syntax_hash_command_exact,omitempty"`

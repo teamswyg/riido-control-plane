@@ -17,7 +17,7 @@ func loadManifest(repoRoot, path string) (manifest, error) {
 		document.CheckedOn != "2026-07-22" || len(document.Assertions) < 5 ||
 		!completeLoop(document.Loop) ||
 		len(document.Pipelines) != 1 || document.Pipelines[0] != document.Runner.Pipeline ||
-		len(document.BoundedChildren) != 11 {
+		len(document.BoundedChildren) != 12 {
 		return manifest{}, errors.New("baseline CI parity contract identity drifted")
 	}
 	if err := verifyBoundedChildIdentities(document); err != nil {
