@@ -19,8 +19,9 @@ const (
 	openQuestionsIssueURL       = "https://github.com/teamswyg/riido-control-plane/issues/1059"
 	harnessPromotionIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1061"
 	integrationMatrixIssueURL   = "https://github.com/teamswyg/riido-control-plane/issues/1063"
-	pipelineSteps               = 42
-	pipelineCases               = 24
-	pipelineChecks              = 32
-	pipelineGates               = 56
+	loopClosureAuditIssueURL    = "https://github.com/teamswyg/riido-control-plane/issues/1065"
+	pipelineSteps               = 44
+	pipelineCases               = 26
+	pipelineChecks              = 34
+	pipelineGates               = 60
 )

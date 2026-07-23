@@ -41,6 +41,7 @@
       "tools/openquestions",
       "tools/harnesspromotion",
       "tools/integrationmatrix",
+      "tools/loopclosureaudit",
       "tools/riido-ci-local",
       "config/ci",
       "pipelines"
@@ -209,6 +210,20 @@
         "want_paths": ["out/executable-knowledge-coverage.json"],
         "want_sha256_present": true,
         "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "loop-closure-audit-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/loop-closure-audit-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-loop-closure-audit-evidence.v1"
+      },
+      {
+        "name": "loop-closure-audit-candidates-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/loop-closure-audit-closed-loop-candidates.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-closed-loop-candidates.v1"
       }
     ],
     "source_checks": [
@@ -244,6 +259,8 @@
           "https://github.com/teamswyg/riido-control-plane/issues/1061",
           "0d2df869bc0836ba70ac9d109d14c03ef9b927ac960d85a699190fc5d6ed9f61",
           "https://github.com/teamswyg/riido-control-plane/issues/1063",
+          "a26fbcca723421a900bdddd2cba8da71079d1110c77acd561fe2e626ae601781",
+          "https://github.com/teamswyg/riido-control-plane/issues/1065",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
           "workflow_retirement_authorized",
@@ -562,6 +579,31 @@
           "IntegrationMatrixCommandExact",
           "out/integration-matrix-evidence.json",
           "out/executable-knowledge-coverage.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "loop-closure-audit-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_loop_closure_audit_cases.go",
+        "contains": [
+          "loop_closure_audit_workflow_digest_is_exact",
+          "loop_closure_audit_six_source_behaviors_are_native",
+          "loop_closure_audit_pipeline_preserves_order",
+          "loop_closure_audit_authority_remains_zero",
+          "loop_closure_audit_classification_is_bounded",
+          "loop_closure_audit_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "loop-closure-audit-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_loop_closure_audit_child.go",
+        "contains": [
+          "a26fbcca723421a900bdddd2cba8da71079d1110c77acd561fe2e626ae601781",
+          "loop_closure_audit",
+          "umask 077",
+          "LoopClosureAuditLoopEnvironmentExact",
+          "out/loop-closure-audit-evidence.json",
+          "out/loop-closure-audit-closed-loop-candidates.json",
           "actions/upload-artifact@v7"
         ]
       },
@@ -885,6 +927,21 @@
       ],
       "redaction": "required",
       "run_when": "always"
+    },
+    {
+      "id": "verify-loop-closure-audit",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=loop_closure_audit && mkdir -p out && go test ./tools/loopclosureaudit -count=1 && go run ./tools/loopclosureaudit -check-doc -evidence-out out/loop-closure-audit-evidence.json -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+    },
+    {
+      "id": "collect-loop-closure-audit-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/loop-closure-audit-evidence.json",
+        "out/loop-closure-audit-closed-loop-candidates.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
     }
   ],
   "success_gate": [
@@ -943,6 +1000,10 @@
     "integration-matrix workflow digest remains exact and unedited",
     "dependency, integration-matrix and executable-knowledge behavior maps with zero adapters",
     "integration-matrix and executable-knowledge evidence is redacted, content-addressed and mode 0600",
-    "integration-matrix workflow retirement and runtime authority remain zero"
+    "integration-matrix workflow retirement and runtime authority remain zero",
+    "loop-closure-audit workflow digest remains exact and unedited",
+    "loop and loop-closure-audit behavior maps with zero adapters",
+    "audit and closed-loop candidate evidence is redacted, content-addressed and mode 0600",
+    "loop-closure-audit scheduling, dispatch, retirement and runtime authority remain zero"
   ]
 }
