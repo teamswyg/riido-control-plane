@@ -1,0 +1,217 @@
+{
+  "admission_receipts": [
+    {
+      "logical_id": "sha256:9e086f794783263bc510f5ac054249b82d08ece64078d11865565e7c3c9545b0",
+      "sha256": "9e086f794783263bc510f5ac054249b82d08ece64078d11865565e7c3c9545b0",
+      "verdict": "GREEN_NAMED_TYPE_SCOPE"
+    }
+  ],
+  "aggregate_nonwork17_receipt": {
+    "count": 17,
+    "mutation_count": 6,
+    "query_count": 11,
+    "sha256": "213f5e6c7263e3c07ad11465e59d8977a7a35d5ca0a7ffb038d01adba7afc1dd"
+  },
+  "artifact": {
+    "logical_path": "contracts/nonwork17-owner-schema/owner-schema.graphqls",
+    "path": "contracts/nonwork17-owner-schema/owner-schema.graphqls",
+    "sha256": "ce69c0c3c4556b7dcb6db92522a1e53e386c3c631bb1c88b821774e2364779b7"
+  },
+  "authority_lineage": {
+    "legacy_revision": "e7f6d9a8f696880f874f5c3732d8197b7d1bae9d",
+    "lineage": [
+      "Riido1 code+wire",
+      "corrected Notion evidence",
+      "Riido2 MSA owner SDL candidate",
+      "BFF composition",
+      "client projection"
+    ],
+    "product_authority": "teamswyg/riido-api-server pinned code plus wire",
+    "shape_policy": "Riido2 may not shrink, rename, or flatten the pinned Riido1 contract"
+  },
+  "composition_namespace": "controlPlane",
+  "composition_type_renames": {
+    "ControlPlaneFireErrorVoid": "ControlPlaneFireErrorVoid"
+  },
+  "contract_auth_policies": [
+    {
+      "evidence_path": "src/app.controller.ts",
+      "evidence_sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3",
+      "name": "fireError",
+      "operation_kind": "Query",
+      "status": "PINNED",
+      "target_policy": "UNAUTHENTICATED"
+    },
+    {
+      "evidence_path": "src/app.controller.ts",
+      "evidence_sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3",
+      "name": "healthCheck",
+      "operation_kind": "Query",
+      "status": "PINNED",
+      "target_policy": "UNAUTHENTICATED"
+    }
+  ],
+  "custom_scalar_mappings": [
+    {
+      "evidence_path": "src/app.controller.ts",
+      "evidence_sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3",
+      "graphql_name": "ControlPlaneFireErrorVoid",
+      "mapping_mode": "EXPLICIT_VOID_SCALAR",
+      "source_kind": "NEVER_RETURNING_VOID",
+      "wire_type": "no successful response value; source always throws"
+    }
+  ],
+  "enum_wire_mappings": [],
+  "lifecycle_slices": {
+    "new80": {
+      "bootstrap_execution": {
+        "access": "ANONYMOUS",
+        "effects": "ZERO",
+        "result": "EMPTY_DETERMINISTIC"
+      },
+      "lifecycle": "SCHEMA_ONLY",
+      "operations": [
+        "fireError",
+        "healthCheck"
+      ],
+      "runtime_wired": false,
+      "target_contract_auth_policy": "UNAUTHENTICATED"
+    }
+  },
+  "named_type_expectations": [
+    {
+      "operation_kind": "Query",
+      "name": "fireError",
+      "expectations": [
+        {
+          "path": "return",
+          "kind": "SCALAR",
+          "name": "ControlPlaneFireErrorVoid"
+        }
+      ]
+    },
+    {
+      "operation_kind": "Query",
+      "name": "healthCheck",
+      "expectations": []
+    }
+  ],
+  "operations": [
+    {
+      "cohort": "NEW80",
+      "coordinate": "Query.fireError",
+      "legacy_http": "GET /sentry",
+      "name": "fireError",
+      "operation_kind": "Query",
+      "ownership": "UNRESOLVED_CONTROL_PLANE_COMPOSITION_CANDIDATE",
+      "request_evidence": {
+        "path": "src/app.controller.ts",
+        "sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3"
+      },
+      "request_refs": [],
+      "response_evidence": {
+        "path": "src/app.controller.ts",
+        "sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3"
+      },
+      "response_ref": "legacy-type/sha256/e7d5fcc0a0c20739c63ca5603c48873b1c84eb7cfe1db2bb7a020fa85a699b50",
+      "source_nullable_paths": [
+        "return"
+      ],
+      "wire_fragment": "operations/by-http/get/domains/bucket-0-2/sentry/items/0544-2dc7e977c33f302c.json",
+      "wire_fragment_sha256": "c690b8a949a68225e253d1a8da2b8e4de5a92e28aa4a2de54a3d28238ae146d2"
+    },
+    {
+      "cohort": "NEW80",
+      "coordinate": "Query.healthCheck",
+      "legacy_http": "GET /healthy",
+      "name": "healthCheck",
+      "operation_kind": "Query",
+      "ownership": "NARROWEST_ACTUAL_RIIDO2_CONTROL_PLANE_CANDIDATE",
+      "request_evidence": {
+        "path": "src/app.controller.ts",
+        "sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3"
+      },
+      "request_refs": [],
+      "response": "HttpStatus.OK (200)",
+      "response_evidence": {
+        "path": "src/app.controller.ts",
+        "sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3"
+      },
+      "response_integer_evidence": {
+        "path": "src/app.controller.ts",
+        "sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3"
+      },
+      "wire_fragment": "operations/by-http/get/domains/bucket-0-5/healthy/items/0250-0c2f3f67c355d477.json",
+      "wire_fragment_sha256": "0dc0265df12d3984424b028ba2e8840251e6bdcaad81476894ca7a80ac47b276"
+    }
+  ],
+  "ordered_coordinates": [
+    "controlPlane.Query.fireError",
+    "controlPlane.Query.healthCheck"
+  ],
+  "owner_coordinate_receipt": {
+    "canonicalization": "ordered service.root.field lines, UTF-8, LF including final LF",
+    "count": 2,
+    "mutation_count": 0,
+    "query_count": 2,
+    "sha256": "7239000e8ccb9034c7e730f25b5f5ac931a39f47b3e5843abb2b8ff13b63a2c8"
+  },
+  "owner_repo_revision": "a85fb25b06e43d09e2ee174befd31a4cd9db48ad",
+  "public_type_equivalences": {
+    "equal": [],
+    "note": "No existing base23 public control-plane type is reused."
+  },
+  "runtime_conformance": "REQUIRED_NOT_YET_PROVEN",
+  "runtime_wired": false,
+  "schema_version": "riido.nonwork17-owner-schema-source.v1",
+  "service": "controlPlane",
+  "source_type_mappings": [
+    {
+      "operation_kind": "Query",
+      "name": "fireError",
+      "path": "return",
+      "source_kind": "NEVER_RETURNING_VOID",
+      "graphql_kind": "SCALAR",
+      "graphql_name": "ControlPlaneFireErrorVoid",
+      "graphql_type": "ControlPlaneFireErrorVoid",
+      "mapping_mode": "EXPLICIT_VOID_SCALAR",
+      "nullable": true,
+      "source_optional": false,
+      "source_nullable": true,
+      "evidence_path": "src/app.controller.ts",
+      "evidence_sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3"
+    },
+    {
+      "operation_kind": "Query",
+      "name": "healthCheck",
+      "path": "return",
+      "source_kind": "NUMBER",
+      "graphql_kind": "SCALAR",
+      "graphql_name": "Int",
+      "graphql_type": "Int!",
+      "mapping_mode": "PROVEN_INTEGER",
+      "nullable": false,
+      "source_optional": false,
+      "source_nullable": false,
+      "evidence_path": "src/app.controller.ts",
+      "evidence_sha256": "dffe5ebdb0dd5e7441aafe28f1842ded4a04e8250aa1357463866996fbbd40b3"
+    }
+  ],
+  "source_type_policy": {
+    "audited_evidence_path_count": 1,
+    "audited_source_path_count": 2,
+    "audited_type_position_count": 2,
+    "mapping_count": 2,
+    "policy_version": "riido1-source-to-graphql.v1",
+    "status": "COMPLETE"
+  },
+  "warnings": [
+    "fireError has no actual Riido2 MSA owner source; controlPlane is an explicitly invented composition candidate and not an ownership decision.",
+    "healthCheck preserves the Riido1 numeric 200 wire even though the Riido2 /healthz candidate returns a JSON object.",
+    "The bootstrap is anonymous empty/zero-effect; both target endpoints are also pinned unauthenticated."
+  ],
+  "wire_ledger": {
+    "path": "public/platform/ledgers/riido1-api-wire-contract/manifest/manifest.json",
+    "sha256": "09952471ff6b91edae8d42255792c03a8f5749e2479e91a73080ecc1560a006c"
+  }
+}

@@ -1,0 +1,6 @@
+scalar ControlPlaneFireErrorVoid
+
+type Query {
+  fireError: ControlPlaneFireErrorVoid
+  healthCheck: Int!
+}
