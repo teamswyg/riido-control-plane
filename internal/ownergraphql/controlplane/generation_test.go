@@ -1,4 +1,4 @@
-package riidoaiserver
+package controlplane
 
 import (
 	"bytes"
@@ -19,8 +19,8 @@ func TestControlPlaneOwnerRegistryGenerationIsDeterministic(t *testing.T) {
 	first := filepath.Join(temporary, "first.go")
 	second := filepath.Join(temporary, "second.go")
 	for _, output := range []string{first, second} {
-		command := exec.Command("go", "run", "control_plane_owner_registry_gen.go",
-			"-schema", "../../contracts/nonwork17-owner-schema/owner-schema.graphqls", "-out", output)
+		command := exec.Command("go", "run", "registry_gen.go",
+			"-schema", "../../../contracts/nonwork17-owner-schema/owner-schema.graphqls", "-out", output)
 		command.Dir = directory
 		if raw, err := command.CombinedOutput(); err != nil {
 			t.Fatalf("generate registry: %v: %s", err, raw)
@@ -28,7 +28,7 @@ func TestControlPlaneOwnerRegistryGenerationIsDeterministic(t *testing.T) {
 	}
 	firstRaw, firstErr := os.ReadFile(first)
 	secondRaw, secondErr := os.ReadFile(second)
-	physical, physicalErr := os.ReadFile(filepath.Join(directory, "control_plane_owner_registry.generated.go"))
+	physical, physicalErr := os.ReadFile(filepath.Join(directory, "registry.generated.go"))
 	if firstErr != nil || secondErr != nil || physicalErr != nil {
 		t.Fatalf("read generated files: %v %v %v", firstErr, secondErr, physicalErr)
 	}

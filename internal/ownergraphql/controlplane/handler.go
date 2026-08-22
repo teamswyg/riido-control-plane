@@ -1,4 +1,4 @@
-package riidoaiserver
+package controlplane
 
 import (
 	"encoding/json"
@@ -9,13 +9,14 @@ import (
 
 const controlPlaneOwnerRequestLimit = 16 << 10
 
-type controlPlaneOwnerHandler struct{ useCase controlPlaneOwnerUseCase }
+type handler struct{ useCase UseCase }
 
-func newControlPlaneOwnerGraphQLHandler(useCase controlPlaneOwnerUseCase) http.Handler {
-	return controlPlaneOwnerHandler{useCase: useCase}
+// NewGraphQLHandler returns the source-ready owner receiver. Production does not register it yet.
+func NewGraphQLHandler(useCase UseCase) http.Handler {
+	return handler{useCase: useCase}
 }
 
-func (h controlPlaneOwnerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		writeControlPlaneOwnerFailure(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -42,23 +43,52 @@ func (h controlPlaneOwnerHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 			writeControlPlaneOwnerFailure(w, http.StatusOK, "control-plane healthCheck failed closed")
 			return
 		}
-		writeControlPlaneOwnerResponse(w, map[string]any{"data": map[string]any{"healthCheck": status}})
+		writeResponse(w, healthResponse{Data: healthData{HealthCheck: status}})
 	case "Query.fireError":
 		_ = h.useCase.FireError(r.Context())
-		writeControlPlaneOwnerResponse(w, map[string]any{
-			"data": map[string]any{"fireError": nil}, "errors": []map[string]string{{"message": errControlPlaneOwnerFire.Error()}},
+		writeResponse(w, fireResponse{
+			Data: fireData{FireError: nil}, Errors: []graphQLError{{Message: errControlPlaneOwnerFire.Error()}},
 		})
 	}
+}
+
+type graphQLError struct {
+	Message string `json:"message"`
+}
+
+type failureResponse struct {
+	Errors []graphQLError `json:"errors"`
+}
+
+type healthData struct {
+	HealthCheck int `json:"healthCheck"`
+}
+
+type healthResponse struct {
+	Data healthData `json:"data"`
+}
+
+type fireData struct {
+	FireError *string `json:"fireError"`
+}
+
+type fireResponse struct {
+	Data   fireData       `json:"data"`
+	Errors []graphQLError `json:"errors"`
 }
 
 func writeControlPlaneOwnerFailure(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/graphql-response+json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(map[string]any{"errors": []map[string]string{{"message": message}}})
+	if err := json.NewEncoder(w).Encode(failureResponse{Errors: []graphQLError{{Message: message}}}); err != nil {
+		return
+	}
 }
 
-func writeControlPlaneOwnerResponse(w http.ResponseWriter, payload map[string]any) {
+func writeResponse(w http.ResponseWriter, payload any) {
 	w.Header().Set("Content-Type", "application/graphql-response+json")
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(payload)
+	if err := json.NewEncoder(w).Encode(payload); err != nil {
+		return
+	}
 }

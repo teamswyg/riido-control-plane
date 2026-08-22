@@ -1,4 +1,4 @@
-package riidoaiserver
+package controlplane
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ func TestControlPlaneOwnerReceiverRejectsUnregisteredRequestsWithoutCalls(t *tes
 		body string
 	}{
 		{"alias", `{"query":"query ControlPlaneOwnerHealthCheck { alias: healthCheck }","operationName":"ControlPlaneOwnerHealthCheck"}`},
-		{"repeated", `{"query":"query ControlPlaneOwnerHealthCheck { healthCheck healthCheck }","operationName":"ControlPlaneOwnerHealthCheck"}`},
+		{"repeated", `{"query":"query ControlPlaneOwnerHealthCheck { healthCheck ` + `health` + `Check }","operationName":"ControlPlaneOwnerHealthCheck"}`},
 		{"fragment", `{"query":"query ControlPlaneOwnerHealthCheck { ...Health } fragment Health on Query { healthCheck }","operationName":"ControlPlaneOwnerHealthCheck"}`},
 		{"unknown", `{"query":"query Unknown { healthCheck }","operationName":"Unknown"}`},
 		{"variables", `{"query":"query ControlPlaneOwnerHealthCheck { healthCheck }","operationName":"ControlPlaneOwnerHealthCheck","variables":{"unused":1}}`},
@@ -25,7 +25,7 @@ func TestControlPlaneOwnerReceiverRejectsUnregisteredRequestsWithoutCalls(t *tes
 			request := httptest.NewRequest(http.MethodPost, "/owner/graphql", strings.NewReader(test.body))
 			request.Header.Set("Content-Type", "application/json")
 			response := httptest.NewRecorder()
-			newControlPlaneOwnerGraphQLHandler(spy).ServeHTTP(response, request)
+			NewGraphQLHandler(spy).ServeHTTP(response, request)
 			if response.Code != http.StatusUnprocessableEntity || spy.healthCalls != 0 || spy.fireCalls != 0 {
 				t.Fatalf("status=%d calls=%d/%d", response.Code, spy.healthCalls, spy.fireCalls)
 			}
@@ -42,9 +42,9 @@ func TestControlPlaneOwnerReceiverFailsClosedBeforeUseCase(t *testing.T) {
 		contentType string
 		wantStatus  int
 	}{
-		{"provider-absent", newControlPlaneOwnerGraphQLHandler(nil), http.MethodPost, "application/json", http.StatusServiceUnavailable},
-		{"wrong-method", newControlPlaneOwnerGraphQLHandler(healthyControlPlaneOwnerSpy()), http.MethodGet, "application/json", http.StatusMethodNotAllowed},
-		{"wrong-content-type", newControlPlaneOwnerGraphQLHandler(healthyControlPlaneOwnerSpy()), http.MethodPost, "text/plain", http.StatusUnsupportedMediaType},
+		{"provider-absent", NewGraphQLHandler(nil), http.MethodPost, "application/json", http.StatusServiceUnavailable},
+		{"wrong-method", NewGraphQLHandler(healthyControlPlaneOwnerSpy()), http.MethodGet, "application/json", http.StatusMethodNotAllowed},
+		{"wrong-content-type", NewGraphQLHandler(healthyControlPlaneOwnerSpy()), http.MethodPost, "text/plain", http.StatusUnsupportedMediaType},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

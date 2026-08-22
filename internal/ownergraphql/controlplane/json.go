@@ -1,4 +1,4 @@
-package riidoaiserver
+package controlplane
 
 import (
 	"bytes"

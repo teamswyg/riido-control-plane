@@ -1,4 +1,4 @@
-package riidoaiserver
+package controlplane
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestSourceReadyControlPlaneOwnerUseCasePreservesPinnedSemantics(t *testing.T) {
-	useCase := sourceReadyControlPlaneOwner{}
+	useCase := NewSourceReadyUseCase()
 	status, err := useCase.HealthCheck(context.Background())
 	if err != nil || status != http.StatusOK {
 		t.Fatalf("health status=%d err=%v", status, err)
@@ -28,7 +28,7 @@ func TestControlPlaneOwnerHealthCheckReturnsExactPublicResponse(t *testing.T) {
 	request.Header.Set("Content-Type", "application/json")
 	response := httptest.NewRecorder()
 
-	newControlPlaneOwnerGraphQLHandler(spy).ServeHTTP(response, request)
+	NewGraphQLHandler(spy).ServeHTTP(response, request)
 
 	if response.Code != http.StatusOK || response.Body.String() != "{\"data\":{\"healthCheck\":200}}\n" {
 		t.Fatalf("unexpected response status=%d body=%q", response.Code, response.Body.String())
@@ -47,7 +47,7 @@ func TestControlPlaneOwnerFireErrorNeverInventsSuccess(t *testing.T) {
 	request.Header.Set("Content-Type", "application/json")
 	response := httptest.NewRecorder()
 
-	newControlPlaneOwnerGraphQLHandler(spy).ServeHTTP(response, request)
+	NewGraphQLHandler(spy).ServeHTTP(response, request)
 
 	want := "{\"data\":{\"fireError\":null},\"errors\":[{\"message\":\"control-plane fireError always fails\"}]}\n"
 	if response.Code != http.StatusOK || response.Body.String() != want {

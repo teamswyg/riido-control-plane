@@ -1,10 +1,12 @@
-package riidoaiserver
+package controlplane
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
 func TestControlPlaneOwnerReceiverIsSourceReadyButNotRegistered(t *testing.T) {
@@ -14,7 +16,7 @@ func TestControlPlaneOwnerReceiverIsSourceReadyButNotRegistered(t *testing.T) {
 	request.Header.Set("Content-Type", "application/json")
 	response := httptest.NewRecorder()
 
-	NewServer(ServerConfig{}).Handler().ServeHTTP(response, request)
+	riidoaiserver.NewServer(riidoaiserver.ServerConfig{}).Handler().ServeHTTP(response, request)
 
 	if response.Code != http.StatusNotFound {
 		t.Fatalf("source-ready receiver must stay unregistered, status=%d", response.Code)
