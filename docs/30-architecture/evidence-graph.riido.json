@@ -21216,20 +21216,13 @@
         "runtime_deployment_boundary_must_preserve_public_private_ownership"
       ],
       "changes": [
-        {"kind":"code","path":"internal/ownergraphql/controlplane/handler.go"},
-        {"kind":"code","path":"internal/ownergraphql/controlplane/usecase.go"},
-        {"kind":"code","path":"internal/ownergraphql/controlplane/registry.generated.go"},
         {"kind":"manifest","path":"docs/30-architecture/module-decomposition.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/module-decomposition.md"},
         {"kind":"manifest","path":"docs/30-architecture/syntax-hash.riido.json"},
         {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"workflow","path":".github/workflows/evidence-graph.yml"},
-        {"kind":"workflow","path":".github/workflows/syntax-hash.yml"}
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
       ],
       "verifiers": [
-        {"kind":"test","path":"internal/ownergraphql/controlplane/handler_test.go"},
-        {"kind":"test","path":"internal/ownergraphql/controlplane/negative_test.go"},
-        {"kind":"test","path":"internal/ownergraphql/controlplane/unwired_test.go"},
         {"kind":"tool","path":"tools/moduledecomposition"},
         {"kind":"tool","path":"tools/syntaxhash"},
         {"kind":"tool","path":"tools/evidencegraph"}
