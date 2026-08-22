@@ -21180,6 +21180,43 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "control_plane_health_owner_source_ready_loop",
+      "observation": "The frozen v-2.1.30 control-plane owner contract published Query.healthCheck as an unauthenticated non-null Int with exact 200 semantics, but it had no generated receiver, executable use case, or application TLS listener capable of populating request.TLS.VerifiedChains; a plain HTTP listener therefore could not honestly receive the BFF workload identity.",
+      "hypothesis": "A generated receiver and stateless exact-200 use case behind a dedicated application-terminated TLS 1.3 mutual-auth listener can make the owner source candidate executable while requiring the exact production BFF SPIFFE identity and withholding production runtime and deployment credit until listener configuration, routing, and multi-instance smoke are proven.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence",
+        "runtime_adapter_config_must_preserve_public_env_contract",
+        "server_route_handlers_must_stay_semantically_split",
+        "shared_contract_compat_must_preserve_generated_contract_surface"
+      ],
+      "changes": [
+        {"kind":"code","path":"internal/controlplanehealth"},
+        {"kind":"code","path":"internal/controlplanegraphql"},
+        {"kind":"code","path":"cmd/riido_ai_server/control_plane_graphql_mtls.go"},
+        {"kind":"code","path":"cmd/riido_ai_server/runtime_http.go"},
+        {"kind":"code","path":"cmd/riido_ai_server/server_lifecycle.go"},
+        {"kind":"test","path":"cmd/riido_ai_server/control_plane_graphql_mtls_test.go"},
+        {"kind":"test","path":"internal/controlplanegraphql/handler_test.go"},
+        {"kind":"manifest","path":"contracts/nonwork17-owner-schema/runtime-health-binding.json"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+      ],
+      "verifiers": [
+        {"kind":"test","path":"cmd/riido_ai_server"},
+        {"kind":"test","path":"internal/controlplanegraphql"},
+        {"kind":"tool","path":"tools/containercontract"},
+        {"kind":"tool","path":"tools/evidencegraph"},
+        {"kind":"tool","path":"tools/loopregistry"}
+      ],
+      "evidence": [
+        {"kind":"test","path":"cmd/riido_ai_server/control_plane_graphql_mtls_test.go"},
+        {"kind":"test","path":"internal/controlplanegraphql/contract_test.go"},
+        {"kind":"artifact","path":"container-image-contract-evidence","redacted":true},
+        {"kind":"artifact","path":"evidence-graph-evidence","redacted":true}
+      ],
+      "decision": "Admit only SOURCE_READY_OWNER_ONLY source at exact frozen schema and manifest hashes. Start the coordinate on a dedicated TLS 1.3 listener only when all certificate, key, client-CA, and address settings are present; require a verified client chain with exactly the BFF production SPIFFE URI; preserve exact 200 and always-error fireError behavior; keep production ingress verification false, deployment HOLD, and production runtime credit zero.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "evidence_graph_native_ci_parity_loop",
       "observation": "Control Plane issue #1034 had fifteen native riido-ci parity slices, but 41 of 56 GitHub Actions workflows remained unmapped. The credential-free evidence-graph workflow was idle, yet its exact source digest, full-history checkout, cached Go setup, test, optional pull-request impact base, annotations, strict success-only artifact behavior, and zero-authority migration boundary were not represented in the native parity receipt.",
       "hypothesis": "Extending the pinned local parity contract with one bounded evidence-graph child can prove all six source behaviors and artifact equivalence with zero adapters while leaving the source workflow byte-exact and withholding scheduling, dispatch, pull-request admission, retirement, runtime, credential, deployment, and fixed-cost authority.",
@@ -21205,7 +21242,7 @@
         {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
         {"kind":"artifact","path":"evidence-graph-evidence","redacted":true}
       ],
-      "decision": "Admit evidence-graph as the sixteenth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact full-history, cached Go, impact-base and annotation behavior, exact source SHA-256 518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710, redacted content-addressed evidence, and a success-only mode-0600 receipt. Preserve the source workflow unchanged and keep scheduling, dispatch, pull-request admission, retirement, runtime, credential, deployment, and fixed-cost authority false; 40 workflows remain for separate bounded review.",
+      "decision": "Admit evidence-graph as the sixteenth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact full-history, cached Go, impact-base and annotation behavior, exact source SHA-256 034ed729d08ff85117f84db26fd23c9dd31d80ba89715243f3b89d8112458b37, redacted content-addressed evidence, and a success-only mode-0600 receipt. Preserve the source workflow unchanged and keep scheduling, dispatch, pull-request admission, retirement, runtime, credential, deployment, and fixed-cost authority false; 40 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
     }
   ],

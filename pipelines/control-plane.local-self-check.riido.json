@@ -269,7 +269,7 @@
           "https://github.com/teamswyg/riido-control-plane/issues/1063",
           "a26fbcca723421a900bdddd2cba8da71079d1110c77acd561fe2e626ae601781",
           "https://github.com/teamswyg/riido-control-plane/issues/1065",
-          "518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710",
+          "034ed729d08ff85117f84db26fd23c9dd31d80ba89715243f3b89d8112458b37",
           "https://github.com/teamswyg/riido-control-plane/issues/1067",
           "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
           "required_adapter_count",
@@ -633,7 +633,7 @@
         "name": "evidence-graph-parity-boundary",
         "file": "tools/ciworkflowparity/verify_evidence_graph_child.go",
         "contains": [
-          "518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710",
+          "034ed729d08ff85117f84db26fd23c9dd31d80ba89715243f3b89d8112458b37",
           "FullHistory",
           "RIIDO_EVIDENCE_GRAPH_IMPACT_BASE",
           "github-annotations",
