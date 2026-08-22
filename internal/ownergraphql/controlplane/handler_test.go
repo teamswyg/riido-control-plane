@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestSourceReadyControlPlaneOwnerUseCasePreservesPinnedSemantics(t *testing.T) {
+func TestControlPlaneOwnerGraphQLBehaviorGolden(t *testing.T) {
 	useCase := NewSourceReadyUseCase()
 	status, err := useCase.HealthCheck(context.Background())
 	if err != nil || status != http.StatusOK {

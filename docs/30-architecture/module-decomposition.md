@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `109`; runtime: `1`; internal: `4`; tools: `103`; forbidden import hits: `0`.
+Packages: `110`; runtime: `1`; internal: `5`; tools: `103`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `93`; max file lines: `832`.
 
@@ -71,6 +71,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 - `runtime-shell`: `cmd/riido_ai_server`
 - `identity-adapter`: `internal/authpep`
 - `compatibility-test`: `internal/contractscompat`
+- `source-ready-adapter`: `internal/ownergraphql/controlplane`
 - `guard`: `internal/repoidentity`
 - `core`: `internal/riidoaiserver`
 - `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/aiagentload`, `tools/aiagentrisk`, `tools/aiagentthreadsnapshot`, `tools/aigeneratedsmokematrix`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/controlplanepressure`, `tools/figmaprojection`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/metricshttpadapter`, `tools/migrationledger`, `tools/openquestions`, `tools/operationalreadiness`, `tools/providerstatus`, `tools/publicpageslive`, `tools/requestauth`, `tools/reviewaccountseed`, `tools/runtimeboundary`, `tools/runtimecdownership`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`

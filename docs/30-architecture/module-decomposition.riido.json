@@ -113,6 +113,12 @@
       "must_not_own": "domain redefinition"
     },
     {
+      "path": "internal/ownergraphql/controlplane",
+      "kind": "source-ready-adapter",
+      "role": "Unregistered source-derived control-plane owner GraphQL receiver, exact use case, and generated operation registry.",
+      "must_not_own": "production route registration, deployment readiness, runtime credit, or mutable public schema"
+    },
+    {
       "path": "internal/repoidentity",
       "kind": "guard",
       "role": "Repository identity guard.",
