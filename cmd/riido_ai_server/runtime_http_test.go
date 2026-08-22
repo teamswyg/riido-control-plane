@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,7 +10,10 @@ import (
 )
 
 func TestNewRuntimeHTTPServersBuildsPrimaryServer(t *testing.T) {
-	servers := newRuntimeHTTPServers(runtimeConfig{Addr: "127.0.0.1:0"}, nil, nil, nil, nil)
+	servers, err := newRuntimeHTTPServers(runtimeConfig{Addr: "127.0.0.1:0"}, nil, nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(servers) != 1 {
 		t.Fatalf("server count = %d, want 1", len(servers))
 	}
@@ -25,10 +29,13 @@ func TestNewRuntimeHTTPServersBuildsPrimaryServer(t *testing.T) {
 }
 
 func TestNewRuntimeHTTPServersAddsPprofServer(t *testing.T) {
-	servers := newRuntimeHTTPServers(runtimeConfig{
+	servers, err := newRuntimeHTTPServers(runtimeConfig{
 		Addr:      "127.0.0.1:0",
 		PprofAddr: "127.0.0.1:6060",
 	}, nil, nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(servers) != 2 {
 		t.Fatalf("server count = %d, want 2", len(servers))
 	}
@@ -44,15 +51,28 @@ func TestNewRuntimeHTTPServersAddsPprofServer(t *testing.T) {
 }
 
 func TestNewRuntimeHandlerPreservesWebCORSConfig(t *testing.T) {
-	handler := newRuntimeHandler(runtimeConfig{
+	handler, err := newRuntimeHandler(runtimeConfig{
 		WebAllowedOrigins: []string{"https://app.riido.io"},
 	}, nil, nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	req.Header.Set("Origin", "https://app.riido.io")
 	resp := httptest.NewRecorder()
 	handler.ServeHTTP(resp, req)
 	if got := resp.Header().Get("Access-Control-Allow-Origin"); got != "https://app.riido.io" {
 		t.Fatalf("access-control-allow-origin = %q", got)
+	}
+}
+
+func TestRuntimeStartupFailsWhenGraphQLContractAdmissionFails(t *testing.T) {
+	handler, err := newRuntimeHandlerWithGraphQL(runtimeConfig{}, nil, nil, nil, nil, nil, errors.New("owner hash drift"))
+	if err == nil || handler != nil || !strings.Contains(err.Error(), "owner hash drift") {
+		t.Fatalf("handler=%v err=%v", handler, err)
+	}
+	if handler, err := newRuntimeHandlerWithGraphQL(runtimeConfig{}, nil, nil, nil, nil, nil, nil); err == nil || handler != nil {
+		t.Fatalf("nil GraphQL receiver was admitted: handler=%v err=%v", handler, err)
 	}
 }
 

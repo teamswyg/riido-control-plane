@@ -41,7 +41,10 @@ func run() error {
 		return err
 	}
 	httpTransactions := riidoaiserver.NewHTTPTransactionMetrics()
-	servers := newRuntimeHTTPServers(config, store, aiAgentClient, httpTransactions, traceRecorder)
+	servers, err := newRuntimeHTTPServers(config, store, aiAgentClient, httpTransactions, traceRecorder)
+	if err != nil {
+		return err
+	}
 	metricsCancel, metricsErrCh := startMetricsPublisher(
 		riidoaiserver.NewObservedMetricsReader(store, httpTransactions, config.AIAgentClientMetrics),
 		config.MetricsLogInterval,

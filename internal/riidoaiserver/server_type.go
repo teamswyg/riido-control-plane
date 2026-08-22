@@ -1,6 +1,9 @@
 package riidoaiserver
 
-import "time"
+import (
+	"net/http"
+	"time"
+)
 
 type ServerConfig struct {
 	Authorizer               RequestAuthorizer
@@ -15,6 +18,7 @@ type ServerConfig struct {
 	WebAllowedOrigins        []string
 	HTTPTransactions         *HTTPTransactionMetrics
 	TraceRecorder            TraceRecorder
+	ControlPlaneGraphQL      http.Handler
 	// LongPollMaxHold caps how long a daemon claim poll (PollRequest.WaitMs) may
 	// be held open. Zero applies the default (25s). Must stay well under the ALB
 	// idle timeout (60s default) and the http.Server write/idle timeouts (unset).

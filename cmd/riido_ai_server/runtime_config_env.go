@@ -19,6 +19,10 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	controlPlaneGraphQLMTLS, err := controlPlaneGraphQLMTLSConfigFromEnv()
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	aiAgentClientDev, err := aiAgentClientDevelopmentFromEnv()
 	if err != nil {
 		return runtimeConfig{}, err
@@ -29,22 +33,24 @@ func configFromEnv() (runtimeConfig, error) {
 		return runtimeConfig{}, err
 	}
 	return configFromEnvParts(timing, runtimeConfigParts{
-		reviewProvision:      reviewProvision,
-		authorizer:           authorizer,
-		tracing:              tracing,
-		pprofAddr:            pprofAddr,
-		aiAgentClientDev:     aiAgentClientDev,
-		aiAgentClientStore:   aiAgentClientStore,
-		aiAgentClientMetrics: aiAgentClientMetrics,
+		reviewProvision:         reviewProvision,
+		authorizer:              authorizer,
+		tracing:                 tracing,
+		pprofAddr:               pprofAddr,
+		controlPlaneGraphQLMTLS: controlPlaneGraphQLMTLS,
+		aiAgentClientDev:        aiAgentClientDev,
+		aiAgentClientStore:      aiAgentClientStore,
+		aiAgentClientMetrics:    aiAgentClientMetrics,
 	})
 }
 
 type runtimeConfigParts struct {
-	reviewProvision      *riidoaiserver.ReviewAccountProvisioning
-	authorizer           riidoaiserver.RequestAuthorizer
-	tracing              tracingRuntimeConfig
-	pprofAddr            string
-	aiAgentClientDev     bool
-	aiAgentClientStore   riidoaiserver.AIAgentClientSnapshotStore
-	aiAgentClientMetrics *riidoaiserver.AIAgentClientPersistenceMetrics
+	reviewProvision         *riidoaiserver.ReviewAccountProvisioning
+	authorizer              riidoaiserver.RequestAuthorizer
+	tracing                 tracingRuntimeConfig
+	pprofAddr               string
+	controlPlaneGraphQLMTLS controlPlaneGraphQLMTLSConfig
+	aiAgentClientDev        bool
+	aiAgentClientStore      riidoaiserver.AIAgentClientSnapshotStore
+	aiAgentClientMetrics    *riidoaiserver.AIAgentClientPersistenceMetrics
 }
