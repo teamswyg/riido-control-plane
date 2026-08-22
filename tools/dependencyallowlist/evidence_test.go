@@ -29,7 +29,7 @@ func TestDependencyAllowlistBehaviorGolden(t *testing.T) {
 	if got.Loop.Observation == "" || got.Loop.Retrospective == "" {
 		t.Fatalf("missing loop evidence: %+v", got)
 	}
-	if got.DirectDependenciesVerified != 5 || got.AllowedDirectModules != 5 {
+	if got.DirectDependenciesVerified != 7 || got.AllowedDirectModules != 7 {
 		t.Fatalf("missing evidence counts: %+v", got)
 	}
 }

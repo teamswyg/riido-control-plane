@@ -778,6 +778,41 @@
       "mode": "golden_locked_operational_readiness_tool"
     },
     {
+      "id": "control_plane_owner_contract_guard",
+      "package_path": "contracts/nonwork17-owner-schema",
+      "golden_command": "go test ./contracts/nonwork17-owner-schema -count=1",
+      "semantic_claim_id": "shared_contract_compat_must_preserve_generated_contract_surface",
+      "mode": "golden_locked_control_plane_owner_contract"
+    },
+    {
+      "id": "control_plane_graphql_receiver_guard",
+      "package_path": "internal/controlplanegraphql",
+      "golden_command": "go test ./internal/controlplanegraphql -count=1",
+      "semantic_claim_id": "server_route_handlers_must_stay_semantically_split",
+      "mode": "golden_locked_control_plane_graphql_receiver"
+    },
+    {
+      "id": "control_plane_graphql_generated_guard",
+      "package_path": "internal/controlplanegraphql/generated",
+      "golden_command": "go test ./internal/controlplanegraphql/generated -count=1",
+      "semantic_claim_id": "shared_contract_compat_must_preserve_generated_contract_surface",
+      "mode": "golden_locked_control_plane_graphql_generated_receiver"
+    },
+    {
+      "id": "control_plane_graphql_model_guard",
+      "package_path": "internal/controlplanegraphql/model",
+      "golden_command": "go test ./internal/controlplanegraphql/model -count=1",
+      "semantic_claim_id": "shared_contract_compat_must_preserve_generated_contract_surface",
+      "mode": "golden_locked_control_plane_graphql_model"
+    },
+    {
+      "id": "control_plane_health_use_case_guard",
+      "package_path": "internal/controlplanehealth",
+      "golden_command": "go test ./internal/controlplanehealth -count=1",
+      "semantic_claim_id": "server_route_handlers_must_stay_semantically_split",
+      "mode": "golden_locked_control_plane_health_use_case"
+    },
+    {
       "id": "riido_ai_server_guard",
       "package_path": "internal/riidoaiserver",
       "golden_command": "go test ./internal/riidoaiserver -run TestRiidoAIServerBehaviorGolden -count=1",

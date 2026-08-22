@@ -1,0 +1,18 @@
+schema:
+  - ../../contracts/nonwork17-owner-schema/owner-schema.graphqls
+exec:
+  filename: generated/generated.go
+  package: generated
+model:
+  filename: model/models_gen.go
+  package: model
+resolver:
+  layout: follow-schema
+  dir: .
+  package: controlplanegraphql
+  filename_template: "{name}.resolvers.go"
+skip_validation: false
+models:
+  ControlPlaneFireErrorVoid:
+    model:
+      - github.com/teamswyg/riido-control-plane/internal/controlplanegraphql/model.FireErrorVoid

@@ -10,16 +10,16 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `110`; runtime: `1`; internal: `5`; tools: `103`; forbidden import hits: `0`.
+Packages: `113`; runtime: `1`; internal: `8`; tools: `103`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `94`; max file lines: `832`.
+File line budget target: `75`; files over target: `101`; max file lines: `2377`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 94 | 99 | 5 |
-| Max file lines | 832 | 2481 | 1649 |
+| Files over target | 101 | 105 | 4 |
+| Max file lines | 2377 | 2481 | 104 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
 
@@ -30,11 +30,13 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 | `internal/riidoaiserver` | 86 | 85 | 832 | 838 | 13196 | 13604 |
 | `internal/authpep` | 6 | 6 | 291 | 306 | 687 | 687 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
-| `cmd/riido_ai_server` | 2 | 3 | 144 | 791 | 92 | 1474 |
+| `cmd/riido_ai_server` | 5 | 5 | 243 | 791 | 268 | 1613 |
 | `tools/containercontract` | 0 | 0 | 0 | 75 | 0 | 0 |
 | `tools/generatedclienthandoff` | 0 | 2 | 0 | 601 | 0 | 578 |
 | `awsadapters` | 0 | 1 | 0 | 84 | 0 | 9 |
 | `internal/contractscompat` | 0 | 1 | 0 | 81 | 0 | 6 |
+| `internal/controlplanegraphql` | 3 | 3 | 172 | 172 | 193 | 193 |
+| `internal/controlplanegraphql/generated` | 1 | 1 | 2377 | 2377 | 2302 | 2302 |
 | `tools/operationalreadiness` | 0 | 1 | 0 | 77 | 0 | 2 |
 | `tools/looprefreshdispatch` | 0 | 0 | 0 | 75 | 0 | 0 |
 
@@ -46,6 +48,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | File | Lines |
 | --- | ---: |
+| `internal/controlplanegraphql/generated/generated.go` | 2377 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 832 |
 | `internal/riidoaiserver/dynamodb_assignment_operation_store.go` | 792 |
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
@@ -55,7 +58,6 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 627 |
 | `internal/riidoaiserver/store.go` | 541 |
 | `internal/riidoaiserver/dynamodb_stream_relay.go` | 519 |
-| `internal/riidoaiserver/ai_agent_client_generated_smoke_test.go` | 482 |
 
 ### Line Budget Hotspots
 
@@ -63,7 +65,9 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | --- | ---: | ---: | ---: |
 | `internal/riidoaiserver` | 86 | 832 | 13196 |
 | `internal/authpep` | 6 | 291 | 687 |
-| `cmd/riido_ai_server` | 2 | 144 | 92 |
+| `cmd/riido_ai_server` | 5 | 243 | 268 |
+| `internal/controlplanegraphql` | 3 | 172 | 193 |
+| `internal/controlplanegraphql/generated` | 1 | 2377 | 2302 |
 
 ## Packages
 
@@ -71,7 +75,10 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 - `runtime-shell`: `cmd/riido_ai_server`
 - `identity-adapter`: `internal/authpep`
 - `compatibility-test`: `internal/contractscompat`
-- `source-ready-adapter`: `internal/ownergraphql/controlplane`
+- `graphql-transport`: `internal/controlplanegraphql`
+- `generated-code`: `internal/controlplanegraphql/generated`
+- `graphql-model`: `internal/controlplanegraphql/model`
+- `use-case`: `internal/controlplanehealth`
 - `guard`: `internal/repoidentity`
 - `core`: `internal/riidoaiserver`
 - `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/aiagentload`, `tools/aiagentrisk`, `tools/aiagentthreadsnapshot`, `tools/aigeneratedsmokematrix`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/controlplanepressure`, `tools/figmaprojection`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/metricshttpadapter`, `tools/migrationledger`, `tools/openquestions`, `tools/operationalreadiness`, `tools/providerstatus`, `tools/publicpageslive`, `tools/requestauth`, `tools/reviewaccountseed`, `tools/runtimeboundary`, `tools/runtimecdownership`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`

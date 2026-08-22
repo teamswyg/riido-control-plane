@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,7 +10,10 @@ import (
 )
 
 func TestNewRuntimeHTTPServersBuildsPrimaryServer(t *testing.T) {
-	servers := newRuntimeHTTPServers(runtimeConfig{Addr: "127.0.0.1:0"}, nil, nil, nil, nil)
+	servers, err := newRuntimeHTTPServers(runtimeConfig{Addr: "127.0.0.1:0"}, nil, nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(servers) != 1 {
 		t.Fatalf("server count = %d, want 1", len(servers))
 	}
@@ -25,10 +29,13 @@ func TestNewRuntimeHTTPServersBuildsPrimaryServer(t *testing.T) {
 }
 
 func TestNewRuntimeHTTPServersAddsPprofServer(t *testing.T) {
-	servers := newRuntimeHTTPServers(runtimeConfig{
+	servers, err := newRuntimeHTTPServers(runtimeConfig{
 		Addr:      "127.0.0.1:0",
 		PprofAddr: "127.0.0.1:6060",
 	}, nil, nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(servers) != 2 {
 		t.Fatalf("server count = %d, want 2", len(servers))
 	}
@@ -44,9 +51,12 @@ func TestNewRuntimeHTTPServersAddsPprofServer(t *testing.T) {
 }
 
 func TestNewRuntimeHandlerPreservesWebCORSConfig(t *testing.T) {
-	handler := newRuntimeHandler(runtimeConfig{
+	handler, err := newRuntimeHandler(runtimeConfig{
 		WebAllowedOrigins: []string{"https://app.riido.io"},
 	}, nil, nil, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	req.Header.Set("Origin", "https://app.riido.io")
 	resp := httptest.NewRecorder()
@@ -56,34 +66,13 @@ func TestNewRuntimeHandlerPreservesWebCORSConfig(t *testing.T) {
 	}
 }
 
-func TestNewRuntimeHandlerRegistersPublicControlPlaneOwnerGraphQL(t *testing.T) {
-	handler := newRuntimeHandler(runtimeConfig{}, nil, nil, nil, nil)
-	tests := []struct {
-		name, request, response string
-	}{
-		{
-			name: "healthCheck",
-			request: `{"query":"query ControlPlaneOwnerHealthCheck { healthCheck }",` +
-				`"operationName":"ControlPlaneOwnerHealthCheck","variables":{}}`,
-			response: "{\"data\":{\"healthCheck\":200}}\n",
-		},
-		{
-			name: "fireError",
-			request: `{"query":"query ControlPlaneOwnerFireError { fireError }",` +
-				`"operationName":"ControlPlaneOwnerFireError","variables":{}}`,
-			response: "{\"data\":{\"fireError\":null},\"errors\":[{\"message\":\"control-plane fireError always fails\"}]}\n",
-		},
+func TestRuntimeStartupFailsWhenGraphQLContractAdmissionFails(t *testing.T) {
+	handler, err := newRuntimeHandlerWithGraphQL(runtimeConfig{}, nil, nil, nil, nil, nil, errors.New("owner hash drift"))
+	if err == nil || handler != nil || !strings.Contains(err.Error(), "owner hash drift") {
+		t.Fatalf("handler=%v err=%v", handler, err)
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			request := httptest.NewRequest(http.MethodPost, "/owner/graphql", strings.NewReader(test.request))
-			request.Header.Set("Content-Type", "application/json")
-			response := httptest.NewRecorder()
-			handler.ServeHTTP(response, request)
-			if response.Code != http.StatusOK || response.Body.String() != test.response {
-				t.Fatalf("status=%d body=%q", response.Code, response.Body.String())
-			}
-		})
+	if handler, err := newRuntimeHandlerWithGraphQL(runtimeConfig{}, nil, nil, nil, nil, nil, nil); err == nil || handler != nil {
+		 t.Fatalf("nil GraphQL receiver was admitted: handler=%v err=%v", handler, err)
 	}
 }
 
