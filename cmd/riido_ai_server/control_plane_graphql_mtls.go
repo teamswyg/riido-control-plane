@@ -53,14 +53,12 @@ func controlPlaneGraphQLMTLSConfigFromEnv() (controlPlaneGraphQLMTLSConfig, erro
 		return controlPlaneGraphQLMTLSConfig{}, fmt.Errorf("control-plane GraphQL client CA contains no certificates")
 	}
 	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{certificate},
-		ClientAuth:   tls.RequireAndVerifyClientCert,
-		ClientCAs:    clientCAs,
-		MinVersion:   tls.VersionTLS13,
-		MaxVersion:   tls.VersionTLS13,
-		VerifyConnection: func(state tls.ConnectionState) error {
-			return controlplanegraphql.VerifyBFFProductionTLSConnection(state)
-		},
+		Certificates:     []tls.Certificate{certificate},
+		ClientAuth:       tls.RequireAndVerifyClientCert,
+		ClientCAs:        clientCAs,
+		MinVersion:       tls.VersionTLS13,
+		MaxVersion:       tls.VersionTLS13,
+		VerifyConnection: controlplanegraphql.VerifyBFFProductionTLSConnection,
 	}
 	return controlPlaneGraphQLMTLSConfig{Addr: addr, TLSConfig: tlsConfig}, nil
 }
