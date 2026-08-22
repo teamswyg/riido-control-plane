@@ -16,6 +16,7 @@ func registerServerRoutes(mux *http.ServeMux, s Server) {
 }
 
 var serverRoutes = []serverRoute{
+	{"/graphql", Server.handleControlPlaneGraphQL},
 	{"/healthz", Server.handleHealth},
 	{"/readyz", Server.handleReady},
 	{"/metrics", Server.handleMetrics},
@@ -40,4 +41,12 @@ var serverRoutes = []serverRoute{
 	{"/v1/agent-catalog/", Server.handleAgentCatalog},
 	{"/v1/component-tasks/", Server.handleComponentTasks},
 	{"/v1/agents/", Server.handleAgents},
+}
+
+func (s Server) handleControlPlaneGraphQL(w http.ResponseWriter, r *http.Request) {
+	if s.config.ControlPlaneGraphQL == nil {
+		http.Error(w, "control_plane_graphql_not_configured", http.StatusServiceUnavailable)
+		return
+	}
+	s.config.ControlPlaneGraphQL.ServeHTTP(w, r)
 }

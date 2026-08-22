@@ -38,7 +38,12 @@ func listenAndServeAll(servers []*http.Server) <-chan error {
 	errCh := make(chan error, len(servers))
 	for _, server := range servers {
 		go func(server *http.Server) {
-			err := server.ListenAndServe()
+			var err error
+			if server.TLSConfig == nil {
+				err = server.ListenAndServe()
+			} else {
+				err = server.ListenAndServeTLS("", "")
+			}
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
 				errCh <- err
 				return
