@@ -21207,6 +21207,34 @@
       ],
       "decision": "Admit evidence-graph as the sixteenth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact full-history, cached Go, impact-base and annotation behavior, exact source SHA-256 518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710, redacted content-addressed evidence, and a success-only mode-0600 receipt. Preserve the source workflow unchanged and keep scheduling, dispatch, pull-request admission, retirement, runtime, credential, deployment, and fixed-cost authority false; 40 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "control_plane_owner_graphql_source_ready_boundary",
+      "observation": "The frozen control-plane owner SDL had exact healthCheck and always-throw fireError shapes, but placing an unregistered receiver in the high-traffic server package incorrectly coupled source readiness to performance evidence and production route ownership.",
+      "hypothesis": "A dedicated ownergraphql/controlplane package can preserve the exact source behavior, generated operation registry, adversarial request rejection, and explicit route-unwired proof without changing the production server, public schema, or deployment readiness.",
+      "claims": [
+        "runtime_deployment_boundary_must_preserve_public_private_ownership"
+      ],
+      "changes": [
+        {"kind":"manifest","path":"docs/30-architecture/module-decomposition.riido.json"},
+        {"kind":"manifest","path":"docs/30-architecture/syntax-hash.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
+        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+      ],
+      "verifiers": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"tool","path":"tools/moduledecomposition"},
+        {"kind":"tool","path":"tools/syntaxhash"},
+        {"kind":"tool","path":"tools/evidencegraph"}
+      ],
+      "evidence": [
+        {"kind":"artifact","path":"module-decomposition-evidence","redacted":true},
+        {"kind":"artifact","path":"syntax-hash-evidence","redacted":true},
+        {"kind":"artifact","path":"evidence-graph-evidence","redacted":true}
+      ],
+      "decision": "Admit only a source-ready, public, exact two-operation owner receiver. healthCheck is exactly 200; fireError always returns null plus the pinned error; aliases, repeated selections, fragments, unknown operations, malformed JSON, and provider absence fail closed. Production route registration, runtime_wired, deployment, effect, and public schema credit remain zero.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

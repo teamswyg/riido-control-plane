@@ -117,11 +117,12 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `7ee1bbf6a41c` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `93cd8c2bb013` | `server_route_handlers_must_stay_semantically_split` |
+| `control_plane_owner_graphql_guard` | `internal/ownergraphql/controlplane` | 100% | `c6a7f731ea6f` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 
 ## Repository Coverage
 
-- Go files: `3403`
-- tracked files: `3403`
+- Go files: `3416`
+- tracked files: `3416`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -129,9 +130,9 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - status: `evidence_only`
 - group by: `ast_shape_hash`
-- duplicate groups: `90`
-- duplicate files: `312`
-- internal groups: `5`
+- duplicate groups: `91`
+- duplicate files: `314`
+- internal groups: `6`
 
 | Shape Hash | Files | Packages |
 | --- | ---: | --- |
@@ -167,16 +168,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3403`
-- unique syntax hashes: `3200`
+- tracked files: `3416`
+- unique syntax hashes: `3213`
 - compression gain: `203`
-- analysis reduction: `5.96%`
+- analysis reduction: `5.94%`
 - collision count: `0`
-- relocation mappings: `3403`
+- relocation mappings: `3416`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
-- golden commands: `109`
+- golden commands: `110`
 - missing golden commands: `0`
-- efficiency score: `596`
+- efficiency score: `594`
 - compression score: `203`
-- weighted score: `799`
+- weighted score: `797`
