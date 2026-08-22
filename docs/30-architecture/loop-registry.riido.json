@@ -1849,7 +1849,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "adf0a0514fb5aa5fc953ccf691132b84c3317c659aa549ad0b936c1f03f85735"
+      "semantic_hash": "fb12c5151d40168f5889f2d042f0b11c1ae15bf717220520947f9dce83268ab2"
     },
     {
       "id": "closed_loop_candidates_must_carry_adoption_plan",
