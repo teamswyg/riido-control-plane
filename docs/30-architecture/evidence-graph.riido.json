@@ -21223,6 +21223,7 @@
         {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
       ],
       "verifiers": [
+        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
         {"kind":"tool","path":"tools/moduledecomposition"},
         {"kind":"tool","path":"tools/syntaxhash"},
         {"kind":"tool","path":"tools/evidencegraph"}
