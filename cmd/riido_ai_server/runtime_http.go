@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	controlplaneowner "github.com/teamswyg/riido-control-plane/internal/ownergraphql/controlplane"
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
@@ -31,6 +32,7 @@ func newRuntimeHandler(config runtimeConfig, store *riidoaiserver.Store, aiAgent
 		WebAllowedOrigins:        config.WebAllowedOrigins,
 		HTTPTransactions:         httpTransactions,
 		TraceRecorder:            traceRecorder,
+		ControlPlaneOwnerGraphQL: controlplaneowner.NewGraphQLHandler(controlplaneowner.NewRuntimeUseCase()),
 		LongPollMaxHold:          config.LongPollMaxHold,
 		LongPollTick:             config.LongPollTick,
 	}).Handler()

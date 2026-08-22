@@ -19,8 +19,8 @@ This reader is generated from the health/ready command SSOT.
 
 ## Evidence Loop
 
-- Observation: The health/ready command workflow proved public endpoints and command configuration through tests but left no durable JSON evidence.
-- Hypothesis: A small SSOT can make public liveness/readiness and command-runtime configuration evidence visible without exposing deployment values.
-- Execute: Call the real health and ready HTTP handlers, verify command source anchors, require generated doc freshness, and upload CI evidence.
-- Evaluate: The verifier fails on endpoint status drift, missing source anchors, stale generated docs, or workflow evidence regression.
-- Retrospective: This keeps health/ready runtime knowledge executable while private deploy topology remains outside the public repo.
+- Observation: The health/ready workflow proved public endpoints, but the source-derived ControlPlane owner operations still lacked a registered production-server receiver.
+- Hypothesis: One executable SSOT can keep liveness/readiness and the exact public owner receiver visible without granting deployment credit.
+- Execute: Call the real health and ready handlers, verify the exact ControlPlane owner receiver/use-case/route anchors and tests, require generated doc freshness, and upload CI evidence.
+- Evaluate: The verifier fails on endpoint status drift, missing receiver or command anchors, stale generated docs, or workflow evidence regression.
+- Retrospective: This keeps the runtime source path executable while immutable deployment and production smoke remain separate readiness gates.

@@ -8,23 +8,23 @@ import (
 
 var errControlPlaneOwnerFire = errors.New("control-plane fireError always fails")
 
-// UseCase is the exact source-ready execution boundary for the frozen owner contract.
+// UseCase is the exact execution boundary for the frozen owner contract.
 type UseCase interface {
 	HealthCheck(context.Context) (int, error)
 	FireError(context.Context) error
 }
 
-type sourceReadyUseCase struct{}
+type runtimeUseCase struct{}
 
-// NewSourceReadyUseCase returns the authoritative source behavior without registering a route.
-func NewSourceReadyUseCase() UseCase {
-	return sourceReadyUseCase{}
+// NewRuntimeUseCase returns the authoritative behavior used by the registered receiver.
+func NewRuntimeUseCase() UseCase {
+	return runtimeUseCase{}
 }
 
-func (sourceReadyUseCase) HealthCheck(context.Context) (int, error) {
+func (runtimeUseCase) HealthCheck(context.Context) (int, error) {
 	return http.StatusOK, nil
 }
 
-func (sourceReadyUseCase) FireError(context.Context) error {
+func (runtimeUseCase) FireError(context.Context) error {
 	return errControlPlaneOwnerFire
 }
