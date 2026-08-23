@@ -10,7 +10,7 @@ const controlPlaneOwnerRequestLimit = 16 << 10
 
 type handler struct{ useCase UseCase }
 
-// NewGraphQLHandler returns the source-ready owner receiver. Production does not register it yet.
+// NewGraphQLHandler returns the exact owner receiver registered by the production server.
 func NewGraphQLHandler(useCase UseCase) http.Handler {
 	return handler{useCase: useCase}
 }

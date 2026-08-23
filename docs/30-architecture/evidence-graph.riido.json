@@ -21210,12 +21210,15 @@
     },
     {
       "id": "control_plane_owner_graphql_source_ready_boundary",
-      "observation": "The frozen control-plane owner SDL had exact healthCheck and always-throw fireError shapes, but placing an unregistered receiver in the high-traffic server package incorrectly coupled source readiness to performance evidence and production route ownership.",
-      "hypothesis": "A dedicated ownergraphql/controlplane package can preserve the exact source behavior, generated operation registry, adversarial request rejection, and explicit route-unwired proof without changing the production server, public schema, or deployment readiness.",
+      "observation": "The frozen control-plane owner SDL had exact healthCheck and always-throw fireError shapes, but the production server had no exact owner receiver route. Registering that route changes the server and syntax-hash surfaces bound to the control-plane performance claim, so source readiness needs explicit reasoning and evidence without being mistaken for deployment or performance credit.",
+      "hypothesis": "A dedicated ownergraphql/controlplane package plus one exact production-server route can preserve the generated operation registry, adversarial request rejection, health 200, and fireError always-throw behavior while route, syntax-hash, and health-ready evidence prove the new source surface without changing the public schema or runtime deployment readiness.",
       "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence",
         "runtime_deployment_boundary_must_preserve_public_private_ownership"
       ],
       "changes": [
+        {"kind":"manifest","path":"docs/30-architecture/health-ready-cmd.riido.json"},
+        {"kind":"generated_doc","path":"docs/30-architecture/health-ready-cmd.md"},
         {"kind":"manifest","path":"docs/30-architecture/module-decomposition.riido.json"},
         {"kind":"manifest","path":"docs/30-architecture/syntax-hash.riido.json"},
         {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
@@ -21224,16 +21227,20 @@
       ],
       "verifiers": [
         {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
+        {"kind":"tool","path":"tools/healthreadycmd"},
         {"kind":"tool","path":"tools/moduledecomposition"},
         {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {"kind":"tool","path":"tools/evidencegraph"},
+        {"kind":"tool","path":"tools/loopregistry"}
       ],
       "evidence": [
+        {"kind":"artifact","path":"health-ready-command-evidence","redacted":true},
         {"kind":"artifact","path":"module-decomposition-evidence","redacted":true},
         {"kind":"artifact","path":"syntax-hash-evidence","redacted":true},
-        {"kind":"artifact","path":"evidence-graph-evidence","redacted":true}
+        {"kind":"artifact","path":"evidence-graph-evidence","redacted":true},
+        {"kind":"artifact","path":"loop-registry-evidence","redacted":true}
       ],
-      "decision": "Admit only a source-ready, public, exact two-operation owner receiver. healthCheck is exactly 200; fireError always returns null plus the pinned error; aliases, repeated selections, fragments, unknown operations, malformed JSON, and provider absence fail closed. Production route registration, runtime_wired, deployment, effect, and public schema credit remain zero.",
+      "decision": "Admit only a source-ready, public, exact two-operation owner receiver registered at /owner/graphql. healthCheck is exactly 200; fireError always returns null plus the pinned error; aliases, repeated selections, fragments, unknown operations, malformed JSON, and missing handler configuration fail closed. The changed route and syntax-hash surfaces are now bound to executable evidence, while runtime_wired, deployment, effect, performance improvement, and public schema credit remain zero.",
       "next_loop": "closed_loop_candidate"
     }
   ],

@@ -56,6 +56,37 @@ func TestNewRuntimeHandlerPreservesWebCORSConfig(t *testing.T) {
 	}
 }
 
+func TestNewRuntimeHandlerRegistersPublicControlPlaneOwnerGraphQL(t *testing.T) {
+	handler := newRuntimeHandler(runtimeConfig{}, nil, nil, nil, nil)
+	tests := []struct {
+		name, request, response string
+	}{
+		{
+			name: "healthCheck",
+			request: `{"query":"query ControlPlaneOwnerHealthCheck { healthCheck }",` +
+				`"operationName":"ControlPlaneOwnerHealthCheck","variables":{}}`,
+			response: "{\"data\":{\"healthCheck\":200}}\n",
+		},
+		{
+			name: "fireError",
+			request: `{"query":"query ControlPlaneOwnerFireError { fireError }",` +
+				`"operationName":"ControlPlaneOwnerFireError","variables":{}}`,
+			response: "{\"data\":{\"fireError\":null},\"errors\":[{\"message\":\"control-plane fireError always fails\"}]}\n",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodPost, "/owner/graphql", strings.NewReader(test.request))
+			request.Header.Set("Content-Type", "application/json")
+			response := httptest.NewRecorder()
+			handler.ServeHTTP(response, request)
+			if response.Code != http.StatusOK || response.Body.String() != test.response {
+				t.Fatalf("status=%d body=%q", response.Code, response.Body.String())
+			}
+		})
+	}
+}
+
 func assertRuntimeHTTPStatus(t *testing.T, handler http.Handler, path, want string) {
 	t.Helper()
 	req := httptest.NewRequest(http.MethodGet, path, nil)

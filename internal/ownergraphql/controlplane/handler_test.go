@@ -10,7 +10,7 @@ import (
 )
 
 func TestControlPlaneOwnerGraphQLBehaviorGolden(t *testing.T) {
-	useCase := NewSourceReadyUseCase()
+	useCase := NewRuntimeUseCase()
 	status, err := useCase.HealthCheck(context.Background())
 	if err != nil || status != http.StatusOK {
 		t.Fatalf("health status=%d err=%v", status, err)

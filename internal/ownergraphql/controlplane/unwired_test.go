@@ -9,7 +9,7 @@ import (
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
-func TestControlPlaneOwnerReceiverIsSourceReadyButNotRegistered(t *testing.T) {
+func TestControlPlaneOwnerReceiverFailsClosedWithoutExplicitHandler(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "/owner/graphql", strings.NewReader(
 		`{"query":"query ControlPlaneOwnerHealthCheck { healthCheck }","operationName":"ControlPlaneOwnerHealthCheck"}`,
 	))
@@ -18,7 +18,7 @@ func TestControlPlaneOwnerReceiverIsSourceReadyButNotRegistered(t *testing.T) {
 
 	riidoaiserver.NewServer(riidoaiserver.ServerConfig{}).Handler().ServeHTTP(response, request)
 
-	if response.Code != http.StatusNotFound {
-		t.Fatalf("source-ready receiver must stay unregistered, status=%d", response.Code)
+	if response.Code != http.StatusServiceUnavailable {
+		t.Fatalf("missing receiver must fail closed, status=%d", response.Code)
 	}
 }

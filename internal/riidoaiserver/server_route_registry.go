@@ -15,9 +15,18 @@ func registerServerRoutes(mux *http.ServeMux, s Server) {
 	}
 }
 
+func (s Server) handleControlPlaneOwnerGraphQL(w http.ResponseWriter, r *http.Request) {
+	if s.config.ControlPlaneOwnerGraphQL == nil {
+		writeError(w, http.StatusServiceUnavailable, "control-plane owner GraphQL is not configured")
+		return
+	}
+	s.config.ControlPlaneOwnerGraphQL.ServeHTTP(w, r)
+}
+
 var serverRoutes = []serverRoute{
 	{"/healthz", Server.handleHealth},
 	{"/readyz", Server.handleReady},
+	{"/owner/graphql", Server.handleControlPlaneOwnerGraphQL},
 	{"/metrics", Server.handleMetrics},
 	{"/v2/desktop/workspaces/", Server.handleDesktopWorkspaceRoutes},
 	{"/v2/client/workspaces/", Server.handleAIAgentClientWorkspaceRoutes},

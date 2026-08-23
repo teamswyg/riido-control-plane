@@ -13,15 +13,26 @@
   "source_checks": [
     {"name": "server", "file": "internal/riidoaiserver/server_health.go", "contains": ["handleHealth", "handleReady", "SchemaVersion"]},
     {"name": "health-tests", "file": "internal/riidoaiserver/health_http_test.go", "contains": ["TestHTTPHealthAndReadyArePublic", "TestHTTPHealthAndReadyRejectWrongMethod"]},
+    {"name": "control-plane-owner-receiver", "file": "internal/ownergraphql/controlplane/handler.go", "contains": ["NewGraphQLHandler", "Query.healthCheck", "Query.fireError"]},
+    {"name": "control-plane-owner-use-case", "file": "internal/ownergraphql/controlplane/usecase.go", "contains": ["NewRuntimeUseCase", "http.StatusOK", "errControlPlaneOwnerFire"]},
+    {"name": "control-plane-owner-tests", "file": "internal/ownergraphql/controlplane/handler_test.go", "contains": ["TestControlPlaneOwnerHealthCheckReturnsExactPublicResponse", "TestControlPlaneOwnerFireErrorNeverInventsSuccess"]},
+    {"name": "control-plane-owner-missing-handler-test", "file": "internal/ownergraphql/controlplane/unwired_test.go", "contains": ["TestControlPlaneOwnerReceiverFailsClosedWithoutExplicitHandler", "http.StatusServiceUnavailable"]},
+    {"name": "server-route-registry", "file": "internal/riidoaiserver/server_route_registry.go", "contains": ["/owner/graphql", "handleControlPlaneOwnerGraphQL"]},
+    {"name": "server-config", "file": "internal/riidoaiserver/server_type.go", "contains": ["ControlPlaneOwnerGraphQL", "http.Handler"]},
+    {"name": "server-config-nil", "file": "internal/riidoaiserver/server_config_nil.go", "contains": ["ControlPlaneOwnerGraphQL", "isNilInterface"]},
+    {"name": "server-route-golden", "file": "internal/riidoaiserver/behavior_golden_test.go", "contains": ["riidoAIServerRouteGoldenHash", "route count"]},
+    {"name": "cmd-owner-registration", "file": "cmd/riido_ai_server/runtime_http.go", "contains": ["ControlPlaneOwnerGraphQL", "NewRuntimeUseCase"]},
+    {"name": "cmd-owner-registration-test", "file": "cmd/riido_ai_server/runtime_http_test.go", "contains": ["TestNewRuntimeHandlerRegistersPublicControlPlaneOwnerGraphQL", "ControlPlaneOwnerFireError"]},
+    {"name": "health-ready-golden-test", "file": "tools/healthreadycmd/main_test.go", "contains": ["healthReadyGoldenSHA256", "TestHealthReadyCommandBehaviorGolden"]},
     {"name": "cmd-core-config", "file": "cmd/riido_ai_server/config_core_test.go", "contains": ["TestConfigFromEnvParsesAddressShutdownAndStaticAuthorizer", "TestConfigFromEnvDefaultsToPublicHealthOnlyRuntime"]},
     {"name": "cmd-observability-config", "file": "cmd/riido_ai_server/observability_config_test.go", "contains": ["TestConfigFromEnvParsesPprofAddr", "TestConfigFromEnvParsesMetricsLogInterval"]}
   ],
   "command_tests": ["ConfigFromEnv", "EnvOptionalDuration", "PprofAddr"],
   "loop": {
-    "observation": "The health/ready command workflow proved public endpoints and command configuration through tests but left no durable JSON evidence.",
-    "hypothesis": "A small SSOT can make public liveness/readiness and command-runtime configuration evidence visible without exposing deployment values.",
-    "execute": "Call the real health and ready HTTP handlers, verify command source anchors, require generated doc freshness, and upload CI evidence.",
-    "evaluate": "The verifier fails on endpoint status drift, missing source anchors, stale generated docs, or workflow evidence regression.",
-    "retrospective": "This keeps health/ready runtime knowledge executable while private deploy topology remains outside the public repo."
+    "observation": "The health/ready workflow proved public endpoints, but the source-derived ControlPlane owner operations still lacked a registered production-server receiver.",
+    "hypothesis": "One executable SSOT can keep liveness/readiness and the exact public owner receiver visible without granting deployment credit.",
+    "execute": "Call the real health and ready handlers, verify the exact ControlPlane owner receiver/use-case/route anchors and tests, require generated doc freshness, and upload CI evidence.",
+    "evaluate": "The verifier fails on endpoint status drift, missing receiver or command anchors, stale generated docs, or workflow evidence regression.",
+    "retrospective": "This keeps the runtime source path executable while immutable deployment and production smoke remain separate readiness gates."
   }
 }
